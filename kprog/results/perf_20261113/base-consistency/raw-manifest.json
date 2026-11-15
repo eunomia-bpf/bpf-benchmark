@@ -1,0 +1,431 @@
+{
+  "utc": "2026-11-15T13:40:30Z",
+  "source_head": "be095d0d30780b2e56d11710e26a820d40333d35",
+  "files": [
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/boot/dry-run.log",
+      "bytes": 817,
+      "sha256": "37dac7f82016474624974bb842a7827db85f01c2db075245f8b4a0651475e845"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/boot/exit-code",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/boot/facts-update.log",
+      "bytes": 272,
+      "sha256": "a3d62c11ec3d0eae311b213f02dd885ea8ccdb449ca2430c11e3248c83ea6308"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/boot/finished",
+      "bytes": 21,
+      "sha256": "7045afd2123e98651d07baa2baeda0401222e2f1847eabdc67ed48eb66cd3486"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/boot/image-lock",
+      "bytes": 49,
+      "sha256": "8e92abb050e4e3bdcb9b30b8fe0da082edd8b3c360b2b7acf6678f5213e35537"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/boot/image-lock-mode",
+      "bytes": 3,
+      "sha256": "ea677ad115dcb3dc7c200051168977d0073e971fe05097c1bd2eaa5b6bd5fd15"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/boot/kernel-layout.json",
+      "bytes": 755,
+      "sha256": "8d38327bc5ff62feb27c126b823c4de210343b70172280906a2e794f263ee502"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/boot/kernel.btf",
+      "bytes": 5669223,
+      "sha256": "27aeaae05fa2f506342e3c6849ccb07856b679c12811a87861eb6a242cf2a79e"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/boot/kernel.kallsyms",
+      "bytes": 9270454,
+      "sha256": "d300fef4f00568c3a29aac60629419176571b83a0cb871c4e5ce73bb98ead395"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/boot/kernel.release",
+      "bytes": 11,
+      "sha256": "8d6235f6ef49b74f5bbf86f7fb40837bfc8ef90a216fe167033c82c178edd6d1"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/boot/launcher.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/boot/launcher.pid",
+      "bytes": 8,
+      "sha256": "d43332d41fc9250b6071969fc6bd5d10cd9fd42e0add3c78df5c426ec0e348e5"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/boot/make-command.txt",
+      "bytes": 146,
+      "sha256": "a43adbfe48de638b479879143d9effb91d2c3c2f82ea7c20f86598c8860102d0"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/boot/make.log",
+      "bytes": 1284,
+      "sha256": "941d924136851417fd66d880cdb28c7e9c063d965d457876f9be9ab094b5296a"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/boot/started",
+      "bytes": 21,
+      "sha256": "5d90d08378b85b27c448a280e0dd04ddb44c8182ff76891ce77a8e9f32bccd2b"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/inventory/dry-run.log",
+      "bytes": 280,
+      "sha256": "67a8c45c0133529141942b01878d95193eb64677bbc7bcc12b497b7ae038756f"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/inventory/exit-code",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/inventory/finished",
+      "bytes": 21,
+      "sha256": "76b600760136bece9da2e38969441600b0fc541055380f505e6debce1de63d6f"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/inventory/image-lock",
+      "bytes": 49,
+      "sha256": "8e92abb050e4e3bdcb9b30b8fe0da082edd8b3c360b2b7acf6678f5213e35537"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/inventory/image-lock-mode",
+      "bytes": 3,
+      "sha256": "046e1152652c7a9497dea5a656f664229dd2de0202c47388dcd4d296fdc02c78"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/inventory/launcher.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/inventory/launcher.pid",
+      "bytes": 8,
+      "sha256": "6ba0cac34da6fbdd391f29912ef400e65e993d3edfb10318d50c247b4e482280"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/inventory/make-command.txt",
+      "bytes": 159,
+      "sha256": "c870506359cbde8277c499200117b2d0fe0c778c267b1bcb144930bb2e6ca598"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/inventory/make.log",
+      "bytes": 490,
+      "sha256": "d45d5fcc40b4742c24b15d0aff83270708b6ba8b29c31dc39d60e333d38246d4"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/inventory/module-inventory.json",
+      "bytes": 286538,
+      "sha256": "b7f88d622b6bf1dadcf7ff32cfb6fcde2fb27c32e1206e0c48909691c8287664"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/inventory/native-refactored.json",
+      "bytes": 409037,
+      "sha256": "784841d13a1a9a1e145a95fd246115a7c109c532da41387da75fd7d66bf6994e"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/inventory/native-refactored.log",
+      "bytes": 502,
+      "sha256": "90609416244b8ecf063205afcbedd9bbaf9e44fc04206441a0cf547ada06734c"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/inventory/started",
+      "bytes": 21,
+      "sha256": "419754aaf697fd6005f9b3bfec45b798d1ace300ea5ed801313cea1ff0ec72e7"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/inventory-final/exit-code",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/inventory-final/finished",
+      "bytes": 21,
+      "sha256": "3920859f69fbe367da28c8bd4cb39aa6576f66d38e76e33eb0fe8d17411cf353"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/inventory-final/image-lock",
+      "bytes": 49,
+      "sha256": "8e92abb050e4e3bdcb9b30b8fe0da082edd8b3c360b2b7acf6678f5213e35537"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/inventory-final/image-lock-mode",
+      "bytes": 3,
+      "sha256": "046e1152652c7a9497dea5a656f664229dd2de0202c47388dcd4d296fdc02c78"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/inventory-final/launcher.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/inventory-final/launcher.pid",
+      "bytes": 8,
+      "sha256": "29ad459bf5f91422838c8da6c689f7b5eb2604869e036dd453c347bb263c6195"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/inventory-final/make-command.txt",
+      "bytes": 165,
+      "sha256": "78325d2708c63e16c81ad92b384f74c16cdca165838a7367a72d1cfcbdbfb636"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/inventory-final/make.log",
+      "bytes": 549,
+      "sha256": "963e8de13093b8b99eeff3de139cde4e60a8aefc0d153145f80225e78448b538"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/inventory-final/module-inventory.json",
+      "bytes": 287303,
+      "sha256": "6e155fd46ff7b6fd69a0f14dbfbcac55c84c617dee069e5cc07a0ba9dc83c56f"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/inventory-final/started",
+      "bytes": 21,
+      "sha256": "4caf3b17b4ffd608aeff5b3d7df9701736b12e89c1b3b3f839761583670bf828"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/kernel.config",
+      "bytes": 164006,
+      "sha256": "0b75fe318542db6698950f2b2ce5163e867118317fe61c538c4e7de7a1357163"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/kernel.config.old",
+      "bytes": 164003,
+      "sha256": "98c9d7927c024d3a70ed45d365dd4b1582d755d892158edfe3e9e1f4e01cb864"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/native-artifact-comparison.json",
+      "bytes": 188,
+      "sha256": "4f049cc9f4162e308776f9ae7daa212358de45d63c0de7d965f4201021cc6267"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/native-artifact-delta.json",
+      "bytes": 14005,
+      "sha256": "e808923db909940556746cc2d0c12117d33311f090a541de1146ccbd32f35c1b"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/native-reader-parity.json",
+      "bytes": 98,
+      "sha256": "62bbd5e821983e68da9d70bd83f42622d1ea793f9a470f012ce4115de4e398e2"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/repair/base-sha256",
+      "bytes": 695,
+      "sha256": "e2f298028f482be129fbf0721a0a19d09177c51e02aa68a387f7123e57927e32"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/repair/before-inputs.json",
+      "bytes": 1702,
+      "sha256": "8136cc1b756789ca37183ee7589c3c603b03eebb5238bb1c50b72cfe4ee18450"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/repair/dry-run.log",
+      "bytes": 258,
+      "sha256": "9ceb51ace8d5915899d86ec6804eee73e71aef58280b8c2b1761f57a307f4477"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/repair/exit-code",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/repair/finished",
+      "bytes": 21,
+      "sha256": "e921d2fbd99cb6ffb59548141ee38f30cca40209cb205c57abd2ab2e994c5b36"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/repair/image-cleanup",
+      "bytes": 15,
+      "sha256": "076fac6371111d1c27e1a888c51b55107b10e00b2838dcdcc838cfdfeb435fa7"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/repair/image-lock",
+      "bytes": 49,
+      "sha256": "8e92abb050e4e3bdcb9b30b8fe0da082edd8b3c360b2b7acf6678f5213e35537"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/repair/image-lock-mode",
+      "bytes": 3,
+      "sha256": "ea677ad115dcb3dc7c200051168977d0073e971fe05097c1bd2eaa5b6bd5fd15"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/repair/kernel-after-modules-sha256",
+      "bytes": 368,
+      "sha256": "81fda64cfb9a3cd4ba6b0ae655d844c96d9241407d656db975684c355589d69b"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/repair/kernel-before-modules-sha256",
+      "bytes": 368,
+      "sha256": "b1cc677f55d57e3cb3ebf9b3be194c90ea3e020759b643d74b56bcdfea33e575"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/repair/launcher.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/repair/launcher.pid",
+      "bytes": 7,
+      "sha256": "68ab1c154f79c432408fb0ac3428e0481431e889fa3ebaa682c475d0b2d397dc"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/repair/make-command.txt",
+      "bytes": 153,
+      "sha256": "4515a523d831bc16f49d005894d0543f94cff5265fc6042b961dd83440f3c1a4"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/repair/make.log",
+      "bytes": 414081,
+      "sha256": "af63d5617b61fb7471b83f32462779bf1b607b7b252701dd1742507da3d05339"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/repair/modules-after.txt",
+      "bytes": 99349,
+      "sha256": "f24e9546ca91c6f866b1b02f859eafe22d951db0dd559884233542749c785ae9"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/repair/modules-before.txt",
+      "bytes": 99349,
+      "sha256": "f24e9546ca91c6f866b1b02f859eafe22d951db0dd559884233542749c785ae9"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/repair/native-inputs-after.json",
+      "bytes": 409037,
+      "sha256": "784841d13a1a9a1e145a95fd246115a7c109c532da41387da75fd7d66bf6994e"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/repair/native-inputs-before.json",
+      "bytes": 449624,
+      "sha256": "155f7c5a3ece234cab6c7566febb72366b8b547e65885934e180106749318d58"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/repair/new-image",
+      "bytes": 72,
+      "sha256": "2c077de1c2b8a6c981a56601699e5e5c4f19128b0e50322eac2386344c4b00b4"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/repair/nfnetlink-sha256",
+      "bytes": 320,
+      "sha256": "d42984d30516e74fb2a0eca2f0b44e1ef61110ec167f157ceb101bd2f403a1cb"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/repair/old-image",
+      "bytes": 72,
+      "sha256": "3298221c13abb957e6428721f7e6f984a0af66f7f8542fde14b67ca676b64801"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/repair/started",
+      "bytes": 21,
+      "sha256": "860a8a6ab62bee0ca976704d16708ca39df03506a993e45e0461084924e5fb1f"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/smoke/corpus-command.txt",
+      "bytes": 463,
+      "sha256": "d5e2e953fcb101a70f1edc2b5ba479053cf5577ce5b966892cfb375fc7d5d811"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/smoke/dry-run.log",
+      "bytes": 128,
+      "sha256": "76ad6f8ecf769f1b87b73da673f3c36279afd95d98ea41537892693261dbc6b7"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/smoke/exit-code",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/smoke/finished",
+      "bytes": 21,
+      "sha256": "d1d1f5cdb4155bf1e99bfc9539f3494065c146943910278a5f307934347a406b"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/smoke/image-lock",
+      "bytes": 49,
+      "sha256": "8e92abb050e4e3bdcb9b30b8fe0da082edd8b3c360b2b7acf6678f5213e35537"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/smoke/image-lock-mode",
+      "bytes": 3,
+      "sha256": "046e1152652c7a9497dea5a656f664229dd2de0202c47388dcd4d296fdc02c78"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/smoke/launcher.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/smoke/launcher.pid",
+      "bytes": 8,
+      "sha256": "f16e040727541dbb02d4125d3373bdf74104766483eba096e3362f9e5c6ca3c6"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/smoke/make-command.txt",
+      "bytes": 151,
+      "sha256": "a82cacc465c4d7fa040e281cb7bc5f73bc5383af3bb6c2186d9400bcf0c64906"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/smoke/make.log",
+      "bytes": 8848,
+      "sha256": "b6da0c62926ffd09c0c01a90aeb816b6721c46df2f8067e4a2d754ee64dcdc49"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/smoke/queued",
+      "bytes": 21,
+      "sha256": "8b953024af2f38a07180d1bec3c92b73cdce758612aaab0e75ce89c2d9f8dfa1"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/smoke/removed-build-copies.txt",
+      "bytes": 179,
+      "sha256": "ad041b55c5671a6557fbf17aa14a6cc37acd01cb20e635f0b6b16e1af1939749"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/smoke/started",
+      "bytes": 21,
+      "sha256": "8b953024af2f38a07180d1bec3c92b73cdce758612aaab0e75ce89c2d9f8dfa1"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-base-consistency/smoke/waiting-for.pid",
+      "bytes": 7,
+      "sha256": "68ab1c154f79c432408fb0ac3428e0481431e889fa3ebaa682c475d0b2d397dc"
+    },
+    {
+      "path": "corpus/results/x86_kvm_corpus_20261115_131113_705227/details/apps/katran.json",
+      "bytes": 17212,
+      "sha256": "481576c26cd4a3f2a851b1f63595037d0867b9e8afb3b0ce930b4e390ae2f82b"
+    },
+    {
+      "path": "corpus/results/x86_kvm_corpus_20261115_131113_705227/details/progress.json",
+      "bytes": 103,
+      "sha256": "e7a5445808aa45a7e5cc5be736a4bb6958b77f4992eedfeee7ec2e1def2a10cc"
+    },
+    {
+      "path": "corpus/results/x86_kvm_corpus_20261115_131113_705227/details/result.json",
+      "bytes": 1758,
+      "sha256": "73297969a9f2671a4c7f4213fe0a95aea0ee01688c127b7b6b0ffdbec63ce297"
+    },
+    {
+      "path": "corpus/results/x86_kvm_corpus_20261115_131113_705227/details/shim-logs/katran.baseline.log",
+      "bytes": 6334,
+      "sha256": "671354922e6941ab83633fd08df6a6f2d66d333238744d056d5107119c582708"
+    },
+    {
+      "path": "corpus/results/x86_kvm_corpus_20261115_131113_705227/details/shim-logs/katran.post_rejit.log",
+      "bytes": 7424,
+      "sha256": "6f5bb26a184db58153c171685623ce12df8199dfa9b9bb90fa3d0c1cf7389ef1"
+    },
+    {
+      "path": "corpus/results/x86_kvm_corpus_20261115_131113_705227/metadata.json",
+      "bytes": 985,
+      "sha256": "f5dd567876b87586ef66031776770228c571db554afabd7e5e72fec6e8f58ed8"
+    }
+  ]
+}

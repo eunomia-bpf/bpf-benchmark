@@ -1,0 +1,427 @@
+{
+  "utc": "2026-11-15T13:28:04Z",
+  "removed": [
+    "tetragon/bpf_execve_event.native.o",
+    "tetragon/bpf_execve_event_v310.native.o",
+    "tetragon/bpf_execve_event_v511.native.o",
+    "tetragon/bpf_execve_event_v53.native.o",
+    "tetragon/bpf_execve_event_v61.native.o",
+    "tetragon/bpf_execve_map_update.native.o",
+    "tetragon/bpf_execve_map_update_v511.native.o",
+    "tetragon/bpf_execve_map_update_v53.native.o",
+    "tetragon/bpf_execve_map_update_v61.native.o",
+    "tetragon/bpf_exit.native.o",
+    "tetragon/bpf_exit_v310.native.o",
+    "tetragon/bpf_exit_v511.native.o",
+    "tetragon/bpf_fmodret_enforcer.native.o",
+    "tetragon/bpf_fork.native.o",
+    "tetragon/bpf_fork_v310.native.o",
+    "tetragon/bpf_fork_v511.native.o",
+    "tetragon/bpf_generic_fentry.native.o",
+    "tetragon/bpf_generic_fentry_v511.native.o",
+    "tetragon/bpf_generic_fentry_v53.native.o",
+    "tetragon/bpf_generic_fentry_v61.native.o",
+    "tetragon/bpf_generic_fexit.native.o",
+    "tetragon/bpf_generic_fexit_v511.native.o",
+    "tetragon/bpf_generic_fexit_v53.native.o",
+    "tetragon/bpf_generic_fexit_v61.native.o",
+    "tetragon/bpf_generic_kprobe.native.o",
+    "tetragon/bpf_generic_kprobe_v511.native.o",
+    "tetragon/bpf_generic_kprobe_v53.native.o",
+    "tetragon/bpf_generic_kprobe_v61.native.o",
+    "tetragon/bpf_generic_lsm_core.native.o",
+    "tetragon/bpf_generic_lsm_core_v511.native.o",
+    "tetragon/bpf_generic_lsm_core_v61.native.o",
+    "tetragon/bpf_generic_lsm_ima_bprm_v511.native.o",
+    "tetragon/bpf_generic_lsm_ima_bprm_v61.native.o",
+    "tetragon/bpf_generic_lsm_ima_file_v511.native.o",
+    "tetragon/bpf_generic_lsm_ima_file_v61.native.o",
+    "tetragon/bpf_generic_lsm_output.native.o",
+    "tetragon/bpf_generic_lsm_output_v511.native.o",
+    "tetragon/bpf_generic_lsm_output_v61.native.o",
+    "tetragon/bpf_generic_rawtp.native.o",
+    "tetragon/bpf_generic_rawtp_v511.native.o",
+    "tetragon/bpf_generic_rawtp_v53.native.o",
+    "tetragon/bpf_generic_rawtp_v61.native.o",
+    "tetragon/bpf_generic_retkprobe.native.o",
+    "tetragon/bpf_generic_retkprobe_v511.native.o",
+    "tetragon/bpf_generic_retkprobe_v53.native.o",
+    "tetragon/bpf_generic_retkprobe_v61.native.o",
+    "tetragon/bpf_generic_retuprobe.native.o",
+    "tetragon/bpf_generic_retuprobe_v511.native.o",
+    "tetragon/bpf_generic_retuprobe_v53.native.o",
+    "tetragon/bpf_generic_retuprobe_v61.native.o",
+    "tetragon/bpf_generic_tracepoint.native.o",
+    "tetragon/bpf_generic_tracepoint_v511.native.o",
+    "tetragon/bpf_generic_tracepoint_v53.native.o",
+    "tetragon/bpf_generic_tracepoint_v61.native.o",
+    "tetragon/bpf_generic_uprobe.native.o",
+    "tetragon/bpf_generic_uprobe_v511.native.o",
+    "tetragon/bpf_generic_uprobe_v53.native.o",
+    "tetragon/bpf_generic_uprobe_v61.native.o",
+    "tetragon/bpf_generic_usdt.native.o",
+    "tetragon/bpf_generic_usdt_v511.native.o",
+    "tetragon/bpf_generic_usdt_v53.native.o",
+    "tetragon/bpf_generic_usdt_v61.native.o",
+    "tetragon/bpf_loader.native.o",
+    "tetragon/bpf_loader_v511.native.o",
+    "tetragon/bpf_multi_enforcer.native.o",
+    "tetragon/bpf_multi_kprobe_v511.native.o",
+    "tetragon/bpf_multi_kprobe_v53.native.o",
+    "tetragon/bpf_multi_kprobe_v61.native.o",
+    "tetragon/bpf_multi_retkprobe_v511.native.o",
+    "tetragon/bpf_multi_retkprobe_v53.native.o",
+    "tetragon/bpf_multi_retkprobe_v61.native.o",
+    "tetragon/bpf_multi_retuprobe_v511.native.o",
+    "tetragon/bpf_multi_retuprobe_v61.native.o",
+    "tetragon/bpf_multi_uprobe_v511.native.o",
+    "tetragon/bpf_multi_uprobe_v61.native.o",
+    "tetragon/bpf_multi_usdt_v511.native.o",
+    "tetragon/bpf_multi_usdt_v61.native.o",
+    "tetragon/bpf_prog_iter.native.o"
+  ],
+  "added": [],
+  "changed": [
+    {
+      "path": "bcc/biosnoop.native.o",
+      "before": {
+        "bytes": 915200,
+        "sha256": "a07dfa5e538b540cfb5991ed6892cb303dbda7ecf31b03f4d0d0650bc44eb7b0"
+      },
+      "after": {
+        "bytes": 915384,
+        "sha256": "11c48508f7ea903e6eb9650da70b8574d00d6a245830e26afc0ecd459a5dda61"
+      }
+    },
+    {
+      "path": "bcc/capable.native.o",
+      "before": {
+        "bytes": 912504,
+        "sha256": "33479c6b04d8a945a471975ed9d5101637458f570f5e534fe8a45a854b3b69c9"
+      },
+      "after": {
+        "bytes": 912504,
+        "sha256": "3a3ccfcb0bc369f93d952351ee216dea51c120ed7371840792728e6ecdc9c0f1"
+      }
+    },
+    {
+      "path": "bcc/opensnoop.native.o",
+      "before": {
+        "bytes": 15456,
+        "sha256": "d19552e4428658ed0d6340c555143e44b9f6dd31e235862b33a81624fb2f1b9d"
+      },
+      "after": {
+        "bytes": 15456,
+        "sha256": "7d8f75f140c233eda05a343f48dbee068ba18adc24176b32dd49bbc0f8c763e2"
+      }
+    },
+    {
+      "path": "bcc/runqlat.native.o",
+      "before": {
+        "bytes": 919624,
+        "sha256": "fc2779158e1cda6d72a8178922a7fc3c54afa6544c2d3a1894e6be276001587c"
+      },
+      "after": {
+        "bytes": 919624,
+        "sha256": "fb5ed86dce136dee8e4baaa953e33e65d80c3e51e13991f64b81a4e8ff714d71"
+      }
+    },
+    {
+      "path": "bcc/syscount.native.o",
+      "before": {
+        "bytes": 910960,
+        "sha256": "7f6b076b0c30b8569721b6c1b1c1fe603ec750281c8c500ef0f01673dabccfa9"
+      },
+      "after": {
+        "bytes": 910960,
+        "sha256": "b2b502a3c82ffbf25090c7c5b484b07b6956881dc8ba2e22f23990f45fe82571"
+      }
+    },
+    {
+      "path": "bcc/tcpconnect.native.o",
+      "before": {
+        "bytes": 919480,
+        "sha256": "b5fdbe7ad4062119b740d0925dcf22c6d45377224ca5e21ad2797795d7d1303a"
+      },
+      "after": {
+        "bytes": 919480,
+        "sha256": "a16c4a398924cc17a470773e2f406dc33b7aa696d86b5e164f1a968f47c36a5a"
+      }
+    },
+    {
+      "path": "bcc/tcplife.native.o",
+      "before": {
+        "bytes": 944936,
+        "sha256": "3d8c8667842217b78a9c28019817fa25490ba23e7a15f0e02273ed44a4c09dd3"
+      },
+      "after": {
+        "bytes": 944928,
+        "sha256": "738b7d4749ffb54ed1817024e17a8440c94ba4020a4716629cf758b28ec263fa"
+      }
+    },
+    {
+      "path": "cilium/bpf_alignchecker.native.o",
+      "before": {
+        "bytes": 111896,
+        "sha256": "b97b400a7fbfdb1eaccd685f65b16dd450cb2d5b6ae2452aeb9efcc974d3a69c"
+      },
+      "after": {
+        "bytes": 111944,
+        "sha256": "001fdaaf4f714cffbce041bd6e0b4cdef6a63746bd4e90ace76f0110934c8fc0"
+      }
+    },
+    {
+      "path": "cilium/bpf_host.native.o",
+      "before": {
+        "bytes": 634568,
+        "sha256": "4a5614b60dbd5e333eb481b8b768b09387f5b3b8ce7c018c085a88bac459e49f"
+      },
+      "after": {
+        "bytes": 634816,
+        "sha256": "bcd0778c3be7b9964252fcafef27fe18283e4a92fa738db61f835534ad3bf7f2"
+      }
+    },
+    {
+      "path": "cilium/bpf_lxc.native.o",
+      "before": {
+        "bytes": 721600,
+        "sha256": "e9b7159e096ddc7cb4933ea67b9a0a910d6dad39183ab30fcbf67cfa9d2218e5"
+      },
+      "after": {
+        "bytes": 721656,
+        "sha256": "269b862447b45c4df64763b77acea8216aaa162cc453fbcdb79c26982c6d8ef7"
+      }
+    },
+    {
+      "path": "cilium/bpf_overlay.native.o",
+      "before": {
+        "bytes": 448320,
+        "sha256": "d1e1429a89a6512411ad4ed6285bddd2cb0213eaaedd631745755e206fb0ab24"
+      },
+      "after": {
+        "bytes": 448368,
+        "sha256": "3924490adf6a134999d396a44e74cb6f122714961a12a0df19416b5b7362b3f6"
+      }
+    },
+    {
+      "path": "cilium/bpf_sock.native.o",
+      "before": {
+        "bytes": 135776,
+        "sha256": "61a00c02eb2d346220174741eef357def850dbd11ec9ed305d3730a2fe3db932"
+      },
+      "after": {
+        "bytes": 135776,
+        "sha256": "0423db3e43ba15edb063f1708f9eda325ab2d7170da9b32167b78c8a99f68273"
+      }
+    },
+    {
+      "path": "cilium/bpf_wireguard.native.o",
+      "before": {
+        "bytes": 424264,
+        "sha256": "3fb2dcea613db71d14baac830683664fdd1528a9ef19a7c02fa4df930bfd535e"
+      },
+      "after": {
+        "bytes": 424320,
+        "sha256": "c042c4711ba1530d76a0aa291e165809ac02b7b635f332e90a547ba51b1d4ebe"
+      }
+    },
+    {
+      "path": "cilium/bpf_xdp.native.o",
+      "before": {
+        "bytes": 288112,
+        "sha256": "f85cdb2b30e32d473f0a9223b50335553bd515b28628d82c838fbc5bcf76a3f6"
+      },
+      "after": {
+        "bytes": 289728,
+        "sha256": "8f9d7139f67d88e00c70a9a35a80897afe3d410f5436a8620403d1337de6cffd"
+      }
+    },
+    {
+      "path": "katran/balancer.native.o",
+      "before": {
+        "bytes": 67928,
+        "sha256": "ba252e0372d100f34b60a0deb3f0a7ccc16b632c3c1a5eb40e9b13d31e558c20"
+      },
+      "after": {
+        "bytes": 67824,
+        "sha256": "9089604a4f05055111b71b375b43cdfba07d5cfe01f4eb8716d571901ff710b1"
+      }
+    },
+    {
+      "path": "katran/healthchecking.native.o",
+      "before": {
+        "bytes": 21472,
+        "sha256": "5e71e9698730fadaad830a8144b7e84bd9de837ae6e1a09eda4b557b11e1f835"
+      },
+      "after": {
+        "bytes": 19296,
+        "sha256": "5ef928f34f2e7d3213258eaa9ab7c7819c59518e215a0df1b42765a3d05a2410"
+      }
+    },
+    {
+      "path": "katran/healthchecking_ipip.native.o",
+      "before": {
+        "bytes": 10664,
+        "sha256": "fb3a1236c31a9deff63780da83e03071d4228d6c37d4cdead7e0b7f1bd3550a0"
+      },
+      "after": {
+        "bytes": 8856,
+        "sha256": "3957cb8848c0d0b1fd4697954afada7e7b75469f89bd9604b3c518e5d6a73510"
+      }
+    },
+    {
+      "path": "katran/xdp_root.native.o",
+      "before": {
+        "bytes": 5784,
+        "sha256": "7ba2c59eb847412edd95d360c60a33acd5319d01573d9706c7e4005e1a04ff18"
+      },
+      "after": {
+        "bytes": 5608,
+        "sha256": "1f451473c7c4de695a30c2d806a65508edc508b4902191ea4214701cc6f49d26"
+      }
+    },
+    {
+      "path": "tetragon/bpf_cgroup.native.o",
+      "before": {
+        "bytes": 920608,
+        "sha256": "1a19cf4eabca88c536d5db87d9b37e8bf9ca30dc7b5606511407fd108aa0b6fc"
+      },
+      "after": {
+        "bytes": 920072,
+        "sha256": "ada291114d932af46f608ab3109db957a2906c048a6e77f613a8a03fe9baaf18"
+      }
+    },
+    {
+      "path": "tetragon/bpf_cgroup_mkdir.native.o",
+      "before": {
+        "bytes": 932792,
+        "sha256": "f9e668e0b7ffaa25359b96fdf781aa7f6a46a26dc284c081fe2ca70bf58edf6d"
+      },
+      "after": {
+        "bytes": 931336,
+        "sha256": "55552d39ab904a36edde8d09d39429be0a41594bcefe85cd60bcfe266989eeb4"
+      }
+    },
+    {
+      "path": "tetragon/bpf_cgroup_mkdir_v511.native.o",
+      "before": {
+        "bytes": 935608,
+        "sha256": "a98e2f1d1608ea63106b5834f55884b74dd88870f00a172d2e45e55196b22551"
+      },
+      "after": {
+        "bytes": 934112,
+        "sha256": "c29687724682bc453253e9597e3b3cfc792708c41a33671b2dc23467b9af6083"
+      }
+    },
+    {
+      "path": "tetragon/bpf_cgroup_release.native.o",
+      "before": {
+        "bytes": 931128,
+        "sha256": "0bf3f88e88b5c50f222e644ac57cdefab19e00c3058ca7f78a3aad716a617dc3"
+      },
+      "after": {
+        "bytes": 930144,
+        "sha256": "33032916d21c4ba2bdff3d9ba43ac1f5962326e9d446187ba852c7fd8c1642a1"
+      }
+    },
+    {
+      "path": "tetragon/bpf_cgroup_release_v511.native.o",
+      "before": {
+        "bytes": 933624,
+        "sha256": "8256dd4f27862d7807e8a444b44a2b583d14eb29e55efc4f2e812cb61d3cca99"
+      },
+      "after": {
+        "bytes": 932744,
+        "sha256": "8df76a2e6070b6f2fd7d88f13d230af2f0b99b92dd1e24dd7704f3873be49eb4"
+      }
+    },
+    {
+      "path": "tetragon/bpf_cgroup_rmdir.native.o",
+      "before": {
+        "bytes": 931112,
+        "sha256": "802c4c96b7d320dcffe41e920b30ff733ffb5b2249d03e5af9ae7a4b01544d18"
+      },
+      "after": {
+        "bytes": 930120,
+        "sha256": "4149ae0f628df47e4dee8027c1b9f12b7680fd45d59bfc4c4fff27bd8f875f99"
+      }
+    },
+    {
+      "path": "tetragon/bpf_cgroup_rmdir_v511.native.o",
+      "before": {
+        "bytes": 933600,
+        "sha256": "7f7db2cf90c14b3f9a9663eebf839ccc40e9bd67b6b1ca51689622b64d27a77e"
+      },
+      "after": {
+        "bytes": 932736,
+        "sha256": "396c2d1208bb48c0f4ab2926f25f8186d1c90ff47e13b4aa51cbb3514382e3a4"
+      }
+    },
+    {
+      "path": "tetragon/bpf_cgtracker.native.o",
+      "before": {
+        "bytes": 925312,
+        "sha256": "f91fcaa75399becc384daef88bbf9b198989b641e076fe55cf0a7d1a208cc083"
+      },
+      "after": {
+        "bytes": 923944,
+        "sha256": "b9d1feeec98dd138ffdf60a694fbbf21378cf1044ab213de147e7c8c2a26809c"
+      }
+    },
+    {
+      "path": "tetragon/bpf_enforcer.native.o",
+      "before": {
+        "bytes": 7888,
+        "sha256": "1fa6db0b9a4e9479717c36cbd90a2486c0bd33f30f912e8cf61bc9a74c0908dc"
+      },
+      "after": {
+        "bytes": 7536,
+        "sha256": "f842b68a2b924dd3fdd7267a7d55ab9de97ee333e233eed703015a201817cc6a"
+      }
+    },
+    {
+      "path": "tetragon/bpf_execve_bprm_commit_creds.native.o",
+      "before": {
+        "bytes": 926848,
+        "sha256": "422729ae5feff178e1f8b10d1d6b114b0c89b39b7b0d8a718e2eac25ecdfb477"
+      },
+      "after": {
+        "bytes": 925792,
+        "sha256": "107d863c22edb089ddb61fa970c1e2a0c4f51a479b7a11fee2e8e05b026bbce7"
+      }
+    },
+    {
+      "path": "tracee/kprobe_check.native.o",
+      "before": {
+        "bytes": 7936,
+        "sha256": "d249e543e9e284e9c3c0fe345f9b48530a108a371264befc0e08011a0eb9d2e9"
+      },
+      "after": {
+        "bytes": 7440,
+        "sha256": "b4eded00b5b27d0e04563b5264c0a4e703795f3110c1bccb126f8e0036af7bdd"
+      }
+    },
+    {
+      "path": "tracee/lsm_check.native.o",
+      "before": {
+        "bytes": 6056,
+        "sha256": "55c87cf5e8d77ff8ae938728776a2c42e80bb3f2a41d9537166aef76e3c3e468"
+      },
+      "after": {
+        "bytes": 5568,
+        "sha256": "53663e5a57a9f0e28efc307fa94b05cd275e3accd84a4179ddf2e2b91a872cf5"
+      }
+    },
+    {
+      "path": "tracee/tracee.native.o",
+      "before": {
+        "bytes": 10063544,
+        "sha256": "fb3f51b32b0013c1258595a785e1053c0ec49a32e7d2fb80afafd2d29817bb82"
+      },
+      "after": {
+        "bytes": 8143048,
+        "sha256": "8174db3401effe9a29373d084e028b723abe6f62d296f99be0792c04e1a8b556"
+      }
+    }
+  ]
+}

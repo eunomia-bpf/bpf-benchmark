@@ -1,0 +1,85 @@
+bash /workspaces/repository/kprog/test/run_base_consistency_smoke.sh /workspaces/kprog-raw/perf/20261115-base-consistency/smoke
+make[1]: Entering directory '/workspaces/repository'
+install -d /var/tmp/kprog-tmp/perf/base-consistency-smoke/var-tmp /workspaces/kprog-raw/perf/20261115-base-consistency/smoke/logs
+ln -f /workspaces/repository/.cache/container-images/x86_64-runner-runtime.image.tar /var/tmp/kprog-tmp/perf/base-consistency-smoke/var-tmp/runtime.image.tar 2>/dev/null || cp /workspaces/repository/.cache/container-images/x86_64-runner-runtime.image.tar /var/tmp/kprog-tmp/perf/base-consistency-smoke/var-tmp/runtime.image.tar
+cp /workspaces/repository/kinsn/module/x86/build/bpf_x86_native_lab.ko /var/tmp/kprog-tmp/perf/base-consistency-smoke/var-tmp/bpf_x86_native_lab.ko
+taskset -c 16-19 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage --cwd /workspaces/repository --rwdir /workspaces/repository --rwdir /var/tmp=/var/tmp/kprog-tmp/perf/base-consistency-smoke/var-tmp --overlay-rwdir /tmp --overlay-rwdir /run --overlay-rwdir /usr/local --disable-monitor --verbose --cpus 8 --memory 64G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f /workspaces/repository/kprog/perf/one-image/Makefile guest APPS=katran SAMPLES=1 WORKLOAD_DURATION=10 BPFREJIT_CORPUS_BPF_STATS=1 NATIVE_MANIFEST=/workspaces/repository/corpus/results/katran-c-hdr-20261115/objects/manifest.json BENCH_PASSES= SKIP_REJIT_MODE=norejit NATIVE_LOADER_MODE=post'
+early console in setup code
+No EFI environment detected.
+early console in extract_kernel
+input_data: 0x00000000044f72cc
+input_len: 0x0000000000e65f0f
+output: 0x0000000001000000
+output_len: 0x00000000042f9f2c
+kernel_total_size: 0x0000000003a30000
+needed_size: 0x0000000004400000
+trampoline_32bit: 0x0000000000000000
+Physical KASLR using RDRAND RDTSC...
+Virtual KASLR using RDRAND RDTSC...
+
+Decompressing Linux... No EFI environment detected.
+Parsing ELF... Performing relocations... done.
+Booting the kernel (entry_offset: 0x0000000002ef0000).
+[    0.000000] Linux version 7.0.0-rc2+ (root@coder-22123351-d4a5-40fc-bc3b-1b853af74a7e-c7ccfb766-j5jjz) (gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, GNU ld (GNU Binutils for Ubuntu) 2.42) #13 SMP PREEMPT_DYNAMIC Sun Nov 15 13:07:11 UTC 2026
+[    0.000000] Command line: virtme_hostname=virtme-ng nr_open=1048576 virtme_link_mods=/workspaces/.agent-state/kprog-ck/build-x86/.virtme_mods/lib/modules/0.0.0 virtme_initmount0=workspaces/repository virtme_initmount1=/var/tmp virtme_rw_overlay0=/etc virtme_rw_overlay1=/lib virtme_rw_overlay2=/home virtme_rw_overlay3=/opt virtme_rw_overlay4=/srv virtme_rw_overlay5=/usr virtme_rw_overlay6=/var virtme_rw_overlay7=/tmp virtme_rw_overlay8=/run virtme_rw_overlay9=/usr/local virtme_console=ttyS0 console=ttyS0 earlyprintk=serial,ttyS0,115200 panic=-1 virtme.exec=`bWFrZSAtZiAvd29ya3NwYWNlcy9yZXBvc2l0b3J5L2twcm9nL3BlcmYvb25lLWltYWdlL01ha2VmaWxlIGd1ZXN0IEFQUFM9a2F0cmFuIFNBTVBMRVM9MSBXT1JLTE9BRF9EVVJBVElPTj0xMCBCUEZSRUpJVF9DT1JQVVNfQlBGX1NUQVRTPTEgTkFUSVZFX01BTklGRVNUPS93b3Jrc3BhY2VzL3JlcG9zaXRvcnkvY29ycHVzL3Jlc3VsdHMva2F0cmFuLWMtaGRyLTIwMjYxMTE1L29iamVjdHMvbWFuaWZlc3QuanNvbiBCRU5DSF9QQVNTRVM9IFNLSVBfUkVKSVRfTU9ERT1ub3Jlaml0IE5BVElWRV9MT0FERVJfTU9ERT1wb3N0` virtme_chdir=workspaces/repository virtme_root_user=1 debug loglevel=4 p
+[    0.000000] x86/split lock detection: #DB: warning on user-space bus_locks
+[    0.000000] BIOS-provided physical RAM map:
+[    0.000000] BIOS-e820: [mem 0x0000000000000000-0x000000000009fbff]  System RAM
+[    0.000000] BIOS-e820: [mem 0x000000000009fc00-0x000000000009ffff]  device reserved
+[    0.000000] BIOS-e820: [gap 0x00000000000a0000-0x00000000000effff]
+[    0.000000] BIOS-e820: [mem 0x00000000000f0000-0x00000000000fffff]  device reserved
+[    0.000000] BIOS-e820: [mem 0x0000000000100000-0x00000000bffdefff]  System RAM
+[    0.000000] BIOS-e820: [mem 0x00000000bffdf000-0x00000000bfffffff]  device reserved
+[    0.000000] BIOS-e820: [gap 0x00000000c0000000-0x00000000feffbfff]
+[    0.000000] BIOS-e820: [mem 0x00000000feffc000-0x00000000feffffff]  device reserved
+[    0.000000] BIOS-e820: [gap 0x00000000ff000000-0x00000000fffbffff]
+[    0.000000] BIOS-e820: [mem 0x00000000fffc0000-0x00000000ffffffff]  device reserved
+[    0.000000] BIOS-e820: [mem 0x0000000100000000-0x000000103fffffff]  System RAM
+[    0.000000] printk: legacy bootconsole [earlyser0] enabled
+Memory KASLR using RDRAND RDTSC...
+Poking KASLR using RDRAND RDTSC...
+[    0.485139] overlay: filesystem on /run/tmp/virtme_rw_overlay9/upper not supported as upperdir
+[    0.486073] overlay: filesystem on /run/tmp/virtme_rw_overlay9/upper not supported as upperdir
+insmod /var/tmp/bpf_x86_native_lab.ko
+echo 1 > /proc/sys/kernel/bpf_stats_enabled
+env -u BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF PATH=/usr/lib/llvm-18/bin:$PATH \
+  BPFREJIT_CORPUS_APPS=katran BPFREJIT_CORPUS_BPF_STATS=1 \
+  BPFREJIT_SHIM_NATIVE_LOADER=post \
+  BPFREJIT_SHIM_NATIVE_MANIFEST=/workspaces/repository/corpus/results/katran-c-hdr-20261115/objects/manifest.json \
+  BPFREJIT_BENCH_PASSES= \
+  BPFREJIT_NATIVE_LOADER_SO=/usr/local/lib/bpfrejit/libnative_loader.so \
+  KEEP_WORKDIRS=all BPFREJIT_KEEP_ALL_WORKDIRS=1 SKIP_REJIT=norejit \
+  make -C /workspaces/repository __runtime-vm-corpus PLATFORM=kvm ARCH=x86 \
+  X86_RUNNER_RUNTIME_IMAGE=bpf-benchmark/kprog:current X86_RUNNER_RUNTIME_IMAGE_TAR=/var/tmp/runtime.image.tar \
+  SAMPLES=1 WORKLOAD_DURATION=10
+make[1]: Entering directory '/workspaces/repository'
+install -d /run/bpf-benchmark-docker /run/bpf-benchmark-docker/data /run/bpf-benchmark-docker/exec
+truncate -s "${BPFREJIT_VM_DOCKER_DISK_SIZE:-64G}" /var/tmp/bpf-benchmark-docker.img
+mkfs.ext4 -F -q /var/tmp/bpf-benchmark-docker.img
+mount -o loop,discard /var/tmp/bpf-benchmark-docker.img /run/bpf-benchmark-docker
+dockerd --data-root /run/bpf-benchmark-docker/data --exec-root /run/bpf-benchmark-docker/exec --pidfile /run/bpf-benchmark-docker/docker.pid --host unix:///run/docker.sock --bridge=none --iptables=false --ip-masq=false --ip-forward=false >/run/bpf-benchmark-docker/dockerd.log 2>&1 &
+for _ in 1 2 3 4 5 6 7 8 9 10; do docker info >/dev/null 2>&1 && break; sleep 1; done
+docker info >/dev/null
+WARNING: No swap limit support
+WARNING: IPv4 forwarding is disabled
+install -d "/workspaces/repository/corpus/results"
+"/workspaces/repository/runner/scripts/bpfrejit-install" --image "bpf-benchmark/kprog:current" "/var/tmp/runtime.image.tar"
+Loaded image: bpf-benchmark/kprog:current
+WARNING: IPv4 forwarding is disabled. Networking will not work.
+docker run --rm --privileged --pid=host --network=host --ipc=host --cgroupns=host -e BPFREJIT_INSIDE_RUNTIME_CONTAINER=1 -e HOME=/root -e TARGET="x86-kvm" -e RUN_TARGET_NAME="x86-kvm" -e RUN_TOKEN="121c014a" -e RUN_TARGET_ARCH="x86_64" -e RUN_EXECUTOR="kvm" -e RUN_REMOTE_PYTHON_BIN="python3" -e RUN_RUNTIME_PYTHON_BIN="python3" -e RUN_BPFTOOL_BIN="bpftool" -e RUN_NATIVE_REPOS_CSV="bcc,katran,tracee,tetragon" -e SAMPLES="1"      -e FUZZ_ROUNDS="1000"  -e WORKLOAD_DURATION="10" -e KEEP_WORKDIRS="all"  -e BPFREJIT_CORPUS_APPS="katran" -e SKIP_REJIT="norejit"           -e BPFREJIT_CORPUS_BPF_STATS="1" -e BPFREJIT_SHIM_NATIVE_LOADER="post" -e BPFREJIT_SHIM_NATIVE_MANIFEST="/workspaces/repository/corpus/results/katran-c-hdr-20261115/objects/manifest.json"  -e BPFREJIT_NATIVE_LOADER_SO="/usr/local/lib/bpfrejit/libnative_loader.so"  -w "/workspaces/repository" -v /sys:/sys -v /sys/fs/bpf:/sys/fs/bpf -v /sys/kernel/debug:/sys/kernel/debug -v /lib/modules:/lib/modules:ro -v /boot:/boot:ro -v "/workspaces/repository/corpus/results:/workspaces/repository/corpus/results" "bpf-benchmark/kprog:current" python3 -m corpus.driver
+{"app": "katran", "event": "app_start", "runner": "katran", "workload": "xdp_pktgen"}
+{"app": "katran", "event": "measurement_start", "phase": "baseline", "runner": "katran", "samples": 1, "workload": "xdp_pktgen"}
+{"app": "katran", "event": "measurement_done", "phase": "baseline", "runner": "katran", "status": "ok"}
+{"app": "katran", "event": "rejit_skipped", "runner": "katran"}
+{"app": "katran", "event": "measurement_start", "phase": "post_rejit", "runner": "katran", "samples": 1, "workload": "xdp_pktgen"}
+{"app": "katran", "event": "measurement_done", "phase": "post_rejit", "runner": "katran", "status": "ok"}
+{"app": "katran", "error": "", "event": "app_done", "status": "ok"}
+{
+  "status": "ok",
+  "artifact_run_dir": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261115_131113_705227",
+  "artifact_metadata": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261115_131113_705227/metadata.json"
+}
+make[1]: Leaving directory '/workspaces/repository'
+[  117.727314] reboot: Power down
+rm -f /var/tmp/kprog-tmp/perf/base-consistency-smoke/var-tmp/bpf-benchmark-docker.img
+make[1]: Leaving directory '/workspaces/repository'

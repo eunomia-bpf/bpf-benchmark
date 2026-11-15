@@ -1,0 +1,1 @@
+taskset -c 8-11 prlimit --as=8589934592 -- /var/tmp/kprog-tmp/perf/kernel-layout/facts /workspaces/.agent-state/kprog-ck/build-x86/vmlinux /workspaces/kprog-raw/perf/20261115-base-consistency/boot/kernel.kallsyms > /var/tmp/kprog-tmp/perf/kernel-layout/kernel-layout.json

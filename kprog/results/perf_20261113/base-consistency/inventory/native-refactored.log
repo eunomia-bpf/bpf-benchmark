@@ -1,0 +1,5 @@
+make: Entering directory '/workspaces/repository/kprog/libnativeloader'
+python3 ../test/image_native_inventory.py --image "/workspaces/repository/.cache/container-images/x86_64-runner-runtime.image.tar" \
+	--stage "/workspaces/repository/vendor/build/native-bpf/x86/stage" --output "/workspaces/kprog-raw/perf/20261115-base-consistency/inventory/native-refactored.json"
+{"image_files": 1174, "stage_files": 1174, "differences": 0}
+make: Leaving directory '/workspaces/repository/kprog/libnativeloader'
