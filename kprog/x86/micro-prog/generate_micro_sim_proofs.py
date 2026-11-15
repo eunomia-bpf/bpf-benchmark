@@ -243,8 +243,8 @@ def load_rodata_blobs(obj: Path) -> dict[str, bytes]:
             offset, size, name = symbol["st_value"], symbol["st_size"], symbol.name
             if size <= 0 or offset + size > len(data):
                 raise ValueError(f"native readonly extent exceeds its section: {name} offset={offset} size={size}")
-            code, maps = readonly_relocations(elf, index, symbol)
-            out[name] = ReadonlyBytes(data[offset:offset + size], code, maps)
+            code, maps, absolute = readonly_relocations(elf, index, symbol)
+            out[name] = ReadonlyBytes(data[offset:offset + size], code, maps, absolute)
         return out
 
 
@@ -1805,11 +1805,13 @@ def render_program(name: str, insns: list[NativeInsn],
                     for name, body in subfunctions.items()}
     all_insns = [*insns, *(i for fn in subfunctions.values() for i in fn)]
     referenced_after_lowering = {i.reloc_symbol for i in all_insns}
-    if any((getattr(data, 'code_relocations', ()) or getattr(data, 'map_relocations', ())) and name in referenced_after_lowering
+    if any((getattr(data, 'code_relocations', ()) or getattr(data, 'map_relocations', ()) or
+            getattr(data, 'absolute_code_relocations', ())) and name in referenced_after_lowering
            for name, data in rodata16.items()):
         raise ValueError('readonly pointer relocation is referenced outside a lowered table')
     rodata16 = {name: data for name, data in rodata16.items()
-                if not (getattr(data, 'code_relocations', ()) or getattr(data, 'map_relocations', ())) or name in referenced_after_lowering}
+                if not (getattr(data, 'code_relocations', ()) or getattr(data, 'map_relocations', ()) or
+                        getattr(data, 'absolute_code_relocations', ())) or name in referenced_after_lowering}
     has_indirect = any(is_indirect_branch(i) for i in all_insns)
     targets = indirect_targets(all_insns, exit_addr, {
         insns[0].addr, *(fn[0].addr for fn in subfunctions.values() if fn)
