@@ -12,11 +12,13 @@
 
 - [x] P-clock-link（51fcc939f、fbee52b39；本提交收据）：normal x86 clock calls/tail transfers绑定同boot fast函数，地址/ID观察及helper可用性不变；44测试/实际十类helper查询和XDP plan通过，17:42配对base发布。image d4b19c9f于17:47发布，本提交image收据；实际shipped工具和1193stage文件一致。实际Katran map绑定/整应用计时仍开。`perf_20261113/clock-lto/report.md`。
 
-- [ ] P-map-CFG：等实际Katran runtime plan到手后，核对known_maps在每个basic-block入口清空命名map事实是否损失新统一参数下的查找内联；若确实命中，用同名指针的CFG meet保留跨分支/调用后callee-saved事实，混合身份/inner-map/窄写/未知内存仍不得猜类型。源码候选，未归因性能，先完成当前固定频率Katran数。
+- [ ] P-map-CFG：实际Katran timed plan已到（4f8b965a8），proof/blob/relocs重放逐字匹配；66lookup中60named，6dynamic offsets3743/3988/5304/5743/5831/6085。先区分真实inner-map结果与basic-block入口清空造成的事实损失；若确实命中，用同名指针的CFG meet保留跨分支/调用后callee-saved事实，混合身份/inner-map/窄写/未知内存仍不得猜类型。当前3.15%每调用结果尚未归因到这6site。
 
 - [ ] P-SPECIALIZE-app（612c9fc18、5c3c95a4d、750897f5f、85b74fdf0、473be88b4）：retry2 read_task_struct stock24/checked27、perf_unwind_stop stock31/checked34成功；perf_unwind_native两个attempt在MIR `dead $w2 = LDW32`失败，Make0/appERROR。whole_word_spills接受dead destination并修正liveness定义，11子例/10600真实执行通过；actualmain重放在Katran窗口后继续。raw `20261115-otel-current-app-retry2`及`20261115-dead-spill`。16/16规模及hotspot正常B/帧448B已完成；整应用安装、两臂输出和等量工作继续。
 
-- [ ] P-Katran-fixed-frequency（协调者2026-11-15T18:38:22Z转交PERF；22b6b7533、473be88b4）：OTel retry2结束后，唯一imagefc5336c2上AA/AB各一次，3x180/stats1、0-7固定频率/allLTO；actualplans、neutralblob/relocmetadata、liveJIT证据由observer保留，原guestMake命令/真实guest3例smoke通过。整批timingEX/imageSH，raw `/workspaces/kprog-raw/perf/20261115-katran-fixed-frequency/batch`。完成后报percall AB/AA、throughput、body及code size；计时窗口Workspace其余编译/guest保持安静。
+- [x] P-Katran-fixed-frequency（7471dc483、4f8b965a8）：19:44:34Z完成AA/AB各3x180/stats1/0-7固定频率/allLTO，唯一imagefc5336c2，Make0/appOK。percall AB/AA1.031460153x，mean throughput1.031074566x；Pbody7965B/installed12418B/JIT13641B，body runtime接下项。实际plan/proof/12386Bneutralblob/288Brelocs匹配，8fastclock+60/66named mapsite；73hostcontrols各run逐项恢复。raw `20261115-katran-fixed-frequency/batch`，结果`kprog/results/katran-c-hdr-20261115/fixed-frequency/`；20%/30%/body-speed目标继续。
+
+- [ ] P-Katran-body-profile（4f8b965a8）：为pure-body runtime补同image/allLTO/冻结workload/fixedfrequency的独立1x60s two-arm profile，timingEX/imageSH。launcher1180023于20:00:21Z启动，raw `/workspaces/kprog-raw/perf/20261115-katran-body-profile`；原AA/AB为正式counter结果，profile需按shim实际窗口对齐，并拆native inlined/runtime部分后再报body，不把全部program-text直接当pure body。
 
 - [x] P-SPECIALIZE-100K-scalar/debug（cab373d96、e8c0f32cf、c851677e1；本提交结果）：100036 指令 scalar/direct 正常 B448B/实际帧0；同一已完成前端去除1512837个非执行 dbg 更新，machine stage 894.162→34.847CPU s、RSS2567276→244708KiB，所有 allocated sections 一致。其余100K形状与stock检查继续，不据此关闭父项或宣称运行时收益。`perf_20261113/inline-families/scale-100k-debug/`。
 

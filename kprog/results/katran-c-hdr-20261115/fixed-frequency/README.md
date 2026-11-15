@@ -89,3 +89,5 @@ timingEX/imageSH. Its perf/module/image inputs are hardlinks to the canonical
 artifacts; the completed profile stage records cleanup paths while retaining
 raw profiles in persistent storage. It supplies samples for attribution and
 keeps the completed A/A–A/B counters above as the official timing observation.
+Launcher1180023 started20:00:21Z; raw data and eventual profile results stay
+under /workspaces/kprog-raw/perf/20261115-katran-body-profile/.
