@@ -14,7 +14,7 @@ def main(a):
     a.output.mkdir(parents=True, exist_ok=True)
     sys.path.insert(0, str(ROOT / 'kprog/x86'))
     import trusted_specializer as worker
-    prefix = '#include ' + json.dumps(str(ROOT / 'kprog/x86/x86_sim_local_bpf.h')) + '\n'
+    prefix = '#define X86_SIM_ENABLE_STACK 1\n#include ' + json.dumps(str(ROOT / 'kprog/x86/x86_sim_local_bpf.h')) + '\n'
     prefix += '''extern unsigned selected(unsigned);
 #define CAPTURE_WIDTH(CODE) ({ const __u8 captured=(CODE); (__u8)KPROG_X86_WIDTH_EFFECTIVE(captured); })
 '''
@@ -32,6 +32,12 @@ else if (KPROG_X86_WRITE_WIDTH_ARM(width)==KPROG_X86_WRITE_WIDTH_ARM_B16) return
 else if (KPROG_X86_WRITE_WIDTH_ARM(width)==KPROG_X86_WRITE_WIDTH_ARM_B32) return selected(4);
 else return selected(8);
 }}
+'''
+    prefix += '''unsigned probe_real_write(void *ctx) {
+X86_SIM_ENTRY_RAW(ctx);
+X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, (__u64)(long)ctx, X86_WIDTH_64);
+return (__u32)(long)__x86_rax.ptr;
+}
 '''
     source, output = a.build / 'width.c', a.build / 'width.ll'
     source.write_text(prefix)
