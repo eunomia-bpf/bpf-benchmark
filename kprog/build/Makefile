@@ -28,29 +28,6 @@ $(BUILD)/runtime-array-layout.json: $(BUILD)/runtime-array-layout $(KDIR)/vmlinu
 .PHONY: runtime-array-layout
 runtime-array-layout: $(BUILD)/runtime-array-layout.json
 
-RUNTIME_ARRAY_BUILD ?= /var/tmp/kprog-tmp/perf/runtime-array-layout
-RUNTIME_ARRAY_PAYLOAD ?= $(ROOT)/corpus/results/perf-runtime-array-linker-20261114
-RUNTIME_ARRAY_RAW ?= /workspaces/kprog-raw/perf/20261114-runtime-array-otel
-RUNTIME_ARRAY_CAPTURE ?= $(ROOT)/corpus/results/perf-runtime-array-otel-20261114
-RUNTIME_ARRAY_STATE ?= /var/tmp/kprog-tmp/perf/runtime-array-otel
-RUNTIME_ARRAY_LINK_WRAPPER ?= native-link-array-on
-RUNTIME_ARRAY_SECONDS ?= 10
-.PHONY: runtime-array-link-payload runtime-array-otel
-runtime-array-link-payload: known-map-link-build
-	$(MAKE) -f $(HERE)/Makefile runtime-array-layout BUILD=$(RUNTIME_ARRAY_BUILD)
-	install -d $(RUNTIME_ARRAY_PAYLOAD)
-	install -m755 $(KNOWN_MAP_TARGET)/release/native-link $(RUNTIME_ARRAY_PAYLOAD)/native-link.real
-	strip --strip-debug $(RUNTIME_ARRAY_PAYLOAD)/native-link.real
-	install -m644 $(RUNTIME_ARRAY_BUILD)/runtime-array-layout.json $(RUNTIME_ARRAY_PAYLOAD)/runtime-array-layout.json
-	install -m755 $(HERE)/native-link-runtime-array.sh $(RUNTIME_ARRAY_PAYLOAD)/native-link-array-on
-	install -m755 $(HERE)/native-link-runtime-array.sh $(RUNTIME_ARRAY_PAYLOAD)/native-link-array-off
-	install -m755 $(HERE)/native-link-runtime-array.sh $(RUNTIME_ARRAY_PAYLOAD)/native-link-array-shared-on
-	install -m755 $(HERE)/native-link-runtime-array.sh $(RUNTIME_ARRAY_PAYLOAD)/native-link-array-shared-off
-
-runtime-array-otel:
-	flock -s /workspaces/.agent-state/kprog-lanes/locks/image env PATH=$(ROOT)/kprog/perf/may29-image/eqcodex-bin:$$PATH EQCODEX_OUT=$(RUNTIME_ARRAY_CAPTURE) EQCODEX_NATIVE_LINK_BINARY=$(RUNTIME_ARRAY_PAYLOAD)/$(RUNTIME_ARRAY_LINK_WRAPPER) \
-		$(MAKE) -f $(ROOT)/kprog/perf/one-image/Makefile corpus APPS=otelcol-ebpf-profiler/profiling SAMPLES=1 WORKLOAD_DURATION=$(RUNTIME_ARRAY_SECONDS) CPUS=16-19 VM_CPUS=4 VM_MEM=16G BPFREJIT_CORPUS_BPF_STATS=1 NATIVE_MANIFEST=$(ROOT)/corpus/results/perf-otel-upstream-20261114/manifest-context.json STATE=$(RUNTIME_ARRAY_STATE) LOGS=$(RUNTIME_ARRAY_RAW)/run
-
 .PHONY: all
 
 
@@ -590,22 +567,6 @@ bpf-function-check: $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-
 	python3 $(HERE)/socket-helper-names.py > $(BPF_FUNCTION_BUILD)/helpers.json
 	python3 $(HERE)/test-bpf-functions.py --build $(BPF_FUNCTION_BUILD) --compiler $(SOCKET_BUILD)/socket-context-lower --reference $(BPF_FUNCTION_BUILD)/reference-lower --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json
 
-RUNTIME_PROBE_BUILD ?= /var/tmp/kprog-tmp/perf/runtime-probe-read-layout
-.PHONY: runtime-probe-read-layout
-runtime-probe-read-layout:
-	$(MAKE) -f $(HERE)/Makefile $(RUNTIME_PROBE_BUILD)/runtime-array-layout BUILD=$(RUNTIME_PROBE_BUILD)
-	$(RUNTIME_PROBE_BUILD)/runtime-array-layout $(KDIR)/vmlinux --probe-read $(KDIR)/System.map > $(RUNTIME_PROBE_BUILD)/runtime-probe-read-layout.json
-
-RUNTIME_PROBE_PAYLOAD ?= $(ROOT)/corpus/results/perf-probe-read-linker-20261114
-.PHONY: runtime-probe-read-payload
-runtime-probe-read-payload: known-map-link-build runtime-probe-read-layout
-	install -d $(RUNTIME_PROBE_PAYLOAD)
-	install -m755 $(KNOWN_MAP_TARGET)/release/native-link $(RUNTIME_PROBE_PAYLOAD)/native-link.real
-	strip --strip-debug $(RUNTIME_PROBE_PAYLOAD)/native-link.real
-	install -m644 $(RUNTIME_PROBE_BUILD)/runtime-probe-read-layout.json $(RUNTIME_PROBE_PAYLOAD)/runtime-probe-read-layout.json
-	install -m755 $(HERE)/native-link-probe-read.sh $(RUNTIME_PROBE_PAYLOAD)/native-link-on
-	install -m755 $(HERE)/native-link-probe-read.sh $(RUNTIME_PROBE_PAYLOAD)/native-link-off
-
 PROBE_KERNEL_BUILD ?= /var/tmp/kprog-tmp/perf/probe-read-kernel
 PROBE_KERNEL_OUTPUT ?= /workspaces/kprog-raw/perf/20261114-probe-read/kernel
 PROBE_KERNEL_LOADER := /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader
@@ -621,8 +582,6 @@ probe-read-kernel-inputs:
 
 probe-read-kernel: probe-read-kernel-inputs
 	install -d $(PROBE_KERNEL_OUTPUT)
-	install -m755 $(PROBE_KERNEL_BUILD)/client $(PROBE_KERNEL_OUTPUT)/client
-	install -m644 $(PROBE_KERNEL_BUILD)/source.bpf.o $(PROBE_KERNEL_BUILD)/source.native.o $(PROBE_KERNEL_OUTPUT)/
 	taskset -c 16-19 vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(PROBE_KERNEL_OUTPUT) --overlay-rwdir /tmp \
 		--disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' \
 		--exec 'make -f kprog/build/Makefile guest-probe-read PROBE_KERNEL_OUTPUT=$(PROBE_KERNEL_OUTPUT)'
@@ -630,53 +589,22 @@ probe-read-kernel: probe-read-kernel-inputs
 guest-probe-read:
 	cat /proc/cpuinfo > $(PROBE_KERNEL_OUTPUT)/cpuinfo
 	uname -r > $(PROBE_KERNEL_OUTPUT)/kernel.release
-	sha256sum $(RUNTIME_PROBE_PAYLOAD)/native-link.real $(RUNTIME_PROBE_PAYLOAD)/runtime-probe-read-layout.json $(PROBE_KERNEL_LOADER) $(PROBE_COMPILER)/compile-sim-ir $(ROOT)/kprog/x86/x86_sim_local_bpf.h > $(PROBE_KERNEL_OUTPUT)/guest-input-sha256
+	sha256sum $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link $(ROOT)/kprog/libnativeloader/src/native_loader_lto.hpp $(PROBE_KERNEL_LOADER) $(PROBE_COMPILER)/compile-sim-ir $(ROOT)/kprog/x86/x86_sim_local_bpf.h > $(PROBE_KERNEL_OUTPUT)/guest-input-sha256
 	@status=0; for mode in submitted-native checked-sim-c; do \
 		install -d $(PROBE_KERNEL_OUTPUT)/$$mode; extra=(); \
 		if [[ $$mode == checked-sim-c ]]; then extra=(--sim-native-compiler $(PROBE_COMPILER)/compile-sim-ir --sim-context-compiler $(PROBE_COMPILER)/context-lower --sim-public-layout $(PROBE_COMPILER)/public-layout.json --sim-physical-layout $(PROBE_COMPILER)/physical-layout.json --sim-bounds-compiler $(PROBE_COMPILER)/packet-bounds); fi; \
-		CLANG=$(ROOT)/kprog/stock-path/bin/clang KPROG_PROBE_LINKER=$(RUNTIME_PROBE_PAYLOAD)/native-link.real KPROG_PROBE_LAYOUT=$(RUNTIME_PROBE_PAYLOAD)/runtime-probe-read-layout.json \
+		CLANG=$(ROOT)/kprog/stock-path/bin/clang \
 		python3 $(ROOT)/kprog/trusted_service.py --arch 1 --endpoint /sys/kernel/debug/bpf_x86_native_lab/specializer --module /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko \
-			--state $(PROBE_KERNEL_OUTPUT)/$$mode/state --results $(PROBE_KERNEL_OUTPUT)/$$mode/service.tar.gz --native-link $(HERE)/native-link-probe-read.sh \
-			--loader $(PROBE_KERNEL_LOADER) --execution-mode $$mode "$${extra[@]}" --run $(PROBE_KERNEL_OUTPUT)/client $(PROBE_KERNEL_OUTPUT)/source.bpf.o $(PROBE_KERNEL_OUTPUT)/source.native.o $(HERE)/native-link-probe-read.sh $(PROBE_KERNEL_OUTPUT)/$$mode \
+			--state $(PROBE_KERNEL_OUTPUT)/$$mode/state --results $(PROBE_KERNEL_OUTPUT)/$$mode/service.tar.gz --native-link $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link \
+			--loader $(PROBE_KERNEL_LOADER) --execution-mode $$mode "$${extra[@]}" --run $(PROBE_KERNEL_BUILD)/client $(PROBE_KERNEL_BUILD)/source.bpf.o $(PROBE_KERNEL_BUILD)/source.native.o $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link $(PROBE_KERNEL_OUTPUT)/$$mode \
 			> $(PROBE_KERNEL_OUTPUT)/$$mode/service.log 2>&1 || status=1; \
 		cat $(PROBE_KERNEL_OUTPUT)/$$mode/service.log; \
 	done; exit $$status
 
-PROBE_OTEL_RAW ?= /workspaces/kprog-raw/perf/20261114-probe-read-otel-lto
-PROBE_OTEL_STATE ?= /var/tmp/kprog-tmp/perf/probe-read-otel-lto
-PROBE_OTEL_CAPTURE ?= $(ROOT)/corpus/results/perf-probe-read-otel-lto-20261114
-.PHONY: probe-read-otel-lto
-probe-read-otel-lto:
-	install -d $(PROBE_OTEL_STATE)/var-tmp $(PROBE_OTEL_RAW)
-	@status=0; env PATH=$(ROOT)/kprog/perf/may29-image/eqcodex-bin:$$PATH EQCODEX_OUT=$(PROBE_OTEL_CAPTURE) EQCODEX_ALL_JIT_PROGRAMS=1 \
-	make -C $(ROOT)/kprog/libnativeloader -o trusted-service trusted-service-kvm \
-		BUILD_DIR=/workspaces/.agent-state/kprog-ck/verified-loader OUTPUT=$(PROBE_OTEL_RAW)/control SERVICE_HOST_CPUS=16-19 VM_CPUS=4 VM_MEM=32G \
-		VNG_FLAGS='--overlay-rwdir /run --overlay-rwdir /usr/local --rwdir /var/tmp=$(PROBE_OTEL_STATE)/var-tmp' \
-		SERVICE_RUN='env BPFREJIT_SHIM_NATIVE_MANIFEST=$(ROOT)/corpus/results/perf-otel-upstream-20261114/manifest-context.json python3 $(ROOT)/kprog/test/verified_corpus.py otelcol-ebpf-profiler/profiling 1 10 1' \
-		SERVICE_EXECUTION_ARGS='$$(CHECKED_COMPILER_SERVICE_ARGS) --native-link $(RUNTIME_PROBE_PAYLOAD)/native-link-on' || status=$$?; \
-	if [[ -f $(PROBE_OTEL_STATE)/var-tmp/bpf-benchmark-docker.img ]]; then rm -f $(PROBE_OTEL_STATE)/var-tmp/bpf-benchmark-docker.img; fi; \
-	exit $$status
-
-RUNTIME_HASH_BUILD ?= /var/tmp/kprog-tmp/perf/runtime-hash-layout
-.PHONY: runtime-hash-layout
-runtime-hash-layout:
-	$(MAKE) -f $(HERE)/Makefile $(RUNTIME_HASH_BUILD)/runtime-array-layout BUILD=$(RUNTIME_HASH_BUILD)
-	$(RUNTIME_HASH_BUILD)/runtime-array-layout $(KDIR)/vmlinux --hash > $(RUNTIME_HASH_BUILD)/runtime-hash-layout.json
-
-RUNTIME_HASH_PAYLOAD ?= $(ROOT)/corpus/results/perf-hash-lto-linker-20261114
 HASH_KERNEL_BUILD ?= /var/tmp/kprog-tmp/perf/hash-lookup-kernel
 HASH_KERNEL_OUTPUT ?= /workspaces/kprog-raw/perf/20261114-hash-lto/kernel
 HASH_KERNEL_CASES := 1-1 2-1 3-1 4-1 5-1 2-5 2-9 2-10 2-13
-.PHONY: runtime-hash-payload hash-lookup-kernel-inputs hash-lookup-kernel guest-hash-lookup
-runtime-hash-payload: known-map-link-build runtime-hash-layout
-	install -d $(RUNTIME_HASH_PAYLOAD)
-	install -m755 $(KNOWN_MAP_TARGET)/release/native-link $(RUNTIME_HASH_PAYLOAD)/native-link.real
-	strip --strip-debug $(RUNTIME_HASH_PAYLOAD)/native-link.real
-	install -m644 $(RUNTIME_HASH_BUILD)/runtime-hash-layout.json $(RUNTIME_HASH_PAYLOAD)/runtime-hash-layout.json
-	install -m644 $(RUNTIME_PROBE_PAYLOAD)/runtime-probe-read-layout.json $(RUNTIME_HASH_PAYLOAD)/runtime-probe-read-layout.json
-	install -m755 $(HERE)/native-link-hash.sh $(RUNTIME_HASH_PAYLOAD)/native-link-on
-	install -m755 $(HERE)/native-link-hash.sh $(RUNTIME_HASH_PAYLOAD)/native-link-off
-
+.PHONY: hash-lookup-kernel-inputs hash-lookup-kernel guest-hash-lookup
 hash-lookup-kernel-inputs:
 	install -d $(HASH_KERNEL_BUILD)
 	@for item in $(HASH_KERNEL_CASES); do \
@@ -688,104 +616,58 @@ hash-lookup-kernel-inputs:
 
 hash-lookup-kernel: hash-lookup-kernel-inputs
 	install -d $(HASH_KERNEL_OUTPUT)
-	install -m755 $(HASH_KERNEL_BUILD)/client $(HASH_KERNEL_OUTPUT)/client
-	install -m644 $(HASH_KERNEL_BUILD)/*.bpf.o $(HASH_KERNEL_BUILD)/*.native.o $(HASH_KERNEL_OUTPUT)/
 	taskset -c 16-19 vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(HASH_KERNEL_OUTPUT) --overlay-rwdir /tmp \
 		--disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -f kprog/build/Makefile guest-hash-lookup HASH_KERNEL_OUTPUT=$(HASH_KERNEL_OUTPUT) RUNTIME_HASH_PAYLOAD=$(RUNTIME_HASH_PAYLOAD) HASH_KERNEL_CASES="$(HASH_KERNEL_CASES)"'
+		--exec 'make -f kprog/build/Makefile guest-hash-lookup HASH_KERNEL_OUTPUT=$(HASH_KERNEL_OUTPUT) HASH_KERNEL_CASES="$(HASH_KERNEL_CASES)"'
 
 guest-hash-lookup:
 	cat /proc/cpuinfo > $(HASH_KERNEL_OUTPUT)/cpuinfo
 	uname -r > $(HASH_KERNEL_OUTPUT)/kernel.release
-	sha256sum $(RUNTIME_HASH_PAYLOAD)/native-link.real $(RUNTIME_HASH_PAYLOAD)/runtime-hash-layout.json $(PROBE_KERNEL_LOADER) $(PROBE_COMPILER)/compile-sim-ir $(ROOT)/kprog/x86/x86_sim_local_bpf.h > $(HASH_KERNEL_OUTPUT)/guest-input-sha256
+	sha256sum $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link $(ROOT)/kprog/libnativeloader/src/native_loader_lto.hpp $(PROBE_KERNEL_LOADER) $(PROBE_COMPILER)/compile-sim-ir $(ROOT)/kprog/x86/x86_sim_local_bpf.h > $(HASH_KERNEL_OUTPUT)/guest-input-sha256
 	@status=0; for mode in submitted-native checked-sim-c; do for item in $(HASH_KERNEL_CASES); do \
 		output=$(HASH_KERNEL_OUTPUT)/$$mode/$$item; install -d $$output; extra=(); \
 		if [[ $$mode == checked-sim-c ]]; then extra=(--sim-native-compiler $(PROBE_COMPILER)/compile-sim-ir --sim-context-compiler $(PROBE_COMPILER)/context-lower --sim-public-layout $(PROBE_COMPILER)/public-layout.json --sim-physical-layout $(PROBE_COMPILER)/physical-layout.json --sim-bounds-compiler $(PROBE_COMPILER)/packet-bounds); fi; \
 		CLANG=$(ROOT)/kprog/stock-path/bin/clang python3 $(ROOT)/kprog/trusted_service.py --arch 1 --endpoint /sys/kernel/debug/bpf_x86_native_lab/specializer --module /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko \
-			--state $$output/state --results $$output/service.tar.gz --native-link $(RUNTIME_HASH_PAYLOAD)/native-link-on \
+			--state $$output/state --results $$output/service.tar.gz --native-link $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link \
 			--loader $(PROBE_KERNEL_LOADER) --execution-mode $$mode "$${extra[@]}" \
-			--run $(HASH_KERNEL_OUTPUT)/client $(HASH_KERNEL_OUTPUT)/$$item.bpf.o $(HASH_KERNEL_OUTPUT)/$$item.native.o $(RUNTIME_HASH_PAYLOAD)/native-link-on $$output \
+			--run $(HASH_KERNEL_BUILD)/client $(HASH_KERNEL_BUILD)/$$item.bpf.o $(HASH_KERNEL_BUILD)/$$item.native.o $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link $$output \
 			> $$output/service.log 2>&1 || status=1; cat $$output/service.log; \
 	done; done; exit $$status
 
-PROBE_TIMING_RAW ?= /workspaces/kprog-raw/perf/20261114-probe-read-direct-timing
-PROBE_TIMING_CAPTURE ?= $(ROOT)/corpus/results/perf-probe-read-direct-timing-20261114
-PROBE_TIMING_STATE ?= /var/tmp/kprog-tmp/perf/probe-read-direct-timing
-.PHONY: probe-read-otel-timing
-probe-read-otel-timing:
-	@for stats in 1 0; do \
-		flock /workspaces/.agent-state/kprog-lanes/locks/timing flock -s /workspaces/.agent-state/kprog-lanes/locks/image env PATH=$(ROOT)/kprog/perf/may29-image/eqcodex-bin:$$PATH EQCODEX_OUT=$(PROBE_TIMING_CAPTURE)/stats$$stats EQCODEX_ALL_JIT_PROGRAMS=1 EQCODEX_NATIVE_LINK_BINARY=$(RUNTIME_PROBE_PAYLOAD)/native-link-on \
-		make -f $(ROOT)/kprog/perf/one-image/Makefile rotate ORDER=otelcol-ebpf-profiler/profiling STATS=$$stats SAMPLES=3 WORKLOAD_DURATION=180 CPUS=0-7 VM_CPUS=8 VM_MEM=64G NATIVE_MANIFEST=$(ROOT)/corpus/results/perf-otel-upstream-20261114/manifest-context.json STATE=$(PROBE_TIMING_STATE) LOGS=$(PROBE_TIMING_RAW)/timing; \
-	done
-
-RUNTIME_LPM_BUILD ?= /var/tmp/kprog-tmp/perf/runtime-lpm-layout
-.PHONY: runtime-lpm-layout
-runtime-lpm-layout:
-	$(MAKE) -f $(HERE)/Makefile $(RUNTIME_LPM_BUILD)/runtime-array-layout BUILD=$(RUNTIME_LPM_BUILD)
-	$(RUNTIME_LPM_BUILD)/runtime-array-layout $(KDIR)/vmlinux --lpm > $(RUNTIME_LPM_BUILD)/runtime-lpm-layout.json
-
-RUNTIME_LPM_PAYLOAD ?= $(ROOT)/corpus/results/perf-lpm-lto-linker-20261114
 LPM_KERNEL_BUILD ?= /var/tmp/kprog-tmp/perf/lpm-lookup-kernel
 LPM_KERNEL_OUTPUT ?= /workspaces/kprog-raw/perf/20261114-lpm-lto/kernel
-.PHONY: runtime-lpm-payload lpm-lookup-kernel
-runtime-lpm-payload: known-map-link-build runtime-lpm-layout
-	install -d $(RUNTIME_LPM_PAYLOAD)
-	install -m755 $(KNOWN_MAP_TARGET)/release/native-link $(RUNTIME_LPM_PAYLOAD)/native-link.real
-	strip --strip-debug $(RUNTIME_LPM_PAYLOAD)/native-link.real
-	install -m644 $(RUNTIME_LPM_BUILD)/runtime-lpm-layout.json $(RUNTIME_LPM_PAYLOAD)/runtime-lpm-layout.json
-	install -m644 $(RUNTIME_HASH_PAYLOAD)/runtime-hash-layout.json $(RUNTIME_LPM_PAYLOAD)/runtime-hash-layout.json
-	install -m644 $(RUNTIME_PROBE_PAYLOAD)/runtime-probe-read-layout.json $(RUNTIME_LPM_PAYLOAD)/runtime-probe-read-layout.json
-	install -m755 $(HERE)/native-link-lpm.sh $(RUNTIME_LPM_PAYLOAD)/native-link-on
-	install -m755 $(HERE)/native-link-lpm.sh $(RUNTIME_LPM_PAYLOAD)/native-link-off
-
+.PHONY: lpm-lookup-kernel
 lpm-lookup-kernel:
-	flock -s /workspaces/.agent-state/kprog-lanes/locks/image make -f $(HERE)/Makefile hash-lookup-kernel HASH_KERNEL_BUILD=$(LPM_KERNEL_BUILD) HASH_KERNEL_OUTPUT=$(LPM_KERNEL_OUTPUT) HASH_KERNEL_CASES='4-11 2-11' RUNTIME_HASH_PAYLOAD=$(RUNTIME_LPM_PAYLOAD)
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image make -f $(HERE)/Makefile hash-lookup-kernel HASH_KERNEL_BUILD=$(LPM_KERNEL_BUILD) HASH_KERNEL_OUTPUT=$(LPM_KERNEL_OUTPUT) HASH_KERNEL_CASES='4-11 2-11'
 
 # Reuse the resource-substitution fixture/client for actual shared ARRAY LTO.
 ARRAY_KERNEL_BUILD ?= /var/tmp/kprog-tmp/perf/array-shared-kernel
 ARRAY_KERNEL_OUTPUT ?= /workspaces/kprog-raw/perf/20261114-array-shared-kernel/kernel
-ARRAY_KERNEL_PAYLOAD ?= $(ROOT)/corpus/results/perf-runtime-array-shared-linker-20261114
 .PHONY: array-shared-kernel-inputs array-shared-kernel array-shared-kernel-run guest-array-shared
 array-shared-kernel-inputs:
 	$(MAKE) -C $(ROOT)/kprog/libnativeloader source-maps-check SOURCE_MAP_BUILD=$(ARRAY_KERNEL_BUILD) SOURCE_MAP_OUTPUT=$(ARRAY_KERNEL_BUILD)/host
 
 array-shared-kernel:
-	flock -s /workspaces/.agent-state/kprog-lanes/locks/image make -f $(HERE)/Makefile array-shared-kernel-run ARRAY_KERNEL_BUILD=$(ARRAY_KERNEL_BUILD) ARRAY_KERNEL_OUTPUT=$(ARRAY_KERNEL_OUTPUT) ARRAY_KERNEL_PAYLOAD=$(ARRAY_KERNEL_PAYLOAD)
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image make -f $(HERE)/Makefile array-shared-kernel-run ARRAY_KERNEL_BUILD=$(ARRAY_KERNEL_BUILD) ARRAY_KERNEL_OUTPUT=$(ARRAY_KERNEL_OUTPUT)
 
 array-shared-kernel-run: array-shared-kernel-inputs
 	install -d $(ARRAY_KERNEL_OUTPUT)
-	sha256sum $(ARRAY_KERNEL_PAYLOAD)/native-link.real $(ARRAY_KERNEL_PAYLOAD)/runtime-array-layout.json $(HERE)/native-link-array-kernel.sh $(PROBE_KERNEL_LOADER) > $(ARRAY_KERNEL_OUTPUT)/input-sha256
-	@for mode in submitted-native checked-sim-c; do \
-		install -d $(ARRAY_KERNEL_OUTPUT)/$$mode; \
-		install -m755 $(ARRAY_KERNEL_BUILD)/source-maps $(ARRAY_KERNEL_OUTPUT)/$$mode/source-maps; \
-		install -m644 $(ARRAY_KERNEL_BUILD)/fixture.bpf.o $(ARRAY_KERNEL_BUILD)/fixture.native.o $(ARRAY_KERNEL_OUTPUT)/$$mode/; \
-		install -m755 $(HERE)/native-link-array-kernel.sh $(ARRAY_KERNEL_OUTPUT)/$$mode/native-link.real; \
-	done
+	sha256sum $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link $(ROOT)/kprog/libnativeloader/src/native_loader_lto.hpp $(PROBE_KERNEL_LOADER) > $(ARRAY_KERNEL_OUTPUT)/input-sha256
 	taskset -c 16-19 vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(ARRAY_KERNEL_OUTPUT) --overlay-rwdir /tmp \
 		--disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -f kprog/build/Makefile guest-array-shared ARRAY_KERNEL_OUTPUT=$(ARRAY_KERNEL_OUTPUT) ARRAY_KERNEL_PAYLOAD=$(ARRAY_KERNEL_PAYLOAD)'
+		--exec 'make -f kprog/build/Makefile guest-array-shared ARRAY_KERNEL_OUTPUT=$(ARRAY_KERNEL_OUTPUT)'
 
 guest-array-shared:
 	uname -r > $(ARRAY_KERNEL_OUTPUT)/kernel.release
 	@status=0; for mode in submitted-native checked-sim-c; do \
-		extra="--execution-mode $$mode"; \
+		install -d $(ARRAY_KERNEL_OUTPUT)/$$mode; extra="--execution-mode $$mode"; \
 		if [[ $$mode == checked-sim-c ]]; then extra="$$extra --sim-native-compiler $(PROBE_COMPILER)/compile-sim-ir --sim-context-compiler $(PROBE_COMPILER)/context-lower --sim-public-layout $(PROBE_COMPILER)/public-layout.json --sim-physical-layout $(PROBE_COMPILER)/physical-layout.json --sim-bounds-compiler $(PROBE_COMPILER)/packet-bounds"; fi; \
-		KPROG_ARRAY_LINKER=$(ARRAY_KERNEL_PAYLOAD)/native-link.real KPROG_ARRAY_LAYOUT=$(ARRAY_KERNEL_PAYLOAD)/runtime-array-layout.json \
-		make -C $(ROOT)/kprog/libnativeloader guest-source-maps SOURCE_MAP_KERNEL_OUTPUT=$(ARRAY_KERNEL_OUTPUT)/$$mode SOURCE_MAP_LOADER=$(PROBE_KERNEL_LOADER) SERVICE_EXECUTION_ARGS="$$extra" \
+		CLANG=$(ROOT)/kprog/stock-path/bin/clang python3 $(ROOT)/kprog/trusted_service.py --arch 1 --endpoint /sys/kernel/debug/bpf_x86_native_lab/specializer --module /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko \
+			--state $(ARRAY_KERNEL_OUTPUT)/$$mode/state --results $(ARRAY_KERNEL_OUTPUT)/$$mode/service.tar.gz --native-link $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link --loader $(PROBE_KERNEL_LOADER) $$extra \
+			--run $(ARRAY_KERNEL_BUILD)/source-maps kernel $(ARRAY_KERNEL_BUILD)/fixture.bpf.o $(ARRAY_KERNEL_BUILD)/fixture.native.o $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link $(ARRAY_KERNEL_OUTPUT)/$$mode \
 			> $(ARRAY_KERNEL_OUTPUT)/$$mode/service.log 2>&1 || status=1; \
 		cat $(ARRAY_KERNEL_OUTPUT)/$$mode/service.log; \
 	done; exit $$status
-
-RUNTIME_COMBINED_ARRAY_PAYLOAD ?= $(ROOT)/corpus/results/perf-combined-array-linker-20261114
-.PHONY: runtime-combined-array-payload
-runtime-combined-array-payload:
-	install -d $(RUNTIME_COMBINED_ARRAY_PAYLOAD)
-	install -m755 $(RUNTIME_LPM_PAYLOAD)/native-link.real $(RUNTIME_COMBINED_ARRAY_PAYLOAD)/native-link.real
-	install -m755 $(RUNTIME_LPM_PAYLOAD)/native-link-on $(RUNTIME_COMBINED_ARRAY_PAYLOAD)/native-link-base
-	install -m644 $(RUNTIME_LPM_PAYLOAD)/runtime-probe-read-layout.json $(RUNTIME_LPM_PAYLOAD)/runtime-hash-layout.json $(RUNTIME_LPM_PAYLOAD)/runtime-lpm-layout.json $(RUNTIME_COMBINED_ARRAY_PAYLOAD)/
-	install -m644 $(ARRAY_KERNEL_PAYLOAD)/runtime-array-layout.json $(RUNTIME_COMBINED_ARRAY_PAYLOAD)/runtime-array-layout.json
-	install -m755 $(HERE)/native-link-combined-array.sh $(RUNTIME_COMBINED_ARRAY_PAYLOAD)/native-link-on
-	install -m755 $(HERE)/native-link-combined-array.sh $(RUNTIME_COMBINED_ARRAY_PAYLOAD)/native-link-off
 
 # Profile-motivated backend comparison over the exact retained physical IR.
 OTEL_CMOV_BUILD ?= /var/tmp/kprog-tmp/perf/otel-cmov-codegen
