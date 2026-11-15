@@ -154,3 +154,22 @@ int kprog_x86_read_recovery_mem(struct x86_sim_register_state *state,
 	X86_SIM_L_READ_RECOVERY_MEM_INTO(recovered, base, dst, aux, displacement);
 	return recovered;
 }
+
+__u8 kprog_x86_mov_load_write_width(__u64 flags)
+{
+	__u8 width;
+	KPROG_X86_MOV_LOAD_WRITE_WIDTH_INTO(width, flags);
+	return width;
+}
+__u8 kprog_x86_mov_load_mem_width(__u64 flags, __u64 aux)
+{
+	__u8 width;
+	KPROG_X86_MOV_LOAD_MEM_WIDTH_INTO(width, flags, aux);
+	return width;
+}
+__u8 kprog_x86_mov_load_arm(__u64 stack, __u64 plain, __u64 memory, __u64 write, __u64 tag)
+{
+	__u8 arm;
+	KPROG_X86_MOV_LOAD_ARM_INTO(arm, stack, plain, memory, write, tag);
+	return arm;
+}

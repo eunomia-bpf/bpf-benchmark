@@ -1,0 +1,56 @@
+{
+  "status": "component checks passed; M4 incomplete",
+  "clight_functions": 22,
+  "new_roots": [
+    "mov_load_write_width",
+    "mov_load_mem_width",
+    "mov_load_arm"
+  ],
+  "width_aux_cases_per_mode": 199680,
+  "arm_capture_cases_per_mode": 7350,
+  "lazy_state_declarations_per_mode": 3993600,
+  "fallback_capture_probes_per_mode": 48,
+  "modes": [
+    "historical native kernels/declarations",
+    "current native",
+    "current CompCert host adapter"
+  ],
+  "negative_checks": {
+    "byte_truth_before_raw_capture": 1,
+    "eager_flags": 1,
+    "eager_tag": 1,
+    "tag_truncation": 1
+  },
+  "make_clight_exit": 0,
+  "targeted_lean_jobs": 38,
+  "deterministic": {
+    "equal": true,
+    "bytes": 881269
+  },
+  "standard_axiom_queries": 3,
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "fidelity": {
+    "allocated_sections_equal": true,
+    "allocated_relocations_equal": true,
+    "current_stream_equals_normal_build": true,
+    "allocated_section_bytes": {
+      ".text": 0,
+      "socket": 1448,
+      "license": 4
+    },
+    "allocated_relocations": 11
+  },
+  "preprocess": {
+    "exit": 0,
+    "bytes": 2676915,
+    "scope": "explicit-profile extraction TU, not full app"
+  },
+  "full_inline_export_exit": 2,
+  "next_blocker": "X86_SIM_L_SKB_READ GNU expression in MOV_LOAD",
+  "migrated_theorems": 0,
+  "whole_library_acceptance": false
+}

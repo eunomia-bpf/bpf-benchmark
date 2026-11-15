@@ -1337,11 +1337,28 @@ wrong input bits, a changed address boundary, a pre-fault SP write, eager index
 evaluation and a shift by64. `make clight`,38 targeted Lean jobs, deterministic
 875,320B regeneration and five standard-axiom queries pass. The same fixture
 retains socket1448B and11 allocated relocations; replay equals normal build.
-The extraction TU is2,676,777B at its explicit profile. Full inline export now
-stops at the MOV-load width selectors; no full-I export or migrated theorem is
-accepted. Small [run receipts](results/m4-x86-recovery/README.md) are committed;
+The extraction TU is2,676,777B at its explicit profile. At that checkpoint full inline export
+stopped at the MOV-load width selectors; no full-I export or migrated theorem
+was accepted. Small [run receipts](results/m4-x86-recovery/README.md) are committed;
 large logs and exact replay recipes stay in
 `/workspaces/kprog-raw/formal/m4-x86-recovery`.
+
+The MOV-load write-width, memory-width and arm selectors now also have actual
+Clight roots (`X86Pointer`:22 functions). Shared declaration/output kernels
+retain raw truth-before-byte capture, the nonzero flags expression's second
+evaluation, AUX-first/lazy fallback and the arm's delayed tag read. The native
+expression and const initializer forms remain; CompCert uses statement outputs
+for the same declaration sequence. Historical/current native and host-adapter
+runs pass199,680 width/AUX cases,7,350 arm/capture cases,3,993,600 partial-state
+binding/frame declarations and48 fallback capture probes. Four mutants catch
+byte truth tests, eager flags/tag reads and tag truncation. `make clight`,38
+Lean jobs, deterministic881,269B regeneration and three standard-axiom queries
+pass. The producer-interface fixture remains socket1448B+11 allocated
+relocations, replay equal to normal compilation. Extraction CPP is2,676,915B
+at its explicit profile; full inline export now stops at the SKB context-read
+expression. [Small receipts](results/m4-x86-mov-selectors/README.md) are committed;
+full logs/recipes stay under `/workspaces/kprog-raw/formal/m4-x86-mov-selectors`.
+No full-I export or migrated theorem is accepted.
 
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight

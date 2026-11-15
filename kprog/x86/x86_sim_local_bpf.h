@@ -1382,9 +1382,20 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
     X86_SIM_L_READ_RECOVERY_AT_INTO(OUTPUT, (BASE), (DST), \
         X86_SIM_L_READ_REG(BASE) + (__u64)X86_SIM_L_MEM_OFFSET((AUX), (DISP)))
 
-#define X86_SIM_L_EXEC_MOV_LOAD(OP, DST, SRC, FLAGS, AUX, IMM)              \
-	do { \
-        if (X86_SIM_L_READ_RECOVERY_MEM(SRC, DST, (AUX), x86_simm(IMM))) break; \
+#if defined(__COMPCERT__)
+/* Same selector bodies, with standard-C outputs. Retain the native const
+ * expression initializers below for its operand folding/code generation. */
+#define X86_SIM_L_MOV_LOAD_SELECTORS(OP, SRC, FLAGS, AUX) \
+    __u8 __x86_l_write_width; \
+    KPROG_X86_MOV_LOAD_WRITE_WIDTH_INTO(__x86_l_write_width, FLAGS); \
+    __u8 __x86_l_mem_captured; \
+    KPROG_X86_MOV_LOAD_MEM_WIDTH_INTO(__x86_l_mem_captured, FLAGS, AUX); \
+    const __u8 __x86_l_mem_width=__x86_l_mem_captured; \
+    __u8 __x86_l_arm; \
+    KPROG_X86_MOV_LOAD_ARM_INTO(__x86_l_arm, (SRC)==X86_RSP, (OP)==X86_OP_MOV_LOAD, \
+        __x86_l_mem_width, __x86_l_write_width, X86_SIM_L_REG_TAG(SRC))
+#else
+#define X86_SIM_L_MOV_LOAD_SELECTORS(OP, SRC, FLAGS, AUX) \
 		__u8 __x86_l_write_width =                                 \
 			KPROG_X86_MOV_LOAD_WRITE_WIDTH(FLAGS);             \
 		const __u8 __x86_l_mem_width =                                   \
@@ -1392,7 +1403,13 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 		__u8 __x86_l_arm = KPROG_X86_MOV_LOAD_ARM(                 \
 			(SRC) == X86_RSP, (OP) == X86_OP_MOV_LOAD,         \
 			__x86_l_mem_width, __x86_l_write_width,            \
-			X86_SIM_L_REG_TAG(SRC));                           \
+			X86_SIM_L_REG_TAG(SRC))
+#endif
+
+#define X86_SIM_L_EXEC_MOV_LOAD(OP, DST, SRC, FLAGS, AUX, IMM)              \
+	do { \
+        if (X86_SIM_L_READ_RECOVERY_MEM(SRC, DST, (AUX), x86_simm(IMM))) break; \
+        X86_SIM_L_MOV_LOAD_SELECTORS(OP, SRC, FLAGS, AUX); \
 		__s64 __x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX), x86_simm(IMM));\
         __s64 __x86_l_meta_disp=__x86_l_disp; \
 		void *__x86_l_base_ptr = (void *)0;                      \

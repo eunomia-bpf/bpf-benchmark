@@ -41,4 +41,7 @@ int kprog_x86_read_recovery(struct x86_sim_register_state *, struct kprog_x86_ar
                             struct kprog_x86_stack_fact *, __u32, __u64, __u64);
 int kprog_x86_read_recovery_mem(struct x86_sim_register_state *, struct kprog_x86_arena *,
                                 struct kprog_x86_stack_fact *, __u32, __u64, __u64, __u64, __s64);
+__u8 kprog_x86_mov_load_write_width(__u64);
+__u8 kprog_x86_mov_load_mem_width(__u64, __u64);
+__u8 kprog_x86_mov_load_arm(__u64, __u64, __u64, __u64, __u64);
 #endif

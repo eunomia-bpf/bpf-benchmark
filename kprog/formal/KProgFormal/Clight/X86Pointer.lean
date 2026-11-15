@@ -21,26 +21,26 @@ def __150 : Ident := identOfString "_150"
 def __151 : Ident := identOfString "_151"
 def __3115 : Ident := identOfString "_3115"
 def __3116 : Ident := identOfString "_3116"
-def __3272 : Ident := identOfString "_3272"
-def __3278 : Ident := identOfString "_3278"
-def __3343 : Ident := identOfString "_3343"
-def __3349 : Ident := identOfString "_3349"
-def __3385 : Ident := identOfString "_3385"
-def __3391 : Ident := identOfString "_3391"
-def __3450 : Ident := identOfString "_3450"
-def __3456 : Ident := identOfString "_3456"
-def __3516 : Ident := identOfString "_3516"
-def __3522 : Ident := identOfString "_3522"
-def __3567 : Ident := identOfString "_3567"
-def __3573 : Ident := identOfString "_3573"
-def __3623 : Ident := identOfString "_3623"
-def __3629 : Ident := identOfString "_3629"
-def __3726 : Ident := identOfString "_3726"
-def __3732 : Ident := identOfString "_3732"
-def __3769 : Ident := identOfString "_3769"
-def __3775 : Ident := identOfString "_3775"
-def __3814 : Ident := identOfString "_3814"
-def __3820 : Ident := identOfString "_3820"
+def __3283 : Ident := identOfString "_3283"
+def __3289 : Ident := identOfString "_3289"
+def __3354 : Ident := identOfString "_3354"
+def __3360 : Ident := identOfString "_3360"
+def __3396 : Ident := identOfString "_3396"
+def __3402 : Ident := identOfString "_3402"
+def __3461 : Ident := identOfString "_3461"
+def __3467 : Ident := identOfString "_3467"
+def __3527 : Ident := identOfString "_3527"
+def __3533 : Ident := identOfString "_3533"
+def __3578 : Ident := identOfString "_3578"
+def __3584 : Ident := identOfString "_3584"
+def __3634 : Ident := identOfString "_3634"
+def __3640 : Ident := identOfString "_3640"
+def __3737 : Ident := identOfString "_3737"
+def __3743 : Ident := identOfString "_3743"
+def __3780 : Ident := identOfString "_3780"
+def __3786 : Ident := identOfString "_3786"
+def __3825 : Ident := identOfString "_3825"
+def __3831 : Ident := identOfString "_3831"
 def ___builtin_ais_annot : Ident := identOfString "__builtin_ais_annot"
 def ___builtin_annot : Ident := identOfString "__builtin_annot"
 def ___builtin_annot_intval : Ident := identOfString "__builtin_annot_intval"
@@ -112,6 +112,9 @@ def ___kprog_x86_lane__2 : Ident := identOfString "__kprog_x86_lane__2"
 def ___kprog_x86_lane__3 : Ident := identOfString "__kprog_x86_lane__3"
 def ___kprog_x86_lane__4 : Ident := identOfString "__kprog_x86_lane__4"
 def ___kprog_x86_lane__5 : Ident := identOfString "__kprog_x86_lane__5"
+def ___kprog_x86_ml_arm : Ident := identOfString "__kprog_x86_ml_arm"
+def ___kprog_x86_ml_mem : Ident := identOfString "__kprog_x86_ml_mem"
+def ___kprog_x86_ml_write : Ident := identOfString "__kprog_x86_ml_write"
 def ___kprog_x86_mo_disp : Ident := identOfString "__kprog_x86_mo_disp"
 def ___kprog_x86_mo_has_index : Ident := identOfString "__kprog_x86_mo_has_index"
 def ___kprog_x86_mo_index : Ident := identOfString "__kprog_x86_mo_index"
@@ -288,6 +291,7 @@ def _abi_kind : Ident := identOfString "abi_kind"
 def _address : Ident := identOfString "address"
 def _af : Ident := identOfString "af"
 def _arena : Ident := identOfString "arena"
+def _arm : Ident := identOfString "arm"
 def _aux : Ident := identOfString "aux"
 def _b : Ident := identOfString "b"
 def _base : Ident := identOfString "base"
@@ -326,6 +330,9 @@ def _kprog_x86_mem_load : Ident := identOfString "kprog_x86_mem_load"
 def _kprog_x86_mem_offset : Ident := identOfString "kprog_x86_mem_offset"
 def _kprog_x86_mem_offset_indexed : Ident := identOfString "kprog_x86_mem_offset_indexed"
 def _kprog_x86_mov_imm : Ident := identOfString "kprog_x86_mov_imm"
+def _kprog_x86_mov_load_arm : Ident := identOfString "kprog_x86_mov_load_arm"
+def _kprog_x86_mov_load_mem_width : Ident := identOfString "kprog_x86_mov_load_mem_width"
+def _kprog_x86_mov_load_write_width : Ident := identOfString "kprog_x86_mov_load_write_width"
 def _kprog_x86_mov_reg : Ident := identOfString "kprog_x86_mov_reg"
 def _kprog_x86_movx_reg : Ident := identOfString "kprog_x86_movx_reg"
 def _kprog_x86_native_load_tagged : Ident := identOfString "kprog_x86_native_load_tagged"
@@ -344,6 +351,7 @@ def _local_ip6 : Ident := identOfString "local_ip6"
 def _local_port : Ident := identOfString "local_port"
 def _main : Ident := identOfString "main"
 def _mark : Ident := identOfString "mark"
+def _memory : Ident := identOfString "memory"
 def _napi_id : Ident := identOfString "napi_id"
 def _native_lab_entry_input : Ident := identOfString "native_lab_entry_input"
 def _native_stack_base : Ident := identOfString "native_stack_base"
@@ -359,6 +367,7 @@ def _pad1 : Ident := identOfString "pad1"
 def _pad2 : Ident := identOfString "pad2"
 def _pf : Ident := identOfString "pf"
 def _pkt_type : Ident := identOfString "pkt_type"
+def _plain : Ident := identOfString "plain"
 def _pointer : Ident := identOfString "pointer"
 def _present : Ident := identOfString "present"
 def _priority : Ident := identOfString "priority"
@@ -411,6 +420,7 @@ def _sk : Ident := identOfString "sk"
 def _skb_abi : Ident := identOfString "skb_abi"
 def _skb_ctx : Ident := identOfString "skb_ctx"
 def _src : Ident := identOfString "src"
+def _stack : Ident := identOfString "stack"
 def _state : Ident := identOfString "state"
 def _tag : Ident := identOfString "tag"
 def _tc_classid : Ident := identOfString "tc_classid"
@@ -424,6 +434,7 @@ def _vlan_tci : Ident := identOfString "vlan_tci"
 def _w : Ident := identOfString "w"
 def _width : Ident := identOfString "width"
 def _wire_len : Ident := identOfString "wire_len"
+def _write : Ident := identOfString "write"
 def _x86_apply_width : Ident := identOfString "x86_apply_width"
 def _x86_sign_extend : Ident := identOfString "x86_sign_extend"
 def _x86_sim_gpr : Ident := identOfString "x86_sim_gpr"
@@ -1080,7 +1091,7 @@ def s_kprog_x86_ptr_load_5 : Stmt :=
                 [(tptr (tvolatile (tptr tvoid))), (tvolatile (tptr tvoid))]
                 [(Expr.Eaddrof
                    (Expr.Efield
-                     (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3272 noattr)))
+                     (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3283 noattr)))
                      _ptr (tvolatile (tptr tvoid)))
                    (tptr (tvolatile (tptr tvoid)))),
                  (Expr.Etempvar _t'45 (tptr tvoid))]))
@@ -1093,7 +1104,7 @@ def s_kprog_x86_ptr_load_5 : Stmt :=
                   (Expr.Ederef
                     (Expr.Ebinop Binop.Oadd
                       (Expr.Efield
-                        (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3272 noattr)))
+                        (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3283 noattr)))
                         _b (tvolatile (tarray tuchar 8)))
                       (Expr.Econst_int (Integers.Int.repr 1) tint)
                       (tptr tuchar)) tuchar)
@@ -1102,7 +1113,7 @@ def s_kprog_x86_ptr_load_5 : Stmt :=
                   (Expr.Ederef
                     (Expr.Ebinop Binop.Oadd
                       (Expr.Efield
-                        (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3272 noattr)))
+                        (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3283 noattr)))
                         _b (tvolatile (tarray tuchar 8)))
                       (Expr.Econst_int (Integers.Int.repr 0) tint)
                       (tptr tuchar)) tuchar)
@@ -1113,7 +1124,7 @@ def s_kprog_x86_ptr_load_5 : Stmt :=
                     [(tptr (tvolatile (tptr tvoid)))]
                     [(Expr.Eaddrof
                        (Expr.Efield
-                         (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3272 noattr)))
+                         (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3283 noattr)))
                          _ptr (tvolatile (tptr tvoid)))
                        (tptr (tvolatile (tptr tvoid))))])
                   (Stmt.Sset ___kprog_x86_bits
@@ -1310,7 +1321,7 @@ def s_kprog_x86_ptr_load_6 : Stmt :=
                      (tvolatile (tptr tvoid))]
                     [(Expr.Eaddrof
                        (Expr.Efield
-                         (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3278 noattr)))
+                         (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3289 noattr)))
                          _ptr (tvolatile (tptr tvoid)))
                        (tptr (tvolatile (tptr tvoid)))),
                      (Expr.Etempvar _t'39 (tptr tvoid))]))
@@ -1319,7 +1330,7 @@ def s_kprog_x86_ptr_load_6 : Stmt :=
                     [(tptr (tvolatile tushort)), (tvolatile tushort)]
                     [(Expr.Eaddrof
                        (Expr.Efield
-                         (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3278 noattr)))
+                         (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3289 noattr)))
                          _w (tvolatile tushort)) (tptr (tvolatile tushort))),
                      (Expr.Etempvar ___kprog_x86_lane__1 tushort)])
                   (Stmt.Ssequence
@@ -1329,7 +1340,7 @@ def s_kprog_x86_ptr_load_6 : Stmt :=
                         [(tptr (tvolatile (tptr tvoid)))]
                         [(Expr.Eaddrof
                            (Expr.Efield
-                             (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3278 noattr)))
+                             (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3289 noattr)))
                              _ptr (tvolatile (tptr tvoid)))
                            (tptr (tvolatile (tptr tvoid))))])
                       (Stmt.Sset ___kprog_x86_bits__1
@@ -2026,9 +2037,9 @@ def f_kprog_x86_ptr_load : Function := {
                 (_capacity, tuint), (_op, tuchar), (_dst, tuchar),
                 (_aux, tuint), (_imm, tulong)],
   fn_vars := [(___x86_wr_cell, (Ty.Tunion _x86_sim_gpr noattr)),
-              (___kprog_x86_partial, (tvolatile (Ty.Tunion __3272 noattr))),
+              (___kprog_x86_partial, (tvolatile (Ty.Tunion __3283 noattr))),
               (___kprog_x86_partial__1,
-               (tvolatile (Ty.Tunion __3278 noattr)))],
+               (tvolatile (Ty.Tunion __3289 noattr)))],
   fn_temps := [(___x86_state,
                 (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
                (___x86_l_pw_tag, tuchar), (___kprog_x86_source_tag, tuchar),
@@ -2739,7 +2750,7 @@ def s_kprog_x86_write_reg_5 : Stmt :=
         [(tptr (tvolatile (tptr tvoid))), (tvolatile (tptr tvoid))]
         [(Expr.Eaddrof
            (Expr.Efield
-             (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3343 noattr)))
+             (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3354 noattr)))
              _ptr (tvolatile (tptr tvoid))) (tptr (tvolatile (tptr tvoid)))),
          (Expr.Etempvar _t'29 (tptr tvoid))]))
     (Stmt.Ssequence
@@ -2750,7 +2761,7 @@ def s_kprog_x86_write_reg_5 : Stmt :=
           (Expr.Ederef
             (Expr.Ebinop Binop.Oadd
               (Expr.Efield
-                (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3343 noattr)))
+                (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3354 noattr)))
                 _b (tvolatile (tarray tuchar 8)))
               (Expr.Econst_int (Integers.Int.repr 1) tint) (tptr tuchar))
             tuchar) (Expr.Etempvar ___kprog_x86_lane tuchar))
@@ -2758,7 +2769,7 @@ def s_kprog_x86_write_reg_5 : Stmt :=
           (Expr.Ederef
             (Expr.Ebinop Binop.Oadd
               (Expr.Efield
-                (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3343 noattr)))
+                (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3354 noattr)))
                 _b (tvolatile (tarray tuchar 8)))
               (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tuchar))
             tuchar) (Expr.Etempvar ___kprog_x86_lane tuchar)))
@@ -2768,7 +2779,7 @@ def s_kprog_x86_write_reg_5 : Stmt :=
             [(tptr (tvolatile (tptr tvoid)))]
             [(Expr.Eaddrof
                (Expr.Efield
-                 (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3343 noattr)))
+                 (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3354 noattr)))
                  _ptr (tvolatile (tptr tvoid)))
                (tptr (tvolatile (tptr tvoid))))])
           (Stmt.Sset ___kprog_x86_bits
@@ -2943,7 +2954,7 @@ def s_kprog_x86_write_reg_11 : Stmt :=
             [(tptr (tvolatile (tptr tvoid))), (tvolatile (tptr tvoid))]
             [(Expr.Eaddrof
                (Expr.Efield
-                 (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3349 noattr)))
+                 (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3360 noattr)))
                  _ptr (tvolatile (tptr tvoid)))
                (tptr (tvolatile (tptr tvoid)))),
              (Expr.Etempvar _t'23 (tptr tvoid))]))
@@ -2952,7 +2963,7 @@ def s_kprog_x86_write_reg_11 : Stmt :=
             [(tptr (tvolatile tushort)), (tvolatile tushort)]
             [(Expr.Eaddrof
                (Expr.Efield
-                 (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3349 noattr)))
+                 (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3360 noattr)))
                  _w (tvolatile tushort)) (tptr (tvolatile tushort))),
              (Expr.Etempvar ___kprog_x86_lane__1 tushort)])
           (Stmt.Ssequence
@@ -2961,7 +2972,7 @@ def s_kprog_x86_write_reg_11 : Stmt :=
                 [(tptr (tvolatile (tptr tvoid)))]
                 [(Expr.Eaddrof
                    (Expr.Efield
-                     (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3349 noattr)))
+                     (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3360 noattr)))
                      _ptr (tvolatile (tptr tvoid)))
                    (tptr (tvolatile (tptr tvoid))))])
               (Stmt.Sset ___kprog_x86_bits__1
@@ -3373,9 +3384,9 @@ def f_kprog_x86_write_reg : Function := {
                 (_capacity, tuint), (_reg, tuchar), (_value, tulong),
                 (_width, tuchar), (_shift, tuchar)],
   fn_vars := [(___x86_wr_cell, (Ty.Tunion _x86_sim_gpr noattr)),
-              (___kprog_x86_partial, (tvolatile (Ty.Tunion __3343 noattr))),
+              (___kprog_x86_partial, (tvolatile (Ty.Tunion __3354 noattr))),
               (___kprog_x86_partial__1,
-               (tvolatile (Ty.Tunion __3349 noattr)))],
+               (tvolatile (Ty.Tunion __3360 noattr)))],
   fn_temps := [(___x86_state,
                 (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
                (___x86_write_old_sp, tlong), (___x86_wr_raw_width, tuchar),
@@ -3858,7 +3869,7 @@ def s_kprog_x86_mov_imm_6 : Stmt :=
             [(tptr (tvolatile (tptr tvoid))), (tvolatile (tptr tvoid))]
             [(Expr.Eaddrof
                (Expr.Efield
-                 (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3385 noattr)))
+                 (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3396 noattr)))
                  _ptr (tvolatile (tptr tvoid)))
                (tptr (tvolatile (tptr tvoid)))),
              (Expr.Etempvar _t'30 (tptr tvoid))]))
@@ -3871,7 +3882,7 @@ def s_kprog_x86_mov_imm_6 : Stmt :=
               (Expr.Ederef
                 (Expr.Ebinop Binop.Oadd
                   (Expr.Efield
-                    (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3385 noattr)))
+                    (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3396 noattr)))
                     _b (tvolatile (tarray tuchar 8)))
                   (Expr.Econst_int (Integers.Int.repr 1) tint) (tptr tuchar))
                 tuchar) (Expr.Etempvar ___kprog_x86_lane tuchar))
@@ -3879,7 +3890,7 @@ def s_kprog_x86_mov_imm_6 : Stmt :=
               (Expr.Ederef
                 (Expr.Ebinop Binop.Oadd
                   (Expr.Efield
-                    (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3385 noattr)))
+                    (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3396 noattr)))
                     _b (tvolatile (tarray tuchar 8)))
                   (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tuchar))
                 tuchar) (Expr.Etempvar ___kprog_x86_lane tuchar)))
@@ -3889,7 +3900,7 @@ def s_kprog_x86_mov_imm_6 : Stmt :=
                 [(tptr (tvolatile (tptr tvoid)))]
                 [(Expr.Eaddrof
                    (Expr.Efield
-                     (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3385 noattr)))
+                     (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3396 noattr)))
                      _ptr (tvolatile (tptr tvoid)))
                    (tptr (tvolatile (tptr tvoid))))])
               (Stmt.Sset ___kprog_x86_bits
@@ -4079,7 +4090,7 @@ def s_kprog_x86_mov_imm_10 : Stmt :=
                 [(tptr (tvolatile (tptr tvoid))), (tvolatile (tptr tvoid))]
                 [(Expr.Eaddrof
                    (Expr.Efield
-                     (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3391 noattr)))
+                     (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3402 noattr)))
                      _ptr (tvolatile (tptr tvoid)))
                    (tptr (tvolatile (tptr tvoid)))),
                  (Expr.Etempvar _t'24 (tptr tvoid))]))
@@ -4088,7 +4099,7 @@ def s_kprog_x86_mov_imm_10 : Stmt :=
                 [(tptr (tvolatile tushort)), (tvolatile tushort)]
                 [(Expr.Eaddrof
                    (Expr.Efield
-                     (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3391 noattr)))
+                     (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3402 noattr)))
                      _w (tvolatile tushort)) (tptr (tvolatile tushort))),
                  (Expr.Etempvar ___kprog_x86_lane__1 tushort)])
               (Stmt.Ssequence
@@ -4097,7 +4108,7 @@ def s_kprog_x86_mov_imm_10 : Stmt :=
                     [(tptr (tvolatile (tptr tvoid)))]
                     [(Expr.Eaddrof
                        (Expr.Efield
-                         (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3391 noattr)))
+                         (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3402 noattr)))
                          _ptr (tvolatile (tptr tvoid)))
                        (tptr (tvolatile (tptr tvoid))))])
                   (Stmt.Sset ___kprog_x86_bits__1
@@ -4542,9 +4553,9 @@ def f_kprog_x86_mov_imm : Function := {
                 (_capacity, tuint), (_dst, tuchar), (_flags, tuchar),
                 (_aux, tuint), (_imm, tulong)],
   fn_vars := [(___x86_wr_cell, (Ty.Tunion _x86_sim_gpr noattr)),
-              (___kprog_x86_partial, (tvolatile (Ty.Tunion __3385 noattr))),
+              (___kprog_x86_partial, (tvolatile (Ty.Tunion __3396 noattr))),
               (___kprog_x86_partial__1,
-               (tvolatile (Ty.Tunion __3391 noattr)))],
+               (tvolatile (Ty.Tunion __3402 noattr)))],
   fn_temps := [(___x86_state,
                 (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
                (___x86_l_width, tuchar), (___x86_write_old_sp, tlong),
@@ -5374,7 +5385,7 @@ def s_kprog_x86_mov_reg_17 : Stmt :=
     [(tptr (tvolatile (tptr tvoid)))]
     [(Expr.Eaddrof
        (Expr.Efield
-         (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3456 noattr)))
+         (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3467 noattr)))
          _ptr (tvolatile (tptr tvoid))) (tptr (tvolatile (tptr tvoid))))])
   (Stmt.Sset ___kprog_x86_bits__1
     (Expr.Ecast
@@ -5891,7 +5902,7 @@ def s_kprog_x86_mov_reg_26 : Stmt :=
                              (tvolatile (tptr tvoid))]
                             [(Expr.Eaddrof
                                (Expr.Efield
-                                 (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3450 noattr)))
+                                 (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3461 noattr)))
                                  _ptr (tvolatile (tptr tvoid)))
                                (tptr (tvolatile (tptr tvoid)))),
                              (Expr.Etempvar _t'192 (tptr tvoid))]))
@@ -5904,7 +5915,7 @@ def s_kprog_x86_mov_reg_26 : Stmt :=
                               (Expr.Ederef
                                 (Expr.Ebinop Binop.Oadd
                                   (Expr.Efield
-                                    (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3450 noattr)))
+                                    (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3461 noattr)))
                                     _b (tvolatile (tarray tuchar 8)))
                                   (Expr.Econst_int (Integers.Int.repr 1) tint)
                                   (tptr tuchar)) tuchar)
@@ -5913,7 +5924,7 @@ def s_kprog_x86_mov_reg_26 : Stmt :=
                               (Expr.Ederef
                                 (Expr.Ebinop Binop.Oadd
                                   (Expr.Efield
-                                    (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3450 noattr)))
+                                    (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3461 noattr)))
                                     _b (tvolatile (tarray tuchar 8)))
                                   (Expr.Econst_int (Integers.Int.repr 0) tint)
                                   (tptr tuchar)) tuchar)
@@ -5925,7 +5936,7 @@ def s_kprog_x86_mov_reg_26 : Stmt :=
                                 [(tptr (tvolatile (tptr tvoid)))]
                                 [(Expr.Eaddrof
                                    (Expr.Efield
-                                     (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3450 noattr)))
+                                     (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3461 noattr)))
                                      _ptr (tvolatile (tptr tvoid)))
                                    (tptr (tvolatile (tptr tvoid))))])
                               (Stmt.Sset ___kprog_x86_bits
@@ -6068,7 +6079,7 @@ def s_kprog_x86_mov_reg_26 : Stmt :=
                                  (tvolatile (tptr tvoid))]
                                 [(Expr.Eaddrof
                                    (Expr.Efield
-                                     (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3456 noattr)))
+                                     (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3467 noattr)))
                                      _ptr (tvolatile (tptr tvoid)))
                                    (tptr (tvolatile (tptr tvoid)))),
                                  (Expr.Etempvar _t'186 (tptr tvoid))]))
@@ -6079,7 +6090,7 @@ def s_kprog_x86_mov_reg_26 : Stmt :=
                                  (tvolatile tushort)]
                                 [(Expr.Eaddrof
                                    (Expr.Efield
-                                     (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3456 noattr)))
+                                     (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3467 noattr)))
                                      _w (tvolatile tushort))
                                    (tptr (tvolatile tushort))),
                                  (Expr.Etempvar ___kprog_x86_lane__1 tushort)])
@@ -7347,7 +7358,7 @@ def s_kprog_x86_mov_reg_55 : Stmt :=
     [(tptr (tvolatile (tptr tvoid))), (tvolatile (tptr tvoid))]
     [(Expr.Eaddrof
        (Expr.Efield
-         (Expr.Evar ___kprog_x86_partial__2 (tvolatile (Ty.Tunion __3516 noattr)))
+         (Expr.Evar ___kprog_x86_partial__2 (tvolatile (Ty.Tunion __3527 noattr)))
          _ptr (tvolatile (tptr tvoid))) (tptr (tvolatile (tptr tvoid)))),
      (Expr.Etempvar _t'145 (tptr tvoid))]))
 
@@ -7359,7 +7370,7 @@ def s_kprog_x86_mov_reg_56 : Stmt :=
     (Expr.Ederef
       (Expr.Ebinop Binop.Oadd
         (Expr.Efield
-          (Expr.Evar ___kprog_x86_partial__2 (tvolatile (Ty.Tunion __3516 noattr)))
+          (Expr.Evar ___kprog_x86_partial__2 (tvolatile (Ty.Tunion __3527 noattr)))
           _b (tvolatile (tarray tuchar 8)))
         (Expr.Econst_int (Integers.Int.repr 1) tint) (tptr tuchar)) tuchar)
     (Expr.Etempvar ___kprog_x86_lane__2 tuchar))
@@ -7367,7 +7378,7 @@ def s_kprog_x86_mov_reg_56 : Stmt :=
     (Expr.Ederef
       (Expr.Ebinop Binop.Oadd
         (Expr.Efield
-          (Expr.Evar ___kprog_x86_partial__2 (tvolatile (Ty.Tunion __3516 noattr)))
+          (Expr.Evar ___kprog_x86_partial__2 (tvolatile (Ty.Tunion __3527 noattr)))
           _b (tvolatile (tarray tuchar 8)))
         (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tuchar)) tuchar)
     (Expr.Etempvar ___kprog_x86_lane__2 tuchar)))
@@ -7379,7 +7390,7 @@ def s_kprog_x86_mov_reg_57 : Stmt :=
       [(tptr (tvolatile (tptr tvoid)))]
       [(Expr.Eaddrof
          (Expr.Efield
-           (Expr.Evar ___kprog_x86_partial__2 (tvolatile (Ty.Tunion __3516 noattr)))
+           (Expr.Evar ___kprog_x86_partial__2 (tvolatile (Ty.Tunion __3527 noattr)))
            _ptr (tvolatile (tptr tvoid))) (tptr (tvolatile (tptr tvoid))))])
     (Stmt.Sset ___kprog_x86_bits__2
       (Expr.Ecast
@@ -7500,7 +7511,7 @@ def s_kprog_x86_mov_reg_64 : Stmt :=
       [(tptr (tvolatile (tptr tvoid))), (tvolatile (tptr tvoid))]
       [(Expr.Eaddrof
          (Expr.Efield
-           (Expr.Evar ___kprog_x86_partial__3 (tvolatile (Ty.Tunion __3522 noattr)))
+           (Expr.Evar ___kprog_x86_partial__3 (tvolatile (Ty.Tunion __3533 noattr)))
            _ptr (tvolatile (tptr tvoid))) (tptr (tvolatile (tptr tvoid)))),
        (Expr.Etempvar _t'139 (tptr tvoid))]))
   (Stmt.Ssequence
@@ -7508,7 +7519,7 @@ def s_kprog_x86_mov_reg_64 : Stmt :=
       [(tptr (tvolatile tushort)), (tvolatile tushort)]
       [(Expr.Eaddrof
          (Expr.Efield
-           (Expr.Evar ___kprog_x86_partial__3 (tvolatile (Ty.Tunion __3522 noattr)))
+           (Expr.Evar ___kprog_x86_partial__3 (tvolatile (Ty.Tunion __3533 noattr)))
            _w (tvolatile tushort)) (tptr (tvolatile tushort))),
        (Expr.Etempvar ___kprog_x86_lane__3 tushort)])
     (Stmt.Ssequence
@@ -7517,7 +7528,7 @@ def s_kprog_x86_mov_reg_64 : Stmt :=
           [(tptr (tvolatile (tptr tvoid)))]
           [(Expr.Eaddrof
              (Expr.Efield
-               (Expr.Evar ___kprog_x86_partial__3 (tvolatile (Ty.Tunion __3522 noattr)))
+               (Expr.Evar ___kprog_x86_partial__3 (tvolatile (Ty.Tunion __3533 noattr)))
                _ptr (tvolatile (tptr tvoid)))
              (tptr (tvolatile (tptr tvoid))))])
         (Stmt.Sset ___kprog_x86_bits__3
@@ -8966,7 +8977,7 @@ def s_kprog_x86_mov_reg_90 : Stmt :=
   [(tptr (tvolatile (tptr tvoid)))]
   [(Expr.Eaddrof
      (Expr.Efield
-       (Expr.Evar ___kprog_x86_partial__5 (tvolatile (Ty.Tunion __3573 noattr)))
+       (Expr.Evar ___kprog_x86_partial__5 (tvolatile (Ty.Tunion __3584 noattr)))
        _ptr (tvolatile (tptr tvoid))) (tptr (tvolatile (tptr tvoid))))])
 
 def s_kprog_x86_mov_reg_91 : Stmt :=
@@ -9459,7 +9470,7 @@ def s_kprog_x86_mov_reg_96 : Stmt :=
                            (tvolatile (tptr tvoid))]
                           [(Expr.Eaddrof
                              (Expr.Efield
-                               (Expr.Evar ___kprog_x86_partial__4 (tvolatile (Ty.Tunion __3567 noattr)))
+                               (Expr.Evar ___kprog_x86_partial__4 (tvolatile (Ty.Tunion __3578 noattr)))
                                _ptr (tvolatile (tptr tvoid)))
                              (tptr (tvolatile (tptr tvoid)))),
                            (Expr.Etempvar _t'109 (tptr tvoid))]))
@@ -9472,7 +9483,7 @@ def s_kprog_x86_mov_reg_96 : Stmt :=
                             (Expr.Ederef
                               (Expr.Ebinop Binop.Oadd
                                 (Expr.Efield
-                                  (Expr.Evar ___kprog_x86_partial__4 (tvolatile (Ty.Tunion __3567 noattr)))
+                                  (Expr.Evar ___kprog_x86_partial__4 (tvolatile (Ty.Tunion __3578 noattr)))
                                   _b (tvolatile (tarray tuchar 8)))
                                 (Expr.Econst_int (Integers.Int.repr 1) tint)
                                 (tptr tuchar)) tuchar)
@@ -9481,7 +9492,7 @@ def s_kprog_x86_mov_reg_96 : Stmt :=
                             (Expr.Ederef
                               (Expr.Ebinop Binop.Oadd
                                 (Expr.Efield
-                                  (Expr.Evar ___kprog_x86_partial__4 (tvolatile (Ty.Tunion __3567 noattr)))
+                                  (Expr.Evar ___kprog_x86_partial__4 (tvolatile (Ty.Tunion __3578 noattr)))
                                   _b (tvolatile (tarray tuchar 8)))
                                 (Expr.Econst_int (Integers.Int.repr 0) tint)
                                 (tptr tuchar)) tuchar)
@@ -9493,7 +9504,7 @@ def s_kprog_x86_mov_reg_96 : Stmt :=
                               [(tptr (tvolatile (tptr tvoid)))]
                               [(Expr.Eaddrof
                                  (Expr.Efield
-                                   (Expr.Evar ___kprog_x86_partial__4 (tvolatile (Ty.Tunion __3567 noattr)))
+                                   (Expr.Evar ___kprog_x86_partial__4 (tvolatile (Ty.Tunion __3578 noattr)))
                                    _ptr (tvolatile (tptr tvoid)))
                                  (tptr (tvolatile (tptr tvoid))))])
                             (Stmt.Sset ___kprog_x86_bits__4
@@ -9652,7 +9663,7 @@ def s_kprog_x86_mov_reg_96 : Stmt :=
                                (tvolatile (tptr tvoid))]
                               [(Expr.Eaddrof
                                  (Expr.Efield
-                                   (Expr.Evar ___kprog_x86_partial__5 (tvolatile (Ty.Tunion __3573 noattr)))
+                                   (Expr.Evar ___kprog_x86_partial__5 (tvolatile (Ty.Tunion __3584 noattr)))
                                    _ptr (tvolatile (tptr tvoid)))
                                  (tptr (tvolatile (tptr tvoid)))),
                                (Expr.Etempvar _t'103 (tptr tvoid))]))
@@ -9663,7 +9674,7 @@ def s_kprog_x86_mov_reg_96 : Stmt :=
                                (tvolatile tushort)]
                               [(Expr.Eaddrof
                                  (Expr.Efield
-                                   (Expr.Evar ___kprog_x86_partial__5 (tvolatile (Ty.Tunion __3573 noattr)))
+                                   (Expr.Evar ___kprog_x86_partial__5 (tvolatile (Ty.Tunion __3584 noattr)))
                                    _w (tvolatile tushort))
                                  (tptr (tvolatile tushort))),
                                (Expr.Etempvar ___kprog_x86_lane__5 tushort)])
@@ -9917,19 +9928,19 @@ def f_kprog_x86_mov_reg : Function := {
                 (_capacity, tuint), (_dst, tuchar), (_src, tuchar),
                 (_flags, tuchar), (_aux, tuint)],
   fn_vars := [(___x86_wr_cell, (Ty.Tunion _x86_sim_gpr noattr)),
-              (___kprog_x86_partial, (tvolatile (Ty.Tunion __3450 noattr))),
+              (___kprog_x86_partial, (tvolatile (Ty.Tunion __3461 noattr))),
               (___kprog_x86_partial__1,
-               (tvolatile (Ty.Tunion __3456 noattr))),
+               (tvolatile (Ty.Tunion __3467 noattr))),
               (___x86_wr_cell__1, (Ty.Tunion _x86_sim_gpr noattr)),
               (___kprog_x86_partial__2,
-               (tvolatile (Ty.Tunion __3516 noattr))),
+               (tvolatile (Ty.Tunion __3527 noattr))),
               (___kprog_x86_partial__3,
-               (tvolatile (Ty.Tunion __3522 noattr))),
+               (tvolatile (Ty.Tunion __3533 noattr))),
               (___x86_wr_cell__2, (Ty.Tunion _x86_sim_gpr noattr)),
               (___kprog_x86_partial__4,
-               (tvolatile (Ty.Tunion __3567 noattr))),
+               (tvolatile (Ty.Tunion __3578 noattr))),
               (___kprog_x86_partial__5,
-               (tvolatile (Ty.Tunion __3573 noattr)))],
+               (tvolatile (Ty.Tunion __3584 noattr)))],
   fn_temps := [(___x86_state,
                 (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
                (___x86_l_width, tuchar), (___x86_mov_stack_offset, tlong),
@@ -11418,7 +11429,7 @@ def s_kprog_x86_movx_reg_13 : Stmt :=
                        (tvolatile (tptr tvoid))]
                       [(Expr.Eaddrof
                          (Expr.Efield
-                           (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3623 noattr)))
+                           (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3634 noattr)))
                            _ptr (tvolatile (tptr tvoid)))
                          (tptr (tvolatile (tptr tvoid)))),
                        (Expr.Etempvar _t'43 (tptr tvoid))]))
@@ -11431,7 +11442,7 @@ def s_kprog_x86_movx_reg_13 : Stmt :=
                         (Expr.Ederef
                           (Expr.Ebinop Binop.Oadd
                             (Expr.Efield
-                              (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3623 noattr)))
+                              (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3634 noattr)))
                               _b (tvolatile (tarray tuchar 8)))
                             (Expr.Econst_int (Integers.Int.repr 1) tint)
                             (tptr tuchar)) tuchar)
@@ -11440,7 +11451,7 @@ def s_kprog_x86_movx_reg_13 : Stmt :=
                         (Expr.Ederef
                           (Expr.Ebinop Binop.Oadd
                             (Expr.Efield
-                              (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3623 noattr)))
+                              (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3634 noattr)))
                               _b (tvolatile (tarray tuchar 8)))
                             (Expr.Econst_int (Integers.Int.repr 0) tint)
                             (tptr tuchar)) tuchar)
@@ -11452,7 +11463,7 @@ def s_kprog_x86_movx_reg_13 : Stmt :=
                           [(tptr (tvolatile (tptr tvoid)))]
                           [(Expr.Eaddrof
                              (Expr.Efield
-                               (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3623 noattr)))
+                               (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3634 noattr)))
                                _ptr (tvolatile (tptr tvoid)))
                              (tptr (tvolatile (tptr tvoid))))])
                         (Stmt.Sset ___kprog_x86_bits
@@ -11668,7 +11679,7 @@ def s_kprog_x86_movx_reg_13 : Stmt :=
                            (tvolatile (tptr tvoid))]
                           [(Expr.Eaddrof
                              (Expr.Efield
-                               (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3629 noattr)))
+                               (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3640 noattr)))
                                _ptr (tvolatile (tptr tvoid)))
                              (tptr (tvolatile (tptr tvoid)))),
                            (Expr.Etempvar _t'37 (tptr tvoid))]))
@@ -11678,7 +11689,7 @@ def s_kprog_x86_movx_reg_13 : Stmt :=
                           [(tptr (tvolatile tushort)), (tvolatile tushort)]
                           [(Expr.Eaddrof
                              (Expr.Efield
-                               (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3629 noattr)))
+                               (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3640 noattr)))
                                _w (tvolatile tushort))
                              (tptr (tvolatile tushort))),
                            (Expr.Etempvar ___kprog_x86_lane__1 tushort)])
@@ -11689,7 +11700,7 @@ def s_kprog_x86_movx_reg_13 : Stmt :=
                               [(tptr (tvolatile (tptr tvoid)))]
                               [(Expr.Eaddrof
                                  (Expr.Efield
-                                   (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3629 noattr)))
+                                   (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3640 noattr)))
                                    _ptr (tvolatile (tptr tvoid)))
                                  (tptr (tvolatile (tptr tvoid))))])
                             (Stmt.Sset ___kprog_x86_bits__1
@@ -11976,9 +11987,9 @@ def f_kprog_x86_movx_reg : Function := {
                 (_capacity, tuint), (_op, tuchar), (_dst, tuchar),
                 (_src, tuchar), (_flags, tuchar), (_aux, tuint)],
   fn_vars := [(___x86_wr_cell, (Ty.Tunion _x86_sim_gpr noattr)),
-              (___kprog_x86_partial, (tvolatile (Ty.Tunion __3623 noattr))),
+              (___kprog_x86_partial, (tvolatile (Ty.Tunion __3634 noattr))),
               (___kprog_x86_partial__1,
-               (tvolatile (Ty.Tunion __3629 noattr)))],
+               (tvolatile (Ty.Tunion __3640 noattr)))],
   fn_temps := [(___x86_state,
                 (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
                (___x86_l_width, tuchar), (___x86_l_src_width, tuchar),
@@ -12870,7 +12881,7 @@ def s_kprog_x86_read_recovery_at_4 : Stmt :=
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
       (Expr.Efield
-        (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3726 noattr)))
+        (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3737 noattr)))
         _b (tvolatile (tarray tuchar 8)))
       (Expr.Econst_int (Integers.Int.repr 1) tint) (tptr tuchar)) tuchar)
   (Expr.Etempvar ___kprog_x86_lane tuchar))
@@ -12880,7 +12891,7 @@ def s_kprog_x86_read_recovery_at_5 : Stmt :=
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
       (Expr.Efield
-        (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3726 noattr)))
+        (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3737 noattr)))
         _b (tvolatile (tarray tuchar 8)))
       (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tuchar)) tuchar)
   (Expr.Etempvar ___kprog_x86_lane tuchar))
@@ -12891,7 +12902,7 @@ def s_kprog_x86_read_recovery_at_6 : Stmt :=
     [(tptr (tvolatile (tptr tvoid)))]
     [(Expr.Eaddrof
        (Expr.Efield
-         (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3726 noattr)))
+         (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3737 noattr)))
          _ptr (tvolatile (tptr tvoid))) (tptr (tvolatile (tptr tvoid))))])
   (Stmt.Sset ___kprog_x86_bits
     (Expr.Ecast
@@ -12992,7 +13003,7 @@ def s_kprog_x86_read_recovery_at_12 : Stmt :=
     [(tptr (tvolatile (tptr tvoid))), (tvolatile (tptr tvoid))]
     [(Expr.Eaddrof
        (Expr.Efield
-         (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3732 noattr)))
+         (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3743 noattr)))
          _ptr (tvolatile (tptr tvoid))) (tptr (tvolatile (tptr tvoid)))),
      (Expr.Etempvar _t'28 (tptr tvoid))]))
 
@@ -13002,7 +13013,7 @@ def s_kprog_x86_read_recovery_at_13 : Stmt :=
     [(tptr (tvolatile tushort)), (tvolatile tushort)]
     [(Expr.Eaddrof
        (Expr.Efield
-         (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3732 noattr)))
+         (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3743 noattr)))
          _w (tvolatile tushort)) (tptr (tvolatile tushort))),
      (Expr.Etempvar ___kprog_x86_lane__1 tushort)])
   (Stmt.Ssequence
@@ -13011,7 +13022,7 @@ def s_kprog_x86_read_recovery_at_13 : Stmt :=
         [(tptr (tvolatile (tptr tvoid)))]
         [(Expr.Eaddrof
            (Expr.Efield
-             (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3732 noattr)))
+             (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3743 noattr)))
              _ptr (tvolatile (tptr tvoid))) (tptr (tvolatile (tptr tvoid))))])
       (Stmt.Sset ___kprog_x86_bits__1
         (Expr.Ecast
@@ -13510,7 +13521,7 @@ def s_kprog_x86_read_recovery_at_17 : Stmt :=
                                  (tvolatile (tptr tvoid))]
                                 [(Expr.Eaddrof
                                    (Expr.Efield
-                                     (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3726 noattr)))
+                                     (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3737 noattr)))
                                      _ptr (tvolatile (tptr tvoid)))
                                    (tptr (tvolatile (tptr tvoid)))),
                                  (Expr.Etempvar _t'34 (tptr tvoid))]))
@@ -13858,9 +13869,9 @@ def f_kprog_x86_read_recovery_at : Function := {
                 (_capacity, tuint), (_base, tulong), (_dst, tulong),
                 (_address, tulong)],
   fn_vars := [(___x86_wr_cell, (Ty.Tunion _x86_sim_gpr noattr)),
-              (___kprog_x86_partial, (tvolatile (Ty.Tunion __3726 noattr))),
+              (___kprog_x86_partial, (tvolatile (Ty.Tunion __3737 noattr))),
               (___kprog_x86_partial__1,
-               (tvolatile (Ty.Tunion __3732 noattr)))],
+               (tvolatile (Ty.Tunion __3743 noattr)))],
   fn_temps := [(___x86_state,
                 (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
                (_recovered, tint), (___x86_read_recovered, tint),
@@ -14096,7 +14107,7 @@ def s_kprog_x86_read_recovery_4 : Stmt :=
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
       (Expr.Efield
-        (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3769 noattr)))
+        (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3780 noattr)))
         _b (tvolatile (tarray tuchar 8)))
       (Expr.Econst_int (Integers.Int.repr 1) tint) (tptr tuchar)) tuchar)
   (Expr.Etempvar ___kprog_x86_lane tuchar))
@@ -14106,7 +14117,7 @@ def s_kprog_x86_read_recovery_5 : Stmt :=
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
       (Expr.Efield
-        (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3769 noattr)))
+        (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3780 noattr)))
         _b (tvolatile (tarray tuchar 8)))
       (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tuchar)) tuchar)
   (Expr.Etempvar ___kprog_x86_lane tuchar))
@@ -14117,7 +14128,7 @@ def s_kprog_x86_read_recovery_6 : Stmt :=
     [(tptr (tvolatile (tptr tvoid)))]
     [(Expr.Eaddrof
        (Expr.Efield
-         (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3769 noattr)))
+         (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3780 noattr)))
          _ptr (tvolatile (tptr tvoid))) (tptr (tvolatile (tptr tvoid))))])
   (Stmt.Sset ___kprog_x86_bits
     (Expr.Ecast
@@ -14218,7 +14229,7 @@ def s_kprog_x86_read_recovery_12 : Stmt :=
     [(tptr (tvolatile (tptr tvoid))), (tvolatile (tptr tvoid))]
     [(Expr.Eaddrof
        (Expr.Efield
-         (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3775 noattr)))
+         (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3786 noattr)))
          _ptr (tvolatile (tptr tvoid))) (tptr (tvolatile (tptr tvoid)))),
      (Expr.Etempvar _t'29 (tptr tvoid))]))
 
@@ -14228,7 +14239,7 @@ def s_kprog_x86_read_recovery_13 : Stmt :=
     [(tptr (tvolatile tushort)), (tvolatile tushort)]
     [(Expr.Eaddrof
        (Expr.Efield
-         (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3775 noattr)))
+         (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3786 noattr)))
          _w (tvolatile tushort)) (tptr (tvolatile tushort))),
      (Expr.Etempvar ___kprog_x86_lane__1 tushort)])
   (Stmt.Ssequence
@@ -14237,7 +14248,7 @@ def s_kprog_x86_read_recovery_13 : Stmt :=
         [(tptr (tvolatile (tptr tvoid)))]
         [(Expr.Eaddrof
            (Expr.Efield
-             (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3775 noattr)))
+             (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3786 noattr)))
              _ptr (tvolatile (tptr tvoid))) (tptr (tvolatile (tptr tvoid))))])
       (Stmt.Sset ___kprog_x86_bits__1
         (Expr.Ecast
@@ -14736,7 +14747,7 @@ def s_kprog_x86_read_recovery_17 : Stmt :=
                                  (tvolatile (tptr tvoid))]
                                 [(Expr.Eaddrof
                                    (Expr.Efield
-                                     (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3769 noattr)))
+                                     (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3780 noattr)))
                                      _ptr (tvolatile (tptr tvoid)))
                                    (tptr (tvolatile (tptr tvoid)))),
                                  (Expr.Etempvar _t'35 (tptr tvoid))]))
@@ -15083,9 +15094,9 @@ def f_kprog_x86_read_recovery : Function := {
                 (_facts, (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr))),
                 (_capacity, tuint), (_base, tulong), (_dst, tulong)],
   fn_vars := [(___x86_wr_cell, (Ty.Tunion _x86_sim_gpr noattr)),
-              (___kprog_x86_partial, (tvolatile (Ty.Tunion __3769 noattr))),
+              (___kprog_x86_partial, (tvolatile (Ty.Tunion __3780 noattr))),
               (___kprog_x86_partial__1,
-               (tvolatile (Ty.Tunion __3775 noattr)))],
+               (tvolatile (Ty.Tunion __3786 noattr)))],
   fn_temps := [(___x86_state,
                 (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
                (_recovered, tint), (___x86_read_recovered, tint),
@@ -15337,7 +15348,7 @@ def s_kprog_x86_read_recovery_mem_4 : Stmt :=
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
       (Expr.Efield
-        (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3814 noattr)))
+        (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3825 noattr)))
         _b (tvolatile (tarray tuchar 8)))
       (Expr.Econst_int (Integers.Int.repr 1) tint) (tptr tuchar)) tuchar)
   (Expr.Etempvar ___kprog_x86_lane tuchar))
@@ -15347,7 +15358,7 @@ def s_kprog_x86_read_recovery_mem_5 : Stmt :=
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
       (Expr.Efield
-        (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3814 noattr)))
+        (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3825 noattr)))
         _b (tvolatile (tarray tuchar 8)))
       (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tuchar)) tuchar)
   (Expr.Etempvar ___kprog_x86_lane tuchar))
@@ -15358,7 +15369,7 @@ def s_kprog_x86_read_recovery_mem_6 : Stmt :=
     [(tptr (tvolatile (tptr tvoid)))]
     [(Expr.Eaddrof
        (Expr.Efield
-         (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3814 noattr)))
+         (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3825 noattr)))
          _ptr (tvolatile (tptr tvoid))) (tptr (tvolatile (tptr tvoid))))])
   (Stmt.Sset ___kprog_x86_bits
     (Expr.Ecast
@@ -15459,7 +15470,7 @@ def s_kprog_x86_read_recovery_mem_12 : Stmt :=
     [(tptr (tvolatile (tptr tvoid))), (tvolatile (tptr tvoid))]
     [(Expr.Eaddrof
        (Expr.Efield
-         (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3820 noattr)))
+         (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3831 noattr)))
          _ptr (tvolatile (tptr tvoid))) (tptr (tvolatile (tptr tvoid)))),
      (Expr.Etempvar _t'30 (tptr tvoid))]))
 
@@ -15469,7 +15480,7 @@ def s_kprog_x86_read_recovery_mem_13 : Stmt :=
     [(tptr (tvolatile tushort)), (tvolatile tushort)]
     [(Expr.Eaddrof
        (Expr.Efield
-         (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3820 noattr)))
+         (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3831 noattr)))
          _w (tvolatile tushort)) (tptr (tvolatile tushort))),
      (Expr.Etempvar ___kprog_x86_lane__1 tushort)])
   (Stmt.Ssequence
@@ -15478,7 +15489,7 @@ def s_kprog_x86_read_recovery_mem_13 : Stmt :=
         [(tptr (tvolatile (tptr tvoid)))]
         [(Expr.Eaddrof
            (Expr.Efield
-             (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3820 noattr)))
+             (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3831 noattr)))
              _ptr (tvolatile (tptr tvoid))) (tptr (tvolatile (tptr tvoid))))])
       (Stmt.Sset ___kprog_x86_bits__1
         (Expr.Ecast
@@ -15977,7 +15988,7 @@ def s_kprog_x86_read_recovery_mem_17 : Stmt :=
                                  (tvolatile (tptr tvoid))]
                                 [(Expr.Eaddrof
                                    (Expr.Efield
-                                     (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3814 noattr)))
+                                     (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3825 noattr)))
                                      _ptr (tvolatile (tptr tvoid)))
                                    (tptr (tvolatile (tptr tvoid)))),
                                  (Expr.Etempvar _t'36 (tptr tvoid))]))
@@ -16325,9 +16336,9 @@ def f_kprog_x86_read_recovery_mem : Function := {
                 (_capacity, tuint), (_base, tulong), (_dst, tulong),
                 (_aux, tulong), (_displacement, tlong)],
   fn_vars := [(___x86_wr_cell, (Ty.Tunion _x86_sim_gpr noattr)),
-              (___kprog_x86_partial, (tvolatile (Ty.Tunion __3814 noattr))),
+              (___kprog_x86_partial, (tvolatile (Ty.Tunion __3825 noattr))),
               (___kprog_x86_partial__1,
-               (tvolatile (Ty.Tunion __3820 noattr)))],
+               (tvolatile (Ty.Tunion __3831 noattr)))],
   fn_temps := [(___x86_state,
                 (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
                (_recovered, tint), (___x86_read_recovered, tint),
@@ -16522,6 +16533,126 @@ def f_kprog_x86_read_recovery_mem : Function := {
     (Stmt.Sreturn (some (Expr.Etempvar _recovered tint)))))
 }
 
+def f_kprog_x86_mov_load_write_width : Function := {
+  fn_return := tuchar,
+  fn_callconv := cc_default,
+  fn_params := [(_flags, tulong)],
+  fn_vars := [],
+  fn_temps := [(_width, tuchar), (___kprog_x86_ml_write, tuchar),
+               (_t'1, tulong)],
+  fn_body :=
+(Stmt.Ssequence
+  (Stmt.Sloop
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Sifthenelse (Expr.Etempvar _flags tulong)
+          (Stmt.Sset _t'1 (Expr.Ecast (Expr.Etempvar _flags tulong) tulong))
+          (Stmt.Sset _t'1
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tuint) tulong)))
+        (Stmt.Sset ___kprog_x86_ml_write
+          (Expr.Ecast (Expr.Etempvar _t'1 tulong) tuchar)))
+      (Stmt.Sset _width
+        (Expr.Ecast (Expr.Etempvar ___kprog_x86_ml_write tuchar) tuchar)))
+    Stmt.Sbreak)
+  (Stmt.Sreturn (some (Expr.Etempvar _width tuchar))))
+}
+
+def f_kprog_x86_mov_load_mem_width : Function := {
+  fn_return := tuchar,
+  fn_callconv := cc_default,
+  fn_params := [(_flags, tulong), (_aux, tulong)],
+  fn_vars := [],
+  fn_temps := [(_width, tuchar), (___kprog_x86_ml_mem, tuchar),
+               (___kprog_x86_ml_write, tuchar), (_t'1, tulong)],
+  fn_body :=
+(Stmt.Ssequence
+  (Stmt.Sloop
+    (Stmt.Ssequence
+      (Stmt.Sset ___kprog_x86_ml_mem
+        (Expr.Ecast
+          (Expr.Ecast
+            (Expr.Ebinop Binop.Oand
+              (Expr.Ebinop Binop.Oshr (Expr.Etempvar _aux tulong)
+                (Expr.Econst_int (Integers.Int.repr 16) tint) tulong)
+              (Expr.Econst_int (Integers.Int.repr 255) tuint) tulong) tuchar)
+          tuchar))
+      (Stmt.Ssequence
+        (Stmt.Sifthenelse (Expr.Eunop Unop.Onotbool
+                            (Expr.Etempvar ___kprog_x86_ml_mem tuchar) tint)
+          (Stmt.Sloop
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Sifthenelse (Expr.Etempvar _flags tulong)
+                  (Stmt.Sset _t'1
+                    (Expr.Ecast (Expr.Etempvar _flags tulong) tulong))
+                  (Stmt.Sset _t'1
+                    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                      tulong)))
+                (Stmt.Sset ___kprog_x86_ml_write
+                  (Expr.Ecast (Expr.Etempvar _t'1 tulong) tuchar)))
+              (Stmt.Sset ___kprog_x86_ml_mem
+                (Expr.Ecast (Expr.Etempvar ___kprog_x86_ml_write tuchar)
+                  tuchar)))
+            Stmt.Sbreak)
+          Stmt.Sskip)
+        (Stmt.Sset _width
+          (Expr.Ecast (Expr.Etempvar ___kprog_x86_ml_mem tuchar) tuchar))))
+    Stmt.Sbreak)
+  (Stmt.Sreturn (some (Expr.Etempvar _width tuchar))))
+}
+
+def f_kprog_x86_mov_load_arm : Function := {
+  fn_return := tuchar,
+  fn_callconv := cc_default,
+  fn_params := [(_stack, tulong), (_plain, tulong), (_memory, tulong),
+                (_write, tulong), (_tag, tulong)],
+  fn_vars := [],
+  fn_temps := [(_arm, tuchar), (___kprog_x86_ml_arm, tuchar), (_t'3, tint),
+               (_t'2, tint), (_t'1, tint)],
+  fn_body :=
+(Stmt.Ssequence
+  (Stmt.Sloop
+    (Stmt.Ssequence
+      (Stmt.Sifthenelse (Expr.Etempvar _stack tulong)
+        (Stmt.Sset ___kprog_x86_ml_arm
+          (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuchar))
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Sifthenelse (Expr.Etempvar _plain tulong)
+                (Stmt.Sset _t'1
+                  (Expr.Ecast
+                    (Expr.Ebinop Binop.Oeq (Expr.Etempvar _memory tulong)
+                      (Expr.Econst_int (Integers.Int.repr 8) tuint) tint)
+                    tbool))
+                (Stmt.Sset _t'1 (Expr.Econst_int (Integers.Int.repr 0) tint)))
+              (Stmt.Sifthenelse (Expr.Etempvar _t'1 tint)
+                (Stmt.Sset _t'2
+                  (Expr.Ecast
+                    (Expr.Ebinop Binop.Oeq (Expr.Etempvar _write tulong)
+                      (Expr.Econst_int (Integers.Int.repr 8) tuint) tint)
+                    tbool))
+                (Stmt.Sset _t'2 (Expr.Econst_int (Integers.Int.repr 0) tint))))
+            (Stmt.Sifthenelse (Expr.Etempvar _t'2 tint)
+              (Stmt.Sset _t'3
+                (Expr.Ecast
+                  (Expr.Ebinop Binop.Oeq (Expr.Etempvar _tag tulong)
+                    (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
+                  tbool))
+              (Stmt.Sset _t'3 (Expr.Econst_int (Integers.Int.repr 0) tint))))
+          (Stmt.Sifthenelse (Expr.Etempvar _t'3 tint)
+            (Stmt.Sset ___kprog_x86_ml_arm
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                tuchar))
+            (Stmt.Sset ___kprog_x86_ml_arm
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                tuchar)))))
+      (Stmt.Sset _arm
+        (Expr.Ecast (Expr.Etempvar ___kprog_x86_ml_arm tuchar) tuchar)))
+    Stmt.Sbreak)
+  (Stmt.Sreturn (some (Expr.Etempvar _arm tuchar))))
+}
+
 def composites : List CompositeDef :=
 [(CompositeDef.Composite __150 SU.Union
    [(Member.Member_plain _flow_keys
@@ -16656,102 +16787,102 @@ def composites : List CompositeDef :=
    [(Member.Member_plain _tag (tptr tuchar)),
     (Member.Member_plain _pointer (tptr (tptr tvoid)))]
    noattr),
- (CompositeDef.Composite __3272 SU.Union
+ (CompositeDef.Composite __3283 SU.Union
    [(Member.Member_plain _ptr (tptr tvoid)),
     (Member.Member_plain _w tushort),
     (Member.Member_plain _b (tarray tuchar 8))]
    noattr),
- (CompositeDef.Composite __3278 SU.Union
+ (CompositeDef.Composite __3289 SU.Union
    [(Member.Member_plain _ptr (tptr tvoid)),
     (Member.Member_plain _w tushort),
     (Member.Member_plain _b (tarray tuchar 8))]
    noattr),
- (CompositeDef.Composite __3343 SU.Union
+ (CompositeDef.Composite __3354 SU.Union
    [(Member.Member_plain _ptr (tptr tvoid)),
     (Member.Member_plain _w tushort),
     (Member.Member_plain _b (tarray tuchar 8))]
    noattr),
- (CompositeDef.Composite __3349 SU.Union
+ (CompositeDef.Composite __3360 SU.Union
    [(Member.Member_plain _ptr (tptr tvoid)),
     (Member.Member_plain _w tushort),
     (Member.Member_plain _b (tarray tuchar 8))]
    noattr),
- (CompositeDef.Composite __3385 SU.Union
+ (CompositeDef.Composite __3396 SU.Union
    [(Member.Member_plain _ptr (tptr tvoid)),
     (Member.Member_plain _w tushort),
     (Member.Member_plain _b (tarray tuchar 8))]
    noattr),
- (CompositeDef.Composite __3391 SU.Union
+ (CompositeDef.Composite __3402 SU.Union
    [(Member.Member_plain _ptr (tptr tvoid)),
     (Member.Member_plain _w tushort),
     (Member.Member_plain _b (tarray tuchar 8))]
    noattr),
- (CompositeDef.Composite __3450 SU.Union
+ (CompositeDef.Composite __3461 SU.Union
    [(Member.Member_plain _ptr (tptr tvoid)),
     (Member.Member_plain _w tushort),
     (Member.Member_plain _b (tarray tuchar 8))]
    noattr),
- (CompositeDef.Composite __3456 SU.Union
+ (CompositeDef.Composite __3467 SU.Union
    [(Member.Member_plain _ptr (tptr tvoid)),
     (Member.Member_plain _w tushort),
     (Member.Member_plain _b (tarray tuchar 8))]
    noattr),
- (CompositeDef.Composite __3516 SU.Union
+ (CompositeDef.Composite __3527 SU.Union
    [(Member.Member_plain _ptr (tptr tvoid)),
     (Member.Member_plain _w tushort),
     (Member.Member_plain _b (tarray tuchar 8))]
    noattr),
- (CompositeDef.Composite __3522 SU.Union
+ (CompositeDef.Composite __3533 SU.Union
    [(Member.Member_plain _ptr (tptr tvoid)),
     (Member.Member_plain _w tushort),
     (Member.Member_plain _b (tarray tuchar 8))]
    noattr),
- (CompositeDef.Composite __3567 SU.Union
+ (CompositeDef.Composite __3578 SU.Union
    [(Member.Member_plain _ptr (tptr tvoid)),
     (Member.Member_plain _w tushort),
     (Member.Member_plain _b (tarray tuchar 8))]
    noattr),
- (CompositeDef.Composite __3573 SU.Union
+ (CompositeDef.Composite __3584 SU.Union
    [(Member.Member_plain _ptr (tptr tvoid)),
     (Member.Member_plain _w tushort),
     (Member.Member_plain _b (tarray tuchar 8))]
    noattr),
- (CompositeDef.Composite __3623 SU.Union
+ (CompositeDef.Composite __3634 SU.Union
    [(Member.Member_plain _ptr (tptr tvoid)),
     (Member.Member_plain _w tushort),
     (Member.Member_plain _b (tarray tuchar 8))]
    noattr),
- (CompositeDef.Composite __3629 SU.Union
+ (CompositeDef.Composite __3640 SU.Union
    [(Member.Member_plain _ptr (tptr tvoid)),
     (Member.Member_plain _w tushort),
     (Member.Member_plain _b (tarray tuchar 8))]
    noattr),
- (CompositeDef.Composite __3726 SU.Union
+ (CompositeDef.Composite __3737 SU.Union
    [(Member.Member_plain _ptr (tptr tvoid)),
     (Member.Member_plain _w tushort),
     (Member.Member_plain _b (tarray tuchar 8))]
    noattr),
- (CompositeDef.Composite __3732 SU.Union
+ (CompositeDef.Composite __3743 SU.Union
    [(Member.Member_plain _ptr (tptr tvoid)),
     (Member.Member_plain _w tushort),
     (Member.Member_plain _b (tarray tuchar 8))]
    noattr),
- (CompositeDef.Composite __3769 SU.Union
+ (CompositeDef.Composite __3780 SU.Union
    [(Member.Member_plain _ptr (tptr tvoid)),
     (Member.Member_plain _w tushort),
     (Member.Member_plain _b (tarray tuchar 8))]
    noattr),
- (CompositeDef.Composite __3775 SU.Union
+ (CompositeDef.Composite __3786 SU.Union
    [(Member.Member_plain _ptr (tptr tvoid)),
     (Member.Member_plain _w tushort),
     (Member.Member_plain _b (tarray tuchar 8))]
    noattr),
- (CompositeDef.Composite __3814 SU.Union
+ (CompositeDef.Composite __3825 SU.Union
    [(Member.Member_plain _ptr (tptr tvoid)),
     (Member.Member_plain _w tushort),
     (Member.Member_plain _b (tarray tuchar 8))]
    noattr),
- (CompositeDef.Composite __3820 SU.Union
+ (CompositeDef.Composite __3831 SU.Union
    [(Member.Member_plain _ptr (tptr tvoid)),
     (Member.Member_plain _w tushort),
     (Member.Member_plain _b (tarray tuchar 8))]
@@ -17063,33 +17194,38 @@ def global_definitions : List (Ident × GlobDef FunDef Ty) :=
  (_kprog_x86_mem_offset, GlobDef.Gfun (FunDef.Internal f_kprog_x86_mem_offset)),
  (_kprog_x86_read_recovery_at, GlobDef.Gfun (FunDef.Internal f_kprog_x86_read_recovery_at)),
  (_kprog_x86_read_recovery, GlobDef.Gfun (FunDef.Internal f_kprog_x86_read_recovery)),
- (_kprog_x86_read_recovery_mem, GlobDef.Gfun (FunDef.Internal f_kprog_x86_read_recovery_mem))]
+ (_kprog_x86_read_recovery_mem, GlobDef.Gfun (FunDef.Internal f_kprog_x86_read_recovery_mem)),
+ (_kprog_x86_mov_load_write_width, GlobDef.Gfun (FunDef.Internal f_kprog_x86_mov_load_write_width)),
+ (_kprog_x86_mov_load_mem_width, GlobDef.Gfun (FunDef.Internal f_kprog_x86_mov_load_mem_width)),
+ (_kprog_x86_mov_load_arm, GlobDef.Gfun (FunDef.Internal f_kprog_x86_mov_load_arm))]
 
 def public_idents : List Ident :=
-[_kprog_x86_read_recovery_mem, _kprog_x86_read_recovery,
- _kprog_x86_read_recovery_at, _kprog_x86_mem_offset,
- _kprog_x86_mem_offset_indexed, _kprog_x86_native_load_tagged,
- _kprog_x86_load_tagged, _kprog_x86_stack_alias, _kprog_x86_movx_reg,
- _kprog_x86_mov_reg, _kprog_x86_mov_imm, _kprog_x86_write_reg,
- _kprog_x86_read_reg, _kprog_x86_ptr_load, _native_lab_entry_input,
- _kprog_c_trap, ___builtin_debug, ___builtin_write32_reversed,
- ___builtin_write16_reversed, ___builtin_read32_reversed,
- ___builtin_read16_reversed, ___builtin_fnmsub, ___builtin_fnmadd,
- ___builtin_fmsub, ___builtin_fmadd, ___builtin_fmin, ___builtin_fmax,
- ___builtin_expect, ___builtin_unreachable, ___builtin_va_end,
- ___builtin_va_copy, ___builtin_va_arg, ___builtin_va_start,
- ___builtin_membar, ___builtin_annot_intval, ___builtin_annot,
- ___builtin_sel, ___builtin_memcpy_aligned, ___builtin_sqrt,
- ___builtin_fsqrt, ___builtin_fabsf, ___builtin_fabs, ___builtin_ctzll,
- ___builtin_ctzl, ___builtin_ctz, ___builtin_clzll, ___builtin_clzl,
- ___builtin_clz, ___builtin_bswap16, ___builtin_bswap32, ___builtin_bswap,
- ___builtin_bswap64, ___builtin_ais_annot, ___compcert_i64_umulh,
- ___compcert_i64_smulh, ___compcert_i64_sar, ___compcert_i64_shr,
- ___compcert_i64_shl, ___compcert_i64_umod, ___compcert_i64_smod,
- ___compcert_i64_udiv, ___compcert_i64_sdiv, ___compcert_i64_utof,
- ___compcert_i64_stof, ___compcert_i64_utod, ___compcert_i64_stod,
- ___compcert_i64_dtou, ___compcert_i64_dtos, ___compcert_va_composite,
- ___compcert_va_float64, ___compcert_va_int64, ___compcert_va_int32]
+[_kprog_x86_mov_load_arm, _kprog_x86_mov_load_mem_width,
+ _kprog_x86_mov_load_write_width, _kprog_x86_read_recovery_mem,
+ _kprog_x86_read_recovery, _kprog_x86_read_recovery_at,
+ _kprog_x86_mem_offset, _kprog_x86_mem_offset_indexed,
+ _kprog_x86_native_load_tagged, _kprog_x86_load_tagged,
+ _kprog_x86_stack_alias, _kprog_x86_movx_reg, _kprog_x86_mov_reg,
+ _kprog_x86_mov_imm, _kprog_x86_write_reg, _kprog_x86_read_reg,
+ _kprog_x86_ptr_load, _native_lab_entry_input, _kprog_c_trap,
+ ___builtin_debug, ___builtin_write32_reversed, ___builtin_write16_reversed,
+ ___builtin_read32_reversed, ___builtin_read16_reversed, ___builtin_fnmsub,
+ ___builtin_fnmadd, ___builtin_fmsub, ___builtin_fmadd, ___builtin_fmin,
+ ___builtin_fmax, ___builtin_expect, ___builtin_unreachable,
+ ___builtin_va_end, ___builtin_va_copy, ___builtin_va_arg,
+ ___builtin_va_start, ___builtin_membar, ___builtin_annot_intval,
+ ___builtin_annot, ___builtin_sel, ___builtin_memcpy_aligned,
+ ___builtin_sqrt, ___builtin_fsqrt, ___builtin_fabsf, ___builtin_fabs,
+ ___builtin_ctzll, ___builtin_ctzl, ___builtin_ctz, ___builtin_clzll,
+ ___builtin_clzl, ___builtin_clz, ___builtin_bswap16, ___builtin_bswap32,
+ ___builtin_bswap, ___builtin_bswap64, ___builtin_ais_annot,
+ ___compcert_i64_umulh, ___compcert_i64_smulh, ___compcert_i64_sar,
+ ___compcert_i64_shr, ___compcert_i64_shl, ___compcert_i64_umod,
+ ___compcert_i64_smod, ___compcert_i64_udiv, ___compcert_i64_sdiv,
+ ___compcert_i64_utof, ___compcert_i64_stof, ___compcert_i64_utod,
+ ___compcert_i64_stod, ___compcert_i64_dtou, ___compcert_i64_dtos,
+ ___compcert_va_composite, ___compcert_va_float64, ___compcert_va_int64,
+ ___compcert_va_int32]
 
 def prog : Program :=
   mkprogram composites global_definitions public_idents _main

@@ -1,0 +1,12 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/formal/m4-x86-mov-selectors",
+  "historical_reference": "50d949d1b",
+  "validation_head": "2de4750a307c0270d77b52412a561aa7ba7724e6",
+  "source_patch": "raw_directory/input.patch",
+  "native_fixture": "oracles/x86_inline_compile.bpf.c",
+  "cpu": 15,
+  "address_space_limit_gib": 32,
+  "lean_threads": 1,
+  "timing": "No global work/timing lease; normal CPU15 build under coordinator16:41 policy",
+  "scope": "actual C selectors/declarations and exports; finite host evidence, not refinement proofs"
+}
