@@ -184,6 +184,8 @@ mod tests {
         assert_eq!(r13.len(), 39);
         assert_eq!(names.get(&0x1629).map(String::as_str), Some("bpf_probe_read_compat"));
         assert_eq!(names.get(&0x1f57).map(String::as_str), Some("bpf_probe_read_kernel"));
+        let proof = rewrite_x86(&elf, &sym, &included, &HashMap::new(), &HashMap::new(),
+            &HashMap::new(), &[], true, true, None, None, None, None, false)?;
         let mut hash = std::process::Command::new("sha256sum").stdin(std::process::Stdio::piped())
             .stdout(std::process::Stdio::piped()).spawn()?;
         hash.stdin.take().ok_or_else(|| anyhow!("hash input pipe missing"))?.write_all(&bytes)?;
@@ -195,9 +197,10 @@ mod tests {
         fs::create_dir_all(output)?;
         fs::write(output.join("tetragon.json"), serde_json::to_vec_pretty(&serde_json::json!({
             "object": path, "sha256": digest, "symbol": sym.name, "r13_calls": r13,
-            "helper_calls": names,
+            "helper_calls": names, "proof_blob_bytes": proof.blob.len(),
+            "proof_data_relocations": proof.proof_data_relocs.len(),
             "included_symbols": included.iter().map(|sym| &sym.name).collect::<Vec<_>>(),
-            "scope": "Actual rebuilt object helper CFG only; full proof rewrite has a separately retained shared-rodata failure; no kernel installation or app execution"
+            "scope": "Actual rebuilt object helper CFG and production proof rewrite; no kernel installation or app execution"
         }))?)?;
         Ok(())
     }

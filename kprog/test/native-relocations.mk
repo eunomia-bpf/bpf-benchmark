@@ -64,6 +64,10 @@ map-table-b: check
 map-table-lookup: check $(CONTEXT_TOOL)
 	taskset -c 19 prlimit --as=17179869184 -- python3 $(ROOT)/kprog/test/build_map_table_lookup.py --build $(MAP_LOOKUP_BUILD) --output $(OUTPUT) --kernel-layout $(KERNEL_LAYOUT) --bounds $(CONTEXT_TOOL)
 
+.PHONY: shared-table-b
+shared-table-b: $(CONTEXT_TOOL)
+	taskset -c 19 prlimit --as=17179869184 -- python3 $(ROOT)/kprog/test/check_shared_table_b.py --build /var/tmp/kprog-tmp/perf/helper-cfg --output $(OUTPUT) --bounds $(CONTEXT_TOOL)
+
 build:
 	flock -x /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) bash -eu -c 'if test -L "$(LINKER_TARGET)/release/native-link"; then unlink "$(LINKER_TARGET)/release/native-link"; fi; exec cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml'
 

@@ -2111,7 +2111,19 @@ fn collect_x86_proof_relocs(
                             anyhow!("PC32 proof target {} below section base", target_name)
                         })?;
                     let sym_size = target_sym.size();
-                    let (data_symbol_name, sym_bytes) = if sym_size == 0 {
+                    let table = if sym_size == 0 && target_name.is_empty() {
+                        readonly_relocs::table_span(elf, layouts, target_section_idx,
+                            i128::from(sym_off_in_sec)+i128::from(reloc.addend())+4)?
+                    } else { None };
+                    let copy_start = table.map(|(start, _)| start)
+                        .unwrap_or(if sym_size == 0 { 0 } else { sym_off_in_sec });
+                    let data_addend = reloc.addend().checked_sub(i64::try_from(table.map(|(start, _)| start).unwrap_or(0))?)
+                        .ok_or_else(|| anyhow!("sliced code-table addend overflow"))?;
+                    let (data_symbol_name, sym_bytes) = if let Some((start, size)) = table {
+                        let bytes = target_data.get(usize::try_from(start)?..usize::try_from(start+size)?)
+                            .ok_or_else(|| anyhow!("referenced code-table slice exceeds section"))?.to_vec();
+                        (format!("section:{target_section_idx:?}:{section_name}:table_{start:x}"), bytes)
+                    } else if sym_size == 0 {
                         if !target_name.is_empty() {
                             bail!("PC32 proof target {} has zero size", target_name);
                         }
@@ -2161,7 +2173,7 @@ fn collect_x86_proof_relocs(
                     let off_within_insn =
                         (local_patch_off - layout.insn_local_ip[insn_idx]) as usize;
                     for reloc in readonly_relocs::data_relocations(elf, layouts,
-                        target_section_idx, if sym_size == 0 { 0 } else { sym_off_in_sec },
+                        target_section_idx, copy_start,
                         sym_bytes.len() as u64, &data_symbol_name, map_addrs)? {
                         let reloc = reloc.proof();
                         let key = (reloc.owner.clone(), reloc.offset);
@@ -2173,7 +2185,7 @@ fn collect_x86_proof_relocs(
                         offset: (new_insn_off + off_within_insn) as u64,
                         r_type,
                         symbol: data_symbol_name,
-                        addend: reloc.addend(),
+                        addend: data_addend,
                         data: Some(sym_bytes),
                     });
                 }
@@ -2536,7 +2548,19 @@ fn apply_elf_relocations(
                         .checked_sub(sec_base)
                         .ok_or_else(|| anyhow!("PC32 target {} below section base", target_name))?;
                     let sym_size = target_sym.size();
-                    let (data_symbol_name, sym_bytes) = if sym_size == 0 {
+                    let table = if sym_size == 0 && target_name.is_empty() {
+                        readonly_relocs::table_span(elf, layouts, target_section_idx,
+                            i128::from(sym_off_in_sec)+i128::from(reloc.addend())+4)?
+                    } else { None };
+                    let copy_start = table.map(|(start, _)| start)
+                        .unwrap_or(if sym_size == 0 { 0 } else { sym_off_in_sec });
+                    let data_addend = reloc.addend().checked_sub(i64::try_from(table.map(|(start, _)| start).unwrap_or(0))?)
+                        .ok_or_else(|| anyhow!("sliced code-table addend overflow"))?;
+                    let (data_symbol_name, sym_bytes) = if let Some((start, size)) = table {
+                        let bytes = target_data.get(usize::try_from(start)?..usize::try_from(start+size)?)
+                            .ok_or_else(|| anyhow!("referenced code-table slice exceeds section"))?.to_vec();
+                        (format!("section:{target_section_idx:?}:{section_name}:table_{start:x}"), bytes)
+                    } else if sym_size == 0 {
                         if !target_name.is_empty() {
                             bail!("PC32 target {} has zero size; cannot embed", target_name);
                         }
@@ -2572,7 +2596,7 @@ fn apply_elf_relocations(
                         let off = blob.len();
                         blob.extend_from_slice(&sym_bytes);
                         for relocation in readonly_relocs::data_relocations(elf, layouts,
-                            target_section_idx, if sym_size == 0 { 0 } else { sym_off_in_sec },
+                            target_section_idx, copy_start,
                             sym_bytes.len() as u64, &data_symbol_name, map_addrs)? {
                             match relocation {
                                 readonly_relocs::DataReloc::RelativeCode { proof, target_offset, table_offset } => {
@@ -2625,8 +2649,7 @@ fn apply_elf_relocations(
                     // A = reloc.addend() (typically -4 for rip-relative
                     // loads since the CPU's rip is 4 bytes past the
                     // disp32 field), P = disp32_off.
-                    let addend = reloc.addend();
-                    let disp = embed_off as i64 + addend - disp32_off as i64;
+                    let disp = embed_off as i64 + data_addend - disp32_off as i64;
                     let d =
                         i32::try_from(disp).map_err(|_| anyhow!("PC32 disp {disp} exceeds i32"))?;
                     blob[disp32_off..disp32_off + 4].copy_from_slice(&d.to_le_bytes());

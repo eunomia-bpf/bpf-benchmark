@@ -111,6 +111,40 @@ pub(super) fn control_targets(elf: &object::File, sym: &SymInfo)
     Ok(result)
 }
 
+// Anonymous section symbols are containers, not individual compiler tables.
+// Copy only the referenced table's contiguous relocation slots, bounded also
+// by the next table of any entry point in the source object.
+pub(super) fn table_span(elf: &object::File, layouts: &[SymbolLayout],
+    section_index: object::SectionIndex, address: i128) -> Result<Option<(u64, u64)>> {
+    let Ok(base) = u64::try_from(address) else { return Ok(None); };
+    let included: Vec<_> = layouts.iter().map(|layout| &layout.sym).collect();
+    if !relative_table_bases(elf, &included, section_index)?.0.contains(&base) { return Ok(None); }
+    let mut symbols = Vec::new();
+    for symbol in elf.symbols().filter(|symbol|
+        symbol.kind() == object::SymbolKind::Text && !symbol.is_undefined() && symbol.size() > 0) {
+        if let Some(index) = symbol.section_index() {
+            symbols.push(SymInfo { name: symbol.name()?.to_owned(), section_index: index,
+                address: symbol.address(), size: symbol.size() });
+        }
+    }
+    let symbols: Vec<_> = symbols.iter().collect();
+    let section = elf.section_by_index(section_index)?;
+    let next = relative_table_bases(elf, &symbols, section_index)?.0.into_iter()
+        .filter(|at| *at > base).min().unwrap_or(section.size());
+    let relocations: BTreeMap<_, _> = section.relocations().collect();
+    let mut end = base;
+    while end.checked_add(4).is_some_and(|limit| limit <= next) {
+        let Some(relocation) = relocations.get(&end) else { break; };
+        if !matches!(relocation.flags(), RelocationFlags::Elf { r_type: 2 }) || relocation.has_implicit_addend() { break; }
+        let RelocationTarget::Symbol(index) = relocation.target() else { break; };
+        let Some(index) = elf.symbol_by_index(index)?.section_index() else { break; };
+        if elf.section_by_index(index)?.kind() != SectionKind::Text { break; }
+        end += 4;
+    }
+    if end == base { bail!("referenced code table has no complete relocation slots"); }
+    Ok(Some((base, end-base)))
+}
+
 pub(super) enum DataReloc {
     RelativeCode { proof: ProofDataReloc, target_offset: u64, table_offset: u64 },
     MapPointer(ProofDataReloc),
@@ -196,6 +230,60 @@ pub(super) fn data_relocations(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn separate_roots_copy_only_their_anonymous_code_table_slots() -> Result<()> {
+        let build = std::path::Path::new("/var/tmp/kprog-tmp/perf/helper-cfg");
+        fs::create_dir_all(build)?;
+        let native = build.join("shared.native.o");
+        let command = ["clang-18", "-target", "x86_64-linux-gnu", "-O3", "-march=native",
+            "-foptimize-sibling-calls", "-fomit-frame-pointer", "-mno-red-zone", "-mgeneral-regs-only",
+            "-fno-stack-protector", "-c", "/workspaces/repository/kprog/test/native_shared_code_tables.c",
+            "-o", native.to_str().ok_or_else(|| anyhow!("shared fixture path is not UTF-8"))?];
+        let compiled = std::process::Command::new(command[0]).args(&command[1..]).output()?;
+        if !compiled.status.success() { bail!("shared-table clang failed: {}", String::from_utf8_lossy(&compiled.stderr)); }
+        fs::write(build.join("shared-compile-command.json"), serde_json::to_vec(&command)?)?;
+        let source = fs::read(native)?;
+        let original = object::File::parse(source.as_slice())?;
+        assert_eq!(original.section_by_name(".rodata").ok_or_else(|| anyhow!("fixture has no tables"))?.relocations().count(), 16);
+        let layout: KernelLayout = serde_json::from_slice(&fs::read(
+            "/var/tmp/kprog-tmp/perf/kernel-layout/kernel-layout.json")?)?;
+        let mut rows = Vec::new();
+        for (name, bias) in [("first_table", 17u64), ("second_table", 29)] {
+            let entry = find_symbol_by_name(&original, name)?;
+            let included = discover_reachable(&original, &entry)?;
+            assert_eq!(included.len(), 1);
+            let proof = rewrite_x86(&original, &entry, &included, &HashMap::new(), &HashMap::new(),
+                &HashMap::new(), &[], true, true, None, None, None, None, false)?;
+            assert_eq!(proof.proof_data_relocs.len(), 8);
+            let path = build.join("shared.proof.o");
+            write_proof_object(&path, object::Architecture::X86_64, name, &proof.blob,
+                &proof.proof_symbols, &proof.proof_relocs, &proof.proof_data_relocs, proof.callee_saved_mask)?;
+            let bytes = fs::read(path)?;
+            let elf = object::File::parse(bytes.as_slice())?;
+            let entry = find_symbol_by_name(&elf, name)?;
+            let linked = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(), &HashMap::new(),
+                &HashMap::new(), &[], false, true, Some(&layout.array), Some(&layout.probe_read),
+                Some(&layout.hash), Some(&layout.lpm), false)?;
+            assert!(linked.relocs.is_empty() && linked.map_patches.is_empty());
+            let mut code = linked.blob; code.push(0xc3);
+            #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
+            for seed in 0..4u64 {
+                let mut context = [0u64; 9];
+                for (i, item) in context.iter_mut().enumerate() { *item = seed*0x9e3779b9+i as u64*71; }
+                let expected = [context[1]+bias, context[2]*3, context[3]^(bias+0x1234), context[4].wrapping_sub(bias),
+                    context[5]|0x8000, context[6]&0x7fff, context[7]+bias*7, context[8]*5];
+                for index in 0..16 {
+                    context[0] = index;
+                    let actual = memory::call_blob(&code, context.as_mut_ptr().cast(), 0, 0) as usize as u32;
+                    assert_eq!(actual, if index < 8 { expected[index as usize] as u32 } else { 0 });
+                }
+            }
+            rows.push(serde_json::json!({"entry":name,"proof_slots":8,"included_functions":1,"native_host_cases":64}));
+        }
+        fs::write(build.join("shared-tables.json"), serde_json::to_vec_pretty(&rows)?)?;
+        Ok(())
+    }
 
     #[test]
     fn compiler_relro_lookup_keeps_map_choices_and_helper_in_proof() -> Result<()> {
