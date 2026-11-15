@@ -31,6 +31,8 @@ mod non_pic;
 
 #[path = "x86_readonly_relocs.rs"]
 mod readonly_relocs;
+#[path = "x86_helper_provenance.rs"]
+mod helper_provenance;
 
 #[path = "x86_effects.rs"]
 mod effects;
@@ -898,99 +900,6 @@ fn clear_x86_call_clobbered_registers<V>(registers: &mut HashMap<Register, V>) {
     }
 }
 
-fn x86_lookahead_indirect_call_uses_register(
-    bytes: &[u8],
-    next_ip: u64,
-    sym_addr: u64,
-    reg: Register,
-) -> Option<Register> {
-    let start = usize::try_from(next_ip.checked_sub(sym_addr)?).ok()?;
-    if start >= bytes.len() {
-        return None;
-    }
-    let mut decoder = Decoder::with_ip(64, &bytes[start..], next_ip, DecoderOptions::NONE);
-    while decoder.can_decode() {
-        let next = decoder.decode();
-        if next.is_invalid() {
-            return None;
-        }
-        if is_alignment_nop(&next) {
-            continue;
-        }
-        if x86_indirect_call_register(&next) == Some(reg) {
-            return Some(reg);
-        }
-        if matches!(
-            next.flow_control(),
-            FlowControl::Call
-                | FlowControl::IndirectCall
-                | FlowControl::Return
-                | FlowControl::UnconditionalBranch
-                | FlowControl::ConditionalBranch
-                | FlowControl::IndirectBranch
-                | FlowControl::Interrupt
-                | FlowControl::XbeginXabortXend
-                | FlowControl::Exception
-        ) {
-            return None;
-        }
-        if x86_written_gpr_family(&next) == Some(reg) {
-            return None;
-        }
-    }
-    None
-}
-
-fn x86_immediate_helper_load_before_call(
-    bytes: &[u8],
-    sym_addr: u64,
-    local_ip: u64,
-    insn: &Instruction,
-) -> Option<(Register, u64)> {
-    let (reg, helper_id) = x86_mov_imm_to_gpr64(insn)?;
-    if helper_id > 255 {
-        return None;
-    }
-    let insn_len = u64::try_from(insn.len()).ok()?;
-    let next_ip = sym_addr.checked_add(local_ip)?.checked_add(insn_len)?;
-    if x86_lookahead_indirect_call_uses_register(bytes, next_ip, sym_addr, reg) == Some(reg) {
-        Some((reg, helper_id))
-    } else {
-        None
-    }
-}
-
-fn x86_known_helper_id_load(insn: &Instruction) -> Option<(Register, u64)> {
-    let (reg, helper_id) = x86_mov_imm_to_gpr64(insn)?;
-    bpf_helper_name_from_id(helper_id)?;
-    Some((reg, helper_id))
-}
-
-fn x86_symbol_has_immediate_helper_id(bytes: &[u8], sym_addr: u64, helper_id: u64) -> Result<bool> {
-    let mut decoder = Decoder::with_ip(64, bytes, sym_addr, DecoderOptions::NONE);
-    while decoder.can_decode() {
-        let insn = decoder.decode();
-        if insn.is_invalid() {
-            bail!(
-                "iced bailed while scanning x86 helper ids at IP {:#x}",
-                insn.ip()
-            );
-        }
-        if is_alignment_nop(&insn) {
-            continue;
-        }
-        let local_ip = insn.ip() - sym_addr;
-        if let Some((_, seen)) =
-            x86_immediate_helper_load_before_call(bytes, sym_addr, local_ip, &insn)
-        {
-            if seen == helper_id {
-                return Ok(true);
-            }
-        }
-    }
-    Ok(false)
-}
-
 fn scan_x86_got_relocations(
     elf: &object::File,
     included: &[SymInfo],
@@ -1177,8 +1086,9 @@ pub(super) fn rewrite_x86(
         let mut tail_transfers = x86_direct_tail_transfers(elf, sym)?;
         let mut tail_calls = Vec::new();
         let memory_constants = memory::constants(&bytes, sym.address)?;
+        let proven_helpers = helper_provenance::calls(elf, sym, &got_relocations, helper_addrs)?;
         let entry_abi_strip = if is_entry {
-            let entry_has_tail_call = x86_symbol_has_immediate_helper_id(&bytes, sym.address, 12)?
+            let entry_has_tail_call = proven_helpers.values().any(|name| name == "bpf_tail_call")
                 || helper_call_sites.iter().any(|(key, name)| {
                     key.0 == sym.section_index && key.1 == sym.address && name == "bpf_tail_call"
                 });
@@ -1205,8 +1115,6 @@ pub(super) fn rewrite_x86(
         // inter-symbol call targets. Below we re-anchor each instruction
         // to a per-symbol IP=0 layout before encoding.
         let mut decoder = Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE);
-        let mut helper_got_registers: HashMap<Register, String> = HashMap::new();
-        let mut helper_imm_registers: HashMap<Register, u64> = HashMap::new();
         let proven_maps = if !proof_mode {
             known_maps::arguments(&bytes, sym, &got_relocations, &absolute_maps, map_addrs)?
         } else { HashMap::new() };
@@ -1270,29 +1178,12 @@ pub(super) fn rewrite_x86(
                 let (replacement, kind) = non_pic::address(reference, proof_mode)?;
                 push_x86_replacement(&mut local, &mut kinds, &mut insn_local_ip,
                     local_ip, replacement, Some(kind));
-                helper_got_registers.remove(&reference.register);
-                helper_imm_registers.remove(&reference.register);
                 let key = local_site_key(sym, reference.relocation_offset);
                 canonicalized_relocations.insert(key);
                 resolved_got_relocations.insert(key);
                 continue;
             }
 
-            let mut helper_imm_load_reg = None;
-            if let Some((reg, helper_id)) =
-                x86_immediate_helper_load_before_call(&bytes, sym.address, local_ip, &insn)
-            {
-                helper_imm_registers.insert(reg, helper_id);
-                helper_imm_load_reg = Some(reg);
-                if !proof_mode {
-                    continue;
-                }
-            } else if let Some((reg, helper_id)) = x86_known_helper_id_load(&insn) {
-                helper_imm_registers.insert(reg, helper_id);
-                helper_imm_load_reg = Some(reg);
-            }
-
-            let mut helper_got_load_reg = None;
             if insn.mnemonic() == Mnemonic::Mov
                 && insn.op_count() >= 2
                 && insn.op0_kind() == OpKind::Register
@@ -1325,16 +1216,15 @@ pub(super) fn rewrite_x86(
                         let local_memory = matches!(target_name.as_str(), "memset" | "memcpy");
                         if target_name.starts_with("bpf_") || helper_addrs.contains_key(target_name) || local_memory
                         {
-                            let dst_family = x86_gpr64_family(dst).ok_or_else(|| {
-                                anyhow!(
-                                    "x86 helper GOT load for {} uses unsupported register {:?}",
-                                    target_name,
-                                    dst
-                                )
-                            })?;
-                            helper_got_registers.insert(dst_family, target_name.clone());
-                            helper_got_load_reg = Some(dst_family);
                             if !proof_mode || local_memory {
+                                // Preserve helper-address observations as well as calls.
+                                // Local memory routines retain their existing private binding.
+                                if !local_memory {
+                                    let address = resolve_helper_target(target_name, helper_addrs,
+                                        "x86 helper address")?;
+                                    push_x86_replacement(&mut local, &mut kinds, &mut insn_local_ip,
+                                        local_ip, build_x86_movabs_reg(dst, address)?, None);
+                                }
                                 resolved_got_relocations.insert(patch_key);
                                 if local_memory { canonicalized_relocations.insert(patch_key); }
                                 continue;
@@ -1349,13 +1239,6 @@ pub(super) fn rewrite_x86(
                 if let Some(reference)=writable_references.get(&local_site_key(sym,at)).filter(|r|
                     !proof_mode || insn.mnemonic()!=Mnemonic::Lea || r.offset!=0 ||
                     Some(insn.op0_register())!=x86_gpr64_family(insn.op0_register())) {
-                    let mut factory=InstructionInfoFactory::new();
-                    for register in factory.info(&insn).used_registers().iter().filter(|r|
-                        matches!(r.access(),OpAccess::Write|OpAccess::CondWrite|OpAccess::ReadWrite|OpAccess::ReadCondWrite)) {
-                        if let Some(reg)=x86_gpr64_family(register.register()) {
-                            helper_got_registers.remove(&reg);helper_imm_registers.remove(&reg);
-                        }
-                    }
                     for (index,(instruction,kind)) in writable_data::instructions(insn,reference,proof_mode)?.into_iter().enumerate() {
                         if index==0 {
                             push_x86_replacement(&mut local,&mut kinds,&mut insn_local_ip,local_ip,instruction,kind);
@@ -1489,27 +1372,9 @@ pub(super) fn rewrite_x86(
                 FlowControl::Call | FlowControl::IndirectCall
             ) {
                 let call_reg = x86_indirect_call_register(&insn);
-                let mut helper_call_name = helper_call_sites.get(&site_key).cloned();
-                if helper_call_name.is_none() {
-                    if let Some(reg) = call_reg {
-                        if let Some(helper_id) = helper_imm_registers.get(&reg).copied() {
-                            let name = bpf_helper_name_from_id(helper_id).ok_or_else(|| {
-                                anyhow!(
-                                    "x86 immediate BPF helper id {} in {} at local offset {:#x} is unsupported",
-                                    helper_id,
-                                    sym.name,
-                                    local_ip
-                                )
-                            })?;
-                            helper_call_name = Some(name.to_string());
-                        } else {
-                            helper_call_name = helper_got_registers.get(&reg).cloned();
-                        }
-                    }
-                }
+                let helper_call_name = helper_call_sites.get(&site_key).cloned()
+                    .or_else(|| proven_helpers.get(&local_ip).cloned());
                 if let Some(name) = helper_call_name {
-                    clear_x86_call_clobbered_registers(&mut helper_imm_registers);
-                    clear_x86_call_clobbered_registers(&mut helper_got_registers);
                     if let Some(routine) = memory::Routine::at_call(&name, memory_constants.get(&local_ip))
                     {
                         push_x86_replacement(&mut local, &mut kinds, &mut insn_local_ip,
@@ -1692,27 +1557,9 @@ pub(super) fn rewrite_x86(
             // the helper-call block above. Keep non-helper instructions as
             // decoded; the ELF relocation pass below handles map literals
             // and local data references.
-            let call_clobbers = matches!(
-                insn.flow_control(),
-                FlowControl::Call | FlowControl::IndirectCall
-            );
-            let written_reg = x86_written_gpr_family(&insn);
             local.push(insn);
             kinds.push(None);
             insn_local_ip.push(local_ip);
-
-            if call_clobbers {
-                clear_x86_call_clobbered_registers(&mut helper_got_registers);
-                clear_x86_call_clobbered_registers(&mut helper_imm_registers);
-            }
-            if let Some(reg) = written_reg {
-                if helper_got_load_reg != Some(reg) {
-                    helper_got_registers.remove(&reg);
-                }
-                if helper_imm_load_reg != Some(reg) {
-                    helper_imm_registers.remove(&reg);
-                }
-            }
         }
 
         // Encode this symbol's local stream at IP=0.

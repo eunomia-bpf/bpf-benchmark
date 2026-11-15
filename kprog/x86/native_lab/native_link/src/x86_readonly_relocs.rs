@@ -81,6 +81,36 @@ pub(super) fn indirect_sites(elf: &object::File, included: &[SymInfo])
     Ok(sites)
 }
 
+// Conservative union of the actual relative-table destinations of this
+// function. A shared successor set may lose precision, never add a helper fact.
+pub(super) fn control_targets(elf: &object::File, sym: &SymInfo)
+    -> Result<HashMap<u64, Vec<u64>>> {
+    let mut result = HashMap::new();
+    for section in elf.sections().filter(|section|
+        section.kind() == SectionKind::ReadOnlyData && section.relocations().next().is_some()) {
+        let (bases, sites) = relative_table_bases(elf, &[sym], section.index())?;
+        if sites.is_empty() { continue; }
+        let mut targets = Vec::new();
+        for (at, relocation) in section.relocations() {
+            let Some(base) = bases.iter().rev().find(|base| **base <= at) else { continue; };
+            if !matches!(relocation.flags(), RelocationFlags::Elf { r_type: 2 }) ||
+                relocation.has_implicit_addend() { bail!("unsupported code-table CFG relocation"); }
+            let RelocationTarget::Symbol(index) = relocation.target() else {
+                bail!("code-table CFG relocation lacks a symbol");
+            };
+            let target = elf.symbol_by_index(index)?;
+            let address = i128::from(target.address()) + i128::from(relocation.addend()) - i128::from(at-base);
+            if target.section_index() == Some(sym.section_index) && address >= i128::from(sym.address) &&
+                address < i128::from(sym.address+sym.size) {
+                targets.push(u64::try_from(address)?);
+            }
+        }
+        targets.sort_unstable(); targets.dedup();
+        for (_, _, site) in sites { result.insert(sym.address+site, targets.clone()); }
+    }
+    Ok(result)
+}
+
 pub(super) enum DataReloc {
     RelativeCode { proof: ProofDataReloc, target_offset: u64, table_offset: u64 },
     MapPointer(ProofDataReloc),
