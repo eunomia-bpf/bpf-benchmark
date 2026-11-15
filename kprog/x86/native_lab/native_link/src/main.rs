@@ -117,10 +117,6 @@ struct Args {
     #[arg(long)]
     preserve_entry_abi: bool,
 
-    /// Emit x86 kernel relocations for the tail counter-frame displacement.
-    #[arg(long)]
-    tail_count_relocs: bool,
-
     /// Dispatch x86 kernel map lookups using the actual map pointer and helper.
     #[arg(long)]
     runtime_map_lookups: bool,
@@ -603,7 +599,6 @@ fn main() -> Result<()> {
                 &update_sites,
                 proof_mode,
                 args.preserve_entry_abi,
-                args.tail_count_relocs,
                 args.runtime_map_lookups && !proof_mode,
                 args.runtime_known_map_lookups && !proof_mode,
                 if proof_mode { None } else { runtime_array_layout.as_ref() },
@@ -2738,14 +2733,6 @@ mod tests {
         assert!(Args::try_parse_from(argv.into_iter().chain([
             "--runtime-map-lookups", "--runtime-array-layout", "layout.json", "--runtime-array-shared"]))
             .unwrap().runtime_array_shared);
-    }
-
-    #[test]
-    fn tail_count_relocations_require_cli_opt_in() {
-        let argv = ["native-link", "--input", "p.o", "--symbol", "entry", "--output", "p.bin"];
-        assert!(!Args::try_parse_from(argv).unwrap().tail_count_relocs);
-        assert!(Args::try_parse_from(argv.into_iter().chain(["--tail-count-relocs"]))
-            .unwrap().tail_count_relocs);
     }
 
     #[test]

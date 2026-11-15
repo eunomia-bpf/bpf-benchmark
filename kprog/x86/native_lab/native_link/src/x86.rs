@@ -1208,7 +1208,6 @@ pub(super) fn rewrite_x86(
     update_sites: &[UpdateSiteSpec],
     proof_mode: bool,
     preserve_entry_abi: bool,
-    tail_count_relocs: bool,
     runtime_map_lookups: bool,
     runtime_known_map_lookups: bool,
     runtime_array_layout: Option<&RuntimeArrayLayout>,
@@ -1671,7 +1670,6 @@ pub(super) fn rewrite_x86(
                             &entry_abi_strip.tail_call_cleanup_bytes,
                             entry_abi_strip.tail_call_bpf_rbp_rsp_offset,
                             entry_abi_strip.tail_call_bpf_rbp_is_live,
-                            tail_count_relocs,
                         )?;
                         // The stub is emitted as 16-byte chunks. A synthetic
                         // advances next_synthetic_ip by one whatever its width, so
@@ -1687,7 +1685,7 @@ pub(super) fn rewrite_x86(
                                 &mut next_synthetic_ip,
                                 ib,
                             )?;
-                            if tail_count_relocs && chunk_index == field_chunk {
+                            if chunk_index == field_chunk {
                                 if let Some(last) = kinds.last_mut() {
                                     *last = Some(PatchKind::TailCount { field_delta });
                                 }
@@ -4096,28 +4094,12 @@ fn append_x86_stub_callee_pop(bytes: &mut Vec<u8>, callee_saved_mask: u8) {
     }
 }
 
-/// Append `add rcx, imm` and return the offset of its immediate field.
-///
-/// The default retains the compact encoding, and opt-in retains its imm32 form.
-/// This entry immediate is not a tail-count relocation field.
-fn append_x86_add_rcx_imm(bytes: &mut Vec<u8>, imm: u32, tail_count_relocs: bool) -> usize {
-    if !tail_count_relocs && imm <= 0x7f {
-        bytes.extend_from_slice(&[0x48, 0x83, 0xC1, imm as u8]);
-        return bytes.len() - 1;
-    }
-    bytes.extend_from_slice(&[0x48, 0x81, 0xC1]);
-    let at = bytes.len();
-    bytes.extend_from_slice(&imm.to_le_bytes());
-    at
-}
-
 fn build_x86_tail_call_inline(
     helper_addrs: &HashMap<String, u64>,
     callee_saved_mask: u8,
     native_cleanup: &[u8],
     saved_bpf_rbp_rsp_offset: Option<i32>,
     bpf_rbp_is_live: bool,
-    tail_count_relocs: bool,
 ) -> Result<(Vec<Instruction>, usize)> {
     const MAX_TAIL_CALL_CNT: u8 = 33;
     let map_max_entries = x86_required_u32_helper_arg(
@@ -4175,7 +4157,8 @@ fn build_x86_tail_call_inline(
     bytes.extend_from_slice(&[0x58, 0x58]); // pop tail_call_cnt_ptr; pop tail_call_cnt
     bytes.extend_from_slice(&[0x48, 0x8B, 0x89]); // mov rcx, [rcx + disp32]
     bytes.extend_from_slice(&prog_bpf_func.to_le_bytes());
-    append_x86_add_rcx_imm(&mut bytes, tail_call_offset, tail_count_relocs);
+    bytes.extend_from_slice(&[0x48, 0x81, 0xC1]); // add rcx, imm32
+    bytes.extend_from_slice(&tail_call_offset.to_le_bytes());
     bytes.extend_from_slice(&[0xFF, 0xE1]); // jmp rcx
 
     let out = bytes.len();
@@ -4560,7 +4543,7 @@ mod tests {
                 let entry = find_symbol_by_name(&elf, "entry")?;
                 let empty = HashMap::new();
                 let proof = rewrite_x86(&elf, &entry, &[entry.clone()], &empty, &empty, &[],
-                    &HashMap::new(), &[], true, true, false, false, false, None, false, None, None, None, false, false, false)?;
+                    &HashMap::new(), &[], true, true, false, false, None, false, None, None, None, false, false, false)?;
                 assert!(proof.proof_relocs.is_empty(), "{name}, form={form}");
                 assert_eq!(proof.proof_symbols.len(), 2, "same length shares one routine");
                 assert!(proof.proof_symbols[1].name.starts_with("__native_link_local_"));
@@ -4574,7 +4557,7 @@ mod tests {
                 let included = discover_reachable(&elf, &entry)?;
                 assert_eq!(included.len(), 2);
                 let result = rewrite_x86(&elf, &entry, &included, &empty, &empty, &[],
-                    &HashMap::new(), &[], false, true, false, false, false, None, false, None, None, None, false, false, false)?;
+                    &HashMap::new(), &[], false, true, false, false, None, false, None, None, None, false, false, false)?;
                 assert!(result.relocs.is_empty());
                 #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
                 {
@@ -4634,7 +4617,7 @@ mod tests {
                 (true, Some(&array), false), (true, Some(&array), true)] {
                 let result = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers,
                     &HashMap::new(), &[site.clone()], &HashMap::new(), &[],
-                    false, false, false, enabled, false, layout, shared, None, None, None, false, false, false)?;
+                    false, false, enabled, false, layout, shared, None, None, None, false, false, false)?;
                 let expected = if enabled { 0x1234 } else { 0x5678 };
                 assert!(result.relocs.iter().any(|r| r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32
                     && r.target == expected), "form={form}, enabled={enabled}: actual helper target");
@@ -4805,7 +4788,7 @@ mod tests {
         })]);
         for enabled in [false, true] {
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps,
-                &[], &facts, &[], false, false, false, true, enabled, None, false, None, None, None, false, false, false)?;
+                &[], &facts, &[], false, false, true, enabled, None, false, None, None, None, false, false, false)?;
             if !enabled {
                 assert!(output.relocs.iter().any(|r| r.target == 0x1234));
                 continue;
@@ -4849,14 +4832,14 @@ mod tests {
         ]);
         for (saved_frame, live_rbp) in [(Some(64), false), (None, true)] {
             let (stub, field) = build_x86_tail_call_inline(
-                &helpers, 15, &[], saved_frame, live_rbp, true,
+                &helpers, 15, &[], saved_frame, live_rbp,
             )?;
             let mut bytes = BlockEncoder::encode(
                 64, InstructionBlock::new(&stub, 0), BlockEncoderOptions::NONE,
             )?.code_buffer;
             assert_eq!(&bytes[field..field + 4], &(-16i32).to_le_bytes(),
                        "relocation must name the counter-frame displacement");
-            bytes[field..field + 4].copy_from_slice(&(-16i32).to_le_bytes());
+            bytes[field..field + 4].copy_from_slice(&(-32i32).to_le_bytes());
             let decoded = decode_x86(&bytes)?;
             let entry = decoded.iter().find(|i| i.mnemonic() == Mnemonic::Add
                 && i.op0_register() == Register::RCX).expect("tail entry add");
@@ -4866,38 +4849,71 @@ mod tests {
                 && i.op0_register() == Register::RAX
                 && i.memory_base() == if live_rbp { Register::RBP } else { Register::RAX })
                 .expect("counter pointer load");
-            assert_eq!(load.memory_displacement64() as i64, -16);
+            assert_eq!(load.memory_displacement64() as i64, -32);
         }
         Ok(())
     }
 
-    /// Preserve the opt-in entry encoding while relocating the separate counter load.
     #[test]
-    fn opt_in_tail_entry_offset_retains_imm32_encoding() {
-        for imm in [0u32, 16, 0x7f, 0x80, 0x1000] {
-            let mut bytes = Vec::new();
-            let at = append_x86_add_rcx_imm(&mut bytes, imm, true);
-            assert_eq!(at, 3, "imm32 opcode is three bytes");
-            assert_eq!(bytes.len(), 7, "opcode plus a four-byte field");
-            assert_eq!(&bytes[..3], &[0x48, 0x81, 0xC1]);
-            assert_eq!(&bytes[3..7], &imm.to_le_bytes());
-        }
-    }
-
-    #[test]
-    fn default_tail_entry_offset_retains_legacy_encoding() {
-        for imm in [0u32, 16, 0x7f, 0x80, 0x1000] {
-            let mut bytes = Vec::new();
-            append_x86_add_rcx_imm(&mut bytes, imm, false);
-            let expected = if imm <= 0x7f {
-                vec![0x48, 0x83, 0xc1, imm as u8]
+    fn kernel_tail_calls_always_relocate_the_counter_frame() -> Result<()> {
+        // An omitted kind-10 relocation leaves the frozen frame displacement
+        // in an otherwise valid tail stub. Check production ELF rewriting,
+        // including the final offset after chunk emission and branch encoding.
+        for immediate in [false, true] {
+            let mut object = WriteObject::new(BinaryFormat::Elf,
+                object::Architecture::X86_64, Endianness::Little);
+            let text = object.add_section(Vec::new(), b".text".to_vec(), SectionKind::Text);
+            let bytes = if immediate {
+                vec![0xb8, 12, 0, 0, 0, 0xff, 0xd0, 0xc3]
             } else {
-                let mut expected = vec![0x48, 0x81, 0xc1];
-                expected.extend_from_slice(&imm.to_le_bytes());
-                expected
+                vec![0xe8, 0, 0, 0, 0, 0xc3]
             };
-            assert_eq!(bytes, expected);
+            object.append_section_data(text, &bytes, 1);
+            object.add_symbol(WriteSymbol {
+                name: b"entry".to_vec(), value: 0, size: bytes.len() as u64,
+                kind: SymbolKind::Text, scope: SymbolScope::Linkage, weak: false,
+                section: WriteSymbolSection::Section(text), flags: SymbolFlags::None,
+            });
+            if !immediate {
+                let helper = object.add_symbol(WriteSymbol {
+                    name: b"bpf_tail_call".to_vec(), value: 0, size: 0,
+                    kind: SymbolKind::Text, scope: SymbolScope::Linkage, weak: false,
+                    section: WriteSymbolSection::Undefined, flags: SymbolFlags::None,
+                });
+                object.add_relocation(text, WriteRelocation {
+                    offset: 1, symbol: helper, addend: -4,
+                    flags: RelocationFlags::Elf { r_type: 4 },
+                })?;
+            }
+            let encoded = object.write()?;
+            let elf = object::File::parse(encoded.as_slice())?;
+            let entry = find_symbol_by_name(&elf, "entry")?;
+            let helpers = HashMap::from([
+                (X86_BPF_MAP_MAX_ENTRIES_OFFSET_KEY.to_owned(), 68),
+                (X86_BPF_ARRAY_PTRS_OFFSET_KEY.to_owned(), 304),
+                (X86_BPF_PROG_BPF_FUNC_OFFSET_KEY.to_owned(), 72),
+                (X86_TAIL_CALL_OFFSET_KEY.to_owned(), 12),
+            ]);
+            let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers,
+                &HashMap::new(), &[], &HashMap::new(), &[], false, false,
+                false, false, None, false, None, None, None, false, false, false)?;
+            assert_eq!(output.relocs.len(), 1, "immediate={immediate}");
+            let relocation = output.relocs[0];
+            assert_eq!(relocation.kind, NATIVE_LAB_RELOC_X86_TAIL_COUNT);
+            assert_eq!(relocation.target, 0);
+            let offset = relocation.offset as usize;
+            assert_eq!(&output.blob[offset - 3..offset], &[0x48, 0x8b, 0x85]);
+            assert_eq!(&output.blob[offset..offset + 4], &(-16i32).to_le_bytes());
+            let mut patched = output.blob;
+            patched[offset..offset + 4].copy_from_slice(&(-32i32).to_le_bytes());
+            let decoded = decode_x86(&patched)?;
+            assert!(decoded.iter().any(|i| i.mnemonic() == Mnemonic::Mov
+                && i.op0_register() == Register::RAX && i.memory_base() == Register::RBP
+                && i.memory_displacement64() as i64 == -32));
+            assert!(decoded.iter().any(|i| i.mnemonic() == Mnemonic::Add
+                && i.op0_register() == Register::RCX && i.immediate32to64() == 12));
         }
+        Ok(())
     }
 
     /// The tail-count field has to be found inside the chunked stub, and the
@@ -4945,7 +4961,7 @@ mod tests {
         let entry = find_symbol_by_name(&elf, "entry")?;
         for preserve in [false, true] {
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(),
-                &HashMap::new(), &[], &HashMap::new(), &[], true, preserve, false, false, false, None, false, None, None, None, false, false, false)?;
+                &HashMap::new(), &[], &HashMap::new(), &[], true, preserve, false, false, None, false, None, None, None, false, false, false)?;
             let mut expected = if preserve { vec![0x53, 0x31, 0xc0, 0x5b] } else { vec![0x31, 0xc0] };
             expected.extend_from_slice(&[0xe9, 0, 0, 0, 0]); // Canonical entry exit in proof mode.
             assert_eq!(output.blob, expected);
