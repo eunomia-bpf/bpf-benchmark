@@ -12,6 +12,8 @@
 
 - [x] P-SPECIALIZE-small-scale（9fc382606、cc83b5d48；本提交结果）：100/1000×scalar/pointer×direct/indirect 八例正常 B 完成，实际 post-PEI 栈帧 0–32B；前端 0.478–2.146s、119–184MB RSS。逐例 CPP/B/CPU/RSS/命令在 `perf_20261113/inline-families/scale-small/`；OTel 整体及大规模仍开，不据此宣称 P-SPECIALIZE 完成。
 
+- [x] P-SPECIALIZE-10K（9fc382606、cc83b5d48；本提交结果）：四种 10K 形状正常 B/实际栈帧完成，前端 11.6–26.3s、峰值 399–920MiB；B 328–200624B、帧 0–40B，详见 `perf_20261113/inline-families/scale-10k/`。旧同名 scalar/direct 70.47GiB/SIGKILL 的实际失败已能完成；不跨不同编译管线宣称独立加速比。100K 继续。
+
 **协调者 2026-11-15T14:18:54Z（运营者 14:12–14:18 的话）**：
 - 源码改动：运营者说“必要的话改一点是可以接受的, 不需要过于严格, 但尽可能不改”。协调者此前把 11-13 的“尽可能禁止改源代码”收紧成“一字不改”，删掉了 C 的兼容分支（a01ef4879、57a19c5f2），还因此重启了 C，这是收紧，已纠正：C 在 Tetragon、Tracee、Cilium 里按 __bpf__ 分开的原生兼容分支按 C 停时的最新版本恢复（本提交，来自 0f16b77f1 和 /workspaces/kprog-raw/C/stop-20261115T0649Z/worktree.patch，eBPF 一侧文本不变）。规则：头文件、编译参数、链接器能做的放那里；做不到的，在源码里加最小的兼容分支。
 - formal 继续证明迁移（运营者：“证明迁移停着。干嘛不做? 继续.”）。“每个 workspace 一个 omp 一个 codex?”是问句，按 11-13 的“可以两个 codex lane”，本 Workspace 是 C（omp）+ perf、formal（两个 Codex）；M4–M6 回到 formal，PERF 的待办里去掉。

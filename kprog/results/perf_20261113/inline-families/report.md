@@ -119,3 +119,22 @@ hashes, resource usage and diagnostics persist without another build copy.
 Pidfd guard released both leases after the Make launcher exited16:24:32Z;
 resume-events.json records the pause/resume boundary. Old paused controls
 and canonical inputs remain untouched.10K/100K scale groups continue.
+
+2026-11-15T16:25:42Z: all four10K cases finish normal B/frame stages,
+exit0 under8GiB AS. Per-stage commands/resources and CPP/B hashes are
+committed in scale-10k/; original larger runs remain raw.
+
+| Native case | Actual insns | CPP bytes | Frontend seconds | Peak KiB | B code bytes | Frame bytes |
+|---|---:|---:|---:|---:|---:|---:|
+|10K scalar direct|10036|4789492|11.609|410732|504|0|
+|10K scalar indirect|10084|4808289|11.894|408556|328|0|
+|10K pointer direct|10036|5389846|26.272|939184|200480|32|
+|10K pointer indirect|10084|5408643|25.672|942316|200624|40|
+
+The old same-named scalar/direct production case ended SIGKILL after5693s
+and73,891,664KiB RSS before B existed (scale-stock-10k-first/report.md).
+This current pipeline completes it with about401MiB frontend peak and a
+zero-byte frame. That is a resolved practical failure on this fixture;
+the intervening compiler changes and scalar constant folding preclude
+attributing an isolated optimization speedup from those two observations.
+100K remains running; there is no new stock-kernel or app/runtime result.
