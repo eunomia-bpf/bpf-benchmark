@@ -38,7 +38,7 @@ finally:target.close()
 worker=adapter(1)
 rows=[]
 for kind,entry,prog_type,section in [('xdp','packet_xdp',6,'xdp'),('tc','packet_tc',3,'tc'),('cgroup_skb','packet_tc',8,'cgroup_skb/egress')]:
-    directory=output/kind;directory.mkdir()
+    directory=output/kind;directory.mkdir(exist_ok=True)
     artifact=worker.specialize(native.read_bytes(),entry,dict(version=1,prog_type=prog_type,section=section,maps=[]),directory/'generated',linker,bounds_compiler=bounds)
     result=worker.compile_checked_simulator(artifact,linker,compiler,context_compiler=context,public_layout=public,physical_layout=physical)
     harness=directory/'harness.c'
