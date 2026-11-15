@@ -84,6 +84,6 @@ def check(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    for name in ('linker', 'layouts', 'build', 'output'):
+    for name in ('linker', 'kernel-layout', 'build', 'output'):
         parser.add_argument('--'+name, type=Path, required=True)
     check(parser.parse_args())
