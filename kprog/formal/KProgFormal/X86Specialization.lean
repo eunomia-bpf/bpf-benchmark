@@ -10,8 +10,8 @@ def x86SpecToken : GeneratedX86Specialization.Op -> String :=
 
 /-- Drop a trailing `_AUX` or `_STEP` spelling suffix. -/
 def stripSuffix (s : String) : String :=
-  if s.endsWith "_AUX" then s.dropRight 4
-  else if s.endsWith "_STEP" then s.dropRight 5
+  if s.endsWith "_AUX" then (s.dropEnd 4).toString
+  else if s.endsWith "_STEP" then (s.dropEnd 5).toString
   else s
 
 /-- Every token the chain and the encoder both serve selects the same
