@@ -329,3 +329,5 @@ KEPT incremental kprog_stock.o and source; raw run archives and logs retained.
 - 2026-11-15T13:12:17Z PERF base-consistency smoke: removed only completed scratch image/module copies in /var/tmp/kprog-tmp/perf/base-consistency-smoke; raw logs/results kept in /workspaces/kprog-raw/perf/20261115-base-consistency/smoke.
 - 2026-11-15T14:04:32Z PERF guest image PC32 check: removed scratch image copies in /var/tmp/kprog-tmp/perf/image-pc32-state; raw retained /workspaces/kprog-raw/perf/20261115-image-pc32.
 - 2026-11-15T14:06:00Z PERF guest image PC32 check: removed scratch image copies in /var/tmp/kprog-tmp/perf/image-pc32-state; raw retained /workspaces/kprog-raw/perf/20261115-image-pc32/retry.
+
+2026-11-15T14:22:20Z PERF: canonical context-loads-v2/packet-bounds and base installed packet-bounds replaced in place (4827e435), same canonical packet-identities/backend fixture products rebuilt; no old compiler binary copy retained. Prior/new hashes and raw control/check logs kept under /workspaces/kprog-raw/perf/20261115-bounds-single. New context fixture compiler outputs stay in canonical context-loads-v2/cases, no compiled output in raw.
