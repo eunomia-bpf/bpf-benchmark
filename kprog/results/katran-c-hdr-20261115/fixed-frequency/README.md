@@ -20,3 +20,11 @@ pass. The official timing outcomes remain pending.
 
 Entry: make -r -f kprog/test/native-relocations.mk katran-fixed-frequency.
 Full raw: /workspaces/kprog-raw/perf/20261115-katran-fixed-frequency/.
+
+A/A completed19:18Z, Make0/appOK. Both actual programs are13641B JIT and
+23840B translated. Per call173.857457→178.067376ns gives first/second
+0.976357718; mean throughput2476317.667→2438470pps gives second/first
+0.984716150 (sample rates retained in aa-analysis.json). Host-frequency controls
+restore with an empty error list. This is the control factor for the pending
+A/B result. The existing per-call-aa/analyze.py reducer retains all counters
+and raw pktgen errors; the batch keeps its timingEX/imageSH locks during A/B.
