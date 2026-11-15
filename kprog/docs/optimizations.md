@@ -318,3 +318,11 @@ changed-B stock execution and OTel improvement remain unmeasured. Revised
 actual frontend queued910213 behind preserved original898093, same one
 build; input locks now release before optimizer work. Initial compile failure
 and all diagnostics: `../results/perf_20261113/pre-sroa-constants/report.md`.
+
+Actual frontend follow-up: the original optimized stage failed with LLVM OOM
+under16GiBAS after2,564.727s/maxRSS16,620,472KiB, before B generation.
+The revised width/selector frontend started normally on the same native,
+proof and metadata; CPP grows289,568,784→297,172,962B (+2.63%). At10:25UTC
+it remains running, so the isolated graph reduction is not yet a full compile
+improvement. Raw command/error/resources: `../results/perf_20261113/otel-frontend-oom/report.md`.
+All LTO and normal optimization flags remain together; no runtime gain claimed.

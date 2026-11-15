@@ -1,0 +1,30 @@
+{
+  "command": [
+    "/workspaces/repository/kprog/stock-path/bin/clang",
+    "-w",
+    "-g",
+    "-O3",
+    "-mcpu=v4",
+    "-target",
+    "bpf",
+    "-mllvm",
+    "-bpf-stack-size=4096",
+    "-D__TARGET_ARCH_x86",
+    "-I",
+    "/workspaces/repository/vendor/libbpf/include/uapi",
+    "-I",
+    "/workspaces/repository/vendor/libbpf/src",
+    "-I",
+    "/usr/include/x86_64-linux-gnu",
+    "-emit-llvm",
+    "-c",
+    "/var/tmp/kprog-tmp/perf/otel-whole-word-checked/trusted_x86.bpf.i",
+    "-o",
+    "/var/tmp/kprog-tmp/perf/otel-whole-word-checked/trusted_x86.bpf.bounds-input.bc"
+  ],
+  "returncode": 1,
+  "wall_seconds": 2564.7267346449953,
+  "user_seconds": 2434.605319,
+  "system_seconds": 26.476374,
+  "max_rss_kib": 16620472
+}
