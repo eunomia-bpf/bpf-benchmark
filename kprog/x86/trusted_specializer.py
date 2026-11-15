@@ -41,10 +41,7 @@ PIECE_SOURCE_BYTES = 1 << 18
 PIECE_MARK = "#pragma kprog_preprocessed_piece"
 
 
-def compile_simulator(clang, source: Path, obj: Path, run, *, bounds_compiler=None) -> None:
-    all_spills = os.environ.get('KPROG_BPF_WHOLE_WORD_SPILLS_ALL', '0')
-    if all_spills not in {'0', '1'}:
-        raise ValueError('KPROG_BPF_WHOLE_WORD_SPILLS_ALL must be 0 or 1')
+def preprocess_simulator(clang, source: Path, run) -> Path:
     lines = source.read_text().split("\n")
     first = next(i for i, line in enumerate(lines) if INSTRUCTION_LABEL.fullmatch(line))
     bounds, start, size = [], first, 0
@@ -72,6 +69,14 @@ def compile_simulator(clang, source: Path, obj: Path, run, *, bounds_compiler=No
             joined.write(body)
             expanded.unlink()
             piece.unlink()
+    return preprocessed
+
+
+def compile_simulator(clang, source: Path, obj: Path, run, *, bounds_compiler=None) -> None:
+    all_spills = os.environ.get('KPROG_BPF_WHOLE_WORD_SPILLS_ALL', '0')
+    if all_spills not in {'0', '1'}:
+        raise ValueError('KPROG_BPF_WHOLE_WORD_SPILLS_ALL must be 0 or 1')
+    preprocessed = preprocess_simulator(clang, source, run)
     compiled_input = preprocessed
     if bounds_compiler:
         initial, lowered = source.with_suffix('.bounds-input.bc'), source.with_suffix('.bounds.bc')
