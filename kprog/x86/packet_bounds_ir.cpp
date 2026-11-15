@@ -4,6 +4,7 @@
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/InlineAsm.h"
+#include "llvm/IR/IntrinsicInst.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Verifier.h"
 #include "llvm/IRReader/IRReader.h"
@@ -100,12 +101,30 @@ static unsigned remove_unused_private_inputs(Module &module) {
   for (auto *load:unused) load->eraseFromParent();
   return unused.size();
 }
+// Variable-location intrinsics have no execution effect. Constant folding of a
+// large simulated block can leave millions of adjacent dbg.value instructions;
+// LLVM18's getStableDebugLoc scans to the next non-debug instruction for each.
+// Keep instruction locations, function/type/global metadata and BTF, but omit
+// these variable updates before B machine-code selection. The checked native
+// compiler still receives the unchanged original frontend IR.
+static unsigned remove_debug_variable_intrinsics(Module &module) {
+  unsigned count=0;
+  for (auto &function:module) for (auto &block:function)
+    for (auto it=block.begin();it!=block.end();) {
+      auto &instruction=*it++;
+      if (isa<DbgVariableIntrinsic>(instruction)) {
+        instruction.eraseFromParent();++count;
+      }
+    }
+  return count;
+}
 int main(int argc,char **argv) {
   cl::ParseCommandLineOptions(argc,argv);
   LLVMContext context;SMDiagnostic error;auto module=parseIRFile(Input,error,context);
   if (!module) { error.print(argv[0],errs());return 1; }
   unsigned unused=remove_unused_private_inputs(*module);
   unsigned contexts=canonical_context_loads(*module);
+  unsigned debug_variables=remove_debug_variable_intrinsics(*module);
   unsigned count=0;
   for (auto &function:*module) {
     if (function.isDeclaration() || function.arg_empty()) continue;
@@ -151,4 +170,5 @@ int main(int argc,char **argv) {
   errs()<<"packet length predicates lowered="<<count<<'\n';
   errs()<<"unused private inputs removed="<<unused<<'\n';
   errs()<<"constant context loads canonicalized="<<contexts<<'\n';
+  errs()<<"debug variable intrinsics removed="<<debug_variables<<'\n';
 }

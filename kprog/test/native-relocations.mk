@@ -448,3 +448,7 @@ inline-scale-stock:
 .PHONY: ir-debug-census
 ir-debug-census:
 	taskset -c 16-19 prlimit --as=4294967296 -- python3 $(ROOT)/kprog/test/observe_inline_debug.py --bitcode $(BITCODE) --output $(OUTPUT)/result.json
+
+.PHONY: b-debug-variables-check
+b-debug-variables-check: $(CONTEXT_TOOL)
+	taskset -c 16-19 prlimit --as=4294967296 -- python3 $(ROOT)/kprog/test/check_b_debug_variables.py --tool $(CONTEXT_TOOL) --previous /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds --build /var/tmp/kprog-tmp/perf/b-debug-variables --output $(OUTPUT)

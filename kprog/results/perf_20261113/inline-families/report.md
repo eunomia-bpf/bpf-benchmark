@@ -148,3 +148,20 @@ actual verifier/test-run outcome and memory trace. Dry-run confirms sole
 kernel/2vCPU/8GiB guest on18–19 with16GiB host AS; outer timingSH then
 imageSH excludes timing. Actual adapter/guest results remain pending.
 This is component correctness evidence, not application/performance timing.
+
+2026-11-15T16:39Z100K diagnosis: optimized frontend131.336CPU s and
+2,908,444KiB RSS completes, but existing backend1070223 spends >13CPU
+minutes. Three16:33 samples all show LLVM18 getStableDebugLoc, whose local
+header and actual disassembly show forward scanning through debug calls.
+Streamed bounds IR census finds1,512,837 debug-variable calls for35 source
+variables,561,197,274 textual IR bytes, maximum pre-codegen contiguous run55.
+Later optimizer folding can merge those runs; no final folded-run count or
+pass-cost percentage is inferred. Full bitcode/text is not copied into raw.
+
+Normal B bounds tool now drops only DbgVariableIntrinsic updates; executable
+instructions/locations, function/types/globals and BTF metadata remain.
+The checked native compiler still gets untouched original frontend IR.
+No C interpreter, P, producer flags, proof inputs or formal adapters changed.
+A real map/context fixture checks allocated sections and BTF equality;
+validation is pending. Current running backend/its IR remain unchanged and
+continue as the captured control. No isolated compile or runtime gain yet.
