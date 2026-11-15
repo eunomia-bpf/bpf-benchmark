@@ -1,0 +1,1 @@
+taskset -c 8-11 make -r -f kprog/test/native-relocations.mk bmi2-specialization OUTPUT=/workspaces/kprog-raw/perf/20261115-all-pairs-single/native-b 

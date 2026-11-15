@@ -1,0 +1,2 @@
+taskset -c 18-19 python3 /workspaces/repository/kprog/test/check_whole_word_backend.py --output /workspaces/kprog-raw/perf/20261115-all-pairs-single/backend --clang /workspaces/repository/kprog/stock-path/bin/clang 
+{"normal_pipeline_allocations_equal_direct": true, "normal_llc_executed": true}

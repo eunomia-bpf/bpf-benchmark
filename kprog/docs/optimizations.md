@@ -262,3 +262,14 @@ the existing dead-source reuse/live-scratch preservation implementation.
 Diagnostic explicit-pair inputs remain callers of the same lowering body.
 Retired switch/old-path comparison tests are replaced by current multi-pair,
 register-pressure and normal-backend checks. No full OTel acceptance claim.
+
+2026-11-15 receipts: common MOV_LOAD writeback2c6ae7717 reduces same-input
+OTel CPP384,511,544→309,459,472B (-19.52%; -28.31% including BMI2).
+Independent load713/stack117782/new pointer-RSP-recovery14 pass; old
+helper-output oracle still fails to link before/after and is reported.
+Actual CPU4032 cases and all16 normal B allocated sets match before/after.
+All-pairs sole policy8f48bf443 passes host grouping/pressure and stock9,540
+executions/zero mismatches; original544B rejection/packed512B acceptance
+retained. Reports: `../results/perf_20261113/load-writeback/report.md` and
+`../results/perf_20261113/all-pairs-single/report.md`. Full OTel B/app and
+runtime performance remain open; native LTO stays together.

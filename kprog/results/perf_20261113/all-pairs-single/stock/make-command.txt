@@ -1,0 +1,1 @@
+taskset -c 16-17 make -r -f kprog/test/scalar-spill-precision.mk spill-groups-run OUTPUT=/workspaces/kprog-raw/perf/20261115-all-pairs-single/stock 

@@ -1,0 +1,49 @@
+{
+  "compile_only": true,
+  "cases": [
+    {
+      "phase": "small-original",
+      "frame_access_depth": 80,
+      "pairs": 0
+    },
+    {
+      "phase": "small-packed",
+      "frame_access_depth": 48,
+      "pairs": 4
+    },
+    {
+      "phase": "large-original",
+      "frame_access_depth": 544,
+      "pairs": 0
+    },
+    {
+      "phase": "large-packed",
+      "frame_access_depth": 512,
+      "pairs": 4
+    },
+    {
+      "phase": "pressure-original",
+      "frame_access_depth": 16
+    },
+    {
+      "phase": "pressure-packed",
+      "frame_access_depth": 8
+    },
+    {
+      "phase": "pressure-context-original",
+      "frame_access_depth": 16
+    },
+    {
+      "phase": "pressure-context-packed",
+      "frame_access_depth": 16
+    },
+    {
+      "phase": "pressure-all-live-original",
+      "frame_access_depth": 16
+    },
+    {
+      "phase": "pressure-all-live-packed",
+      "frame_access_depth": 24
+    }
+  ]
+}
