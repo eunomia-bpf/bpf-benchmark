@@ -259,6 +259,7 @@ load-oracles:
 
 .PHONY: native-stores
 native-stores: $(CONTEXT_TOOL)
+	python3 $(ROOT)/kprog/formal/tools/generate_x86_store_spec.py --check
 	taskset -c 8-11 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_native_stores.py --build /var/tmp/kprog-tmp/perf/store-writeback --output $(OUTPUT) --bounds $(CONTEXT_TOOL) --linker $(LINKER_BINARY)
 
 .PHONY: current-otel-frontend
