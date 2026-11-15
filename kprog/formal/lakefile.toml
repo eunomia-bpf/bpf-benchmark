@@ -17,6 +17,7 @@ path = "external/clean/export"
 [[lean_lib]]
 name = "KProgFormal"
 globs = ["KProgFormal.*"]
+weakLeanArgs = ["-j1"]
 
 [[lean_exe]]
 name = "reference"

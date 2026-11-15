@@ -905,7 +905,7 @@ def f_kprog_x86_mem_load : Function := {
               LStmts.LSnil)))))))
 }
 
-def s_kprog_x86_ptr_load_0 : Stmt :=
+@[noinline] def s_kprog_x86_ptr_load_0 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'52
     (Expr.Efield
@@ -927,16 +927,16 @@ def s_kprog_x86_ptr_load_0 : Stmt :=
   (Stmt.Sset _t'3
     (Expr.Ecast (Expr.Etempvar _t'52 (tptr tvoid)) (tptr tvoid))))
 
-def s_kprog_x86_ptr_load_1 : Stmt :=
+@[noinline] def s_kprog_x86_ptr_load_1 : Stmt :=
 (Stmt.Sset _t'3
   (Expr.Ecast
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid))
     (tptr tvoid)))
 
-def s_kprog_x86_ptr_load_2 : Stmt :=
+@[noinline] def s_kprog_x86_ptr_load_2 : Stmt :=
 (Stmt.Sset ___x86_tag_reg (Expr.Ecast (Expr.Etempvar _dst tuchar) tulong))
 
-def s_kprog_x86_ptr_load_3 : Stmt :=
+@[noinline] def s_kprog_x86_ptr_load_3 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
                       (Expr.Etempvar ___x86_tag_reg tulong)
@@ -963,7 +963,7 @@ def s_kprog_x86_ptr_load_3 : Stmt :=
   (Stmt.Sset ___x86_wr_cell_tag
     (Expr.Ecast (Expr.Etempvar _t'4 tuint) tuchar)))
 
-def s_kprog_x86_ptr_load_4 : Stmt :=
+@[noinline] def s_kprog_x86_ptr_load_4 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Ecast (Expr.Etempvar ___x86_wr_width tuchar)
                       tuchar) (Expr.Econst_int (Integers.Int.repr 1) tuint)
@@ -995,7 +995,7 @@ def s_kprog_x86_ptr_load_4 : Stmt :=
           (Stmt.Sset _t'9 (Expr.Ecast (Expr.Etempvar _t'9 tuint) tuint)))
         (Stmt.Sset _t'9 (Expr.Ecast (Expr.Etempvar _t'9 tuint) tuint))))))
 
-def s_kprog_x86_ptr_load_5 : Stmt :=
+@[noinline] def s_kprog_x86_ptr_load_5 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq (Expr.Etempvar _dst tuchar)
                       (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
@@ -1204,7 +1204,7 @@ def s_kprog_x86_ptr_load_5 : Stmt :=
           (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuchar))))
     Stmt.Sbreak))
 
-def s_kprog_x86_ptr_load_6 : Stmt :=
+@[noinline] def s_kprog_x86_ptr_load_6 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                       (Expr.Ecast (Expr.Etempvar ___x86_wr_width tuchar)
@@ -1477,7 +1477,7 @@ def s_kprog_x86_ptr_load_6 : Stmt :=
                 tuchar)))
           Stmt.Sbreak)))))
 
-def s_kprog_x86_ptr_load_7 : Stmt :=
+@[noinline] def s_kprog_x86_ptr_load_7 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq (Expr.Etempvar _dst tuchar)
                     (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
   (Stmt.Ssequence
@@ -1503,7 +1503,7 @@ def s_kprog_x86_ptr_load_7 : Stmt :=
               (Expr.Etempvar _t'38 tulong) tulong) tlong) (tptr tvoid)))))
   Stmt.Sskip)
 
-def s_kprog_x86_ptr_load_8 : Stmt :=
+@[noinline] def s_kprog_x86_ptr_load_8 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Ole
                     (Expr.Ebinop Binop.Oadd
                       (Expr.Etempvar ___x86_release_i tuint)
@@ -1515,7 +1515,7 @@ def s_kprog_x86_ptr_load_8 : Stmt :=
         (Expr.Etempvar ___x86_release_old tlong) tint) tbool))
   (Stmt.Sset _t'14 (Expr.Econst_int (Integers.Int.repr 0) tint)))
 
-def s_kprog_x86_ptr_load_9 : Stmt :=
+@[noinline] def s_kprog_x86_ptr_load_9 : Stmt :=
 (Stmt.Sset _t'15
   (Expr.Ecast
     (Expr.Ebinop Binop.Ole
@@ -1523,7 +1523,7 @@ def s_kprog_x86_ptr_load_9 : Stmt :=
         (Expr.Econst_int (Integers.Int.repr 8) tint) tlong)
       (Expr.Etempvar ___x86_release_new tlong) tint) tbool))
 
-def s_kprog_x86_ptr_load_10 : Stmt :=
+@[noinline] def s_kprog_x86_ptr_load_10 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Scall (some _t'10)
     (Expr.Evar _native_lab_entry_input (Ty.Tfunction [tuint] tulong
@@ -1546,7 +1546,7 @@ def s_kprog_x86_ptr_load_10 : Stmt :=
              (tptr (tvolatile tulong))) (tvolatile tulong))
          (tptr (tvolatile tulong))), (Expr.Etempvar _t'10 tulong)])))
 
-def s_kprog_x86_ptr_load_11 : Stmt :=
+@[noinline] def s_kprog_x86_ptr_load_11 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___x86_release_lane
     (Expr.Econst_int (Integers.Int.repr 0) tint))
@@ -1611,7 +1611,7 @@ def s_kprog_x86_ptr_load_11 : Stmt :=
       (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_release_lane tuint)
         (Expr.Econst_int (Integers.Int.repr 1) tint) tuint))))
 
-def s_kprog_x86_ptr_load_12 : Stmt :=
+@[noinline] def s_kprog_x86_ptr_load_12 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
                     (Expr.Ebinop Binop.Osub
                       (Expr.Ecast
@@ -1652,10 +1652,10 @@ def s_kprog_x86_ptr_load_12 : Stmt :=
     Stmt.Sbreak)
   Stmt.Sskip)
 
-def s_kprog_x86_ptr_load_13 : Stmt :=
+@[noinline] def s_kprog_x86_ptr_load_13 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_x86_ptr_load_14 : Stmt :=
+@[noinline] def s_kprog_x86_ptr_load_14 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___x86_wr_next_ptr
     (Expr.Efield (Expr.Evar ___x86_wr_cell (Ty.Tunion _x86_sim_gpr noattr))
@@ -1825,7 +1825,7 @@ def s_kprog_x86_ptr_load_14 : Stmt :=
           Stmt.Sbreak)
         Stmt.Sskip))))
 
-def s_kprog_x86_ptr_load_15 : Stmt :=
+@[noinline] def s_kprog_x86_ptr_load_15 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset ___x86_release_i__1
@@ -2395,7 +2395,7 @@ def f_kprog_x86_ptr_load : Function := {
     Stmt.Sbreak))
 }
 
-def s_kprog_x86_read_reg_0 : Stmt :=
+@[noinline] def s_kprog_x86_read_reg_0 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
                     (Expr.Etempvar ___x86_tag_reg tulong)
                     (Expr.Econst_int (Integers.Int.repr 16) tuint) tint)
@@ -2419,7 +2419,7 @@ def s_kprog_x86_read_reg_0 : Stmt :=
   (Stmt.Sset _t'3
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuint)))
 
-def s_kprog_x86_read_reg_1 : Stmt :=
+@[noinline] def s_kprog_x86_read_reg_1 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'7
@@ -2463,14 +2463,14 @@ def s_kprog_x86_read_reg_1 : Stmt :=
       (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_stack_delta tulong)
         (Expr.Etempvar _t'6 tulong) tulong))))
 
-def s_kprog_x86_read_reg_2 : Stmt :=
+@[noinline] def s_kprog_x86_read_reg_2 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_x86_read_reg_3 : Stmt :=
+@[noinline] def s_kprog_x86_read_reg_3 : Stmt :=
 (Stmt.Sset _t'5
   (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 65535) tulong) tulong))
 
-def s_kprog_x86_read_reg_4 : Stmt :=
+@[noinline] def s_kprog_x86_read_reg_4 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'5
@@ -2479,7 +2479,7 @@ def s_kprog_x86_read_reg_4 : Stmt :=
     (Stmt.Sset _t'5 (Expr.Ecast (Expr.Etempvar _t'5 tulong) tulong)))
   (Stmt.Sset _t'5 (Expr.Ecast (Expr.Etempvar _t'5 tulong) tulong)))
 
-def s_kprog_x86_read_reg_5 : Stmt :=
+@[noinline] def s_kprog_x86_read_reg_5 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'5
@@ -2655,11 +2655,11 @@ def f_kprog_x86_read_reg : Function := {
     (Stmt.Sreturn (some (Expr.Etempvar _result tulong)))))
 }
 
-def s_kprog_x86_write_reg_0 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_0 : Stmt :=
 (Stmt.Sset _t'8
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
 
-def s_kprog_x86_write_reg_1 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_1 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'8
@@ -2667,7 +2667,7 @@ def s_kprog_x86_write_reg_1 : Stmt :=
     (Stmt.Sset _t'8 (Expr.Ecast (Expr.Etempvar _t'8 tuint) tuint)))
   (Stmt.Sset _t'8 (Expr.Ecast (Expr.Etempvar _t'8 tuint) tuint)))
 
-def s_kprog_x86_write_reg_2 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_2 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'8
@@ -2675,7 +2675,7 @@ def s_kprog_x86_write_reg_2 : Stmt :=
     (Stmt.Sset _t'8 (Expr.Ecast (Expr.Etempvar _t'8 tuint) tuint)))
   (Stmt.Sset _t'8 (Expr.Ecast (Expr.Etempvar _t'8 tuint) tuint)))
 
-def s_kprog_x86_write_reg_3 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_3 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'33
     (Expr.Efield (Expr.Evar ___x86_wr_cell (Ty.Tunion _x86_sim_gpr noattr))
@@ -2697,7 +2697,7 @@ def s_kprog_x86_write_reg_3 : Stmt :=
               tulong) (Expr.Etempvar _t'34 tulong) tulong) tlong)
         (tptr tvoid)))))
 
-def s_kprog_x86_write_reg_4 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_4 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sloop
     (Stmt.Ssequence
@@ -2755,7 +2755,7 @@ def s_kprog_x86_write_reg_4 : Stmt :=
       (Expr.Ecast (Expr.Etempvar ___x86_wr_stack_bits tulong) tlong)
       (tptr tvoid))))
 
-def s_kprog_x86_write_reg_5 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_5 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Etempvar ___x86_wr_cell_tag tuchar)
                     (Expr.Econst_int (Integers.Int.repr 0) tuint) tint)
@@ -2854,17 +2854,17 @@ def s_kprog_x86_write_reg_5 : Stmt :=
               (Expr.Ecast (Expr.Etempvar ___kprog_x86_bits tulong) tlong)
               (tptr tvoid))))))))
 
-def s_kprog_x86_write_reg_6 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_6 : Stmt :=
 (Stmt.Sset ___x86_wr_cell_tag
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuchar))
 
-def s_kprog_x86_write_reg_7 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_7 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'7
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
   (Stmt.Sset _t'7 (Expr.Ecast (Expr.Etempvar _t'7 tuint) tuint)))
 
-def s_kprog_x86_write_reg_8 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_8 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Ecast (Expr.Etempvar ___x86_wr_width tuchar)
                       tuchar) (Expr.Econst_int (Integers.Int.repr 4) tuint)
@@ -2882,7 +2882,7 @@ def s_kprog_x86_write_reg_8 : Stmt :=
       (Stmt.Sset _t'7 (Expr.Ecast (Expr.Etempvar _t'7 tuint) tuint)))
     (Stmt.Sset _t'7 (Expr.Ecast (Expr.Etempvar _t'7 tuint) tuint))))
 
-def s_kprog_x86_write_reg_9 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_9 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'27
     (Expr.Efield (Expr.Evar ___x86_wr_cell (Ty.Tunion _x86_sim_gpr noattr))
@@ -2904,7 +2904,7 @@ def s_kprog_x86_write_reg_9 : Stmt :=
               tulong) (Expr.Etempvar _t'28 tulong) tulong) tlong)
         (tptr tvoid)))))
 
-def s_kprog_x86_write_reg_10 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_10 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Etempvar ___x86_wr_cell_tag tuchar)
                     (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
@@ -2968,7 +2968,7 @@ def s_kprog_x86_write_reg_10 : Stmt :=
         (tptr tvoid))))
   Stmt.Sskip)
 
-def s_kprog_x86_write_reg_11 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_11 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_x86_lane__1
     (Expr.Ecast (Expr.Etempvar ___x86_wr_next tulong) tushort))
@@ -3032,14 +3032,14 @@ def s_kprog_x86_write_reg_11 : Stmt :=
     (Stmt.Sset ___x86_wr_cell_tag
       (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuchar))))
 
-def s_kprog_x86_write_reg_12 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_12 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_x86_write_reg_13 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_13 : Stmt :=
 (Stmt.Sset _t'6
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuint))
 
-def s_kprog_x86_write_reg_14 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_14 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Ecast (Expr.Etempvar ___x86_wr_width tuchar)
                       tuchar) (Expr.Econst_int (Integers.Int.repr 2) tuint)
@@ -3065,7 +3065,7 @@ def s_kprog_x86_write_reg_14 : Stmt :=
         (Stmt.Sset _t'6 (Expr.Ecast (Expr.Etempvar _t'6 tuint) tuint)))
       (Stmt.Sset _t'6 (Expr.Ecast (Expr.Etempvar _t'6 tuint) tuint)))))
 
-def s_kprog_x86_write_reg_15 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_15 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___x86_wr_next
     (Expr.Ecast (Expr.Ecast (Expr.Etempvar ___x86_wr_next tulong) tuint)
@@ -3084,7 +3084,7 @@ def s_kprog_x86_write_reg_15 : Stmt :=
         (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuchar)))
     Stmt.Sbreak))
 
-def s_kprog_x86_write_reg_16 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_16 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Efield (Expr.Evar ___x86_wr_cell (Ty.Tunion _x86_sim_gpr noattr))
@@ -3095,13 +3095,13 @@ def s_kprog_x86_write_reg_16 : Stmt :=
   (Stmt.Sset ___x86_wr_cell_tag
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuchar)))
 
-def s_kprog_x86_write_reg_17 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_17 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_x86_write_reg_18 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_18 : Stmt :=
 (Stmt.Sset ___x86_store_reg (Expr.Ecast (Expr.Etempvar _reg tuchar) tulong))
 
-def s_kprog_x86_write_reg_19 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_19 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
                     (Expr.Etempvar ___x86_store_reg tulong)
                     (Expr.Econst_int (Integers.Int.repr 16) tuint) tint)
@@ -3142,7 +3142,7 @@ def s_kprog_x86_write_reg_19 : Stmt :=
       (Expr.Etempvar ___x86_wr_next_tag tuchar)))
   Stmt.Sskip)
 
-def s_kprog_x86_write_reg_20 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_20 : Stmt :=
 (Stmt.Sset _t'11
   (Expr.Ecast
     (Expr.Ebinop Binop.Oge
@@ -3150,7 +3150,7 @@ def s_kprog_x86_write_reg_20 : Stmt :=
         (Expr.Etempvar ___x86_release_lane tuint) tlong)
       (Expr.Etempvar ___x86_release_old tlong) tint) tbool))
 
-def s_kprog_x86_write_reg_21 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_21 : Stmt :=
 (Stmt.Sset _t'12
   (Expr.Ecast
     (Expr.Ebinop Binop.Olt
@@ -3158,12 +3158,12 @@ def s_kprog_x86_write_reg_21 : Stmt :=
         (Expr.Etempvar ___x86_release_lane tuint) tlong)
       (Expr.Etempvar ___x86_release_new tlong) tint) tbool))
 
-def s_kprog_x86_write_reg_22 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_22 : Stmt :=
 (Stmt.Scall (some _t'10)
   (Expr.Evar _native_lab_entry_input (Ty.Tfunction [tuint] tulong cc_default))
   [(Expr.Econst_int (Integers.Int.repr 6) tint)])
 
-def s_kprog_x86_write_reg_23 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_23 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'18
     (Expr.Efield
@@ -3182,7 +3182,7 @@ def s_kprog_x86_write_reg_23 : Stmt :=
        (tptr (tvolatile tuchar))),
      (Expr.Ecast (Expr.Etempvar _t'10 tulong) tuchar)]))
 
-def s_kprog_x86_write_reg_24 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_24 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___x86_release_old (Expr.Etempvar ___x86_write_old_sp tlong))
   (Stmt.Ssequence
@@ -3408,7 +3408,7 @@ def s_kprog_x86_write_reg_24 : Stmt :=
           Stmt.Sbreak))
       Stmt.Sskip)))
 
-def s_kprog_x86_write_reg_25 : Stmt :=
+@[noinline] def s_kprog_x86_write_reg_25 : Stmt :=
 Stmt.Sbreak
 
 def f_kprog_x86_write_reg : Function := {
@@ -3736,7 +3736,7 @@ def f_kprog_x86_write_reg : Function := {
     Stmt.Sbreak))
 }
 
-def s_kprog_x86_mov_imm_0 : Stmt :=
+@[noinline] def s_kprog_x86_mov_imm_0 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'36
     (Expr.Efield
@@ -3755,17 +3755,17 @@ def s_kprog_x86_mov_imm_0 : Stmt :=
         (Ty.Tstruct _x86_sim_gpr_cell noattr)) _tag tuchar))
   (Stmt.Sset _t'4 (Expr.Ecast (Expr.Etempvar _t'36 tuchar) tuint)))
 
-def s_kprog_x86_mov_imm_1 : Stmt :=
+@[noinline] def s_kprog_x86_mov_imm_1 : Stmt :=
 (Stmt.Sset _t'4
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuint))
 
-def s_kprog_x86_mov_imm_2 : Stmt :=
+@[noinline] def s_kprog_x86_mov_imm_2 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'9
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
   (Stmt.Sset _t'9 (Expr.Ecast (Expr.Etempvar _t'9 tuint) tuint)))
 
-def s_kprog_x86_mov_imm_3 : Stmt :=
+@[noinline] def s_kprog_x86_mov_imm_3 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Ecast (Expr.Etempvar ___x86_wr_width tuchar)
                       tuchar) (Expr.Econst_int (Integers.Int.repr 4) tuint)
@@ -3783,7 +3783,7 @@ def s_kprog_x86_mov_imm_3 : Stmt :=
       (Stmt.Sset _t'9 (Expr.Ecast (Expr.Etempvar _t'9 tuint) tuint)))
     (Stmt.Sset _t'9 (Expr.Ecast (Expr.Etempvar _t'9 tuint) tuint))))
 
-def s_kprog_x86_mov_imm_4 : Stmt :=
+@[noinline] def s_kprog_x86_mov_imm_4 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'34
     (Expr.Efield (Expr.Evar ___x86_wr_cell (Ty.Tunion _x86_sim_gpr noattr))
@@ -3805,7 +3805,7 @@ def s_kprog_x86_mov_imm_4 : Stmt :=
               tulong) (Expr.Etempvar _t'35 tulong) tulong) tlong)
         (tptr tvoid)))))
 
-def s_kprog_x86_mov_imm_5 : Stmt :=
+@[noinline] def s_kprog_x86_mov_imm_5 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Etempvar ___x86_wr_cell_tag tuchar)
                     (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
@@ -3868,7 +3868,7 @@ def s_kprog_x86_mov_imm_5 : Stmt :=
         (tptr tvoid))))
   Stmt.Sskip)
 
-def s_kprog_x86_mov_imm_6 : Stmt :=
+@[noinline] def s_kprog_x86_mov_imm_6 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_x86_lane
     (Expr.Ecast (Expr.Etempvar ___x86_wr_next tulong) tuchar))
@@ -3977,14 +3977,14 @@ def s_kprog_x86_mov_imm_6 : Stmt :=
     (Stmt.Sset ___x86_wr_cell_tag
       (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuchar))))
 
-def s_kprog_x86_mov_imm_7 : Stmt :=
+@[noinline] def s_kprog_x86_mov_imm_7 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_x86_mov_imm_8 : Stmt :=
+@[noinline] def s_kprog_x86_mov_imm_8 : Stmt :=
 (Stmt.Sset _t'8
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuint))
 
-def s_kprog_x86_mov_imm_9 : Stmt :=
+@[noinline] def s_kprog_x86_mov_imm_9 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Ecast (Expr.Etempvar ___x86_wr_width tuchar)
                       tuchar) (Expr.Econst_int (Integers.Int.repr 2) tuint)
@@ -4010,7 +4010,7 @@ def s_kprog_x86_mov_imm_9 : Stmt :=
         (Stmt.Sset _t'8 (Expr.Ecast (Expr.Etempvar _t'8 tuint) tuint)))
       (Stmt.Sset _t'8 (Expr.Ecast (Expr.Etempvar _t'8 tuint) tuint)))))
 
-def s_kprog_x86_mov_imm_10 : Stmt :=
+@[noinline] def s_kprog_x86_mov_imm_10 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq (Expr.Etempvar _dst tuchar)
                       (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
@@ -4170,7 +4170,7 @@ def s_kprog_x86_mov_imm_10 : Stmt :=
           (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuchar))))
     Stmt.Sbreak))
 
-def s_kprog_x86_mov_imm_11 : Stmt :=
+@[noinline] def s_kprog_x86_mov_imm_11 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                       (Expr.Ecast (Expr.Etempvar ___x86_wr_width tuchar)
@@ -4237,7 +4237,7 @@ def s_kprog_x86_mov_imm_11 : Stmt :=
           (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuchar)))
       Stmt.Sbreak)))
 
-def s_kprog_x86_mov_imm_12 : Stmt :=
+@[noinline] def s_kprog_x86_mov_imm_12 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'22
     (Expr.Efield (Expr.Evar ___x86_wr_cell (Ty.Tunion _x86_sim_gpr noattr))
@@ -4259,7 +4259,7 @@ def s_kprog_x86_mov_imm_12 : Stmt :=
               tulong) (Expr.Etempvar _t'23 tulong) tulong) tlong)
         (tptr tvoid)))))
 
-def s_kprog_x86_mov_imm_13 : Stmt :=
+@[noinline] def s_kprog_x86_mov_imm_13 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___x86_store_reg
     (Expr.Ecast (Expr.Etempvar _dst tuchar) tulong))
@@ -4303,17 +4303,17 @@ def s_kprog_x86_mov_imm_13 : Stmt :=
         (Expr.Etempvar ___x86_wr_next_tag tuchar)))
     Stmt.Sskip))
 
-def s_kprog_x86_mov_imm_14 : Stmt :=
+@[noinline] def s_kprog_x86_mov_imm_14 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_x86_mov_imm_15 : Stmt :=
+@[noinline] def s_kprog_x86_mov_imm_15 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
                     (Expr.Etempvar ___x86_release_lane tuint)
                     (Expr.Econst_int (Integers.Int.repr 8) tuint) tint)
   Stmt.Sskip
   Stmt.Sbreak)
 
-def s_kprog_x86_mov_imm_16 : Stmt :=
+@[noinline] def s_kprog_x86_mov_imm_16 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
@@ -4363,7 +4363,7 @@ def s_kprog_x86_mov_imm_16 : Stmt :=
            (Expr.Ecast (Expr.Etempvar _t'11 tulong) tuchar)])))
     Stmt.Sskip))
 
-def s_kprog_x86_mov_imm_17 : Stmt :=
+@[noinline] def s_kprog_x86_mov_imm_17 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'17
@@ -4390,10 +4390,10 @@ def s_kprog_x86_mov_imm_17 : Stmt :=
       (Expr.Ederef (Expr.Etempvar _t'16 (tptr (tptr tvoid))) (tptr tvoid))
       (Expr.Econst_int (Integers.Int.repr 0) tint))))
 
-def s_kprog_x86_mov_imm_18 : Stmt :=
+@[noinline] def s_kprog_x86_mov_imm_18 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_x86_mov_imm_19 : Stmt :=
+@[noinline] def s_kprog_x86_mov_imm_19 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq (Expr.Etempvar _dst tuchar)
                     (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
   (Stmt.Sloop
@@ -4810,10 +4810,10 @@ def f_kprog_x86_mov_imm : Function := {
     Stmt.Sbreak))
 }
 
-def s_kprog_x86_mov_reg_0 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_0 : Stmt :=
 (Stmt.Sset ___x86_store_reg (Expr.Ecast (Expr.Etempvar _dst tuchar) tulong))
 
-def s_kprog_x86_mov_reg_1 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_1 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
                     (Expr.Etempvar ___x86_store_reg tulong)
                     (Expr.Econst_int (Integers.Int.repr 16) tuint) tint)
@@ -4854,7 +4854,7 @@ def s_kprog_x86_mov_reg_1 : Stmt :=
       (Expr.Etempvar ___x86_wr_next_tag tuchar)))
   Stmt.Sskip)
 
-def s_kprog_x86_mov_reg_2 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_2 : Stmt :=
 (Stmt.Sset _t'5
   (Expr.Ecast
     (Expr.Ebinop Binop.Oge
@@ -4862,7 +4862,7 @@ def s_kprog_x86_mov_reg_2 : Stmt :=
         (Expr.Etempvar ___x86_release_lane tuint) tlong)
       (Expr.Etempvar ___x86_release_old tlong) tint) tbool))
 
-def s_kprog_x86_mov_reg_3 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_3 : Stmt :=
 (Stmt.Sset _t'6
   (Expr.Ecast
     (Expr.Ebinop Binop.Olt
@@ -4870,12 +4870,12 @@ def s_kprog_x86_mov_reg_3 : Stmt :=
         (Expr.Etempvar ___x86_release_lane tuint) tlong)
       (Expr.Etempvar ___x86_release_new tlong) tint) tbool))
 
-def s_kprog_x86_mov_reg_4 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_4 : Stmt :=
 (Stmt.Scall (some _t'4)
   (Expr.Evar _native_lab_entry_input (Ty.Tfunction [tuint] tulong cc_default))
   [(Expr.Econst_int (Integers.Int.repr 6) tint)])
 
-def s_kprog_x86_mov_reg_5 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_5 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'209
     (Expr.Efield
@@ -4894,7 +4894,7 @@ def s_kprog_x86_mov_reg_5 : Stmt :=
        (tptr (tvolatile tuchar))),
      (Expr.Ecast (Expr.Etempvar _t'4 tulong) tuchar)]))
 
-def s_kprog_x86_mov_reg_6 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_6 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___x86_release_old (Expr.Etempvar ___x86_write_old_sp tlong))
   (Stmt.Ssequence
@@ -5120,19 +5120,19 @@ def s_kprog_x86_mov_reg_6 : Stmt :=
           Stmt.Sbreak))
       Stmt.Sskip)))
 
-def s_kprog_x86_mov_reg_7 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_7 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_x86_mov_reg_8 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_8 : Stmt :=
 (Stmt.Scall (some _t'9)
   (Expr.Evar _x86_width_effective (Ty.Tfunction [tuchar] tuchar cc_default))
   [(Expr.Etempvar ___x86_rd_raw_width tuchar)])
 
-def s_kprog_x86_mov_reg_9 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_9 : Stmt :=
 (Stmt.Sset ___x86_rd_shift
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuchar))
 
-def s_kprog_x86_mov_reg_10 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_10 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
@@ -5331,16 +5331,16 @@ def s_kprog_x86_mov_reg_10 : Stmt :=
               (Expr.Etempvar _t'12 tuint) tulong)
             (Expr.Etempvar _t'13 tulong) tulong))))))
 
-def s_kprog_x86_mov_reg_11 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_11 : Stmt :=
 (Stmt.Scall (some _t'14)
   (Expr.Evar _x86_width_effective (Ty.Tfunction [tuchar] tuchar cc_default))
   [(Expr.Etempvar ___x86_wr_raw_width tuchar)])
 
-def s_kprog_x86_mov_reg_12 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_12 : Stmt :=
 (Stmt.Sset ___x86_wr_shift
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuchar))
 
-def s_kprog_x86_mov_reg_13 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_13 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Etempvar ___x86_wr_shift tuchar)
                     (Expr.Econst_int (Integers.Int.repr 8) tuint) tint)
@@ -5360,14 +5360,14 @@ def s_kprog_x86_mov_reg_13 : Stmt :=
           (Expr.Econst_long (Integers.Int64.repr 255) tulong) tulong) tulong)
       (Expr.Etempvar ___kprog_x86_lane tuchar) tulong)))
 
-def s_kprog_x86_mov_reg_14 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_14 : Stmt :=
 (Stmt.Sassign
   (Expr.Efield (Expr.Evar ___x86_wr_cell (Ty.Tunion _x86_sim_gpr noattr))
     _ptr (tptr tvoid))
   (Expr.Ecast (Expr.Ecast (Expr.Etempvar ___kprog_x86_bits tulong) tlong)
     (tptr tvoid)))
 
-def s_kprog_x86_mov_reg_15 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_15 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'188
     (Expr.Efield (Expr.Evar ___x86_wr_cell (Ty.Tunion _x86_sim_gpr noattr))
@@ -5403,7 +5403,7 @@ def s_kprog_x86_mov_reg_15 : Stmt :=
                         tulong) tulong) tulong) tulong) (tptr tuchar))
               (tptr tvoid)) tlong) tulong) tulong))))
 
-def s_kprog_x86_mov_reg_16 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_16 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'187
     (Expr.Efield
@@ -5415,7 +5415,7 @@ def s_kprog_x86_mov_reg_16 : Stmt :=
     (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_stack_delta__2 tulong)
       (Expr.Etempvar _t'187 tulong) tulong)))
 
-def s_kprog_x86_mov_reg_17 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_17 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sbuiltin (some _t'18) (ExtFun.EF_vload Chunk.Mint64)
     [(tptr (tvolatile (tptr tvoid)))]
@@ -5428,7 +5428,7 @@ def s_kprog_x86_mov_reg_17 : Stmt :=
       (Expr.Ecast (Expr.Etempvar _t'18 (tvolatile (tptr tvoid))) tlong)
       tulong)))
 
-def s_kprog_x86_mov_reg_18 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_18 : Stmt :=
 (Stmt.Sassign
   (Expr.Efield (Expr.Evar ___x86_wr_cell (Ty.Tunion _x86_sim_gpr noattr))
     _ptr (tptr tvoid))
@@ -5441,18 +5441,18 @@ def s_kprog_x86_mov_reg_18 : Stmt :=
           tulong) (Expr.Etempvar ___kprog_x86_lane__1 tushort) tulong) tlong)
     (tptr tvoid)))
 
-def s_kprog_x86_mov_reg_19 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_19 : Stmt :=
 (Stmt.Sset _t'19
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 2) tuint) tuint))
 
-def s_kprog_x86_mov_reg_20 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_20 : Stmt :=
 (Stmt.Sset _t'19
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
 
-def s_kprog_x86_mov_reg_21 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_21 : Stmt :=
 (Stmt.Sset ___x86_release_i__1 (Expr.Econst_int (Integers.Int.repr 0) tint))
 
-def s_kprog_x86_mov_reg_22 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_22 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
                       (Expr.Etempvar ___x86_release_i__1 tuint)
@@ -5585,12 +5585,12 @@ def s_kprog_x86_mov_reg_22 : Stmt :=
                 (Expr.Etempvar ___x86_release_lane__1 tuint)
                 (Expr.Econst_int (Integers.Int.repr 1) tint) tuint))))))))
 
-def s_kprog_x86_mov_reg_23 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_23 : Stmt :=
 (Stmt.Sset ___x86_release_i__1
   (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_release_i__1 tuint)
     (Expr.Econst_int (Integers.Int.repr 8) tuint) tuint))
 
-def s_kprog_x86_mov_reg_24 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_24 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'180
@@ -5673,10 +5673,10 @@ def s_kprog_x86_mov_reg_24 : Stmt :=
         (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_sv_i__1 tuint)
           (Expr.Econst_int (Integers.Int.repr 1) tint) tuint)))))
 
-def s_kprog_x86_mov_reg_25 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_25 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_x86_mov_reg_26 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_26 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___x86_wr_next (Expr.Etempvar ___x86_mov_numeric tulong))
   (Stmt.Ssequence
@@ -6356,7 +6356,7 @@ def s_kprog_x86_mov_reg_26 : Stmt :=
                     Stmt.Sbreak)
                   Stmt.Sskip)))))))))
 
-def s_kprog_x86_mov_reg_27 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_27 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'176
     (Expr.Efield
@@ -6378,13 +6378,13 @@ def s_kprog_x86_mov_reg_27 : Stmt :=
   (Stmt.Sset _t'28
     (Expr.Ecast (Expr.Etempvar _t'176 (tptr tvoid)) (tptr tvoid))))
 
-def s_kprog_x86_mov_reg_28 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_28 : Stmt :=
 (Stmt.Sset _t'28
   (Expr.Ecast
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid))
     (tptr tvoid)))
 
-def s_kprog_x86_mov_reg_29 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_29 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___x86_store_reg__2
     (Expr.Ecast (Expr.Etempvar _dst tuchar) tulong))
@@ -6428,10 +6428,10 @@ def s_kprog_x86_mov_reg_29 : Stmt :=
         (Expr.Etempvar ___x86_wr_next_tag__2 tuchar)))
     Stmt.Sskip))
 
-def s_kprog_x86_mov_reg_30 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_30 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_x86_mov_reg_31 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_31 : Stmt :=
 (Stmt.Sset _t'31
   (Expr.Ecast
     (Expr.Ebinop Binop.Oge
@@ -6439,7 +6439,7 @@ def s_kprog_x86_mov_reg_31 : Stmt :=
         (Expr.Etempvar ___x86_release_lane__2 tuint) tlong)
       (Expr.Etempvar ___x86_release_old__2 tlong) tint) tbool))
 
-def s_kprog_x86_mov_reg_32 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_32 : Stmt :=
 (Stmt.Sset _t'32
   (Expr.Ecast
     (Expr.Ebinop Binop.Olt
@@ -6447,12 +6447,12 @@ def s_kprog_x86_mov_reg_32 : Stmt :=
         (Expr.Etempvar ___x86_release_lane__2 tuint) tlong)
       (Expr.Etempvar ___x86_release_new__2 tlong) tint) tbool))
 
-def s_kprog_x86_mov_reg_33 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_33 : Stmt :=
 (Stmt.Scall (some _t'30)
   (Expr.Evar _native_lab_entry_input (Ty.Tfunction [tuint] tulong cc_default))
   [(Expr.Econst_int (Integers.Int.repr 6) tint)])
 
-def s_kprog_x86_mov_reg_34 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_34 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'172
     (Expr.Efield
@@ -6471,7 +6471,7 @@ def s_kprog_x86_mov_reg_34 : Stmt :=
        (tptr (tvolatile tuchar))),
      (Expr.Ecast (Expr.Etempvar _t'30 tulong) tuchar)]))
 
-def s_kprog_x86_mov_reg_35 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_35 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___x86_release_old__2
     (Expr.Etempvar ___x86_write_old_sp__2 tlong))
@@ -6702,10 +6702,10 @@ def s_kprog_x86_mov_reg_35 : Stmt :=
           Stmt.Sbreak))
       Stmt.Sskip)))
 
-def s_kprog_x86_mov_reg_36 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_36 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_x86_mov_reg_37 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_37 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'167
     (Expr.Efield
@@ -6727,23 +6727,23 @@ def s_kprog_x86_mov_reg_37 : Stmt :=
   (Stmt.Sset _t'38
     (Expr.Ecast (Expr.Etempvar _t'167 (tptr tvoid)) (tptr tvoid))))
 
-def s_kprog_x86_mov_reg_38 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_38 : Stmt :=
 (Stmt.Sset _t'38
   (Expr.Ecast
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid))
     (tptr tvoid)))
 
-def s_kprog_x86_mov_reg_39 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_39 : Stmt :=
 (Stmt.Sset ___x86_wr_next_tag__3
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuchar))
 
-def s_kprog_x86_mov_reg_40 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_40 : Stmt :=
 (Stmt.Sset _t'43
   (Expr.Ecast
     (Expr.Ebinop Binop.Oge (Expr.Etempvar ___x86_release_off__3 tlong)
       (Expr.Etempvar ___x86_release_old__3 tlong) tint) tbool))
 
-def s_kprog_x86_mov_reg_41 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_41 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
                       (Expr.Etempvar ___x86_release_lane__3 tuint)
@@ -6801,12 +6801,12 @@ def s_kprog_x86_mov_reg_41 : Stmt :=
              (Expr.Ecast (Expr.Etempvar _t'40 tulong) tuchar)])))
       Stmt.Sskip)))
 
-def s_kprog_x86_mov_reg_42 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_42 : Stmt :=
 (Stmt.Sset ___x86_release_lane__3
   (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_release_lane__3 tuint)
     (Expr.Econst_int (Integers.Int.repr 1) tint) tuint))
 
-def s_kprog_x86_mov_reg_43 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_43 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'160
@@ -6833,10 +6833,10 @@ def s_kprog_x86_mov_reg_43 : Stmt :=
       (Expr.Ederef (Expr.Etempvar _t'159 (tptr (tptr tvoid))) (tptr tvoid))
       (Expr.Econst_int (Integers.Int.repr 0) tint))))
 
-def s_kprog_x86_mov_reg_44 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_44 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_x86_mov_reg_45 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_45 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sloop
     (Stmt.Ssequence
@@ -7060,22 +7060,22 @@ def s_kprog_x86_mov_reg_45 : Stmt :=
       Stmt.Sbreak)
     Stmt.Sskip))
 
-def s_kprog_x86_mov_reg_46 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_46 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'71
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuint))
   (Stmt.Sset _t'71 (Expr.Ecast (Expr.Etempvar _t'71 tuint) tuint)))
 
-def s_kprog_x86_mov_reg_47 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_47 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'71
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
   (Stmt.Sset _t'71 (Expr.Ecast (Expr.Etempvar _t'71 tuint) tuint)))
 
-def s_kprog_x86_mov_reg_48 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_48 : Stmt :=
 (Stmt.Sset ___x86_rd_reg__1 (Expr.Ecast (Expr.Etempvar _src tuchar) tuchar))
 
-def s_kprog_x86_mov_reg_49 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_49 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___x86_rd_raw_width__1
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tuint) tuchar))
@@ -7301,7 +7301,7 @@ def s_kprog_x86_mov_reg_49 : Stmt :=
                     (Expr.Etempvar _t'48 tuint) tulong)
                   (Expr.Etempvar _t'49 tulong) tulong)))))))))
 
-def s_kprog_x86_mov_reg_50 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_50 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'153
     (Expr.Efield
@@ -7317,7 +7317,7 @@ def s_kprog_x86_mov_reg_50 : Stmt :=
   (Stmt.Sset ___x86_write_old_sp__4
     (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'153 (tptr tvoid)) tlong) tlong)))
 
-def s_kprog_x86_mov_reg_51 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_51 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'147
     (Expr.Efield
@@ -7354,7 +7354,7 @@ def s_kprog_x86_mov_reg_51 : Stmt :=
                         tulong) tulong) tulong) tulong) (tptr tuchar))
               (tptr tvoid)) tlong) tulong) tulong))))
 
-def s_kprog_x86_mov_reg_52 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_52 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'146
     (Expr.Efield
@@ -7366,7 +7366,7 @@ def s_kprog_x86_mov_reg_52 : Stmt :=
     (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_stack_delta__4 tulong)
       (Expr.Etempvar _t'146 tulong) tulong)))
 
-def s_kprog_x86_mov_reg_53 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_53 : Stmt :=
 (Stmt.Sassign
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
@@ -7375,7 +7375,7 @@ def s_kprog_x86_mov_reg_53 : Stmt :=
         (tarray tuchar 8)) (Expr.Econst_int (Integers.Int.repr 1) tint)
       (tptr tuchar)) tuchar) (Expr.Etempvar ___kprog_x86_lane__2 tuchar))
 
-def s_kprog_x86_mov_reg_54 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_54 : Stmt :=
 (Stmt.Sassign
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
@@ -7384,7 +7384,7 @@ def s_kprog_x86_mov_reg_54 : Stmt :=
         (tarray tuchar 8)) (Expr.Econst_int (Integers.Int.repr 0) tint)
       (tptr tuchar)) tuchar) (Expr.Etempvar ___kprog_x86_lane__2 tuchar))
 
-def s_kprog_x86_mov_reg_55 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_55 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'145
     (Expr.Efield
@@ -7398,7 +7398,7 @@ def s_kprog_x86_mov_reg_55 : Stmt :=
          _ptr (tvolatile (tptr tvoid))) (tptr (tvolatile (tptr tvoid)))),
      (Expr.Etempvar _t'145 (tptr tvoid))]))
 
-def s_kprog_x86_mov_reg_56 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_56 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Etempvar ___x86_wr_shift__1 tuchar)
                     (Expr.Econst_int (Integers.Int.repr 8) tuint) tint)
@@ -7419,7 +7419,7 @@ def s_kprog_x86_mov_reg_56 : Stmt :=
         (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tuchar)) tuchar)
     (Expr.Etempvar ___kprog_x86_lane__2 tuchar)))
 
-def s_kprog_x86_mov_reg_57 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_57 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sbuiltin (some _t'53) (ExtFun.EF_vload Chunk.Mint64)
@@ -7459,19 +7459,19 @@ def s_kprog_x86_mov_reg_57 : Stmt :=
         (Expr.Ecast (Expr.Etempvar ___kprog_x86_bits__2 tulong) tlong)
         (tptr tvoid)))))
 
-def s_kprog_x86_mov_reg_58 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_58 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'56
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 2) tuint) tuint))
   (Stmt.Sset _t'56 (Expr.Ecast (Expr.Etempvar _t'56 tuint) tuint)))
 
-def s_kprog_x86_mov_reg_59 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_59 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'56
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
   (Stmt.Sset _t'56 (Expr.Ecast (Expr.Etempvar _t'56 tuint) tuint)))
 
-def s_kprog_x86_mov_reg_60 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_60 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'141
@@ -7520,10 +7520,10 @@ def s_kprog_x86_mov_reg_60 : Stmt :=
       (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_stack_delta__5 tulong)
         (Expr.Etempvar _t'140 tulong) tulong))))
 
-def s_kprog_x86_mov_reg_61 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_61 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_x86_mov_reg_62 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_62 : Stmt :=
 (Stmt.Sassign
   (Expr.Efield (Expr.Evar ___x86_wr_cell__1 (Ty.Tunion _x86_sim_gpr noattr))
     _ptr (tptr tvoid))
@@ -7531,12 +7531,12 @@ def s_kprog_x86_mov_reg_62 : Stmt :=
     (Expr.Ecast (Expr.Etempvar ___x86_wr_stack_bits__3 tulong) tlong)
     (tptr tvoid)))
 
-def s_kprog_x86_mov_reg_63 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_63 : Stmt :=
 (Stmt.Sassign
   (Expr.Efield (Expr.Evar ___x86_wr_cell__1 (Ty.Tunion _x86_sim_gpr noattr))
     _w tushort) (Expr.Etempvar ___kprog_x86_lane__3 tushort))
 
-def s_kprog_x86_mov_reg_64 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_64 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'139
@@ -7586,11 +7586,11 @@ def s_kprog_x86_mov_reg_64 : Stmt :=
               (Expr.Etempvar ___kprog_x86_lane__3 tushort) tulong) tlong)
           (tptr tvoid))))))
 
-def s_kprog_x86_mov_reg_65 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_65 : Stmt :=
 (Stmt.Sset _t'55
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
 
-def s_kprog_x86_mov_reg_66 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_66 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'55
@@ -7598,7 +7598,7 @@ def s_kprog_x86_mov_reg_66 : Stmt :=
     (Stmt.Sset _t'55 (Expr.Ecast (Expr.Etempvar _t'55 tuint) tuint)))
   (Stmt.Sset _t'55 (Expr.Ecast (Expr.Etempvar _t'55 tuint) tuint)))
 
-def s_kprog_x86_mov_reg_67 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_67 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'55
@@ -7606,7 +7606,7 @@ def s_kprog_x86_mov_reg_67 : Stmt :=
     (Stmt.Sset _t'55 (Expr.Ecast (Expr.Etempvar _t'55 tuint) tuint)))
   (Stmt.Sset _t'55 (Expr.Ecast (Expr.Etempvar _t'55 tuint) tuint)))
 
-def s_kprog_x86_mov_reg_68 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_68 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'136
     (Expr.Efield
@@ -7622,7 +7622,7 @@ def s_kprog_x86_mov_reg_68 : Stmt :=
   (Stmt.Sset ___x86_release_new__4
     (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'136 (tptr tvoid)) tlong) tlong)))
 
-def s_kprog_x86_mov_reg_69 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_69 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset ___x86_release_i__4
@@ -7861,7 +7861,7 @@ def s_kprog_x86_mov_reg_69 : Stmt :=
               (Expr.Econst_int (Integers.Int.repr 1) tint) tuint)))))
     Stmt.Sbreak))
 
-def s_kprog_x86_mov_reg_70 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_70 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___x86_wr_raw_width__1
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tuint) tuchar))
@@ -8365,7 +8365,7 @@ def s_kprog_x86_mov_reg_70 : Stmt :=
                           Stmt.Sbreak)
                         Stmt.Sskip))))))))))))
 
-def s_kprog_x86_mov_reg_71 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_71 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'130
     (Expr.Efield
@@ -8381,7 +8381,7 @@ def s_kprog_x86_mov_reg_71 : Stmt :=
   (Stmt.Sset ___x86_write_old_sp__5
     (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'130 (tptr tvoid)) tlong) tlong)))
 
-def s_kprog_x86_mov_reg_72 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_72 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
                       (Expr.Ecast (Expr.Etempvar _src tuchar) tulong)
@@ -8413,13 +8413,13 @@ def s_kprog_x86_mov_reg_72 : Stmt :=
   (Stmt.Sset ___x86_wr_next_ptr__5
     (Expr.Ecast (Expr.Etempvar _t'64 (tptr tvoid)) (tptr tvoid))))
 
-def s_kprog_x86_mov_reg_73 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_73 : Stmt :=
 (Stmt.Sset _t'69
   (Expr.Ecast
     (Expr.Ebinop Binop.Oge (Expr.Etempvar ___x86_release_off__5 tlong)
       (Expr.Etempvar ___x86_release_old__5 tlong) tint) tbool))
 
-def s_kprog_x86_mov_reg_74 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_74 : Stmt :=
 (Stmt.Sset _t'70
   (Expr.Ecast
     (Expr.Ebinop Binop.Ole
@@ -8427,12 +8427,12 @@ def s_kprog_x86_mov_reg_74 : Stmt :=
         (Expr.Econst_int (Integers.Int.repr 8) tint) tlong)
       (Expr.Etempvar ___x86_release_new__5 tlong) tint) tbool))
 
-def s_kprog_x86_mov_reg_75 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_75 : Stmt :=
 (Stmt.Scall (some _t'65)
   (Expr.Evar _native_lab_entry_input (Ty.Tfunction [tuint] tulong cc_default))
   [(Expr.Econst_int (Integers.Int.repr 6) tint)])
 
-def s_kprog_x86_mov_reg_76 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_76 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'127
     (Expr.Efield
@@ -8450,11 +8450,11 @@ def s_kprog_x86_mov_reg_76 : Stmt :=
            (tptr (tvolatile tulong))) (tvolatile tulong))
        (tptr (tvolatile tulong))), (Expr.Etempvar _t'65 tulong)]))
 
-def s_kprog_x86_mov_reg_77 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_77 : Stmt :=
 (Stmt.Sset ___x86_release_lane__5
   (Expr.Econst_int (Integers.Int.repr 0) tint))
 
-def s_kprog_x86_mov_reg_78 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_78 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
                       (Expr.Etempvar ___x86_release_lane__5 tuint)
@@ -8512,12 +8512,12 @@ def s_kprog_x86_mov_reg_78 : Stmt :=
              (Expr.Ecast (Expr.Etempvar _t'66 tulong) tuchar)])))
       Stmt.Sskip)))
 
-def s_kprog_x86_mov_reg_79 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_79 : Stmt :=
 (Stmt.Sset ___x86_release_lane__5
   (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_release_lane__5 tuint)
     (Expr.Econst_int (Integers.Int.repr 1) tint) tuint))
 
-def s_kprog_x86_mov_reg_80 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_80 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'124
@@ -8544,10 +8544,10 @@ def s_kprog_x86_mov_reg_80 : Stmt :=
       (Expr.Ederef (Expr.Etempvar _t'123 (tptr (tptr tvoid))) (tptr tvoid))
       (Expr.Econst_int (Integers.Int.repr 0) tint))))
 
-def s_kprog_x86_mov_reg_81 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_81 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_x86_mov_reg_82 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_82 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___x86_wr_next_tag__5
     (Expr.Ecast (Expr.Etempvar ___x86_mov_source_tag tuchar) tuchar))
@@ -8744,7 +8744,7 @@ def s_kprog_x86_mov_reg_82 : Stmt :=
         Stmt.Sbreak)
       Stmt.Sskip)))
 
-def s_kprog_x86_mov_reg_83 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_83 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
                       (Expr.Ecast (Expr.Etempvar ___x86_rd_reg__2 tuchar)
@@ -8776,7 +8776,7 @@ def s_kprog_x86_mov_reg_83 : Stmt :=
           (tptr tvoid)) (tptr tvoid))))
   (Stmt.Sset ___x86_rd_ptr__2 (Expr.Etempvar _t'74 (tptr tvoid))))
 
-def s_kprog_x86_mov_reg_84 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_84 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___x86_rd_value__2
     (Expr.Ecast
@@ -8944,10 +8944,10 @@ def s_kprog_x86_mov_reg_84 : Stmt :=
             (Expr.Etempvar _t'76 tuint) tulong) (Expr.Etempvar _t'77 tulong)
           tulong)))))
 
-def s_kprog_x86_mov_reg_85 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_85 : Stmt :=
 (Stmt.Sset ___x86_wr_next__2 (Expr.Etempvar ___x86_l_value tulong))
 
-def s_kprog_x86_mov_reg_86 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_86 : Stmt :=
 (Stmt.Sset ___kprog_x86_bits__4
   (Expr.Ebinop Binop.Oor
     (Expr.Ebinop Binop.Oand (Expr.Etempvar ___kprog_x86_bits__4 tulong)
@@ -8957,7 +8957,7 @@ def s_kprog_x86_mov_reg_86 : Stmt :=
       (Expr.Ecast (Expr.Etempvar ___kprog_x86_lane__4 tuchar) tulong)
       (Expr.Econst_int (Integers.Int.repr 8) tint) tulong) tulong))
 
-def s_kprog_x86_mov_reg_87 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_87 : Stmt :=
 (Stmt.Sset ___kprog_x86_bits__4
   (Expr.Ebinop Binop.Oor
     (Expr.Ebinop Binop.Oand (Expr.Etempvar ___kprog_x86_bits__4 tulong)
@@ -8965,7 +8965,7 @@ def s_kprog_x86_mov_reg_87 : Stmt :=
         (Expr.Econst_long (Integers.Int64.repr 255) tulong) tulong) tulong)
     (Expr.Etempvar ___kprog_x86_lane__4 tuchar) tulong))
 
-def s_kprog_x86_mov_reg_88 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_88 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'106
     (Expr.Efield
@@ -8996,7 +8996,7 @@ def s_kprog_x86_mov_reg_88 : Stmt :=
                       tulong) tulong) tulong) tulong) (tptr tuchar))
             (tptr tvoid)) tlong) tulong) tulong)))
 
-def s_kprog_x86_mov_reg_89 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_89 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'104
     (Expr.Efield
@@ -9008,7 +9008,7 @@ def s_kprog_x86_mov_reg_89 : Stmt :=
     (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_stack_delta__8 tulong)
       (Expr.Etempvar _t'104 tulong) tulong)))
 
-def s_kprog_x86_mov_reg_90 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_90 : Stmt :=
 (Stmt.Sbuiltin (some _t'82) (ExtFun.EF_vload Chunk.Mint64)
   [(tptr (tvolatile (tptr tvoid)))]
   [(Expr.Eaddrof
@@ -9016,7 +9016,7 @@ def s_kprog_x86_mov_reg_90 : Stmt :=
        (Expr.Evar ___kprog_x86_partial__5 (tvolatile (Ty.Tunion __3644 noattr)))
        _ptr (tvolatile (tptr tvoid))) (tptr (tvolatile (tptr tvoid))))])
 
-def s_kprog_x86_mov_reg_91 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_91 : Stmt :=
 (Stmt.Sassign
   (Expr.Efield (Expr.Evar ___x86_wr_cell__2 (Ty.Tunion _x86_sim_gpr noattr))
     _ptr (tptr tvoid))
@@ -9029,7 +9029,7 @@ def s_kprog_x86_mov_reg_91 : Stmt :=
           tulong) (Expr.Etempvar ___kprog_x86_lane__5 tushort) tulong) tlong)
     (tptr tvoid)))
 
-def s_kprog_x86_mov_reg_92 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_92 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
                       (Expr.Etempvar ___x86_release_i__6 tuint)
@@ -9162,12 +9162,12 @@ def s_kprog_x86_mov_reg_92 : Stmt :=
                 (Expr.Etempvar ___x86_release_lane__6 tuint)
                 (Expr.Econst_int (Integers.Int.repr 1) tint) tuint))))))))
 
-def s_kprog_x86_mov_reg_93 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_93 : Stmt :=
 (Stmt.Sset ___x86_release_i__6
   (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_release_i__6 tuint)
     (Expr.Econst_int (Integers.Int.repr 8) tuint) tuint))
 
-def s_kprog_x86_mov_reg_94 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_94 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'97
     (Expr.Efield
@@ -9183,7 +9183,7 @@ def s_kprog_x86_mov_reg_94 : Stmt :=
   (Stmt.Sset ___x86_sv_sp__6
     (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'97 (tptr tvoid)) tlong) tlong)))
 
-def s_kprog_x86_mov_reg_95 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_95 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___x86_sv_i__6 (Expr.Econst_int (Integers.Int.repr 0) tint))
   (Stmt.Sloop
@@ -9249,7 +9249,7 @@ def s_kprog_x86_mov_reg_95 : Stmt :=
       (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_sv_i__6 tuint)
         (Expr.Econst_int (Integers.Int.repr 1) tint) tuint))))
 
-def s_kprog_x86_mov_reg_96 : Stmt :=
+@[noinline] def s_kprog_x86_mov_reg_96 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
@@ -9955,6 +9955,169 @@ def s_kprog_x86_mov_reg_96 : Stmt :=
                   Stmt.Sbreak)
                 Stmt.Sskip))))))))
 
+@[noinline] def l_kprog_x86_mov_reg_temps_0 : List (Ident × Ty) :=
+[(___x86_state, (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
+ (___x86_l_width, tuchar), (___x86_mov_stack_offset, tlong),
+ (___x86_alias_delta, tulong), (___x86_write_old_sp, tlong),
+ (___x86_wr_next_ptr, (tptr tvoid)), (___x86_wr_next_tag, tuchar),
+ (___x86_store_reg, tulong), (___x86_release_old, tlong),
+ (___x86_release_new, tlong), (___x86_release_i, tuint),
+ (___x86_release_off, tlong), (___x86_release_lane, tuint),
+ (___x86_sv_sp, tlong), (___x86_sv_i, tuint), (___x86_mov_numeric, tulong),
+ (___x86_rd_reg, tuchar), (___x86_rd_raw_width, tuchar),
+ (___x86_rd_width, tuchar), (___x86_rd_shift, tuchar),
+ (___x86_rd_ptr, (tptr tvoid)), (___x86_rd_value, tulong),
+ (___x86_rd_tag, tuchar), (___x86_tag_reg, tulong),
+ (___x86_stack_delta, tulong), (___x86_write_old_sp__1, tlong),
+ (___x86_wr_raw_width, tuchar), (___x86_wr_width, tuchar),
+ (___x86_wr_shift, tuchar), (___x86_wr_next, tulong),
+ (___x86_wr_cell_tag, tuchar), (___x86_tag_reg__1, tulong),
+ (___x86_wr_stack_bits, tulong), (___x86_stack_delta__1, tulong),
+ (___kprog_x86_lane, tuchar), (___kprog_x86_bits, tulong),
+ (___x86_wr_stack_bits__1, tulong), (___x86_stack_delta__2, tulong),
+ (___kprog_x86_lane__1, tushort), (___kprog_x86_bits__1, tulong),
+ (___x86_wr_next_ptr__1, (tptr tvoid)), (___x86_wr_next_tag__1, tuchar),
+ (___x86_store_reg__1, tulong), (___x86_release_old__1, tlong),
+ (___x86_release_new__1, tlong), (___x86_release_i__1, tuint),
+ (___x86_release_off__1, tlong), (___x86_release_lane__1, tuint),
+ (___x86_sv_sp__1, tlong), (___x86_sv_i__1, tuint),
+ (___x86_write_old_sp__2, tlong), (___x86_wr_next_ptr__2, (tptr tvoid)),
+ (___x86_wr_next_tag__2, tuchar), (___x86_store_reg__2, tulong),
+ (___x86_release_old__2, tlong), (___x86_release_new__2, tlong),
+ (___x86_release_i__2, tuint), (___x86_release_off__2, tlong),
+ (___x86_release_lane__2, tuint), (___x86_sv_sp__2, tlong),
+ (___x86_sv_i__2, tuint), (___x86_mov_source_tag, tuchar),
+ (___x86_tag_reg__2, tulong), (___x86_mov_stack_offset__1, tlong),
+ (___x86_alias_delta__1, tulong), (___x86_write_old_sp__3, tlong),
+ (___x86_wr_next_ptr__3, (tptr tvoid)), (___x86_wr_next_tag__3, tuchar),
+ (___x86_store_reg__3, tulong), (___x86_release_old__3, tlong),
+ (___x86_release_new__3, tlong), (___x86_release_i__3, tuint),
+ (___x86_release_off__3, tlong), (___x86_release_lane__3, tuint),
+ (___x86_sv_sp__3, tlong), (___x86_sv_i__3, tuint),
+ (___x86_mov_numeric__1, tulong), (___x86_rd_reg__1, tuchar),
+ (___x86_rd_raw_width__1, tuchar), (___x86_rd_width__1, tuchar),
+ (___x86_rd_shift__1, tuchar), (___x86_rd_ptr__1, (tptr tvoid)),
+ (___x86_rd_value__1, tulong), (___x86_rd_tag__1, tuchar),
+ (___x86_tag_reg__3, tulong), (___x86_stack_delta__3, tulong),
+ (___x86_write_old_sp__4, tlong), (___x86_wr_raw_width__1, tuchar),
+ (___x86_wr_width__1, tuchar), (___x86_wr_shift__1, tuchar),
+ (___x86_wr_next__1, tulong), (___x86_wr_cell_tag__1, tuchar),
+ (___x86_tag_reg__4, tulong)]
+
+@[noinline] def l_kprog_x86_mov_reg_temps_1 : List (Ident × Ty) :=
+[(___x86_wr_stack_bits__2, tulong), (___x86_stack_delta__4, tulong),
+ (___kprog_x86_lane__2, tuchar), (___kprog_x86_bits__2, tulong),
+ (___x86_wr_stack_bits__3, tulong), (___x86_stack_delta__5, tulong),
+ (___kprog_x86_lane__3, tushort), (___kprog_x86_bits__3, tulong),
+ (___x86_wr_next_ptr__4, (tptr tvoid)), (___x86_wr_next_tag__4, tuchar),
+ (___x86_store_reg__4, tulong), (___x86_release_old__4, tlong),
+ (___x86_release_new__4, tlong), (___x86_release_i__4, tuint),
+ (___x86_release_off__4, tlong), (___x86_release_lane__4, tuint),
+ (___x86_sv_sp__4, tlong), (___x86_sv_i__4, tuint),
+ (___x86_write_old_sp__5, tlong), (___x86_wr_next_ptr__5, (tptr tvoid)),
+ (___x86_wr_next_tag__5, tuchar), (___x86_store_reg__5, tulong),
+ (___x86_release_old__5, tlong), (___x86_release_new__5, tlong),
+ (___x86_release_i__5, tuint), (___x86_release_off__5, tlong),
+ (___x86_release_lane__5, tuint), (___x86_sv_sp__5, tlong),
+ (___x86_sv_i__5, tuint), (___x86_l_value, tulong),
+ (___x86_rd_reg__2, tuchar), (___x86_rd_raw_width__2, tuchar),
+ (___x86_rd_width__2, tuchar), (___x86_rd_shift__2, tuchar),
+ (___x86_rd_ptr__2, (tptr tvoid)), (___x86_rd_value__2, tulong),
+ (___x86_rd_tag__2, tuchar), (___x86_tag_reg__5, tulong),
+ (___x86_stack_delta__6, tulong), (___x86_write_old_sp__6, tlong),
+ (___x86_wr_raw_width__2, tuchar), (___x86_wr_width__2, tuchar),
+ (___x86_wr_shift__2, tuchar), (___x86_wr_next__2, tulong),
+ (___x86_wr_cell_tag__2, tuchar), (___x86_tag_reg__6, tulong),
+ (___x86_wr_stack_bits__4, tulong), (___x86_stack_delta__7, tulong),
+ (___kprog_x86_lane__4, tuchar), (___kprog_x86_bits__4, tulong),
+ (___x86_wr_stack_bits__5, tulong), (___x86_stack_delta__8, tulong),
+ (___kprog_x86_lane__5, tushort), (___kprog_x86_bits__5, tulong),
+ (___x86_wr_next_ptr__6, (tptr tvoid)), (___x86_wr_next_tag__6, tuchar),
+ (___x86_store_reg__6, tulong), (___x86_release_old__6, tlong),
+ (___x86_release_new__6, tlong), (___x86_release_i__6, tuint),
+ (___x86_release_off__6, tlong), (___x86_release_lane__6, tuint),
+ (___x86_sv_sp__6, tlong), (___x86_sv_i__6, tuint), (_t'94, tuint),
+ (_t'93, tuint), (_t'92, tuint), (_t'91, tint), (_t'90, tint), (_t'89, tint),
+ (_t'88, tint), (_t'87, tulong), (_t'86, tulong), (_t'85, tuint),
+ (_t'84, tuint), (_t'83, tuint), (_t'82, (tvolatile (tptr tvoid))),
+ (_t'81, (tvolatile (tptr tvoid))), (_t'80, tuint), (_t'79, (tptr tvoid)),
+ (_t'78, tuchar), (_t'77, tulong), (_t'76, tuint), (_t'75, tuint),
+ (_t'74, (tptr tvoid)), (_t'73, tuchar), (_t'72, tint), (_t'71, tuint),
+ (_t'70, tint), (_t'69, tint), (_t'68, tint), (_t'67, tint), (_t'66, tulong)]
+
+@[noinline] def l_kprog_x86_mov_reg_temps_2 : List (Ident × Ty) :=
+[(_t'65, tulong), (_t'64, (tptr tvoid)), (_t'63, tint), (_t'62, tint),
+ (_t'61, tint), (_t'60, tint), (_t'59, tulong), (_t'58, tulong),
+ (_t'57, tuint), (_t'56, tuint), (_t'55, tuint),
+ (_t'54, (tvolatile (tptr tvoid))), (_t'53, (tvolatile (tptr tvoid))),
+ (_t'52, tuint), (_t'51, (tptr tvoid)), (_t'50, tuchar), (_t'49, tulong),
+ (_t'48, tuint), (_t'47, tuint), (_t'46, (tptr tvoid)), (_t'45, tuchar),
+ (_t'44, tint), (_t'43, tint), (_t'42, tint), (_t'41, tint), (_t'40, tulong),
+ (_t'39, tulong), (_t'38, (tptr tvoid)), (_t'37, tuint), (_t'36, tint),
+ (_t'35, tuint), (_t'34, tint), (_t'33, tint), (_t'32, tint), (_t'31, tint),
+ (_t'30, tulong), (_t'29, tulong), (_t'28, (tptr tvoid)), (_t'27, tint),
+ (_t'26, tint), (_t'25, tint), (_t'24, tint), (_t'23, tulong),
+ (_t'22, tulong), (_t'21, tuint), (_t'20, tuint), (_t'19, tuint),
+ (_t'18, (tvolatile (tptr tvoid))), (_t'17, (tvolatile (tptr tvoid))),
+ (_t'16, tuint), (_t'15, (tptr tvoid)), (_t'14, tuchar), (_t'13, tulong),
+ (_t'12, tuint), (_t'11, tuint), (_t'10, (tptr tvoid)), (_t'9, tuchar),
+ (_t'8, tint), (_t'7, tint), (_t'6, tint), (_t'5, tint), (_t'4, tulong),
+ (_t'3, tulong), (_t'2, (tptr tvoid)), (_t'1, tuchar),
+ (_t'215, (tptr tvoid)), (_t'214, (tptr (tvolatile tuchar))),
+ (_t'213, (tptr (tvolatile tuchar))), (_t'212, (tptr tvoid)),
+ (_t'211, (tptr tvoid)), (_t'210, (tptr (tvolatile tulong))),
+ (_t'209, (tptr (tvolatile tuchar))), (_t'208, (tptr tvoid)),
+ (_t'207, (tptr tuchar)), (_t'206, (tptr (tptr tvoid))),
+ (_t'205, (tptr tvoid)), (_t'204, tulong), (_t'203, tuchar),
+ (_t'202, (tptr (tvolatile tuchar))), (_t'201, tulong),
+ (_t'200, (tptr tvoid)), (_t'199, (tptr tvoid)), (_t'198, tuchar),
+ (_t'197, tulong), (_t'196, (tptr tvoid)),
+ (_t'195, (tptr (tvolatile tuchar))), (_t'194, (tptr tvoid)),
+ (_t'193, tulong), (_t'192, (tptr tvoid)), (_t'191, tulong),
+ (_t'190, (tptr tvoid)), (_t'189, (tptr (tvolatile tuchar))),
+ (_t'188, (tptr tvoid))]
+
+@[noinline] def l_kprog_x86_mov_reg_temps_3 : List (Ident × Ty) :=
+[(_t'187, tulong), (_t'186, (tptr tvoid)), (_t'185, tulong),
+ (_t'184, (tptr tvoid)), (_t'183, (tptr tvoid)),
+ (_t'182, (tptr (tvolatile tulong))), (_t'181, (tptr (tvolatile tuchar))),
+ (_t'180, (tptr tvoid)), (_t'179, (tptr tuchar)),
+ (_t'178, (tptr (tptr tvoid))), (_t'177, (tptr tvoid)),
+ (_t'176, (tptr tvoid)), (_t'175, (tptr (tvolatile tuchar))),
+ (_t'174, (tptr tvoid)), (_t'173, (tptr (tvolatile tulong))),
+ (_t'172, (tptr (tvolatile tuchar))), (_t'171, (tptr tvoid)),
+ (_t'170, (tptr tuchar)), (_t'169, (tptr (tptr tvoid))), (_t'168, tuchar),
+ (_t'167, (tptr tvoid)), (_t'166, (tptr (tvolatile tuchar))),
+ (_t'165, (tptr tvoid)), (_t'164, (tptr tvoid)),
+ (_t'163, (tptr (tvolatile tulong))), (_t'162, (tptr (tvolatile tuchar))),
+ (_t'161, (tptr tvoid)), (_t'160, (tptr tuchar)),
+ (_t'159, (tptr (tptr tvoid))), (_t'158, (tptr tvoid)), (_t'157, tulong),
+ (_t'156, tuchar), (_t'155, (tptr (tvolatile tuchar))), (_t'154, tulong),
+ (_t'153, (tptr tvoid)), (_t'152, (tptr tvoid)), (_t'151, tuchar),
+ (_t'150, tulong), (_t'149, (tptr tvoid)),
+ (_t'148, (tptr (tvolatile tuchar))), (_t'147, (tptr tvoid)),
+ (_t'146, tulong), (_t'145, (tptr tvoid)), (_t'144, tulong),
+ (_t'143, (tptr tvoid)), (_t'142, (tptr (tvolatile tuchar))),
+ (_t'141, (tptr tvoid)), (_t'140, tulong), (_t'139, (tptr tvoid)),
+ (_t'138, tulong), (_t'137, (tptr tvoid)), (_t'136, (tptr tvoid)),
+ (_t'135, (tptr (tvolatile tulong))), (_t'134, (tptr (tvolatile tuchar))),
+ (_t'133, (tptr tvoid)), (_t'132, (tptr tuchar)),
+ (_t'131, (tptr (tptr tvoid))), (_t'130, (tptr tvoid)),
+ (_t'129, (tptr tvoid)), (_t'128, (tptr tvoid)),
+ (_t'127, (tptr (tvolatile tulong))), (_t'126, (tptr (tvolatile tuchar))),
+ (_t'125, (tptr tvoid)), (_t'124, (tptr tuchar)),
+ (_t'123, (tptr (tptr tvoid))), (_t'122, (tptr tvoid)), (_t'121, tulong),
+ (_t'120, tuchar), (_t'119, (tptr (tvolatile tuchar))), (_t'118, tulong),
+ (_t'117, (tptr tvoid)), (_t'116, (tptr tvoid)), (_t'115, tuchar),
+ (_t'114, tulong), (_t'113, (tptr tvoid)),
+ (_t'112, (tptr (tvolatile tuchar))), (_t'111, (tptr tvoid)),
+ (_t'110, tulong), (_t'109, (tptr tvoid)), (_t'108, tulong),
+ (_t'107, (tptr tvoid)), (_t'106, (tptr (tvolatile tuchar))),
+ (_t'105, (tptr tvoid)), (_t'104, tulong), (_t'103, (tptr tvoid)),
+ (_t'102, tulong), (_t'101, (tptr tvoid)), (_t'100, (tptr tvoid)),
+ (_t'99, (tptr (tvolatile tulong))), (_t'98, (tptr (tvolatile tuchar))),
+ (_t'97, (tptr tvoid)), (_t'96, (tptr tuchar)), (_t'95, (tptr (tptr tvoid)))]
+
 def f_kprog_x86_mov_reg : Function := {
   fn_return := tvoid,
   fn_callconv := cc_default,
@@ -9977,202 +10140,7 @@ def f_kprog_x86_mov_reg : Function := {
                (tvolatile (Ty.Tunion __3638 noattr))),
               (___kprog_x86_partial__5,
                (tvolatile (Ty.Tunion __3644 noattr)))],
-  fn_temps := [(___x86_state,
-                (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
-               (___x86_l_width, tuchar), (___x86_mov_stack_offset, tlong),
-               (___x86_alias_delta, tulong), (___x86_write_old_sp, tlong),
-               (___x86_wr_next_ptr, (tptr tvoid)),
-               (___x86_wr_next_tag, tuchar), (___x86_store_reg, tulong),
-               (___x86_release_old, tlong), (___x86_release_new, tlong),
-               (___x86_release_i, tuint), (___x86_release_off, tlong),
-               (___x86_release_lane, tuint), (___x86_sv_sp, tlong),
-               (___x86_sv_i, tuint), (___x86_mov_numeric, tulong),
-               (___x86_rd_reg, tuchar), (___x86_rd_raw_width, tuchar),
-               (___x86_rd_width, tuchar), (___x86_rd_shift, tuchar),
-               (___x86_rd_ptr, (tptr tvoid)), (___x86_rd_value, tulong),
-               (___x86_rd_tag, tuchar), (___x86_tag_reg, tulong),
-               (___x86_stack_delta, tulong), (___x86_write_old_sp__1, tlong),
-               (___x86_wr_raw_width, tuchar), (___x86_wr_width, tuchar),
-               (___x86_wr_shift, tuchar), (___x86_wr_next, tulong),
-               (___x86_wr_cell_tag, tuchar), (___x86_tag_reg__1, tulong),
-               (___x86_wr_stack_bits, tulong),
-               (___x86_stack_delta__1, tulong), (___kprog_x86_lane, tuchar),
-               (___kprog_x86_bits, tulong),
-               (___x86_wr_stack_bits__1, tulong),
-               (___x86_stack_delta__2, tulong),
-               (___kprog_x86_lane__1, tushort),
-               (___kprog_x86_bits__1, tulong),
-               (___x86_wr_next_ptr__1, (tptr tvoid)),
-               (___x86_wr_next_tag__1, tuchar),
-               (___x86_store_reg__1, tulong), (___x86_release_old__1, tlong),
-               (___x86_release_new__1, tlong), (___x86_release_i__1, tuint),
-               (___x86_release_off__1, tlong),
-               (___x86_release_lane__1, tuint), (___x86_sv_sp__1, tlong),
-               (___x86_sv_i__1, tuint), (___x86_write_old_sp__2, tlong),
-               (___x86_wr_next_ptr__2, (tptr tvoid)),
-               (___x86_wr_next_tag__2, tuchar),
-               (___x86_store_reg__2, tulong), (___x86_release_old__2, tlong),
-               (___x86_release_new__2, tlong), (___x86_release_i__2, tuint),
-               (___x86_release_off__2, tlong),
-               (___x86_release_lane__2, tuint), (___x86_sv_sp__2, tlong),
-               (___x86_sv_i__2, tuint), (___x86_mov_source_tag, tuchar),
-               (___x86_tag_reg__2, tulong),
-               (___x86_mov_stack_offset__1, tlong),
-               (___x86_alias_delta__1, tulong),
-               (___x86_write_old_sp__3, tlong),
-               (___x86_wr_next_ptr__3, (tptr tvoid)),
-               (___x86_wr_next_tag__3, tuchar),
-               (___x86_store_reg__3, tulong), (___x86_release_old__3, tlong),
-               (___x86_release_new__3, tlong), (___x86_release_i__3, tuint),
-               (___x86_release_off__3, tlong),
-               (___x86_release_lane__3, tuint), (___x86_sv_sp__3, tlong),
-               (___x86_sv_i__3, tuint), (___x86_mov_numeric__1, tulong),
-               (___x86_rd_reg__1, tuchar), (___x86_rd_raw_width__1, tuchar),
-               (___x86_rd_width__1, tuchar), (___x86_rd_shift__1, tuchar),
-               (___x86_rd_ptr__1, (tptr tvoid)),
-               (___x86_rd_value__1, tulong), (___x86_rd_tag__1, tuchar),
-               (___x86_tag_reg__3, tulong), (___x86_stack_delta__3, tulong),
-               (___x86_write_old_sp__4, tlong),
-               (___x86_wr_raw_width__1, tuchar),
-               (___x86_wr_width__1, tuchar), (___x86_wr_shift__1, tuchar),
-               (___x86_wr_next__1, tulong), (___x86_wr_cell_tag__1, tuchar),
-               (___x86_tag_reg__4, tulong),
-               (___x86_wr_stack_bits__2, tulong),
-               (___x86_stack_delta__4, tulong),
-               (___kprog_x86_lane__2, tuchar),
-               (___kprog_x86_bits__2, tulong),
-               (___x86_wr_stack_bits__3, tulong),
-               (___x86_stack_delta__5, tulong),
-               (___kprog_x86_lane__3, tushort),
-               (___kprog_x86_bits__3, tulong),
-               (___x86_wr_next_ptr__4, (tptr tvoid)),
-               (___x86_wr_next_tag__4, tuchar),
-               (___x86_store_reg__4, tulong), (___x86_release_old__4, tlong),
-               (___x86_release_new__4, tlong), (___x86_release_i__4, tuint),
-               (___x86_release_off__4, tlong),
-               (___x86_release_lane__4, tuint), (___x86_sv_sp__4, tlong),
-               (___x86_sv_i__4, tuint), (___x86_write_old_sp__5, tlong),
-               (___x86_wr_next_ptr__5, (tptr tvoid)),
-               (___x86_wr_next_tag__5, tuchar),
-               (___x86_store_reg__5, tulong), (___x86_release_old__5, tlong),
-               (___x86_release_new__5, tlong), (___x86_release_i__5, tuint),
-               (___x86_release_off__5, tlong),
-               (___x86_release_lane__5, tuint), (___x86_sv_sp__5, tlong),
-               (___x86_sv_i__5, tuint), (___x86_l_value, tulong),
-               (___x86_rd_reg__2, tuchar), (___x86_rd_raw_width__2, tuchar),
-               (___x86_rd_width__2, tuchar), (___x86_rd_shift__2, tuchar),
-               (___x86_rd_ptr__2, (tptr tvoid)),
-               (___x86_rd_value__2, tulong), (___x86_rd_tag__2, tuchar),
-               (___x86_tag_reg__5, tulong), (___x86_stack_delta__6, tulong),
-               (___x86_write_old_sp__6, tlong),
-               (___x86_wr_raw_width__2, tuchar),
-               (___x86_wr_width__2, tuchar), (___x86_wr_shift__2, tuchar),
-               (___x86_wr_next__2, tulong), (___x86_wr_cell_tag__2, tuchar),
-               (___x86_tag_reg__6, tulong),
-               (___x86_wr_stack_bits__4, tulong),
-               (___x86_stack_delta__7, tulong),
-               (___kprog_x86_lane__4, tuchar),
-               (___kprog_x86_bits__4, tulong),
-               (___x86_wr_stack_bits__5, tulong),
-               (___x86_stack_delta__8, tulong),
-               (___kprog_x86_lane__5, tushort),
-               (___kprog_x86_bits__5, tulong),
-               (___x86_wr_next_ptr__6, (tptr tvoid)),
-               (___x86_wr_next_tag__6, tuchar),
-               (___x86_store_reg__6, tulong), (___x86_release_old__6, tlong),
-               (___x86_release_new__6, tlong), (___x86_release_i__6, tuint),
-               (___x86_release_off__6, tlong),
-               (___x86_release_lane__6, tuint), (___x86_sv_sp__6, tlong),
-               (___x86_sv_i__6, tuint), (_t'94, tuint), (_t'93, tuint),
-               (_t'92, tuint), (_t'91, tint), (_t'90, tint), (_t'89, tint),
-               (_t'88, tint), (_t'87, tulong), (_t'86, tulong),
-               (_t'85, tuint), (_t'84, tuint), (_t'83, tuint),
-               (_t'82, (tvolatile (tptr tvoid))),
-               (_t'81, (tvolatile (tptr tvoid))), (_t'80, tuint),
-               (_t'79, (tptr tvoid)), (_t'78, tuchar), (_t'77, tulong),
-               (_t'76, tuint), (_t'75, tuint), (_t'74, (tptr tvoid)),
-               (_t'73, tuchar), (_t'72, tint), (_t'71, tuint), (_t'70, tint),
-               (_t'69, tint), (_t'68, tint), (_t'67, tint), (_t'66, tulong),
-               (_t'65, tulong), (_t'64, (tptr tvoid)), (_t'63, tint),
-               (_t'62, tint), (_t'61, tint), (_t'60, tint), (_t'59, tulong),
-               (_t'58, tulong), (_t'57, tuint), (_t'56, tuint),
-               (_t'55, tuint), (_t'54, (tvolatile (tptr tvoid))),
-               (_t'53, (tvolatile (tptr tvoid))), (_t'52, tuint),
-               (_t'51, (tptr tvoid)), (_t'50, tuchar), (_t'49, tulong),
-               (_t'48, tuint), (_t'47, tuint), (_t'46, (tptr tvoid)),
-               (_t'45, tuchar), (_t'44, tint), (_t'43, tint), (_t'42, tint),
-               (_t'41, tint), (_t'40, tulong), (_t'39, tulong),
-               (_t'38, (tptr tvoid)), (_t'37, tuint), (_t'36, tint),
-               (_t'35, tuint), (_t'34, tint), (_t'33, tint), (_t'32, tint),
-               (_t'31, tint), (_t'30, tulong), (_t'29, tulong),
-               (_t'28, (tptr tvoid)), (_t'27, tint), (_t'26, tint),
-               (_t'25, tint), (_t'24, tint), (_t'23, tulong),
-               (_t'22, tulong), (_t'21, tuint), (_t'20, tuint),
-               (_t'19, tuint), (_t'18, (tvolatile (tptr tvoid))),
-               (_t'17, (tvolatile (tptr tvoid))), (_t'16, tuint),
-               (_t'15, (tptr tvoid)), (_t'14, tuchar), (_t'13, tulong),
-               (_t'12, tuint), (_t'11, tuint), (_t'10, (tptr tvoid)),
-               (_t'9, tuchar), (_t'8, tint), (_t'7, tint), (_t'6, tint),
-               (_t'5, tint), (_t'4, tulong), (_t'3, tulong),
-               (_t'2, (tptr tvoid)), (_t'1, tuchar), (_t'215, (tptr tvoid)),
-               (_t'214, (tptr (tvolatile tuchar))),
-               (_t'213, (tptr (tvolatile tuchar))), (_t'212, (tptr tvoid)),
-               (_t'211, (tptr tvoid)), (_t'210, (tptr (tvolatile tulong))),
-               (_t'209, (tptr (tvolatile tuchar))), (_t'208, (tptr tvoid)),
-               (_t'207, (tptr tuchar)), (_t'206, (tptr (tptr tvoid))),
-               (_t'205, (tptr tvoid)), (_t'204, tulong), (_t'203, tuchar),
-               (_t'202, (tptr (tvolatile tuchar))), (_t'201, tulong),
-               (_t'200, (tptr tvoid)), (_t'199, (tptr tvoid)),
-               (_t'198, tuchar), (_t'197, tulong), (_t'196, (tptr tvoid)),
-               (_t'195, (tptr (tvolatile tuchar))), (_t'194, (tptr tvoid)),
-               (_t'193, tulong), (_t'192, (tptr tvoid)), (_t'191, tulong),
-               (_t'190, (tptr tvoid)), (_t'189, (tptr (tvolatile tuchar))),
-               (_t'188, (tptr tvoid)), (_t'187, tulong),
-               (_t'186, (tptr tvoid)), (_t'185, tulong),
-               (_t'184, (tptr tvoid)), (_t'183, (tptr tvoid)),
-               (_t'182, (tptr (tvolatile tulong))),
-               (_t'181, (tptr (tvolatile tuchar))), (_t'180, (tptr tvoid)),
-               (_t'179, (tptr tuchar)), (_t'178, (tptr (tptr tvoid))),
-               (_t'177, (tptr tvoid)), (_t'176, (tptr tvoid)),
-               (_t'175, (tptr (tvolatile tuchar))), (_t'174, (tptr tvoid)),
-               (_t'173, (tptr (tvolatile tulong))),
-               (_t'172, (tptr (tvolatile tuchar))), (_t'171, (tptr tvoid)),
-               (_t'170, (tptr tuchar)), (_t'169, (tptr (tptr tvoid))),
-               (_t'168, tuchar), (_t'167, (tptr tvoid)),
-               (_t'166, (tptr (tvolatile tuchar))), (_t'165, (tptr tvoid)),
-               (_t'164, (tptr tvoid)), (_t'163, (tptr (tvolatile tulong))),
-               (_t'162, (tptr (tvolatile tuchar))), (_t'161, (tptr tvoid)),
-               (_t'160, (tptr tuchar)), (_t'159, (tptr (tptr tvoid))),
-               (_t'158, (tptr tvoid)), (_t'157, tulong), (_t'156, tuchar),
-               (_t'155, (tptr (tvolatile tuchar))), (_t'154, tulong),
-               (_t'153, (tptr tvoid)), (_t'152, (tptr tvoid)),
-               (_t'151, tuchar), (_t'150, tulong), (_t'149, (tptr tvoid)),
-               (_t'148, (tptr (tvolatile tuchar))), (_t'147, (tptr tvoid)),
-               (_t'146, tulong), (_t'145, (tptr tvoid)), (_t'144, tulong),
-               (_t'143, (tptr tvoid)), (_t'142, (tptr (tvolatile tuchar))),
-               (_t'141, (tptr tvoid)), (_t'140, tulong),
-               (_t'139, (tptr tvoid)), (_t'138, tulong),
-               (_t'137, (tptr tvoid)), (_t'136, (tptr tvoid)),
-               (_t'135, (tptr (tvolatile tulong))),
-               (_t'134, (tptr (tvolatile tuchar))), (_t'133, (tptr tvoid)),
-               (_t'132, (tptr tuchar)), (_t'131, (tptr (tptr tvoid))),
-               (_t'130, (tptr tvoid)), (_t'129, (tptr tvoid)),
-               (_t'128, (tptr tvoid)), (_t'127, (tptr (tvolatile tulong))),
-               (_t'126, (tptr (tvolatile tuchar))), (_t'125, (tptr tvoid)),
-               (_t'124, (tptr tuchar)), (_t'123, (tptr (tptr tvoid))),
-               (_t'122, (tptr tvoid)), (_t'121, tulong), (_t'120, tuchar),
-               (_t'119, (tptr (tvolatile tuchar))), (_t'118, tulong),
-               (_t'117, (tptr tvoid)), (_t'116, (tptr tvoid)),
-               (_t'115, tuchar), (_t'114, tulong), (_t'113, (tptr tvoid)),
-               (_t'112, (tptr (tvolatile tuchar))), (_t'111, (tptr tvoid)),
-               (_t'110, tulong), (_t'109, (tptr tvoid)), (_t'108, tulong),
-               (_t'107, (tptr tvoid)), (_t'106, (tptr (tvolatile tuchar))),
-               (_t'105, (tptr tvoid)), (_t'104, tulong),
-               (_t'103, (tptr tvoid)), (_t'102, tulong),
-               (_t'101, (tptr tvoid)), (_t'100, (tptr tvoid)),
-               (_t'99, (tptr (tvolatile tulong))),
-               (_t'98, (tptr (tvolatile tuchar))), (_t'97, (tptr tvoid)),
-               (_t'96, (tptr tuchar)), (_t'95, (tptr (tptr tvoid)))],
+  fn_temps := ((l_kprog_x86_mov_reg_temps_0 ++ l_kprog_x86_mov_reg_temps_1) ++ (l_kprog_x86_mov_reg_temps_2 ++ l_kprog_x86_mov_reg_temps_3)),
   fn_body :=
 (Stmt.Ssequence
   (Stmt.Sset ___x86_state
@@ -10891,7 +10859,7 @@ def f_kprog_x86_mov_reg : Function := {
     Stmt.Sbreak))
 }
 
-def s_kprog_x86_movx_reg_0 : Stmt :=
+@[noinline] def s_kprog_x86_movx_reg_0 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'56
     (Expr.Efield
@@ -10913,7 +10881,7 @@ def s_kprog_x86_movx_reg_0 : Stmt :=
   (Stmt.Sset _t'9
     (Expr.Ecast (Expr.Etempvar _t'56 (tptr tvoid)) (tptr tvoid))))
 
-def s_kprog_x86_movx_reg_1 : Stmt :=
+@[noinline] def s_kprog_x86_movx_reg_1 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'55
     (Expr.Efield
@@ -10925,7 +10893,7 @@ def s_kprog_x86_movx_reg_1 : Stmt :=
     (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_rd_value tulong)
       (Expr.Etempvar _t'55 tulong) tulong)))
 
-def s_kprog_x86_movx_reg_2 : Stmt :=
+@[noinline] def s_kprog_x86_movx_reg_2 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sloop
     (Stmt.Ssequence
@@ -11008,7 +10976,7 @@ def s_kprog_x86_movx_reg_2 : Stmt :=
       Stmt.Sbreak)
     Stmt.Sskip))
 
-def s_kprog_x86_movx_reg_3 : Stmt :=
+@[noinline] def s_kprog_x86_movx_reg_3 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Etempvar ___x86_rd_width tuchar)
                     (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
@@ -11016,11 +10984,11 @@ def s_kprog_x86_movx_reg_3 : Stmt :=
   (Stmt.Sset _t'11
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuint)))
 
-def s_kprog_x86_movx_reg_4 : Stmt :=
+@[noinline] def s_kprog_x86_movx_reg_4 : Stmt :=
 (Stmt.Sset _t'12
   (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 255) tulong) tulong))
 
-def s_kprog_x86_movx_reg_5 : Stmt :=
+@[noinline] def s_kprog_x86_movx_reg_5 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Etempvar ___x86_rd_width tuchar)
                     (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
@@ -11048,7 +11016,7 @@ def s_kprog_x86_movx_reg_5 : Stmt :=
         (Stmt.Sset _t'12 (Expr.Ecast (Expr.Etempvar _t'12 tulong) tulong)))
       (Stmt.Sset _t'12 (Expr.Ecast (Expr.Etempvar _t'12 tulong) tulong)))))
 
-def s_kprog_x86_movx_reg_6 : Stmt :=
+@[noinline] def s_kprog_x86_movx_reg_6 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
                     (Expr.Ecast (Expr.Etempvar _dst tuchar) tulong)
                     (Expr.Econst_int (Integers.Int.repr 16) tuint) tint)
@@ -11077,7 +11045,7 @@ def s_kprog_x86_movx_reg_6 : Stmt :=
       (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid))
       (tptr tvoid))))
 
-def s_kprog_x86_movx_reg_7 : Stmt :=
+@[noinline] def s_kprog_x86_movx_reg_7 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___x86_tag_reg__1
     (Expr.Ecast (Expr.Etempvar _dst tuchar) tulong))
@@ -11107,16 +11075,16 @@ def s_kprog_x86_movx_reg_7 : Stmt :=
     (Stmt.Sset ___x86_wr_cell_tag
       (Expr.Ecast (Expr.Etempvar _t'17 tuint) tuchar))))
 
-def s_kprog_x86_movx_reg_8 : Stmt :=
+@[noinline] def s_kprog_x86_movx_reg_8 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_x86_movx_reg_9 : Stmt :=
+@[noinline] def s_kprog_x86_movx_reg_9 : Stmt :=
 (Stmt.Sset ___x86_release_off
   (Expr.Ebinop Binop.Osub
     (Expr.Ecast (Expr.Etempvar ___x86_release_i tuint) tlong)
     (Expr.Ecast (Expr.Etempvar _capacity tuint) tlong) tlong))
 
-def s_kprog_x86_movx_reg_10 : Stmt :=
+@[noinline] def s_kprog_x86_movx_reg_10 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sifthenelse (Expr.Ebinop Binop.Ole
@@ -11229,7 +11197,7 @@ def s_kprog_x86_movx_reg_10 : Stmt :=
           (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_release_lane tuint)
             (Expr.Econst_int (Integers.Int.repr 1) tint) tuint))))))
 
-def s_kprog_x86_movx_reg_11 : Stmt :=
+@[noinline] def s_kprog_x86_movx_reg_11 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt (Expr.Etempvar ___x86_sv_i tuint)
                       (Expr.Ebinop Binop.Odiv
@@ -11284,12 +11252,12 @@ def s_kprog_x86_movx_reg_11 : Stmt :=
       Stmt.Sskip)
     Stmt.Sbreak))
 
-def s_kprog_x86_movx_reg_12 : Stmt :=
+@[noinline] def s_kprog_x86_movx_reg_12 : Stmt :=
 (Stmt.Sset ___x86_sv_i
   (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_sv_i tuint)
     (Expr.Econst_int (Integers.Int.repr 1) tint) tuint))
 
-def s_kprog_x86_movx_reg_13 : Stmt :=
+@[noinline] def s_kprog_x86_movx_reg_13 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
@@ -12844,7 +12812,7 @@ def f_kprog_x86_mem_offset : Function := {
   (Stmt.Sreturn (some (Expr.Etempvar _offset tlong))))
 }
 
-def s_kprog_x86_read_recovery_at_0 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_at_0 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'42
     (Expr.Efield
@@ -12860,11 +12828,11 @@ def s_kprog_x86_read_recovery_at_0 : Stmt :=
   (Stmt.Sset ___x86_write_old_sp
     (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'42 (tptr tvoid)) tlong) tlong)))
 
-def s_kprog_x86_read_recovery_at_1 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_at_1 : Stmt :=
 (Stmt.Sset ___x86_wr_raw_width
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tuint) tuchar))
 
-def s_kprog_x86_read_recovery_at_2 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_at_2 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'36
     (Expr.Efield (Expr.Evar ___x86_wr_cell (Ty.Tunion _x86_sim_gpr noattr))
@@ -12900,7 +12868,7 @@ def s_kprog_x86_read_recovery_at_2 : Stmt :=
                         tulong) tulong) tulong) tulong) (tptr tuchar))
               (tptr tvoid)) tlong) tulong) tulong))))
 
-def s_kprog_x86_read_recovery_at_3 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_at_3 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'35
     (Expr.Efield
@@ -12912,7 +12880,7 @@ def s_kprog_x86_read_recovery_at_3 : Stmt :=
     (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_stack_delta tulong)
       (Expr.Etempvar _t'35 tulong) tulong)))
 
-def s_kprog_x86_read_recovery_at_4 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_at_4 : Stmt :=
 (Stmt.Sassign
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
@@ -12922,7 +12890,7 @@ def s_kprog_x86_read_recovery_at_4 : Stmt :=
       (Expr.Econst_int (Integers.Int.repr 1) tint) (tptr tuchar)) tuchar)
   (Expr.Etempvar ___kprog_x86_lane tuchar))
 
-def s_kprog_x86_read_recovery_at_5 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_at_5 : Stmt :=
 (Stmt.Sassign
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
@@ -12932,7 +12900,7 @@ def s_kprog_x86_read_recovery_at_5 : Stmt :=
       (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tuchar)) tuchar)
   (Expr.Etempvar ___kprog_x86_lane tuchar))
 
-def s_kprog_x86_read_recovery_at_6 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_at_6 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sbuiltin (some _t'5) (ExtFun.EF_vload Chunk.Mint64)
     [(tptr (tvolatile (tptr tvoid)))]
@@ -12945,7 +12913,7 @@ def s_kprog_x86_read_recovery_at_6 : Stmt :=
       (Expr.Ecast (Expr.Etempvar _t'5 (tvolatile (tptr tvoid))) tlong)
       tulong)))
 
-def s_kprog_x86_read_recovery_at_7 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_at_7 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                       (Expr.Etempvar ___x86_wr_shift tuchar)
@@ -12971,15 +12939,15 @@ def s_kprog_x86_read_recovery_at_7 : Stmt :=
     (Expr.Ecast (Expr.Ecast (Expr.Etempvar ___kprog_x86_bits tulong) tlong)
       (tptr tvoid))))
 
-def s_kprog_x86_read_recovery_at_8 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_at_8 : Stmt :=
 (Stmt.Sset _t'8
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 2) tuint) tuint))
 
-def s_kprog_x86_read_recovery_at_9 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_at_9 : Stmt :=
 (Stmt.Sset _t'8
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
 
-def s_kprog_x86_read_recovery_at_10 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_at_10 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'30
@@ -13027,10 +12995,10 @@ def s_kprog_x86_read_recovery_at_10 : Stmt :=
       (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_stack_delta__1 tulong)
         (Expr.Etempvar _t'29 tulong) tulong))))
 
-def s_kprog_x86_read_recovery_at_11 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_at_11 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_x86_read_recovery_at_12 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_at_12 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'28
     (Expr.Efield (Expr.Evar ___x86_wr_cell (Ty.Tunion _x86_sim_gpr noattr))
@@ -13043,7 +13011,7 @@ def s_kprog_x86_read_recovery_at_12 : Stmt :=
          _ptr (tvolatile (tptr tvoid))) (tptr (tvolatile (tptr tvoid)))),
      (Expr.Etempvar _t'28 (tptr tvoid))]))
 
-def s_kprog_x86_read_recovery_at_13 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_at_13 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint16unsigned)
     [(tptr (tvolatile tushort)), (tvolatile tushort)]
@@ -13077,7 +13045,7 @@ def s_kprog_x86_read_recovery_at_13 : Stmt :=
               tulong) (Expr.Etempvar ___kprog_x86_lane__1 tushort) tulong)
           tlong) (tptr tvoid)))))
 
-def s_kprog_x86_read_recovery_at_14 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_at_14 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'7
@@ -13085,7 +13053,7 @@ def s_kprog_x86_read_recovery_at_14 : Stmt :=
     (Stmt.Sset _t'7 (Expr.Ecast (Expr.Etempvar _t'7 tuint) tuint)))
   (Stmt.Sset _t'7 (Expr.Ecast (Expr.Etempvar _t'7 tuint) tuint)))
 
-def s_kprog_x86_read_recovery_at_15 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_at_15 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'7
@@ -13093,7 +13061,7 @@ def s_kprog_x86_read_recovery_at_15 : Stmt :=
     (Stmt.Sset _t'7 (Expr.Ecast (Expr.Etempvar _t'7 tuint) tuint)))
   (Stmt.Sset _t'7 (Expr.Ecast (Expr.Etempvar _t'7 tuint) tuint)))
 
-def s_kprog_x86_read_recovery_at_16 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_at_16 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset ___x86_release_i (Expr.Econst_int (Integers.Int.repr 0) tint))
@@ -13328,7 +13296,7 @@ def s_kprog_x86_read_recovery_at_16 : Stmt :=
               (Expr.Econst_int (Integers.Int.repr 1) tint) tuint)))))
     Stmt.Sbreak))
 
-def s_kprog_x86_read_recovery_at_17 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_at_17 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Scall (some _t'2)
@@ -14070,7 +14038,7 @@ def f_kprog_x86_read_recovery_at : Function := {
     (Stmt.Sreturn (some (Expr.Etempvar _recovered tint)))))
 }
 
-def s_kprog_x86_read_recovery_0 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_0 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'43
     (Expr.Efield
@@ -14086,11 +14054,11 @@ def s_kprog_x86_read_recovery_0 : Stmt :=
   (Stmt.Sset ___x86_write_old_sp
     (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'43 (tptr tvoid)) tlong) tlong)))
 
-def s_kprog_x86_read_recovery_1 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_1 : Stmt :=
 (Stmt.Sset ___x86_wr_raw_width
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tuint) tuchar))
 
-def s_kprog_x86_read_recovery_2 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_2 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'37
     (Expr.Efield (Expr.Evar ___x86_wr_cell (Ty.Tunion _x86_sim_gpr noattr))
@@ -14126,7 +14094,7 @@ def s_kprog_x86_read_recovery_2 : Stmt :=
                         tulong) tulong) tulong) tulong) (tptr tuchar))
               (tptr tvoid)) tlong) tulong) tulong))))
 
-def s_kprog_x86_read_recovery_3 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_3 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'36
     (Expr.Efield
@@ -14138,7 +14106,7 @@ def s_kprog_x86_read_recovery_3 : Stmt :=
     (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_stack_delta tulong)
       (Expr.Etempvar _t'36 tulong) tulong)))
 
-def s_kprog_x86_read_recovery_4 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_4 : Stmt :=
 (Stmt.Sassign
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
@@ -14148,7 +14116,7 @@ def s_kprog_x86_read_recovery_4 : Stmt :=
       (Expr.Econst_int (Integers.Int.repr 1) tint) (tptr tuchar)) tuchar)
   (Expr.Etempvar ___kprog_x86_lane tuchar))
 
-def s_kprog_x86_read_recovery_5 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_5 : Stmt :=
 (Stmt.Sassign
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
@@ -14158,7 +14126,7 @@ def s_kprog_x86_read_recovery_5 : Stmt :=
       (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tuchar)) tuchar)
   (Expr.Etempvar ___kprog_x86_lane tuchar))
 
-def s_kprog_x86_read_recovery_6 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_6 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sbuiltin (some _t'5) (ExtFun.EF_vload Chunk.Mint64)
     [(tptr (tvolatile (tptr tvoid)))]
@@ -14171,7 +14139,7 @@ def s_kprog_x86_read_recovery_6 : Stmt :=
       (Expr.Ecast (Expr.Etempvar _t'5 (tvolatile (tptr tvoid))) tlong)
       tulong)))
 
-def s_kprog_x86_read_recovery_7 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_7 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                       (Expr.Etempvar ___x86_wr_shift tuchar)
@@ -14197,15 +14165,15 @@ def s_kprog_x86_read_recovery_7 : Stmt :=
     (Expr.Ecast (Expr.Ecast (Expr.Etempvar ___kprog_x86_bits tulong) tlong)
       (tptr tvoid))))
 
-def s_kprog_x86_read_recovery_8 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_8 : Stmt :=
 (Stmt.Sset _t'8
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 2) tuint) tuint))
 
-def s_kprog_x86_read_recovery_9 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_9 : Stmt :=
 (Stmt.Sset _t'8
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
 
-def s_kprog_x86_read_recovery_10 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_10 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'31
@@ -14253,10 +14221,10 @@ def s_kprog_x86_read_recovery_10 : Stmt :=
       (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_stack_delta__1 tulong)
         (Expr.Etempvar _t'30 tulong) tulong))))
 
-def s_kprog_x86_read_recovery_11 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_11 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_x86_read_recovery_12 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_12 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'29
     (Expr.Efield (Expr.Evar ___x86_wr_cell (Ty.Tunion _x86_sim_gpr noattr))
@@ -14269,7 +14237,7 @@ def s_kprog_x86_read_recovery_12 : Stmt :=
          _ptr (tvolatile (tptr tvoid))) (tptr (tvolatile (tptr tvoid)))),
      (Expr.Etempvar _t'29 (tptr tvoid))]))
 
-def s_kprog_x86_read_recovery_13 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_13 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint16unsigned)
     [(tptr (tvolatile tushort)), (tvolatile tushort)]
@@ -14303,7 +14271,7 @@ def s_kprog_x86_read_recovery_13 : Stmt :=
               tulong) (Expr.Etempvar ___kprog_x86_lane__1 tushort) tulong)
           tlong) (tptr tvoid)))))
 
-def s_kprog_x86_read_recovery_14 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_14 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'7
@@ -14311,7 +14279,7 @@ def s_kprog_x86_read_recovery_14 : Stmt :=
     (Stmt.Sset _t'7 (Expr.Ecast (Expr.Etempvar _t'7 tuint) tuint)))
   (Stmt.Sset _t'7 (Expr.Ecast (Expr.Etempvar _t'7 tuint) tuint)))
 
-def s_kprog_x86_read_recovery_15 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_15 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'7
@@ -14319,7 +14287,7 @@ def s_kprog_x86_read_recovery_15 : Stmt :=
     (Stmt.Sset _t'7 (Expr.Ecast (Expr.Etempvar _t'7 tuint) tuint)))
   (Stmt.Sset _t'7 (Expr.Ecast (Expr.Etempvar _t'7 tuint) tuint)))
 
-def s_kprog_x86_read_recovery_16 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_16 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset ___x86_release_i (Expr.Econst_int (Integers.Int.repr 0) tint))
@@ -14554,7 +14522,7 @@ def s_kprog_x86_read_recovery_16 : Stmt :=
               (Expr.Econst_int (Integers.Int.repr 1) tint) tuint)))))
     Stmt.Sbreak))
 
-def s_kprog_x86_read_recovery_17 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_17 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Scall (some _t'2)
@@ -15311,7 +15279,7 @@ def f_kprog_x86_read_recovery : Function := {
     (Stmt.Sreturn (some (Expr.Etempvar _recovered tint)))))
 }
 
-def s_kprog_x86_read_recovery_mem_0 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_mem_0 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'44
     (Expr.Efield
@@ -15327,11 +15295,11 @@ def s_kprog_x86_read_recovery_mem_0 : Stmt :=
   (Stmt.Sset ___x86_write_old_sp
     (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'44 (tptr tvoid)) tlong) tlong)))
 
-def s_kprog_x86_read_recovery_mem_1 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_mem_1 : Stmt :=
 (Stmt.Sset ___x86_wr_raw_width
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tuint) tuchar))
 
-def s_kprog_x86_read_recovery_mem_2 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_mem_2 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'38
     (Expr.Efield (Expr.Evar ___x86_wr_cell (Ty.Tunion _x86_sim_gpr noattr))
@@ -15367,7 +15335,7 @@ def s_kprog_x86_read_recovery_mem_2 : Stmt :=
                         tulong) tulong) tulong) tulong) (tptr tuchar))
               (tptr tvoid)) tlong) tulong) tulong))))
 
-def s_kprog_x86_read_recovery_mem_3 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_mem_3 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'37
     (Expr.Efield
@@ -15379,7 +15347,7 @@ def s_kprog_x86_read_recovery_mem_3 : Stmt :=
     (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_stack_delta tulong)
       (Expr.Etempvar _t'37 tulong) tulong)))
 
-def s_kprog_x86_read_recovery_mem_4 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_mem_4 : Stmt :=
 (Stmt.Sassign
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
@@ -15389,7 +15357,7 @@ def s_kprog_x86_read_recovery_mem_4 : Stmt :=
       (Expr.Econst_int (Integers.Int.repr 1) tint) (tptr tuchar)) tuchar)
   (Expr.Etempvar ___kprog_x86_lane tuchar))
 
-def s_kprog_x86_read_recovery_mem_5 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_mem_5 : Stmt :=
 (Stmt.Sassign
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
@@ -15399,7 +15367,7 @@ def s_kprog_x86_read_recovery_mem_5 : Stmt :=
       (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tuchar)) tuchar)
   (Expr.Etempvar ___kprog_x86_lane tuchar))
 
-def s_kprog_x86_read_recovery_mem_6 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_mem_6 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sbuiltin (some _t'5) (ExtFun.EF_vload Chunk.Mint64)
     [(tptr (tvolatile (tptr tvoid)))]
@@ -15412,7 +15380,7 @@ def s_kprog_x86_read_recovery_mem_6 : Stmt :=
       (Expr.Ecast (Expr.Etempvar _t'5 (tvolatile (tptr tvoid))) tlong)
       tulong)))
 
-def s_kprog_x86_read_recovery_mem_7 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_mem_7 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                       (Expr.Etempvar ___x86_wr_shift tuchar)
@@ -15438,15 +15406,15 @@ def s_kprog_x86_read_recovery_mem_7 : Stmt :=
     (Expr.Ecast (Expr.Ecast (Expr.Etempvar ___kprog_x86_bits tulong) tlong)
       (tptr tvoid))))
 
-def s_kprog_x86_read_recovery_mem_8 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_mem_8 : Stmt :=
 (Stmt.Sset _t'8
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 2) tuint) tuint))
 
-def s_kprog_x86_read_recovery_mem_9 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_mem_9 : Stmt :=
 (Stmt.Sset _t'8
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
 
-def s_kprog_x86_read_recovery_mem_10 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_mem_10 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'32
@@ -15494,10 +15462,10 @@ def s_kprog_x86_read_recovery_mem_10 : Stmt :=
       (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_stack_delta__1 tulong)
         (Expr.Etempvar _t'31 tulong) tulong))))
 
-def s_kprog_x86_read_recovery_mem_11 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_mem_11 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_x86_read_recovery_mem_12 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_mem_12 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'30
     (Expr.Efield (Expr.Evar ___x86_wr_cell (Ty.Tunion _x86_sim_gpr noattr))
@@ -15510,7 +15478,7 @@ def s_kprog_x86_read_recovery_mem_12 : Stmt :=
          _ptr (tvolatile (tptr tvoid))) (tptr (tvolatile (tptr tvoid)))),
      (Expr.Etempvar _t'30 (tptr tvoid))]))
 
-def s_kprog_x86_read_recovery_mem_13 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_mem_13 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint16unsigned)
     [(tptr (tvolatile tushort)), (tvolatile tushort)]
@@ -15544,7 +15512,7 @@ def s_kprog_x86_read_recovery_mem_13 : Stmt :=
               tulong) (Expr.Etempvar ___kprog_x86_lane__1 tushort) tulong)
           tlong) (tptr tvoid)))))
 
-def s_kprog_x86_read_recovery_mem_14 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_mem_14 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'7
@@ -15552,7 +15520,7 @@ def s_kprog_x86_read_recovery_mem_14 : Stmt :=
     (Stmt.Sset _t'7 (Expr.Ecast (Expr.Etempvar _t'7 tuint) tuint)))
   (Stmt.Sset _t'7 (Expr.Ecast (Expr.Etempvar _t'7 tuint) tuint)))
 
-def s_kprog_x86_read_recovery_mem_15 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_mem_15 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'7
@@ -15560,7 +15528,7 @@ def s_kprog_x86_read_recovery_mem_15 : Stmt :=
     (Stmt.Sset _t'7 (Expr.Ecast (Expr.Etempvar _t'7 tuint) tuint)))
   (Stmt.Sset _t'7 (Expr.Ecast (Expr.Etempvar _t'7 tuint) tuint)))
 
-def s_kprog_x86_read_recovery_mem_16 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_mem_16 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset ___x86_release_i (Expr.Econst_int (Integers.Int.repr 0) tint))
@@ -15795,7 +15763,7 @@ def s_kprog_x86_read_recovery_mem_16 : Stmt :=
               (Expr.Econst_int (Integers.Int.repr 1) tint) tuint)))))
     Stmt.Sbreak))
 
-def s_kprog_x86_read_recovery_mem_17 : Stmt :=
+@[noinline] def s_kprog_x86_read_recovery_mem_17 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Scall (some _t'2)
@@ -16726,11 +16694,11 @@ def f_kprog_x86_mem_read_src : Function := {
   (Stmt.Sreturn (some (Expr.Etempvar _source tuchar))))
 }
 
-def s_kprog_x86_stack_read_owned_0 : Stmt :=
+@[noinline] def s_kprog_x86_stack_read_owned_0 : Stmt :=
 (Stmt.Sset _t'7
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
 
-def s_kprog_x86_stack_read_owned_1 : Stmt :=
+@[noinline] def s_kprog_x86_stack_read_owned_1 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Etempvar ___x86_str_width tuchar)
                     (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
@@ -16754,7 +16722,7 @@ def s_kprog_x86_stack_read_owned_1 : Stmt :=
         (Stmt.Sset _t'7 (Expr.Ecast (Expr.Etempvar _t'7 tuint) tuint)))
       (Stmt.Sset _t'7 (Expr.Ecast (Expr.Etempvar _t'7 tuint) tuint)))))
 
-def s_kprog_x86_stack_read_owned_2 : Stmt :=
+@[noinline] def s_kprog_x86_stack_read_owned_2 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sbuiltin (some _t'6) (ExtFun.EF_vload Chunk.Mint8unsigned)
     [(tptr (tvolatile tuchar))]
@@ -16775,7 +16743,7 @@ def s_kprog_x86_stack_read_owned_2 : Stmt :=
           (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tint) tuint)
           tuint) tulong) tulong)))
 
-def s_kprog_x86_stack_read_owned_3 : Stmt :=
+@[noinline] def s_kprog_x86_stack_read_owned_3 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Etempvar ___x86_str_width tuchar)
                     (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
@@ -16805,7 +16773,7 @@ def s_kprog_x86_stack_read_owned_3 : Stmt :=
           (Stmt.Sset _t'9 (Expr.Ecast (Expr.Etempvar _t'9 tuint) tuint)))
         (Stmt.Sset _t'9 (Expr.Ecast (Expr.Etempvar _t'9 tuint) tuint))))))
 
-def s_kprog_x86_stack_read_owned_4 : Stmt :=
+@[noinline] def s_kprog_x86_stack_read_owned_4 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sbuiltin (some _t'8) (ExtFun.EF_vload Chunk.Mint8unsigned)
     [(tptr (tvolatile tuchar))]
@@ -16826,7 +16794,7 @@ def s_kprog_x86_stack_read_owned_4 : Stmt :=
           (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 2) tint) tuint)
           tuint) tulong) tulong)))
 
-def s_kprog_x86_stack_read_owned_5 : Stmt :=
+@[noinline] def s_kprog_x86_stack_read_owned_5 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                       (Expr.Etempvar ___x86_str_width tuchar)
@@ -16887,7 +16855,7 @@ def s_kprog_x86_stack_read_owned_5 : Stmt :=
               tuint) tulong) tulong)))
     Stmt.Sskip))
 
-def s_kprog_x86_stack_read_owned_6 : Stmt :=
+@[noinline] def s_kprog_x86_stack_read_owned_6 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
@@ -17422,12 +17390,12 @@ def f_kprog_x86_stack_read_owned : Function := {
   (Stmt.Sreturn (some (Expr.Etempvar _value tulong))))
 }
 
-def s_kprog_x86_stack_read_0 : Stmt :=
+@[noinline] def s_kprog_x86_stack_read_0 : Stmt :=
 (Stmt.Scall (some _t'4)
   (Expr.Evar _x86_width_effective (Ty.Tfunction [tuchar] tuchar cc_default))
   [(Expr.Etempvar _width tulong)])
 
-def s_kprog_x86_stack_read_1 : Stmt :=
+@[noinline] def s_kprog_x86_stack_read_1 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sbuiltin (some _t'5) (ExtFun.EF_vload Chunk.Mint8unsigned)
     [(tptr (tvolatile tuchar))]
@@ -17440,7 +17408,7 @@ def s_kprog_x86_stack_read_1 : Stmt :=
   (Stmt.Sset ___x86_str_value
     (Expr.Ecast (Expr.Etempvar _t'5 (tvolatile tuchar)) tulong)))
 
-def s_kprog_x86_stack_read_2 : Stmt :=
+@[noinline] def s_kprog_x86_stack_read_2 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
@@ -18221,7 +18189,7 @@ def f_kprog_x86_stack_read : Function := {
     (Stmt.Sreturn (some (Expr.Etempvar _value tulong)))))
 }
 
-def s_kprog_x86_stack_values_read_0 : Stmt :=
+@[noinline] def s_kprog_x86_stack_values_read_0 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'9
     (Expr.Efield
@@ -18238,7 +18206,7 @@ def s_kprog_x86_stack_values_read_0 : Stmt :=
         (Expr.Ebinop Binop.One (Expr.Etempvar _t'10 tuchar)
           (Expr.Econst_int (Integers.Int.repr 0) tuint) tint) tbool))))
 
-def s_kprog_x86_stack_values_read_1 : Stmt :=
+@[noinline] def s_kprog_x86_stack_values_read_1 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'7
     (Expr.Efield
@@ -18255,7 +18223,7 @@ def s_kprog_x86_stack_values_read_1 : Stmt :=
         (Expr.Evar ___x86_sv_result (Ty.Tstruct _x86_sim_stack_value noattr))
         _tag tuchar) (Expr.Etempvar _t'8 tuchar))))
 
-def s_kprog_x86_stack_values_read_2 : Stmt :=
+@[noinline] def s_kprog_x86_stack_values_read_2 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'4
     (Expr.Efield

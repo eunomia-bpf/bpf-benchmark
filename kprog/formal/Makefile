@@ -730,6 +730,7 @@ clight: clightgen
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Pointer.lean c/X86Pointer.c
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Context.lean c/X86Context.c
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Memory.lean c/X86Memory.c
+	external/clean/clightgen -fstruct-passing -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Inline.lean c/X86Inline.c
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64Address.lean c/Arm64Address.c
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64Stack.lean c/Arm64Stack.c
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64Access.lean c/Arm64Access.c

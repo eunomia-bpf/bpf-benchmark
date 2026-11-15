@@ -298,7 +298,7 @@ def _t'89 : Ident := (Positive.ofNat 216)
 def _t'9 : Ident := (Positive.ofNat 136)
 def _t'90 : Ident := (Positive.ofNat 217)
 
-def s_kprog_arm64_stack_read_owned_0 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_read_owned_0 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'16
     (Expr.Efield
@@ -317,7 +317,7 @@ def s_kprog_arm64_stack_read_owned_0 : Stmt :=
            (tptr (tvolatile tuchar))) (tvolatile tuchar))
        (tptr (tvolatile tuchar)))]))
 
-def s_kprog_arm64_stack_read_owned_1 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_read_owned_1 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'15
     (Expr.Efield
@@ -336,7 +336,7 @@ def s_kprog_arm64_stack_read_owned_1 : Stmt :=
            (tptr (tvolatile tuchar))) (tvolatile tuchar))
        (tptr (tvolatile tuchar)))]))
 
-def s_kprog_arm64_stack_read_owned_2 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_read_owned_2 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'14
@@ -361,7 +361,7 @@ def s_kprog_arm64_stack_read_owned_2 : Stmt :=
         (Expr.Ecast (Expr.Etempvar _t'7 (tvolatile tuchar)) tulong)
         (Expr.Econst_int (Integers.Int.repr 40) tint) tulong) tulong)))
 
-def s_kprog_arm64_stack_read_owned_3 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_read_owned_3 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'13
@@ -386,7 +386,7 @@ def s_kprog_arm64_stack_read_owned_3 : Stmt :=
         (Expr.Ecast (Expr.Etempvar _t'8 (tvolatile tuchar)) tulong)
         (Expr.Econst_int (Integers.Int.repr 48) tint) tulong) tulong)))
 
-def s_kprog_arm64_stack_read_owned_4 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_read_owned_4 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'12
@@ -662,7 +662,7 @@ def f_kprog_arm64_stack_read_owned : Function := {
   (Stmt.Sreturn (some (Expr.Etempvar _result tulong))))
 }
 
-def s_kprog_arm64_stack_read_0 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_read_0 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'22
     (Expr.Efield
@@ -681,7 +681,7 @@ def s_kprog_arm64_stack_read_0 : Stmt :=
            (tptr (tvolatile tuchar))) (tvolatile tuchar))
        (tptr (tvolatile tuchar)))]))
 
-def s_kprog_arm64_stack_read_1 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_read_1 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'21
     (Expr.Efield
@@ -700,7 +700,7 @@ def s_kprog_arm64_stack_read_1 : Stmt :=
            (tptr (tvolatile tuchar))) (tvolatile tuchar))
        (tptr (tvolatile tuchar)))]))
 
-def s_kprog_arm64_stack_read_2 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_read_2 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'20
@@ -725,7 +725,7 @@ def s_kprog_arm64_stack_read_2 : Stmt :=
         (Expr.Ecast (Expr.Etempvar _t'5 (tvolatile tuchar)) tulong)
         (Expr.Econst_int (Integers.Int.repr 24) tint) tulong) tulong)))
 
-def s_kprog_arm64_stack_read_3 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_read_3 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'19
@@ -750,7 +750,7 @@ def s_kprog_arm64_stack_read_3 : Stmt :=
         (Expr.Ecast (Expr.Etempvar _t'6 (tvolatile tuchar)) tulong)
         (Expr.Econst_int (Integers.Int.repr 32) tint) tulong) tulong)))
 
-def s_kprog_arm64_stack_read_4 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_read_4 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
                     (Expr.Etempvar ___a64_str_width tuchar)
                     (Expr.Econst_int (Integers.Int.repr 8) tuint) tint)
@@ -780,7 +780,7 @@ def s_kprog_arm64_stack_read_4 : Stmt :=
           (Expr.Econst_int (Integers.Int.repr 40) tint) tulong) tulong)))
   Stmt.Sskip)
 
-def s_kprog_arm64_stack_read_5 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_read_5 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
                       (Expr.Etempvar ___a64_str_width tuchar)
@@ -839,14 +839,14 @@ def s_kprog_arm64_stack_read_5 : Stmt :=
             (Expr.Econst_int (Integers.Int.repr 56) tint) tulong) tulong)))
     Stmt.Sskip))
 
-def s_kprog_arm64_stack_read_6 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_read_6 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'13
     (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 4294967295) tulong)
       tulong))
   (Stmt.Sset _t'13 (Expr.Ecast (Expr.Etempvar _t'13 tulong) tulong)))
 
-def s_kprog_arm64_stack_read_7 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_read_7 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'13
     (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr (-1)) tulong) tulong))
@@ -1258,10 +1258,10 @@ def f_kprog_arm64_stack_read_tag : Function := {
   (Stmt.Sreturn (some (Expr.Etempvar _result tuchar))))
 }
 
-def s_kprog_arm64_stack_write_owned_0 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_owned_0 : Stmt :=
 (Stmt.Sset ___a64_unmat_tag (Expr.Ecast (Expr.Etempvar _tag tuchar) tuchar))
 
-def s_kprog_arm64_stack_write_owned_1 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_owned_1 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                       (Expr.Etempvar ___a64_unmat_tag tuchar)
@@ -1418,18 +1418,18 @@ def s_kprog_arm64_stack_write_owned_1 : Stmt :=
       Stmt.Sskip))
   (Stmt.Sset ___a64_stw_payload (Expr.Etempvar ___a64_unmat_value tulong)))
 
-def s_kprog_arm64_stack_write_owned_2 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_owned_2 : Stmt :=
 (Stmt.Sbuiltin (some _t'8) (ExtFun.EF_vload Chunk.Mint64)
   [(tptr (tvolatile tulong))]
   [(Expr.Eaddrof
      (Expr.Ederef (Expr.Etempvar ___tp (tptr (tvolatile tulong)))
        (tvolatile tulong)) (tptr (tvolatile tulong)))])
 
-def s_kprog_arm64_stack_write_owned_3 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_owned_3 : Stmt :=
 (Stmt.Sset _t'10
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 2) tuint) tuint))
 
-def s_kprog_arm64_stack_write_owned_4 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_owned_4 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'10
@@ -1437,7 +1437,7 @@ def s_kprog_arm64_stack_write_owned_4 : Stmt :=
     (Stmt.Sset _t'10 (Expr.Ecast (Expr.Etempvar _t'10 tuint) tuint)))
   (Stmt.Sset _t'10 (Expr.Ecast (Expr.Etempvar _t'10 tuint) tuint)))
 
-def s_kprog_arm64_stack_write_owned_5 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_owned_5 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'10
@@ -1445,7 +1445,7 @@ def s_kprog_arm64_stack_write_owned_5 : Stmt :=
     (Stmt.Sset _t'10 (Expr.Ecast (Expr.Etempvar _t'10 tuint) tuint)))
   (Stmt.Sset _t'10 (Expr.Ecast (Expr.Etempvar _t'10 tuint) tuint)))
 
-def s_kprog_arm64_stack_write_owned_6 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_owned_6 : Stmt :=
 (Stmt.Sset ___ts__2
   (Expr.Ecast
     (Expr.Ebinop Binop.Omul
@@ -1453,7 +1453,7 @@ def s_kprog_arm64_stack_write_owned_6 : Stmt :=
         (Expr.Econst_int (Integers.Int.repr 7) tuint) tulong)
       (Expr.Econst_int (Integers.Int.repr 8) tuint) tulong) tuint))
 
-def s_kprog_arm64_stack_write_owned_7 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_owned_7 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'27
@@ -1494,11 +1494,11 @@ def s_kprog_arm64_stack_write_owned_7 : Stmt :=
              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint)
                tuchar) tulong) (Expr.Etempvar ___ts__2 tuint) tulong) tulong)])))
 
-def s_kprog_arm64_stack_write_owned_8 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_owned_8 : Stmt :=
 (Stmt.Sset ___kprog_a64_bl_shift
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
 
-def s_kprog_arm64_stack_write_owned_9 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_owned_9 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sswitch (Expr.Etempvar ___kprog_a64_bl_lane tulong)
     (LStmts.LScons (some 0)
@@ -1577,11 +1577,11 @@ def s_kprog_arm64_stack_write_owned_9 : Stmt :=
          (Expr.Ebinop Binop.Oshr (Expr.Etempvar ___kprog_a64_bl_value tulong)
            (Expr.Etempvar ___kprog_a64_bl_shift tulong) tulong) tuchar)])))
 
-def s_kprog_arm64_stack_write_owned_10 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_owned_10 : Stmt :=
 (Stmt.Sset _t'12
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
 
-def s_kprog_arm64_stack_write_owned_11 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_owned_11 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Etempvar ___a64_stw_width tuchar)
                     (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
@@ -1605,7 +1605,7 @@ def s_kprog_arm64_stack_write_owned_11 : Stmt :=
         (Stmt.Sset _t'12 (Expr.Ecast (Expr.Etempvar _t'12 tuint) tuint)))
       (Stmt.Sset _t'12 (Expr.Ecast (Expr.Etempvar _t'12 tuint) tuint)))))
 
-def s_kprog_arm64_stack_write_owned_12 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_owned_12 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_a64_bl_lane__1
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tint) tulong))
@@ -1702,14 +1702,14 @@ def s_kprog_arm64_stack_write_owned_12 : Stmt :=
                  (Expr.Etempvar ___kprog_a64_bl_shift__1 tulong) tulong)
                tuchar)]))))))
 
-def s_kprog_arm64_stack_write_owned_13 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_owned_13 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_arm64_stack_write_owned_14 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_owned_14 : Stmt :=
 (Stmt.Sset _t'13
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
 
-def s_kprog_arm64_stack_write_owned_15 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_owned_15 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Etempvar ___a64_stw_width tuchar)
                     (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
@@ -1733,7 +1733,7 @@ def s_kprog_arm64_stack_write_owned_15 : Stmt :=
         (Stmt.Sset _t'13 (Expr.Ecast (Expr.Etempvar _t'13 tuint) tuint)))
       (Stmt.Sset _t'13 (Expr.Ecast (Expr.Etempvar _t'13 tuint) tuint)))))
 
-def s_kprog_arm64_stack_write_owned_16 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_owned_16 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_a64_bl_lane__2
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 2) tint) tulong))
@@ -1830,10 +1830,10 @@ def s_kprog_arm64_stack_write_owned_16 : Stmt :=
                  (Expr.Etempvar ___kprog_a64_bl_shift__2 tulong) tulong)
                tuchar)]))))))
 
-def s_kprog_arm64_stack_write_owned_17 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_owned_17 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_arm64_stack_write_owned_18 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_owned_18 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Etempvar ___a64_stw_width tuchar)
                     (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
@@ -1863,7 +1863,7 @@ def s_kprog_arm64_stack_write_owned_18 : Stmt :=
           (Stmt.Sset _t'14 (Expr.Ecast (Expr.Etempvar _t'14 tuint) tuint)))
         (Stmt.Sset _t'14 (Expr.Ecast (Expr.Etempvar _t'14 tuint) tuint))))))
 
-def s_kprog_arm64_stack_write_owned_19 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_owned_19 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_a64_bl_lane__3
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tint) tulong))
@@ -1960,10 +1960,10 @@ def s_kprog_arm64_stack_write_owned_19 : Stmt :=
                  (Expr.Etempvar ___kprog_a64_bl_shift__3 tulong) tulong)
                tuchar)]))))))
 
-def s_kprog_arm64_stack_write_owned_20 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_owned_20 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_arm64_stack_write_owned_21 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_owned_21 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                       (Expr.Etempvar ___a64_stw_width tuchar)
@@ -2104,7 +2104,7 @@ def s_kprog_arm64_stack_write_owned_21 : Stmt :=
       Stmt.Sbreak)
     Stmt.Sskip))
 
-def s_kprog_arm64_stack_write_owned_22 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_owned_22 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
@@ -3086,11 +3086,11 @@ def f_kprog_arm64_stack_write_owned : Function := {
   Stmt.Sbreak)
 }
 
-def s_kprog_arm64_stack_write_0 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_0 : Stmt :=
 (Stmt.Sset _t'1
   (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 65535) tulong) tulong))
 
-def s_kprog_arm64_stack_write_1 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_1 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'1
@@ -3099,7 +3099,7 @@ def s_kprog_arm64_stack_write_1 : Stmt :=
     (Stmt.Sset _t'1 (Expr.Ecast (Expr.Etempvar _t'1 tulong) tulong)))
   (Stmt.Sset _t'1 (Expr.Ecast (Expr.Etempvar _t'1 tulong) tulong)))
 
-def s_kprog_arm64_stack_write_2 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_2 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'1
@@ -3108,39 +3108,39 @@ def s_kprog_arm64_stack_write_2 : Stmt :=
     (Stmt.Sset _t'1 (Expr.Ecast (Expr.Etempvar _t'1 tulong) tulong)))
   (Stmt.Sset _t'1 (Expr.Ecast (Expr.Etempvar _t'1 tulong) tulong)))
 
-def s_kprog_arm64_stack_write_3 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_3 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'2
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tint) tint))
   (Stmt.Sset _t'2 (Expr.Ecast (Expr.Etempvar _t'2 tint) tbool)))
 
-def s_kprog_arm64_stack_write_4 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_4 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'2
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tint))
   (Stmt.Sset _t'2 (Expr.Ecast (Expr.Etempvar _t'2 tint) tbool)))
 
-def s_kprog_arm64_stack_write_5 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_5 : Stmt :=
 (Stmt.Sset _t'4
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tint) tint))
 
-def s_kprog_arm64_stack_write_6 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_6 : Stmt :=
 (Stmt.Sset _t'4
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tint))
 
-def s_kprog_arm64_stack_write_7 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_7 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'3
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
   (Stmt.Sset _t'3 (Expr.Ecast (Expr.Etempvar _t'3 tuint) tuint)))
 
-def s_kprog_arm64_stack_write_8 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_8 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'3
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 2) tuint) tuint))
   (Stmt.Sset _t'3 (Expr.Ecast (Expr.Etempvar _t'3 tuint) tuint)))
 
-def s_kprog_arm64_stack_write_9 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_9 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq (Expr.Etempvar _tag tuchar)
                     (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
   (Stmt.Sset _t'7 (Expr.Econst_int (Integers.Int.repr 1) tint))
@@ -3149,7 +3149,7 @@ def s_kprog_arm64_stack_write_9 : Stmt :=
       (Expr.Ebinop Binop.Oeq (Expr.Etempvar _tag tuchar)
         (Expr.Econst_int (Integers.Int.repr 10) tuint) tint) tbool)))
 
-def s_kprog_arm64_stack_write_10 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_10 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Scall (some _t'6)
     (Expr.Evar _native_lab_entry_input (Ty.Tfunction [tuint] tulong
@@ -3169,7 +3169,7 @@ def s_kprog_arm64_stack_write_10 : Stmt :=
           (Ty.Tstruct _kprog_arm64_coordinates noattr)) _return_base tulong)
       (Expr.Etempvar _t'6 tulong))))
 
-def s_kprog_arm64_stack_write_11 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_11 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'82
     (Expr.Efield
@@ -3184,7 +3184,7 @@ def s_kprog_arm64_stack_write_11 : Stmt :=
         (Ty.Tstruct _kprog_arm64_coordinates noattr)) _return_valid tuchar)
     (Expr.Econst_int (Integers.Int.repr 1) tint)))
 
-def s_kprog_arm64_stack_write_12 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_12 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sloop
     (Stmt.Ssequence
@@ -3343,7 +3343,7 @@ def s_kprog_arm64_stack_write_12 : Stmt :=
             (tptr tulong)) tulong) (Expr.Etempvar ___a64_stw_payload tulong)))
     Stmt.Sbreak))
 
-def s_kprog_arm64_stack_write_13 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_13 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___ti
     (Expr.Ebinop Binop.Oshr
@@ -3396,16 +3396,16 @@ def s_kprog_arm64_stack_write_13 : Stmt :=
                (Expr.Ecast (Expr.Ecast (Expr.Etempvar _tag tuchar) tuchar)
                  tulong) (Expr.Etempvar ___ts tuint) tulong) tulong)])))))
 
-def s_kprog_arm64_stack_write_14 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_14 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_arm64_stack_write_15 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_15 : Stmt :=
 (Stmt.Sset ___ti__1
   (Expr.Ebinop Binop.Oshr
     (Expr.Ecast (Expr.Etempvar ___a64_stw_index tulong) tulong)
     (Expr.Econst_int (Integers.Int.repr 3) tint) tulong))
 
-def s_kprog_arm64_stack_write_16 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_16 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___ts__1
     (Expr.Ecast
@@ -3455,7 +3455,7 @@ def s_kprog_arm64_stack_write_16 : Stmt :=
                  tuchar) tulong) (Expr.Etempvar ___ts__1 tuint) tulong)
            tulong)]))))
 
-def s_kprog_arm64_stack_write_17 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_17 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Etempvar ___a64_stw_width tuchar)
                     (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
@@ -3484,7 +3484,7 @@ def s_kprog_arm64_stack_write_17 : Stmt :=
           (Stmt.Sset _t'10 (Expr.Ecast (Expr.Etempvar _t'10 tuint) tuint)))
         (Stmt.Sset _t'10 (Expr.Ecast (Expr.Etempvar _t'10 tuint) tuint))))))
 
-def s_kprog_arm64_stack_write_18 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_18 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.One
                     (Expr.Ebinop Binop.Oshr
                       (Expr.Ecast (Expr.Etempvar ___a64_stw_last tulong)
@@ -3554,95 +3554,95 @@ def s_kprog_arm64_stack_write_18 : Stmt :=
     Stmt.Sbreak)
   Stmt.Sskip)
 
-def s_kprog_arm64_stack_write_19 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_19 : Stmt :=
 (Stmt.Scall none
   (Expr.Evar _arm64_sim_unsupported_opcode (Ty.Tfunction [] tvoid cc_default))
   [])
 
-def s_kprog_arm64_stack_write_20 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_20 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_arm64_stack_write_21 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_21 : Stmt :=
 (Stmt.Sset ___kprog_a64_bl_shift__6
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
 
-def s_kprog_arm64_stack_write_22 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_22 : Stmt :=
 (Stmt.Sset ___kprog_a64_bl_shift__6
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tint) tulong))
 
-def s_kprog_arm64_stack_write_23 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_23 : Stmt :=
 (Stmt.Sset ___kprog_a64_bl_shift__6
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 16) tint) tulong))
 
-def s_kprog_arm64_stack_write_24 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_24 : Stmt :=
 (Stmt.Sset ___kprog_a64_bl_shift__6
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 24) tint) tulong))
 
-def s_kprog_arm64_stack_write_25 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_25 : Stmt :=
 (Stmt.Sset ___kprog_a64_bl_shift__6
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 32) tint) tulong))
 
-def s_kprog_arm64_stack_write_26 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_26 : Stmt :=
 (Stmt.Sset ___kprog_a64_bl_shift__6
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 40) tint) tulong))
 
-def s_kprog_arm64_stack_write_27 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_27 : Stmt :=
 (Stmt.Sset ___kprog_a64_bl_shift__6
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 48) tint) tulong))
 
-def s_kprog_arm64_stack_write_28 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_28 : Stmt :=
 (Stmt.Sset ___kprog_a64_bl_shift__6
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 56) tint) tulong))
 
-def s_kprog_arm64_stack_write_29 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_29 : Stmt :=
 (Stmt.Scall none
   (Expr.Evar _arm64_sim_unsupported_opcode (Ty.Tfunction [] tvoid cc_default))
   [])
 
-def s_kprog_arm64_stack_write_30 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_30 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_arm64_stack_write_31 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_31 : Stmt :=
 (Stmt.Sset ___kprog_a64_bl_shift__7
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
 
-def s_kprog_arm64_stack_write_32 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_32 : Stmt :=
 (Stmt.Sset ___kprog_a64_bl_shift__7
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tint) tulong))
 
-def s_kprog_arm64_stack_write_33 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_33 : Stmt :=
 (Stmt.Sset ___kprog_a64_bl_shift__7
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 16) tint) tulong))
 
-def s_kprog_arm64_stack_write_34 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_34 : Stmt :=
 (Stmt.Sset ___kprog_a64_bl_shift__7
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 24) tint) tulong))
 
-def s_kprog_arm64_stack_write_35 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_35 : Stmt :=
 (Stmt.Sset ___kprog_a64_bl_shift__7
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 32) tint) tulong))
 
-def s_kprog_arm64_stack_write_36 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_36 : Stmt :=
 (Stmt.Sset ___kprog_a64_bl_shift__7
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 40) tint) tulong))
 
-def s_kprog_arm64_stack_write_37 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_37 : Stmt :=
 (Stmt.Sset ___kprog_a64_bl_shift__7
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 48) tint) tulong))
 
-def s_kprog_arm64_stack_write_38 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_38 : Stmt :=
 (Stmt.Sset ___kprog_a64_bl_shift__7
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 56) tint) tulong))
 
-def s_kprog_arm64_stack_write_39 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_39 : Stmt :=
 (Stmt.Scall none
   (Expr.Evar _arm64_sim_unsupported_opcode (Ty.Tfunction [] tvoid cc_default))
   [])
 
-def s_kprog_arm64_stack_write_40 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_40 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_arm64_stack_write_41 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_41 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sloop
     (Stmt.Ssequence
@@ -4788,7 +4788,7 @@ def s_kprog_arm64_stack_write_41 : Stmt :=
                     Stmt.Sbreak)
                   Stmt.Sskip)))))))))
 
-def s_kprog_arm64_stack_write_42 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_42 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'65
     (Expr.Efield
@@ -4809,7 +4809,7 @@ def s_kprog_arm64_stack_write_42 : Stmt :=
             (Expr.Etempvar ___a64_loss_i tuint) tlong)
           (Expr.Etempvar _t'66 tlong) tint) tbool))))
 
-def s_kprog_arm64_stack_write_43 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_43 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'64
     (Expr.Efield
@@ -4822,7 +4822,7 @@ def s_kprog_arm64_stack_write_43 : Stmt :=
         (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___a64_loss_off tlong)
           (Expr.Etempvar ___a64_loss_i tuint) tlong) tulong) tulong)))
 
-def s_kprog_arm64_stack_write_44 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_44 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sloop
     (Stmt.Ssequence
@@ -4892,7 +4892,7 @@ def s_kprog_arm64_stack_write_44 : Stmt :=
     (Expr.Ebinop Binop.Osub (Expr.Etempvar ___a64_unmat_value__1 tulong)
       (Expr.Etempvar ___a64_unmat_base__2 tulong) tulong)))
 
-def s_kprog_arm64_stack_write_45 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_45 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Etempvar ___a64_unmat_tag__1 tuchar)
                     (Expr.Econst_int (Integers.Int.repr 10) tuint) tint)
@@ -4970,70 +4970,70 @@ def s_kprog_arm64_stack_write_45 : Stmt :=
         (Expr.Etempvar ___a64_unmat_base__3 tulong) tulong)))
   Stmt.Sskip)
 
-def s_kprog_arm64_stack_write_46 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_46 : Stmt :=
 (Stmt.Sset _t'29
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 4) tuint) tuint))
 
-def s_kprog_arm64_stack_write_47 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_47 : Stmt :=
 (Stmt.Sset _t'29
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tuint) tuint))
 
-def s_kprog_arm64_stack_write_48 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_48 : Stmt :=
 (Stmt.Sbuiltin (some _t'30) (ExtFun.EF_vload Chunk.Mint64)
   [(tptr (tvolatile tulong))]
   [(Expr.Eaddrof
      (Expr.Ederef (Expr.Etempvar ___tp__5 (tptr (tvolatile tulong)))
        (tvolatile tulong)) (tptr (tvolatile tulong)))])
 
-def s_kprog_arm64_stack_write_49 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_49 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_a64_bl_shift__8
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
   Stmt.Sbreak)
 
-def s_kprog_arm64_stack_write_50 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_50 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_a64_bl_shift__8
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tint) tulong))
   Stmt.Sbreak)
 
-def s_kprog_arm64_stack_write_51 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_51 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_a64_bl_shift__8
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 16) tint) tulong))
   Stmt.Sbreak)
 
-def s_kprog_arm64_stack_write_52 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_52 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_a64_bl_shift__8
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 24) tint) tulong))
   Stmt.Sbreak)
 
-def s_kprog_arm64_stack_write_53 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_53 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_a64_bl_shift__8
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 32) tint) tulong))
   Stmt.Sbreak)
 
-def s_kprog_arm64_stack_write_54 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_54 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_a64_bl_shift__8
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 40) tint) tulong))
   Stmt.Sbreak)
 
-def s_kprog_arm64_stack_write_55 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_55 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_a64_bl_shift__8
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 48) tint) tulong))
   Stmt.Sbreak)
 
-def s_kprog_arm64_stack_write_56 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_56 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_a64_bl_shift__8
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 56) tint) tulong))
   Stmt.Sbreak)
 
-def s_kprog_arm64_stack_write_57 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_57 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sloop
     (Stmt.Scall none
@@ -5042,11 +5042,11 @@ def s_kprog_arm64_stack_write_57 : Stmt :=
     Stmt.Sbreak)
   Stmt.Sbreak)
 
-def s_kprog_arm64_stack_write_58 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_58 : Stmt :=
 (Stmt.Sset _t'31
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
 
-def s_kprog_arm64_stack_write_59 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_59 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'31
@@ -5054,7 +5054,7 @@ def s_kprog_arm64_stack_write_59 : Stmt :=
     (Stmt.Sset _t'31 (Expr.Ecast (Expr.Etempvar _t'31 tuint) tuint)))
   (Stmt.Sset _t'31 (Expr.Ecast (Expr.Etempvar _t'31 tuint) tuint)))
 
-def s_kprog_arm64_stack_write_60 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_60 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'31
@@ -5062,11 +5062,11 @@ def s_kprog_arm64_stack_write_60 : Stmt :=
     (Stmt.Sset _t'31 (Expr.Ecast (Expr.Etempvar _t'31 tuint) tuint)))
   (Stmt.Sset _t'31 (Expr.Ecast (Expr.Etempvar _t'31 tuint) tuint)))
 
-def s_kprog_arm64_stack_write_61 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_61 : Stmt :=
 (Stmt.Sset ___kprog_a64_bl_shift__9
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
 
-def s_kprog_arm64_stack_write_62 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_62 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sswitch (Expr.Etempvar ___kprog_a64_bl_lane__9 tulong)
     (LStmts.LScons (some 0)
@@ -5148,13 +5148,13 @@ def s_kprog_arm64_stack_write_62 : Stmt :=
            (Expr.Etempvar ___kprog_a64_bl_value__9 tulong)
            (Expr.Etempvar ___kprog_a64_bl_shift__9 tulong) tulong) tuchar)])))
 
-def s_kprog_arm64_stack_write_63 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_63 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'32
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
   (Stmt.Sset _t'32 (Expr.Ecast (Expr.Etempvar _t'32 tuint) tuint)))
 
-def s_kprog_arm64_stack_write_64 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_64 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Etempvar ___a64_stw_width__1 tuchar)
                     (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
@@ -5171,11 +5171,11 @@ def s_kprog_arm64_stack_write_64 : Stmt :=
       (Stmt.Sset _t'32 (Expr.Ecast (Expr.Etempvar _t'32 tuint) tuint)))
     (Stmt.Sset _t'32 (Expr.Ecast (Expr.Etempvar _t'32 tuint) tuint))))
 
-def s_kprog_arm64_stack_write_65 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_65 : Stmt :=
 (Stmt.Sset ___kprog_a64_bl_value__10
   (Expr.Etempvar ___a64_stw_value__1 tulong))
 
-def s_kprog_arm64_stack_write_66 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_66 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_a64_bl_shift__10
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
@@ -5262,13 +5262,13 @@ def s_kprog_arm64_stack_write_66 : Stmt :=
              (Expr.Etempvar ___kprog_a64_bl_value__10 tulong)
              (Expr.Etempvar ___kprog_a64_bl_shift__10 tulong) tulong) tuchar)]))))
 
-def s_kprog_arm64_stack_write_67 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_67 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'33
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
   (Stmt.Sset _t'33 (Expr.Ecast (Expr.Etempvar _t'33 tuint) tuint)))
 
-def s_kprog_arm64_stack_write_68 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_68 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Etempvar ___a64_stw_width__1 tuchar)
                     (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
@@ -5285,11 +5285,11 @@ def s_kprog_arm64_stack_write_68 : Stmt :=
       (Stmt.Sset _t'33 (Expr.Ecast (Expr.Etempvar _t'33 tuint) tuint)))
     (Stmt.Sset _t'33 (Expr.Ecast (Expr.Etempvar _t'33 tuint) tuint))))
 
-def s_kprog_arm64_stack_write_69 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_69 : Stmt :=
 (Stmt.Sset ___kprog_a64_bl_lane__11
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tint) tulong))
 
-def s_kprog_arm64_stack_write_70 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_70 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_a64_bl_value__11
     (Expr.Etempvar ___a64_stw_value__1 tulong))
@@ -5382,11 +5382,11 @@ def s_kprog_arm64_stack_write_70 : Stmt :=
                (Expr.Etempvar ___kprog_a64_bl_shift__11 tulong) tulong)
              tuchar)])))))
 
-def s_kprog_arm64_stack_write_71 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_71 : Stmt :=
 (Stmt.Sset _t'34
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
 
-def s_kprog_arm64_stack_write_72 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_72 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Etempvar ___a64_stw_width__1 tuchar)
                     (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
@@ -5410,7 +5410,7 @@ def s_kprog_arm64_stack_write_72 : Stmt :=
         (Stmt.Sset _t'34 (Expr.Ecast (Expr.Etempvar _t'34 tuint) tuint)))
       (Stmt.Sset _t'34 (Expr.Ecast (Expr.Etempvar _t'34 tuint) tuint)))))
 
-def s_kprog_arm64_stack_write_73 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_73 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_a64_bl_lane__12
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 4) tint) tulong))
@@ -5507,14 +5507,14 @@ def s_kprog_arm64_stack_write_73 : Stmt :=
                  (Expr.Etempvar ___kprog_a64_bl_shift__12 tulong) tulong)
                tuchar)]))))))
 
-def s_kprog_arm64_stack_write_74 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_74 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_arm64_stack_write_75 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_75 : Stmt :=
 (Stmt.Sset _t'35
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
 
-def s_kprog_arm64_stack_write_76 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_76 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Etempvar ___a64_stw_width__1 tuchar)
                     (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
@@ -5538,7 +5538,7 @@ def s_kprog_arm64_stack_write_76 : Stmt :=
         (Stmt.Sset _t'35 (Expr.Ecast (Expr.Etempvar _t'35 tuint) tuint)))
       (Stmt.Sset _t'35 (Expr.Ecast (Expr.Etempvar _t'35 tuint) tuint)))))
 
-def s_kprog_arm64_stack_write_77 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_77 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_a64_bl_lane__13
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 5) tint) tulong))
@@ -5635,10 +5635,10 @@ def s_kprog_arm64_stack_write_77 : Stmt :=
                  (Expr.Etempvar ___kprog_a64_bl_shift__13 tulong) tulong)
                tuchar)]))))))
 
-def s_kprog_arm64_stack_write_78 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_78 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_arm64_stack_write_79 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_79 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Etempvar ___a64_stw_width__1 tuchar)
                     (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
@@ -5668,7 +5668,7 @@ def s_kprog_arm64_stack_write_79 : Stmt :=
           (Stmt.Sset _t'36 (Expr.Ecast (Expr.Etempvar _t'36 tuint) tuint)))
         (Stmt.Sset _t'36 (Expr.Ecast (Expr.Etempvar _t'36 tuint) tuint))))))
 
-def s_kprog_arm64_stack_write_80 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_80 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_a64_bl_lane__14
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 6) tint) tulong))
@@ -5765,10 +5765,10 @@ def s_kprog_arm64_stack_write_80 : Stmt :=
                  (Expr.Etempvar ___kprog_a64_bl_shift__14 tulong) tulong)
                tuchar)]))))))
 
-def s_kprog_arm64_stack_write_81 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_81 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_arm64_stack_write_82 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_82 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                     (Expr.Etempvar ___a64_stw_width__1 tuchar)
                     (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
@@ -5798,7 +5798,7 @@ def s_kprog_arm64_stack_write_82 : Stmt :=
           (Stmt.Sset _t'37 (Expr.Ecast (Expr.Etempvar _t'37 tuint) tuint)))
         (Stmt.Sset _t'37 (Expr.Ecast (Expr.Etempvar _t'37 tuint) tuint))))))
 
-def s_kprog_arm64_stack_write_83 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_83 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_a64_bl_lane__15
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 7) tint) tulong))
@@ -5895,10 +5895,10 @@ def s_kprog_arm64_stack_write_83 : Stmt :=
                  (Expr.Etempvar ___kprog_a64_bl_shift__15 tulong) tulong)
                tuchar)]))))))
 
-def s_kprog_arm64_stack_write_84 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_84 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_arm64_stack_write_85 : Stmt :=
+@[noinline] def s_kprog_arm64_stack_write_85 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___a64_stw_width__1
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuchar))
@@ -6597,6 +6597,102 @@ def s_kprog_arm64_stack_write_85 : Stmt :=
                                   s_kprog_arm64_stack_write_84)
                                 Stmt.Sskip))))))))))))))))
 
+@[noinline] def l_kprog_arm64_stack_write_temps_0 : List (Ident × Ty) :=
+[(___a64_loss_off, tlong), (___a64_loss_width, tuchar),
+ (___a64_loss_value, tulong), (___a64_stw_index, tulong),
+ (___a64_stw_width, tuchar), (___a64_stw_value, tulong),
+ (___a64_stw_action, tuchar), (___a64_stw_payload, tulong),
+ (___a64_unmat_value, tulong), (___a64_unmat_tag, tuchar),
+ (___a64_unmat_base, tulong), (___a64_unmat_base__1, tulong),
+ (___ti, tulong), (___ts, tuint), (___tp, (tptr (tvolatile tulong))),
+ (___tv, tulong), (___ti__1, tulong), (___ts__1, tuint),
+ (___tp__1, (tptr (tvolatile tulong))), (___tv__1, tulong),
+ (___a64_stw_last, tulong), (___ti__2, tulong), (___ts__2, tuint),
+ (___tp__2, (tptr (tvolatile tulong))), (___tv__2, tulong),
+ (___kprog_a64_bl_lane, tulong), (___kprog_a64_bl_value, tulong),
+ (___kprog_a64_bl_shift, tulong), (___kprog_a64_bl_lane__1, tulong),
+ (___kprog_a64_bl_value__1, tulong), (___kprog_a64_bl_shift__1, tulong),
+ (___kprog_a64_bl_lane__2, tulong), (___kprog_a64_bl_value__2, tulong),
+ (___kprog_a64_bl_shift__2, tulong), (___kprog_a64_bl_lane__3, tulong),
+ (___kprog_a64_bl_value__3, tulong), (___kprog_a64_bl_shift__3, tulong),
+ (___kprog_a64_bl_lane__4, tulong), (___kprog_a64_bl_value__4, tulong),
+ (___kprog_a64_bl_shift__4, tulong), (___kprog_a64_bl_lane__5, tulong),
+ (___kprog_a64_bl_value__5, tulong), (___kprog_a64_bl_shift__5, tulong),
+ (___kprog_a64_bl_lane__6, tulong), (___kprog_a64_bl_value__6, tulong),
+ (___kprog_a64_bl_shift__6, tulong), (___kprog_a64_bl_lane__7, tulong),
+ (___kprog_a64_bl_value__7, tulong), (___kprog_a64_bl_shift__7, tulong),
+ (___a64_loss_i, tuint), (___a64_stw_index__1, tulong),
+ (___a64_stw_width__1, tuchar), (___a64_stw_value__1, tulong),
+ (___a64_stw_action__1, tuchar), (___a64_stw_payload__1, tulong),
+ (___a64_unmat_value__1, tulong), (___a64_unmat_tag__1, tuchar),
+ (___a64_unmat_base__2, tulong), (___a64_unmat_base__3, tulong),
+ (___ti__3, tulong), (___ts__3, tuint),
+ (___tp__3, (tptr (tvolatile tulong))), (___tv__3, tulong),
+ (___ti__4, tulong), (___ts__4, tuint),
+ (___tp__4, (tptr (tvolatile tulong))), (___tv__4, tulong),
+ (___a64_stw_last__1, tulong), (___ti__5, tulong), (___ts__5, tuint),
+ (___tp__5, (tptr (tvolatile tulong))), (___tv__5, tulong),
+ (___kprog_a64_bl_lane__8, tulong), (___kprog_a64_bl_value__8, tulong),
+ (___kprog_a64_bl_shift__8, tulong), (___kprog_a64_bl_lane__9, tulong),
+ (___kprog_a64_bl_value__9, tulong), (___kprog_a64_bl_shift__9, tulong),
+ (___kprog_a64_bl_lane__10, tulong), (___kprog_a64_bl_value__10, tulong),
+ (___kprog_a64_bl_shift__10, tulong), (___kprog_a64_bl_lane__11, tulong),
+ (___kprog_a64_bl_value__11, tulong), (___kprog_a64_bl_shift__11, tulong),
+ (___kprog_a64_bl_lane__12, tulong), (___kprog_a64_bl_value__12, tulong),
+ (___kprog_a64_bl_shift__12, tulong), (___kprog_a64_bl_lane__13, tulong),
+ (___kprog_a64_bl_value__13, tulong), (___kprog_a64_bl_shift__13, tulong),
+ (___kprog_a64_bl_lane__14, tulong), (___kprog_a64_bl_value__14, tulong),
+ (___kprog_a64_bl_shift__14, tulong)]
+
+@[noinline] def l_kprog_arm64_stack_write_temps_1 : List (Ident × Ty) :=
+[(___kprog_a64_bl_lane__15, tulong), (___kprog_a64_bl_value__15, tulong),
+ (___kprog_a64_bl_shift__15, tulong), (_t'38, tint), (_t'37, tuint),
+ (_t'36, tuint), (_t'35, tuint), (_t'34, tuint), (_t'33, tuint),
+ (_t'32, tuint), (_t'31, tuint), (_t'30, (tvolatile tulong)), (_t'29, tuint),
+ (_t'28, (tvolatile tulong)), (_t'27, (tvolatile tulong)), (_t'26, tint),
+ (_t'25, tulong), (_t'24, tulong), (_t'23, tint), (_t'22, tuint),
+ (_t'21, tint), (_t'20, tulong), (_t'19, tulong), (_t'18, tuint),
+ (_t'17, tuint), (_t'16, tuint), (_t'15, tuint), (_t'14, tuint),
+ (_t'13, tuint), (_t'12, tuint), (_t'11, (tvolatile tulong)), (_t'10, tuint),
+ (_t'9, (tvolatile tulong)), (_t'8, (tvolatile tulong)), (_t'7, tint),
+ (_t'6, tulong), (_t'5, tulong), (_t'4, tint), (_t'3, tuint), (_t'2, tint),
+ (_t'1, tulong), (_t'90, tlong), (_t'89, (tptr (tvolatile tulong))),
+ (_t'88, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+ (_t'87, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+ (_t'86, tuchar),
+ (_t'85, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+ (_t'84, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+ (_t'83, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+ (_t'82, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+ (_t'81, tuchar),
+ (_t'80, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+ (_t'79, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+ (_t'78, (tptr tulong)), (_t'77, (tptr tuchar)), (_t'76, (tptr tuchar)),
+ (_t'75, (tptr tuchar)), (_t'74, (tptr (tvolatile tuchar))),
+ (_t'73, (tptr (tvolatile tuchar))), (_t'72, (tptr (tvolatile tuchar))),
+ (_t'71, (tptr (tvolatile tuchar))), (_t'70, (tptr (tvolatile tuchar))),
+ (_t'69, (tptr (tvolatile tuchar))), (_t'68, (tptr (tvolatile tuchar))),
+ (_t'67, (tptr (tvolatile tuchar))), (_t'66, tlong),
+ (_t'65, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+ (_t'64, tlong), (_t'63, (tptr (tvolatile tulong))),
+ (_t'62, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+ (_t'61, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+ (_t'60, tuchar),
+ (_t'59, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+ (_t'58, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+ (_t'57, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+ (_t'56, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+ (_t'55, tuchar),
+ (_t'54, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+ (_t'53, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
+ (_t'52, (tptr tulong)), (_t'51, (tptr tuchar)), (_t'50, (tptr tuchar)),
+ (_t'49, (tptr tuchar)), (_t'48, (tptr (tvolatile tuchar))),
+ (_t'47, (tptr (tvolatile tuchar))), (_t'46, (tptr (tvolatile tuchar))),
+ (_t'45, (tptr (tvolatile tuchar))), (_t'44, (tptr (tvolatile tuchar))),
+ (_t'43, (tptr (tvolatile tuchar))), (_t'42, (tptr (tvolatile tuchar))),
+ (_t'41, (tptr (tvolatile tuchar))), (_t'40, tlong),
+ (_t'39, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))]
+
 def f_kprog_arm64_stack_write : Function := {
   fn_return := tvoid,
   fn_callconv := cc_default,
@@ -6604,134 +6700,7 @@ def f_kprog_arm64_stack_write : Function := {
                 (_off, tlong), (_width, tuchar), (_value, tulong),
                 (_tag, tuchar)],
   fn_vars := [],
-  fn_temps := [(___a64_loss_off, tlong), (___a64_loss_width, tuchar),
-               (___a64_loss_value, tulong), (___a64_stw_index, tulong),
-               (___a64_stw_width, tuchar), (___a64_stw_value, tulong),
-               (___a64_stw_action, tuchar), (___a64_stw_payload, tulong),
-               (___a64_unmat_value, tulong), (___a64_unmat_tag, tuchar),
-               (___a64_unmat_base, tulong), (___a64_unmat_base__1, tulong),
-               (___ti, tulong), (___ts, tuint),
-               (___tp, (tptr (tvolatile tulong))), (___tv, tulong),
-               (___ti__1, tulong), (___ts__1, tuint),
-               (___tp__1, (tptr (tvolatile tulong))), (___tv__1, tulong),
-               (___a64_stw_last, tulong), (___ti__2, tulong),
-               (___ts__2, tuint), (___tp__2, (tptr (tvolatile tulong))),
-               (___tv__2, tulong), (___kprog_a64_bl_lane, tulong),
-               (___kprog_a64_bl_value, tulong),
-               (___kprog_a64_bl_shift, tulong),
-               (___kprog_a64_bl_lane__1, tulong),
-               (___kprog_a64_bl_value__1, tulong),
-               (___kprog_a64_bl_shift__1, tulong),
-               (___kprog_a64_bl_lane__2, tulong),
-               (___kprog_a64_bl_value__2, tulong),
-               (___kprog_a64_bl_shift__2, tulong),
-               (___kprog_a64_bl_lane__3, tulong),
-               (___kprog_a64_bl_value__3, tulong),
-               (___kprog_a64_bl_shift__3, tulong),
-               (___kprog_a64_bl_lane__4, tulong),
-               (___kprog_a64_bl_value__4, tulong),
-               (___kprog_a64_bl_shift__4, tulong),
-               (___kprog_a64_bl_lane__5, tulong),
-               (___kprog_a64_bl_value__5, tulong),
-               (___kprog_a64_bl_shift__5, tulong),
-               (___kprog_a64_bl_lane__6, tulong),
-               (___kprog_a64_bl_value__6, tulong),
-               (___kprog_a64_bl_shift__6, tulong),
-               (___kprog_a64_bl_lane__7, tulong),
-               (___kprog_a64_bl_value__7, tulong),
-               (___kprog_a64_bl_shift__7, tulong), (___a64_loss_i, tuint),
-               (___a64_stw_index__1, tulong), (___a64_stw_width__1, tuchar),
-               (___a64_stw_value__1, tulong), (___a64_stw_action__1, tuchar),
-               (___a64_stw_payload__1, tulong),
-               (___a64_unmat_value__1, tulong),
-               (___a64_unmat_tag__1, tuchar), (___a64_unmat_base__2, tulong),
-               (___a64_unmat_base__3, tulong), (___ti__3, tulong),
-               (___ts__3, tuint), (___tp__3, (tptr (tvolatile tulong))),
-               (___tv__3, tulong), (___ti__4, tulong), (___ts__4, tuint),
-               (___tp__4, (tptr (tvolatile tulong))), (___tv__4, tulong),
-               (___a64_stw_last__1, tulong), (___ti__5, tulong),
-               (___ts__5, tuint), (___tp__5, (tptr (tvolatile tulong))),
-               (___tv__5, tulong), (___kprog_a64_bl_lane__8, tulong),
-               (___kprog_a64_bl_value__8, tulong),
-               (___kprog_a64_bl_shift__8, tulong),
-               (___kprog_a64_bl_lane__9, tulong),
-               (___kprog_a64_bl_value__9, tulong),
-               (___kprog_a64_bl_shift__9, tulong),
-               (___kprog_a64_bl_lane__10, tulong),
-               (___kprog_a64_bl_value__10, tulong),
-               (___kprog_a64_bl_shift__10, tulong),
-               (___kprog_a64_bl_lane__11, tulong),
-               (___kprog_a64_bl_value__11, tulong),
-               (___kprog_a64_bl_shift__11, tulong),
-               (___kprog_a64_bl_lane__12, tulong),
-               (___kprog_a64_bl_value__12, tulong),
-               (___kprog_a64_bl_shift__12, tulong),
-               (___kprog_a64_bl_lane__13, tulong),
-               (___kprog_a64_bl_value__13, tulong),
-               (___kprog_a64_bl_shift__13, tulong),
-               (___kprog_a64_bl_lane__14, tulong),
-               (___kprog_a64_bl_value__14, tulong),
-               (___kprog_a64_bl_shift__14, tulong),
-               (___kprog_a64_bl_lane__15, tulong),
-               (___kprog_a64_bl_value__15, tulong),
-               (___kprog_a64_bl_shift__15, tulong), (_t'38, tint),
-               (_t'37, tuint), (_t'36, tuint), (_t'35, tuint),
-               (_t'34, tuint), (_t'33, tuint), (_t'32, tuint),
-               (_t'31, tuint), (_t'30, (tvolatile tulong)), (_t'29, tuint),
-               (_t'28, (tvolatile tulong)), (_t'27, (tvolatile tulong)),
-               (_t'26, tint), (_t'25, tulong), (_t'24, tulong),
-               (_t'23, tint), (_t'22, tuint), (_t'21, tint), (_t'20, tulong),
-               (_t'19, tulong), (_t'18, tuint), (_t'17, tuint),
-               (_t'16, tuint), (_t'15, tuint), (_t'14, tuint),
-               (_t'13, tuint), (_t'12, tuint), (_t'11, (tvolatile tulong)),
-               (_t'10, tuint), (_t'9, (tvolatile tulong)),
-               (_t'8, (tvolatile tulong)), (_t'7, tint), (_t'6, tulong),
-               (_t'5, tulong), (_t'4, tint), (_t'3, tuint), (_t'2, tint),
-               (_t'1, tulong), (_t'90, tlong),
-               (_t'89, (tptr (tvolatile tulong))),
-               (_t'88, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
-               (_t'87, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
-               (_t'86, tuchar),
-               (_t'85, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
-               (_t'84, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
-               (_t'83, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
-               (_t'82, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
-               (_t'81, tuchar),
-               (_t'80, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
-               (_t'79, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
-               (_t'78, (tptr tulong)), (_t'77, (tptr tuchar)),
-               (_t'76, (tptr tuchar)), (_t'75, (tptr tuchar)),
-               (_t'74, (tptr (tvolatile tuchar))),
-               (_t'73, (tptr (tvolatile tuchar))),
-               (_t'72, (tptr (tvolatile tuchar))),
-               (_t'71, (tptr (tvolatile tuchar))),
-               (_t'70, (tptr (tvolatile tuchar))),
-               (_t'69, (tptr (tvolatile tuchar))),
-               (_t'68, (tptr (tvolatile tuchar))),
-               (_t'67, (tptr (tvolatile tuchar))), (_t'66, tlong),
-               (_t'65, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
-               (_t'64, tlong), (_t'63, (tptr (tvolatile tulong))),
-               (_t'62, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
-               (_t'61, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
-               (_t'60, tuchar),
-               (_t'59, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
-               (_t'58, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
-               (_t'57, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
-               (_t'56, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
-               (_t'55, tuchar),
-               (_t'54, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
-               (_t'53, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr))),
-               (_t'52, (tptr tulong)), (_t'51, (tptr tuchar)),
-               (_t'50, (tptr tuchar)), (_t'49, (tptr tuchar)),
-               (_t'48, (tptr (tvolatile tuchar))),
-               (_t'47, (tptr (tvolatile tuchar))),
-               (_t'46, (tptr (tvolatile tuchar))),
-               (_t'45, (tptr (tvolatile tuchar))),
-               (_t'44, (tptr (tvolatile tuchar))),
-               (_t'43, (tptr (tvolatile tuchar))),
-               (_t'42, (tptr (tvolatile tuchar))),
-               (_t'41, (tptr (tvolatile tuchar))), (_t'40, tlong),
-               (_t'39, (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))],
+  fn_temps := (l_kprog_arm64_stack_write_temps_0 ++ l_kprog_arm64_stack_write_temps_1),
   fn_body :=
 (Stmt.Sloop
   (Stmt.Ssequence

@@ -259,7 +259,7 @@ def f_kprog_arm64_return_base : Function := {
   (Stmt.Sreturn (some (Expr.Etempvar _result tulong))))
 }
 
-def s_kprog_arm64_materialize_0 : Stmt :=
+@[noinline] def s_kprog_arm64_materialize_0 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Scall (some _t'2)
     (Expr.Evar _native_lab_entry_input (Ty.Tfunction [tuint] tulong
@@ -272,7 +272,7 @@ def s_kprog_arm64_materialize_0 : Stmt :=
         (Ty.Tstruct _kprog_arm64_coordinates noattr)) _return_base tulong)
     (Expr.Etempvar _t'2 tulong)))
 
-def s_kprog_arm64_materialize_1 : Stmt :=
+@[noinline] def s_kprog_arm64_materialize_1 : Stmt :=
 (Stmt.Sassign
   (Expr.Efield
     (Expr.Ederef
@@ -386,7 +386,7 @@ def f_kprog_arm64_materialize : Function := {
   (Stmt.Sreturn (some (Expr.Etempvar _result tulong))))
 }
 
-def s_kprog_arm64_unmaterialize_0 : Stmt :=
+@[noinline] def s_kprog_arm64_unmaterialize_0 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Scall (some _t'2)
     (Expr.Evar _native_lab_entry_input (Ty.Tfunction [tuint] tulong
@@ -399,7 +399,7 @@ def s_kprog_arm64_unmaterialize_0 : Stmt :=
         (Ty.Tstruct _kprog_arm64_coordinates noattr)) _return_base tulong)
     (Expr.Etempvar _t'2 tulong)))
 
-def s_kprog_arm64_unmaterialize_1 : Stmt :=
+@[noinline] def s_kprog_arm64_unmaterialize_1 : Stmt :=
 (Stmt.Sassign
   (Expr.Efield
     (Expr.Ederef
@@ -513,7 +513,7 @@ def f_kprog_arm64_unmaterialize : Function := {
   (Stmt.Sreturn (some (Expr.Etempvar _result tulong))))
 }
 
-def s_kprog_arm64_read_reg_0 : Stmt :=
+@[noinline] def s_kprog_arm64_read_reg_0 : Stmt :=
 (Stmt.Sassign
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
@@ -526,7 +526,7 @@ def s_kprog_arm64_read_reg_0 : Stmt :=
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuchar)
     (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
 
-def s_kprog_arm64_read_reg_1 : Stmt :=
+@[noinline] def s_kprog_arm64_read_reg_1 : Stmt :=
 (Stmt.Sassign
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
@@ -537,7 +537,7 @@ def s_kprog_arm64_read_reg_1 : Stmt :=
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuchar)
     (tptr tuchar)))
 
-def s_kprog_arm64_read_reg_2 : Stmt :=
+@[noinline] def s_kprog_arm64_read_reg_2 : Stmt :=
 (Stmt.Sassign
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
@@ -548,10 +548,10 @@ def s_kprog_arm64_read_reg_2 : Stmt :=
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 18) tuint) tuchar)
     (tptr tuchar)))
 
-def s_kprog_arm64_read_reg_3 : Stmt :=
+@[noinline] def s_kprog_arm64_read_reg_3 : Stmt :=
 (Stmt.Sset ___a64_l_reg (Expr.Etempvar _reg tulong))
 
-def s_kprog_arm64_read_reg_4 : Stmt :=
+@[noinline] def s_kprog_arm64_read_reg_4 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                       (Expr.Etempvar ___a64_l_reg tulong)
@@ -592,7 +592,7 @@ def s_kprog_arm64_read_reg_4 : Stmt :=
         (Stmt.Sset _t'1 (Expr.Ecast (Expr.Etempvar _t'1 tulong) tulong)))))
   (Stmt.Sset ___a64_read_value (Expr.Etempvar _t'1 tulong)))
 
-def s_kprog_arm64_read_reg_5 : Stmt :=
+@[noinline] def s_kprog_arm64_read_reg_5 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___a64_l_reg__1 (Expr.Etempvar _reg tulong))
   (Stmt.Ssequence
@@ -625,10 +625,10 @@ def s_kprog_arm64_read_reg_5 : Stmt :=
     (Stmt.Sset ___a64_read_tag
       (Expr.Ecast (Expr.Etempvar _t'2 tuint) tuchar))))
 
-def s_kprog_arm64_read_reg_6 : Stmt :=
+@[noinline] def s_kprog_arm64_read_reg_6 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_arm64_read_reg_7 : Stmt :=
+@[noinline] def s_kprog_arm64_read_reg_7 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___a64_mat_value (Expr.Etempvar ___a64_read_value tulong))
   (Stmt.Ssequence
@@ -731,10 +731,10 @@ def s_kprog_arm64_read_reg_7 : Stmt :=
           Stmt.Sskip))
       (Stmt.Sset _result (Expr.Etempvar ___a64_mat_value tulong)))))
 
-def s_kprog_arm64_read_reg_8 : Stmt :=
+@[noinline] def s_kprog_arm64_read_reg_8 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_arm64_read_reg_9 : Stmt :=
+@[noinline] def s_kprog_arm64_read_reg_9 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Ederef
@@ -882,7 +882,7 @@ def s_kprog_arm64_read_reg_9 : Stmt :=
                             Stmt.Sbreak)
                           (Stmt.Sreturn (some (Expr.Etempvar _result tulong))))))))))))))))
 
-def s_kprog_arm64_read_reg_10 : Stmt :=
+@[noinline] def s_kprog_arm64_read_reg_10 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Ederef
@@ -1063,7 +1063,7 @@ def s_kprog_arm64_read_reg_10 : Stmt :=
                                   s_kprog_arm64_read_reg_2
                                   s_kprog_arm64_read_reg_9)))))))))))))))))
 
-def s_kprog_arm64_read_reg_11 : Stmt :=
+@[noinline] def s_kprog_arm64_read_reg_11 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Ederef
@@ -1489,7 +1489,7 @@ def f_kprog_arm64_read_reg : Function := {
                                 s_kprog_arm64_read_reg_11))))))))))))))))
 }
 
-def s_kprog_arm64_write_reg_0 : Stmt :=
+@[noinline] def s_kprog_arm64_write_reg_0 : Stmt :=
 (Stmt.Sassign
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
@@ -1502,7 +1502,7 @@ def s_kprog_arm64_write_reg_0 : Stmt :=
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuchar)
     (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
 
-def s_kprog_arm64_write_reg_1 : Stmt :=
+@[noinline] def s_kprog_arm64_write_reg_1 : Stmt :=
 (Stmt.Sassign
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
@@ -1513,7 +1513,7 @@ def s_kprog_arm64_write_reg_1 : Stmt :=
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuchar)
     (tptr tuchar)))
 
-def s_kprog_arm64_write_reg_2 : Stmt :=
+@[noinline] def s_kprog_arm64_write_reg_2 : Stmt :=
 (Stmt.Sassign
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
@@ -1524,7 +1524,7 @@ def s_kprog_arm64_write_reg_2 : Stmt :=
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 18) tuint) tuchar)
     (tptr tuchar)))
 
-def s_kprog_arm64_write_reg_3 : Stmt :=
+@[noinline] def s_kprog_arm64_write_reg_3 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq (Expr.Etempvar _width tuchar)
                       (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
@@ -1558,7 +1558,7 @@ def s_kprog_arm64_write_reg_3 : Stmt :=
     (Expr.Ebinop Binop.Oand (Expr.Etempvar _value tulong)
       (Expr.Etempvar _t'1 tulong) tulong)))
 
-def s_kprog_arm64_write_reg_4 : Stmt :=
+@[noinline] def s_kprog_arm64_write_reg_4 : Stmt :=
 (Stmt.Sset ___ts
   (Expr.Ecast
     (Expr.Ebinop Binop.Omul
@@ -1566,7 +1566,7 @@ def s_kprog_arm64_write_reg_4 : Stmt :=
         (Expr.Econst_int (Integers.Int.repr 7) tuint) tulong)
       (Expr.Econst_int (Integers.Int.repr 8) tuint) tulong) tuint))
 
-def s_kprog_arm64_write_reg_5 : Stmt :=
+@[noinline] def s_kprog_arm64_write_reg_5 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___tp
     (Expr.Ecast
@@ -1601,7 +1601,7 @@ def s_kprog_arm64_write_reg_5 : Stmt :=
              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint)
                tuchar) tulong) (Expr.Etempvar ___ts tuint) tulong) tulong)])))
 
-def s_kprog_arm64_write_reg_6 : Stmt :=
+@[noinline] def s_kprog_arm64_write_reg_6 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
                       (Expr.Etempvar ___a64_l_reg tulong)
@@ -1886,7 +1886,7 @@ def s_kprog_arm64_write_reg_6 : Stmt :=
       Stmt.Sbreak)
     Stmt.Sskip))
 
-def s_kprog_arm64_write_reg_7 : Stmt :=
+@[noinline] def s_kprog_arm64_write_reg_7 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Ederef
@@ -2038,7 +2038,7 @@ def s_kprog_arm64_write_reg_7 : Stmt :=
                                   s_kprog_arm64_write_reg_6)))
                             Stmt.Sbreak))))))))))))))
 
-def s_kprog_arm64_write_reg_8 : Stmt :=
+@[noinline] def s_kprog_arm64_write_reg_8 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Ederef
@@ -2219,7 +2219,7 @@ def s_kprog_arm64_write_reg_8 : Stmt :=
                                   s_kprog_arm64_write_reg_2
                                   s_kprog_arm64_write_reg_7)))))))))))))))))
 
-def s_kprog_arm64_write_reg_9 : Stmt :=
+@[noinline] def s_kprog_arm64_write_reg_9 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Ederef
@@ -2653,7 +2653,7 @@ def f_kprog_arm64_write_reg : Function := {
                                 s_kprog_arm64_write_reg_9))))))))))))))))
 }
 
-def s_kprog_arm64_write_ptr_0 : Stmt :=
+@[noinline] def s_kprog_arm64_write_ptr_0 : Stmt :=
 (Stmt.Sassign
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
@@ -2666,7 +2666,7 @@ def s_kprog_arm64_write_ptr_0 : Stmt :=
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuchar)
     (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
 
-def s_kprog_arm64_write_ptr_1 : Stmt :=
+@[noinline] def s_kprog_arm64_write_ptr_1 : Stmt :=
 (Stmt.Sassign
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
@@ -2677,7 +2677,7 @@ def s_kprog_arm64_write_ptr_1 : Stmt :=
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuchar)
     (tptr tuchar)))
 
-def s_kprog_arm64_write_ptr_2 : Stmt :=
+@[noinline] def s_kprog_arm64_write_ptr_2 : Stmt :=
 (Stmt.Sassign
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
@@ -2688,11 +2688,11 @@ def s_kprog_arm64_write_ptr_2 : Stmt :=
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 18) tuint) tuchar)
     (tptr tuchar)))
 
-def s_kprog_arm64_write_ptr_3 : Stmt :=
+@[noinline] def s_kprog_arm64_write_ptr_3 : Stmt :=
 (Stmt.Sset ___a64_l_next_ptr
   (Expr.Ecast (Expr.Etempvar _value (tptr tvoid)) (tptr tvoid)))
 
-def s_kprog_arm64_write_ptr_4 : Stmt :=
+@[noinline] def s_kprog_arm64_write_ptr_4 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'16
     (Expr.Efield
@@ -2721,7 +2721,7 @@ def s_kprog_arm64_write_ptr_4 : Stmt :=
         (Expr.Econst_int (Integers.Int.repr 1) tint)))
     Stmt.Sskip))
 
-def s_kprog_arm64_write_ptr_5 : Stmt :=
+@[noinline] def s_kprog_arm64_write_ptr_5 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'15
@@ -2756,21 +2756,21 @@ def s_kprog_arm64_write_ptr_5 : Stmt :=
         (Expr.Etempvar _coordinates (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
         (Ty.Tstruct _kprog_arm64_coordinates noattr)) _return_base tulong)))
 
-def s_kprog_arm64_write_ptr_6 : Stmt :=
+@[noinline] def s_kprog_arm64_write_ptr_6 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_arm64_write_ptr_7 : Stmt :=
+@[noinline] def s_kprog_arm64_write_ptr_7 : Stmt :=
 (Stmt.Sset _t'8
   (Expr.Ecast
     (Expr.Ebinop Binop.Olt (Expr.Etempvar ___a64_release_off tlong)
       (Expr.Etempvar ___a64_release_new tlong) tint) tbool))
 
-def s_kprog_arm64_write_ptr_8 : Stmt :=
+@[noinline] def s_kprog_arm64_write_ptr_8 : Stmt :=
 (Stmt.Scall (some _t'7)
   (Expr.Evar _native_lab_entry_input (Ty.Tfunction [tuint] tulong cc_default))
   [(Expr.Econst_int (Integers.Int.repr 6) tint)])
 
-def s_kprog_arm64_write_ptr_9 : Stmt :=
+@[noinline] def s_kprog_arm64_write_ptr_9 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'11
     (Expr.Efield (Expr.Evar ___a64_stack (Ty.Tstruct __2879 noattr)) _b
@@ -2785,10 +2785,10 @@ def s_kprog_arm64_write_ptr_9 : Stmt :=
          (tvolatile tuchar)) (tptr (tvolatile tuchar))),
      (Expr.Ecast (Expr.Etempvar _t'7 tulong) tuchar)]))
 
-def s_kprog_arm64_write_ptr_10 : Stmt :=
+@[noinline] def s_kprog_arm64_write_ptr_10 : Stmt :=
 (Stmt.Sset ___ti (Expr.Ecast (Expr.Etempvar ___a64_release_w tuint) tulong))
 
-def s_kprog_arm64_write_ptr_11 : Stmt :=
+@[noinline] def s_kprog_arm64_write_ptr_11 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___ts
     (Expr.Ecast
@@ -2830,7 +2830,7 @@ def s_kprog_arm64_write_ptr_11 : Stmt :=
                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint)
                  tuchar) tulong) (Expr.Etempvar ___ts tuint) tulong) tulong)]))))
 
-def s_kprog_arm64_write_ptr_12 : Stmt :=
+@[noinline] def s_kprog_arm64_write_ptr_12 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___a64_l_next_tag
     (Expr.Ecast (Expr.Etempvar _tag tuchar) tuchar))
@@ -3120,7 +3120,7 @@ def s_kprog_arm64_write_ptr_12 : Stmt :=
         Stmt.Sbreak)
       Stmt.Sskip)))
 
-def s_kprog_arm64_write_ptr_13 : Stmt :=
+@[noinline] def s_kprog_arm64_write_ptr_13 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Ederef
@@ -3272,7 +3272,7 @@ def s_kprog_arm64_write_ptr_13 : Stmt :=
                                   s_kprog_arm64_write_ptr_12)))
                             Stmt.Sbreak))))))))))))))
 
-def s_kprog_arm64_write_ptr_14 : Stmt :=
+@[noinline] def s_kprog_arm64_write_ptr_14 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Ederef
@@ -3453,7 +3453,7 @@ def s_kprog_arm64_write_ptr_14 : Stmt :=
                                   s_kprog_arm64_write_ptr_2
                                   s_kprog_arm64_write_ptr_13)))))))))))))))))
 
-def s_kprog_arm64_write_ptr_15 : Stmt :=
+@[noinline] def s_kprog_arm64_write_ptr_15 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Ederef
@@ -3890,7 +3890,7 @@ def f_kprog_arm64_write_ptr : Function := {
                                 s_kprog_arm64_write_ptr_15))))))))))))))))
 }
 
-def s_kprog_arm64_exec_adrp_0 : Stmt :=
+@[noinline] def s_kprog_arm64_exec_adrp_0 : Stmt :=
 (Stmt.Sassign
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
@@ -3903,7 +3903,7 @@ def s_kprog_arm64_exec_adrp_0 : Stmt :=
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuchar)
     (tptr (Ty.Tunion _arm64_sim_gpr noattr))))
 
-def s_kprog_arm64_exec_adrp_1 : Stmt :=
+@[noinline] def s_kprog_arm64_exec_adrp_1 : Stmt :=
 (Stmt.Sassign
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
@@ -3914,7 +3914,7 @@ def s_kprog_arm64_exec_adrp_1 : Stmt :=
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuchar)
     (tptr tuchar)))
 
-def s_kprog_arm64_exec_adrp_2 : Stmt :=
+@[noinline] def s_kprog_arm64_exec_adrp_2 : Stmt :=
 (Stmt.Sassign
   (Expr.Ederef
     (Expr.Ebinop Binop.Oadd
@@ -3925,11 +3925,11 @@ def s_kprog_arm64_exec_adrp_2 : Stmt :=
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 18) tuint) tuchar)
     (tptr tuchar)))
 
-def s_kprog_arm64_exec_adrp_3 : Stmt :=
+@[noinline] def s_kprog_arm64_exec_adrp_3 : Stmt :=
 (Stmt.Sset ___kprog_a64_adrp_op
   (Expr.Ecast (Expr.Etempvar _op tulong) tuchar))
 
-def s_kprog_arm64_exec_adrp_4 : Stmt :=
+@[noinline] def s_kprog_arm64_exec_adrp_4 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_a64_adrp_tag
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tuchar))
@@ -3959,14 +3959,14 @@ def s_kprog_arm64_exec_adrp_4 : Stmt :=
     (Stmt.Sset ___a64_adrp_tag
       (Expr.Ecast (Expr.Etempvar ___kprog_a64_adrp_tag tuchar) tuchar))))
 
-def s_kprog_arm64_exec_adrp_5 : Stmt :=
+@[noinline] def s_kprog_arm64_exec_adrp_5 : Stmt :=
 (Stmt.Sset ___a64_write_old_sp
   (Expr.Efield
     (Expr.Ederef
       (Expr.Etempvar _coordinates (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
       (Ty.Tstruct _kprog_arm64_coordinates noattr)) _stack_offset tlong))
 
-def s_kprog_arm64_exec_adrp_6 : Stmt :=
+@[noinline] def s_kprog_arm64_exec_adrp_6 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'16
@@ -4001,10 +4001,10 @@ def s_kprog_arm64_exec_adrp_6 : Stmt :=
         (Expr.Etempvar _coordinates (tptr (Ty.Tstruct _kprog_arm64_coordinates noattr)))
         (Ty.Tstruct _kprog_arm64_coordinates noattr)) _sp_base tulong)))
 
-def s_kprog_arm64_exec_adrp_7 : Stmt :=
+@[noinline] def s_kprog_arm64_exec_adrp_7 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_arm64_exec_adrp_8 : Stmt :=
+@[noinline] def s_kprog_arm64_exec_adrp_8 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sloop
     (Stmt.Ssequence
@@ -4047,12 +4047,12 @@ def s_kprog_arm64_exec_adrp_8 : Stmt :=
     (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___a64_mat_value tulong)
       (Expr.Etempvar ___a64_mat_base__1 tulong) tulong)))
 
-def s_kprog_arm64_exec_adrp_9 : Stmt :=
+@[noinline] def s_kprog_arm64_exec_adrp_9 : Stmt :=
 (Stmt.Scall (some _t'3)
   (Expr.Evar _native_lab_entry_input (Ty.Tfunction [tuint] tulong cc_default))
   [(Expr.Econst_int (Integers.Int.repr 1) tint)])
 
-def s_kprog_arm64_exec_adrp_10 : Stmt :=
+@[noinline] def s_kprog_arm64_exec_adrp_10 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
                     (Expr.Etempvar ___a64_release_off tlong)
                     (Expr.Etempvar ___a64_release_old tlong) tint)
@@ -4062,7 +4062,7 @@ def s_kprog_arm64_exec_adrp_10 : Stmt :=
         (Expr.Etempvar ___a64_release_new tlong) tint) tbool))
   (Stmt.Sset _t'8 (Expr.Econst_int (Integers.Int.repr 0) tint)))
 
-def s_kprog_arm64_exec_adrp_11 : Stmt :=
+@[noinline] def s_kprog_arm64_exec_adrp_11 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Scall (some _t'7)
     (Expr.Evar _native_lab_entry_input (Ty.Tfunction [tuint] tulong
@@ -4083,7 +4083,7 @@ def s_kprog_arm64_exec_adrp_11 : Stmt :=
          (tptr (tvolatile tuchar))),
        (Expr.Ecast (Expr.Etempvar _t'7 tulong) tuchar)])))
 
-def s_kprog_arm64_exec_adrp_12 : Stmt :=
+@[noinline] def s_kprog_arm64_exec_adrp_12 : Stmt :=
 (Stmt.Sset _t'10
   (Expr.Ecast
     (Expr.Ebinop Binop.Ogt
@@ -4096,7 +4096,7 @@ def s_kprog_arm64_exec_adrp_12 : Stmt :=
         (Expr.Ecast (Expr.Etempvar _bias tlong) tlong) tlong)
       (Expr.Etempvar ___a64_release_old tlong) tint) tbool))
 
-def s_kprog_arm64_exec_adrp_13 : Stmt :=
+@[noinline] def s_kprog_arm64_exec_adrp_13 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___ti
     (Expr.Ecast (Expr.Etempvar ___a64_release_w tuint) tulong))
@@ -4143,10 +4143,10 @@ def s_kprog_arm64_exec_adrp_13 : Stmt :=
                    tuchar) tulong) (Expr.Etempvar ___ts tuint) tulong)
              tulong)])))))
 
-def s_kprog_arm64_exec_adrp_14 : Stmt :=
+@[noinline] def s_kprog_arm64_exec_adrp_14 : Stmt :=
 Stmt.Sbreak
 
-def s_kprog_arm64_exec_adrp_15 : Stmt :=
+@[noinline] def s_kprog_arm64_exec_adrp_15 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___a64_l_reg (Expr.Etempvar _dst tulong))
   (Stmt.Ssequence
@@ -4409,7 +4409,7 @@ def s_kprog_arm64_exec_adrp_15 : Stmt :=
             Stmt.Sbreak)
           Stmt.Sskip)))))
 
-def s_kprog_arm64_exec_adrp_16 : Stmt :=
+@[noinline] def s_kprog_arm64_exec_adrp_16 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Ederef
@@ -4559,7 +4559,7 @@ def s_kprog_arm64_exec_adrp_16 : Stmt :=
                                 Stmt.Sbreak))
                             Stmt.Sbreak))))))))))))))
 
-def s_kprog_arm64_exec_adrp_17 : Stmt :=
+@[noinline] def s_kprog_arm64_exec_adrp_17 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Ederef
@@ -4740,7 +4740,7 @@ def s_kprog_arm64_exec_adrp_17 : Stmt :=
                                   s_kprog_arm64_exec_adrp_2
                                   s_kprog_arm64_exec_adrp_16)))))))))))))))))
 
-def s_kprog_arm64_exec_adrp_18 : Stmt :=
+@[noinline] def s_kprog_arm64_exec_adrp_18 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Ederef

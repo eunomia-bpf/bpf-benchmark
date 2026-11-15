@@ -1497,9 +1497,26 @@ to ten struct-return errors; the suggested `-fstruct-passing` probe exports115
 functions successfully, with Lean validation recorded separately.
 [Receipts](results/m4-x86-conditional/README.md) retain the distinctions.
 
-M4 remains open: handler expression macros, constant helper function pointers,
-remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight
-handler exports and full default compiled-byte coverage remain to do. Preserve
+The full production x86 inline interpreter now exports and builds as
+[Clight/X86Inline.lean](KProgFormal/Clight/X86Inline.lean):115 functions,
+19,427,933B, including the actual by-reference entry and all family bodies.
+`make clight` uses CompCert's existing `-fstruct-passing` frontend transformation.
+Clean fork `3df8ae2` keeps long statement/local-list syntax shared during Lean
+code generation; no AST value, numerical semantics or proof limit changes.
+The regression checks1,600 variable entries,2,001 scalar temporaries and2,001
+mixed function-pointer temporaries, including order/types and native codegen.
+The exact failing1667-temporary fields also pass in isolation after chunking.
+The all-ten-module Clight build passes47 jobs; full re-export is deterministic
+and five AST-root axiom queries use only the standard three. Lake now passes
+`-j1` explicitly through `weakLeanArgs`; the environment setting alone had not
+enforced one worker, and the earlier32GiB virtual-memory failure is retained.
+The successful build keeps that same memory limit. This is the explicit64-byte
+inline profile, not all producer capacities or a Clight refinement theorem.
+[Full export receipts](results/m4-x86-inline-export/README.md) record the scope.
+
+M4 remains open for the full ARM interpreter, remaining producer/storage
+profiles and full default compiled-byte coverage. The stated x86 inline
+profile now clears its earlier syntax/code-generation obstructions. Preserve
 unaligned memory and real context-pointer domains when binding the Clight
 memory/ABI semantics; header parsing does not establish those relations.
 The old generator's `--check` still expects its historical C rendering and

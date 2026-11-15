@@ -383,7 +383,7 @@ def f_kprog_x86_mem_load : Function := {
               LStmts.LSnil)))))))
 }
 
-def s_kprog_x86_skb_read_0 : Stmt :=
+@[noinline] def s_kprog_x86_skb_read_0 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sbuiltin (some _t'7) (ExtFun.EF_vload Chunk.Mint8unsigned)
     [(tptr (tvolatile tuchar))]
@@ -400,7 +400,7 @@ def s_kprog_x86_skb_read_0 : Stmt :=
         (Expr.Ecast (Expr.Etempvar _t'7 (tvolatile tuchar)) tulong)
         (Expr.Econst_int (Integers.Int.repr 8) tint) tulong) tulong)))
 
-def s_kprog_x86_skb_read_1 : Stmt :=
+@[noinline] def s_kprog_x86_skb_read_1 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge (Expr.Etempvar _width tulong)
                     (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
   (Stmt.Ssequence
@@ -420,7 +420,7 @@ def s_kprog_x86_skb_read_1 : Stmt :=
           (Expr.Econst_int (Integers.Int.repr 16) tint) tulong) tulong)))
   Stmt.Sskip)
 
-def s_kprog_x86_skb_read_2 : Stmt :=
+@[noinline] def s_kprog_x86_skb_read_2 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge (Expr.Etempvar _width tulong)
                       (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
@@ -526,7 +526,7 @@ def s_kprog_x86_skb_read_2 : Stmt :=
             Stmt.Sskip)
           (Stmt.Sset ___x86_sr_value (Expr.Etempvar ___x86_cbr_value tulong)))))))
 
-def s_kprog_x86_skb_read_3 : Stmt :=
+@[noinline] def s_kprog_x86_skb_read_3 : Stmt :=
 (Stmt.Sset _t'20
   (Expr.Ecast
     (Expr.Ebinop Binop.Ole (Expr.Etempvar ___x86_sr_off tlong)
@@ -536,7 +536,7 @@ def s_kprog_x86_skb_read_3 : Stmt :=
           (Expr.Econst_int (Integers.Int.repr 4) tint) tint)
         (Expr.Etempvar ___x86_sr_width tuchar) tint) tint) tbool))
 
-def s_kprog_x86_skb_read_4 : Stmt :=
+@[noinline] def s_kprog_x86_skb_read_4 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'27
     (Expr.Efield
@@ -553,7 +553,7 @@ def s_kprog_x86_skb_read_4 : Stmt :=
          (Expr.Econst_int (Integers.Int.repr 8) tint) tlong) tulong),
      (Expr.Etempvar ___x86_sr_width tuchar)]))
 
-def s_kprog_x86_skb_read_5 : Stmt :=
+@[noinline] def s_kprog_x86_skb_read_5 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge (Expr.Etempvar ___x86_sr_off tlong)
                     (Expr.Econst_int (Integers.Int.repr 168) tint) tint)
   (Stmt.Sset _t'19
@@ -566,7 +566,7 @@ def s_kprog_x86_skb_read_5 : Stmt :=
           (Expr.Etempvar ___x86_sr_width tuchar) tint) tint) tbool))
   (Stmt.Sset _t'19 (Expr.Econst_int (Integers.Int.repr 0) tint)))
 
-def s_kprog_x86_skb_read_6 : Stmt :=
+@[noinline] def s_kprog_x86_skb_read_6 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'26
@@ -586,7 +586,7 @@ def s_kprog_x86_skb_read_6 : Stmt :=
        (Expr.Etempvar ___x86_sr_width tuchar)]))
   (Stmt.Sset ___x86_sr_value (Expr.Etempvar _t'16 tulong)))
 
-def s_kprog_x86_skb_read_7 : Stmt :=
+@[noinline] def s_kprog_x86_skb_read_7 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
@@ -628,7 +628,7 @@ def s_kprog_x86_skb_read_7 : Stmt :=
            tulong) (tptr tuchar)), (Expr.Etempvar _width tulong)]))
   (Stmt.Sset ___x86_sr_value (Expr.Etempvar _t'18 tulong)))
 
-def s_kprog_x86_skb_read_8 : Stmt :=
+@[noinline] def s_kprog_x86_skb_read_8 : Stmt :=
 Stmt.Sbreak
 
 def f_kprog_x86_skb_read : Function := {

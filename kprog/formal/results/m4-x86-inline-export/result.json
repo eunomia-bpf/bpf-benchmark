@@ -1,0 +1,107 @@
+{
+  "status": "full x86 inline AST and Clight subset pass; M4 incomplete",
+  "functions": 115,
+  "profile_stack_bytes": 64,
+  "frontend_options": [
+    "-fstruct-passing",
+    "-lean",
+    "-normalize"
+  ],
+  "clean_revision": "3df8ae2",
+  "lean_version": "4.35.0",
+  "clight_modules": 10,
+  "targeted_lean_jobs": 47,
+  "deterministic": {
+    "equal": true,
+    "bytes": 19427933
+  },
+  "axiom_queries": 5,
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "regression_entries": {
+    "variables": 1600,
+    "scalar_temporaries": 2001,
+    "mixed_temporaries": 2001
+  },
+  "isolated_function_fields": {
+    "before": {
+      "exit": 1,
+      "seconds": 14.485763549804688,
+      "bytes": 683967,
+      "purpose": "synthetic same function fields with Sskip body; diagnostic only, no handler refinement"
+    },
+    "after": {
+      "exit": 0,
+      "seconds": 16.024733304977417,
+      "bytes": 594237,
+      "purpose": "synthetic same function fields with Sskip body; diagnostic only, no handler refinement"
+    }
+  },
+  "syntax_sharing_comparison": {
+    "Arm64Access.lean": {
+      "local_list_normal_form_equal": true,
+      "source_path_spelling_normalized": false,
+      "bytes": 35984
+    },
+    "Arm64Address.lean": {
+      "local_list_normal_form_equal": true,
+      "source_path_spelling_normalized": false,
+      "bytes": 291155
+    },
+    "Arm64Addressing.lean": {
+      "local_list_normal_form_equal": true,
+      "source_path_spelling_normalized": false,
+      "bytes": 8745201
+    },
+    "Arm64Numeric.lean": {
+      "local_list_normal_form_equal": true,
+      "source_path_spelling_normalized": false,
+      "bytes": 133062
+    },
+    "Arm64Stack.lean": {
+      "local_list_normal_form_equal": true,
+      "source_path_spelling_normalized": false,
+      "bytes": 371161
+    },
+    "X86Context.lean": {
+      "local_list_normal_form_equal": true,
+      "source_path_spelling_normalized": false,
+      "bytes": 100627
+    },
+    "X86Inline.lean": {
+      "local_list_normal_form_equal": true,
+      "source_path_spelling_normalized": false,
+      "bytes": 19427933
+    },
+    "X86Memory.lean": {
+      "local_list_normal_form_equal": true,
+      "source_path_spelling_normalized": false,
+      "bytes": 1809735
+    },
+    "X86Numeric.lean": {
+      "local_list_normal_form_equal": true,
+      "source_path_spelling_normalized": false,
+      "bytes": 54037
+    },
+    "X86Pointer.lean": {
+      "local_list_normal_form_equal": true,
+      "source_path_spelling_normalized": false,
+      "bytes": 989508
+    }
+  },
+  "compiler_workers": 1,
+  "address_space_limit_gib": 32,
+  "earlier_failures_preserved": [
+    "default struct-return rejection",
+    "code-generator recursion in two functions",
+    "balanced-list-only failure",
+    "statement-noinline-only failure",
+    "32GiB virtual OOM with worker pool"
+  ],
+  "full_library_lake_build": "not run in this M4 step",
+  "make_check": "pending ordered M5/M6 completion",
+  "refinements_migrated": 0
+}

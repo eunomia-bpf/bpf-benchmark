@@ -253,11 +253,11 @@ def f_kprog_arm64_alu_result : Function := {
   (Stmt.Sreturn (some (Expr.Etempvar _result tulong))))
 }
 
-def s_kprog_arm64_mod_0 : Stmt :=
+@[noinline] def s_kprog_arm64_mod_0 : Stmt :=
 (Stmt.Sset _t'2
   (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 65535) tulong) tulong))
 
-def s_kprog_arm64_mod_1 : Stmt :=
+@[noinline] def s_kprog_arm64_mod_1 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'2
@@ -266,7 +266,7 @@ def s_kprog_arm64_mod_1 : Stmt :=
     (Stmt.Sset _t'2 (Expr.Ecast (Expr.Etempvar _t'2 tulong) tulong)))
   (Stmt.Sset _t'2 (Expr.Ecast (Expr.Etempvar _t'2 tulong) tulong)))
 
-def s_kprog_arm64_mod_2 : Stmt :=
+@[noinline] def s_kprog_arm64_mod_2 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'2
@@ -275,11 +275,11 @@ def s_kprog_arm64_mod_2 : Stmt :=
     (Stmt.Sset _t'2 (Expr.Ecast (Expr.Etempvar _t'2 tulong) tulong)))
   (Stmt.Sset _t'2 (Expr.Ecast (Expr.Etempvar _t'2 tulong) tulong)))
 
-def s_kprog_arm64_mod_3 : Stmt :=
+@[noinline] def s_kprog_arm64_mod_3 : Stmt :=
 (Stmt.Sset _t'3
   (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 65535) tulong) tulong))
 
-def s_kprog_arm64_mod_4 : Stmt :=
+@[noinline] def s_kprog_arm64_mod_4 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'3
@@ -288,7 +288,7 @@ def s_kprog_arm64_mod_4 : Stmt :=
     (Stmt.Sset _t'3 (Expr.Ecast (Expr.Etempvar _t'3 tulong) tulong)))
   (Stmt.Sset _t'3 (Expr.Ecast (Expr.Etempvar _t'3 tulong) tulong)))
 
-def s_kprog_arm64_mod_5 : Stmt :=
+@[noinline] def s_kprog_arm64_mod_5 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sset _t'3
@@ -297,7 +297,7 @@ def s_kprog_arm64_mod_5 : Stmt :=
     (Stmt.Sset _t'3 (Expr.Ecast (Expr.Etempvar _t'3 tulong) tulong)))
   (Stmt.Sset _t'3 (Expr.Ecast (Expr.Etempvar _t'3 tulong) tulong)))
 
-def s_kprog_arm64_mod_6 : Stmt :=
+@[noinline] def s_kprog_arm64_mod_6 : Stmt :=
 (Stmt.Sset _t'4
   (Expr.Ecast
     (Expr.Ecast
@@ -310,7 +310,7 @@ def s_kprog_arm64_mod_6 : Stmt :=
             (Expr.Etempvar ___kprog_a64_mod_amount tuchar) tuint) tuint)
         tuint) tulong) tulong))
 
-def s_kprog_arm64_mod_7 : Stmt :=
+@[noinline] def s_kprog_arm64_mod_7 : Stmt :=
 (Stmt.Sset _t'4
   (Expr.Ecast (Expr.Ecast (Expr.Etempvar ___kprog_a64_mod_w32 tuint) tulong)
     tulong))
@@ -557,20 +557,20 @@ def f_kprog_arm64_mod : Function := {
   (Stmt.Sreturn (some (Expr.Etempvar _result tulong))))
 }
 
-def s_kprog_arm64_shift_0 : Stmt :=
+@[noinline] def s_kprog_arm64_shift_0 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'1
     (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 4294967295) tulong)
       tulong))
   (Stmt.Sset _t'1 (Expr.Ecast (Expr.Etempvar _t'1 tulong) tulong)))
 
-def s_kprog_arm64_shift_1 : Stmt :=
+@[noinline] def s_kprog_arm64_shift_1 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'1
     (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr (-1)) tulong) tulong))
   (Stmt.Sset _t'1 (Expr.Ecast (Expr.Etempvar _t'1 tulong) tulong)))
 
-def s_kprog_arm64_shift_2 : Stmt :=
+@[noinline] def s_kprog_arm64_shift_2 : Stmt :=
 (Stmt.Sset _t'3
   (Expr.Ecast
     (Expr.Ecast
@@ -578,7 +578,7 @@ def s_kprog_arm64_shift_2 : Stmt :=
         (Expr.Ecast (Expr.Etempvar ___kprog_a64_shift_value tulong) tint)
         (Expr.Etempvar ___kprog_a64_shift_k tulong) tint) tulong) tulong))
 
-def s_kprog_arm64_shift_3 : Stmt :=
+@[noinline] def s_kprog_arm64_shift_3 : Stmt :=
 (Stmt.Sset _t'3
   (Expr.Ecast
     (Expr.Ecast
@@ -586,7 +586,7 @@ def s_kprog_arm64_shift_3 : Stmt :=
         (Expr.Ecast (Expr.Etempvar ___kprog_a64_shift_value tulong) tlong)
         (Expr.Etempvar ___kprog_a64_shift_k tulong) tlong) tulong) tulong))
 
-def s_kprog_arm64_shift_4 : Stmt :=
+@[noinline] def s_kprog_arm64_shift_4 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_a64_shift_w32
     (Expr.Ecast (Expr.Etempvar ___kprog_a64_shift_value tulong) tuint))
@@ -611,7 +611,7 @@ def s_kprog_arm64_shift_4 : Stmt :=
           tulong)))
     (Stmt.Sset ___kprog_a64_shift_result (Expr.Etempvar _t'4 tulong))))
 
-def s_kprog_arm64_shift_5 : Stmt :=
+@[noinline] def s_kprog_arm64_shift_5 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sifthenelse (Expr.Etempvar ___kprog_a64_shift_k tulong)
     (Stmt.Sset _t'5
@@ -777,7 +777,7 @@ def f_kprog_arm64_shift : Function := {
   (Stmt.Sreturn (some (Expr.Etempvar _result tulong))))
 }
 
-def s_kprog_arm64_bitfield_0 : Stmt :=
+@[noinline] def s_kprog_arm64_bitfield_0 : Stmt :=
 (Stmt.Sifthenelse (Expr.Ebinop Binop.Oge
                     (Expr.Etempvar ___kprog_a64_bf_bits tuchar)
                     (Expr.Econst_int (Integers.Int.repr 64) tint) tint)
@@ -788,14 +788,14 @@ def s_kprog_arm64_bitfield_0 : Stmt :=
       (Expr.Ebinop Binop.Osub (Expr.Etempvar ___kprog_a64_bf_bits tuchar)
         (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint) tuint)))
 
-def s_kprog_arm64_bitfield_1 : Stmt :=
+@[noinline] def s_kprog_arm64_bitfield_1 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_a64_bf_result
     (Expr.Ebinop Binop.Oand (Expr.Etempvar ___kprog_a64_bf_src_r tulong)
       (Expr.Etempvar ___kprog_a64_bf_mask tulong) tulong))
   Stmt.Sbreak)
 
-def s_kprog_arm64_bitfield_2 : Stmt :=
+@[noinline] def s_kprog_arm64_bitfield_2 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
@@ -815,14 +815,14 @@ def s_kprog_arm64_bitfield_2 : Stmt :=
     (Stmt.Sset ___kprog_a64_bf_result (Expr.Etempvar _t'7 tulong)))
   Stmt.Sbreak)
 
-def s_kprog_arm64_bitfield_3 : Stmt :=
+@[noinline] def s_kprog_arm64_bitfield_3 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_a64_bf_result
     (Expr.Ebinop Binop.Oand (Expr.Etempvar ___kprog_a64_bf_src_l tulong)
       (Expr.Etempvar ___kprog_a64_bf_field tulong) tulong))
   Stmt.Sbreak)
 
-def s_kprog_arm64_bitfield_4 : Stmt :=
+@[noinline] def s_kprog_arm64_bitfield_4 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_a64_bf_result
     (Expr.Ebinop Binop.Oor
@@ -833,7 +833,7 @@ def s_kprog_arm64_bitfield_4 : Stmt :=
         (Expr.Etempvar ___kprog_a64_bf_mask tulong) tulong) tulong))
   Stmt.Sbreak)
 
-def s_kprog_arm64_bitfield_5 : Stmt :=
+@[noinline] def s_kprog_arm64_bitfield_5 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___kprog_a64_bf_result
     (Expr.Ebinop Binop.Oor
@@ -844,7 +844,7 @@ def s_kprog_arm64_bitfield_5 : Stmt :=
         (Expr.Etempvar ___kprog_a64_bf_field tulong) tulong) tulong))
   Stmt.Sbreak)
 
-def s_kprog_arm64_bitfield_6 : Stmt :=
+@[noinline] def s_kprog_arm64_bitfield_6 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sloop
     (Stmt.Scall none
@@ -1020,7 +1020,7 @@ def f_kprog_arm64_bitfield : Function := {
   (Stmt.Sreturn (some (Expr.Etempvar _result tulong))))
 }
 
-def s_kprog_arm64_mul_0 : Stmt :=
+@[noinline] def s_kprog_arm64_mul_0 : Stmt :=
 (Stmt.Sset ___kprog_a64_mul_result
   (Expr.Ebinop Binop.Oadd
     (Expr.Ebinop Binop.Oadd
@@ -1240,34 +1240,34 @@ def f_kprog_arm64_mul : Function := {
   (Stmt.Sreturn (some (Expr.Etempvar _result tulong))))
 }
 
-def s_kprog_arm64_extrev_0 : Stmt :=
+@[noinline] def s_kprog_arm64_extrev_0 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'1
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 32) tuint) tuint))
   (Stmt.Sset _t'1 (Expr.Ecast (Expr.Etempvar _t'1 tuint) tuint)))
 
-def s_kprog_arm64_extrev_1 : Stmt :=
+@[noinline] def s_kprog_arm64_extrev_1 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset _t'1
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 64) tuint) tuint))
   (Stmt.Sset _t'1 (Expr.Ecast (Expr.Etempvar _t'1 tuint) tuint)))
 
-def s_kprog_arm64_extrev_2 : Stmt :=
+@[noinline] def s_kprog_arm64_extrev_2 : Stmt :=
 (Stmt.Sset _t'2
   (Expr.Ecast
     (Expr.Ebinop Binop.Oshl (Expr.Etempvar ___kprog_a64_ext_src tulong)
       (Expr.Ebinop Binop.Osub (Expr.Etempvar ___kprog_a64_ext_bits tulong)
         (Expr.Etempvar ___kprog_a64_ext_shift tulong) tulong) tulong) tulong))
 
-def s_kprog_arm64_extrev_3 : Stmt :=
+@[noinline] def s_kprog_arm64_extrev_3 : Stmt :=
 (Stmt.Sset _t'2
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tulong))
 
-def s_kprog_arm64_extrev_4 : Stmt :=
+@[noinline] def s_kprog_arm64_extrev_4 : Stmt :=
 (Stmt.Sset ___kprog_a64_ext_w32
   (Expr.Ecast (Expr.Etempvar ___kprog_a64_ext_src tulong) tuint))
 
-def s_kprog_arm64_extrev_5 : Stmt :=
+@[noinline] def s_kprog_arm64_extrev_5 : Stmt :=
 (Stmt.Sset ___kprog_a64_ext_result
   (Expr.Ebinop Binop.Oor
     (Expr.Ebinop Binop.Oor
@@ -1871,12 +1871,12 @@ def f_kprog_arm64_csel : Function := {
   (Stmt.Sreturn (some (Expr.Etempvar _result tulong))))
 }
 
-def s_kprog_arm64_cneg_0 : Stmt :=
+@[noinline] def s_kprog_arm64_cneg_0 : Stmt :=
 (Stmt.Sset _t'2
   (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 4294967295) tulong)
     tulong))
 
-def s_kprog_arm64_cneg_1 : Stmt :=
+@[noinline] def s_kprog_arm64_cneg_1 : Stmt :=
 (Stmt.Sset _t'2
   (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr (-1)) tulong) tulong))
 

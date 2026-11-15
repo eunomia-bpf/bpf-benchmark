@@ -1,0 +1,12 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/formal/m4-x86-inline-export",
+  "previous_raw_directory": "/workspaces/kprog-raw/formal/m4-x86-conditional",
+  "cpu": 15,
+  "address_space_limit_gib": 32,
+  "lean_workers": 1,
+  "actual_compiler_argument": "-j1",
+  "clean_revision": "3df8ae2d921053d987e97e6536ed8ceea81f2f3f",
+  "source": "c/X86Inline.c",
+  "artifact": "KProgFormal/Clight/X86Inline.lean",
+  "scope": "AST export and typecheck/codegen; no handler refinement or whole-default byte coverage"
+}
