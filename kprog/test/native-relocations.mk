@@ -218,12 +218,12 @@ guest-scheduled-table-stock:
 
 .PHONY: scheduled-table-checked guest-scheduled-table-checked
 scheduled-table-checked:
-	install -d $(OUTPUT)
-	taskset -c 16-17 prlimit --as=17179869184 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-scheduled-table-checked OUTPUT=$(OUTPUT)'
+	install -d $(OUTPUT) $(OUTPUT)/inputs
+	taskset -c 16-17 prlimit --as=17179869184 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --rwdir $(OUTPUT)/inputs=/var/tmp/kprog-tmp/perf/scheduled-table --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-scheduled-table-checked OUTPUT=$(OUTPUT)'
 
 guest-scheduled-table-checked:
 	uname -r > $(OUTPUT)/kernel.release
 	mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 	mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf
 	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
-	CLANG=$(ROOT)/kprog/stock-path/bin/clang python3 $(ROOT)/kprog/test/verify_retained_proof.py --native /var/tmp/kprog-tmp/perf/scheduled-table/scheduled.native.o --metadata $(ROOT)/kprog/test/table_context_metadata.json --context $(ROOT)/kprog/test/table_context_load_context.json --source /var/tmp/kprog-tmp/perf/scheduled-table/scheduled.original.bpf.o --proof /var/tmp/kprog-tmp/perf/scheduled-table/scheduled.bpf.o --symbol scheduled_table --linker $(LINKER_BINARY) --checked-source /var/tmp/kprog-tmp/perf/scheduled-table/scheduled.bpf.i --checked-frontend /var/tmp/kprog-tmp/perf/scheduled-table/scheduled.bpf.bounds-input.bc --checked-compiler /workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir --output $(OUTPUT)/replay
+	CLANG=$(ROOT)/kprog/stock-path/bin/clang python3 $(ROOT)/kprog/test/verify_retained_proof.py --native $(OUTPUT)/inputs/scheduled.native.o --metadata $(ROOT)/kprog/test/table_context_metadata.json --context $(ROOT)/kprog/test/table_context_load_context.json --source $(OUTPUT)/inputs/scheduled.original.bpf.o --proof $(OUTPUT)/inputs/scheduled.bpf.o --symbol scheduled_table --linker $(LINKER_BINARY) --checked-source $(OUTPUT)/inputs/scheduled.bpf.i --checked-frontend $(OUTPUT)/inputs/scheduled.bpf.bounds-input.bc --checked-compiler /workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir --output $(OUTPUT)/replay
