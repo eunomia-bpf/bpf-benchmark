@@ -48,6 +48,7 @@ def phase(raw):
 def profile(capture, run):
     data=json.loads((capture/'attribution.json').read_text())
     app=json.loads((run/'details/apps/katran.json').read_text())
+    metadata=json.loads((run/'details/result.json').read_text())
     output={}
     for arm in ['baseline','post_rejit']:
         runs=sum(r['run_cnt_delta'] for r in app[arm]['bpf'].values())
@@ -57,6 +58,9 @@ def profile(capture, run):
                                 '__htab_map_lookup_elem','lookup_nulls_elem_raw'])
         output[arm]=dict(runs=runs,total_samples=data[arm]['samples'],bpf_samples=data[arm]['bpf_samples'],
             bpf_share_of_capture=data[arm]['bpf_share_of_all'],
+            configured_warmups=metadata['warmups'],configured_samples=metadata['samples'],
+            configured_workload_seconds=metadata['workload_seconds'],
+            normalization_scope='Full profile capture divided by measured-only run_cnt_delta; not a matched counter window.',
             samples_per_million_runs={name:sum(buckets[k][0] for k in names if k in buckets)*1e6/runs
                                       for name,names in groups.items()})
     windows={}
@@ -96,6 +100,7 @@ def main(args):
     shutil.copyfile(args.run/'metadata.json',args.output/'metadata-raw.json')
     shutil.copyfile(args.profile_capture/'attribution.json',args.output/'profile-attribution-raw.json')
     shutil.copyfile(args.profile_run/'details/apps/katran.json',args.output/'profile-app-raw.json')
+    shutil.copyfile(args.profile_run/'details/result.json',args.output/'profile-metadata-raw.json')
     lines=['# Katran C4 packet accounting','',
         f'Source `{args.run.name}`, status `{app["status"]}`, stats on, three180-second samples. '
         'No workload or runner change; this is retrospective analysis.','',
@@ -139,7 +144,14 @@ def main(args):
         str(prof['post_rejit']['capture_wall_seconds'])+'s native, while its one workload sample is '
         'configured60s. Its global sample share must retain that capture-window scope; it is not '
         'a direct C4 critical-path fraction.','',
-        '| profile samples per million counted runs | eBPF | native |',
+        'There is also a counter-window mismatch: profile details/result.json records one warmup '
+        'and one measured60-second sample. corpus/driver.py emits measurement_start before '
+        'measure_app_phase; runner/libs/rejit.py:440 runs warmups before the shim measure_start. '
+        'The profile observer brackets the outer event, so its samples include warmup while '
+        'run_cnt_delta excludes warmup. The table below is the literal raw quotient, not a '
+        'matched-window per-call cost. No exact matching invocation denominator can be recovered '
+        'from the retained C4/profile counter deltas.','',
+        '| full-capture samples per million measured-only runs (window mismatch) | eBPF | native |',
         '| --- | ---: | ---: |']
     for key in ['program_text','clock','map_lookup']:
         lines.append(f'| {key} | {prof["baseline"]["samples_per_million_runs"][key]:.3f} | '
