@@ -786,3 +786,6 @@ extern int *bpf_iter_num_next(struct bpf_iter_num *it) __attribute__((weak)) __a
 extern void bpf_iter_num_destroy(struct bpf_iter_num *it) __attribute__((weak)) __attribute__((section(".ksyms")));
 #endif
 
+/* access.h keeps a BPF-register asm arm under `__bpf__` and a plain C arm
+ * otherwise; nothing is needed here. Cilium's own arms now split on `__bpf__`,
+ * so a native target reaches the C arm. */

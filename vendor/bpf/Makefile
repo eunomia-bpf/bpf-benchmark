@@ -141,7 +141,13 @@ $(CORE_ANSWERS)/otel.h: $(CORE_ANSWERS_PY) $(wildcard otel/support/ebpf/*.h)
 		--cflags "-Iotel/support/ebpf -I. -I/usr/include -I/usr/include/x86_64-linux-gnu" \
 		--out "$@" --report "$(CORE_ANSWERS)/otel.json" otel/support/ebpf
 
-CORE_ANSWER_TABLES := $(CORE_ANSWERS)/bcc.h $(CORE_ANSWERS)/tracee.h $(CORE_ANSWERS)/tetragon.h $(CORE_ANSWERS)/otel.h
+$(CORE_ANSWERS)/cilium.h: $(CORE_ANSWERS_PY) $(wildcard cilium/bpf/lib/*.h)
+	install -d "$(CORE_ANSWERS)"
+	python3 "$(CORE_ANSWERS_PY)" --btf "$(VMLINUX_BTF)" --bpftool "$(BPFTOOL)" --clang "$(CLANG)" \
+		--cflags "-Icilium/bpf -Icilium/bpf/include -Icilium/bpf/include/bpf -Icilium/bpf/include/linux -Icilium/bpf/lib -I/usr/include -I/usr/include/x86_64-linux-gnu" \
+		--out "$@" --report "$(CORE_ANSWERS)/cilium.json" cilium/bpf
+
+CORE_ANSWER_TABLES := $(CORE_ANSWERS)/bcc.h $(CORE_ANSWERS)/tracee.h $(CORE_ANSWERS)/tetragon.h $(CORE_ANSWERS)/otel.h $(CORE_ANSWERS)/cilium.h
 # Everything a CO-RE app's native objects need: the compat scaffolding and the
 # app's own answer table.
 core_flags = -include "$(CURDIR)/core-compat.h" -D__KPROG_CORE_ANSWERS='"$(1)"'
@@ -246,6 +252,7 @@ $(NATIVE_OUT)/cilium/bpf_alignchecker.native.o: CILIUM_NATIVE_OPTIONS := $(CILIU
 $(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c
 	install -d "$(dir $@)"
 	"$(CLANG)" $(CILIUM_NATIVE_OPTIONS) $(NATIVE_CFLAGS) \
+		$(call core_flags,$(CORE_ANSWERS)/cilium.h) -DMICRO_NATIVE_CILIUM \
 		-I"$(CURDIR)/cilium/bpf" -I"$(CURDIR)/cilium/bpf/include" \
 		-I"$(CURDIR)/cilium/bpf/include/bpf" \
 		-I"$(CURDIR)/cilium/bpf/include/linux" \
