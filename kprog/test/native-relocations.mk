@@ -7,6 +7,7 @@ LINKER_TARGET := $(ROOT)/kprog/x86/native_lab/native_link/target
 LINKER_BINARY ?= $(LINKER_TARGET)/release/native-link
 OUTPUT ?= /workspaces/kprog-raw/perf/20261115-native-relocations
 BUILD := /var/tmp/kprog-tmp/perf/native-relocations
+TABLE_CONTEXT_BUILD := /var/tmp/kprog-tmp/perf/table-context
 CONTEXT_TOOL := /var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds
 KERNEL_LAYOUT_BUILD := /var/tmp/kprog-tmp/perf/kernel-layout
 KERNEL_LAYOUT := $(KERNEL_LAYOUT_BUILD)/kernel-layout.json
@@ -97,3 +98,20 @@ $(CONTEXT_TOOL): $(ROOT)/kprog/x86/packet_bounds_ir.cpp
 .PHONY: identity-normal-check
 identity-normal-check: $(CONTEXT_TOOL)
 	taskset -c 8-11 prlimit --as=12884901888 -- python3 $(ROOT)/kprog/test/check_packet_identities.py --tool $(CONTEXT_TOOL) --output $(OUTPUT)/identities
+
+.PHONY: table-context-build
+table-context-build: $(KERNEL_LAYOUT) $(CONTEXT_TOOL)
+	taskset -c 19 prlimit --as=17179869184 -- python3 $(ROOT)/kprog/test/build_context_table.py --build $(TABLE_CONTEXT_BUILD) --output $(OUTPUT) --linker $(LINKER_BINARY) --kernel-layout $(KERNEL_LAYOUT) --bounds $(CONTEXT_TOOL)
+
+$(TABLE_CONTEXT_BUILD)/stock-client: $(ROOT)/kprog/test/context_table_stock.c
+	install -d $(TABLE_CONTEXT_BUILD)
+	$(CC) -O2 -g -Wall -Wextra -Werror -I$(LIBBPF_PREFIX)/include $< $(LIBBPF_LIBRARY) -lelf -lz -o $@
+
+.PHONY: table-context-stock guest-table-context-stock
+table-context-stock: $(TABLE_CONTEXT_BUILD)/stock-client
+	install -d $(OUTPUT) $(OUTPUT)/inputs
+	taskset -c 16-17 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --rodir $(OUTPUT)/inputs=$(TABLE_CONTEXT_BUILD) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-table-context-stock OUTPUT=$(OUTPUT) TABLE_CONTEXT_BUILD=$(OUTPUT)/inputs'
+
+guest-table-context-stock:
+	uname -r > $(OUTPUT)/kernel.release
+	$(TABLE_CONTEXT_BUILD)/stock-client $(TABLE_CONTEXT_BUILD)/original.bpf.o $(TABLE_CONTEXT_BUILD)/trusted_x86.bpf.o $(OUTPUT)/original.verifier.log $(OUTPUT)/generated.verifier.log > $(OUTPUT)/stock.jsonl
