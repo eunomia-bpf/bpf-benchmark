@@ -22,6 +22,7 @@ sys.path[:0] = [str(ROOT/'kprog/x86'), str(ROOT/'kprog/test')]
 import trusted_specializer as worker
 from memory_b_pipeline import MemoryPipeline, post_pei_frames
 from analyze_spill_lifetimes import analyze as spill_liveness
+from whole_word_spills import narrow_scalar_storage
 from elftools.elf.elffile import ELFFile
 
 CHOICES = {'normal': [], 'basic': ['-regalloc=basic'], 'pbqp': ['-regalloc=pbqp'],
@@ -121,6 +122,14 @@ def main(a):
             worker._compile_simulator_backend(str(ROOT/'kprog/stock-path/bin/clang'),
                 pipe, obj, run, compiled_input=initial)
             before = pipe.stage('.before.mir').read_text()
+            normalized_documents = []
+            for document in before.split('\n---\n'):
+                if 'body:             |' in document:
+                    document, _ = narrow_scalar_storage(document)
+                normalized_documents.append(document)
+            narrow = pipe.stage('.scalar-shapes.mir')
+            narrow.write_text('\n---\n'.join(normalized_documents))
+            case['narrow_scalar_liveness'] = spill_liveness(narrow)
             embedded = before.split('\n---\n', 1)[0]
             if not embedded.startswith('--- |\n'):
                 raise ValueError('Expected the actual optimized LLVM IR embedded in MIR')
