@@ -1,0 +1,16 @@
+{
+  "time": "2026-11-15T06:21:35.949600+00:00",
+  "source_head": "e1e96deff1c4ad938d8047104863577a63f029ca",
+  "app": "katran",
+  "arms": "eBPF/eBPF, two application starts",
+  "skip_rejit_mode": "all",
+  "samples": 3,
+  "duration_seconds": 180,
+  "stats": 1,
+  "cpus": "0-7",
+  "vm_cpus": 8,
+  "vm_memory": "64G",
+  "address_space_limit_bytes": 85899345920,
+  "reason": "Coordinator 2026-11-15T06:06:55Z: isolated A/A after stopping old-route census and scale",
+  "derivation": "runner/libs/rejit.py skip_rejit_disables_shim(all), runner/libs/agent.py _shim_env_for returns empty, corpus/driver.py retains baseline stop and post start"
+}

@@ -1,0 +1,1 @@
+taskset -c 0-7 make -r -f kprog/perf/one-image/Makefile corpus APPS=katran SAMPLES=3 WORKLOAD_DURATION=180 BPFREJIT_CORPUS_BPF_STATS=1 SKIP_REJIT_MODE=all CPUS=0-7 STATE=/var/tmp/kprog-tmp/perf/aa LOGS=/workspaces/kprog-raw/perf/20261115-isolated-aa/logs 
