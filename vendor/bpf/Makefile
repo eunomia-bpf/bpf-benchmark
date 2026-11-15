@@ -238,7 +238,7 @@ BCC_SAME_SOURCE ?= 0
 # lane perf's default output cannot change what this recipe runs (they reported a
 # "Permission denied" from exactly that race at 2026-11-13T10:31).
 CORE_IR_LOWER ?= /var/tmp/kprog-tmp/perf/core-ir/core-ir-lower
-NATIVE_IR_PREP ?= $(CURDIR)/../../kprog/results/tracee-samesource-20261113/native-ir-prep.py
+NATIVE_IR_PREP ?= $(CURDIR)/../../kprog/build/native-ir-prep.py
 KATRAN_TARGET_BTF ?= /workspaces/.agent-state/kprog-ck/build-x86/vmlinux
 # The BCC same-source route needs the SOLE kernel's release and BTF.  vendor/bpf
 # defaults both to the host ($(uname -r), /sys/kernel/btf/vmlinux), and `make -B`

@@ -230,7 +230,7 @@ def serve(args):
                         source_paths.extend([args.sim_native_compiler, ROOT/'kprog/x86/compile_sim_ir.cpp'])
                         if args.sim_context_compiler:
                             source_paths.extend([args.sim_context_compiler,args.sim_public_layout,args.sim_physical_layout,
-                                ROOT/'kprog/perf/native-context/socket-context-lower.cpp'])
+                                ROOT/'kprog/build/socket-context-lower.cpp'])
                     if args.sim_bounds_compiler:
                         source_paths.extend([args.sim_bounds_compiler,ROOT/'kprog/x86/packet_bounds_ir.cpp'])
                     identities={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in source_paths}

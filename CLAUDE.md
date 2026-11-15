@@ -10,10 +10,14 @@ Operator, 2026-11-11: "确保需要的功能 merge 到一起之后, 删掉所有
 - One kernel version: the vendor/linux-framework submodule at the commit master records. Functions a path needs are merged into that line as commits on top of it, made inside the submodule checkout (pushed to eunomia-bpf/linux kprog-no-kinsn, master's pointer updated in the same step). After the merge every other kernel version, kernel tree and kernel build is removed.
 - One image (bpf-benchmark/kprog:current) and one base (/workspaces/.agent-state/kprog-ck: the kernel build build-x86, its modules, the loader, shim, native-link and the object sets) serve every lane at any time. A lane that changes the base rebuilds it in place and announces it in COORDINATION.md.
 - Raw data is kept: run directories, logs, archives, census and replay outputs stay on persistent storage under /workspaces, committed when they back a number. /var/tmp is cleared when the container restarts, so raw data written there moves to /workspaces. Removal applies to rebuildable build outputs (kernels, images, object builds) only, and every removal is listed in kprog/docs/cleanup-log.md.
+- One build output: each product (kernel, image, linker, compiled apps, simulator C, B) exists as one build, and a new build replaces the previous one; no clone of any repository (operator, 2026-11-14: "不新建 worktree, 不能 clone, 不能有多个编译产物").
 - Benchmark settings stay at the 2026-05-29 definition (9f3855f6f): the workload, its configuration and the runtime image definition. Any change needs the operator's explicit consent.
-- Work order from 2026-11-11 (operator: "把需要的功能合进唯一内核线：在子模块检出里原地提交，推送后更新 master 指针；链接器和内核是不是应该在 05-29 上改? 内核应该从 stock 开始依次把需要的部分合并进来吧? kinsn RFC 那个也可以清理掉?" "停掉所有的, 然后确保重新开始" "你能自己来的整理可以自己来, omp 辅助 review; 先不用 claude subagent 了. 这些事情搞定, 性能确保回到 05-29 或者更好, 在开始考虑做别的"): every lane is stopped; the coordinator does the rebuild itself, omp reviews each step, no Claude subagent. (1) Kernel: start from the stock base c23719abc330 (bpf-next/master, shared by every kernel line) and add only the commits a path needs, one at a time in the submodule checkout, each built and checked. (2) Linker: start from the 2026-05-29 native-link source (9f3855f6f) and add only the changes a path needs, one at a time, with the six applications' native bytes compared against the 2026-05-29 output after each. (3) One image, one base. (4) One six-application sweep; every application at or above its 2026-05-29 number. Other work starts after that.
+- History, 2026-11-11 to 11-12 (operator: "把需要的功能合进唯一内核线：在子模块检出里原地提交，推送后更新 master 指针；链接器和内核是不是应该在 05-29 上改? 内核应该从 stock 开始依次把需要的部分合并进来吧? kinsn RFC 那个也可以清理掉?" "停掉所有的, 然后确保重新开始" "你能自己来的整理可以自己来, omp 辅助 review; 先不用 claude subagent 了. 这些事情搞定, 性能确保回到 05-29 或者更好, 在开始考虑做别的"): the rebuild ran with every lane stopped, the coordinator rebuilding and omp reviewing. It is finished; lanes run again on the operator\'s later words, and the steps below are its record. (1) Kernel: start from the stock base c23719abc330 (bpf-next/master, shared by every kernel line) and add only the commits a path needs, one at a time in the submodule checkout, each built and checked. (2) Linker: start from the 2026-05-29 native-link source (9f3855f6f) and add only the changes a path needs, one at a time, with the six applications' native bytes compared against the 2026-05-29 output after each. (3) One image, one base. (4) One six-application sweep; every application at or above its 2026-05-29 number.
 - Breadth first (operator 2026-11-11: "每小时监控提醒不能停" "自己推进, 直到性能这部分全部做完, 优化也搞定为止. 每个应用跑3次之后换下一个应用这样, 广度优先"): the coordinator keeps going until the performance work and the optimization are finished. Timing and optimization rotate across the applications: three runs of one application, then the next application, rather than many rounds on one.
-- Performance floor: the current system reaches, application by application, at least the 2026-05-29 system: OTel 1.849x, BCC 0.985x, Tracee 0.948x, Katran 1.113x, Tetragon 1.009x, Cilium 1.319x (stats off, reproduced 2026-11-10 on the frozen workload). The 2026-05-29 code is the reference. For each application the current chain's native code is compared byte by byte with the 2026-05-29 code first; each difference is a measured improvement or goes back to the 2026-05-29 form.
+  Refined by the operator on 2026-11-13 ("是不是过于慢了? 应该都弄好再?", spark-manage workspace-rules.md "Batch, then confirm once"): between fixes, time only the apps a fix touches, three samples each; the full six-app round runs once, before the freeze.
+- Performance floor: the current system reaches, application by application, at least the 2026-05-29 system: OTel 1.849x, BCC 0.985x, Tracee 0.948x, Katran 1.113x, Tetragon 1.009x, Cilium 1.319x (stats off, reproduced 2026-11-10 on the frozen workload). The 2026-05-29 code is the reference. The 2026-05-29 numbers were measured without an equal-work check (kprog/docs/todo.md section 0); how they enter the paper is the operator's call.
+
+The operator's words are recorded verbatim in kprog/docs/user-instruction.md (operator, 2026-11-14: "确保没有做错, 并且每一个原话都记录下来"). Standing words for every Workspace: "不新建 worktree, 不能 clone, 不能有多个编译产物", "结果一出来就提交, 有更改就提交 git, 但不能改论文", "不许 revert 提交". A rule that is his words keeps its wording; any rule is relaxed only when it blocks the work ("要不还是不要放宽, 除非 blovk 了").
 
 ## Working Agreement
 
@@ -32,18 +36,19 @@ docs should link here instead of restating a rule.
 
 **Branch and git**: `master` is the only development branch; don't create
 task branches, and stop to align with the user if a session starts on
-another one. State-mutating git commands (`pull`, `add`, `commit`, `push`)
-need the user's explicit, scoped ask; check `git status`/`git diff` first and
-never overwrite unrelated uncommitted work (may be another agent's WIP, not
+another one. Commit and push every step ("做一步 commit push 一步"), committing only your
+own paths; check `git status`/`git diff` first and never overwrite unrelated uncommitted work (may be another agent's WIP, not
 recoverable via `reflog`). History-rewriting/destructive commands
 (`commit --amend`, `checkout --`, `reset`, `restore`, `stash`, `branch -D`,
 `push -f`, `rebase`, `cherry-pick`, `revert`) stay forbidden even if asked;
 fix a wrong change forward in a new commit instead of `git revert`/"Restore
-X". Tell Codex "DO NOT modify git state" on a dirty tree.
+X".
 
 ## Measurement Integrity
 
-Workload throughput is the primary measurement. Don't invent
+Workload throughput and per-invocation BPF time are both reported; the 20%
+target counts on per-invocation time, since throughput is bounded by BPF's CPU
+share (kprog/docs/todo.md section 0). Don't invent
 validity/admission/publication gates — matched no-op controls,
 zero-drop/zero-error assertions, idle benchmark CPUs, a minimum `run_cnt`, a
 clean checkout/commit/push — to stop the queue, discard a completed run, or
