@@ -142,3 +142,17 @@ table-context-stock: $(TABLE_CONTEXT_BUILD)/stock-client
 guest-table-context-stock:
 	uname -r > $(OUTPUT)/kernel.release
 	$(TABLE_CONTEXT_BUILD)/stock-client $(TABLE_CONTEXT_BUILD)/original.bpf.o $(TABLE_CONTEXT_BUILD)/trusted_x86.bpf.o $(OUTPUT)/original.verifier.log $(OUTPUT)/generated.verifier.log > $(OUTPUT)/stock.jsonl
+
+.PHONY: table-context-checked guest-table-context-checked
+table-context-checked:
+	install -d $(OUTPUT) $(OUTPUT)/inputs
+	git -C $(ROOT) rev-parse HEAD > $(OUTPUT)/source-head.txt
+	sha256sum $(KDIR)/arch/x86/boot/bzImage $(LINKER_BINARY) /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader /workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir $(TABLE_CONTEXT_BUILD)/table.native.o $(TABLE_CONTEXT_BUILD)/trusted_x86.bpf.o > $(OUTPUT)/inputs.sha256
+	taskset -c 16-17 prlimit --as=17179869184 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --rwdir $(OUTPUT)/inputs=$(TABLE_CONTEXT_BUILD) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-table-context-checked OUTPUT=$(OUTPUT) TABLE_CONTEXT_BUILD=$(OUTPUT)/inputs'
+
+guest-table-context-checked:
+	uname -r > $(OUTPUT)/kernel.release
+	mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf
+	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
+	CLANG=$(ROOT)/kprog/stock-path/bin/clang python3 $(ROOT)/kprog/test/verify_retained_proof.py --native $(TABLE_CONTEXT_BUILD)/table.native.o --metadata $(ROOT)/kprog/test/table_context_metadata.json --context $(ROOT)/kprog/test/table_context_load_context.json --source $(TABLE_CONTEXT_BUILD)/original.bpf.o --proof $(TABLE_CONTEXT_BUILD)/trusted_x86.bpf.o --symbol jump_table --linker $(LINKER_BINARY) --checked-source $(TABLE_CONTEXT_BUILD)/trusted_x86.bpf.i --checked-frontend $(TABLE_CONTEXT_BUILD)/trusted_x86.bpf.bounds-input.bc --checked-compiler /workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir --output $(OUTPUT)/replay
