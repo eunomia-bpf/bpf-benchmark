@@ -1,0 +1,19 @@
+{
+  "command": [
+    "llc-18",
+    "-O3",
+    "-march=bpf",
+    "-mcpu=v4",
+    "-bpf-stack-size=4096",
+    "-verify-machineinstrs",
+    "-start-before=prologepilog",
+    "-filetype=obj",
+    "/var/tmp/kprog-tmp/perf/otel-whole-word-checked/trusted_x86.bpf.packed.mir",
+    "-o",
+    "/var/tmp/kprog-tmp/perf/otel-whole-word-checked/trusted_x86.bpf.o"
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "",
+  "wall_seconds": 350.1711255639966
+}

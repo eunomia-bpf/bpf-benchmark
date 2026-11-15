@@ -1,0 +1,1 @@
+taskset -c 19 prlimit --as=25769803776 -- python3 /workspaces/repository/kprog/test/replay_hotspot_spills.py --archive /workspaces/kprog-raw/perf/20261114-otel-whole-word-checked/service.tar.gz --member service/requests/5.failure.tar.gz --build /var/tmp/kprog-tmp/perf/otel-whole-word-checked --output /workspaces/kprog-raw/perf/20261115-otel-hotspot-spills/replay

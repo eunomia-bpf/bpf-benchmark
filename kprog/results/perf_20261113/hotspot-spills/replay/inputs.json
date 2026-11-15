@@ -1,0 +1,18 @@
+{
+  "started": "2026-11-15T05:29:46.685558+00:00",
+  "archive": "/workspaces/kprog-raw/perf/20261114-otel-whole-word-checked/service.tar.gz",
+  "member": "service/requests/5.failure.tar.gz",
+  "scope": "Archived hotspot MIR diagnostic, no P or production compiler change",
+  "archived_hashes": {
+    "request/generated/commands.jsonl": "39db795d694be137385e4330a77e7d49a230d717ae160460d4f13e82d7e65134",
+    "request/generated/trusted_x86.bpf.before.mir": "0c40d1929ab4682fc5b0e9e380576ed88d615d7ce49360c81a436837caafb50c",
+    "request/generated/trusted_x86.bpf.o": "48ceafd06399df5d7ff31dc386ecdf91b098cbd4d64f2866f7d5de465ee22aef",
+    "request/generated/trusted_x86.bpf.packed.mir": "ba0d4d6a845954851ac24caa2ac92b743a79b42f2a2b31bf06da4c609eca513c",
+    "request/generation.metadata.json": "e5c8459b6798aa812ef24253a87a143593ad28148499c3752076f1c4603e6e4a",
+    "request/kernel.entry": "b58c36089556a971447dfdbdd9dd94c7ceaca1b7d6f4ae03f0d4f1105f4dfbdf",
+    "request/kernel.facts.json": "767073b68b0bb812ad4beddc78cdfd46a9e8ea9c3c392f96da3d615e33119699",
+    "request/kernel.native.o": "ef44985c193e1d737ffd8980009b67f3c36ab91baf67af0c7878e69590d747da",
+    "request/source-identities.json": "010311a9f39362e4c8aa1d19c1b20521db76a07cf8279d5de3a85050faf26c43",
+    "request/verify.stderr": "7a2ba97de548ed65c74dae52d52d6ce55b2ff5a17f7627091ddce46d924839f1"
+  }
+}

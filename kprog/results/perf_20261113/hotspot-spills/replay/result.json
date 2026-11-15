@@ -1,0 +1,4769 @@
+{
+  "started": "2026-11-15T05:29:46.685558+00:00",
+  "archive": "/workspaces/kprog-raw/perf/20261114-otel-whole-word-checked/service.tar.gz",
+  "member": "service/requests/5.failure.tar.gz",
+  "scope": "Archived hotspot MIR diagnostic, no P or production compiler change",
+  "archived_hashes": {
+    "request/generated/commands.jsonl": "39db795d694be137385e4330a77e7d49a230d717ae160460d4f13e82d7e65134",
+    "request/generated/trusted_x86.bpf.before.mir": "0c40d1929ab4682fc5b0e9e380576ed88d615d7ce49360c81a436837caafb50c",
+    "request/generated/trusted_x86.bpf.o": "48ceafd06399df5d7ff31dc386ecdf91b098cbd4d64f2866f7d5de465ee22aef",
+    "request/generated/trusted_x86.bpf.packed.mir": "ba0d4d6a845954851ac24caa2ac92b743a79b42f2a2b31bf06da4c609eca513c",
+    "request/generation.metadata.json": "e5c8459b6798aa812ef24253a87a143593ad28148499c3752076f1c4603e6e4a",
+    "request/kernel.entry": "b58c36089556a971447dfdbdd9dd94c7ceaca1b7d6f4ae03f0d4f1105f4dfbdf",
+    "request/kernel.facts.json": "767073b68b0bb812ad4beddc78cdfd46a9e8ea9c3c392f96da3d615e33119699",
+    "request/kernel.native.o": "ef44985c193e1d737ffd8980009b67f3c36ab91baf67af0c7878e69590d747da",
+    "request/source-identities.json": "010311a9f39362e4c8aa1d19c1b20521db76a07cf8279d5de3a85050faf26c43",
+    "request/verify.stderr": "7a2ba97de548ed65c74dae52d52d6ce55b2ff5a17f7627091ddce46d924839f1"
+  },
+  "original_spill_slots": [
+    {
+      "id": 20,
+      "size": 4,
+      "alignment": 8
+    },
+    {
+      "id": 21,
+      "size": 8,
+      "alignment": 8
+    },
+    {
+      "id": 22,
+      "size": 8,
+      "alignment": 8
+    },
+    {
+      "id": 23,
+      "size": 8,
+      "alignment": 8
+    },
+    {
+      "id": 24,
+      "size": 8,
+      "alignment": 8
+    },
+    {
+      "id": 25,
+      "size": 8,
+      "alignment": 8
+    },
+    {
+      "id": 26,
+      "size": 8,
+      "alignment": 8
+    },
+    {
+      "id": 27,
+      "size": 8,
+      "alignment": 8
+    },
+    {
+      "id": 28,
+      "size": 8,
+      "alignment": 8
+    },
+    {
+      "id": 29,
+      "size": 8,
+      "alignment": 8
+    },
+    {
+      "id": 30,
+      "size": 8,
+      "alignment": 8
+    },
+    {
+      "id": 31,
+      "size": 8,
+      "alignment": 8
+    },
+    {
+      "id": 32,
+      "size": 8,
+      "alignment": 8
+    },
+    {
+      "id": 33,
+      "size": 8,
+      "alignment": 8
+    },
+    {
+      "id": 34,
+      "size": 8,
+      "alignment": 8
+    },
+    {
+      "id": 35,
+      "size": 8,
+      "alignment": 8
+    },
+    {
+      "id": 36,
+      "size": 4,
+      "alignment": 8
+    },
+    {
+      "id": 37,
+      "size": 4,
+      "alignment": 8
+    },
+    {
+      "id": 38,
+      "size": 4,
+      "alignment": 8
+    },
+    {
+      "id": 39,
+      "size": 4,
+      "alignment": 8
+    },
+    {
+      "id": 40,
+      "size": 4,
+      "alignment": 8
+    },
+    {
+      "id": 41,
+      "size": 4,
+      "alignment": 8
+    },
+    {
+      "id": 42,
+      "size": 4,
+      "alignment": 8
+    },
+    {
+      "id": 43,
+      "size": 4,
+      "alignment": 8
+    },
+    {
+      "id": 44,
+      "size": 4,
+      "alignment": 8
+    }
+  ],
+  "grouped_mir_sha256": "465665d20ff707f72532da078e611578567f72a9d350b8ecbaadd339405f964a",
+  "pairs": [
+    {
+      "document": 1,
+      "low": 43,
+      "high": 44,
+      "changes": [
+        {
+          "block": 6515,
+          "original": "STW32 killed $w1, %stack.44, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 6562,
+          "original": "STW32 killed $w1, %stack.43, 0, debug-location !1657928",
+          "scratch": [
+            8,
+            9
+          ]
+        },
+        {
+          "block": 6563,
+          "original": "STW32 killed $w1, %stack.43, 0",
+          "scratch": [
+            5,
+            8
+          ]
+        },
+        {
+          "block": 6584,
+          "original": "$w2 = LDW32 %stack.43, 0, debug-location !1657958"
+        },
+        {
+          "block": 6614,
+          "original": "$w6 = LDW32 %stack.44, 0"
+        },
+        {
+          "block": 9057,
+          "original": "STW32 killed $w1, %stack.44, 0, debug-location !1672452",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 11553,
+          "original": "STW32 killed $w1, %stack.44, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 11600,
+          "original": "STW32 killed $w1, %stack.43, 0, debug-location !1688910",
+          "scratch": [
+            0,
+            5
+          ]
+        },
+        {
+          "block": 11601,
+          "original": "STW32 killed $w1, %stack.43, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 11622,
+          "original": "$w4 = LDW32 %stack.43, 0, debug-location !1688940"
+        },
+        {
+          "block": 11652,
+          "original": "$w6 = LDW32 %stack.44, 0"
+        },
+        {
+          "block": 14624,
+          "original": "STW32 killed $w1, %stack.44, 0, debug-location !1706786",
+          "scratch": [
+            0,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "document": 1,
+      "low": 41,
+      "high": 42,
+      "changes": [
+        {
+          "block": 6576,
+          "original": "STW32 killed $w2, %stack.41, 0, debug-location !1657948",
+          "scratch": [
+            8,
+            2
+          ],
+          "reuses_dead_source": true
+        },
+        {
+          "block": 6577,
+          "original": "STW32 killed $w2, %stack.41, 0",
+          "scratch": [
+            8,
+            2
+          ],
+          "reuses_dead_source": true
+        },
+        {
+          "block": 6578,
+          "original": "STW32 killed $w2, %stack.42, 0, debug-location !1657952",
+          "scratch": [
+            8,
+            2
+          ],
+          "reuses_dead_source": true
+        },
+        {
+          "block": 6579,
+          "original": "STW32 killed $w2, %stack.42, 0",
+          "scratch": [
+            8,
+            2
+          ],
+          "reuses_dead_source": true
+        },
+        {
+          "block": 6595,
+          "original": "$w2 = LDW32 %stack.42, 0, debug-location !1612988"
+        },
+        {
+          "block": 6597,
+          "original": "$w1 = LDW32 %stack.41, 0, debug-location !1612988"
+        },
+        {
+          "block": 11614,
+          "original": "STW32 killed $w2, %stack.41, 0, debug-location !1688930",
+          "scratch": [
+            9,
+            2
+          ],
+          "reuses_dead_source": true
+        },
+        {
+          "block": 11615,
+          "original": "STW32 killed $w2, %stack.41, 0",
+          "scratch": [
+            9,
+            2
+          ],
+          "reuses_dead_source": true
+        },
+        {
+          "block": 11616,
+          "original": "STW32 killed $w2, %stack.42, 0, debug-location !1688934",
+          "scratch": [
+            9,
+            2
+          ],
+          "reuses_dead_source": true
+        },
+        {
+          "block": 11617,
+          "original": "STW32 killed $w2, %stack.42, 0",
+          "scratch": [
+            9,
+            2
+          ],
+          "reuses_dead_source": true
+        },
+        {
+          "block": 11633,
+          "original": "$w6 = LDW32 %stack.42, 0, debug-location !1612988"
+        },
+        {
+          "block": 11635,
+          "original": "$w1 = LDW32 %stack.41, 0, debug-location !1612988"
+        }
+      ]
+    },
+    {
+      "document": 1,
+      "low": 39,
+      "high": 40,
+      "changes": [
+        {
+          "block": 6558,
+          "original": "STW32 killed $w0, %stack.39, 0",
+          "scratch": [
+            8,
+            9
+          ]
+        },
+        {
+          "block": 6559,
+          "original": "STW32 killed $w1, %stack.39, 0",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 6574,
+          "original": "STW32 killed $w2, %stack.40, 0, debug-location !1657944",
+          "scratch": [
+            8,
+            2
+          ],
+          "reuses_dead_source": true
+        },
+        {
+          "block": 6575,
+          "original": "STW32 killed $w2, %stack.40, 0",
+          "scratch": [
+            8,
+            2
+          ],
+          "reuses_dead_source": true
+        },
+        {
+          "block": 6591,
+          "original": "$w2 = LDW32 %stack.39, 0"
+        },
+        {
+          "block": 6601,
+          "original": "$w2 = LDW32 %stack.40, 0, debug-location !1612988"
+        },
+        {
+          "block": 11596,
+          "original": "STW32 killed $w4, %stack.39, 0",
+          "scratch": [
+            0,
+            5
+          ]
+        },
+        {
+          "block": 11597,
+          "original": "STW32 killed $w1, %stack.39, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 11612,
+          "original": "STW32 killed $w2, %stack.40, 0, debug-location !1688926",
+          "scratch": [
+            9,
+            2
+          ],
+          "reuses_dead_source": true
+        },
+        {
+          "block": 11613,
+          "original": "STW32 killed $w2, %stack.40, 0",
+          "scratch": [
+            9,
+            2
+          ],
+          "reuses_dead_source": true
+        },
+        {
+          "block": 11629,
+          "original": "$w4 = LDW32 %stack.39, 0"
+        },
+        {
+          "block": 11639,
+          "original": "$w4 = LDW32 %stack.40, 0, debug-location !1612988"
+        }
+      ]
+    },
+    {
+      "document": 1,
+      "low": 37,
+      "high": 38,
+      "changes": [
+        {
+          "block": 6556,
+          "original": "STW32 killed $w0, %stack.37, 0",
+          "scratch": [
+            8,
+            9
+          ]
+        },
+        {
+          "block": 6557,
+          "original": "STW32 killed $w1, %stack.37, 0",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 6560,
+          "original": "STW32 killed $w1, %stack.38, 0, debug-location !1657926",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 6561,
+          "original": "STW32 killed $w1, %stack.38, 0",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 6607,
+          "original": "$w4 = LDW32 %stack.38, 0"
+        },
+        {
+          "block": 6609,
+          "original": "$w4 = LDW32 %stack.37, 0"
+        },
+        {
+          "block": 11594,
+          "original": "STW32 killed $w4, %stack.37, 0",
+          "scratch": [
+            0,
+            5
+          ]
+        },
+        {
+          "block": 11595,
+          "original": "STW32 killed $w1, %stack.37, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 11598,
+          "original": "STW32 killed $w1, %stack.38, 0, debug-location !1688908",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 11599,
+          "original": "STW32 killed $w1, %stack.38, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 11645,
+          "original": "$w5 = LDW32 %stack.38, 0"
+        },
+        {
+          "block": 11647,
+          "original": "$w0 = LDW32 %stack.37, 0"
+        }
+      ]
+    },
+    {
+      "document": 1,
+      "low": 20,
+      "high": 36,
+      "changes": [
+        {
+          "block": 37,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 112,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1613894",
+          "scratch": [
+            0,
+            3
+          ],
+          "reuses_dead_source": true
+        },
+        {
+          "block": 174,
+          "original": "STW32 killed $w2, %stack.20, 0, debug-location !1614326",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 185,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 186,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 201,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 210,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            1
+          ]
+        },
+        {
+          "block": 234,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 243,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            1
+          ]
+        },
+        {
+          "block": 245,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            1
+          ]
+        },
+        {
+          "block": 249,
+          "original": "$w4 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 250,
+          "original": "$w4 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 421,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 424,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 517,
+          "original": "$w3 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 518,
+          "original": "STW32 killed $w4, %stack.20, 0, debug-location !1617460",
+          "scratch": [
+            5,
+            7
+          ]
+        },
+        {
+          "block": 519,
+          "original": "STW32 killed $w3, %stack.20, 0",
+          "scratch": [
+            4,
+            5
+          ]
+        },
+        {
+          "block": 582,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            1
+          ]
+        },
+        {
+          "block": 657,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 660,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            3,
+            4
+          ]
+        },
+        {
+          "block": 828,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 831,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            3,
+            4
+          ]
+        },
+        {
+          "block": 960,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1620270",
+          "scratch": [
+            7,
+            0
+          ],
+          "reuses_dead_source": true
+        },
+        {
+          "block": 1007,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1620528",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 1010,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 1013,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 1014,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 1023,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 1024,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 1033,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 1034,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 1043,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 1044,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 1053,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 1054,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 1063,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 1064,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 1073,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 1074,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 1083,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 1084,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 1093,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 1094,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 1103,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 1104,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 1113,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 1114,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 1192,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1622520",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 1222,
+          "original": "$w4 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 1233,
+          "original": "STW32 killed $w4, %stack.20, 0",
+          "scratch": [
+            0,
+            1
+          ]
+        },
+        {
+          "block": 1278,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 1287,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            1
+          ]
+        },
+        {
+          "block": 1292,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            1
+          ]
+        },
+        {
+          "block": 1296,
+          "original": "$w9 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 1298,
+          "original": "STW32 killed $w9, %stack.20, 0",
+          "scratch": [
+            0,
+            1
+          ]
+        },
+        {
+          "block": 1315,
+          "original": "$w3 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 1316,
+          "original": "STW32 killed $w4, %stack.20, 0, debug-location !1623925",
+          "scratch": [
+            0,
+            5
+          ]
+        },
+        {
+          "block": 1317,
+          "original": "STW32 killed $w3, %stack.20, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 1322,
+          "original": "$w7 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 1350,
+          "original": "STW32 killed $w8, %stack.20, 0, debug-location !1624160",
+          "scratch": [
+            0,
+            8
+          ],
+          "reuses_dead_source": true,
+          "saved_live_registers": [
+            {
+              "register": 0,
+              "slot": 44
+            }
+          ]
+        },
+        {
+          "block": 1351,
+          "original": "STW32 killed $w7, %stack.20, 0",
+          "scratch": [
+            8,
+            9
+          ]
+        },
+        {
+          "block": 1396,
+          "original": "$w0 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 1401,
+          "original": "STW32 killed $w7, %stack.20, 0, debug-location !1624496",
+          "scratch": [
+            0,
+            7
+          ],
+          "reuses_dead_source": true,
+          "saved_live_registers": [
+            {
+              "register": 0,
+              "slot": 44
+            }
+          ]
+        },
+        {
+          "block": 1402,
+          "original": "STW32 killed $w9, %stack.20, 0",
+          "scratch": [
+            7,
+            8
+          ]
+        },
+        {
+          "block": 1601,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1625778",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 1602,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1625786",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 1627,
+          "original": "$w0 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 1632,
+          "original": "STW32 killed $w6, %stack.20, 0, debug-location !1626002",
+          "scratch": [
+            8,
+            6
+          ],
+          "reuses_dead_source": true
+        },
+        {
+          "block": 1633,
+          "original": "STW32 killed $w7, %stack.20, 0",
+          "scratch": [
+            6,
+            8
+          ]
+        },
+        {
+          "block": 1707,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1626469",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 1710,
+          "original": "STW32 killed $w2, %stack.20, 0, debug-location !1626532",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 1735,
+          "original": "$w0 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 1740,
+          "original": "STW32 killed $w7, %stack.20, 0, debug-location !1626748",
+          "scratch": [
+            0,
+            7
+          ],
+          "reuses_dead_source": true,
+          "saved_live_registers": [
+            {
+              "register": 0,
+              "slot": 44
+            }
+          ]
+        },
+        {
+          "block": 1741,
+          "original": "STW32 killed $w9, %stack.20, 0",
+          "scratch": [
+            7,
+            8
+          ]
+        },
+        {
+          "block": 1774,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 1808,
+          "original": "$w0 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 1813,
+          "original": "STW32 killed $w6, %stack.20, 0, debug-location !1627264",
+          "scratch": [
+            8,
+            6
+          ],
+          "reuses_dead_source": true
+        },
+        {
+          "block": 1814,
+          "original": "STW32 killed $w7, %stack.20, 0",
+          "scratch": [
+            6,
+            8
+          ]
+        },
+        {
+          "block": 2015,
+          "original": "$w0 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 2020,
+          "original": "STW32 killed $w7, %stack.20, 0, debug-location !1628657",
+          "scratch": [
+            0,
+            7
+          ],
+          "reuses_dead_source": true,
+          "saved_live_registers": [
+            {
+              "register": 0,
+              "slot": 44
+            }
+          ]
+        },
+        {
+          "block": 2021,
+          "original": "STW32 killed $w9, %stack.20, 0",
+          "scratch": [
+            7,
+            8
+          ]
+        },
+        {
+          "block": 2061,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 2061,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 2156,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            3,
+            4
+          ]
+        },
+        {
+          "block": 2156,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 2219,
+          "original": "$w3 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 2220,
+          "original": "STW32 killed $w4, %stack.20, 0, debug-location !1630277",
+          "scratch": [
+            5,
+            7
+          ]
+        },
+        {
+          "block": 2221,
+          "original": "STW32 killed $w3, %stack.20, 0",
+          "scratch": [
+            4,
+            5
+          ]
+        },
+        {
+          "block": 2313,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 2359,
+          "original": "STW32 killed $w8, %stack.20, 0, debug-location !1631206",
+          "scratch": [
+            9,
+            8
+          ],
+          "reuses_dead_source": true
+        },
+        {
+          "block": 2360,
+          "original": "STW32 killed $w5, %stack.20, 0",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 2422,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 2628,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1632896",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 2675,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1633154",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 2678,
+          "original": "STW32 killed $w2, %stack.20, 0, debug-location !1633217",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 2680,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            3,
+            4
+          ]
+        },
+        {
+          "block": 2680,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 2891,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1634349",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 2894,
+          "original": "STW32 killed $w2, %stack.20, 0, debug-location !1634412",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 2962,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1634865",
+          "scratch": [
+            6,
+            8
+          ]
+        },
+        {
+          "block": 3062,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1635445",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 3109,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1635697",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 3112,
+          "original": "STW32 killed $w2, %stack.20, 0, debug-location !1635760",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 3168,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1636036",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 3254,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1636510",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 3324,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 3326,
+          "original": "$w9 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 3329,
+          "original": "STW32 killed $w9, %stack.20, 0",
+          "scratch": [
+            0,
+            1
+          ]
+        },
+        {
+          "block": 3347,
+          "original": "$w5 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 3352,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1637106",
+          "scratch": [
+            9,
+            0
+          ],
+          "reuses_dead_source": true
+        },
+        {
+          "block": 3353,
+          "original": "STW32 killed $w8, %stack.20, 0",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 3373,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 3373,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 3394,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 3437,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1637792",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 3489,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1638063",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 3524,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1638256",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 3591,
+          "original": "STW32 killed $w5, %stack.20, 0, debug-location !1638582",
+          "scratch": [
+            0,
+            7
+          ]
+        },
+        {
+          "block": 3663,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1638981",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 3735,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 3785,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1639628",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 3854,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1639972",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 3921,
+          "original": "STW32 killed $w5, %stack.20, 0, debug-location !1640298",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 3968,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1640562",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 3971,
+          "original": "STW32 killed $w2, %stack.20, 0, debug-location !1640625",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 4093,
+          "original": "STW32 killed $w5, %stack.20, 0, debug-location !1641280",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 4160,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1628920",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 4232,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1642011",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 4332,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1642568",
+          "scratch": [
+            0,
+            5
+          ]
+        },
+        {
+          "block": 4387,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1642892",
+          "scratch": [
+            0,
+            5
+          ]
+        },
+        {
+          "block": 4459,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1643268",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 4526,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1643638",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 4628,
+          "original": "STW32 killed $w3, %stack.20, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 4684,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1644551",
+          "scratch": [
+            0,
+            5
+          ]
+        },
+        {
+          "block": 4739,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1644875",
+          "scratch": [
+            0,
+            5
+          ]
+        },
+        {
+          "block": 4786,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1645133",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 4789,
+          "original": "STW32 killed $w2, %stack.20, 0, debug-location !1645196",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 4885,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1645716",
+          "scratch": [
+            0,
+            5
+          ]
+        },
+        {
+          "block": 4930,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1645962",
+          "scratch": [
+            9,
+            0
+          ],
+          "reuses_dead_source": true
+        },
+        {
+          "block": 4940,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            1
+          ]
+        },
+        {
+          "block": 4942,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            1
+          ]
+        },
+        {
+          "block": 5039,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1646762",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 5065,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 5068,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            3,
+            4
+          ]
+        },
+        {
+          "block": 5104,
+          "original": "$w3 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 5109,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            1,
+            3
+          ]
+        },
+        {
+          "block": 5112,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 5134,
+          "original": "$w8 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 5164,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 5259,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 5296,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 5309,
+          "original": "$w9 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 5320,
+          "original": "STW32 killed $w5, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 5467,
+          "original": "$w9 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 5478,
+          "original": "STW32 killed $w5, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 5480,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 5709,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 5718,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 5922,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1652739",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 5969,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1652991",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 5972,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 5975,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 5978,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            3,
+            4
+          ]
+        },
+        {
+          "block": 5987,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 5990,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            3,
+            4
+          ]
+        },
+        {
+          "block": 5999,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6002,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            3,
+            4
+          ]
+        },
+        {
+          "block": 6011,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6014,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            3,
+            4
+          ]
+        },
+        {
+          "block": 6023,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6026,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            3,
+            4
+          ]
+        },
+        {
+          "block": 6035,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6038,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            3,
+            4
+          ]
+        },
+        {
+          "block": 6047,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6050,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            3,
+            4
+          ]
+        },
+        {
+          "block": 6059,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6062,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            3,
+            4
+          ]
+        },
+        {
+          "block": 6071,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6074,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            3,
+            4
+          ]
+        },
+        {
+          "block": 6083,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6086,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            3,
+            4
+          ]
+        },
+        {
+          "block": 6095,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6098,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            3,
+            4
+          ]
+        },
+        {
+          "block": 6106,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6115,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            1
+          ]
+        },
+        {
+          "block": 6157,
+          "original": "$w5 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6158,
+          "original": "STW32 killed $w6, %stack.20, 0, debug-location !1655111",
+          "scratch": [
+            7,
+            8
+          ]
+        },
+        {
+          "block": 6159,
+          "original": "STW32 killed $w5, %stack.20, 0",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 6194,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6203,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 6253,
+          "original": "$w9 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6272,
+          "original": "STW32 killed $w9, %stack.20, 0",
+          "scratch": [
+            0,
+            1
+          ]
+        },
+        {
+          "block": 6274,
+          "original": "$w9 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6345,
+          "original": "STW32 $w9, %stack.20, 0",
+          "scratch": [
+            0,
+            1
+          ]
+        },
+        {
+          "block": 6356,
+          "original": "STW32 killed $w4, %stack.20, 0",
+          "scratch": [
+            0,
+            5
+          ]
+        },
+        {
+          "block": 6367,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            6
+          ],
+          "reuses_dead_source": true,
+          "saved_live_registers": [
+            {
+              "register": 0,
+              "slot": 44
+            }
+          ]
+        },
+        {
+          "block": 6389,
+          "original": "$w8 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6405,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1656837",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 6406,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 6422,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 6422,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6443,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6486,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1657515",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 6502,
+          "original": "$w9 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6513,
+          "original": "STW32 killed $w5, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 6515,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6521,
+          "original": "STW32 killed $w4, %stack.20, 0",
+          "scratch": [
+            0,
+            5
+          ]
+        },
+        {
+          "block": 6522,
+          "original": "STW32 killed $w3, %stack.20, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 6529,
+          "original": "STW32 killed $w3, %stack.36, 0, debug-location !1657743",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 6530,
+          "original": "STW32 killed $w3, %stack.36, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 6584,
+          "original": "$w9 = LDW32 %stack.36, 0"
+        },
+        {
+          "block": 6599,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1658025",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 6599,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6601,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6617,
+          "original": "STW32 killed $w8, %stack.20, 0, debug-location !1658037",
+          "scratch": [
+            9,
+            8
+          ],
+          "reuses_dead_source": true
+        },
+        {
+          "block": 6618,
+          "original": "STW32 killed $w7, %stack.20, 0",
+          "scratch": [
+            8,
+            9
+          ]
+        },
+        {
+          "block": 6716,
+          "original": "STW32 killed $w2, %stack.20, 0, debug-location !1658595",
+          "scratch": [
+            3,
+            4
+          ]
+        },
+        {
+          "block": 6763,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1658847",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 6766,
+          "original": "STW32 killed $w2, %stack.20, 0, debug-location !1658910",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 6787,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1659162",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 6802,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            1
+          ]
+        },
+        {
+          "block": 6856,
+          "original": "$w4 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6857,
+          "original": "STW32 killed $w7, %stack.20, 0, debug-location !1659596",
+          "scratch": [
+            0,
+            7
+          ],
+          "reuses_dead_source": true,
+          "saved_live_registers": [
+            {
+              "register": 0,
+              "slot": 44
+            }
+          ]
+        },
+        {
+          "block": 6858,
+          "original": "STW32 killed $w4, %stack.20, 0",
+          "scratch": [
+            5,
+            7
+          ]
+        },
+        {
+          "block": 6878,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6879,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1659596",
+          "scratch": [
+            7,
+            8
+          ]
+        },
+        {
+          "block": 6880,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 6942,
+          "original": "$w4 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6943,
+          "original": "STW32 killed $w7, %stack.20, 0, debug-location !1660018",
+          "scratch": [
+            0,
+            7
+          ],
+          "reuses_dead_source": true,
+          "saved_live_registers": [
+            {
+              "register": 0,
+              "slot": 44
+            }
+          ]
+        },
+        {
+          "block": 6944,
+          "original": "STW32 killed $w4, %stack.20, 0",
+          "scratch": [
+            5,
+            7
+          ]
+        },
+        {
+          "block": 6964,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 6965,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1660018",
+          "scratch": [
+            7,
+            8
+          ]
+        },
+        {
+          "block": 6966,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 7045,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 7046,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1660545",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 7100,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1660891",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 7103,
+          "original": "STW32 killed $w2, %stack.20, 0, debug-location !1660954",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 7144,
+          "original": "$w4 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 7145,
+          "original": "STW32 killed $w7, %stack.20, 0, debug-location !1661194",
+          "scratch": [
+            0,
+            7
+          ],
+          "reuses_dead_source": true,
+          "saved_live_registers": [
+            {
+              "register": 0,
+              "slot": 44
+            }
+          ]
+        },
+        {
+          "block": 7146,
+          "original": "STW32 killed $w4, %stack.20, 0",
+          "scratch": [
+            5,
+            7
+          ]
+        },
+        {
+          "block": 7166,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 7167,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1661194",
+          "scratch": [
+            7,
+            8
+          ]
+        },
+        {
+          "block": 7168,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 7230,
+          "original": "$w4 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 7231,
+          "original": "STW32 killed $w7, %stack.20, 0, debug-location !1661616",
+          "scratch": [
+            0,
+            7
+          ],
+          "reuses_dead_source": true,
+          "saved_live_registers": [
+            {
+              "register": 0,
+              "slot": 44
+            }
+          ]
+        },
+        {
+          "block": 7232,
+          "original": "STW32 killed $w4, %stack.20, 0",
+          "scratch": [
+            5,
+            7
+          ]
+        },
+        {
+          "block": 7252,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 7253,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1661616",
+          "scratch": [
+            7,
+            8
+          ]
+        },
+        {
+          "block": 7254,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 7347,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1662177",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 7394,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1662429",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 7397,
+          "original": "STW32 killed $w2, %stack.20, 0, debug-location !1662492",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 7438,
+          "original": "$w4 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 7439,
+          "original": "STW32 killed $w7, %stack.20, 0, debug-location !1662732",
+          "scratch": [
+            0,
+            7
+          ],
+          "reuses_dead_source": true,
+          "saved_live_registers": [
+            {
+              "register": 0,
+              "slot": 44
+            }
+          ]
+        },
+        {
+          "block": 7440,
+          "original": "STW32 killed $w4, %stack.20, 0",
+          "scratch": [
+            5,
+            7
+          ]
+        },
+        {
+          "block": 7460,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 7461,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1662732",
+          "scratch": [
+            7,
+            8
+          ]
+        },
+        {
+          "block": 7462,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 7498,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 7498,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 7499,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 7499,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 7632,
+          "original": "$w9 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 7643,
+          "original": "STW32 killed $w5, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 7645,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 7732,
+          "original": "$w0 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 7733,
+          "original": "STW32 killed $w7, %stack.20, 0, debug-location !1664780",
+          "scratch": [
+            8,
+            9
+          ]
+        },
+        {
+          "block": 7734,
+          "original": "STW32 killed $w0, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 7789,
+          "original": "$w4 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 7790,
+          "original": "STW32 killed $w6, %stack.20, 0, debug-location !1665114",
+          "scratch": [
+            0,
+            6
+          ],
+          "reuses_dead_source": true,
+          "saved_live_registers": [
+            {
+              "register": 0,
+              "slot": 44
+            }
+          ]
+        },
+        {
+          "block": 7791,
+          "original": "STW32 killed $w4, %stack.20, 0",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 7869,
+          "original": "$w0 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 7870,
+          "original": "STW32 killed $w7, %stack.20, 0, debug-location !1665628",
+          "scratch": [
+            8,
+            9
+          ]
+        },
+        {
+          "block": 7871,
+          "original": "STW32 killed $w0, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 8014,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 8015,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 8062,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1666726",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 8065,
+          "original": "STW32 killed $w2, %stack.20, 0, debug-location !1666789",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 8114,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1667061",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 8117,
+          "original": "STW32 killed $w2, %stack.20, 0, debug-location !1667124",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 8164,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1667376",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 8167,
+          "original": "STW32 killed $w2, %stack.20, 0, debug-location !1667439",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 8214,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1667691",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 8217,
+          "original": "STW32 killed $w2, %stack.20, 0, debug-location !1667754",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 8273,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 8373,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 8420,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1668928",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 8423,
+          "original": "STW32 killed $w2, %stack.20, 0, debug-location !1668991",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 8519,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1669562",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 8566,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1669829",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 8569,
+          "original": "STW32 killed $w2, %stack.20, 0, debug-location !1669889",
+          "scratch": [
+            3,
+            7
+          ]
+        },
+        {
+          "block": 8605,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 8657,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1670353",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 8724,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1670685",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 8796,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 8866,
+          "original": "STW32 killed $w3, %stack.20, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 9002,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1672129",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 9104,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1672722",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 9107,
+          "original": "STW32 killed $w2, %stack.20, 0, debug-location !1672785",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 9174,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1663020",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 9246,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 9301,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1673821",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 9356,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1674145",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 9428,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1674521",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 9495,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1674891",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 9653,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1675802",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 9708,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1676126",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 9755,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1676384",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 9758,
+          "original": "STW32 killed $w2, %stack.20, 0, debug-location !1676447",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 9813,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1676765",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 9858,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1677011",
+          "scratch": [
+            9,
+            0
+          ],
+          "reuses_dead_source": true
+        },
+        {
+          "block": 9868,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            1
+          ]
+        },
+        {
+          "block": 9870,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            1
+          ]
+        },
+        {
+          "block": 9967,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1677800",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 9993,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 10002,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 10044,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 10055,
+          "original": "STW32 killed $w4, %stack.20, 0",
+          "scratch": [
+            1,
+            2
+          ]
+        },
+        {
+          "block": 10058,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 10089,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 10125,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 10223,
+          "original": "$w3 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 10259,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 10272,
+          "original": "$w9 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 10283,
+          "original": "STW32 killed $w5, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 10430,
+          "original": "$w9 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 10441,
+          "original": "STW32 killed $w5, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 10443,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 10677,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 10686,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 10894,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 10941,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1684106",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 10944,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 10947,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 10956,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 10965,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 10974,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 10983,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 10992,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 11001,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 11010,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 11019,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 11028,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 11037,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 11046,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 11055,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 11064,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 11142,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1685612",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 11144,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 11153,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            1
+          ]
+        },
+        {
+          "block": 11195,
+          "original": "$w5 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 11196,
+          "original": "STW32 killed $w6, %stack.20, 0, debug-location !1686093",
+          "scratch": [
+            7,
+            8
+          ]
+        },
+        {
+          "block": 11197,
+          "original": "STW32 killed $w5, %stack.20, 0",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 11232,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 11241,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 11291,
+          "original": "$w9 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 11310,
+          "original": "STW32 killed $w9, %stack.20, 0",
+          "scratch": [
+            0,
+            1
+          ]
+        },
+        {
+          "block": 11312,
+          "original": "$w9 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 11383,
+          "original": "STW32 $w9, %stack.20, 0",
+          "scratch": [
+            0,
+            1
+          ]
+        },
+        {
+          "block": 11394,
+          "original": "STW32 killed $w4, %stack.20, 0",
+          "scratch": [
+            0,
+            5
+          ]
+        },
+        {
+          "block": 11405,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            6
+          ],
+          "reuses_dead_source": true,
+          "saved_live_registers": [
+            {
+              "register": 0,
+              "slot": 44
+            }
+          ]
+        },
+        {
+          "block": 11427,
+          "original": "$w8 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 11443,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1687819",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 11444,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 11460,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 11460,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 11481,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 11524,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1688497",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 11540,
+          "original": "$w9 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 11551,
+          "original": "STW32 killed $w5, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 11553,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 11559,
+          "original": "STW32 killed $w3, %stack.20, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 11560,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 11567,
+          "original": "STW32 killed $w3, %stack.36, 0, debug-location !1688725",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 11568,
+          "original": "STW32 killed $w3, %stack.36, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 11622,
+          "original": "$w9 = LDW32 %stack.36, 0"
+        },
+        {
+          "block": 11637,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1689007",
+          "scratch": [
+            0,
+            7
+          ]
+        },
+        {
+          "block": 11637,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 11639,
+          "original": "$w4 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 11655,
+          "original": "STW32 killed $w8, %stack.20, 0, debug-location !1689019",
+          "scratch": [
+            9,
+            8
+          ],
+          "reuses_dead_source": true
+        },
+        {
+          "block": 11656,
+          "original": "STW32 killed $w7, %stack.20, 0",
+          "scratch": [
+            8,
+            9
+          ]
+        },
+        {
+          "block": 11729,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1689450",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 11732,
+          "original": "STW32 killed $w2, %stack.20, 0, debug-location !1689513",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 11753,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1689765",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 11768,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            1
+          ]
+        },
+        {
+          "block": 11822,
+          "original": "$w4 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 11823,
+          "original": "STW32 killed $w8, %stack.20, 0, debug-location !1690199",
+          "scratch": [
+            0,
+            8
+          ],
+          "reuses_dead_source": true,
+          "saved_live_registers": [
+            {
+              "register": 0,
+              "slot": 44
+            }
+          ]
+        },
+        {
+          "block": 11824,
+          "original": "STW32 killed $w4, %stack.20, 0",
+          "scratch": [
+            5,
+            8
+          ]
+        },
+        {
+          "block": 11844,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 11845,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1690199",
+          "scratch": [
+            7,
+            8
+          ]
+        },
+        {
+          "block": 11846,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 11908,
+          "original": "$w4 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 11909,
+          "original": "STW32 killed $w8, %stack.20, 0, debug-location !1690621",
+          "scratch": [
+            0,
+            8
+          ],
+          "reuses_dead_source": true,
+          "saved_live_registers": [
+            {
+              "register": 0,
+              "slot": 44
+            }
+          ]
+        },
+        {
+          "block": 11910,
+          "original": "STW32 killed $w4, %stack.20, 0",
+          "scratch": [
+            5,
+            8
+          ]
+        },
+        {
+          "block": 11930,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 11931,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1690621",
+          "scratch": [
+            7,
+            8
+          ]
+        },
+        {
+          "block": 11932,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 12011,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 12012,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1691148",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 12066,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1691494",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 12069,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 12110,
+          "original": "$w4 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 12111,
+          "original": "STW32 killed $w8, %stack.20, 0, debug-location !1691797",
+          "scratch": [
+            0,
+            8
+          ],
+          "reuses_dead_source": true,
+          "saved_live_registers": [
+            {
+              "register": 0,
+              "slot": 44
+            }
+          ]
+        },
+        {
+          "block": 12112,
+          "original": "STW32 killed $w4, %stack.20, 0",
+          "scratch": [
+            5,
+            8
+          ]
+        },
+        {
+          "block": 12132,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 12133,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1691797",
+          "scratch": [
+            7,
+            8
+          ]
+        },
+        {
+          "block": 12134,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 12196,
+          "original": "$w4 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 12197,
+          "original": "STW32 killed $w8, %stack.20, 0, debug-location !1692219",
+          "scratch": [
+            0,
+            8
+          ],
+          "reuses_dead_source": true,
+          "saved_live_registers": [
+            {
+              "register": 0,
+              "slot": 44
+            }
+          ]
+        },
+        {
+          "block": 12198,
+          "original": "STW32 killed $w4, %stack.20, 0",
+          "scratch": [
+            5,
+            8
+          ]
+        },
+        {
+          "block": 12218,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 12219,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1692219",
+          "scratch": [
+            7,
+            8
+          ]
+        },
+        {
+          "block": 12220,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 12313,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 12360,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1693032",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 12363,
+          "original": "STW32 killed $w2, %stack.20, 0, debug-location !1693095",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 12404,
+          "original": "$w4 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 12405,
+          "original": "STW32 killed $w8, %stack.20, 0, debug-location !1693335",
+          "scratch": [
+            0,
+            8
+          ],
+          "reuses_dead_source": true,
+          "saved_live_registers": [
+            {
+              "register": 0,
+              "slot": 44
+            }
+          ]
+        },
+        {
+          "block": 12406,
+          "original": "STW32 killed $w4, %stack.20, 0",
+          "scratch": [
+            5,
+            8
+          ]
+        },
+        {
+          "block": 12426,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 12427,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1693335",
+          "scratch": [
+            7,
+            8
+          ]
+        },
+        {
+          "block": 12428,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 12464,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 12464,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 12465,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 12465,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 12598,
+          "original": "$w9 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 12609,
+          "original": "STW32 killed $w5, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 12611,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 12698,
+          "original": "$w0 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 12699,
+          "original": "STW32 killed $w7, %stack.20, 0, debug-location !1695383",
+          "scratch": [
+            8,
+            9
+          ]
+        },
+        {
+          "block": 12700,
+          "original": "STW32 killed $w0, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 12755,
+          "original": "$w4 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 12756,
+          "original": "STW32 killed $w6, %stack.20, 0, debug-location !1695717",
+          "scratch": [
+            0,
+            6
+          ],
+          "reuses_dead_source": true,
+          "saved_live_registers": [
+            {
+              "register": 0,
+              "slot": 44
+            }
+          ]
+        },
+        {
+          "block": 12757,
+          "original": "STW32 killed $w4, %stack.20, 0",
+          "scratch": [
+            6,
+            9
+          ]
+        },
+        {
+          "block": 12875,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1696379",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 12878,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 12885,
+          "original": "$w0 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 12886,
+          "original": "STW32 killed $w7, %stack.20, 0, debug-location !1696546",
+          "scratch": [
+            8,
+            9
+          ]
+        },
+        {
+          "block": 12887,
+          "original": "STW32 killed $w0, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 13030,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 13031,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 13080,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1697664",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 13083,
+          "original": "STW32 killed $w2, %stack.20, 0, debug-location !1697727",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 13130,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1697979",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 13133,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 13180,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1698294",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 13183,
+          "original": "STW32 killed $w2, %stack.20, 0, debug-location !1698357",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 13230,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1698609",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 13233,
+          "original": "STW32 killed $w2, %stack.20, 0, debug-location !1698669",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 13289,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 13389,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 13456,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1699917",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 13526,
+          "original": "STW32 killed $w3, %stack.20, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 13563,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 13615,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1700787",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 13662,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1701045",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 13665,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 13712,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1701360",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 13715,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 13762,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1701675",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 13765,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 13812,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1701990",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 13815,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 13818,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 13827,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 13876,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 13882,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 13891,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 13940,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 13946,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 13955,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 14004,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 14010,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 14019,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 14068,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 14207,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1704368",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 14241,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1704556",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 14375,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 14447,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1705723",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 14514,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1706093",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 14559,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1706339",
+          "scratch": [
+            9,
+            0
+          ],
+          "reuses_dead_source": true
+        },
+        {
+          "block": 14569,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            1
+          ]
+        },
+        {
+          "block": 14799,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 14854,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1708086",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 14909,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1708410",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 14964,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1708734",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 15019,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1709058",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 15074,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1709382",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 15141,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1693623",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 15213,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1710094",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 15214,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 15286,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 15388,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 15414,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 15423,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 15478,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 15511,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 15522,
+          "original": "STW32 killed $w4, %stack.20, 0",
+          "scratch": [
+            1,
+            2
+          ]
+        },
+        {
+          "block": 15525,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 15556,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 15557,
+          "original": "$w7 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 15593,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 15594,
+          "original": "$w7 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 15692,
+          "original": "$w3 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 15693,
+          "original": "$w5 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 15729,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 15741,
+          "original": "$w8 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 15750,
+          "original": "STW32 killed $w5, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 15847,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 15947,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 16039,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 16042,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 16172,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 16219,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1716358",
+          "scratch": [
+            0,
+            8
+          ]
+        },
+        {
+          "block": 16222,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 16225,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 16234,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 16283,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 16289,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 16298,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 16347,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 16353,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 16362,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 16411,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 16417,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 16426,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 16475,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 16481,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 16490,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 16539,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 16545,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 16554,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 16603,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 16609,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 16618,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 16667,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 16673,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 16682,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 16731,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 16737,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 16746,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 16795,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 16801,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 16810,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 16859,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 16865,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 16874,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 16923,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 17152,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1722422",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 17280,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1723130",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 17332,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 17335,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            3,
+            4
+          ]
+        },
+        {
+          "block": 17460,
+          "original": "STW32 killed $w4, %stack.20, 0, debug-location !1724419",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 17562,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1724968",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 17624,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 17627,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            2,
+            3
+          ]
+        },
+        {
+          "block": 17688,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1725871",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 17765,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1726319",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 17897,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 17924,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 17925,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            3,
+            4
+          ]
+        },
+        {
+          "block": 17932,
+          "original": "$w6 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 17975,
+          "original": "STW32 $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 17976,
+          "original": "STW32 $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 17977,
+          "original": "STW32 $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 17978,
+          "original": "STW32 $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 17979,
+          "original": "STW32 $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 17980,
+          "original": "STW32 $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 17981,
+          "original": "STW32 $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 17982,
+          "original": "STW32 $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 17983,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 18056,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 18071,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 18074,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 18130,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 18151,
+          "original": "$w5 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 18375,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1730412",
+          "scratch": [
+            3,
+            4
+          ]
+        },
+        {
+          "block": 18916,
+          "original": "STW32 killed $w7, %stack.20, 0",
+          "scratch": [
+            1,
+            2
+          ]
+        },
+        {
+          "block": 18917,
+          "original": "STW32 killed $w7, %stack.20, 0",
+          "scratch": [
+            1,
+            2
+          ]
+        },
+        {
+          "block": 18966,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 18967,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 19024,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1734690",
+          "scratch": [
+            0,
+            4
+          ]
+        },
+        {
+          "block": 19121,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 19142,
+          "original": "$w9 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 19215,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 19217,
+          "original": "$w9 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 19303,
+          "original": "STW32 killed $w4, %stack.20, 0",
+          "scratch": [
+            0,
+            5
+          ]
+        },
+        {
+          "block": 19310,
+          "original": "STW32 killed $w4, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 19323,
+          "original": "STW32 killed $w2, %stack.20, 0",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 19323,
+          "original": "$w2 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 19395,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1737434",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 19462,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1737803",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 19527,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1738270",
+          "scratch": [
+            6,
+            9
+          ]
+        },
+        {
+          "block": 19570,
+          "original": "STW32 killed $w0, %stack.20, 0, debug-location !1738557",
+          "scratch": [
+            6,
+            7
+          ]
+        },
+        {
+          "block": 19576,
+          "original": "STW32 killed $w1, %stack.20, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 19576,
+          "original": "$w1 = LDW32 %stack.20, 0"
+        },
+        {
+          "block": 19645,
+          "original": "STW32 killed $w1, %stack.20, 0, debug-location !1739019",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 19725,
+          "original": "STW32 killed $w3, %stack.20, 0, debug-location !1739414",
+          "scratch": [
+            0,
+            6
+          ]
+        },
+        {
+          "block": 19807,
+          "original": "STW32 killed $w6, %stack.20, 0",
+          "scratch": [
+            0,
+            1
+          ]
+        }
+      ]
+    }
+  ],
+  "compiled": true,
+  "sections": [
+    {
+      "name": ".text",
+      "bytes": 0,
+      "frame_access_depth": 0
+    },
+    {
+      "name": "perf_event",
+      "bytes": 1149592,
+      "frame_access_depth": 552
+    }
+  ],
+  "object_sha256": "2d43efc7ae4815a8a4fc14a8c2ea29fae943fa30598880f17ef26189f29d40ac",
+  "finished": "2026-11-15T05:35:45.761352+00:00",
+  "wall_seconds": 359.07582361299137,
+  "address_space_limit_bytes": 25769803776
+}
