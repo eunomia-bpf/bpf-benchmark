@@ -1,4 +1,4 @@
-"""Image-bound facts for lowering compiler-generated relative code tables."""
+"""Image-bound facts for lowering compiler-generated code tables."""
 from dataclasses import dataclass
 from dataclasses import replace
 from collections import deque
