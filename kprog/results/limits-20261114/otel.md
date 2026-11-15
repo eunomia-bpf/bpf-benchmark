@@ -1,28 +1,80 @@
-# OTel performance limits, 2026-11-14
+# OTel eBPF profiler performance limits, 2026-11-15
 
-The measured same-source known-hash diagnostic is **0.954x throughput** and **0.885x per invocation** (3315.2 to 3745.7 ns). The 20% target is throughput; neither per-invocation speed nor a host component pass satisfies it. Run `054100_189324`, raw `/workspaces/kprog-raw/perf/20261114-known-hash-instruction-profile`; source analysis/receipt: `../perf_20261113/known-hash-instruction-profile-results.json`.
+Both arms of one run, same guest, same workload, `kprog/perf/profile/phase-profile.py
+run --app otelcol-ebpf-profiler/profiling --seconds 60 --cpus 0-7`. Capture
+`/workspaces/kprog-raw/C/20261115T013715Z-phase-profile-otelcol-ebpf-profiler_profiling`;
+corpus run `x86_kvm_corpus_20261115_013848_695617` (`status: ok`).
 
-## Observed profile
+## `cpu-clock` sampling cannot see this app's BPF time at all
 
-These are sampled cycle shares of **all measured guest-kernel roots**, not shares of BPF time. Inlined map/tail code stays in program text. Root-only IPs cannot assign an inclusive helper caller or separate tail dispatch after inlining. Unknown and unrelated kernel roots stay visible.
+The capture's own `summary.txt` reports **0.00% BPF** in both arms, and that is not a
+"BPF is negligible" finding: it is the sampling method failing on this program type.
 
-| Root bucket | eBPF | Native |
-| --- | ---: | ---: |
-| other_guest_kernel | 36.17% | 32.24% |
-| lpm_lookup | 19.75% | 21.16% |
-| program_text | 14.04% | 16.83% |
-| user_nofault_copy | 17.07% | 15.72% |
-| hash_lookup | 9.53% | 7.93% |
-| array_lookup | 1.55% | 4.24% |
-| generic_lookup_dispatch | 1.00% | 1.12% |
-| probe_read_user_entry | 0.85% | 0.74% |
-| probe_read_kernel_entry | 0.02% | 0.01% |
-| kernel_nofault_copy | 0.01% | 0.01% |
+The app's entire measurable BPF cost sits in one program:
 
-## Conditional code-generation limit
+| arm | program | type | invocations | BPF time | ns/invocation | jited bytes |
+|---|---|---|---:|---:|---:|---:|
+| eBPF | `native_tracer_e` | `perf_event` | 22 381 403 | 54.66 s | **2 442.2** | 3 815 |
+| native | `native_tracer_e` | `perf_event` | 22 290 666 | 3.06 s | **137.5** | 7 510 |
 
-For a BPF-time program fraction f and a program-only speedup s, total speedup is `1 / (1-f+f/s)`. The absolute program-only ceiling in that model is `1/(1-f)`; a modest assumed code speedup is a different calculation, not an absolute ceiling.
+`native_tracer_e` is a `perf_event` program driven by the profiler's own sampling timer.
+`cpu-clock` at 999 Hz produced 471 388 samples in the eBPF phase and **one** of them landed
+inside a JIT'd program range; the native phase produced 456 405 and **zero**. A
+perf_event program runs for microseconds per invocation between its own timer ticks, so the
+odds of an independent 999 Hz software-clock sample landing in its text are vanishing, and
+perf's callchain sampling attributes the cost to the timer path instead. Every other
+unwinder program (`perf_unwind_*`) ran fewer than 100 times per phase and contributed
+nothing measurable.
 
-If the identified program/helper candidate roots were a representative BPF denominator, f would be 0.2200. Under that **unproven denominator assumption**, eliminating all program-text cost gives 1.282x, making code 30% faster gives 1.053x, and reaching 1.20x needs 4.13x program-only speed. The actual native main unwinder is slower: normalized root cycles rise 2221.88 to 2894.39 per entry. This supports prioritizing helper LTO, while it does not establish a measured 1.06x absolute ceiling.
+So for OTel, the kernel's counters are the whole story and the perf share is not.
 
-Exact BPF-time shares for every helper and tail calls are **still unmeasured** in this capture. Caller-sensitive BPF attribution is needed to complete that part of the requested profile. This is not a new measurement admission gate; the complete 0.954x result is retained. Cilium and Tetragon profiles remain separate open work. Probe-read first, then hash/LPM LTO, remains the optimization order.
+## What the counters say
+
+Per-invocation BPF time **2 442.2 → 137.5 ns, 17.8x less**, at essentially the same
+invocation count (22 381 403 against 22 290 666, 0.4% apart) over the same 60 s window.
+Both arms ran exactly two programs: `native_tracer_e` (the cost) and one
+`tracepoint__sched_*` program with ~90 invocations and negligible time.
+
+This is the largest per-invocation native win measured on any app in this project, and it
+comes with the one caveat that matters for a whole-app ratio: OTel's BPF time is a
+**sampling workload** — 22.4 M invocations in 60 s is the profiler sampling the machine,
+not the guest workload calling into a hook. The guest's whole CPU is dominated by the
+workload and by the OTel agent's user-space processing, and the profile shows the BPF part
+nearly disappearing (54.66 s → 3.06 s of a 60 s window) without a corresponding workload
+throughput change, because the profiler and the workload are not in a caller/callee
+relationship.
+
+The jited byte count doubles (3 815 → 7 510) because the native object carries the unwind
+machinery the eBPF arm calls out to; that is a size cost, not a per-invocation one, since
+the measured per-invocation time falls 17.8x.
+
+## What this bounds
+
+The eBPF arm charged 54.66 s of a 60.04 s window to BPF. If that time were serialized on
+the measured CPU set the app could not have run at all, so much of it is spread across
+sampling contexts that overlap with workload and agent time. Treat 54.66 s as the
+per-invocation sum, not as a serial wall-clock budget.
+
+Two consequences for planning:
+
+- **Codegen has almost nothing left to win on OTel** in the native arm: the remaining
+  3.06 s is the whole BPF budget, and a perfect body still leaves the agent's user-space
+  work and the workload untouched.
+- **The interesting question for OTel is the eBPF arm's 54.66 s**, i.e. what the JIT'd
+  `native_tracer_e` does for 2.4 µs per sample. That is where the native arm's 17.8x comes
+  from, and it is consistent with the native body replacing a chain of helper calls with
+  inlined work.
+
+## Note on the profile's own workload
+
+One sample of the app's normal workload per phase, so its throughput numbers are not
+timing results. Use it for the per-invocation counters only; the perf share is unusable
+here for the reason above.
+
+Raw capture:
+`/workspaces/kprog-raw/C/20261115T013715Z-phase-profile-otelcol-ebpf-profiler_profiling`
+(`baseline.data`, `post_rejit.data`, per-phase `kallsyms` and `jit-lines.json`,
+`attribution.json`/`attribution.txt`). Regenerate with
+`python3 kprog/results/limits-20261114/bpf-attribution.py <capture dir>`, and note that
+its BPF share will read 0.00% for both arms — that is the method's limit, not the app's
+cost.
