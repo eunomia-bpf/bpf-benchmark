@@ -230,12 +230,8 @@ FUNC_INLINE int return_error(int *s, int err)
 FUNC_INLINE char *
 args_off(struct msg_generic_kprobe *e, unsigned long off)
 {
-#ifdef __bpf__
 	asm volatile("%[off] &= 0x3fff;\n"
 		     : [off] "+r"(off));
-#else
-	off &= 0x3fff;
-#endif
 	return e->args + (off & 0x3fff);
 }
 
@@ -246,7 +242,6 @@ args_off(struct msg_generic_kprobe *e, unsigned long off)
 FUNC_INLINE int
 return_stack_error(char *args, int orig, int err)
 {
-#ifdef __bpf__
 	asm volatile("%[orig] &= 0xfff;\n"
 		     "r1 = *(u64 *)%[args];\n"
 		     "r1 += %[orig];\n"
@@ -254,10 +249,6 @@ return_stack_error(char *args, int orig, int err)
 		     : [orig] "+r"(orig), [args] "+m"(args), [err] "+r"(err)
 		     :
 		     : "r1");
-#else
-	orig &= 0xfff;
-	*(int *)(args + orig) = err;
-#endif
 	return sizeof(int);
 }
 
@@ -279,12 +270,8 @@ parse_iovec_array(long off, unsigned long arg, int i, unsigned long max,
 		size = max;
 	if (size > 4094)
 		return char_buf_toolarge;
-#ifdef __bpf__
 	asm volatile("%[size] &= 0xfff;\n"
 		     : [size] "+r"(size));
-#else
-	size &= 0xfff;
-#endif
 	err = probe_read(args_off(e, off), size, (char *)iov.iov_base);
 	if (err < 0)
 		return char_buf_pagefault;
@@ -2697,7 +2684,6 @@ FUNC_INLINE const struct path *get_path(long type, unsigned long arg, struct pat
 
 #define __STR(x) #x
 
-#ifdef __bpf__
 #define set_if_not_errno_or_zero(x, y)                  \
 	({                                              \
 		asm volatile("if %0 s< -4095 goto +1\n" \
@@ -2705,13 +2691,6 @@ FUNC_INLINE const struct path *get_path(long type, unsigned long arg, struct pat
 			     "%0 = " __STR(y) "\n"      \
 			     : "+r"(x));                \
 	})
-#else
-#define set_if_not_errno_or_zero(x, y)         \
-	({                                     \
-		if ((long)(x) > 0 || (long)(x) < -4095) \
-			(x) = (y);                  \
-	})
-#endif
 
 FUNC_INLINE int try_override(void *ctx, struct bpf_map_def *override_tasks)
 {

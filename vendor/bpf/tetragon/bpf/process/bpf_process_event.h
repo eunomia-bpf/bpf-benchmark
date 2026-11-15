@@ -70,15 +70,10 @@ getcwd(struct msg_process *curr, __u32 offset, __u32 proc_pid)
 	if (!buffer)
 		return 0;
 
-#ifdef __bpf__
 	asm volatile("%[offset] &= 0x3ff;\n"
 		     : [offset] "+r"(offset));
 	asm volatile("%[size] &= 0xfff;\n"
 		     : [size] "+r"(size));
-#else
-	offset &= 0x3ff;
-	size &= 0xfff;
-#endif
 	probe_read((char *)curr + offset, size, buffer);
 
 	// Unfortunate special case for '/' where nothing was added we need
