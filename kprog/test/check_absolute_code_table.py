@@ -23,7 +23,7 @@ def main(a):
         (a.output/'commands.json').write_text(json.dumps(commands, indent=2)+'\n')
         result.check_returncode()
 
-    sys.path[:0] = [str(ROOT/'kprog'), str(ROOT/'kprog/x86/micro-prog')]
+    sys.path[:0] = [str(ROOT/'kprog'), str(ROOT/'kprog/x86'), str(ROOT/'kprog/x86/micro-prog')]
     import trusted_specializer as worker
     gen = worker.gen
     body, functions, exit_addr, data = gen.parse_proof_object_program('absolute', a.build)
