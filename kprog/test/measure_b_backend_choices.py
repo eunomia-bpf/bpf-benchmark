@@ -28,6 +28,26 @@ CHOICES = {'normal': [], 'basic': ['-regalloc=basic'], 'pbqp': ['-regalloc=pbqp'
            'no-misched': ['-enable-misched=false']}
 
 
+def storage_observation(path, fds):
+    """Observe IR in memory; retain counts/examples, never a second IR build."""
+    command = ['llvm-dis-18', str(path), '-o', '-']
+    result = subprocess.run(command, capture_output=True, text=True,
+                            pass_fds=tuple(fds), check=True)
+    lines = result.stdout.splitlines()
+    objects = []
+    for line in lines:
+        match = re.match(r'\s*(%[-\w.]+) = alloca\b', line)
+        if not match:
+            continue
+        name = match[1]
+        operand = re.compile(re.escape(name)+r'(?![-\w.])')
+        uses = [item.strip() for item in lines if item != line and operand.search(item)]
+        objects.append(dict(name=name, declaration=line.strip(), direct_uses=len(uses),
+            examples=uses[:12]))
+    return dict(command=command, allocas=objects,
+                scope='Direct textual operand observations, not alias/escape proofs or a transformation.')
+
+
 def main(a):
     a.output.mkdir(parents=True, exist_ok=True)
     with tarfile.open(a.archive) as outer:
@@ -74,6 +94,7 @@ def main(a):
                 prepared = pipe.stage('.bounds.bc')
                 run([a.bounds, initial, '-o', prepared])
                 initial = prepared
+            case['ir_storage'] = storage_observation(initial, pipe.fds)
             worker._compile_simulator_backend(str(ROOT/'kprog/stock-path/bin/clang'),
                 pipe, obj, run, compiled_input=initial)
             before = pipe.stage('.before.mir').read_text()
