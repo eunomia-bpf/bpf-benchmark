@@ -4152,9 +4152,10 @@ mod tests {
             let entry = find_symbol_by_name(&elf, "entry")?;
             let helpers = HashMap::from([("bpf_ktime_get_ns".into(),0x1234),
                 (MONO_FAST_HELPER_KEY.into(),0x5678)]);
-            let rewrite = |facts| rewrite_x86(&elf,&entry,&[entry.clone()],facts,&HashMap::new(),
+            let rewrite = |facts: &HashMap<String,u64>| rewrite_x86(&elf,&entry,&[entry.clone()],facts,&HashMap::new(),
                 &HashMap::new(),&[],false,true,None,None,None,None,false);
-            assert!(rewrite(&HashMap::from([("bpf_ktime_get_ns".into(),0x1234)])).is_err(),
+            let missing = HashMap::from([("bpf_ktime_get_ns".into(),0x1234)]);
+            assert!(rewrite(&missing).is_err(),
                 "missing clock fact cannot silently use the old wrapper");
             let mut zero = helpers.clone();zero.insert(MONO_FAST_HELPER_KEY.into(),0);
             assert!(rewrite(&zero).is_err());
