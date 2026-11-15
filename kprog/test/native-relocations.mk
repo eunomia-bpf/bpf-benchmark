@@ -266,6 +266,11 @@ native-stores: $(CONTEXT_TOOL)
 current-otel-frontend:
 	taskset -c 8-11 prlimit --as=17179869184 -- python3 $(ROOT)/kprog/test/profile_current_otel.py --frontend --build /var/tmp/kprog-tmp/perf/otel-whole-word-checked --output $(OUTPUT) --metadata /workspaces/kprog-raw/perf/20261115-otel-hotspot-spills/replay/request__generation.metadata.json --entry /workspaces/kprog-raw/perf/20261115-otel-hotspot-spills/replay/request__kernel.entry
 
+FRONTEND_PROFILE ?= /workspaces/kprog-raw/perf/20261115-store-constants/otel-frontend/result.json
+.PHONY: current-otel-backend
+current-otel-backend: $(CONTEXT_TOOL)
+	taskset -c 8-11 prlimit --as=17179869184 -- python3 $(ROOT)/kprog/test/resume_simulator_frontend.py --profile $(FRONTEND_PROFILE) --source /var/tmp/kprog-tmp/perf/otel-whole-word-checked/trusted_x86.bpf.c --object /var/tmp/kprog-tmp/perf/otel-whole-word-checked/trusted_x86.bpf.o --bounds $(CONTEXT_TOOL) --output $(OUTPUT)
+
 .PHONY: frontend-debugger frontend-stacks
 frontend-debugger:
 	install -d $(OUTPUT)

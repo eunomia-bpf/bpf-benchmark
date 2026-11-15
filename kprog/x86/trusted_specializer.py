@@ -74,12 +74,24 @@ def preprocess_simulator(clang, source: Path, run) -> Path:
 
 def compile_simulator(clang, source: Path, obj: Path, run, *, bounds_compiler=None) -> None:
     preprocessed = preprocess_simulator(clang, source, run)
-    compiled_input = preprocessed
     if bounds_compiler:
-        initial, lowered = source.with_suffix('.bounds-input.bc'), source.with_suffix('.bounds.bc')
+        initial = source.with_suffix('.bounds-input.bc')
         run([clang, *COMPILE_FLAGS, '-emit-llvm', '-c', preprocessed, '-o', initial])
-        run([bounds_compiler, initial, '-o', lowered, '--canonical-ctx-loads', '--strict-identities'])
-        compiled_input = lowered
+        compile_simulator_from_frontend(clang, source, obj, run,
+                                        frontend=initial, bounds_compiler=bounds_compiler)
+    else:
+        _compile_simulator_backend(clang, source, obj, run, compiled_input=preprocessed)
+
+
+def compile_simulator_from_frontend(clang, source: Path, obj: Path, run, *,
+                                    frontend: Path, bounds_compiler) -> None:
+    """Continue the normal pipeline from its completed optimized LLVM stage."""
+    lowered = source.with_suffix('.bounds.bc')
+    run([bounds_compiler, frontend, '-o', lowered, '--canonical-ctx-loads', '--strict-identities'])
+    _compile_simulator_backend(clang, source, obj, run, compiled_input=lowered)
+
+
+def _compile_simulator_backend(clang, source: Path, obj: Path, run, *, compiled_input: Path) -> None:
     before, packed = source.with_suffix('.before.mir'), source.with_suffix('.packed.mir')
     run([clang, *COMPILE_FLAGS, '-c', compiled_input, '-mllvm',
          '-stop-before=prologepilog', '-o', before])
