@@ -29,8 +29,7 @@ def main(args):
     result = dict(started=datetime.now(timezone.utc).isoformat(), archive=str(args.archive),
                   member=args.member, scope='Archived pre-PEI MIR diagnostic; no repeated C frontend or kernel submission')
     try:
-        wanted = {'request/generated/trusted_x86.bpf.before.mir': args.build/'trusted_x86.bpf.before.mir',
-                  'request/kernel.native.o': args.build/'kernel.native.o'}
+        wanted = {'request/generated/trusted_x86.bpf.before.mir': args.build/'trusted_x86.bpf.before.mir'}
         facts = {'request/kernel.entry', 'request/kernel.facts.json', 'request/generation.metadata.json',
                  'request/source-identities.json', 'request/generated/commands.jsonl'}
         hashes = {}
@@ -51,9 +50,9 @@ def main(args):
                     data = nested.extractfile(member).read()
                     (args.output/member.name.replace('/', '__')).write_bytes(data)
                     hashes[member.name] = hashlib.sha256(data).hexdigest()
-                elif member.name in {'request/generated/trusted_x86.bpf.packed.mir', 'request/generated/trusted_x86.bpf.o'}:
+                elif member.name in {'request/kernel.native.o', 'request/generated/trusted_x86.bpf.packed.mir', 'request/generated/trusted_x86.bpf.o'}:
                     hashes[member.name] = hashlib.file_digest(nested.extractfile(member), 'sha256').hexdigest()
-        if not all(name in hashes for name in wanted) or not all(name in hashes for name in facts):
+        if not all(name in hashes for name in {*wanted, *facts, 'request/kernel.native.o'}):
             raise ValueError('Retained request lacks actual MIR/native/context evidence')
         result['archived_hashes'] = hashes
         (args.output/'inputs.json').write_text(json.dumps(result, indent=2)+'\n')
