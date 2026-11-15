@@ -138,6 +138,15 @@ outweigh packing. Service/default-byte checks pass; real main replay still
 fails on a `dead` load annotation. Mode remains default-off, no whole-body
 acceptance or performance gain. See spill-groups/report.md.
 
+2026-11-15 hotspot follow-up: `replay_hotspot_spills.py` streams retained
+request 5 from the existing service archive and tests the existing all-pairs
+mode on its actual pre-PEI MIR, with machine-instruction verification. The
+original 25 spill slots include ten scalar slots; five selected pairs need
+18 scratch-save sites. Job 819162 records commands, input hashes and final
+frame depth under `20261115-otel-hotspot-spills/replay`. Production compilation
+and the mode default are unchanged; frame depth and stock acceptance are
+not inferred from the number of pairs.
+
 Target-BTF CO-RE audit (9ab6012a8 / b244f3cfc): all13 relocation kinds match
 original-ELF/libbpf answers on the sole kernel (22 fixture records). Existing
 resolved Tracee/BCC reports also match, but selected direct-native producers

@@ -14,6 +14,10 @@ IDENTITY_ARGS ?=
 HELPER_SHAPE_BUILD ?= /var/tmp/kprog-tmp/perf/helper-shapes
 SPILL_GROUP_BUILD ?= /var/tmp/kprog-tmp/perf/spill-groups
 
+.PHONY: hotspot-spill-replay
+hotspot-spill-replay:
+	taskset -c 19 prlimit --as=25769803776 -- python3 $(ROOT)/kprog/test/replay_hotspot_spills.py --archive /workspaces/kprog-raw/perf/20261114-otel-whole-word-checked/service.tar.gz --member service/requests/5.failure.tar.gz --build /var/tmp/kprog-tmp/perf/otel-whole-word-checked --output $(OUTPUT)
+
 .PHONY: spill-groups-main
 spill-groups-main:
 	taskset -c 19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/replay_spill_groups_mir.py --archive /workspaces/kprog-raw/perf/20261114-otel-whole-word-checked/state/session-d1wppo7h/requests/3.success.tar.gz --build $(SPILL_GROUP_BUILD) --output $(OUTPUT)
