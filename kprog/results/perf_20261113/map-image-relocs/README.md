@@ -20,10 +20,25 @@ Kernel refresh attempt1 failed before boot/image replacement because caller
 OUTPUT/Make overrides leaked into Kbuild host-tool outputs.606ae1d0e isolates
 those variables at the refresh script boundary; all canonical output arguments
 remain explicit.67 accidental host-tool build files/header copies were removed
-with exact hash/size inventory; Make logs and command text stay. Retry is
-running under imageEX on the sole build; no second kernel/image/base exists.
+with exact hash/size inventory; Make logs and command text stay. Retry completed
+on the sole build under imageEX, retaining the single kernel, image and base.
 The dry-run cannot create the later boot/kernel.kallsyms dependency, so its
 missing-generated-file status is recorded separately from actual execution.
 
 Raw: /workspaces/kprog-raw/perf/20261115-map-image-relocs/.
-Corrected kernel executions, whole-app retry and performance remain pending.
+Corrected-kernel execution completed at18:21:41Z, Make0. All three cases load
+and execute successfully: map-value-offset42, map-pointer-and-value304 (the
+boot-BTF array value offset), image-pointer-to-map-value42. The old-kernel
+failure and the fixed executions use the same fixture and real map resources.
+Small command/status/result receipts are in fixed/.
+
+Kernel publication completed18:14:16Z, Make0, source099357174783. The sole image
+is fc5336c2, replacing d4b19c9f; the packaging cleanup records the superseded
+image as already absent. All1193 staged native paths match the image. Existing
+clock LTO and app objects stay installed. Kernel source/build/boot, module and
+image receipts are in kernel/; full logs/inventories stay in the raw directory.
+
+Fresh whole-app OTel retry launcher1148872 started18:21:58Z, CPUs16-19,
+2vCPU16GiB/32GiB address-space cap, imageSH. It uses the existing checked-corpus
+target and the current image manifest. Application installation, output parity
+and performance remain open.

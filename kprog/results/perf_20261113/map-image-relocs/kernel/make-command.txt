@@ -1,0 +1,1 @@
+taskset -c 8-19 make -r -f kprog/test/native-relocations.mk absolute-image-kernel OUTPUT=/workspaces/kprog-raw/perf/20261115-map-image-relocs/kernel-v2 ABSOLUTE_KERNEL_OUTPUT=/workspaces/kprog-raw/perf/20261115-map-image-relocs/kernel-v2 
