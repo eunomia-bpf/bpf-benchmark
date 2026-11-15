@@ -1,0 +1,1 @@
+taskset -c 8-11 make -f kprog/test/native-relocations.mk check build evidence OUTPUT=/workspaces/kprog-raw/perf/20261115-normal-map-lto/normal 

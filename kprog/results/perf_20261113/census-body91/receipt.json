@@ -1,0 +1,29 @@
+{
+  "recorded": "2026-11-15T02:30:33Z",
+  "journal": "/workspaces/kprog-raw/perf/20261114-census-resume/control/outcomes.jsonl",
+  "journal_bytes": 15995053,
+  "journal_sha256": "43cd6c881f5e3840783bb066fcea730da9377d3f4d345c5ced9b63ed49257966",
+  "completed_resume_rows": 37,
+  "body_group": 91,
+  "application": "tracee/monitor",
+  "name": "trace_do_sigaction",
+  "stage": "installed",
+  "native_prog_id": 136,
+  "source_prog_id": 581,
+  "native_sha256": "489a7a69184baae011350d4c7632faf0f5539d9df8417aa2892246cc49be777f",
+  "service": {
+    "request_id": 37,
+    "source_prog_id": 0,
+    "native_sha256": "489a7a69184baae011350d4c7632faf0f5539d9df8417aa2892246cc49be777f",
+    "execution_mode": "submitted-native",
+    "started": "2026-11-15T02:07:28.148971+00:00",
+    "prog_id": 136,
+    "phase": "load",
+    "status": 0,
+    "artifact_archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/37.success.tar.gz",
+    "finished": "2026-11-15T02:22:38.697104+00:00"
+  },
+  "archive_bytes": 16512939,
+  "archive_sha256": "7d38c8e1bcad4b0bd463051b3359295314d011fd36a98ddecb1b94b5e8a427be",
+  "scope": "Retained prior native producer, submitted-native stock load-only; no execution/equal-work/checked-whole-app claim"
+}

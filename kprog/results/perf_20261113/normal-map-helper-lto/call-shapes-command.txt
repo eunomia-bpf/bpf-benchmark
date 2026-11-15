@@ -1,0 +1,1 @@
+taskset -c 19 make -f kprog/test/scalar-spill-precision.mk helper-shapes OUTPUT=/workspaces/kprog-raw/perf/20261115-normal-helper-lto/call-shapes 

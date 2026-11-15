@@ -1,0 +1,56 @@
+{
+  "current_linker_sha256": "d6be1d25cfc5628ac396112e26794e7ce55a5a30d79fdc1f7ed52b4c64b4dc23",
+  "fixture_flags": [
+    "-target",
+    "x86_64-linux-gnu",
+    "-O3",
+    "-march=native",
+    "-foptimize-sibling-calls",
+    "-fomit-frame-pointer",
+    "-mno-red-zone",
+    "-mgeneral-regs-only",
+    "-fno-stack-protector"
+  ],
+  "fixture_sha256": "fddc616f76c295d15a95a6dac170d18260f84aff60f768692d3c81728cc5af9e",
+  "proof_sha256": "4d0f221b5d37a9eda340943275f110af89b987555eb7b842ef95fb2512c52334",
+  "proof_map_operation": "X86_OP_MOV_LOAD_MAP_PTR",
+  "host_executions": [
+    {
+      "path": "proof-roundtrip",
+      "key": 0,
+      "actual": 101,
+      "expected": 101
+    },
+    {
+      "path": "proof-roundtrip",
+      "key": 1,
+      "actual": 202,
+      "expected": 202
+    },
+    {
+      "path": "proof-roundtrip",
+      "key": 2,
+      "actual": 303,
+      "expected": 303
+    },
+    {
+      "path": "proof-roundtrip",
+      "key": 3,
+      "actual": 0,
+      "expected": 0
+    },
+    {
+      "path": "proof-roundtrip",
+      "key": 4,
+      "actual": 0,
+      "expected": 0
+    },
+    {
+      "path": "proof-roundtrip",
+      "key": 4294967295,
+      "actual": 0,
+      "expected": 0
+    }
+  ],
+  "scope": "Host code/metadata checks; no kernel or app timing"
+}
