@@ -1,0 +1,193 @@
+{
+  "app_status": "ok",
+  "app_error": "",
+  "rejit_result": {
+    "mode": "loadtime",
+    "status": "skipped"
+  },
+  "arms": {
+    "baseline": {
+      "samples": [
+        {
+          "duration_s": 180.14801476600002,
+          "threads": [
+            {
+              "sent": 105650791,
+              "errors": 123507377,
+              "pps": 587003
+            },
+            {
+              "sent": 124752568,
+              "errors": 149921742,
+              "pps": 693134
+            },
+            {
+              "sent": 107363446,
+              "errors": 127264048,
+              "pps": 596519
+            },
+            {
+              "sent": 115041560,
+              "errors": 142949741,
+              "pps": 639179
+            }
+          ],
+          "sent": 452808365,
+          "errors": 543642908,
+          "pktgen_pps": 2515835
+        },
+        {
+          "duration_s": 180.10569864199994,
+          "threads": [
+            {
+              "sent": 148247384,
+              "errors": 177042939,
+              "pps": 823570
+            },
+            {
+              "sent": 155584734,
+              "errors": 176491108,
+              "pps": 864331
+            },
+            {
+              "sent": 66311387,
+              "errors": 83490867,
+              "pps": 368384
+            },
+            {
+              "sent": 166442379,
+              "errors": 191523245,
+              "pps": 924650
+            }
+          ],
+          "sent": 536585884,
+          "errors": 628548159,
+          "pktgen_pps": 2980935
+        },
+        {
+          "duration_s": 180.033428479,
+          "threads": [
+            {
+              "sent": 156790533,
+              "errors": 174934558,
+              "pps": 871297
+            },
+            {
+              "sent": 113655037,
+              "errors": 124016442,
+              "pps": 631570
+            },
+            {
+              "sent": 143449669,
+              "errors": 165766037,
+              "pps": 797149
+            },
+            {
+              "sent": 165891887,
+              "errors": 183286457,
+              "pps": 921831
+            }
+          ],
+          "sent": 579787126,
+          "errors": 648003494,
+          "pktgen_pps": 3221847
+        }
+      ],
+      "bpf": {},
+      "mean_pktgen_pps": 2906205.6666666665
+    },
+    "post_rejit": {
+      "samples": [
+        {
+          "duration_s": 180.061119608,
+          "threads": [
+            {
+              "sent": 27817237,
+              "errors": 26502161,
+              "pps": 154539
+            },
+            {
+              "sent": 200527248,
+              "errors": 202032472,
+              "pps": 1114034
+            },
+            {
+              "sent": 212192816,
+              "errors": 206768573,
+              "pps": 1178841
+            },
+            {
+              "sent": 196376135,
+              "errors": 189436339,
+              "pps": 1090972
+            }
+          ],
+          "sent": 636913436,
+          "errors": 624739545,
+          "pktgen_pps": 3538386
+        },
+        {
+          "duration_s": 180.01636553800017,
+          "threads": [
+            {
+              "sent": 149117179,
+              "errors": 157935673,
+              "pps": 828635
+            },
+            {
+              "sent": 82643686,
+              "errors": 92029550,
+              "pps": 459245
+            },
+            {
+              "sent": 173213457,
+              "errors": 181629215,
+              "pps": 962537
+            },
+            {
+              "sent": 166029712,
+              "errors": 173002023,
+              "pps": 922616
+            }
+          ],
+          "sent": 571004034,
+          "errors": 604596461,
+          "pktgen_pps": 3173033
+        },
+        {
+          "duration_s": 180.0080909589999,
+          "threads": [
+            {
+              "sent": 156483724,
+              "errors": 164973529,
+              "pps": 869867
+            },
+            {
+              "sent": 71720353,
+              "errors": 73538708,
+              "pps": 398659
+            },
+            {
+              "sent": 204958614,
+              "errors": 217690402,
+              "pps": 1139267
+            },
+            {
+              "sent": 198645028,
+              "errors": 209216345,
+              "pps": 1104174
+            }
+          ],
+          "sent": 631807719,
+          "errors": 665418984,
+          "pktgen_pps": 3511967
+        }
+      ],
+      "bpf": {},
+      "mean_pktgen_pps": 3407795.3333333335
+    }
+  },
+  "post_over_baseline_throughput": 1.172592625642347,
+  "per_invocation_ratio": null,
+  "limitation": "Both BPF counter dictionaries are empty despite stats=true. Program IDs/bytes and per-call drift were not observed. Same configured image and disabled shim establish a workload-throughput A/A only."
+}
