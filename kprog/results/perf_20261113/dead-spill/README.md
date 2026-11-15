@@ -40,3 +40,11 @@ name explicitly. No candidate changes the production compiler. All ephemeral
 outputs close after each case; `backend-choices.json` records every command,
 resource measurement and outcome. The coordinator20:38 order now puts Katran
 hot-instruction comparison before the next OTel app attempt.
+
+Input transport follow-up70e696ed5: hash the retained native member directly
+inside the raw archive, without extracting another native-object copy. The
+same canonical MIR replay completes in9.366s with identical archived input
+identities, packed MIR, B object and sections. The unused2341976B rebuildable
+native input copy is removed with an exact inventory; the original archive
+and every raw diagnostic remain. `input-transport.json` records this check.
+The784B frame and open stock/application status are unchanged.
