@@ -1,6 +1,6 @@
 #!/bin/bash
 # Tetragon on the compile-flag/header route.
-# Protocol (coordinator 2026-11-15T14:03, from the operator's "A/A 一次"): one A/A run
+# Protocol (the coordinator's own decision, 2026-11-15T14:03): one A/A run
 # (both arms eBPF) and one A/B run (first arm eBPF, second arm native), 3x180 s each,
 # BPF stats on, CPUs 0-7, per-call time primary. `check` is the 10 s functional start.
 # Per-CPU busy time of CPUs 0-7 is recorded around every sample so contention is visible.
