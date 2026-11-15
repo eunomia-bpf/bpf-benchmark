@@ -2969,14 +2969,6 @@ struct __sk_buff {
   __bpf_md_ptr(struct bpf_sock*, sk);
 };
 
-static inline void* katran_skb_data(const struct __sk_buff* skb) {
-  return (void*)(long)skb->data;
-}
-
-static inline void* katran_skb_data_end(const struct __sk_buff* skb) {
-  return (void*)(long)skb->data_end;
-}
-
 struct bpf_tunnel_key {
   __u32 tunnel_id;
   union {
