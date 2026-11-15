@@ -61,12 +61,12 @@ def main(a):
             # cost before bounds/MIR/packing, rather than running a huge B
             # backend without knowing which stage still grows.
             initial=source.with_suffix('.bounds-input.bc')
-            record.update(frontend_completed=False,
+            record.update(completed=False,frontend_completed=False,
                 scope='Production proof/render/chunk CPP and normal optimized LLVM frontend; no bounds, MIR, B backend or kernel submission')
             (a.output/'result.json').write_text(json.dumps(record,indent=2)+'\n')
             run([ROOT/'kprog/stock-path/bin/clang',*worker.COMPILE_FLAGS,
                  '-emit-llvm','-c',expanded,'-o',initial])
-            record.update(frontend_completed=True,frontend_bytes=initial.stat().st_size,
+            record.update(completed=True,frontend_completed=True,frontend_bytes=initial.stat().st_size,
                           frontend_sha256=digest(initial))
     except (ValueError,RuntimeError,subprocess.CalledProcessError) as error:
         record.update(completed=False,error=str(error));raise
