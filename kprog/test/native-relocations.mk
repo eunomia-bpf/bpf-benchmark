@@ -458,3 +458,7 @@ b-debug-variables-check: $(CONTEXT_TOOL)
 .PHONY: host-cpu-check
 host-cpu-check:
 	taskset -c 16-19 prlimit --as=536870912 -- python3 $(ROOT)/kprog/test/check_host_cpu.py --build /var/tmp/kprog-tmp/perf/host-cpu-check --output $(OUTPUT)
+
+.PHONY: memory-b-continuation-check
+memory-b-continuation-check: $(CONTEXT_TOOL)
+	taskset -c 16-19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_memory_b_pipeline.py --frontend $(FRONTEND) --object $(REFERENCE_OBJECT) --bounds $(CONTEXT_TOOL) --output $(OUTPUT)

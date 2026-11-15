@@ -3,9 +3,11 @@ import argparse
 import hashlib
 import io
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
+import time
 from elftools.elf.elffile import ELFFile
 
 ROOT=Path(__file__).resolve().parents[2]
@@ -39,16 +41,31 @@ def main(a):
     commands=[]
     def run(command,data,name,fds):
         command=list(map(str,command))
-        result=subprocess.run(command,input=data,capture_output=True,pass_fds=fds)
-        (a.output/(name+'.stderr')).write_bytes(result.stderr)
-        if name.startswith('backend-'):(a.output/(name+'.stdout')).write_bytes(result.stdout)
-        commands.append(dict(command=command,returncode=result.returncode))
+        started=time.monotonic()
+        with (a.output/(name+'.stderr')).open('wb') as errors:
+            process=subprocess.Popen(command,stdin=subprocess.PIPE,stdout=subprocess.PIPE,
+                                     stderr=errors,pass_fds=fds)
+            process.stdin.write(data)
+            process.stdin.close()
+            stdout=process.stdout.read()
+            _,status,usage=os.wait4(process.pid,0)
+            process.returncode=os.waitstatus_to_exitcode(status)
+        if name.startswith('backend-'):(a.output/(name+'.stdout')).write_bytes(stdout)
+        commands.append(dict(command=command,returncode=process.returncode,
+            wall_seconds=time.monotonic()-started,user_seconds=usage.ru_utime,
+            system_seconds=usage.ru_stime,max_rss_kib=usage.ru_maxrss,
+            stdout_bytes=len(stdout),stdout_sha256=hashlib.sha256(stdout).hexdigest()))
         (a.output/'commands.json').write_text(json.dumps(commands,indent=2)+'\n')
-        result.check_returncode()
-        return result.stdout
+        if process.returncode:
+            raise subprocess.CalledProcessError(process.returncode,command)
+        return stdout
     pipeline=MemoryPipeline()
     try:
-        result=pipeline.compile(worker,a.frontend.read_bytes(),a.bounds,run,a.output/'lowering.json')
+        frontend=a.frontend.read_bytes()
+        result=pipeline.compile(worker,frontend,a.bounds,run,a.output/'lowering.json')
+        result.update(frontend_sha256=hashlib.sha256(frontend).hexdigest(),
+            bounds_sha256=hashlib.sha256(a.bounds.read_bytes()).hexdigest(),
+            reference_object_sha256=hashlib.sha256(a.object.read_bytes()).hexdigest())
         result['allocated_equal_normal_file_pipeline']=(
             {name:value['sha256'] for name,value in result['allocated_sections'].items()}
             == allocated(a.object.read_bytes()))
