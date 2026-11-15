@@ -764,11 +764,19 @@ fn write_proof_object(
     for reloc in proof_data_relocs {
         let &(base, size) = rodata_offsets.get(&reloc.owner)
             .ok_or_else(|| anyhow!("nested proof relocation has no data owner {}", reloc.owner))?;
-        if reloc.offset.checked_add(4).is_none_or(|end| end > size) || reloc.r_type != 2 {
+        let width = match reloc.r_type { 1 => 8, 2 => 4, _ => bail!("unsupported nested proof relocation type") };
+        if reloc.offset.checked_add(width).is_none_or(|end| end > size) {
             bail!("nested proof relocation exceeds {} or has unsupported type", reloc.owner);
         }
-        let symbol = *symbol_ids.get(&reloc.symbol)
-            .ok_or_else(|| anyhow!("nested proof relocation has no text target {}", reloc.symbol))?;
+        let symbol = if let Some(&symbol) = symbol_ids.get(&reloc.symbol) { symbol } else if reloc.r_type == 1 {
+            let symbol = object.add_symbol(WriteSymbol {
+                name: reloc.symbol.as_bytes().to_vec(), value: 0, size: 0,
+                kind: SymbolKind::Data, scope: SymbolScope::Linkage, weak: false,
+                section: WriteSymbolSection::Undefined, flags: SymbolFlags::None,
+            });
+            symbol_ids.insert(reloc.symbol.clone(), symbol);
+            symbol
+        } else { bail!("nested proof relocation has no text target {}", reloc.symbol); };
         object.add_relocation(data_section, WriteRelocation {
             offset: base + reloc.offset, symbol, addend: reloc.addend,
             flags: RelocationFlags::Elf { r_type: reloc.r_type },

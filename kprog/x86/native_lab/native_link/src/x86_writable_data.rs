@@ -22,7 +22,11 @@ pub(super) fn references(elf: &object::File, included: &[SymInfo])
             let target=elf.symbol_by_index(index)?;
             let name=target.name()?;
             let data=target.section_index().map(|i|elf.section_by_index(i)).transpose()?;
-            let writable=data.as_ref().is_some_and(|s| matches!(s.kind(),SectionKind::Data|SectionKind::UninitializedData) && s.name().ok()!=Some(".maps"));
+            let writable=match data.as_ref() {
+                Some(s) => matches!(s.kind(),SectionKind::Data|SectionKind::UninitializedData) &&
+                    s.name()? != ".maps" && !readonly_relocs::immutable_section(s.kind(),s.name()?),
+                None => false,
+            };
             if !writable && !target.is_undefined() {continue;}
             let insn=insns.iter().find(|i|i.ip()<=at && at<i.next_ip())
                 .ok_or_else(||anyhow!("PC32 data relocation outside decoded instruction"))?;

@@ -1,6 +1,10 @@
-//! Preserve relative code-table relocations when proof rodata is copied.
-//! ELF addends refer to the source instruction layout, not the rewritten one.
+//! Preserve code and live-map identities in immutable compiler tables.
+//! Relative code addends refer to source instructions, not the rewritten layout.
 use super::*;
+
+pub(super) fn immutable_section(kind: SectionKind, name: &str) -> bool {
+    kind == SectionKind::ReadOnlyData || name == ".data.rel.ro" || name.starts_with(".data.rel.ro.")
+}
 
 fn relative_table_bases(
     elf: &object::File, symbols: &[&SymInfo], data_section: object::SectionIndex,
@@ -77,16 +81,21 @@ pub(super) fn indirect_sites(elf: &object::File, included: &[SymInfo])
     Ok(sites)
 }
 
-pub(super) struct CodeReloc {
-    pub proof: ProofDataReloc,
-    pub target_offset: u64,
-    pub table_offset: u64,
+pub(super) enum DataReloc {
+    RelativeCode { proof: ProofDataReloc, target_offset: u64, table_offset: u64 },
+    MapPointer(ProofDataReloc),
 }
 
-pub(super) fn code_relocations(
+impl DataReloc {
+    pub fn proof(self) -> ProofDataReloc {
+        match self { Self::RelativeCode { proof, .. } | Self::MapPointer(proof) => proof }
+    }
+}
+
+pub(super) fn data_relocations(
     elf: &object::File, layouts: &[SymbolLayout], section_index: object::SectionIndex,
-    start: u64, size: u64, owner: &str,
-) -> Result<Vec<CodeReloc>> {
+    start: u64, size: u64, owner: &str, maps: &HashMap<String, u64>,
+) -> Result<Vec<DataReloc>> {
     let section = elf.section_by_index(section_index)?;
     let end = start.checked_add(size).ok_or_else(|| anyhow!("proof data range overflow"))?;
     let relocations: Vec<_> = section.relocations().filter(|(at, _)| *at >= start && *at < end).collect();
@@ -95,6 +104,34 @@ pub(super) fn code_relocations(
     let bases = relative_table_bases(elf, &symbols, section_index)?.0;
     let mut result = Vec::new();
     for (at, relocation) in relocations {
+        if matches!(relocation.flags(), RelocationFlags::Elf { r_type: 1 }) {
+            let RelocationTarget::Symbol(index) = relocation.target() else {
+                bail!("nested map pointer requires a symbol target");
+            };
+            let target = elf.symbol_by_index(index)?;
+            let name = target.name()?;
+            let declared_data = match target.section_index() {
+                Some(index) => {
+                    let target_section = elf.section_by_index(index)?;
+                    matches!(target_section.kind(), SectionKind::Data | SectionKind::UninitializedData) &&
+                        !immutable_section(target_section.kind(), target_section.name()?) &&
+                        target.kind() == SymbolKind::Data
+                }
+                None => target.is_undefined() && target.kind() != SymbolKind::Text,
+            };
+            if name.is_empty() || (!declared_data && !maps.contains_key(name)) {
+                bail!("nested absolute read-only relocation {owner} does not name a live map/data capability");
+            }
+            if relocation.has_implicit_addend() || relocation.addend() != 0 ||
+                at.checked_add(8).is_none_or(|limit| limit > end) {
+                bail!("nested map address {name} requires an explicit zero address addend and full pointer slot");
+            }
+            result.push(DataReloc::MapPointer(ProofDataReloc {
+                owner: owner.to_owned(), offset: at - start, r_type: 1,
+                symbol: name.to_owned(), addend: 0,
+            }));
+            continue;
+        }
         if !matches!(relocation.flags(), RelocationFlags::Elf { r_type: 2 }) ||
             relocation.has_implicit_addend() || at.checked_add(4).is_none_or(|limit| limit > end)
         { bail!("unsupported nested read-only relocation in {owner} at {at:#x}"); }
@@ -115,7 +152,7 @@ pub(super) fn code_relocations(
             .ok_or_else(|| anyhow!("relative jump table {owner} targets a removed or interior instruction"))?;
         let encoded = destination.new_offset_in_sym[index];
         if encoded == u32::MAX { bail!("relative jump-table target has no rewritten instruction"); }
-        result.push(CodeReloc {
+        result.push(DataReloc::RelativeCode {
             proof: ProofDataReloc { owner: owner.to_owned(), offset: at - start, r_type: 2,
                 symbol: destination.sym.name.clone(), addend: i64::try_from(u64::from(encoded) + at - base)? },
             target_offset: u64::try_from(destination.base_in_blob)?.checked_add(u64::from(encoded))
@@ -129,6 +166,92 @@ pub(super) fn code_relocations(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn compiler_relro_map_table_keeps_live_pointer_slots_through_proof() -> Result<()> {
+        // Bug: treating the anonymous RELRO table as mutable DATASEC either
+        // rejects valid clang output or freezes zero placeholders as pointers.
+        let build = std::path::Path::new("/var/tmp/kprog-tmp/perf/map-pointer-tables");
+        fs::create_dir_all(build)?;
+        let native = build.join("fixture.native.o");
+        let command = ["clang-18", "-target", "x86_64-linux-gnu", "-O3", "-march=native",
+            "-foptimize-sibling-calls", "-fomit-frame-pointer", "-mno-red-zone", "-mgeneral-regs-only",
+            "-fno-stack-protector", "-c", "/workspaces/repository/kprog/test/native_map_pointer_table.c",
+            "-o", native.to_str().ok_or_else(|| anyhow!("native fixture path is not UTF-8"))?];
+        fs::write(build.join("compile-command.json"), serde_json::to_vec(&command)?)?;
+        let compiled = std::process::Command::new(command[0]).args(&command[1..]).output()?;
+        if !compiled.status.success() { bail!("clang RELRO fixture failed: {}", String::from_utf8_lossy(&compiled.stderr)); }
+        let bytes = fs::read(&native)?;
+        let elf = object::File::parse(bytes.as_slice())?;
+        let table = elf.section_by_name(".data.rel.ro").ok_or_else(|| anyhow!("clang did not emit a RELRO table"))?;
+        assert_eq!(table.relocations().count(), 8);
+        let entry = find_symbol_by_name(&elf, "map_pointer_table")?;
+        let empty = HashMap::new();
+        let values = [[0xa5u8; 1]; 8];
+        let maps: HashMap<_, _> = values.iter().enumerate()
+            .map(|(index, value)| (format!("map{index}"), value.as_ptr() as u64)).collect();
+        let proof = rewrite_x86(&elf, &entry, &[entry.clone()], &empty, &maps, &HashMap::new(),
+            &[], true, true, None, None, None, None, false)?;
+        assert_eq!(proof.proof_data_relocs.len(), 8);
+        for relocation in &proof.proof_data_relocs {
+            assert_eq!((relocation.r_type, relocation.addend), (1, 0));
+            assert!(maps.contains_key(&relocation.symbol));
+        }
+        let proof_path = build.join("fixture.proof.o");
+        write_proof_object(&proof_path, object::Architecture::X86_64, "map_pointer_table", &proof.blob,
+            &proof.proof_symbols, &proof.proof_relocs, &proof.proof_data_relocs, proof.callee_saved_mask)?;
+        let bytes = fs::read(&proof_path)?;
+        let elf = object::File::parse(bytes.as_slice())?;
+        let entry = find_symbol_by_name(&elf, "map_pointer_table")?;
+        let layout: KernelLayout = serde_json::from_slice(&fs::read(
+            "/var/tmp/kprog-tmp/perf/kernel-layout/kernel-layout.json")?)?;
+        let linked = rewrite_x86(&elf, &entry, &[entry.clone()], &empty, &maps, &HashMap::new(),
+            &[], false, true, Some(&layout.array), Some(&layout.probe_read),
+            Some(&layout.hash), Some(&layout.lpm), false)?;
+        assert_eq!(linked.map_patches.len(), 8);
+        assert!(linked.relocs.is_empty());
+        let mut missing = maps.clone();
+        missing.remove("map3");
+        let error = rewrite_x86(&elf, &entry, &[entry.clone()], &empty, &missing, &HashMap::new(),
+            &[], false, true, Some(&layout.array), Some(&layout.probe_read),
+            Some(&layout.hash), Some(&layout.lpm), false).err()
+            .ok_or_else(|| anyhow!("missing live map was silently embedded"))?;
+        assert!(error.to_string().contains("unknown live map/data capability"));
+        // Existing map-pointer ABI binds the exact handle. Do not silently
+        // discard an ELF addend and return a different pointer.
+        let mut altered = bytes.clone();
+        let (relocation_offset, _) = elf.section_by_name(".rela.native_link_rodata")
+            .ok_or_else(|| anyhow!("proof lost nested relocations"))?.file_range()
+            .ok_or_else(|| anyhow!("nested relocation section has no file range"))?;
+        altered[relocation_offset as usize + 16..relocation_offset as usize + 24]
+            .copy_from_slice(&8i64.to_le_bytes());
+        let invalid = object::File::parse(altered.as_slice())?;
+        let invalid_entry = find_symbol_by_name(&invalid, "map_pointer_table")?;
+        let error = rewrite_x86(&invalid, &invalid_entry, &[invalid_entry.clone()], &empty, &maps,
+            &HashMap::new(), &[], false, true, Some(&layout.array), Some(&layout.probe_read),
+            Some(&layout.hash), Some(&layout.lpm), false).err()
+            .ok_or_else(|| anyhow!("nested map-pointer addend was silently dropped"))?;
+        assert!(error.to_string().contains("explicit zero address addend"));
+        let mut code = linked.blob;
+        for patch in &linked.map_patches {
+            code[patch.offset..patch.offset + 8].copy_from_slice(&maps[&patch.name].to_le_bytes());
+        }
+        code.push(0xc3);
+        #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
+        for index in [0u32,1,2,3,4,5,6,7,8,u32::MAX] {
+            let expected = if index < 8 { values[index as usize].as_ptr() as u64 } else { 0 };
+            let actual = memory::call_blob(&code, (&index as *const u32).cast_mut().cast(), 0, 0) as u64;
+            assert_eq!(actual, expected);
+            if index < 8 { assert!(actual > u32::MAX as u64); }
+        }
+        fs::write(build.join("result.json"), serde_json::to_vec_pretty(&serde_json::json!({
+            "native_relro_slots": 8, "proof_map_relocations": 8, "kernel_map_patches": 8,
+            "host_executions": 10, "normal_boot_facts": true,
+            "missing_map_rejected": true, "interior_map_handle_rejected": true,
+            "scope": "Actual clang output/proof/kernel rewrite and host pointer identity only; no B or app acceptance"
+        }))?)?;
+        Ok(())
+    }
 
     fn fixture(interior: bool, base: u64) -> Result<Vec<u8>> {
         let mut object = WriteObject::new(BinaryFormat::Elf, object::Architecture::X86_64, Endianness::Little);
@@ -161,12 +284,14 @@ mod tests {
                 insn_local_ip: vec![0,7,11,14,16,21,22,27],
                 new_offset_in_sym: vec![0,7,11,14,30,35,40,45] };
             let data = elf.section_by_name(".rodata").unwrap();
-            let result = code_relocations(&elf, &[layout], data.index(), base, 8, "table");
+            let result = data_relocations(&elf, &[layout], data.index(), base, 8, "table", &HashMap::new());
             if interior { assert!(result.is_err()); continue; }
             let result = result?;
-            assert_eq!(result.iter().map(|r| (r.proof.offset, r.proof.symbol.as_str(), r.proof.addend)).collect::<Vec<_>>(),
+            assert_eq!(result.iter().map(|r| match r { DataReloc::RelativeCode { proof, .. } =>
+                (proof.offset, proof.symbol.as_str(), proof.addend), _ => panic!("expected relative code") }).collect::<Vec<_>>(),
                 vec![(0,"entry",30),(4,"entry",44)]);
-            assert_eq!(result.iter().map(|r| (r.target_offset,r.table_offset)).collect::<Vec<_>>(),
+            assert_eq!(result.iter().map(|r| match r { DataReloc::RelativeCode { target_offset, table_offset, .. } =>
+                (*target_offset,*table_offset), _ => panic!("expected relative code") }).collect::<Vec<_>>(),
                 vec![(129,0),(139,0)]);
         }
         Ok(())

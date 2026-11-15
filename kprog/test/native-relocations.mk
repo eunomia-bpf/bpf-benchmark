@@ -52,7 +52,7 @@ guest-kernel-layout:
 	$(KERNEL_LAYOUT_BUILD)/facts /sys/kernel/btf/vmlinux /proc/kallsyms > $(OUTPUT)/kernel-layout.json
 
 .PHONY: check build
-check:
+check: $(KERNEL_LAYOUT)
 	taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) cargo test --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
 
 build:

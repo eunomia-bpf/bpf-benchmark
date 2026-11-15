@@ -1872,7 +1872,7 @@ pub(super) fn rewrite_x86(
     // PLT32 helper calls use in-blob absolute trampolines.
     let mut proof_data_relocs = Vec::new();
     let mut proof_relocs = if proof_mode {
-        let (mut collected, nested) = collect_x86_proof_relocs(elf, &layouts, &canonicalized_relocations, &writable_references)?;
+        let (mut collected, nested) = collect_x86_proof_relocs(elf, &layouts, &canonicalized_relocations, &writable_references, map_addrs)?;
         proof_data_relocs = nested;
         collected.extend(tail_proof_relocs);
         collected
@@ -2064,6 +2064,7 @@ fn collect_x86_proof_relocs(
     layouts: &[SymbolLayout],
     resolved_relocations: &HashSet<LocalSiteKey>,
     writable_references: &HashMap<LocalSiteKey,writable_data::Reference>,
+    map_addrs: &HashMap<String, u64>,
 ) -> Result<(Vec<ProofReloc>, Vec<ProofDataReloc>)> {
     let mut relocs = Vec::new();
     let mut nested = BTreeMap::new();
@@ -2267,7 +2268,7 @@ fn collect_x86_proof_relocs(
                         if !target_name.is_empty() {
                             bail!("PC32 proof target {} has zero size", target_name);
                         }
-                        let section_bytes = if section_name.starts_with(".rodata") {
+                        let section_bytes = if readonly_relocs::immutable_section(target_section.kind(), &section_name) {
                             target_data.to_vec()
                         } else if section_name == ".bss" {
                             let section_size = usize::try_from(target_section.size())
@@ -2312,10 +2313,10 @@ fn collect_x86_proof_relocs(
                         layout.base_in_blob + layout.new_offset_in_sym[insn_idx] as usize;
                     let off_within_insn =
                         (local_patch_off - layout.insn_local_ip[insn_idx]) as usize;
-                    for reloc in readonly_relocs::code_relocations(elf, layouts,
+                    for reloc in readonly_relocs::data_relocations(elf, layouts,
                         target_section_idx, if sym_size == 0 { 0 } else { sym_off_in_sec },
-                        sym_bytes.len() as u64, &data_symbol_name)? {
-                        let reloc = reloc.proof;
+                        sym_bytes.len() as u64, &data_symbol_name, map_addrs)? {
+                        let reloc = reloc.proof();
                         let key = (reloc.owner.clone(), reloc.offset);
                         if let Some(previous) = nested.insert(key, reloc.clone()) {
                             if previous != reloc { bail!("conflicting nested read-only relocations"); }
@@ -2692,7 +2693,7 @@ fn apply_elf_relocations(
                         if !target_name.is_empty() {
                             bail!("PC32 target {} has zero size; cannot embed", target_name);
                         }
-                        let section_bytes = if section_name.starts_with(".rodata") {
+                        let section_bytes = if readonly_relocs::immutable_section(target_section.kind(), &section_name) {
                             target_data.to_vec()
                         } else if section_name == ".bss" {
                             let section_size = usize::try_from(target_section.size())
@@ -2723,16 +2724,28 @@ fn apply_elf_relocations(
                     } else {
                         let off = blob.len();
                         blob.extend_from_slice(&sym_bytes);
-                        for relocation in readonly_relocs::code_relocations(elf, layouts,
+                        for relocation in readonly_relocs::data_relocations(elf, layouts,
                             target_section_idx, if sym_size == 0 { 0 } else { sym_off_in_sec },
-                            sym_bytes.len() as u64, &data_symbol_name)? {
-                            let displacement = i128::from(relocation.target_offset) -
-                                i128::try_from(off)? - i128::from(relocation.table_offset);
-                            let displacement = i32::try_from(displacement)
-                                .map_err(|_| anyhow!("relative jump-table displacement exceeds i32"))?;
-                            let field = off.checked_add(usize::try_from(relocation.proof.offset)?)
-                                .ok_or_else(|| anyhow!("relative jump-table patch offset overflow"))?;
-                            blob[field..field + 4].copy_from_slice(&displacement.to_le_bytes());
+                            sym_bytes.len() as u64, &data_symbol_name, map_addrs)? {
+                            match relocation {
+                                readonly_relocs::DataReloc::RelativeCode { proof, target_offset, table_offset } => {
+                                    let displacement = i128::from(target_offset) - i128::try_from(off)? - i128::from(table_offset);
+                                    let displacement = i32::try_from(displacement)
+                                        .map_err(|_| anyhow!("relative jump-table displacement exceeds i32"))?;
+                                    let field = off.checked_add(usize::try_from(proof.offset)?)
+                                        .ok_or_else(|| anyhow!("relative jump-table patch offset overflow"))?;
+                                    blob[field..field + 4].copy_from_slice(&displacement.to_le_bytes());
+                                }
+                                readonly_relocs::DataReloc::MapPointer(proof) => {
+                                    if !map_addrs.contains_key(&proof.symbol) {
+                                        bail!("immutable table references unknown live map/data capability {}", proof.symbol);
+                                    }
+                                    let field = off.checked_add(usize::try_from(proof.offset)?)
+                                        .ok_or_else(|| anyhow!("immutable map-pointer patch offset overflow"))?;
+                                    blob[field..field + 8].fill(0);
+                                    map_patches.push(MapPatch { name: proof.symbol, offset: field });
+                                }
+                            }
                         }
                         local_data_embed.insert(data_symbol_name, off);
                         off
