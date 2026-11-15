@@ -225,9 +225,9 @@ tracee:
 			-o "$(OUT)/tracee/lsm_support/$${src}.bpf.o"; \
 	done
 
-$(NATIVE_OUT)/katran/%.native.o: katran/katran/lib/bpf/%.c
+$(NATIVE_OUT)/katran/%.native.o: katran/katran/lib/bpf/%.c katran-compat.h
 	install -d "$(dir $@)"
-	"$(CLANG)" $(NATIVE_CFLAGS) -DDEBUG -D__KERNEL__ \
+	"$(CLANG)" $(NATIVE_CFLAGS) -include "$(CURDIR)/katran-compat.h" -DDEBUG -D__KERNEL__ \
 		-I"$(CURDIR)/katran" -I"$(CURDIR)/katran/katran/lib/linux_includes" \
 		-I/usr/include -I/usr/include/x86_64-linux-gnu \
 		-o "$@" "$<"
