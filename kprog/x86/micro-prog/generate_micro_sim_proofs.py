@@ -1398,7 +1398,7 @@ def append_step(lines: list[str], insn: NativeInsn, indent: str = "\t",
             raise ValueError(f"unsupported REP STOS operand form: {insn.raw}")
         width = WIDTH_CONST[width_bits]
         lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
-        lines.append(f"{indent}X86_SIM_L_EXEC_REP_STOS({width});")
+        lines.append(f"{indent}x86_sim_inline_stos(&__x86_inline_bindings, {width});")
         return
     encoded = encode(insn, rodata_idents or {})
     lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")
@@ -1422,11 +1422,6 @@ def append_step(lines: list[str], insn: NativeInsn, indent: str = "\t",
 
 def append_encoded_step(lines: list[str], encoded: EncodedInsn,
                         indent: str, step_macro: str) -> None:
-    if step_macro == "X86_SIM_RUN_OP":
-        direct = direct_step_statement(encoded)
-        if direct is not None:
-            lines.append(f"{indent}{direct};")
-            return
     lines.append(
         f"{indent}{step_macro}("
         f"{encoded.op}, {encoded.dst}, {encoded.src}, "
@@ -1491,8 +1486,7 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
                               aux='X86_MAP_PTR_AUX_VALUE' if is_value else '0', imm=c_ptr_u64(expression))
             else:
                 encoded = enc('X86_OP_MOV_IMM', dst=dst, imm=c_u64(value))
-            step = direct_step_statement(encoded) or (
-                f'{step_macro}({encoded.op}, {encoded.dst}, {encoded.src}, {encoded.flags}, {encoded.aux}, {encoded.imm});')
+            step = f'{step_macro}({encoded.op}, {encoded.dst}, {encoded.src}, {encoded.flags}, {encoded.aux}, {encoded.imm});'
             lines.append(f'{indent}case {offset}ULL: {step.rstrip(";")}; break;')
         lines.extend([f'{indent}default: X86_SIM_L_ARCHITECTURAL_FAULT();', f'{indent}}}'])
         return
@@ -1532,7 +1526,7 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
         if source is None or source[1] != 64:
             raise ValueError(f"unsupported unsigned multiply form: {insn.raw}")
         lines.extend([f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */",
-                      f"{indent}X86_SIM_L_EXEC_MUL_U64({source[0]});"])
+                      f"{indent}x86_sim_inline_mul(&__x86_inline_bindings, {source[0]});"])
         return
     address = code_address(insn)
     if address in addrs and reg_info(insn.operands[0])[1] == 64:
@@ -1933,11 +1927,13 @@ def render_program(name: str, insns: list[NativeInsn],
                      + json.dumps(metadata) + ';')
         lines.append("")
     lines.extend(readonly_load_declarations(readonly_values))
+    lines.extend(['#include ' + json.dumps(str(REPO_ROOT / "kprog/x86/x86_sim_inline.h")), ''])
     lines.extend([
         section,
         f"int {name}_x86_sim_xdp({ctx_type}ctx)",
         "{",
         f"\t{declare}",
+        "\tX86_SIM_BIND_INLINE();",
     ])
     for insn in insns:
         label = f"x86_l_{insn.addr:x}"
