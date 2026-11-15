@@ -15,5 +15,4 @@ python3 kprog/trusted_service.py --arch 1 \
     --sim-public-layout /workspaces/.agent-state/kprog-ck/verified-compiler/public-layout.json \
     --sim-physical-layout /workspaces/.agent-state/kprog-ck/verified-compiler/physical-layout.json \
     --sim-bounds-compiler /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds \
-    --run env BPFREJIT_SHIM_NATIVE_MANIFEST=/workspaces/repository/corpus/results/perf-combined-codegen-source-all-20261114/manifest-context.json \
-    python3 /workspaces/repository/kprog/test/verified_corpus.py otelcol-ebpf-profiler/profiling 1 10 1
+    --run python3 /workspaces/repository/kprog/test/verified_corpus.py otelcol-ebpf-profiler/profiling 1 10 1
