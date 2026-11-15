@@ -282,3 +282,11 @@ fact clearing and freed-stack inputs stay in the same order. This removes
 duplicate preprocessing of the same body; it changes no P or benchmark.
 Native CPU/shared-C memory/flag and normal-B baseline fixtures are committed
 in2647a9aca. Completed validation and CPP sizes follow in the result receipt.
+
+Shared-store receipt (b30e228e0): same-input OTel CPP309,459,472→289,568,784B
+(-6.43%; cumulative-32.92% including BMI2/load writeback). Native/shared-C
+full memory+flags512 cases pass before/after, all16 normal B allocated sets
+match, independent store1,292,621 checks pass. Old removed-helper oracle
+still has its baseline link failure, reported explicitly. All LTO stays
+together; full OTel B/stack/app and runtime claims remain open. Exact
+identities/commands: `../results/perf_20261113/store-writeback/report.md`.

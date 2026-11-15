@@ -1,0 +1,29 @@
+{
+  "command": [
+    "/workspaces/repository/kprog/stock-path/bin/clang",
+    "-w",
+    "-g",
+    "-O3",
+    "-mcpu=v4",
+    "-target",
+    "bpf",
+    "-mllvm",
+    "-bpf-stack-size=4096",
+    "-D__TARGET_ARCH_x86",
+    "-I",
+    "/workspaces/repository/vendor/libbpf/include/uapi",
+    "-I",
+    "/workspaces/repository/vendor/libbpf/src",
+    "-I",
+    "/usr/include/x86_64-linux-gnu",
+    "-E",
+    "/var/tmp/kprog-tmp/perf/otel-whole-word-checked/trusted_x86.bpf.piece2.c",
+    "-o",
+    "/var/tmp/kprog-tmp/perf/otel-whole-word-checked/trusted_x86.bpf.piece2.i"
+  ],
+  "returncode": 0,
+  "wall_seconds": 2.9376993749756366,
+  "user_seconds": 2.817771,
+  "system_seconds": 0.118958,
+  "max_rss_kib": 288656
+}

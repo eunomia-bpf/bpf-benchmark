@@ -1,0 +1,17 @@
+taskset -c 8-11 prlimit --as=8589934592 -- python3 /workspaces/repository/kprog/test/check_native_stores.py --build /var/tmp/kprog-tmp/perf/store-writeback --output /workspaces/kprog-raw/perf/20261115-store-writeback/native-after --bounds /var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds --linker /workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link
+store1regflat: 32 memory/flag cases; normal B compiled
+store1regindex: 32 memory/flag cases; normal B compiled
+store1immflat: 32 memory/flag cases; normal B compiled
+store1immindex: 32 memory/flag cases; normal B compiled
+store2regflat: 32 memory/flag cases; normal B compiled
+store2regindex: 32 memory/flag cases; normal B compiled
+store2immflat: 32 memory/flag cases; normal B compiled
+store2immindex: 32 memory/flag cases; normal B compiled
+store4regflat: 32 memory/flag cases; normal B compiled
+store4regindex: 32 memory/flag cases; normal B compiled
+store4immflat: 32 memory/flag cases; normal B compiled
+store4immindex: 32 memory/flag cases; normal B compiled
+store8regflat: 32 memory/flag cases; normal B compiled
+store8regindex: 32 memory/flag cases; normal B compiled
+store8immflat: 32 memory/flag cases; normal B compiled
+store8immindex: 32 memory/flag cases; normal B compiled
