@@ -182,3 +182,23 @@ removed (BTF.ext240→224), not whole-object equality. Sixty untied/tied
 provenance cases, four context load widths and normal all-pairs backend
 also PASS. Source cab373d96/e8c0f32cf, result b-debug/. Base tool not yet
 published while captured100K control uses it. Real100K effect still open.
+
+2026-11-15T16:54Z actual100K scalar/direct effect measured from the EXACT
+same completed frontend (SHA2aa1cd7b...), without repeating C optimization
+or replacing the existing canonical B/control inputs. The old normal pipeline
+completes100036native instructions: CPP14,998,224B, frontend131.336CPU s/
+2,908,444KiB. With its1,512,837debug updates, machine-code stage costs
+894.162CPU s/2,567,276KiB. The normal candidate bounds stage removes only
+those updates,6.365CPU s/965268KiB, followed by34.847CPU s/244708KiB
+machine-code stage. All-pairs0.122s, final object7.759s, post-PEI frame
+observation8.013s. Commands/hashes/resources are in scale-100k-debug/.
+
+All allocated sections are byte-identical to the completed canonical control:
+448executable bytes and the same zero-byte frame. The temporary candidate
+object4,092,168B and MIR stayed in anonymous descriptors and were closed;
+there is no second retained B build. Compiler frequency/load was not fixed;
+these are recorded CPU/resource observations, not a native runtime speedup.
+The old second scalar/indirect compile continues unchanged; pointer cases
+and actual stock outcomes remain pending. Source/current bounds tool has
+this one metadata-cleanup path; installed base tool still awaits its safe
+publication while the captured group uses the old binary.

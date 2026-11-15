@@ -1,0 +1,26 @@
+{
+  "object_bytes": 4092168,
+  "object_sha256": "a343f34a510e3be613c8d17703c9f5fa257c559d6a548989e1109ba43f5bb1fb",
+  "allocated_sections": {
+    ".text": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "xdp": {
+      "bytes": 448,
+      "sha256": "300857e58e26f37de6345aeb9b211b0438cd410692a270bf207e778954c17e5c"
+    },
+    "license": {
+      "bytes": 4,
+      "sha256": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a"
+    }
+  },
+  "code_bytes": 448,
+  "post_pei_stack_bytes": {
+    "n100000_scalar_direct_x86_sim_xdp": 0
+  },
+  "frontend_sha256": "2aa1cd7b5eea98f948a5507bb175506a7d75b9dc9c8c870859d160405dbbdd42",
+  "bounds_sha256": "1965e868939e48b724ad6674cef65de867c459ccd88d46da5fc6e92afe00b2b6",
+  "reference_object_sha256": "64db433af19c24a26a26e32757d9aa7f1878089c3d1c86d7d6e211d888bce55d",
+  "allocated_equal_normal_file_pipeline": true
+}
