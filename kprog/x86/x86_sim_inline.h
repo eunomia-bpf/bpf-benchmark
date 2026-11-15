@@ -242,11 +242,32 @@ x86_sim_inline_helper_register_clobbers(const struct x86_sim_inline_bindings *__
 #undef X86_SIM_L_HELPER_REGISTER_CLOBBERS
 #define X86_SIM_L_HELPER_REGISTER_CLOBBERS() x86_sim_inline_helper_register_clobbers(__x86_bind)
 
+/* Families are compiled separately before constant-opcode wrappers inline.
+ * The C statements and dispatch conditions remain shared with the raw I. */
+#define X86_SIM_INLINE_FAMILY(NAME) \
+    static __always_inline __attribute__((nodebug)) void \
+    x86_sim_inline_arm_##NAME(const struct x86_sim_inline_bindings *__x86_bind, \
+        __u8 op, __u8 dst, __u8 src, __u8 flags, __u32 aux, __u64 imm, __u8 width) \
+    { X86_SIM_L_ARM_##NAME(op, dst, src, flags, aux, imm, width); }
+X86_SIM_L_FAMILIES(X86_SIM_INLINE_FAMILY)
+#undef X86_SIM_INLINE_FAMILY
+
+#define X86_SIM_INLINE_CALL_ARM(BIND, NAME, OP, DST, SRC, FLAGS, AUX, IMM, WIDTH) \
+    x86_sim_inline_arm_##NAME(BIND, OP, DST, SRC, FLAGS, AUX, IMM, WIDTH)
+
+/* This template contains calls only, never a second copy of a handler body. */
+#define X86_SIM_DECLARE_INSTRUCTION(NAME, OPCODE) \
+    static __always_inline __attribute__((nodebug)) void \
+    NAME(const struct x86_sim_inline_bindings *__x86_bind, \
+         __u8 dst, __u8 src, __u8 flags, __u32 aux, __u64 imm) \
+    { X86_SIM_L_EXEC_DISPATCH(X86_SIM_INLINE_CALL_ARM, __x86_bind, \
+                             OPCODE, dst, src, flags, aux, imm); }
+
 static __always_inline __attribute__((nodebug)) void
 x86_sim_inline_execute(const struct x86_sim_inline_bindings *__x86_bind,
     __u8 op, __u8 dst, __u8 src, __u8 flags, __u32 aux, __u64 imm)
 {
-    X86_SIM_L_EXEC(op, dst, src, flags, aux, imm);
+    X86_SIM_L_EXEC_DISPATCH(X86_SIM_INLINE_CALL_ARM, __x86_bind, op, dst, src, flags, aux, imm);
 }
 
 static __always_inline __attribute__((nodebug)) void
@@ -346,7 +367,10 @@ x86_sim_inline_recover(const struct x86_sim_inline_bindings *__x86_bind,
 
 #undef X86_SIM_RUN_OP
 #define X86_SIM_RUN_OP(OP, DST, SRC, FLAGS, AUX, IMM) \
-    x86_sim_inline_execute(&__x86_inline_bindings, (OP), (DST), (SRC), (FLAGS), (AUX), (__u64)(IMM))
+    __x86_instruction_##OP(&__x86_inline_bindings, (DST), (SRC), (FLAGS), (AUX), (__u64)(IMM))
+#undef X86_SIM_RUN_OP_SUB
+#define X86_SIM_RUN_OP_SUB(OP, DST, SRC, FLAGS, AUX, IMM) \
+    __x86_instruction_##OP(&__x86_inline_bindings, (DST), (SRC), (FLAGS), (AUX), (__u64)(IMM))
 #undef X86_SIM_L_EVAL_CC
 #define X86_SIM_L_EVAL_CC(CC) x86_sim_inline_condition(&__x86_inline_bindings, (CC))
 #undef X86_SIM_X86_CODE_ADDRESS

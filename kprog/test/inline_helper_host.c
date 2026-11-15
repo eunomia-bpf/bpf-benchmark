@@ -17,6 +17,7 @@ unsigned long native_lab_entry_input(unsigned int kind)
 static __u64 observed_clock(void) { ++calls; return 0x123456789abcdef0ULL; }
 #define bpf_ktime_get_ns observed_clock
 #include "../x86/x86_sim_inline.h"
+X86_SIM_DECLARE_INSTRUCTION(__x86_instruction_X86_OP_CALL_HELPER, X86_OP_CALL_HELPER)
 
 int main(void)
 {

@@ -1928,6 +1928,7 @@ def render_program(name: str, insns: list[NativeInsn],
         lines.append("")
     lines.extend(readonly_load_declarations(readonly_values))
     lines.extend(['#include ' + json.dumps(str(REPO_ROOT / "kprog/x86/x86_sim_inline.h")), ''])
+    instruction_declarations = len(lines)
     lines.extend([
         section,
         f"int {name}_x86_sim_xdp({ctx_type}ctx)",
@@ -1964,6 +1965,10 @@ def render_program(name: str, insns: list[NativeInsn],
             "",
         ])
     lines.extend(["}", "", "X86_SIM_LICENSE();", ""])
+    opcodes = sorted(set(re.findall(r"\bX86_SIM_RUN_OP(?:_SUB)?\(\s*(X86_OP_\w+)", "\n".join(lines))))
+    lines[instruction_declarations:instruction_declarations] = [
+        f"X86_SIM_DECLARE_INSTRUCTION(__x86_instruction_{op}, {op})" for op in opcodes
+    ] + [""]
     return "\n".join(lines)
 
 
