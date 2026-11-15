@@ -8,42 +8,43 @@ import re
 import tarfile
 
 
-def measure(source, archive, member):
+def measure_stream(source, stream, expected_bytes):
     lines = source.read_text().splitlines()
     macros, counts, headers, locations = (Counter() for _ in range(4))
     total = directives = lineno = 0
     filename = ''
-    with tarfile.open(archive, 'r|gz') as captured:
-        for entry in captured:
-            if entry.name != member:
-                continue
-            for line in captured.extractfile(entry):
-                total += len(line)
-                marker = re.match(rb'\s*#\s+(\d+)\s+"([^"]+)"', line)
-                if marker:
-                    lineno, filename = int(marker[1]), marker[2].decode(errors='replace')
-                    directives += len(line)
-                    continue
-                if Path(filename).name == source.name and 0 < lineno <= len(lines):
-                    macro = re.search(r'\b(X86_SIM_[A-Z0-9_]+)\s*\(', lines[lineno - 1])
-                    key = macro[1] if macro else 'generated-C-other'
-                    macros[key] += len(line)
-                    counts[key] += 1
-                    locations[lineno] += len(line)
-                else:
-                    headers[filename] += len(line)
-                lineno += 1
-            if total != entry.size:
-                raise ValueError('archive member did not stream completely')
-            break
+    for line in stream:
+        total += len(line)
+        marker = re.match(rb'\s*#\s+(\d+)\s+"([^"]+)"', line)
+        if marker:
+            lineno, filename = int(marker[1]), marker[2].decode(errors='replace')
+            directives += len(line)
+            continue
+        if Path(filename).name == source.name and 0 < lineno <= len(lines):
+            macro = re.search(r'\b(X86_SIM_[A-Z0-9_]+)\s*\(', lines[lineno - 1])
+            key = macro[1] if macro else 'generated-C-other'
+            macros[key] += len(line)
+            counts[key] += 1
+            locations[lineno] += len(line)
         else:
-            raise ValueError('preprocessor member is absent: ' + member)
+            headers[filename] += len(line)
+        lineno += 1
+    if total != expected_bytes:
+        raise ValueError('preprocessor input did not stream completely')
     return dict(preprocessed_bytes=total, generated_c_bytes=source.stat().st_size,
                 expansion_ratio=total/source.stat().st_size, line_directive_bytes=directives,
                 macro_expanded_bytes=dict(macros.most_common()), expanded_line_counts=dict(counts),
                 header_bytes=dict(headers.most_common()), largest_source_lines=[
                     dict(line=n, expanded_bytes=b, source=lines[n-1][:250])
                     for n, b in locations.most_common(12)])
+
+
+def measure(source, archive, member):
+    with tarfile.open(archive, 'r|gz') as captured:
+        for entry in captured:
+            if entry.name == member:
+                return measure_stream(source, captured.extractfile(entry), entry.size)
+    raise ValueError('preprocessor member is absent: ' + member)
 
 
 def main():

@@ -1,0 +1,1 @@
+taskset -c 8-11 make -r -C kprog/fidelity preprocess-profile SCALE_BUILD=/var/tmp/kprog-tmp/perf/scale SCALE_OUT=/workspaces/kprog-raw/perf/20261115-preprocess-growth/baseline 
