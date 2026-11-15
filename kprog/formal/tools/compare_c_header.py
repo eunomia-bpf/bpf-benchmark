@@ -32,8 +32,12 @@ def allocated(path: Path):
             symbols = elf.get_section(section["sh_link"])
             for relocation in section.iter_relocations():
                 symbol = symbols.get_symbol(relocation["r_info_sym"])
+                symbol_entry = dict(symbol.entry)
+                # The resolved name is compared below; its string-table offset
+                # changes with ELF string packing and is not target identity.
+                del symbol_entry["st_name"]
                 relocations.append((target.name, dict(relocation.entry),
-                                    symbol.name, dict(symbol.entry)))
+                                    symbol.name, symbol_entry))
         return sections, relocations
 
 
