@@ -1,4 +1,4 @@
-//! Key-size-specialized raw htab lookup. Matches hashtab.c lookup_nulls_elem_raw:
+//! Compact word-key raw htab lookup. Matches hashtab.c lookup_nulls_elem_raw:
 //! live seed/buckets, Jenkins32, exact key equality, nulls-marker retry and raw
 //! element return. Existing caller supplies map lifetime/RCU and postprocessing.
 use super::*;
@@ -19,30 +19,40 @@ fn rotate(b:&mut Vec<u8>,src:u8,n:u8) {
     b.extend_from_slice(&[0x44,0x89,0xc0|(src<<3),0xc1,0xc0,n]); // eax=rol(src,n)
 }
 fn temp(b:&mut Vec<u8>,op:u8,dst:u8) { b.extend_from_slice(&[0x41,op,0xc0|dst]); }
-fn hash(b:&mut Vec<u8>,layout:&RuntimeHashLayout,size:u32) -> Result<()> {
+fn hash(b:&mut Vec<u8>,layout:&RuntimeHashLayout) -> Result<()> {
+    b.extend_from_slice(&[0x41,0x89,0xcb]); // r11d=key bytes, retained for comparison
     disp(b,&[0x44,0x8b,0x87],layout.hashrnd)?; // a=live seed
+    b.extend_from_slice(&[0x41,0x01,0xc8]); // a += key bytes
     b.extend_from_slice(&[0x41,0x81,0xc0]);
-    b.extend_from_slice(&0xdead_beefu32.wrapping_add(size).to_le_bytes());
+    b.extend_from_slice(&0xdead_beefu32.to_le_bytes());
     b.extend_from_slice(&[0x45,0x89,0xc1,0x45,0x89,0xc2]); // b=c=a
-    if size==16 {
-        for reg in 0..3 { disp(b,&[0x44,0x03,0x86|(reg<<3)],u32::from(reg)*4)?; }
-        for (dst,src,n,add_dst,add_src) in [(0,2,4,2,1),(1,0,6,0,2),(2,1,8,1,0),
-            (0,2,16,2,1),(1,0,19,0,2),(2,1,4,1,0)] {
-            alu(b,0x29,dst,src);rotate(b,src,n);temp(b,0x31,dst);alu(b,0x01,add_dst,add_src);
-        }
-        disp(b,&[0x44,0x03,0x86],12)?;
-    } else {
-        // Match jhash2's final-word switch order c,b,a.
-        for reg in (0..(size/4) as u8).rev() { disp(b,&[0x44,0x03,0x86|(reg<<3)],u32::from(reg)*4)?; }
+    b.extend_from_slice(&[0x48,0x89,0xf2]); // rdx=current key chunk
+    let more=b.len();b.extend_from_slice(&[0x83,0xf9,12]);
+    let tail=append_x86_jcc_rel32(b,0x86);
+    for reg in 0..3 { disp(b,&[0x44,0x03,0x82|(reg<<3)],u32::from(reg)*4)?; }
+    for (dst,src,n,add_dst,add_src) in [(0,2,4,2,1),(1,0,6,0,2),(2,1,8,1,0),
+        (0,2,16,2,1),(1,0,19,0,2),(2,1,4,1,0)] {
+        alu(b,0x29,dst,src);rotate(b,src,n);temp(b,0x31,dst);alu(b,0x01,add_dst,add_src);
     }
+    b.extend_from_slice(&[0x83,0xe9,12,0x48,0x83,0xc2,12]);
+    let back=jump(b);patch_x86_rel32(b,back,more)?;
+    let tail_label=b.len();patch_x86_rel32(b,tail,tail_label)?;
+    // jhash2's final-word switch order c,b,a; remaining bytes are 4,8,12.
+    b.extend_from_slice(&[0x83,0xf9,12]);let below_three=append_x86_jcc_rel32(b,0x85);
+    disp(b,&[0x44,0x03,0x92],8)?;
+    let second=b.len();patch_x86_rel32(b,below_three,second)?;
+    b.extend_from_slice(&[0x83,0xf9,8]);let below_two=append_x86_jcc_rel32(b,0x82);
+    disp(b,&[0x44,0x03,0x8a],4)?;
+    let first=b.len();patch_x86_rel32(b,below_two,first)?;
+    disp(b,&[0x44,0x03,0x82],0)?;
     for (dst,src,n) in [(2,1,14),(0,2,11),(1,0,25),(2,1,16),(0,2,4),(1,0,14),(2,1,24)] {
         alu(b,0x31,dst,src);rotate(b,src,n);temp(b,0x29,dst);
     }
     Ok(())
 }
 
-fn lookup(layout:&RuntimeHashLayout,size:u32) -> Result<Vec<u8>> {
-    let mut b=Vec::new();hash(&mut b,layout,size)?;
+fn lookup(layout:&RuntimeHashLayout) -> Result<Vec<u8>> {
+    let mut b=Vec::new();hash(&mut b,layout)?;
     disp(&mut b,&[0x44,0x8b,0x87],layout.n_buckets)?;
     b.extend_from_slice(&[0x41,0xff,0xc8,0x45,0x21,0xd0]); // r8d=(n-1)&hash
     disp(&mut b,&[0x48,0x8b,0x97],layout.buckets)?; // actual bucket array
@@ -57,23 +67,20 @@ fn lookup(layout:&RuntimeHashLayout,size:u32) -> Result<Vec<u8>> {
     let mut next=vec![append_x86_jcc_rel32(&mut b,0x85)];
     // Kernel generic memcmp first compares ulong chunks. On a differing chunk
     // it rechecks that remaining range bytewise; preserve this access shape.
-    let mut byte_fixes=Vec::new();
-    let words=size/8;
-    for i in 0..words {
-        disp(&mut b,&[0x48,0x8b,0x88],layout.key+i*8)?;
-        disp(&mut b,&[0x48,0x3b,0x8e],i*8)?;
-        byte_fixes.push((append_x86_jcc_rel32(&mut b,0x85),i*8));
-    }
-    if size%8==0 { b.push(0xc3); } else { byte_fixes.push((jump(&mut b),words*8)); }
-    let mut byte_labels=Vec::new();
-    for i in 0..size {
-        byte_labels.push(b.len());
-        disp(&mut b,&[0x0f,0xb6,0x88],layout.key+i)?;
-        disp(&mut b,&[0x3a,0x8e],i)?;
-        next.push(append_x86_jcc_rel32(&mut b,0x85));
-    }
+    b.extend_from_slice(&[0x45,0x31,0xc9]); // r9d=key comparison byte offset
+    let word=b.len();b.extend_from_slice(&[0x44,0x89,0xd9,0x44,0x29,0xc9,0x83,0xf9,8]);
+    let byte_tail=append_x86_jcc_rel32(&mut b,0x82);
+    disp(&mut b,&[0x4a,0x8b,0x8c,0x08],layout.key)?;
+    b.extend_from_slice(&[0x4a,0x3b,0x0c,0x0e]);
+    let byte_mismatch=append_x86_jcc_rel32(&mut b,0x85);
+    b.extend_from_slice(&[0x41,0x83,0xc1,8]);let more=jump(&mut b);patch_x86_rel32(&mut b,more,word)?;
+    let byte=b.len();patch_x86_rel32(&mut b,byte_tail,byte)?;patch_x86_rel32(&mut b,byte_mismatch,byte)?;
+    b.extend_from_slice(&[0x45,0x39,0xd9]);let equal=append_x86_jcc_rel32(&mut b,0x84);
+    disp(&mut b,&[0x42,0x0f,0xb6,0x8c,0x08],layout.key)?;
+    b.extend_from_slice(&[0x42,0x3a,0x0c,0x0e]);next.push(append_x86_jcc_rel32(&mut b,0x85));
+    b.extend_from_slice(&[0x41,0xff,0xc1]);let more=jump(&mut b);patch_x86_rel32(&mut b,more,byte)?;
+    let hit=b.len();patch_x86_rel32(&mut b,equal,hit)?;
     b.push(0xc3);
-    for (fix,offset) in byte_fixes {patch_x86_rel32(&mut b,fix,byte_labels[offset as usize])?;}
     let next_label=b.len();for fix in next {patch_x86_rel32(&mut b,fix,next_label)?;}
     disp(&mut b,&[0x48,0x8b,0x80],layout.node+layout.next)?;
     let back=jump(&mut b);patch_x86_rel32(&mut b,back,walk)?;
@@ -85,19 +92,15 @@ fn lookup(layout:&RuntimeHashLayout,size:u32) -> Result<Vec<u8>> {
 }
 
 pub(super) fn routine(layout:&RuntimeHashLayout) -> Result<(Vec<u8>,usize)> {
-    let mut b=Vec::new();disp(&mut b,&[0x8b,0x87],layout.key_size)?;
-    let mut entries=Vec::new();
-    for size in [4u8,8,12,16] {
-        b.extend_from_slice(&[0x83,0xf8,size]);entries.push((append_x86_jcc_rel32(&mut b,0x84),size));
-    }
-    // Other key sizes retain the original raw helper, with unchanged arguments.
+    let mut b=Vec::new();disp(&mut b,&[0x8b,0x8f],layout.key_size)?;
+    b.extend_from_slice(&[0xf7,0xc1,3,0,0,0]);let byte_key=append_x86_jcc_rel32(&mut b,0x85);
+    b.extend_from_slice(&[0x85,0xc9]);let zero_key=append_x86_jcc_rel32(&mut b,0x84);
+    b.extend_from_slice(&lookup(layout)?);
+    let original=b.len();patch_x86_rel32(&mut b,byte_key,original)?;patch_x86_rel32(&mut b,zero_key,original)?;
+    // Non-word keys retain the kernel's byte-key hash, with original arguments.
     b.extend_from_slice(&[0x48,0x83,0xec,8]);let call=b.len();
     b.extend_from_slice(&X86_HELPER_CALL_REL32_SLOT);
     b.extend_from_slice(&[0x48,0x83,0xc4,8,0xc3]);
-    for (fix,size) in entries {
-        let start=b.len();patch_x86_rel32(&mut b,fix,start)?;
-        b.extend_from_slice(&lookup(layout,u32::from(size))?);
-    }
     Ok((b,call))
 }
 

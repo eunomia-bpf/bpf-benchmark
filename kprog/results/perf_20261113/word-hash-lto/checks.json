@@ -1,0 +1,17 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/perf/20261115-word-hash-lto",
+  "rust_tests": {
+    "passed": 44,
+    "failed": 0,
+    "ignored": 1
+  },
+  "host_execution": "hash host: 49178 kernel-jhash2/table/guard/collision/null/retry/ABI vectors PASS",
+  "key_bytes": {
+    "first": 4,
+    "last": 128,
+    "step": 4
+  },
+  "vectors": 49178,
+  "routine_bytes": 508,
+  "scope": "Actual emitted x86 host execution against this kernel jhash2; no image publication, actual kernel execution, app acceptance or performance result"
+}

@@ -32,12 +32,12 @@ int main(int argc,char **argv)
     int64_t distance=(intptr_t)generic-(intptr_t)(code+call+5);assert(distance==(int32_t)distance);
     int32_t disp=distance;memcpy(code+call+1,&disp,4);assert(!mprotect(code,n,PROT_READ|PROT_EXEC));
     uintptr_t (*lookup)(void *,const void *)=(void *)code;
-    unsigned char map[128]={0},buckets[512]={0},hit[96]={0},collision[96]={0};
+    unsigned char map[128]={0},buckets[512]={0},hit[256]={0},collision[256]={0};
     ptrat(map,40,buckets);u32at(map,32,16);
     unsigned char *pages=mmap(NULL,8192,PROT_READ|PROT_WRITE,MAP_ANONYMOUS|MAP_PRIVATE,-1,0);
     assert(pages!=MAP_FAILED && !mprotect(pages+4096,4096,PROT_NONE));
     uint32_t random=0x91abcdef;unsigned vectors=0;
-    for(unsigned size=4;size<=16;size+=4) for(unsigned sample=0;sample<512;++sample) {
+    for(unsigned size=4;size<=128;size+=4) for(unsigned sample=0;sample<512;++sample) {
         unsigned char *key=sample<256 ? pages+2048+sample%4 : pages+4096-size;
         for(unsigned i=0;i<size;++i){random=random*1664525+1013904223;key[i]=random>>24;}
         uint32_t seed=random,hash=jhash2((const u32 *)key,size/4,seed),index=hash&15;
@@ -51,8 +51,8 @@ int main(int argc,char **argv)
         ptrat(buckets+index*32,8,hit+8);u32at(hit,32,hash^0x80000000);
         assert(!lookup(map,key));++vectors; /* full hash equality, not bucket equality */
     }
-    /* Arbitrary unsupported sizes preserve original helper+args+stack alignment. */
-    for(unsigned size=0;size<32;++size) if(size!=4 && size!=8 && size!=12 && size!=16) {
+    /* Non-word/zero keys preserve original helper+args+stack alignment. */
+    for(unsigned size=0;size<32;++size) if(size==0 || size%4) {
         u32at(map,12,size);assert(lookup(map,(void *)1)==((uintptr_t)map^1));++vectors;
     }
     unsigned char *key=pages+4096-16;u32at(map,12,16);u32at(map,20,123);
