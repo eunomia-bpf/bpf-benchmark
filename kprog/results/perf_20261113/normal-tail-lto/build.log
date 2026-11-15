@@ -1,0 +1,3 @@
+taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/workspaces/repository/kprog/x86/native_lab/native_link/target cargo build --release --manifest-path /workspaces/repository/kprog/x86/native_lab/native_link/Cargo.toml
+   Compiling native-link v0.1.0 (/workspaces/repository/kprog/x86/native_lab/native_link)
+    Finished `release` profile [optimized] target(s) in 14.46s
