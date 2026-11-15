@@ -34,7 +34,8 @@ def main(a):
     plan.write_text(json.dumps(dict(version=1, kernel_layout=json.loads(a.kernel_layout.read_text()))))
     run([a.linker, '--input', proof, '--symbol', 'absolute_table', '--mode', 'kernel',
          '--output', a.build/'absolute.bin', '--output-relocs', a.build/'absolute.relocs',
-         '--output-map-patches', a.build/'absolute.maps', '--link-plan', plan])
+         '--output-map-patches', a.build/'absolute.maps', '--output-abi', a.build/'absolute.abi',
+         '--link-plan', plan])
     if (a.build/'absolute.maps').read_bytes():
         raise ValueError('local code table acquired a map capability')
 
