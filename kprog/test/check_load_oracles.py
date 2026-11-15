@@ -27,6 +27,7 @@ unsigned long native_lab_entry_input(unsigned int kind) {
                                      ('test_stack_output_lifetime_host', True)]]
     tests.append((ROOT / 'kprog/test/load_writeback_host.c', True))
     tests.append((ROOT / 'kprog/formal/oracles/test_x86_store_route_host.c', False))
+    tests.append((ROOT / 'kprog/test/width_capture_host.c', False))
     variants = [(source, own_input, []) for source, own_input in tests]
     variants.append((ROOT / 'kprog/formal/oracles/test_stack_output_lifetime_host.c',
                      True, ['-DTEST_ARM64']))

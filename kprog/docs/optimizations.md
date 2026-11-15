@@ -299,3 +299,12 @@ This is validation of existing LTO/helper behavior, no production change or
 speed claim. Earlier failures and corrected kernel-outcome assumption remain
 in `../results/perf_20261113/helper-output-oracle/report.md`; full host-input
 matching, actual OTel B/app and M4–M6 stay open.
+
+2026-11-15 pre-SROA width constants: three running-compiler snapshots locate
+the actual OTel cost in SROA/PromoteMemToReg/IDF calculation. The shared width
+contract is now evaluated with one captured byte argument and byte result;
+immutable instruction/read/write width locals remain constant through the C
+frontend. No optimizer flag/pass is disabled. A diagnostic width gate had25–28
+pre-optimizer branches via ordinary/function locals and0 through captured
+constant contract locals. Actual handler/normal-B validation follows; this
+does not yet claim a full OTel compile or runtime improvement. All LTO stays on.
