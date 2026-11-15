@@ -18,6 +18,10 @@ SPILL_GROUP_BUILD ?= /var/tmp/kprog-tmp/perf/spill-groups
 hotspot-spill-replay:
 	taskset -c 19 prlimit --as=25769803776 -- python3 $(ROOT)/kprog/test/replay_hotspot_spills.py --archive /workspaces/kprog-raw/perf/20261114-otel-whole-word-checked/service.tar.gz --member service/requests/5.failure.tar.gz --build /var/tmp/kprog-tmp/perf/otel-whole-word-checked --output $(OUTPUT)
 
+.PHONY: otel-main-spill-replay
+otel-main-spill-replay:
+	taskset -c 8-11 prlimit --as=17179869184 -- python3 $(ROOT)/kprog/test/replay_hotspot_spills.py --archive /workspaces/kprog-raw/perf/20261115-otel-current-app-retry2/service.tar.gz --member service/requests/3.failure.tar.gz --build /var/tmp/kprog-tmp/perf/otel-main-spill-replay --output $(OUTPUT)
+
 .PHONY: hotspot-spill-lifetimes
 hotspot-spill-lifetimes:
 	install -d $(OUTPUT)

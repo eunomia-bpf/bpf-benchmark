@@ -1,4 +1,4 @@
-"""Measure existing all-pairs spill lowering on the archived OTel hotspot MIR."""
+"""Resume normal all-pairs/llc lowering from an archived OTel pre-PEI MIR."""
 import argparse
 from contextlib import ExitStack
 from datetime import datetime, timezone
@@ -27,12 +27,12 @@ def main(args):
     args.output.mkdir(parents=True, exist_ok=True)
     began = time.monotonic()
     result = dict(started=datetime.now(timezone.utc).isoformat(), archive=str(args.archive),
-                  member=args.member, scope='Archived hotspot MIR diagnostic, no P or production compiler change')
+                  member=args.member, scope='Archived pre-PEI MIR diagnostic; no repeated C frontend or kernel submission')
     try:
         wanted = {'request/generated/trusted_x86.bpf.before.mir': args.build/'trusted_x86.bpf.before.mir',
                   'request/kernel.native.o': args.build/'kernel.native.o'}
         facts = {'request/kernel.entry', 'request/kernel.facts.json', 'request/generation.metadata.json',
-                 'request/source-identities.json', 'request/verify.stderr', 'request/generated/commands.jsonl'}
+                 'request/source-identities.json', 'request/generated/commands.jsonl'}
         hashes = {}
         # Stream the existing nested request; no duplicate 125 MB archive or
         # expanded source tree is created alongside the canonical build.
@@ -47,7 +47,7 @@ def main(args):
                         while data := stream.read(1 << 20):
                             output.write(data)
                     hashes[member.name] = digest_file(target)
-                elif member.name in facts:
+                elif member.name in facts or member.name == 'request/verify.stderr':
                     data = nested.extractfile(member).read()
                     (args.output/member.name.replace('/', '__')).write_bytes(data)
                     hashes[member.name] = hashlib.sha256(data).hexdigest()
