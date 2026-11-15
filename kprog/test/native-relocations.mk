@@ -4,6 +4,7 @@ ROOT := /workspaces/repository
 LINKER_TARGET := $(ROOT)/kprog/x86/native_lab/native_link/target
 OUTPUT ?= /workspaces/kprog-raw/perf/20261115-native-relocations
 BUILD := /var/tmp/kprog-tmp/perf/native-relocations
+CONTEXT_TOOL := /var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds
 
 .PHONY: check build
 check:
@@ -30,4 +31,11 @@ jump-table-check: build jump-table-forms
 .PHONY: compiler-cleanup-check
 compiler-cleanup-check:
 	taskset -c 8-11 prlimit --as=12884901888 -- python3 $(ROOT)/kprog/test/check_whole_word_backend.py --output $(OUTPUT)/backend --clang $(ROOT)/kprog/stock-path/bin/clang
-	taskset -c 8-11 prlimit --as=12884901888 -- python3 $(ROOT)/kprog/test/check_packet_identities.py --tool /var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds --output $(OUTPUT)/identities
+	$(MAKE) -f $(ROOT)/kprog/test/native-relocations.mk identity-normal-check OUTPUT=$(OUTPUT)
+
+$(CONTEXT_TOOL): $(ROOT)/kprog/x86/packet_bounds_ir.cpp
+	taskset -c 8-11 prlimit --as=8589934592 -- clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -I$(ROOT)/vendor/libbpf/include/uapi $< -o $@ $$(llvm-config-18 --ldflags --libs core irreader bitwriter analysis support --system-libs)
+
+.PHONY: identity-normal-check
+identity-normal-check: $(CONTEXT_TOOL)
+	taskset -c 8-11 prlimit --as=12884901888 -- python3 $(ROOT)/kprog/test/check_packet_identities.py --tool $(CONTEXT_TOOL) --output $(OUTPUT)/identities

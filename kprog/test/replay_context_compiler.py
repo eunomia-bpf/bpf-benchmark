@@ -6,6 +6,7 @@ commands and stage outcomes remain in the persistent output directory.
 import argparse
 from datetime import datetime, timezone
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 import resource
@@ -21,7 +22,9 @@ def replay(args):
     args.build.mkdir(parents=True, exist_ok=True)
     start = time.monotonic()
     record = dict(started=datetime.now(timezone.utc).isoformat(), archive=str(args.archive),
-                  build=str(args.build), compiler=str(args.tool), scope='Archived generated-C compiler replay')
+                  build=str(args.build), compiler=str(args.tool),
+                  compiler_sha256=hashlib.sha256(args.tool.read_bytes()).hexdigest(),
+                  scope='Archived generated-C compiler replay through current single B pipeline')
     (args.output/'started.json').write_text(json.dumps(record, indent=2)+'\n')
     try:
         with tarfile.open(args.archive) as archive:
