@@ -1,0 +1,3 @@
+native-link: entry=tracepoint__module__module_free (5771 bytes), 1 reachable symbol(s) total
+  - tracepoint__module__module_free (vaddr 0x0, 5771 bytes) [entry]
+native-link: wrote proof object 6188 bytes, 172 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

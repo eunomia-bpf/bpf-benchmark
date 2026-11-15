@@ -1,0 +1,549 @@
+func#0 @0
+Live regs before insn:
+      0: .1........ (79) r1 = *(u64 *)(r1 +0)
+      1: .1........ (54) w1 &= 7
+      2: .1........ (bc) w1 = w1
+      3: .1........ (b4) w0 = 0
+      4: 01........ (67) r1 <<= 2
+      5: 01........ (18) r2 = 0xffff8cfc45141b30
+      7: 012....... (0f) r2 += r1
+      8: 012....... (07) r2 += 4
+      9: 012....... (a5) if r2 < 0x1000 goto pc+253
+     10: 01........ (18) r2 = 0xffff8cfc4770a930
+     12: 012....... (79) r2 = *(u64 *)(r2 +0)
+     13: 012....... (57) r2 &= 1
+     14: 012....... (55) if r2 != 0x0 goto pc+248
+     15: .1........ (65) if r1 s> 0x19 goto pc+9
+     16: .1........ (65) if r1 s> 0xa goto pc+25
+     17: .1........ (65) if r1 s> 0x2 goto pc+46
+     18: .1........ (65) if r1 s> 0xfffffffe goto pc+95
+     19: .1........ (15) if r1 == 0xfffffffc goto pc+203
+     20: .1........ (15) if r1 == 0xfffffffd goto pc+206
+     21: .1........ (15) if r1 == 0xfffffffe goto pc+1
+     22: .1........ (05) goto pc+232
+     23: .......... (b7) r0 = 16847412
+     24: 0......... (05) goto pc+237
+     25: .1........ (65) if r1 s> 0x28 goto pc+8
+     26: .1........ (65) if r1 s> 0x20 goto pc+23
+     27: .1........ (65) if r1 s> 0x1c goto pc+56
+     28: .1........ (15) if r1 == 0x1a goto pc+162
+     29: .1........ (15) if r1 == 0x1b goto pc+163
+     30: .1........ (15) if r1 == 0x1c goto pc+1
+     31: .1........ (05) goto pc+223
+     32: .......... (b7) r0 = 305399816
+     33: 0......... (05) goto pc+228
+     34: .1........ (65) if r1 s> 0x30 goto pc+22
+     35: .1........ (65) if r1 s> 0x2c goto pc+54
+     36: .1........ (65) if r1 s> 0x2a goto pc+104
+     37: .1........ (15) if r1 == 0x29 goto pc+169
+     38: .1........ (15) if r1 == 0x2a goto pc+1
+     39: .1........ (05) goto pc+215
+     40: .......... (b7) r0 = 202117684
+     41: 0......... (05) goto pc+220
+     42: .1........ (65) if r1 s> 0x11 goto pc+28
+     43: .1........ (65) if r1 s> 0xd goto pc+76
+     44: .1........ (15) if r1 == 0xb goto pc+180
+     45: .1........ (15) if r1 == 0xc goto pc+183
+     46: .1........ (15) if r1 == 0xd goto pc+1
+     47: .1........ (05) goto pc+207
+     48: .......... (b7) r0 = 85079044
+     49: 0......... (05) goto pc+212
+     50: .1........ (65) if r1 s> 0x24 goto pc+27
+     51: .1........ (65) if r1 s> 0x22 goto pc+74
+     52: .1........ (15) if r1 == 0x21 goto pc+142
+     53: .1........ (15) if r1 == 0x22 goto pc+1
+     54: .1........ (05) goto pc+200
+     55: .......... (b7) r0 = 168432180
+     56: 0......... (05) goto pc+205
+     57: .1........ (65) if r1 s> 0x34 goto pc+38
+     58: .1........ (65) if r1 s> 0x32 goto pc+87
+     59: .1........ (15) if r1 == 0x31 goto pc+149
+     60: .1........ (15) if r1 == 0x32 goto pc+1
+     61: .1........ (05) goto pc+193
+     62: .......... (b7) r0 = 235803188
+     63: 0......... (05) goto pc+198
+     64: .1........ (65) if r1 s> 0x6 goto pc+37
+     65: .1........ (65) if r1 s> 0x4 goto pc+95
+     66: .1........ (15) if r1 == 0x3 goto pc+164
+     67: .1........ (15) if r1 == 0x4 goto pc+1
+     68: .1........ (05) goto pc+186
+     69: .......... (b7) r0 = 305398274
+     70: 0......... (05) goto pc+191
+     71: .1........ (65) if r1 s> 0x15 goto pc+36
+     72: .1........ (65) if r1 s> 0x13 goto pc+93
+     73: .1........ (15) if r1 == 0x12 goto pc+159
+     74: .1........ (15) if r1 == 0x13 goto pc+1
+     75: .1........ (05) goto pc+179
+     76: .......... (b7) r0 = 872810002
+     77: 0......... (05) goto pc+184
+     78: .1........ (65) if r1 s> 0x26 goto pc+52
+     79: .1........ (15) if r1 == 0x25 goto pc+117
+     80: .1........ (15) if r1 == 0x26 goto pc+1
+     81: .1........ (05) goto pc+173
+     82: .......... (b7) r0 = 185274932
+     83: 0......... (05) goto pc+178
+     84: .1........ (65) if r1 s> 0x1e goto pc+51
+     85: .1........ (15) if r1 == 0x1d goto pc+117
+     86: .1........ (15) if r1 == 0x1e goto pc+1
+     87: .1........ (05) goto pc+167
+     88: .......... (b7) r0 = 151589428
+     89: 0......... (05) goto pc+172
+     90: .1........ (65) if r1 s> 0x2e goto pc+60
+     91: .1........ (15) if r1 == 0x2d goto pc+119
+     92: .1........ (15) if r1 == 0x2e goto pc+1
+     93: .1........ (05) goto pc+161
+     94: .......... (b7) r0 = 218960436
+     95: 0......... (05) goto pc+166
+     96: .1........ (65) if r1 s> 0x36 goto pc+59
+     97: .1........ (15) if r1 == 0x35 goto pc+115
+     98: .1........ (15) if r1 == 0x36 goto pc+1
+     99: .1........ (05) goto pc+155
+    100: .......... (b7) r0 = 252645940
+    101: 0......... (05) goto pc+160
+    102: .1........ (65) if r1 s> 0x8 goto pc+68
+    103: .1........ (15) if r1 == 0x7 goto pc+131
+    104: .1........ (15) if r1 == 0x8 goto pc+1
+    105: .1........ (05) goto pc+149
+    106: .......... (b7) r0 = 305398531
+    107: 0......... (05) goto pc+154
+    108: .1........ (65) if r1 s> 0x17 goto pc+67
+    109: .1........ (15) if r1 == 0x16 goto pc+127
+    110: .1........ (15) if r1 == 0x17 goto pc+1
+    111: .1........ (05) goto pc+143
+    112: .......... (b7) r0 = 872875794
+    113: 0......... (05) goto pc+148
+    114: .1........ (65) if r1 s> 0x0 goto pc+66
+    115: .1........ (15) if r1 == 0xffffffff goto pc+131
+    116: .1........ (15) if r1 == 0x0 goto pc+1
+    117: .1........ (05) goto pc+137
+    118: .......... (b7) r0 = 305398017
+    119: 0......... (05) goto pc+142
+    120: .1........ (65) if r1 s> 0xf goto pc+65
+    121: .1........ (15) if r1 == 0xe goto pc+127
+    122: .1........ (15) if r1 == 0xf goto pc+1
+    123: .1........ (05) goto pc+131
+    124: .......... (b7) r0 = 872744210
+    125: 0......... (05) goto pc+136
+    126: .1........ (15) if r1 == 0x23 goto pc+72
+    127: .1........ (15) if r1 == 0x24 goto pc+1
+    128: .1........ (05) goto pc+126
+    129: .......... (b7) r0 = 305400330
+    130: 0......... (05) goto pc+131
+    131: .1........ (15) if r1 == 0x27 goto pc+69
+    132: .1........ (15) if r1 == 0x28 goto pc+1
+    133: .1........ (05) goto pc+121
+    134: .......... (b7) r0 = 305400587
+    135: 0......... (05) goto pc+126
+    136: .1........ (15) if r1 == 0x1f goto pc+68
+    137: .1........ (15) if r1 == 0x20 goto pc+1
+    138: .1........ (05) goto pc+116
+    139: .......... (b7) r0 = 305400073
+    140: 0......... (05) goto pc+121
+    141: .1........ (15) if r1 == 0x2b goto pc+73
+    142: .1........ (15) if r1 == 0x2c goto pc+1
+    143: .1........ (05) goto pc+111
+    144: .......... (b7) r0 = 305400844
+    145: 0......... (05) goto pc+116
+    146: .1........ (15) if r1 == 0x33 goto pc+70
+    147: .1........ (15) if r1 == 0x34 goto pc+1
+    148: .1........ (05) goto pc+106
+    149: .......... (b7) r0 = 305401358
+    150: 0......... (05) goto pc+111
+    151: .1........ (15) if r1 == 0x2f goto pc+67
+    152: .1........ (15) if r1 == 0x30 goto pc+1
+    153: .1........ (05) goto pc+101
+    154: .......... (b7) r0 = 305401101
+    155: 0......... (05) goto pc+106
+    156: .1........ (15) if r1 == 0x37 goto pc+64
+    157: .1........ (15) if r1 == 0x38 goto pc+1
+    158: .1........ (05) goto pc+96
+    159: .......... (b7) r0 = 305401615
+    160: 0......... (05) goto pc+101
+    161: .1........ (15) if r1 == 0x5 goto pc+77
+    162: .1........ (15) if r1 == 0x6 goto pc+1
+    163: .1........ (05) goto pc+91
+    164: .......... (b7) r0 = 50532916
+    165: 0......... (05) goto pc+96
+    166: .1........ (15) if r1 == 0x14 goto pc+74
+    167: .1........ (15) if r1 == 0x15 goto pc+1
+    168: .1........ (05) goto pc+86
+    169: .......... (b7) r0 = 118633478
+    170: 0......... (05) goto pc+91
+    171: .1........ (15) if r1 == 0x9 goto pc+71
+    172: .1........ (15) if r1 == 0xa goto pc+1
+    173: .1........ (05) goto pc+81
+    174: .......... (b7) r0 = 67375668
+    175: 0......... (05) goto pc+86
+    176: .1........ (15) if r1 == 0x18 goto pc+68
+    177: .1........ (15) if r1 == 0x19 goto pc+1
+    178: .1........ (05) goto pc+76
+    179: .......... (b7) r0 = 135410695
+    180: 0......... (05) goto pc+81
+    181: .1........ (15) if r1 == 0x1 goto pc+69
+    182: .1........ (15) if r1 == 0x2 goto pc+1
+    183: .1........ (05) goto pc+71
+    184: .......... (b7) r0 = 33690164
+    185: 0......... (05) goto pc+76
+    186: .1........ (15) if r1 == 0x10 goto pc+66
+    187: .1........ (15) if r1 == 0x11 goto pc+1
+    188: .1........ (05) goto pc+66
+    189: .......... (b7) r0 = 101856261
+    190: 0......... (05) goto pc+71
+    191: .......... (b7) r0 = 134746676
+    192: 0......... (05) goto pc+69
+    193: .......... (b7) r0 = 872941586
+    194: 0......... (05) goto pc+67
+    195: .......... (b7) r0 = 168965129
+    196: 0......... (05) goto pc+65
+    197: .......... (b7) r0 = 185742346
+    198: 0......... (05) goto pc+63
+    199: .......... (b7) r0 = 873073170
+    200: 0......... (05) goto pc+61
+    201: .......... (b7) r0 = 873138962
+    202: 0......... (05) goto pc+59
+    203: .......... (b7) r0 = 152187912
+    204: 0......... (05) goto pc+57
+    205: .......... (b7) r0 = 873007378
+    206: 0......... (05) goto pc+55
+    207: .......... (b7) r0 = 202519563
+    208: 0......... (05) goto pc+53
+    209: .......... (b7) r0 = 236073997
+    210: 0......... (05) goto pc+51
+    211: .......... (b7) r0 = 219296780
+    212: 0......... (05) goto pc+49
+    213: .......... (b7) r0 = 252851214
+    214: 0......... (05) goto pc+47
+    215: .......... (b7) r0 = 873204754
+    216: 0......... (05) goto pc+45
+    217: .......... (b7) r0 = 873336338
+    218: 0......... (05) goto pc+43
+    219: .......... (b7) r0 = 873270546
+    220: 0......... (05) goto pc+41
+    221: .......... (b7) r0 = 873402130
+    222: 0......... (05) goto pc+39
+    223: .......... (b7) r0 = 305397760
+    224: 0......... (05) goto pc+37
+    225: .......... (b7) r0 = 872678418
+    226: 0......... (05) goto pc+35
+    227: .......... (b7) r0 = 17970176
+    228: 0......... (05) goto pc+33
+    229: .......... (b7) r0 = 305398788
+    230: 0......... (05) goto pc+31
+    231: .......... (b7) r0 = 872546834
+    232: 0......... (05) goto pc+29
+    233: .......... (b7) r0 = 101061172
+    234: 0......... (05) goto pc+27
+    235: .......... (b7) r0 = 872612626
+    236: 0......... (05) goto pc+25
+    237: .......... (b7) r0 = 117903924
+    238: 0......... (05) goto pc+23
+    239: .......... (b7) r0 = 51524610
+    240: 0......... (05) goto pc+21
+    241: .......... (b7) r0 = 305399302
+    242: 0......... (05) goto pc+19
+    243: .......... (b7) r0 = 68301827
+    244: 0......... (05) goto pc+17
+    245: .......... (b7) r0 = 305399559
+    246: 0......... (05) goto pc+15
+    247: .......... (b7) r0 = 872481042
+    248: 0......... (05) goto pc+13
+    249: .......... (b7) r0 = 84218420
+    250: 0......... (05) goto pc+11
+    251: .......... (b7) r0 = 34747393
+    252: 0......... (05) goto pc+9
+    253: .......... (b7) r0 = 305399045
+    254: 0......... (05) goto pc+7
+    255: .1........ (18) r2 = 0xffff8cfc45141b30
+    257: .12....... (0f) r2 += r1
+    258: ..2....... (07) r2 += 4
+    259: ..2....... (61) r0 = *(u32 *)(r2 +0)
+    260: 0......... (67) r0 <<= 32
+    261: 0......... (77) r0 >>= 32
+    262: 0......... (bc) w0 = w0
+    263: 0......... (95) exit
+0: R1=ctx() R10=fp0
+0: (79) r1 = *(u64 *)(r1 +0)          ; R1=scalar()
+1: (54) w1 &= 7                       ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=7,var_off=(0x0; 0x7))
+2: (bc) w1 = w1                       ; R1=scalar(id=1,smin=smin32=0,smax=umax=smax32=umax32=7,var_off=(0x0; 0x7))
+3: (b4) w0 = 0                        ; R0=0
+4: (67) r1 <<= 2                      ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c))
+5: (18) r2 = 0xffff8cfc45141b30       ; R2=map_value(map=.rodata.native.,ks=4,vs=64)
+7: (0f) r2 += r1
+mark_precise: frame0: last_idx 7 first_idx 0 subseq_idx -1 
+mark_precise: frame0: regs=r1 stack= before 5: (18) r2 = 0xffff8cfc45141b30
+mark_precise: frame0: regs=r1 stack= before 4: (67) r1 <<= 2
+mark_precise: frame0: regs=r1 stack= before 3: (b4) w0 = 0
+mark_precise: frame0: regs=r1 stack= before 2: (bc) w1 = w1
+mark_precise: frame0: regs=r1 stack= before 1: (54) w1 &= 7
+mark_precise: frame0: regs=r1 stack= before 0: (79) r1 = *(u64 *)(r1 +0)
+8: R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R2=map_value(map=.rodata.native.,ks=4,vs=64,smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c))
+8: (07) r2 += 4                       ; R2=map_value(map=.rodata.native.,ks=4,vs=64,off=4,smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c))
+9: (a5) if r2 < 0x1000 goto pc+253    ; R2=map_value(map=.rodata.native.,ks=4,vs=64,off=4,smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c))
+10: (18) r2 = 0xffff8cfc4770a930      ; R2=map_value(map=scheduled_input,ks=4,vs=8)
+12: (79) r2 = *(u64 *)(r2 +0)         ; R2=scalar()
+13: (57) r2 &= 1                      ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))
+14: (55) if r2 != 0x0 goto pc+248     ; R2=0
+15: (65) if r1 s> 0x19 goto pc+9      ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=25,var_off=(0x0; 0x1c))
+16: (65) if r1 s> 0xa goto pc+25      ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=10,var_off=(0x0; 0xc))
+17: (65) if r1 s> 0x2 goto pc+46      ; R1=0
+18: (65) if r1 s> 0xfffffffe goto pc+95
+mark_precise: frame0: last_idx 18 first_idx 15 subseq_idx -1 
+mark_precise: frame0: regs=r1 stack= before 17: (65) if r1 s> 0x2 goto pc+46
+mark_precise: frame0: regs=r1 stack= before 16: (65) if r1 s> 0xa goto pc+25
+mark_precise: frame0: regs=r1 stack= before 15: (65) if r1 s> 0x19 goto pc+9
+mark_precise: frame0: parent state regs=r1 stack=:  R0=0 R1=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R2=0 R10=fp0
+mark_precise: frame0: last_idx 14 first_idx 0 subseq_idx 15 
+mark_precise: frame0: regs=r1 stack= before 14: (55) if r2 != 0x0 goto pc+248
+mark_precise: frame0: regs=r1 stack= before 13: (57) r2 &= 1
+mark_precise: frame0: regs=r1 stack= before 12: (79) r2 = *(u64 *)(r2 +0)
+mark_precise: frame0: regs=r1 stack= before 10: (18) r2 = 0xffff8cfc4770a930
+mark_precise: frame0: regs=r1 stack= before 9: (a5) if r2 < 0x1000 goto pc+253
+mark_precise: frame0: regs=r1 stack= before 8: (07) r2 += 4
+mark_precise: frame0: regs=r1 stack= before 7: (0f) r2 += r1
+mark_precise: frame0: regs=r1 stack= before 5: (18) r2 = 0xffff8cfc45141b30
+mark_precise: frame0: regs=r1 stack= before 4: (67) r1 <<= 2
+mark_precise: frame0: regs=r1 stack= before 3: (b4) w0 = 0
+mark_precise: frame0: regs=r1 stack= before 2: (bc) w1 = w1
+mark_precise: frame0: regs=r1 stack= before 1: (54) w1 &= 7
+mark_precise: frame0: regs=r1 stack= before 0: (79) r1 = *(u64 *)(r1 +0)
+18: R1=0
+114: (65) if r1 s> 0x0 goto pc+66
+mark_precise: frame0: last_idx 114 first_idx 15 subseq_idx -1 
+mark_precise: frame0: regs=r1 stack= before 18: (65) if r1 s> 0xfffffffe goto pc+95
+mark_precise: frame0: regs=r1 stack= before 17: (65) if r1 s> 0x2 goto pc+46
+mark_precise: frame0: regs=r1 stack= before 16: (65) if r1 s> 0xa goto pc+25
+mark_precise: frame0: regs=r1 stack= before 15: (65) if r1 s> 0x19 goto pc+9
+mark_precise: frame0: parent state regs= stack=:  R0=0 R1=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R2=0 R10=fp0
+114: R1=0
+115: (15) if r1 == 0xffffffff goto pc+131
+mark_precise: frame0: last_idx 115 first_idx 15 subseq_idx -1 
+mark_precise: frame0: regs=r1 stack= before 114: (65) if r1 s> 0x0 goto pc+66
+mark_precise: frame0: regs=r1 stack= before 18: (65) if r1 s> 0xfffffffe goto pc+95
+mark_precise: frame0: regs=r1 stack= before 17: (65) if r1 s> 0x2 goto pc+46
+mark_precise: frame0: regs=r1 stack= before 16: (65) if r1 s> 0xa goto pc+25
+mark_precise: frame0: regs=r1 stack= before 15: (65) if r1 s> 0x19 goto pc+9
+mark_precise: frame0: parent state regs= stack=:  R0=0 R1=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R2=0 R10=fp0
+115: R1=0
+116: (15) if r1 == 0x0 goto pc+1
+mark_precise: frame0: last_idx 116 first_idx 15 subseq_idx -1 
+mark_precise: frame0: regs=r1 stack= before 115: (15) if r1 == 0xffffffff goto pc+131
+mark_precise: frame0: regs=r1 stack= before 114: (65) if r1 s> 0x0 goto pc+66
+mark_precise: frame0: regs=r1 stack= before 18: (65) if r1 s> 0xfffffffe goto pc+95
+mark_precise: frame0: regs=r1 stack= before 17: (65) if r1 s> 0x2 goto pc+46
+mark_precise: frame0: regs=r1 stack= before 16: (65) if r1 s> 0xa goto pc+25
+mark_precise: frame0: regs=r1 stack= before 15: (65) if r1 s> 0x19 goto pc+9
+mark_precise: frame0: parent state regs= stack=:  R0=0 R1=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R2=0 R10=fp0
+116: R1=0
+118: (b7) r0 = 305398017              ; R0=0x12340101
+119: (05) goto pc+142
+262: (bc) w0 = w0                     ; R0=0x12340101
+263: (95) exit
+
+from 17 to 64: R0=0 R1=scalar(smin=umin=smin32=umin32=3,smax=umax=smax32=umax32=10,var_off=(0x0; 0xc)) R2=0 R10=fp0
+64: R0=0 R1=scalar(smin=umin=smin32=umin32=3,smax=umax=smax32=umax32=10,var_off=(0x0; 0xc)) R2=0 R10=fp0
+64: (65) if r1 s> 0x6 goto pc+37      ; R1=4
+65: (65) if r1 s> 0x4 goto pc+95
+mark_precise: frame0: last_idx 65 first_idx 15 subseq_idx -1 
+mark_precise: frame0: regs=r1 stack= before 64: (65) if r1 s> 0x6 goto pc+37
+mark_precise: frame0: regs=r1 stack= before 17: (65) if r1 s> 0x2 goto pc+46
+mark_precise: frame0: regs=r1 stack= before 16: (65) if r1 s> 0xa goto pc+25
+mark_precise: frame0: regs=r1 stack= before 15: (65) if r1 s> 0x19 goto pc+9
+mark_precise: frame0: parent state regs= stack=:  R0=0 R1=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R2=0 R10=fp0
+65: R1=4
+66: (15) if r1 == 0x3 goto pc+164
+mark_precise: frame0: last_idx 66 first_idx 15 subseq_idx -1 
+mark_precise: frame0: regs=r1 stack= before 65: (65) if r1 s> 0x4 goto pc+95
+mark_precise: frame0: regs=r1 stack= before 64: (65) if r1 s> 0x6 goto pc+37
+mark_precise: frame0: regs=r1 stack= before 17: (65) if r1 s> 0x2 goto pc+46
+mark_precise: frame0: regs=r1 stack= before 16: (65) if r1 s> 0xa goto pc+25
+mark_precise: frame0: regs=r1 stack= before 15: (65) if r1 s> 0x19 goto pc+9
+mark_precise: frame0: parent state regs= stack=:  R0=0 R1=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R2=0 R10=fp0
+66: R1=4
+67: (15) if r1 == 0x4 goto pc+1
+mark_precise: frame0: last_idx 67 first_idx 15 subseq_idx -1 
+mark_precise: frame0: regs=r1 stack= before 66: (15) if r1 == 0x3 goto pc+164
+mark_precise: frame0: regs=r1 stack= before 65: (65) if r1 s> 0x4 goto pc+95
+mark_precise: frame0: regs=r1 stack= before 64: (65) if r1 s> 0x6 goto pc+37
+mark_precise: frame0: regs=r1 stack= before 17: (65) if r1 s> 0x2 goto pc+46
+mark_precise: frame0: regs=r1 stack= before 16: (65) if r1 s> 0xa goto pc+25
+mark_precise: frame0: regs=r1 stack= before 15: (65) if r1 s> 0x19 goto pc+9
+mark_precise: frame0: parent state regs= stack=:  R0=0 R1=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R2=0 R10=fp0
+67: R1=4
+69: (b7) r0 = 305398274               ; R0=0x12340202
+70: (05) goto pc+191
+262: safe
+
+from 64 to 102: R0=0 R1=8 R2=0 R10=fp0
+102: R0=0 R1=8 R2=0 R10=fp0
+102: (65) if r1 s> 0x8 goto pc+68
+mark_precise: frame0: last_idx 102 first_idx 102 subseq_idx -1 
+mark_precise: frame0: parent state regs=r1 stack=:  R0=0 R1=P8 R2=0 R10=fp0
+mark_precise: frame0: last_idx 64 first_idx 15 subseq_idx 102 
+mark_precise: frame0: regs=r1 stack= before 64: (65) if r1 s> 0x6 goto pc+37
+mark_precise: frame0: regs=r1 stack= before 17: (65) if r1 s> 0x2 goto pc+46
+mark_precise: frame0: regs=r1 stack= before 16: (65) if r1 s> 0xa goto pc+25
+mark_precise: frame0: regs=r1 stack= before 15: (65) if r1 s> 0x19 goto pc+9
+mark_precise: frame0: parent state regs= stack=:  R0=0 R1=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R2=0 R10=fp0
+102: R1=8
+103: (15) if r1 == 0x7 goto pc+131
+mark_precise: frame0: last_idx 103 first_idx 102 subseq_idx -1 
+mark_precise: frame0: regs=r1 stack= before 102: (65) if r1 s> 0x8 goto pc+68
+mark_precise: frame0: parent state regs= stack=:  R0=0 R1=P8 R2=0 R10=fp0
+103: R1=8
+104: (15) if r1 == 0x8 goto pc+1
+mark_precise: frame0: last_idx 104 first_idx 102 subseq_idx -1 
+mark_precise: frame0: regs=r1 stack= before 103: (15) if r1 == 0x7 goto pc+131
+mark_precise: frame0: regs=r1 stack= before 102: (65) if r1 s> 0x8 goto pc+68
+mark_precise: frame0: parent state regs= stack=:  R0=0 R1=P8 R2=0 R10=fp0
+104: R1=8
+106: (b7) r0 = 305398531              ; R0=0x12340303
+107: (05) goto pc+154
+262: safe
+
+from 16 to 42: R0=0 R1=scalar(smin=umin=smin32=umin32=11,smax=umax=smax32=umax32=25,var_off=(0x0; 0x1c)) R2=0 R10=fp0
+42: R0=0 R1=scalar(smin=umin=smin32=umin32=11,smax=umax=smax32=umax32=25,var_off=(0x0; 0x1c)) R2=0 R10=fp0
+42: (65) if r1 s> 0x11 goto pc+28     ; R1=scalar(smin=umin=smin32=umin32=11,smax=umax=smax32=umax32=17,var_off=(0x0; 0x1c))
+43: (65) if r1 s> 0xd goto pc+76      ; R1=12
+44: (15) if r1 == 0xb goto pc+180
+mark_precise: frame0: last_idx 44 first_idx 44 subseq_idx -1 
+mark_precise: frame0: parent state regs=r1 stack=:  R0=0 R1=P12 R2=0 R10=fp0
+mark_precise: frame0: last_idx 43 first_idx 15 subseq_idx 44 
+mark_precise: frame0: regs=r1 stack= before 43: (65) if r1 s> 0xd goto pc+76
+mark_precise: frame0: regs=r1 stack= before 42: (65) if r1 s> 0x11 goto pc+28
+mark_precise: frame0: regs=r1 stack= before 16: (65) if r1 s> 0xa goto pc+25
+mark_precise: frame0: regs=r1 stack= before 15: (65) if r1 s> 0x19 goto pc+9
+mark_precise: frame0: parent state regs= stack=:  R0=0 R1=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R2=0 R10=fp0
+44: R1=12
+45: (15) if r1 == 0xc goto pc+183
+mark_precise: frame0: last_idx 45 first_idx 44 subseq_idx -1 
+mark_precise: frame0: regs=r1 stack= before 44: (15) if r1 == 0xb goto pc+180
+mark_precise: frame0: parent state regs= stack=:  R0=0 R1=P12 R2=0 R10=fp0
+45: R1=12
+229: (b7) r0 = 305398788              ; R0=0x12340404
+230: (05) goto pc+31
+262: safe
+
+from 43 to 120: R0=0 R1=16 R2=0 R10=fp0
+120: R0=0 R1=16 R2=0 R10=fp0
+120: (65) if r1 s> 0xf goto pc+65
+mark_precise: frame0: last_idx 120 first_idx 15 subseq_idx -1 
+mark_precise: frame0: regs=r1 stack= before 43: (65) if r1 s> 0xd goto pc+76
+mark_precise: frame0: regs=r1 stack= before 42: (65) if r1 s> 0x11 goto pc+28
+mark_precise: frame0: regs=r1 stack= before 16: (65) if r1 s> 0xa goto pc+25
+mark_precise: frame0: regs=r1 stack= before 15: (65) if r1 s> 0x19 goto pc+9
+mark_precise: frame0: parent state regs= stack=:  R0=0 R1=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R2=0 R10=fp0
+120: R1=16
+186: (15) if r1 == 0x10 goto pc+66
+mark_precise: frame0: last_idx 186 first_idx 15 subseq_idx -1 
+mark_precise: frame0: regs=r1 stack= before 120: (65) if r1 s> 0xf goto pc+65
+mark_precise: frame0: regs=r1 stack= before 43: (65) if r1 s> 0xd goto pc+76
+mark_precise: frame0: regs=r1 stack= before 42: (65) if r1 s> 0x11 goto pc+28
+mark_precise: frame0: regs=r1 stack= before 16: (65) if r1 s> 0xa goto pc+25
+mark_precise: frame0: regs=r1 stack= before 15: (65) if r1 s> 0x19 goto pc+9
+mark_precise: frame0: parent state regs= stack=:  R0=0 R1=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R2=0 R10=fp0
+186: R1=16
+253: (b7) r0 = 305399045              ; R0=0x12340505
+254: (05) goto pc+7
+262: safe
+
+from 42 to 71: R0=0 R1=scalar(smin=umin=smin32=umin32=18,smax=umax=smax32=umax32=25,var_off=(0x10; 0xc)) R2=0 R10=fp0
+71: R0=0 R1=scalar(smin=umin=smin32=umin32=18,smax=umax=smax32=umax32=25,var_off=(0x10; 0xc)) R2=0 R10=fp0
+71: (65) if r1 s> 0x15 goto pc+36     ; R1=20
+72: (65) if r1 s> 0x13 goto pc+93
+mark_precise: frame0: last_idx 72 first_idx 71 subseq_idx -1 
+mark_precise: frame0: regs=r1 stack= before 71: (65) if r1 s> 0x15 goto pc+36
+mark_precise: frame0: parent state regs=r1 stack=:  R0=0 R1=Pscalar(smin=umin=smin32=umin32=18,smax=umax=smax32=umax32=25,var_off=(0x10; 0xc)) R2=0 R10=fp0
+mark_precise: frame0: last_idx 42 first_idx 15 subseq_idx 71 
+mark_precise: frame0: regs=r1 stack= before 42: (65) if r1 s> 0x11 goto pc+28
+mark_precise: frame0: regs=r1 stack= before 16: (65) if r1 s> 0xa goto pc+25
+mark_precise: frame0: regs=r1 stack= before 15: (65) if r1 s> 0x19 goto pc+9
+mark_precise: frame0: parent state regs= stack=:  R0=0 R1=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R2=0 R10=fp0
+72: R1=20
+166: (15) if r1 == 0x14 goto pc+74
+mark_precise: frame0: last_idx 166 first_idx 71 subseq_idx -1 
+mark_precise: frame0: regs=r1 stack= before 72: (65) if r1 s> 0x13 goto pc+93
+mark_precise: frame0: regs=r1 stack= before 71: (65) if r1 s> 0x15 goto pc+36
+mark_precise: frame0: parent state regs= stack=:  R0=0 R1=Pscalar(smin=umin=smin32=umin32=18,smax=umax=smax32=umax32=25,var_off=(0x10; 0xc)) R2=0 R10=fp0
+166: R1=20
+241: (b7) r0 = 305399302              ; R0=0x12340606
+242: (05) goto pc+19
+262: safe
+
+from 71 to 108: R0=0 R1=24 R2=0 R10=fp0
+108: R0=0 R1=24 R2=0 R10=fp0
+108: (65) if r1 s> 0x17 goto pc+67
+mark_precise: frame0: last_idx 108 first_idx 71 subseq_idx -1 
+mark_precise: frame0: regs=r1 stack= before 71: (65) if r1 s> 0x15 goto pc+36
+mark_precise: frame0: parent state regs= stack=:  R0=0 R1=Pscalar(smin=umin=smin32=umin32=18,smax=umax=smax32=umax32=25,var_off=(0x10; 0xc)) R2=0 R10=fp0
+108: R1=24
+176: (15) if r1 == 0x18 goto pc+68
+mark_precise: frame0: last_idx 176 first_idx 71 subseq_idx -1 
+mark_precise: frame0: regs=r1 stack= before 108: (65) if r1 s> 0x17 goto pc+67
+mark_precise: frame0: regs=r1 stack= before 71: (65) if r1 s> 0x15 goto pc+36
+mark_precise: frame0: parent state regs= stack=:  R0=0 R1=Pscalar(smin=umin=smin32=umin32=18,smax=umax=smax32=umax32=25,var_off=(0x10; 0xc)) R2=0 R10=fp0
+176: R1=24
+245: (b7) r0 = 305399559              ; R0=0x12340707
+246: (05) goto pc+15
+262: safe
+
+from 15 to 25: R0=0 R1=28 R2=0 R10=fp0
+25: R0=0 R1=28 R2=0 R10=fp0
+25: (65) if r1 s> 0x28 goto pc+8
+mark_precise: frame0: last_idx 25 first_idx 15 subseq_idx -1 
+mark_precise: frame0: regs=r1 stack= before 15: (65) if r1 s> 0x19 goto pc+9
+mark_precise: frame0: parent state regs= stack=:  R0=0 R1=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R2=0 R10=fp0
+25: R1=28
+26: (65) if r1 s> 0x20 goto pc+23
+mark_precise: frame0: last_idx 26 first_idx 15 subseq_idx -1 
+mark_precise: frame0: regs=r1 stack= before 25: (65) if r1 s> 0x28 goto pc+8
+mark_precise: frame0: regs=r1 stack= before 15: (65) if r1 s> 0x19 goto pc+9
+mark_precise: frame0: parent state regs= stack=:  R0=0 R1=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R2=0 R10=fp0
+26: R1=28
+27: (65) if r1 s> 0x1c goto pc+56
+mark_precise: frame0: last_idx 27 first_idx 15 subseq_idx -1 
+mark_precise: frame0: regs=r1 stack= before 26: (65) if r1 s> 0x20 goto pc+23
+mark_precise: frame0: regs=r1 stack= before 25: (65) if r1 s> 0x28 goto pc+8
+mark_precise: frame0: regs=r1 stack= before 15: (65) if r1 s> 0x19 goto pc+9
+mark_precise: frame0: parent state regs= stack=:  R0=0 R1=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R2=0 R10=fp0
+27: R1=28
+28: (15) if r1 == 0x1a goto pc+162
+mark_precise: frame0: last_idx 28 first_idx 15 subseq_idx -1 
+mark_precise: frame0: regs=r1 stack= before 27: (65) if r1 s> 0x1c goto pc+56
+mark_precise: frame0: regs=r1 stack= before 26: (65) if r1 s> 0x20 goto pc+23
+mark_precise: frame0: regs=r1 stack= before 25: (65) if r1 s> 0x28 goto pc+8
+mark_precise: frame0: regs=r1 stack= before 15: (65) if r1 s> 0x19 goto pc+9
+mark_precise: frame0: parent state regs= stack=:  R0=0 R1=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R2=0 R10=fp0
+28: R1=28
+29: (15) if r1 == 0x1b goto pc+163
+mark_precise: frame0: last_idx 29 first_idx 15 subseq_idx -1 
+mark_precise: frame0: regs=r1 stack= before 28: (15) if r1 == 0x1a goto pc+162
+mark_precise: frame0: regs=r1 stack= before 27: (65) if r1 s> 0x1c goto pc+56
+mark_precise: frame0: regs=r1 stack= before 26: (65) if r1 s> 0x20 goto pc+23
+mark_precise: frame0: regs=r1 stack= before 25: (65) if r1 s> 0x28 goto pc+8
+mark_precise: frame0: regs=r1 stack= before 15: (65) if r1 s> 0x19 goto pc+9
+mark_precise: frame0: parent state regs= stack=:  R0=0 R1=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R2=0 R10=fp0
+29: R1=28
+30: (15) if r1 == 0x1c goto pc+1
+mark_precise: frame0: last_idx 30 first_idx 30 subseq_idx -1 
+mark_precise: frame0: parent state regs=r1 stack=:  R0=0 R1=P28 R2=0 R10=fp0
+mark_precise: frame0: last_idx 29 first_idx 15 subseq_idx 30 
+mark_precise: frame0: regs=r1 stack= before 29: (15) if r1 == 0x1b goto pc+163
+mark_precise: frame0: regs=r1 stack= before 28: (15) if r1 == 0x1a goto pc+162
+mark_precise: frame0: regs=r1 stack= before 27: (65) if r1 s> 0x1c goto pc+56
+mark_precise: frame0: regs=r1 stack= before 26: (65) if r1 s> 0x20 goto pc+23
+mark_precise: frame0: regs=r1 stack= before 25: (65) if r1 s> 0x28 goto pc+8
+mark_precise: frame0: regs=r1 stack= before 15: (65) if r1 s> 0x19 goto pc+9
+mark_precise: frame0: parent state regs= stack=:  R0=0 R1=Pscalar(smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R2=0 R10=fp0
+30: R1=28
+32: (b7) r0 = 305399816               ; R0=0x12340808
+33: (05) goto pc+228
+262: safe
+
+from 14 to 263: R0=0 R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R2=1 R10=fp0
+263: R0=0 R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R2=1 R10=fp0
+263: (95) exit
+
+from 9 to 263: R0=0 R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R2=map_value(map=.rodata.native.,ks=4,vs=64,off=4,smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R10=fp0
+263: R0=0 R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R2=map_value(map=.rodata.native.,ks=4,vs=64,off=4,smin=smin32=0,smax=umax=smax32=umax32=28,var_off=(0x0; 0x1c)) R10=fp0
+263: (95) exit
+processed 71 insns (limit 1000000) max_states_per_insn 0 total_states 7 peak_states 7 mark_read 0

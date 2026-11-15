@@ -1,0 +1,3 @@
+native-link: entry=trace_proc_create (5147 bytes), 1 reachable symbol(s) total
+  - trace_proc_create (vaddr 0x0, 5147 bytes) [entry]
+native-link: wrote proof object 5564 bytes, 161 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

@@ -1,0 +1,3 @@
+native-link: entry=uprobe_syscall_table_check (71470 bytes), 1 reachable symbol(s) total
+  - uprobe_syscall_table_check (vaddr 0x0, 71470 bytes) [entry]
+native-link: wrote proof object 71771 bytes, 2331 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

@@ -1,0 +1,3 @@
+native-link: entry=trace_security_file_mprotect (22863 bytes), 1 reachable symbol(s) total
+  - trace_security_file_mprotect (vaddr 0x0, 22863 bytes) [entry]
+native-link: wrote proof object 23289 bytes, 594 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

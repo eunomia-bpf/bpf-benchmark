@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+    "--mode",
+    "proof",
+    "--input",
+    "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+    "--symbol",
+    "tracepoint__exec_test",
+    "--preserve-entry-abi",
+    "--output",
+    "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+  ],
+  "returncode": 0,
+  "wall_seconds": 0.04817628499586135,
+  "user_seconds": 0.028978999999999998,
+  "system_seconds": 0.018986,
+  "max_rss_kib": 47868
+}

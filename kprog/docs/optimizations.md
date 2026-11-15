@@ -396,3 +396,12 @@ boundary. This avoids copying unrelated jump tables from the same container;
 code-table spans keep their existing handling. Actual Tracee seven failures
 and the new start/interior regression reproduce the old whole-section error.
 Validation follows; this is linker correctness, not a measured runtime gain.
+
+Scalar-span receipt84b895d26:42Rust/1existingignored,128proof→kernel host
+executions and64full shared-simulator cases/normalB pass. Same Tracee native
+ELF165/172→172/172 proofs, previous165 proof files byte-identical. Paired CLI
+c500c99e published in place; loader/bounds/checked hashes unchanged. Stock
+reference+generated KPROBE accepted after using production private input-map
+binding; original plain-libbpf binding failure is retained. Whole app/native
+installation/equal-work performance remain open. Exact scope/results:
+`../results/perf_20261113/scalar-rodata/report.md`.

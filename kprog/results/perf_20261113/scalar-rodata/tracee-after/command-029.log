@@ -1,0 +1,3 @@
+native-link: entry=empty_kprobe (3 bytes), 1 reachable symbol(s) total
+  - empty_kprobe (vaddr 0x0, 3 bytes) [entry]
+native-link: wrote proof object 7 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

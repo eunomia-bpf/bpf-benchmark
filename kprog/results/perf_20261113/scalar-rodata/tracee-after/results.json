@@ -1,0 +1,5162 @@
+[
+  {
+    "symbol": "murmur32",
+    "section": ".text",
+    "address": 0,
+    "bytes": 482,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "murmur32",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-000.log.resources.json",
+    "wall_seconds": 0.0066447930003050715,
+    "proof_sha256": "d358386970ca6a6045b748e2073b95a85bdf83b2d2208cda24eeef966db3e926",
+    "proof_bytes": 19680,
+    "sections": {
+      ".text": 475,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 0
+  },
+  {
+    "symbol": "hash_u32_and_u64",
+    "section": ".text",
+    "address": 496,
+    "bytes": 166,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "hash_u32_and_u64",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-001.log.resources.json",
+    "wall_seconds": 0.006449411011999473,
+    "proof_sha256": "18f4f8dc0acf3e951d2f97223d7c1f9cca32a3edadf8eb17682cb0ed95d507ba",
+    "proof_bytes": 7368,
+    "sections": {
+      ".text": 170,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 0
+  },
+  {
+    "symbol": "hash_task_id",
+    "section": ".text",
+    "address": 672,
+    "bytes": 198,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "hash_task_id",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-002.log.resources.json",
+    "wall_seconds": 0.0059207330050412565,
+    "proof_sha256": "1c6d358f5ef7c6f3be0e809d2acbaced2b4a58d3bfb76f3bd7267381aa7a56ee",
+    "proof_bytes": 8232,
+    "sections": {
+      ".text": 202,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 0
+  },
+  {
+    "symbol": "cgroup_skb_egress",
+    "section": "cgroup_skb/egress",
+    "address": 0,
+    "bytes": 5538,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "cgroup_skb_egress",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-003.log.resources.json",
+    "wall_seconds": 0.010537924012169242,
+    "proof_sha256": "abd7043df8939198cad1b297dbff793e08529f88874f1688edbb78cf3284e343",
+    "proof_bytes": 171416,
+    "sections": {
+      ".text": 5545,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 138
+  },
+  {
+    "symbol": "cgroup_skb_ingress",
+    "section": "cgroup_skb/ingress",
+    "address": 0,
+    "bytes": 5538,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "cgroup_skb_ingress",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-004.log.resources.json",
+    "wall_seconds": 0.010627490992192179,
+    "proof_sha256": "22d658854b88c49ef61e483e842a9a6e2106a0fc50b9496db636c5363b73153c",
+    "proof_bytes": 171416,
+    "sections": {
+      ".text": 5545,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 138
+  },
+  {
+    "symbol": "cgroup_bpf_run_filter_skb",
+    "section": "kprobe/__cgroup_bpf_run_filter_skb",
+    "address": 0,
+    "bytes": 3450,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "cgroup_bpf_run_filter_skb",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-005.log.resources.json",
+    "wall_seconds": 0.008417717996053398,
+    "proof_sha256": "ecd6ef0d93f7458d9b214069dcb094e81315268bc11f9655c8861c8efc596699",
+    "proof_bytes": 114752,
+    "sections": {
+      ".text": 3867,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 97
+  },
+  {
+    "symbol": "trace___debugfs_create_file",
+    "section": "kprobe/__debugfs_create_file",
+    "address": 0,
+    "bytes": 5775,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace___debugfs_create_file",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-006.log.resources.json",
+    "wall_seconds": 0.011531181982718408,
+    "proof_sha256": "82a7c7a4ce49e3362b3fe48b7d3f0bff3dfded0579e303803951c7e811ea77f3",
+    "proof_bytes": 217256,
+    "sections": {
+      ".text": 6190,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 173
+  },
+  {
+    "symbol": "trace_kernel_write",
+    "section": "kprobe/__kernel_write",
+    "address": 0,
+    "bytes": 111,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_kernel_write",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-007.log.resources.json",
+    "wall_seconds": 0.00584976002573967,
+    "proof_sha256": "5997ddecaf00d64bcc4719a2935108c6327483b938dfe515852d28495c66e3f2",
+    "proof_bytes": 5056,
+    "sections": {
+      ".text": 115,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 3
+  },
+  {
+    "symbol": "kernel_write_magic_enter",
+    "section": "kprobe/__kernel_write",
+    "address": 112,
+    "bytes": 208,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "kernel_write_magic_enter",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-008.log.resources.json",
+    "wall_seconds": 0.0057950310001615435,
+    "proof_sha256": "fd1479c9489f4c9d56bf91d26ebcaa7efc25510d2cfabce15e91cb894917fa8e",
+    "proof_bytes": 8968,
+    "sections": {
+      ".text": 216,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 6
+  },
+  {
+    "symbol": "trace___register_chrdev",
+    "section": "kprobe/__register_chrdev",
+    "address": 0,
+    "bytes": 111,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace___register_chrdev",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-009.log.resources.json",
+    "wall_seconds": 0.006495440000435337,
+    "proof_sha256": "b55983c74f67536113554ebbb0936dc888ebb630be0bd05a8641355ae32dadf2",
+    "proof_bytes": 5056,
+    "sections": {
+      ".text": 115,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 3
+  },
+  {
+    "symbol": "trace_arch_prctl",
+    "section": "kprobe/arch_prctl",
+    "address": 0,
+    "bytes": 1399,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_arch_prctl",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-010.log.resources.json",
+    "wall_seconds": 0.006844932999229059,
+    "proof_sha256": "4cc50cfabb56456614cad9e654cefd3a4c65ced39cc9c3b7cb0be467de9745a4",
+    "proof_bytes": 58160,
+    "sections": {
+      ".text": 1536,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 58
+  },
+  {
+    "symbol": "trace_bpf_check",
+    "section": "kprobe/bpf_check",
+    "address": 0,
+    "bytes": 4219,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_bpf_check",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-011.log.resources.json",
+    "wall_seconds": 0.009990755992475897,
+    "proof_sha256": "93ddfe03deab83bd3fdd001baa3391f6047c53ad58209accbe55425d190c2c24",
+    "proof_bytes": 158120,
+    "sections": {
+      ".text": 4636,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 123
+  },
+  {
+    "symbol": "trace_call_usermodehelper",
+    "section": "kprobe/call_usermodehelper",
+    "address": 0,
+    "bytes": 18075,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_call_usermodehelper",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-012.log.resources.json",
+    "wall_seconds": 0.02308610698673874,
+    "proof_sha256": "d0a09493ac295bec5b30c4d4036fbadecd61cf34c356ed4f5dd7b9fd496f2bd1",
+    "proof_bytes": 571752,
+    "sections": {
+      ".text": 18492,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 393
+  },
+  {
+    "symbol": "trace_cap_capable",
+    "section": "kprobe/cap_capable",
+    "address": 0,
+    "bytes": 5037,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_cap_capable",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-013.log.resources.json",
+    "wall_seconds": 0.012268646009033546,
+    "proof_sha256": "cf04f4d256492a2768ad457f692b3c697d3d21ddbec4b2b8cb1ec3499e528822",
+    "proof_bytes": 194016,
+    "sections": {
+      ".text": 5454,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 160
+  },
+  {
+    "symbol": "trace_check_helper_call",
+    "section": "kprobe/check_helper_call",
+    "address": 0,
+    "bytes": 4433,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_check_helper_call",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-014.log.resources.json",
+    "wall_seconds": 0.009833496995270252,
+    "proof_sha256": "7e68f7628e0cdbf65fa865d0fe3d420a950ad3b78f9a28614939a1b49cbb1045",
+    "proof_bytes": 163488,
+    "sections": {
+      ".text": 4854,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 124
+  },
+  {
+    "symbol": "trace_check_map_func_compatibility",
+    "section": "kprobe/check_map_func_compatibility",
+    "address": 0,
+    "bytes": 4438,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_check_map_func_compatibility",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-015.log.resources.json",
+    "wall_seconds": 0.009086236997973174,
+    "proof_sha256": "af28d57d001fed9697f8b9a06cf10d0be2a6c933b9324611a57745181f3aa4e1",
+    "proof_bytes": 163504,
+    "sections": {
+      ".text": 4859,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 123
+  },
+  {
+    "symbol": "trace_chmod_common",
+    "section": "kprobe/chmod_common",
+    "address": 0,
+    "bytes": 10856,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_chmod_common",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-016.log.resources.json",
+    "wall_seconds": 0.01635537698166445,
+    "proof_sha256": "8da7a45605a1e63930ab4e5ffd917f6da5d814a3f9f83dacbd231e7dda8c1a56",
+    "proof_bytes": 380488,
+    "sections": {
+      ".text": 11273,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 310
+  },
+  {
+    "symbol": "trace_commit_creds",
+    "section": "kprobe/commit_creds",
+    "address": 0,
+    "bytes": 6814,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_commit_creds",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-017.log.resources.json",
+    "wall_seconds": 0.011297085002297536,
+    "proof_sha256": "92a80548304ebc4fdda54954a1e64392d3574253c200e7df9e6d344366b532ac",
+    "proof_bytes": 237360,
+    "sections": {
+      ".text": 7231,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 194
+  },
+  {
+    "symbol": "trace_debugfs_create_dir",
+    "section": "kprobe/debugfs_create_dir",
+    "address": 0,
+    "bytes": 5598,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_debugfs_create_dir",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-018.log.resources.json",
+    "wall_seconds": 0.010481486999196932,
+    "proof_sha256": "e6cce6a0d77f5aa23146439b1cf5abf7673db49268fc539640baffe9260af275",
+    "proof_bytes": 210768,
+    "sections": {
+      ".text": 6012,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 171
+  },
+  {
+    "symbol": "trace_device_add",
+    "section": "kprobe/device_add",
+    "address": 0,
+    "bytes": 5259,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_device_add",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-019.log.resources.json",
+    "wall_seconds": 0.011088083003414795,
+    "proof_sha256": "4304f386379f49d70d714ebfc8b444d905baf1ee75b4daf2b6309e4b120cef64",
+    "proof_bytes": 200448,
+    "sections": {
+      ".text": 5676,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 164
+  },
+  {
+    "symbol": "trace_do_exit",
+    "section": "kprobe/do_exit",
+    "address": 0,
+    "bytes": 5018,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_do_exit",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-020.log.resources.json",
+    "wall_seconds": 0.010091278003528714,
+    "proof_sha256": "c55bbcae787db8ff23befb2032d501515a6f0f45a745036667e296b1ef9380e5",
+    "proof_bytes": 193344,
+    "sections": {
+      ".text": 5435,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 160
+  },
+  {
+    "symbol": "trace_do_init_module",
+    "section": "kprobe/do_init_module",
+    "address": 0,
+    "bytes": 111,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_do_init_module",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-021.log.resources.json",
+    "wall_seconds": 0.005875498987734318,
+    "proof_sha256": "fedbf707103b68616cdd78fa2dee40ab9ca4218b3a23340d073d1df63ceb3a9d",
+    "proof_bytes": 5056,
+    "sections": {
+      ".text": 115,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 3
+  },
+  {
+    "symbol": "trace_do_mmap",
+    "section": "kprobe/do_mmap",
+    "address": 0,
+    "bytes": 111,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_do_mmap",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-022.log.resources.json",
+    "wall_seconds": 0.0065524280071258545,
+    "proof_sha256": "14422095fbdaef7608192640a30e25c49c983267c27b01eaff75dc2bf46a36dd",
+    "proof_bytes": 5048,
+    "sections": {
+      ".text": 115,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 3
+  },
+  {
+    "symbol": "trace_do_sigaction",
+    "section": "kprobe/do_sigaction",
+    "address": 0,
+    "bytes": 6525,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_do_sigaction",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-023.log.resources.json",
+    "wall_seconds": 0.011580088990740478,
+    "proof_sha256": "abbf050da5d0adee13ca720dd1f94d7d6c7ed660df70a1166caa4aa39e1bc341",
+    "proof_bytes": 227112,
+    "sections": {
+      ".text": 6942,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 177
+  },
+  {
+    "symbol": "trace_do_splice",
+    "section": "kprobe/do_splice",
+    "address": 0,
+    "bytes": 111,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_do_splice",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-024.log.resources.json",
+    "wall_seconds": 0.006286710005952045,
+    "proof_sha256": "f2dde5ac082f8fc46d1306eb299e9e76f247cd2004a14e3a373c4a1d2a1a25db",
+    "proof_bytes": 5048,
+    "sections": {
+      ".text": 115,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 3
+  },
+  {
+    "symbol": "trace_do_truncate",
+    "section": "kprobe/do_truncate",
+    "address": 0,
+    "bytes": 5787,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_do_truncate",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-025.log.resources.json",
+    "wall_seconds": 0.01217326000914909,
+    "proof_sha256": "6936e9a55910c349e8b2f3f0c9afa3d787f1c1085f363b08e24ffda8ad8258a3",
+    "proof_bytes": 216936,
+    "sections": {
+      ".text": 6198,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 178
+  },
+  {
+    "symbol": "trace_dup",
+    "section": "kprobe/dup",
+    "address": 0,
+    "bytes": 1399,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_dup",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-026.log.resources.json",
+    "wall_seconds": 0.006889188982313499,
+    "proof_sha256": "d38209be85635a6627752d56da5cc0af7900394ac091dbf3b53522327d26e2d7",
+    "proof_bytes": 58152,
+    "sections": {
+      ".text": 1536,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 58
+  },
+  {
+    "symbol": "trace_dup2",
+    "section": "kprobe/dup2",
+    "address": 0,
+    "bytes": 1399,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_dup2",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-027.log.resources.json",
+    "wall_seconds": 0.006566319992998615,
+    "proof_sha256": "895c99a1ff83c2ab016e0db008aa9fa3fbb007c61d01796af2152ef976d025a8",
+    "proof_bytes": 58152,
+    "sections": {
+      ".text": 1536,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 58
+  },
+  {
+    "symbol": "trace_dup3",
+    "section": "kprobe/dup3",
+    "address": 0,
+    "bytes": 1399,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_dup3",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-028.log.resources.json",
+    "wall_seconds": 0.006206510995980352,
+    "proof_sha256": "d5eba48f075b0c35958d6b2335c56c54c1f306d7e8c937236b52e7ceb11f7fbe",
+    "proof_bytes": 58152,
+    "sections": {
+      ".text": 1536,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 58
+  },
+  {
+    "symbol": "empty_kprobe",
+    "section": "kprobe/empty_kprobe",
+    "address": 0,
+    "bytes": 3,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "empty_kprobe",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-029.log.resources.json",
+    "wall_seconds": 0.005824685009429231,
+    "proof_sha256": "cf665b80e8d67f4c29ca57ef2b6683ca976bb29a4c02a97eda067a9e668dcb82",
+    "proof_bytes": 1032,
+    "sections": {
+      ".text": 7,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 0
+  },
+  {
+    "symbol": "trace_exec_binprm",
+    "section": "kprobe/exec_binprm",
+    "address": 0,
+    "bytes": 11145,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_exec_binprm",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-030.log.resources.json",
+    "wall_seconds": 0.016495263000251725,
+    "proof_sha256": "13cf733621913bec65453dbf6a38bf63c43f61350d81110e14f1f6341c4e8a38",
+    "proof_bytes": 387936,
+    "sections": {
+      ".text": 11574,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 294
+  },
+  {
+    "symbol": "trace_fd_install",
+    "section": "kprobe/fd_install",
+    "address": 0,
+    "bytes": 10212,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_fd_install",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-031.log.resources.json",
+    "wall_seconds": 0.016806015017209575,
+    "proof_sha256": "545b1516e7280489c85bb801a4dd392ca93aaa04cb0a507c0a7595754ea53d8b",
+    "proof_bytes": 360352,
+    "sections": {
+      ".text": 10636,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 282
+  },
+  {
+    "symbol": "trace_file_modified",
+    "section": "kprobe/file_modified",
+    "address": 0,
+    "bytes": 341,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_file_modified",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-032.log.resources.json",
+    "wall_seconds": 0.006312150973826647,
+    "proof_sha256": "3c3f8461c945cc3deaafcad75b127753d55334edcf2565fa0f206d0d89dcee53",
+    "proof_bytes": 12456,
+    "sections": {
+      ".text": 345,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 10
+  },
+  {
+    "symbol": "trace_file_update_time",
+    "section": "kprobe/file_update_time",
+    "address": 0,
+    "bytes": 341,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_file_update_time",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-033.log.resources.json",
+    "wall_seconds": 0.00572675300645642,
+    "proof_sha256": "25c93f1748453dd0fa759ff0f1b9ee29be2bad45ff1648306b48865b47278585",
+    "proof_bytes": 12456,
+    "sections": {
+      ".text": 345,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 10
+  },
+  {
+    "symbol": "trace_filldir64",
+    "section": "kprobe/filldir64",
+    "address": 0,
+    "bytes": 5076,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_filldir64",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-034.log.resources.json",
+    "wall_seconds": 0.009681631985586137,
+    "proof_sha256": "0f95fc5be49f7fee113efc3066cbb11020c1ace7077c4b9fd0cc4518400537d8",
+    "proof_bytes": 194608,
+    "sections": {
+      ".text": 5497,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 160
+  },
+  {
+    "symbol": "trace_filp_close",
+    "section": "kprobe/filp_close",
+    "address": 0,
+    "bytes": 10139,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_filp_close",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-035.log.resources.json",
+    "wall_seconds": 0.015568186005111784,
+    "proof_sha256": "54e3b9a36cff6702155cbdbe7ccef2d9bfe844f4c67375b7cff8a0e8885fccc5",
+    "proof_bytes": 358440,
+    "sections": {
+      ".text": 10567,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 280
+  },
+  {
+    "symbol": "trace_inotify_find_inode",
+    "section": "kprobe/inotify_find_inode",
+    "address": 0,
+    "bytes": 111,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_inotify_find_inode",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-036.log.resources.json",
+    "wall_seconds": 0.006050480995327234,
+    "proof_sha256": "d685765ff471f92320db2b95baf4744d86c5cc56e3d77f9a6494d6612876f8f5",
+    "proof_bytes": 5056,
+    "sections": {
+      ".text": 115,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 3
+  },
+  {
+    "symbol": "trace_kallsyms_lookup_name",
+    "section": "kprobe/kallsyms_lookup_name",
+    "address": 0,
+    "bytes": 111,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_kallsyms_lookup_name",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-037.log.resources.json",
+    "wall_seconds": 0.005541628983337432,
+    "proof_sha256": "bc9012541a34b6b8b5e02fc0a23baa751b9cdfff24edbfa0a8910e3567128afa",
+    "proof_bytes": 5064,
+    "sections": {
+      ".text": 115,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 3
+  },
+  {
+    "symbol": "trace_load_elf_phdrs",
+    "section": "kprobe/load_elf_phdrs",
+    "address": 0,
+    "bytes": 11878,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_load_elf_phdrs",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-038.log.resources.json",
+    "wall_seconds": 0.017025217995978892,
+    "proof_sha256": "20a87caba42280b4b659ca2140f6b4f51ec4e843c0087c827985a3b827c28570",
+    "proof_bytes": 410816,
+    "sections": {
+      ".text": 12303,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 324
+  },
+  {
+    "symbol": "trace_proc_create",
+    "section": "kprobe/proc_create",
+    "address": 0,
+    "bytes": 5147,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_proc_create",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-039.log.resources.json",
+    "wall_seconds": 0.012074117985321209,
+    "proof_sha256": "7ffa2e33cf08a0613b84754d7b4d3398b9942a625aa18fb9a4ce92b631ba6fc9",
+    "proof_bytes": 196824,
+    "sections": {
+      ".text": 5564,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 161
+  },
+  {
+    "symbol": "process_execute_failed_tail",
+    "section": "kprobe/process_execute_failed_tail",
+    "address": 0,
+    "bytes": 7150,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "process_execute_failed_tail",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-040.log.resources.json",
+    "wall_seconds": 0.012244862009538338,
+    "proof_sha256": "a8e8ee349a621dfdea58ed59cb3155c2941db26c00d6e7fe6c4843ceb1b7ef8c",
+    "proof_bytes": 242656,
+    "sections": {
+      ".text": 7154,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 210
+  },
+  {
+    "symbol": "trace_process_vm_writev",
+    "section": "kprobe/process_vm_writev",
+    "address": 0,
+    "bytes": 1399,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_process_vm_writev",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-041.log.resources.json",
+    "wall_seconds": 0.006729902001097798,
+    "proof_sha256": "f15944b9e2276b1d31bc4b2b2ef0afb48d15c767b65b3fd195121971de919bbb",
+    "proof_bytes": 58168,
+    "sections": {
+      ".text": 1536,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 58
+  },
+  {
+    "symbol": "trace_ptrace",
+    "section": "kprobe/ptrace",
+    "address": 0,
+    "bytes": 1399,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ptrace",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-042.log.resources.json",
+    "wall_seconds": 0.00705956801539287,
+    "proof_sha256": "500d5307dbfb9516298bb8d1f44a68636edecc3566a03e78a12ad10613334622",
+    "proof_bytes": 58152,
+    "sections": {
+      ".text": 1536,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 58
+  },
+  {
+    "symbol": "trace_register_kprobe",
+    "section": "kprobe/register_kprobe",
+    "address": 0,
+    "bytes": 111,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_register_kprobe",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-043.log.resources.json",
+    "wall_seconds": 0.005521503975614905,
+    "proof_sha256": "d4d8d6d15fc795f0601ca1911f90d78c1a90841a576b9f03ec62e4dc26846961",
+    "proof_bytes": 5056,
+    "sections": {
+      ".text": 115,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 3
+  },
+  {
+    "symbol": "trace_security_bpf",
+    "section": "kprobe/security_bpf",
+    "address": 0,
+    "bytes": 10694,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_bpf",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-044.log.resources.json",
+    "wall_seconds": 0.015960051998263225,
+    "proof_sha256": "474e3ba0c8f8ca69736ee1d1b4a297246ed0df1fe12136f4310fd83c8e4e2109",
+    "proof_bytes": 375768,
+    "sections": {
+      ".text": 11111,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 302
+  },
+  {
+    "symbol": "trace_security_bpf_map",
+    "section": "kprobe/security_bpf_map",
+    "address": 0,
+    "bytes": 5168,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_bpf_map",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-045.log.resources.json",
+    "wall_seconds": 0.010862619004910812,
+    "proof_sha256": "1837651762a1a489ff749535850467879f440446299bc0de69aa111c755815d9",
+    "proof_bytes": 197416,
+    "sections": {
+      ".text": 5585,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 161
+  },
+  {
+    "symbol": "trace_security_bpf_prog",
+    "section": "kprobe/security_bpf_prog",
+    "address": 0,
+    "bytes": 6271,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_bpf_prog",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-046.log.resources.json",
+    "wall_seconds": 0.011410159000661224,
+    "proof_sha256": "049bbe9b1c04d1cebc90effbabe174bf3a41c725af222ef3cbb9ef89e048e913",
+    "proof_bytes": 218816,
+    "sections": {
+      ".text": 6688,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 181
+  },
+  {
+    "symbol": "trace_security_bprm_check",
+    "section": "kprobe/security_bprm_check",
+    "address": 0,
+    "bytes": 24531,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_bprm_check",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-047.log.resources.json",
+    "wall_seconds": 0.029561755975009874,
+    "proof_sha256": "bc081116480085edf0d2230aeb6ae804e3b0d535c3835cb51043600dc24d2e69",
+    "proof_bytes": 789264,
+    "sections": {
+      ".text": 24956,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 549
+  },
+  {
+    "symbol": "trace_security_bprm_creds_for_exec",
+    "section": "kprobe/security_bprm_creds_for_exec",
+    "address": 0,
+    "bytes": 11163,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_bprm_creds_for_exec",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-048.log.resources.json",
+    "wall_seconds": 0.01628774599521421,
+    "proof_sha256": "2d62f027c6cc2fb17c6fa21ff0fffad45cbf9bf6e0e6aeff72dc4bb100d1130a",
+    "proof_bytes": 387536,
+    "sections": {
+      ".text": 11588,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 294
+  },
+  {
+    "symbol": "trace_security_file_ioctl",
+    "section": "kprobe/security_file_ioctl",
+    "address": 0,
+    "bytes": 6782,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_file_ioctl",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-049.log.resources.json",
+    "wall_seconds": 0.012804263998987153,
+    "proof_sha256": "5adce3e26b1073dd0c874bf69d7149f8912acc6e2b647033dfd7b6651f13cef9",
+    "proof_bytes": 244256,
+    "sections": {
+      ".text": 7199,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 197
+  },
+  {
+    "symbol": "trace_security_file_mprotect",
+    "section": "kprobe/security_file_mprotect",
+    "address": 0,
+    "bytes": 22863,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_file_mprotect",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-050.log.resources.json",
+    "wall_seconds": 0.028985580982407555,
+    "proof_sha256": "9d083de0f15633f7191d269559b302192bdf8b0c75efaa9916aa7b633245ec45",
+    "proof_bytes": 763368,
+    "sections": {
+      ".text": 23289,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 594
+  },
+  {
+    "symbol": "trace_security_file_open",
+    "section": "kprobe/security_file_open",
+    "address": 0,
+    "bytes": 13133,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_file_open",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-051.log.resources.json",
+    "wall_seconds": 0.01993373199366033,
+    "proof_sha256": "cadc5bca94853f31b851d3763a22e08cbdf0e4aee517bcfa5a6b393555ee1b02",
+    "proof_bytes": 461280,
+    "sections": {
+      ".text": 13732,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 347
+  },
+  {
+    "symbol": "trace_security_file_permission",
+    "section": "kprobe/security_file_permission",
+    "address": 0,
+    "bytes": 5581,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_file_permission",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-052.log.resources.json",
+    "wall_seconds": 0.011764693015720695,
+    "proof_sha256": "67f2f4dfe9c975882d4120b623f31f8dd975a47960de7f16498371f82c07e835",
+    "proof_bytes": 206840,
+    "sections": {
+      ".text": 5998,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 171
+  },
+  {
+    "symbol": "trace_security_inode_mknod",
+    "section": "kprobe/security_inode_mknod",
+    "address": 0,
+    "bytes": 5635,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_inode_mknod",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-053.log.resources.json",
+    "wall_seconds": 0.011567712004762143,
+    "proof_sha256": "e7534e684af3d77cc7bed85bde30386e111e237d55297f2e83093f860f9d480f",
+    "proof_bytes": 212368,
+    "sections": {
+      ".text": 6045,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 172
+  },
+  {
+    "symbol": "trace_security_inode_rename",
+    "section": "kprobe/security_inode_rename",
+    "address": 0,
+    "bytes": 6571,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_inode_rename",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-054.log.resources.json",
+    "wall_seconds": 0.011897681979462504,
+    "proof_sha256": "e77367b8ea1ad40438b8cfca95e9d363f6e93c5846199f0a789518aa5c472a58",
+    "proof_bytes": 234696,
+    "sections": {
+      ".text": 6983,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 181
+  },
+  {
+    "symbol": "trace_security_inode_symlink",
+    "section": "kprobe/security_inode_symlink",
+    "address": 0,
+    "bytes": 5598,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_inode_symlink",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-055.log.resources.json",
+    "wall_seconds": 0.010628045012708753,
+    "proof_sha256": "3499a70d6cc2f801df0de4704b1e2bf1c5db61b7780daa24956901ccec22079c",
+    "proof_bytes": 210776,
+    "sections": {
+      ".text": 6012,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 171
+  },
+  {
+    "symbol": "trace_security_inode_unlink",
+    "section": "kprobe/security_inode_unlink",
+    "address": 0,
+    "bytes": 6114,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_inode_unlink",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-056.log.resources.json",
+    "wall_seconds": 0.010924566013272852,
+    "proof_sha256": "28b15418033f29b13eba4d651226ac63dd466c23e3b6b63b5b05286850768249",
+    "proof_bytes": 226840,
+    "sections": {
+      ".text": 6521,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 185
+  },
+  {
+    "symbol": "trace_security_kernel_post_read_file",
+    "section": "kprobe/security_kernel_post_read_file",
+    "address": 0,
+    "bytes": 11767,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_kernel_post_read_file",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-057.log.resources.json",
+    "wall_seconds": 0.01773929299088195,
+    "proof_sha256": "4169738dd401687858b940b113146074eb84affa035b163e607b3bc79730ec8a",
+    "proof_bytes": 407144,
+    "sections": {
+      ".text": 12184,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 323
+  },
+  {
+    "symbol": "trace_security_kernel_read_file",
+    "section": "kprobe/security_kernel_read_file",
+    "address": 0,
+    "bytes": 11632,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_kernel_read_file",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-058.log.resources.json",
+    "wall_seconds": 0.017381940997438505,
+    "proof_sha256": "6da29223a1c2103c867626dfca2aa4249a7c3202ad0746ba97585386111a1b97",
+    "proof_bytes": 406600,
+    "sections": {
+      ".text": 12053,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 323
+  },
+  {
+    "symbol": "trace_mmap_alert",
+    "section": "kprobe/security_mmap_addr",
+    "address": 0,
+    "bytes": 13218,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_mmap_alert",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-059.log.resources.json",
+    "wall_seconds": 0.019267691997811198,
+    "proof_sha256": "010a0e285b4a3809baa2bfc596af45e2c280619f10b09cbe0063e95da2ac823e",
+    "proof_bytes": 439288,
+    "sections": {
+      ".text": 13635,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 342
+  },
+  {
+    "symbol": "trace_security_mmap_file",
+    "section": "kprobe/security_mmap_file",
+    "address": 0,
+    "bytes": 22424,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_mmap_file",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-060.log.resources.json",
+    "wall_seconds": 0.029583723022369668,
+    "proof_sha256": "ace314b8ccb5cc5c121fc9dccdec58ab6075f7e3a34dea35d651c6c5ae113325",
+    "proof_bytes": 767080,
+    "sections": {
+      ".text": 23023,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 581
+  },
+  {
+    "symbol": "trace_security_path_notify",
+    "section": "kprobe/security_path_notify",
+    "address": 0,
+    "bytes": 11181,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_path_notify",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-061.log.resources.json",
+    "wall_seconds": 0.016353457001969218,
+    "proof_sha256": "6f38f1c63fc3f7c30667d20a0b67cefca6b8fdd7f97ec0e40a6f15a3ece3914e",
+    "proof_bytes": 394904,
+    "sections": {
+      ".text": 11598,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 320
+  },
+  {
+    "symbol": "trace_security_sb_mount",
+    "section": "kprobe/security_sb_mount",
+    "address": 0,
+    "bytes": 11351,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_sb_mount",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-062.log.resources.json",
+    "wall_seconds": 0.017249116994207725,
+    "proof_sha256": "2fc17f5c4460d9a3f90c9f94e22af45eae0a5f11ab61a29bfdc7402cfed9c527",
+    "proof_bytes": 398728,
+    "sections": {
+      ".text": 11768,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 312
+  },
+  {
+    "symbol": "trace_security_sb_umount",
+    "section": "kprobe/security_sb_umount",
+    "address": 0,
+    "bytes": 5777,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_sb_umount",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-063.log.resources.json",
+    "wall_seconds": 0.011117531976196915,
+    "proof_sha256": "fe6b8bfecde069f57b01d77f75dc7ea41b91300bfdcf30cb9981ccd762ce72d8",
+    "proof_bytes": 216432,
+    "sections": {
+      ".text": 6187,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 176
+  },
+  {
+    "symbol": "trace_security_settime64",
+    "section": "kprobe/security_settime64",
+    "address": 0,
+    "bytes": 5371,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_settime64",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-064.log.resources.json",
+    "wall_seconds": 0.010868431010749191,
+    "proof_sha256": "0142c863d6448ae0028f5c6e82d650aaa4f8f6d7c6c86d1d827ca18c20f09d73",
+    "proof_bytes": 203688,
+    "sections": {
+      ".text": 5788,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 167
+  },
+  {
+    "symbol": "trace_security_sk_clone",
+    "section": "kprobe/security_sk_clone",
+    "address": 0,
+    "bytes": 233,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_sk_clone",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-065.log.resources.json",
+    "wall_seconds": 0.005905989994062111,
+    "proof_sha256": "7bfc37668d3e91a9266c3f8491b484d01dc198f23b0c3676f9c23a2f64b28a09",
+    "proof_bytes": 10088,
+    "sections": {
+      ".text": 237,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 10
+  },
+  {
+    "symbol": "trace_security_socket_accept",
+    "section": "kprobe/security_socket_accept",
+    "address": 0,
+    "bytes": 6928,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_socket_accept",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-066.log.resources.json",
+    "wall_seconds": 0.011326943000312895,
+    "proof_sha256": "327b0ad5ca1fd93282042114ed8bc8bf604d17765c97feeb4d065a8a6bfc4f8a",
+    "proof_bytes": 238224,
+    "sections": {
+      ".text": 7348,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 194
+  },
+  {
+    "symbol": "trace_security_socket_bind",
+    "section": "kprobe/security_socket_bind",
+    "address": 0,
+    "bytes": 6404,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_socket_bind",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-067.log.resources.json",
+    "wall_seconds": 0.011210676020709798,
+    "proof_sha256": "bbeb3db0301d24a917211213660b266ec00bf0b05d5be6ebfd3cc3dff5877892",
+    "proof_bytes": 222624,
+    "sections": {
+      ".text": 6821,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 177
+  },
+  {
+    "symbol": "trace_security_socket_connect",
+    "section": "kprobe/security_socket_connect",
+    "address": 0,
+    "bytes": 6248,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_socket_connect",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-068.log.resources.json",
+    "wall_seconds": 0.01129641299485229,
+    "proof_sha256": "22606c91f9444da6766f91575919a2ffbdb643f5beac2a9b5e482aa76304bcad",
+    "proof_bytes": 218640,
+    "sections": {
+      ".text": 6665,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 173
+  },
+  {
+    "symbol": "trace_security_socket_create",
+    "section": "kprobe/security_socket_create",
+    "address": 0,
+    "bytes": 5277,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_socket_create",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-069.log.resources.json",
+    "wall_seconds": 0.010770822002086788,
+    "proof_sha256": "bb0c3cb90ae25c3c5660273ba1128f94c33bff9bcd6d92ec3f26219281b21cd4",
+    "proof_bytes": 200744,
+    "sections": {
+      ".text": 5694,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 163
+  },
+  {
+    "symbol": "trace_security_socket_listen",
+    "section": "kprobe/security_socket_listen",
+    "address": 0,
+    "bytes": 6537,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_socket_listen",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-070.log.resources.json",
+    "wall_seconds": 0.012037145992508158,
+    "proof_sha256": "e1fb7212834feb4d992ac49eb6b1fcba22090e7ca1377782daeddd75fb146420",
+    "proof_bytes": 228192,
+    "sections": {
+      ".text": 6958,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 181
+  },
+  {
+    "symbol": "trace_security_socket_recvmsg",
+    "section": "kprobe/security_socket_recvmsg",
+    "address": 0,
+    "bytes": 5306,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_socket_recvmsg",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-071.log.resources.json",
+    "wall_seconds": 0.010538025002460927,
+    "proof_sha256": "7cf61a97ba54c80b614b45132e7158705eaa591880be5c1c2aa35a041ac2b6e4",
+    "proof_bytes": 191984,
+    "sections": {
+      ".text": 5723,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 160
+  },
+  {
+    "symbol": "trace_security_socket_sendmsg",
+    "section": "kprobe/security_socket_sendmsg",
+    "address": 0,
+    "bytes": 5306,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_socket_sendmsg",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-072.log.resources.json",
+    "wall_seconds": 0.010558811016380787,
+    "proof_sha256": "4d72c32e19e23671bce1cde808c68505a0d4f1dba182edbac60dc4dfb2c6d675",
+    "proof_bytes": 191984,
+    "sections": {
+      ".text": 5723,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 160
+  },
+  {
+    "symbol": "trace_security_socket_setsockopt",
+    "section": "kprobe/security_socket_setsockopt",
+    "address": 0,
+    "bytes": 6792,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_socket_setsockopt",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-073.log.resources.json",
+    "wall_seconds": 0.012087962997611612,
+    "proof_sha256": "3cb0f393740668b4ccaaff187c9c22a218e3ef1c521c8c41f18e36f478a6bed8",
+    "proof_bytes": 235456,
+    "sections": {
+      ".text": 7209,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 188
+  },
+  {
+    "symbol": "trace_security_task_prctl",
+    "section": "kprobe/security_task_prctl",
+    "address": 0,
+    "bytes": 28852,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_task_prctl",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-074.log.resources.json",
+    "wall_seconds": 0.03828394098673016,
+    "proof_sha256": "5ca042b38e713e5586e4800ed235344dae82423c0dae2a0350fa15630c6c0e46",
+    "proof_bytes": 956752,
+    "sections": {
+      ".text": 29014,
+      ".native_link_rodata": 72,
+      ".native_link_abi": 47
+    },
+    "relocations": 724
+  },
+  {
+    "symbol": "trace_security_task_setrlimit",
+    "section": "kprobe/security_task_setrlimit",
+    "address": 0,
+    "bytes": 5320,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_security_task_setrlimit",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-075.log.resources.json",
+    "wall_seconds": 0.011657730996375903,
+    "proof_sha256": "8f4c32937c147b3ea47b93607732b5448fdf9a9f66838ddcd148aae7c411b34c",
+    "proof_bytes": 202200,
+    "sections": {
+      ".text": 5737,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 166
+  },
+  {
+    "symbol": "send_bin",
+    "section": "kprobe/send_bin",
+    "address": 0,
+    "bytes": 668,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "send_bin",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-076.log.resources.json",
+    "wall_seconds": 0.0067696350160986185,
+    "proof_sha256": "a805ccf93c4f3e7fe1752f39909c8f4b2cafde30ae9553e144350caab8ddc87c",
+    "proof_bytes": 24904,
+    "sections": {
+      ".text": 668,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 20
+  },
+  {
+    "symbol": "trace_set_fs_pwd",
+    "section": "kprobe/set_fs_pwd",
+    "address": 0,
+    "bytes": 11649,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_set_fs_pwd",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-077.log.resources.json",
+    "wall_seconds": 0.01693956198869273,
+    "proof_sha256": "52278c22e70f5d22fef370ac13cf4d0dec0f684fbc4a22ab2798b1a717344a87",
+    "proof_bytes": 405016,
+    "sections": {
+      ".text": 12066,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 316
+  },
+  {
+    "symbol": "trace_sock_alloc_file",
+    "section": "kprobe/sock_alloc_file",
+    "address": 0,
+    "bytes": 237,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_sock_alloc_file",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-078.log.resources.json",
+    "wall_seconds": 0.005603023018920794,
+    "proof_sha256": "98d585eb4f0d5f13b0b9b4e295d4bf15e30cd2c6709e2c2b64f09c131854b978",
+    "proof_bytes": 9232,
+    "sections": {
+      ".text": 241,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 7
+  },
+  {
+    "symbol": "trace_switch_task_namespaces",
+    "section": "kprobe/switch_task_namespaces",
+    "address": 0,
+    "bytes": 6674,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_switch_task_namespaces",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-079.log.resources.json",
+    "wall_seconds": 0.012512112996773794,
+    "proof_sha256": "99b5cfb6af5e75af7d4515b689258c0e8969debfc2e842dc53294301712cc623",
+    "proof_bytes": 235320,
+    "sections": {
+      ".text": 7091,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 194
+  },
+  {
+    "symbol": "sys_dup_exit_tail",
+    "section": "kprobe/sys_dup",
+    "address": 0,
+    "bytes": 6325,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "sys_dup_exit_tail",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-080.log.resources.json",
+    "wall_seconds": 0.011347558989655226,
+    "proof_sha256": "8559b9a84124ead19c379e14f0be0945b4d57a9feaa86bacf7be9284de32db6d",
+    "proof_bytes": 202112,
+    "sections": {
+      ".text": 6333,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 160
+  },
+  {
+    "symbol": "syscall_checker",
+    "section": "kprobe/syscall_checker",
+    "address": 0,
+    "bytes": 9230,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "syscall_checker",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-081.log.resources.json",
+    "wall_seconds": 0.015601980994688347,
+    "proof_sha256": "cb5c2c35d47a2143a164ec18a205f348bd5eb1f8293263b48a2cc329508aad4c",
+    "proof_bytes": 326136,
+    "sections": {
+      ".text": 9772,
+      ".native_link_rodata": 68,
+      ".native_link_abi": 47
+    },
+    "relocations": 279
+  },
+  {
+    "symbol": "trace_tracepoint_probe_register_prio_may_exist",
+    "section": "kprobe/tracepoint_probe_register_prio_may_exist",
+    "address": 0,
+    "bytes": 6061,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_tracepoint_probe_register_prio_may_exist",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-082.log.resources.json",
+    "wall_seconds": 0.01174736800021492,
+    "proof_sha256": "d71a3b3ae2de147be15cf31c33042d5a444a3da042855fd123ae65c0fb8d1b7c",
+    "proof_bytes": 219448,
+    "sections": {
+      ".text": 6478,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 176
+  },
+  {
+    "symbol": "trace_utimes_common",
+    "section": "kprobe/utimes_common",
+    "address": 0,
+    "bytes": 11746,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_utimes_common",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-083.log.resources.json",
+    "wall_seconds": 0.017952849011635408,
+    "proof_sha256": "5b959dab308b2ec88da28974e0d4ba960fe2e3d35d75ce2e643cb6ffb5033dd7",
+    "proof_bytes": 410312,
+    "sections": {
+      ".text": 12163,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 323
+  },
+  {
+    "symbol": "trace_vfs_read",
+    "section": "kprobe/vfs_read",
+    "address": 0,
+    "bytes": 111,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_vfs_read",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-084.log.resources.json",
+    "wall_seconds": 0.0059366450004745275,
+    "proof_sha256": "b2af94700fd840f61c2fe500259de9edb90e7acfb6d3d2c88b4ad4679528aa50",
+    "proof_bytes": 5048,
+    "sections": {
+      ".text": 115,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 3
+  },
+  {
+    "symbol": "trace_vfs_readv",
+    "section": "kprobe/vfs_readv",
+    "address": 0,
+    "bytes": 111,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_vfs_readv",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-085.log.resources.json",
+    "wall_seconds": 0.005527560017071664,
+    "proof_sha256": "2b867130f8ae3f91e0863e7b6b02f6b9aab6510082168c14e1b8832fc3176bb9",
+    "proof_bytes": 5048,
+    "sections": {
+      ".text": 115,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 3
+  },
+  {
+    "symbol": "trace_vfs_utimes",
+    "section": "kprobe/vfs_utimes",
+    "address": 0,
+    "bytes": 11746,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_vfs_utimes",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-086.log.resources.json",
+    "wall_seconds": 0.017305045999819413,
+    "proof_sha256": "1d30f2ecbff8b48c721f5f879b962fd6e876420e2c839336f81002a6d8f3da29",
+    "proof_bytes": 410304,
+    "sections": {
+      ".text": 12163,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 323
+  },
+  {
+    "symbol": "trace_vfs_write",
+    "section": "kprobe/vfs_write",
+    "address": 0,
+    "bytes": 111,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_vfs_write",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-087.log.resources.json",
+    "wall_seconds": 0.0057815439940895885,
+    "proof_sha256": "8b717d081256286618e562fa67ce8339a3ce5ec38469bd32f753c6d2eab884b2",
+    "proof_bytes": 5048,
+    "sections": {
+      ".text": 115,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 3
+  },
+  {
+    "symbol": "vfs_write_magic_enter",
+    "section": "kprobe/vfs_write",
+    "address": 112,
+    "bytes": 208,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "vfs_write_magic_enter",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-088.log.resources.json",
+    "wall_seconds": 0.006177175004268065,
+    "proof_sha256": "61b87c10c07b35e181deaf819c552a03e864ff6e4f045f6c451c7ea6cd6cbeea",
+    "proof_bytes": 8968,
+    "sections": {
+      ".text": 216,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 6
+  },
+  {
+    "symbol": "trace_vfs_writev",
+    "section": "kprobe/vfs_writev",
+    "address": 0,
+    "bytes": 111,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_vfs_writev",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-089.log.resources.json",
+    "wall_seconds": 0.005805849999887869,
+    "proof_sha256": "8d8de83187cbf886cfd964f08fe54992c6225d891b33c81b903cdbc580b126e9",
+    "proof_bytes": 5048,
+    "sections": {
+      ".text": 115,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 3
+  },
+  {
+    "symbol": "vfs_writev_magic_enter",
+    "section": "kprobe/vfs_writev",
+    "address": 112,
+    "bytes": 208,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "vfs_writev_magic_enter",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-090.log.resources.json",
+    "wall_seconds": 0.0061141740006860346,
+    "proof_sha256": "4619da9e38396f63c06a2cdcea2098de1ba738f04bb8ea0c63d4d59a5ec46000",
+    "proof_bytes": 8968,
+    "sections": {
+      ".text": 216,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 6
+  },
+  {
+    "symbol": "trace_ret_kernel_write",
+    "section": "kretprobe/__kernel_write",
+    "address": 0,
+    "bytes": 12338,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_kernel_write",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-091.log.resources.json",
+    "wall_seconds": 0.01725125699886121,
+    "proof_sha256": "63a454e96abd96fe6d3383e19d8e1580710b63e13e16e02014123f772b2462aa",
+    "proof_bytes": 417720,
+    "sections": {
+      ".text": 12759,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 343
+  },
+  {
+    "symbol": "kernel_write_magic_return",
+    "section": "kretprobe/__kernel_write",
+    "address": 12352,
+    "bytes": 14291,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "kernel_write_magic_return",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-092.log.resources.json",
+    "wall_seconds": 0.018893942004069686,
+    "proof_sha256": "d063b75e7a887705774708fed762fd53b3a8672f5ab60d1316a2aa6d4a885474",
+    "proof_bytes": 475584,
+    "sections": {
+      ".text": 14898,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 357
+  },
+  {
+    "symbol": "trace_ret_kernel_write_tail",
+    "section": "kretprobe/__kernel_write_tail",
+    "address": 0,
+    "bytes": 20097,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_kernel_write_tail",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-093.log.resources.json",
+    "wall_seconds": 0.02664107599412091,
+    "proof_sha256": "846adcf6927a1abd4d93c96fa17a61bd12e6d3a8e73a905e627686897f5c694d",
+    "proof_bytes": 681624,
+    "sections": {
+      ".text": 20611,
+      ".native_link_rodata": 88,
+      ".native_link_abi": 47
+    },
+    "relocations": 539
+  },
+  {
+    "symbol": "trace_ret__register_chrdev",
+    "section": "kretprobe/__register_chrdev",
+    "address": 0,
+    "bytes": 5529,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret__register_chrdev",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-094.log.resources.json",
+    "wall_seconds": 0.01131576398620382,
+    "proof_sha256": "b4d9df2f4001ac9d2b09c827ccc1addc5806587e272f4dc571ba9cfc1d3073b6",
+    "proof_bytes": 207952,
+    "sections": {
+      ".text": 5946,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 169
+  },
+  {
+    "symbol": "trace_ret_arch_prctl",
+    "section": "kretprobe/arch_prctl",
+    "address": 0,
+    "bytes": 8448,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_arch_prctl",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-095.log.resources.json",
+    "wall_seconds": 0.01383363499189727,
+    "proof_sha256": "21c40adfc18d68c23c8d0b851387b53f1313330e65998ef3890bc9cbbcdedd9a",
+    "proof_bytes": 284184,
+    "sections": {
+      ".text": 8865,
+      ".native_link_rodata": 64,
+      ".native_link_abi": 47
+    },
+    "relocations": 186
+  },
+  {
+    "symbol": "trace_ret_do_init_module",
+    "section": "kretprobe/do_init_module",
+    "address": 0,
+    "bytes": 9322,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_do_init_module",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-096.log.resources.json",
+    "wall_seconds": 0.0150618769985158,
+    "proof_sha256": "30c24ed0f9e16e72330c596a7b67876bf3e176156db31a045966b67b8ebde568",
+    "proof_bytes": 336760,
+    "sections": {
+      ".text": 9743,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 263
+  },
+  {
+    "symbol": "trace_ret_do_mmap",
+    "section": "kretprobe/do_mmap",
+    "address": 0,
+    "bytes": 11995,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_do_mmap",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-097.log.resources.json",
+    "wall_seconds": 0.01883675600402057,
+    "proof_sha256": "d6330a5a7baf146043f3d16e84d9c6267c3e125e8b62f83330647a2f90868a17",
+    "proof_bytes": 418208,
+    "sections": {
+      ".text": 12412,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 332
+  },
+  {
+    "symbol": "trace_ret_do_splice",
+    "section": "kretprobe/do_splice",
+    "address": 0,
+    "bytes": 12890,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_do_splice",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-098.log.resources.json",
+    "wall_seconds": 0.02116648099035956,
+    "proof_sha256": "f9158cbb87fad99c6c679bb89691ddb0c54d7c313443dfba9d6c7e070e081094",
+    "proof_bytes": 441128,
+    "sections": {
+      ".text": 13315,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 341
+  },
+  {
+    "symbol": "trace_ret_dup",
+    "section": "kretprobe/dup",
+    "address": 0,
+    "bytes": 8448,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_dup",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-099.log.resources.json",
+    "wall_seconds": 0.016132986987940967,
+    "proof_sha256": "3fbe321396d958b116828d46271074e0514435f61f944d2465a61c29e480ee0c",
+    "proof_bytes": 284176,
+    "sections": {
+      ".text": 8865,
+      ".native_link_rodata": 64,
+      ".native_link_abi": 47
+    },
+    "relocations": 186
+  },
+  {
+    "symbol": "trace_ret_dup2",
+    "section": "kretprobe/dup2",
+    "address": 0,
+    "bytes": 8448,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_dup2",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-100.log.resources.json",
+    "wall_seconds": 0.015778522996697575,
+    "proof_sha256": "dcce5ebc0f24217e3d0c896e2919e7b0061ec2e101676375332b7854ef3d7e47",
+    "proof_bytes": 284176,
+    "sections": {
+      ".text": 8865,
+      ".native_link_rodata": 64,
+      ".native_link_abi": 47
+    },
+    "relocations": 186
+  },
+  {
+    "symbol": "trace_ret_dup3",
+    "section": "kretprobe/dup3",
+    "address": 0,
+    "bytes": 8448,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_dup3",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-101.log.resources.json",
+    "wall_seconds": 0.014953759993659332,
+    "proof_sha256": "404de866bf39662565fdf06b50f131ee0169854b9b37c19b7685eea288f29ff5",
+    "proof_bytes": 284176,
+    "sections": {
+      ".text": 8865,
+      ".native_link_rodata": 64,
+      ".native_link_abi": 47
+    },
+    "relocations": 186
+  },
+  {
+    "symbol": "trace_execute_finished",
+    "section": "kretprobe/execute_finished",
+    "address": 0,
+    "bytes": 19097,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_execute_finished",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-102.log.resources.json",
+    "wall_seconds": 0.02558233999297954,
+    "proof_sha256": "3024a553f96bc97e1f9354a2814904315848aa0a709bd3df8451c574e425d530",
+    "proof_bytes": 609936,
+    "sections": {
+      ".text": 19514,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 413
+  },
+  {
+    "symbol": "trace_ret_file_modified",
+    "section": "kretprobe/file_modified",
+    "address": 0,
+    "bytes": 12254,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_file_modified",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-103.log.resources.json",
+    "wall_seconds": 0.017969120002817363,
+    "proof_sha256": "8642c11bb3c23fd9a72cc69e2a74f350efcd49e6b2f1341f0d9fcbe1a45689ca",
+    "proof_bytes": 410592,
+    "sections": {
+      ".text": 12675,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 334
+  },
+  {
+    "symbol": "trace_ret_file_update_time",
+    "section": "kretprobe/file_update_time",
+    "address": 0,
+    "bytes": 12254,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_file_update_time",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-104.log.resources.json",
+    "wall_seconds": 0.018210165988421068,
+    "proof_sha256": "fcbece4015b7d1334ec74c13c32a8ca586ed17afda7f3ee8550179e0e9fb5a62",
+    "proof_bytes": 410600,
+    "sections": {
+      ".text": 12675,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 334
+  },
+  {
+    "symbol": "trace_ret_inotify_find_inode",
+    "section": "kretprobe/inotify_find_inode",
+    "address": 0,
+    "bytes": 11366,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_inotify_find_inode",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-105.log.resources.json",
+    "wall_seconds": 0.01790271999198012,
+    "proof_sha256": "b937e2198e028a7b00108fb310f1b374834753009dffca7e5653c9ab510c04f1",
+    "proof_bytes": 398224,
+    "sections": {
+      ".text": 11790,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 323
+  },
+  {
+    "symbol": "trace_ret_kallsyms_lookup_name",
+    "section": "kretprobe/kallsyms_lookup_name",
+    "address": 0,
+    "bytes": 5267,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_kallsyms_lookup_name",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-106.log.resources.json",
+    "wall_seconds": 0.010782135010231286,
+    "proof_sha256": "da587b5b629335bd79415ad00942171c854cf1748caf236d124770e425dd1c1f",
+    "proof_bytes": 200496,
+    "sections": {
+      ".text": 5684,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 167
+  },
+  {
+    "symbol": "trace_ret_process_vm_writev",
+    "section": "kretprobe/process_vm_writev",
+    "address": 0,
+    "bytes": 8448,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_process_vm_writev",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-107.log.resources.json",
+    "wall_seconds": 0.013610016991151497,
+    "proof_sha256": "11b50ea3ae07145d5e33877825a8328e8974b0cbf6a628b42e912bcc1ad995ad",
+    "proof_bytes": 284192,
+    "sections": {
+      ".text": 8865,
+      ".native_link_rodata": 64,
+      ".native_link_abi": 47
+    },
+    "relocations": 186
+  },
+  {
+    "symbol": "trace_ret_ptrace",
+    "section": "kretprobe/ptrace",
+    "address": 0,
+    "bytes": 8448,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_ptrace",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-108.log.resources.json",
+    "wall_seconds": 0.014053471008082852,
+    "proof_sha256": "84e1fe3c948ecb066d380be9034739d4eccf6f003bcdfee2bff552e4ea391d85",
+    "proof_bytes": 284176,
+    "sections": {
+      ".text": 8865,
+      ".native_link_rodata": 64,
+      ".native_link_abi": 47
+    },
+    "relocations": 186
+  },
+  {
+    "symbol": "trace_ret_register_kprobe",
+    "section": "kretprobe/register_kprobe",
+    "address": 0,
+    "bytes": 5471,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_register_kprobe",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-109.log.resources.json",
+    "wall_seconds": 0.0103316479944624,
+    "proof_sha256": "ed0bed3e549ae78931047ba982e7857673b0432a5ecf5fac3b7aff22dc194ac4",
+    "proof_bytes": 206040,
+    "sections": {
+      ".text": 5888,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 171
+  },
+  {
+    "symbol": "trace_ret_sock_alloc_file",
+    "section": "kretprobe/sock_alloc_file",
+    "address": 0,
+    "bytes": 5187,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_sock_alloc_file",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-110.log.resources.json",
+    "wall_seconds": 0.0105359899753239,
+    "proof_sha256": "a85e9160a256396b67c4b10281f1a43c8af0f228ddb653b730522513db9f559a",
+    "proof_bytes": 188912,
+    "sections": {
+      ".text": 5604,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 159
+  },
+  {
+    "symbol": "trace_ret_vfs_read",
+    "section": "kretprobe/vfs_read",
+    "address": 0,
+    "bytes": 12338,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_vfs_read",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-111.log.resources.json",
+    "wall_seconds": 0.017193512001540512,
+    "proof_sha256": "90c88aa86db79131ab36fd8817d3307e00c81aca958fdce825213d28400d3714",
+    "proof_bytes": 417712,
+    "sections": {
+      ".text": 12759,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 343
+  },
+  {
+    "symbol": "trace_ret_vfs_read_tail",
+    "section": "kretprobe/vfs_read_tail",
+    "address": 0,
+    "bytes": 12281,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_vfs_read_tail",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-112.log.resources.json",
+    "wall_seconds": 0.017392213980201632,
+    "proof_sha256": "30ef6e85ff0bdecb69dfd0248433697693a1fe88dd3b3a8a09f9fc513c666293",
+    "proof_bytes": 408840,
+    "sections": {
+      ".text": 12794,
+      ".native_link_rodata": 88,
+      ".native_link_abi": 47
+    },
+    "relocations": 335
+  },
+  {
+    "symbol": "trace_ret_vfs_readv",
+    "section": "kretprobe/vfs_readv",
+    "address": 0,
+    "bytes": 12338,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_vfs_readv",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-113.log.resources.json",
+    "wall_seconds": 0.016988171002594754,
+    "proof_sha256": "ef60ee2e9bb5a0a75cdff9cac7b7c3a5cec68e787a219e5b6ce79cc57f370826",
+    "proof_bytes": 417712,
+    "sections": {
+      ".text": 12759,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 343
+  },
+  {
+    "symbol": "trace_ret_vfs_readv_tail",
+    "section": "kretprobe/vfs_readv_tail",
+    "address": 0,
+    "bytes": 12264,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_vfs_readv_tail",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-114.log.resources.json",
+    "wall_seconds": 0.01800061497488059,
+    "proof_sha256": "39896f4ba7f47a8c5747d735812c49b20f8331c6422d07b8146ff98c2955b2b7",
+    "proof_bytes": 411872,
+    "sections": {
+      ".text": 12781,
+      ".native_link_rodata": 88,
+      ".native_link_abi": 47
+    },
+    "relocations": 338
+  },
+  {
+    "symbol": "trace_ret_vfs_write",
+    "section": "kretprobe/vfs_write",
+    "address": 0,
+    "bytes": 12335,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_vfs_write",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-115.log.resources.json",
+    "wall_seconds": 0.01923107900074683,
+    "proof_sha256": "eb50913f8b2641d4a533e3f6d404ff1a71361c965f2913b8ccfebe69ae3cc1c8",
+    "proof_bytes": 417704,
+    "sections": {
+      ".text": 12756,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 343
+  },
+  {
+    "symbol": "vfs_write_magic_return",
+    "section": "kretprobe/vfs_write",
+    "address": 12336,
+    "bytes": 14291,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "vfs_write_magic_return",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-116.log.resources.json",
+    "wall_seconds": 0.01888727498590015,
+    "proof_sha256": "283a2b79cda0afdb9be28736de433677d588f7842300aa09ccf0216028daac18",
+    "proof_bytes": 475584,
+    "sections": {
+      ".text": 14898,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 357
+  },
+  {
+    "symbol": "trace_ret_vfs_write_tail",
+    "section": "kretprobe/vfs_write_tail",
+    "address": 0,
+    "bytes": 20097,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_vfs_write_tail",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-117.log.resources.json",
+    "wall_seconds": 0.027784336998593062,
+    "proof_sha256": "a1780fd90dba71603d32b5f5f6b14fca2de6b42e5c21877f79637bce9d46a35a",
+    "proof_bytes": 681616,
+    "sections": {
+      ".text": 20611,
+      ".native_link_rodata": 88,
+      ".native_link_abi": 47
+    },
+    "relocations": 539
+  },
+  {
+    "symbol": "trace_ret_vfs_writev",
+    "section": "kretprobe/vfs_writev",
+    "address": 0,
+    "bytes": 12338,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_vfs_writev",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-118.log.resources.json",
+    "wall_seconds": 0.017585130990482867,
+    "proof_sha256": "e9cfdecc942ba4da5bb097eb7ca2ee41d479ba1c6afb8acc5ab3df12647085c0",
+    "proof_bytes": 417712,
+    "sections": {
+      ".text": 12759,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 343
+  },
+  {
+    "symbol": "vfs_writev_magic_return",
+    "section": "kretprobe/vfs_writev",
+    "address": 12352,
+    "bytes": 14330,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "vfs_writev_magic_return",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-119.log.resources.json",
+    "wall_seconds": 0.019463500007987022,
+    "proof_sha256": "904a144b8cf2f03c816ccb9d6acbf19813a70fa8cc146d8112b132cd5d3439e6",
+    "proof_bytes": 476544,
+    "sections": {
+      ".text": 14937,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 358
+  },
+  {
+    "symbol": "trace_ret_vfs_writev_tail",
+    "section": "kretprobe/vfs_writev_tail",
+    "address": 0,
+    "bytes": 20515,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_ret_vfs_writev_tail",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-120.log.resources.json",
+    "wall_seconds": 0.026432137994561344,
+    "proof_sha256": "2ea5a4acf7b9289e3ab7af6461406129ae1a5a3f1617b192f146830bb8b11623",
+    "proof_bytes": 686544,
+    "sections": {
+      ".text": 21036,
+      ".native_link_rodata": 88,
+      ".native_link_abi": 47
+    },
+    "relocations": 541
+  },
+  {
+    "symbol": "lsm_file_open_test",
+    "section": "lsm/file_open",
+    "address": 0,
+    "bytes": 4911,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "lsm_file_open_test",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-121.log.resources.json",
+    "wall_seconds": 0.010825056000612676,
+    "proof_sha256": "12c03a0ad372c73e132897697cc639bb3236780ba3227846c3a551b40fd4fecd",
+    "proof_bytes": 189720,
+    "sections": {
+      ".text": 5328,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 159
+  },
+  {
+    "symbol": "tracepoint__cgroup__cgroup_attach_task",
+    "section": "raw_tracepoint/cgroup_attach_task",
+    "address": 0,
+    "bytes": 5336,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "tracepoint__cgroup__cgroup_attach_task",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-122.log.resources.json",
+    "wall_seconds": 0.010436674987431616,
+    "proof_sha256": "020ac818a1be9c9941a95018bedb055ac2f008e5857d3c9fc9016414355c5892",
+    "proof_bytes": 202064,
+    "sections": {
+      ".text": 5753,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 164
+  },
+  {
+    "symbol": "tracepoint__cgroup__cgroup_mkdir",
+    "section": "raw_tracepoint/cgroup_mkdir",
+    "address": 0,
+    "bytes": 5335,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "tracepoint__cgroup__cgroup_mkdir",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-123.log.resources.json",
+    "wall_seconds": 0.010355753998737782,
+    "proof_sha256": "c163e9d11ba645e9081847d6d2e0d16f3891e74e37f805ab311919155ae1a7cd",
+    "proof_bytes": 202096,
+    "sections": {
+      ".text": 5752,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 166
+  },
+  {
+    "symbol": "cgroup_mkdir_signal",
+    "section": "raw_tracepoint/cgroup_mkdir_signal",
+    "address": 0,
+    "bytes": 646,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "cgroup_mkdir_signal",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-124.log.resources.json",
+    "wall_seconds": 0.0064520300074946135,
+    "proof_sha256": "a0b6a1e797bfceca88b0a0b4517b915424b4a2c91ac5fe3072de91ba5fa17b37",
+    "proof_bytes": 22840,
+    "sections": {
+      ".text": 650,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 15
+  },
+  {
+    "symbol": "tracepoint__cgroup__cgroup_rmdir",
+    "section": "raw_tracepoint/cgroup_rmdir",
+    "address": 0,
+    "bytes": 5335,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "tracepoint__cgroup__cgroup_rmdir",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-125.log.resources.json",
+    "wall_seconds": 0.009955622983397916,
+    "proof_sha256": "6aad5e7a9456d359fe1f685dfd30180642e8eaedec823e1df4d980ea1fef95d3",
+    "proof_bytes": 202096,
+    "sections": {
+      ".text": 5752,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 166
+  },
+  {
+    "symbol": "cgroup_rmdir_signal",
+    "section": "raw_tracepoint/cgroup_rmdir_signal",
+    "address": 0,
+    "bytes": 618,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "cgroup_rmdir_signal",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-126.log.resources.json",
+    "wall_seconds": 0.005728911986807361,
+    "proof_sha256": "8e8ddaca85e0854b838bffb2e4ffc1cf437302dd0080366b6620d8a5772803cd",
+    "proof_bytes": 22360,
+    "sections": {
+      ".text": 622,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 15
+  },
+  {
+    "symbol": "tracepoint__exec_test",
+    "section": "raw_tracepoint/exec_test",
+    "address": 0,
+    "bytes": 38880,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "tracepoint__exec_test",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-127.log.resources.json",
+    "wall_seconds": 0.04817628499586135,
+    "proof_sha256": "8806469da7cc16e6b0f875628f5f1706cbfb3fc6147cdb72ac10e57e9b3dabce",
+    "proof_bytes": 1345696,
+    "sections": {
+      ".text": 39300,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 1031
+  },
+  {
+    "symbol": "tracepoint__module__module_free",
+    "section": "raw_tracepoint/module_free",
+    "address": 0,
+    "bytes": 5771,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "tracepoint__module__module_free",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-128.log.resources.json",
+    "wall_seconds": 0.011474200000520796,
+    "proof_sha256": "8abbfef98e657f99a099941088190518f72931d3a0a25c384e54adc9d7fc7c49",
+    "proof_bytes": 209048,
+    "sections": {
+      ".text": 6188,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 172
+  },
+  {
+    "symbol": "tracepoint__module__module_load",
+    "section": "raw_tracepoint/module_load",
+    "address": 0,
+    "bytes": 12365,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "tracepoint__module__module_load",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-129.log.resources.json",
+    "wall_seconds": 0.018107106996467337,
+    "proof_sha256": "56970b301e9b7aea465baaf0041617fe4bfa05fc9b0f6cc683fdb4c4af53a990",
+    "proof_bytes": 429968,
+    "sections": {
+      ".text": 12793,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 345
+  },
+  {
+    "symbol": "tracepoint__sched__sched_process_exec",
+    "section": "raw_tracepoint/sched_process_exec",
+    "address": 0,
+    "bytes": 13563,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "tracepoint__sched__sched_process_exec",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-130.log.resources.json",
+    "wall_seconds": 0.01982402300927788,
+    "proof_sha256": "a0241275a917c6251fd85bd712326ca490e235c100fc356147a909eecbe5b03c",
+    "proof_bytes": 475600,
+    "sections": {
+      ".text": 14162,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 347
+  },
+  {
+    "symbol": "sched_process_exec_signal",
+    "section": "raw_tracepoint/sched_process_exec",
+    "address": 13568,
+    "bytes": 15607,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "sched_process_exec_signal",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-131.log.resources.json",
+    "wall_seconds": 0.02004240799578838,
+    "proof_sha256": "2e157404ad43acd2fbb3ee239d96a53dfe8f36525f961accbb042eb61bcd48a3",
+    "proof_bytes": 522288,
+    "sections": {
+      ".text": 15894,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 383
+  },
+  {
+    "symbol": "sched_process_exec_event_submit_tail",
+    "section": "raw_tracepoint/sched_process_exec_event_submit_tail",
+    "address": 0,
+    "bytes": 14544,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "sched_process_exec_event_submit_tail",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-132.log.resources.json",
+    "wall_seconds": 0.019871579977916554,
+    "proof_sha256": "ab4e2d0a7317fa312b73b3845efdf212ae97d44b020cf5549df2d27f2a9bc1f7",
+    "proof_bytes": 475632,
+    "sections": {
+      ".text": 14552,
+      ".native_link_rodata": 15,
+      ".native_link_abi": 47
+    },
+    "relocations": 378
+  },
+  {
+    "symbol": "tracepoint__sched__sched_process_exit",
+    "section": "raw_tracepoint/sched_process_exit",
+    "address": 0,
+    "bytes": 5402,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "tracepoint__sched__sched_process_exit",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-133.log.resources.json",
+    "wall_seconds": 0.011703794007189572,
+    "proof_sha256": "e687b16eb68ede2de68e49f2db42a22d405e885925349c325158602b16fcf2c7",
+    "proof_bytes": 203928,
+    "sections": {
+      ".text": 5819,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 168
+  },
+  {
+    "symbol": "sched_process_exit_signal",
+    "section": "raw_tracepoint/sched_process_exit",
+    "address": 5408,
+    "bytes": 793,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "sched_process_exit_signal",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-134.log.resources.json",
+    "wall_seconds": 0.0068970499851275235,
+    "proof_sha256": "5b44e6d778a42619179bc38d9adf1f96faef38beb845a68b69eadf09f2050e78",
+    "proof_bytes": 27136,
+    "sections": {
+      ".text": 797,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 18
+  },
+  {
+    "symbol": "tracepoint__sched__sched_process_fork",
+    "section": "raw_tracepoint/sched_process_fork",
+    "address": 0,
+    "bytes": 12121,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "tracepoint__sched__sched_process_fork",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-135.log.resources.json",
+    "wall_seconds": 0.017779849004000425,
+    "proof_sha256": "14fecb3317a4c1095d435c3630c1a972ff30eb5eecff3a2a09ab90a4cccb17d0",
+    "proof_bytes": 425736,
+    "sections": {
+      ".text": 12655,
+      ".native_link_rodata": 68,
+      ".native_link_abi": 47
+    },
+    "relocations": 354
+  },
+  {
+    "symbol": "sched_process_fork_signal",
+    "section": "raw_tracepoint/sched_process_fork",
+    "address": 12128,
+    "bytes": 2844,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "sched_process_fork_signal",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-136.log.resources.json",
+    "wall_seconds": 0.008370058989385143,
+    "proof_sha256": "533f2174ab638fa78fe96e2c83bc83daf8171109a4daa6735e4161394e37ad38",
+    "proof_bytes": 94480,
+    "sections": {
+      ".text": 2848,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 69
+  },
+  {
+    "symbol": "tracepoint__sched__sched_process_free",
+    "section": "raw_tracepoint/sched_process_free",
+    "address": 0,
+    "bytes": 166,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "tracepoint__sched__sched_process_free",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-137.log.resources.json",
+    "wall_seconds": 0.006220187991857529,
+    "proof_sha256": "48b5e3158c60f507c13b8a13c2cd1180bb6bf4c5c8b744bb33cdef7744881e24",
+    "proof_bytes": 7536,
+    "sections": {
+      ".text": 170,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 9
+  },
+  {
+    "symbol": "tracepoint__sched__sched_switch",
+    "section": "raw_tracepoint/sched_switch",
+    "address": 0,
+    "bytes": 5538,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "tracepoint__sched__sched_switch",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-138.log.resources.json",
+    "wall_seconds": 0.010690727009205148,
+    "proof_sha256": "d44d046c4153b593056720fcb07b6cc52a2a8f8486d2e4d1329efae7dbac3171",
+    "proof_bytes": 208000,
+    "sections": {
+      ".text": 5955,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 167
+  },
+  {
+    "symbol": "send_bin_tp",
+    "section": "raw_tracepoint/send_bin_tp",
+    "address": 0,
+    "bytes": 668,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "send_bin_tp",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-139.log.resources.json",
+    "wall_seconds": 0.0062203590059652925,
+    "proof_sha256": "4b46a17444e48f7487769b401e6563dc66d759e18a64b9afefb4da1133972b21",
+    "proof_bytes": 24912,
+    "sections": {
+      ".text": 668,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 20
+  },
+  {
+    "symbol": "tracepoint__raw_syscalls__sys_enter",
+    "section": "raw_tracepoint/sys_enter",
+    "address": 0,
+    "bytes": 93,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "tracepoint__raw_syscalls__sys_enter",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-140.log.resources.json",
+    "wall_seconds": 0.006163543002912775,
+    "proof_sha256": "ff4ee2774e4c6a6838aa2ad340b23886b726938ef6e26652f7571179d85a481b",
+    "proof_bytes": 5520,
+    "sections": {
+      ".text": 97,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 6
+  },
+  {
+    "symbol": "sys_enter_init",
+    "section": "raw_tracepoint/sys_enter_init",
+    "address": 0,
+    "bytes": 1456,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "sys_enter_init",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-141.log.resources.json",
+    "wall_seconds": 0.006805426994105801,
+    "proof_sha256": "e89170feb46935b399ac149d5232b585410356084f9f94086c84ff5ec793eff8",
+    "proof_bytes": 60688,
+    "sections": {
+      ".text": 1593,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 61
+  },
+  {
+    "symbol": "sys_enter_submit",
+    "section": "raw_tracepoint/sys_enter_submit",
+    "address": 0,
+    "bytes": 11690,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "sys_enter_submit",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-142.log.resources.json",
+    "wall_seconds": 0.0224300229747314,
+    "proof_sha256": "41d68dfc21e51b174d4c68371da41ed7bfc5766b4501f671bcdffa1c47696096",
+    "proof_bytes": 412048,
+    "sections": {
+      ".text": 11835,
+      ".native_link_rodata": 1823,
+      ".native_link_abi": 47
+    },
+    "relocations": 770
+  },
+  {
+    "symbol": "syscall__execve_enter",
+    "section": "raw_tracepoint/sys_execve",
+    "address": 0,
+    "bytes": 16302,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "syscall__execve_enter",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-143.log.resources.json",
+    "wall_seconds": 0.019976718991529197,
+    "proof_sha256": "f6a4595f0c01de74e0e211e011b53354bd9a2cb1fd34d4e1b7fb3579377ae96d",
+    "proof_bytes": 499616,
+    "sections": {
+      ".text": 16310,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 326
+  },
+  {
+    "symbol": "syscall__execve_exit",
+    "section": "raw_tracepoint/sys_execve",
+    "address": 16304,
+    "bytes": 16390,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "syscall__execve_exit",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-144.log.resources.json",
+    "wall_seconds": 0.019829093012958765,
+    "proof_sha256": "1c066ea8532ba0f900f843e6d9bd127bff17a4131c7f4593cb929dc0a9e1dc76",
+    "proof_bytes": 503176,
+    "sections": {
+      ".text": 16398,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 327
+  },
+  {
+    "symbol": "syscall__execveat_enter",
+    "section": "raw_tracepoint/sys_execveat",
+    "address": 0,
+    "bytes": 16483,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "syscall__execveat_enter",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-145.log.resources.json",
+    "wall_seconds": 0.021013142017181963,
+    "proof_sha256": "7c993e491ee0fc3830b75ce222c9fbf709240cad11d2398457f3548417664b35",
+    "proof_bytes": 504808,
+    "sections": {
+      ".text": 16491,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 328
+  },
+  {
+    "symbol": "syscall__execveat_exit",
+    "section": "raw_tracepoint/sys_execveat",
+    "address": 16496,
+    "bytes": 16566,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "syscall__execveat_exit",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-146.log.resources.json",
+    "wall_seconds": 0.020617966016288847,
+    "proof_sha256": "c2d2d6a238724d1a436ea30a598b80f87d451aba680d31db755ce73f405889a5",
+    "proof_bytes": 508080,
+    "sections": {
+      ".text": 16574,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 329
+  },
+  {
+    "symbol": "tracepoint__raw_syscalls__sys_exit",
+    "section": "raw_tracepoint/sys_exit",
+    "address": 0,
+    "bytes": 123,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "tracepoint__raw_syscalls__sys_exit",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-147.log.resources.json",
+    "wall_seconds": 0.006502072996227071,
+    "proof_sha256": "3c743887445742ca80968b6f04fc26e0439b85ed7aef9084b90e6779754f787a",
+    "proof_bytes": 6320,
+    "sections": {
+      ".text": 127,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 7
+  },
+  {
+    "symbol": "sys_exit_init",
+    "section": "raw_tracepoint/sys_exit_init",
+    "address": 0,
+    "bytes": 1318,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "sys_exit_init",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-148.log.resources.json",
+    "wall_seconds": 0.007032050983980298,
+    "proof_sha256": "e56353f22c30bafdbadc31192b13c70e72ef9fe8e01e5543a9a74046a93edffb",
+    "proof_bytes": 52528,
+    "sections": {
+      ".text": 1455,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 54
+  },
+  {
+    "symbol": "sys_exit_submit",
+    "section": "raw_tracepoint/sys_exit_submit",
+    "address": 0,
+    "bytes": 8436,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "sys_exit_submit",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-149.log.resources.json",
+    "wall_seconds": 0.01307245300267823,
+    "proof_sha256": "2db71e20909615e85093b4bbef003e802a7d6ecd6bbec7355e8bf7f23f342e47",
+    "proof_bytes": 283312,
+    "sections": {
+      ".text": 8857,
+      ".native_link_rodata": 64,
+      ".native_link_abi": 47
+    },
+    "relocations": 186
+  },
+  {
+    "symbol": "syscall__init_module",
+    "section": "raw_tracepoint/sys_init_module",
+    "address": 0,
+    "bytes": 461,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "syscall__init_module",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-150.log.resources.json",
+    "wall_seconds": 0.006552828010171652,
+    "proof_sha256": "0eab5aa80f8027cc35addb129ffe9268bb7810dae2636254676f8850ca3446b3",
+    "proof_bytes": 15456,
+    "sections": {
+      ".text": 465,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 15
+  },
+  {
+    "symbol": "syscall__accept4",
+    "section": "raw_tracepoint/syscall__accept4",
+    "address": 0,
+    "bytes": 5658,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "syscall__accept4",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-151.log.resources.json",
+    "wall_seconds": 0.010023150010965765,
+    "proof_sha256": "c340ccefb6feb827593cd9d532aa4651d43f2897c1c70387a52cff5e62e1af6c",
+    "proof_bytes": 182600,
+    "sections": {
+      ".text": 5662,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 140
+  },
+  {
+    "symbol": "tracepoint__task__task_rename",
+    "section": "raw_tracepoint/task_rename",
+    "address": 0,
+    "bytes": 5239,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "tracepoint__task__task_rename",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-152.log.resources.json",
+    "wall_seconds": 0.010193447989877313,
+    "proof_sha256": "eccef5c9050ec8d07bc7be858e101ad761a5d53a96bba92d13c719216436a131",
+    "proof_bytes": 198976,
+    "sections": {
+      ".text": 5656,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 162
+  },
+  {
+    "symbol": "trace_sys_enter",
+    "section": "raw_tracepoint/trace_sys_enter",
+    "address": 0,
+    "bytes": 5089,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_sys_enter",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-153.log.resources.json",
+    "wall_seconds": 0.011230222997255623,
+    "proof_sha256": "e61454d2e0b198c4829c6cf7a0b3d35970dff84a04408ed1ec049b76e6f89c39",
+    "proof_bytes": 195416,
+    "sections": {
+      ".text": 5506,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 164
+  },
+  {
+    "symbol": "trace_sys_exit",
+    "section": "raw_tracepoint/trace_sys_exit",
+    "address": 0,
+    "bytes": 5108,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "trace_sys_exit",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-154.log.resources.json",
+    "wall_seconds": 0.010657973994966596,
+    "proof_sha256": "15854c01fe6f8788a823e58b4b31f24cfcb470e841e12ed466ed2eede7266bc8",
+    "proof_bytes": 196200,
+    "sections": {
+      ".text": 5525,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 165
+  },
+  {
+    "symbol": "heartbeat_capture",
+    "section": "uprobe/capture_heartbeat",
+    "address": 0,
+    "bytes": 94,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "heartbeat_capture",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-155.log.resources.json",
+    "wall_seconds": 0.0058796299854293466,
+    "proof_sha256": "19881f94bea6fd1bf5ddea24083194edb4583af206a3229d4ff93787e4552010",
+    "proof_bytes": 4264,
+    "sections": {
+      ".text": 98,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 4
+  },
+  {
+    "symbol": "uprobe__features_fallback_arena_tailcall",
+    "section": "uprobe/features_fallback_arena_tailcall",
+    "address": 0,
+    "bytes": 1193,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "uprobe__features_fallback_arena_tailcall",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-156.log.resources.json",
+    "wall_seconds": 0.008284367999294773,
+    "proof_sha256": "b46fb48c4fb7186a7bb445760ad70410166d22ef7ab9a9d2f6fdc0b8d1a4ef03",
+    "proof_bytes": 45760,
+    "sections": {
+      ".text": 1197,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 49
+  },
+  {
+    "symbol": "uprobe__features_fallback_helper_tailcall",
+    "section": "uprobe/features_fallback_helper_tailcall",
+    "address": 0,
+    "bytes": 1193,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "uprobe__features_fallback_helper_tailcall",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-157.log.resources.json",
+    "wall_seconds": 0.008063142973696813,
+    "proof_sha256": "3f149701152e00bca4c7ed8e6b08f8102d12747751d28c7e0fd9ff5a3091008c",
+    "proof_bytes": 45760,
+    "sections": {
+      ".text": 1197,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 49
+  },
+  {
+    "symbol": "uprobe__features_fallback_minimal_tailcall",
+    "section": "uprobe/features_fallback_minimal_tailcall",
+    "address": 0,
+    "bytes": 1193,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "uprobe__features_fallback_minimal_tailcall",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-158.log.resources.json",
+    "wall_seconds": 0.007047749997582287,
+    "proof_sha256": "4f7f2045273b4d35cdec5340fdf1de88f972dc10f80fe69ef2f1705e3908890f",
+    "proof_bytes": 45760,
+    "sections": {
+      ".text": 1197,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 49
+  },
+  {
+    "symbol": "uprobe__features_fallback_arena",
+    "section": "uprobe/features_fallback_test",
+    "address": 0,
+    "bytes": 2271,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "uprobe__features_fallback_arena",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-159.log.resources.json",
+    "wall_seconds": 0.008306527975946665,
+    "proof_sha256": "b4cd198f8f70e611dc6f829db10d1d1a66dbdd50ad5f97a073ee18f6acb58f4b",
+    "proof_bytes": 86704,
+    "sections": {
+      ".text": 2688,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 80
+  },
+  {
+    "symbol": "uprobe__features_fallback_helper",
+    "section": "uprobe/features_fallback_test",
+    "address": 2272,
+    "bytes": 2271,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "uprobe__features_fallback_helper",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-160.log.resources.json",
+    "wall_seconds": 0.007800160004990175,
+    "proof_sha256": "246579887f91b4fc87f007687d7285f94b8dfa6788dbf3712a1172fdb72f6fc6",
+    "proof_bytes": 86840,
+    "sections": {
+      ".text": 2688,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 80
+  },
+  {
+    "symbol": "uprobe__features_fallback_minimal",
+    "section": "uprobe/features_fallback_test",
+    "address": 4544,
+    "bytes": 2266,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "uprobe__features_fallback_minimal",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-161.log.resources.json",
+    "wall_seconds": 0.0075483999971766025,
+    "proof_sha256": "a039dea0ff8e979e33d3667dbd6377a1a410c695185c1a1480dc7b4afb252aeb",
+    "proof_bytes": 86712,
+    "sections": {
+      ".text": 2683,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 79
+  },
+  {
+    "symbol": "uprobe_lkm_seeker",
+    "section": "uprobe/lkm_seeker",
+    "address": 0,
+    "bytes": 2985,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "uprobe_lkm_seeker",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-162.log.resources.json",
+    "wall_seconds": 0.008338690997334197,
+    "proof_sha256": "99251b7c78888349c073aa8e26b29c127b15fce52709ac0f1eab1df3b2e1bd1d",
+    "proof_bytes": 109032,
+    "sections": {
+      ".text": 3415,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 101
+  },
+  {
+    "symbol": "lkm_seeker_kset_tail",
+    "section": "uprobe/lkm_seeker_kset_tail",
+    "address": 0,
+    "bytes": 64846,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "lkm_seeker_kset_tail",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-163.log.resources.json",
+    "wall_seconds": 0.08113211998715997,
+    "proof_sha256": "44c9c3e6ae873c8226f4831d60cbaeb54345355e595056dd4f9e5434378b8693",
+    "proof_bytes": 2157024,
+    "sections": {
+      ".text": 64898,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 1920
+  },
+  {
+    "symbol": "lkm_seeker_mod_tree_tail",
+    "section": "uprobe/lkm_seeker_mod_tree_tail",
+    "address": 0,
+    "bytes": 421,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "lkm_seeker_mod_tree_tail",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-164.log.resources.json",
+    "wall_seconds": 0.006198217015480623,
+    "proof_sha256": "ef52542d1242a8202e2ec592cd1d9b253dab5d5b1ad9212365ac4544a03323d0",
+    "proof_bytes": 14528,
+    "sections": {
+      ".text": 425,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 18
+  },
+  {
+    "symbol": "lkm_seeker_modtree_loop",
+    "section": "uprobe/lkm_seeker_modtree_loop_tail",
+    "address": 0,
+    "bytes": 74200,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "lkm_seeker_modtree_loop",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-165.log.resources.json",
+    "wall_seconds": 0.09984739002538845,
+    "proof_sha256": "667656095c945ae7b7916d47706e3a4adcce643626d7b22292b7ec87b805852c",
+    "proof_bytes": 2588640,
+    "sections": {
+      ".text": 74758,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 2479
+  },
+  {
+    "symbol": "lkm_seeker_new_mod_only_tail",
+    "section": "uprobe/lkm_seeker_new_mod_only_tail",
+    "address": 0,
+    "bytes": 2404,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "lkm_seeker_new_mod_only_tail",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-166.log.resources.json",
+    "wall_seconds": 0.007789903989760205,
+    "proof_sha256": "9a7e0e8dbb6437e9612750eef0e0920aed4070acb41670074bb62b1c2c95bb67",
+    "proof_bytes": 79472,
+    "sections": {
+      ".text": 2406,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 74
+  },
+  {
+    "symbol": "lkm_seeker_proc_tail",
+    "section": "uprobe/lkm_seeker_proc_tail",
+    "address": 0,
+    "bytes": 60411,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "lkm_seeker_proc_tail",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-167.log.resources.json",
+    "wall_seconds": 0.07314126202254556,
+    "proof_sha256": "7aa08698c0fc805a1301a5ed1756051290defb617ce488c1e5be98ce8f6fc7e2",
+    "proof_bytes": 2008968,
+    "sections": {
+      ".text": 60689,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 1774
+  },
+  {
+    "symbol": "uprobe_lkm_seeker_submitter",
+    "section": "uprobe/lkm_seeker_submitter",
+    "address": 0,
+    "bytes": 3796,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "uprobe_lkm_seeker_submitter",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-168.log.resources.json",
+    "wall_seconds": 0.008856403001118451,
+    "proof_sha256": "e395ffa7121f08e52905e7d86999204b352601dd86039af7097992532a34c066",
+    "proof_bytes": 141232,
+    "sections": {
+      ".text": 4213,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 125
+  },
+  {
+    "symbol": "uprobe_syscall_table_check",
+    "section": "uprobe/syscall_table_check",
+    "address": 0,
+    "bytes": 71470,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "uprobe_syscall_table_check",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-169.log.resources.json",
+    "wall_seconds": 0.09338633198058233,
+    "proof_sha256": "8b5d1d3cb4e0c725bbad897401a1373f9d01949324c6c9dc41f4f97952a3f1c0",
+    "proof_bytes": 2383464,
+    "sections": {
+      ".text": 71771,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 2331
+  },
+  {
+    "symbol": "uprobe_mem_dump_trigger",
+    "section": "uprobe/trigger_mem_dump_event",
+    "address": 0,
+    "bytes": 4187,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "uprobe_mem_dump_trigger",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-170.log.resources.json",
+    "wall_seconds": 0.009653766988776624,
+    "proof_sha256": "2b7fabe838053766d7b90a2416bc47ce75252456154625b5b5a17e99f14c1483",
+    "proof_bytes": 146816,
+    "sections": {
+      ".text": 4604,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 132
+  },
+  {
+    "symbol": "uprobe_seq_ops_trigger",
+    "section": "uprobe/trigger_seq_ops_event",
+    "address": 0,
+    "bytes": 4561,
+    "binding": "STB_GLOBAL",
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--mode",
+      "proof",
+      "--input",
+      "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o",
+      "--symbol",
+      "uprobe_seq_ops_trigger",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-proof-survey/proof.o"
+    ],
+    "returncode": 0,
+    "resource": "/workspaces/kprog-raw/perf/20261115-tracee-proof-survey-after/command-171.log.resources.json",
+    "wall_seconds": 0.009230159019352868,
+    "proof_sha256": "a9d2d68333f83a7465993a468f93879cd23783edea48c3a935bf6096501bc78e",
+    "proof_bytes": 157584,
+    "sections": {
+      ".text": 4973,
+      ".native_link_rodata": 0,
+      ".native_link_abi": 47
+    },
+    "relocations": 134
+  }
+]

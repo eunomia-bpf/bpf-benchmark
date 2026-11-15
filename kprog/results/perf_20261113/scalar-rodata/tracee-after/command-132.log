@@ -1,0 +1,3 @@
+native-link: entry=sched_process_exec_event_submit_tail (14544 bytes), 1 reachable symbol(s) total
+  - sched_process_exec_event_submit_tail (vaddr 0x0, 14544 bytes) [entry]
+native-link: wrote proof object 14552 bytes, 378 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

@@ -1,0 +1,1 @@
+taskset -c 8-19 make -r -f kprog/test/native-relocations.mk check scalar-rodata-b scalar-rodata-reference OUTPUT=/workspaces/kprog-raw/perf/20261115-scalar-rodata/after 

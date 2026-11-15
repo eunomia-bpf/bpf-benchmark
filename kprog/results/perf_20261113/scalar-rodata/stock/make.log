@@ -1,0 +1,12 @@
+install -d /workspaces/kprog-raw/perf/20261115-scalar-rodata/stock /workspaces/kprog-raw/perf/20261115-scalar-rodata/stock/inputs
+taskset -c 16-17 prlimit --as=8589934592 -- vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage --cwd /workspaces/repository --rwdir /workspaces/repository --rwdir /workspaces/kprog-raw/perf/20261115-scalar-rodata/stock --rodir /workspaces/kprog-raw/perf/20261115-scalar-rodata/stock/inputs=/var/tmp/kprog-tmp/perf/scalar-rodata --rodir /workspaces/kprog-raw/perf/20261115-scalar-rodata/stock/client=/var/tmp/kprog-tmp/perf/table-context --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-scalar-rodata-stock OUTPUT=/workspaces/kprog-raw/perf/20261115-scalar-rodata/stock'
+uname -r > /workspaces/kprog-raw/perf/20261115-scalar-rodata/stock/kernel.release
+/workspaces/kprog-raw/perf/20261115-scalar-rodata/stock/client/stock-client /workspaces/kprog-raw/perf/20261115-scalar-rodata/stock/inputs/scalar.original.bpf.o /workspaces/kprog-raw/perf/20261115-scalar-rodata/stock/inputs/scalar.bpf.o /workspaces/kprog-raw/perf/20261115-scalar-rodata/stock/original.verifier.log /workspaces/kprog-raw/perf/20261115-scalar-rodata/stock/generated.verifier.log scalar_reference scalar_model_x86_sim_xdp > /workspaces/kprog-raw/perf/20261115-scalar-rodata/stock/stock.jsonl
+libbpf: elf: skipping unrecognized data section(6) .native_lab.rodata
+libbpf: extern (var ksym) 'kprog_unspecified_input': not found in kernel BTF
+load /workspaces/kprog-raw/perf/20261115-scalar-rodata/stock/inputs/scalar.bpf.o failed: -22
+
+line 27: status == 0
+line 42: check(argv[2], argc == 7 ? argv[6] : "trusted_x86_x86_sim_xdp", argv[4]) == 0
+make: *** [kprog/test/native-relocations.mk:299: guest-scalar-rodata-stock] Error 1
+make: *** [kprog/test/native-relocations.mk:295: scalar-rodata-stock] Error 2

@@ -1,0 +1,3 @@
+native-link: entry=cgroup_rmdir_signal (618 bytes), 1 reachable symbol(s) total
+  - cgroup_rmdir_signal (vaddr 0x0, 618 bytes) [entry]
+native-link: wrote proof object 622 bytes, 15 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

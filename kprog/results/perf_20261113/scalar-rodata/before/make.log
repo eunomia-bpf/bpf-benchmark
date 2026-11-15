@@ -1,0 +1,18 @@
+taskset -c 16-19 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/workspaces/repository/kprog/x86/native_lab/native_link/target cargo test --release --manifest-path /workspaces/repository/kprog/x86/native_lab/native_link/Cargo.toml anonymous_section_data_reference_excludes_unrelated_code_tables -- --nocapture
+   Compiling native-link v0.1.0 (/workspaces/repository/kprog/x86/native_lab/native_link)
+    Finished `release` profile [optimized] target(s) in 14.69s
+     Running unittests src/main.rs (kprog/x86/native_lab/native_link/target/release/deps/native_link-62ccb5c6f5eda54e)
+
+running 1 test
+Error: nested PC32 code relocation in section:SectionIndex(4):.rodata has no relative jump-table base
+test x86::readonly_relocs::tests::anonymous_section_data_reference_excludes_unrelated_code_tables ... FAILED
+
+failures:
+
+failures:
+    x86::readonly_relocs::tests::anonymous_section_data_reference_excludes_unrelated_code_tables
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 42 filtered out; finished in 0.05s
+
+error: test failed, to rerun pass `--bin native-link`
+make: *** [kprog/test/native-relocations.mk:284: scalar-rodata-check] Error 101

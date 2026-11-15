@@ -1,0 +1,3 @@
+native-link: entry=trace_ret__register_chrdev (5529 bytes), 1 reachable symbol(s) total
+  - trace_ret__register_chrdev (vaddr 0x0, 5529 bytes) [entry]
+native-link: wrote proof object 5946 bytes, 169 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

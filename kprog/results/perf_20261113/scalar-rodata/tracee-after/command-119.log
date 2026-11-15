@@ -1,0 +1,3 @@
+native-link: entry=vfs_writev_magic_return (14330 bytes), 1 reachable symbol(s) total
+  - vfs_writev_magic_return (vaddr 0x3040, 14330 bytes) [entry]
+native-link: wrote proof object 14937 bytes, 358 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

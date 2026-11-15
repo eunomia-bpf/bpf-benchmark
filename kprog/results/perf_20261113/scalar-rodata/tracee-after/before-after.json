@@ -1,0 +1,14 @@
+{
+  "previous_success": 165,
+  "unchanged_success": 165,
+  "changed_success": [],
+  "new_success": [
+    "trace_ret_arch_prctl",
+    "trace_ret_dup",
+    "trace_ret_dup2",
+    "trace_ret_dup3",
+    "trace_ret_process_vm_writev",
+    "trace_ret_ptrace",
+    "sys_exit_submit"
+  ]
+}

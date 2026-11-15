@@ -1,0 +1,3 @@
+native-link: entry=tracepoint__raw_syscalls__sys_enter (93 bytes), 1 reachable symbol(s) total
+  - tracepoint__raw_syscalls__sys_enter (vaddr 0x0, 93 bytes) [entry]
+native-link: wrote proof object 97 bytes, 6 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

@@ -1,0 +1,42 @@
+[
+  {
+    "path": "/var/tmp/kprog-tmp/perf/scalar-rodata/scalar.native.o",
+    "bytes": 1272,
+    "sha256": "e830bdb8ef11c55ba31742f17e4893838444e406fed8d9962b31ef9e57599146"
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/scalar-rodata/scalar.proof.o",
+    "bytes": 1776,
+    "sha256": "b068f4f64bf1da75eedb4189698af2b59c79895934ffc0e747df9fac3eca4deb"
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/scalar-rodata/scalar.bpf.o",
+    "bytes": 29568,
+    "sha256": "77e87d84979fa5807956235df8664a3771dc5f77a576f56805939c53527d4177"
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/scalar-rodata/scalar.original.bpf.o",
+    "bytes": 4048,
+    "sha256": "31ef02d0373659037473c7ba8ad869252701f8b2c863112798862044aa6bac2a"
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/scalar-rodata/scalar.bpf.bounds-input.bc",
+    "bytes": 47696,
+    "sha256": "d8462791a8eade08126562ef5dff08d07ca787b1cf9343ed572b41b806b76c5d"
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/scalar-rodata/scalar.bpf.bounds.bc",
+    "bytes": 46084,
+    "sha256": "716a8f87be8d9525474df67c3b1d4285f5ad588ed8e16110812b73937bddd162"
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/scalar-rodata/scalar.bpf.before.mir",
+    "bytes": 299165,
+    "sha256": "6d1877b738b45ae8e24b66f2457f7ac75fbaf4fd6353b2130bd3730658e80bba"
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/scalar-rodata/scalar.bpf.packed.mir",
+    "bytes": 299165,
+    "sha256": "6d1877b738b45ae8e24b66f2457f7ac75fbaf4fd6353b2130bd3730658e80bba"
+  }
+]

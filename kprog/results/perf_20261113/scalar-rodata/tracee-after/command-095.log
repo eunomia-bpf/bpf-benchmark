@@ -1,0 +1,3 @@
+native-link: entry=trace_ret_arch_prctl (8448 bytes), 1 reachable symbol(s) total
+  - trace_ret_arch_prctl (vaddr 0x0, 8448 bytes) [entry]
+native-link: wrote proof object 8865 bytes, 186 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

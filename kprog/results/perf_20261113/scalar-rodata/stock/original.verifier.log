@@ -1,0 +1,15 @@
+func#0 @0
+Live regs before insn:
+      0: .1........ (79) r0 = *(u64 *)(r1 +0)
+      1: 0......... (57) r0 &= 7
+      2: 0......... (27) r0 *= 257
+      3: 0......... (07) r0 += 305398017
+      4: 0......... (95) exit
+0: R1=ctx() R10=fp0
+; return 0x12340000U + ((context[0] & 7) + 1) * 0x101U; @ scalar_rodata_reference.bpf.c:6
+0: (79) r0 = *(u64 *)(r1 +0)          ; R0=scalar() R1=ctx()
+1: (57) r0 &= 7                       ; R0=scalar(smin=smin32=0,smax=umax=smax32=umax32=7,var_off=(0x0; 0x7))
+2: (27) r0 *= 257                     ; R0=scalar(smin=smin32=0,smax=umax=smax32=umax32=1799,var_off=(0x0; 0x707))
+3: (07) r0 += 305398017               ; R0=scalar(smin=umin=smin32=umin32=0x12340101,smax=umax=smax32=umax32=0x12340808,var_off=(0x12340000; 0xf0f))
+4: (95) exit
+processed 5 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0

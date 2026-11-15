@@ -1,0 +1,3 @@
+native-link: entry=cgroup_bpf_run_filter_skb (3450 bytes), 1 reachable symbol(s) total
+  - cgroup_bpf_run_filter_skb (vaddr 0x0, 3450 bytes) [entry]
+native-link: wrote proof object 3867 bytes, 97 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

@@ -1,0 +1,3 @@
+native-link: entry=uprobe_mem_dump_trigger (4187 bytes), 1 reachable symbol(s) total
+  - uprobe_mem_dump_trigger (vaddr 0x0, 4187 bytes) [entry]
+native-link: wrote proof object 4604 bytes, 132 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

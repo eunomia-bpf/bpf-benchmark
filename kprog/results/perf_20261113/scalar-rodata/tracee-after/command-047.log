@@ -1,0 +1,3 @@
+native-link: entry=trace_security_bprm_check (24531 bytes), 1 reachable symbol(s) total
+  - trace_security_bprm_check (vaddr 0x0, 24531 bytes) [entry]
+native-link: wrote proof object 24956 bytes, 549 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

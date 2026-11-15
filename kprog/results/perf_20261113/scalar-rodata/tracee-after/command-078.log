@@ -1,0 +1,3 @@
+native-link: entry=trace_sock_alloc_file (237 bytes), 1 reachable symbol(s) total
+  - trace_sock_alloc_file (vaddr 0x0, 237 bytes) [entry]
+native-link: wrote proof object 241 bytes, 7 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

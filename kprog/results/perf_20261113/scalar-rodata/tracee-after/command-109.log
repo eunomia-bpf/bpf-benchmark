@@ -1,0 +1,3 @@
+native-link: entry=trace_ret_register_kprobe (5471 bytes), 1 reachable symbol(s) total
+  - trace_ret_register_kprobe (vaddr 0x0, 5471 bytes) [entry]
+native-link: wrote proof object 5888 bytes, 171 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

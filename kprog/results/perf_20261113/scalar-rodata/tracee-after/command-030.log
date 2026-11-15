@@ -1,0 +1,3 @@
+native-link: entry=trace_exec_binprm (11145 bytes), 1 reachable symbol(s) total
+  - trace_exec_binprm (vaddr 0x0, 11145 bytes) [entry]
+native-link: wrote proof object 11574 bytes, 294 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o
