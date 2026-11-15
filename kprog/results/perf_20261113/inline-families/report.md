@@ -165,3 +165,12 @@ No C interpreter, P, producer flags, proof inputs or formal adapters changed.
 A real map/context fixture checks allocated sections and BTF equality;
 validation is pending. Current running backend/its IR remain unchanged and
 continue as the captured control. No isolated compile or runtime gain yet.
+
+2026-11-15T16:41Z first debug-cleanup fixture: executable128B,32B map and
+1062B BTF types are byte-identical;2055 variable updates become0. The test
+failed because it also required entire BTF.ext byte equality:240→224B, one
+line-info entry removed. That assertion overconstrained diagnostic line
+records. The follow-up checks the unchanged BTF function-info payload and
+ordinary instruction-location count separately, while retaining the exact
+code/maps/types comparison and reporting both line-section hashes. Original
+failure/commands persist in raw b-debug-check; corrected check pending.

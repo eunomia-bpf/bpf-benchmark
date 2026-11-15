@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import struct
 import subprocess
 
 from elftools.elf.elffile import ELFFile
@@ -16,6 +17,16 @@ def sections(path):
         return {s.name: dict(bytes=s.data_size, sha256=hashlib.sha256(s.data()).hexdigest())
                 for s in ELFFile(stream).iter_sections()
                 if s['sh_flags'] & 2 or s.name in ('.BTF', '.BTF.ext')}
+
+
+def function_info(path):
+    with path.open('rb') as stream:
+        data = ELFFile(stream).get_section_by_name('.BTF.ext').data()
+    header = struct.unpack_from('<I', data, 4)[0]
+    offset, size = struct.unpack_from('<II', data, 8)
+    if not size or header+offset+size > len(data):
+        raise ValueError('Invalid BTF function info extent')
+    return hashlib.sha256(data[header+offset:header+offset+size]).hexdigest()
 
 
 def check(a):
@@ -63,7 +74,9 @@ char LICENSE[] SEC("license") = "GPL";
         run(['llc-18', '-O3', '-march=bpf', '-mcpu=v4', '-filetype=obj', bitcode, '-o', obj])
         reports[name] = dict(
             debug_variables=len(re.findall(r'call void @llvm\.dbg\.(?:value|declare|assign)\(', ir)),
-            instruction_locations=len(re.findall(r', !dbg !\d+', ir)), sections=sections(obj))
+            instruction_locations=sum(', !dbg !' in line and '@llvm.dbg.' not in line
+                                      for line in ir.splitlines()),
+            btf_function_info_sha256=function_info(obj), sections=sections(obj))
     (a.output/'result.json').write_text(json.dumps(reports, indent=2)+'\n')
     if not reports['before']['debug_variables'] or reports['after']['debug_variables']:
         raise ValueError('B debug variable updates were not removed')
@@ -72,8 +85,16 @@ char LICENSE[] SEC("license") = "GPL";
     for name in ('.BTF', '.BTF.ext', '.maps', 'xdp'):
         if not reports['after']['sections'].get(name, {}).get('bytes'):
             raise ValueError('Required BTF/map/program section missing: '+name)
-    if reports['before']['sections'] != reports['after']['sections']:
-        raise ValueError('B-only debug cleanup changes allocated sections or BTF')
+    # Removing variable updates can remove their otherwise emitted line-info
+    # entries. Program/map bytes, BTF types and function info must still match.
+    for name in ('before', 'after'):
+        reports[name]['code_types_maps'] = {key: value for key, value in
+            reports[name]['sections'].items() if key != '.BTF.ext'}
+    (a.output/'result.json').write_text(json.dumps(reports, indent=2)+'\n')
+    if (reports['before']['code_types_maps'] != reports['after']['code_types_maps'] or
+        reports['before']['btf_function_info_sha256'] != reports['after']['btf_function_info_sha256'] or
+        reports['before']['instruction_locations'] != reports['after']['instruction_locations']):
+        raise ValueError('B debug cleanup changes code/maps/BTF types, function info or instruction location count')
     print(json.dumps(reports), flush=True)
 
 
