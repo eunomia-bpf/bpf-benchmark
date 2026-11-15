@@ -19,7 +19,10 @@ bpf_clear_meta(struct __sk_buff *ctx)
 	WRITE_ONCE(ctx->cb[4], zero);
 
 	/* This needs to be cleared mainly for tcx. */
+#ifndef __bpf__
+#else
 	WRITE_ONCE(ctx->tc_classid, zero);
+#endif
 }
 
 static __always_inline __maybe_unused void

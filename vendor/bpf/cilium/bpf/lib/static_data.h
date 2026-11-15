@@ -62,6 +62,7 @@
  * accesses must be done through this macro to ensure the loader's dead code
  * elimination can recognize them.
  */
+#ifdef __bpf__
 #define CONFIG(name)	\
 (*({			\
 	void *out;	\
@@ -81,3 +82,7 @@
 			: "=r"(out));	\
 	(typeof(__config_##name) *)out;	\
 }))
+#else
+/* The asm names the rodata symbol; natively the declaration is the value. */
+#define CONFIG(name) (__config_##name)
+#endif
