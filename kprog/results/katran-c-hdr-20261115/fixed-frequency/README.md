@@ -106,3 +106,31 @@ failed attempts remain intact; a fresh profile attempt uses the corrected map.
 Corrected retry2 launcher1185536/QEMU1185714 started20:12:15Z and booted with
 the canonical links; its raw directory is
 /workspaces/kprog-raw/perf/20261115-katran-body-profile-retry2/.
+
+The corrected profile completed20:18:33Z, Make0/appOK in both arms, with all73
+host controls restored exactly. This separate1x60s diagnostic retains all LTO,
+imagefc5336c2 and fixed frequency; normal peer CPU15 work may coexist. Its actual
+shim windows are165.295878–226.195782 and296.865980–357.715726 guest seconds.
+Offline exact live-JIT attribution recovers484783/473176 samples in those
+windows despite the stock summary's missing JIT names. Root program text is
+59.604569/52.271865 sampled ns per invocation (1.140280x); these estimates
+include inlined helpers and do not replace the3x180s counters above.
+
+The timed neutral payload matches this profile's installed payload at byte19
+outside568 relocation-immediate bytes, after substituting only this boot's
+captured `this_cpu_off` and `cpu_number` symbol addresses. The other11818 bytes
+match exactly; calls and map pointers are masked, so their runtime values are
+not certified by this match. Both original mismatch diagnostics remain raw.
+Joining retained proof and kernel instruction maps gives45.255691 sampled
+ns/call in balancer_ingress and0.637211 in jhash_2words;6.378963 stays explicitly
+unmapped/expanded/runtime. JIT BTF source samples are retained separately:
+that arm still includes inlined helper instructions, so dividing its total by
+the retained native subset would not establish pure-body speedup. The1.50x
+body-speed target stays open. `profile/source-costs.json` records the scopes,
+byte matching, original counters, source lines and helper stacks.
+
+Conditional on a captured BPF frame, both arms still sample substantial
+pvclock_clocksource_read_nowd, htab_map_hash and lookup_nulls_elem_raw work.
+Static clock binding alone does not remove the underlying clocksource cost.
+This identifies shared helper costs for follow-up without attributing the
+whole-program3.15% gain to an individual optimization.

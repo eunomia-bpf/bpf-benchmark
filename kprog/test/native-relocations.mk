@@ -465,9 +465,10 @@ memory-b-continuation-check: $(CONTEXT_TOOL)
 
 # Audit the published canonical linker; do not rebuild it during artifact analysis.
 KATRAN_LINK_PLAN ?=
+KATRAN_AUDIT_JIT ?=
 .PHONY: katran-helper-audit
 katran-helper-audit:
-	taskset -c 16-19 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/audit_native_helper_sites.py --native $(ROOT)/corpus/results/katran-c-hdr-20261115/objects/balancer.native.o --symbol balancer_ingress --linker $(LINKER_BINARY) $(if $(KATRAN_LINK_PLAN),--link-plan $(KATRAN_LINK_PLAN),) --output $(OUTPUT)
+	taskset -c 16-19 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/audit_native_helper_sites.py --native $(ROOT)/corpus/results/katran-c-hdr-20261115/objects/balancer.native.o --symbol balancer_ingress --linker $(LINKER_BINARY) $(if $(KATRAN_LINK_PLAN),--link-plan $(KATRAN_LINK_PLAN),) $(if $(KATRAN_AUDIT_JIT),--jit-capture $(KATRAN_AUDIT_JIT) --jit-program 16,) --output $(OUTPUT)
 
 .PHONY: clock-kernel-facts
 clock-kernel-facts:
@@ -521,3 +522,7 @@ profile-input-smoke:
 .PHONY: katran-profile-analysis
 katran-profile-analysis:
 	taskset -c 8-11 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/perf/profile/jit-window-costs.py --directory /workspaces/kprog-raw/perf/20261115-katran-body-profile-retry2/profile --run $(ROOT)/corpus/results/x86_kvm_corpus_20261115_201355_537645 --perf /var/tmp/kprog-tmp/C/perf-build/perf --app katran --output $(OUTPUT)
+
+.PHONY: katran-source-costs
+katran-source-costs:
+	python3 $(ROOT)/kprog/perf/profile/source-costs.py --analysis /workspaces/kprog-raw/perf/20261115-katran-body-profile-retry2/analysis-callers/result.json --source-map /workspaces/kprog-raw/perf/20261115-katran-body-profile-retry2/source-audit-profile-facts/jit-source-map.json --baseline-capture /workspaces/kprog-raw/perf/20261115-katran-body-profile-retry2/profile/baseline.jit-lines.json --output $(OUTPUT)

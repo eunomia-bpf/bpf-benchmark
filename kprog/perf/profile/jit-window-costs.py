@@ -101,6 +101,7 @@ def analyze(args):
 
         windows = intervals(args.run/'details/shim-logs'/f'{args.app}.{phase}.log')
         roots, root_periods, inclusive, inclusive_periods = [Counter() for _ in range(4)]
+        under_jit = {ident: Counter() for ident in programs}
         commands, samples, periods = [], 0, 0
         for first, last in windows:
             command = [str(args.perf), 'script', '-i', str(args.directory/f'{phase}.data'),
@@ -120,6 +121,8 @@ def analyze(args):
                     for sym in {r[0] for r in resolved}:
                         inclusive[sym] += 1
                         inclusive_periods[sym] += period
+                    for parent in {r[1] for r in resolved if r[1] is not None}:
+                        under_jit[parent][symbol] += period
                     if ident is not None:
                         p = programs[ident]
                         p['samples'] += 1
@@ -132,6 +135,7 @@ def analyze(args):
         for p in programs.values():
             p['offset_period_ns'] = sorted(p.pop('offsets').items())
             p['measured_counters'] = measured.get(str(p['id']))
+            p['root_period_ns_on_program_chain'] = dict(under_jit[p['id']].most_common())
             if p['measured_counters'] and p['measured_counters']['run_cnt_delta']:
                 p['sampled_text_ns_per_call'] = p['period_ns']/p['measured_counters']['run_cnt_delta']
         result['phases'][phase] = dict(windows=windows, commands=commands,

@@ -1,0 +1,286 @@
+{
+  "scope": "Join offline root sample offsets with byte-matched retained source instructions.\n\nThe native retained subset excludes expanded instructions and generated helpers.\nThe JIT text still contains inlined helpers; its BTF line attribution is sampled\ndebug information, not a semantic boundary between helpers and application work.\nThese scopes cannot establish a pure-body speedup by dividing their totals.\n",
+  "source_map": {
+    "capture": "/workspaces/kprog-raw/perf/20261115-katran-body-profile-retry2/profile/post_rejit.jit-lines.json",
+    "program": 16,
+    "installed_bytes": 12418,
+    "installed_sha256": "2136b9cad52170510547bc605a23a6a267f7f53960115fc054ee2e4cca6fafd1",
+    "payload_start": 19,
+    "payload_bytes": 12386,
+    "unmasked_bytes": 11818,
+    "relocation_masked_bytes": 568,
+    "matched_unmasked_bytes": true,
+    "scope": "Only exactly joined retained instructions; expanded/synthetic instructions remain unmapped. Relocated immediates are masked; this does not prove their runtime values."
+  },
+  "native_retained_output_bytes": {
+    "balancer_ingress": 8130,
+    "jhash": 223,
+    "jhash_2words": 88
+  },
+  "native_root_period_ns": {
+    "balancer_ingress": 6611611605,
+    "[unmapped/expanded/runtime]": 931931931,
+    "jhash_2words": 93093093
+  },
+  "native_sampled_ns_per_call": {
+    "balancer_ingress": 45.25569088492599,
+    "[unmapped/expanded/runtime]": 6.378962636467237,
+    "jhash_2words": 0.6372110904312063
+  },
+  "baseline_sampled_text_ns_per_call": 59.604569382498205,
+  "native_sampled_text_ns_per_call": 52.271864611824434,
+  "baseline_top_btf_lines": [
+    {
+      "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+      "line": 889,
+      "text": "          key = *real_pos;",
+      "period_ns": 1681681680,
+      "sampled_ns_per_call": 11.45717123141842
+    },
+    {
+      "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/csum_helpers.h",
+      "line": 56,
+      "text": "    *csum += *next_iph_u16++;",
+      "period_ns": 1211211210,
+      "sampled_ns_per_call": 8.251891184533505
+    },
+    {
+      "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+      "line": 150,
+      "text": "    key = *real_pos;",
+      "period_ns": 968968968,
+      "sampled_ns_per_call": 6.601512947626804
+    },
+    {
+      "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+      "line": 143,
+      "text": "    hash = get_packet_hash(pckt, hash_16bytes) % RING_SIZE;",
+      "period_ns": 775775775,
+      "sampled_ns_per_call": 5.285302204969807
+    },
+    {
+      "file": "/workspaces/repository/vendor/repos/katran/katran/lib/linux_includes/jhash.h",
+      "line": 8,
+      "text": "  return (word << shift) | (word >> ((-shift) & 31));",
+      "period_ns": 292292292,
+      "sampled_ns_per_call": 1.991365475937011
+    },
+    {
+      "file": "/workspaces/repository/vendor/repos/katran/katran/lib/linux_includes/jhash.h",
+      "line": 106,
+      "text": "  __jhash_final(a, b, c);",
+      "period_ns": 273273273,
+      "sampled_ns_per_call": 1.8617903251054932
+    },
+    {
+      "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+      "line": 1051,
+      "text": "  data_stats->v1 += 1;",
+      "period_ns": 258258258,
+      "sampled_ns_per_call": 1.7594941533964001
+    },
+    {
+      "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+      "line": 1047,
+      "text": "  data_stats = bpf_map_lookup_elem(&reals_stats, &pckt.real_index);",
+      "period_ns": 222222222,
+      "sampled_ns_per_call": 1.513983341294577
+    },
+    {
+      "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+      "line": 1105,
+      "text": "  data_stats->v1 += 1;",
+      "period_ns": 192192192,
+      "sampled_ns_per_call": 1.309390997876391
+    },
+    {
+      "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+      "line": 144,
+      "text": "    key = RING_SIZE * (vip_info->vip_num) + hash;",
+      "period_ns": 124124124,
+      "sampled_ns_per_call": 0.845648352795169
+    },
+    {
+      "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/encap_helpers.h",
+      "line": 73,
+      "text": "  iph->check = csum;",
+      "period_ns": 124124124,
+      "sampled_ns_per_call": 0.845648352795169
+    },
+    {
+      "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+      "line": 660,
+      "text": "      vip_info->flags & F_UDP_FLOW_MIGRATION && !is_under_flood(&cur_time)) {",
+      "period_ns": 116116116,
+      "sampled_ns_per_call": 0.7910903945503195
+    },
+    {
+      "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+      "line": 50,
+      "text": "  if ((*cur_time - conn_rate_stats->v2) > ONE_SEC) {",
+      "period_ns": 110110110,
+      "sampled_ns_per_call": 0.7501719258666822
+    },
+    {
+      "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+      "line": 1108,
+      "text": "  eth_proto = eth->h_proto;",
+      "period_ns": 107107107,
+      "sampled_ns_per_call": 0.7297126915248636
+    },
+    {
+      "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/csum_helpers.h",
+      "line": 34,
+      "text": "    if (csum >> 16)",
+      "period_ns": 103103103,
+      "sampled_ns_per_call": 0.7024337124024388
+    },
+    {
+      "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+      "line": 1059,
+      "text": "  pckt.flow.port16[0] = original_sport;",
+      "period_ns": 93093093,
+      "sampled_ns_per_call": 0.6342362645963768
+    },
+    {
+      "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+      "line": 0,
+      "text": null,
+      "period_ns": 89089089,
+      "sampled_ns_per_call": 0.606957285473952
+    },
+    {
+      "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+      "line": 34,
+      "text": "    return jhash_2words(pckt->flow.src, pckt->flow.ports, INIT_JHASH_SEED);",
+      "period_ns": 89089089,
+      "sampled_ns_per_call": 0.606957285473952
+    },
+    {
+      "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+      "line": 160,
+      "text": "  if (!(*real)) {",
+      "period_ns": 73073073,
+      "sampled_ns_per_call": 0.49784136898425274
+    },
+    {
+      "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+      "line": 42,
+      "text": "      bpf_map_lookup_elem(&stats, &conn_rate_key);",
+      "period_ns": 71071071,
+      "sampled_ns_per_call": 0.4842018794230404
+    }
+  ],
+  "phases": {
+    "baseline": {
+      "samples": 484783,
+      "windows": [
+        [
+          165.295878,
+          226.195782
+        ]
+      ],
+      "measured_programs": [
+        {
+          "id": 9,
+          "counters": {
+            "bytes_jited": 13641,
+            "bytes_xlated": 23840,
+            "id": 9,
+            "name": "balancer_ingres",
+            "run_cnt_delta": 146779833,
+            "run_time_ns_delta": 26172868869,
+            "type": "xdp"
+          },
+          "root_period_ns_on_program_chain": {
+            "jit:9:balancer_ingres": 8748748740,
+            "pvclock_clocksource_read_nowd": 6431431425,
+            "htab_map_hash": 2950950948,
+            "lookup_nulls_elem_raw": 2201201199,
+            "ktime_get_mono_fast_ns": 773773773,
+            "_raw_spin_unlock_irqrestore": 219219219,
+            "htab_lru_map_lookup_elem": 211211211,
+            "memcmp": 197197197,
+            "__htab_map_lookup_elem": 173173173,
+            "kvm_clock_get_cycles": 145145145,
+            "bpf_xdp_adjust_head": 122122122,
+            "bpf_map_lookup_elem": 83083083,
+            "bpf_ktime_get_ns": 82082082,
+            "htab_lru_map_update_elem": 56056056,
+            "memcpy": 9009009,
+            "its_return_thunk": 6006006,
+            "bpf_common_lru_pop_free": 5005005,
+            "_raw_spin_lock_irqsave": 3003003,
+            "bpf_lru_pop_free": 3003003,
+            "prealloc_lru_pop": 2002002,
+            "bpf_map_update_elem": 2002002,
+            "bpf_obj_memcpy": 1001001
+          },
+          "remaining_root_period_ns": 0
+        }
+      ]
+    },
+    "post_rejit": {
+      "samples": 473176,
+      "windows": [
+        [
+          296.86598,
+          357.715726
+        ]
+      ],
+      "measured_programs": [
+        {
+          "id": 16,
+          "counters": {
+            "bytes_jited": 12418,
+            "bytes_xlated": 16,
+            "id": 16,
+            "name": "balancer_ingres",
+            "run_cnt_delta": 146094590,
+            "run_time_ns_delta": 25651587193,
+            "type": "xdp"
+          },
+          "root_period_ns_on_program_chain": {
+            "jit:16:balancer_ingres": 7636636629,
+            "pvclock_clocksource_read_nowd": 6444444438,
+            "htab_map_hash": 3006006003,
+            "lookup_nulls_elem_raw": 2156156154,
+            "ktime_get_mono_fast_ns": 838838838,
+            "htab_lru_map_lookup_elem": 232232232,
+            "_raw_spin_unlock_irqrestore": 231231231,
+            "memcmp": 222222222,
+            "kvm_clock_get_cycles": 169169169,
+            "__htab_map_lookup_elem": 148148148,
+            "bpf_xdp_adjust_head": 117117117,
+            "bpf_map_lookup_elem": 86086086,
+            "htab_lru_map_update_elem": 65065065,
+            "array_of_map_lookup_elem": 39039039,
+            "memcpy": 12012012,
+            "bpf_common_lru_pop_free": 9009009,
+            "its_return_thunk": 8008008,
+            "prealloc_lru_pop": 8008008,
+            "_raw_spin_lock_irqsave": 5005005,
+            "bpf_lru_pop_free": 4004004,
+            "bpf_map_update_elem": 3003003,
+            "bpf_obj_memcpy": 2002002
+          },
+          "remaining_root_period_ns": 0
+        }
+      ]
+    }
+  },
+  "profile_boot_fact": {
+    "symbol": "this_cpu_off",
+    "supplied": 18446744072152088616,
+    "observed": 18446744071732658216,
+    "cpu_number_observed": 18446744071732658228,
+    "kallsyms": "/workspaces/kprog-raw/perf/20261115-katran-body-profile-retry2/profile/post_rejit.kallsyms",
+    "scope": "Only directly encoded per-CPU boot addresses are updated; calls/map immediates are relocation-masked, not value-certified"
+  },
+  "runtime_template": {
+    "bytes": 12386,
+    "sha256": "9e75ad307883b36f4947c84687902c1108756c6d5c0a54d6e1e48d425cd8e197"
+  },
+  "actual_timed_template_sha256": "d4daae8dd48c4f75d2a609e55c43d0321dcf042dc0ca270975eadae6ceb69e33",
+  "raw_directory": "/workspaces/kprog-raw/perf/20261115-katran-body-profile-retry2"
+}
