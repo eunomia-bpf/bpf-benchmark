@@ -59,6 +59,18 @@ build:
 preserve-running-linker:
 	flock -s /workspaces/.agent-state/kprog-lanes/locks/image python3 $(ROOT)/kprog/test/preserve_running_linker.py --canonical $(LINKER_TARGET)/release/native-link --retained $(ROOT)/corpus/results/perf-corrected-all-lto-linker-20261114/native-link-on --loader /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader --output $(OUTPUT)/pairing
 
+# The queued run_verified_make caller holds image EX before Make starts.
+.PHONY: publish-normal-pair
+publish-normal-pair: $(CONTEXT_TOOL)
+	install -d $(OUTPUT)
+	git -C $(ROOT) rev-parse HEAD > $(OUTPUT)/source-head.txt
+	CMAKE_BUILD_PARALLEL_LEVEL=2 $(MAKE) -r -C $(ROOT)/kprog/libnativeloader trusted-service BUILD_DIR=/workspaces/.agent-state/kprog-ck/verified-loader
+	if test -L $(LINKER_TARGET)/release/native-link; then unlink $(LINKER_TARGET)/release/native-link; fi
+	taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
+	install -m755 $(CONTEXT_TOOL) /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds
+	sha256sum $(LINKER_TARGET)/release/native-link /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader /workspaces/.agent-state/kprog-ck/verified-loader/libnative_loader.a /workspaces/.agent-state/kprog-ck/verified-loader/libnative_loader.so /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds > $(OUTPUT)/tool-sha256.txt
+	date -u +%FT%TZ > $(OUTPUT)/published
+
 .PHONY: evidence
 evidence: $(KERNEL_LAYOUT)
 	taskset -c 8-11 prlimit --as=12884901888 -- python3 $(ROOT)/kprog/test/check_non_pic_maps.py --build $(BUILD) --output $(OUTPUT)/maps --linker $(LINKER_BINARY) --kernel-layout $(KERNEL_LAYOUT)

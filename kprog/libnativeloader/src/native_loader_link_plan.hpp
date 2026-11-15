@@ -128,11 +128,11 @@ inline void write_json_array(std::ostream &out,
 inline const std::string &native_kernel_lto_layout()
 {
     static const std::string kernel_layout = [] {
-        std::unique_ptr<btf, decltype(&btf__free)> types(btf__load_vmlinux_btf(), btf__free);
-        if (!types || libbpf_get_error(types.get())) {
-            types.release(); // libbpf encoded error pointers are not allocations.
+        btf *loaded = btf__load_vmlinux_btf();
+        if (!loaded || libbpf_get_error(loaded)) {
             fail("load running kernel BTF for native LTO");
         }
+        std::unique_ptr<btf, decltype(&btf__free)> types(loaded, btf__free);
         std::ostringstream facts;
         native_lto::write_layout(facts, types.get(), [](const char *name) {
             return kallsyms_lookup(name);
