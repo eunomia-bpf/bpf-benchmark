@@ -26,3 +26,7 @@ hardware:
 	install -d $(OUTPUT)
 	python3 $(ROOT)/kprog/test/check_x86_mul.py $(HARDWARE_BUILD)
 	cp $(HARDWARE_BUILD)/result.json $(HARDWARE_BUILD)/compile.stdout $(HARDWARE_BUILD)/compile.stderr $(OUTPUT)/
+
+.PHONY: baseline-control
+baseline-control:
+	python3 $(ROOT)/kprog/test/compare_control_header.py --baseline d4a6e8fed --output /workspaces/kprog-raw/perf/20261115-preprocess-growth/baseline-control
