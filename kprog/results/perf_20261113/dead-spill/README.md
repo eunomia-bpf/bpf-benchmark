@@ -32,3 +32,11 @@ This is code generation evidence; stock verification and checked installation
 are still open. `actual-main.json` retains the exact input identities and scope;
 raw `/workspaces/kprog-raw/perf/20261115-otel-main-spill-replay/` keeps every
 command, retained metadata, lowering observation and compiler diagnostic.
+
+The retained optimized-IR backend comparison completes all six choices. Normal,
+basic, PBQP, disabled machine LICM and disabled machine scheduling each report
+an actual post-PEI frame of784B. LLVM18 rejects the requested `source` scheduler
+name explicitly. No candidate changes the production compiler. All ephemeral
+outputs close after each case; `backend-choices.json` records every command,
+resource measurement and outcome. The coordinator20:38 order now puts Katran
+hot-instruction comparison before the next OTel app attempt.

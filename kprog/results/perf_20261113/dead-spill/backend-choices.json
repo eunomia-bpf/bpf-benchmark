@@ -1,0 +1,588 @@
+{
+  "archive": "/workspaces/kprog-raw/perf/20261115-otel-current-app-retry2/service.tar.gz",
+  "member": "service/requests/3.failure.tar.gz",
+  "entry": "perf_unwind_native",
+  "bounds_bytes": 1994244,
+  "bounds_sha256": "3219dcb550243434ae63bf14686ecf1e472ad9276e729359500731ae9e1d1b8c",
+  "compile_flags": [
+    "-w",
+    "-g",
+    "-O3",
+    "-mcpu=v4",
+    "-target",
+    "bpf",
+    "-mllvm",
+    "-bpf-stack-size=4096",
+    "-D__TARGET_ARCH_x86",
+    "-I",
+    "/workspaces/repository/vendor/libbpf/include/uapi",
+    "-I",
+    "/workspaces/repository/vendor/libbpf/src",
+    "-I",
+    "/usr/include/x86_64-linux-gnu"
+  ],
+  "scope": "Diagnose stack pressure on one retained optimized B IR, with ephemeral outputs.\n\nEach backend choice consumes the same completed bounds IR. Native P, the C\nfrontend, bounds transformation and production defaults remain unchanged.\n",
+  "cases": [
+    {
+      "name": "normal",
+      "flags": [],
+      "completed": true,
+      "commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-x",
+            "ir",
+            "-w",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-c",
+            "/proc/self/fd/3",
+            "-mllvm",
+            "-stop-before=prologepilog",
+            "-o",
+            "/proc/self/fd/5"
+          ],
+          "returncode": 0,
+          "wall_seconds": 8.90796727599809,
+          "user_seconds": 8.775334,
+          "system_seconds": 0.129781,
+          "max_rss_kib": 297156
+        },
+        {
+          "command": [
+            "/opt/virtme-ng/bin/python3",
+            "/workspaces/repository/kprog/x86/whole_word_spills.py",
+            "/proc/self/fd/5",
+            "/proc/self/fd/6",
+            "--report",
+            "/workspaces/kprog-raw/perf/20261115-otel-main-backend-choices/normal/lowering.json"
+          ],
+          "returncode": 0,
+          "wall_seconds": 6.0050658239924815,
+          "user_seconds": 5.856733,
+          "system_seconds": 0.145968,
+          "max_rss_kib": 167332
+        },
+        {
+          "command": [
+            "llc-18",
+            "-x=mir",
+            "-O3",
+            "-march=bpf",
+            "-mcpu=v4",
+            "-bpf-stack-size=4096",
+            "-start-before=prologepilog",
+            "-filetype=obj",
+            "/proc/self/fd/6",
+            "-o",
+            "/proc/self/fd/4"
+          ],
+          "returncode": 0,
+          "wall_seconds": 1.4919097209931351,
+          "user_seconds": 1.415494,
+          "system_seconds": 0.075972,
+          "max_rss_kib": 215856
+        },
+        {
+          "command": [
+            "llc-18",
+            "-x=mir",
+            "-O3",
+            "-march=bpf",
+            "-mcpu=v4",
+            "-bpf-stack-size=4096",
+            "-start-before=prologepilog",
+            "-stop-after=prologepilog",
+            "/proc/self/fd/6",
+            "-o",
+            "/proc/self/fd/7"
+          ],
+          "returncode": 0,
+          "wall_seconds": 1.3748002869833726,
+          "user_seconds": 1.287268,
+          "system_seconds": 0.087018,
+          "max_rss_kib": 230768
+        }
+      ],
+      "spill_slots_before_packing": 52,
+      "object_bytes": 2176496,
+      "post_pei_stack_bytes": {
+        "trusted_x86_x86_sim_xdp": 784
+      }
+    },
+    {
+      "name": "basic",
+      "flags": [
+        "-regalloc=basic"
+      ],
+      "completed": true,
+      "commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-x",
+            "ir",
+            "-mllvm",
+            "-regalloc=basic",
+            "-w",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-c",
+            "/proc/self/fd/3",
+            "-mllvm",
+            "-stop-before=prologepilog",
+            "-o",
+            "/proc/self/fd/5"
+          ],
+          "returncode": 0,
+          "wall_seconds": 8.530597912991652,
+          "user_seconds": 8.412395,
+          "system_seconds": 0.116924,
+          "max_rss_kib": 288700
+        },
+        {
+          "command": [
+            "/opt/virtme-ng/bin/python3",
+            "/workspaces/repository/kprog/x86/whole_word_spills.py",
+            "/proc/self/fd/5",
+            "/proc/self/fd/6",
+            "--report",
+            "/workspaces/kprog-raw/perf/20261115-otel-main-backend-choices/basic/lowering.json"
+          ],
+          "returncode": 0,
+          "wall_seconds": 6.045592887996463,
+          "user_seconds": 5.89449,
+          "system_seconds": 0.14996099999999998,
+          "max_rss_kib": 148172
+        },
+        {
+          "command": [
+            "llc-18",
+            "-x=mir",
+            "-O3",
+            "-march=bpf",
+            "-mcpu=v4",
+            "-bpf-stack-size=4096",
+            "-start-before=prologepilog",
+            "-filetype=obj",
+            "/proc/self/fd/6",
+            "-o",
+            "/proc/self/fd/4"
+          ],
+          "returncode": 0,
+          "wall_seconds": 1.4870461749960668,
+          "user_seconds": 1.402159,
+          "system_seconds": 0.08295,
+          "max_rss_kib": 215232
+        },
+        {
+          "command": [
+            "llc-18",
+            "-x=mir",
+            "-O3",
+            "-march=bpf",
+            "-mcpu=v4",
+            "-bpf-stack-size=4096",
+            "-start-before=prologepilog",
+            "-stop-after=prologepilog",
+            "/proc/self/fd/6",
+            "-o",
+            "/proc/self/fd/7"
+          ],
+          "returncode": 0,
+          "wall_seconds": 1.3498022229759954,
+          "user_seconds": 1.253324,
+          "system_seconds": 0.096024,
+          "max_rss_kib": 231896
+        }
+      ],
+      "spill_slots_before_packing": 52,
+      "object_bytes": 2113952,
+      "post_pei_stack_bytes": {
+        "trusted_x86_x86_sim_xdp": 784
+      }
+    },
+    {
+      "name": "pbqp",
+      "flags": [
+        "-regalloc=pbqp"
+      ],
+      "completed": true,
+      "commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-x",
+            "ir",
+            "-mllvm",
+            "-regalloc=pbqp",
+            "-w",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-c",
+            "/proc/self/fd/3",
+            "-mllvm",
+            "-stop-before=prologepilog",
+            "-o",
+            "/proc/self/fd/5"
+          ],
+          "returncode": 0,
+          "wall_seconds": 12.277950048010098,
+          "user_seconds": 12.096439,
+          "system_seconds": 0.176802,
+          "max_rss_kib": 313504
+        },
+        {
+          "command": [
+            "/opt/virtme-ng/bin/python3",
+            "/workspaces/repository/kprog/x86/whole_word_spills.py",
+            "/proc/self/fd/5",
+            "/proc/self/fd/6",
+            "--report",
+            "/workspaces/kprog-raw/perf/20261115-otel-main-backend-choices/pbqp/lowering.json"
+          ],
+          "returncode": 0,
+          "wall_seconds": 7.223981660994468,
+          "user_seconds": 7.093587,
+          "system_seconds": 0.128992,
+          "max_rss_kib": 153880
+        },
+        {
+          "command": [
+            "llc-18",
+            "-x=mir",
+            "-O3",
+            "-march=bpf",
+            "-mcpu=v4",
+            "-bpf-stack-size=4096",
+            "-start-before=prologepilog",
+            "-filetype=obj",
+            "/proc/self/fd/6",
+            "-o",
+            "/proc/self/fd/4"
+          ],
+          "returncode": 0,
+          "wall_seconds": 1.4940050469886046,
+          "user_seconds": 1.409537,
+          "system_seconds": 0.08397199999999999,
+          "max_rss_kib": 217360
+        },
+        {
+          "command": [
+            "llc-18",
+            "-x=mir",
+            "-O3",
+            "-march=bpf",
+            "-mcpu=v4",
+            "-bpf-stack-size=4096",
+            "-start-before=prologepilog",
+            "-stop-after=prologepilog",
+            "/proc/self/fd/6",
+            "-o",
+            "/proc/self/fd/7"
+          ],
+          "returncode": 0,
+          "wall_seconds": 1.3864365339977667,
+          "user_seconds": 1.2869220000000001,
+          "system_seconds": 0.098994,
+          "max_rss_kib": 233848
+        }
+      ],
+      "spill_slots_before_packing": 53,
+      "object_bytes": 2170808,
+      "post_pei_stack_bytes": {
+        "trusted_x86_x86_sim_xdp": 784
+      }
+    },
+    {
+      "name": "source",
+      "flags": [
+        "-misched=source"
+      ],
+      "completed": false,
+      "commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-x",
+            "ir",
+            "-mllvm",
+            "-misched=source",
+            "-w",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-c",
+            "/proc/self/fd/3",
+            "-mllvm",
+            "-stop-before=prologepilog",
+            "-o",
+            "/proc/self/fd/5"
+          ],
+          "returncode": 1,
+          "wall_seconds": 0.02171886299038306,
+          "user_seconds": 0.00769,
+          "system_seconds": 0.013770999999999999,
+          "max_rss_kib": 114772
+        }
+      ],
+      "error": "Command '['/workspaces/repository/kprog/stock-path/bin/clang', '-x', 'ir', '-mllvm', '-misched=source', '-w', '-g', '-O3', '-mcpu=v4', '-target', 'bpf', '-mllvm', '-bpf-stack-size=4096', '-D__TARGET_ARCH_x86', '-I', '/workspaces/repository/vendor/libbpf/include/uapi', '-I', '/workspaces/repository/vendor/libbpf/src', '-I', '/usr/include/x86_64-linux-gnu', '-c', '/proc/self/fd/3', '-mllvm', '-stop-before=prologepilog', '-o', '/proc/self/fd/5']' returned non-zero exit status 1."
+    },
+    {
+      "name": "no-machine-licm",
+      "flags": [
+        "-disable-machine-licm"
+      ],
+      "completed": true,
+      "commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-x",
+            "ir",
+            "-mllvm",
+            "-disable-machine-licm",
+            "-w",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-c",
+            "/proc/self/fd/3",
+            "-mllvm",
+            "-stop-before=prologepilog",
+            "-o",
+            "/proc/self/fd/5"
+          ],
+          "returncode": 0,
+          "wall_seconds": 8.613938496011542,
+          "user_seconds": 8.47827,
+          "system_seconds": 0.13297599999999998,
+          "max_rss_kib": 297040
+        },
+        {
+          "command": [
+            "/opt/virtme-ng/bin/python3",
+            "/workspaces/repository/kprog/x86/whole_word_spills.py",
+            "/proc/self/fd/5",
+            "/proc/self/fd/6",
+            "--report",
+            "/workspaces/kprog-raw/perf/20261115-otel-main-backend-choices/no-machine-licm/lowering.json"
+          ],
+          "returncode": 0,
+          "wall_seconds": 6.043060414987849,
+          "user_seconds": 5.890869,
+          "system_seconds": 0.150971,
+          "max_rss_kib": 167336
+        },
+        {
+          "command": [
+            "llc-18",
+            "-x=mir",
+            "-O3",
+            "-march=bpf",
+            "-mcpu=v4",
+            "-bpf-stack-size=4096",
+            "-start-before=prologepilog",
+            "-filetype=obj",
+            "/proc/self/fd/6",
+            "-o",
+            "/proc/self/fd/4"
+          ],
+          "returncode": 0,
+          "wall_seconds": 1.4700233379844576,
+          "user_seconds": 1.3824239999999999,
+          "system_seconds": 0.08702599999999999,
+          "max_rss_kib": 216088
+        },
+        {
+          "command": [
+            "llc-18",
+            "-x=mir",
+            "-O3",
+            "-march=bpf",
+            "-mcpu=v4",
+            "-bpf-stack-size=4096",
+            "-start-before=prologepilog",
+            "-stop-after=prologepilog",
+            "/proc/self/fd/6",
+            "-o",
+            "/proc/self/fd/7"
+          ],
+          "returncode": 0,
+          "wall_seconds": 1.3472889769764151,
+          "user_seconds": 1.248797,
+          "system_seconds": 0.097984,
+          "max_rss_kib": 230412
+        }
+      ],
+      "spill_slots_before_packing": 52,
+      "object_bytes": 2176496,
+      "post_pei_stack_bytes": {
+        "trusted_x86_x86_sim_xdp": 784
+      }
+    },
+    {
+      "name": "no-misched",
+      "flags": [
+        "-enable-misched=false"
+      ],
+      "completed": true,
+      "commands": [
+        {
+          "command": [
+            "/workspaces/repository/kprog/stock-path/bin/clang",
+            "-x",
+            "ir",
+            "-mllvm",
+            "-enable-misched=false",
+            "-w",
+            "-g",
+            "-O3",
+            "-mcpu=v4",
+            "-target",
+            "bpf",
+            "-mllvm",
+            "-bpf-stack-size=4096",
+            "-D__TARGET_ARCH_x86",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/include/uapi",
+            "-I",
+            "/workspaces/repository/vendor/libbpf/src",
+            "-I",
+            "/usr/include/x86_64-linux-gnu",
+            "-c",
+            "/proc/self/fd/3",
+            "-mllvm",
+            "-stop-before=prologepilog",
+            "-o",
+            "/proc/self/fd/5"
+          ],
+          "returncode": 0,
+          "wall_seconds": 8.553639240999473,
+          "user_seconds": 8.395048,
+          "system_seconds": 0.15709399999999998,
+          "max_rss_kib": 296828
+        },
+        {
+          "command": [
+            "/opt/virtme-ng/bin/python3",
+            "/workspaces/repository/kprog/x86/whole_word_spills.py",
+            "/proc/self/fd/5",
+            "/proc/self/fd/6",
+            "--report",
+            "/workspaces/kprog-raw/perf/20261115-otel-main-backend-choices/no-misched/lowering.json"
+          ],
+          "returncode": 0,
+          "wall_seconds": 6.108105788007379,
+          "user_seconds": 5.970135,
+          "system_seconds": 0.13598,
+          "max_rss_kib": 167212
+        },
+        {
+          "command": [
+            "llc-18",
+            "-x=mir",
+            "-O3",
+            "-march=bpf",
+            "-mcpu=v4",
+            "-bpf-stack-size=4096",
+            "-start-before=prologepilog",
+            "-filetype=obj",
+            "/proc/self/fd/6",
+            "-o",
+            "/proc/self/fd/4"
+          ],
+          "returncode": 0,
+          "wall_seconds": 1.4851769499946386,
+          "user_seconds": 1.403704,
+          "system_seconds": 0.080982,
+          "max_rss_kib": 215788
+        },
+        {
+          "command": [
+            "llc-18",
+            "-x=mir",
+            "-O3",
+            "-march=bpf",
+            "-mcpu=v4",
+            "-bpf-stack-size=4096",
+            "-start-before=prologepilog",
+            "-stop-after=prologepilog",
+            "/proc/self/fd/6",
+            "-o",
+            "/proc/self/fd/7"
+          ],
+          "returncode": 0,
+          "wall_seconds": 1.3676755590131506,
+          "user_seconds": 1.270147,
+          "system_seconds": 0.097011,
+          "max_rss_kib": 230784
+        }
+      ],
+      "spill_slots_before_packing": 52,
+      "object_bytes": 2176496,
+      "post_pei_stack_bytes": {
+        "trusted_x86_x86_sim_xdp": 784
+      }
+    }
+  ]
+}

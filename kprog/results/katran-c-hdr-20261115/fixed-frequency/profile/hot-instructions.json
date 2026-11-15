@@ -1,0 +1,3319 @@
+{
+  "scope": "Decode root samples against the exact live JIT bytes in both measured arms.\n\nCPU-clock attribution has sampling skid and possible periodic aliasing. A hot\nload or an instruction after a call is not proof of load latency or call cost.\nStack-address syntax does not establish compiler spills. Retained native source\nintervals leave all expanded/synthetic instructions explicitly unmapped.\n",
+  "phases": {
+    "baseline": {
+      "id": 9,
+      "bytes": 13641,
+      "measured_counters": {
+        "bytes_jited": 13641,
+        "bytes_xlated": 23840,
+        "id": 9,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 146779833,
+        "run_time_ns_delta": 26172868869,
+        "type": "xdp"
+      },
+      "sampled_text_ns_per_call": 59.604569382498205,
+      "category_sampled_ns_per_call": {
+        "other": 28.404237011224833,
+        "other_memory_operand": 7.5630969616922785,
+        "rbp_address_operand": 21.489015803690144,
+        "control": 1.4798846173915459,
+        "call": 0.10229617170909304,
+        "stack_frame": 0.5660388167903148
+      },
+      "hot_64byte_blocks": [
+        {
+          "offset": 9344,
+          "sampled_ns_per_call": 11.545827913566301
+        },
+        {
+          "offset": 11968,
+          "sampled_ns_per_call": 7.453981045202579
+        },
+        {
+          "offset": 11072,
+          "sampled_ns_per_call": 6.826564525386808
+        },
+        {
+          "offset": 11008,
+          "sampled_ns_per_call": 5.810422553076484
+        },
+        {
+          "offset": 10240,
+          "sampled_ns_per_call": 3.675842436746743
+        },
+        {
+          "offset": 13568,
+          "sampled_ns_per_call": 2.4073699075539894
+        },
+        {
+          "offset": 128,
+          "sampled_ns_per_call": 2.0391036894012546
+        },
+        {
+          "offset": 12032,
+          "sampled_ns_per_call": 1.5685412995394266
+        },
+        {
+          "offset": 12096,
+          "sampled_ns_per_call": 1.3503094665600281
+        },
+        {
+          "offset": 10944,
+          "sampled_ns_per_call": 0.9479445245042621
+        },
+        {
+          "offset": 13504,
+          "sampled_ns_per_call": 0.8933865662594125
+        },
+        {
+          "offset": 9664,
+          "sampled_ns_per_call": 0.8661075871369877
+        },
+        {
+          "offset": 9728,
+          "sampled_ns_per_call": 0.6546954989381955
+        },
+        {
+          "offset": 9280,
+          "sampled_ns_per_call": 0.6137770302545582
+        },
+        {
+          "offset": 11264,
+          "sampled_ns_per_call": 0.49784136898425274
+        },
+        {
+          "offset": 11200,
+          "sampled_ns_per_call": 0.4773821346424342
+        },
+        {
+          "offset": 10880,
+          "sampled_ns_per_call": 0.47056238986182797
+        },
+        {
+          "offset": 9408,
+          "sampled_ns_per_call": 0.38872545249455354
+        },
+        {
+          "offset": 11904,
+          "sampled_ns_per_call": 0.3546267285915225
+        },
+        {
+          "offset": 0,
+          "sampled_ns_per_call": 0.3409872390303101
+        }
+      ],
+      "hot_instructions": [
+        {
+          "offset": 9355,
+          "bytes": 3,
+          "asm": "mov    %edi,-0x24(%rbp)",
+          "period_ns": 1679679678,
+          "sampled_ns_per_call": 11.443531741857207,
+          "context": [
+            {
+              "address": 9347,
+              "end": 9350,
+              "asm": "test   %rax,%rax"
+            },
+            {
+              "address": 9350,
+              "end": 9352,
+              "asm": "je     0x24da"
+            },
+            {
+              "address": 9352,
+              "end": 9355,
+              "asm": "mov    0x0(%rax),%edi"
+            },
+            {
+              "address": 9355,
+              "end": 9358,
+              "asm": "mov    %edi,-0x24(%rbp)"
+            },
+            {
+              "address": 9358,
+              "end": 9361,
+              "asm": "test   %rdi,%rdi"
+            },
+            {
+              "address": 9361,
+              "end": 9363,
+              "asm": "je     0x24da"
+            },
+            {
+              "address": 9363,
+              "end": 9366,
+              "asm": "mov    %edi,-0x30(%rbp)"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642116835,
+            "raw_insn_off": 1985,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+            "text": "          key = *real_pos;",
+            "line": 889,
+            "column": 15
+          }
+        },
+        {
+          "offset": 12003,
+          "bytes": 3,
+          "asm": "add    %r13,%rsi",
+          "period_ns": 1005005004,
+          "sampled_ns_per_call": 6.847023759728627,
+          "context": [
+            {
+              "address": 11989,
+              "end": 11993,
+              "asm": "movzwl %r13w,%r13d"
+            },
+            {
+              "address": 11993,
+              "end": 11998,
+              "asm": "mov    %r13w,0x10(%rdi)"
+            },
+            {
+              "address": 11998,
+              "end": 12003,
+              "asm": "movzwq 0xe(%rdi),%rsi"
+            },
+            {
+              "address": 12003,
+              "end": 12006,
+              "asm": "add    %r13,%rsi"
+            },
+            {
+              "address": 12006,
+              "end": 12009,
+              "asm": "mov    %edx,0x1e(%rdi)"
+            },
+            {
+              "address": 12009,
+              "end": 12014,
+              "asm": "movzwq 0x16(%rdi),%rcx"
+            },
+            {
+              "address": 12014,
+              "end": 12017,
+              "asm": "add    %rcx,%rsi"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642119483,
+            "raw_insn_off": 2563,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/csum_helpers.h",
+            "text": "    *csum += *next_iph_u16++;",
+            "line": 56,
+            "column": 11
+          }
+        },
+        {
+          "offset": 11102,
+          "bytes": 3,
+          "asm": "mov    %edi,-0x24(%rbp)",
+          "period_ns": 925925925,
+          "sampled_ns_per_call": 6.308263922060737,
+          "context": [
+            {
+              "address": 11090,
+              "end": 11093,
+              "asm": "test   %rax,%rax"
+            },
+            {
+              "address": 11093,
+              "end": 11099,
+              "asm": "je     0x2104"
+            },
+            {
+              "address": 11099,
+              "end": 11102,
+              "asm": "mov    0x0(%rax),%edi"
+            },
+            {
+              "address": 11102,
+              "end": 11105,
+              "asm": "mov    %edi,-0x24(%rbp)"
+            },
+            {
+              "address": 11105,
+              "end": 11108,
+              "asm": "test   %rdi,%rdi"
+            },
+            {
+              "address": 11108,
+              "end": 11110,
+              "asm": "jne    0x2bca"
+            },
+            {
+              "address": 11110,
+              "end": 11115,
+              "asm": "mov    $0x209,%edi"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642118582,
+            "raw_insn_off": 2365,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+            "text": "    key = *real_pos;",
+            "line": 150,
+            "column": 9
+          }
+        },
+        {
+          "offset": 11016,
+          "bytes": 3,
+          "asm": "mov    %rdx,%rax",
+          "period_ns": 725725725,
+          "sampled_ns_per_call": 4.944314965939497,
+          "context": [
+            {
+              "address": 11004,
+              "end": 11011,
+              "asm": "mov    $0x10001,%r11"
+            },
+            {
+              "address": 11011,
+              "end": 11013,
+              "asm": "xor    %edx,%edx"
+            },
+            {
+              "address": 11013,
+              "end": 11016,
+              "asm": "div    %r11"
+            },
+            {
+              "address": 11016,
+              "end": 11019,
+              "asm": "mov    %rdx,%rax"
+            },
+            {
+              "address": 11019,
+              "end": 11020,
+              "asm": "pop    %rdx"
+            },
+            {
+              "address": 11020,
+              "end": 11027,
+              "asm": "mov    -0xa0(%rbp),%rdi"
+            },
+            {
+              "address": 11027,
+              "end": 11030,
+              "asm": "mov    0x4(%rdi),%edi"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642118483,
+            "raw_insn_off": 2346,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+            "text": "    hash = get_packet_hash(pckt, hash_16bytes) % RING_SIZE;",
+            "line": 143,
+            "column": 48
+          }
+        },
+        {
+          "offset": 10246,
+          "bytes": 9,
+          "asm": "add    %gs:0xffffffff8a2b0028,%rax",
+          "period_ns": 186186186,
+          "sampled_ns_per_call": 1.2684725291927537,
+          "context": [
+            {
+              "address": 10235,
+              "end": 10239,
+              "asm": "shl    $0x3,%rax"
+            },
+            {
+              "address": 10239,
+              "end": 10242,
+              "asm": "add    %rdi,%rax"
+            },
+            {
+              "address": 10242,
+              "end": 10246,
+              "asm": "mov    0x0(%rax),%rax"
+            },
+            {
+              "address": 10246,
+              "end": 10255,
+              "asm": "add    %gs:0xffffffff8a2b0028,%rax"
+            },
+            {
+              "address": 10255,
+              "end": 10257,
+              "asm": "jmp    0x2813"
+            },
+            {
+              "address": 10257,
+              "end": 10259,
+              "asm": "xor    %eax,%eax"
+            },
+            {
+              "address": 10259,
+              "end": 10262,
+              "asm": "test   %rax,%rax"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642117686,
+            "raw_insn_off": 2164,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+            "text": "  data_stats = bpf_map_lookup_elem(&reals_stats, &pckt.real_index);",
+            "line": 1047,
+            "column": 16
+          }
+        },
+        {
+          "offset": 156,
+          "bytes": 4,
+          "asm": "mov    0x0(%rax),%rdi",
+          "period_ns": 179179179,
+          "sampled_ns_per_call": 1.2207343157285102,
+          "context": [
+            {
+              "address": 145,
+              "end": 149,
+              "asm": "mov    0x8(%rax),%rdi"
+            },
+            {
+              "address": 149,
+              "end": 152,
+              "asm": "add    %r15,%rdi"
+            },
+            {
+              "address": 152,
+              "end": 156,
+              "asm": "mov    %rdi,0x8(%rax)"
+            },
+            {
+              "address": 156,
+              "end": 160,
+              "asm": "mov    0x0(%rax),%rdi"
+            },
+            {
+              "address": 160,
+              "end": 164,
+              "asm": "add    $0x1,%rdi"
+            },
+            {
+              "address": 164,
+              "end": 168,
+              "asm": "mov    %rdi,0x0(%rax)"
+            },
+            {
+              "address": 168,
+              "end": 173,
+              "asm": "movzbq 0xc(%r14),%rsi"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642107625,
+            "raw_insn_off": 24,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+            "text": "  data_stats->v1 += 1;",
+            "line": 1105,
+            "column": 18
+          }
+        },
+        {
+          "offset": 10279,
+          "bytes": 4,
+          "asm": "mov    0x0(%rax),%rdi",
+          "period_ns": 157157157,
+          "sampled_ns_per_call": 1.0706999305551737,
+          "context": [
+            {
+              "address": 10268,
+              "end": 10272,
+              "asm": "mov    0x8(%rax),%rdi"
+            },
+            {
+              "address": 10272,
+              "end": 10275,
+              "asm": "add    %r13,%rdi"
+            },
+            {
+              "address": 10275,
+              "end": 10279,
+              "asm": "mov    %rdi,0x8(%rax)"
+            },
+            {
+              "address": 10279,
+              "end": 10283,
+              "asm": "mov    0x0(%rax),%rdi"
+            },
+            {
+              "address": 10283,
+              "end": 10286,
+              "asm": "add    %r14,%rdi"
+            },
+            {
+              "address": 10286,
+              "end": 10290,
+              "asm": "mov    %rdi,0x0(%rax)"
+            },
+            {
+              "address": 10290,
+              "end": 10297,
+              "asm": "mov    -0xb8(%rbp),%rdi"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642117748,
+            "raw_insn_off": 2176,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+            "text": "  data_stats->v1 += 1;",
+            "line": 1051,
+            "column": 18
+          }
+        },
+        {
+          "offset": 168,
+          "bytes": 5,
+          "asm": "movzbq 0xc(%r14),%rsi",
+          "period_ns": 98098098,
+          "sampled_ns_per_call": 0.6683349884994079,
+          "context": [
+            {
+              "address": 156,
+              "end": 160,
+              "asm": "mov    0x0(%rax),%rdi"
+            },
+            {
+              "address": 160,
+              "end": 164,
+              "asm": "add    $0x1,%rdi"
+            },
+            {
+              "address": 164,
+              "end": 168,
+              "asm": "mov    %rdi,0x0(%rax)"
+            },
+            {
+              "address": 168,
+              "end": 173,
+              "asm": "movzbq 0xc(%r14),%rsi"
+            },
+            {
+              "address": 173,
+              "end": 178,
+              "asm": "movzbq 0xd(%r14),%rdi"
+            },
+            {
+              "address": 178,
+              "end": 182,
+              "asm": "shl    $0x8,%rdi"
+            },
+            {
+              "address": 182,
+              "end": 185,
+              "asm": "or     %rsi,%rdi"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642107648,
+            "raw_insn_off": 30,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+            "text": "  eth_proto = eth->h_proto;",
+            "line": 1108,
+            "column": 20
+          }
+        },
+        {
+          "offset": 9677,
+          "bytes": 7,
+          "asm": "and    $0x200,%rdi",
+          "period_ns": 93093093,
+          "sampled_ns_per_call": 0.6342362645963768,
+          "context": [
+            {
+              "address": 9663,
+              "end": 9667,
+              "asm": "cmp    $0x11,%rdi"
+            },
+            {
+              "address": 9667,
+              "end": 9673,
+              "asm": "jne    0x2718"
+            },
+            {
+              "address": 9673,
+              "end": 9677,
+              "asm": "mov    0x0(%r14),%edi"
+            },
+            {
+              "address": 9677,
+              "end": 9684,
+              "asm": "and    $0x200,%rdi"
+            },
+            {
+              "address": 9684,
+              "end": 9687,
+              "asm": "test   %rdi,%rdi"
+            },
+            {
+              "address": 9687,
+              "end": 9693,
+              "asm": "je     0x2718"
+            },
+            {
+              "address": 9693,
+              "end": 9698,
+              "asm": "mov    $0x202,%edi"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642117157,
+            "raw_insn_off": 2054,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+            "text": "      vip_info->flags & F_UDP_FLOW_MIGRATION && !is_under_flood(&cur_time)) {",
+            "line": 660,
+            "column": 23
+          }
+        },
+        {
+          "offset": 10290,
+          "bytes": 7,
+          "asm": "mov    -0xb8(%rbp),%rdi",
+          "period_ns": 93093093,
+          "sampled_ns_per_call": 0.6342362645963768,
+          "context": [
+            {
+              "address": 10279,
+              "end": 10283,
+              "asm": "mov    0x0(%rax),%rdi"
+            },
+            {
+              "address": 10283,
+              "end": 10286,
+              "asm": "add    %r14,%rdi"
+            },
+            {
+              "address": 10286,
+              "end": 10290,
+              "asm": "mov    %rdi,0x0(%rax)"
+            },
+            {
+              "address": 10290,
+              "end": 10297,
+              "asm": "mov    -0xb8(%rbp),%rdi"
+            },
+            {
+              "address": 10297,
+              "end": 10301,
+              "asm": "mov    %di,-0x38(%rbp)"
+            },
+            {
+              "address": 10301,
+              "end": 10308,
+              "asm": "mov    -0x90(%rbp),%rdi"
+            },
+            {
+              "address": 10308,
+              "end": 10313,
+              "asm": "movzbq 0x10(%rdi),%rdi"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642117770,
+            "raw_insn_off": 2182,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+            "text": "  pckt.flow.port16[0] = original_sport;",
+            "line": 1059,
+            "column": 23
+          }
+        },
+        {
+          "offset": 11043,
+          "bytes": 3,
+          "asm": "mov    %rbp,%rsi",
+          "period_ns": 87087087,
+          "sampled_ns_per_call": 0.5933177959127396,
+          "context": [
+            {
+              "address": 11030,
+              "end": 11037,
+              "asm": "imul   $0x10001,%rdi,%rdi"
+            },
+            {
+              "address": 11037,
+              "end": 11040,
+              "asm": "add    %rax,%rdi"
+            },
+            {
+              "address": 11040,
+              "end": 11043,
+              "asm": "mov    %edi,-0x24(%rbp)"
+            },
+            {
+              "address": 11043,
+              "end": 11046,
+              "asm": "mov    %rbp,%rsi"
+            },
+            {
+              "address": 11046,
+              "end": 11050,
+              "asm": "add    $0xffffffffffffffdc,%rsi"
+            },
+            {
+              "address": 11050,
+              "end": 11060,
+              "asm": "movabs $0xffffd032423ec000,%rdi"
+            },
+            {
+              "address": 11060,
+              "end": 11067,
+              "asm": "add    $0x130,%rdi"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642118520,
+            "raw_insn_off": 2351,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+            "text": "    key = RING_SIZE * (vip_info->vip_num) + hash;",
+            "line": 144,
+            "column": 9
+          }
+        },
+        {
+          "offset": 10275,
+          "bytes": 4,
+          "asm": "mov    %rdi,0x8(%rax)",
+          "period_ns": 77077077,
+          "sampled_ns_per_call": 0.5251203481066776,
+          "context": [
+            {
+              "address": 10262,
+              "end": 10268,
+              "asm": "je     0x210a"
+            },
+            {
+              "address": 10268,
+              "end": 10272,
+              "asm": "mov    0x8(%rax),%rdi"
+            },
+            {
+              "address": 10272,
+              "end": 10275,
+              "asm": "add    %r13,%rdi"
+            },
+            {
+              "address": 10275,
+              "end": 10279,
+              "asm": "mov    %rdi,0x8(%rax)"
+            },
+            {
+              "address": 10279,
+              "end": 10283,
+              "asm": "mov    0x0(%rax),%rdi"
+            },
+            {
+              "address": 10283,
+              "end": 10286,
+              "asm": "add    %r14,%rdi"
+            },
+            {
+              "address": 10286,
+              "end": 10290,
+              "asm": "mov    %rdi,0x0(%rax)"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642117748,
+            "raw_insn_off": 2176,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+            "text": "  data_stats->v1 += 1;",
+            "line": 1051,
+            "column": 18
+          }
+        },
+        {
+          "offset": 11267,
+          "bytes": 3,
+          "asm": "test   %rax,%rax",
+          "period_ns": 73073073,
+          "sampled_ns_per_call": 0.49784136898425274,
+          "context": [
+            {
+              "address": 11256,
+              "end": 11258,
+              "asm": "jmp    0x2bfc"
+            },
+            {
+              "address": 11258,
+              "end": 11260,
+              "asm": "xor    %eax,%eax"
+            },
+            {
+              "address": 11260,
+              "end": 11267,
+              "asm": "mov    %rax,-0x90(%rbp)"
+            },
+            {
+              "address": 11267,
+              "end": 11270,
+              "asm": "test   %rax,%rax"
+            },
+            {
+              "address": 11270,
+              "end": 11272,
+              "asm": "jne    0x2c6c"
+            },
+            {
+              "address": 11272,
+              "end": 11277,
+              "asm": "mov    $0x209,%edi"
+            },
+            {
+              "address": 11277,
+              "end": 11280,
+              "asm": "mov    %edi,-0x8(%rbp)"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642118747,
+            "raw_insn_off": 2401,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+            "text": "  if (!(*real)) {",
+            "line": 160,
+            "column": 7
+          }
+        },
+        {
+          "offset": 12124,
+          "bytes": 5,
+          "asm": "jmp    0x58d",
+          "period_ns": 70070070,
+          "sampled_ns_per_call": 0.4773821346424342,
+          "context": [
+            {
+              "address": 12113,
+              "end": 12116,
+              "asm": "add    %rdx,%rsi"
+            },
+            {
+              "address": 12116,
+              "end": 12120,
+              "asm": "xor    $0xffffffffffffffff,%rsi"
+            },
+            {
+              "address": 12120,
+              "end": 12124,
+              "asm": "mov    %si,0x18(%rdi)"
+            },
+            {
+              "address": 12124,
+              "end": 12129,
+              "asm": "jmp    0x58d"
+            },
+            {
+              "address": 12129,
+              "end": 12134,
+              "asm": "mov    $0x207,%edi"
+            },
+            {
+              "address": 12134,
+              "end": 12137,
+              "asm": "mov    %edi,-0x20(%rbp)"
+            },
+            {
+              "address": 12137,
+              "end": 12140,
+              "asm": "mov    %rbp,%rsi"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642119600,
+            "raw_insn_off": 2592,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/encap_helpers.h",
+            "text": "  iph->check = csum;",
+            "line": 73,
+            "column": 14
+          }
+        },
+        {
+          "offset": 10889,
+          "bytes": 5,
+          "asm": "mov    $0x3b9aca01,%edi",
+          "period_ns": 69069069,
+          "sampled_ns_per_call": 0.47056238986182797,
+          "context": [
+            {
+              "address": 10879,
+              "end": 10883,
+              "asm": "mov    0x8(%r13),%rdi"
+            },
+            {
+              "address": 10883,
+              "end": 10886,
+              "asm": "mov    %r14,%rsi"
+            },
+            {
+              "address": 10886,
+              "end": 10889,
+              "asm": "sub    %rdi,%rsi"
+            },
+            {
+              "address": 10889,
+              "end": 10894,
+              "asm": "mov    $0x3b9aca01,%edi"
+            },
+            {
+              "address": 10894,
+              "end": 10897,
+              "asm": "cmp    %rsi,%rdi"
+            },
+            {
+              "address": 10897,
+              "end": 10899,
+              "asm": "ja     0x2aa2"
+            },
+            {
+              "address": 10899,
+              "end": 10903,
+              "asm": "mov    %r14,0x8(%r13)"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642118363,
+            "raw_insn_off": 2317,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+            "text": "  if ((*cur_time - conn_rate_stats->v2) > ONE_SEC) {",
+            "line": 50,
+            "column": 18
+          }
+        },
+        {
+          "offset": 12120,
+          "bytes": 4,
+          "asm": "mov    %si,0x18(%rdi)",
+          "period_ns": 54054054,
+          "sampled_ns_per_call": 0.3682662181527349,
+          "context": [
+            {
+              "address": 12109,
+              "end": 12113,
+              "asm": "shr    $0x10,%rdx"
+            },
+            {
+              "address": 12113,
+              "end": 12116,
+              "asm": "add    %rdx,%rsi"
+            },
+            {
+              "address": 12116,
+              "end": 12120,
+              "asm": "xor    $0xffffffffffffffff,%rsi"
+            },
+            {
+              "address": 12120,
+              "end": 12124,
+              "asm": "mov    %si,0x18(%rdi)"
+            },
+            {
+              "address": 12124,
+              "end": 12129,
+              "asm": "jmp    0x58d"
+            },
+            {
+              "address": 12129,
+              "end": 12134,
+              "asm": "mov    $0x207,%edi"
+            },
+            {
+              "address": 12134,
+              "end": 12137,
+              "asm": "mov    %edi,-0x20(%rbp)"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642119600,
+            "raw_insn_off": 2592,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/encap_helpers.h",
+            "text": "  iph->check = csum;",
+            "line": 73,
+            "column": 14
+          }
+        },
+        {
+          "offset": 26,
+          "bytes": 3,
+          "asm": "mov    %rdi,%rbx",
+          "period_ns": 50050050,
+          "sampled_ns_per_call": 0.3409872390303101,
+          "context": [
+            {
+              "address": 20,
+              "end": 22,
+              "asm": "push   %r13"
+            },
+            {
+              "address": 22,
+              "end": 24,
+              "asm": "push   %r14"
+            },
+            {
+              "address": 24,
+              "end": 26,
+              "asm": "push   %r15"
+            },
+            {
+              "address": 26,
+              "end": 29,
+              "asm": "mov    %rdi,%rbx"
+            },
+            {
+              "address": 29,
+              "end": 35,
+              "asm": "mov    $0x1,%r13d"
+            },
+            {
+              "address": 35,
+              "end": 39,
+              "asm": "mov    0x0(%rbx),%r14"
+            },
+            {
+              "address": 39,
+              "end": 43,
+              "asm": "mov    0x8(%rbx),%r15"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642107480,
+            "raw_insn_off": 0,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+            "text": "int balancer_ingress(struct xdp_md* ctx) {",
+            "line": 1084,
+            "column": 0
+          }
+        },
+        {
+          "offset": 11003,
+          "bytes": 1,
+          "asm": "push   %rdx",
+          "period_ns": 50050050,
+          "sampled_ns_per_call": 0.3409872390303101,
+          "context": [
+            {
+              "address": 10990,
+              "end": 10995,
+              "asm": "call   0x34d8"
+            },
+            {
+              "address": 10995,
+              "end": 10999,
+              "asm": "shl    $0x20,%rax"
+            },
+            {
+              "address": 10999,
+              "end": 11003,
+              "asm": "shr    $0x20,%rax"
+            },
+            {
+              "address": 11003,
+              "end": 11004,
+              "asm": "push   %rdx"
+            },
+            {
+              "address": 11004,
+              "end": 11011,
+              "asm": "mov    $0x10001,%r11"
+            },
+            {
+              "address": 11011,
+              "end": 11013,
+              "asm": "xor    %edx,%edx"
+            },
+            {
+              "address": 11013,
+              "end": 11016,
+              "asm": "div    %r11"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642118483,
+            "raw_insn_off": 2346,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+            "text": "    hash = get_packet_hash(pckt, hash_16bytes) % RING_SIZE;",
+            "line": 143,
+            "column": 48
+          }
+        },
+        {
+          "offset": 13375,
+          "bytes": 5,
+          "asm": "nopl   0x0(%rax,%rax,1)",
+          "period_ns": 50050050,
+          "sampled_ns_per_call": 0.3409872390303101,
+          "context": [
+            {
+              "address": 13368,
+              "end": 13369,
+              "asm": "pop    %rbx"
+            },
+            {
+              "address": 13369,
+              "end": 13370,
+              "asm": "leave"
+            },
+            {
+              "address": 13370,
+              "end": 13375,
+              "asm": "jmp    0xffffffffc7a11ff5"
+            },
+            {
+              "address": 13375,
+              "end": 13380,
+              "asm": "nopl   0x0(%rax,%rax,1)"
+            },
+            {
+              "address": 13380,
+              "end": 13383,
+              "asm": "nopl   (%rax)"
+            },
+            {
+              "address": 13383,
+              "end": 13384,
+              "asm": "push   %rbp"
+            },
+            {
+              "address": 13384,
+              "end": 13387,
+              "asm": "mov    %rsp,%rbp"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642121008,
+            "raw_insn_off": 2904,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/linux_includes/jhash.h",
+            "text": "  b += initval;",
+            "line": 104,
+            "column": 5
+          }
+        },
+        {
+          "offset": 10999,
+          "bytes": 4,
+          "asm": "shr    $0x20,%rax",
+          "period_ns": 49049049,
+          "sampled_ns_per_call": 0.33416749424970393,
+          "context": [
+            {
+              "address": 10987,
+              "end": 10990,
+              "asm": "mov    -0x38(%rbp),%esi"
+            },
+            {
+              "address": 10990,
+              "end": 10995,
+              "asm": "call   0x34d8"
+            },
+            {
+              "address": 10995,
+              "end": 10999,
+              "asm": "shl    $0x20,%rax"
+            },
+            {
+              "address": 10999,
+              "end": 11003,
+              "asm": "shr    $0x20,%rax"
+            },
+            {
+              "address": 11003,
+              "end": 11004,
+              "asm": "push   %rdx"
+            },
+            {
+              "address": 11004,
+              "end": 11011,
+              "asm": "mov    $0x10001,%r11"
+            },
+            {
+              "address": 11011,
+              "end": 11013,
+              "asm": "xor    %edx,%edx"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642118467,
+            "raw_insn_off": 2342,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+            "text": "    return jhash_2words(pckt->flow.src, pckt->flow.ports, INIT_JHASH_SEED);",
+            "line": 34,
+            "column": 12
+          }
+        },
+        {
+          "offset": 12017,
+          "bytes": 5,
+          "asm": "mov    $0xffff0000,%ecx",
+          "period_ns": 48048048,
+          "sampled_ns_per_call": 0.3273477494690977,
+          "context": [
+            {
+              "address": 12006,
+              "end": 12009,
+              "asm": "mov    %edx,0x1e(%rdi)"
+            },
+            {
+              "address": 12009,
+              "end": 12014,
+              "asm": "movzwq 0x16(%rdi),%rcx"
+            },
+            {
+              "address": 12014,
+              "end": 12017,
+              "asm": "add    %rcx,%rsi"
+            },
+            {
+              "address": 12017,
+              "end": 12022,
+              "asm": "mov    $0xffff0000,%ecx"
+            },
+            {
+              "address": 12022,
+              "end": 12025,
+              "asm": "and    %rcx,%rbx"
+            },
+            {
+              "address": 12025,
+              "end": 12029,
+              "asm": "shr    $0x10,%rbx"
+            },
+            {
+              "address": 12029,
+              "end": 12032,
+              "asm": "add    %rbx,%rsi"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642119494,
+            "raw_insn_off": 2566,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/csum_helpers.h",
+            "text": "    *csum += *next_iph_u16++;",
+            "line": 56,
+            "column": 11
+          }
+        },
+        {
+          "offset": 11496,
+          "bytes": 3,
+          "asm": "mov    0x0(%rsi),%eax",
+          "period_ns": 46046046,
+          "sampled_ns_per_call": 0.3137082599078853,
+          "context": [
+            {
+              "address": 11475,
+              "end": 11479,
+              "asm": "add    $0xffffffffffffffe0,%rsi"
+            },
+            {
+              "address": 11479,
+              "end": 11489,
+              "asm": "movabs $0xffff8c1f87b02800,%rdi"
+            },
+            {
+              "address": 11489,
+              "end": 11496,
+              "asm": "add    $0x130,%rdi"
+            },
+            {
+              "address": 11496,
+              "end": 11499,
+              "asm": "mov    0x0(%rsi),%eax"
+            },
+            {
+              "address": 11499,
+              "end": 11503,
+              "asm": "cmp    $0x1,%rax"
+            },
+            {
+              "address": 11503,
+              "end": 11505,
+              "asm": "jae    0x2cfa"
+            },
+            {
+              "address": 11505,
+              "end": 11509,
+              "asm": "imul   $0x18,%rax,%rax"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642118959,
+            "raw_insn_off": 2449,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+            "text": "      bpf_map_lookup_elem(&vip_miss_stats, &vip_miss_stats_key);",
+            "line": 588,
+            "column": 7
+          }
+        },
+        {
+          "offset": 9658,
+          "bytes": 5,
+          "asm": "movzbq -0x34(%rbp),%rdi",
+          "period_ns": 45045045,
+          "sampled_ns_per_call": 0.3068885151272791,
+          "context": [
+            {
+              "address": 9646,
+              "end": 9648,
+              "asm": "xor    %eax,%eax"
+            },
+            {
+              "address": 9648,
+              "end": 9651,
+              "asm": "mov    %rax,%r13"
+            },
+            {
+              "address": 9651,
+              "end": 9658,
+              "asm": "mov    -0xa0(%rbp),%r14"
+            },
+            {
+              "address": 9658,
+              "end": 9663,
+              "asm": "movzbq -0x34(%rbp),%rdi"
+            },
+            {
+              "address": 9663,
+              "end": 9667,
+              "asm": "cmp    $0x11,%rdi"
+            },
+            {
+              "address": 9667,
+              "end": 9673,
+              "asm": "jne    0x2718"
+            },
+            {
+              "address": 9673,
+              "end": 9677,
+              "asm": "mov    0x0(%r14),%edi"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642117138,
+            "raw_insn_off": 2051,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+            "text": "  if (dst && pckt->flow.proto == IPPROTO_UDP &&",
+            "line": 659,
+            "column": 25
+          }
+        },
+        {
+          "offset": 10779,
+          "bytes": 4,
+          "asm": "mov    %r14,-0x20(%rbp)",
+          "period_ns": 45045045,
+          "sampled_ns_per_call": 0.3068885151272791,
+          "context": [
+            {
+              "address": 10768,
+              "end": 10772,
+              "asm": "mov    %rdi,0x0(%rax)"
+            },
+            {
+              "address": 10772,
+              "end": 10775,
+              "asm": "xor    %r14d,%r14d"
+            },
+            {
+              "address": 10775,
+              "end": 10779,
+              "asm": "mov    %r14,-0x18(%rbp)"
+            },
+            {
+              "address": 10779,
+              "end": 10783,
+              "asm": "mov    %r14,-0x20(%rbp)"
+            },
+            {
+              "address": 10783,
+              "end": 10788,
+              "asm": "mov    $0x202,%edi"
+            },
+            {
+              "address": 10788,
+              "end": 10791,
+              "asm": "mov    %edi,-0x8(%rbp)"
+            },
+            {
+              "address": 10791,
+              "end": 10794,
+              "asm": "mov    %rbp,%rsi"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642118255,
+            "raw_insn_off": 2293,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+            "text": "  struct real_pos_lru new_dst_lru = {};",
+            "line": 94,
+            "column": 23
+          }
+        },
+        {
+          "offset": 13587,
+          "bytes": 3,
+          "asm": "mov    %rax,%rdx",
+          "period_ns": 44044044,
+          "sampled_ns_per_call": 0.3000687703466729,
+          "context": [
+            {
+              "address": 13577,
+              "end": 13580,
+              "asm": "mov    %rax,%rcx"
+            },
+            {
+              "address": 13580,
+              "end": 13583,
+              "asm": "and    %rdx,%rcx"
+            },
+            {
+              "address": 13583,
+              "end": 13587,
+              "asm": "shr    $0x12,%rcx"
+            },
+            {
+              "address": 13587,
+              "end": 13590,
+              "asm": "mov    %rax,%rdx"
+            },
+            {
+              "address": 13590,
+              "end": 13594,
+              "asm": "shl    $0xe,%rdx"
+            },
+            {
+              "address": 13594,
+              "end": 13597,
+              "asm": "or     %rcx,%rdx"
+            },
+            {
+              "address": 13597,
+              "end": 13600,
+              "asm": "xor    %rdi,%rax"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642121216,
+            "raw_insn_off": 2963,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/linux_includes/jhash.h",
+            "text": "  return (word << shift) | (word >> ((-shift) & 31));",
+            "line": 8,
+            "column": 26
+          }
+        },
+        {
+          "offset": 11099,
+          "bytes": 3,
+          "asm": "mov    0x0(%rax),%edi",
+          "period_ns": 43043043,
+          "sampled_ns_per_call": 0.2932490255660667,
+          "context": [
+            {
+              "address": 11088,
+              "end": 11090,
+              "asm": "xor    %eax,%eax"
+            },
+            {
+              "address": 11090,
+              "end": 11093,
+              "asm": "test   %rax,%rax"
+            },
+            {
+              "address": 11093,
+              "end": 11099,
+              "asm": "je     0x2104"
+            },
+            {
+              "address": 11099,
+              "end": 11102,
+              "asm": "mov    0x0(%rax),%edi"
+            },
+            {
+              "address": 11102,
+              "end": 11105,
+              "asm": "mov    %edi,-0x24(%rbp)"
+            },
+            {
+              "address": 11105,
+              "end": 11108,
+              "asm": "test   %rdi,%rdi"
+            },
+            {
+              "address": 11108,
+              "end": 11110,
+              "asm": "jne    0x2bca"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642118579,
+            "raw_insn_off": 2364,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+            "text": "    key = *real_pos;",
+            "line": 150,
+            "column": 11
+          }
+        },
+        {
+          "offset": 12116,
+          "bytes": 4,
+          "asm": "xor    $0xffffffffffffffff,%rsi",
+          "period_ns": 43043043,
+          "sampled_ns_per_call": 0.2932490255660667,
+          "context": [
+            {
+              "address": 12106,
+              "end": 12109,
+              "asm": "mov    %rsi,%rdx"
+            },
+            {
+              "address": 12109,
+              "end": 12113,
+              "asm": "shr    $0x10,%rdx"
+            },
+            {
+              "address": 12113,
+              "end": 12116,
+              "asm": "add    %rdx,%rsi"
+            },
+            {
+              "address": 12116,
+              "end": 12120,
+              "asm": "xor    $0xffffffffffffffff,%rsi"
+            },
+            {
+              "address": 12120,
+              "end": 12124,
+              "asm": "mov    %si,0x18(%rdi)"
+            },
+            {
+              "address": 12124,
+              "end": 12129,
+              "asm": "jmp    0x58d"
+            },
+            {
+              "address": 12129,
+              "end": 12134,
+              "asm": "mov    $0x207,%edi"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642119596,
+            "raw_insn_off": 2591,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/csum_helpers.h",
+            "text": "  return ~csum;",
+            "line": 37,
+            "column": 10
+          }
+        },
+        {
+          "offset": 9982,
+          "bytes": 4,
+          "asm": "mov    0x0(%r14),%rdi",
+          "period_ns": 42042042,
+          "sampled_ns_per_call": 0.2864292807854605,
+          "context": [
+            {
+              "address": 9969,
+              "end": 9973,
+              "asm": "add    $0x1,%rdi"
+            },
+            {
+              "address": 9973,
+              "end": 9977,
+              "asm": "mov    %rdi,0x0(%rax)"
+            },
+            {
+              "address": 9977,
+              "end": 9982,
+              "asm": "jmp    0x2994"
+            },
+            {
+              "address": 9982,
+              "end": 9986,
+              "asm": "mov    0x0(%r14),%rdi"
+            },
+            {
+              "address": 9986,
+              "end": 9990,
+              "asm": "add    $0x1,%rdi"
+            },
+            {
+              "address": 9990,
+              "end": 9994,
+              "asm": "mov    %rdi,0x0(%r14)"
+            },
+            {
+              "address": 9994,
+              "end": 9999,
+              "asm": "mov    $0x1e849,%esi"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642117462,
+            "raw_insn_off": 2118,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+            "text": "    conn_rate_stats->v1 += 1;",
+            "line": 55,
+            "column": 25
+          }
+        },
+        {
+          "offset": 10065,
+          "bytes": 2,
+          "asm": "jmp    0x2755",
+          "period_ns": 42042042,
+          "sampled_ns_per_call": 0.2864292807854605,
+          "context": [
+            {
+              "address": 10056,
+              "end": 10058,
+              "asm": "jae    0x2753"
+            },
+            {
+              "address": 10058,
+              "end": 10062,
+              "asm": "shl    $0x3,%rax"
+            },
+            {
+              "address": 10062,
+              "end": 10065,
+              "asm": "add    %rdi,%rax"
+            },
+            {
+              "address": 10065,
+              "end": 10067,
+              "asm": "jmp    0x2755"
+            },
+            {
+              "address": 10067,
+              "end": 10069,
+              "asm": "xor    %eax,%eax"
+            },
+            {
+              "address": 10069,
+              "end": 10075,
+              "asm": "mov    $0x1,%r14d"
+            },
+            {
+              "address": 10075,
+              "end": 10082,
+              "asm": "mov    %rax,-0xa0(%rbp)"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642117512,
+            "raw_insn_off": 2128,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/balancer.c",
+            "text": "  cval = bpf_map_lookup_elem(&ctl_array, &mac_addr_pos);",
+            "line": 1033,
+            "column": 10
+          }
+        },
+        {
+          "offset": 12042,
+          "bytes": 5,
+          "asm": "movzwq 0x20(%rdi),%rdx",
+          "period_ns": 42042042,
+          "sampled_ns_per_call": 0.2864292807854605,
+          "context": [
+            {
+              "address": 12029,
+              "end": 12032,
+              "asm": "add    %rbx,%rsi"
+            },
+            {
+              "address": 12032,
+              "end": 12039,
+              "asm": "and    $0xffff,%rdx"
+            },
+            {
+              "address": 12039,
+              "end": 12042,
+              "asm": "add    %rdx,%rsi"
+            },
+            {
+              "address": 12042,
+              "end": 12047,
+              "asm": "movzwq 0x20(%rdi),%rdx"
+            },
+            {
+              "address": 12047,
+              "end": 12050,
+              "asm": "add    %rdx,%rsi"
+            },
+            {
+              "address": 12050,
+              "end": 12057,
+              "asm": "add    $0x10ac,%rsi"
+            },
+            {
+              "address": 12057,
+              "end": 12062,
+              "asm": "mov    $0x10000,%edx"
+            }
+          ],
+          "btf_source": {
+            "address": 18446744072642119522,
+            "raw_insn_off": 2574,
+            "file": "/workspaces/repository/vendor/repos/katran/katran/lib/bpf/csum_helpers.h",
+            "text": "    *csum += *next_iph_u16++;",
+            "line": 56,
+            "column": 14
+          }
+        }
+      ],
+      "disassembly_command": [
+        "objdump",
+        "-D",
+        "-z",
+        "-w",
+        "--no-show-raw-insn",
+        "-b",
+        "binary",
+        "-m",
+        "i386:x86-64",
+        "/workspaces/kprog-raw/perf/20261115-katran-body-profile-retry2/profile/baseline.jit-lines.d/prog-9.bin"
+      ]
+    },
+    "post_rejit": {
+      "id": 16,
+      "bytes": 12418,
+      "measured_counters": {
+        "bytes_jited": 12418,
+        "bytes_xlated": 16,
+        "id": 16,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 146094590,
+        "run_time_ns_delta": 25651587193,
+        "type": "xdp"
+      },
+      "sampled_text_ns_per_call": 52.271864611824434,
+      "category_sampled_ns_per_call": {
+        "stack_frame": 0.2603658218966219,
+        "rsp_address_operand": 18.56134240836707,
+        "other_memory_operand": 9.880197767761285,
+        "other": 21.740546128367928,
+        "control": 1.5690466635349056,
+        "call": 0.2603658218966219
+      },
+      "hot_64byte_blocks": [
+        {
+          "offset": 6848,
+          "sampled_ns_per_call": 8.578368658278174
+        },
+        {
+          "offset": 8192,
+          "sampled_ns_per_call": 7.194318762932974
+        },
+        {
+          "offset": 9088,
+          "sampled_ns_per_call": 5.988413903622304
+        },
+        {
+          "offset": 128,
+          "sampled_ns_per_call": 3.7958596139665404
+        },
+        {
+          "offset": 8128,
+          "sampled_ns_per_call": 2.9530965588801066
+        },
+        {
+          "offset": 9152,
+          "sampled_ns_per_call": 2.8229136479317956
+        },
+        {
+          "offset": 9216,
+          "sampled_ns_per_call": 2.4597718437075597
+        },
+        {
+          "offset": 7680,
+          "sampled_ns_per_call": 2.261071611207506
+        },
+        {
+          "offset": 8256,
+          "sampled_ns_per_call": 1.3566429667245037
+        },
+        {
+          "offset": 7232,
+          "sampled_ns_per_call": 1.1579427342244502
+        },
+        {
+          "offset": 7168,
+          "sampled_ns_per_call": 1.1099806091382303
+        },
+        {
+          "offset": 64,
+          "sampled_ns_per_call": 1.0072046268106163
+        },
+        {
+          "offset": 10112,
+          "sampled_ns_per_call": 0.760542269224343
+        },
+        {
+          "offset": 6784,
+          "sampled_ns_per_call": 0.6098041618105092
+        },
+        {
+          "offset": 6976,
+          "sampled_ns_per_call": 0.5823972331898122
+        },
+        {
+          "offset": 8000,
+          "sampled_ns_per_call": 0.5755455010346379
+        },
+        {
+          "offset": 10048,
+          "sampled_ns_per_call": 0.5275833759484181
+        },
+        {
+          "offset": 12032,
+          "sampled_ns_per_call": 0.500176447327721
+        },
+        {
+          "offset": 10176,
+          "sampled_ns_per_call": 0.4933247151725468
+        },
+        {
+          "offset": 7936,
+          "sampled_ns_per_call": 0.3974004650001071
+        }
+      ],
+      "hot_instructions": [
+        {
+          "offset": 6861,
+          "bytes": 4,
+          "asm": "mov    %eax,0x24(%rsp)",
+          "period_ns": 1240240239,
+          "sampled_ns_per_call": 8.489296140260908,
+          "context": [
+            {
+              "address": 6850,
+              "end": 6853,
+              "asm": "test   %rax,%rax"
+            },
+            {
+              "address": 6853,
+              "end": 6859,
+              "asm": "je     0x1b49"
+            },
+            {
+              "address": 6859,
+              "end": 6861,
+              "asm": "mov    (%rax),%eax"
+            },
+            {
+              "address": 6861,
+              "end": 6865,
+              "asm": "mov    %eax,0x24(%rsp)"
+            },
+            {
+              "address": 6865,
+              "end": 6867,
+              "asm": "test   %eax,%eax"
+            },
+            {
+              "address": 6867,
+              "end": 6869,
+              "asm": "je     0x1b49"
+            },
+            {
+              "address": 6869,
+              "end": 6873,
+              "asm": "mov    %eax,0x68(%rsp)"
+            }
+          ],
+          "retained_source": {
+            "start": 6861,
+            "end": 6865,
+            "symbol": "balancer_ingress",
+            "section": 3,
+            "input_offset": 5690,
+            "symbol_offset": 5690
+          }
+        },
+        {
+          "offset": 8243,
+          "bytes": 4,
+          "asm": "mov    %eax,0x24(%rsp)",
+          "period_ns": 978978978,
+          "sampled_ns_per_call": 6.700994047760427,
+          "context": [
+            {
+              "address": 8232,
+              "end": 8235,
+              "asm": "test   %rax,%rax"
+            },
+            {
+              "address": 8235,
+              "end": 8241,
+              "asm": "je     0x2218"
+            },
+            {
+              "address": 8241,
+              "end": 8243,
+              "asm": "mov    (%rax),%eax"
+            },
+            {
+              "address": 8243,
+              "end": 8247,
+              "asm": "mov    %eax,0x24(%rsp)"
+            },
+            {
+              "address": 8247,
+              "end": 8249,
+              "asm": "test   %eax,%eax"
+            },
+            {
+              "address": 8249,
+              "end": 8255,
+              "asm": "je     0x2190"
+            },
+            {
+              "address": 8255,
+              "end": 8259,
+              "asm": "mov    %eax,0x68(%rsp)"
+            }
+          ],
+          "retained_source": {
+            "start": 8243,
+            "end": 8247,
+            "symbol": "balancer_ingress",
+            "section": 3,
+            "input_offset": 6693,
+            "symbol_offset": 6693
+          }
+        },
+        {
+          "offset": 9137,
+          "bytes": 3,
+          "asm": "movzwl %dx,%edx",
+          "period_ns": 833833833,
+          "sampled_ns_per_call": 5.70749288526016,
+          "context": [
+            {
+              "address": 9124,
+              "end": 9127,
+              "asm": "mov    %ecx,0x1a(%rax)"
+            },
+            {
+              "address": 9127,
+              "end": 9133,
+              "asm": "movw   $0x440,0x16(%rax)"
+            },
+            {
+              "address": 9133,
+              "end": 9137,
+              "asm": "movzwl 0xe(%rax),%ecx"
+            },
+            {
+              "address": 9137,
+              "end": 9140,
+              "asm": "movzwl %dx,%edx"
+            },
+            {
+              "address": 9140,
+              "end": 9144,
+              "asm": "movzwl 0x16(%rax),%edi"
+            },
+            {
+              "address": 9144,
+              "end": 9147,
+              "asm": "add    %rcx,%rdi"
+            },
+            {
+              "address": 9147,
+              "end": 9150,
+              "asm": "shr    $0x10,%ebp"
+            }
+          ],
+          "retained_source": {
+            "start": 9137,
+            "end": 9140,
+            "symbol": "balancer_ingress",
+            "section": 3,
+            "input_offset": 7354,
+            "symbol_offset": 7354
+          }
+        },
+        {
+          "offset": 140,
+          "bytes": 4,
+          "asm": "add    %r15,0x8(%rax)",
+          "period_ns": 388388388,
+          "sampled_ns_per_call": 2.6584720762076133,
+          "context": [
+            {
+              "address": 128,
+              "end": 134,
+              "asm": "je     0x22a4"
+            },
+            {
+              "address": 134,
+              "end": 137,
+              "asm": "sub    %r12,%r15"
+            },
+            {
+              "address": 137,
+              "end": 140,
+              "asm": "incq   (%rax)"
+            },
+            {
+              "address": 140,
+              "end": 144,
+              "asm": "add    %r15,0x8(%rax)"
+            },
+            {
+              "address": 144,
+              "end": 150,
+              "asm": "movzwl 0xc(%r12),%eax"
+            },
+            {
+              "address": 150,
+              "end": 155,
+              "asm": "cmp    $0xdd86,%eax"
+            },
+            {
+              "address": 155,
+              "end": 161,
+              "asm": "je     0x1fd"
+            }
+          ],
+          "retained_source": {
+            "start": 140,
+            "end": 144,
+            "symbol": "balancer_ingress",
+            "section": 3,
+            "input_offset": 94,
+            "symbol_offset": 94
+          }
+        },
+        {
+          "offset": 7698,
+          "bytes": 4,
+          "asm": "add    %rbp,0x8(%rax)",
+          "period_ns": 187187187,
+          "sampled_ns_per_call": 1.2812739130175868,
+          "context": [
+            {
+              "address": 7686,
+              "end": 7689,
+              "asm": "test   %rax,%rax"
+            },
+            {
+              "address": 7689,
+              "end": 7695,
+              "asm": "je     0x221e"
+            },
+            {
+              "address": 7695,
+              "end": 7698,
+              "asm": "incq   (%rax)"
+            },
+            {
+              "address": 7698,
+              "end": 7702,
+              "asm": "add    %rbp,0x8(%rax)"
+            },
+            {
+              "address": 7702,
+              "end": 7706,
+              "asm": "mov    0x38(%rsp),%eax"
+            },
+            {
+              "address": 7706,
+              "end": 7711,
+              "asm": "mov    %ax,0x60(%rsp)"
+            },
+            {
+              "address": 7711,
+              "end": 7719,
+              "asm": "mov    0xa8(%rsp),%rax"
+            }
+          ],
+          "retained_source": {
+            "start": 7698,
+            "end": 7702,
+            "symbol": "balancer_ingress",
+            "section": 3,
+            "input_offset": 6278,
+            "symbol_offset": 6278
+          }
+        },
+        {
+          "offset": 144,
+          "bytes": 6,
+          "asm": "movzwl 0xc(%r12),%eax",
+          "period_ns": 136136136,
+          "sampled_ns_per_call": 0.9318355731036995,
+          "context": [
+            {
+              "address": 134,
+              "end": 137,
+              "asm": "sub    %r12,%r15"
+            },
+            {
+              "address": 137,
+              "end": 140,
+              "asm": "incq   (%rax)"
+            },
+            {
+              "address": 140,
+              "end": 144,
+              "asm": "add    %r15,0x8(%rax)"
+            },
+            {
+              "address": 144,
+              "end": 150,
+              "asm": "movzwl 0xc(%r12),%eax"
+            },
+            {
+              "address": 150,
+              "end": 155,
+              "asm": "cmp    $0xdd86,%eax"
+            },
+            {
+              "address": 155,
+              "end": 161,
+              "asm": "je     0x1fd"
+            },
+            {
+              "address": 161,
+              "end": 164,
+              "asm": "cmp    $0x8,%eax"
+            }
+          ],
+          "retained_source": {
+            "start": 144,
+            "end": 150,
+            "symbol": "balancer_ingress",
+            "section": 3,
+            "input_offset": 98,
+            "symbol_offset": 98
+          }
+        },
+        {
+          "offset": 7702,
+          "bytes": 4,
+          "asm": "mov    0x38(%rsp),%eax",
+          "period_ns": 114114114,
+          "sampled_ns_per_call": 0.7810974656898657,
+          "context": [
+            {
+              "address": 7689,
+              "end": 7695,
+              "asm": "je     0x221e"
+            },
+            {
+              "address": 7695,
+              "end": 7698,
+              "asm": "incq   (%rax)"
+            },
+            {
+              "address": 7698,
+              "end": 7702,
+              "asm": "add    %rbp,0x8(%rax)"
+            },
+            {
+              "address": 7702,
+              "end": 7706,
+              "asm": "mov    0x38(%rsp),%eax"
+            },
+            {
+              "address": 7706,
+              "end": 7711,
+              "asm": "mov    %ax,0x60(%rsp)"
+            },
+            {
+              "address": 7711,
+              "end": 7719,
+              "asm": "mov    0xa8(%rsp),%rax"
+            },
+            {
+              "address": 7719,
+              "end": 7723,
+              "asm": "testb  $0x1,0x10(%rax)"
+            }
+          ],
+          "retained_source": {
+            "start": 7702,
+            "end": 7706,
+            "symbol": "balancer_ingress",
+            "section": 3,
+            "input_offset": 6282,
+            "symbol_offset": 6282
+          }
+        },
+        {
+          "offset": 112,
+          "bytes": 9,
+          "asm": "add    %gs:0xffffffff8a2b0028,%rax",
+          "period_ns": 111111111,
+          "sampled_ns_per_call": 0.760542269224343,
+          "context": [
+            {
+              "address": 99,
+              "end": 101,
+              "asm": "jae    0x7b"
+            },
+            {
+              "address": 101,
+              "end": 109,
+              "asm": "lea    0x130(%rdi,%rax,8),%rax"
+            },
+            {
+              "address": 109,
+              "end": 112,
+              "asm": "mov    (%rax),%rax"
+            },
+            {
+              "address": 112,
+              "end": 121,
+              "asm": "add    %gs:0xffffffff8a2b0028,%rax"
+            },
+            {
+              "address": 121,
+              "end": 123,
+              "asm": "jmp    0x7d"
+            },
+            {
+              "address": 123,
+              "end": 125,
+              "asm": "xor    %eax,%eax"
+            },
+            {
+              "address": 125,
+              "end": 128,
+              "asm": "test   %rax,%rax"
+            }
+          ],
+          "retained_source": null
+        },
+        {
+          "offset": 10136,
+          "bytes": 10,
+          "asm": "cmpl   $0x2,0x38(%rdi)",
+          "period_ns": 95095095,
+          "sampled_ns_per_call": 0.6509145547415548,
+          "context": [
+            {
+              "address": 10127,
+              "end": 10133,
+              "asm": "rorx   $0x8,%esi,%ecx"
+            },
+            {
+              "address": 10133,
+              "end": 10135,
+              "asm": "sub    %ecx,%eax"
+            },
+            {
+              "address": 10135,
+              "end": 10136,
+              "asm": "ret"
+            },
+            {
+              "address": 10136,
+              "end": 10146,
+              "asm": "cmpl   $0x2,0x38(%rdi)"
+            },
+            {
+              "address": 10146,
+              "end": 10148,
+              "asm": "jne    0x27cd"
+            },
+            {
+              "address": 10148,
+              "end": 10150,
+              "asm": "mov    (%rsi),%eax"
+            },
+            {
+              "address": 10150,
+              "end": 10156,
+              "asm": "cmp    0x44(%rdi),%eax"
+            }
+          ],
+          "retained_source": null
+        },
+        {
+          "offset": 7246,
+          "bytes": 9,
+          "asm": "add    %gs:0xffffffff8a2b0028,%rax",
+          "period_ns": 93093093,
+          "sampled_ns_per_call": 0.6372110904312063,
+          "context": [
+            {
+              "address": 7233,
+              "end": 7235,
+              "asm": "jae    0x1c59"
+            },
+            {
+              "address": 7235,
+              "end": 7243,
+              "asm": "lea    0x130(%rdi,%rax,8),%rax"
+            },
+            {
+              "address": 7243,
+              "end": 7246,
+              "asm": "mov    (%rax),%rax"
+            },
+            {
+              "address": 7246,
+              "end": 7255,
+              "asm": "add    %gs:0xffffffff8a2b0028,%rax"
+            },
+            {
+              "address": 7255,
+              "end": 7257,
+              "asm": "jmp    0x1c5b"
+            },
+            {
+              "address": 7257,
+              "end": 7259,
+              "asm": "xor    %eax,%eax"
+            },
+            {
+              "address": 7259,
+              "end": 7262,
+              "asm": "test   %rax,%rax"
+            }
+          ],
+          "retained_source": null
+        },
+        {
+          "offset": 8030,
+          "bytes": 4,
+          "asm": "sub    0x8(%r13),%rax",
+          "period_ns": 83083083,
+          "sampled_ns_per_call": 0.5686937688794637,
+          "context": [
+            {
+              "address": 8017,
+              "end": 8022,
+              "asm": "call   0xffffffffc6db351c"
+            },
+            {
+              "address": 8022,
+              "end": 8025,
+              "asm": "mov    %rax,%rcx"
+            },
+            {
+              "address": 8025,
+              "end": 8030,
+              "asm": "mov    %rax,0x70(%rsp)"
+            },
+            {
+              "address": 8030,
+              "end": 8034,
+              "asm": "sub    0x8(%r13),%rax"
+            },
+            {
+              "address": 8034,
+              "end": 8040,
+              "asm": "cmp    $0x3b9aca01,%rax"
+            },
+            {
+              "address": 8040,
+              "end": 8042,
+              "asm": "jb     0x1f86"
+            },
+            {
+              "address": 8042,
+              "end": 8050,
+              "asm": "movq   $0x1,0x0(%r13)"
+            }
+          ],
+          "retained_source": {
+            "start": 8030,
+            "end": 8034,
+            "symbol": "balancer_ingress",
+            "section": 3,
+            "input_offset": 6502,
+            "symbol_offset": 6502
+          }
+        },
+        {
+          "offset": 8317,
+          "bytes": 3,
+          "asm": "test   %rax,%rax",
+          "period_ns": 77077077,
+          "sampled_ns_per_call": 0.5275833759484181,
+          "context": [
+            {
+              "address": 8305,
+              "end": 8307,
+              "asm": "jmp    0x2075"
+            },
+            {
+              "address": 8307,
+              "end": 8309,
+              "asm": "xor    %eax,%eax"
+            },
+            {
+              "address": 8309,
+              "end": 8317,
+              "asm": "mov    %rax,0xa8(%rsp)"
+            },
+            {
+              "address": 8317,
+              "end": 8320,
+              "asm": "test   %rax,%rax"
+            },
+            {
+              "address": 8320,
+              "end": 8326,
+              "asm": "je     0x21d8"
+            },
+            {
+              "address": 8326,
+              "end": 8331,
+              "asm": "mov    0x28(%rsp),%rax"
+            },
+            {
+              "address": 8331,
+              "end": 8334,
+              "asm": "movzbl (%rax),%eax"
+            }
+          ],
+          "retained_source": {
+            "start": 8317,
+            "end": 8320,
+            "symbol": "balancer_ingress",
+            "section": 3,
+            "input_offset": 6738,
+            "symbol_offset": 6738
+          }
+        },
+        {
+          "offset": 9259,
+          "bytes": 6,
+          "asm": "mov    $0x3,%r13d",
+          "period_ns": 77077077,
+          "sampled_ns_per_call": 0.5275833759484181,
+          "context": [
+            {
+              "address": 9251,
+              "end": 9253,
+              "asm": "add    %ecx,%edx"
+            },
+            {
+              "address": 9253,
+              "end": 9255,
+              "asm": "not    %edx"
+            },
+            {
+              "address": 9255,
+              "end": 9259,
+              "asm": "mov    %dx,0x18(%rax)"
+            },
+            {
+              "address": 9259,
+              "end": 9265,
+              "asm": "mov    $0x3,%r13d"
+            },
+            {
+              "address": 9265,
+              "end": 9270,
+              "asm": "jmp    0x221e"
+            },
+            {
+              "address": 9270,
+              "end": 9273,
+              "asm": "mov    (%r14),%rax"
+            },
+            {
+              "address": 9273,
+              "end": 9277,
+              "asm": "mov    0x8(%r14),%rcx"
+            }
+          ],
+          "retained_source": {
+            "start": 9259,
+            "end": 9265,
+            "symbol": "balancer_ingress",
+            "section": 3,
+            "input_offset": 7476,
+            "symbol_offset": 7476
+          }
+        },
+        {
+          "offset": 8191,
+          "bytes": 10,
+          "asm": "movabs $0xffffd0324296b000,%rdi",
+          "period_ns": 74074074,
+          "sampled_ns_per_call": 0.5070281794828952,
+          "context": [
+            {
+              "address": 8183,
+              "end": 8185,
+              "asm": "add    %ecx,%edx"
+            },
+            {
+              "address": 8185,
+              "end": 8187,
+              "asm": "add    %eax,%edx"
+            },
+            {
+              "address": 8187,
+              "end": 8191,
+              "asm": "mov    %edx,0x24(%rsp)"
+            },
+            {
+              "address": 8191,
+              "end": 8201,
+              "asm": "movabs $0xffffd0324296b000,%rdi"
+            },
+            {
+              "address": 8201,
+              "end": 8206,
+              "asm": "lea    0x24(%rsp),%rsi"
+            },
+            {
+              "address": 8206,
+              "end": 8211,
+              "asm": "mov    $0x1,%eax"
+            },
+            {
+              "address": 8211,
+              "end": 8213,
+              "asm": "mov    (%rsi),%eax"
+            }
+          ],
+          "retained_source": {
+            "start": 8191,
+            "end": 8201,
+            "symbol": "balancer_ingress",
+            "section": 3,
+            "input_offset": 6663,
+            "symbol_offset": 6663
+          }
+        },
+        {
+          "offset": 12075,
+          "bytes": 10,
+          "asm": "cmpl   $0xb,0x38(%rdi)",
+          "period_ns": 73073073,
+          "sampled_ns_per_call": 0.500176447327721,
+          "context": [
+            {
+              "address": 12066,
+              "end": 12072,
+              "asm": "jne    0x2d97"
+            },
+            {
+              "address": 12072,
+              "end": 12074,
+              "asm": "xor    %eax,%eax"
+            },
+            {
+              "address": 12074,
+              "end": 12075,
+              "asm": "ret"
+            },
+            {
+              "address": 12075,
+              "end": 12085,
+              "asm": "cmpl   $0xb,0x38(%rdi)"
+            },
+            {
+              "address": 12085,
+              "end": 12091,
+              "asm": "jne    0x3067"
+            },
+            {
+              "address": 12091,
+              "end": 12099,
+              "asm": "cmpq   $0xc,0x188(%rdi)"
+            },
+            {
+              "address": 12099,
+              "end": 12105,
+              "asm": "jne    0x3067"
+            }
+          ],
+          "retained_source": null
+        },
+        {
+          "offset": 8157,
+          "bytes": 4,
+          "asm": "shr    $0x30,%rdx",
+          "period_ns": 62062062,
+          "sampled_ns_per_call": 0.42480739362080416,
+          "context": [
+            {
+              "address": 8146,
+              "end": 8148,
+              "asm": "mov    %eax,%ecx"
+            },
+            {
+              "address": 8148,
+              "end": 8153,
+              "asm": "mov    $0xffff0001,%edx"
+            },
+            {
+              "address": 8153,
+              "end": 8157,
+              "asm": "imul   %rcx,%rdx"
+            },
+            {
+              "address": 8157,
+              "end": 8161,
+              "asm": "shr    $0x30,%rdx"
+            },
+            {
+              "address": 8161,
+              "end": 8163,
+              "asm": "mov    %edx,%ecx"
+            },
+            {
+              "address": 8163,
+              "end": 8166,
+              "asm": "shl    $0x10,%ecx"
+            },
+            {
+              "address": 8166,
+              "end": 8168,
+              "asm": "or     %edx,%ecx"
+            }
+          ],
+          "retained_source": {
+            "start": 8157,
+            "end": 8161,
+            "symbol": "balancer_ingress",
+            "section": 3,
+            "input_offset": 6629,
+            "symbol_offset": 6629
+          }
+        },
+        {
+          "offset": 7963,
+          "bytes": 5,
+          "asm": "mov    $0x1,%eax",
+          "period_ns": 57057057,
+          "sampled_ns_per_call": 0.39054873284493286,
+          "context": [
+            {
+              "address": 7940,
+              "end": 7948,
+              "asm": "movl   $0x202,0x1c(%rsp)"
+            },
+            {
+              "address": 7948,
+              "end": 7958,
+              "asm": "movabs $0xffff8c2001620000,%rdi"
+            },
+            {
+              "address": 7958,
+              "end": 7963,
+              "asm": "lea    0x1c(%rsp),%rsi"
+            },
+            {
+              "address": 7963,
+              "end": 7968,
+              "asm": "mov    $0x1,%eax"
+            },
+            {
+              "address": 7968,
+              "end": 7970,
+              "asm": "mov    (%rsi),%eax"
+            },
+            {
+              "address": 7970,
+              "end": 7975,
+              "asm": "cmp    $0x400,%eax"
+            },
+            {
+              "address": 7975,
+              "end": 7977,
+              "asm": "jae    0x1f3f"
+            }
+          ],
+          "retained_source": {
+            "start": 7963,
+            "end": 7968,
+            "symbol": "balancer_ingress",
+            "section": 3,
+            "input_offset": 6469,
+            "symbol_offset": 6469
+          }
+        },
+        {
+          "offset": 7195,
+          "bytes": 6,
+          "asm": "je     0x1d31",
+          "period_ns": 50050050,
+          "sampled_ns_per_call": 0.342586607758713,
+          "context": [
+            {
+              "address": 7179,
+              "end": 7184,
+              "asm": "cmpb   $0x11,0x64(%rsp)"
+            },
+            {
+              "address": 7184,
+              "end": 7190,
+              "asm": "jne    0x1d31"
+            },
+            {
+              "address": 7190,
+              "end": 7195,
+              "asm": "testb  $0x2,0x1(%r13)"
+            },
+            {
+              "address": 7195,
+              "end": 7201,
+              "asm": "je     0x1d31"
+            },
+            {
+              "address": 7201,
+              "end": 7208,
+              "asm": "movl   $0x202,(%rsp)"
+            },
+            {
+              "address": 7208,
+              "end": 7218,
+              "asm": "movabs $0xffff8c2001620000,%rdi"
+            },
+            {
+              "address": 7218,
+              "end": 7221,
+              "asm": "mov    %rsp,%rsi"
+            }
+          ],
+          "retained_source": {
+            "start": 7195,
+            "end": 7201,
+            "symbol": "balancer_ingress",
+            "section": 3,
+            "input_offset": 5957,
+            "symbol_offset": 5957
+          }
+        },
+        {
+          "offset": 8492,
+          "bytes": 2,
+          "asm": "jne    0x217f",
+          "period_ns": 50050050,
+          "sampled_ns_per_call": 0.342586607758713,
+          "context": [
+            {
+              "address": 8474,
+              "end": 8482,
+              "asm": "movzbl 0x92(%rsp),%ecx"
+            },
+            {
+              "address": 8482,
+              "end": 8489,
+              "asm": "cmp    0x80(%rsp),%edi"
+            },
+            {
+              "address": 8489,
+              "end": 8492,
+              "asm": "mov    %cl,0x12(%rax)"
+            },
+            {
+              "address": 8492,
+              "end": 8494,
+              "asm": "jne    0x217f"
+            },
+            {
+              "address": 8494,
+              "end": 8497,
+              "asm": "cmp    %si,%dx"
+            },
+            {
+              "address": 8497,
+              "end": 8499,
+              "asm": "jne    0x217f"
+            },
+            {
+              "address": 8499,
+              "end": 8501,
+              "asm": "test   %cl,%cl"
+            }
+          ],
+          "retained_source": {
+            "start": 8492,
+            "end": 8494,
+            "symbol": "balancer_ingress",
+            "section": 3,
+            "input_offset": 6882,
+            "symbol_offset": 6882
+          }
+        },
+        {
+          "offset": 9176,
+          "bytes": 3,
+          "asm": "mov    %rcx,%rdx",
+          "period_ns": 50050050,
+          "sampled_ns_per_call": 0.342586607758713,
+          "context": [
+            {
+              "address": 9162,
+              "end": 9166,
+              "asm": "movzwl 0x20(%rax),%edx"
+            },
+            {
+              "address": 9166,
+              "end": 9169,
+              "asm": "add    %rdx,%rcx"
+            },
+            {
+              "address": 9169,
+              "end": 9176,
+              "asm": "add    $0x10ac,%rcx"
+            },
+            {
+              "address": 9176,
+              "end": 9179,
+              "asm": "mov    %rcx,%rdx"
+            },
+            {
+              "address": 9179,
+              "end": 9183,
+              "asm": "shr    $0x10,%rdx"
+            },
+            {
+              "address": 9183,
+              "end": 9186,
+              "asm": "movzwl %cx,%esi"
+            },
+            {
+              "address": 9186,
+              "end": 9189,
+              "asm": "add    %rdx,%rsi"
+            }
+          ],
+          "retained_source": {
+            "start": 9176,
+            "end": 9179,
+            "symbol": "balancer_ingress",
+            "section": 3,
+            "input_offset": 7393,
+            "symbol_offset": 7393
+          }
+        },
+        {
+          "offset": 8187,
+          "bytes": 4,
+          "asm": "mov    %edx,0x24(%rsp)",
+          "period_ns": 49049049,
+          "sampled_ns_per_call": 0.33573487560353876,
+          "context": [
+            {
+              "address": 8180,
+              "end": 8183,
+              "asm": "shl    $0x10,%edx"
+            },
+            {
+              "address": 8183,
+              "end": 8185,
+              "asm": "add    %ecx,%edx"
+            },
+            {
+              "address": 8185,
+              "end": 8187,
+              "asm": "add    %eax,%edx"
+            },
+            {
+              "address": 8187,
+              "end": 8191,
+              "asm": "mov    %edx,0x24(%rsp)"
+            },
+            {
+              "address": 8191,
+              "end": 8201,
+              "asm": "movabs $0xffffd0324296b000,%rdi"
+            },
+            {
+              "address": 8201,
+              "end": 8206,
+              "asm": "lea    0x24(%rsp),%rsi"
+            },
+            {
+              "address": 8206,
+              "end": 8211,
+              "asm": "mov    $0x1,%eax"
+            }
+          ],
+          "retained_source": {
+            "start": 8187,
+            "end": 8191,
+            "symbol": "balancer_ingress",
+            "section": 3,
+            "input_offset": 6659,
+            "symbol_offset": 6659
+          }
+        },
+        {
+          "offset": 8170,
+          "bytes": 5,
+          "asm": "mov    0x28(%rsp),%rcx",
+          "period_ns": 48048048,
+          "sampled_ns_per_call": 0.3288831434483645,
+          "context": [
+            {
+              "address": 8163,
+              "end": 8166,
+              "asm": "shl    $0x10,%ecx"
+            },
+            {
+              "address": 8166,
+              "end": 8168,
+              "asm": "or     %edx,%ecx"
+            },
+            {
+              "address": 8168,
+              "end": 8170,
+              "asm": "sub    %ecx,%eax"
+            },
+            {
+              "address": 8170,
+              "end": 8175,
+              "asm": "mov    0x28(%rsp),%rcx"
+            },
+            {
+              "address": 8175,
+              "end": 8178,
+              "asm": "mov    0x4(%rcx),%ecx"
+            },
+            {
+              "address": 8178,
+              "end": 8180,
+              "asm": "mov    %ecx,%edx"
+            },
+            {
+              "address": 8180,
+              "end": 8183,
+              "asm": "shl    $0x10,%edx"
+            }
+          ],
+          "retained_source": {
+            "start": 8170,
+            "end": 8175,
+            "symbol": "balancer_ingress",
+            "section": 3,
+            "input_offset": 6642,
+            "symbol_offset": 6642
+          }
+        },
+        {
+          "offset": 3308,
+          "bytes": 5,
+          "asm": "mov    %rax,0x78(%rsp)",
+          "period_ns": 47047047,
+          "sampled_ns_per_call": 0.32203141129319024,
+          "context": [
+            {
+              "address": 3289,
+              "end": 3295,
+              "asm": "je     0x2218"
+            },
+            {
+              "address": 3295,
+              "end": 3298,
+              "asm": "incq   (%rax)"
+            },
+            {
+              "address": 3298,
+              "end": 3308,
+              "asm": "movabs $0xffff8c2041e07c00,%rax"
+            },
+            {
+              "address": 3308,
+              "end": 3313,
+              "asm": "mov    %rax,0x78(%rsp)"
+            },
+            {
+              "address": 3313,
+              "end": 3318,
+              "asm": "mov    0x28(%rsp),%r13"
+            },
+            {
+              "address": 3318,
+              "end": 3323,
+              "asm": "testb  $0x4,0x0(%r13)"
+            },
+            {
+              "address": 3323,
+              "end": 3329,
+              "asm": "je     0x1b5a"
+            }
+          ],
+          "retained_source": {
+            "start": 3308,
+            "end": 3313,
+            "symbol": "balancer_ingress",
+            "section": 3,
+            "input_offset": 2917,
+            "symbol_offset": 2917
+          }
+        },
+        {
+          "offset": 9153,
+          "bytes": 3,
+          "asm": "movzwl %si,%ecx",
+          "period_ns": 47047047,
+          "sampled_ns_per_call": 0.32203141129319024,
+          "context": [
+            {
+              "address": 9144,
+              "end": 9147,
+              "asm": "add    %rcx,%rdi"
+            },
+            {
+              "address": 9147,
+              "end": 9150,
+              "asm": "shr    $0x10,%ebp"
+            },
+            {
+              "address": 9150,
+              "end": 9153,
+              "asm": "add    %rdi,%rbp"
+            },
+            {
+              "address": 9153,
+              "end": 9156,
+              "asm": "movzwl %si,%ecx"
+            },
+            {
+              "address": 9156,
+              "end": 9159,
+              "asm": "add    %rbp,%rcx"
+            },
+            {
+              "address": 9159,
+              "end": 9162,
+              "asm": "add    %rdx,%rcx"
+            },
+            {
+              "address": 9162,
+              "end": 9166,
+              "asm": "movzwl 0x20(%rax),%edx"
+            }
+          ],
+          "retained_source": {
+            "start": 9153,
+            "end": 9156,
+            "symbol": "balancer_ingress",
+            "section": 3,
+            "input_offset": 7370,
+            "symbol_offset": 7370
+          }
+        },
+        {
+          "offset": 10203,
+          "bytes": 6,
+          "asm": "mov    0x3c(%rdi),%eax",
+          "period_ns": 46046046,
+          "sampled_ns_per_call": 0.315179679138016,
+          "context": [
+            {
+              "address": 10193,
+              "end": 10198,
+              "asm": "call   0x2f2b"
+            },
+            {
+              "address": 10198,
+              "end": 10202,
+              "asm": "add    $0x8,%rsp"
+            },
+            {
+              "address": 10202,
+              "end": 10203,
+              "asm": "ret"
+            },
+            {
+              "address": 10203,
+              "end": 10209,
+              "asm": "mov    0x3c(%rdi),%eax"
+            },
+            {
+              "address": 10209,
+              "end": 10212,
+              "asm": "cmp    $0x4,%eax"
+            },
+            {
+              "address": 10212,
+              "end": 10218,
+              "asm": "je     0x2813"
+            },
+            {
+              "address": 10218,
+              "end": 10221,
+              "asm": "cmp    $0x8,%eax"
+            }
+          ],
+          "retained_source": null
+        },
+        {
+          "offset": 7601,
+          "bytes": 3,
+          "asm": "test   %rax,%rax",
+          "period_ns": 45045045,
+          "sampled_ns_per_call": 0.3083279469828417,
+          "context": [
+            {
+              "address": 7588,
+              "end": 7597,
+              "asm": "add    %gs:0xffffffff8a2b0028,%rax"
+            },
+            {
+              "address": 7597,
+              "end": 7599,
+              "asm": "jmp    0x1db1"
+            },
+            {
+              "address": 7599,
+              "end": 7601,
+              "asm": "xor    %eax,%eax"
+            },
+            {
+              "address": 7601,
+              "end": 7604,
+              "asm": "test   %rax,%rax"
+            },
+            {
+              "address": 7604,
+              "end": 7610,
+              "asm": "je     0x221e"
+            },
+            {
+              "address": 7610,
+              "end": 7615,
+              "asm": "movzwl 0x34(%rsp),%ecx"
+            },
+            {
+              "address": 7615,
+              "end": 7619,
+              "asm": "rol    $0x8,%cx"
+            }
+          ],
+          "retained_source": {
+            "start": 7601,
+            "end": 7604,
+            "symbol": "balancer_ingress",
+            "section": 3,
+            "input_offset": 6215,
+            "symbol_offset": 6215
+          }
+        },
+        {
+          "offset": 8168,
+          "bytes": 2,
+          "asm": "sub    %ecx,%eax",
+          "period_ns": 45045045,
+          "sampled_ns_per_call": 0.3083279469828417,
+          "context": [
+            {
+              "address": 8161,
+              "end": 8163,
+              "asm": "mov    %edx,%ecx"
+            },
+            {
+              "address": 8163,
+              "end": 8166,
+              "asm": "shl    $0x10,%ecx"
+            },
+            {
+              "address": 8166,
+              "end": 8168,
+              "asm": "or     %edx,%ecx"
+            },
+            {
+              "address": 8168,
+              "end": 8170,
+              "asm": "sub    %ecx,%eax"
+            },
+            {
+              "address": 8170,
+              "end": 8175,
+              "asm": "mov    0x28(%rsp),%rcx"
+            },
+            {
+              "address": 8175,
+              "end": 8178,
+              "asm": "mov    0x4(%rcx),%ecx"
+            },
+            {
+              "address": 8178,
+              "end": 8180,
+              "asm": "mov    %ecx,%edx"
+            }
+          ],
+          "retained_source": {
+            "start": 8168,
+            "end": 8170,
+            "symbol": "balancer_ingress",
+            "section": 3,
+            "input_offset": 6640,
+            "symbol_offset": 6640
+          }
+        },
+        {
+          "offset": 8426,
+          "bytes": 3,
+          "asm": "cmp    $0x1,%eax",
+          "period_ns": 44044044,
+          "sampled_ns_per_call": 0.30147621482766745,
+          "context": [
+            {
+              "address": 8416,
+              "end": 8419,
+              "asm": "mov    %rsp,%rsi"
+            },
+            {
+              "address": 8419,
+              "end": 8424,
+              "asm": "mov    $0x1,%eax"
+            },
+            {
+              "address": 8424,
+              "end": 8426,
+              "asm": "mov    (%rsi),%eax"
+            },
+            {
+              "address": 8426,
+              "end": 8429,
+              "asm": "cmp    $0x1,%eax"
+            },
+            {
+              "address": 8429,
+              "end": 8431,
+              "asm": "jae    0x2101"
+            },
+            {
+              "address": 8431,
+              "end": 8438,
+              "asm": "imul   $0x18,%rax,%rax"
+            },
+            {
+              "address": 8438,
+              "end": 8441,
+              "asm": "add    %rdi,%rax"
+            }
+          ],
+          "retained_source": null
+        },
+        {
+          "offset": 9236,
+          "bytes": 7,
+          "asm": "cmp    $0x10000,%rdx",
+          "period_ns": 44044044,
+          "sampled_ns_per_call": 0.30147621482766745,
+          "context": [
+            {
+              "address": 9227,
+              "end": 9231,
+              "asm": "shr    $0x10,%rcx"
+            },
+            {
+              "address": 9231,
+              "end": 9234,
+              "asm": "movzwl %dx,%esi"
+            },
+            {
+              "address": 9234,
+              "end": 9236,
+              "asm": "add    %esi,%ecx"
+            },
+            {
+              "address": 9236,
+              "end": 9243,
+              "asm": "cmp    $0x10000,%rdx"
+            },
+            {
+              "address": 9243,
+              "end": 9246,
+              "asm": "cmovb  %edx,%ecx"
+            },
+            {
+              "address": 9246,
+              "end": 9248,
+              "asm": "mov    %ecx,%edx"
+            },
+            {
+              "address": 9248,
+              "end": 9251,
+              "asm": "shr    $0x10,%edx"
+            }
+          ],
+          "retained_source": {
+            "start": 9236,
+            "end": 9243,
+            "symbol": "balancer_ingress",
+            "section": 3,
+            "input_offset": 7453,
+            "symbol_offset": 7453
+          }
+        },
+        {
+          "offset": 9200,
+          "bytes": 3,
+          "asm": "mov    %rsi,%rcx",
+          "period_ns": 43043043,
+          "sampled_ns_per_call": 0.2946244826724932,
+          "context": [
+            {
+              "address": 9186,
+              "end": 9189,
+              "asm": "add    %rdx,%rsi"
+            },
+            {
+              "address": 9189,
+              "end": 9196,
+              "asm": "cmp    $0x10000,%rcx"
+            },
+            {
+              "address": 9196,
+              "end": 9200,
+              "asm": "cmovb  %rcx,%rsi"
+            },
+            {
+              "address": 9200,
+              "end": 9203,
+              "asm": "mov    %rsi,%rcx"
+            },
+            {
+              "address": 9203,
+              "end": 9207,
+              "asm": "shr    $0x10,%rcx"
+            },
+            {
+              "address": 9207,
+              "end": 9210,
+              "asm": "movzwl %si,%edx"
+            },
+            {
+              "address": 9210,
+              "end": 9213,
+              "asm": "add    %rcx,%rdx"
+            }
+          ],
+          "retained_source": {
+            "start": 9200,
+            "end": 9203,
+            "symbol": "balancer_ingress",
+            "section": 3,
+            "input_offset": 7417,
+            "symbol_offset": 7417
+          }
+        }
+      ],
+      "disassembly_command": [
+        "objdump",
+        "-D",
+        "-z",
+        "-w",
+        "--no-show-raw-insn",
+        "-b",
+        "binary",
+        "-m",
+        "i386:x86-64",
+        "/workspaces/kprog-raw/perf/20261115-katran-body-profile-retry2/profile/post_rejit.jit-lines.d/prog-16.bin"
+      ]
+    }
+  }
+}

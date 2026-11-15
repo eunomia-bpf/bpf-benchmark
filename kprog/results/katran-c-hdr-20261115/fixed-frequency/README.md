@@ -134,3 +134,23 @@ pvclock_clocksource_read_nowd, htab_map_hash and lookup_nulls_elem_raw work.
 Static clock binding alone does not remove the underlying clocksource cost.
 This identifies shared helper costs for follow-up without attributing the
 whole-program3.15% gain to an individual optimization.
+
+Hot-instruction comparison, coordinator20:38 follow-up: `profile/hot-instructions.json`
+decodes the exact same-profile live bytes, joins retained native instructions
+and JIT BTF lines, and includes neighboring instructions. The two heaviest
+native samples,8.489/6.701ns per call, land on stores immediately after loading
+`*real_pos` (balancer.c889/150); JIT has the same pairs at11.444/6.308ns.
+These are map-value dependency chains, not demonstrated stack spills. Another
+native5.707ns sample is just after a packet load in the IPv4 checksum, which
+also costs JIT6.847ns. JIT's modulo path samples4.944ns after integer division;
+native uses constant multiply/shift. CPU-clock skid prevents assigning these
+costs to a single store, load or division instruction. All native stack-address
+syntax totals18.561ns versus JIT21.489ns; that syntax includes source locals.
+
+One concrete missed LTO class is visible: the raw hash routine dispatches only
+4/8/12/16-byte keys, while Katran's vip_definition key is20B. Both BPF stacks
+still reach htab_map_hash/lookup_nulls_elem_raw; the actual plan's typed hash
+sites select that same raw routine. This calls for a compact word-key Jenkins
+path rather than more duplicated fixed-length bodies. Source barriers and
+bounds checks do not dominate the top sampled instructions in this capture.
+No runtime gain is inferred before the next fixed-frequency comparison.

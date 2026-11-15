@@ -526,3 +526,7 @@ katran-profile-analysis:
 .PHONY: katran-source-costs
 katran-source-costs:
 	python3 $(ROOT)/kprog/perf/profile/source-costs.py --analysis /workspaces/kprog-raw/perf/20261115-katran-body-profile-retry2/analysis-callers/result.json --source-map /workspaces/kprog-raw/perf/20261115-katran-body-profile-retry2/source-audit-profile-facts/jit-source-map.json --baseline-capture /workspaces/kprog-raw/perf/20261115-katran-body-profile-retry2/profile/baseline.jit-lines.json --output $(OUTPUT)
+
+.PHONY: katran-hot-instructions
+katran-hot-instructions:
+	taskset -c 8-11 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/perf/profile/hot-jit-instructions.py --capture /workspaces/kprog-raw/perf/20261115-katran-body-profile-retry2/profile --analysis /workspaces/kprog-raw/perf/20261115-katran-body-profile-retry2/analysis-callers/result.json --source-map /workspaces/kprog-raw/perf/20261115-katran-body-profile-retry2/source-audit-profile-facts/jit-source-map.json --output $(OUTPUT)
