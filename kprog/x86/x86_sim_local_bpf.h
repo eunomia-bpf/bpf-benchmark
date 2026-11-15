@@ -1524,14 +1524,9 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \
             if (X86_SIM_L_REG_TAG(DST)==X86_SIM_TAG_STACK) \
                 X86_SIM_L_STACK_VALUES_ERASE((__u64)(long)__x86_l_addr-(__u64)(long)&__x86_stack_mem.b[0],__x86_l_width); \
-            if (X86_SIM_L_REG_TAG(DST) == X86_SIM_TAG_STACK && \
-			    ((OP) == X86_OP_MOV_STORE_IMM ||             \
-			     X86_SIM_L_REG_TAG(SRC) == X86_SIM_TAG_SCALAR)) \
-				X86_SIM_L_STORE_ADDR_TAGGED(             \
-					__x86_l_addr, __x86_l_width,      \
-					__x86_l_value, X86_SIM_TAG_STACK);                   \
-			else                                             \
-				X86_SIM_L_STORE_ADDR_TAGGED(__x86_l_addr, \
+            /* The former special arm already required DST's tag to \
+             * be STACK, so both arms passed exactly the same tag. */ \
+            X86_SIM_L_STORE_ADDR_TAGGED(__x86_l_addr, \
                     __x86_l_width,__x86_l_value,X86_SIM_L_REG_TAG(DST));     \
             if (X86_SIM_L_REG_TAG(DST)==X86_SIM_TAG_STACK && (OP)==X86_OP_MOV_STORE_REG && \
                 __x86_l_width==X86_WIDTH_64 && KPROG_X86_STORE_SRC_SHIFT(0U,(AUX))==0U) \

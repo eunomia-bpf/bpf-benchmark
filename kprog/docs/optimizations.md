@@ -273,3 +273,12 @@ executions/zero mismatches; original544B rejection/packed512B acceptance
 retained. Reports: `../results/perf_20261113/load-writeback/report.md` and
 `../results/perf_20261113/all-pairs-single/report.md`. Full OTel B/app and
 runtime performance remain open; native LTO stays together.
+
+2026-11-15 shared tagged-store call: the MOV store default arm now has
+one STORE_ADDR_TAGGED invocation. The removed condition's true arm already
+required the destination tag to be STACK, making its tag argument identical
+to the general arm. Address/value evaluation, alias erase/save, unknown-store
+fact clearing and freed-stack inputs stay in the same order. This removes
+duplicate preprocessing of the same body; it changes no P or benchmark.
+Native CPU/shared-C memory/flag and normal-B baseline fixtures are committed
+in2647a9aca. Completed validation and CPP sizes follow in the result receipt.
