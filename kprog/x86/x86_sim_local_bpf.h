@@ -1526,10 +1526,8 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
             break;                                           \
 		default:                                                 \
 			void *__x86_l_addr = KPROG_PTR_ADD64_BITS(__x86_l_base_ptr, __x86_l_disp);               \
-            if (X86_SIM_L_REG_TAG(DST)==X86_SIM_TAG_STACK) \
-                X86_SIM_L_STACK_VALUES_ERASE((__u64)(long)__x86_l_addr-(__u64)(long)&__x86_stack_mem.b[0],__x86_l_width); \
-            /* The former special arm already required DST's tag to \
-             * be STACK, so both arms passed exactly the same tag. */ \
+            /* Tagged store invalidates this range before writing it; \
+             * the source value has already been captured above. */ \
             X86_SIM_L_STORE_ADDR_TAGGED(__x86_l_addr, \
                     __x86_l_width,__x86_l_value,X86_SIM_L_REG_TAG(DST));     \
             if (X86_SIM_L_REG_TAG(DST)==X86_SIM_TAG_STACK && (OP)==X86_OP_MOV_STORE_REG && \

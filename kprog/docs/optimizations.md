@@ -363,3 +363,13 @@ match their previous outputs32/32, checked-C packet host25 pass. One bounded
 actual OTel frontend921682 is queued behind preserved910213, same canonical
 build, normal flags and all LTO. Full compilation/runtime gains remain open.
 Exact commands/results: `../results/perf_20261113/store-constants/report.md`.
+
+2026-11-15 single aliased-store fact invalidation: EXEC_STORE's ordinary-address
+arm now lets STORE_ADDR_TAGGED invalidate the saved pointer facts for the range.
+It already performs the identical invalidation before the volatile write; the
+removed earlier pass had no intervening reads of those facts. Source value,
+destination address and register tags are captured/read in the same order,
+and post-store fact saving stays in place. Before changing the body,4,224
+independent aliased-stack cases pass (complete arena bytes, all saved facts,
+flags, zero/nonzero free-byte choices and draw counts). Validation and graph
+measurement follow; P, normal flags and combined LTO are unchanged.
