@@ -27,4 +27,9 @@ void kprog_x86_mov_reg(struct x86_sim_register_state *, struct kprog_x86_arena *
                       struct kprog_x86_stack_fact *, __u32, __u8, __u8, __u8, __u32);
 void kprog_x86_movx_reg(struct x86_sim_register_state *, struct kprog_x86_arena *,
                        struct kprog_x86_stack_fact *, __u32, __u8, __u8, __u8, __u8, __u32);
+__s64 kprog_x86_stack_alias(struct kprog_x86_arena *, __u32, const void *);
+__u64 kprog_x86_load_tagged(struct x86_sim_register_state *, struct kprog_x86_arena *,
+                           __u32, const void *, __u64, __u64);
+__u64 kprog_x86_native_load_tagged(struct x86_sim_register_state *, struct kprog_x86_arena *,
+                                  __u32, const void *, __s64, __u64, __u64);
 #endif

@@ -69,3 +69,33 @@ void kprog_x86_movx_reg(struct x86_sim_register_state *state,
 	struct x86_sim_register_state *__x86_state = state;
 	X86_SIM_L_EXEC_MOVX_REG(op, dst, src, flags, aux);
 }
+
+/* Actual tagged-memory primitives, including read-before-release observation.
+ * Full-width width/tag inputs retain the native macro's capture boundaries. */
+__s64 kprog_x86_stack_alias(struct kprog_x86_arena *arena, __u32 capacity,
+                            const void *address)
+{
+	__s64 result;
+	X86_SIM_L_STACK_ALIAS_OFFSET_INTO(result, address);
+	return result;
+}
+
+__u64 kprog_x86_load_tagged(struct x86_sim_register_state *state,
+                            struct kprog_x86_arena *arena, __u32 capacity,
+                            const void *address, __u64 width, __u64 tag)
+{
+	struct x86_sim_register_state *__x86_state = state;
+	__u64 result;
+	X86_SIM_L_LOAD_ADDR_TAGGED_INTO(result, address, width, tag);
+	return result;
+}
+
+__u64 kprog_x86_native_load_tagged(struct x86_sim_register_state *state,
+                                   struct kprog_x86_arena *arena, __u32 capacity,
+                                   const void *base, __s64 offset, __u64 width, __u64 tag)
+{
+	struct x86_sim_register_state *__x86_state = state;
+	__u64 result;
+	X86_SIM_L_NATIVE_DATA_LOAD_TAGGED_INTO(result, base, offset, width, tag);
+	return result;
+}

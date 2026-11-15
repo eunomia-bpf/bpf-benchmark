@@ -873,16 +873,35 @@ do { \
 ({ __s64 __x86_alias_result; \
    X86_SIM_L_STACK_ALIAS_OFFSET_INTO(__x86_alias_result, ADDR); \
    __x86_alias_result; })
+/* Keep the physical access before tag/alias observations and free input.
+ * In particular, neither a nonstack tag nor a failed access reads the arena.
+ * Call sites use statement outputs rather than eagerly evaluated tag args. */
+#define X86_SIM_L_LOAD_ADDR_TAGGED_INTO(OUTPUT, ADDR, WIDTH, TAG) \
+    do { __u64 __x86_alias_observed=X86_SIM_L_LOAD_ADDR((ADDR),(WIDTH)); \
+         if ((TAG)==X86_SIM_TAG_STACK) { \
+             __s64 __x86_alias_offset; \
+             X86_SIM_L_STACK_ALIAS_OFFSET_INTO(__x86_alias_offset, ADDR); \
+             if (__x86_alias_offset<X86_SIM_L_STACK_SP()) \
+                 __x86_alias_observed=x86_apply_width(X86_SIM_L_UNSPECIFIED(),X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)); \
+         } \
+         (OUTPUT)=__x86_alias_observed; } while(0)
 #define X86_SIM_L_LOAD_ADDR_TAGGED(ADDR, WIDTH, TAG) \
-    ({ __u64 __x86_alias_observed=X86_SIM_L_LOAD_ADDR((ADDR),(WIDTH)); \
-       if ((TAG)==X86_SIM_TAG_STACK && X86_SIM_L_STACK_ALIAS_OFFSET(ADDR)<X86_SIM_L_STACK_SP()) \
-         __x86_alias_observed=x86_apply_width(X86_SIM_L_UNSPECIFIED(),X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)); \
-       __x86_alias_observed; })
+    ({ __u64 __x86_alias_result; \
+       X86_SIM_L_LOAD_ADDR_TAGGED_INTO(__x86_alias_result, ADDR, WIDTH, TAG); \
+       __x86_alias_result; })
+#define X86_SIM_L_NATIVE_DATA_LOAD_TAGGED_INTO(OUTPUT, BASE, OFF, WIDTH, TAG) \
+    do { __u64 __x86_data_observed=X86_SIM_L_NATIVE_DATA_LOAD((BASE),(OFF),(WIDTH)); \
+         if ((TAG)==X86_SIM_TAG_STACK) { \
+             __s64 __x86_data_offset; \
+             X86_SIM_L_STACK_ALIAS_OFFSET_INTO(__x86_data_offset,KPROG_PTR_ADD64_BITS((BASE),(OFF))); \
+             if (__x86_data_offset<X86_SIM_L_STACK_SP()) \
+                 __x86_data_observed=x86_apply_width(X86_SIM_L_UNSPECIFIED(),X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)); \
+         } \
+         (OUTPUT)=__x86_data_observed; } while(0)
 #define X86_SIM_L_NATIVE_DATA_LOAD_TAGGED(BASE, OFF, WIDTH, TAG) \
-    ({ __u64 __x86_alias_observed=X86_SIM_L_NATIVE_DATA_LOAD((BASE),(OFF),(WIDTH)); \
-       if ((TAG)==X86_SIM_TAG_STACK && X86_SIM_L_STACK_ALIAS_OFFSET(KPROG_PTR_ADD64_BITS((BASE),(OFF)))<X86_SIM_L_STACK_SP()) \
-         __x86_alias_observed=x86_apply_width(X86_SIM_L_UNSPECIFIED(),X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)); \
-       __x86_alias_observed; })
+    ({ __u64 __x86_data_result; \
+       X86_SIM_L_NATIVE_DATA_LOAD_TAGGED_INTO(__x86_data_result, BASE, OFF, WIDTH, TAG); \
+       __x86_data_result; })
 
 #if defined(__BPF__) || defined(__bpf__)
 #define X86_SIM_L_LOAD_PTR_ADDR(ADDR) (*(void * volatile *)(ADDR))
@@ -904,7 +923,8 @@ typedef void *x86_sim_unaligned_ptr __attribute__((aligned(1), may_alias));
         else if (__x86_st_tag==X86_SIM_TAG_SCALAR) X86_SIM_L_STACK_VALUES_CLEAR(); \
         KPROG_X86_MEM_STORE(__x86_st_addr,__x86_st_width,__x86_st_value); \
         if (__x86_st_tag==X86_SIM_TAG_STACK) { \
-            __s64 __x86_st_off=X86_SIM_L_STACK_ALIAS_OFFSET(__x86_st_addr); \
+            __s64 __x86_st_off; \
+            X86_SIM_L_STACK_ALIAS_OFFSET_INTO(__x86_st_off, __x86_st_addr); \
             if (__x86_st_off<X86_SIM_L_STACK_SP()) { _Pragma("unroll") \
                 for (__u32 __x86_st_i=0; __x86_st_i<8U; ++__x86_st_i) \
                     if (__x86_st_i<X86_SIM_L_EFFECTIVE_WIDTH(__x86_st_width) && \
@@ -1315,7 +1335,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 					x86_store_imm_disp(IMM) : x86_simm(IMM), \
 					__x86_l_read_mem_width);         \
 			else                                             \
-				__x86_l_value = X86_SIM_L_NATIVE_DATA_LOAD_TAGGED( \
+				X86_SIM_L_NATIVE_DATA_LOAD_TAGGED_INTO(__x86_l_value,  \
 					__x86_l_base_ptr, __x86_l_disp,       \
 					__x86_l_read_mem_width, X86_SIM_L_REG_TAG(BASE_REG));          \
 			break;                                           \
@@ -1424,7 +1444,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 					__x86_l_value = KPROG_X86_MEM_LOAD_FIXED( \
 						__x86_l_base_ptr, x86_simm(IMM), __x86_l_mem_width); \
 				else                                      \
-					__x86_l_value = X86_SIM_L_NATIVE_DATA_LOAD_TAGGED( \
+					X86_SIM_L_NATIVE_DATA_LOAD_TAGGED_INTO(__x86_l_value,  \
 					__x86_l_base_ptr, __x86_l_disp, __x86_l_mem_width, X86_SIM_L_REG_TAG(SRC)); \
 				break;                                    \
 			}                                                 \
@@ -1448,7 +1468,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 				__x86_l_value = KPROG_X86_MEM_LOAD_FIXED( \
 					__x86_l_base_ptr, x86_simm(IMM), __x86_l_mem_width); \
 			else                                             \
-				__x86_l_value = X86_SIM_L_NATIVE_DATA_LOAD_TAGGED( \
+				X86_SIM_L_NATIVE_DATA_LOAD_TAGGED_INTO(__x86_l_value,  \
 					__x86_l_base_ptr, __x86_l_disp, __x86_l_mem_width, X86_SIM_L_REG_TAG(SRC)); \
 			if ((OP) == X86_OP_MOVSX_LOAD)                    \
 				__x86_l_value = x86_sign_extend(           \
@@ -1595,9 +1615,9 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 					? (__u8 *)__x86_l_base_ptr        \
 						  + __x86_l_disp          \
 					: __x86_l_base_ptr;               \
-			__x86_xmm0_lo = X86_SIM_L_LOAD_ADDR_TAGGED(__x86_l_addr,\
+			X86_SIM_L_LOAD_ADDR_TAGGED_INTO(__x86_xmm0_lo, __x86_l_addr,\
 				X86_WIDTH_64, X86_SIM_L_REG_TAG(SRC));                            \
-			__x86_xmm0_hi = X86_SIM_L_LOAD_ADDR_TAGGED(             \
+			X86_SIM_L_LOAD_ADDR_TAGGED_INTO(__x86_xmm0_hi,              \
 				(__u8 *)__x86_l_addr                       \
 					+ KPROG_X86_XMM0_LANE_OFFSET(1),  \
 				X86_WIDTH_64, X86_SIM_L_REG_TAG(SRC));                            \
@@ -2253,7 +2273,8 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 				(__x86_l_i * (WIDTH)));                    \
 			void *__x86_l_dst_addr = KPROG_PTR_ADD64_BITS(__x86_l_dst_ptr,\
 				(__x86_l_i * (WIDTH)));                    \
-			__u64 __x86_l_value = X86_SIM_L_LOAD_ADDR_TAGGED(       \
+			__u64 __x86_l_value; \
+            X86_SIM_L_LOAD_ADDR_TAGGED_INTO(__x86_l_value,        \
 				__x86_l_src_addr, (WIDTH), __x86_l_src_tag);              \
 			X86_SIM_L_STORE_ADDR_TAGGED(__x86_l_dst_addr, (WIDTH),  \
 					     __x86_l_value, __x86_l_dst_tag);              \
@@ -2304,7 +2325,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			__u64 __x86_l_byte;                               \
 			if (KPROG_X86_CALLMEM_KIND(OP_IS_COPY) ==          \
 			    KPROG_X86_CALLMEM_COPY)                      \
-				__x86_l_byte = X86_SIM_L_LOAD_ADDR_TAGGED(       \
+				X86_SIM_L_LOAD_ADDR_TAGGED_INTO(__x86_l_byte,        \
 					KPROG_PTR_ADD64_BITS(             \
 						__x86_l_src_ptr, __x86_l_i), \
 					X86_WIDTH_8, X86_SIM_L_REG_TAG(X86_RSI));                    \

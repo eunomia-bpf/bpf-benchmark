@@ -763,7 +763,12 @@ clight: clightgen
 	  $(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -DPROFILE=$${fixture%:*} -DSCALAR_FACTS=$${fixture#*:} -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_x86_storage_profile_host.c build/x86_pointer_binding.o -o build/test_x86_storage_profile_host && \
 	  ./build/test_x86_storage_profile_host || exit $$?; \
 	done
-	$(CC) -D__COMPCERT__ -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_x86_inline_binding_host.c -o build/test_x86_inline_binding_host
+	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_x86_tagged_load_host.c build/x86_pointer_binding.o -o build/test_x86_tagged_load_host
+	./build/test_x86_tagged_load_host
+	$(CC) -D__COMPCERT__ -include oracles/compcert_memory_host.h -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -c c/X86Pointer.c -o build/x86_pointer_binding.o
+	$(CC) -D__COMPCERT__ -include oracles/compcert_memory_host.h -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_x86_tagged_load_host.c build/x86_pointer_binding.o -o build/test_x86_tagged_load_host
+	./build/test_x86_tagged_load_host
+	$(CC) -D__COMPCERT__ -include oracles/compcert_memory_host.h -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_x86_inline_binding_host.c -o build/test_x86_inline_binding_host
 	./build/test_x86_inline_binding_host
 	../stock-path/bin/clang -g -O2 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c oracles/x86_inline_compile.bpf.c -o build/x86_inline_compile.bpf.o
 	../stock-path/bin/clang -g -O2 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_arm64 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c oracles/arm64_address_compile.bpf.c -o build/arm64_address_compile.bpf.o

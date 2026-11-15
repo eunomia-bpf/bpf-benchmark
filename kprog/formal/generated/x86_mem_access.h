@@ -9,6 +9,17 @@ typedef unsigned char kprog_x86_unaligned8 __attribute__((aligned(1),may_alias))
 typedef unsigned short kprog_x86_unaligned16 __attribute__((aligned(1),may_alias));
 typedef unsigned int kprog_x86_unaligned32 __attribute__((aligned(1),may_alias));
 typedef __u64 kprog_x86_unaligned64 __attribute__((aligned(1),may_alias));
+#if defined(__COMPCERT__)
+/* Clight scalar chunks require alignment even for aligned(1) C types.
+ * The upstream alignment-1 copy preserves the complete source byte window.
+ * A volatile local keeps the physical observation used before tag/choice
+ * evaluation, including when the logical released value replaces it. Its
+ * block is local, rather than a new volatile global or platform import. */
+#define KPROG_X86_CLIGHT_LOAD_RETURN(TYPE) \
+    do { volatile TYPE observed; \
+         __builtin_memcpy_aligned((void *)&observed,address,sizeof(TYPE),1); \
+         return observed; } while(0)
+#endif
 static __attribute__((always_inline)) inline __u64
 kprog_x86_mem_load(const void *address, __u8 width)
 {
@@ -20,6 +31,8 @@ kprog_x86_mem_load(const void *address, __u8 width)
 #if defined(__bpf__) || defined(__BPF__)
         asm volatile("%0 = *(u8 *)(%1 + 0)" : "=r"(value) : "r"(address) : "memory");
         return (__u8)value;
+#elif defined(__COMPCERT__)
+        KPROG_X86_CLIGHT_LOAD_RETURN(__u8);
 #else
         return *(volatile const kprog_x86_unaligned8 *)address;
 #endif
@@ -27,6 +40,8 @@ kprog_x86_mem_load(const void *address, __u8 width)
 #if defined(__bpf__) || defined(__BPF__)
         asm volatile("%0 = *(u16 *)(%1 + 0)" : "=r"(value) : "r"(address) : "memory");
         return (__u16)value;
+#elif defined(__COMPCERT__)
+        KPROG_X86_CLIGHT_LOAD_RETURN(__u16);
 #else
         return *(volatile const kprog_x86_unaligned16 *)address;
 #endif
@@ -34,6 +49,8 @@ kprog_x86_mem_load(const void *address, __u8 width)
 #if defined(__bpf__) || defined(__BPF__)
         asm volatile("%0 = *(u32 *)(%1 + 0)" : "=r"(value) : "r"(address) : "memory");
         return (__u32)value;
+#elif defined(__COMPCERT__)
+        KPROG_X86_CLIGHT_LOAD_RETURN(__u32);
 #else
         return *(volatile const kprog_x86_unaligned32 *)address;
 #endif
@@ -41,12 +58,17 @@ kprog_x86_mem_load(const void *address, __u8 width)
 #if defined(__bpf__) || defined(__BPF__)
         asm volatile("%0 = *(u64 *)(%1 + 0)" : "=r"(value) : "r"(address) : "memory");
         return value;
+#elif defined(__COMPCERT__)
+        KPROG_X86_CLIGHT_LOAD_RETURN(__u64);
 #else
         return *(volatile const kprog_x86_unaligned64 *)address;
 #endif
     default: KPROG_C_TRAP();
     }
 }
+#if defined(__COMPCERT__)
+#undef KPROG_X86_CLIGHT_LOAD_RETURN
+#endif
 /* Preserve the context register itself: the verifier distinguishes a fixed
  * LDX offset from adding the same offset to a context pointer first.
  * Other displacements use the equivalent computed-address encoding. */

@@ -1295,9 +1295,34 @@ the existing byte-parameter helper. Native facades retain their folding behavior
 The new oracle checks580,608 defined-lane/register/tag/origin/frame cases,
 including absent unused references and restoration of the caller's macros.
 `X86Pointer` is regenerated for the current named/indexed register-cell ABI.
-Full inline extraction still fails at the tagged-memory GNU expressions;
-`X86Inline` has no accepted Clight export or refinement yet. Raw probes and
+At that checkpoint, full inline extraction stopped at tagged-memory GNU
+expressions; `X86Inline` had no accepted Clight export or refinement. Raw probes and
 validation are retained under `/workspaces/kprog-raw/formal/m4-x86-inline`.
+
+The next slice shares statement-output tagged-load bodies with their native
+expression facades and all direct consumers. Physical reads still precede tag,
+alias and released-value input observations. Three actual alias/tagged-load
+roots extend `X86Pointer` to14 functions, including its physical-load callee.
+CompCert uses the upstream alignment-1 copy builtin into a volatile local before
+returning the value: reduced C type alignment alone cannot relax Clight chunk
+loads. The AST contains size1/2/4/8 copies with source alignment1. Native GCC
+and BPF accesses retain their typed/asm forms. Native/global volatile events,
+pointer fragments, permission/init and fault interpretation remain M5 work.
+
+Historical and current native bodies and the CompCert host adapter pass58,320
+capacity/width/full-tag/release/frame cases plus eight protected-access probes.
+The adapter also checks the copy's actual source, byte count and alignment.
+Four mutations catch lost width masking, eager tag reads, truncated tags and
+wrong copy alignment; the three earlier binding mutations are also detected.
+`make clight`,38 targeted Lean jobs, deterministic regeneration and four
+standard-axiom queries pass. The expanded producer-interface fixture exercises
+indexed scalar/XMM loads, memcpy and REP MOVS: socket1448B and11 allocated
+relocations match the historical headers exactly, and replay equals normal
+compilation. The extraction TU expands to2,870,798 bytes at its explicit profile;
+this is not a whole-app scale result. Full inline extraction now stops at
+`READ_RECOVERY_AT` and its lazy effective-address expression. No full-I export,
+M4 completion or migrated theorem is accepted. Raw evidence:
+`/workspaces/kprog-raw/formal/m4-x86-tagged` and the completed inline receipts.
 
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight
