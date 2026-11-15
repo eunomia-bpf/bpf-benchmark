@@ -1,0 +1,108 @@
+{
+  "table": {
+    "native_cases": 1024,
+    "shared_simulator_cases": 1024,
+    "normal_b_compiled": true,
+    "sha256": {
+      "absolute.native.o": "fdf385277f03666abb9cb8598638ad4c479c68574482f52ba8ba37679d4d56d1",
+      "absolute.proof.o": "f89c6349f311e3a0377d9931296014a98fec0d63622633757f235428b81b771a",
+      "absolute.bin": "99285a968da59232def9122f0a8be5804cd7fbcb9e3f723581c6d6ab0e8f0470",
+      "absolute.bpf.o": "73369732fca8844b7d945565720377e3ba6692165be089e583aeb056f027929c"
+    },
+    "scope": "Native host image-relative binding and shared-C/normal-B compilation; no kernel installation or application claim."
+  },
+  "helper": {
+    "clock_calls": 1,
+    "unspecified_choices": 24,
+    "stack_bytes": 64,
+    "full_clobber_checks": true
+  },
+  "transport": {
+    "object_bytes": 22256,
+    "object_sha256": "73369732fca8844b7d945565720377e3ba6692165be089e583aeb056f027929c",
+    "allocated_sections": {
+      ".text": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "kprobe/absolute_table": {
+        "bytes": 360,
+        "sha256": "dbc1af2281fd13f2dc5df7bd7801eafb75dd43c8fd155a74d18d48c067d77fb3"
+      },
+      "license": {
+        "bytes": 4,
+        "sha256": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a"
+      }
+    },
+    "code_bytes": 360,
+    "post_pei_stack_bytes": {
+      "absolute_model_x86_sim_xdp": 0
+    },
+    "allocated_equal_normal_file_pipeline": true
+  },
+  "otel": {
+    "source_head": "3b619520b9fd6006fae58b210f1629ea2fdcb4fb",
+    "entry": "perf_unwind_hotspot",
+    "native_sha256": "c50a8df99505eead7881bbd9bebb8eb9357fd53106feb7ff58a8f7781e393150",
+    "proof_sha256": "717ece2934366ecfd4b61c0118e460153048cdce657a66d416df29ca5d823452",
+    "metadata_sha256": "e5c8459b6798aa812ef24253a87a143593ad28148499c3752076f1c4603e6e4a",
+    "native_instructions": 6945,
+    "generated_bytes": 1093129,
+    "source_sha256": "c65335a5d4198032cac2ed319d5c8cd9dc7704868fedceab64f5e7aeceb15baf",
+    "inline_header_sha256": "f27e1de52099e03fa8b9998910fd28a7630ab67cf0a77f19012ac06777c3d9f6",
+    "simulator_header_sha256": "f8f868285b95d4f0954d1b477db496080cd0dd355038df9bad03c5eae2658dc8",
+    "commands": [
+      {
+        "command": [
+          "/workspaces/repository/kprog/stock-path/bin/clang",
+          "-w",
+          "-g",
+          "-O3",
+          "-mcpu=v4",
+          "-target",
+          "bpf",
+          "-mllvm",
+          "-bpf-stack-size=4096",
+          "-D__TARGET_ARCH_x86",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I",
+          "/workspaces/repository/vendor/libbpf/src",
+          "-I",
+          "/usr/include/x86_64-linux-gnu",
+          "-x",
+          "c",
+          "-E",
+          "-",
+          "-o",
+          "-"
+        ],
+        "returncode": 0,
+        "seconds": 0.27257676399312913,
+        "stdin_bytes": 1093129,
+        "stdin_sha256": "c65335a5d4198032cac2ed319d5c8cd9dc7704868fedceab64f5e7aeceb15baf",
+        "stdout_bytes": 6019192,
+        "stdout_sha256": "4219df97b0ceab152c7431ff67d72b9666cfcd8befb05982f92100c517607bf3",
+        "user_seconds": 0.24562699999999998,
+        "system_seconds": 0.022903999999999997,
+        "max_rss_kib": 91000
+      }
+    ],
+    "completed": false,
+    "frontend_requested": true,
+    "scope": "Same captured OTel proof/map metadata; streamed current C/CPP with optional normal-O3 frontend to null; no B/stack/kernel/application result",
+    "preprocessed_bytes": 6019192,
+    "preprocessed_sha256": "4219df97b0ceab152c7431ff67d72b9666cfcd8befb05982f92100c517607bf3",
+    "expansion": 5.506387626711944
+  },
+  "resource_events": {
+    "compiler": 1054890,
+    "launcher": 1054875,
+    "events": [
+      {
+        "event": "waiting-for-timing-work-lease",
+        "time": "2026-11-15T15:37:16.442689+00:00"
+      }
+    ]
+  }
+}
