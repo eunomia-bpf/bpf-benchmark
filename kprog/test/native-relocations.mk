@@ -277,3 +277,7 @@ frontend-stacks:
 .PHONY: frontend-release-image
 frontend-release-image:
 	taskset -c 8-11 prlimit --as=536870912 -- python3 $(ROOT)/kprog/test/release_compiler_image_lock.py --pid $(COMPILER_LAUNCHER) --fd 9 --lock /workspaces/.agent-state/kprog-lanes/locks/image --output $(OUTPUT)
+
+.PHONY: frontend-constants
+frontend-constants:
+	taskset -c 8-11 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/probe_frontend_constants.py --build /var/tmp/kprog-tmp/perf/frontend-constants --output $(OUTPUT)
