@@ -27,3 +27,19 @@ Production CLI/base/image have not been replaced in this step.
 Raw compilation, machine-code fixture and execution diagnostics remain at
 /workspaces/kprog-raw/perf/20261115-word-hash-lto/. The test fixture directory
 moved there intact from its completed temporary path; no raw data was deleted.
+
+Queued confirmation, 2026-11-15T21:09:06Z: the existing image publisher1208082 waits for
+C's whole Tracee timing parent1197138 to exit, then acquires imageEX. Proxy
+1208081 holds imageSH for that active pair. Validation1211115 follows completed
+image production under imageSH: existing actual-plan replay and1x10s Katran
+startup, with live JIT/cache observations retained. Timing1211116 follows the
+validation process ending and runs the existing fixed-frequency one A/A plus
+one A/B,3x180s/stats1,CPU0–7, all LTO, timingEX then imageSH. Publication and
+new timings have not started at this checkpoint. No runtime gain is claimed.
+
+Each job uses the committed Make recipes and run_verified_make launcher,
+setsid/nohup and a hard address-space bound; persistent raw directories are
+`20261115-word-hash-lto/{image,validation,timing}` under /workspaces/kprog-raw/perf.
+The queue waits on process/resource order. Supplementary observation or smoke
+status does not discard a completed measurement. Actual application errors,
+exit statuses and observer diagnostics will remain with the raw outputs.
