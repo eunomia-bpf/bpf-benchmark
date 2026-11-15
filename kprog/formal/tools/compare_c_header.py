@@ -12,6 +12,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 
 from elftools.elf.elffile import ELFFile
@@ -46,7 +47,7 @@ def main():
     for option in ("before", "header", "source", "output"):
         parser.add_argument("--" + option, required=True)
     parser.add_argument("--also-header", action="append", default=[],
-                        help="also replay a header directly included by --header")
+                        help="replay an included header, after any parent supplied earlier")
     parser.add_argument("--ir-pass", help="production LLVM IR pass applied before the BPF backend")
     parser.add_argument("--objdump", help="record stage disassembly as raw diagnostic output")
     parser.add_argument("compiler", nargs=argparse.REMAINDER)
@@ -113,17 +114,28 @@ def main():
     observations = {}
     for phase, body in (("before", previous), ("after", header.read_text())):
         for path in nested:
-            candidates = {f'#include "{path}"',
-                          f'#include "{os.path.relpath(path, header.parent)}"'}
-            directives = [line.strip() for line in body.splitlines() if line.strip() in candidates]
-            if len(directives) != 1:
-                raise SystemExit(f"primary header must directly include {path} once")
-            include = directives[0]
-            at = body.index(include)
-            line = body[:at].count("\n") + 1
+            # Earlier replacements carry #line locations for their own quoted
+            # includes. Resolve those against that parent, rather than the root.
+            parent, line, offset, sites = header, 1, 0, []
+            for row in body.splitlines(keepends=True):
+                marker = re.fullmatch(r'#line (\d+) "([^"]+)"\s*', row)
+                quoted = re.fullmatch(r'\s*#include "([^"]+)"\s*', row)
+                if marker:
+                    line, parent = int(marker[1]), Path(marker[2])
+                else:
+                    if quoted and (parent.parent / quoted[1]).resolve() == path:
+                        include = row.strip()
+                        sites.append((offset + row.index(include), include, line, parent))
+                    line += 1
+                offset += len(row)
+            if not sites:
+                raise SystemExit(f"replayed include graph must contain {path}")
             contents = historical_nested[path] if phase == "before" else path.read_text()
-            body = (body[:at] + f'#line 1 "{path}"\n' + contents
-                    + f'\n#line {line} "{header}"\n' + body[at + len(include):])
+            # Replace every occurrence: a guarded header may be included both
+            # directly and through another header; its first inclusion wins.
+            for at, include, line, parent in reversed(sites):
+                body = (body[:at] + f'#line 1 "{path}"\n' + contents
+                        + f'\n#line {line} "{parent}"\n' + body[at + len(include):])
         unit = (f'#line 1 "{source}"\n' + text[:position] + f'#line 1 "{header}"\n'
                 + body + f'\n#line {resume} "{source}"\n' + text[position + len(directive):])
         run(phase + "-preprocess", flags + ["-E", "-x", "c", "-", "-o", str(preprocessed)], unit)

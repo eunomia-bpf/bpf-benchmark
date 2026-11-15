@@ -349,9 +349,138 @@ static void xmm_faults(void)
     check(!munmap(p,page) && !munmap(mem,page*2),"XMM prefix unmap");
     puts("XMM: 2 guarded second-lane C-prefix probes");
 }
+/* Decode conditions independently, including parity and noncanonical flag
+ * bytes. Writer composition uses the separately checked exported primitive. */
+static __u64 condition(unsigned cc,const struct x86_sim_register_state *s)
+{
+    const unsigned values[]={s->of,!s->of,s->cf,!s->cf,s->zf,!s->zf,
+        s->cf||s->zf,!s->cf&&!s->zf,s->sf,!s->sf,s->pf,!s->pf,
+        s->sf!=s->of,s->sf==s->of,s->zf||s->sf!=s->of,!s->zf&&s->sf==s->of};
+    return cc<16?values[cc]:0;
+}
+static void conditional_cases(void)
+{
+    const unsigned widths[]={0,1,2,4,8,255},capacities[]={16,64,200,376};
+    const unsigned tags[]={0,1,2,4,255},destinations[]={0,4,6,255},shifts[]={0,8,9,255};
+    _Alignas(8) __u8 bytes[512],saved[512],expected_bytes[512];
+    __u8 ft[47],saved_ft[47],expected_ft[47];void *fp[47],*saved_fp[47],*expected_fp[47];
+    struct kprog_x86_stack_fact facts[47];
+    struct kprog_x86_arena arena={.b=bytes+64,.q=(void *)(bytes+64),.w=(void *)(bytes+64),.d=(void *)(bytes+64)};
+    unsigned counts[4]={0};
+    for (unsigned i=0;i<47;i++) { facts[i].tag=&ft[i];facts[i].pointer=&fp[i]; }
+    for (unsigned op=0;op<4;op++) for (unsigned c=0;c<4;c++)
+    for (unsigned ci=0;ci<32;ci++) for (unsigned f=0;f<34;f++)
+    for (unsigned route=0;route<3;route++) for (unsigned wi=0;wi<(op<2?6:1);wi++) {
+        unsigned capacity=capacities[c],at=capacity-8-(f&1),width=widths[wi]?widths[wi]:8;
+        unsigned cc=ci<16?ci:op==0?0x100+ci-16:240+ci-16;
+        unsigned dst=op==3?(route==0?4:route==1?6:255):destinations[ci%4];
+        unsigned src=route==0?4:route==1?6:255,tag=tags[(f/2)%5];
+        unsigned indexed=route==2 || (f&1),n=op==3?1:(width==255 || (f&1))?4:width;
+        __s64 off=(__s64)at-capacity,sp=off+(f%3==0?0:f%3==1?1:5),disp=route==0?off-sp-indexed:-3;
+        struct x86_sim_register_state state,initial,expected;
+        memset(&state,0x6b,sizeof(state));state.abi_kind=X86_SIM_ABI_KIND_RAW;state.is_xdp=0;
+        state.cf=f&1;state.zf=(f>>1)&1;state.sf=(f>>2)&1;state.of=(f>>3)&1;state.pf=(f>>4)&1;
+        if (f>=32) { state.of=2;state.sf=255;state.pf=f==32?2:255;state.cf=255;state.zf=0; }
+        state.native_stack_base=0x100000;state.rsp.ptr=(void *)(intptr_t)sp;
+        state.gpr_cells[6].value.ptr=bytes+64+at-disp-indexed;state.gpr_cells[6].tag=tag;
+        state.gpr_cells[2].value.ptr=(void *)(uintptr_t)(route==2?(uintptr_t)(bytes+64+at)-disp:1);state.gpr_cells[2].tag=0;
+        __u32 aux=op==0?cc:op==2?cc|(shifts[ci%4]<<8):
+            X86_MEM_AUX(indexed?2:X86_REG_NONE,0)|(n<<16)|((cc&255)<<24);
+        /* Exercise both memory-width fallback and explicit override. */
+        if (op==1 && width!=255 && !(f&1)) aux&=~0xff0000U;
+        __u64 imm=op==1?((__u64)(__u32)disp<<32)|0x12345678U:(__u64)disp;
+        unsigned recovery=op==1 && route==1 && tag==0,rejected=recovery && (f&1);
+        if (rejected && dst==4) continue; /* Nonreturn probe below. */
+        choice=(f&1)?0x8192a3b4c5d6e7f9ULL:0x8192a3b4c5d6e7f8ULL;
+        for (unsigned i=0;i<512;i++) bytes[i]=(__u8)(i*29+0x57);
+        for (unsigned i=0;i<47;i++) { ft[i]=4;fp[i]=bytes+i; }
+        memcpy(saved,bytes,sizeof(bytes));memcpy(saved_ft,ft,sizeof(ft));memcpy(saved_fp,fp,sizeof(fp));
+        memcpy(&initial,&state,sizeof(state));memcpy(&expected,&state,sizeof(state));reset();
+        __u64 truth=condition(cc,&state),value=0;unsigned physical=0;
+        if (op==0) value=kprog_x86_read_reg(&state,&arena,capacity,src,8,0);
+        if (op==1 && !rejected) {
+            value=little(bytes+64+at,n);physical=route!=0;
+            if ((route==0 || (route==1 && tag==4 && indexed)) && off<sp) {
+                value=choice & (n==8?~0ULL:(1ULL<<(8*n))-1);draws++;
+            }
+        }
+        if (recovery) draws++;
+        if (op<2) {
+            if (rejected) kprog_x86_write_reg(&expected,&arena,facts,capacity,dst,0,8,0);
+            else if (truth) {
+                if (op==0 && width==8) kprog_x86_mov_reg(&expected,&arena,facts,capacity,dst,src,8,0);
+                else kprog_x86_write_reg(&expected,&arena,facts,capacity,dst,value,width,0);
+            } else if (width==4) kprog_x86_write_reg(&expected,&arena,facts,capacity,dst,
+                kprog_x86_read_reg(&expected,&arena,capacity,dst,8,0),4,0);
+        } else if (op==2) kprog_x86_write_reg(&expected,&arena,facts,capacity,dst,truth,1,shifts[ci%4]==8?8:0);
+        else {
+            bytes[64+at]=(__u8)truth;physical=route!=0;
+            if ((route==0 || (route==1 && tag==4)) && off<sp) { bytes[64+at]=(__u8)choice;draws++; }
+            for (unsigned i=0;i<(capacity+7)/8;i++)
+                if (route==2 || (route==1 && tag==0) || ((route==0 || tag==4) && i==at/8)) { ft[i]=0;fp[i]=NULL; }
+        }
+        unsigned expected_draws=draws;
+        memcpy(expected_bytes,bytes,sizeof(bytes));memcpy(expected_ft,ft,sizeof(ft));memcpy(expected_fp,fp,sizeof(fp));
+        memcpy(bytes,saved,sizeof(bytes));memcpy(ft,saved_ft,sizeof(ft));memcpy(fp,saved_fp,sizeof(fp));
+        memcpy(&state,&initial,sizeof(state));reset();writing=op==3;expected_source=expected_destination=bytes+64+at;expected_size=n;
+        if (op==0) kprog_x86_cmov(&state,&arena,facts,capacity,dst,src,widths[wi],aux);
+        if (op==1) kprog_x86_cmov_mem(&state,&arena,facts,capacity,dst,src,widths[wi],aux,imm);
+        if (op==2) kprog_x86_setcc(&state,&arena,facts,capacity,dst,aux);
+        if (op==3) kprog_x86_setcc_mem(&state,&arena,facts,capacity,dst,aux,imm);
+        if (memcmp(&state,&expected,sizeof(state)) || memcmp(bytes,expected_bytes,sizeof(bytes)) || draws!=expected_draws)
+            fprintf(stderr,"conditional op=%u cap=%u cc=%u f=%u route=%u width=%u draws=%u/%u\n",op,capacity,cc,f,route,width,draws,expected_draws);
+        check(!memcmp(&state,&expected,sizeof(state)) && !memcmp(bytes,expected_bytes,sizeof(bytes)) &&
+            !memcmp(ft,expected_ft,sizeof(ft)) && !memcmp(fp,expected_fp,sizeof(fp)) && draws==expected_draws,"conditional source/condition/writer/complete frame");
+        copy_count(physical);counts[op]++;
+    }
+    writing=0;
+    const __u64 extra[]={256,0x100000008ULL,0x1000000ffULL,~0ULL};
+    for (unsigned i=0;i<260;i++) {
+        __u64 v=i<256?i:extra[i-256],p=v;__u8 out;
+        KPROG_X86_CMOV_WRITEBACK_INTO(out,p++);check(out==(v?0:1) && p==v+1 && kprog_x86_cmov_writeback(v)==out,"CMOV truth/capture");
+        p=v;KPROG_X86_SETCC_LANE_INTO(out,p++);check(out==(v==8) && p==v+1 && kprog_x86_setcc_lane(v)==out,"SETCC full lane/capture");
+        p=v;KPROG_X86_SETCC_MEM_BASE_INTO(out,p++);check(out==(v==255?0:1) && p==v+1 && kprog_x86_setcc_mem_base(v)==out,"SETCC full base/capture");
+        p=v;KPROG_X86_SETCC_MEM_ARM_INTO(out,p++);check(out==(v?0:1) && p==v+1 && kprog_x86_setcc_mem_arm(v)==out,"SETCC arm truth/capture");
+    }
+    printf("conditional full frames: CMOV=%u CMOVmem=%u SETCC=%u SETCCmem=%u;260 selector groups\n",counts[0],counts[1],counts[2],counts[3]);
+}
+static void conditional_faults(void)
+{
+    long page=sysconf(_SC_PAGESIZE);check(page>0,"conditional page");
+    void *mem=mmap(NULL,page,PROT_NONE,MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
+    struct x86_sim_register_state *s=mmap(NULL,page,PROT_READ|PROT_WRITE,MAP_SHARED|MAP_ANONYMOUS,-1,0),initial;
+    check(mem!=MAP_FAILED && s!=MAP_FAILED,"conditional guard mappings");
+    for (unsigned indexed=0;indexed<2;indexed++) {
+        memset(s,0x5a,sizeof(*s));s->abi_kind=X86_SIM_ABI_KIND_RAW;s->is_xdp=0;
+        s->gpr_cells[6].tag=4;s->gpr_cells[6].value.ptr=(void *)((uintptr_t)mem-indexed);
+        s->gpr_cells[2].tag=0;s->gpr_cells[2].value.ptr=(void *)1;memcpy(&initial,s,sizeof(initial));
+        pid_t pid=fork();check(pid>=0,"false CMOV fork");
+        if (!pid) {
+            struct sigaction a={0};a.sa_sigaction=fault;a.sa_flags=SA_SIGINFO;
+            if (sigemptyset(&a.sa_mask) || sigaction(SIGSEGV,&a,NULL)) _exit(2);
+            fault_address=expected_source=mem;expected_size=4;fault_draws=0;reset();
+            kprog_x86_cmov_mem(s,NULL,NULL,0,0,6,4,X86_MEM_AUX(indexed?2:X86_REG_NONE,0)|(16U<<24),0);_exit(3);
+        }
+        int status;check(waitpid(pid,&status,0)==pid && WIFEXITED(status) && !WEXITSTATUS(status),"false CMOV physical fault before release/condition");
+        check(!memcmp(s,&initial,sizeof(initial)),"false CMOV fault precedes 32-bit zero extension");
+    }
+    pid_t pid=fork();check(pid>=0,"CMOV recovery fork");
+    if (!pid) {
+        memset(s,0,sizeof(*s));s->abi_kind=X86_SIM_ABI_KIND_RAW;
+        kprog_x86_cmov_mem(s,NULL,NULL,0,4,6,8,X86_MEM_AUX(X86_REG_NONE,0)|(16U<<24),0);_exit(3);
+    }
+    int status;check(waitpid(pid,&status,0)==pid,"CMOV recovery wait");
+#if defined(__COMPCERT__)
+    check(WIFEXITED(status) && WEXITSTATUS(status)==77,"false CMOV RSP recovery nonreturn");
+#else
+    check(WIFSIGNALED(status) && WTERMSIG(status)==SIGILL,"false CMOV RSP recovery native trap");
+#endif
+    check(!munmap(s,page) && !munmap(mem,page),"conditional guard unmap");
+    puts("conditional: 2 false-condition first-fault frames,1 RSP recovery nonreturn");
+}
 int main(void)
 {
-    selector_cases();read_cases();handler_cases();guarded();store_cases();xmm_cases();xmm_faults();
+    selector_cases();read_cases();handler_cases();guarded();store_cases();xmm_cases();xmm_faults();conditional_cases();conditional_faults();
     printf("x86 shared memory/MOVBE:260 selector cases,%lu read/frame cases,%lu handler/frame cases,7 read probes,%lu store/frame cases,7 store guard/fault/refusal probes\n",reads,handlers,stores);
     return 0;
 }

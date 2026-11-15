@@ -1481,6 +1481,22 @@ XMM3424B/21relocs and ordinary1448B/11 match historical and normal compilation.
 Full inline export now stops at CMOV writeback's GNU expression; profile CPP
 is2,443,837B. [Receipts](results/m4-x86-xmm0/README.md) link the raw evidence.
 
+The conditional handlers now share standard-C output selectors while retaining
+their native expression facades. Four actual CMOV/SETCC register/memory roots
+bring `X86Memory` to28 functions. Historical/native/CompCert-adapter modes each
+pass78,336 CMOV,77,568 memory-CMOV,13,056 SETCC and13,056 memory-SETCC complete
+frames,260 selector groups and three fault/nonreturn probes. Condition decoding
+is independent; write composition uses the separately tested exported writer.
+All16 conditions, parity, whole-word versus byte AUX, noncanonical flag bytes,
+false32 zero extension, recovery and stack effects are covered. Eight mutations,
+`make clight`,40 targeted Lean jobs, deterministic1,808,925B Memory output and
+eight standard-axiom queries pass. Historical conditional1008B/4relocs and
+ordinary1448B/11 are exact. Header replay now resolves nested include locations
+and replaces every occurrence of guarded headers. Full inline export advances
+to ten struct-return errors; the suggested `-fstruct-passing` probe exports115
+functions successfully, with Lean validation recorded separately.
+[Receipts](results/m4-x86-conditional/README.md) retain the distinctions.
+
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight
 handler exports and full default compiled-byte coverage remain to do. Preserve

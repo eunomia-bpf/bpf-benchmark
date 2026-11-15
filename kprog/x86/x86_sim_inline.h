@@ -390,6 +390,34 @@ static __always_inline __u8 x86_sim_inline_xmm0_arm(__u64 stack)
 #pragma push_macro("KPROG_X86_XMM0_ARM")
 #undef KPROG_X86_XMM0_ARM
 #define KPROG_X86_XMM0_ARM(STACK) x86_sim_inline_xmm0_arm(STACK)
+static __always_inline __u8 x86_sim_inline_cmov_writeback(__u64 wide)
+{
+    __u8 result; KPROG_X86_CMOV_WRITEBACK_INTO(result,wide); return result;
+}
+static __always_inline __u8 x86_sim_inline_setcc_lane(__u64 shift)
+{
+    __u8 result; KPROG_X86_SETCC_LANE_INTO(result,shift); return result;
+}
+static __always_inline __u8 x86_sim_inline_setcc_mem_base(__u64 dst)
+{
+    __u8 result; KPROG_X86_SETCC_MEM_BASE_INTO(result,dst); return result;
+}
+static __always_inline __u8 x86_sim_inline_setcc_mem_arm(__u64 stack)
+{
+    __u8 result; KPROG_X86_SETCC_MEM_ARM_INTO(result,stack); return result;
+}
+#pragma push_macro("KPROG_X86_CMOV_WRITEBACK")
+#undef KPROG_X86_CMOV_WRITEBACK
+#define KPROG_X86_CMOV_WRITEBACK(WIDE) x86_sim_inline_cmov_writeback(WIDE)
+#pragma push_macro("KPROG_X86_SETCC_LANE")
+#undef KPROG_X86_SETCC_LANE
+#define KPROG_X86_SETCC_LANE(SHIFT) x86_sim_inline_setcc_lane(SHIFT)
+#pragma push_macro("KPROG_X86_SETCC_MEM_BASE")
+#undef KPROG_X86_SETCC_MEM_BASE
+#define KPROG_X86_SETCC_MEM_BASE(DST) x86_sim_inline_setcc_mem_base(DST)
+#pragma push_macro("KPROG_X86_SETCC_MEM_ARM")
+#undef KPROG_X86_SETCC_MEM_ARM
+#define KPROG_X86_SETCC_MEM_ARM(STACK) x86_sim_inline_setcc_mem_arm(STACK)
 #endif
 
 static __always_inline __attribute__((nodebug)) void
@@ -485,6 +513,10 @@ x86_sim_inline_recover(const struct x86_sim_inline_bindings *__x86_bind,
 #pragma pop_macro("X86_SIM_L_STACK_VALUES_CALL_FRAME")
 #pragma pop_macro("X86_SIM_L_STACK_VALUES_CLEAR")
 #if defined(__COMPCERT__)
+#pragma pop_macro("KPROG_X86_SETCC_MEM_ARM")
+#pragma pop_macro("KPROG_X86_SETCC_MEM_BASE")
+#pragma pop_macro("KPROG_X86_SETCC_LANE")
+#pragma pop_macro("KPROG_X86_CMOV_WRITEBACK")
 #pragma pop_macro("KPROG_X86_XMM0_ARM")
 #pragma pop_macro("KPROG_X86_STORE_ARM")
 #pragma pop_macro("KPROG_X86_STORE_SRC_SHIFT")

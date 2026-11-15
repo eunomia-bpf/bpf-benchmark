@@ -2802,8 +2802,7 @@ do { \
 				__x86_l_scm_value);                          \
 		else                                                        \
 			X86_SIM_L_STORE_ADDR_TAGGED(                               \
-				(__u8 *)__x86_l_scm_base +                   \
-					__x86_l_scm_disp,                    \
+				KPROG_PTR_ADD64_NATIVE(__x86_l_scm_base, __x86_l_scm_disp), \
 				KPROG_X86_SETCC_MEM_WIDTH_CODE,              \
 				__x86_l_scm_value, X86_SIM_L_REG_TAG(DST));                          \
 	} while (0)

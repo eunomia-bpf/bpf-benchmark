@@ -1,0 +1,83 @@
+{
+  "status": "component checks passed; M4 incomplete",
+  "historical_reference": "2044b0c62",
+  "modes": [
+    "historical native",
+    "current native",
+    "current CompCert host adapter"
+  ],
+  "frame_cases_per_mode": {
+    "cmov": 78336,
+    "cmov_mem": 77568,
+    "setcc": 13056,
+    "setcc_mem": 13056
+  },
+  "selector_capture_groups": 260,
+  "fault_nonreturn_probes_per_mode": 3,
+  "negative_checks": {
+    "wb-byte": 1,
+    "lane-byte": 1,
+    "base-byte": 1,
+    "arm-byte": 1,
+    "register-condition-byte": 1,
+    "memory-condition-payload": 1,
+    "false32": 1,
+    "conditional-read": 1
+  },
+  "make_clight_exit": 0,
+  "targeted_lean_jobs": 40,
+  "ast_functions": {
+    "X86Pointer": 34,
+    "X86Memory": 28
+  },
+  "deterministic": {
+    "X86Pointer": {
+      "equal": true,
+      "bytes": 988925
+    },
+    "X86Memory": {
+      "equal": true,
+      "bytes": 1808925
+    }
+  },
+  "axiom_queries": 8,
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "native_fidelity": {
+    "conditional": {
+      "allocated_sections_equal": true,
+      "allocated_relocations_equal": true,
+      "current_stream_equals_normal_build": true,
+      "allocated_section_bytes": {
+        ".text": 0,
+        "socket": 1008,
+        "license": 4
+      },
+      "allocated_relocations": 4
+    },
+    "ordinary": {
+      "allocated_sections_equal": true,
+      "allocated_relocations_equal": true,
+      "current_stream_equals_normal_build": true,
+      "allocated_section_bytes": {
+        ".text": 0,
+        "socket": 1448,
+        "license": 4
+      },
+      "allocated_relocations": 11
+    }
+  },
+  "full_inline_default_exit": 2,
+  "obstruction": "ten unsupported struct/union return errors",
+  "profile_cpp_bytes": 2444905,
+  "struct_passing_probe": {
+    "exit": 0,
+    "functions": 115,
+    "bytes": 19550502,
+    "lean_validation": "separate step"
+  },
+  "refinement_theorems_migrated": 0
+}

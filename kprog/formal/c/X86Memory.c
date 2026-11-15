@@ -100,3 +100,58 @@ void kprog_x86_store_xmm0(struct x86_sim_register_state *state,
     struct x86_sim_register_state *__x86_state=state;
     X86_SIM_L_EXEC_STORE_XMM0(dst,aux,imm);
 }
+
+__u8 kprog_x86_cmov_writeback(__u64 wide)
+{
+    __u8 result; KPROG_X86_CMOV_WRITEBACK_INTO(result,wide); return result;
+}
+__u8 kprog_x86_setcc_lane(__u64 shift)
+{
+    __u8 result; KPROG_X86_SETCC_LANE_INTO(result,shift); return result;
+}
+__u8 kprog_x86_setcc_mem_base(__u64 dst)
+{
+    __u8 result; KPROG_X86_SETCC_MEM_BASE_INTO(result,dst); return result;
+}
+__u8 kprog_x86_setcc_mem_arm(__u64 stack)
+{
+    __u8 result; KPROG_X86_SETCC_MEM_ARM_INTO(result,stack); return result;
+}
+#if defined(__COMPCERT__)
+#undef KPROG_X86_CMOV_WRITEBACK
+#define KPROG_X86_CMOV_WRITEBACK(WIDE) kprog_x86_cmov_writeback(WIDE)
+#undef KPROG_X86_SETCC_LANE
+#define KPROG_X86_SETCC_LANE(SHIFT) kprog_x86_setcc_lane(SHIFT)
+#undef KPROG_X86_SETCC_MEM_BASE
+#define KPROG_X86_SETCC_MEM_BASE(DST) kprog_x86_setcc_mem_base(DST)
+#undef KPROG_X86_SETCC_MEM_ARM
+#define KPROG_X86_SETCC_MEM_ARM(STACK) kprog_x86_setcc_mem_arm(STACK)
+#endif
+void kprog_x86_cmov(struct x86_sim_register_state *state,
+                    struct kprog_x86_arena *arena,struct kprog_x86_stack_fact *facts,
+                    __u32 capacity,__u8 dst,__u8 src,__u8 flags,__u32 aux)
+{
+    struct x86_sim_register_state *__x86_state=state;
+    X86_SIM_L_EXEC_CMOV(dst,src,flags,aux);
+}
+void kprog_x86_cmov_mem(struct x86_sim_register_state *state,
+                        struct kprog_x86_arena *arena,struct kprog_x86_stack_fact *facts,
+                        __u32 capacity,__u8 dst,__u8 src,__u8 flags,__u32 aux,__u64 imm)
+{
+    struct x86_sim_register_state *__x86_state=state;
+    X86_SIM_L_EXEC_CMOV_MEM(dst,src,flags,aux,imm);
+}
+void kprog_x86_setcc(struct x86_sim_register_state *state,
+                     struct kprog_x86_arena *arena,struct kprog_x86_stack_fact *facts,
+                     __u32 capacity,__u8 dst,__u32 aux)
+{
+    struct x86_sim_register_state *__x86_state=state;
+    X86_SIM_L_EXEC_SETCC(dst,aux);
+}
+void kprog_x86_setcc_mem(struct x86_sim_register_state *state,
+                         struct kprog_x86_arena *arena,struct kprog_x86_stack_fact *facts,
+                         __u32 capacity,__u8 dst,__u32 aux,__u64 imm)
+{
+    struct x86_sim_register_state *__x86_state=state;
+    X86_SIM_L_EXEC_SETCC_MEM(dst,aux,imm);
+}
