@@ -13,7 +13,7 @@ finish_pc32() {
     exit "$pc32_status"
 }
 trap finish_pc32 EXIT
-ln "$pc32_root/.cache/container-images/x86_64-runner-runtime.image.tar" "$pc32_state/var-tmp/runtime.image.tar"
+cp "$pc32_root/.cache/container-images/x86_64-runner-runtime.image.tar" "$pc32_state/var-tmp/runtime.image.tar"
 taskset -c 16-17 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
     --cwd "$pc32_root" --rwdir "$pc32_root" --rwdir "$pc32_output" \
     --rwdir "/var/tmp=$pc32_state/var-tmp" \
