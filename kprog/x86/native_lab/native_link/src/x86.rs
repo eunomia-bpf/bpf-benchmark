@@ -3468,22 +3468,6 @@ fn x86_encoded_instruction_is_indirect_call(blob: &[u8], off: usize) -> Result<b
     Ok(matches!(insn.flow_control(), FlowControl::IndirectCall))
 }
 
-fn x86_written_gpr_family(insn: &Instruction) -> Option<Register> {
-    if matches!(
-        insn.flow_control(),
-        FlowControl::Call | FlowControl::IndirectCall
-    ) {
-        return None;
-    }
-    if insn.op_count() == 0 || insn.op0_kind() != OpKind::Register {
-        return None;
-    }
-    match insn.mnemonic() {
-        Mnemonic::Cmp | Mnemonic::Test | Mnemonic::Push => None,
-        _ => x86_gpr64_family(insn.op0_register()),
-    }
-}
-
 fn x86_saved_push_reg(insn: &Instruction) -> Option<Register> {
     if insn.mnemonic() != Mnemonic::Push {
         return None;
