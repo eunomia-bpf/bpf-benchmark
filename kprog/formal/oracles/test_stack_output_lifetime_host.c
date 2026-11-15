@@ -74,8 +74,11 @@ static long output_comm(void *output, __u32 size)
         bad_helper_arguments = 1;
         return -13;
     }
-    for (unsigned i = 0; i < size; ++i) ((unsigned char *)output)[i] = (unsigned char)(0xd0U+i);
-    return -7;
+    if (!size) return -22; /* get_current_comm's zero-size EINVAL outcome */
+    const unsigned char comm[] = "helper-outcome";
+    for (unsigned i = 0; i < size; ++i)
+        ((unsigned char *)output)[i] = i+1 < size ? comm[i] : 0;
+    return 0;
 }
 #define bpf_get_current_comm output_comm
 
@@ -101,7 +104,7 @@ static int run(unsigned operation, long offset, unsigned length, unsigned long i
         for (unsigned i = 0; i < length; ++i) {
             unsigned at = (unsigned)((long)BIAS+offset+i);
             expected[at] = operation == 1 ? 7U : operation == 2 ?
-                original[BIAS-16+i] : (unsigned char)(0xd0U+i);
+                original[BIAS-16+i] : i+1 < length ? (unsigned char)"helper-outcome"[i] : 0;
         }
         /* A call releases callee-owned bytes below the unchanged caller SP.
          * A repeated-byte input gives independent byte/word packing the same
@@ -112,7 +115,7 @@ static int run(unsigned operation, long offset, unsigned length, unsigned long i
         else if (operation == 2) COPY();
         else HELPER(length);
         if (operation == 3) {
-            if (calls != 1 || bad_helper_arguments || RESULT_BITS() != (__u64)-7LL ||
+            if (calls != 1 || bad_helper_arguments || RESULT_BITS() != (length ? 0 : (__u64)-22LL) ||
                 RESULT_TAG() != SCALAR_TAG) return 2;
         } else if (calls || RESULT_BITS() != LIBC_RESULT(offset) || RESULT_TAG() != STACK_TAG) return 3;
     }
