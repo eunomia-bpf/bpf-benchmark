@@ -14,7 +14,7 @@
 
 - [ ] P-hash-word-keys（本提交source/checks；coordinator20:38 Katran先于OTelapp）：sameprofile发现VIP20B未进4/8/12/16 LTO，compact508B word-key jhash2/memcmp替换四份体；49178真实machine-code/kernel-reference+44Rust通过。下一步正常CLI/base/image配对发布、actualplan重放/code长度与真实guest，再固定频率Katran AA/AB；allLTO统一开，不据host测试宣称runtime提升。`perf_20261113/word-hash-lto/`。
 
-- [ ] P-map-CFG：实际Katran timed plan已到（4f8b965a8），proof/blob/relocs重放逐字匹配；66lookup中60named，6dynamic offsets3743/3988/5304/5743/5831/6085。先区分真实inner-map结果与basic-block入口清空造成的事实损失；若确实命中，用同名指针的CFG meet保留跨分支/调用后callee-saved事实，混合身份/inner-map/窄写/未知内存仍不得猜类型。当前3.15%每调用结果尚未归因到这6site。
+- [ ] P-map-CFG：实际Katran timed plan已到（4f8b965a8），proof/blob/relocs重放逐字匹配；66lookup中60named，6dynamic offsets3743/3988/5304/5743/5831/6085。已判明4site为lru_mapping inner/fallback_cache经rsp+0x78合流，2site直接消费vip_to_down_reals_map返回的inner；不是单一同名指针跨块遗失，单纯CFG meet无解（本提交dynamic-map-sites.json）。下一类须真实inner-map shape事实且保持混合路径语义；混合身份/inner-map/窄写/未知内存仍不得猜类型。当前3.15%每调用结果尚未归因到这6site。
 
 - [ ] P-SPECIALIZE-app（612c9fc18、5c3c95a4d、750897f5f、85b74fdf0、473be88b4）：retry2 read_task_struct stock24/checked27、perf_unwind_stop stock31/checked34成功；perf_unwind_native两个attempt在MIR `dead $w2 = LDW32`失败，Make0/appERROR。whole_word_spills接受dead destination并修正liveness定义，11子例/10600真实执行通过；actualmain重放a96cefb82于20:35:15完成6pairs/693accesses/llc通过，B991592codeB但实际R10depth784，native stack408+spill压力继续诊断；未宣称stock接受。raw `20261115-otel-current-app-retry2`及`20261115-dead-spill`。16/16规模及hotspot正常B/帧448B已完成；整应用安装、两臂输出和等量工作继续。
 

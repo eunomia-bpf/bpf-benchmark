@@ -1,0 +1,39 @@
+{
+  "scope": "Manual classification from retained actual proof disassembly, helper-site bindings and unchanged upstream Katran source; not an execution-frequency or speed attribution",
+  "proof_disassembly": "/workspaces/kprog-raw/perf/20261115-katran-body-profile-retry2/source-audit-profile-facts/linker.stderr.txt",
+  "sites": [
+    {
+      "input_offset": 3743,
+      "origin": "lru_mapping inner result or fallback_cache, joined through private stack slot rsp+0x78",
+      "source_line": 839
+    },
+    {
+      "input_offset": 5304,
+      "origin": "lru_mapping inner result or fallback_cache, joined through private stack slot rsp+0x78",
+      "source_line": 839
+    },
+    {
+      "input_offset": 5743,
+      "origin": "lru_mapping inner result or fallback_cache, joined through private stack slot rsp+0x78",
+      "source_line": 839
+    },
+    {
+      "input_offset": 5831,
+      "origin": "lru_mapping inner result or fallback_cache, joined through private stack slot rsp+0x78",
+      "source_line": 839
+    },
+    {
+      "input_offset": 3988,
+      "origin": "direct inner map returned by vip_to_down_reals_map lookup",
+      "outer_lookup_offset": 3972,
+      "source_line": 662
+    },
+    {
+      "input_offset": 6085,
+      "origin": "direct inner map returned by vip_to_down_reals_map lookup",
+      "outer_lookup_offset": 6069,
+      "source_line": 662
+    }
+  ],
+  "conclusion": "All six involve genuine dynamic inner-map results or mixed inner/fallback identity. Preserving a single named identity at CFG joins does not resolve these sites. Any further specialization needs actual inner-map shape facts and compatible mixed-path semantics, not guessed identity."
+}

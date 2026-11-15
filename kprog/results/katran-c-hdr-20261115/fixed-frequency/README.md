@@ -154,3 +154,11 @@ sites select that same raw routine. This calls for a compact word-key Jenkins
 path rather than more duplicated fixed-length bodies. Source barriers and
 bounds checks do not dominate the top sampled instructions in this capture.
 No runtime gain is inferred before the next fixed-frequency comparison.
+
+The six unnamed lookup sites are now classified in `profile/dynamic-map-sites.json`.
+Four consume the lru_mapping inner result or fallback_cache after their mixed
+identity joins through private stack slot rsp+0x78. Two consume a direct inner
+result from vip_to_down_reals_map. A same-name CFG meet cannot resolve these
+six; future inner-map specialization needs real shape facts and mixed-path
+semantics. The compact word-key hash change addresses the separately observed
+20-byte-key gap without inventing map identities.
