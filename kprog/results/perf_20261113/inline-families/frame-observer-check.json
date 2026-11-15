@@ -1,0 +1,23 @@
+{
+  "object_bytes": 22168,
+  "object_sha256": "7a21b5b5835390f7a3dd3596758e81d9006b34a30ff3826973e0f26df1ab93e9",
+  "allocated_sections": {
+    ".text": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "kprobe/absolute_table": {
+      "bytes": 360,
+      "sha256": "dbc1af2281fd13f2dc5df7bd7801eafb75dd43c8fd155a74d18d48c067d77fb3"
+    },
+    "license": {
+      "bytes": 4,
+      "sha256": "b20d0dac092c812b64f524c77de4a7557346c116ba13b90a441995cc4184021a"
+    }
+  },
+  "code_bytes": 360,
+  "post_pei_stack_bytes": {
+    "absolute_model_x86_sim_xdp": 0
+  },
+  "allocated_equal_normal_file_pipeline": true
+}

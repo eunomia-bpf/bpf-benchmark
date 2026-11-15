@@ -61,3 +61,13 @@ MIR build is added. Parser and real normal-B transport checks are queued
 behind shared timing/image leases; validation of this observer extension
 is pending. Scale100/1000 uses the updated observer when its existing job
 starts after OTel. P-SPECIALIZE remains open.
+
+2026-11-15T16:20:06Z: cc83b5d48 observer regression PASSED after actual C
+EX release. Nonzero576/zero subprogram frames and missing/duplicate frame
+errors pass; real anonymous normal-B continuation still matches every
+ordinary allocated section (360code bytes, actual fixture stackSize0).
+Whole-object bytes differ through metadata, so equality is scoped to
+allocated sections. Result: frame-observer-check.json; full commands/logs
+remain under raw inline-families/frame-observer-check. The pidfd guardian
+acquired timingSH/imageSH and resumed exact OTel1054890 at16:20:06Z.
+Actual OTel frontend+B/frame remain running, not inferred from this test.
