@@ -414,3 +414,12 @@ its macro in tests. Small native host fixtures explicitly choose their input
 environment; B/CompCert expressions, P and all LTO are unchanged. Existing
 CPU observer zero choices remain a limited test domain, with hardware input
 matching and full AST/formal work still open. Validation follows; no speed claim.
+
+Host-route receipt080a1aa08/8ef77c1a1: the old header fails four independent
+oracle groups once their overrides are removed; the explicit route passes all
+scoped zero/nonzero/draw-count checks.925344x86/1474560ARM full storage/
+distinct-stream comparisons pass under UBSan. CPU512store/4032BMI2 and map/
+table/context host checks pass,32 normal B allocated outputs unchanged. CPU
+control still has4864/8960 mismatches under its explicit zero input choice;
+hardware input matching and full formal work remain open. All failures, exact
+scope and raw recordings: `../results/perf_20261113/host-input-route/report.md`.

@@ -1,0 +1,195 @@
+[
+  {
+    "command": [
+      "cc",
+      "-Wall",
+      "-Wextra",
+      "-O2",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "-c",
+      "/workspaces/repository/kprog/formal/c/Arm64Address.c",
+      "-o",
+      "/workspaces/repository/kprog/formal/build/arm64_address_binding.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "/workspaces/repository/kprog/formal/c/Arm64Address.c: In function \u2018kprog_arm64_write_reg\u2019:\n/workspaces/repository/kprog/formal/c/Arm64Address.c:72: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   72 |         ARM64_SIM_L_WRITE_REG_WIDTH(reg, value, width);\n      | \n/workspaces/repository/kprog/formal/c/Arm64Address.c:72: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n/workspaces/repository/kprog/formal/c/Arm64Address.c: In function \u2018kprog_arm64_write_ptr\u2019:\n/workspaces/repository/kprog/formal/c/Arm64Address.c:83: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   83 |         ARM64_SIM_L_WRITE_REG_PTR_TAG(reg, value, tag);\n      | \n/workspaces/repository/kprog/formal/c/Arm64Address.c:83: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n/workspaces/repository/kprog/formal/c/Arm64Address.c: In function \u2018kprog_arm64_exec_adrp\u2019:\n/workspaces/repository/kprog/formal/c/Arm64Address.c:94: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   94 |         ARM64_SIM_L_EXEC_ADRP(op, dst, imm);\n      | \n/workspaces/repository/kprog/formal/c/Arm64Address.c:94: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n"
+  },
+  {
+    "command": [
+      "cc",
+      "-Wall",
+      "-Wextra",
+      "-O2",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "-DPROFILE=1",
+      "-DBIAS=0",
+      "/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c",
+      "/workspaces/repository/kprog/formal/build/arm64_address_binding.o",
+      "-o",
+      "/workspaces/repository/kprog/formal/build/test_arm64_storage_profile_host"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c: In function \u2018canonical\u2019:\n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:64: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   64 |         case 0: ARM64_SIM_L_WRITE_REG_PTR_TAG(o.reg,(void *)(uintptr_t)o.value,o.tag); break;\n      | \n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:64: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:65: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   65 |         case 1: ARM64_SIM_L_WRITE_REG_WIDTH(o.reg,o.value,o.width); break;\n      | \n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:65: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:66: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   66 |         case 2: ARM64_SIM_L_EXEC_ADRP(ARM64_OP_ADRP_GOT,o.reg,o.value); break;\n      | \n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:66: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:67: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   67 |         case 3: ARM64_SIM_L_EXEC_ADRP(ARM64_OP_ADRP_RODATA,o.reg,o.value); break;\n      | \n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:67: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/formal/build/test_arm64_storage_profile_host"
+    ],
+    "returncode": 0,
+    "stdout": "ARM capacity 1 bias 0: 245760 full storage/stream comparisons, 6257 free draws\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "cc",
+      "-Wall",
+      "-Wextra",
+      "-O2",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "-DPROFILE=7",
+      "-DBIAS=-3",
+      "/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c",
+      "/workspaces/repository/kprog/formal/build/arm64_address_binding.o",
+      "-o",
+      "/workspaces/repository/kprog/formal/build/test_arm64_storage_profile_host"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c: In function \u2018canonical\u2019:\n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:64: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   64 |         case 0: ARM64_SIM_L_WRITE_REG_PTR_TAG(o.reg,(void *)(uintptr_t)o.value,o.tag); break;\n      | \n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:64: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:65: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   65 |         case 1: ARM64_SIM_L_WRITE_REG_WIDTH(o.reg,o.value,o.width); break;\n      | \n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:65: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:66: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   66 |         case 2: ARM64_SIM_L_EXEC_ADRP(ARM64_OP_ADRP_GOT,o.reg,o.value); break;\n      | \n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:66: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:67: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   67 |         case 3: ARM64_SIM_L_EXEC_ADRP(ARM64_OP_ADRP_RODATA,o.reg,o.value); break;\n      | \n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:67: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/formal/build/test_arm64_storage_profile_host"
+    ],
+    "returncode": 0,
+    "stdout": "ARM capacity 7 bias -3: 245760 full storage/stream comparisons, 37499 free draws\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "cc",
+      "-Wall",
+      "-Wextra",
+      "-O2",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "-DPROFILE=9",
+      "-DBIAS=4",
+      "/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c",
+      "/workspaces/repository/kprog/formal/build/arm64_address_binding.o",
+      "-o",
+      "/workspaces/repository/kprog/formal/build/test_arm64_storage_profile_host"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c: In function \u2018canonical\u2019:\n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:64: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   64 |         case 0: ARM64_SIM_L_WRITE_REG_PTR_TAG(o.reg,(void *)(uintptr_t)o.value,o.tag); break;\n      | \n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:64: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:65: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   65 |         case 1: ARM64_SIM_L_WRITE_REG_WIDTH(o.reg,o.value,o.width); break;\n      | \n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:65: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:66: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   66 |         case 2: ARM64_SIM_L_EXEC_ADRP(ARM64_OP_ADRP_GOT,o.reg,o.value); break;\n      | \n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:66: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:67: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   67 |         case 3: ARM64_SIM_L_EXEC_ADRP(ARM64_OP_ADRP_RODATA,o.reg,o.value); break;\n      | \n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:67: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/formal/build/test_arm64_storage_profile_host"
+    ],
+    "returncode": 0,
+    "stdout": "ARM capacity 9 bias 4: 245760 full storage/stream comparisons, 49055 free draws\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "cc",
+      "-Wall",
+      "-Wextra",
+      "-O2",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "-DPROFILE=160",
+      "-DBIAS=96",
+      "/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c",
+      "/workspaces/repository/kprog/formal/build/arm64_address_binding.o",
+      "-o",
+      "/workspaces/repository/kprog/formal/build/test_arm64_storage_profile_host"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c: In function \u2018canonical\u2019:\n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:64: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   64 |         case 0: ARM64_SIM_L_WRITE_REG_PTR_TAG(o.reg,(void *)(uintptr_t)o.value,o.tag); break;\n      | \n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:64: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:65: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   65 |         case 1: ARM64_SIM_L_WRITE_REG_WIDTH(o.reg,o.value,o.width); break;\n      | \n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:65: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:66: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   66 |         case 2: ARM64_SIM_L_EXEC_ADRP(ARM64_OP_ADRP_GOT,o.reg,o.value); break;\n      | \n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:66: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:67: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   67 |         case 3: ARM64_SIM_L_EXEC_ADRP(ARM64_OP_ADRP_RODATA,o.reg,o.value); break;\n      | \n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:67: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/formal/build/test_arm64_storage_profile_host"
+    ],
+    "returncode": 0,
+    "stdout": "ARM capacity 160 bias 96: 245760 full storage/stream comparisons, 925640 free draws\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "cc",
+      "-Wall",
+      "-Wextra",
+      "-O2",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "-DPROFILE=200",
+      "-DBIAS=160",
+      "/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c",
+      "/workspaces/repository/kprog/formal/build/arm64_address_binding.o",
+      "-o",
+      "/workspaces/repository/kprog/formal/build/test_arm64_storage_profile_host"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c: In function \u2018canonical\u2019:\n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:64: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   64 |         case 0: ARM64_SIM_L_WRITE_REG_PTR_TAG(o.reg,(void *)(uintptr_t)o.value,o.tag); break;\n      | \n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:64: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:65: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   65 |         case 1: ARM64_SIM_L_WRITE_REG_WIDTH(o.reg,o.value,o.width); break;\n      | \n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:65: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:66: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   66 |         case 2: ARM64_SIM_L_EXEC_ADRP(ARM64_OP_ADRP_GOT,o.reg,o.value); break;\n      | \n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:66: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:67: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   67 |         case 3: ARM64_SIM_L_EXEC_ADRP(ARM64_OP_ADRP_RODATA,o.reg,o.value); break;\n      | \n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:67: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/formal/build/test_arm64_storage_profile_host"
+    ],
+    "returncode": 0,
+    "stdout": "ARM capacity 200 bias 160: 245760 full storage/stream comparisons, 1221600 free draws\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "cc",
+      "-Wall",
+      "-Wextra",
+      "-O2",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "-DPROFILE=376",
+      "-DBIAS=280",
+      "/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c",
+      "/workspaces/repository/kprog/formal/build/arm64_address_binding.o",
+      "-o",
+      "/workspaces/repository/kprog/formal/build/test_arm64_storage_profile_host"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c: In function \u2018canonical\u2019:\n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:64: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   64 |         case 0: ARM64_SIM_L_WRITE_REG_PTR_TAG(o.reg,(void *)(uintptr_t)o.value,o.tag); break;\n      | \n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:64: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:65: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   65 |         case 1: ARM64_SIM_L_WRITE_REG_WIDTH(o.reg,o.value,o.width); break;\n      | \n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:65: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:66: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   66 |         case 2: ARM64_SIM_L_EXEC_ADRP(ARM64_OP_ADRP_GOT,o.reg,o.value); break;\n      | \n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:66: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:67: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n   67 |         case 3: ARM64_SIM_L_EXEC_ADRP(ARM64_OP_ADRP_RODATA,o.reg,o.value); break;\n      | \n/workspaces/repository/kprog/formal/oracles/test_arm64_storage_profile_host.c:67: warning: ignoring \u2018#pragma unroll \u2019 [-Wunknown-pragmas]\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/formal/build/test_arm64_storage_profile_host"
+    ],
+    "returncode": 0,
+    "stdout": "ARM capacity 376 bias 280: 245760 full storage/stream comparisons, 2302432 free draws\n",
+    "stderr": ""
+  }
+]

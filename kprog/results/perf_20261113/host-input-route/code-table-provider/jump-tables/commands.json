@@ -1,0 +1,174 @@
+[
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/native-relocations/jump-table.native.o",
+      "--symbol",
+      "jump_table",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/jump-table.proof.o",
+      "--show"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=jump_table (100 bytes), 1 reachable symbol(s) total\n  - jump_table (vaddr 0x0, 100 bytes) [entry]\nnative-link-source-map {\"input_offset\":0,\"length\":3,\"output_offset\":0,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":0}\nnative-link-source-map {\"input_offset\":3,\"length\":6,\"output_offset\":3,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":3}\nnative-link-source-map {\"input_offset\":5,\"length\":2,\"output_offset\":9,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":5}\nnative-link-source-map {\"input_offset\":7,\"length\":7,\"output_offset\":11,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":7}\nnative-link-source-map {\"input_offset\":14,\"length\":4,\"output_offset\":18,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":14}\nnative-link-source-map {\"input_offset\":18,\"length\":3,\"output_offset\":22,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":18}\nnative-link-source-map {\"input_offset\":21,\"length\":2,\"output_offset\":25,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":21}\nnative-link-source-map {\"input_offset\":23,\"length\":3,\"output_offset\":27,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":23}\nnative-link-source-map {\"input_offset\":26,\"length\":4,\"output_offset\":30,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":26}\nnative-link-source-map {\"input_offset\":30,\"length\":5,\"output_offset\":34,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":30}\nnative-link-source-map {\"input_offset\":31,\"length\":5,\"output_offset\":39,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":31}\nnative-link-source-map {\"input_offset\":36,\"length\":4,\"output_offset\":44,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":36}\nnative-link-source-map {\"input_offset\":40,\"length\":5,\"output_offset\":48,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":40}\nnative-link-source-map {\"input_offset\":41,\"length\":5,\"output_offset\":53,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":41}\nnative-link-source-map {\"input_offset\":46,\"length\":4,\"output_offset\":58,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":46}\nnative-link-source-map {\"input_offset\":50,\"length\":5,\"output_offset\":62,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":50}\nnative-link-source-map {\"input_offset\":51,\"length\":4,\"output_offset\":67,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":51}\nnative-link-source-map {\"input_offset\":55,\"length\":4,\"output_offset\":71,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":55}\nnative-link-source-map {\"input_offset\":59,\"length\":5,\"output_offset\":75,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":59}\nnative-link-source-map {\"input_offset\":60,\"length\":4,\"output_offset\":80,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":60}\nnative-link-source-map {\"input_offset\":64,\"length\":4,\"output_offset\":84,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":64}\nnative-link-source-map {\"input_offset\":68,\"length\":5,\"output_offset\":88,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":68}\nnative-link-source-map {\"input_offset\":69,\"length\":4,\"output_offset\":93,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":69}\nnative-link-source-map {\"input_offset\":73,\"length\":4,\"output_offset\":97,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":73}\nnative-link-source-map {\"input_offset\":77,\"length\":5,\"output_offset\":101,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":77}\nnative-link-source-map {\"input_offset\":78,\"length\":4,\"output_offset\":106,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":78}\nnative-link-source-map {\"input_offset\":82,\"length\":5,\"output_offset\":110,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":82}\nnative-link-source-map {\"input_offset\":87,\"length\":5,\"output_offset\":115,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":87}\nnative-link-source-map {\"input_offset\":88,\"length\":4,\"output_offset\":120,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":88}\nnative-link-source-map {\"input_offset\":92,\"length\":4,\"output_offset\":124,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":92}\nnative-link-source-map {\"input_offset\":96,\"length\":5,\"output_offset\":128,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":96}\nnative-link-source-map {\"input_offset\":97,\"length\":2,\"output_offset\":133,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":97}\nnative-link-source-map {\"input_offset\":99,\"length\":5,\"output_offset\":135,\"section\":2,\"symbol\":\"jump_table\",\"symbol_offset\":99}\n0000: cmp esi,7\n0003: ja near 0000000000000085h\n0009: mov eax,esi\n000b: lea rcx,[rel 12h]\n0012: movsxd rax,[rcx+rax*4]\n0016: add rax,rcx\n0019: jmp rax\n001b: mov rax,[rdi]\n001e: add rax,11h\n0022: jmp 000000000000008Ch\n0027: mov eax,8000h\n002c: or rax,[rdi+20h]\n0030: jmp 000000000000008Ch\n0035: mov eax,1234h\n003a: xor rax,[rdi+10h]\n003e: jmp 000000000000008Ch\n0043: mov rax,[rdi+18h]\n0047: add rax,0FFFFFFFFFFFFFFE3h\n004b: jmp 000000000000008Ch\n0050: mov rax,[rdi+38h]\n0054: lea rax,[rax+rax*4]\n0058: jmp 000000000000008Ch\n005d: mov rax,[rdi+8]\n0061: lea rax,[rax+rax*2]\n0065: jmp 000000000000008Ch\n006a: mov rax,[rdi+28h]\n006e: and eax,7FFFh\n0073: jmp 000000000000008Ch\n0078: mov rax,[rdi+30h]\n007c: add rax,47h\n0080: jmp 000000000000008Ch\n0085: xor eax,eax\n0087: jmp 000000000000008Ch\nnative-link: wrote proof object 140 bytes, 1 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/jump-table.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/native-relocations/jump-table-interior.proof.o",
+      "--symbol",
+      "jump_table",
+      "--mode",
+      "kernel",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/jump-table-invalid.bin",
+      "--output-relocs",
+      "/var/tmp/kprog-tmp/perf/native-relocations/jump-table.relocs",
+      "--output-map-patches",
+      "/var/tmp/kprog-tmp/perf/native-relocations/jump-table.maps",
+      "--link-plan",
+      "/var/tmp/kprog-tmp/perf/native-relocations/jump-table-plan.json",
+      "--output-abi",
+      "/var/tmp/kprog-tmp/perf/native-relocations/jump-table.abi"
+    ],
+    "returncode": 1,
+    "stdout": "",
+    "stderr": "native-link: entry=jump_table (140 bytes), 1 reachable symbol(s) total\n  - jump_table (vaddr 0x0, 140 bytes) [entry]\nError: helper CFG branch targets an interior byte\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/native-relocations/jump-table.proof.o",
+      "--symbol",
+      "jump_table",
+      "--mode",
+      "kernel",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/jump-table.bin",
+      "--output-relocs",
+      "/var/tmp/kprog-tmp/perf/native-relocations/jump-table.relocs",
+      "--output-map-patches",
+      "/var/tmp/kprog-tmp/perf/native-relocations/jump-table.maps",
+      "--link-plan",
+      "/var/tmp/kprog-tmp/perf/native-relocations/jump-table-plan.json",
+      "--output-abi",
+      "/var/tmp/kprog-tmp/perf/native-relocations/jump-table.abi"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=jump_table (140 bytes), 1 reachable symbol(s) total\n  - jump_table (vaddr 0x0, 140 bytes) [entry]\nnative-link: wrote 172 bytes -> /var/tmp/kprog-tmp/perf/native-relocations/jump-table.bin (0 relocs)\nnative-link: wrote 0 relocs -> /var/tmp/kprog-tmp/perf/native-relocations/jump-table.relocs\nnative-link: wrote 0 map patch site(s) -> /var/tmp/kprog-tmp/perf/native-relocations/jump-table.maps\nnative-link: wrote ABI metadata -> /var/tmp/kprog-tmp/perf/native-relocations/jump-table.abi\n"
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I",
+      "/workspaces/repository/kprog/x86/micro-prog",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/native-relocations/jump-table-model.c",
+      "/var/tmp/kprog-tmp/perf/native-relocations/jump-table-model-input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/native-relocations/jump-table-model.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-target",
+      "x86_64-linux-gnu",
+      "-O3",
+      "-march=native",
+      "-foptimize-sibling-calls",
+      "-fomit-frame-pointer",
+      "-mno-red-zone",
+      "-mgeneral-regs-only",
+      "-fno-stack-protector",
+      "-DTEST_TABLE_LIVE_FLAGS",
+      "-c",
+      "/workspaces/repository/kprog/test/native_jump_table.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/native-relocations/live-flags.native.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/native-relocations/live-flags.native.o",
+      "--symbol",
+      "jump_table",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/live-flags.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=jump_table (100 bytes), 1 reachable symbol(s) total\n  - jump_table (vaddr 0x0, 100 bytes) [entry]\nnative-link: wrote proof object 140 bytes, 1 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/live-flags.proof.o\n"
+  },
+  {
+    "command": [
+      "clang-18",
+      "-target",
+      "x86_64-linux-gnu",
+      "-O3",
+      "-march=native",
+      "-foptimize-sibling-calls",
+      "-fomit-frame-pointer",
+      "-mno-red-zone",
+      "-mgeneral-regs-only",
+      "-fno-stack-protector",
+      "-DTEST_TABLE_PARTIAL_RESULT",
+      "-c",
+      "/workspaces/repository/kprog/test/native_jump_table.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/native-relocations/partial-result.native.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/native-relocations/partial-result.native.o",
+      "--symbol",
+      "jump_table",
+      "--mode",
+      "proof",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/native-relocations/partial-result.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=jump_table (97 bytes), 1 reachable symbol(s) total\n  - jump_table (vaddr 0x0, 97 bytes) [entry]\nnative-link: wrote proof object 133 bytes, 1 reloc(s) -> /var/tmp/kprog-tmp/perf/native-relocations/partial-result.proof.o\n"
+  },
+  {
+    "command": [
+      "objdump",
+      "-dr",
+      "-Mintel",
+      "/var/tmp/kprog-tmp/perf/native-relocations/jump-table.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "\n/var/tmp/kprog-tmp/perf/native-relocations/jump-table.proof.o:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\n0000000000000000 <jump_table>:\n   0:\t83 fe 07             \tcmp    esi,0x7\n   3:\t0f 87 7c 00 00 00    \tja     85 <jump_table+0x85>\n   9:\t89 f0                \tmov    eax,esi\n   b:\t48 8d 0d 00 00 00 00 \tlea    rcx,[rip+0x0]        # 12 <jump_table+0x12>\n\t\t\te: R_X86_64_PC32\tsection:SectionIndex(4):.rodata:table_0-0x4\n  12:\t48 63 04 81          \tmovsxd rax,DWORD PTR [rcx+rax*4]\n  16:\t48 01 c8             \tadd    rax,rcx\n  19:\tff e0                \tjmp    rax\n  1b:\t48 8b 07             \tmov    rax,QWORD PTR [rdi]\n  1e:\t48 83 c0 11          \tadd    rax,0x11\n  22:\te9 65 00 00 00       \tjmp    8c <jump_table+0x8c>\n  27:\tb8 00 80 00 00       \tmov    eax,0x8000\n  2c:\t48 0b 47 20          \tor     rax,QWORD PTR [rdi+0x20]\n  30:\te9 57 00 00 00       \tjmp    8c <jump_table+0x8c>\n  35:\tb8 34 12 00 00       \tmov    eax,0x1234\n  3a:\t48 33 47 10          \txor    rax,QWORD PTR [rdi+0x10]\n  3e:\te9 49 00 00 00       \tjmp    8c <jump_table+0x8c>\n  43:\t48 8b 47 18          \tmov    rax,QWORD PTR [rdi+0x18]\n  47:\t48 83 c0 e3          \tadd    rax,0xffffffffffffffe3\n  4b:\te9 3c 00 00 00       \tjmp    8c <jump_table+0x8c>\n  50:\t48 8b 47 38          \tmov    rax,QWORD PTR [rdi+0x38]\n  54:\t48 8d 04 80          \tlea    rax,[rax+rax*4]\n  58:\te9 2f 00 00 00       \tjmp    8c <jump_table+0x8c>\n  5d:\t48 8b 47 08          \tmov    rax,QWORD PTR [rdi+0x8]\n  61:\t48 8d 04 40          \tlea    rax,[rax+rax*2]\n  65:\te9 22 00 00 00       \tjmp    8c <jump_table+0x8c>\n  6a:\t48 8b 47 28          \tmov    rax,QWORD PTR [rdi+0x28]\n  6e:\t25 ff 7f 00 00       \tand    eax,0x7fff\n  73:\te9 14 00 00 00       \tjmp    8c <jump_table+0x8c>\n  78:\t48 8b 47 30          \tmov    rax,QWORD PTR [rdi+0x30]\n  7c:\t48 83 c0 47          \tadd    rax,0x47\n  80:\te9 07 00 00 00       \tjmp    8c <jump_table+0x8c>\n  85:\t31 c0                \txor    eax,eax\n  87:\te9 00 00 00 00       \tjmp    8c <jump_table+0x8c>\n",
+    "stderr": ""
+  }
+]

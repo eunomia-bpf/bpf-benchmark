@@ -1,0 +1,2 @@
+taskset -c 16-19 prlimit --as=8589934592 -- python3 /workspaces/repository/kprog/test/check_scalar_rodata_b.py --build /var/tmp/kprog-tmp/perf/scalar-rodata --output /workspaces/kprog-raw/perf/20261115-host-input-route/scalar-table --bounds /var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds
+scalar rodata: normal B compiled; 64 shared-C cases match independent values

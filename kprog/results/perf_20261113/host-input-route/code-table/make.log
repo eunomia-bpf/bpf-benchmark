@@ -1,0 +1,12 @@
+install -d /var/tmp/kprog-tmp/perf/native-relocations /workspaces/kprog-raw/perf/20261115-host-input-route/code-table
+clang-18 -target x86_64-linux-gnu -O3 -march=native -foptimize-sibling-calls -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only -fno-stack-protector -c /workspaces/repository/kprog/test/native_jump_table.c -o /var/tmp/kprog-tmp/perf/native-relocations/jump-table.native.o
+objdump -dr -Mintel /var/tmp/kprog-tmp/perf/native-relocations/jump-table.native.o > /workspaces/kprog-raw/perf/20261115-host-input-route/code-table/jump-table.disassembly
+readelf -rW /var/tmp/kprog-tmp/perf/native-relocations/jump-table.native.o > /workspaces/kprog-raw/perf/20261115-host-input-route/code-table/jump-table.relocations
+taskset -c 8-11 prlimit --as=12884901888 -- python3 /workspaces/repository/kprog/test/check_native_jump_tables.py --build /var/tmp/kprog-tmp/perf/native-relocations --output /workspaces/kprog-raw/perf/20261115-host-input-route/code-table/jump-tables --linker /workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link --kernel-layout /var/tmp/kprog-tmp/perf/kernel-layout/kernel-layout.json
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/test/check_native_jump_tables.py", line 194, in <module>
+    main()
+  File "/workspaces/repository/kprog/test/check_native_jump_tables.py", line 85, in main
+    raise ValueError('Interior table target was not rejected at its source boundary')
+ValueError: Interior table target was not rejected at its source boundary
+make: *** [kprog/test/native-relocations.mk:113: jump-table-check] Error 1

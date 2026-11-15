@@ -1,0 +1,2 @@
+taskset -c 8-11 prlimit --as=8589934592 -- python3 /workspaces/repository/kprog/test/check_scheduled_table.py --build /var/tmp/kprog-tmp/perf/scheduled-table --output /workspaces/kprog-raw/perf/20261115-host-input-route/scheduled-table/simulator --bounds /var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds
+{"b_compiled": true, "shared_simulator_cases": 64, "negative_diagnostics": ["relative table schedule observes or overwrites private results"]}

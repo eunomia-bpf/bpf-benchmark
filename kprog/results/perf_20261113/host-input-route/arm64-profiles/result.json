@@ -1,0 +1,34 @@
+{
+  "arch": "arm64",
+  "generic_sha256": "42da2cd80641ad767af67584add37d6d47db56cc0e36abae322ead6067da9b72",
+  "oracle_sha256": "3896e185cfd2a9359441c87c20fb10b8c85e48bc1d388fec128af3e5b7e285d7",
+  "header_sha256": "d83ffaf473b402ec9dac6c760ad2b461689c26efffce2c4f1733f69ee863ba62",
+  "scope": "Existing generic/canonical storage and input-stream equivalence; no hardware or full formal proof",
+  "completed": true,
+  "profiles": [
+    [
+      1,
+      0
+    ],
+    [
+      7,
+      -3
+    ],
+    [
+      9,
+      4
+    ],
+    [
+      160,
+      96
+    ],
+    [
+      200,
+      160
+    ],
+    [
+      376,
+      280
+    ]
+  ]
+}

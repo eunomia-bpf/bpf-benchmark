@@ -1,0 +1,2570 @@
+[
+  {
+    "command": [
+      "clang-18",
+      "-c",
+      "/workspaces/repository/kprog/test/native_stores.S",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/native.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "/var/tmp/kprog-tmp/perf/store-writeback/native.o",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/native.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/store-writeback/native.o",
+      "--symbol",
+      "store1regflat",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regflat.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=store1regflat (63 bytes), 1 reachable symbol(s) total\n  - store1regflat (vaddr 0x0, 63 bytes) [entry]\nnative-link: wrote proof object 67 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/store-writeback/store1regflat.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regflat.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regflat.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regflat.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regflat.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regflat.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regflat.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regflat.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regflat.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regflat.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regflat.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regflat.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regflat.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regflat.bpf.c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regflat.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/store-writeback/native.o",
+      "--symbol",
+      "store1regindex",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regindex.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=store1regindex (62 bytes), 1 reachable symbol(s) total\n  - store1regindex (vaddr 0x3f, 62 bytes) [entry]\nnative-link: wrote proof object 66 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/store-writeback/store1regindex.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regindex.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regindex.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regindex.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regindex.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regindex.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regindex.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regindex.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regindex.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regindex.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regindex.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regindex.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regindex.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regindex.bpf.c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1regindex.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/store-writeback/native.o",
+      "--symbol",
+      "store1immflat",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immflat.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=store1immflat (64 bytes), 1 reachable symbol(s) total\n  - store1immflat (vaddr 0x7d, 64 bytes) [entry]\nnative-link: wrote proof object 68 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/store-writeback/store1immflat.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immflat.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immflat.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immflat.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immflat.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immflat.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immflat.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immflat.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immflat.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immflat.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immflat.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immflat.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immflat.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immflat.bpf.c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immflat.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/store-writeback/native.o",
+      "--symbol",
+      "store1immindex",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=store1immindex (63 bytes), 1 reachable symbol(s) total\n  - store1immindex (vaddr 0xbd, 63 bytes) [entry]\nnative-link: wrote proof object 67 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/store-writeback/store1immindex.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.bpf.c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store1immindex.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/store-writeback/native.o",
+      "--symbol",
+      "store2regflat",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regflat.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=store2regflat (64 bytes), 1 reachable symbol(s) total\n  - store2regflat (vaddr 0xfc, 64 bytes) [entry]\nnative-link: wrote proof object 68 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/store-writeback/store2regflat.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regflat.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regflat.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regflat.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regflat.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regflat.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regflat.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regflat.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regflat.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regflat.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regflat.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regflat.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regflat.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regflat.bpf.c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regflat.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/store-writeback/native.o",
+      "--symbol",
+      "store2regindex",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regindex.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=store2regindex (63 bytes), 1 reachable symbol(s) total\n  - store2regindex (vaddr 0x13c, 63 bytes) [entry]\nnative-link: wrote proof object 67 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/store-writeback/store2regindex.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regindex.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regindex.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regindex.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regindex.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regindex.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regindex.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regindex.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regindex.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regindex.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regindex.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regindex.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regindex.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regindex.bpf.c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2regindex.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/store-writeback/native.o",
+      "--symbol",
+      "store2immflat",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immflat.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=store2immflat (66 bytes), 1 reachable symbol(s) total\n  - store2immflat (vaddr 0x17b, 66 bytes) [entry]\nnative-link: wrote proof object 70 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/store-writeback/store2immflat.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immflat.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immflat.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immflat.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immflat.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immflat.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immflat.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immflat.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immflat.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immflat.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immflat.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immflat.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immflat.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immflat.bpf.c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immflat.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/store-writeback/native.o",
+      "--symbol",
+      "store2immindex",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immindex.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=store2immindex (65 bytes), 1 reachable symbol(s) total\n  - store2immindex (vaddr 0x1bd, 65 bytes) [entry]\nnative-link: wrote proof object 69 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/store-writeback/store2immindex.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immindex.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immindex.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immindex.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immindex.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immindex.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immindex.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immindex.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immindex.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immindex.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immindex.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immindex.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immindex.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immindex.bpf.c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store2immindex.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/store-writeback/native.o",
+      "--symbol",
+      "store4regflat",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regflat.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=store4regflat (63 bytes), 1 reachable symbol(s) total\n  - store4regflat (vaddr 0x1fe, 63 bytes) [entry]\nnative-link: wrote proof object 67 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/store-writeback/store4regflat.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regflat.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regflat.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regflat.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regflat.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regflat.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regflat.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regflat.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regflat.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regflat.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regflat.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regflat.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regflat.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regflat.bpf.c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regflat.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/store-writeback/native.o",
+      "--symbol",
+      "store4regindex",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regindex.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=store4regindex (62 bytes), 1 reachable symbol(s) total\n  - store4regindex (vaddr 0x23d, 62 bytes) [entry]\nnative-link: wrote proof object 66 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/store-writeback/store4regindex.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regindex.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regindex.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regindex.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regindex.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regindex.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regindex.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regindex.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regindex.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regindex.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regindex.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regindex.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regindex.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regindex.bpf.c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4regindex.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/store-writeback/native.o",
+      "--symbol",
+      "store4immflat",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immflat.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=store4immflat (67 bytes), 1 reachable symbol(s) total\n  - store4immflat (vaddr 0x27b, 67 bytes) [entry]\nnative-link: wrote proof object 71 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/store-writeback/store4immflat.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immflat.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immflat.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immflat.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immflat.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immflat.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immflat.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immflat.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immflat.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immflat.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immflat.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immflat.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immflat.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immflat.bpf.c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immflat.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/store-writeback/native.o",
+      "--symbol",
+      "store4immindex",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immindex.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=store4immindex (66 bytes), 1 reachable symbol(s) total\n  - store4immindex (vaddr 0x2be, 66 bytes) [entry]\nnative-link: wrote proof object 70 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/store-writeback/store4immindex.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immindex.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immindex.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immindex.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immindex.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immindex.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immindex.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immindex.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immindex.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immindex.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immindex.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immindex.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immindex.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immindex.bpf.c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store4immindex.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/store-writeback/native.o",
+      "--symbol",
+      "store8regflat",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regflat.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=store8regflat (64 bytes), 1 reachable symbol(s) total\n  - store8regflat (vaddr 0x300, 64 bytes) [entry]\nnative-link: wrote proof object 68 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/store-writeback/store8regflat.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regflat.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regflat.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regflat.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regflat.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regflat.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regflat.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regflat.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regflat.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regflat.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regflat.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regflat.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regflat.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regflat.bpf.c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regflat.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/store-writeback/native.o",
+      "--symbol",
+      "store8regindex",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=store8regindex (63 bytes), 1 reachable symbol(s) total\n  - store8regindex (vaddr 0x340, 63 bytes) [entry]\nnative-link: wrote proof object 67 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/store-writeback/store8regindex.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.bpf.c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8regindex.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/store-writeback/native.o",
+      "--symbol",
+      "store8immflat",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immflat.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=store8immflat (68 bytes), 1 reachable symbol(s) total\n  - store8immflat (vaddr 0x37f, 68 bytes) [entry]\nnative-link: wrote proof object 72 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/store-writeback/store8immflat.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immflat.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immflat.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immflat.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immflat.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immflat.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immflat.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immflat.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immflat.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immflat.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immflat.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immflat.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immflat.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immflat.bpf.c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immflat.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/store-writeback/native.o",
+      "--symbol",
+      "store8immindex",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immindex.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=store8immindex (67 bytes), 1 reachable symbol(s) total\n  - store8immindex (vaddr 0x3c3, 67 bytes) [entry]\nnative-link: wrote proof object 71 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/store-writeback/store8immindex.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immindex.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immindex.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immindex.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immindex.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immindex.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immindex.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=0\nunused private inputs removed=24\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immindex.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immindex.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immindex.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immindex.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immindex.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immindex.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immindex.bpf.c",
+      "/var/tmp/kprog-tmp/perf/store-writeback/input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/store-writeback/store8immindex.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

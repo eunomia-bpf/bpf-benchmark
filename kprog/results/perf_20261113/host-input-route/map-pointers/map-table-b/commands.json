@@ -1,0 +1,36 @@
+[
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/map-pointer-tables/map-table.bpf.c",
+      "/var/tmp/kprog-tmp/perf/map-pointer-tables/model-input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/map-pointer-tables/map-table-model.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "-w",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "/var/tmp/kprog-tmp/perf/map-pointer-tables/map-table.bpf.c",
+      "/var/tmp/kprog-tmp/perf/map-pointer-tables/model-input.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/map-pointer-tables/map-table-model.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]
