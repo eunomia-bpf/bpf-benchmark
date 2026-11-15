@@ -48,13 +48,22 @@ static int run(unsigned mode, unsigned tag)
         memset(before + X86_SIM_STACK_BYTES - 48, 0, 32);
         struct x86_sim_stack_value stale = X86_SIM_L_STACK_VALUES_READ(
             X86_SIM_STACK_BYTES - 40, X86_WIDTH_64);
-        if (stale.tag != X86_SIM_TAG_SCALAR || stale.pointer) return 1;
+        if (stale.tag != X86_SIM_TAG_SCALAR || stale.pointer) {
+            fprintf(stderr, "released fact: tag=%u pointer=%p\n", stale.tag, stale.pointer);
+            return 1;
+        }
     }
     if (X86_SIM_L_READ_REG_PTR(dst) != expected || X86_SIM_L_REG_TAG(dst) != expected_tag ||
         draws != (mode == 3 ? 4U : 0U) ||
         memcmp(before, (const void *)__x86_stack_mem.b, sizeof(before)) ||
         __x86_cf != 1 || __x86_zf != 0 || __x86_sf != 1 ||
-        __x86_of != 0 || __x86_pf != 1 || __x86_af != 0) return 1;
+        __x86_of != 0 || __x86_pf != 1 || __x86_af != 0) {
+        fprintf(stderr, "actual ptr=%p tag=%u draws=%u memory_diff=%d; expected ptr=%p tag=%u draws=%u\n",
+                X86_SIM_L_READ_REG_PTR(dst), X86_SIM_L_REG_TAG(dst), draws,
+                memcmp(before, (const void *)__x86_stack_mem.b, sizeof(before)),
+                expected, expected_tag, mode == 3 ? 4U : 0U);
+        return 1;
+    }
     return 0;
 }
 
