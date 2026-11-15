@@ -1,0 +1,1 @@
+taskset -c 8-19 make -f kprog/test/native-relocations.mk map-table-b OUTPUT=/workspaces/kprog-raw/perf/20261115-map-table-b/host-fixed 

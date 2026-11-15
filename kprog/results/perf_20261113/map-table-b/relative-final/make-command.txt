@@ -1,0 +1,1 @@
+taskset -c 8-11 make -f kprog/test/native-relocations.mk jump-table-check OUTPUT=/workspaces/kprog-raw/perf/20261115-map-table-b/relative-final LINKER_BINARY=/workspaces/repository/kprog/x86/native_lab/native_link/target/release/deps/native_link-89e6cdf9b2bb753e 

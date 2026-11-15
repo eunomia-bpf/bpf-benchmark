@@ -1,0 +1,148 @@
+{
+  "cases": [
+    {
+      "value_capability": false,
+      "index": 0,
+      "native": 129877754937408,
+      "simulator": 129877754937408,
+      "tag": 5
+    },
+    {
+      "value_capability": false,
+      "index": 1,
+      "native": 129877754937440,
+      "simulator": 129877754937440,
+      "tag": 5
+    },
+    {
+      "value_capability": false,
+      "index": 2,
+      "native": 129877754937472,
+      "simulator": 129877754937472,
+      "tag": 5
+    },
+    {
+      "value_capability": false,
+      "index": 3,
+      "native": 129877754937504,
+      "simulator": 129877754937504,
+      "tag": 5
+    },
+    {
+      "value_capability": false,
+      "index": 4,
+      "native": 129877754937536,
+      "simulator": 129877754937536,
+      "tag": 5
+    },
+    {
+      "value_capability": false,
+      "index": 5,
+      "native": 129877754937568,
+      "simulator": 129877754937568,
+      "tag": 5
+    },
+    {
+      "value_capability": false,
+      "index": 6,
+      "native": 129877754937600,
+      "simulator": 129877754937600,
+      "tag": 5
+    },
+    {
+      "value_capability": false,
+      "index": 7,
+      "native": 129877754937632,
+      "simulator": 129877754937632,
+      "tag": 5
+    },
+    {
+      "value_capability": false,
+      "index": 8,
+      "native": 0,
+      "simulator": 0,
+      "tag": 0
+    },
+    {
+      "value_capability": false,
+      "index": 4294967295,
+      "native": 0,
+      "simulator": 0,
+      "tag": 0
+    },
+    {
+      "value_capability": true,
+      "index": 0,
+      "native": 129877754937408,
+      "simulator": 129877754937408,
+      "tag": 6
+    },
+    {
+      "value_capability": true,
+      "index": 1,
+      "native": 129877754937440,
+      "simulator": 129877754937440,
+      "tag": 6
+    },
+    {
+      "value_capability": true,
+      "index": 2,
+      "native": 129877754937472,
+      "simulator": 129877754937472,
+      "tag": 6
+    },
+    {
+      "value_capability": true,
+      "index": 3,
+      "native": 129877754937504,
+      "simulator": 129877754937504,
+      "tag": 6
+    },
+    {
+      "value_capability": true,
+      "index": 4,
+      "native": 129877754937536,
+      "simulator": 129877754937536,
+      "tag": 6
+    },
+    {
+      "value_capability": true,
+      "index": 5,
+      "native": 129877754937568,
+      "simulator": 129877754937568,
+      "tag": 6
+    },
+    {
+      "value_capability": true,
+      "index": 6,
+      "native": 129877754937600,
+      "simulator": 129877754937600,
+      "tag": 6
+    },
+    {
+      "value_capability": true,
+      "index": 7,
+      "native": 129877754937632,
+      "simulator": 129877754937632,
+      "tag": 6
+    },
+    {
+      "value_capability": true,
+      "index": 8,
+      "native": 0,
+      "simulator": 0,
+      "tag": 0
+    },
+    {
+      "value_capability": true,
+      "index": 4294967295,
+      "native": 0,
+      "simulator": 0,
+      "tag": 0
+    }
+  ],
+  "dataflow_negatives": 3,
+  "missing_capability_rejected": true,
+  "proof_sha256": "24ec79b5d146992552fe8f1ee66340f19c314bda8121452fe70d121e06324a5a",
+  "scope": "Actual native proof and complete shared simulator host capability identity/tag checks; no BPF acceptance or app execution"
+}
