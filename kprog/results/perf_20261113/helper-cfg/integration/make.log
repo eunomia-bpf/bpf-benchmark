@@ -1,0 +1,14 @@
+taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/workspaces/repository/kprog/x86/native_lab/native_link/target cargo test --release --manifest-path /workspaces/repository/kprog/x86/native_lab/native_link/Cargo.toml
+   Compiling native-link v0.1.0 (/workspaces/repository/kprog/x86/native_lab/native_link)
+error[E0308]: mismatched types
+   --> src/x86_helper_provenance.rs:157:74
+    |
+157 |         assert_eq!(memory::call_blob(&code, std::ptr::null_mut(), 0, 0), 4);
+    |                                                                          ^ expected `*mut u8`, found integer
+    |
+    = note: expected raw pointer `*mut u8`
+                      found type `{integer}`
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `native-link` (bin "native-link" test) due to 1 previous error
+make: *** [kprog/test/native-relocations.mk:57: check] Error 101
