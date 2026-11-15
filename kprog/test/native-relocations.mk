@@ -251,4 +251,4 @@ bmi2-contract-host:
 
 .PHONY: bmi2-contract-lean
 bmi2-contract-lean:
-	cd $(ROOT)/kprog/formal && taskset -c 8-11 prlimit --as=8589934592 -- env LEAN_NUM_THREADS=2 lake build KProgFormal.X86Specialization
+	cd $(ROOT)/kprog/formal && taskset -c 8-11 prlimit --as=17179869184 -- env LEAN_NUM_THREADS=2 lake build KProgFormal.X86Specialization
