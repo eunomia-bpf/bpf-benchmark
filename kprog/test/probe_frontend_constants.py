@@ -39,6 +39,15 @@ X86_SIM_L_WRITE_REG_WIDTH(X86_RAX, (__u64)(long)ctx, X86_WIDTH_64);
 return (__u32)(long)__x86_rax.ptr;
 }
 '''
+    for form, opcode in [('reg', 'X86_OP_MOV_STORE_REG'), ('imm', 'X86_OP_MOV_STORE_IMM')]:
+        for base, reg in [('memory', 'X86_RDI'), ('stack', 'X86_RSP')]:
+            prefix += f'''unsigned probe_store_{form}_{base}(void *ctx) {{
+X86_SIM_ENTRY_RAW(ctx);
+X86_SIM_L_EXEC_STORE({opcode}, {reg}, X86_RAX, X86_WIDTH_64,
+    X86_MEM_AUX(X86_REG_NONE, 0), 0);
+return (__u32)(long)__x86_rax.ptr;
+}}
+'''
     source, output = a.build / 'width.c', a.build / 'width.ll'
     source.write_text(prefix)
     # This is an observation of the pre-optimizer graph, not a B production
