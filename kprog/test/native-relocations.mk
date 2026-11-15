@@ -421,3 +421,7 @@ frontend-constants:
 .PHONY: inline-otel-measure
 inline-otel-measure:
 	taskset -c 8-11 prlimit --as=17179869184 -- python3 $(ROOT)/kprog/test/measure_inline_otel.py --build /var/tmp/kprog-tmp/perf/otel-whole-word-checked --metadata /workspaces/kprog-raw/perf/20261115-otel-hotspot-spills/replay/request__generation.metadata.json --previous /workspaces/kprog-raw/perf/20261115-width-constants/otel-frontend/result.json --output $(OUTPUT) $(INLINE_MEASURE_ARGS)
+
+.PHONY: inline-table-debug
+inline-table-debug:
+	taskset -c 16-19 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/observe_inline_debug.py --bitcode $(ABSOLUTE_TABLE_BUILD)/absolute.bpf.bounds-input.bc --object $(ABSOLUTE_TABLE_BUILD)/absolute.bpf.o --output $(OUTPUT)/debug.json
