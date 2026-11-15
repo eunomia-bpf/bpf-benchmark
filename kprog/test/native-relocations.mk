@@ -104,6 +104,18 @@ base-stock-module-smoke:
 	sha256sum $(KDIR)/arch/x86/boot/bzImage /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko > $(OUTPUT)/input-sha256.txt
 	taskset -c 16-17 vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'bash kprog/test/guest_base_stock_module.sh $(OUTPUT)'
 
+.PHONY: image-pc32 guest-image-pc32
+image-pc32:
+	install -d $(BUILD) $(OUTPUT)
+	clang-18 -target x86_64-linux-gnu -O3 -march=native -foptimize-sibling-calls -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only -fno-stack-protector -c $(ROOT)/kprog/test/non_pic_map.c -o $(BUILD)/non-pic.native.o
+	readelf -rW $(BUILD)/non-pic.native.o > $(OUTPUT)/native-relocations.txt
+	bash $(ROOT)/kprog/test/run_image_pc32.sh $(OUTPUT)
+
+guest-image-pc32:
+	$(MAKE) -r -C $(ROOT) __runtime-vm-docker
+	$(ROOT)/runner/scripts/bpfrejit-install --image bpf-benchmark/kprog:current /var/tmp/runtime.image.tar
+	python3 $(ROOT)/kprog/test/check_image_pc32.py --image bpf-benchmark/kprog:current --build $(OUTPUT)/inputs --kernel-layout $(OUTPUT)/layout/kernel-layout.json --repo-linker $(LINKER_BINARY) --output $(OUTPUT)
+
 # The queued run_verified_make caller holds image EX before Make starts.
 .PHONY: publish-normal-pair
 publish-normal-pair: $(CONTEXT_TOOL) $(CHECKED_TOOL)
