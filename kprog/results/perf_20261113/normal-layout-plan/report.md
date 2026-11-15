@@ -30,7 +30,9 @@ fact collector ran inside the sole boot kernel. Host verification in
 The map cases include named ARRAY, dynamic ARRAY using real boot-layout
 offsets, and a non-ARRAY helper continuation preserving arguments and return.
 The ordinary helper-shape suite separately passed six adjacent/separated/
-hoisted immediate/PLT cases (`call-shapes-fixed/job`). Rust source tests
+hoisted immediate/PLT cases, repeated against the authoritative boot facts in
+`final-shapes/job` at 03:50 UTC. `final-syntax/job` also passed after the final
+header ownership cleanup. Rust source tests
 passed 33 cases with one existing ignored test before the incidents below.
 The explicit normal ELF used for authoritative host checks is the existing
 Cargo deps product `native_link-89e6cdf9b2bb753e`, SHA256

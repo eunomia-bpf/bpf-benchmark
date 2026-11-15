@@ -6,7 +6,6 @@ from pathlib import Path
 import shutil
 import tarfile
 
-ROOT = Path(__file__).resolve().parents[3]
 RAW = Path('/workspaces/kprog-raw/perf')
 OUT = Path(__file__).resolve().parent
 
@@ -33,9 +32,11 @@ for group in ('kernel-layout', 'maps', 'jump-tables'):
         source = normal/'authoritative'/group/filename
         if source.exists():
             copy(source, target/group/filename)
-for group in ('authoritative', 'boot-ready'):
+for group in ('authoritative', 'boot-ready', 'final-syntax', 'final-shapes'):
     for filename in ('make-command.txt', 'make.log', 'exit-code', 'finished'):
         copy(normal/group/'job'/filename, target/group/filename)
+for filename in ('commands.json', 'result.json'):
+    copy(normal/'final-shapes'/filename, target/'final-shapes'/filename)
 for group in ('recovery', 'boot-recovery', 'pairing'):
     copy(normal/group/'receipt.json', target/group/'receipt.json')
 copy(normal/'job/make.log', target/'initial-make.log')

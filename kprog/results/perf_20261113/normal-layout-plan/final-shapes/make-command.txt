@@ -1,0 +1,1 @@
+taskset -c 19 make -f kprog/test/scalar-spill-precision.mk helper-shapes OUTPUT=/workspaces/kprog-raw/perf/20261115-normal-layout-plan/final-shapes HELPER_SHAPE_LINKER=/workspaces/repository/kprog/x86/native_lab/native_link/target/release/deps/native_link-89e6cdf9b2bb753e 
