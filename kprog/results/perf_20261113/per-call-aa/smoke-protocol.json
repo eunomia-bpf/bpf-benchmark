@@ -1,0 +1,29 @@
+{
+  "recorded_at": "2026-11-15T07:18:26Z",
+  "source_commit": "65504dc71",
+  "pid": 856971,
+  "command": [
+    "make",
+    "-r",
+    "-f",
+    "kprog/perf/one-image/Makefile",
+    "corpus",
+    "APPS=katran",
+    "SAMPLES=1",
+    "WORKLOAD_DURATION=1",
+    "BPFREJIT_CORPUS_BPF_STATS=1",
+    "SKIP_REJIT_MODE=norejit",
+    "NATIVE_LOADER_MODE=0",
+    "CPUS=0-7",
+    "STATE=/var/tmp/kprog-tmp/perf/aa",
+    "LOGS=/workspaces/kprog-raw/perf/20261115-per-call-aa/smoke/logs"
+  ],
+  "locks": [
+    "timing EX",
+    "image SH"
+  ],
+  "address_space_limit_bytes": 85899345920,
+  "vm_cpus": 8,
+  "vm_memory": "64G",
+  "scope": "1-second counter-collection smoke, not a performance measurement"
+}

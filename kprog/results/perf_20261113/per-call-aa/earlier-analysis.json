@@ -1,0 +1,193 @@
+{
+  "run": "corpus/results/x86_kvm_corpus_20261115_062302_565500",
+  "app_status": "ok",
+  "app_error": "",
+  "input_sha256": "f158933dba28b4306bd95782a2ac7517cb4e4502dd758519ddec85f4a6e21c78",
+  "arms": {
+    "baseline": {
+      "programs": [],
+      "total_run_cnt": 0,
+      "total_run_time_ns": 0,
+      "aggregate_ns_per_invocation": null,
+      "samples": [
+        {
+          "duration_s": 180.14801476600002,
+          "threads": [
+            {
+              "sent": 105650791,
+              "errors": 123507377,
+              "pps": 587003
+            },
+            {
+              "sent": 124752568,
+              "errors": 149921742,
+              "pps": 693134
+            },
+            {
+              "sent": 107363446,
+              "errors": 127264048,
+              "pps": 596519
+            },
+            {
+              "sent": 115041560,
+              "errors": 142949741,
+              "pps": 639179
+            }
+          ]
+        },
+        {
+          "duration_s": 180.10569864199994,
+          "threads": [
+            {
+              "sent": 148247384,
+              "errors": 177042939,
+              "pps": 823570
+            },
+            {
+              "sent": 155584734,
+              "errors": 176491108,
+              "pps": 864331
+            },
+            {
+              "sent": 66311387,
+              "errors": 83490867,
+              "pps": 368384
+            },
+            {
+              "sent": 166442379,
+              "errors": 191523245,
+              "pps": 924650
+            }
+          ]
+        },
+        {
+          "duration_s": 180.033428479,
+          "threads": [
+            {
+              "sent": 156790533,
+              "errors": 174934558,
+              "pps": 871297
+            },
+            {
+              "sent": 113655037,
+              "errors": 124016442,
+              "pps": 631570
+            },
+            {
+              "sent": 143449669,
+              "errors": 165766037,
+              "pps": 797149
+            },
+            {
+              "sent": 165891887,
+              "errors": 183286457,
+              "pps": 921831
+            }
+          ]
+        }
+      ],
+      "pktgen_pps": [
+        2515835,
+        2980935,
+        3221847
+      ],
+      "mean_pps": 2906205.6666666665,
+      "median_pps": 2980935
+    },
+    "post_rejit": {
+      "programs": [],
+      "total_run_cnt": 0,
+      "total_run_time_ns": 0,
+      "aggregate_ns_per_invocation": null,
+      "samples": [
+        {
+          "duration_s": 180.061119608,
+          "threads": [
+            {
+              "sent": 27817237,
+              "errors": 26502161,
+              "pps": 154539
+            },
+            {
+              "sent": 200527248,
+              "errors": 202032472,
+              "pps": 1114034
+            },
+            {
+              "sent": 212192816,
+              "errors": 206768573,
+              "pps": 1178841
+            },
+            {
+              "sent": 196376135,
+              "errors": 189436339,
+              "pps": 1090972
+            }
+          ]
+        },
+        {
+          "duration_s": 180.01636553800017,
+          "threads": [
+            {
+              "sent": 149117179,
+              "errors": 157935673,
+              "pps": 828635
+            },
+            {
+              "sent": 82643686,
+              "errors": 92029550,
+              "pps": 459245
+            },
+            {
+              "sent": 173213457,
+              "errors": 181629215,
+              "pps": 962537
+            },
+            {
+              "sent": 166029712,
+              "errors": 173002023,
+              "pps": 922616
+            }
+          ]
+        },
+        {
+          "duration_s": 180.0080909589999,
+          "threads": [
+            {
+              "sent": 156483724,
+              "errors": 164973529,
+              "pps": 869867
+            },
+            {
+              "sent": 71720353,
+              "errors": 73538708,
+              "pps": 398659
+            },
+            {
+              "sent": 204958614,
+              "errors": 217690402,
+              "pps": 1139267
+            },
+            {
+              "sent": 198645028,
+              "errors": 209216345,
+              "pps": 1104174
+            }
+          ]
+        }
+      ],
+      "pktgen_pps": [
+        3538386,
+        3173033,
+        3511967
+      ],
+      "mean_pps": 3407795.3333333335,
+      "median_pps": 3511967
+    }
+  },
+  "observed_shape_pairs": [],
+  "later_over_first_mean_pps": 1.172592625642347,
+  "later_over_first_median_pps": 1.178142763931451,
+  "first_over_later_aggregate_ns_per_invocation": null,
+  "scope": "All recorded programs retained, including zero-run and unmatched/ambiguous shapes. Shape pairing is not byte identity. Aggregated per-call time uses the entire recorded counter window, excluding runner warmup. Ratios are analysis only, not native gains or automatic equal-work certification."
+}

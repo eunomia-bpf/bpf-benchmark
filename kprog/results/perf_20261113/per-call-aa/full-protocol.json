@@ -1,0 +1,30 @@
+{
+  "recorded_at": "2026-11-15T07:21:49Z",
+  "source_head": "2f13ff93535a4c1a5bb902657e94659d85c05fde",
+  "pid": 858016,
+  "command": [
+    "make",
+    "-r",
+    "-f",
+    "kprog/perf/one-image/Makefile",
+    "corpus",
+    "APPS=katran",
+    "SAMPLES=3",
+    "WORKLOAD_DURATION=180",
+    "BPFREJIT_CORPUS_BPF_STATS=1",
+    "SKIP_REJIT_MODE=norejit",
+    "NATIVE_LOADER_MODE=0",
+    "CPUS=0-7",
+    "STATE=/var/tmp/kprog-tmp/perf/aa",
+    "LOGS=/workspaces/kprog-raw/perf/20261115-per-call-aa/full/logs"
+  ],
+  "locks": [
+    "timing EX",
+    "image SH"
+  ],
+  "address_space_limit_bytes": 85899345920,
+  "vm_cpus": 8,
+  "vm_memory": "64G",
+  "reason": "User/coordinator06:58 per-call A/A first; retain shim counters and disable native in both application starts",
+  "status": "running, no completed per-call ratio"
+}

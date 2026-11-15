@@ -1,0 +1,127 @@
+{
+  "run": "corpus/results/x86_kvm_corpus_20261115_071929_236167",
+  "app_status": "ok",
+  "app_error": "",
+  "input_sha256": "06ff02ce75086bb7351d608b2fc1cb255dce3e3cf4c7de3dff7a5ac903dbeb47",
+  "arms": {
+    "baseline": {
+      "programs": [
+        {
+          "bytes_jited": 13641,
+          "bytes_xlated": 23840,
+          "id": 9,
+          "name": "balancer_ingres",
+          "run_cnt_delta": 3255312,
+          "run_time_ns_delta": 374721099,
+          "type": "xdp",
+          "ns_per_invocation": 115.11065575281263
+        }
+      ],
+      "total_run_cnt": 3255312,
+      "total_run_time_ns": 374721099,
+      "aggregate_ns_per_invocation": 115.11065575281263,
+      "samples": [
+        {
+          "duration_s": 1.026586289000008,
+          "threads": [
+            {
+              "sent": 1080576,
+              "errors": 1199898,
+              "pps": 1193155
+            },
+            {
+              "sent": 1088806,
+              "errors": 1200108,
+              "pps": 1202439
+            },
+            {
+              "sent": 1283,
+              "errors": 1,
+              "pps": 1416
+            },
+            {
+              "sent": 1084647,
+              "errors": 1200468,
+              "pps": 1197696
+            }
+          ]
+        }
+      ],
+      "pktgen_pps": [
+        3594706
+      ],
+      "mean_pps": 3594706,
+      "median_pps": 3594706
+    },
+    "post_rejit": {
+      "programs": [
+        {
+          "bytes_jited": 13641,
+          "bytes_xlated": 23840,
+          "id": 15,
+          "name": "balancer_ingres",
+          "run_cnt_delta": 3145190,
+          "run_time_ns_delta": 371055791,
+          "type": "xdp",
+          "ns_per_invocation": 117.9756361300907
+        }
+      ],
+      "total_run_cnt": 3145190,
+      "total_run_time_ns": 371055791,
+      "aggregate_ns_per_invocation": 117.9756361300907,
+      "samples": [
+        {
+          "duration_s": 1.0139063040000025,
+          "threads": [
+            {
+              "sent": 1188,
+              "errors": 5,
+              "pps": 1307
+            },
+            {
+              "sent": 1069221,
+              "errors": 1150231,
+              "pps": 1177097
+            },
+            {
+              "sent": 1040423,
+              "errors": 1131480,
+              "pps": 1145402
+            },
+            {
+              "sent": 1034358,
+              "errors": 1134263,
+              "pps": 1138846
+            }
+          ]
+        }
+      ],
+      "pktgen_pps": [
+        3462652
+      ],
+      "mean_pps": 3462652,
+      "median_pps": 3462652
+    }
+  },
+  "observed_shape_pairs": [
+    {
+      "observed_shape": [
+        "balancer_ingres",
+        "xdp",
+        13641,
+        23840
+      ],
+      "first_ids": [
+        9
+      ],
+      "later_ids": [
+        15
+      ],
+      "first_over_later_ns_per_invocation": 0.9757154911704067
+    }
+  ],
+  "later_over_first_mean_pps": 0.9632643114624673,
+  "later_over_first_median_pps": 0.9632643114624673,
+  "first_over_later_aggregate_ns_per_invocation": 0.9757154911704067,
+  "scope": "All recorded programs retained, including zero-run and unmatched/ambiguous shapes. Shape pairing is not byte identity. Aggregated per-call time uses the entire recorded counter window, excluding runner warmup. Ratios are analysis only, not native gains or automatic equal-work certification."
+}
