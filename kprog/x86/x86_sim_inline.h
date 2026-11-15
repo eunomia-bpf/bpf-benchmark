@@ -264,6 +264,32 @@ x86_sim_inline_mem_read_src(const struct x86_sim_inline_bindings *__x86_bind,
 #define X86_SIM_L_MEM_READ_SRC(BASE, WIDTH) \
     x86_sim_inline_mem_read_src(__x86_bind, (BASE), (WIDTH))
 
+static __always_inline __u64
+x86_sim_inline_stack_read(const struct x86_sim_inline_bindings *__x86_bind,
+    __s64 offset, __u64 width)
+{
+    __u64 value;
+    X86_SIM_L_STACK_READ_INTO(value, offset, width);
+    return value;
+}
+#pragma push_macro("X86_SIM_L_STACK_READ")
+#undef X86_SIM_L_STACK_READ
+#define X86_SIM_L_STACK_READ(OFF, WIDTH) \
+    x86_sim_inline_stack_read(__x86_bind, (OFF), (WIDTH))
+
+static __always_inline struct x86_sim_stack_value
+x86_sim_inline_stack_values_read(const struct x86_sim_inline_bindings *__x86_bind,
+    __u64 index, __u64 width)
+{
+    struct x86_sim_stack_value value;
+    X86_SIM_L_STACK_VALUES_READ_INTO(value, index, width);
+    return value;
+}
+#pragma push_macro("X86_SIM_L_STACK_VALUES_READ")
+#undef X86_SIM_L_STACK_VALUES_READ
+#define X86_SIM_L_STACK_VALUES_READ(INDEX, WIDTH) \
+    x86_sim_inline_stack_values_read(__x86_bind, (INDEX), (WIDTH))
+
 static __always_inline __s64
 x86_sim_inline_mem_offset(const struct x86_sim_inline_bindings *__x86_bind,
     __u64 aux, __s64 displacement)
@@ -399,6 +425,8 @@ x86_sim_inline_recover(const struct x86_sim_inline_bindings *__x86_bind,
 #pragma pop_macro("X86_SIM_L_READ_RECOVERY_MEM")
 #pragma pop_macro("X86_SIM_L_READ_RECOVERY")
 #pragma pop_macro("X86_SIM_L_MEM_OFFSET")
+#pragma pop_macro("X86_SIM_L_STACK_VALUES_READ")
+#pragma pop_macro("X86_SIM_L_STACK_READ")
 #pragma pop_macro("X86_SIM_L_MEM_READ_SRC")
 #pragma pop_macro("X86_SIM_L_REG_TAG")
 #pragma pop_macro("X86_SIM_L_READ_REG_WIDTH_SHIFT")

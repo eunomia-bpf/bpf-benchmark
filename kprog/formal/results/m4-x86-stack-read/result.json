@@ -1,0 +1,87 @@
+{
+  "status": "component checks passed; M4 incomplete",
+  "clight_module": "X86Pointer",
+  "clight_functions": 26,
+  "new_roots": [
+    "stack_read_owned",
+    "stack_read",
+    "stack_values_read"
+  ],
+  "read_frame_cases_per_mode": 133974,
+  "metadata_frame_cases_per_mode": 1462272,
+  "modes": [
+    "historical c348ce08b native bodies",
+    "current native",
+    "current CompCert host bodies"
+  ],
+  "guarded_windows": 4,
+  "first_fault_probes": 2,
+  "capture_protected_SP_probes": 224,
+  "inline_read_metadata_binding_cases": 4296,
+  "negative_checks": {
+    "fixed_capacity": 1,
+    "byte_shift": 1,
+    "release_boundary": 1,
+    "lost_physical_read": 1,
+    "ghost_width_capture": 1,
+    "ghost_boundary": 1,
+    "eager_ghost_payload": 1
+  },
+  "make_clight_exit": 0,
+  "targeted_lean_jobs": 39,
+  "deterministic": {
+    "equal": true,
+    "bytes": 970802
+  },
+  "axiom_queries": 3,
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "native_fidelity": {
+    "stack": {
+      "allocated_sections_equal": true,
+      "allocated_relocations_equal": true,
+      "current_stream_equals_normal_build": true,
+      "allocated_section_bytes": {
+        ".text": 0,
+        "socket": 2856,
+        "license": 4
+      },
+      "allocated_relocations": 8
+    },
+    "ordinary": {
+      "allocated_sections_equal": true,
+      "allocated_relocations_equal": true,
+      "current_stream_equals_normal_build": true,
+      "allocated_section_bytes": {
+        ".text": 0,
+        "socket": 1448,
+        "license": 4
+      },
+      "allocated_relocations": 11
+    },
+    "context": {
+      "allocated_sections_equal": true,
+      "allocated_relocations_equal": true,
+      "current_stream_equals_normal_build": true,
+      "allocated_section_bytes": {
+        ".text": 0,
+        "xdp": 360,
+        "tc": 760,
+        "license": 4
+      },
+      "allocated_relocations": 4
+    }
+  },
+  "preprocess": {
+    "exit": 0,
+    "bytes": 2593834,
+    "scope": "extraction TU only, not full app"
+  },
+  "full_inline_export_exit": 2,
+  "next_blocker": "DISP_MOVBE_LOAD: KPROG_X86_MOVBE_WIDTH then shared MEM_READ_VALUE GNU expressions",
+  "migrated_theorems": 0,
+  "whole_library_acceptance": false
+}

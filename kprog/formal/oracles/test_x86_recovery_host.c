@@ -121,7 +121,7 @@ int main(void)
     memset(&small,0xa7,sizeof(small)); memset(large,0xa7,sizeof(large));
     for (unsigned ci=0;ci<3;ci++) for (unsigned ti=0;ti<5;ti++) for (unsigned oi=0;oi<3;oi++) {
         unsigned capacity=capacities[ci];
-        struct kprog_x86_arena arena={capacity==64?small.b:large+32,NULL};
+        struct kprog_x86_arena arena={.b=capacity==64?small.b:large+32,.q=NULL};
         initialize(&arena,capacity,tags[ti],origins[oi]); memcpy(&before,&state,sizeof(state));
         for (unsigned ix=0;ix<19;ix++) for (unsigned sc=0;sc<10;sc++) for (unsigned di=0;di<8;di++) {
             unsigned index=ix<16 ? ix : ix==16 ? 16 : ix==17 ? 254 : 255;
@@ -144,7 +144,7 @@ int main(void)
     const __u64 bases[]={0,1,4,15,16,255,256,0x100000004ULL,~0ULL};
     const __u64 dests[]={0,1,4,15,16,255,0x100000004ULL};
     const __u64 words[]={0,1,2,0x8000000000000000ULL,0x100000001ULL,~0ULL};
-    struct kprog_x86_arena arena={small.b,small.q}; unsigned capacity=64;
+    struct kprog_x86_arena arena={.b=small.b,.q=small.q}; unsigned capacity=64;
     for (unsigned bi=0;bi<9;bi++) for (unsigned dj=0;dj<7;dj++) for (unsigned ti=0;ti<4;ti++)
     for (unsigned di=0;di<8;di++) for (unsigned wi=0;wi<6;wi++) for (unsigned kind=0;kind<3;kind++) {
         __u64 base=bases[bi],dst=dests[dj],raw=(__u64)disps[di];

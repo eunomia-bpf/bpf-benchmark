@@ -9,13 +9,18 @@
 #include "../../x86/x86_sim_inline.h"
 
 static unsigned long cases;
+static int allow_stack_choice;
+static unsigned stack_draws;
 static void check(int ok, const char *why)
 {
 	if (!ok) { fprintf(stderr,"inline binding case %lu: %s\n",cases,why); exit(1); }
 }
 unsigned long native_lab_entry_input(unsigned kind)
 {
-	(void)kind; fputs("unexpected input in register observation\n",stderr); abort();
+	if (allow_stack_choice && kind==NATIVE_LAB_INPUT_UNSPECIFIED) {
+		stack_draws++; return 0xfedcba9876543210ULL;
+	}
+	fputs("unexpected input in register observation\n",stderr); abort();
 }
 void kprog_c_trap(void) { fputs("unexpected inline trap\n",stderr); abort(); }
 
@@ -87,6 +92,37 @@ int main(void)
 		source_cases++;
 	}
 	printf("x86 inline memory-source: %u lazy binding/frame cases\n",source_cases);
+	unsigned stack_cases=0;
+	const __u8 stack_tags[]={0,1,4,255};
+	allow_stack_choice=1;
+	for (unsigned wi=0;wi<sizeof(widths)/sizeof(widths[0]);wi++)
+	for (unsigned index=0;index<64;index++) for (unsigned released=0;released<2;released++)
+	for (unsigned t=0;t<4;t++) {
+		__u64 width=widths[wi]; unsigned code=(__u8)width; if (!code) code=8;
+		unsigned n=code==1?1:code==2?2:code==4?4:8;
+		if (index+n>64) continue;
+		for (unsigned i=0;i<64;i++) state.stack_mem.b[i]=(__u8)(i*37+0x83);
+		state.rsp.ptr=(void *)(intptr_t)((__s64)index-64+released);
+		memcpy(&before,&state,sizeof(state));
+		binding=(struct x86_sim_inline_bindings){0};
+		binding.cells=state.gpr_cells; binding.stack=&state.stack_mem; stack_draws=0;
+		__u64 expected=0;
+		for (unsigned i=0;i<n;i++) expected|=(__u64)state.stack_mem.b[index+i]<<(8*i);
+		if (released) expected=0xfedcba9876543210ULL & (n==8?~0ULL:(1ULL<<(n*8))-1);
+		check(x86_sim_inline_stack_read(&binding,(__s64)index-64,width)==expected && stack_draws==released,"inline stack view/release binding");
+		__u8 tag=stack_tags[t]; void *pointer=(void *)(uintptr_t)0xfedcba9876543200ULL;
+		int selected=!released && code==8 && !(index&7);
+		if (selected) {
+			binding.values[index/8].tag=&tag;
+			binding.values[index/8].pointer=tag==4 ? &pointer : NULL;
+		}
+		struct x86_sim_stack_value value=x86_sim_inline_stack_values_read(&binding,index,width);
+		check(value.tag==(selected?tag:0) && value.pointer==(selected && tag==4?pointer:NULL),"inline lazy ghost references");
+		check(tag==stack_tags[t] && pointer==(void *)(uintptr_t)0xfedcba9876543200ULL && !memcmp(&state,&before,sizeof(state)),"inline stack/fact full frame");
+		stack_cases++;
+	}
+	allow_stack_choice=0;
+	printf("x86 inline stack: %u read/metadata lazy binding/frame cases\n",stack_cases);
 	printf("x86 inline binding: %lu defined-lane/register/profile/frame cases\n",cases);
 	return 0;
 }

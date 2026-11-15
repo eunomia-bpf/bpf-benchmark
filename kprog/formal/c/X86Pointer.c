@@ -180,3 +180,28 @@ __u8 kprog_x86_mem_read_src(__u64 stack, __u64 tag, __u64 width)
 	KPROG_X86_MEM_READ_SRC_INTO(source, stack, tag, width);
 	return source;
 }
+
+__u64 kprog_x86_stack_read_owned(struct kprog_x86_arena *arena, __u32 capacity,
+                                 __s64 offset, __u64 width)
+{
+	__u64 value;
+	X86_SIM_L_STACK_READ_OWNED_INTO(value, offset, width);
+	return value;
+}
+__u64 kprog_x86_stack_read(struct x86_sim_register_state *state,
+                           struct kprog_x86_arena *arena, __u32 capacity,
+                           __s64 offset, __u64 width)
+{
+	struct x86_sim_register_state *__x86_state = state;
+	__u64 value;
+	X86_SIM_L_STACK_READ_INTO(value, offset, width);
+	return value;
+}
+void kprog_x86_stack_values_read(struct x86_sim_register_state *state,
+                                  struct kprog_x86_stack_fact *facts, __u32 capacity,
+                                  __u64 index, __u64 width,
+                                  struct x86_sim_stack_value *output)
+{
+	struct x86_sim_register_state *__x86_state = state;
+	X86_SIM_L_STACK_VALUES_READ_INTO(*output, index, width);
+}

@@ -1,0 +1,11 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/formal/m4-x86-stack-read",
+  "historical_reference": "c348ce08b",
+  "validation_head": "6570224379fb231006710c10727b177f407c3a9e",
+  "source_patch": "raw_directory/final-input.patch",
+  "cpu": 15,
+  "address_space_limit_gib": 32,
+  "lean_threads": 1,
+  "timing": "CPU15 without work timing lease",
+  "scope": "shared actual C kernels/AST and finite native/host-adapter checks; not native-memory or Clight refinements"
+}

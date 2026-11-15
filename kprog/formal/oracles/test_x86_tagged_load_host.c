@@ -73,7 +73,7 @@ static void order_checks(void)
     page=mmap(NULL,page_size,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
     check(page!=MAP_FAILED,"guard page allocation");
     memset(page,0x39,page_size);
-    struct kprog_x86_arena storage={page,page}, *arena=&storage;
+    struct kprog_x86_arena storage={.b=page,.q=page}, *arena=&storage;
     struct x86_sim_register_state state={0}, *__x86_state=&state;
     __u32 capacity=64;
     choice=0xa1b2c3d4e5f60718ULL;
@@ -119,7 +119,7 @@ int main(void)
     const __s64 offsets[]={0,11,-17};
     _Alignas(8) __u8 bytes[512], before_bytes[512];
     struct x86_sim_register_state state, before;
-    struct kprog_x86_arena arena={bytes+32,(volatile __u64 *)(void *)(bytes+32)};
+    struct kprog_x86_arena arena={.b=bytes+32,.q=(volatile __u64 *)(void *)(bytes+32)};
     for (unsigned i=0;i<sizeof(bytes);i++) bytes[i]=(__u8)(17U*i+91U);
     memcpy(before_bytes,bytes,sizeof(bytes));
     memset(&state,0x6d,sizeof(state));

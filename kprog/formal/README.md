@@ -1396,10 +1396,29 @@ standard-axiom query pass. Four-header replay retains ordinary1448B/11relocs and
 XDP360B/TC760B/4relocs, equal to normal compilation. The first replay recipe
 omitted an intermediate header and stopped before compilation; its failed
 receipt stays in raw. Profile extraction CPP is2,674,873B. Full inline export
-now stops at `STACK_READ`/`STACK_READ_OWNED` GNU expressions. These checks do
+at that checkpoint stopped at `STACK_READ`/`STACK_READ_OWNED` GNU expressions. These checks do
 not establish Clight/native-memory refinements. [Small receipts](results/m4-x86-read-source/README.md)
 are committed; raw commands and observations stay under
 `/workspaces/kprog-raw/formal/m4-x86-read-source`.
+
+Private-stack owned/released and ghost-fact reads now share statement bodies
+with the original native expression/initializer forms. Three actual roots bring
+`X86Pointer` to26 functions; the generic binding adds active16/32-bit views of
+the same arena alongside b/q. CompCert inline adapters retain physical read
+before SP/release/input, byte width capture, aligned/byte routes and lazy ghost
+payload reads. Historical/current native/adapter modes each pass133,974 read
+and1,462,272 metadata/frame cases across six capacities, including partial
+words and200/376. Four guarded read sizes, two first-fault probes and224
+protected-SP/operand-count probes pass;4,296 inline binding cases and seven
+semantic mutations pass their expected outcomes. `make clight`,39 targeted
+Lean jobs, deterministic970,802B export and three standard-axiom queries pass.
+The stack fixture is2856B/8relocs; ordinary1448B/11 and contextXDP360B/TC760B/4
+remain exact against historical headers and normal compilation. Full inline
+export advances to MOVBE width/shared-read GNU expressions. CPP2,593,834B is
+profile extraction only. Native arena-view/volatile/permission/fault relations
+remain proof work. [Small receipts](results/m4-x86-stack-read/README.md) are
+committed; complete raw evidence stays under
+`/workspaces/kprog-raw/formal/m4-x86-stack-read`.
 
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight

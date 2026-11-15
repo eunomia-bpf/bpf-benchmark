@@ -100,7 +100,7 @@ int main(void)
 {
 	enum { words=KPROG_X86_STACK_WORDS(PROFILE), extent=(PROFILE+7U)&~7U };
 	__u8 *bytes=malloc(extent+16); if(!bytes) return 1;
-	struct kprog_x86_arena arena={bytes,(volatile __u64 *)(void *)bytes};
+	struct kprog_x86_arena arena={.b=bytes,.q=(volatile __u64 *)(void *)bytes};
 	__u8 tags[words],saved_tags[words],initial_tags[words],initial_bytes[extent+16],saved_bytes[extent+16];
 	void *pointers[words],*saved_pointers[words],*initial_pointers[words];
 	struct scattered { __u64 before; void *pointer; __u64 middle; __u8 tag; __u64 after; } scattered[words];

@@ -309,9 +309,14 @@ struct x86_sim_stack_value { void *pointer; __u8 tag; };
     do { if (__x86_sv_at==(__u64)(I)*8U && X86_SIM_L_SV_TAG(I)!=X86_SIM_TAG_SCALAR) { \
          __x86_sv_result.tag=X86_SIM_L_SV_TAG(I); \
          if (__x86_sv_result.tag==X86_SIM_TAG_STACK) __x86_sv_result.pointer=X86_SIM_L_SV_PTR(I); } } while(0);
+#define X86_SIM_L_STACK_VALUES_READ_DECL(INDEX, WIDTH) \
+    struct x86_sim_stack_value __x86_sv_result={0}; __u64 __x86_sv_at=(INDEX); \
+       if ((__s64)__x86_sv_at-(__s64)X86_SIM_STACK_BYTES>=X86_SIM_L_STACK_SP() && X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)==X86_WIDTH_64) { X86_SIM_L_SV_EACH(X86_SIM_L_SV_READ_ONE) }
+#define X86_SIM_L_STACK_VALUES_READ_INTO(OUTPUT, INDEX, WIDTH) \
+    do { X86_SIM_L_STACK_VALUES_READ_DECL(INDEX, WIDTH) \
+         (OUTPUT)=__x86_sv_result; } while (0)
 #define X86_SIM_L_STACK_VALUES_READ(INDEX, WIDTH) \
-    ({ struct x86_sim_stack_value __x86_sv_result={0}; __u64 __x86_sv_at=(INDEX); \
-       if ((__s64)__x86_sv_at-(__s64)X86_SIM_STACK_BYTES>=X86_SIM_L_STACK_SP() && X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)==X86_WIDTH_64) { X86_SIM_L_SV_EACH(X86_SIM_L_SV_READ_ONE) } \
+    ({ X86_SIM_L_STACK_VALUES_READ_DECL(INDEX, WIDTH) \
        __x86_sv_result; })
 /* Ordinary callees keep the caller's allocated frame. Ghost facts for older
  * deallocated slots disappear while their architectural bytes stay raw. */
@@ -786,13 +791,23 @@ X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
       } \
     } while(0)
 
+/* Both forms perform the physical read before checking release or drawing.
+ * Keep the original repeated OFF/WIDTH evaluations and native initializer. */
+#define X86_SIM_L_STACK_READ_OWNED_INIT(NAME, OFF, WIDTH) \
+    __u64 NAME=X86_SIM_L_STACK_READ_OWNED((OFF),(WIDTH))
+#define X86_SIM_L_STACK_READ_OWNED_DECLARE_INTO(NAME, OFF, WIDTH) \
+    __u64 NAME; X86_SIM_L_STACK_READ_OWNED_INTO(NAME, (OFF), (WIDTH))
+#define X86_SIM_L_STACK_READ_DECL(NAME, OFF, WIDTH, READ) \
+    READ(NAME, OFF, WIDTH); \
+    if ((__s64)(OFF)<X86_SIM_L_STACK_SP()) NAME=x86_apply_width(X86_SIM_L_UNSPECIFIED(),X86_SIM_L_EFFECTIVE_WIDTH(WIDTH))
+#define X86_SIM_L_STACK_READ_INTO(OUTPUT, OFF, WIDTH) \
+    do { X86_SIM_L_STACK_READ_DECL(__x86_observed, OFF, WIDTH, X86_SIM_L_STACK_READ_OWNED_DECLARE_INTO); \
+         (OUTPUT)=__x86_observed; } while (0)
 #define X86_SIM_L_STACK_READ(OFF, WIDTH) \
-    ({ __u64 __x86_observed=X86_SIM_L_STACK_READ_OWNED((OFF),(WIDTH)); \
-       if ((__s64)(OFF)<X86_SIM_L_STACK_SP()) __x86_observed=x86_apply_width(X86_SIM_L_UNSPECIFIED(),X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)); \
+    ({ X86_SIM_L_STACK_READ_DECL(__x86_observed, OFF, WIDTH, X86_SIM_L_STACK_READ_OWNED_INIT); \
        __x86_observed; })
 
-#define X86_SIM_L_STACK_READ_OWNED(OFF, WIDTH)                                    \
-	({                                                                 \
+#define X86_SIM_L_STACK_READ_OWNED_DECL(OFF, WIDTH)                                    \
 		__u64 __x86_str_index = X86_SIM_L_STACK_INDEX(OFF);       \
 		__u64 __x86_str_value;                                   \
 		if (KPROG_X86_STACK_ARM(                                  \
@@ -843,9 +858,13 @@ X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
 				__x86_str_value |=                        \
 					KPROG_X86_STACK_ASSEMBLE(         \
 						__x86_str_bytes[__x86_str_index + 7], 7);\
-		}                                                         \
-		__x86_str_value;                                          \
-	})
+		}
+#define X86_SIM_L_STACK_READ_OWNED_INTO(OUTPUT, OFF, WIDTH) \
+    do { X86_SIM_L_STACK_READ_OWNED_DECL(OFF, WIDTH) \
+         (OUTPUT)=__x86_str_value; } while (0)
+#define X86_SIM_L_STACK_READ_OWNED(OFF, WIDTH) \
+    ({ X86_SIM_L_STACK_READ_OWNED_DECL(OFF, WIDTH) \
+       __x86_str_value; })
 
 #define X86_SIM_L_STACK_PTR(OFF)                                           \
 	((void *)KPROG_PTR_ADD64_BITS(&__x86_stack_mem.b[0], X86_SIM_L_STACK_INDEX((OFF))))
