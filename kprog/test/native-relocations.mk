@@ -1,5 +1,7 @@
 SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
+# External kernel artifacts are inputs; never apply Make's implicit link rules.
+MAKEFLAGS += --no-builtin-rules
 ROOT := /workspaces/repository
 LINKER_TARGET := $(ROOT)/kprog/x86/native_lab/native_link/target
 OUTPUT ?= /workspaces/kprog-raw/perf/20261115-native-relocations
@@ -20,6 +22,10 @@ $(KERNEL_LAYOUT): $(KERNEL_LAYOUT_BUILD)/facts $(KDIR)/vmlinux $(KDIR)/System.ma
 
 .PHONY: kernel-layout kernel-layout-check loader-syntax
 kernel-layout: $(KERNEL_LAYOUT)
+
+.PHONY: recover-kernel-elf
+recover-kernel-elf:
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image bash -eu -c 'test ! -e "$(KDIR)/vmlinux"; objcopy --set-section-flags .modinfo=noload --set-section-flags ".rel*"=noload --set-section-flags "!.rel*.dyn"=noload --set-section-flags ".rel.*"=noload "$(KDIR)/vmlinux.unstripped" "$(KDIR)/vmlinux"; objcopy --remove-section=.modinfo --remove-section=".rel*" --remove-section="!.rel*.dyn" --remove-section=".rel.*" -w --strip-unneeded-symbol="__mod_device_table__*" "$(KDIR)/vmlinux"'
 
 kernel-layout-check: $(KERNEL_LAYOUT)
 	taskset -c 8-11 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_kernel_lto_layout.py --layout $(KERNEL_LAYOUT) --kernel $(KDIR) --reference $(ROOT)/corpus/results/perf-corrected-all-lto-linker-20261114 --output $(OUTPUT)/kernel-layout
