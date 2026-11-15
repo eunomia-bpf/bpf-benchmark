@@ -549,10 +549,10 @@ _Static_assert(X86_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP &&
 
 #define X86_SIM_L_READ_REG_WIDTH_SHIFT_INTO(OUTPUT, REG, WIDTH, SRC_SHIFT) \
 do { \
-    __u8 __x86_rd_reg = (REG); \
-    __u8 __x86_rd_raw_width = (WIDTH); \
-    __u8 __x86_rd_width = X86_SIM_L_EFFECTIVE_WIDTH(__x86_rd_raw_width); \
-    __u8 __x86_rd_shift = (SRC_SHIFT); \
+    const __u8 __x86_rd_reg = (REG); \
+    const __u8 __x86_rd_raw_width = (WIDTH); \
+    const __u8 __x86_rd_width = X86_SIM_L_EFFECTIVE_WIDTH(__x86_rd_raw_width); \
+    const __u8 __x86_rd_shift = (SRC_SHIFT); \
     void *__x86_rd_ptr = X86_SIM_L_READ_REG_PTR(__x86_rd_reg); \
     __u64 __x86_rd_value = (__u64)(long)__x86_rd_ptr; \
     if (__x86_rd_reg == X86_RSP) \
@@ -578,7 +578,7 @@ X86_SIM_L_READ_REG_WIDTH_SHIFT_INTO(OUTPUT, (REG), X86_WIDTH_64, 0U)
 X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
 
 #define X86_SIM_L_REG_TAG_INTO(OUTPUT, REG) \
-    do { __u64 __x86_tag_reg = (REG); \
+    do { const __u64 __x86_tag_reg = (REG); \
          (OUTPUT) = __x86_tag_reg < KPROG_X86_GPR_COUNT \
              ? __x86_gpr_cells[KPROG_X86_GPR_CELL(__x86_tag_reg)].tag : X86_SIM_TAG_SCALAR; \
     } while (0)
@@ -589,7 +589,7 @@ X86_SIM_L_READ_REG_WIDTH_SHIFT((REG), X86_WIDTH_64, 0U)
 	   __x86_reg_tag_result; })
 
 #define X86_SIM_L_STORE_REG_CELL(REG, POINTER, TAG) \
-    do { __u64 __x86_store_reg = (REG); \
+    do { const __u64 __x86_store_reg = (REG); \
          if (__x86_store_reg < KPROG_X86_GPR_COUNT) { \
              __x86_gpr_cells[KPROG_X86_GPR_CELL(__x86_store_reg)].value.ptr = (POINTER); \
              __x86_gpr_cells[KPROG_X86_GPR_CELL(__x86_store_reg)].tag = (TAG); \
