@@ -471,3 +471,7 @@ katran-helper-audit: build
 clock-kernel-facts:
 	$(MAKE) -r -C $(ROOT)/kprog/libnativeloader helper-context-kernel-input HELPER_BUILD=/var/tmp/kprog-tmp/perf/helper-context
 	$(MAKE) -r -C $(ROOT)/kprog/libnativeloader helper-context-kernel-kvm HELPER_BUILD=/var/tmp/kprog-tmp/perf/helper-context HELPER_KERNEL_OUTPUT=$(OUTPUT)
+
+.PHONY: image-tool-inventory
+image-tool-inventory:
+	python3 $(ROOT)/kprog/test/image_tool_inventory.py --image $(ROOT)/.cache/container-images/x86_64-runner-runtime.image.tar --output $(OUTPUT)/tool-inventory.json
