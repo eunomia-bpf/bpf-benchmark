@@ -222,6 +222,27 @@ struct x86_sim_inline_bindings {
 #define X86_SIM_L_SV_PTR(I) (*__x86_bind->values[(I)].pointer)
 
 static __always_inline __attribute__((nodebug)) void
+x86_sim_inline_clear_values(const struct x86_sim_inline_bindings *__x86_bind)
+{ X86_SIM_L_STACK_VALUES_CLEAR(); }
+#pragma push_macro("X86_SIM_L_STACK_VALUES_CLEAR")
+#undef X86_SIM_L_STACK_VALUES_CLEAR
+#define X86_SIM_L_STACK_VALUES_CLEAR() x86_sim_inline_clear_values(__x86_bind)
+
+static __always_inline __attribute__((nodebug)) void
+x86_sim_inline_call_frame_values(const struct x86_sim_inline_bindings *__x86_bind)
+{ X86_SIM_L_STACK_VALUES_CALL_FRAME(); }
+#pragma push_macro("X86_SIM_L_STACK_VALUES_CALL_FRAME")
+#undef X86_SIM_L_STACK_VALUES_CALL_FRAME
+#define X86_SIM_L_STACK_VALUES_CALL_FRAME() x86_sim_inline_call_frame_values(__x86_bind)
+
+static __always_inline __attribute__((nodebug)) void
+x86_sim_inline_helper_register_clobbers(const struct x86_sim_inline_bindings *__x86_bind)
+{ X86_SIM_L_HELPER_REGISTER_CLOBBERS(); }
+#pragma push_macro("X86_SIM_L_HELPER_REGISTER_CLOBBERS")
+#undef X86_SIM_L_HELPER_REGISTER_CLOBBERS
+#define X86_SIM_L_HELPER_REGISTER_CLOBBERS() x86_sim_inline_helper_register_clobbers(__x86_bind)
+
+static __always_inline __attribute__((nodebug)) void
 x86_sim_inline_execute(const struct x86_sim_inline_bindings *__x86_bind,
     __u8 op, __u8 dst, __u8 src, __u8 flags, __u32 aux, __u64 imm)
 {
@@ -268,6 +289,9 @@ x86_sim_inline_recover(const struct x86_sim_inline_bindings *__x86_bind,
     __u8 base, __u8 dst, __u32 aux, __s64 displacement)
 { return X86_SIM_L_READ_RECOVERY_MEM(base, dst, aux, displacement); }
 
+#pragma pop_macro("X86_SIM_L_HELPER_REGISTER_CLOBBERS")
+#pragma pop_macro("X86_SIM_L_STACK_VALUES_CALL_FRAME")
+#pragma pop_macro("X86_SIM_L_STACK_VALUES_CLEAR")
 #pragma pop_macro("X86_SIM_L_SV_PTR")
 #pragma pop_macro("X86_SIM_L_SV_TAG")
 #pragma pop_macro("__x86_stack_mem")

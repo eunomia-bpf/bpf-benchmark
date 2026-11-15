@@ -1455,7 +1455,7 @@ def append_indirect(lines: list[str], insn: NativeInsn,
                 else:
                     action = f"goto x86_l_{target:x};"
             else:
-                action = f"X86_SIM_BPF_CALL_{helpers[target]}(); break;"
+                action = f"X86_SIM_RUN_OP(X86_OP_CALL_HELPER, 0, 0, 0, 0, X86_SIM_HELPER_{helpers[target]}); break;"
             lines.append(f"{indent}\t\tcase 0x{target:x}ULL: {action}")
         lines.extend([f"{indent}\t\tdefault: __x86_sim_unresolved_indirect_target();",
                       f"{indent}\t\t}}", f"{indent}\t\tbreak;"])
