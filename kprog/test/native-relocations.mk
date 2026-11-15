@@ -475,3 +475,11 @@ clock-kernel-facts:
 .PHONY: image-tool-inventory
 image-tool-inventory:
 	python3 $(ROOT)/kprog/test/image_tool_inventory.py --image $(ROOT)/.cache/container-images/x86_64-runner-runtime.image.tar --output $(OUTPUT)/tool-inventory.json
+
+HELPER_AUDIT_BUILD := /var/tmp/kprog-tmp/perf/helper-audit
+HELPER_AUDIT_PLAN ?= /workspaces/kprog-raw/perf/20261115-clock-lto/kernel-facts/clock.link-plan.json
+.PHONY: clock-plan-audit
+clock-plan-audit:
+	install -d $(HELPER_AUDIT_BUILD) $(OUTPUT)
+	clang-18 -target x86_64-linux-gnu -O3 -march=native -fPIC -foptimize-sibling-calls -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only -fno-stack-protector -c $(ROOT)/kprog/test/native_clock_audit.c -o $(HELPER_AUDIT_BUILD)/clock.native.o
+	taskset -c 16-19 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/audit_native_helper_sites.py --native $(HELPER_AUDIT_BUILD)/clock.native.o --symbol clock_audit --linker $(LINKER_BINARY) --link-plan $(HELPER_AUDIT_PLAN) --output $(OUTPUT)
