@@ -2,6 +2,7 @@
 import ctypes as c
 import hashlib
 import json
+import shutil
 from pathlib import Path
 import subprocess
 import sys
@@ -34,7 +35,7 @@ def prepare_generated(directory,kind):
     for row in rows:
         path=Path(row['path'])
         if row['action']=='replace-build':path.unlink()
-        else:path.rename(records/path.name)
+        else:shutil.move(str(path),str(records/path.name))
         row['done']=True
         manifest.write_text(json.dumps(rows,indent=2)+'\n')
     directory.rmdir()
