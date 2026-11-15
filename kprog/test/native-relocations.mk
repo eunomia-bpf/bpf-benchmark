@@ -439,3 +439,8 @@ memory-b-pipeline-check:
 .PHONY: resume-owned-compiler
 resume-owned-compiler:
 	taskset -c 16 prlimit --as=536870912 -- python3 $(ROOT)/kprog/test/resume_owned_compiler.py --compiler $(RESUME_COMPILER) --launcher $(RESUME_LAUNCHER) --timing /workspaces/.agent-state/kprog-lanes/locks/timing --image /workspaces/.agent-state/kprog-lanes/locks/image --output $(OUTPUT)
+
+.PHONY: inline-scale-stock
+inline-scale-stock:
+	taskset -c 16-19 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/prepare_inline_scale_checks.py --profiles $(SCALE_PROFILES) --build /var/tmp/kprog-tmp/perf/scale --output $(OUTPUT)/records
+	$(MAKE) -r -C $(ROOT)/kprog/fidelity scale-kvm SCALE_BUILD=/var/tmp/kprog-tmp/perf/scale SCALE_RECORDS=$(OUTPUT)/records SCALE_OUT=$(OUTPUT)/guest

@@ -138,3 +138,13 @@ zero-byte frame. That is a resolved practical failure on this fixture;
 the intervening compiler changes and scalar constant folding preclude
 attributing an isolated optimization speedup from those two observations.
 100K remains running; there is no new stock-kernel or app/runtime result.
+
+2026-11-15T16:29Z: prepared one stock-kernel functional batch using the existing
+scale-kvm target, after the100K compiler launcher exits. The small adapter
+binds measured native/B allocated-section hashes to that suite's existing
+case records and expected outputs; it regenerates no C, LLVM or objects.
+Incomplete compile rows stay failures. The existing suite records each
+actual verifier/test-run outcome and memory trace. Dry-run confirms sole
+kernel/2vCPU/8GiB guest on18–19 with16GiB host AS; outer timingSH then
+imageSH excludes timing. Actual adapter/guest results remain pending.
+This is component correctness evidence, not application/performance timing.
