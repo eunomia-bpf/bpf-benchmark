@@ -36,7 +36,10 @@ def main():
     spec=importlib.util.spec_from_file_location('encoder',ROOT/'kprog/x86/micro-prog/generate_micro_sim_proofs.py')
     enc=importlib.util.module_from_spec(spec);sys.modules[spec.name]=enc;spec.loader.exec_module(enc)
     identities=source_identities(includes(ROOT/'kprog/x86/x86_sim_local_bpf.h') |
-                                 imports(Path(enc.__file__)) | imports(Path(__file__)))
+                                 imports(Path(enc.__file__)) | imports(Path(__file__)) |
+                                 {ROOT/'kprog/fidelity'/name for name in
+                                  ['control_inputs.c', 'control_inputs.h', 'control_trace.cpp',
+                                   'driver.c', 'driver.h', 'Makefile']})
     (out/'source-identities.json').write_text(json.dumps(identities,indent=2)+'\n')
     assembly=['.intel_syntax noprefix','.section .kprog_native,"ax",@progbits']
     matrix=forms()

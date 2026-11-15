@@ -288,7 +288,7 @@ check-stack-base-flags:
 .PHONY: x86-control-build x86-control-run
 X86_CONTROL_BUILD ?= build-x86-control
 X86_CONTROL_OUT ?= ../results/kprog_fidelity_20261107/differential/x86-control
-$(X86_CONTROL_BUILD)/generated.c $(X86_CONTROL_BUILD)/native.o &: x86_control.py generate.py tcb.py driver.h ../helper_abi.py ../trusted_generation.py ../../kinsn/module/include/native_lab_input.h $(wildcard ../x86/micro-prog/*.py ../x86/*.h ../formal/generated/*.h)
+$(X86_CONTROL_BUILD)/generated.c $(X86_CONTROL_BUILD)/native.o &: x86_control.py generate.py tcb.py driver.c driver.h control_inputs.c control_inputs.h control_trace.cpp Makefile ../helper_abi.py ../trusted_generation.py ../../kinsn/module/include/native_lab_input.h $(wildcard ../x86/micro-prog/*.py ../x86/*.h ../formal/generated/*.h)
 	$(PYTHON) x86_control.py $(X86_CONTROL_BUILD)
 
 $(X86_CONTROL_BUILD)/cpu-differential: $(X86_CONTROL_BUILD)/generated.c $(X86_CONTROL_BUILD)/native.o driver.c driver.h control_inputs.c control_inputs.h
