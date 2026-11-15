@@ -1,0 +1,30 @@
+{
+  "compiler": 1054890,
+  "launcher": 1054875,
+  "events": [
+    {
+      "event": "waiting-for-timing-work-lease",
+      "time": "2026-11-15T15:37:16.442689+00:00"
+    },
+    {
+      "event": "timing-work-lease-acquired",
+      "time": "2026-11-15T16:20:06.023590+00:00"
+    },
+    {
+      "event": "image-shared-lease-acquired",
+      "time": "2026-11-15T16:20:06.023909+00:00"
+    },
+    {
+      "event": "compiler-resumed",
+      "time": "2026-11-15T16:20:06.044739+00:00"
+    },
+    {
+      "event": "make-launcher-exited",
+      "time": "2026-11-15T16:24:32.222145+00:00"
+    },
+    {
+      "event": "leases-released",
+      "time": "2026-11-15T16:24:32.222478+00:00"
+    }
+  ]
+}

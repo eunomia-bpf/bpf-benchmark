@@ -96,3 +96,26 @@ The one-time handler definitions account for most small-case CPP bytes;
 increasing100→1000 adds approximately100–158KiB rather than cloning each
 handler per instruction. These are different scale inputs, not a paired
 runtime comparison. Full6945-instruction OTel frontend still running.
+
+2026-11-15T16:24:32Z: full captured OTel hotspot completes normal B and actual
+post-PEI frame observation (all stages exit0). Same6945-instruction P/proof/
+metadata hashes as the earlier observation; source/header hashes are in
+`otel-complete.json`. CPP6,019,192bytes, optimized frontend8,381,368bytes;
+frontend251.093user+3.541system=254.634CPU seconds, peak5,539,808KiB
+(5.28GiB). The raw3096.438s wall includes the explicit15:32:52–16:20:06
+pause and must not be presented as uninterrupted compile latency. Three
+late debugger samples caught loop analysis/unrolling/induction, not a pass
+cost breakdown. Normal bounds/MIR/all-pairs/final object stages take about
+9.27s total; independent frame observation adds2.30s.
+
+B executable bytes1,103,248 (137906BPF slots), object2,356,504bytes;
+actual allocated frame448bytes. Historic hotspot observations were576bytes
+before packing and552after packing; compiler/bounds/storage changed too,
+so this is the current combined normal pipeline, not an isolated effect of
+one edit. It is under512; no kernel load, checked-native installation,
+whole-app acceptance or runtime speed is established by this observer.
+B/IR/MIR were anonymous descriptors and closed after measurement; commands,
+hashes, resource usage and diagnostics persist without another build copy.
+Pidfd guard released both leases after the Make launcher exited16:24:32Z;
+resume-events.json records the pause/resume boundary. Old paused controls
+and canonical inputs remain untouched.10K/100K scale groups continue.
