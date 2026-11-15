@@ -90,6 +90,10 @@ preserve-running-linker:
 hold-existing-guest-image:
 	tail --pid=$(PERF_GUEST_OWNER_PID) -f /dev/null
 
+.PHONY: base-consistency-smoke
+base-consistency-smoke:
+	bash $(ROOT)/kprog/test/run_base_consistency_smoke.sh $(OUTPUT)
+
 # The queued run_verified_make caller holds image EX before Make starts.
 .PHONY: publish-normal-pair
 publish-normal-pair: $(CONTEXT_TOOL) $(CHECKED_TOOL)
