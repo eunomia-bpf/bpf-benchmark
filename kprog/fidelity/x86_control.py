@@ -77,8 +77,9 @@ def main():
         init += [f'__x86_{reg}.ptr=(void *)(uintptr_t)s->r[{j}];' for j,reg in enumerate(REGS)]
         init += ['for(unsigned k=0;k<64;k++) __x86_stack_mem.b[k]=s->stack[k];',
                  '__x86_cf=s->flags&1; __x86_pf=(s->flags>>2)&1; __x86_af=(s->flags>>4)&1; __x86_zf=(s->flags>>6)&1; __x86_sf=(s->flags>>7)&1; __x86_of=(s->flags>>11)&1;',
-                 '__x86_xmm0_lo=s->vec[0]; __x86_xmm0_hi=s->vec[1];']
-        finish=['observed:;']+[f's->r[{j}]='+('(uintptr_t)__x86_rsp.ptr;' if reg=='rsp' else f'X86_SIM_L_READ_REG({j});') for j,reg in enumerate(REGS)]
+                 '__x86_xmm0_lo=s->vec[0]; __x86_xmm0_hi=s->vec[1];',
+                 'control_begin_inputs();']
+        finish=['observed:;', 'control_end_inputs();']+[f's->r[{j}]='+('(uintptr_t)__x86_rsp.ptr;' if reg=='rsp' else f'X86_SIM_L_READ_REG({j});') for j,reg in enumerate(REGS)]
         finish += ['for(unsigned k=0;k<64;k++) s->stack[k]=__x86_stack_mem.b[k];',
                    's->flags=__x86_cf|((uint64_t)__x86_pf<<2)|((uint64_t)__x86_af<<4)|((uint64_t)__x86_zf<<6)|((uint64_t)__x86_sf<<7)|((uint64_t)__x86_of<<11);',
                    's->vec[0]=__x86_xmm0_lo; s->vec[1]=__x86_xmm0_hi;']
@@ -86,7 +87,7 @@ def main():
         entries.append(f'{{{json.dumps(name)},"X86_CONTROL",native_{i},sim_{i},0x8d5U,64,0,6,&native_pc_{i},&native_next_{i}}}')
         coverage.append(dict(assembly=name,opcode='X86_CONTROL',native_instructions=len(code)))
     prelude=['#include "../driver.h"','#include <stdlib.h>','#define X86_SIM_ENABLE_STACK 1',f'#include "{ROOT}/kprog/x86/x86_sim_local_bpf.h"','extern uint64_t native_stack_base;', 'extern void __x86_sim_unresolved_indirect_target(void) __attribute__((error("indirect target was not eliminated by specialization")));']
-    prelude += ['unsigned long native_lab_entry_input(unsigned int kind) { if (kind == NATIVE_LAB_INPUT_SP) return native_stack_base; if (kind == NATIVE_LAB_INPUT_UNSPECIFIED) return 0; /* Explicit observer choice; not a hardware-input witness. */ fputs("unexpected control observer input\\n", stderr); exit(1); }']
+    prelude += ['#include "../control_inputs.h"']
     (out/'generated.c').write_text('\n'.join(prelude+functions+['const struct form forms[]={',',\n'.join(entries),'};','const unsigned form_count=sizeof(forms)/sizeof(forms[0]);'])+'\n')
     (out/'coverage.json').write_text(json.dumps(coverage,indent=2)+'\n')
     print(f'generated {len(matrix)} real x86 finite-control observers')

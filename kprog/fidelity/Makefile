@@ -291,16 +291,20 @@ X86_CONTROL_OUT ?= ../results/kprog_fidelity_20261107/differential/x86-control
 $(X86_CONTROL_BUILD)/generated.c $(X86_CONTROL_BUILD)/native.o &: x86_control.py generate.py tcb.py driver.h ../helper_abi.py ../trusted_generation.py ../../kinsn/module/include/native_lab_input.h $(wildcard ../x86/micro-prog/*.py ../x86/*.h ../formal/generated/*.h)
 	$(PYTHON) x86_control.py $(X86_CONTROL_BUILD)
 
-$(X86_CONTROL_BUILD)/cpu-differential: $(X86_CONTROL_BUILD)/generated.c $(X86_CONTROL_BUILD)/native.o driver.c driver.h
+$(X86_CONTROL_BUILD)/cpu-differential: $(X86_CONTROL_BUILD)/generated.c $(X86_CONTROL_BUILD)/native.o driver.c driver.h control_inputs.c control_inputs.h
 	$(CC_x86) -O1 -g -std=gnu11 -static -I../../vendor/libbpf/src \
-		driver.c $(X86_CONTROL_BUILD)/generated.c $(X86_CONTROL_BUILD)/native.o \
+		driver.c control_inputs.c $(X86_CONTROL_BUILD)/generated.c $(X86_CONTROL_BUILD)/native.o \
 		-Wl,--section-start=.kprog_native=0x1000000 -o $@
 
-x86-control-build: $(X86_CONTROL_BUILD)/cpu-differential
+$(X86_CONTROL_BUILD)/control-trace: control_trace.cpp
+	install -d $(X86_CONTROL_BUILD)
+	$(CXX) -O2 -std=c++20 -Wall -Wextra -Werror $< -lelf -o $@
+
+x86-control-build: $(X86_CONTROL_BUILD)/cpu-differential $(X86_CONTROL_BUILD)/control-trace
 
 x86-control-run: x86-control-build
 	install -d $(X86_CONTROL_OUT)
-	./$(X86_CONTROL_BUILD)/cpu-differential $(CASES) $(X86_CONTROL_OUT) $(X86_CONTROL_OUT)/cpu-states.bin
+	./$(X86_CONTROL_BUILD)/control-trace ./$(X86_CONTROL_BUILD)/cpu-differential $(CASES) $(X86_CONTROL_OUT) $(X86_CONTROL_OUT)/cpu-states.bin
 
 PREPROCESS_SIZES ?= 100 1000
 PREPROCESS_ARGS ?=

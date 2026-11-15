@@ -423,3 +423,5 @@ table/context host checks pass,32 normal B allocated outputs unchanged. CPU
 control still has4864/8960 mismatches under its explicit zero input choice;
 hardware input matching and full formal work remain open. All failures, exact
 scope and raw recordings: `../results/perf_20261113/host-input-route/report.md`.
+
+2026-11-15T11:59:17Z finite-control input fidelity: replace the observer body's zero choices with hardware stack-release words recorded by ptrace hardware breakpoints/single-step before the simulator runs. Initialization choices are explicitly zero and overwritten by the complete driver input state; body input identity/count/consumption is checked. Native body bytes, full-state comparator, production compiler and all LTO unchanged. Validation follows; no runtime speed or complete formal claim.
