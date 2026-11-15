@@ -18,7 +18,6 @@ import sys
 import tempfile
 
 
-FLAGS = ["--runtime-map-lookups", "--runtime-known-map-lookups"]
 
 
 def option(argv, name):
@@ -48,7 +47,7 @@ def capture(argv, payload):
     root = payload / "audit"
     root.mkdir(exist_ok=True)
     directory = Path(tempfile.mkdtemp(prefix="link-", dir=root))
-    command = [str(binary), *FLAGS, *argv]
+    command = [str(binary), *argv]
     record = dict(version=1, started_at=datetime.now(timezone.utc).isoformat(),
                   pid=os.getpid(), boot_id=Path("/proc/sys/kernel/random/boot_id").read_text().strip(),
                   label=os.environ.get("KPROG_LINK_AUDIT_LABEL", "runtime"),

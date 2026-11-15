@@ -225,14 +225,6 @@ linker-tail-count-check:
 linker-map-dispatch-check:
 	cargo test --manifest-path ../x86/native_lab/native_link/Cargo.toml map_lookup
 
-.PHONY: linker-runtime-map-payload
-linker-runtime-map-payload:
-	cargo build --manifest-path ../x86/native_lab/native_link/Cargo.toml
-	install -d "$(OUTPUT)"
-	install -m 755 ../x86/native_lab/native_link/target/debug/native-link "$(OUTPUT)/native-link.real"
-	strip --strip-debug "$(OUTPUT)/native-link.real"
-	install -m 755 ../test/native-link-runtime-lookups.sh "$(OUTPUT)/native-link"
-	"$(OUTPUT)/native-link" --help > "$(OUTPUT)/help.txt"
 
 kernel-check: linker-build
 

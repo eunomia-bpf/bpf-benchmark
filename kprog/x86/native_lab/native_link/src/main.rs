@@ -117,16 +117,8 @@ struct Args {
     #[arg(long)]
     preserve_entry_abi: bool,
 
-    /// Dispatch x86 kernel map lookups using the actual map pointer and helper.
-    #[arg(long)]
-    runtime_map_lookups: bool,
-
-    /// Use proven named array/hash plans within actual-pointer runtime dispatch.
-    #[arg(long, requires = "runtime_map_lookups")]
-    runtime_known_map_lookups: bool,
-
     /// Inline runtime ARRAY lookups using this target-kernel field layout.
-    #[arg(long, requires = "runtime_map_lookups")]
+    #[arg(long)]
     runtime_array_layout: Option<PathBuf>,
 
     /// Share one runtime ARRAY routine instead of expanding every lookup site.
@@ -594,13 +586,10 @@ fn main() -> Result<()> {
                 &included,
                 &helper_addrs,
                 &map_addrs,
-                &lookup_sites,
                 &lookup_maps,
                 &update_sites,
                 proof_mode,
                 args.preserve_entry_abi,
-                args.runtime_map_lookups && !proof_mode,
-                args.runtime_known_map_lookups && !proof_mode,
                 if proof_mode { None } else { runtime_array_layout.as_ref() },
                 args.runtime_array_shared && !proof_mode,
                 runtime_probe_read_layout.as_ref(),
@@ -2703,35 +2692,16 @@ mod tests {
     use super::*;
 
     #[test]
-    fn runtime_map_lookups_require_cli_opt_in() {
-        let argv = ["native-link", "--input", "p.o", "--symbol", "entry", "--output", "p.bin"];
-        assert!(!Args::try_parse_from(argv).unwrap().runtime_map_lookups);
-        assert!(Args::try_parse_from(argv.into_iter().chain(["--runtime-map-lookups"]))
-            .unwrap().runtime_map_lookups);
-    }
-
-    #[test]
-    fn known_map_lookups_require_runtime_dispatch_and_explicit_opt_in() {
-        let argv = ["native-link", "--input", "p.o", "--symbol", "entry", "--output", "p.bin"];
-        assert!(!Args::try_parse_from(argv).unwrap().runtime_known_map_lookups);
-        assert!(Args::try_parse_from(argv.into_iter().chain(["--runtime-known-map-lookups"])).is_err());
-        assert!(Args::try_parse_from(argv.into_iter().chain([
-            "--runtime-map-lookups", "--runtime-known-map-lookups"]))
-            .unwrap().runtime_known_map_lookups);
-    }
-
-    #[test]
-    fn runtime_array_layout_requires_explicit_runtime_dispatch() {
+    fn runtime_array_layout_and_sharing_cli_contract() {
         let argv = ["native-link", "--input", "p.o", "--symbol", "entry", "--output", "p.bin"];
         assert!(Args::try_parse_from(argv).unwrap().runtime_array_layout.is_none());
         assert!(!Args::try_parse_from(argv).unwrap().runtime_array_shared);
         assert!(Args::try_parse_from(argv.into_iter().chain(["--runtime-array-shared"])).is_err());
-        assert!(Args::try_parse_from(argv.into_iter().chain(["--runtime-array-layout", "layout.json"])).is_err());
         assert_eq!(Args::try_parse_from(argv.into_iter().chain([
-            "--runtime-map-lookups", "--runtime-array-layout", "layout.json"]))
+            "--runtime-array-layout", "layout.json"]))
             .unwrap().runtime_array_layout, Some(PathBuf::from("layout.json")));
         assert!(Args::try_parse_from(argv.into_iter().chain([
-            "--runtime-map-lookups", "--runtime-array-layout", "layout.json", "--runtime-array-shared"]))
+            "--runtime-array-layout", "layout.json", "--runtime-array-shared"]))
             .unwrap().runtime_array_shared);
     }
 

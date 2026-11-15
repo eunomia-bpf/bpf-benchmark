@@ -139,8 +139,7 @@ def main():
         blob, maps, relocs = [args.build/(label+suffix) for suffix in ['.bin', '.maps', '.relocs']]
         run([args.linker, '--input', source, '--symbol', 'entry', '--mode', 'kernel',
              '--output', blob, '--output-map-patches', maps, '--output-relocs', relocs,
-             '--link-plan', plan_path, '--runtime-map-lookups',
-             '--runtime-known-map-lookups'])
+             '--link-plan', plan_path])
         if relocs.read_bytes():
             raise ValueError('Named array lookup was not inlined')
         code = bytearray(blob.read_bytes())

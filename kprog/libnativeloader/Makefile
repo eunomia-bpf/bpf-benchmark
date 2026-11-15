@@ -158,22 +158,21 @@ source-maps-kvm:
 	install -d "$(SOURCE_MAP_KERNEL_OUTPUT)"
 	install -m 0755 "$(SOURCE_MAP_BUILD)/source-maps" "$(SOURCE_MAP_KERNEL_OUTPUT)/source-maps"
 	install -m 0644 "$(SOURCE_MAP_BUILD)/fixture.bpf.o" "$(SOURCE_MAP_BUILD)/fixture.native.o" "$(SOURCE_MAP_KERNEL_OUTPUT)/"
-	install -m 0755 "$(FRAME_LINKER)" "$(SOURCE_MAP_KERNEL_OUTPUT)/native-link.real"
 	taskset -c 14 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
 		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(SOURCE_MAP_KERNEL_OUTPUT)" --overlay-rwdir /tmp \
 		--disable-monitor --cpus 2 --memory $(SOURCE_MAP_VM_MEMORY) --append 'loglevel=4 panic=30 oops=panic' \
 		--exec 'make -C kprog/libnativeloader guest-source-maps SOURCE_MAP_KERNEL_OUTPUT=$(SOURCE_MAP_KERNEL_OUTPUT) SOURCE_MAP_LOADER=$(SOURCE_MAP_LOADER) SERVICE_EXECUTION_ARGS="$(SERVICE_EXECUTION_ARGS)"'
 
 guest-source-maps:
-	CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" KPROG_FRAME_LINKER="$(SOURCE_MAP_KERNEL_OUTPUT)/native-link.real" \
+	CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" \
 		python3 ../trusted_service.py --arch 1 \
 		--endpoint /sys/kernel/debug/bpf_x86_native_lab/specializer \
 		--module /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko \
 		--state "$(SOURCE_MAP_KERNEL_OUTPUT)/state" --results "$(SOURCE_MAP_KERNEL_OUTPUT)/service.tar.gz" \
-		--native-link "$(REPO_ROOT)/kprog/test/tail_call_frame/native-link.sh" \
+		--native-link "$(FRAME_LINKER)" \
 		--loader "$(SOURCE_MAP_LOADER)" $(SERVICE_EXECUTION_ARGS) \
 		--run "$(SOURCE_MAP_KERNEL_OUTPUT)/source-maps" kernel "$(SOURCE_MAP_KERNEL_OUTPUT)/fixture.bpf.o" \
-		"$(SOURCE_MAP_KERNEL_OUTPUT)/fixture.native.o" "$(REPO_ROOT)/kprog/test/tail_call_frame/native-link.sh" "$(SOURCE_MAP_KERNEL_OUTPUT)"
+		"$(SOURCE_MAP_KERNEL_OUTPUT)/fixture.native.o" "$(FRAME_LINKER)" "$(SOURCE_MAP_KERNEL_OUTPUT)"
 
 .PHONY: checked-sim-inputs checked-sim-check checked-sim-kvm checked-sim-stage
 .PHONY: lto-fault-check
@@ -298,7 +297,6 @@ checked-packet-kvm:
 		"$(CHECKED_PACKET_BUILD)/context-lower" "$(CHECKED_PACKET_BUILD)/packet-bounds" "$(CHECKED_PACKET_BUILD)/client" "$(CHECKED_PACKET_KERNEL_OUTPUT)/"
 	install -m 0644 "$(CHECKED_PACKET_BUILD)/source.bpf.o" "$(CHECKED_PACKET_BUILD)/packet.native.o" \
 		"$(CHECKED_PACKET_BUILD)/bad.native.o" "$(CHECKED_PACKET_KERNEL_OUTPUT)/"
-	install -m 0755 "$(FRAME_LINKER)" "$(CHECKED_PACKET_KERNEL_OUTPUT)/native-link.real"
 	"$(CHECKED_PACKET_BUILD)/public-layout" > "$(CHECKED_PACKET_KERNEL_OUTPUT)/public-layout.json"
 	"$(CHECKED_PACKET_BUILD)/physical-layout" > "$(CHECKED_PACKET_KERNEL_OUTPUT)/physical-layout.json"
 	taskset -c 14 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
@@ -310,12 +308,12 @@ guest-checked-packet:
 	python3 ../test/check_checked_packet_guest.py "$(CHECKED_PACKET_KERNEL_OUTPUT)"
 
 guest-checked-packet-case:
-	CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" KPROG_FRAME_LINKER="$(CHECKED_PACKET_KERNEL_OUTPUT)/native-link.real" \
+	CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" \
 		python3 ../trusted_service.py --arch 1 --endpoint /sys/kernel/debug/bpf_x86_native_lab/specializer \
 		--module /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko \
 		--state "$(CHECKED_PACKET_KERNEL_OUTPUT)/$(CHECKED_PACKET_CASE)/state" \
 		--results "$(CHECKED_PACKET_KERNEL_OUTPUT)/$(CHECKED_PACKET_CASE)/service.tar.gz" \
-		--native-link "$(REPO_ROOT)/kprog/test/tail_call_frame/native-link.sh" \
+		--native-link "$(FRAME_LINKER)" \
 		--loader "$(CHECKED_PACKET_KERNEL_OUTPUT)/trusted-native-loader" --execution-mode checked-sim-c \
 		--sim-native-compiler "$(CHECKED_PACKET_KERNEL_OUTPUT)/compile-sim-ir" \
 		--sim-context-compiler "$(CHECKED_PACKET_KERNEL_OUTPUT)/context-lower" \
@@ -324,7 +322,7 @@ guest-checked-packet-case:
 		--sim-bounds-compiler "$(CHECKED_PACKET_KERNEL_OUTPUT)/packet-bounds" \
 		--run "$(CHECKED_PACKET_KERNEL_OUTPUT)/client" "$(CHECKED_PACKET_KERNEL_OUTPUT)/source.bpf.o" \
 		"$(CHECKED_PACKET_KERNEL_OUTPUT)/$(if $(filter reject,$(CHECKED_PACKET_CASE)),bad,packet).native.o" \
-		"$(REPO_ROOT)/kprog/test/tail_call_frame/native-link.sh" "$(CHECKED_PACKET_CASE)" \
+		"$(FRAME_LINKER)" "$(CHECKED_PACKET_CASE)" \
 		"$(CHECKED_PACKET_KERNEL_OUTPUT)/$(CHECKED_PACKET_CASE)/execution.jsonl"
 
 .PHONY: tail-frame-inputs tail-frame-kvm guest-tail-frame
@@ -343,22 +341,21 @@ tail-frame-kvm:
 	install -d "$(FRAME_OUTPUT)"
 	install -m 0755 "$(FRAME_BUILD)/client" "$(FRAME_OUTPUT)/client"
 	install -m 0644 "$(FRAME_BUILD)/source.bpf.o" "$(FRAME_BUILD)/frame.native.o" "$(FRAME_OUTPUT)/"
-	install -m 0755 "$(FRAME_LINKER)" "$(FRAME_OUTPUT)/native-link.real"
 	taskset -c 13 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
 		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(FRAME_OUTPUT)" --overlay-rwdir /tmp \
 		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'make -C kprog/libnativeloader guest-tail-frame FRAME_OUTPUT=$(FRAME_OUTPUT) FRAME_LINKER=$(FRAME_OUTPUT)/native-link.real'
+		--exec 'make -C kprog/libnativeloader guest-tail-frame FRAME_OUTPUT=$(FRAME_OUTPUT) FRAME_LINKER=$(FRAME_LINKER)'
 
 guest-tail-frame:
-	CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" KPROG_FRAME_LINKER="$(FRAME_LINKER)" \
+	CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" \
 		python3 ../trusted_service.py --arch 1 \
 		--endpoint /sys/kernel/debug/bpf_x86_native_lab/specializer \
 		--module /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko \
 		--state "$(FRAME_OUTPUT)/state" --results "$(FRAME_OUTPUT)/service.tar.gz" \
-		--native-link "$(REPO_ROOT)/kprog/test/tail_call_frame/native-link.sh" \
+		--native-link "$(FRAME_LINKER)" \
 		--loader /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader \
 		--run "$(FRAME_OUTPUT)/client" "$(FRAME_OUTPUT)/source.bpf.o" "$(FRAME_OUTPUT)/frame.native.o" \
-		"$(REPO_ROOT)/kprog/test/tail_call_frame/native-link.sh" "$(FRAME_OUTPUT)/native-image.bin"
+		"$(FRAME_LINKER)" "$(FRAME_OUTPUT)/native-image.bin"
 
 .PHONY: direct-tail-check
 direct-tail-check:

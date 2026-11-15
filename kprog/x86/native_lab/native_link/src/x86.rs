@@ -60,44 +60,6 @@ fn local_site_key(sym: &SymInfo, local_ip: u64) -> LocalSiteKey {
     (sym.section_index, sym.address, local_ip)
 }
 
-fn truncate_bpf_obj_name(name: &str) -> String {
-    name.bytes().take(15).map(char::from).collect()
-}
-
-fn lookup_site_matches_native_map(spec: &LookupSiteSpec, native_map_name: &str) -> bool {
-    let Some(source_map_name) = spec.map_name.as_deref() else {
-        return false;
-    };
-    source_map_name == native_map_name
-        || truncate_bpf_obj_name(source_map_name) == truncate_bpf_obj_name(native_map_name)
-}
-
-fn lookup_map_spec(
-    lookup_maps: &HashMap<String, LookupSiteSpec>,
-    native_map_name: &str,
-) -> Result<Option<LookupSiteSpec>> {
-    if let Some(spec) = lookup_maps.get(native_map_name) {
-        return Ok(Some(spec.clone()));
-    }
-
-    let native_truncated = truncate_bpf_obj_name(native_map_name);
-    let mut match_spec: Option<LookupSiteSpec> = None;
-    let mut match_name: Option<&str> = None;
-    for (name, spec) in lookup_maps {
-        if truncate_bpf_obj_name(name) != native_truncated {
-            continue;
-        }
-        if let Some(existing) = match_name {
-            bail!(
-                "native map name {native_map_name:?} matches multiple link-plan lookup_maps entries: {existing:?} and {name:?}"
-            );
-        }
-        match_name = Some(name.as_str());
-        match_spec = Some(spec.clone());
-    }
-    Ok(match_spec)
-}
-
 fn generic_lookup_site(target_addr: u64, map_name: Option<&str>) -> Option<LookupSiteSpec> {
     if target_addr == 0 {
         return None;
@@ -116,73 +78,30 @@ fn generic_lookup_site(target_addr: u64, map_name: Option<&str>) -> Option<Looku
 }
 
 fn select_lookup_site(
-    lookup_sites: &[LookupSiteSpec],
     lookup_maps: &HashMap<String, LookupSiteSpec>,
-    used: &mut [bool],
     native_call_index: usize,
     native_map_name: Option<&str>,
     sym_name: &str,
     generic_target_addr: u64,
-    runtime_map_lookups: bool,
-    runtime_known_map_lookups: bool,
-) -> Result<(String, Option<usize>, LookupSiteSpec)> {
-    if runtime_map_lookups {
-        // Only an exact symbol whose actual pointer was traced to RDI may
-        // select a layout. Never consume positional or truncated-name facts.
-        if runtime_known_map_lookups {
-            if let Some(name) = native_map_name {
-                if let Some(spec) = lookup_maps.get(name) {
-                    if matches!(spec.kind, LookupKind::Array | LookupKind::PerCpuArray |
-                        LookupKind::Hash | LookupKind::LruHash | LookupKind::PerCpuHash |
-                        LookupKind::HashOfMaps) {
-                        return Ok((format!("runtime-map:{name}"), None, spec.clone()));
-                    }
-                }
+) -> Result<(String, LookupSiteSpec)> {
+    // A layout belongs only to the exact map whose pointer was proven to
+    // reach RDI. Native/BPF call order and truncated names are not identities.
+    if let Some(name) = native_map_name {
+        if let Some(spec) = lookup_maps.get(name) {
+            if matches!(spec.kind, LookupKind::Array | LookupKind::PerCpuArray |
+                LookupKind::Hash | LookupKind::LruHash | LookupKind::PerCpuHash |
+                LookupKind::HashOfMaps) {
+                return Ok((format!("runtime-map:{name}"), spec.clone()));
             }
         }
-        // Native and BPF helper ordering is not an identity relation. Dispatch
-        // on the actual RDI map instead of borrowing another site's layout.
-        let spec = generic_lookup_site(generic_target_addr, native_map_name)
-            .ok_or_else(|| anyhow!(
-                "x86 runtime map lookup {native_call_index} in {sym_name} requires the bpf_map_lookup_elem helper target"
-            ))?;
-        return Ok((format!("runtime:{native_call_index}"), None, spec));
     }
-    if let Some(map_name) = native_map_name {
-        if let Some((idx, spec)) = lookup_sites
-            .iter()
-            .enumerate()
-            .find(|(idx, spec)| !used[*idx] && lookup_site_matches_native_map(spec, map_name))
-        {
-            used[idx] = true;
-            return Ok((idx.to_string(), Some(idx), spec.clone()));
-        }
-
-        if let Some(spec) = lookup_map_spec(lookup_maps, map_name)? {
-            return Ok((format!("map:{map_name}"), None, spec));
-        }
-
-        if let Some(spec) = generic_lookup_site(generic_target_addr, Some(map_name)) {
-            return Ok((format!("generic:{map_name}"), None, spec));
-        }
-
-        bail!(
-            "x86 bpf_map_lookup_elem native call {native_call_index} in {sym_name} uses map {map_name:?} but no matching link-plan lookup_sites or lookup_maps metadata exists"
-        );
-    }
-
-    if let Some((idx, spec)) = lookup_sites.iter().enumerate().find(|(idx, _)| !used[*idx]) {
-        used[idx] = true;
-        return Ok((idx.to_string(), Some(idx), spec.clone()));
-    }
-
-    if let Some(spec) = generic_lookup_site(generic_target_addr, None) {
-        return Ok(("generic".to_string(), None, spec));
-    }
-
-    bail!(
-        "x86 bpf_map_lookup_elem native call {native_call_index} in {sym_name} is missing link-plan lookup_sites metadata"
-    );
+    // A dynamic map retains its actual pointer and generic helper semantics;
+    // the shared runtime routines dispatch on the real map's type.
+    let spec = generic_lookup_site(generic_target_addr, native_map_name)
+        .ok_or_else(|| anyhow!(
+            "x86 runtime map lookup {native_call_index} in {sym_name} requires the bpf_map_lookup_elem helper target"
+        ))?;
+    Ok((format!("runtime:{native_call_index}"), spec))
 }
 
 pub(super) fn bpf_helper_name_from_id(helper_id: u64) -> Option<&'static str> {
@@ -1203,13 +1122,10 @@ pub(super) fn rewrite_x86(
     included: &[SymInfo],
     helper_addrs: &HashMap<String, u64>,
     map_addrs: &HashMap<String, u64>,
-    lookup_sites: &[LookupSiteSpec],
     lookup_maps: &HashMap<String, LookupSiteSpec>,
     update_sites: &[UpdateSiteSpec],
     proof_mode: bool,
     preserve_entry_abi: bool,
-    runtime_map_lookups: bool,
-    runtime_known_map_lookups: bool,
     runtime_array_layout: Option<&RuntimeArrayLayout>,
     runtime_array_shared: bool,
     runtime_probe_read_layout: Option<&RuntimeProbeReadLayout>,
@@ -1267,14 +1183,7 @@ pub(super) fn rewrite_x86(
         patches.push(PatchInfo { global_offset: 13, kind: PatchKind::JmpEnd });
         code_ranges.push((0, 18));
     }
-    // For each `bpf_map_lookup_elem` call site encountered in
-    // reachable-symbol byte order, record (symbol_addr, local_call_offset)
-    // -> selected spec. Filled during the decode loop; consumed by
-    // apply_elf_relocations to route each call to its own dedicated
-    // literal-pool entry holding the per-site target address.
-    let mut lookup_call_specs: HashMap<LocalSiteKey, LookupSiteSpec> = HashMap::new();
     let mut lookup_call_counter: usize = 0;
-    let mut lookup_site_used = vec![false; lookup_sites.len()];
     let map_lookup_helper_addr = helper_addrs
         .get("bpf_map_lookup_elem")
         .copied()
@@ -1321,8 +1230,7 @@ pub(super) fn rewrite_x86(
         let mut decoder = Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE);
         let mut helper_got_registers: HashMap<Register, String> = HashMap::new();
         let mut helper_imm_registers: HashMap<Register, u64> = HashMap::new();
-        let mut map_symbol_registers: HashMap<Register, String> = HashMap::new();
-        let proven_maps = if runtime_known_map_lookups && !proof_mode {
+        let proven_maps = if !proof_mode {
             known_maps::arguments(&bytes, sym, &got_relocations, &absolute_maps, map_addrs)?
         } else { HashMap::new() };
 
@@ -1385,7 +1293,6 @@ pub(super) fn rewrite_x86(
                 let (replacement, kind) = non_pic::address(reference, proof_mode)?;
                 push_x86_replacement(&mut local, &mut kinds, &mut insn_local_ip,
                     local_ip, replacement, Some(kind));
-                map_symbol_registers.insert(reference.register, reference.name.clone());
                 helper_got_registers.remove(&reference.register);
                 helper_imm_registers.remove(&reference.register);
                 let key = local_site_key(sym, reference.relocation_offset);
@@ -1423,13 +1330,6 @@ pub(super) fn rewrite_x86(
                     if let Some(target_name) = got_relocations.get(&patch_key) {
                         let dst = insn.op0_register();
                         if !proof_mode && map_addrs.contains_key(target_name) {
-                            let dst_family = x86_gpr64_family(dst).ok_or_else(|| {
-                                anyhow!(
-                                    "x86 map GOT load for {} uses unsupported register {:?}",
-                                    target_name,
-                                    dst
-                                )
-                            })?;
                             let movabs = build_x86_movabs_reg(dst, 0)?;
                             push_x86_replacement(
                                 &mut local,
@@ -1442,7 +1342,6 @@ pub(super) fn rewrite_x86(
                                     imm_offset: 2,
                                 }),
                             );
-                            map_symbol_registers.insert(dst_family, target_name.clone());
                             resolved_got_relocations.insert(patch_key);
                             continue;
                         }
@@ -1458,7 +1357,6 @@ pub(super) fn rewrite_x86(
                             })?;
                             helper_got_registers.insert(dst_family, target_name.clone());
                             helper_got_load_reg = Some(dst_family);
-                            map_symbol_registers.remove(&dst_family);
                             if !proof_mode || local_memory {
                                 resolved_got_relocations.insert(patch_key);
                                 if local_memory { canonicalized_relocations.insert(patch_key); }
@@ -1478,7 +1376,7 @@ pub(super) fn rewrite_x86(
                     for register in factory.info(&insn).used_registers().iter().filter(|r|
                         matches!(r.access(),OpAccess::Write|OpAccess::CondWrite|OpAccess::ReadWrite|OpAccess::ReadCondWrite)) {
                         if let Some(reg)=x86_gpr64_family(register.register()) {
-                            helper_got_registers.remove(&reg);helper_imm_registers.remove(&reg);map_symbol_registers.remove(&reg);
+                            helper_got_registers.remove(&reg);helper_imm_registers.remove(&reg);
                         }
                     }
                     for (index,(instruction,kind)) in writable_data::instructions(insn,reference,proof_mode)?.into_iter().enumerate() {
@@ -1601,7 +1499,6 @@ pub(super) fn rewrite_x86(
                         opcode: 0xe8,
                     }));
                     insn_local_ip.push(local_ip);
-                    clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                     continue;
                 }
                 // Else: keep verbatim. ELF reloc pass handles helpers; any
@@ -1645,14 +1542,12 @@ pub(super) fn rewrite_x86(
                         if helper_call_sites.contains_key(&site_key) {
                             canonicalized_relocations.insert(local_site_key(sym, local_ip + insn.len() as u64 - 4));
                         }
-                        clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                         continue;
                     }
                     if proof_mode {
                         local.push(insn);
                         kinds.push(None);
                         insn_local_ip.push(local_ip);
-                        clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                         continue;
                     }
                     if name == "bpf_tail_call" {
@@ -1692,7 +1587,6 @@ pub(super) fn rewrite_x86(
                             }
                         }
                         resolved_helper_call_sites.insert(site_key);
-                        clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                         continue;
                     }
                     if runtime_percpu_loads {
@@ -1701,7 +1595,6 @@ pub(super) fn rewrite_x86(
                                 push_x86_synthetic(&mut local,&mut kinds,&mut insn_local_ip,&mut next_synthetic_ip,ib)?;
                             }
                             resolved_helper_call_sites.insert(site_key);
-                            clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                             continue;
                         }
                     }
@@ -1717,7 +1610,6 @@ pub(super) fn rewrite_x86(
                                 )?;
                             }
                             resolved_helper_call_sites.insert(site_key);
-                            clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                             continue;
                         }
                     }
@@ -1725,23 +1617,11 @@ pub(super) fn rewrite_x86(
                     if name == "bpf_map_lookup_elem" {
                         let native_call_index = lookup_call_counter;
                         lookup_call_counter += 1;
-                        let native_map_name = if runtime_known_map_lookups {
-                            proven_maps.get(&local_ip).map(String::as_str)
-                        } else {
-                            map_symbol_registers.get(&Register::RDI).map(String::as_str)
-                        };
-                        let (site_label, _site_index, spec) = select_lookup_site(
-                            lookup_sites,
-                            lookup_maps,
-                            &mut lookup_site_used,
-                            native_call_index,
-                            native_map_name,
-                            &sym.name,
-                            map_lookup_helper_addr,
-                            runtime_map_lookups,
-                            runtime_known_map_lookups,
+                        let (site_label, spec) = select_lookup_site(
+                            lookup_maps, native_call_index,
+                            proven_maps.get(&local_ip).map(String::as_str),
+                            &sym.name, map_lookup_helper_addr,
                         )?;
-                        lookup_call_specs.insert(site_key, spec.clone());
                         if let Some(layout) = runtime_array_layout.filter(|_| !runtime_array_shared && matches!(spec.kind, LookupKind::Call)) {
                             // Prefix-local branches skip exactly this five-byte helper
                             // slot for ARRAY and NULL results. Other types use the
@@ -1762,7 +1642,6 @@ pub(super) fn rewrite_x86(
                                 opcode: 0xe8,
                             });
                             resolved_helper_call_sites.insert(site_key);
-                            clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                             continue;
                         }
                         match spec.kind {
@@ -1777,7 +1656,6 @@ pub(super) fn rewrite_x86(
                                     )?;
                                 }
                                 resolved_helper_call_sites.insert(site_key);
-                                clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                                 continue;
                             }
                             LookupKind::Call
@@ -1806,7 +1684,6 @@ pub(super) fn rewrite_x86(
                                     )?;
                                 }
                                 resolved_helper_call_sites.insert(site_key);
-                                clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                                 continue;
                             }
                         }
@@ -1828,7 +1705,6 @@ pub(super) fn rewrite_x86(
                                         )?;
                                     }
                                     resolved_helper_call_sites.insert(site_key);
-                                    clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                                     continue;
                                 }
                                 UpdateKind::Call => {
@@ -1844,7 +1720,6 @@ pub(super) fn rewrite_x86(
                                         helper_addr,
                                     )?;
                                     resolved_helper_call_sites.insert(site_key);
-                                    clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                                     continue;
                                 }
                             }
@@ -1864,7 +1739,6 @@ pub(super) fn rewrite_x86(
                         helper_addr,
                     )?;
                     resolved_helper_call_sites.insert(site_key);
-                    clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                     continue;
                 } else if let Some(reg) = call_reg {
                     bail!(
@@ -1884,56 +1758,14 @@ pub(super) fn rewrite_x86(
                 insn.flow_control(),
                 FlowControl::Call | FlowControl::IndirectCall
             );
-            let lookup_map_name_for_call = if helper_call_sites.get(&site_key).map(String::as_str)
-                == Some("bpf_map_lookup_elem")
-            {
-                map_symbol_registers.get(&Register::RDI).cloned()
-            } else {
-                None
-            };
-            let map_reg_move = x86_mov_gpr64_to_gpr64(&insn).and_then(|(dst, src)| {
-                map_symbol_registers
-                    .get(&src)
-                    .cloned()
-                    .map(|name| (dst, name))
-            });
             let written_reg = x86_written_gpr_family(&insn);
             local.push(insn);
             kinds.push(None);
             insn_local_ip.push(local_ip);
 
-            // Track lookup callsite consumption after the call. The native C
-            // and BPF backends do not always preserve global helper call order
-            // across split subprograms, so prefer map-symbol matching when the
-            // native callsite's rdi argument can be traced.
-            if let Some(name) = helper_call_sites.get(&site_key) {
-                if name == "bpf_map_lookup_elem" {
-                    let native_call_index = lookup_call_counter;
-                    lookup_call_counter += 1;
-                    let (_site_label, _site_index, spec) = select_lookup_site(
-                        lookup_sites,
-                        lookup_maps,
-                        &mut lookup_site_used,
-                        native_call_index,
-                        if runtime_known_map_lookups {
-                            proven_maps.get(&local_ip).map(String::as_str)
-                        } else { lookup_map_name_for_call.as_deref() },
-                        &sym.name,
-                        map_lookup_helper_addr,
-                        runtime_map_lookups,
-                        runtime_known_map_lookups,
-                    )?;
-                    lookup_call_specs.insert(site_key, spec.clone());
-                }
-            }
             if call_clobbers {
-                clear_x86_call_clobbered_registers(&mut map_symbol_registers);
                 clear_x86_call_clobbered_registers(&mut helper_got_registers);
                 clear_x86_call_clobbered_registers(&mut helper_imm_registers);
-            } else if let Some((dst, name)) = map_reg_move {
-                map_symbol_registers.insert(dst, name);
-            } else if let Some(reg) = written_reg {
-                map_symbol_registers.remove(&reg);
             }
             if let Some(reg) = written_reg {
                 if helper_got_load_reg != Some(reg) {
@@ -2112,7 +1944,6 @@ pub(super) fn rewrite_x86(
             &layouts,
             helper_addrs,
             map_addrs,
-            &lookup_call_specs,
             &resolved_helper_call_sites,
             &resolved_got_relocations,
             &mut blob,
@@ -2585,7 +2416,6 @@ fn apply_elf_relocations(
     layouts: &[SymbolLayout],
     helper_addrs: &HashMap<String, u64>,
     map_addrs: &HashMap<String, u64>,
-    lookup_call_specs: &HashMap<LocalSiteKey, LookupSiteSpec>,
     resolved_helper_call_sites: &HashSet<LocalSiteKey>,
     resolved_got_relocations: &HashSet<LocalSiteKey>,
     blob: &mut Vec<u8>,
@@ -2750,51 +2580,13 @@ fn apply_elf_relocations(
                         continue;
                     }
 
-                    // Per-call-site routing for `bpf_map_lookup_elem`.
-                    // Route each `bpf_map_lookup_elem` call to the
-                    // mandatory per-site target supplied by the runner.
-                    // This avoids a single shared pool entry forcing all
-                    // lookup sites to share one helper target.
-                    let mut dedicated_pool_addr: Option<u64> = None;
-                    if target_name == "bpf_map_lookup_elem" {
-                        // The reloc offset points at the disp32 of the
-                        // 6-byte indirect call (`ff 15 dd dd dd dd`);
-                        // the call's opcode is 2 bytes earlier.
-                        let spec = lookup_call_specs
-                            .get(&local_site_key(&layout.sym, got_call_local_off))
-                            .ok_or_else(|| {
-                                anyhow!(
-                                    "x86 bpf_map_lookup_elem GOT relocation in {} at {:#x} has no lookup-site spec",
-                                    layout.sym.name,
-                                    got_call_local_off
-                                )
-                            })?;
-                        if spec.target_addr == 0 {
-                            bail!(
-                                "x86 lookup site for {} at {:#x} is {:?} but has no GOT-call target address",
-                                layout.sym.name,
-                                got_call_local_off,
-                                spec.kind
-                            );
-                        }
-                        dedicated_pool_addr = Some(spec.target_addr);
-                    }
-                    let kernel_addr = if let Some(a) = dedicated_pool_addr {
-                        a
-                    } else {
-                        helper_addrs
-                            .get(&target_name)
-                            .copied()
-                            .or_else(|| map_addrs.get(&target_name).copied())
-                            .ok_or_else(|| {
-                                anyhow!(
-                                    "GOT-relative reloc against unknown symbol {}; add it to link-plan helpers or maps",
-                                    target_name
-                                )
-                            })?
-                    };
-                    let is_map_literal = dedicated_pool_addr.is_none()
-                        && !helper_addrs.contains_key(&target_name)
+                    let kernel_addr = helper_addrs.get(&target_name).copied()
+                        .or_else(|| map_addrs.get(&target_name).copied())
+                        .ok_or_else(|| anyhow!(
+                            "GOT-relative reloc against unknown symbol {}; add it to link-plan helpers or maps",
+                            target_name
+                        ))?;
+                    let is_map_literal = !helper_addrs.contains_key(&target_name)
                         && map_addrs.contains_key(&target_name);
                     let map_addr = kernel_addr; /* used by code below */
 
@@ -4542,8 +4334,8 @@ mod tests {
                 let elf = object::File::parse(data.as_slice())?;
                 let entry = find_symbol_by_name(&elf, "entry")?;
                 let empty = HashMap::new();
-                let proof = rewrite_x86(&elf, &entry, &[entry.clone()], &empty, &empty, &[],
-                    &HashMap::new(), &[], true, true, false, false, None, false, None, None, None, false, false, false)?;
+                let proof = rewrite_x86(&elf, &entry, &[entry.clone()], &empty, &empty,
+                    &HashMap::new(), &[], true, true, None, false, None, None, None, false, false, false)?;
                 assert!(proof.proof_relocs.is_empty(), "{name}, form={form}");
                 assert_eq!(proof.proof_symbols.len(), 2, "same length shares one routine");
                 assert!(proof.proof_symbols[1].name.starts_with("__native_link_local_"));
@@ -4556,8 +4348,8 @@ mod tests {
                 let entry = find_symbol_by_name(&elf, "entry")?;
                 let included = discover_reachable(&elf, &entry)?;
                 assert_eq!(included.len(), 2);
-                let result = rewrite_x86(&elf, &entry, &included, &empty, &empty, &[],
-                    &HashMap::new(), &[], false, true, false, false, None, false, None, None, None, false, false, false)?;
+                let result = rewrite_x86(&elf, &entry, &included, &empty, &empty,
+                    &HashMap::new(), &[], false, true, None, false, None, None, None, false, false, false)?;
                 assert!(result.relocs.is_empty());
                 #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
                 {
@@ -4610,19 +4402,16 @@ mod tests {
             let elf = object::File::parse(encoded.as_slice())?;
             let entry = find_symbol_by_name(&elf, "entry")?;
             let helpers = HashMap::from([("bpf_map_lookup_elem".to_owned(), 0x1234)]);
-            let site = generic_lookup_site(0x5678, None).expect("site");
             let array = RuntimeArrayLayout { map_type: 12, max_entries: 24, elem_size: 32,
                 index_mask: 36, value: 64, array_type: 2 };
-            for (enabled, layout, shared) in [(false, None, false), (true, None, false),
-                (true, Some(&array), false), (true, Some(&array), true)] {
+            for (layout, shared) in [(None, false), (Some(&array), false), (Some(&array), true)] {
                 let result = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers,
-                    &HashMap::new(), &[site.clone()], &HashMap::new(), &[],
-                    false, false, enabled, false, layout, shared, None, None, None, false, false, false)?;
-                let expected = if enabled { 0x1234 } else { 0x5678 };
+                    &HashMap::new(), &HashMap::new(), &[],
+                    false, false, layout, shared, None, None, None, false, false, false)?;
                 assert!(result.relocs.iter().any(|r| r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32
-                    && r.target == expected), "form={form}, enabled={enabled}: actual helper target");
+                    && r.target == 0x1234), "form={form}: actual helper target");
                 assert!(!result.relocs.iter().any(|r| r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32
-                    && r.target == if enabled { 0x5678 } else { 0x1234 }));
+                    && r.target == 0x5678));
                 #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
                 if layout.is_some() {
                     let mut map = [0u8; 128];
@@ -4642,32 +4431,16 @@ mod tests {
     }
 
     #[test]
-    fn runtime_map_lookup_ignores_positional_type_and_keeps_default() -> Result<()> {
-        let sites = vec![LookupSiteSpec {
-            kind: LookupKind::PerCpuArray, target_addr: 0, key_offset: 0,
-            max_entries: 8, elem_size: 8, index_mask: 7, value_offset: 0,
-            percpu_base_addr: 0x8000, map_name: Some("outer".to_owned()),
-        }];
+    fn dynamic_map_lookup_requires_the_actual_helper() -> Result<()> {
         for name in [None, Some("outer")] {
-            let mut used = [false];
-            let (_, index, spec) = select_lookup_site(
-                &sites, &HashMap::new(), &mut used, 0, name, "entry", 0x1234, true, false,
-            )?;
-            assert!(matches!(spec.kind, LookupKind::Call));
+            let (_, spec) = select_lookup_site(&HashMap::new(), 0, name, "entry", 0x1234)?;
+            assert_eq!(spec.kind, LookupKind::Call);
             assert_eq!(spec.target_addr, 0x1234);
             assert_eq!(spec.key_offset, 0);
-            assert_eq!(index, None);
-            assert!(!used[0], "runtime dispatch cannot consume positional metadata");
-            let (_, index, spec) = select_lookup_site(
-                &sites, &HashMap::new(), &mut used, 0, name, "entry", 0x1234, false, false,
-            )?;
-            assert!(matches!(spec.kind, LookupKind::PerCpuArray));
-            assert_eq!(index, Some(0));
-            assert!(used[0]);
+            assert_eq!(spec.map_name.as_deref(), name);
+            assert!(select_lookup_site(&HashMap::new(), 0, name, "entry", 0).is_err(),
+                "a missing helper must not produce a guessed map type");
         }
-        assert!(select_lookup_site(&sites, &HashMap::new(), &mut [false],
-                                  0, None, "entry", 0, true, false).is_err(),
-                "missing runtime helper must not use a guessed map type");
         Ok(())
     }
 
@@ -4678,35 +4451,24 @@ mod tests {
             max_entries: 8, elem_size: 8, index_mask: 7, value_offset: 32,
             percpu_base_addr: 0, map_name: Some("known_map".into()),
         };
-        let sites = [array.clone()];
-        let mut maps = HashMap::from([("known_map".into(), array)]);
+        let mut maps = HashMap::from([("known_map".into(), array.clone())]);
         for kind in [LookupKind::Array, LookupKind::PerCpuArray, LookupKind::Hash,
                      LookupKind::LruHash, LookupKind::PerCpuHash,
                      LookupKind::Call, LookupKind::HashOfMaps] {
             maps.get_mut("known_map").unwrap().kind = kind;
             maps.get_mut("known_map").unwrap().target_addr = 0x5678;
             for name in [None, Some("unknown"), Some("known_map")] {
-                for enabled in [false, true] {
-                    let mut used = [false];
-                    let (_, index, spec) = select_lookup_site(&sites, &maps, &mut used,
-                        0, name, "entry", 0x1234, true, enabled)?;
-                    let specialized = enabled && name == Some("known_map") && kind != LookupKind::Call;
-                    if specialized {
-                        assert_eq!(spec.kind, kind);
-                        assert_eq!(spec.target_addr, 0x5678);
-                    } else {
-                        assert_eq!(spec.kind, LookupKind::Call);
-                        assert_eq!(spec.target_addr, 0x1234);
-                    }
-                    assert!(index.is_none() && !used[0], "never consume positional sites");
-                }
+                let (_, spec) = select_lookup_site(&maps, 0, name, "entry", 0x1234)?;
+                let specialized = name == Some("known_map") && kind != LookupKind::Call;
+                assert_eq!(spec.kind, if specialized { kind } else { LookupKind::Call });
+                assert_eq!(spec.target_addr, if specialized { 0x5678 } else { 0x1234 });
             }
         }
         maps.clear();
-        maps.insert("0123456789abcde_A".into(), sites[0].clone());
-        let (_, _, spec) = select_lookup_site(&sites, &maps, &mut [false], 0,
-            Some("0123456789abcde_B"), "entry", 0x1234, true, true)?;
-        assert!(matches!(spec.kind, LookupKind::Call), "truncation is not map identity");
+        maps.insert("0123456789abcde_A".into(), array);
+        let (_, spec) = select_lookup_site(&maps, 0,
+            Some("0123456789abcde_B"), "entry", 0x1234)?;
+        assert_eq!(spec.kind, LookupKind::Call, "truncation is not map identity");
         Ok(())
     }
 
@@ -4786,13 +4548,8 @@ mod tests {
             elem_size: 8, index_mask: 3, value_offset: 32, percpu_base_addr: 0,
             map_name: Some("known_map".into()),
         })]);
-        for enabled in [false, true] {
-            let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps,
-                &[], &facts, &[], false, false, true, enabled, None, false, None, None, None, false, false, false)?;
-            if !enabled {
-                assert!(output.relocs.iter().any(|r| r.target == 0x1234));
-                continue;
-            }
+        {
+            let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps, &facts, &[], false, false, None, false, None, None, None, false, false, false)?;
             assert!(output.relocs.is_empty(), "known array must avoid generic helper");
             assert_eq!(output.map_patches.len(), 1);
             let mut code = output.blob;
@@ -4895,8 +4652,7 @@ mod tests {
                 (X86_TAIL_CALL_OFFSET_KEY.to_owned(), 12),
             ]);
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers,
-                &HashMap::new(), &[], &HashMap::new(), &[], false, false,
-                false, false, None, false, None, None, None, false, false, false)?;
+                &HashMap::new(), &HashMap::new(), &[], false, false, None, false, None, None, None, false, false, false)?;
             assert_eq!(output.relocs.len(), 1, "immediate={immediate}");
             let relocation = output.relocs[0];
             assert_eq!(relocation.kind, NATIVE_LAB_RELOC_X86_TAIL_COUNT);
@@ -4961,7 +4717,7 @@ mod tests {
         let entry = find_symbol_by_name(&elf, "entry")?;
         for preserve in [false, true] {
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(),
-                &HashMap::new(), &[], &HashMap::new(), &[], true, preserve, false, false, None, false, None, None, None, false, false, false)?;
+                &HashMap::new(), &HashMap::new(), &[], true, preserve, None, false, None, None, None, false, false, false)?;
             let mut expected = if preserve { vec![0x53, 0x31, 0xc0, 0x5b] } else { vec![0x31, 0xc0] };
             expected.extend_from_slice(&[0xe9, 0, 0, 0, 0]); // Canonical entry exit in proof mode.
             assert_eq!(output.blob, expected);

@@ -9,7 +9,6 @@ import subprocess
 import tempfile
 
 
-FLAGS = ["--runtime-map-lookups", "--runtime-known-map-lookups"]
 
 
 def main():
@@ -18,7 +17,6 @@ def main():
     parser.add_argument("--evidence", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--scratch", type=Path, required=True)
-    parser.add_argument("--replay", type=Path, required=True)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     args.scratch.mkdir(parents=True, exist_ok=True)
@@ -47,10 +45,10 @@ def main():
                           ("--output-map-patches", "maps"), ("--output-abi", "abi")]
             for flag, suffix in files:
                 argv += [flag, str(scratch / (label + "." + suffix))]
-            reference = subprocess.run([str(binary), *FLAGS, *argv],
+            reference = subprocess.run([str(binary), *argv],
                                        capture_output=True, pass_fds=(fd,))
             (attempt / (label + ".reference-command.json")).write_text(json.dumps(dict(
-                command=[str(binary), *FLAGS, *argv], returncode=reference.returncode,
+                command=[str(binary), *argv], returncode=reference.returncode,
                 stdout=reference.stdout.decode(), stderr=reference.stderr.decode()), indent=2) + "\n")
             assert reference.returncode == (1 if name == "entry_that_does_not_exist" else 0), label
             reference_files = {}
@@ -87,16 +85,8 @@ def main():
             rows.append(dict(case=label, returncode=actual.returncode, capture=str(directory),
                              identical_exit_stdout_stderr=True, inherited_fd_preserved=True,
                              identical_emitted_files=actual.returncode == 0))
-    incomplete = attempt / "incomplete-input"
-    (incomplete / "link-incomplete").mkdir(parents=True)
-    replay_output = attempt / "incomplete-replay"
-    subprocess.run(["python3", str(args.replay), str(incomplete), "--linker", str(binary),
-                    "--output", str(replay_output)], check=True)
-    incomplete_report = json.loads((replay_output / "report.json").read_text())
-    assert len(incomplete_report["cases"]) == 1
-    assert incomplete_report["cases"][0]["completed_capture"] is False
     (attempt / "report.json").write_text(json.dumps(dict(
-        cases=rows, incomplete_capture_reported=True,
+        cases=rows,
         scope="Actual CLI transport/capture regressions, synthetic host plan only; no kernel execution."), indent=2) + "\n")
 
 

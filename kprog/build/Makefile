@@ -136,26 +136,6 @@ known-map-link-check:
 known-map-link-build:
 	taskset -c 8-15 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(KNOWN_MAP_TARGET) cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
 
-KNOWN_MAP_RAW ?= /workspaces/kprog-raw/perf/20261114-known-map-linker
-
-.PHONY: known-map-link-payload
-KNOWN_MAP_PAYLOAD ?= $(ROOT)/corpus/results/perf-known-map-linker-20261114
-known-map-link-payload:
-	install -d $(KNOWN_MAP_PAYLOAD)
-	install -m755 $(KNOWN_MAP_TARGET)/release/native-link $(KNOWN_MAP_PAYLOAD)/native-link.real
-	install -m755 $(HERE)/native-link-known-maps.sh $(KNOWN_MAP_PAYLOAD)/native-link-known-on
-	install -m755 $(HERE)/native-link-known-maps.sh $(KNOWN_MAP_PAYLOAD)/native-link-known-off
-	$(KNOWN_MAP_PAYLOAD)/native-link-known-on --help > $(KNOWN_MAP_RAW)/on-help.txt
-	$(KNOWN_MAP_PAYLOAD)/native-link-known-off --help > $(KNOWN_MAP_RAW)/off-help.txt
-
-.PHONY: known-map-otel-timing
-KNOWN_MAP_TIMING_RAW ?= /workspaces/kprog-raw/perf/20261114-known-map-otel-timing
-KNOWN_MAP_TIMING_CAPTURE ?= $(ROOT)/corpus/results/perf-known-map-otel-timing-20261114
-KNOWN_MAP_TIMING_STATE ?= /var/tmp/kprog-tmp/perf/known-map-otel-timing
-known-map-otel-timing:
-	flock /workspaces/.agent-state/kprog-lanes/locks/timing flock -s /workspaces/.agent-state/kprog-lanes/locks/image env PATH=$(ROOT)/kprog/perf/may29-image/eqcodex-bin:$$PATH EQCODEX_OUT=$(KNOWN_MAP_TIMING_CAPTURE) EQCODEX_NATIVE_LINK_BINARY=$(KNOWN_MAP_PAYLOAD)/native-link-known-on \
-		make -f $(ROOT)/kprog/perf/one-image/Makefile rotate ORDER=otelcol-ebpf-profiler/profiling STATS=1 SAMPLES=3 WORKLOAD_DURATION=180 CPUS=0-7 VM_CPUS=8 VM_MEM=64G NATIVE_MANIFEST=$(ROOT)/corpus/results/perf-otel-upstream-20261114/manifest-context.json STATE=$(KNOWN_MAP_TIMING_STATE) LOGS=$(KNOWN_MAP_TIMING_RAW)/timing
-
 .PHONY: link-audit-payload link-audit-check link-audit-otel
 LINK_AUDIT_PAYLOAD ?= $(ROOT)/corpus/results/perf-link-audit-20261114
 LINK_AUDIT_SOURCE ?= $(ROOT)/corpus/results/perf-known-hash-linker-20261114/native-link.real
@@ -168,14 +148,7 @@ link-audit-payload:
 	install -m755 $(HERE)/native-link-audit.py $(LINK_AUDIT_PAYLOAD)/native-link-on
 
 link-audit-check:
-	taskset -c 8-15 prlimit --as=8589934592 -- python3 $(HERE)/test-link-audit.py --payload $(LINK_AUDIT_PAYLOAD) --evidence /workspaces/kprog-raw/perf/20261114-known-hash-linker/evidence/default/otel --output $(LINK_AUDIT_HOST) --scratch /var/tmp/kprog-tmp/perf/link-audit-host --replay $(HERE)/link-audit-replay.py
-
-.PHONY: link-audit-replay
-LINK_AUDIT_REPLAY ?= $(LINK_AUDIT_HOST)/replay
-LINK_AUDIT_REPLAY_LINKER ?= $(LINK_AUDIT_PAYLOAD)/native-link.real
-LINK_AUDIT_REPLAY_ARGS ?=
-link-audit-replay:
-	taskset -c 8-15 prlimit --as=8589934592 -- python3 $(HERE)/link-audit-replay.py $(LINK_AUDIT_PAYLOAD)/audit --linker $(LINK_AUDIT_REPLAY_LINKER) --output $(LINK_AUDIT_REPLAY) $(LINK_AUDIT_REPLAY_ARGS)
+	taskset -c 8-15 prlimit --as=8589934592 -- python3 $(HERE)/test-link-audit.py --payload $(LINK_AUDIT_PAYLOAD) --evidence /workspaces/kprog-raw/perf/20261114-known-hash-linker/evidence/default/otel --output $(LINK_AUDIT_HOST) --scratch /var/tmp/kprog-tmp/perf/link-audit-host
 
 link-audit-otel:
 	env PATH=$(ROOT)/kprog/perf/may29-image/eqcodex-bin:$$PATH EQCODEX_OUT=$(LINK_AUDIT_CAPTURE) EQCODEX_NATIVE_LINK_BINARY=$(LINK_AUDIT_PAYLOAD)/native-link-on \

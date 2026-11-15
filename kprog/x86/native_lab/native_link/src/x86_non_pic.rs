@@ -115,8 +115,7 @@ mod tests {
     fn link(data: &[u8], proof: bool, maps: &HashMap<String, u64>) -> Result<RewriteResult> {
         let elf = object::File::parse(data)?;
         let entry = find_symbol_by_name(&elf, "entry")?;
-        rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(), maps,
-            &[], &HashMap::new(), &[], proof, false, false, false, None,
+        rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(), maps, &HashMap::new(), &[], proof, false, None,
             false, None, None, None, false, false, false)
     }
 
