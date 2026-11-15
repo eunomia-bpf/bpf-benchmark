@@ -17,8 +17,8 @@ fn relative_table_bases(
         let bytes = read_symbol_bytes(elf, sym)?;
         let instructions: Vec<_> = Decoder::with_ip(64, &bytes, sym.address,
             DecoderOptions::NONE).into_iter().collect();
-        for window in instructions.windows(4) {
-            let [lea, load, add, jump] = window else { unreachable!() };
+        for (start, window) in instructions.windows(3).enumerate() {
+            let [lea, load, add] = window else { unreachable!() };
             if lea.mnemonic() != Mnemonic::Lea || !lea.is_ip_rel_memory_operand() ||
                 lea.op0_kind() != OpKind::Register ||
                 x86_gpr64_family(lea.op0_register()) != Some(lea.op0_register()) ||
@@ -29,9 +29,25 @@ fn relative_table_bases(
                 load.op0_register() == lea.op0_register() ||
                 add.mnemonic() != Mnemonic::Add || add.op0_kind() != OpKind::Register ||
                 add.op1_kind() != OpKind::Register || add.op0_register() != load.op0_register() ||
-                add.op1_register() != lea.op0_register() || jump.flow_control() != FlowControl::IndirectBranch ||
-                jump.op0_kind() != OpKind::Register || jump.op0_register() != load.op0_register()
+                add.op1_register() != lea.op0_register()
             { continue; }
+            // Scheduling may overwrite the index after the target address
+            // has been formed. Follow that address, not the current index.
+            let mut factory = InstructionInfoFactory::new();
+            let mut dispatch = None;
+            for next in &instructions[start + 3..] {
+                if next.flow_control() == FlowControl::IndirectBranch {
+                    if next.op0_kind() == OpKind::Register &&
+                        next.op0_register() == load.op0_register() { dispatch = Some(next); }
+                    break;
+                }
+                if next.flow_control() != FlowControl::Next { break; }
+                if factory.info(next).used_registers().iter().any(|used|
+                    x86_gpr64_family(used.register()) == Some(load.op0_register()) &&
+                    matches!(used.access(), OpAccess::Write | OpAccess::CondWrite |
+                        OpAccess::ReadWrite | OpAccess::ReadCondWrite)) { break; }
+            }
+            let Some(jump) = dispatch else { continue; };
             for (at, relocation) in section.relocations().filter(|(at, _)|
                 *at >= lea.ip() && *at < lea.next_ip())
             {
@@ -230,6 +246,88 @@ pub(super) fn data_relocations(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn scheduled_code_identity_survives_index_overwrite_before_jump() -> Result<()> {
+        let build = std::path::Path::new("/var/tmp/kprog-tmp/perf/scheduled-table");
+        fs::create_dir_all(build)?;
+        let layout: KernelLayout = serde_json::from_slice(&fs::read(
+            "/var/tmp/kprog-tmp/perf/kernel-layout/kernel-layout.json")?)?;
+        let mut rows = Vec::new();
+        for (name, selection) in [("clobber", "-DSCHEDULE_WRITE_TARGET"),
+            ("flags", "-DSCHEDULE_READ_FLAGS"), ("scheduled", "-DSCHEDULE_NORMAL")] {
+            let native = build.join("scheduled.native.o");
+            let command = ["clang-18", "-target", "x86_64-linux-gnu", "-c", selection,
+                "/workspaces/repository/kprog/test/native_scheduled_code_table.S",
+                "-o", native.to_str().ok_or_else(|| anyhow!("scheduled fixture path is not UTF-8"))?];
+            let compiled = std::process::Command::new(command[0]).args(&command[1..]).output()?;
+            if !compiled.status.success() { bail!("scheduled fixture failed: {}", String::from_utf8_lossy(&compiled.stderr)); }
+            let bytes = fs::read(&native)?;
+            let elf = object::File::parse(bytes.as_slice())?;
+            let entry = find_symbol_by_name(&elf, "scheduled_table")?;
+            let targets = control_targets(&elf, &entry)?;
+            if name == "clobber" {
+                assert!(targets.is_empty(), "overwritten destination retained a table identity");
+                rows.push(serde_json::json!({"variant":name,"table_identity":false}));
+                continue;
+            }
+            assert_eq!(targets.len(), 1);
+            assert_eq!(targets.values().next().unwrap().len(), 4);
+            let proof = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(), &HashMap::new(),
+                &HashMap::new(), &[], true, true, None, None, None, None, false)?;
+            assert_eq!(proof.proof_data_relocs.len(), 4);
+            let path = build.join(format!("{name}.proof.o"));
+            write_proof_object(&path, object::Architecture::X86_64, "scheduled_table", &proof.blob,
+                &proof.proof_symbols, &proof.proof_relocs, &proof.proof_data_relocs, proof.callee_saved_mask)?;
+            let bytes = fs::read(path)?;
+            let elf = object::File::parse(bytes.as_slice())?;
+            let entry = find_symbol_by_name(&elf, "scheduled_table")?;
+            let linked = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(), &HashMap::new(),
+                &HashMap::new(), &[], false, true, Some(&layout.array), Some(&layout.probe_read),
+                Some(&layout.hash), Some(&layout.lpm), false)?;
+            let mut code = linked.blob; code.push(0xc3);
+            if name == "scheduled" {
+                for index in 0..64u64 {
+                    let mut context = [index];
+                    let actual = memory::call_blob(&code, context.as_mut_ptr().cast(), 0, 0) as usize as u32;
+                    let selected = index & 7;
+                    assert_eq!(actual, if selected < 4 { (selected as u32 + 1)*10 + 10 } else { 0 });
+                }
+            }
+            rows.push(serde_json::json!({"variant":name,"table_identity":true,
+                "proof_slots":4,"native_host_cases":if name=="scheduled" {64} else {0}}));
+        }
+        fs::write(build.join("rust-result.json"), serde_json::to_vec_pretty(&rows)?)?;
+        Ok(())
+    }
+
+    #[test]
+    fn current_otel_scheduled_tables_restore_helper_cfg_predecessors() -> Result<()> {
+        let release = fs::read_to_string("/workspaces/.agent-state/kprog-ck/build-x86/include/config/kernel.release")?;
+        let path = format!("/workspaces/repository/vendor/build/native-bpf/x86/{}/native/otel/otelcol-ebpf-profiler.native.o", release.trim());
+        let bytes = fs::read(&path)?;
+        let elf = object::File::parse(bytes.as_slice())?;
+        let entry = find_symbol_by_name(&elf, "kprobe_unwind_hotspot")?;
+        let targets = control_targets(&elf, &entry)?;
+        assert_eq!(targets.len(), 4);
+        let included = discover_reachable(&elf, &entry)?;
+        let got = scan_x86_got_relocations(&elf, &included)?;
+        let calls = helper_provenance::calls(&elf, &entry, &got, &HashMap::new())?;
+        assert_eq!(calls.get(&0x211).map(String::as_str), Some("bpf_probe_read_user"));
+        let proof = rewrite_x86(&elf, &entry, &included, &HashMap::new(), &HashMap::new(),
+            &HashMap::new(), &[], true, true, None, None, None, None, false)?;
+        let build = std::path::Path::new("/var/tmp/kprog-tmp/perf/scheduled-table");
+        fs::create_dir_all(build)?;
+        write_proof_object(&build.join("otel.proof.o"), object::Architecture::X86_64,
+            "kprobe_unwind_hotspot", &proof.blob, &proof.proof_symbols, &proof.proof_relocs,
+            &proof.proof_data_relocs, proof.callee_saved_mask)?;
+        fs::write(build.join("otel-cfg.json"), serde_json::to_vec_pretty(&serde_json::json!({
+            "object":path,"symbol":entry.name,"table_targets":targets,"helper_calls":calls,
+            "proof_blob_bytes":proof.blob.len(),"proof_data_relocations":proof.proof_data_relocs.len(),
+            "scope":"Current object helper CFG and production proof; no B verification or application execution"
+        }))?)?;
+        Ok(())
+    }
 
     #[test]
     fn separate_roots_copy_only_their_anonymous_code_table_slots() -> Result<()> {

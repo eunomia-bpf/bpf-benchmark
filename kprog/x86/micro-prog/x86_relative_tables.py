@@ -162,12 +162,12 @@ def lower_relative_tables(insns, rodata, decode, exit_addr, function_starts):
     by_addr = {i.addr: i for i in insns}
     following = {a.addr: b.addr for a, b in zip(insns, insns[1:])}
     candidates = []
-    for window in zip(insns, insns[1:], insns[2:], insns[3:]):
-        lea, load, add, jump = window
+    for position, window in enumerate(zip(insns, insns[1:], insns[2:])):
+        lea, load, add = window
         if (lea.mnemonic != 'lea' or lea.reloc_symbol not in rodata or
                 not getattr(rodata[lea.reloc_symbol], 'code_relocations', ()) or
                 lea.reloc_type != 'R_X86_64_PC32' or '[rip' not in lea.raw.lower() or
-                load.mnemonic != 'movsxd' or add.mnemonic != 'add' or jump.mnemonic != 'jmp'):
+                load.mnemonic != 'movsxd' or add.mnemonic != 'add'):
             continue
         base = decode.reg_info(lea.operands[0])
         destination = decode.reg_info(load.operands[0])
@@ -183,10 +183,21 @@ def lower_relative_tables(insns, rodata, decode, exit_addr, function_starts):
                 displacement != 0 or destination[0] == base[0] or
                 base[0] == 'X86_RSP' or destination[0] == 'X86_RSP' or
                 decode.reg_info(add.operands[0]) != destination or
-                decode.reg_info(add.operands[1]) != base or
-                decode.reg_info(jump.operands[0]) != destination):
+                decode.reg_info(add.operands[1]) != base):
             continue
-        candidates.append(dict(window=window, symbol=lea.reloc_symbol,
+        scheduled = []
+        jump = None
+        for instruction in insns[position+3:]:
+            if instruction.mnemonic == 'jmp':
+                if decode.reg_info(instruction.operands[0]) == destination:
+                    jump = instruction
+                break
+            if instruction.mnemonic in {'call', 'ret'} or instruction.mnemonic.startswith(('j', 'loop')):
+                break
+            scheduled.append(instruction)
+        if jump is None:
+            continue
+        candidates.append(dict(window=(lea, load, add, jump), scheduled=tuple(scheduled), symbol=lea.reloc_symbol,
                                base=lea.symbol_offset, scratch=(base[0], destination[0]),
                                index=index_info))
     entries = set(function_starts)
@@ -223,16 +234,17 @@ def lower_relative_tables(insns, rodata, decode, exit_addr, function_starts):
 
     full = (1 << 64) - 1
 
-    def fused(candidate):
-        lea, _, _, jump = candidate['window']
+    def captured(candidate):
+        lea, load, add, _ = candidate['window']
         index = candidate['index']
-        return replace(lea, mnemonic='jmp', operands=(index,),
+        return replace(lea, mnemonic='mov', operands=(load.operands[0], index),
             reloc_symbol=None, reloc_type=None, reloc_target=None, symbol_offset=0,
-            end_addr=jump.end_addr, table_dispatch=candidate['choices'],
-            effects=NativeEffects(((decode.reg_info(index)[0], full),), (), 0, 0))
+            end_addr=add.end_addr, code_table=candidate['choices'],
+            effects=NativeEffects(((decode.reg_info(index)[0], full),),
+                ((candidate['scratch'][1], full),), 0, 0))
 
-    provisional = {c['window'][0].addr: fused(c) for c in candidates}
-    interiors = {i.addr for c in candidates for i in c['window'][1:]}
+    provisional = {c['window'][0].addr: captured(c) for c in candidates}
+    interiors = {i.addr for c in candidates for i in c['window'][1:3]}
     provisional_insns = [provisional.get(i.addr, i) for i in insns if i.addr not in interiors]
     call_targets = decode.indirect_targets(provisional_insns, exit_addr, function_starts)
 
@@ -246,10 +258,19 @@ def lower_relative_tables(insns, rodata, decode, exit_addr, function_starts):
     replacements, removed = {}, set()
     for candidate in candidates:
         lea, load, add, jump = candidate['window']
-        if entries.intersection((load.addr, add.addr, jump.addr)):
+        if entries.intersection((load.addr, add.addr, jump.addr, *(i.addr for i in candidate['scheduled']))):
             raise ValueError('relative table computation has an external CFG entry')
+        if add.effects is None:
+            raise ValueError('relative table lowering requires native instruction effects')
+        for instruction in candidate['scheduled']:
+            if instruction.effects is None:
+                raise ValueError('relative table schedule lacks native instruction effects')
+            effects = instruction.effects
+            touched = dict(effects.reads + effects.writes)
+            if any(touched.get(reg, 0) for reg in candidate['scratch']) or effects.flags_read & add.effects.flags_written:
+                raise ValueError('relative table schedule observes or overwrites private results')
         if not dead(candidate):
             raise ValueError('relative table computation has live register or flag results')
-        replacements[lea.addr] = fused(candidate)
-        removed.update((load.addr, add.addr, jump.addr))
+        replacements[lea.addr] = captured(candidate)
+        removed.update((load.addr, add.addr))
     return [replacements.get(insn.addr, insn) for insn in insns if insn.addr not in removed]

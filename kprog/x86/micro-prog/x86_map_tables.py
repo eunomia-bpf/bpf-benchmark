@@ -12,8 +12,8 @@ def lower_map_tables(insns, rodata, decode, exit_addr, function_starts, source_p
     following = {a.addr: b.addr for a, b in zip(insns, insns[1:])}
     entries = set(function_starts)
     targets = decode.indirect_targets(insns, exit_addr, function_starts)
-    table_targets = {i.addr: tuple(target for _, target in i.table_dispatch)
-                     for i in insns if i.table_dispatch is not None}
+    table_targets = {i.addr: tuple(target for kind, target in targets.get(i.addr, ()) if kind == 'code')
+                     for i in insns if i.mnemonic == 'jmp' and decode.is_indirect_branch(i)}
     for insn in insns:
         address = decode.code_address(insn)
         if address in by_addr:

@@ -105,7 +105,7 @@ class NativeInsn:
     source_pointer: tuple[bool, str] | None = None
     kernel_function: dict | None = None
     effects: NativeEffects | None = None
-    table_dispatch: tuple[tuple[int, int], ...] | None = None
+    code_table: tuple[tuple[int, int], ...] | None = None
     map_table: tuple[tuple[int, tuple[bool, str] | int], ...] | None = None
 
 
@@ -1273,7 +1273,9 @@ def indirect_targets(insns: list[NativeInsn], exit_addr: int | None = None,
                 outgoing[indices[reg]] = None
         if dst and op in {"mov", "movabs"} and dst[1] in {32, 64}:
             value = None
-            if insn.map_table is not None:
+            if insn.code_table is not None:
+                value = frozenset(('code', target) for _, target in insn.code_table)
+            elif insn.map_table is not None:
                 pass  # A selected capability is not a scalar/code address.
             elif is_int(args[1]):
                 value = frozenset({("scalar", parse_int(args[1]) & ((1 << dst[1]) - 1))})
@@ -1292,8 +1294,7 @@ def indirect_targets(insns: list[NativeInsn], exit_addr: int | None = None,
         outgoing = tuple(outgoing)
         indirect = is_indirect_branch(insn)
         if indirect:
-            values = (frozenset(('code', target) for _, target in insn.table_dispatch)
-                      if insn.table_dispatch is not None else read(incoming, args[0]))
+            values = read(incoming, args[0])
             if values is not None:
                 for kind, target in values:
                     if kind == "code":
@@ -1334,8 +1335,7 @@ def indirect_targets(insns: list[NativeInsn], exit_addr: int | None = None,
             continue
         if insn.addr not in states:
             continue
-        values = (frozenset(('code', target) for _, target in insn.table_dispatch)
-                  if insn.table_dispatch is not None else read(states[insn.addr], insn.operands[0]))
+        values = read(states[insn.addr], insn.operands[0])
         if values is None:
             raise ValueError(f"unresolved finite indirect target at 0x{insn.addr:x}: {insn.raw}")
         for kind, target in values:
@@ -1496,12 +1496,12 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
             lines.append(f'{indent}case {offset}ULL: {step.rstrip(";")}; break;')
         lines.extend([f'{indent}default: X86_SIM_L_ARCHITECTURAL_FAULT();', f'{indent}}}'])
         return
-    if insn.table_dispatch is not None:
-        index = reg_info(insn.operands[0])[0]
-        lines.extend([f'{indent}/* Image-bound relative code table; dead private address computation. */',
+    if insn.code_table is not None:
+        destination, index = [reg_info(operand)[0] for operand in insn.operands]
+        lines.extend([f'{indent}/* Capture image-bound code identity before scheduled instructions. */',
                       f'{indent}switch (X86_SIM_L_READ_REG({index}) << 2) {{'])
-        for offset, target in insn.table_dispatch:
-            lines.append(f'{indent}case {offset}ULL: goto x86_l_{target:x};')
+        for offset, target in insn.code_table:
+            lines.append(f'{indent}case {offset}ULL: X86_SIM_X86_CODE_ADDRESS({destination}, 0x{target:x}ULL); break;')
         lines.extend([f'{indent}default: __x86_sim_unresolved_indirect_target();', f'{indent}}}'])
         return
     if is_indirect_branch(insn):

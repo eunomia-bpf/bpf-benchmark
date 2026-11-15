@@ -206,3 +206,14 @@ and full CompCert pointer-binding parsing pass. Wider CPU suite still fails
 its unsupported movups case; raw failures retained. This reduces compiler
 input, not native execution time; 1K pointer CPP remains 61.7MB and 10K/100K
 stay stopped. No base/image/kernel change; all native LTO pieces stay combined.
+
+2026-11-15T07:36:53Z PERF: scheduled code tables (this commit; report
+`results/perf_20261113/scheduled-table/report.md`). The normal linker tracks
+the formed target through the schedule; B captures existing CODE identity
+before index clobbers and retains the scheduled effects and final JMP,
+replacing early goto fusion. Private result/flag liveness and external entry
+conditions remain. 41 Rust, 64 native +64 normal-B/shared-simulator vectors,
+shared-table64 and map-capability20/3 regressions pass. Actual OTel hotspot
+full proof39127B/28 nested relocs and shared C6945 instructions now generate;
+full B/stock/app remain open. This enables unified jump-table codegen without
+changing upstream source. No execution speedup measured; all LTO stays on.

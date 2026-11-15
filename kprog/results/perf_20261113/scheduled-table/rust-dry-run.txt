@@ -1,0 +1,4 @@
+install -d /var/tmp/kprog-tmp/perf/kernel-layout
+taskset -c 8-11 prlimit --as=8589934592 -- clang++-18 -std=c++20 -O2 -Wall -Wextra -Werror -I/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix/include /workspaces/repository/kprog/test/kernel_lto_layout.cpp /workspaces/repository/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o /var/tmp/kprog-tmp/perf/kernel-layout/facts
+taskset -c 8-11 prlimit --as=8589934592 -- /var/tmp/kprog-tmp/perf/kernel-layout/facts /workspaces/.agent-state/kprog-ck/build-x86/vmlinux /workspaces/kprog-raw/perf/20261115-normal-layout-plan/boot-ready/kernel.kallsyms > /var/tmp/kprog-tmp/perf/kernel-layout/kernel-layout.json
+taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/workspaces/repository/kprog/x86/native_lab/native_link/target cargo test --release --manifest-path /workspaces/repository/kprog/x86/native_lab/native_link/Cargo.toml
