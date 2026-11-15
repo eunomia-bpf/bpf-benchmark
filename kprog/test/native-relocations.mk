@@ -4,12 +4,14 @@ SHELL := /bin/bash
 MAKEFLAGS += --no-builtin-rules
 ROOT := /workspaces/repository
 LINKER_TARGET := $(ROOT)/kprog/x86/native_lab/native_link/target
+LINKER_BINARY ?= $(LINKER_TARGET)/release/native-link
 OUTPUT ?= /workspaces/kprog-raw/perf/20261115-native-relocations
 BUILD := /var/tmp/kprog-tmp/perf/native-relocations
 CONTEXT_TOOL := /var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds
 KERNEL_LAYOUT_BUILD := /var/tmp/kprog-tmp/perf/kernel-layout
 KERNEL_LAYOUT := $(KERNEL_LAYOUT_BUILD)/kernel-layout.json
 KDIR := /workspaces/.agent-state/kprog-ck/build-x86
+BOOT_CAPTURE ?= /workspaces/kprog-raw/perf/20261115-normal-layout-plan/boot-fixed
 LIBBPF_PREFIX := $(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix
 LIBBPF_LIBRARY := $(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a
 
@@ -17,14 +19,17 @@ $(KERNEL_LAYOUT_BUILD)/facts: $(ROOT)/kprog/test/kernel_lto_layout.cpp $(ROOT)/k
 	install -d $(KERNEL_LAYOUT_BUILD)
 	taskset -c 8-11 prlimit --as=8589934592 -- clang++-18 -std=c++20 -O2 -Wall -Wextra -Werror -I$(LIBBPF_PREFIX)/include $< $(LIBBPF_LIBRARY) -lelf -lz -o $@
 
-$(KERNEL_LAYOUT): $(KERNEL_LAYOUT_BUILD)/facts $(KDIR)/vmlinux $(KDIR)/System.map
-	taskset -c 8-11 prlimit --as=8589934592 -- $(KERNEL_LAYOUT_BUILD)/facts $(KDIR)/vmlinux $(KDIR)/System.map > $@
+$(KERNEL_LAYOUT): $(KERNEL_LAYOUT_BUILD)/facts $(KDIR)/vmlinux $(BOOT_CAPTURE)/kernel.kallsyms
+	taskset -c 8-11 prlimit --as=8589934592 -- $(KERNEL_LAYOUT_BUILD)/facts $(KDIR)/vmlinux $(BOOT_CAPTURE)/kernel.kallsyms > $@
+
+$(KERNEL_LAYOUT_BUILD)/runtime-array-layout: $(ROOT)/kprog/build/runtime-array-layout.c
+	$(MAKE) -r -f $(ROOT)/kprog/build/Makefile $@ BUILD=$(KERNEL_LAYOUT_BUILD)
 
 .PHONY: kernel-layout kernel-layout-check loader-syntax
 kernel-layout: $(KERNEL_LAYOUT)
 
-kernel-layout-check: $(KERNEL_LAYOUT)
-	taskset -c 8-11 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_kernel_lto_layout.py --layout $(KERNEL_LAYOUT) --kernel $(KDIR) --reference $(ROOT)/corpus/results/perf-corrected-all-lto-linker-20261114 --output $(OUTPUT)/kernel-layout
+kernel-layout-check: $(KERNEL_LAYOUT) $(KERNEL_LAYOUT_BUILD)/runtime-array-layout
+	taskset -c 8-11 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_kernel_lto_layout.py --layout $(KERNEL_LAYOUT) --kernel $(KDIR) --boot-capture $(BOOT_CAPTURE) --reference-compiler $(KERNEL_LAYOUT_BUILD)/runtime-array-layout --historical-reference $(ROOT)/corpus/results/perf-corrected-all-lto-linker-20261114 --output $(OUTPUT)/kernel-layout
 
 loader-syntax:
 	taskset -c 8-11 prlimit --as=12884901888 -- clang++-18 -std=gnu++20 -fsyntax-only -I$(ROOT)/kprog/libnativeloader/include -I$(ROOT)/micro/programs/build-x86 -I$(LIBBPF_PREFIX)/include -I$(ROOT)/vendor/libbpf/include -I$(ROOT)/vendor/libbpf/include/uapi $(ROOT)/kprog/libnativeloader/src/native_loader.cpp
@@ -35,7 +40,7 @@ restore-boot-metadata:
 
 kernel-layout-boot: $(KERNEL_LAYOUT_BUILD)/facts
 	install -d $(OUTPUT)
-	taskset -c 16-17 prlimit --as=17179869184 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-kernel-layout OUTPUT=$(OUTPUT)'
+	taskset -c 16-17 prlimit --as=17179869184 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --rodir $(KERNEL_LAYOUT_BUILD) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-kernel-layout OUTPUT=$(OUTPUT)'
 
 guest-kernel-layout:
 	uname -r > $(OUTPUT)/kernel.release
@@ -56,7 +61,7 @@ preserve-running-linker:
 
 .PHONY: evidence
 evidence: $(KERNEL_LAYOUT)
-	taskset -c 8-11 prlimit --as=12884901888 -- python3 $(ROOT)/kprog/test/check_non_pic_maps.py --build $(BUILD) --output $(OUTPUT)/maps --linker $(LINKER_TARGET)/release/native-link --kernel-layout $(KERNEL_LAYOUT)
+	taskset -c 8-11 prlimit --as=12884901888 -- python3 $(ROOT)/kprog/test/check_non_pic_maps.py --build $(BUILD) --output $(OUTPUT)/maps --linker $(LINKER_BINARY) --kernel-layout $(KERNEL_LAYOUT)
 
 .PHONY: jump-table-forms
 jump-table-forms:
@@ -66,8 +71,8 @@ jump-table-forms:
 	readelf -rW $(BUILD)/jump-table.native.o > $(OUTPUT)/jump-table.relocations
 
 .PHONY: jump-table-check
-jump-table-check: build jump-table-forms $(KERNEL_LAYOUT)
-	taskset -c 8-11 prlimit --as=12884901888 -- python3 $(ROOT)/kprog/test/check_native_jump_tables.py --build $(BUILD) --output $(OUTPUT)/jump-tables --linker $(LINKER_TARGET)/release/native-link --kernel-layout $(KERNEL_LAYOUT)
+jump-table-check: $(LINKER_BINARY) jump-table-forms $(KERNEL_LAYOUT)
+	taskset -c 8-11 prlimit --as=12884901888 -- python3 $(ROOT)/kprog/test/check_native_jump_tables.py --build $(BUILD) --output $(OUTPUT)/jump-tables --linker $(LINKER_BINARY) --kernel-layout $(KERNEL_LAYOUT)
 
 .PHONY: compiler-cleanup-check
 compiler-cleanup-check:

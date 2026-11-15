@@ -36,10 +36,11 @@ spill-groups-guest:
 tracee-probe-sites:
 	taskset -c 19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/results/perf_20261113/tracee_probe_sites.py --capture /workspaces/kprog-raw/C/limits/tracee --output $(OUTPUT) --perf /var/tmp/kprog-tmp/C/perf-build/perf --baseline-id 25 --native-id 217
 
+HELPER_SHAPE_LINKER ?= $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link
 .PHONY: helper-shapes
 helper-shapes:
 	$(MAKE) -f $(ROOT)/kprog/test/native-relocations.mk kernel-layout
-	taskset -c 19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_helper_call_shapes.py --linker $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link --kernel-layout /var/tmp/kprog-tmp/perf/kernel-layout/kernel-layout.json --build $(HELPER_SHAPE_BUILD) --output $(OUTPUT)
+	taskset -c 19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_helper_call_shapes.py --linker $(HELPER_SHAPE_LINKER) --kernel-layout /var/tmp/kprog-tmp/perf/kernel-layout/kernel-layout.json --build $(HELPER_SHAPE_BUILD) --output $(OUTPUT)
 
 .PHONY: build run analyze codegen whole-word replay values-build values-run backend-check checked-corpus context-build context-run context-replay identity-check
 identity-check:
