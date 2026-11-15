@@ -83,6 +83,7 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-15 ~14:10 UTC: "每个应用 A/A 一次、A/B 一次，以每次调用为主。我说过吗（前半句引用协调者的话）"
 - 2026-11-15 ~14:10 UTC: "现在还差啥? 干嘛改了这么多? 全部看看?"
 - 2026-11-15 ~14:10 UTC: "看看过去5 天时间线"
+- 2026-11-15 ~14:20 UTC: "你的新规则让原生一侧的路线换了两次：先是改源码 → 编译中改写 IR（11-13），再是改写 IR → 兼容头文件（11-15），每换一次原生一侧都要重建。干嘛换两次?????（前半句引用协调者的话） 对照我的原话, 看看我的设计, 讲解现在的设计"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
