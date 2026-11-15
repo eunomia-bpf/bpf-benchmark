@@ -1,0 +1,25 @@
+{
+  "stamp": "2026-11-15T17:56:31Z",
+  "old_linker": "4af1f80508464063bef2169a9ff6e8d2f39d7495f3b70ebca942108525e68679",
+  "published_linker": "64eb98aa10c5e8b117278d77a7abf006bcf83dbc61d8ec3dc12ebcc5574a064d",
+  "compared_fields": [
+    "native_sha256",
+    "proof_bytes",
+    "proof_sha256",
+    "helper_sites",
+    "helper_counts"
+  ],
+  "equal": true,
+  "native_sha256": "c0dc65fc746d7027c94969df1239b2eb603ecef541e9ab333a7186ce636eb13e",
+  "proof_sha256": "876861294109de6de1daad67a8753519fa235bc3a101fc0810a2a3a31f8a2943",
+  "helper_counts": {
+    "bpf_map_lookup_elem": 66,
+    "bpf_get_smp_processor_id": 2,
+    "bpf_ktime_get_ns": 8,
+    "bpf_xdp_adjust_head": 4,
+    "bpf_map_update_elem": 4
+  },
+  "raw": "/workspaces/kprog-raw/perf/20261115-clock-lto/katran-audit-v2/result.json",
+  "commands": "/workspaces/kprog-raw/perf/20261115-clock-lto/katran-audit-v2/command.json",
+  "scope": "Proof output and actual site inventory regression only; no runtime map identity or timing claim."
+}

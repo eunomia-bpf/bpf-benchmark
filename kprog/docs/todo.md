@@ -12,6 +12,8 @@
 
 - [x] P-clock-link（51fcc939f、fbee52b39；本提交收据）：normal x86 clock calls/tail transfers绑定同boot fast函数，地址/ID观察及helper可用性不变；44测试/实际十类helper查询和XDP plan通过，17:42配对base发布。image d4b19c9f于17:47发布，本提交image收据；实际shipped工具和1193stage文件一致。实际Katran map绑定/整应用计时仍开。`perf_20261113/clock-lto/report.md`。
 
+- [ ] P-map-CFG：等实际Katran runtime plan到手后，核对known_maps在每个basic-block入口清空命名map事实是否损失新统一参数下的查找内联；若确实命中，用同名指针的CFG meet保留跨分支/调用后callee-saved事实，混合身份/inner-map/窄写/未知内存仍不得猜类型。源码候选，未归因性能，先完成当前固定频率Katran数。
+
 - [ ] P-SPECIALIZE-app：16/16规模形状已实核执行通过，OTel hotspot正常B完成/帧448B；后续仍需当前完整应用的stock/checked-native安装和两臂等量工作，不能把组件通过当整应用通过。
 
 - [x] P-SPECIALIZE-100K-scalar/debug（cab373d96、e8c0f32cf、c851677e1；本提交结果）：100036 指令 scalar/direct 正常 B448B/实际帧0；同一已完成前端去除1512837个非执行 dbg 更新，machine stage 894.162→34.847CPU s、RSS2567276→244708KiB，所有 allocated sections 一致。其余100K形状与stock检查继续，不据此关闭父项或宣称运行时收益。`perf_20261113/inline-families/scale-100k-debug/`。

@@ -86,3 +86,17 @@ invocations returned0. This validates the replay tool and normal call binding,
 not a timed Katran arm. See runtime-audit.json/runtime-audit-commands.json;
 full logs remain in the raw runtime-audit directory. No image/CLI rebuild was
 needed for this analysis-only tooling.
+
+The revised proof-only audit was also rerun on the shipped Katran c0dc65fc
+object with published linker64eb98aa. Full proof bytes/hash and all84 helper
+sites match the earlier4af1f805 audit exactly (audit-regression.json).
+
+Source optimization lead: x86_known_maps currently clears map facts at every
+basic-block entry. A dominating map pointer hoisted into a callee-saved register
+therefore loses named lookup specialization across a branch even when all
+reachable paths retain it. Existing tests explicitly enforce that conservative
+behavior. Determine its actual Katran frequency from the saved runtime plan
+before attributing the1.060x result to it. A CFG meet over identical map names
+could preserve these facts; mixed identities, unknown inner maps, partial
+writes and call clobbers must remain unknown. This is a candidate, not a landed
+optimization or a measured explanation.
