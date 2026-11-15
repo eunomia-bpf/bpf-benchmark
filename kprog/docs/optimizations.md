@@ -355,3 +355,11 @@ Store-arm selection now initializes its immutable byte with the same conditional
 expression instead of assigning it in an if/else. The condition still executes
 once, with the same two arm constants. This keeps a fixed decoded register's
 arm visible to Clang before SSA; runtime register dispatch remains supported.
+
+Store-constant receipt1af8005a5/6d515de02/69c74d4c6: actual stack-store probe
+branches436→226 and400→192, memory-store436→331 and400→298. CPU512store/
+4032BMI2 and complete scoped oracle suite pass; normal B allocated sections
+match their previous outputs32/32, checked-C packet host25 pass. One bounded
+actual OTel frontend921682 is queued behind preserved910213, same canonical
+build, normal flags and all LTO. Full compilation/runtime gains remain open.
+Exact commands/results: `../results/perf_20261113/store-constants/report.md`.

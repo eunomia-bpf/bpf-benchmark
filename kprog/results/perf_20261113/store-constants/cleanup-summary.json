@@ -1,0 +1,50 @@
+[
+  {
+    "run": "packet",
+    "manifest": "/workspaces/kprog-raw/perf/checked-packet-rebuild/1794738786451298346/xdp/manifest.json",
+    "sha256": "45dcdc30ffa52107bafa64d1d881dd223e2d3691496d9658c3e8f48d38cf8d50",
+    "replaced": 15,
+    "replaced_bytes": 2152263,
+    "preserved": 7
+  },
+  {
+    "run": "packet",
+    "manifest": "/workspaces/kprog-raw/perf/checked-packet-rebuild/1794738786842396515/tc/manifest.json",
+    "sha256": "3c66436612f1fcc448b9f91e55f2b71573b5cc49aeb9f6a274274fc7359fb048",
+    "replaced": 15,
+    "replaced_bytes": 2919327,
+    "preserved": 7
+  },
+  {
+    "run": "packet",
+    "manifest": "/workspaces/kprog-raw/perf/checked-packet-rebuild/1794738787333996736/cgroup_skb/manifest.json",
+    "sha256": "c937d0d16953bad105652a67e090419a8577bd17f86b5c163b7740ee18c1cbf1",
+    "replaced": 15,
+    "replaced_bytes": 2923014,
+    "preserved": 7
+  },
+  {
+    "run": "arm-packet",
+    "manifest": "/workspaces/kprog-raw/perf/checked-packet-rebuild/1794738878686443079/xdp/manifest.json",
+    "sha256": "538d54639991926cc3f10f69f4051987d43c31f8b382496e0929279b3faf4e6e",
+    "replaced": 15,
+    "replaced_bytes": 2117337,
+    "preserved": 7
+  },
+  {
+    "run": "arm-packet",
+    "manifest": "/workspaces/kprog-raw/perf/checked-packet-rebuild/1794738879189990248/tc/manifest.json",
+    "sha256": "9276c5b4f80cd4a955fb1753db5a92ea662e617bc722ea76b0f1b97b9b38e561",
+    "replaced": 15,
+    "replaced_bytes": 2903561,
+    "preserved": 7
+  },
+  {
+    "run": "arm-packet",
+    "manifest": "/workspaces/kprog-raw/perf/checked-packet-rebuild/1794738879796200571/cgroup_skb/manifest.json",
+    "sha256": "ffe36a87d88ea90286ef2504aaad02c5616e4df67ada9588215a1c08e4479ace",
+    "replaced": 15,
+    "replaced_bytes": 2907248,
+    "preserved": 7
+  }
+]

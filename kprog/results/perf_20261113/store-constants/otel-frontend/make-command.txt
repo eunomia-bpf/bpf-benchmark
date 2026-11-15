@@ -1,0 +1,1 @@
+taskset -c 8-19 make -r -f kprog/test/native-relocations.mk current-otel-frontend OUTPUT=/workspaces/kprog-raw/perf/20261115-store-constants/otel-frontend 

@@ -1,0 +1,75 @@
+{
+  "observations": [
+    {
+      "function": "probe_function",
+      "ir_bytes": 5726,
+      "branches": 25,
+      "allocas": 4,
+      "selected_calls": 4
+    },
+    {
+      "function": "probe_const_function",
+      "ir_bytes": 5667,
+      "branches": 25,
+      "allocas": 4,
+      "selected_calls": 4
+    },
+    {
+      "function": "probe_contract",
+      "ir_bytes": 6211,
+      "branches": 28,
+      "allocas": 4,
+      "selected_calls": 4
+    },
+    {
+      "function": "probe_const_contract",
+      "ir_bytes": 688,
+      "branches": 0,
+      "allocas": 2,
+      "selected_calls": 1
+    },
+    {
+      "function": "probe_const_capture",
+      "ir_bytes": 1129,
+      "branches": 0,
+      "allocas": 4,
+      "selected_calls": 1
+    },
+    {
+      "function": "probe_real_write",
+      "ir_bytes": 25195,
+      "branches": 12,
+      "allocas": 58,
+      "selected_calls": 0
+    },
+    {
+      "function": "probe_store_reg_memory",
+      "ir_bytes": 171642,
+      "branches": 436,
+      "allocas": 206,
+      "selected_calls": 0
+    },
+    {
+      "function": "probe_store_reg_stack",
+      "ir_bytes": 173655,
+      "branches": 436,
+      "allocas": 206,
+      "selected_calls": 0
+    },
+    {
+      "function": "probe_store_imm_memory",
+      "ir_bytes": 157781,
+      "branches": 400,
+      "allocas": 182,
+      "selected_calls": 0
+    },
+    {
+      "function": "probe_store_imm_stack",
+      "ir_bytes": 157781,
+      "branches": 400,
+      "allocas": 182,
+      "selected_calls": 0
+    }
+  ],
+  "scope": "Small width-gate diagnostic before LLVM passes; no production change or actual OTel result"
+}

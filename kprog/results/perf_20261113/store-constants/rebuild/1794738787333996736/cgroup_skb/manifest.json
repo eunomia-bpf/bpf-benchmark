@@ -1,0 +1,156 @@
+[
+  {
+    "path": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/artifacts.json",
+    "sha256": "339af2bc7e12e86b5035fa24ab6ab5ae9b28279b6cde23ace9781b1b22365d78",
+    "bytes": 1060,
+    "action": "preserve-data",
+    "done": true
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/checked-simulator.bc",
+    "sha256": "df0ef4ef1e729e8873561a8634fdcd02a58a316009eae7a86c85867a37ccc572",
+    "bytes": 70980,
+    "action": "replace-build",
+    "done": true
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/checked-simulator.context.bc",
+    "sha256": "e39e451c990601439e4ea48d1fb529f3fd1d74da6631548689df7bb410059925",
+    "bytes": 68928,
+    "action": "replace-build",
+    "done": true
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/checked-simulator.i",
+    "sha256": "fc5fb4f7706a4d053b0e10f685f3a52b63bedf67f5059d2a3b4dd96bb80499b5",
+    "bytes": 802363,
+    "action": "replace-build",
+    "done": true
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/checked-simulator.json",
+    "sha256": "1ea51bdfbd62b3bfc333d6cf229e5a1df2b5c6320fcc2f60410092a098e0dd0a",
+    "bytes": 1937,
+    "action": "preserve-data",
+    "done": true
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/checked-simulator.native.bc",
+    "sha256": "6e5fd049681f9b5d02acee9cdc64ef59cd6b3d6045aced75c5440e51e6acf4a3",
+    "bytes": 68800,
+    "action": "replace-build",
+    "done": true
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/checked-simulator.native.o",
+    "sha256": "ca19c6c1db73c55e5b3b2cc30abb3b439fb9a66638ef80f47b860c0dd009e39c",
+    "bytes": 20664,
+    "action": "replace-build",
+    "done": true
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/checked-simulator.proof.o",
+    "sha256": "99b68fa15a487b84489d5e946a4cfcb7b502e460c39dc5a12adcc1dcb218c182",
+    "bytes": 10128,
+    "action": "replace-build",
+    "done": true
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/commands.jsonl",
+    "sha256": "f4c470f434a85fce256d13f732470ef468fe0fb6b32510d2d1b143d509474167",
+    "bytes": 3586,
+    "action": "preserve-data",
+    "done": true
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/frontend-ir-reuse.json",
+    "sha256": "f8173c1ee5391ecccf9b2268107c602bed86b39833853247f2926bb9338e5a2c",
+    "bytes": 283,
+    "action": "preserve-data",
+    "done": true
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/kernel-functions.json",
+    "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+    "bytes": 3,
+    "action": "preserve-data",
+    "done": true
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/native-commands.jsonl",
+    "sha256": "0815bee0fd306259eb909778d7e857549a38a68dccbdc11cefc290baca132ae7",
+    "bytes": 2353,
+    "action": "preserve-data",
+    "done": true
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/request.native.o",
+    "sha256": "89e87f603de48891fbc9f0258b97788e84f8cd1caf9aedac79ef1a02d4fff6a4",
+    "bytes": 840,
+    "action": "replace-build",
+    "done": true
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/trusted_x86.bpf.before.mir",
+    "sha256": "ac90518d0e7ca759b8a12333aecc752c18d8646c3cab38680e906669706ebd79",
+    "bytes": 453825,
+    "action": "replace-build",
+    "done": true
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/trusted_x86.bpf.bounds-input.bc",
+    "sha256": "df0ef4ef1e729e8873561a8634fdcd02a58a316009eae7a86c85867a37ccc572",
+    "bytes": 70980,
+    "action": "replace-build",
+    "done": true
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/trusted_x86.bpf.bounds.bc",
+    "sha256": "1e25f99096e68938b22f8bba218df05b522cbe47dfc1b589418fad08356faef1",
+    "bytes": 69180,
+    "action": "replace-build",
+    "done": true
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/trusted_x86.bpf.c",
+    "sha256": "d52fa62524c34a8dc46106f463fbc9837c5e7614c169d85c516e18a5063a2f9b",
+    "bytes": 2034,
+    "action": "replace-build",
+    "done": true
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/trusted_x86.bpf.i",
+    "sha256": "fc5fb4f7706a4d053b0e10f685f3a52b63bedf67f5059d2a3b4dd96bb80499b5",
+    "bytes": 802363,
+    "action": "replace-build",
+    "done": true
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/trusted_x86.bpf.o",
+    "sha256": "3208651cb10ccc709d32817cf9b51301b3b35111275c3ec0f68cd0460cf4c324",
+    "bytes": 25368,
+    "action": "replace-build",
+    "done": true
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/trusted_x86.bpf.packed.lowering.json",
+    "sha256": "20b8031b9d73311b77312f883e38923f390a759343b8386e69abf05a3f217302",
+    "bytes": 254,
+    "action": "preserve-data",
+    "done": true
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/trusted_x86.bpf.packed.mir",
+    "sha256": "ac90518d0e7ca759b8a12333aecc752c18d8646c3cab38680e906669706ebd79",
+    "bytes": 453825,
+    "action": "replace-build",
+    "done": true
+  },
+  {
+    "path": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/trusted_x86.proof.o",
+    "sha256": "041162955ed0a2326de2ec2eae2a996ce8802b1ebca8c54011fa6edec8b2ea3e",
+    "bytes": 2736,
+    "action": "replace-build",
+    "done": true
+  }
+]
