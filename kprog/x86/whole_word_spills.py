@@ -156,12 +156,41 @@ def lower_text(text, low, high, *, require_final=True, reuse_dead_source=False, 
     return output, changes
 
 
-def automatic(path):
+def narrow_scalar_storage(document):
+    """An8-byte spill used only by32-bit operations has four unobserved bytes.
+
+    Keep full-width, partial-offset and address-taking slots unchanged. This
+    exposes the same four-byte scalar shape that the existing packer handles.
+    """
+    head, body = document.split('body:             |', 1)
+    slots = {int(i) for i in re.findall(
+        r'  - \{ id: (\d+),[^\n]*type: spill-slot,[^\n]*size: 8, alignment: 8,', head)}
+    narrowed = []
+    for slot in sorted(slots):
+        operand = re.compile(r'%stack\.'+str(slot)+r'(?!\d)')
+        uses = [line for line in body.splitlines() if operand.search(line)]
+        direct = (r'\s*(?:STW32 (?:killed )?\$w\d+, '
+                  r'|(?:dead )?\$w\d+ = LDW32 )%stack\.'+str(slot)+
+                  r', 0(?:, debug-location !\d+)?')
+        if not uses or not all(re.fullmatch(direct, line) for line in uses):
+            continue
+        pattern = r'(  - \{ id: '+str(slot)+r',[^\n]*type: spill-slot,[^\n]*size:) 8,'
+        head, count = re.subn(pattern, r'\g<1> 4,', head)
+        if count != 1:
+            raise ValueError('Scalar spill declaration is not unique')
+        narrowed.append(slot)
+    return head+'body:             |'+body, narrowed
+
+
+def automatic(path, normalizations=None):
     documents = path.read_text().split('\n---\n')
     records = []
     for index, document in enumerate(documents):
         if 'body:             |' not in document:
             continue
+        document, narrowed = narrow_scalar_storage(document)
+        if normalizations is not None and narrowed:
+            normalizations.append(dict(document=index, slots=narrowed))
         head = document.split('body:             |', 1)[0]
         slots = {int(i): (int(n), int(a)) for i, n, a in re.findall(
             r'  - \{ id: (\d+),[^\n]*type: spill-slot,[^\n]*size: (\d+), alignment: (\d+),', head)}
@@ -185,12 +214,14 @@ if __name__ == '__main__':
     args = parser.parse_args()
     if (args.low is None) != (args.high is None):
         parser.error('--low and --high are supplied together')
+    normalizations = []
     if args.low is None:
-        output, changes = automatic(args.mir)
+        output, changes = automatic(args.mir, normalizations)
     else:
         output, changes = lower(args.mir, args.low, args.high)
     args.output.write_text(output)
     report = args.report if args.report is not None else args.output.with_suffix('.lowering.json')
     report.write_text(json.dumps(dict(
         source=str(args.mir), low=args.low, high=args.high, changes=changes,
+        narrowed_scalar_slots=normalizations,
         scope='Compiler-private spill storage transformation; actual stock verification follows.'), indent=2) + '\n')

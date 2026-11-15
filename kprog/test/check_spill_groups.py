@@ -131,6 +131,43 @@ def check(args):
                 row.update(execution)
             cases.append(row)
             (args.output/'cases.json').write_text(json.dumps(cases, indent=2)+'\n')
+    # LLVM can reserve8 bytes for a slot whose entire use is STW32/LDW32.
+    # Catch missing compaction while retaining genuine64-bit/escaping storage.
+    wide = base.replace('size: 4, alignment: 8,', 'size: 8, alignment: 8,')
+    normalized, selected = spills.narrow_scalar_storage(wide)
+    if selected != list(range(8)):
+        raise ValueError('Wide scalar descriptors or the genuine64-bit slot were misclassified')
+    for variant in [
+        wide.replace('STW32 $w2, %stack.0, 0', 'STD $r2, %stack.0, 0'),
+        wide.replace('LDW32 %stack.0, 0', 'LDW32 %stack.0, 4'),
+        wide.replace('    RET implicit $r0',
+                     '    $r4 = FI_ri %stack.0, 0\n    RET implicit $r0'),
+    ]:
+        _, selected = spills.narrow_scalar_storage(variant)
+        if 0 in selected:
+            raise ValueError('Wide/offset/escaping access lost its original spill allocation')
+    mir = args.build/'fixture.mir'
+    mir.write_text(wide)
+    normalizations = []
+    lowered, pairs = spills.automatic(mir, normalizations)
+    if normalizations != [dict(document=1, slots=list(range(8)))]:
+        raise ValueError('Normal route omitted the wide scalar spill normalization')
+    mir.write_text(lowered)
+    obj = args.build/'fixture.o'
+    run(['llc-18', '-O3', '-march=bpf', '-mcpu=v4', '-verify-machineinstrs',
+         '-start-before=prologepilog', '-filetype=obj', mir, '-o', obj])
+    actual_depth = depth(obj)
+    if actual_depth != 48:
+        raise ValueError('Wide scalar declarations still waste aligned stack words')
+    row = dict(phase='wide-descriptor-packed', frame_access_depth=actual_depth,
+               normalized_slots=normalizations)
+    if not args.compile_only:
+        execution = json.loads(run([args.build/'values-client', '--groups',
+                                    'wide-descriptor-packed', obj]).stdout)
+        if execution['failed'] or execution['executions'] != 1060:
+            raise ValueError('Narrowing the unread upper half changed packed execution')
+        row.update(execution)
+    cases.append(row)
     # Real OTel MIR annotates a scalar reload's unused definition with `dead`.
     # It is still a definition for scratch liveness, and a supported reload.
     mir = args.build/'fixture.mir'
