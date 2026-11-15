@@ -102,6 +102,7 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-15 ~23:25 UTC: "然后继续做.
   在之前最好的数据的版本上我们改进了什么?"
 - 2026-11-15 ~23:28 UTC: "整体框架从 5 月份之后改进了什么?"
+- 2026-11-15 ~23:35 UTC: "每次都必须所有都得盘点"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
