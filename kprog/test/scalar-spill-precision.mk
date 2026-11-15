@@ -44,7 +44,7 @@ helper-shapes:
 identity-check:
 	install -d $(OUTPUT) $(CONTEXT_BUILD)
 	taskset -c 18-19 clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -I$(ROOT)/vendor/libbpf/include/uapi $(ROOT)/kprog/x86/packet_bounds_ir.cpp -o $(CONTEXT_BUILD)/packet-bounds $$(llvm-config-18 --ldflags --libs core irreader bitwriter analysis support --system-libs)
-	taskset -c 18-19 python3 $(ROOT)/kprog/test/check_packet_identities.py --tool $(CONTEXT_BUILD)/packet-bounds --legacy /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds --output $(OUTPUT) $(IDENTITY_ARGS)
+	taskset -c 18-19 python3 $(ROOT)/kprog/test/check_packet_identities.py --tool $(CONTEXT_BUILD)/packet-bounds --output $(OUTPUT) $(IDENTITY_ARGS)
 
 context-replay:
 	install -d $(OUTPUT) $(CONTEXT_BUILD)

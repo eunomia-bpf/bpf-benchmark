@@ -3,15 +3,15 @@ import argparse
 import ctypes as c
 import importlib.util
 import json
-import os
 from pathlib import Path
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def check(tool, legacy, output, retained):
+def check(tool, output, retained, build=Path('/var/tmp/kprog-tmp/perf/packet-identities')):
     output.mkdir(parents=True, exist_ok=True)
+    build.mkdir(parents=True, exist_ok=True)
     calls = []
 
     def run(command):
@@ -38,18 +38,14 @@ def check(tool, legacy, output, retained):
 ret i32 %result
 }}
 '''
-    before = output/'before.ll'
+    before = build/'before.ll'
     before.write_text(source)
-    run([legacy, before, '-o', output/'legacy.bc'])
-    run([tool, before, '-o', output/'off.bc'])
-    if (output/'legacy.bc').read_bytes() != (output/'off.bc').read_bytes():
-        raise ValueError('Disabled identity change differs from the prior compiler')
-    active = run([tool, before, '-o', output/'strict.bc', '--strict-identities'])
+    active = run([tool, before, '-o', build/'strict.bc', '--strict-identities'])
     if 'packet length predicates lowered=1' not in active.stderr:
         raise ValueError('Strict mode must recognize the tied field only')
     libraries = {}
-    for name, ir in [('before', before), ('legacy', output/'legacy.bc'), ('strict', output/'strict.bc')]:
-        library = output/(name+'.so')
+    for name, ir in [('before', before), ('strict', build/'strict.bc')]:
+        library = build/(name+'.so')
         run(['clang-18', '-shared', '-fPIC', '-O2', ir, ROOT/'kprog/test/packet_choice_call.S', '-o', library])
         libraries[name] = c.CDLL(str(library))
         libraries[name].run_packet_choice.argtypes = [c.c_void_p, c.c_void_p, c.c_uint64]
@@ -72,31 +68,22 @@ ret i32 %result
                                          expected=expected, **values))
     counterexample = next(row for row in observations if row['function']=='untied' and
                           row['start']==100 and row['end']==200 and row['seed']==0)
-    if counterexample['legacy'] == counterexample['expected']:
-        raise ValueError('The actual legacy counterexample was disconnected')
     (output/'execution.json').write_text(json.dumps(observations, indent=2)+'\n')
     # The native fixture pins a register to make the permitted untied output
     # reproducible. Exercise the matching rule in BPF's own register domain too.
-    bpf = output/'bpf.ll'
+    bpf = build/'bpf.ll'
     bpf.write_text(source.replace('x86_64-unknown-linux-gnu', 'bpf').replace('={r12},{rdi}', '=r,r'))
-    run([legacy, bpf, '-o', output/'bpf-legacy.bc'])
-    bpf_result = run([tool, bpf, '-o', output/'bpf-strict.bc', '--strict-identities'])
+    bpf_result = run([tool, bpf, '-o', build/'bpf-strict.bc', '--strict-identities'])
     if 'packet length predicates lowered=1' not in bpf_result.stderr:
         raise ValueError('BPF untied output received invented field provenance')
-    for variant in ('legacy', 'strict'):
-        run(['clang-18', '-target', 'bpf', '-mcpu=v4', '-O3', '-c',
-             output/('bpf-'+variant+'.bc'), '-o', output/('bpf-'+variant+'.o')])
+    run(['clang-18', '-target', 'bpf', '-mcpu=v4', '-O3', '-c',
+         build/'bpf-strict.bc', '-o', build/'bpf-strict.o'])
     replay = []
     for index, path in enumerate(retained):
-        old, default, strict = [output/f'retained-{index}-{label}.bc' for label in ('old', 'off', 'strict')]
-        run([legacy, path, '-o', old])
-        run([tool, path, '-o', default])
+        strict = build/f'retained-{index}-strict.bc'
         run([tool, path, '-o', strict, '--strict-identities'])
-        if old.read_bytes() != default.read_bytes():
-            raise ValueError('Default compiler changed a retained packet input')
-        replay.append(dict(input=str(path), default_equal=True,
-                           strict_equal=old.read_bytes()==strict.read_bytes()))
-    pipeline = output/'pipeline.bpf.c'
+        replay.append(dict(input=str(path), compiled=True))
+    pipeline = build/'pipeline.bpf.c'
     pipeline.write_text('''#include <linux/bpf.h>
 #include <bpf_helpers.h>
 SEC("xdp") int pipeline(struct xdp_md *ctx) {
@@ -111,21 +98,14 @@ char LICENSE[] SEC("license") = "GPL";
     spec = importlib.util.spec_from_file_location('identity_worker', ROOT/'kprog/x86/trusted_specializer.py')
     worker = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(worker)
-    saved = os.environ.get('KPROG_BPF_STRICT_IDENTITIES')
-    try:
-        os.environ['KPROG_BPF_STRICT_IDENTITIES'] = '1'
-        first = len(calls)
-        worker.compile_simulator(str(ROOT/'kprog/stock-path/bin/clang'), pipeline,
-                                 output/'pipeline.o', run, bounds_compiler=tool)
-        if not any('--strict-identities' in row['command'] for row in calls[first:]):
-            raise ValueError('Service compiler did not forward strict identity selection')
-    finally:
-        if saved is None:
-            os.environ.pop('KPROG_BPF_STRICT_IDENTITIES')
-        else:
-            os.environ['KPROG_BPF_STRICT_IDENTITIES'] = saved
-    result = dict(default_equal=True, counterexample=counterexample,
-                  execution_cases=len(observations), retained=replay, service_flag_forwarded=True,
+    first = len(calls)
+    worker.compile_simulator(str(ROOT/'kprog/stock-path/bin/clang'), pipeline,
+                             build/'pipeline.o', run, bounds_compiler=tool)
+    if not any('--strict-identities' in row['command'] and '--canonical-ctx-loads' in row['command']
+               for row in calls[first:]):
+        raise ValueError('Normal service compiler omitted strict identity/context lowering')
+    result = dict(counterexample=counterexample,
+                  execution_cases=len(observations), retained=replay, normal_service_path=True,
                   bpf_untied_output_preserved=True)
     (output/'result.json').write_text(json.dumps(result, indent=2)+'\n')
     print(json.dumps(result))
@@ -133,8 +113,9 @@ char LICENSE[] SEC("license") = "GPL";
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    for name in ('tool', 'legacy', 'output'):
+    for name in ('tool', 'output'):
         parser.add_argument('--'+name, type=Path, required=True)
     parser.add_argument('--retained', type=Path, action='append', default=[])
+    parser.add_argument('--build', type=Path, default=Path('/var/tmp/kprog-tmp/perf/packet-identities'))
     args = parser.parse_args()
-    check(args.tool, args.legacy, args.output, args.retained)
+    check(args.tool, args.output, args.retained, args.build)

@@ -1,4 +1,4 @@
-"""Compile an archived generated simulator with optional context B lowering.
+"""Compile an archived generated simulator with the normal B pipeline.
 
 Generated C is copied unchanged into cleanable compiler storage. Request facts,
 commands and stage outcomes remain in the persistent output directory.
@@ -7,7 +7,6 @@ import argparse
 from datetime import datetime, timezone
 import importlib.util
 import json
-import os
 from pathlib import Path
 import resource
 import subprocess
@@ -35,8 +34,6 @@ def replay(args):
         spec = importlib.util.spec_from_file_location('context_replay_worker', ROOT/'kprog/x86/trusted_specializer.py')
         worker = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(worker)
-        os.environ['KPROG_BPF_CONTEXT_LOADS'] = '1'
-        os.environ['KPROG_BPF_WHOLE_WORD_SPILLS'] = '0'
 
         def run(command):
             command = list(map(str, command))
