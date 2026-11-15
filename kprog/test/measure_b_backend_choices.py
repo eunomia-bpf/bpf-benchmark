@@ -5,6 +5,7 @@ from the completed frontend; otherwise the completed bounds IR is used.
 This diagnostic never repeats the C frontend or publishes production tools.
 """
 import argparse
+from collections import Counter
 import hashlib
 import io
 import json
@@ -33,7 +34,16 @@ def storage_observation(path, fds):
     command = ['llvm-dis-18', str(path), '-o', '-']
     result = subprocess.run(command, capture_output=True, text=True,
                             pass_fds=tuple(fds), check=True)
-    lines = result.stdout.splitlines()
+    return storage_text_observation(result.stdout, command)
+
+
+def storage_text_observation(text, command=None):
+    lines = text.splitlines()
+    definitions = {}
+    for line in lines:
+        match = re.match(r'\s*(%[-\w.]+) = (.*)', line)
+        if match:
+            definitions[match[1]] = match[2]
     objects = []
     for line in lines:
         match = re.match(r'\s*(%[-\w.]+) = alloca\b', line)
@@ -42,8 +52,21 @@ def storage_observation(path, fds):
         name = match[1]
         operand = re.compile(re.escape(name)+r'(?![-\w.])')
         uses = [item.strip() for item in lines if item != line and operand.search(item)]
+        operations = Counter(re.sub(r'^%[-\w.]+ = ', '', item).split()[0] for item in uses)
+        dynamic_geps = []
+        for item in uses:
+            if 'getelementptr' not in item:
+                continue
+            # Operand definitions expose what prevents constant slot addressing.
+            indices = re.findall(r'\bi(?:32|64) (%[-\w.]+)', item)
+            if indices:
+                dynamic_geps.append(dict(instruction=item,
+                    index_definitions={index:definitions[index] for index in indices}))
         objects.append(dict(name=name, declaration=line.strip(), direct_uses=len(uses),
-            examples=uses[:12]))
+            direct_operations=dict(operations), examples=uses[:12],
+            dynamic_gep_count=len(dynamic_geps), dynamic_gep_examples=dynamic_geps[:8],
+            other_use_examples=[item for item in uses
+                                if 'getelementptr' not in item][:12]))
     return dict(command=command, allocas=objects,
                 scope='Direct textual operand observations, not alias/escape proofs or a transformation.')
 
@@ -98,6 +121,12 @@ def main(a):
             worker._compile_simulator_backend(str(ROOT/'kprog/stock-path/bin/clang'),
                 pipe, obj, run, compiled_input=initial)
             before = pipe.stage('.before.mir').read_text()
+            embedded = before.split('\n---\n', 1)[0]
+            if not embedded.startswith('--- |\n'):
+                raise ValueError('Expected the actual optimized LLVM IR embedded in MIR')
+            optimized = '\n'.join(line.removeprefix('  ')
+                                   for line in embedded.removeprefix('--- |\n').splitlines())
+            case['optimized_ir_storage'] = storage_text_observation(optimized)
             slots = re.findall(r'  - \{ id: (\d+),[^\n]*type: spill-slot,[^\n]*size: (\d+),', before)
             case['spill_slots_before_packing'] = len(slots)
             code = obj.read_bytes()
