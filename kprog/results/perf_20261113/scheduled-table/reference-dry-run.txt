@@ -1,0 +1,1 @@
+taskset -c 8-11 prlimit --as=8589934592 -- clang-18 -target bpf -O2 -g -I/usr/include/x86_64-linux-gnu -I/workspaces/repository/vendor/libbpf/src -c /workspaces/repository/kprog/test/scheduled_table_reference.bpf.c -o /var/tmp/kprog-tmp/perf/scheduled-table/scheduled.original.bpf.o
