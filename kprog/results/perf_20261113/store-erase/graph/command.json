@@ -1,0 +1,30 @@
+{
+  "command": [
+    "/workspaces/repository/kprog/stock-path/bin/clang",
+    "-w",
+    "-g",
+    "-O3",
+    "-mcpu=v4",
+    "-target",
+    "bpf",
+    "-mllvm",
+    "-bpf-stack-size=4096",
+    "-D__TARGET_ARCH_x86",
+    "-I",
+    "/workspaces/repository/vendor/libbpf/include/uapi",
+    "-I",
+    "/workspaces/repository/vendor/libbpf/src",
+    "-I",
+    "/usr/include/x86_64-linux-gnu",
+    "-Xclang",
+    "-disable-llvm-passes",
+    "-emit-llvm",
+    "-S",
+    "/var/tmp/kprog-tmp/perf/frontend-constants/width.c",
+    "-o",
+    "/var/tmp/kprog-tmp/perf/frontend-constants/width.ll"
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": ""
+}

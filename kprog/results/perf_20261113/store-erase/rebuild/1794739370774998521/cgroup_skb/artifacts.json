@@ -1,0 +1,16 @@
+{
+  "native_object": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/request.native.o",
+  "native_proof_object": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/trusted_x86.proof.o",
+  "simulator_object": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/trusted_x86.bpf.o",
+  "simulator_program": "trusted_x86_x86_sim_xdp",
+  "simulator_source": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/trusted_x86.bpf.c",
+  "simulator_preprocessed": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/trusted_x86.bpf.i",
+  "context_kind": "cgroup_skb",
+  "symbol": "packet_tc",
+  "native_sha256": "89e87f603de48891fbc9f0258b97788e84f8cd1caf9aedac79ef1a02d4fff6a4",
+  "simulator_frontend": {
+    "path": "/var/tmp/kprog-tmp/perf/checked-packet/host/cgroup_skb/generated/trusted_x86.bpf.bounds-input.bc",
+    "source_sha256": "252278808731649bde77397c93dfcec959d8cd6aefc28bbd3a1739db311ed5e8",
+    "ir_sha256": "792a78cd20944adb6b4c070772a1e4dd743a44b5e8f8dc4ca3e23cef1afaa25a"
+  }
+}

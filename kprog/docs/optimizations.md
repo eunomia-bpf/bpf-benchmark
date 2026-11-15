@@ -373,3 +373,10 @@ and post-store fact saving stays in place. Before changing the body,4,224
 independent aliased-stack cases pass (complete arena bytes, all saved facts,
 flags, zero/nonzero free-byte choices and draw counts). Validation and graph
 measurement follow; P, normal flags and combined LTO are unchanged.
+
+Single-invalidation receipt1e66d1be8: new4,224 independent alias-store cases
+pass before/after; full scoped suite/512native-store/25checked-packet host
+checks pass,16 normal B allocated outputs unchanged. Memory-store preSSA
+branches331→309/298→276, stack probes unchanged. No full compile/runtime
+claim; queued921682 captures current source after preserved910213 ends.
+Commands/results: `../results/perf_20261113/store-erase/report.md`.
