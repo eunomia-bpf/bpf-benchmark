@@ -8,6 +8,7 @@ refresh_loader=/workspaces/.agent-state/kprog-ck/verified-loader
 refresh_direct=$refresh_root/kinsn/module/x86/build
 refresh_linker=$refresh_root/kprog/x86/native_lab/native_link/target/release/native-link
 refresh_image=bpf-benchmark/kprog:current
+refresh_kernel_jobs=${REFRESH_KERNEL_JOBS:-4}
 install -d "$refresh_output"
 
 finalize_refresh() {
@@ -35,7 +36,7 @@ finalize_refresh() {
         "$refresh_direct/bpf_x86_native_lab.ko" \
         /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko > "$refresh_output/base-sha256"
     date -u +%FT%TZ > "$refresh_output/finished"
-    printf -- '- LANE VERIFIED %s: IMAGE REBUILT current %s; superseded %s cleanup=%s. Canonical image/base writer completed; raw logs/inventories/hashes %s. Application validation and census outcomes remain separate; frozen benchmark settings unchanged.\n' \
+    printf -- '- LANE PERF %s: IMAGE REBUILT current %s; superseded %s cleanup=%s. Canonical image/base writer completed; raw logs/inventories/hashes %s. Application validation and census outcomes remain separate; frozen benchmark settings unchanged.\n' \
         "$(date -u +%FT%TZ)" "$refresh_new_image" "$refresh_old_image" "$refresh_cleanup" \
         "$refresh_output" >> /workspaces/.agent-state/kprog-lanes/COORDINATION.md
 }
@@ -81,26 +82,6 @@ if [[ $refresh_operation == --direct-recovery ]]; then
     make -C "$refresh_root/kprog/libnativeloader" trusted-service BUILD_DIR="$refresh_loader"
 fi
 
-if [[ $refresh_operation == full ]]; then
-make -C "$refresh_root/kprog/stock-path/module"
-make -C "$refresh_kernel" M="$refresh_root/kprog/perf/direct-native" MO="$refresh_direct" ARCH=x86 modules -j1
-make -C "$refresh_root/kprog/libnativeloader" trusted-service BUILD_DIR="$refresh_loader"
-
-# Exercise both frontends of the shared query transport before image assembly.
-for refresh_module in verified direct; do
-    if [[ $refresh_module == verified ]]; then
-        refresh_module_path=/workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
-    else
-        refresh_module_path=$refresh_direct/bpf_x86_native_lab.ko
-    fi
-    make -C "$refresh_root/kprog/libnativeloader" helper-context-kernel-kvm \
-        HELPER_KERNEL_MODULE="$refresh_module_path" \
-        HELPER_KERNEL_OUTPUT="$refresh_output/helper-$refresh_module"
-done
-make -C "$refresh_root/kprog/libnativeloader" native-image-handoff-kvm \
-    BUILD_DIR="$refresh_loader" NATIVE_MODULE="$refresh_direct/bpf_x86_native_lab.ko" SERVICE_HOST_CPUS=13
-fi
-
 if [[ $refresh_operation == --loader-only ]]; then
     sha256sum "$refresh_kernel/arch/x86/boot/bzImage" "$refresh_kernel/vmlinux" \
         "$refresh_kernel/.config" "$refresh_direct/bpf_x86_native_lab.ko" \
@@ -110,7 +91,8 @@ if [[ $refresh_operation == --loader-only ]]; then
 elif [[ $refresh_operation == full || $refresh_operation == --modules-only ]]; then
 # Kbuild's modules_install parser removes the installed kernel directory even
 # with make -n. Finish the sole build's module outputs before reinstalling;
-# retain the existing core ELF and boot image, with no source/version change.
+# Build boot and modules together. Marking vmlinux old suppresses Kbuild's
+# module-BTF regeneration when the core BTF has changed.
 find "$refresh_kernel/modules-install" -type f -print > "$refresh_output/modules-before.txt"
 refresh_release=$(cat "$refresh_kernel/include/config/kernel.release")
 if [[ ! -e $refresh_kernel/modules.order ]]; then
@@ -125,18 +107,40 @@ fi
 sha256sum "$refresh_kernel/arch/x86/boot/bzImage" "$refresh_kernel/vmlinux" \
     "$refresh_kernel/.config" > "$refresh_output/kernel-before-modules-sha256"
 make -C "$refresh_root/vendor/linux-framework" O="$refresh_kernel" ARCH=x86_64 \
-    -o vmlinux -o vmlinux.o modules -j1
+    bzImage modules -j"$refresh_kernel_jobs"
 sha256sum "$refresh_kernel/arch/x86/boot/bzImage" "$refresh_kernel/vmlinux" \
     "$refresh_kernel/.config" > "$refresh_output/kernel-after-modules-sha256"
 make -C "$refresh_root/vendor/linux-framework" O="$refresh_kernel" ARCH=x86_64 \
     INSTALL_MOD_PATH="$refresh_kernel/modules-install" INSTALL_MOD_STRIP=1 \
-    DEPMOD=true modules_install -j1
+    DEPMOD=true modules_install -j"$refresh_kernel_jobs"
 find "$refresh_kernel/modules-install" -type f -print > "$refresh_output/modules-after.txt"
 sha256sum "$refresh_kernel/net/netfilter/nfnetlink.ko" \
     "$refresh_kernel/modules-install/lib/modules/$refresh_release/kernel/net/netfilter/nfnetlink.ko" \
     > "$refresh_output/nfnetlink-sha256"
-printf -- '- %s VERIFIED module packaging repair: completed module outputs and replaced incomplete modules-install in the sole build (INSTALL_MOD_STRIP=1); core ELF/boot retained, no source/version change; file inventories and raw logs retained in %s.\n' \
+printf -- '- %s PERF module packaging repair: rebuilt matching boot/modules and replaced modules-install in the sole build (INSTALL_MOD_STRIP=1); no source/version/config change; before/after hashes, file inventories and raw logs retained in %s.\n' \
     "$(date -u +%FT%TZ)" "$refresh_output" >> "$refresh_root/kprog/docs/cleanup-log.md"
+fi
+
+if [[ $refresh_operation == full || $refresh_operation == --modules-only ]]; then
+# External modules consume the current combined Module.symvers and BTF base.
+make -C "$refresh_root/kprog/stock-path/module"
+make -C "$refresh_kernel" M="$refresh_root/kprog/perf/direct-native" MO="$refresh_direct" ARCH=x86 modules -j"$refresh_kernel_jobs"
+fi
+
+if [[ $refresh_operation == full ]]; then
+make -C "$refresh_root/kprog/libnativeloader" trusted-service BUILD_DIR="$refresh_loader"
+for refresh_module in verified direct; do
+    if [[ $refresh_module == verified ]]; then
+        refresh_module_path=/workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
+    else
+        refresh_module_path=$refresh_direct/bpf_x86_native_lab.ko
+    fi
+    make -C "$refresh_root/kprog/libnativeloader" helper-context-kernel-kvm \
+        HELPER_KERNEL_MODULE="$refresh_module_path" \
+        HELPER_KERNEL_OUTPUT="$refresh_output/helper-$refresh_module"
+done
+make -C "$refresh_root/kprog/libnativeloader" native-image-handoff-kvm \
+    BUILD_DIR="$refresh_loader" NATIVE_MODULE="$refresh_direct/bpf_x86_native_lab.ko" SERVICE_HOST_CPUS=13
 fi
 
 # The frozen image recipe below skips stable Rust artifacts. Rebuild the

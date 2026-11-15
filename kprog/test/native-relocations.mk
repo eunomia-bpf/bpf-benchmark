@@ -147,8 +147,7 @@ absolute-image-kernel:
 	install -d $(ABSOLUTE_KERNEL_OUTPUT)
 	git -C $(ROOT)/vendor/linux-framework rev-parse HEAD > $(ABSOLUTE_KERNEL_OUTPUT)/kernel-source.txt
 	sha256sum $(KDIR)/.config $(KDIR)/arch/x86/boot/bzImage $(KDIR)/vmlinux > $(ABSOLUTE_KERNEL_OUTPUT)/before-sha256.txt
-	$(MAKE) -C $(ROOT)/vendor/linux-framework O=$(KDIR) -j4 bzImage
-	$(MAKE) -C $(ROOT)/kprog/stock-path/module KDIR=$(KDIR) MO=/workspaces/.agent-state/kprog-ck/verified-module
+	$(MAKE) -r -C $(ROOT)/kprog/libnativeloader shared-base-modules-repair REFRESH_OUTPUT=$(ABSOLUTE_KERNEL_OUTPUT)/packaging
 	sha256sum $(KDIR)/.config $(KDIR)/arch/x86/boot/bzImage $(KDIR)/vmlinux /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko > $(ABSOLUTE_KERNEL_OUTPUT)/after-sha256.txt
 	$(MAKE) -r -f $(ROOT)/kprog/test/native-relocations.mk kernel-layout-boot OUTPUT=$(ABSOLUTE_KERNEL_OUTPUT)/boot
 	$(MAKE) -r -f $(ROOT)/kprog/test/native-relocations.mk kernel-layout BOOT_CAPTURE=$(ABSOLUTE_KERNEL_OUTPUT)/boot
