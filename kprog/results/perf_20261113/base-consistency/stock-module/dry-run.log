@@ -1,0 +1,3 @@
+install -d /workspaces/kprog-raw/perf/20261115-base-consistency/stock-module
+sha256sum /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko > /workspaces/kprog-raw/perf/20261115-base-consistency/stock-module/input-sha256.txt
+taskset -c 16-17 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage --cwd /workspaces/repository --rwdir /workspaces/repository --rwdir /workspaces/kprog-raw/perf/20261115-base-consistency/stock-module --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'bash kprog/test/guest_base_stock_module.sh /workspaces/kprog-raw/perf/20261115-base-consistency/stock-module'

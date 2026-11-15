@@ -38,6 +38,10 @@ Validation completed:
 - Metadata guest1021133 completes under image EX at13:22:54UTC. Runtime BTF
   equals the core ELF BTF: **27aeaae0**. 000f463ef selects this boot capture
   as the default linker-layout input, and the canonical facts are refreshed.
+- a1686fc7b separately loads the stock-path native module on the repaired
+  kernel. Guest1024970 succeeds13:45:31–13:45:34UTC; its kernel log records
+  the expected out-of-tree taint notice without a BTF/version rejection.
+  This checks module loading, not checked-native program installation.
 - The refactored native inventory reader produces the same complete result
   as the earlier reader for this image/stage. No image filesystem or second
   base is materialized by either inventory tool.
