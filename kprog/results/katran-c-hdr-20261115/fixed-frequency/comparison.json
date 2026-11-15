@@ -1,0 +1,174 @@
+{
+  "observed": "2026-11-15T19:51:26Z",
+  "aa_run": "corpus/results/x86_kvm_corpus_20261115_185356_204200",
+  "ab_run": "corpus/results/x86_kvm_corpus_20261115_192007_061187",
+  "scope": "One fixed-frequency same-program control and native comparison, all LTO enabled together; temporal control normalization, with all raw samples retained",
+  "per_call_speedup": 1.031460152724618,
+  "mean_throughput_speedup": 1.0310745662127851,
+  "median_throughput_speedup": 1.0324096130777127,
+  "code": {
+    "native_body_bytes": 7965,
+    "jit_program_bytes": 13641,
+    "installed_native_bytes": 12418,
+    "native_body_over_jit": 0.5839014734990103,
+    "installed_native_over_jit": 0.9103438164357451
+  },
+  "body_timing": {
+    "status": "unmeasured",
+    "reason": "Whole-program counters include helpers and link-time routines; this timing pair records counters and live bytes, with pure-body runtime requiring a matched profile"
+  },
+  "linkage": {
+    "actual_plan": "be14e409af5bfa5b.tmp.3017.link-plan.json",
+    "replay_matches": {
+      "proof": true,
+      "blob": true,
+      "relocations": true
+    },
+    "native_sha256": "c0dc65fc746d7027c94969df1239b2eb603ecef541e9ab333a7186ce636eb13e",
+    "helper_counts": {
+      "bpf_map_lookup_elem": 66,
+      "bpf_get_smp_processor_id": 2,
+      "bpf_ktime_get_ns": 8,
+      "bpf_xdp_adjust_head": 4,
+      "bpf_map_update_elem": 4
+    },
+    "static_lookup_sites": 66,
+    "static_named_lookup_sites": 60,
+    "static_dynamic_lookup_sites": [
+      3743,
+      3988,
+      5304,
+      5743,
+      5831,
+      6085
+    ],
+    "fast_clock_relocations": [
+      {
+        "offset": 4368,
+        "kind": 1,
+        "target": 18446744072102843280,
+        "helper_names": [
+          "__native_x86_ktime_get_mono_fast_ns"
+        ]
+      },
+      {
+        "offset": 4570,
+        "kind": 1,
+        "target": 18446744072102843280,
+        "helper_names": [
+          "__native_x86_ktime_get_mono_fast_ns"
+        ]
+      },
+      {
+        "offset": 5398,
+        "kind": 1,
+        "target": 18446744072102843280,
+        "helper_names": [
+          "__native_x86_ktime_get_mono_fast_ns"
+        ]
+      },
+      {
+        "offset": 6631,
+        "kind": 1,
+        "target": 18446744072102843280,
+        "helper_names": [
+          "__native_x86_ktime_get_mono_fast_ns"
+        ]
+      },
+      {
+        "offset": 7046,
+        "kind": 1,
+        "target": 18446744072102843280,
+        "helper_names": [
+          "__native_x86_ktime_get_mono_fast_ns"
+        ]
+      },
+      {
+        "offset": 7257,
+        "kind": 1,
+        "target": 18446744072102843280,
+        "helper_names": [
+          "__native_x86_ktime_get_mono_fast_ns"
+        ]
+      },
+      {
+        "offset": 7998,
+        "kind": 1,
+        "target": 18446744072102843280,
+        "helper_names": [
+          "__native_x86_ktime_get_mono_fast_ns"
+        ]
+      },
+      {
+        "offset": 9604,
+        "kind": 1,
+        "target": 18446744072102843280,
+        "helper_names": [
+          "__native_x86_ktime_get_mono_fast_ns"
+        ]
+      }
+    ]
+  },
+  "arms": {
+    "aa": {
+      "baseline": {
+        "calls": 1336571778,
+        "runtime_ns": 232372970387,
+        "ns_per_call": 173.85745697452546,
+        "sample_pps": [
+          2465596,
+          2469795,
+          2493562
+        ],
+        "mean_pps": 2476317.6666666665,
+        "sent": 1336571777,
+        "invocations_minus_sent": 1,
+        "tx_errors": 1368123077
+      },
+      "post_rejit": {
+        "calls": 1316088636,
+        "runtime_ns": 234352450220,
+        "ns_per_call": 178.06737617024754,
+        "sample_pps": [
+          2422963,
+          2435062,
+          2457385
+        ],
+        "mean_pps": 2438470,
+        "sent": 1316088636,
+        "invocations_minus_sent": 0,
+        "tx_errors": 1416558841
+      }
+    },
+    "ab": {
+      "baseline": {
+        "calls": 1304901039,
+        "runtime_ns": 230985529654,
+        "ns_per_call": 177.01382921038504,
+        "sample_pps": [
+          2414827,
+          2428241,
+          2407429
+        ],
+        "mean_pps": 2416832.3333333335,
+        "sent": 1304901039,
+        "invocations_minus_sent": 0,
+        "tx_errors": 1393117137
+      },
+      "post_rejit": {
+        "calls": 1324540412,
+        "runtime_ns": 232815018093,
+        "ns_per_call": 175.77041514457017,
+        "sample_pps": [
+          2468130,
+          2435384,
+          2458030
+        ],
+        "mean_pps": 2453848,
+        "sent": 1324540412,
+        "invocations_minus_sent": 0,
+        "tx_errors": 1470002253
+      }
+    }
+  }
+}

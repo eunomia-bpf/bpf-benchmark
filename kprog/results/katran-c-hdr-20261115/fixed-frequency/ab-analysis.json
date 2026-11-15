@@ -1,0 +1,242 @@
+{
+  "run": "corpus/results/x86_kvm_corpus_20261115_192007_061187",
+  "app_status": "ok",
+  "app_error": "",
+  "input_sha256": "963160e2fd1bb3f65f3016b62cc49abf811b37e1f1b0cb48bc50ee07b868399f",
+  "arms": {
+    "baseline": {
+      "programs": [
+        {
+          "bytes_jited": 13641,
+          "bytes_xlated": 23840,
+          "id": 9,
+          "name": "balancer_ingres",
+          "run_cnt_delta": 1304901039,
+          "run_time_ns_delta": 230985529654,
+          "type": "xdp",
+          "ns_per_invocation": 177.01382921038504
+        }
+      ],
+      "total_run_cnt": 1304901039,
+      "total_run_time_ns": 230985529654,
+      "aggregate_ns_per_invocation": 177.01382921038504,
+      "samples": [
+        {
+          "duration_s": 180.058093596,
+          "threads": [
+            {
+              "sent": 106240517,
+              "errors": 119566666,
+              "pps": 590314
+            },
+            {
+              "sent": 79223265,
+              "errors": 90319267,
+              "pps": 440188
+            },
+            {
+              "sent": 106486002,
+              "errors": 118580785,
+              "pps": 591669
+            },
+            {
+              "sent": 142658583,
+              "errors": 156582452,
+              "pps": 792656
+            }
+          ]
+        },
+        {
+          "duration_s": 180.072080272,
+          "threads": [
+            {
+              "sent": 30828587,
+              "errors": 35503254,
+              "pps": 171288
+            },
+            {
+              "sent": 141185156,
+              "errors": 146701833,
+              "pps": 784448
+            },
+            {
+              "sent": 127029070,
+              "errors": 128396730,
+              "pps": 705795
+            },
+            {
+              "sent": 137992712,
+              "errors": 142857954,
+              "pps": 766710
+            }
+          ]
+        },
+        {
+          "duration_s": 180.05480925400002,
+          "threads": [
+            {
+              "sent": 145760247,
+              "errors": 151902940,
+              "pps": 809937
+            },
+            {
+              "sent": 125047999,
+              "errors": 130143969,
+              "pps": 694836
+            },
+            {
+              "sent": 141066859,
+              "errors": 149268060,
+              "pps": 783846
+            },
+            {
+              "sent": 21382042,
+              "errors": 23293227,
+              "pps": 118810
+            }
+          ]
+        }
+      ],
+      "pktgen_pps": [
+        2414827,
+        2428241,
+        2407429
+      ],
+      "mean_pps": 2416832.3333333335,
+      "median_pps": 2414827
+    },
+    "post_rejit": {
+      "programs": [
+        {
+          "bytes_jited": 12418,
+          "bytes_xlated": 16,
+          "id": 16,
+          "name": "balancer_ingres",
+          "run_cnt_delta": 1324540412,
+          "run_time_ns_delta": 232815018093,
+          "type": "xdp",
+          "ns_per_invocation": 175.77041514457017
+        }
+      ],
+      "total_run_cnt": 1324540412,
+      "total_run_time_ns": 232815018093,
+      "aggregate_ns_per_invocation": 175.77041514457017,
+      "samples": [
+        {
+          "duration_s": 180.06306111000004,
+          "threads": [
+            {
+              "sent": 62274120,
+              "errors": 74431671,
+              "pps": 346161
+            },
+            {
+              "sent": 114712790,
+              "errors": 133141584,
+              "pps": 637650
+            },
+            {
+              "sent": 143640057,
+              "errors": 167103724,
+              "pps": 798447
+            },
+            {
+              "sent": 123387854,
+              "errors": 144076267,
+              "pps": 685872
+            }
+          ]
+        },
+        {
+          "duration_s": 180.098731951,
+          "threads": [
+            {
+              "sent": 84778697,
+              "errors": 93160260,
+              "pps": 471034
+            },
+            {
+              "sent": 136988887,
+              "errors": 153347716,
+              "pps": 761117
+            },
+            {
+              "sent": 145995961,
+              "errors": 154702097,
+              "pps": 811161
+            },
+            {
+              "sent": 70566761,
+              "errors": 77814626,
+              "pps": 392072
+            }
+          ]
+        },
+        {
+          "duration_s": 180.0444010399999,
+          "threads": [
+            {
+              "sent": 98329126,
+              "errors": 103730072,
+              "pps": 546582
+            },
+            {
+              "sent": 106944842,
+              "errors": 110047624,
+              "pps": 594474
+            },
+            {
+              "sent": 139985121,
+              "errors": 153209549,
+              "pps": 778135
+            },
+            {
+              "sent": 96936196,
+              "errors": 105237063,
+              "pps": 538839
+            }
+          ]
+        }
+      ],
+      "pktgen_pps": [
+        2468130,
+        2435384,
+        2458030
+      ],
+      "mean_pps": 2453848,
+      "median_pps": 2458030
+    }
+  },
+  "observed_shape_pairs": [
+    {
+      "observed_shape": [
+        "balancer_ingres",
+        "xdp",
+        12418,
+        16
+      ],
+      "first_ids": [],
+      "later_ids": [
+        16
+      ],
+      "first_over_later_ns_per_invocation": null
+    },
+    {
+      "observed_shape": [
+        "balancer_ingres",
+        "xdp",
+        13641,
+        23840
+      ],
+      "first_ids": [
+        9
+      ],
+      "later_ids": [],
+      "first_over_later_ns_per_invocation": null
+    }
+  ],
+  "later_over_first_mean_pps": 1.0153157776632415,
+  "later_over_first_median_pps": 1.0178907226066298,
+  "first_over_later_aggregate_ns_per_invocation": 1.0070740804975182,
+  "scope": "All recorded programs retained, including zero-run and unmatched/ambiguous shapes. Shape pairing is not byte identity. Aggregated per-call time uses the entire recorded counter window, excluding runner warmup. Ratios are analysis only, not native gains or automatic equal-work certification."
+}

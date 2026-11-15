@@ -156,9 +156,9 @@ def run(args: argparse.Namespace) -> int:
         raise SystemExit(f"output directory exists: {out}")
     out.mkdir(parents=True)
     var_tmp.mkdir(parents=True)
-    shutil.copy2(PERF, var_tmp / "perf")
-    shutil.copy2(KINSN, var_tmp / "bpf_x86_native_lab.ko")
-    shutil.copy2(IMAGE_TAR, var_tmp / "runtime.image.tar")
+    os.link(PERF, var_tmp / "perf")
+    os.link(KINSN, var_tmp / "bpf_x86_native_lab.ko")
+    os.link(IMAGE_TAR, var_tmp / "runtime.image.tar")
     guest = var_tmp / "phase-profile-guest.sh"
     manifest = args.manifest or (
         f"/opt/bpf-benchmark/native-bpf/x86_64/{args.app.split('/')[0]}/manifest.json")
@@ -222,6 +222,11 @@ def run(args: argparse.Namespace) -> int:
             continue
         if not args.persist_output:
             shutil.copy2(source, out / name_)
+    removed = [str(path) for path in sorted(state.rglob('*'))]
+    (out / "removed-build-inputs.json").write_text(json.dumps(removed, indent=2) + "\n")
+    with (ROOT / "kprog/docs/cleanup-log.md").open("a") as cleanup:
+        cleanup.write(f"- {_stamp()} PERF profile: removed completed input links/runtime disk at {state}; "
+                      f"path inventory {out / 'removed-build-inputs.json'}; raw profile/corpus evidence kept at {out}.\n")
     shutil.rmtree(state)
     print(f"run directory: {out}")
     if completed.returncode != 0:

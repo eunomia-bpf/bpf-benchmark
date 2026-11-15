@@ -1,5 +1,13 @@
 # Katran on the compile-flag/header route, 2026-11-15
 
+Fixed-frequency follow-up completed19:44:34Z on imagefc5336c2 with all LTO,
+including clock linkage. One A/A plus one A/B yields **1.031460x per call** and
+**1.031075x mean throughput** after A/A normalization. Native application body
+is7965B; installed native code12418B versus JIT13641B. Pure-body runtime needs
+matched profiling; these counters include helper work. Full counters, sample
+rates, actual link plan/blob metadata and replay are in [fixed-frequency/](fixed-frequency/README.md).
+The earlier measurements below retain their original unfixed-frequency scope.
+
 Katran's native objects come from untouched upstream source through compile flags and
 one `-include` header. This records what the build produced, what both arms emitted,
 and the first timing under the coordinator's 14:03 protocol (one A/A, one A/B).

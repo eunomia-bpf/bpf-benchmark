@@ -1,0 +1,83 @@
+{
+  "command": "make -f /workspaces/repository/kprog/perf/one-image/Makefile guest APPS=katran SAMPLES=3 WORKLOAD_DURATION=180 BPFREJIT_CORPUS_BPF_STATS=1 NATIVE_MANIFEST=/opt/bpf-benchmark/native-bpf/x86_64/katran/manifest.json BENCH_PASSES= SKIP_REJIT_MODE=norejit NATIVE_LOADER_MODE=0",
+  "observations": [
+    {
+      "command": [
+        "python3",
+        "/workspaces/repository/kprog/perf/profile/jit-lines.py",
+        "/workspaces/kprog-raw/perf/20261115-katran-fixed-frequency/batch/aa/baseline.jit-lines.json"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "docker",
+        "ps",
+        "--filter",
+        "ancestor=bpf-benchmark/kprog:current",
+        "--format",
+        "{{.ID}}"
+      ],
+      "returncode": 0,
+      "stdout": "057dd40ff609\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "docker",
+        "exec",
+        "057dd40ff609",
+        "python3",
+        "-c",
+        "import hashlib,json,pathlib\nroot=pathlib.Path('/tmp/native_kernel_link_cache')\nrows=[]\nfor plan in sorted(root.glob('*.link-plan.json')):\n stem=plan.name.removesuffix('.link-plan.json')\n key=stem.partition('.tmp.')[0]\n files=[]\n diagnostics={}\n for path in sorted(root.glob(key+'.*')):\n  if path.is_file():\n   with path.open('rb') as source: digest=hashlib.file_digest(source,'sha256').hexdigest()\n   files.append(dict(name=path.name,bytes=path.stat().st_size,sha256=digest))\n   if path.name.endswith('.stderr.txt'): diagnostics[path.name]=path.read_text()\n rows.append(dict(name=plan.name,cache_key=key,plan=json.loads(plan.read_text()),\n  cache_template_files=files,diagnostics=diagnostics))\nprint(json.dumps(rows))\n"
+      ],
+      "returncode": 0,
+      "stdout": "[]\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "/workspaces/repository/kprog/perf/profile/jit-lines.py",
+        "/workspaces/kprog-raw/perf/20261115-katran-fixed-frequency/batch/aa/post_rejit.jit-lines.json"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "docker",
+        "ps",
+        "--filter",
+        "ancestor=bpf-benchmark/kprog:current",
+        "--format",
+        "{{.ID}}"
+      ],
+      "returncode": 0,
+      "stdout": "057dd40ff609\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "docker",
+        "exec",
+        "057dd40ff609",
+        "python3",
+        "-c",
+        "import hashlib,json,pathlib\nroot=pathlib.Path('/tmp/native_kernel_link_cache')\nrows=[]\nfor plan in sorted(root.glob('*.link-plan.json')):\n stem=plan.name.removesuffix('.link-plan.json')\n key=stem.partition('.tmp.')[0]\n files=[]\n diagnostics={}\n for path in sorted(root.glob(key+'.*')):\n  if path.is_file():\n   with path.open('rb') as source: digest=hashlib.file_digest(source,'sha256').hexdigest()\n   files.append(dict(name=path.name,bytes=path.stat().st_size,sha256=digest))\n   if path.name.endswith('.stderr.txt'): diagnostics[path.name]=path.read_text()\n rows.append(dict(name=plan.name,cache_key=key,plan=json.loads(plan.read_text()),\n  cache_template_files=files,diagnostics=diagnostics))\nprint(json.dumps(rows))\n"
+      ],
+      "returncode": 0,
+      "stdout": "[]\n",
+      "stderr": ""
+    }
+  ],
+  "errors": [],
+  "command_returncode": 0,
+  "observed_phases": [
+    "baseline",
+    "post_rejit"
+  ]
+}

@@ -504,3 +504,8 @@ guest-native-map-relocs:
 .PHONY: katran-fixed-frequency
 katran-fixed-frequency:
 	prlimit --as=103079215104 -- bash $(ROOT)/kprog/test/run_katran_fixed_frequency.sh $(OUTPUT)
+
+.PHONY: katran-body-profile
+katran-body-profile:
+	install -d $(OUTPUT)
+	flock -x /workspaces/.agent-state/kprog-lanes/locks/timing flock -s /workspaces/.agent-state/kprog-lanes/locks/image prlimit --as=103079215104 -- python3 $(ROOT)/kprog/perf/one-image/host_cpu.py --state $(OUTPUT)/host-cpu.json -- python3 $(ROOT)/kprog/perf/profile/phase-profile.py run --app katran --seconds 60 --cpus 0-7 --vcpus 8 --memory 64G --freq 999 --out $(OUTPUT)/profile --annotate 0 --state-root /var/tmp/kprog-tmp/perf/katran-body-profile --perf /var/tmp/kprog-tmp/C/perf-build/perf --persist-output

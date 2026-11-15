@@ -1,0 +1,1576 @@
+{
+  "native": "/workspaces/repository/corpus/results/katran-c-hdr-20261115/objects/balancer.native.o",
+  "symbol": "balancer_ingress",
+  "native_sha256": "c0dc65fc746d7027c94969df1239b2eb603ecef541e9ab333a7186ce636eb13e",
+  "linker_sha256": "61b001e1f56e09d2df208eb007814d654371f3009e4f7f85978cff081c0bfe79",
+  "proof_bytes": 272952,
+  "proof_sha256": "876861294109de6de1daad67a8753519fa235bc3a101fc0810a2a3a31f8a2943",
+  "helper_sites": [
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 77,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 1604,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 1804,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 1876,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_get_smp_processor_id",
+      "input_offset": 1937,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 1966,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 2000,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 2078,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 2250,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 2389,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 2524,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 2698,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 2772,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_get_smp_processor_id",
+      "input_offset": 2833,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 2862,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 2896,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 2974,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 3136,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 3198,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 3344,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 3407,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 3493,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 3559,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 3750,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "input_offset": 3772,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 3834,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 3888,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "input_offset": 3907,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 3979,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 3995,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 4025,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 4074,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 4115,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 4157,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_xdp_adjust_head",
+      "input_offset": 4218,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 4433,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 4500,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "input_offset": 4518,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 4706,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 4756,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_update_elem",
+      "input_offset": 4836,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 4860,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_xdp_adjust_head",
+      "input_offset": 4949,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 5175,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 5251,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 5290,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 5311,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 5523,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "input_offset": 5542,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 5611,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 5681,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 5720,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 5750,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 5838,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "input_offset": 5860,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 5931,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 5985,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "input_offset": 6004,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6076,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6092,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6122,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6178,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6213,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6264,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_xdp_adjust_head",
+      "input_offset": 6327,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6359,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6407,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6474,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "input_offset": 6492,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6680,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6727,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_update_elem",
+      "input_offset": 6815,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6839,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6918,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 6969,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 7002,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 7103,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_xdp_adjust_head",
+      "input_offset": 7152,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 7184,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_update_elem",
+      "input_offset": 7735,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 7784,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "input_offset": 7803,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_lookup_elem",
+      "input_offset": 7865,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    },
+    {
+      "helper": "bpf_map_update_elem",
+      "input_offset": 7941,
+      "map": null,
+      "proof_mode": true,
+      "symbol": "balancer_ingress"
+    }
+  ],
+  "helper_counts": {
+    "bpf_map_lookup_elem": 66,
+    "bpf_get_smp_processor_id": 2,
+    "bpf_ktime_get_ns": 8,
+    "bpf_xdp_adjust_head": 4,
+    "bpf_map_update_elem": 4
+  },
+  "scope": "Current object/proof CFG; no timed-image/map-LTO/kernel execution certification",
+  "runtime": {
+    "link_plan": "/workspaces/kprog-raw/perf/20261115-katran-fixed-frequency/batch/ab/post_rejit-429195073aeb/be14e409af5bfa5b.tmp.3017.link-plan.json",
+    "link_plan_sha256": "29b322be868463e854133d61ee2f636c08367c0a76365cd123c9267fbe853fc3",
+    "blob_bytes": 12386,
+    "blob_sha256": "d4daae8dd48c4f75d2a609e55c43d0321dcf042dc0ca270975eadae6ceb69e33",
+    "relocs_bytes": 288,
+    "relocs_sha256": "d15963c032af59945be541441362147db2baf927993a94c4cb50764441bb7561",
+    "relocations": [
+      {
+        "offset": 4368,
+        "kind": 1,
+        "target": 18446744072102843280,
+        "helper_names": [
+          "__native_x86_ktime_get_mono_fast_ns"
+        ]
+      },
+      {
+        "offset": 4570,
+        "kind": 1,
+        "target": 18446744072102843280,
+        "helper_names": [
+          "__native_x86_ktime_get_mono_fast_ns"
+        ]
+      },
+      {
+        "offset": 5027,
+        "kind": 1,
+        "target": 18446744072112978608,
+        "helper_names": [
+          "bpf_xdp_adjust_head"
+        ]
+      },
+      {
+        "offset": 5398,
+        "kind": 1,
+        "target": 18446744072102843280,
+        "helper_names": [
+          "__native_x86_ktime_get_mono_fast_ns"
+        ]
+      },
+      {
+        "offset": 5770,
+        "kind": 1,
+        "target": 18446744072103889456,
+        "helper_names": [
+          "bpf_map_update_elem"
+        ]
+      },
+      {
+        "offset": 5914,
+        "kind": 1,
+        "target": 18446744072112978608,
+        "helper_names": [
+          "bpf_xdp_adjust_head"
+        ]
+      },
+      {
+        "offset": 6631,
+        "kind": 1,
+        "target": 18446744072102843280,
+        "helper_names": [
+          "__native_x86_ktime_get_mono_fast_ns"
+        ]
+      },
+      {
+        "offset": 7046,
+        "kind": 1,
+        "target": 18446744072102843280,
+        "helper_names": [
+          "__native_x86_ktime_get_mono_fast_ns"
+        ]
+      },
+      {
+        "offset": 7257,
+        "kind": 1,
+        "target": 18446744072102843280,
+        "helper_names": [
+          "__native_x86_ktime_get_mono_fast_ns"
+        ]
+      },
+      {
+        "offset": 7728,
+        "kind": 1,
+        "target": 18446744072112978608,
+        "helper_names": [
+          "bpf_xdp_adjust_head"
+        ]
+      },
+      {
+        "offset": 7998,
+        "kind": 1,
+        "target": 18446744072102843280,
+        "helper_names": [
+          "__native_x86_ktime_get_mono_fast_ns"
+        ]
+      },
+      {
+        "offset": 8375,
+        "kind": 1,
+        "target": 18446744072103889456,
+        "helper_names": [
+          "bpf_map_update_elem"
+        ]
+      },
+      {
+        "offset": 8879,
+        "kind": 1,
+        "target": 18446744072112978608,
+        "helper_names": [
+          "bpf_xdp_adjust_head"
+        ]
+      },
+      {
+        "offset": 9499,
+        "kind": 1,
+        "target": 18446744072103889456,
+        "helper_names": [
+          "bpf_map_update_elem"
+        ]
+      },
+      {
+        "offset": 9604,
+        "kind": 1,
+        "target": 18446744072102843280,
+        "helper_names": [
+          "__native_x86_ktime_get_mono_fast_ns"
+        ]
+      },
+      {
+        "offset": 9779,
+        "kind": 1,
+        "target": 18446744072103889456,
+        "helper_names": [
+          "bpf_map_update_elem"
+        ]
+      },
+      {
+        "offset": 10230,
+        "kind": 1,
+        "target": 18446744072103946704,
+        "helper_names": []
+      },
+      {
+        "offset": 12376,
+        "kind": 1,
+        "target": 18446744072103889408,
+        "helper_names": [
+          "bpf_map_lookup_elem"
+        ]
+      }
+    ],
+    "map_patches": "stats\t52\nstats\t1618\nvip_map\t1847\nstats\t1934\nlru_mapping\t2064\nstats\t2109\nfallback_cache\t2172\nquic_stats_map\t2222\nstats\t2428\nvip_map\t2596\nstats\t2751\nvip_map\t2954\nstats\t3043\nlru_mapping\t3173\nstats\t3218\nfallback_cache\t3281\nquic_stats_map\t3331\nvip_map\t3522\nstats\t3604\nstats\t3784\nstats\t3881\nserver_id_stats\t4005\nserver_id_stats\t4105\nreals\t4420\nstats\t4504\nvip_to_down_reals_map\t4630\nstats\t4701\nctl_array\t4778\nstats\t4844\nreals_stats\t4922\nstats\t5232\nstats\t5331\nch_rings\t5574\nreals\t5645\nvip_miss_stats\t5784\nlru_miss_stats\t6128\nserver_id_map\t6238\nreals\t6298\nstats\t6565\nserver_id_stats\t6690\nserver_id_map\t6792\nreals\t6856\nreals\t7107\nstats\t7191\nvip_to_down_reals_map\t7317\nstats\t7388\nctl_array\t7473\nstats\t7533\nreals_stats\t7621\nstats\t7750\nstats\t7832\nstats\t7931\nch_rings\t8174\nreals\t8242\nvip_miss_stats\t8389\nlru_miss_stats\t8494\nstats\t8583\nstats\t8655\nstats\t8781\nstats\t8901\nstats\t9538\nserver_id_stats\t9656\n",
+    "abi": "version\tnative-link-abi-v2\ncallee_saved_mask\t15\nload_site\t10,3,12\nload_site\t13,4,15\nload_site\t73,2,0\nload_site\t90,3,0\nload_site\t93,9,0\nload_site\t118,3,65535\nload_site\t121,4,65535\nload_site\t125,6,0\nload_site\t151,3,12\nload_site\t154,4,9\nload_site\t272,6,0\nload_site\t288,6,0\nload_site\t298,6,0\nload_site\t308,6,1\nload_site\t326,6,8\nload_site\t354,4,0\nload_site\t388,7,65535\nload_site\t405,5,2\nload_site\t410,5,6\nload_site\t425,6,7\nload_site\t431,6,8\nload_site\t446,6,0\nload_site\t458,6,0\nload_site\t473,6,2\nload_site\t490,3,12\nload_site\t493,4,5\nload_site\t611,6,0\nload_site\t621,6,1\nload_site\t634,6,2\nload_site\t658,8,7\nload_site\t689,4,0\nload_site\t734,6,65535\nload_site\t746,5,0\nload_site\t751,5,1\nload_site\t765,5,0\nload_site\t770,5,1\nload_site\t785,4,0\nload_site\t789,5,1\nload_site\t804,6,0\nload_site\t815,5,0\nload_site\t824,4,0\nload_site\t833,6,0\nload_site\t845,4,0\nload_site\t853,5,0\nload_site\t863,5,1\nload_site\t868,5,2\nload_site\t883,5,1\nload_site\t888,5,2\nload_site\t925,4,0\nload_site\t959,7,65535\nload_site\t972,5,0\nload_site\t977,5,1\nload_site\t992,6,2\nload_site\t998,6,6\nload_site\t1007,6,2\nload_site\t1013,6,7\nload_site\t1025,6,2\nload_site\t1040,6,2\nload_site\t1052,6,2\nload_site\t1149,6,0\nload_site\t1160,5,0\nload_site\t1168,4,0\nload_site\t1177,6,0\nload_site\t1189,3,0\nload_site\t1196,5,0\nload_site\t1275,4,7\nload_site\t1300,4,7\nload_site\t1329,5,1\nload_site\t1338,5,1\nload_site\t1369,4,0\nload_site\t1476,3,1\nload_site\t1484,4,1\nload_site\t1546,4,7\nload_site\t1571,4,7\nload_site\t1634,2,0\nload_site\t1651,3,0\nload_site\t1654,9,0\nload_site\t1676,3,65535\nload_site\t1679,7,1\nload_site\t1695,5,8\nload_site\t1702,4,65535\nload_site\t1720,6,0\nload_site\t1730,5,1\nload_site\t1742,5,2\nload_site\t1747,5,6\nload_site\t1762,5,2\nload_site\t1767,5,6\nload_site\t1787,4,1\nload_site\t1796,3,1\nload_site\t1804,5,2\nload_site\t1809,5,6\nload_site\t1955,2,0\nload_site\t1972,3,0\nload_site\t1975,9,0\nload_site\t2005,3,65535\nload_site\t2008,5,13\nload_site\t2013,5,65535\nload_site\t2027,4,0\nload_site\t2047,8,0\nload_site\t2125,2,0\nload_site\t2142,3,0\nload_site\t2145,9,0\nload_site\t2167,3,65535\nload_site\t2185,5,13\nload_site\t2190,5,65535\nload_site\t2201,5,65535\nload_site\t2240,2,0\nload_site\t2255,3,0\nload_site\t2258,9,0\nload_site\t2284,5,65535\nload_site\t2289,6,12\nload_site\t2309,6,1\nload_site\t2339,3,6\nload_site\t2383,4,0\nload_site\t2390,4,2\nload_site\t2402,6,65535\nload_site\t2444,2,0\nload_site\t2461,3,0\nload_site\t2464,9,0\nload_site\t2486,3,65535\nload_site\t2489,6,65535\nload_site\t2497,4,65535\nload_site\t2501,4,7\nload_site\t2505,5,8\nload_site\t2524,5,0\nload_site\t2539,6,0\nload_site\t2549,5,1\nload_site\t2561,5,2\nload_site\t2570,5,2\nload_site\t2640,3,65535\nload_site\t2706,3,1\nload_site\t2714,4,1\nload_site\t2723,6,65535\nload_site\t2767,2,0\nload_site\t2784,3,0\nload_site\t2787,9,0\nload_site\t2809,3,65535\nload_site\t2812,6,65535\nload_site\t2820,4,65535\nload_site\t2824,6,8\nload_site\t2830,5,9\nload_site\t2849,5,0\nload_site\t2864,6,0\nload_site\t2874,5,1\nload_site\t2886,5,2\nload_site\t2895,5,2\nload_site\t2909,4,1\nload_site\t2918,3,1\nload_site\t2926,4,2\nload_site\t2998,5,1\nload_site\t3064,2,0\nload_site\t3081,3,0\nload_site\t3084,9,0\nload_site\t3114,3,65535\nload_site\t3117,5,13\nload_site\t3122,5,65535\nload_site\t3136,4,0\nload_site\t3156,8,0\nload_site\t3234,2,0\nload_site\t3251,3,0\nload_site\t3254,9,0\nload_site\t3276,3,65535\nload_site\t3294,5,13\nload_site\t3299,5,65535\nload_site\t3310,5,65535\nload_site\t3349,2,0\nload_site\t3364,3,0\nload_site\t3367,9,0\nload_site\t3396,5,65535\nload_site\t3410,5,65535\nload_site\t3421,6,0\nload_site\t3439,5,65535\nload_site\t3450,3,2\nload_site\t3491,4,6\nload_site\t3498,4,1\nload_site\t3566,3,65535\nload_site\t3620,2,0\nload_site\t3637,3,0\nload_site\t3640,9,0\nload_site\t3662,3,65535\nload_site\t3665,7,1\nload_site\t3681,5,9\nload_site\t3688,4,65535\nload_site\t3706,6,0\nload_site\t3721,5,1\nload_site\t3733,5,6\nload_site\t3738,5,7\nload_site\t3753,5,6\nload_site\t3758,5,7\nload_site\t3800,2,0\nload_site\t3817,3,0\nload_site\t3820,9,0\nload_site\t3842,3,65535\nload_site\t3845,6,1\nload_site\t3863,4,65535\nload_site\t3897,2,0\nload_site\t3914,3,0\nload_site\t3917,9,0\nload_site\t3939,3,65535\nload_site\t3942,6,1\nload_site\t3960,4,65535\nload_site\t3992,4,65535\nload_site\t3996,4,0\nload_site\t4021,2,0\nload_site\t4038,3,0\nload_site\t4041,9,0\nload_site\t4073,5,65535\nload_site\t4092,4,65535\nload_site\t4096,4,0\nload_site\t4121,2,0\nload_site\t4138,3,0\nload_site\t4141,9,0\nload_site\t4163,3,65535\nload_site\t4171,6,65535\nload_site\t4191,4,6\nload_site\t4198,4,0\nload_site\t4207,4,2\nload_site\t4213,4,0\nload_site\t4220,4,6\nload_site\t4229,4,0\nload_site\t4238,4,2\nload_site\t4297,3,65535\nload_site\t4300,5,13\nload_site\t4305,5,1\nload_site\t4314,5,65535\nload_site\t4321,5,65535\nload_site\t4338,5,7\nload_site\t4356,5,65535\nload_site\t4376,4,1\nload_site\t4407,4,0\nload_site\t4436,2,0\nload_site\t4468,5,13\nload_site\t4473,5,65535\nload_site\t4484,5,65535\nload_site\t4520,2,0\nload_site\t4537,3,0\nload_site\t4540,9,0\nload_site\t4578,4,1\nload_site\t4605,4,0\nload_site\t4666,3,0\nload_site\t4717,2,0\nload_site\t4734,3,0\nload_site\t4737,9,0\nload_site\t4759,3,65535\nload_site\t4800,2,0\nload_site\t4860,2,0\nload_site\t4877,3,0\nload_site\t4880,9,0\nload_site\t4902,3,65535\nload_site\t4905,6,12\nload_site\t4911,4,65535\nload_site\t4935,2,0\nload_site\t4952,3,0\nload_site\t4955,9,0\nload_site\t4977,3,65535\nload_site\t4980,4,65535\nload_site\t4984,4,0\nload_site\t4993,5,0\nload_site\t4998,4,65535\nload_site\t5008,6,12\nload_site\t5040,3,0\nload_site\t5043,4,1\nload_site\t5073,4,1\nload_site\t5088,4,1\nload_site\t5096,3,1\nload_site\t5101,3,1\nload_site\t5107,4,1\nload_site\t5129,5,2\nload_site\t5134,5,6\nload_site\t5139,2,6\nload_site\t5148,4,2\nload_site\t5184,4,1\nload_site\t5191,4,7\nload_site\t5216,5,65535\nload_site\t5248,2,0\nload_site\t5265,3,0\nload_site\t5268,9,0\nload_site\t5292,5,65535\nload_site\t5300,4,65535\nload_site\t5349,2,0\nload_site\t5366,3,0\nload_site\t5369,9,0\nload_site\t5406,4,0\nload_site\t5430,5,0\nload_site\t5440,5,0\nload_site\t5447,4,0\nload_site\t5464,5,0\nload_site\t5473,3,65535\nload_site\t5478,5,0\nload_site\t5516,4,6\nload_site\t5551,5,1\nload_site\t5556,3,1\nload_site\t5592,2,0\nload_site\t5622,2,0\nload_site\t5664,2,0\nload_site\t5707,5,0\nload_site\t5712,3,0\nload_site\t5724,5,65535\nload_site\t5731,5,65535\nload_site\t5743,4,0\nload_site\t5763,5,7\nload_site\t5800,2,0\nload_site\t5836,2,1\nload_site\t5838,7,65535\nload_site\t5851,3,1\nload_site\t5854,7,65535\nload_site\t5867,3,1\nload_site\t5870,7,65535\nload_site\t5883,3,1\nload_site\t5886,7,65535\nload_site\t5927,3,0\nload_site\t5930,4,1\nload_site\t5960,4,1\nload_site\t5968,3,1\nload_site\t5973,3,1\nload_site\t5979,4,1\nload_site\t5993,5,1\nload_site\t5998,4,1\nload_site\t6002,5,2\nload_site\t6039,4,2\nload_site\t6070,5,2\nload_site\t6082,4,6\nload_site\t6086,8,7\nload_site\t6094,8,2\nload_site\t6118,4,0\nload_site\t6146,2,0\nload_site\t6163,3,0\nload_site\t6166,9,0\nload_site\t6188,2,65535\nload_site\t6190,8,0\nload_site\t6198,4,65535\nload_site\t6202,5,5\nload_site\t6228,3,65535\nload_site\t6256,2,0\nload_site\t6282,2,0\nload_site\t6317,2,0\nload_site\t6359,5,7\nload_site\t6378,4,1\nload_site\t6382,2,65535\nload_site\t6390,4,65535\nload_site\t6399,4,65535\nload_site\t6407,4,65535\nload_site\t6416,6,65535\nload_site\t6440,4,65535\nload_site\t6449,4,6\nload_site\t6456,4,2\nload_site\t6465,4,1\nload_site\t6471,4,2\nload_site\t6478,4,6\nload_site\t6487,4,2\nload_site\t6496,4,1\nload_site\t6581,2,0\nload_site\t6598,3,0\nload_site\t6601,9,0\nload_site\t6639,5,1\nload_site\t6677,4,65535\nload_site\t6681,4,0\nload_site\t6706,2,0\nload_site\t6723,3,0\nload_site\t6726,9,0\nload_site\t6748,4,65535\nload_site\t6782,3,65535\nload_site\t6810,2,0\nload_site\t6840,2,0\nload_site\t6875,2,0\nload_site\t6926,5,7\nload_site\t6945,4,1\nload_site\t6949,2,65535\nload_site\t6957,4,65535\nload_site\t6966,4,65535\nload_site\t6974,4,65535\nload_site\t6978,5,13\nload_site\t6983,5,1\nload_site\t6992,5,65535\nload_site\t6999,5,65535\nload_site\t7016,5,7\nload_site\t7034,5,65535\nload_site\t7054,4,1\nload_site\t7083,5,13\nload_site\t7094,4,0\nload_site\t7123,2,0\nload_site\t7152,5,13\nload_site\t7160,5,65535\nload_site\t7171,5,65535\nload_site\t7207,2,0\nload_site\t7224,3,0\nload_site\t7227,9,0\nload_site\t7265,4,1\nload_site\t7292,4,0\nload_site\t7353,3,0\nload_site\t7404,2,0\nload_site\t7421,3,0\nload_site\t7424,9,0\nload_site\t7446,3,65535\nload_site\t7494,2,0\nload_site\t7549,2,0\nload_site\t7566,3,0\nload_site\t7569,9,0\nload_site\t7591,5,1\nload_site\t7600,3,65535\nload_site\t7610,4,65535\nload_site\t7634,2,0\nload_site\t7651,3,0\nload_site\t7654,9,0\nload_site\t7676,3,65535\nload_site\t7679,4,65535\nload_site\t7683,4,0\nload_site\t7692,8,0\nload_site\t7700,4,65535\nload_site\t7710,5,5\nload_site\t7766,2,0\nload_site\t7783,3,0\nload_site\t7786,9,0\nload_site\t7808,3,65535\nload_site\t7816,5,65535\nload_site\t7848,2,0\nload_site\t7865,3,0\nload_site\t7868,9,0\nload_site\t7892,5,65535\nload_site\t7900,4,65535\nload_site\t7949,2,0\nload_site\t7966,3,0\nload_site\t7969,9,0\nload_site\t8011,4,0\nload_site\t8031,5,0\nload_site\t8051,4,0\nload_site\t8072,5,0\nload_site\t8077,3,65535\nload_site\t8082,4,7\nload_site\t8088,5,0\nload_site\t8118,4,6\nload_site\t8151,5,1\nload_site\t8156,3,1\nload_site\t8192,2,0\nload_site\t8222,2,0\nload_site\t8261,2,0\nload_site\t8307,5,0\nload_site\t8312,3,0\nload_site\t8324,5,65535\nload_site\t8331,5,65535\nload_site\t8338,5,0\nload_site\t8348,4,0\nload_site\t8368,5,7\nload_site\t8405,2,0\nload_site\t8441,2,7\nload_site\t8443,4,2\nload_site\t8447,8,6\nload_site\t8455,8,1\nload_site\t8463,7,65535\nload_site\t8484,4,0\nload_site\t8512,2,0\nload_site\t8529,3,0\nload_site\t8532,9,0\nload_site\t8554,2,65535\nload_site\t8556,8,0\nload_site\t8564,4,65535\nload_site\t8601,2,0\nload_site\t8618,3,0\nload_site\t8621,9,0\nload_site\t8639,4,65535\nload_site\t8668,2,0\nload_site\t8685,3,0\nload_site\t8688,9,0\nload_site\t8706,3,65535\nload_site\t8802,2,0\nload_site\t8819,3,0\nload_site\t8822,9,0\nload_site\t8840,3,65535\nload_site\t8843,4,65535\nload_site\t8858,2,12\nload_site\t8860,1,5\nload_site\t8917,2,0\nload_site\t8934,3,0\nload_site\t8937,9,0\nload_site\t8959,4,65535\nload_site\t8968,3,0\nload_site\t8971,4,1\nload_site\t9001,4,1\nload_site\t9014,6,1\nload_site\t9024,4,1\nload_site\t9030,3,1\nload_site\t9036,4,1\nload_site\t9056,5,2\nload_site\t9061,8,6\nload_site\t9069,2,6\nload_site\t9078,4,2\nload_site\t9114,4,1\nload_site\t9121,4,7\nload_site\t9143,4,2\nload_site\t9251,3,0\nload_site\t9254,4,1\nload_site\t9284,6,1\nload_site\t9294,4,1\nload_site\t9300,3,1\nload_site\t9306,4,1\nload_site\t9320,5,1\nload_site\t9325,4,1\nload_site\t9329,5,2\nload_site\t9366,5,2\nload_site\t9393,8,2\nload_site\t9401,3,1\nload_site\t9404,4,2\nload_site\t9427,4,65535\nload_site\t9436,4,0\nload_site\t9472,4,0\nload_site\t9492,5,7\nload_site\t9504,4,65535\nload_site\t9508,4,65535\nload_site\t9512,5,0\nload_site\t9554,2,0\nload_site\t9571,3,0\nload_site\t9574,9,0\nload_site\t9612,5,1\nload_site\t9643,4,65535\nload_site\t9647,4,0\nload_site\t9672,2,0\nload_site\t9689,3,0\nload_site\t9692,9,0\nload_site\t9710,4,65535\nload_site\t9716,4,0\nload_site\t9752,4,0\nload_site\t9772,5,7\nload_site\t9784,4,65535\nload_site\t9788,4,65535\nload_site\t9792,5,0\nload_site\t9806,2,0\nload_site\t9808,3,1\nload_site\t9817,3,6\nload_site\t9918,4,6\nload_site\t9925,5,8\nload_site\t9937,5,9\nload_site\t9949,4,6\nload_site\t10028,1,65535\nload_site\t10116,1,65535\nload_site\t10117,10,65535\nload_site\t10129,2,0\nload_site\t10131,6,65535\nload_site\t10139,6,0\nload_site\t10145,6,2\nload_site\t10169,1,65535\nload_site\t10183,1,65535\nload_site\t10184,6,0\nload_site\t10239,1,65535\nload_site\t10240,7,8\nload_site\t10260,7,8\nload_site\t10351,7,8\nload_site\t10364,7,2\nload_site\t10389,7,0\nload_site\t10404,7,65535\nload_site\t10422,7,1\nload_site\t10429,6,65535\nload_site\t10441,7,1\nload_site\t10448,6,65535\nload_site\t10460,7,1\nload_site\t10467,6,65535\nload_site\t10479,7,1\nload_site\t10486,6,65535\nload_site\t10498,1,65535\nload_site\t10499,7,0\nload_site\t10528,1,65535\nload_site\t10529,7,8\nload_site\t10549,7,9\nload_site\t10556,7,8\nload_site\t10647,7,8\nload_site\t10660,7,2\nload_site\t10685,7,0\nload_site\t10700,7,65535\nload_site\t10713,7,1\nload_site\t10720,7,65535\nload_site\t10733,1,65535\nload_site\t10734,7,1\nload_site\t10741,6,65535\nload_site\t10753,7,1\nload_site\t10760,6,65535\nload_site\t10772,7,1\nload_site\t10779,6,65535\nload_site\t10791,7,1\nload_site\t10798,6,65535\nload_site\t10810,7,1\nload_site\t10817,6,65535\nload_site\t10829,7,1\nload_site\t10836,6,65535\nload_site\t10848,7,1\nload_site\t10855,6,65535\nload_site\t10867,7,1\nload_site\t10874,6,65535\nload_site\t10886,1,65535\nload_site\t10887,7,0\nload_site\t10916,1,65535\nload_site\t10917,7,8\nload_site\t10937,7,10\nload_site\t10944,7,9\nload_site\t10951,7,8\nload_site\t11042,7,8\nload_site\t11055,7,2\nload_site\t11080,7,0\nload_site\t11095,7,65535\nload_site\t11108,7,1\nload_site\t11115,7,65535\nload_site\t11133,7,1\nload_site\t11140,6,65535\nload_site\t11152,7,1\nload_site\t11159,6,65535\nload_site\t11171,7,1\nload_site\t11178,6,65535\nload_site\t11190,7,1\nload_site\t11197,6,65535\nload_site\t11209,7,1\nload_site\t11216,6,65535\nload_site\t11228,7,1\nload_site\t11235,6,65535\nload_site\t11247,7,1\nload_site\t11254,6,65535\nload_site\t11266,7,1\nload_site\t11273,6,65535\nload_site\t11285,7,1\nload_site\t11292,6,65535\nload_site\t11304,7,1\nload_site\t11311,6,65535\nload_site\t11323,7,1\nload_site\t11330,6,65535\nload_site\t11342,7,1\nload_site\t11349,6,65535\nload_site\t11361,1,65535\nload_site\t11362,7,0\nload_site\t11391,1,65535\nload_site\t11392,7,8\nload_site\t11412,7,8\nload_site\t11419,7,9\nload_site\t11426,7,10\nload_site\t11523,7,8\nload_site\t11614,7,8\nload_site\t11627,7,2\nload_site\t11652,7,0\nload_site\t11667,7,65535\nload_site\t11680,7,1\nload_site\t11687,7,65535\nload_site\t11700,7,1\nload_site\t11707,7,65535\nload_site\t11720,1,65535\nload_site\t11721,7,1\nload_site\t11728,6,65535\nload_site\t11740,7,1\nload_site\t11747,6,65535\nload_site\t11759,7,1\nload_site\t11766,6,65535\nload_site\t11778,7,1\nload_site\t11785,6,65535\nload_site\t11797,7,1\nload_site\t11804,6,65535\nload_site\t11816,7,1\nload_site\t11823,6,65535\nload_site\t11835,7,1\nload_site\t11842,6,65535\nload_site\t11854,7,1\nload_site\t11861,6,65535\nload_site\t11873,7,1\nload_site\t11880,6,65535\nload_site\t11892,7,1\nload_site\t11899,6,65535\nload_site\t11911,7,1\nload_site\t11918,6,65535\nload_site\t11930,7,1\nload_site\t11937,6,65535\nload_site\t11949,7,1\nload_site\t11956,6,65535\nload_site\t11968,7,1\nload_site\t11975,6,65535\nload_site\t11987,7,1\nload_site\t11994,6,65535\nload_site\t12006,7,1\nload_site\t12013,6,65535\nload_site\t12025,1,65535\nload_site\t12026,7,0\nload_site\t12055,1,65535\nload_site\t12056,10,65535\nload_site\t12072,8,65535\nload_site\t12086,7,10\nload_site\t12093,7,65535\nload_site\t12109,7,2\nload_site\t12125,7,11\nload_site\t12160,8,0\nload_site\t12189,8,7\nload_site\t12197,7,0\nload_site\t12204,7,0\nload_site\t12247,6,0\nload_site\t12253,6,0\nload_site\t12322,10,65535\nload_site\t12368,1,65535\nload_site\t12371,1,65535\nload_site\t12385,1,65535\n",
+    "helper_sites": [
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 70,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 1597,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 1797,
+        "map": "vip_map",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 1869,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_get_smp_processor_id",
+        "input_offset": 1930,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 1959,
+        "map": "lru_mapping",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 1993,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 2071,
+        "map": "quic_stats_map",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 2243,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 2382,
+        "map": "vip_map",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 2517,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 2691,
+        "map": "vip_map",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 2765,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_get_smp_processor_id",
+        "input_offset": 2826,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 2855,
+        "map": "lru_mapping",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 2889,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 2967,
+        "map": "quic_stats_map",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 3129,
+        "map": "vip_map",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 3191,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 3337,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 3400,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 3486,
+        "map": "server_id_stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 3552,
+        "map": "server_id_stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 3743,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_ktime_get_ns",
+        "input_offset": 3765,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 3827,
+        "map": "reals",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 3881,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_ktime_get_ns",
+        "input_offset": 3900,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 3972,
+        "map": "vip_to_down_reals_map",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 3988,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 4018,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 4067,
+        "map": "ctl_array",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 4108,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 4150,
+        "map": "reals_stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_xdp_adjust_head",
+        "input_offset": 4211,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 4426,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 4493,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_ktime_get_ns",
+        "input_offset": 4511,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 4699,
+        "map": "ch_rings",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 4749,
+        "map": "reals",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_update_elem",
+        "input_offset": 4829,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 4853,
+        "map": "vip_miss_stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_xdp_adjust_head",
+        "input_offset": 4942,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 5168,
+        "map": "lru_miss_stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 5244,
+        "map": "server_id_map",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 5283,
+        "map": "reals",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 5304,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 5516,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_ktime_get_ns",
+        "input_offset": 5535,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 5604,
+        "map": "server_id_stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 5674,
+        "map": "server_id_map",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 5713,
+        "map": "reals",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 5743,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 5831,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_ktime_get_ns",
+        "input_offset": 5853,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 5924,
+        "map": "reals",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 5978,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_ktime_get_ns",
+        "input_offset": 5997,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 6069,
+        "map": "vip_to_down_reals_map",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 6085,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 6115,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 6171,
+        "map": "ctl_array",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 6206,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 6257,
+        "map": "reals_stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_xdp_adjust_head",
+        "input_offset": 6320,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 6352,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 6400,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 6467,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_ktime_get_ns",
+        "input_offset": 6485,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 6673,
+        "map": "ch_rings",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 6720,
+        "map": "reals",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_update_elem",
+        "input_offset": 6808,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 6832,
+        "map": "vip_miss_stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 6911,
+        "map": "lru_miss_stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 6962,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 6995,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 7096,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_xdp_adjust_head",
+        "input_offset": 7142,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 7174,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_update_elem",
+        "input_offset": 7725,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 7774,
+        "map": "stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_ktime_get_ns",
+        "input_offset": 7793,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_lookup_elem",
+        "input_offset": 7855,
+        "map": "server_id_stats",
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      },
+      {
+        "helper": "bpf_map_update_elem",
+        "input_offset": 7931,
+        "map": null,
+        "proof_mode": false,
+        "symbol": "balancer_ingress"
+      }
+    ],
+    "helper_counts": {
+      "bpf_map_lookup_elem": 66,
+      "bpf_get_smp_processor_id": 2,
+      "bpf_ktime_get_ns": 8,
+      "bpf_xdp_adjust_head": 4,
+      "bpf_map_update_elem": 4
+    },
+    "lookup_maps": [
+      {
+        "name": "ch_rings",
+        "kind": "array",
+        "target_addr": 18446744072103889408,
+        "key_offset": 0,
+        "max_entries": 33554944,
+        "elem_size": 8,
+        "index_mask": 67108863,
+        "value_offset": 304,
+        "percpu_base_addr": 0,
+        "map_name": "ch_rings"
+      },
+      {
+        "name": "ctl_array",
+        "kind": "array",
+        "target_addr": 18446744072103889408,
+        "key_offset": 0,
+        "max_entries": 16,
+        "elem_size": 8,
+        "index_mask": 15,
+        "value_offset": 304,
+        "percpu_base_addr": 0,
+        "map_name": "ctl_array"
+      },
+      {
+        "name": "decap_vip_stats",
+        "kind": "percpu_array",
+        "target_addr": 18446744072103889408,
+        "key_offset": 0,
+        "max_entries": 512,
+        "elem_size": 8,
+        "index_mask": 511,
+        "value_offset": 304,
+        "percpu_base_addr": 18446744072152088616,
+        "map_name": "decap_vip_stats"
+      },
+      {
+        "name": "fallback_cache",
+        "kind": "lru_hash",
+        "target_addr": 18446744072103946704,
+        "key_offset": 88,
+        "max_entries": 0,
+        "elem_size": 0,
+        "index_mask": 0,
+        "value_offset": 35,
+        "percpu_base_addr": 0,
+        "map_name": "fallback_cache"
+      },
+      {
+        "name": "lru_mapping",
+        "kind": "call",
+        "target_addr": 18446744072103966080,
+        "key_offset": 0,
+        "max_entries": 0,
+        "elem_size": 0,
+        "index_mask": 0,
+        "value_offset": 0,
+        "percpu_base_addr": 0,
+        "map_name": "lru_mapping"
+      },
+      {
+        "name": "lru_miss_stats",
+        "kind": "percpu_array",
+        "target_addr": 18446744072103889408,
+        "key_offset": 0,
+        "max_entries": 4096,
+        "elem_size": 8,
+        "index_mask": 4095,
+        "value_offset": 304,
+        "percpu_base_addr": 18446744072152088616,
+        "map_name": "lru_miss_stats"
+      },
+      {
+        "name": "quic_stats_map",
+        "kind": "percpu_array",
+        "target_addr": 18446744072103889408,
+        "key_offset": 0,
+        "max_entries": 1,
+        "elem_size": 8,
+        "index_mask": 0,
+        "value_offset": 304,
+        "percpu_base_addr": 18446744072152088616,
+        "map_name": "quic_stats_map"
+      },
+      {
+        "name": "reals",
+        "kind": "array",
+        "target_addr": 18446744072103889408,
+        "key_offset": 0,
+        "max_entries": 4096,
+        "elem_size": 24,
+        "index_mask": 4095,
+        "value_offset": 304,
+        "percpu_base_addr": 0,
+        "map_name": "reals"
+      },
+      {
+        "name": "reals_stats",
+        "kind": "percpu_array",
+        "target_addr": 18446744072103889408,
+        "key_offset": 0,
+        "max_entries": 4096,
+        "elem_size": 8,
+        "index_mask": 4095,
+        "value_offset": 304,
+        "percpu_base_addr": 18446744072152088616,
+        "map_name": "reals_stats"
+      },
+      {
+        "name": "server_id_map",
+        "kind": "array",
+        "target_addr": 18446744072103889408,
+        "key_offset": 0,
+        "max_entries": 16777214,
+        "elem_size": 8,
+        "index_mask": 16777215,
+        "value_offset": 304,
+        "percpu_base_addr": 0,
+        "map_name": "server_id_map"
+      },
+      {
+        "name": "server_id_stats",
+        "kind": "percpu_array",
+        "target_addr": 18446744072103889408,
+        "key_offset": 0,
+        "max_entries": 512,
+        "elem_size": 8,
+        "index_mask": 511,
+        "value_offset": 304,
+        "percpu_base_addr": 18446744072152088616,
+        "map_name": "server_id_stats"
+      },
+      {
+        "name": "stable_rt_stats",
+        "kind": "percpu_array",
+        "target_addr": 18446744072103889408,
+        "key_offset": 0,
+        "max_entries": 1,
+        "elem_size": 8,
+        "index_mask": 0,
+        "value_offset": 304,
+        "percpu_base_addr": 18446744072152088616,
+        "map_name": "stable_rt_stats"
+      },
+      {
+        "name": "stats",
+        "kind": "percpu_array",
+        "target_addr": 18446744072103889408,
+        "key_offset": 0,
+        "max_entries": 1024,
+        "elem_size": 8,
+        "index_mask": 1023,
+        "value_offset": 304,
+        "percpu_base_addr": 18446744072152088616,
+        "map_name": "stats"
+      },
+      {
+        "name": "tpr_stats_map",
+        "kind": "percpu_array",
+        "target_addr": 18446744072103889408,
+        "key_offset": 0,
+        "max_entries": 1,
+        "elem_size": 8,
+        "index_mask": 0,
+        "value_offset": 304,
+        "percpu_base_addr": 18446744072152088616,
+        "map_name": "tpr_stats_map"
+      },
+      {
+        "name": "vip_map",
+        "kind": "hash",
+        "target_addr": 18446744072103946704,
+        "key_offset": 72,
+        "max_entries": 0,
+        "elem_size": 0,
+        "index_mask": 0,
+        "value_offset": 0,
+        "percpu_base_addr": 0,
+        "map_name": "vip_map"
+      },
+      {
+        "name": "vip_miss_stats",
+        "kind": "array",
+        "target_addr": 18446744072103889408,
+        "key_offset": 0,
+        "max_entries": 1,
+        "elem_size": 24,
+        "index_mask": 0,
+        "value_offset": 304,
+        "percpu_base_addr": 0,
+        "map_name": "vip_miss_stats"
+      },
+      {
+        "name": "vip_to_down_rea",
+        "kind": "hash_of_maps",
+        "target_addr": 18446744072103946704,
+        "key_offset": 72,
+        "max_entries": 0,
+        "elem_size": 0,
+        "index_mask": 0,
+        "value_offset": 0,
+        "percpu_base_addr": 0,
+        "map_name": "vip_to_down_rea"
+      },
+      {
+        "name": "vip_to_down_reals_map",
+        "kind": "hash_of_maps",
+        "target_addr": 18446744072103946704,
+        "key_offset": 72,
+        "max_entries": 0,
+        "elem_size": 0,
+        "index_mask": 0,
+        "value_offset": 0,
+        "percpu_base_addr": 0,
+        "map_name": "vip_to_down_reals_map"
+      }
+    ],
+    "scope": "Normal proof-to-kernel replay of supplied facts; compare hashes with captured run to establish identity; no kernel execution"
+  }
+}
