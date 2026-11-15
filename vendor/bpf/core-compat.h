@@ -379,6 +379,10 @@ static void __kprog_core_unanswered(void)
 })
 #endif
 
+/* An app that declares its helpers as function-pointer variables (the libbpf
+ * style OTel uses) reaches them through __kprog_extern_helper, which names the
+ * object the same way with the declaration folded into a typedef. */
+#ifndef __KPROG_HELPERS_ARE_POINTERS
 extern void *bpf_map_lookup_elem(void *map, const void *key);
 extern long bpf_map_update_elem(void *map, const void *key, const void *value,
                                 unsigned long long flags);
@@ -423,6 +427,7 @@ extern long bpf_skb_load_bytes(void *skb, unsigned int offset, void *to,
 extern long bpf_skb_load_bytes_relative(void *skb, unsigned int offset,
                                         void *to, unsigned int len,
                                         unsigned int start_header);
+#endif /* __KPROG_HELPERS_ARE_POINTERS */
 
 #ifdef MICRO_NATIVE_HELPER_MACROS
 static __always_inline unsigned long native_helper_id0(unsigned long id)
@@ -482,6 +487,8 @@ static __always_inline unsigned long native_helper_id5(unsigned long id,
 #define native_bpf_helper0(type, id) ((type)native_helper_id0((unsigned long)(id)))
 #define native_bpf_helper1(type, id, a0) \
     ((type)native_helper_id1((unsigned long)(id), (unsigned long)(a0)))
+#define __kprog_va1(a, ...) a
+
 #define native_bpf_helper2(type, id, a0, a1) \
     ((type)native_helper_id2((unsigned long)(id), (unsigned long)(a0), (unsigned long)(a1)))
 #define native_bpf_helper3(type, id, a0, a1, a2) \
@@ -508,6 +515,7 @@ static __always_inline unsigned long native_helper_id5(unsigned long id,
 #define NATIVE_BPF_FUNC_get_current_uid_gid 15
 #define NATIVE_BPF_FUNC_get_current_comm 16
 #define NATIVE_BPF_FUNC_perf_event_output 25
+#define NATIVE_BPF_FUNC_trace_printk 6
 #define NATIVE_BPF_FUNC_skb_load_bytes 26
 #define NATIVE_BPF_FUNC_get_stackid 27
 #define NATIVE_BPF_FUNC_get_current_task 35
@@ -679,6 +687,22 @@ static __always_inline unsigned long native_helper_id5(unsigned long id,
     native_bpf_helper5(long (*)(void *, void *, unsigned long long, void *, unsigned long long), \
                        NATIVE_BPF_FUNC_perf_event_output, (ctx), (map), (flags), (data), (size))( \
         (ctx), (map), (flags), (data), (size))
+/* trace_printk takes three format arguments in registers and the kernel reads
+ * only the ones the format names, so a short call pads with zeros. */
+static __always_inline long __kprog_trace_printk(const char *fmt, unsigned int size,
+                                                 unsigned long long a1,
+                                                 unsigned long long a2,
+                                                 unsigned long long a3)
+{
+    return (long)native_helper_id5(NATIVE_BPF_FUNC_trace_printk,
+                                   (unsigned long)fmt, (unsigned long)size,
+                                   a1, a2, a3);
+}
+#define __kprog_trace_printk_pad(fmt, size, a1, a2, a3, ...) \
+    __kprog_trace_printk((fmt), (size), (unsigned long long)(a1), \
+                         (unsigned long long)(a2), (unsigned long long)(a3))
+#undef bpf_trace_printk
+#define bpf_trace_printk(...) __kprog_trace_printk_pad(__VA_ARGS__, 0, 0, 0)
 #undef bpf_ringbuf_output
 #define bpf_ringbuf_output(ringbuf, data, size, flags) \
     native_bpf_helper4(long (*)(void *, void *, unsigned long long, unsigned long long), \

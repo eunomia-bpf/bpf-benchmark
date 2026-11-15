@@ -134,7 +134,14 @@ $(CORE_ANSWERS)/tetragon.h: $(CORE_ANSWERS_PY) $(wildcard tetragon/bpf/lib/*.h) 
 		--cflags "$(TETRAGON_CORE_CFLAGS)" --out "$@" --report "$(CORE_ANSWERS)/tetragon.json" \
 		tetragon/bpf/process tetragon/bpf/lib tetragon/bpf/errmetrics tetragon/bpf/cgroup
 
-CORE_ANSWER_TABLES := $(CORE_ANSWERS)/bcc.h $(CORE_ANSWERS)/tracee.h $(CORE_ANSWERS)/tetragon.h
+# OTel makes no CO-RE query; an empty table still gates a query it starts to make.
+$(CORE_ANSWERS)/otel.h: $(CORE_ANSWERS_PY) $(wildcard otel/support/ebpf/*.h)
+	install -d "$(CORE_ANSWERS)"
+	python3 "$(CORE_ANSWERS_PY)" --btf "$(VMLINUX_BTF)" --bpftool "$(BPFTOOL)" --clang "$(CLANG)" \
+		--cflags "-Iotel/support/ebpf -I. -I/usr/include -I/usr/include/x86_64-linux-gnu" \
+		--out "$@" --report "$(CORE_ANSWERS)/otel.json" otel/support/ebpf
+
+CORE_ANSWER_TABLES := $(CORE_ANSWERS)/bcc.h $(CORE_ANSWERS)/tracee.h $(CORE_ANSWERS)/tetragon.h $(CORE_ANSWERS)/otel.h
 # Everything a CO-RE app's native objects need: the compat scaffolding and the
 # app's own answer table.
 core_flags = -include "$(CURDIR)/core-compat.h" -D__KPROG_CORE_ANSWERS='"$(1)"'
@@ -249,9 +256,10 @@ $(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c
 $(OTEL_EBPF_DIR)/errors.h: otel/tools/errors-codegen/errors.json otel/tools/errors-codegen/main.go
 	$(MAKE) -C "$(CURDIR)/$(OTEL_EBPF_DIR)" errors.h
 
-$(NATIVE_OUT)/otel/%.native.o: $(OTEL_EBPF_DIR)/%.ebpf.c $(OTEL_EBPF_DIR)/errors.h
+$(NATIVE_OUT)/otel/%.native.o: $(OTEL_EBPF_DIR)/%.ebpf.c $(OTEL_EBPF_DIR)/errors.h $(CORE_ANSWERS)/otel.h
 	install -d "$(dir $@)"
-	"$(CLANG)" $(NATIVE_CFLAGS) \
+	"$(CLANG)" $(NATIVE_CFLAGS) $(call core_flags,$(CORE_ANSWERS)/otel.h) \
+		-DMICRO_NATIVE_HELPER_MACROS -D__KPROG_HELPERS_ARE_POINTERS \
 		-Wno-unused-function -Wno-unused-variable \
 		-I"$(CURDIR)/$(OTEL_EBPF_DIR)" \
 		-o "$@" "$<"

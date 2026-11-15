@@ -462,10 +462,11 @@ def main() -> None:
         sources += sorted(p for p in d.rglob("*") if p.suffix in (".c", ".h"))
     work = Path(tempfile.mkdtemp(prefix="core-answers-"))
     queries, per_tu, types = scan(sources, args.clang, args.cflags.split(), work)
-    if not queries:
-        sys.exit("core-answers: no CO-RE queries found")
 
-    btf = Btf(args.bpftool, args.btf)
+    # An app that makes no CO-RE query still gets a table: every lookup macro
+    # exists, so a query it starts to make fails the compile instead of
+    # silently picking up a default.
+    btf = Btf(args.bpftool, args.btf) if queries else None
     report = []
     unresolved = []
     answered: dict[tuple[str, str], tuple[int, str]] = {}
