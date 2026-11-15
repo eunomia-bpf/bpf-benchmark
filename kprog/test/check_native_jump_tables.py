@@ -113,15 +113,69 @@ def main():
         b_status = dict(status='not_generated', error=str(error))
     else:
         b_status = dict(status='generated', scope='Generation only; not compiled or stock verified')
+    model_executions, refusal_cases = [], []
+    if b_status['status'] == 'generated':
+        prelude = '''extern unsigned long long table_test_seed;
+#undef X86_SIM_L_UNSPECIFIED
+#define X86_SIM_L_UNSPECIFIED() table_test_seed
+extern void table_test_unresolved(void);
+#define __x86_sim_unresolved_indirect_target table_test_unresolved
+'''
+        model = args.build/'jump-table-model.c'
+        model.write_text(generator.render_program('table_model', body, subfunctions,
+            kind='raw', program_section='socket/table_model', exit_addr=exit_address,
+            rodata16=data, source_prelude=prelude))
+        adapter = args.build/'jump-table-model-input.c'
+        adapter.write_text('''#include <stdlib.h>
+unsigned long long table_test_seed;
+void table_test_unresolved(void) { abort(); }
+''')
+        library = args.build/'jump-table-model.so'
+        run(['clang-18', '-shared', '-fPIC', '-O2', '-w', '-I', ROOT/'kprog/x86/micro-prog',
+             '-I', ROOT/'vendor/libbpf/src', model, adapter, '-o', library])
+        loaded = ctypes.CDLL(str(library))
+        seed_value = ctypes.c_uint64.in_dll(loaded, 'table_test_seed')
+        function = loaded.table_model_x86_sim_xdp
+        function.argtypes = [ctypes.c_void_p]
+        function.restype = ctypes.c_uint32
+        for row in executions:
+            values = [(row['seed'] * 0x9e3779b97f4a7c15 + i * 0xd1b54a32d192ed03) & mask for i in range(8)]
+            array = (ctypes.c_uint64 * 8)(*values)
+            seed_value.value = row['index']
+            actual_value = function(ctypes.cast(array, ctypes.c_void_p))
+            expected_value = row['expected'] & 0xffffffff
+            if actual_value != expected_value:
+                raise ValueError(f'Shared simulator mismatch: {row}: {actual_value} != {expected_value}')
+            model_executions.append(dict(seed=row['seed'], index=row['index'],
+                                         actual=actual_value, expected=expected_value))
+        flags = ['-target', 'x86_64-linux-gnu', '-O3', '-march=native', '-foptimize-sibling-calls',
+                 '-fomit-frame-pointer', '-mno-red-zone', '-mgeneral-regs-only', '-fno-stack-protector']
+        for name, define in [('live-flags', 'TEST_TABLE_LIVE_FLAGS'), ('partial-result', 'TEST_TABLE_PARTIAL_RESULT')]:
+            negative = args.build/f'{name}.native.o'
+            negative_proof = args.build/f'{name}.proof.o'
+            run(['clang-18', *flags, '-D'+define, '-c', ROOT/'kprog/test/native_jump_table.c', '-o', negative])
+            run([args.linker, '--input', negative, '--symbol', 'jump_table', '--mode', 'proof', '--output', negative_proof])
+            negative_body, negative_functions, negative_exit, negative_data = generator.parse_proof_object_program(name, args.build)
+            try:
+                generator.render_program('negative_table', negative_body, negative_functions,
+                    exit_addr=negative_exit, rodata16=negative_data)
+            except ValueError as error:
+                if 'live register or flag results' not in str(error):
+                    raise
+                refusal_cases.append(dict(case=name, error=str(error)))
+            else:
+                raise ValueError(f'{name}: private table state was incorrectly discarded')
     result = dict(source_sha256=hashlib.sha256(native.read_bytes()).hexdigest(),
                   proof_sha256=hashlib.sha256(proof.read_bytes()).hexdigest(),
                   native_sha256=hashlib.sha256(binary.read_bytes()).hexdigest(),
                   proof_targets=actual, expected_targets=expected, interior_target_rejected=True,
                   host_executions=executions, b_generation=b_status,
+                  shared_simulator_executions=model_executions, private_state_refusals=refusal_cases,
                   scope='Host native execution/proof relocation binding; no kernel/app acceptance or timing')
     (args.output/'result.json').write_text(json.dumps(result, indent=2)+'\n')
     run(['objdump', '-dr', '-Mintel', proof])
-    print(json.dumps(dict(proof_targets=len(actual), host_executions=len(executions), b_generation=b_status)))
+    print(json.dumps(dict(proof_targets=len(actual), host_executions=len(executions),
+                         shared_simulator_executions=len(model_executions), b_generation=b_status)))
 
 
 if __name__ == '__main__':
