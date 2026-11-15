@@ -72,7 +72,8 @@ def main():
         emitted += ['goto observed;','return_dispatch: switch (__x86_sim_ret_addr) {']
         emitted += [f'case 0x{addr:x}ULL: goto x86_l_{addr:x};' for addr in returns]
         emitted += ['default: abort();','}']
-        init=['X86_SIM_L_DECLARE_STATE(); X86_SIM_L_DECLARE_STACK(); __u8 __x86_sim_abi_kind=KPROG_ABI_KIND_XDP;',
+        init=['control_initialize_inputs();',
+              'X86_SIM_L_DECLARE_STATE(); X86_SIM_L_DECLARE_STACK(); __u8 __x86_sim_abi_kind=KPROG_ABI_KIND_XDP;',
               '__x86_native_stack_base=native_stack_base;']
         init += [f'__x86_{reg}.ptr=(void *)(uintptr_t)s->r[{j}];' for j,reg in enumerate(REGS)]
         init += ['for(unsigned k=0;k<64;k++) __x86_stack_mem.b[k]=s->stack[k];',
