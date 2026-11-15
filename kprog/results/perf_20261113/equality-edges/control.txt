@@ -1,0 +1,8 @@
+taskset -c 16-19 prlimit --as=8589934592 -- python3 /workspaces/repository/kprog/test/check_packet_identities.py --tool /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds --output /workspaces/kprog-raw/perf/20261115-equality-edges/control/identities
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/test/check_packet_identities.py", line 173, in <module>
+    check(args.tool, args.output, args.retained, args.build)
+  File "/workspaces/repository/kprog/test/check_packet_identities.py", line 150, in check
+    raise ValueError('Equality-edge folding lost a NULL/nonzero fact or guessed another edge')
+ValueError: Equality-edge folding lost a NULL/nonzero fact or guessed another edge
+make: *** [kprog/test/native-relocations.mk:197: bounds-single-control] Error 1

@@ -1,0 +1,17 @@
+{
+  "started": "2026-11-15T18:34:45Z",
+  "launcher_pid": 1155245,
+  "raw_directory": "/workspaces/kprog-raw/perf/20261115-otel-current-app-retry2",
+  "kernel_commit": "0993571747839a7e83c958dfea7ad777c9820ee5",
+  "image": "bpf-benchmark/kprog:current",
+  "image_revision": "fc5336c2747e",
+  "base_bounds_compiler_revision": "a7d9ab49cc3a",
+  "image_bundled_bounds_compiler_revision": "1965e868939e",
+  "target": "make -r -f kprog/test/scalar-spill-precision.mk checked-corpus",
+  "host_cpus": "16-19",
+  "guest_cpus": 2,
+  "guest_memory": "16G",
+  "address_space_bytes": 34359738368,
+  "image_lock": "shared",
+  "scope": "Functional checked OTel retry with base B compiler equality-edge folding and all LTO enabled; stock/install/output outcomes pending"
+}
