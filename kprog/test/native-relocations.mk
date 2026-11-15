@@ -192,3 +192,7 @@ guest-map-table-lookup-checked:
 	mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf
 	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
 	CLANG=$(ROOT)/kprog/stock-path/bin/clang python3 $(ROOT)/kprog/test/verify_retained_proof.py --native $(MAP_LOOKUP_BUILD)/lookup.native.o --metadata $(ROOT)/kprog/test/map_table_lookup_metadata.json --context $(ROOT)/kprog/test/table_context_load_context.json --source $(MAP_LOOKUP_BUILD)/original.bpf.o --proof $(MAP_LOOKUP_BUILD)/trusted_x86.bpf.o --symbol map_lookup_table --linker $(LINKER_BINARY) --checked-source $(MAP_LOOKUP_BUILD)/trusted_x86.bpf.i --checked-frontend $(MAP_LOOKUP_BUILD)/trusted_x86.bpf.bounds-input.bc --checked-compiler /workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir --output $(OUTPUT)/replay
+
+.PHONY: scheduled-table-b
+scheduled-table-b: $(CONTEXT_TOOL)
+	taskset -c 8-11 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_scheduled_table.py --build /var/tmp/kprog-tmp/perf/scheduled-table --output $(OUTPUT)/simulator --bounds $(CONTEXT_TOOL)
