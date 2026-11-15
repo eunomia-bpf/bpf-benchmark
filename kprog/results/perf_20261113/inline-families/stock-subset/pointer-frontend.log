@@ -1,0 +1,92 @@
+LLVM ERROR: out of memory
+Allocation failed
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace, preprocessed source, and associated run script.
+Stack dump:
+0.	Program arguments: /usr/lib/llvm-18/bin/clang -include /workspaces/repository/kprog/stock-path/bin/../include/stock_native_input.h -w -g -O3 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I /workspaces/repository/vendor/libbpf/include/uapi -I /workspaces/repository/vendor/libbpf/src -I /usr/include/x86_64-linux-gnu -emit-llvm -c /var/tmp/kprog-tmp/perf/scale/n100000_ptr_direct.bpf.i -o /var/tmp/kprog-tmp/perf/scale/n100000_ptr_direct.bpf.bounds-input.bc
+1.	<eof> parser at end of file
+2.	Optimizer
+ #0 0x0000787584b483bf llvm::sys::PrintStackTrace(llvm::raw_ostream&, int) build-llvm/tools/clang/stage2-bins/llvm/lib/Support/Unix/Signals.inc:723:13
+ #1 0x0000787584b464f9 llvm::sys::RunSignalHandlers() build-llvm/tools/clang/stage2-bins/llvm/lib/Support/Signals.cpp:106:18
+ #2 0x0000787584a92227 HandleCrash build-llvm/tools/clang/stage2-bins/llvm/lib/Support/CrashRecoveryContext.cpp:73:5
+ #3 0x0000787584a92227 CrashRecoverySignalHandler build-llvm/tools/clang/stage2-bins/llvm/lib/Support/CrashRecoveryContext.cpp:390:51
+ #4 0x0000787583952330 (/lib/x86_64-linux-gnu/libc.so.6+0x45330)
+ #5 0x00007875839abb2c pthread_kill (/lib/x86_64-linux-gnu/libc.so.6+0x9eb2c)
+ #6 0x000078758395227e raise (/lib/x86_64-linux-gnu/libc.so.6+0x4527e)
+ #7 0x00007875839358ff abort (/lib/x86_64-linux-gnu/libc.so.6+0x288ff)
+ #8 0x0000787584aa022d lock /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/std_mutex.h:117:2
+ #9 0x0000787584aa022d lock_guard /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/std_mutex.h:249:19
+#10 0x0000787584aa022d llvm::report_bad_alloc_error(char const*, bool) build-llvm/tools/clang/stage2-bins/llvm/lib/Support/ErrorHandling.cpp:153:33
+#11 0x0000787584aa0289 (/usr/lib/llvm-18/bin/../lib/libLLVM.so.18.1+0xcfe289)
+#12 0x0000787583bda9e8 aligned_alloc /build/gcc-14-FpLBWZ/gcc-14-14.2.0/build/x86_64-linux-gnu/libstdc++-v3/libsupc++/../../../../src/libstdc++-v3/libsupc++/new_opa.cc:78:28
+#13 0x0000787583bda9e8 operator new(unsigned long, std::align_val_t) /build/gcc-14-FpLBWZ/gcc-14-14.2.0/build/x86_64-linux-gnu/libstdc++-v3/libsupc++/../../../../src/libstdc++-v3/libsupc++/new_opa.cc:149:40
+#14 0x0000787584c366f7 grow build-llvm/tools/clang/stage2-bins/llvm/include/llvm/ADT/DenseMap.h:1113:36
+#15 0x0000787584c36610 grow build-llvm/tools/clang/stage2-bins/llvm/include/llvm/ADT/DenseMap.h:0:36
+#16 0x0000787584c36610 InsertIntoBucketImpl<llvm::BasicBlock *> build-llvm/tools/clang/stage2-bins/llvm/include/llvm/ADT/DenseMap.h:0:0
+#17 0x0000787584c36610 InsertIntoBucket<llvm::BasicBlock *> build-llvm/tools/clang/stage2-bins/llvm/include/llvm/ADT/DenseMap.h:574:17
+#18 0x0000787584c2a374 FindAndConstruct build-llvm/tools/clang/stage2-bins/llvm/include/llvm/ADT/DenseMap.h:0:13
+#19 0x0000787584c2a374 operator[] build-llvm/tools/clang/stage2-bins/llvm/include/llvm/ADT/DenseMap.h:369:12
+#20 0x0000787584c2a374 GraphDiff build-llvm/tools/clang/stage2-bins/llvm/include/llvm/Support/CFGDiff.h:101:7
+#21 0x0000787585f9ceac applyUpdates build-llvm/tools/clang/stage2-bins/llvm/include/llvm/Support/GenericDomTree.h:564:5
+#22 0x0000787585f9ceac llvm::DomTreeUpdater::applyDomTreeUpdates() build-llvm/tools/clang/stage2-bins/llvm/lib/Analysis/DomTreeUpdater.cpp:68:9
+#23 0x0000787585f9cf52 llvm::DomTreeUpdater::flush() build-llvm/tools/clang/stage2-bins/llvm/lib/Analysis/DomTreeUpdater.cpp:75:3
+#24 0x0000787585a5f316 SmallPtrSet build-llvm/tools/clang/stage2-bins/llvm/include/llvm/ADT/SmallPtrSet.h:465:25
+#25 0x0000787585a5f316 PreservedAnalyses build-llvm/tools/clang/stage2-bins/llvm/include/llvm/IR/PassManager.h:172:7
+#26 0x0000787585a5f316 getPreservedAnalysis build-llvm/tools/clang/stage2-bins/llvm/lib/Transforms/Scalar/JumpThreading.cpp:3132:21
+#27 0x0000787585a5f316 llvm::JumpThreadingPass::run(llvm::Function&, llvm::AnalysisManager<llvm::Function>&) build-llvm/tools/clang/stage2-bins/llvm/lib/Transforms/Scalar/JumpThreading.cpp:279:10
+#28 0x000078758cfd3936 build-llvm/tools/clang/stage2-bins/llvm/include/llvm/IR/PassManagerInternal.h:89:5
+#29 0x0000787584cd1551 llvm::PassManager<llvm::Function, llvm::AnalysisManager<llvm::Function>>::run(llvm::Function&, llvm::AnalysisManager<llvm::Function>&) build-llvm/tools/clang/stage2-bins/llvm/include/llvm/IR/PassManager.h:547:10
+#30 0x0000787586c35db6 build-llvm/tools/clang/stage2-bins/llvm/include/llvm/IR/PassManagerInternal.h:89:5
+#31 0x0000787585f47458 llvm::CGSCCToFunctionPassAdaptor::run(llvm::LazyCallGraph::SCC&, llvm::AnalysisManager<llvm::LazyCallGraph::SCC, llvm::LazyCallGraph&>&, llvm::LazyCallGraph&, llvm::CGSCCUpdateResult&) build-llvm/tools/clang/stage2-bins/llvm/lib/Analysis/CGSCCPassManager.cpp:540:23
+#32 0x0000787586c378a6 build-llvm/tools/clang/stage2-bins/llvm/include/llvm/IR/PassManagerInternal.h:89:5
+#33 0x0000787585f44563 llvm::PassManager<llvm::LazyCallGraph::SCC, llvm::AnalysisManager<llvm::LazyCallGraph::SCC, llvm::LazyCallGraph&>, llvm::LazyCallGraph&, llvm::CGSCCUpdateResult&>::run(llvm::LazyCallGraph::SCC&, llvm::AnalysisManager<llvm::LazyCallGraph::SCC, llvm::LazyCallGraph&>&, llvm::LazyCallGraph&, llvm::CGSCCUpdateResult&) build-llvm/tools/clang/stage2-bins/llvm/lib/Analysis/CGSCCPassManager.cpp:90:12
+#34 0x0000787585cb9e96 build-llvm/tools/clang/stage2-bins/llvm/include/llvm/IR/PassManagerInternal.h:89:5
+#35 0x0000787585f46237 llvm::DevirtSCCRepeatedPass::run(llvm::LazyCallGraph::SCC&, llvm::AnalysisManager<llvm::LazyCallGraph::SCC, llvm::LazyCallGraph&>&, llvm::LazyCallGraph&, llvm::CGSCCUpdateResult&) build-llvm/tools/clang/stage2-bins/llvm/lib/Analysis/CGSCCPassManager.cpp:0:38
+#36 0x0000787585cba526 build-llvm/tools/clang/stage2-bins/llvm/include/llvm/IR/PassManagerInternal.h:89:5
+#37 0x0000787585f45941 llvm::ModuleToPostOrderCGSCCPassAdaptor::run(llvm::Module&, llvm::AnalysisManager<llvm::Module>&) build-llvm/tools/clang/stage2-bins/llvm/lib/Analysis/CGSCCPassManager.cpp:278:18
+#38 0x0000787585cba316 build-llvm/tools/clang/stage2-bins/llvm/include/llvm/IR/PassManagerInternal.h:89:5
+#39 0x0000787584cd0261 llvm::PassManager<llvm::Module, llvm::AnalysisManager<llvm::Module>>::run(llvm::Module&, llvm::AnalysisManager<llvm::Module>&) build-llvm/tools/clang/stage2-bins/llvm/include/llvm/IR/PassManager.h:547:10
+#40 0x0000787585cb754c isSmall build-llvm/tools/clang/stage2-bins/llvm/include/llvm/ADT/SmallPtrSet.h:195:33
+#41 0x0000787585cb754c ~SmallPtrSetImplBase build-llvm/tools/clang/stage2-bins/llvm/include/llvm/ADT/SmallPtrSet.h:83:10
+#42 0x0000787585cb754c ~PreservedAnalyses build-llvm/tools/clang/stage2-bins/llvm/include/llvm/IR/PassManager.h:172:7
+#43 0x0000787585cb754c llvm::ModuleInlinerWrapperPass::run(llvm::Module&, llvm::AnalysisManager<llvm::Module>&) build-llvm/tools/clang/stage2-bins/llvm/lib/Transforms/IPO/Inliner.cpp:631:3
+#44 0x0000787587cc6f96 build-llvm/tools/clang/stage2-bins/llvm/include/llvm/IR/PassManagerInternal.h:89:5
+#45 0x0000787584cd0261 llvm::PassManager<llvm::Module, llvm::AnalysisManager<llvm::Module>>::run(llvm::Module&, llvm::AnalysisManager<llvm::Module>&) build-llvm/tools/clang/stage2-bins/llvm/include/llvm/IR/PassManager.h:547:10
+#46 0x000078758cfcc590 isSmall build-llvm/tools/clang/stage2-bins/llvm/include/llvm/ADT/SmallPtrSet.h:195:33
+#47 0x000078758cfcc590 ~SmallPtrSetImplBase build-llvm/tools/clang/stage2-bins/llvm/include/llvm/ADT/SmallPtrSet.h:83:10
+#48 0x000078758cfcc590 ~PreservedAnalyses build-llvm/tools/clang/stage2-bins/llvm/include/llvm/IR/PassManager.h:172:7
+#49 0x000078758cfcc590 RunOptimizationPipeline build-llvm/tools/clang/stage2-bins/clang/lib/CodeGen/BackendUtil.cpp:1101:5
+#50 0x000078758cfc3ef3 EmitAssembly build-llvm/tools/clang/stage2-bins/clang/lib/CodeGen/BackendUtil.cpp:0:3
+#51 0x000078758cfc3ef3 clang::EmitBackendOutput(clang::DiagnosticsEngine&, clang::HeaderSearchOptions const&, clang::CodeGenOptions const&, clang::TargetOptions const&, clang::LangOptions const&, llvm::StringRef, llvm::Module*, clang::BackendAction, llvm::IntrusiveRefCntPtr<llvm::vfs::FileSystem>, std::unique_ptr<llvm::raw_pwrite_stream, std::default_delete<llvm::raw_pwrite_stream>>, clang::BackendConsumer*) build-llvm/tools/clang/stage2-bins/clang/lib/CodeGen/BackendUtil.cpp:1328:13
+#52 0x000078758d34ca07 ~unique_ptr /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/unique_ptr.h:403:6
+#53 0x000078758d34ca07 clang::BackendConsumer::HandleTranslationUnit(clang::ASTContext&) build-llvm/tools/clang/stage2-bins/clang/lib/CodeGen/CodeGenAction.cpp:379:3
+#54 0x000078758bf443d6 __normal_iterator /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/stl_iterator.h:1077:20
+#55 0x000078758bf443d6 begin /usr/lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/stl_vector.h:874:16
+#56 0x000078758bf443d6 finalize<std::vector<std::unique_ptr<clang::TemplateInstantiationCallback, std::default_delete<clang::TemplateInstantiationCallback> >, std::allocator<std::unique_ptr<clang::TemplateInstantiationCallback, std::default_delete<clang::TemplateInstantiationCallback> > > > > build-llvm/tools/clang/stage2-bins/clang/include/clang/Sema/TemplateInstCallback.h:54:16
+#57 0x000078758bf443d6 clang::ParseAST(clang::Sema&, bool, bool) build-llvm/tools/clang/stage2-bins/clang/lib/Parse/ParseAST.cpp:183:3
+#58 0x000078758ddb362c clang::FrontendAction::Execute() build-llvm/tools/clang/stage2-bins/clang/lib/Frontend/FrontendAction.cpp:1073:10
+#59 0x000078758dd300b4 getPtr build-llvm/tools/clang/stage2-bins/llvm/include/llvm/Support/Error.h:279:12
+#60 0x000078758dd300b4 operator bool build-llvm/tools/clang/stage2-bins/llvm/include/llvm/Support/Error.h:239:16
+#61 0x000078758dd300b4 clang::CompilerInstance::ExecuteAction(clang::FrontendAction&) build-llvm/tools/clang/stage2-bins/clang/lib/Frontend/CompilerInstance.cpp:1057:23
+#62 0x000078758de2f63d clang::ExecuteCompilerInvocation(clang::CompilerInstance*) build-llvm/tools/clang/stage2-bins/clang/lib/FrontendTool/ExecuteCompilerInvocation.cpp:272:25
+#63 0x00005bb740aab42e cc1_main(llvm::ArrayRef<char const*>, char const*, void*) build-llvm/tools/clang/stage2-bins/clang/tools/driver/cc1_main.cpp:294:15
+#64 0x00005bb740aa8894 ExecuteCC1Tool build-llvm/tools/clang/stage2-bins/clang/tools/driver/driver.cpp:365:12
+#65 0x000078758d9e0972 operator() build-llvm/tools/clang/stage2-bins/clang/lib/Driver/Job.cpp:440:30
+#66 0x000078758d9e0972 callback_fn<(lambda at clang/lib/Driver/Job.cpp:440:22)> build-llvm/tools/clang/stage2-bins/llvm/include/llvm/ADT/STLFunctionalExtras.h:45:12
+#67 0x0000787584a91f77 operator() build-llvm/tools/clang/stage2-bins/llvm/include/llvm/ADT/STLFunctionalExtras.h:0:12
+#68 0x0000787584a91f77 llvm::CrashRecoveryContext::RunSafely(llvm::function_ref<void ()>) build-llvm/tools/clang/stage2-bins/llvm/lib/Support/CrashRecoveryContext.cpp:426:3
+#69 0x000078758d9e0237 clang::driver::CC1Command::Execute(llvm::ArrayRef<std::optional<llvm::StringRef>>, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*, bool*) const build-llvm/tools/clang/stage2-bins/clang/lib/Driver/Job.cpp:440:7
+#70 0x000078758d9a8518 clang::driver::Compilation::ExecuteCommand(clang::driver::Command const&, clang::driver::Command const*&, bool) const build-llvm/tools/clang/stage2-bins/clang/lib/Driver/Compilation.cpp:199:15
+#71 0x000078758d9a877f clang::driver::Compilation::ExecuteJobs(clang::driver::JobList const&, llvm::SmallVectorImpl<std::pair<int, clang::driver::Command const*>>&, bool) const build-llvm/tools/clang/stage2-bins/clang/lib/Driver/Compilation.cpp:253:13
+#72 0x000078758d9c4c20 empty build-llvm/tools/clang/stage2-bins/llvm/include/llvm/ADT/SmallVector.h:94:46
+#73 0x000078758d9c4c20 clang::driver::Driver::ExecuteCompilation(clang::driver::Compilation&, llvm::SmallVectorImpl<std::pair<int, clang::driver::Command const*>>&) build-llvm/tools/clang/stage2-bins/clang/lib/Driver/Driver.cpp:1921:23
+#74 0x00005bb740aa81ec clang_main(int, char**, llvm::ToolContext const&) build-llvm/tools/clang/stage2-bins/clang/tools/driver/driver.cpp:540:21
+#75 0x00005bb740ab5383 main build-llvm/tools/clang/stage2-bins/build-llvm/tools/clang/stage2-bins/tools/clang/tools/driver/clang-driver.cpp:17:10
+#76 0x00007875839371ca (/lib/x86_64-linux-gnu/libc.so.6+0x2a1ca)
+#77 0x000078758393728b __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x2a28b)
+#78 0x00005bb740aa5255 _start (/usr/lib/llvm-18/bin/clang+0xe255)
+clang: error: clang frontend command failed with exit code 134 (use -v to see invocation)
+Ubuntu clang version 18.1.3 (1ubuntu1)
+Target: bpf
+Thread model: posix
+InstalledDir: /usr/lib/llvm-18/bin
+clang: note: diagnostic msg: Error generating preprocessed source(s) - no preprocessable inputs.

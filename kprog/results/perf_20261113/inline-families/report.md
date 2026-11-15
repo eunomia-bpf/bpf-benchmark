@@ -218,3 +218,25 @@ under16GiB AS, on distinct host CPU sets, after retaining the8GiB failure.
 Default8GiB/all-shapes behavior is unchanged. These are fixture resource
 controls, not benchmark settings or program exclusions. Parent P-SPECIALIZE
 remains open; the14 actual passes do not establish OTel whole-app acceptance.
+
+2026-11-15T17:22Z pointer retries finish under16GiB AS, independently on
+8–11 and16–19. Both also pass actual sole-kernel load/test-run in the one
+subsequent2vCPU/8GiB functional guest. Together with the earlier14 passes,
+all16 scale shapes have actual kernel/output evidence; old8GiB failure is
+retained. This completes the P-SPECIALIZE handler/measurement task, not
+whole-app equal work or native-body performance targets.
+
+|100K pointer|Actual insns|CPP bytes|Frontend CPU s|Peak KiB|B code bytes|Frame|
+|---|---:|---:|---:|---:|---:|---:|
+|direct|100036|21085350|365.485|8889824|2000480|32|
+|indirect|100084|21104279|380.316|8890424|2000624|40|
+
+B machine stages47.177/47.022CPU s with830504/835256KiB RSS. Logs,
+commands, allocated hashes and actual verifier/output results are in
+pointer-16g/. Host/compiler frequency was not controlled for these compile
+costs. No AS limit changed on a running process;8GiB failure and two fresh
+16GiB attempts remain distinct. Canonical products replace failed/unattempted
+case outputs in place; no raw data removed. Validated B tool1965e868 was
+published17:11:11 under imageEX with no live QEMU; loader/linker/image remain
+unchanged by that publication. OTel full B compile448B frame is measured,
+not actual OTel stock/native whole-app installation.

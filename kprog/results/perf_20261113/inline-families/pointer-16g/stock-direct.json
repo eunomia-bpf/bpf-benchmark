@@ -1,0 +1,60 @@
+{
+  "name": "n100000_ptr_direct",
+  "target_native_instructions": 100000,
+  "native_instructions": 100036,
+  "expected_result": 50007,
+  "pipeline": "stock",
+  "profile": "/workspaces/kprog-raw/perf/20261115-inline-families/pointer-direct-16g/result.json",
+  "stage": "passed",
+  "returncode": 0,
+  "object_sha256": "729849da8c92edbb412608cf1fd88f28bc124e47b9f01c716a4e8d9a879f3b6f",
+  "bpf_code_bytes": 2000480,
+  "post_pei_stack_bytes": {
+    "n100000_ptr_direct_x86_sim_xdp": 32
+  },
+  "trace_returncode": 0,
+  "probe_counters": [
+    {
+      "program_id": 6,
+      "proof_bpf_instructions": 250060,
+      "verified_instructions": 468828,
+      "bytes_jited": 1050346,
+      "program_memlock_bytes": 2002944,
+      "loader_maxrss_kib": 11296,
+      "result": 50007,
+      "expected_result": 50007,
+      "retval": 2
+    }
+  ],
+  "verifier_allocation_intervals": [
+    {
+      "slab_peak_bytes": 39632,
+      "vmap_reserved_peak_bytes": 16384
+    },
+    {
+      "slab_peak_bytes": 39616,
+      "vmap_reserved_peak_bytes": 16384
+    },
+    {
+      "slab_peak_bytes": 39616,
+      "vmap_reserved_peak_bytes": 16384
+    },
+    {
+      "slab_peak_bytes": 42472,
+      "vmap_reserved_peak_bytes": 32768
+    },
+    {
+      "slab_peak_bytes": 39616,
+      "vmap_reserved_peak_bytes": 16384
+    },
+    {
+      "slab_peak_bytes": 13685280,
+      "vmap_reserved_peak_bytes": 32477184
+    }
+  ],
+  "verifier_slab_peak_bytes": 13685280,
+  "verifier_vmap_reserved_peak_bytes": 32477184,
+  "trace_lost_events": 0,
+  "verification_time_us": 73914,
+  "peak_states": 10
+}
