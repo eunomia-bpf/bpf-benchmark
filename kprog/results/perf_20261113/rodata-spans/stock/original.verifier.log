@@ -1,0 +1,141 @@
+func#0 @0
+Live regs before insn:
+      0: .1........ (b7) r0 = 0
+      1: 01........ (79) r2 = *(u64 *)(r1 +0)
+      2: 012....... (57) r2 &= 15
+      3: 012....... (65) if r2 s> 0x3 goto pc+7
+      4: 012....... (65) if r2 s> 0x1 goto pc+13
+      5: 012....... (15) if r2 == 0x0 goto pc+24
+      6: 012....... (15) if r2 == 0x1 goto pc+1
+      7: 0......... (05) goto pc+33
+      8: .1........ (79) r0 = *(u64 *)(r1 +16)
+      9: 0......... (27) r0 *= 3
+     10: 0......... (05) goto pc+30
+     11: 012....... (65) if r2 s> 0x5 goto pc+12
+     12: 012....... (15) if r2 == 0x4 goto pc+20
+     13: 012....... (15) if r2 == 0x5 goto pc+1
+     14: 0......... (05) goto pc+26
+     15: .1........ (79) r0 = *(u64 *)(r1 +48)
+     16: 0......... (57) r0 &= 32767
+     17: 0......... (05) goto pc+23
+     18: 012....... (15) if r2 == 0x2 goto pc+17
+     19: 012....... (15) if r2 == 0x3 goto pc+1
+     20: 0......... (05) goto pc+20
+     21: .1........ (79) r0 = *(u64 *)(r1 +32)
+     22: 0......... (07) r0 += -29
+     23: 0......... (05) goto pc+17
+     24: 012....... (15) if r2 == 0x6 goto pc+14
+     25: 012....... (15) if r2 == 0x7 goto pc+1
+     26: 0......... (05) goto pc+14
+     27: .1........ (79) r0 = *(u64 *)(r1 +64)
+     28: 0......... (27) r0 *= 5
+     29: 0......... (05) goto pc+11
+     30: .1........ (79) r0 = *(u64 *)(r1 +8)
+     31: 0......... (07) r0 += 29
+     32: 0......... (05) goto pc+8
+     33: .1........ (79) r0 = *(u64 *)(r1 +40)
+     34: 0......... (47) r0 |= 32768
+     35: 0......... (05) goto pc+5
+     36: .1........ (79) r0 = *(u64 *)(r1 +24)
+     37: 0......... (a7) r0 ^= 4689
+     38: 0......... (05) goto pc+2
+     39: .1........ (79) r0 = *(u64 *)(r1 +56)
+     40: 0......... (07) r0 += 203
+     41: 0......... (95) exit
+0: R1=ctx() R10=fp0
+; ROOT(second_table, 29) @ native_shared_code_tables.c:21
+0: (b7) r0 = 0                        ; R0=0
+1: (79) r2 = *(u64 *)(r1 +0)          ; R1=ctx() R2=scalar()
+2: (57) r2 &= 15                      ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=15,var_off=(0x0; 0xf))
+3: (65) if r2 s> 0x3 goto pc+7        ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=3,var_off=(0x0; 0x3))
+4: (65) if r2 s> 0x1 goto pc+13       ; R2=scalar(smin=smin32=0,smax=umax=smax32=umax32=1,var_off=(0x0; 0x1))
+5: (15) if r2 == 0x0 goto pc+24       ; R2=1
+6: (15) if r2 == 0x1 goto pc+1
+mark_precise: frame0: last_idx 6 first_idx 0 subseq_idx -1 
+mark_precise: frame0: regs=r2 stack= before 5: (15) if r2 == 0x0 goto pc+24
+mark_precise: frame0: regs=r2 stack= before 4: (65) if r2 s> 0x1 goto pc+13
+mark_precise: frame0: regs=r2 stack= before 3: (65) if r2 s> 0x3 goto pc+7
+mark_precise: frame0: regs=r2 stack= before 2: (57) r2 &= 15
+mark_precise: frame0: regs=r2 stack= before 1: (79) r2 = *(u64 *)(r1 +0)
+6: R2=1
+8: (79) r0 = *(u64 *)(r1 +16)         ; R0=scalar() R1=ctx()
+9: (27) r0 *= 3                       ; R0=scalar()
+10: (05) goto pc+30
+41: (95) exit
+
+from 5 to 30: R0=0 R1=ctx() R2=0 R10=fp0
+30: R0=0 R1=ctx() R2=0 R10=fp0
+30: (79) r0 = *(u64 *)(r1 +8)         ; R0=scalar() R1=ctx()
+31: (07) r0 += 29                     ; R0=scalar()
+32: (05) goto pc+8
+41: (95) exit
+
+from 4 to 18: R0=0 R1=ctx() R2=scalar(smin=umin=smin32=umin32=2,smax=umax=smax32=umax32=3,var_off=(0x2; 0x1)) R10=fp0
+18: R0=0 R1=ctx() R2=scalar(smin=umin=smin32=umin32=2,smax=umax=smax32=umax32=3,var_off=(0x2; 0x1)) R10=fp0
+18: (15) if r2 == 0x2 goto pc+17      ; R2=3
+19: (15) if r2 == 0x3 goto pc+1
+mark_precise: frame0: last_idx 19 first_idx 18 subseq_idx -1 
+mark_precise: frame0: regs=r2 stack= before 18: (15) if r2 == 0x2 goto pc+17
+mark_precise: frame0: parent state regs=r2 stack=:  R0=0 R1=ctx() R2=Pscalar(smin=umin=smin32=umin32=2,smax=umax=smax32=umax32=3,var_off=(0x2; 0x1)) R10=fp0
+mark_precise: frame0: last_idx 4 first_idx 0 subseq_idx 18 
+mark_precise: frame0: regs=r2 stack= before 4: (65) if r2 s> 0x1 goto pc+13
+mark_precise: frame0: regs=r2 stack= before 3: (65) if r2 s> 0x3 goto pc+7
+mark_precise: frame0: regs=r2 stack= before 2: (57) r2 &= 15
+mark_precise: frame0: regs=r2 stack= before 1: (79) r2 = *(u64 *)(r1 +0)
+19: R2=3
+21: (79) r0 = *(u64 *)(r1 +32)        ; R0=scalar() R1=ctx()
+22: (07) r0 += -29                    ; R0=scalar()
+23: (05) goto pc+17
+41: (95) exit
+
+from 18 to 36: R0=0 R1=ctx() R2=2 R10=fp0
+36: R0=0 R1=ctx() R2=2 R10=fp0
+36: (79) r0 = *(u64 *)(r1 +24)        ; R0=scalar() R1=ctx()
+37: (a7) r0 ^= 4689                   ; R0=scalar()
+38: (05) goto pc+2
+41: (95) exit
+
+from 3 to 11: R0=0 R1=ctx() R2=scalar(smin=umin=smin32=umin32=4,smax=umax=smax32=umax32=15,var_off=(0x0; 0xf)) R10=fp0
+11: R0=0 R1=ctx() R2=scalar(smin=umin=smin32=umin32=4,smax=umax=smax32=umax32=15,var_off=(0x0; 0xf)) R10=fp0
+11: (65) if r2 s> 0x5 goto pc+12      ; R2=scalar(smin=umin=smin32=umin32=4,smax=umax=smax32=umax32=5,var_off=(0x4; 0x1))
+12: (15) if r2 == 0x4 goto pc+20      ; R2=5
+13: (15) if r2 == 0x5 goto pc+1
+mark_precise: frame0: last_idx 13 first_idx 0 subseq_idx -1 
+mark_precise: frame0: regs=r2 stack= before 12: (15) if r2 == 0x4 goto pc+20
+mark_precise: frame0: regs=r2 stack= before 11: (65) if r2 s> 0x5 goto pc+12
+mark_precise: frame0: regs=r2 stack= before 3: (65) if r2 s> 0x3 goto pc+7
+mark_precise: frame0: regs=r2 stack= before 2: (57) r2 &= 15
+mark_precise: frame0: regs=r2 stack= before 1: (79) r2 = *(u64 *)(r1 +0)
+13: R2=5
+15: (79) r0 = *(u64 *)(r1 +48)        ; R0=scalar() R1=ctx()
+16: (57) r0 &= 32767                  ; R0=scalar(smin=smin32=0,smax=umax=smax32=umax32=32767,var_off=(0x0; 0x7fff))
+17: (05) goto pc+23
+41: safe
+
+from 12 to 33: R0=0 R1=ctx() R2=4 R10=fp0
+33: R0=0 R1=ctx() R2=4 R10=fp0
+33: (79) r0 = *(u64 *)(r1 +40)        ; R0=scalar() R1=ctx()
+34: (47) r0 |= 32768                  ; R0=scalar(smin=0x8000000000008000,umin=umin32=32768,smin32=0x80008000,var_off=(0x8000; 0xffffffffffff7fff))
+35: (05) goto pc+5
+41: safe
+
+from 11 to 24: R0=0 R1=ctx() R2=scalar(smin=umin=smin32=umin32=6,smax=umax=smax32=umax32=15,var_off=(0x0; 0xf)) R10=fp0
+24: R0=0 R1=ctx() R2=scalar(smin=umin=smin32=umin32=6,smax=umax=smax32=umax32=15,var_off=(0x0; 0xf)) R10=fp0
+24: (15) if r2 == 0x6 goto pc+14      ; R2=scalar(smin=umin=smin32=umin32=7,smax=umax=smax32=umax32=15,var_off=(0x0; 0xf))
+25: (15) if r2 == 0x7 goto pc+1       ; R2=scalar(smin=umin=smin32=umin32=8,smax=umax=smax32=umax32=15,var_off=(0x8; 0x7))
+26: (05) goto pc+14
+41: safe
+
+from 25 to 27: R0=0 R1=ctx() R2=7 R10=fp0
+27: R0=0 R1=ctx() R2=7 R10=fp0
+27: (79) r0 = *(u64 *)(r1 +64)        ; R0=scalar() R1=ctx()
+28: (27) r0 *= 5                      ; R0=scalar()
+29: (05) goto pc+11
+41: safe
+
+from 24 to 39: R0=0 R1=ctx() R2=6 R10=fp0
+39: R0=0 R1=ctx() R2=6 R10=fp0
+39: (79) r0 = *(u64 *)(r1 +56)        ; R0=scalar() R1=ctx()
+40: (07) r0 += 203
+41: safe
+processed 47 insns (limit 1000000) max_states_per_insn 0 total_states 5 peak_states 5 mark_read 0

@@ -1,0 +1,1 @@
+["clang-18","-target","x86_64-linux-gnu","-O3","-march=native","-foptimize-sibling-calls","-fomit-frame-pointer","-mno-red-zone","-mgeneral-regs-only","-fno-stack-protector","-I/workspaces/repository/vendor/libbpf/src","-c","/workspaces/repository/kprog/test/native_shared_code_tables.c","-o","/var/tmp/kprog-tmp/perf/helper-cfg/shared.native.o"]

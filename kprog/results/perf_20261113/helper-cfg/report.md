@@ -32,6 +32,10 @@ its SHA is computed from the bytes analyzed. No source/object copy or app
 rebuild is made by the test. Raw logs:
 `/workspaces/kprog-raw/perf/20261115-helper-cfg`.
 
-This receipt captures the helper step before the separate rodata-span fix.
+The 38-test logs capture the helper step before the separate rodata-span fix.
+`tetragon.json` was copied after the follow-up rodata-span test had completed:
+its helper facts are unchanged, while its proof size/relocation fields belong
+to that later fix, documented in `../rodata-spans/report.md`. Those proof
+fields are not a result of `399a6bab0` alone.
 No normal CLI/base publication, kernel installation, application execution,
 throughput, per-call speed or code-size gain is claimed.
