@@ -179,6 +179,33 @@ void kprog_arm64_exclusive_store(struct kprog_arm64_addressing *addressing,
 	__u8 width = ARM64_SIM_L_EFFECTIVE_WIDTH(flags);
 	ARM64_SIM_L_STLXR_STEP(ARM64_OP_STLXR, dst, src, base, aux, site, width);
 }
+void kprog_arm64_atomic_add(struct kprog_arm64_addressing *addressing,
+                             __u64 dst, __u64 src, __u64 base, __u32 aux, __u8 flags)
+{
+	REGISTERS();
+	__u8 width = ARM64_SIM_L_EFFECTIVE_WIDTH(flags);
+	ARM64_SIM_L_ATOMIC_RMW(__atomic_fetch_add, 0, dst, src, base, width, aux);
+}
+void kprog_arm64_atomic_set(struct kprog_arm64_addressing *addressing,
+                             __u64 dst, __u64 src, __u64 base, __u32 aux, __u8 flags)
+{
+	REGISTERS();
+	__u8 width = ARM64_SIM_L_EFFECTIVE_WIDTH(flags);
+	ARM64_SIM_L_ATOMIC_RMW(__atomic_fetch_or, 0, dst, src, base, width, aux);
+}
+void kprog_arm64_atomic_clear(struct kprog_arm64_addressing *addressing,
+                             __u64 dst, __u64 src, __u64 base, __u32 aux, __u8 flags)
+{
+	REGISTERS();
+	__u8 width = ARM64_SIM_L_EFFECTIVE_WIDTH(flags);
+	ARM64_SIM_L_ATOMIC_RMW(__atomic_fetch_and, 1, dst, src, base, width, aux);
+}
+void kprog_arm64_memory_tags(struct kprog_arm64_addressing *addressing,
+                              __s64 dst, __u8 dtag, __s64 src, __u8 stag,
+                              __u64 length, __u8 copy)
+{
+	ARM64_SIM_L_MEMORY_TAG_TRANSFER(dst, dtag, src, stag, length, copy);
+}
 #undef __a64_v0
 #undef __a64_v0_hi
 #define __a64_v0 (*v0_lo)

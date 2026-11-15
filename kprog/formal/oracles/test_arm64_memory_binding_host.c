@@ -8,6 +8,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include "../c/Arm64Addressing.h"
+#ifndef ATOMIC_IMPORT
+#define ATOMIC_IMPORT ADAPTER
+#endif
 static unsigned long cases;
 static unsigned requests[512], wanted[512], count, wanted_count, copies;
 static __u64 entropy, expected_entropy;
@@ -22,6 +25,10 @@ static jmp_buf rejected;
 static int allow_reject, force_draw;
 static __u64 draw_value, exclusive_choice;
 static unsigned exclusive_site, exclusive_visits;
+static unsigned atomic_visits, atomic_inputs, atomic_width, atomic_operation, atomic_order;
+static int atomic_reject;
+static void *atomic_address;
+static __u64 atomic_value, atomic_old;
 static void check(int ok, const char *what)
 {
 	if (!ok) { fprintf(stderr, "ARM memory adapter=%u case=%lu: %s\n", ADAPTER, cases, what); exit(1); }
@@ -52,6 +59,27 @@ void *kprog_c_context_pointer(const void *ctx, __u8 kind, __u32 off)
 	(void)ctx; (void)kind; (void)off; check(0, "unselected context operation"); abort();
 }
 __u64 kprog_c_pointer_bits(const void *p) { (void)p; check(0, "unselected projection"); abort(); }
+/* Execute the real fetch builtin while observing the extraction ABI. */
+__u64 kprog_c_atomic_fetch(void *address, __u64 value, __u32 width, __u32 operation, __u32 order)
+{
+	check(!atomic_visits, "one indivisible atomic operation");
+	atomic_visits++; atomic_inputs = count; atomic_address = address;
+	atomic_value = value; atomic_width = width; atomic_operation = operation; atomic_order = order;
+	check(operation <= 2 && (order == __ATOMIC_RELAXED || order == __ATOMIC_ACQUIRE || order == __ATOMIC_RELEASE || order == __ATOMIC_ACQ_REL), "atomic operation/order ABI");
+	if (atomic_reject) { check(allow_reject,"unexpected atomic refusal"); longjmp(rejected,3); }
+#define FETCH_AT_WIDTH(TYPE) \
+	do { atomic_old = operation == 0 ? __atomic_fetch_add((TYPE *)address,(TYPE)value,order) : \
+		operation == 1 ? __atomic_fetch_or((TYPE *)address,(TYPE)value,order) : __atomic_fetch_and((TYPE *)address,(TYPE)value,order); } while (0)
+	switch (width) {
+	case 1: FETCH_AT_WIDTH(__u8); break;
+	case 2: FETCH_AT_WIDTH(__u16); break;
+	case 4: FETCH_AT_WIDTH(__u32); break;
+	case 8: FETCH_AT_WIDTH(__u64); break;
+	default: check(0,"atomic width ABI"); abort();
+	}
+#undef FETCH_AT_WIDTH
+	return atomic_old;
+}
 void __builtin_memcpy_aligned(void *dst, const void *src, size_t size, size_t alignment)
 {
 	check(copies < 4, "too many memory operations");
@@ -127,7 +155,8 @@ static void check_native_hook(void)
 int main(void)
 {
 	static __u64 arena[48], before_arena[48], packed[6], before_packed[6], payload[48], expected_payload[48];
-	static __u8 raw[512], expected_raw[512], tags[31], before_tags[31];
+	_Alignas(8) static __u8 raw[512];
+	static __u8 expected_raw[512], tags[31], before_tags[31];
 	static union arm64_sim_gpr regs[31], before_regs[31];
 	static struct kprog_arm64_coordinates c, expected_c;
 	static struct kprog_arm64_addressing a, before_a;
@@ -520,6 +549,108 @@ int main(void)
 		check(WIFEXITED(status) && WEXITSTATUS(status) == 1 && !strcmp(message,"native exclusive failure choice must be 0 or 1\n"),"invalid exclusive choice must report and exit1");
 	}
 	printf("ARM exclusive protocol adapter %u: 4 invalid-choice exit/message cases\n",ADAPTER);
+	start = cases;
+	void (*atomic_steps[])(struct kprog_arm64_addressing *,__u64,__u64,__u64,__u32,__u8) = {kprog_arm64_atomic_add,kprog_arm64_atomic_set,kprog_arm64_atomic_clear};
+	const __u64 atomic_fields[][2] = {{0,1},{0,0},{15,1},{0,15},{32,1},{31,1},{255,1},{0x100000000ULL,32},{0,255}};
+	const unsigned memory_tags[] = {0,4,10,255};
+	for (unsigned oi = 0; oi < 3; oi++) for (unsigned profile = 0; profile < 6; profile++)
+	for (unsigned ri = 0; ri < 9; ri++) for (unsigned fi = 0; fi < 5; fi++) for (unsigned order = 0; order < 4; order++) for (unsigned di = 0; di < 3; di++) for (unsigned ti = 0; ti < 4; ti++) {
+		__u64 dst = atomic_fields[ri][0], src = atomic_fields[ri][1], base = profile >= 4 ? 32 : 15;
+		unsigned width = flags[fi] ? flags[fi] : 8, private = profile >= 2;
+		__u32 aux = order | 0xfedcba00U;
+		c = (struct kprog_arm64_coordinates){5,7,profile == 3 ? -56 : profile == 5 ? -79 : -80,0,0}; expected_c = c;
+		a = (struct kprog_arm64_addressing){&c,regs,tags,(__u8 *)arena,(__u8 *)packed,payload,160,96,NULL,NULL,0,255,arena}; before_a = a;
+		for (unsigned i = 0; i < 31; i++) { regs[i].x = values[(cases+i)%6]; tags[i] = exclusive_tags[(ri+oi+fi+ti)%4]; }
+		if (base == 15) { regs[15].ptr = private ? (void *)(intptr_t)-80 : raw+200; tags[15] = private ? 4 : profile == 0 ? 6 : 0; }
+		for (unsigned i = 0; i < sizeof(arena); i++) ((__u8 *)arena)[i] = (__u8)(cases+i*17);
+		for (unsigned i = 0; i < sizeof(raw); i++) raw[i] = (__u8)(cases+i*31);
+		for (unsigned i = 0; i < sizeof(packed); i++) ((__u8 *)packed)[i] = (__u8)(cases+i*13);
+		((__u8 *)packed)[2] = memory_tags[ti];
+		for (unsigned i = 0; i < 48; i++) payload[i] = 0x123456789abcdef0ULL ^ ((__u64)i*0x11223344556677ULL);
+		for (unsigned i = 0; i < 64; i++) vectors[i] = 0xfedcba9876543210ULL ^ i;
+		memcpy(before_regs,regs,sizeof(regs)); memcpy(before_tags,tags,sizeof(tags)); memcpy(before_arena,arena,sizeof(arena)); memcpy(before_packed,packed,sizeof(packed)); memcpy(expected_payload,payload,sizeof(payload)); memcpy(expected_raw,raw,sizeof(raw)); memcpy(expected_vectors,vectors,sizeof(vectors));
+		count = wanted_count = copies = atomic_visits = 0; expected_entropy = entropy;
+		force_draw = !private; draw_value = draws[di];
+		int rejects = profile == 5, fault = !private && di;
+		__u64 operand = 0, old = private ? little((__u8 *)arena+16,width) : little(raw+200,width);
+		unsigned before_atomic_inputs = 0;
+		if (!rejects) {
+			if (!private) wanted[wanted_count++] = 6;
+			if (fault) expected_write(&expected_c,before_regs,before_tags,(__u8 *)before_arena,(__u8 *)before_packed,a.capacity,a.bias,dst,0,8,0,0);
+			else {
+				unsigned tag = src == 32 ? 4 : src < 31 ? tags[src] : 0;
+				operand = src == 32 ? (__u64)expected_c.stack_offset + coordinate(&expected_c,1) : src < 31 ? regs[src].x + (tag == 4 ? coordinate(&expected_c,1) : tag == 10 ? coordinate(&expected_c,3) : 0) : 0;
+				if (oi == 2) operand = ~operand;
+				before_atomic_inputs = wanted_count;
+				__u64 returned = old, next = oi == 0 ? old+operand : oi == 1 ? old|operand : old&operand;
+				unsigned loaded_tag = private && profile != 3 && width == 8 ? memory_tags[ti] : 0;
+				if (profile == 3) {
+					returned = free_value() & mask(width);
+					next = oi == 0 ? returned+operand : oi == 1 ? returned|operand : returned&operand;
+					expected_stack_store(&expected_c,(__u8 *)before_arena,(__u8 *)before_packed,expected_payload,a.bias,-80,width,next,0);
+				} else for (unsigned i = 0; i < width; i++) (private ? (__u8 *)before_arena+16 : expected_raw+200)[i] = (__u8)(next >> (8*i));
+				if (loaded_tag == 4 || loaded_tag == 10) returned = payload[2];
+				if (private) ((__u8 *)before_packed)[2] = 0;
+				expected_write(&expected_c,before_regs,before_tags,(__u8 *)before_arena,(__u8 *)before_packed,a.capacity,a.bias,dst,returned,width == 8 ? 8 : 4,loaded_tag,loaded_tag != 0);
+			}
+		}
+		allow_reject = rejects;
+		if (!setjmp(rejected)) { atomic_steps[oi](&a,dst,src,base,aux,flags[fi]); check(!rejects,"missing atomic SP alignment rejection"); }
+		allow_reject = 0; inputs_equal(&c,&expected_c);
+		check(atomic_visits == (unsigned)(ATOMIC_IMPORT && !rejects && !fault) && !copies,"atomic rejection/recovery/indivisible access count");
+		if (atomic_visits) {
+			unsigned acquire = (order&1) && dst != 31;
+			unsigned expected_order = order&2 ? acquire ? __ATOMIC_ACQ_REL : __ATOMIC_RELEASE : acquire ? __ATOMIC_ACQUIRE : __ATOMIC_RELAXED;
+			check(atomic_inputs == before_atomic_inputs && atomic_address == (private ? (void *)((__u8 *)arena+16) : raw+200) && atomic_width == width && atomic_operation == oi && atomic_order == expected_order && atomic_value == (operand&mask(width)) && atomic_old == old,"atomic source/value/old/width/op/order/input-prefix ABI");
+		}
+		check(!memcmp(&a,&before_a,sizeof(a)) && !memcmp(regs,before_regs,sizeof(regs)) && !memcmp(tags,before_tags,sizeof(tags)) && !memcmp(vectors,expected_vectors,sizeof(vectors)),"atomic complete destination/source/GPR/SIMD/profile frame");
+		check(!memcmp(arena,before_arena,sizeof(arena)) && !memcmp(raw,expected_raw,sizeof(raw)) && !memcmp(packed,before_packed,sizeof(packed)) && !memcmp(payload,expected_payload,sizeof(payload)),"atomic complete byte/tag/payload/released frame");
+		cases++;
+	}
+	printf("ARM atomic adapter %u import %u: %lu operation/ordering/recovery/released/provenance/frame cases\n",ADAPTER,ATOMIC_IMPORT,cases-start);
+#if ATOMIC_IMPORT
+	start = cases;
+	for (unsigned oi = 0; oi < 3; oi++) for (unsigned wi = 0; wi < 4; wi++) {
+		c = (struct kprog_arm64_coordinates){5,7,-80,0,0}; expected_c = c;
+		a = (struct kprog_arm64_addressing){&c,regs,tags,(__u8 *)arena,(__u8 *)packed,payload,160,96,NULL,NULL,0,255,arena}; before_a = a;
+		regs[15].ptr = (void *)(intptr_t)-80; tags[15] = 4; regs[1].x = 0xfedcba9876543210ULL; tags[1] = 10;
+		memcpy(before_regs,regs,sizeof(regs)); memcpy(before_tags,tags,sizeof(tags)); memcpy(before_arena,arena,sizeof(arena)); memcpy(before_packed,packed,sizeof(packed)); memcpy(expected_payload,payload,sizeof(payload)); memcpy(expected_raw,raw,sizeof(raw));
+		count = wanted_count = copies = atomic_visits = 0; expected_entropy = entropy; coordinate(&expected_c,3);
+		atomic_reject = allow_reject = 1; int result = setjmp(rejected);
+		if (!result) { atomic_steps[oi](&a,0,1,15,3,widths[wi]); check(0,"atomic refusal returned"); }
+		atomic_reject = allow_reject = 0; inputs_equal(&c,&expected_c);
+		check(result == 3 && atomic_visits == 1 && !copies,"atomic adapter refusal prefix/class");
+		check(!memcmp(&a,&before_a,sizeof(a)) && !memcmp(regs,before_regs,sizeof(regs)) && !memcmp(tags,before_tags,sizeof(tags)) && !memcmp(arena,before_arena,sizeof(arena)) && !memcmp(raw,expected_raw,sizeof(raw)) && !memcmp(packed,before_packed,sizeof(packed)) && !memcmp(payload,expected_payload,sizeof(payload)),"atomic refusal preserves pretransfer byte/tag/payload/register frame"); cases++;
+	}
+	printf("ARM atomic adapter refusal: %lu source-before-call/no-commit prefix cases\n",cases-start);
+#endif
+	start = cases;
+	const __s64 tag_destinations[] = {-80,-79,-72,-64,-55}, tag_sources[] = {-80,-72,-64,-56};
+	const unsigned lengths[] = {0,1,7,8,9,16,24}, copy_flags[] = {0,1,255};
+	for (unsigned di = 0; di < 5; di++) for (unsigned si = 0; si < 4; si++) for (unsigned li = 0; li < 7; li++) for (unsigned ci = 0; ci < 3; ci++) for (unsigned dt = 0; dt < 4; dt++) for (unsigned st = 0; st < 4; st++) for (unsigned released = 0; released < 2; released++) {
+		__s64 dst = tag_destinations[di], src = tag_sources[si]; unsigned length = lengths[li];
+		c = (struct kprog_arm64_coordinates){5,7,released ? -56 : -80,0,0}; expected_c = c;
+		a = (struct kprog_arm64_addressing){&c,regs,tags,(__u8 *)arena,(__u8 *)packed,payload,160,96,NULL,NULL,0,255,arena}; before_a = a;
+		for (unsigned i = 0; i < sizeof(packed); i++) ((__u8 *)packed)[i] = memory_tags[i%4];
+		for (unsigned i = 0; i < 48; i++) payload[i] = 0xfedcba9876543210ULL ^ ((__u64)i*0x11223344556677ULL);
+		memcpy(before_regs,regs,sizeof(regs)); memcpy(before_tags,tags,sizeof(tags)); memcpy(before_arena,arena,sizeof(arena)); memcpy(before_packed,packed,sizeof(packed)); memcpy(expected_payload,payload,sizeof(payload)); memcpy(expected_raw,raw,sizeof(raw));
+		if (memory_tags[dt] == 4 && length) for (unsigned word = 0; word < 20; word++) {
+			__s64 begin = (__s64)(word*8)-96;
+			if (begin < dst+length && begin+8 > dst) {
+				unsigned tag = 0; __s64 source = src+begin-dst;
+				if (copy_flags[ci] && memory_tags[st] == 4 && begin >= dst && begin+8 <= dst+length && begin >= c.stack_offset && source >= c.stack_offset && !((source+96)&7)) {
+					unsigned source_word = (unsigned)(source+96)/8;
+					tag = ((__u8 *)before_packed)[source_word];
+					if (tag == 4 || tag == 10) expected_payload[word] = expected_payload[source_word];
+				}
+				((__u8 *)before_packed)[word] = tag;
+			}
+		}
+		count = wanted_count = copies = atomic_visits = 0; expected_entropy = entropy;
+		kprog_arm64_memory_tags(&a,dst,memory_tags[dt],src,memory_tags[st],length,copy_flags[ci]); inputs_equal(&c,&expected_c);
+		check(!copies && !atomic_visits && !memcmp(&a,&before_a,sizeof(a)) && !memcmp(regs,before_regs,sizeof(regs)) && !memcmp(tags,before_tags,sizeof(tags)) && !memcmp(arena,before_arena,sizeof(arena)) && !memcmp(raw,expected_raw,sizeof(raw)) && !memcmp(packed,before_packed,sizeof(packed)) && !memcmp(payload,expected_payload,sizeof(payload)),"tag transfer whole-word coverage/provenance/overlap/release/full frame"); cases++;
+	}
+	printf("ARM tag transfer adapter %u: %lu copy/partial/overlap/released/frame cases\n",ADAPTER,cases-start);
 	check_native_hook();
 	return 0;
 }

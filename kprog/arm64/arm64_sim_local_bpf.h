@@ -1721,6 +1721,11 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
  ((__u8)bpf_arm64_native_lab_atomic8((__u8 *)(ADDR), (VALUE), ARM64_SIM_L_ATOMIC_KIND_##FETCH, (ORDER)))
 #define ARM64_SIM_L_ATOMIC_HALF(FETCH, ADDR, VALUE, ORDER) \
  ((__u16)bpf_arm64_native_lab_atomic16((__u16 *)(ADDR), (VALUE), ARM64_SIM_L_ATOMIC_KIND_##FETCH, (ORDER)))
+#elif defined(__COMPCERT__)
+#define ARM64_SIM_L_ATOMIC_BYTE(FETCH, ADDR, VALUE, ORDER) \
+ ((__u8)kprog_c_atomic_fetch((ADDR), (__u8)(VALUE), 1U, ARM64_SIM_L_ATOMIC_KIND_##FETCH, (ORDER)))
+#define ARM64_SIM_L_ATOMIC_HALF(FETCH, ADDR, VALUE, ORDER) \
+ ((__u16)kprog_c_atomic_fetch((ADDR), (__u16)(VALUE), 2U, ARM64_SIM_L_ATOMIC_KIND_##FETCH, (ORDER)))
 #else
 #define ARM64_SIM_L_ATOMIC_BYTE(FETCH, ADDR, VALUE, ORDER) \
  FETCH((__u8 *)(ADDR), (__u8)(VALUE), (ORDER))
@@ -1728,39 +1733,62 @@ extern __u64 bpf_arm64_native_lab_atomic16(__u16 *word, __u64 value, __u32 opera
  FETCH((__u16 *)(ADDR), (__u16)(VALUE), (ORDER))
 #endif
 
+/* GCC overloads these builtins by pointed-to width. Preserve that native
+ * operand form; CompCert calls the explicitly typed atomic platform operation. */
+#if defined(__COMPCERT__)
+#define ARM64_SIM_L_ATOMIC_WORD(FETCH, BITS, ADDR, VALUE, ORDER) \
+ ((__u##BITS)kprog_c_atomic_fetch((ADDR), (__u##BITS)(VALUE), (BITS)/8U, ARM64_SIM_L_ATOMIC_KIND_##FETCH, (ORDER)))
+#else
+#define ARM64_SIM_L_ATOMIC_WORD(FETCH, BITS, ADDR, VALUE, ORDER) \
+ FETCH((__u##BITS *)(ADDR), (__u##BITS)(VALUE), (ORDER))
+#endif
+
 #define ARM64_SIM_L_ATOMIC_RMW(FETCH, COMPLEMENT, DST, SRC, BASE, WIDTH, AUX) \
  do { \
-        ARM64_SIM_L_SP_ALIGNMENT(BASE); \
-    if (ARM64_SIM_L_READ_FAULT((BASE), ARM64_REG_NONE, 0, 0)) { \
+    ARM64_SIM_L_SP_ALIGNMENT(BASE); \
+    int __a64_la_fault; \
+    ARM64_SIM_L_READ_FAULT_CALL_INTO(__a64_la_fault, (BASE), ARM64_REG_NONE, 0, 0); \
+    if (__a64_la_fault) { \
         ARM64_SIM_L_CLEAR_READ_DEST(DST); \
         break; \
     } \
-    void *__a64_la_addr = ARM64_SIM_L_HELPER_ARG_PTR(BASE); \
-    __u64 __a64_la_add = ARM64_SIM_L_READ_REG(SRC); \
+    void *__a64_la_addr; ARM64_SIM_L_HELPER_ARG_PTR_INTO(__a64_la_addr, (BASE)); \
+    __u64 __a64_la_add; ARM64_SIM_L_READ_REG_INTO(__a64_la_add, (SRC)); \
     if (COMPLEMENT) __a64_la_add = ~__a64_la_add; \
     __u32 __a64_la_mem_aux = ARM64_AUX_MEM(ARM64_REG_NONE, ARM64_MOD_NONE, 0, 0); \
-    __u8 __a64_la_tag = ARM64_SIM_L_MEM_READ_TAG((BASE), ARM64_REG_NONE, __a64_la_mem_aux, 0, 0, (WIDTH)); \
+    __u8 __a64_la_tag; \
+    ARM64_SIM_L_MEM_READ_TAG_INTO(__a64_la_tag, (BASE), ARM64_REG_NONE, __a64_la_mem_aux, 0, 0, (WIDTH)); \
     int __a64_la_acquire = ((AUX) & 1U) && (DST) != ARM64_XZR; \
     int __a64_la_order = ((AUX) & 2U) ? (__a64_la_acquire ? __ATOMIC_ACQ_REL : __ATOMIC_RELEASE) : (__a64_la_acquire ? __ATOMIC_ACQUIRE : __ATOMIC_RELAXED); \
     __u64 __a64_la_old; \
     if ((WIDTH) == ARM64_WIDTH_64) \
-        __a64_la_old = FETCH((__u64 *)__a64_la_addr, __a64_la_add, __a64_la_order); \
+        __a64_la_old = ARM64_SIM_L_ATOMIC_WORD(FETCH, 64, __a64_la_addr, __a64_la_add, __a64_la_order); \
     else if ((WIDTH) == ARM64_WIDTH_32) \
-        __a64_la_old = FETCH((__u32 *)__a64_la_addr, (__u32)__a64_la_add, __a64_la_order); \
+        __a64_la_old = ARM64_SIM_L_ATOMIC_WORD(FETCH, 32, __a64_la_addr, __a64_la_add, __a64_la_order); \
     else if ((WIDTH) == ARM64_WIDTH_16) \
         __a64_la_old = ARM64_SIM_L_ATOMIC_HALF(FETCH, __a64_la_addr, __a64_la_add, __a64_la_order); \
     else \
         __a64_la_old = ARM64_SIM_L_ATOMIC_BYTE(FETCH, __a64_la_addr, __a64_la_add, __a64_la_order); \
-    if (ARM64_SIM_L_REG_TAG(BASE)==ARM64_SIM_TAG_STACK && \
-        (__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE)<ARM64_SIM_L_STACK_SP()) { \
-        __a64_la_old=KPROG_ARM64_APPLY_WIDTH(ARM64_SIM_L_UNSPECIFIED(),(WIDTH)); \
-        __u64 __a64_la_next=ARM64_SIM_L_ATOMIC_KIND_##FETCH==0U ? __a64_la_old+__a64_la_add : \
-            ARM64_SIM_L_ATOMIC_KIND_##FETCH==1U ? __a64_la_old|__a64_la_add : __a64_la_old&__a64_la_add; \
-        ARM64_SIM_L_MEM_WRITE((BASE),ARM64_REG_NONE,__a64_la_mem_aux,0,0,(WIDTH),__a64_la_next,ARM64_SIM_TAG_SCALAR); \
+    __u8 __a64_la_base_tag; ARM64_SIM_L_REG_TAG_INTO(__a64_la_base_tag, (BASE)); \
+    if (__a64_la_base_tag == ARM64_SIM_TAG_STACK) { \
+        void *__a64_la_base; ARM64_SIM_L_READ_REG_PTR_INTO(__a64_la_base, (BASE)); \
+        if ((__s64)(long)__a64_la_base < ARM64_SIM_L_STACK_SP()) { \
+            __a64_la_old = KPROG_ARM64_APPLY_WIDTH(ARM64_SIM_L_UNSPECIFIED(), (WIDTH)); \
+            __u64 __a64_la_next = ARM64_SIM_L_ATOMIC_KIND_##FETCH == 0U ? __a64_la_old + __a64_la_add : \
+                ARM64_SIM_L_ATOMIC_KIND_##FETCH == 1U ? __a64_la_old | __a64_la_add : __a64_la_old & __a64_la_add; \
+            ARM64_SIM_L_MEM_WRITE((BASE), ARM64_REG_NONE, __a64_la_mem_aux, 0, 0, (WIDTH), __a64_la_next, ARM64_SIM_TAG_SCALAR); \
+        } \
     } \
-    __u64 __a64_la_payload = ARM64_SIM_L_MEM_PAYLOAD((BASE), ARM64_REG_NONE, __a64_la_mem_aux, 0, 0, __a64_la_old, __a64_la_tag); \
-    ARM64_SIM_L_MEMORY_TAG_TRANSFER((__s64)(long)ARM64_SIM_L_READ_REG_PTR(BASE), ARM64_SIM_L_REG_TAG(BASE), 0, ARM64_SIM_TAG_SCALAR, (WIDTH), 0); \
-    if (ARM64_SIM_L_LOAD_TAG_PRESERVE(ARM64_OP_LOAD, __a64_la_tag, (WIDTH))) \
+    __u64 __a64_la_payload; \
+    ARM64_SIM_L_MEM_PAYLOAD_INTO(__a64_la_payload, (BASE), ARM64_REG_NONE, __a64_la_mem_aux, 0, 0, __a64_la_old, __a64_la_tag); \
+    __u8 __a64_la_transfer_tag; ARM64_SIM_L_REG_TAG_INTO(__a64_la_transfer_tag, (BASE)); \
+    if (__a64_la_transfer_tag == ARM64_SIM_TAG_STACK) { \
+        void *__a64_la_transfer_base; ARM64_SIM_L_READ_REG_PTR_INTO(__a64_la_transfer_base, (BASE)); \
+        ARM64_SIM_L_MEMORY_TAG_TRANSFER((__s64)(long)__a64_la_transfer_base, __a64_la_transfer_tag, 0, ARM64_SIM_TAG_SCALAR, (WIDTH), 0); \
+    } \
+    __u64 __a64_la_preserve; \
+    KPROG_ARM64_LOAD_TAG_PRESERVE_INTO(__a64_la_preserve, ARM64_OP_LOAD, __a64_la_tag, (WIDTH), ARM64_SIM_L_UNSUPPORTED_OPCODE()); \
+    if (__a64_la_preserve) \
         ARM64_SIM_L_WRITE_REG_PTR_TAG((DST), (void *)(long)__a64_la_payload, __a64_la_tag); \
     else \
         ARM64_SIM_L_WRITE_REG_WIDTH((DST), __a64_la_old, (WIDTH) == ARM64_WIDTH_64 ? ARM64_WIDTH_64 : ARM64_WIDTH_32); \
@@ -2119,7 +2147,7 @@ do { \
                         !(__a64_mt_at & 7U) && __a64_mt_len - __a64_mt_i >= 8U) { \
                         __u64 __a64_mt_src = ARM64_SIM_L_STACK_INDEX(SRC) + __a64_mt_i; \
                         if (!(__a64_mt_src & 7U)) { \
-                            __a64_mt_tag = ARM64_SIM_L_TAG_GET(__a64_mt_src >> 3); \
+                            ARM64_SIM_L_TAG_GET_INTO(__a64_mt_tag, __a64_mt_src >> 3); \
                             if (__a64_mt_tag == ARM64_SIM_TAG_STACK || __a64_mt_tag == ARM64_SIM_TAG_RETURN) \
                                 ARM64_SIM_L_STACK_PAYLOAD_STORE(__a64_mt_at >> 3, ARM64_SIM_L_STACK_PAYLOAD_LOAD(__a64_mt_src >> 3)); \
                         } \

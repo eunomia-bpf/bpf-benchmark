@@ -38,4 +38,8 @@ void kprog_arm64_store(struct kprog_arm64_addressing *, __u64, __u64, __u64, __u
 void kprog_arm64_pair_step(struct kprog_arm64_addressing *, __u32, __u64, __u64, __u64, __u64, __u64, __u32, __u64, __u8);
 void kprog_arm64_vector_step(struct kprog_arm64_addressing *, __u64 *, __u64 *, __u32, __u64, __u64, __u32, __u64);
 void kprog_arm64_exclusive_store(struct kprog_arm64_addressing *, __u64, __u64, __u64, __u32, __u64, __u8);
+void kprog_arm64_atomic_add(struct kprog_arm64_addressing *, __u64, __u64, __u64, __u32, __u8);
+void kprog_arm64_atomic_set(struct kprog_arm64_addressing *, __u64, __u64, __u64, __u32, __u8);
+void kprog_arm64_atomic_clear(struct kprog_arm64_addressing *, __u64, __u64, __u64, __u32, __u8);
+void kprog_arm64_memory_tags(struct kprog_arm64_addressing *, __s64, __u8, __s64, __u8, __u64, __u8);
 #endif

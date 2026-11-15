@@ -24,6 +24,11 @@ unsigned long native_lab_exclusive_failure_choice(unsigned site)
 {
 	(void)site; fputs("unexpected exclusive choice in nonexclusive fixture\n", stderr); abort();
 }
+__u64 kprog_c_atomic_fetch(void *address, __u64 value, __u32 width, __u32 operation, __u32 order)
+{
+	(void)address; (void)value; (void)width; (void)operation; (void)order;
+	fputs("unexpected atomic in nonatomic fixture\n", stderr); abort();
+}
 void arm64_sim_unsupported_opcode(void){if(allow_reject) longjmp(rejected,1);abort();}
 static void check(int ok,const char *what)
 {

@@ -46,6 +46,12 @@ SEC("socket") int arm64_addressing_compile(struct __sk_buff *ctx)
 	ARM64_SIM_DIRECT_ARM64_OP_STLXR(18,10,2,255,8,aux,0x87654321);
 	ARM64_SIM_DIRECT_ARM64_OP_STLXR(19,11,2,255,1,aux,0xffffffff);
 	result^=__a64_x18.x^__a64_x19.x;
+	ARM64_SIM_DIRECT_ARM64_OP_LDADD(20,10,2,255,8,ctx->mark,0);
+	ARM64_SIM_DIRECT_ARM64_OP_LDSET(21,11,2,255,4,ctx->mark,0);
+	ARM64_SIM_DIRECT_ARM64_OP_LDCLR(22,12,2,255,2,ctx->mark,0);
+	ARM64_SIM_DIRECT_ARM64_OP_LDADD(23,13,2,255,1,ctx->mark,0);
+	ARM64_SIM_L_MEMORY_TAG_TRANSFER(-72,4,-64,4,ctx->mark&15,ctx->mark&1);
+	result^=__a64_x20.x^__a64_x21.x^__a64_x22.x^__a64_x23.x;
 	result^=__a64_x16.x^__a64_x17.x^__a64_v0^__a64_v0_hi;
 	ARM64_SIM_L_MEM_PRE(ARM64_SP,aux,8);
 	ARM64_SIM_L_MEM_POST(ARM64_SP,aux,8);

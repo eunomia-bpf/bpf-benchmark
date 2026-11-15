@@ -81,6 +81,12 @@ extern void kprog_c_trap(void) __attribute__((noreturn));
  * pointer exposure; these are not arbitrary fresh inputs or low32 loads. */
 extern void *kprog_c_context_pointer(const void *context, __u8 kind, __u32 offset);
 extern __u64 kprog_c_pointer_bits(const void *pointer);
+/* The existing indivisible fetch operation, not an ordinary read/store pair.
+ * WIDTH is1/2/4/8 bytes; OPERATION0/1/2 is add/or/and; ORDER is the existing
+ * relaxed/acquire/release/acq_rel code. The interpretation must bind its exact
+ * old value, truncated update, ordering, permissions, atomicity and effects. */
+extern __u64 kprog_c_atomic_fetch(void *address, __u64 value, __u32 width,
+                                 __u32 operation, __u32 order);
 /* CompCert's alignment-1 memcpy builtin has upstream Clight semantics for
  * the complete byte window, including pointer fragments. These adapters
  * keep typed local storage aligned without imposing alignment on the source

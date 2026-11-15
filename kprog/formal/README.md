@@ -1256,6 +1256,33 @@ current replay equal to normal compilation. Raw evidence:
 `/workspaces/kprog-raw/formal/m4-arm64-exclusive`. Remaining atomic/control/helper
 and full dispatcher/default-byte coverage still keep M4 open.
 
+Three atomic RMW roots (LDADD/LDSET/LDCLR) and the shared metadata-transfer root
+bring `Arm64Addressing` to26 functions. The frontend probe treated the GCC atomic
+names as unprototyped `int` externs, so the export now uses an explicit64-bit
+atomic boundary with byte width, operation and ordering. Native GCC/BPF operands
+and narrow kfuncs retain their original form. The primitive's indivisible
+old/new effects, ordering, permissions, initialization and fault interpretation
+remain M5 obligations; its declaration does not supply those semantics.
+
+The oracle adds38,880 atomic state/input/ABI profiles and13,440 metadata
+copy/partial/overlap/release profiles, passing with previous native bodies and
+current x86/AArch64 user mode in native and adapter forms. Twelve adapter-only
+refusals retain the source-before-call/no-commit prefix. Six mutations catch
+old-value truncation, wrong ordering, lost CLR complement, missing released
+value, missing atomic tag clearing and missing copied tags. `make clight`,133
+targeted Lean jobs, deterministic export and26 standard-axiom checks pass.
+The BPF fixture retains socket18000B and36 relocations exactly. Its comparator
+now compares the resolved symbol name without its string-table offset; actual
+ELF mutations reproduce the old false difference and still detect retargeting.
+Current replay equals normal compilation. The ten read-follow-up discrepancies
+remain identical to the previous header. Raw evidence:
+`/workspaces/kprog-raw/formal/m4-arm64-atomic`.
+
+The coordinator's2026-11-15 decision in [todo section0](../docs/todo.md) ends the
+formal lane after this turn; remaining M4–M6 pass to PERF after its linker work.
+The remaining full dispatcher/default-byte coverage, all2,065 refinements,
+recount, archival and whole-package checks are not accepted by this handoff.
+
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight
 handler exports and full default compiled-byte coverage remain to do. Preserve
