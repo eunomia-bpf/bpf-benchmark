@@ -43,6 +43,16 @@ released-stack hardware/model difference (`control-after`). Fields and cases
 are preserved; the header fix does not solve that witness. Numeric/full-ISA
 and remaining host-caller migration/AST/formal checks are not certified here.
 
+The recorded comparison6a30b0998 checks the old/new counterexample identities
+and exact stack XOR patterns, differing register/vector indices, ISA-masked
+flags and external memory. All4,864 identities and patterns match, with no
+added/missing case; registers, vectors, meaningful flags and external memory
+have zero differences in these records. Unmasked flags and all other raw
+fields remain in the lossless recordings. This substantiates the unchanged
+released-stack diagnosis; it supplies no hardware input witness. Reproduce
+with `control-input-comparison`; exact input hashes and results are in
+`control-comparison/comparison.json`.
+
 The first code-table check stopped on an outdated diagnostic assertion, while
 the linker correctly rejected the interior target with `helper CFG branch
 targets an interior byte`. fada46340 asserts the current rejection; all

@@ -1,0 +1,15 @@
+{
+  "before": "/workspaces/kprog-raw/perf/20261115-preprocess-growth/cells-control/mismatches.jsonl",
+  "before_sha256": "1ac15f4cfac53bd7625d27320333885d22ee3576d4140e439529e01b2911b896",
+  "after": "/workspaces/kprog-raw/perf/20261115-host-input-route/control-after/mismatches.jsonl",
+  "after_sha256": "c50764dc01f19c7d58b1d25f70e049c56b36f5fa38ff2f3f79c8a9a9734fc8b6",
+  "shared_cases": 4864,
+  "before_only": [],
+  "after_only": [],
+  "changed_cases": [],
+  "after_register_differences": 0,
+  "after_vector_differences": 0,
+  "after_masked_flag_differences": 0,
+  "after_memory_differences": 0,
+  "scope": "Exact counterexample identities and observed differences; all raw fields remain in input recordings. No hardware-input witness or proof."
+}
