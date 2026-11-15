@@ -1105,7 +1105,7 @@ def c_comment(text: str) -> str:
 # The specialized step for each token the encoder can lower directly, and the
 # aux-gated override for the six lane-shift-sensitive tokens. Both come from the
 # machine-checked specialization contract in
-# `kprog/formal/x86_specialization_spec.json` (the `directMacro` and
+# `kprog/formal/contracts/x86_specialization_spec.json` (the `directMacro` and
 # aux-gated rows): `X86_SPECIALIZATION_DIRECT_CALL` is the call the encoder
 # emits at aux 0, `X86_SPECIALIZATION_AUX_CALL` the one it emits for nonzero
 # aux. `kprog/formal/KProgFormal/X86Specialization.lean` proves each of these
