@@ -1,0 +1,22 @@
+{
+  "journal": "/workspaces/kprog-raw/perf/20261114-census-resume/control/outcomes.jsonl",
+  "journal_rows_at_capture": 50,
+  "journal_sha256": "a2535153a971f4b5cc3f84eb7de517b23b4ceb84064edc408fa71b785997cd4c",
+  "body_group": 104,
+  "application": "tracee/monitor",
+  "name": "trace_mmap_alert",
+  "stage": "verifier_rejected",
+  "original_class": "verifier_stack_access",
+  "request_id": 50,
+  "native_id": 0,
+  "native_sha256": "489a7a69184baae011350d4c7632faf0f5539d9df8417aa2892246cc49be777f",
+  "execution_mode": "submitted-native",
+  "started": "2026-11-15T04:29:58.516550+00:00",
+  "finished": "2026-11-15T06:05:45.547569+00:00",
+  "diagnostic_tail": "6: (79) r2 = *(u64 *)(r1 +0)       ; R1=map_value(map=kprog_unspec,ks=4,vs=8) R2=scalar()\n1127: (79) r2 = *(u64 *)(r1 +0)       ; R1=map_value(map=kprog_unspec,ks=4,vs=8) R2=scalar()\n1128: (79) r1 = *(u64 *)(r1 +0)       ; R1=scalar()\n1129: (b4) w9 = 6                     ; R9=6\n1130: (05) goto pc+45\n1176: (b7) r1 = 280                   ; R1=280\n1177: (bf) r2 = r1                    ; R1=280 R2=280\n1178: (07) r2 += 8                    ; R2=288\n1179: (bf) r3 = r1                    ; R1=280 R3=280\n1180: (57) r3 &= 7                    ; R3=0\n1181: (55) if r3 != 0x0 goto pc+16    ; R3=0\n1182: (bf) r3 = r10                   ; R3=fp0 R10=fp0\n1183: (07) r3 += -368                 ; R3=fp-368\n1184: (0f) r3 += r2                   ; R2=288 R3=fp-80\n1185: (79) r4 = *(u64 *)(r10 -400)    ; R4=map_value(map=config_map,ks=4,vs=272) R10=fp0 fp-400=map_value(map=config_map,ks=4,vs=272)\n1186: (7b) *(u64 *)(r3 +0) = r4       ; R3=fp-80 R4=map_value(map=config_map,ks=4,vs=272) fp-80=map_value(map=config_map,ks=4,vs=272)\n1187: (65) if r1 s> 0xffffffff goto pc+1      ; R1=280\n1189: (79) r1 = *(u64 *)(r10 -416)    ; R1=1 R10=fp0 fp-416=1\n1190: (56) if w1 != 0x1 goto pc+96    ; R1=1\n1191: (61) r1 = *(u32 *)(r10 -432)    ; R1=6 R10=fp0 fp-432=????6\n1192: (63) *(u32 *)(r10 -384) = r1    ; R1=6 R10=fp0 fp-384=mmmm6\n1193: (15) if r6 == 0x0 goto pc+97    ; R6=map_value(map=task_info_map,ks=4,vs=200)\n1194: (61) r1 = *(u32 *)(r10 -432)    ; R1=6 R10=fp0 fp-432=????6\n1195: (63) *(u32 *)(r10 -384) = r1    ; R1=6 R10=fp0 fp-384=mmmm6\n1196: (79) r3 = *(u64 *)(r10 -376)    ; R3=map_value(map=event_data_map,ks=4,vs=32536) R10=fp0 fp-376=map_value(map=event_data_map,ks=4,vs=32536)\n1197: (05) goto pc+1206\n2404: (b7) r1 = 4                     ; R1=4\n2405: (79) r1 = *(u64 *)(r10 -400)    ; R1=map_value(map=config_map,ks=4,vs=272) R10=fp0 fp-400=map_value(map=config_map,ks=4,vs=272)\n2406: (71) r1 = *(u8 *)(r1 +4)        ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=255,var_off=(0x0; 0xff))\n2407: (b4) w4 = 0                     ; R4=0\n2408: (57) r1 &= 32                   ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=32,var_off=(0x0; 0x20))\n2409: (61) r2 = *(u32 *)(r10 -432)    ; R2=6 R10=fp0 fp-432=????6\n2410: (63) *(u32 *)(r10 -1080) = r2\ninvalid write to stack R10 off=-1080 size=4\nprocessed 759 insns (limit 1000000) max_states_per_insn 0 total_states 38 peak_states 38 mark_read 0\n\n",
+  "compiler_failures": [],
+  "archive": "/workspaces/kprog-raw/perf/20261114-census-resume/control/retained-requests/session-eji1_le_/50.failure.tar.gz",
+  "archive_bytes": 30683474,
+  "archive_sha256": "750c24809d7373922ec8ea6551a9709fdb249fc564ff9959f48327b9a3de4dd1",
+  "scope": "Retained producer/worker; direct joined-C compilation, stock rejection, no current normal MIR or execution conclusion"
+}
