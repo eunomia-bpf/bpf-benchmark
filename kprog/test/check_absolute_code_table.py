@@ -5,6 +5,7 @@ import hashlib
 import json
 import mmap
 from pathlib import Path
+import struct
 import subprocess
 import sys
 
@@ -22,6 +23,20 @@ def main(a):
                              stdout=result.stdout, stderr=result.stderr))
         (a.output/'commands.json').write_text(json.dumps(commands, indent=2)+'\n')
         result.check_returncode()
+
+    proof = a.build/'absolute.proof.o'
+    previous_proof = hashlib.sha256(proof.read_bytes()).hexdigest()
+    run([a.linker, '--input', a.build/'absolute.native.o', '--symbol', 'absolute_table',
+         '--mode', 'proof', '--preserve-entry-abi', '--output', proof])
+    if hashlib.sha256(proof.read_bytes()).hexdigest() != previous_proof:
+        raise ValueError('published CLI proof differs from the tested library proof')
+    plan = a.build/'absolute-plan.json'
+    plan.write_text(json.dumps(dict(version=1, kernel_layout=json.loads(a.kernel_layout.read_text()))))
+    run([a.linker, '--input', proof, '--symbol', 'absolute_table', '--mode', 'kernel',
+         '--output', a.build/'absolute.bin', '--output-relocs', a.build/'absolute.relocs',
+         '--output-map-patches', a.build/'absolute.maps', '--link-plan', plan])
+    if (a.build/'absolute.maps').read_bytes():
+        raise ValueError('local code table acquired a map capability')
 
     sys.path[:0] = [str(ROOT/'kprog'), str(ROOT/'kprog/x86'), str(ROOT/'kprog/x86/micro-prog')]
     import trusted_specializer as worker
@@ -50,7 +65,10 @@ unsigned long native_lab_entry_input(unsigned int kind) {
     model = c.CDLL(str(library)).absolute_model_x86_sim_xdp
     model.argtypes, model.restype = [c.c_void_p], c.c_uint32
     metadata = json.loads((a.build/'rust-result.json').read_text())
-    pointers = metadata['runtime_image_pointers']
+    pointers = [dict(offset=offset, kind=kind, target=target) for offset, kind, target in
+                struct.iter_unpack('<IIQ', (a.build/'absolute.relocs').read_bytes())]
+    if pointers != metadata['runtime_image_pointers']:
+        raise ValueError('published CLI image pointers differ from tested library binding')
     binary = (a.build/'absolute.bin').read_bytes() + b'\xc3'
     rows = []
     with mmap.mmap(-1, len(binary), prot=mmap.PROT_READ|mmap.PROT_WRITE|mmap.PROT_EXEC) as memory:
@@ -91,6 +109,6 @@ unsigned long native_lab_entry_input(unsigned int kind) {
 
 if __name__ == '__main__':
     p = argparse.ArgumentParser(description=__doc__)
-    for name in ['build', 'output', 'bounds']:
+    for name in ['build', 'output', 'bounds', 'linker', 'kernel-layout']:
         p.add_argument('--'+name, type=Path, required=True)
     main(p.parse_args())

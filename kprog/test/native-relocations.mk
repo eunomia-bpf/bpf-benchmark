@@ -129,7 +129,7 @@ absolute-table-source: $(KERNEL_LAYOUT)
 
 .PHONY: absolute-table-b
 absolute-table-b: $(CONTEXT_TOOL)
-	taskset -c 16-19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_absolute_code_table.py --build $(ABSOLUTE_TABLE_BUILD) --output $(OUTPUT) --bounds $(CONTEXT_TOOL)
+	taskset -c 16-19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_absolute_code_table.py --build $(ABSOLUTE_TABLE_BUILD) --output $(OUTPUT) --bounds $(CONTEXT_TOOL) --linker $(LINKER_BINARY) --kernel-layout $(KERNEL_LAYOUT)
 
 .PHONY: absolute-table-stock guest-absolute-table-stock
 absolute-table-stock: /var/tmp/kprog-tmp/perf/scheduled-table/stock-client
