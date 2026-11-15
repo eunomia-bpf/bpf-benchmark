@@ -264,3 +264,12 @@ native-stores: $(CONTEXT_TOOL)
 .PHONY: current-otel-frontend
 current-otel-frontend:
 	taskset -c 8-11 prlimit --as=17179869184 -- python3 $(ROOT)/kprog/test/profile_current_otel.py --frontend --build /var/tmp/kprog-tmp/perf/otel-whole-word-checked --output $(OUTPUT) --metadata /workspaces/kprog-raw/perf/20261115-otel-hotspot-spills/replay/request__generation.metadata.json --entry /workspaces/kprog-raw/perf/20261115-otel-hotspot-spills/replay/request__kernel.entry
+
+.PHONY: frontend-debugger frontend-stacks
+frontend-debugger:
+	install -d $(OUTPUT)
+	apt-get --simulate --no-install-recommends install gdb > $(OUTPUT)/package-plan.log 2>&1
+	taskset -c 8-11 prlimit --as=2147483648 -- env DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install gdb > $(OUTPUT)/package-install.log 2>&1
+
+frontend-stacks:
+	taskset -c 8-11 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/sample_compiler_stack.py --pid $(COMPILER_PID) --output $(OUTPUT)
