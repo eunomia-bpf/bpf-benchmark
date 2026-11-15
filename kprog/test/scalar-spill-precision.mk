@@ -36,7 +36,7 @@ spill-groups-build:
 spill-groups-run:
 	install -d $(OUTPUT)
 	exec 9>/workspaces/.agent-state/kprog-lanes/locks/image; flock -s 9; \
-	taskset -c 22-23 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir /var/tmp=$(SPILL_GROUP_BUILD) --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(ROOT)/kprog/test/scalar-spill-precision.mk spill-groups-guest SPILL_GROUP_BUILD=/var/tmp OUTPUT=$(OUTPUT)'
+	taskset -c 16-17 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir /var/tmp=$(SPILL_GROUP_BUILD) --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(ROOT)/kprog/test/scalar-spill-precision.mk spill-groups-guest SPILL_GROUP_BUILD=/var/tmp OUTPUT=$(OUTPUT)'
 
 spill-groups-guest:
 	python3 $(ROOT)/kprog/test/check_spill_groups.py --build $(SPILL_GROUP_BUILD) --output $(OUTPUT)
