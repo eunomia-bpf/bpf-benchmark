@@ -1,0 +1,35 @@
+{
+  "time": "2026-11-15T20:05:43Z",
+  "paths": [
+    {
+      "path": "/var/tmp/kprog-tmp/perf/katran-fixed-frequency/var-tmp/runtime.image.tar",
+      "old_bytes": 666575872,
+      "old_device": 4194525,
+      "old_inode": 63833843,
+      "operation": "replace completed build-input copy with canonical symlink",
+      "target": "/workspaces/repository/.cache/container-images/x86_64-runner-runtime.image.tar"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/katran-fixed-frequency/var-tmp/bpf_x86_native_lab.ko",
+      "old_bytes": 689680,
+      "old_device": 4194525,
+      "old_inode": 63833844,
+      "operation": "replace completed build-input copy with canonical symlink",
+      "target": "/workspaces/repository/kinsn/module/x86/build/bpf_x86_native_lab.ko"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/katran-body-profile/20261115T200021Z/var-tmp/perf",
+      "old_bytes": 9253168,
+      "operation": "unlink failed-stage perf hardlink; canonical perf retained"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/katran-body-profile/20261115T200021Z/var-tmp",
+      "operation": "remove empty build directory"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/katran-body-profile/20261115T200021Z",
+      "operation": "remove empty build directory"
+    }
+  ],
+  "raw_removed": false
+}

@@ -97,3 +97,9 @@ with a read-only mount for the canonical perf directory hidden by guest
 /var/tmp. The existing one-image copy fallback also becomes symbolic links.
 The first attempt's logs and restored host controls stay in its raw directory;
 the official completed comparison and its measured inputs keep their scope.
+The first retry also stops before boot on read-only mount argument order.
+The corrected guest=host mapping passes a real1vCPU guest transport smoke:
+canonical perf executes, and image666575872B/module689680B are readable.
+profile-transport/ retains both startup failures' host-restoration outcomes,
+the owned-copy cleanup inventory and this smoke. Raw directories for the
+failed attempts remain intact; a fresh profile attempt uses the corrected map.

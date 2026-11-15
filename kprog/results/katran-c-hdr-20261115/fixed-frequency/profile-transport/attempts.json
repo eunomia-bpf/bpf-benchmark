@@ -1,0 +1,23 @@
+{
+  "observed": "2026-11-15T20:11:34Z",
+  "attempts": [
+    {
+      "raw": "/workspaces/kprog-raw/perf/20261115-katran-body-profile",
+      "make_exit": 2,
+      "failure_stage": "before guest boot",
+      "reason": "cross-device module hardlink",
+      "host_restore_exact": true,
+      "restore_errors": []
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/20261115-katran-body-profile-retry1",
+      "make_exit": 2,
+      "failure_stage": "before guest boot",
+      "reason": "read-only mount guest/host order",
+      "host_restore_exact": true,
+      "restore_errors": []
+    }
+  ],
+  "smoke_raw": "/workspaces/kprog-raw/perf/20261115-profile-input-smoke",
+  "smoke_exit": 0
+}

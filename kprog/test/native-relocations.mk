@@ -509,3 +509,11 @@ katran-fixed-frequency:
 katran-body-profile:
 	install -d $(OUTPUT)
 	flock -x /workspaces/.agent-state/kprog-lanes/locks/timing flock -s /workspaces/.agent-state/kprog-lanes/locks/image prlimit --as=103079215104 -- python3 $(ROOT)/kprog/perf/one-image/host_cpu.py --state $(OUTPUT)/host-cpu.json -- python3 $(ROOT)/kprog/perf/profile/phase-profile.py run --app katran --seconds 60 --cpus 0-7 --vcpus 8 --memory 64G --freq 999 --out $(OUTPUT)/profile --annotate 0 --state-root /var/tmp/kprog-tmp/perf/katran-body-profile --perf /var/tmp/kprog-tmp/C/perf-build/perf --persist-output
+
+.PHONY: profile-input-smoke
+profile-input-smoke:
+	install -d /var/tmp/kprog-tmp/perf/profile-input-smoke $(OUTPUT)
+	ln -sfn /var/tmp/perf-input/perf /var/tmp/kprog-tmp/perf/profile-input-smoke/perf
+	ln -sfn $(ROOT)/kinsn/module/x86/build/bpf_x86_native_lab.ko /var/tmp/kprog-tmp/perf/profile-input-smoke/bpf_x86_native_lab.ko
+	ln -sfn $(ROOT)/.cache/container-images/x86_64-runner-runtime.image.tar /var/tmp/kprog-tmp/perf/profile-input-smoke/runtime.image.tar
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 16-17 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir /var/tmp=/var/tmp/kprog-tmp/perf/profile-input-smoke --rodir /var/tmp/perf-input=/var/tmp/kprog-tmp/C/perf-build --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'set -eu; test -x /var/tmp/perf; test -r /var/tmp/runtime.image.tar; test -r /var/tmp/bpf_x86_native_lab.ko; /var/tmp/perf --version > $(OUTPUT)/perf-version.txt; stat -Lc "%F %s %n" /var/tmp/perf /var/tmp/runtime.image.tar /var/tmp/bpf_x86_native_lab.ko > $(OUTPUT)/guest-inputs.txt'
