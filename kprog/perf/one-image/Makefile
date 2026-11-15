@@ -77,7 +77,6 @@ SAMPLES ?= 3
 WORKLOAD_DURATION ?= 180
 # The native configuration switch. The default is the image's own manifest, the
 # 2026-05-29 path with no load-time specialization. Pointing it at a directory
-# built by vendor/bpf/native_specialize_objects.py selects the specialized
 # objects (.rodata values as constants, array lookups as address arithmetic);
 # the path must be one the runtime container sees (corpus/results is mounted).
 NATIVE_MANIFEST ?= /opt/bpf-benchmark/native-bpf/x86_64/$(APP_DIR)/manifest.json

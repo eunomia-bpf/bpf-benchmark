@@ -70,6 +70,10 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-15 ~00:06 UTC: "你原话里要你同意的东西（benchmark 设置、论文、故事、设计）保持原样是吧? 确认一下."
 - 2026-11-15 ~00:06 UTC: "强调一下, 通知其他人"
 - 2026-11-15 ~00:21 UTC: "编译参数所有 app 统一."
+- 2026-11-15 ~00:2x-00:4x UTC: "你看看, 旧的会误导的不要关闭, 要拆掉丢掉. 你看看有啥不符合设计的都要删掉. 免得误导."
+- 2026-11-15 ~00:2x-00:4x UTC: "每个 workspace 一个 omp 一个 codex?"
+- 2026-11-15 ~00:2x-00:4x UTC: "你来拆."
+- 2026-11-15 ~00:2x-00:4x UTC: "不需要编译通过, 先清理不干净的东西"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 

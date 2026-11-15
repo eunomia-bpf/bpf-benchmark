@@ -20,11 +20,9 @@ No other image is kept. Removals are listed in `kprog/docs/cleanup-log.md`.
 - the default, `/opt/bpf-benchmark/native-bpf/x86_64/<app>/manifest.json`, is the
   image's own manifest: the 2026-05-29 path with no load-time specialization;
 - a directory under `corpus/results/` built by
-  `vendor/bpf/native_specialize_objects.py` holds the specialized objects, where
   frozen `.rodata` globals are plain constants (clang folds their branches) and
   plain-array lookups are address arithmetic.
 
-`scripts/specialized-timing.sh <app> <manifest-dir> <state-dir> <samples>
 <seconds> <cpus>` runs one application with either configuration against its own
 eBPF baseline in the same run. Measured on BCC (3x180 s, stats on, CPUs 0-7), per
 invocation: 0.982x with the image's objects and 1.001x with the specialized
