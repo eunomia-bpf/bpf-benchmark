@@ -1,0 +1,94 @@
+{
+  "image_old": "sha256:fc5336c2747efa080cf174710d1c7b41d01a3a7603be262ccd4667a645068247",
+  "image_new": "sha256:b6ed6a16d1412847c2f7521f9fd1e2f48156dfead8b8a6c528390c45f7a93765",
+  "started": "2026-11-15T21:16:10Z",
+  "finished": "2026-11-15T21:17:35Z",
+  "publication_exit": 0,
+  "superseded_image_cleanup": "already-absent",
+  "stable_kernel_and_modules": true,
+  "stable_artifacts": {
+    "/workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage": "d49f38ec06ad33ffa63def6487431667a94df612c0ce48f9824cf4cd29101166",
+    "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux": "c157c2ca9fd4875ea0a82b1294f6d0bef57e2966888da3263f99d068598dfca9",
+    "/workspaces/.agent-state/kprog-ck/build-x86/.config": "0b75fe318542db6698950f2b2ce5163e867118317fe61c538c4e7de7a1357163",
+    "/workspaces/repository/kinsn/module/x86/build/bpf_x86_native_lab.ko": "c3d739a4916b8821376246f088ffdb57d3d871b769b7d97d0f52abc5b8b96270",
+    "/workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko": "da7139d1e793409befa0cb3f8f31593253d8b977c313ffe10a7d72b07c63b293"
+  },
+  "tools": [
+    {
+      "path": "/usr/local/bin/native-link",
+      "shipped": {
+        "bytes": 2871768,
+        "sha256": "fb61167b8f53d7e009882b88455c4a7684bbb9b000093f7873258c32a290a885"
+      },
+      "built": "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "current": {
+        "bytes": 2871768,
+        "sha256": "fb61167b8f53d7e009882b88455c4a7684bbb9b000093f7873258c32a290a885"
+      },
+      "equal": true
+    },
+    {
+      "path": "/usr/local/lib/bpfrejit/libnative_loader.so",
+      "shipped": {
+        "bytes": 801360,
+        "sha256": "928a15583274d44fc38fcd6bf7a830e241bb803cdbe74b2fc391e6e99ea7c14a"
+      },
+      "built": "/workspaces/repository/runner/build-llvmbpf/native_loader/libnative_loader.so",
+      "current": {
+        "bytes": 801360,
+        "sha256": "928a15583274d44fc38fcd6bf7a830e241bb803cdbe74b2fc391e6e99ea7c14a"
+      },
+      "equal": true
+    },
+    {
+      "path": "/usr/local/lib/bpfrejit/libbpfrejit_shim.so",
+      "shipped": {
+        "bytes": 463696,
+        "sha256": "19f2f67ad127424b1356e8913eb9114299f4ea250ca2750511129af0b2a51ab0"
+      },
+      "built": "/workspaces/repository/bpfopt/shim/build-x86/libbpfrejit_shim.so",
+      "current": {
+        "bytes": 463696,
+        "sha256": "19f2f67ad127424b1356e8913eb9114299f4ea250ca2750511129af0b2a51ab0"
+      },
+      "equal": true
+    }
+  ],
+  "native_inventory": {
+    "image_before_files": 1193,
+    "image_after_files": 1252,
+    "stage_after_files": 1252,
+    "after_differences": [],
+    "changed_apps": {
+      "tetragon": 89
+    },
+    "added": 59,
+    "removed": 0,
+    "changed": 30
+  },
+  "runtime_replay": {
+    "native_sha256": "c0dc65fc746d7027c94969df1239b2eb603ecef541e9ab333a7186ce636eb13e",
+    "proof_sha256": "876861294109de6de1daad67a8753519fa235bc3a101fc0810a2a3a31f8a2943",
+    "linker_sha256": "fb61167b8f53d7e009882b88455c4a7684bbb9b000093f7873258c32a290a885",
+    "prior_blob_bytes": 12386,
+    "blob_bytes": 11016,
+    "blob_sha256": "ce07dee2dbe4b907741730216cdca15641919f42b8a3785ace6304ad3e4a6fab",
+    "relocs_bytes": 288,
+    "relocs_sha256": "cd5e673240a814d3b1c6512952377b45cc35658e51533070d5de1ca965998f7b",
+    "scope": "New code replay on the prior actual timed plan; actual new timed-object binding follows current A/B capture"
+  },
+  "smoke": {
+    "exit_code": 2,
+    "phase": "Before guest boot",
+    "error": "Missing caller-created KPROG_TIMING_CAPTURE_DIR",
+    "host_controls": 73,
+    "host_restored_exact": true,
+    "host_restore_errors": [],
+    "forward_fix": "run_base_consistency_smoke.sh creates selected observation output directory; syntax checked; current full timing continues"
+  },
+  "timing": {
+    "launcher": 1211116,
+    "started": "2026-11-15T21:17:36Z",
+    "scope": "Existing fixed-frequency A/A plus A/B, all LTO, both application/counter outcomes still pending"
+  }
+}

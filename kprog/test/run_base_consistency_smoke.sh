@@ -5,6 +5,9 @@ base_smoke_output=$1
 base_smoke_root=/workspaces/repository
 base_smoke_state=/var/tmp/kprog-tmp/perf/base-consistency-smoke
 install -d "$base_smoke_output"
+if [[ -n ${KPROG_TIMING_CAPTURE_DIR:-} ]]; then
+    install -d "$KPROG_TIMING_CAPTURE_DIR"
+fi
 
 finish_base_smoke() {
     base_smoke_status=$?

@@ -43,3 +43,22 @@ setsid/nohup and a hard address-space bound; persistent raw directories are
 The queue waits on process/resource order. Supplementary observation or smoke
 status does not discard a completed measurement. Actual application errors,
 exit statuses and observer diagnostics will remain with the raw outputs.
+
+Publication completes21:17:35Z, exit0, sole imageb6ed6a16 and CLIfb611.
+Boot, kernel config, ELF and both external modules match the before state;
+the shipped CLI, loader and shim match their packaging inputs. All1252 native
+stage files match the image. The89 stage differences from the previous image
+are C's Tetragon work:59 additions and30 changes; Katran's input stays c0dc.
+
+New-code replay on the prior actual timed plan keeps proof87686129 and reduces
+the neutral runtime payload12386→11016B, with288B relocations. This is an
+11.06% payload reduction, with actual installed size and new timed binding
+still to be measured. The prior per-call/body targets remain open.
+
+The separate smoke stops before boot because its observation directory was
+not created; all73 host controls restore exactly. The caller now creates the
+selected observation directory. Syntax passes; no separate application success
+is claimed. The existing fixed-frequency pair starts21:17:36Z and continues,
+with its own per-arm observation directories already created. Its actual
+application/counter outcomes will be retained. No smoke failure or missing
+supplementary observation discards the scheduled measurements.

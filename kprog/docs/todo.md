@@ -12,7 +12,7 @@
 
 - [x] P-clock-link（51fcc939f、fbee52b39；本提交收据）：normal x86 clock calls/tail transfers绑定同boot fast函数，地址/ID观察及helper可用性不变；44测试/实际十类helper查询和XDP plan通过，17:42配对base发布。image d4b19c9f于17:47发布，本提交image收据；实际shipped工具和1193stage文件一致。实际Katran map绑定/整应用计时仍开。`perf_20261113/clock-lto/report.md`。
 
-- [ ] P-hash-word-keys（585706fe1 source/checks；coordinator20:38 Katran先于OTelapp）：sameprofile发现VIP20B未进4/8/12/16 LTO，compact508B word-key jhash2/memcmp替换四份体；49178真实machine-code/kernel-reference+44Rust通过。配对image发布1208082等待C完整1197138后EX；已排validation1211115(actualplan/1x10s实际guest)及固定频率AA/AB1211116，随后收actualcode长度/计数；allLTO统一开，不据host测试宣称runtime提升。`perf_20261113/word-hash-lto/`。
+- [ ] P-hash-word-keys（585706fe1 source/checks；coordinator20:38 Katran先于OTelapp）：sameprofile发现VIP20B未进4/8/12/16 LTO，compact508B word-key jhash2/memcmp替换四份体；49178真实machine-code/kernel-reference+44Rust通过。配对发布于21:17:35完成imageb6ed6a16/CLI fb611，actual旧plan重放neutralblob12386→11016B/proof不变；smoke因未建capture目录在boot前失败且73controls精确恢复，caller已修，未宣称app通过。固定频率AA/AB1211116于21:17:36开始，实际新plan/计数继续收；allLTO统一开，不据host测试宣称runtime提升。`perf_20261113/word-hash-lto/`。
 
 - [ ] P-map-CFG：实际Katran timed plan已到（4f8b965a8），proof/blob/relocs重放逐字匹配；66lookup中60named，6dynamic offsets3743/3988/5304/5743/5831/6085。已判明4site为lru_mapping inner/fallback_cache经rsp+0x78合流，2site直接消费vip_to_down_reals_map返回的inner；不是单一同名指针跨块遗失，单纯CFG meet无解（本提交dynamic-map-sites.json）。下一类须真实inner-map shape事实且保持混合路径语义；混合身份/inner-map/窄写/未知内存仍不得猜类型。当前3.15%每调用结果尚未归因到这6site。
 
