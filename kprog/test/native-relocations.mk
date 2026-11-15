@@ -196,3 +196,7 @@ guest-map-table-lookup-checked:
 .PHONY: scheduled-table-b
 scheduled-table-b: $(CONTEXT_TOOL)
 	taskset -c 8-11 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_scheduled_table.py --build /var/tmp/kprog-tmp/perf/scheduled-table --output $(OUTPUT)/simulator --bounds $(CONTEXT_TOOL)
+
+.PHONY: scheduled-otel-source
+scheduled-otel-source:
+	taskset -c 8-11 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/render_scheduled_otel.py --build /var/tmp/kprog-tmp/perf/scheduled-table --output $(OUTPUT)/otel-source
