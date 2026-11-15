@@ -55,6 +55,10 @@ guest-kernel-layout:
 check: $(KERNEL_LAYOUT)
 	taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) cargo test --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
 
+.PHONY: map-table-b
+map-table-b: check
+	taskset -c 19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_map_table_b.py --build /var/tmp/kprog-tmp/perf/map-pointer-tables --output $(OUTPUT)/map-table-b
+
 build:
 	flock -x /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) bash -eu -c 'if test -L "$(LINKER_TARGET)/release/native-link"; then unlink "$(LINKER_TARGET)/release/native-link"; fi; exec cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml'
 

@@ -218,7 +218,9 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
         for arg in args:
             if decode.is_mem(arg) and op not in {'lea', 'nop', 'data16', 'cs'}:
                 address(arg)
-        if op in {'mov', 'movabs', 'movzx', 'movsx', 'movsxd', 'movaps', 'movups', 'movbe'}:
+        if insn.map_table is not None:
+            write(args[0], FULL, pointer=False)
+        elif op in {'mov', 'movabs', 'movzx', 'movsx', 'movsxd', 'movaps', 'movups', 'movbe'}:
             dst = ri(args[0])
             src = ri(args[1])
             if dst:

@@ -16,9 +16,10 @@ class NativeEffects:
 
 
 class ReadonlyBytes(bytes):
-    def __new__(cls, data, code_relocations=()):
+    def __new__(cls, data, code_relocations=(), map_relocations=()):
         value = super().__new__(cls, data)
         value.code_relocations = tuple(code_relocations)
+        value.map_relocations = tuple(map_relocations)
         return value
 
 
@@ -46,11 +47,11 @@ def instruction_effects(elf):
     return result
 
 
-def readonly_code_relocations(elf, section_index, symbol):
+def readonly_relocations(elf, section_index, symbol):
     symbols = elf.get_section_by_name('.symtab')
     text_index = elf.get_section_index('.text')
     start, size = symbol['st_value'], symbol['st_size']
-    result = []
+    result, maps = [], []
     for section in elf.iter_sections():
         if section['sh_type'] not in {'SHT_REL', 'SHT_RELA'} or section['sh_info'] != section_index:
             continue
@@ -59,11 +60,17 @@ def readonly_code_relocations(elf, section_index, symbol):
             if not start <= offset < start + size:
                 continue
             target = symbols.get_symbol(relocation['r_info_sym'])
+            if (section['sh_type'] == 'SHT_RELA' and relocation['r_info_type'] == 1 and
+                    target['st_shndx'] == 'SHN_UNDEF' and target.name and
+                    target['st_info']['type'] != 'STT_FUNC' and
+                    relocation['r_addend'] == 0 and offset + 8 <= start + size):
+                maps.append((offset-start, target.name))
+                continue
             if (section['sh_type'] != 'SHT_RELA' or relocation['r_info_type'] != 2 or
                     target['st_shndx'] != text_index or offset + 4 > start + size):
                 raise ValueError('unsupported nested native readonly relocation')
             result.append((offset-start, target['st_value'] + relocation['r_addend'] - (offset-start)))
-    return tuple(sorted(result))
+    return tuple(sorted(result)), tuple(sorted(maps))
 
 
 def private_results_dead(insns, starts, scratch, flags, decode, exit_addr, call_targets, table_targets):

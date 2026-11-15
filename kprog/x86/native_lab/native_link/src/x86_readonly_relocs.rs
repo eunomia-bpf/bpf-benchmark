@@ -210,6 +210,9 @@ mod tests {
             Some(&layout.hash), Some(&layout.lpm), false)?;
         assert_eq!(linked.map_patches.len(), 8);
         assert!(linked.relocs.is_empty());
+        fs::write(build.join("fixture.kernel.bin"), &linked.blob)?;
+        fs::write(build.join("fixture.map-patches.tsv"), linked.map_patches.iter()
+            .map(|patch| format!("{}\t{}\n", patch.name, patch.offset)).collect::<String>())?;
         let mut missing = maps.clone();
         missing.remove("map3");
         let error = rewrite_x86(&elf, &entry, &[entry.clone()], &empty, &missing, &HashMap::new(),

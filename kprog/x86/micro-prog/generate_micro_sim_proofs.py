@@ -21,7 +21,8 @@ from helper_abi import helper_idents, is_helper_symbol
 from x86_abi import check_definedness
 import kfunc_codegen
 from x86_relative_tables import (NativeEffects, ReadonlyBytes, instruction_effects,
-                                 readonly_code_relocations, lower_relative_tables)
+                                 readonly_relocations, lower_relative_tables)
+from x86_map_tables import lower_map_tables
 
 from generated_x86_alu_decode import ALU_AUX
 from generated_x86_full_condition import CC_AUX
@@ -105,6 +106,7 @@ class NativeInsn:
     kernel_function: dict | None = None
     effects: NativeEffects | None = None
     table_dispatch: tuple[tuple[int, int], ...] | None = None
+    map_table: tuple[tuple[int, tuple[bool, str] | int], ...] | None = None
 
 
 @dataclass(frozen=True)
@@ -241,8 +243,8 @@ def load_rodata_blobs(obj: Path) -> dict[str, bytes]:
             offset, size, name = symbol["st_value"], symbol["st_size"], symbol.name
             if size <= 0 or offset + size > len(data):
                 raise ValueError(f"native readonly extent exceeds its section: {name} offset={offset} size={size}")
-            out[name] = ReadonlyBytes(data[offset:offset + size],
-                readonly_code_relocations(elf, index, symbol))
+            code, maps = readonly_relocations(elf, index, symbol)
+            out[name] = ReadonlyBytes(data[offset:offset + size], code, maps)
         return out
 
 
@@ -1271,7 +1273,9 @@ def indirect_targets(insns: list[NativeInsn], exit_addr: int | None = None,
                 outgoing[indices[reg]] = None
         if dst and op in {"mov", "movabs"} and dst[1] in {32, 64}:
             value = None
-            if is_int(args[1]):
+            if insn.map_table is not None:
+                pass  # A selected capability is not a scalar/code address.
+            elif is_int(args[1]):
                 value = frozenset({("scalar", parse_int(args[1]) & ((1 << dst[1]) - 1))})
             elif reg_info(args[1]):
                 value = read(incoming, args[1])
@@ -1476,6 +1480,22 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
     branch_macro = "X86_SIM_X86_SUB_JCC" if subroutine else "X86_SIM_X86_JCC"
     jump_macro = "X86_SIM_X86_SUB_JMP" if subroutine else "X86_SIM_X86_JMP"
     return_targets = return_targets or set()
+    if insn.map_table is not None:
+        dst, index = (reg_info(operand)[0] for operand in insn.operands)
+        lines.extend([f'{indent}/* Image-bound immutable capability table; private base is dead. */',
+                      f'{indent}switch (X86_SIM_L_READ_REG({index}) << 3) {{'])
+        for offset, value in insn.map_table:
+            if isinstance(value, tuple):
+                is_value, expression = value
+                encoded = enc('X86_OP_MOV_LOAD_MAP_PTR', dst=dst,
+                              aux='X86_MAP_PTR_AUX_VALUE' if is_value else '0', imm=c_ptr_u64(expression))
+            else:
+                encoded = enc('X86_OP_MOV_IMM', dst=dst, imm=c_u64(value))
+            step = direct_step_statement(encoded) or (
+                f'{step_macro}({encoded.op}, {encoded.dst}, {encoded.src}, {encoded.flags}, {encoded.aux}, {encoded.imm});')
+            lines.append(f'{indent}case {offset}ULL: {step.rstrip(";")}; break;')
+        lines.extend([f'{indent}default: X86_SIM_L_ARCHITECTURAL_FAULT();', f'{indent}}}'])
+        return
     if insn.table_dispatch is not None:
         index = reg_info(insn.operands[0])[0]
         lines.extend([f'{indent}/* Image-bound relative code table; dead private address computation. */',
@@ -1764,6 +1784,7 @@ def render_program(name: str, insns: list[NativeInsn],
     # A capsule can list maps unused by this particular entry. Annotate only
     # actual native relocations; never manufacture an unused program load.
     referenced = {i.reloc_symbol for i in all_insns}
+    referenced.update(symbol for data in rodata16.values() for _, symbol in getattr(data, 'map_relocations', ()))
     source_pointers = {name:value for name,value in source_pointers.items()
                        if name not in trusted_names or name in referenced}
     used = referenced & source_pointers.keys()
@@ -1775,18 +1796,20 @@ def render_program(name: str, insns: list[NativeInsn],
     insns = source_annotations(insns)
     subfunctions = {symbol: source_annotations(body) for symbol, body in subfunctions.items()}
     all_insns = [*insns, *(i for fn in subfunctions.values() for i in fn)]
-    lowered = {i.addr: i for i in lower_relative_tables(all_insns, rodata16,
-        sys.modules[__name__], exit_addr, {insns[0].addr, *(fn[0].addr for fn in subfunctions.values() if fn)})}
+    function_starts = {insns[0].addr, *(fn[0].addr for fn in subfunctions.values() if fn)}
+    lowered_insns = lower_relative_tables(all_insns, rodata16, sys.modules[__name__], exit_addr, function_starts)
+    lowered = {i.addr: i for i in lower_map_tables(lowered_insns, rodata16,
+        sys.modules[__name__], exit_addr, function_starts, source_pointers)}
     insns = [lowered[i.addr] for i in insns if i.addr in lowered]
     subfunctions = {name: [lowered[i.addr] for i in body if i.addr in lowered]
                     for name, body in subfunctions.items()}
     all_insns = [*insns, *(i for fn in subfunctions.values() for i in fn)]
     referenced_after_lowering = {i.reloc_symbol for i in all_insns}
-    if any(getattr(data, 'code_relocations', ()) and name in referenced_after_lowering
+    if any((getattr(data, 'code_relocations', ()) or getattr(data, 'map_relocations', ())) and name in referenced_after_lowering
            for name, data in rodata16.items()):
-        raise ValueError('readonly code relocation is referenced outside a lowered table')
+        raise ValueError('readonly pointer relocation is referenced outside a lowered table')
     rodata16 = {name: data for name, data in rodata16.items()
-                if not getattr(data, 'code_relocations', ()) or name in referenced_after_lowering}
+                if not (getattr(data, 'code_relocations', ()) or getattr(data, 'map_relocations', ())) or name in referenced_after_lowering}
     has_indirect = any(is_indirect_branch(i) for i in all_insns)
     targets = indirect_targets(all_insns, exit_addr, {
         insns[0].addr, *(fn[0].addr for fn in subfunctions.values() if fn)
