@@ -33,7 +33,7 @@ def main(a):
         return result.stdout
     pipeline=MemoryPipeline()
     try:
-        result=pipeline.compile(worker,a.frontend.read_bytes(),a.bounds,run)
+        result=pipeline.compile(worker,a.frontend.read_bytes(),a.bounds,run,a.output/'lowering.json')
         result['allocated_equal_normal_file_pipeline']=(
             {name:value['sha256'] for name,value in result['allocated_sections'].items()}
             == allocated(a.object.read_bytes()))

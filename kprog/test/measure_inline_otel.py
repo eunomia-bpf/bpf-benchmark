@@ -96,9 +96,13 @@ def main(a):
             pipeline = MemoryPipeline()
             try:
                 record['bpf'] = pipeline.compile(worker, frontend,
-                    Path('/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds'), run)
+                    Path('/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds'), run,
+                    a.output/'lowering.json')
                 record['bpf_compiled'] = True
             finally:
+                if pipeline.result is not None:
+                    record.update(bpf=pipeline.result, bpf_compiled=True)
+                    result.write_text(json.dumps(record, indent=2)+'\n')
                 pipeline.close()
             record['scope'] = 'Same captured OTel proof/map metadata; normal bounds/MIR/all-pairs/llc via anonymous stage files and post-PEI frame observation; no kernel/application acceptance'
     record['completed'] = True

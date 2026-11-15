@@ -180,6 +180,8 @@ if __name__ == '__main__':
     parser.add_argument('output', type=Path)
     parser.add_argument('--low', type=int)
     parser.add_argument('--high', type=int)
+    parser.add_argument('--report', type=Path,
+                        help='Write lowering observations independently of the MIR output path')
     args = parser.parse_args()
     if (args.low is None) != (args.high is None):
         parser.error('--low and --high are supplied together')
@@ -188,6 +190,7 @@ if __name__ == '__main__':
     else:
         output, changes = lower(args.mir, args.low, args.high)
     args.output.write_text(output)
-    args.output.with_suffix('.lowering.json').write_text(json.dumps(dict(
+    report = args.report if args.report is not None else args.output.with_suffix('.lowering.json')
+    report.write_text(json.dumps(dict(
         source=str(args.mir), low=args.low, high=args.high, changes=changes,
         scope='Compiler-private spill storage transformation; actual stock verification follows.'), indent=2) + '\n')

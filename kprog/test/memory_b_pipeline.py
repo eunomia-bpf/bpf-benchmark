@@ -16,6 +16,7 @@ class MemoryPipeline:
     def __init__(self):
         self.fds = []
         self.stages = {}
+        self.result = None
 
     def stage(self, suffix):
         if suffix not in self.stages:
@@ -31,7 +32,7 @@ class MemoryPipeline:
         for fd in self.fds:
             os.close(fd)
 
-    def compile(self, worker, frontend, bounds, run):
+    def compile(self, worker, frontend, bounds, run, report):
         initial = self.stage('.bounds-input.bc')
         initial.write_bytes(frontend)
         obj = self.stage('.o')
@@ -46,6 +47,8 @@ class MemoryPipeline:
                 command[1:1] = ['-x', 'ir']
             elif command[0] == 'llc-18':
                 command[1:1] = ['-x=mir']
+            elif command[1] == str(worker.ROOT/'kprog/x86/whole_word_spills.py'):
+                command.extend(['--report', str(report)])
             output = run(command, b'', 'backend-'+str(stage), tuple(self.fds))
             stage += 1
             return output
@@ -59,6 +62,7 @@ class MemoryPipeline:
         result = dict(object_bytes=len(data),object_sha256=hashlib.sha256(data).hexdigest(),
                       allocated_sections=allocated,
                       code_bytes=sum(s.data_size for s in elf.iter_sections() if s['sh_flags'] & 4))
+        self.result = result
         mir = run(['llc-18','-O3','-march=bpf','-mcpu=v4','-bpf-stack-size=4096',
             '-x=mir','-start-before=prologepilog','-stop-after=prologepilog',
             self.stage('.packed.mir'),'-o','-'],b'','frame',tuple(self.fds)).decode()
