@@ -129,6 +129,21 @@ def main(a):
             case['optimized_ir_storage'] = storage_text_observation(optimized)
             slots = re.findall(r'  - \{ id: (\d+),[^\n]*type: spill-slot,[^\n]*size: (\d+),', before)
             case['spill_slots_before_packing'] = len(slots)
+            spill_ids = {int(slot) for slot, _ in slots}
+            origins = {slot: dict(stores=0, examples=[]) for slot in sorted(spill_ids)}
+            context = []
+            for line in before.split('body:             |', 1)[1].splitlines():
+                if re.match(r'  bb\.\d+', line):
+                    context = [line.strip()]
+                store = re.search(r'\b(?:STD|STW32)\b.*%stack\.(\d+), 0(?:,| |$)', line)
+                if store and int(store[1]) in spill_ids:
+                    origin = origins[int(store[1])]
+                    origin['stores'] += 1
+                    if len(origin['examples']) < 3:
+                        origin['examples'].append(context[-6:]+[line.strip()])
+                if line.strip():
+                    context.append(line.strip())
+            case['spill_store_origins'] = origins
             code = obj.read_bytes()
             case['object_bytes'] = len(code)
             elf = ELFFile(io.BytesIO(code))
