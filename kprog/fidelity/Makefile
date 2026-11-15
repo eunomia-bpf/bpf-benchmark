@@ -302,6 +302,8 @@ x86-control-run: x86-control-build
 	install -d $(X86_CONTROL_OUT)
 	./$(X86_CONTROL_BUILD)/cpu-differential $(CASES) $(X86_CONTROL_OUT) $(X86_CONTROL_OUT)/cpu-states.bin
 
+PREPROCESS_SIZES ?= 100 1000
+PREPROCESS_ARGS ?=
 .PHONY: preprocess-profile
 preprocess-profile:
-	taskset -c 8-11 prlimit --as=8589934592 -- python3 /workspaces/repository/kprog/test/profile_b_preprocess.py --sizes 100 1000 --build $(SCALE_BUILD) --output $(SCALE_OUT)
+	taskset -c 8-11 prlimit --as=8589934592 -- python3 /workspaces/repository/kprog/test/profile_b_preprocess.py --sizes $(PREPROCESS_SIZES) $(PREPROCESS_ARGS) --build $(SCALE_BUILD) --output $(SCALE_OUT)

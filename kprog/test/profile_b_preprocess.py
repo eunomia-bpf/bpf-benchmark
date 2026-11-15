@@ -12,6 +12,7 @@ sys.path[:0] = [str(ROOT/'kprog/fidelity'), str(ROOT/'kprog/x86'), str(ROOT/'kpr
 import scale
 import trusted_specializer as worker
 from measure_preprocessor_expansion import measure_stream
+from elftools.elf.elffile import ELFFile
 
 
 def digest(path):
@@ -62,6 +63,17 @@ def main(args):
                     native_sha256=digest(native), generated_sha256=digest(source), preprocessed_sha256=digest(expanded),
                     helper_call_like_tokens=dict(calls), switch_tokens=switches,
                     scope='Current generator and real one-piece Clang -E only; no new B compilation or kernel acceptance')
+                if args.compile:
+                    compiled = args.build/(name+'.bpf.o')
+                    worker.compile_simulator(str(ROOT/'kprog/stock-path/bin/clang'), source, compiled,
+                        lambda command: run(command, 'compile-'+str(len(commands))),
+                        bounds_compiler=Path('/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds'))
+                    with compiled.open('rb') as stream:
+                        elf = ELFFile(stream)
+                        record['allocated_sections'] = {section.name: dict(bytes=section.data_size,
+                            sha256=hashlib.sha256(section.data()).hexdigest())
+                            for section in elf.iter_sections() if section['sh_flags'] & 2}
+                    record['scope'] += '; normal production B backend compiled, not submitted to kernel'
                 records.append(record)
                 (args.output/'result.json').write_text(json.dumps(records, indent=2)+'\n')
                 print(json.dumps(dict(name=name, expanded=record['preprocessed_bytes'],
@@ -70,6 +82,7 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--compile', action='store_true', help='Also compile through the normal production B pipeline')
     parser.add_argument('--sizes', nargs='+', type=int, required=True)
     for name in ('build', 'output'):
         parser.add_argument('--'+name, type=Path, required=True)
