@@ -1,0 +1,63 @@
+{
+  "old_linker_sha256": "1e673ee12df13d65e726d1679b8c5125eac74a4c04aa2111ced5dc4951b3fea2",
+  "current_linker_sha256": "7c890b59c639693729c336024fc72d6dfc57c8596977432c2be0fb3bf803d076",
+  "default_real_object_entries": 22,
+  "default_equal": true,
+  "fixture_flags": [
+    "-target",
+    "x86_64-linux-gnu",
+    "-O3",
+    "-march=native",
+    "-foptimize-sibling-calls",
+    "-fomit-frame-pointer",
+    "-mno-red-zone",
+    "-mgeneral-regs-only",
+    "-fno-stack-protector"
+  ],
+  "fixture_sha256": "fddc616f76c295d15a95a6dac170d18260f84aff60f768692d3c81728cc5af9e",
+  "proof_sha256": "ffc8d23a3f668ff4561172c144970773d341501479c900ad497e7db4de901516",
+  "proof_map_operation": "X86_OP_MOV_LOAD_MAP_PTR",
+  "host_executions": [
+    {
+      "path": "proof-roundtrip",
+      "key": 0,
+      "actual": 101,
+      "expected": 101
+    },
+    {
+      "path": "proof-roundtrip",
+      "key": 1,
+      "actual": 202,
+      "expected": 202
+    },
+    {
+      "path": "proof-roundtrip",
+      "key": 2,
+      "actual": 303,
+      "expected": 303
+    },
+    {
+      "path": "proof-roundtrip",
+      "key": 3,
+      "actual": 0,
+      "expected": 0
+    },
+    {
+      "path": "proof-roundtrip",
+      "key": 4,
+      "actual": 0,
+      "expected": 0
+    },
+    {
+      "path": "proof-roundtrip",
+      "key": 4294967295,
+      "actual": 0,
+      "expected": 0
+    }
+  ],
+  "scope": "Host code/metadata checks; no kernel or app timing",
+  "raw_directory": "/workspaces/kprog-raw/perf/20261115-native-relocations/datasec",
+  "commands_sha256": "9dc699c0ab81baffc97898fdac0c343bc78963bb393ba1cd113f9d71a8616313",
+  "rust_tests_passed": 36,
+  "rust_tests_ignored": 1
+}

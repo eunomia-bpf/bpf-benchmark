@@ -1,0 +1,95 @@
+{
+  "source": "/workspaces/kprog-raw/perf/20261114-otel-whole-word-checked/state/session-d1wppo7h/requests/request-mzua5wpn/generated/trusted_x86.bpf.before.mir",
+  "low": null,
+  "high": null,
+  "changes": [
+    {
+      "document": 1,
+      "low": 43,
+      "high": 44,
+      "changes": [
+        {
+          "block": 6515,
+          "original": "STW32 killed $w1, %stack.44, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 6562,
+          "original": "STW32 killed $w1, %stack.43, 0, debug-location !1653674",
+          "scratch": [
+            8,
+            9
+          ]
+        },
+        {
+          "block": 6563,
+          "original": "STW32 killed $w1, %stack.43, 0",
+          "scratch": [
+            5,
+            8
+          ]
+        },
+        {
+          "block": 6584,
+          "original": "$w2 = LDW32 %stack.43, 0, debug-location !1653704"
+        },
+        {
+          "block": 6614,
+          "original": "$w6 = LDW32 %stack.44, 0"
+        },
+        {
+          "block": 9057,
+          "original": "STW32 killed $w1, %stack.44, 0, debug-location !1668198",
+          "scratch": [
+            0,
+            3
+          ]
+        },
+        {
+          "block": 11553,
+          "original": "STW32 killed $w1, %stack.44, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 11600,
+          "original": "STW32 killed $w1, %stack.43, 0, debug-location !1684656",
+          "scratch": [
+            0,
+            5
+          ]
+        },
+        {
+          "block": 11601,
+          "original": "STW32 killed $w1, %stack.43, 0",
+          "scratch": [
+            0,
+            2
+          ]
+        },
+        {
+          "block": 11622,
+          "original": "$w4 = LDW32 %stack.43, 0, debug-location !1684686"
+        },
+        {
+          "block": 11652,
+          "original": "$w6 = LDW32 %stack.44, 0"
+        },
+        {
+          "block": 14624,
+          "original": "STW32 killed $w1, %stack.44, 0, debug-location !1702532",
+          "scratch": [
+            0,
+            3
+          ]
+        }
+      ]
+    }
+  ],
+  "scope": "Compiler-private spill storage transformation; actual stock verification follows."
+}

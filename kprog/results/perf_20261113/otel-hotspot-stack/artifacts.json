@@ -1,0 +1,16 @@
+{
+  "native_object": "/workspaces/kprog-raw/perf/20261114-otel-whole-word-checked/state/session-d1wppo7h/requests/request-mzua5wpn/generated/request.native.o",
+  "native_proof_object": "/workspaces/kprog-raw/perf/20261114-otel-whole-word-checked/state/session-d1wppo7h/requests/request-mzua5wpn/generated/trusted_x86.proof.o",
+  "simulator_object": "/workspaces/kprog-raw/perf/20261114-otel-whole-word-checked/state/session-d1wppo7h/requests/request-mzua5wpn/generated/trusted_x86.bpf.o",
+  "simulator_program": "trusted_x86_x86_sim_xdp",
+  "simulator_source": "/workspaces/kprog-raw/perf/20261114-otel-whole-word-checked/state/session-d1wppo7h/requests/request-mzua5wpn/generated/trusted_x86.bpf.c",
+  "simulator_preprocessed": "/workspaces/kprog-raw/perf/20261114-otel-whole-word-checked/state/session-d1wppo7h/requests/request-mzua5wpn/generated/trusted_x86.bpf.i",
+  "context_kind": "raw",
+  "symbol": "perf_unwind_hotspot",
+  "native_sha256": "ef44985c193e1d737ffd8980009b67f3c36ab91baf67af0c7878e69590d747da",
+  "simulator_frontend": {
+    "path": "/workspaces/kprog-raw/perf/20261114-otel-whole-word-checked/state/session-d1wppo7h/requests/request-mzua5wpn/generated/trusted_x86.bpf.bounds-input.bc",
+    "source_sha256": "3e657624d571bed9b15e9d963ff19eb2ef27d9ed239b31194290680d08ac1214",
+    "ir_sha256": "fb40961b83b413f508c62238a83df2e109fe3514ecd9e2d02b4cbc87d0879d39"
+  }
+}
