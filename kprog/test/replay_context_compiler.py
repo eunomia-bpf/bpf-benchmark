@@ -33,7 +33,12 @@ def replay(args):
             source.write_bytes(archive.extractfile(member).read())
             record['generated_c_bytes'] = member.size
             for name in ('kernel.native.o', 'kernel.entry', 'kernel.facts.json', 'generation.metadata.json'):
-                (args.output/name).write_bytes(archive.extractfile('request/'+name).read())
+                data = archive.extractfile('request/'+name).read()
+                destination = (args.build if name == 'kernel.native.o' else args.output)/name
+                destination.write_bytes(data)
+                if name == 'kernel.native.o':
+                    record['native_input'] = str(destination)
+                    record['native_input_sha256'] = hashlib.sha256(data).hexdigest()
         spec = importlib.util.spec_from_file_location('context_replay_worker', ROOT/'kprog/x86/trusted_specializer.py')
         worker = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(worker)
@@ -49,7 +54,8 @@ def replay(args):
                        wall_seconds=time.monotonic()-began, stdout=stdout, stderr=stderr)
             with (args.output/'commands.jsonl').open('a') as f:
                 f.write(json.dumps(row)+'\n')
-            process.check_returncode()
+            if process.returncode:
+                raise subprocess.CalledProcessError(process.returncode, command, output=stdout, stderr=stderr)
 
         worker.compile_simulator(str(ROOT/'kprog/stock-path/bin/clang'), source,
                                  args.build/'trusted_x86.bpf.o', run, bounds_compiler=args.tool)
