@@ -159,49 +159,30 @@ mod tests {
     }
 
     #[test]
-    fn rebuilt_tetragon_r13_calls_keep_their_actual_helper_identity() -> Result<()> {
-        use std::io::Write;
-        // Workspace regression input is C's current unified-flag product.
-        // No copy of its source or object is made by this check.
-        let release = fs::read_to_string("/workspaces/.agent-state/kprog-ck/build-x86/include/config/kernel.release")?;
-        let path = format!("/workspaces/repository/vendor/build/native-bpf/x86/{}/native/tetragon/bpf_execve_event.native.o", release.trim());
-        let bytes = fs::read(&path)?;
+    fn r13_rebinding_distinguishes_compat_and_kernel_read_targets() -> Result<()> {
+        // Preserve the old Tetragon failure class without depending on a
+        // moving producer artifact's register allocation or fixed offsets:
+        // R13=4, skip an unreachable1, call; then rebind R13=113 and call.
+        use object::write::{Object, Symbol, SymbolSection};
+        let code = [0x41,0x55,0x41,0xbd,4,0,0,0,0xeb,6,0x41,0xbd,1,0,0,0,
+            0x41,0xff,0xd5,0x41,0xbd,113,0,0,0,0x41,0xff,0xd5,0x41,0x5d,0xc3];
+        let mut object = Object::new(object::BinaryFormat::Elf,object::Architecture::X86_64,object::Endianness::Little);
+        let section = object.add_section(Vec::new(),b".text".to_vec(),SectionKind::Text);
+        object.append_section_data(section,&code,1);
+        object.add_symbol(Symbol { name:b"entry".to_vec(),value:0,size:code.len() as u64,
+            kind:object::SymbolKind::Text,scope:object::SymbolScope::Linkage,weak:false,
+            section:SymbolSection::Section(section),flags:object::SymbolFlags::None });
+        let bytes = object.write()?;
         let elf = object::File::parse(bytes.as_slice())?;
-        let sym = find_symbol_by_name(&elf, "event_execve")?;
-        let included = discover_reachable(&elf, &sym)?;
-        let got = scan_x86_got_relocations(&elf, &included)?;
-        let names = calls(&elf, &sym, &got, &HashMap::new())?;
-        let body = read_symbol_bytes(&elf, &sym)?;
-        let mut r13 = Vec::new();
-        for insn in Decoder::with_ip(64, &body, sym.address, DecoderOptions::NONE) {
-            if x86_indirect_call_register(&insn) == Some(Register::R13) {
-                let at = insn.ip()-sym.address;
-                assert!(matches!(names.get(&at).map(String::as_str),
-                    Some("bpf_probe_read_compat" | "bpf_probe_read_kernel")), "R13 at {at:#x}");
-                r13.push(at);
-            }
-        }
-        assert_eq!(r13.len(), 39);
-        assert_eq!(names.get(&0x1629).map(String::as_str), Some("bpf_probe_read_compat"));
-        assert_eq!(names.get(&0x1f57).map(String::as_str), Some("bpf_probe_read_kernel"));
-        let proof = rewrite_x86(&elf, &sym, &included, &HashMap::new(), &HashMap::new(),
-            &HashMap::new(), &[], true, true, None, None, None, None, false)?;
-        let mut hash = std::process::Command::new("sha256sum").stdin(std::process::Stdio::piped())
-            .stdout(std::process::Stdio::piped()).spawn()?;
-        hash.stdin.take().ok_or_else(|| anyhow!("hash input pipe missing"))?.write_all(&bytes)?;
-        let hash = hash.wait_with_output()?;
-        if !hash.status.success() { bail!("native input hash failed"); }
-        let digest = String::from_utf8(hash.stdout)?.split_whitespace().next()
-            .ok_or_else(|| anyhow!("native input hash missing"))?.to_owned();
-        let output = std::path::Path::new("/var/tmp/kprog-tmp/perf/helper-cfg");
-        fs::create_dir_all(output)?;
-        fs::write(output.join("tetragon.json"), serde_json::to_vec_pretty(&serde_json::json!({
-            "object": path, "sha256": digest, "symbol": sym.name, "r13_calls": r13,
-            "helper_calls": names, "proof_blob_bytes": proof.blob.len(),
-            "proof_data_relocations": proof.proof_data_relocs.len(),
-            "included_symbols": included.iter().map(|sym| &sym.name).collect::<Vec<_>>(),
-            "scope": "Actual rebuilt object helper CFG and production proof rewrite; no kernel installation or app execution"
-        }))?)?;
+        let entry = find_symbol_by_name(&elf,"entry")?;
+        let names = calls(&elf,&entry,&HashMap::new(),&HashMap::new())?;
+        assert_eq!(names.get(&16).map(String::as_str),Some("bpf_probe_read_compat"));
+        assert_eq!(names.get(&25).map(String::as_str),Some("bpf_probe_read_kernel"));
+        let helpers = HashMap::from([("bpf_probe_read_compat".into(),0x1234),
+            ("bpf_probe_read_kernel".into(),0x5678)]);
+        let linked = rewrite_x86(&elf,&entry,&[entry.clone()],&helpers,&HashMap::new(),
+            &HashMap::new(),&[],false,true,None,None,None,None,false)?;
+        assert_eq!(linked.relocs.iter().map(|r|r.target).collect::<Vec<_>>(),vec![0x1234,0x5678]);
         Ok(())
     }
 }

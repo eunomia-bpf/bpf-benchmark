@@ -43,3 +43,14 @@ to that later fix, documented in `../rodata-spans/report.md`. Those proof
 fields are not a result of `399a6bab0` alone.
 No normal CLI/base publication, kernel installation, application execution,
 throughput, per-call speed or code-size gain is claimed.
+
+2026-11-15T17:22Z: the old in-place application assertion is retired as a
+unit test: C's new header-route object has no R13 calls, so expecting39 at
+fixed offsets tests a removed product's register allocation. Its historical
+receipt above remains. The deterministic replacement retains the actual
+failure class (R13=4 over an unreachable1, then rebind113) and checks distinct
+compat/kernel-read identities and relocation targets. Current application
+objects are inventories through --show helper-site JSON, without assuming
+the old object's offsets/counts. Clock suite first compiled with a test-only
+lifetime error, then passed its new seven shapes but hit this stale artifact
+assertion; both failures remain raw. Full corrected-suite result pending.
