@@ -1,0 +1,1537 @@
+{
+  "version": 1,
+  "helpers": [
+    {
+      "name": "__native_x86_cpu_number",
+      "addr": 18446744071665549364
+    },
+    {
+      "name": "__native_x86_this_cpu_off",
+      "addr": 18446744071665549352
+    },
+    {
+      "name": "__native_x86_bpf_map_max_entries_offset",
+      "addr": 68
+    },
+    {
+      "name": "__native_x86_bpf_array_ptrs_offset",
+      "addr": 304
+    },
+    {
+      "name": "__native_x86_bpf_prog_bpf_func_offset",
+      "addr": 72
+    },
+    {
+      "name": "__native_x86_tail_call_offset",
+      "addr": 12
+    },
+    {
+      "name": "__native_x86_ktime_get_mono_fast_ns",
+      "addr": 18446744071616304016
+    },
+    {
+      "name": "bpf_probe_read_compat",
+      "addr": 18446744071617008624
+    },
+    {
+      "name": "bpf_probe_read_compat_str",
+      "addr": 18446744071617006736
+    },
+    {
+      "name": "bpf_trace_printk",
+      "addr": 18446744071617009088
+    },
+    {
+      "name": "bpf_ktime_get_ns",
+      "addr": 18446744071617351216
+    },
+    {
+      "name": "bpf_ktime_get_boot_ns",
+      "addr": 18446744071617351248
+    },
+    {
+      "name": "bpf_get_current_pid_tgid",
+      "addr": 18446744071617350976
+    },
+    {
+      "name": "bpf_get_current_uid_gid",
+      "addr": 18446744071617351440
+    },
+    {
+      "name": "bpf_get_smp_processor_id",
+      "addr": 18446744071617350480
+    },
+    {
+      "name": "bpf_probe_read_kernel",
+      "addr": 18446744071617001872
+    },
+    {
+      "name": "bpf_probe_read_user",
+      "addr": 18446744071617001680
+    },
+    {
+      "name": "bpf_probe_write_user",
+      "addr": 18446744071617002064
+    },
+    {
+      "name": "bpf_probe_read_kernel_str",
+      "addr": 18446744071617001968
+    },
+    {
+      "name": "bpf_probe_read_user_str",
+      "addr": 18446744071617001776
+    },
+    {
+      "name": "bpf_map_lookup_elem",
+      "addr": 18446744071617350144
+    },
+    {
+      "name": "bpf_map_update_elem",
+      "addr": 18446744071617350192
+    },
+    {
+      "name": "bpf_map_delete_elem",
+      "addr": 18446744071617350240
+    },
+    {
+      "name": "bpf_get_current_comm",
+      "addr": 18446744071617351552
+    },
+    {
+      "name": "bpf_get_current_cgroup_id",
+      "addr": 18446744071617356688
+    },
+    {
+      "name": "bpf_current_task_under_cgroup",
+      "addr": 18446744071617351056
+    },
+    {
+      "name": "bpf_get_stackid",
+      "addr": 18446744071617620544
+    },
+    {
+      "name": "bpf_get_stack",
+      "addr": 18446744071617621792
+    },
+    {
+      "name": "bpf_get_current_task",
+      "addr": 18446744071616999152
+    },
+    {
+      "name": "bpf_perf_event_output",
+      "addr": 18446744071617009840
+    },
+    {
+      "name": "bpf_ringbuf_output",
+      "addr": 18446744071617454336
+    },
+    {
+      "name": "bpf_ringbuf_reserve",
+      "addr": 18446744071617454160
+    },
+    {
+      "name": "bpf_ringbuf_submit",
+      "addr": 18446744071617456096
+    },
+    {
+      "name": "bpf_ringbuf_discard",
+      "addr": 18446744071617456224
+    },
+    {
+      "name": "bpf_ringbuf_query",
+      "addr": 18446744071617453088
+    },
+    {
+      "name": "bpf_xdp_adjust_meta",
+      "addr": 18446744071626434144
+    },
+    {
+      "name": "bpf_xdp_adjust_head",
+      "addr": 18446744071626439344
+    },
+    {
+      "name": "bpf_xdp_adjust_tail",
+      "addr": 18446744071626459920
+    },
+    {
+      "name": "bpf_xdp_get_buff_len",
+      "addr": 18446744071626434080
+    },
+    {
+      "name": "bpf_xdp_load_bytes",
+      "addr": 18446744071626498240
+    },
+    {
+      "name": "bpf_xdp_store_bytes",
+      "addr": 18446744071626498352
+    },
+    {
+      "name": "bpf_skb_store_bytes",
+      "addr": 18446744071626478224
+    },
+    {
+      "name": "bpf_l3_csum_replace",
+      "addr": 18446744071626475344
+    },
+    {
+      "name": "bpf_l4_csum_replace",
+      "addr": 18446744071626475760
+    },
+    {
+      "name": "bpf_clone_redirect",
+      "addr": 18446744071626477936
+    },
+    {
+      "name": "bpf_get_cgroup_classid",
+      "addr": 18446744071626439120
+    },
+    {
+      "name": "bpf_skb_vlan_push",
+      "addr": 18446744071626472368
+    },
+    {
+      "name": "bpf_skb_vlan_pop",
+      "addr": 18446744071626470640
+    },
+    {
+      "name": "bpf_skb_get_tunnel_key",
+      "addr": 18446744071626457776
+    },
+    {
+      "name": "bpf_skb_set_tunnel_key",
+      "addr": 18446744071626462416
+    },
+    {
+      "name": "bpf_redirect",
+      "addr": 18446744071626487344
+    },
+    {
+      "name": "bpf_get_route_realm",
+      "addr": 18446744071626458320
+    },
+    {
+      "name": "bpf_skb_load_bytes",
+      "addr": 18446744071626461008
+    },
+    {
+      "name": "bpf_skb_load_bytes_relative",
+      "addr": 18446744071626436496
+    },
+    {
+      "name": "bpf_csum_diff",
+      "addr": 18446744071626438688
+    },
+    {
+      "name": "bpf_skb_get_tunnel_opt",
+      "addr": 18446744071626467920
+    },
+    {
+      "name": "bpf_skb_set_tunnel_opt",
+      "addr": 18446744071626468144
+    },
+    {
+      "name": "bpf_skb_change_proto",
+      "addr": 18446744071626487728
+    },
+    {
+      "name": "bpf_skb_change_type",
+      "addr": 18446744071626434000
+    },
+    {
+      "name": "bpf_skb_under_cgroup",
+      "addr": 18446744071626464720
+    },
+    {
+      "name": "bpf_get_hash_recalc",
+      "addr": 18446744071626439264
+    },
+    {
+      "name": "bpf_skb_change_tail",
+      "addr": 18446744071626466672
+    },
+    {
+      "name": "bpf_skb_pull_data",
+      "addr": 18446744071626467120
+    },
+    {
+      "name": "bpf_csum_update",
+      "addr": 18446744071626411840
+    },
+    {
+      "name": "bpf_set_hash_invalid",
+      "addr": 18446744071626412272
+    },
+    {
+      "name": "bpf_skb_adjust_room",
+      "addr": 18446744071626490064
+    },
+    {
+      "name": "bpf_get_numa_node_id",
+      "addr": 18446744071617350528
+    },
+    {
+      "name": "bpf_skb_change_head",
+      "addr": 18446744071626466240
+    },
+    {
+      "name": "bpf_get_socket_cookie",
+      "addr": 18446744071626440816
+    },
+    {
+      "name": "bpf_get_socket_uid",
+      "addr": 18446744071626464592
+    },
+    {
+      "name": "bpf_sk_lookup_udp",
+      "addr": 18446744071626473104
+    },
+    {
+      "name": "bpf_sk_release",
+      "addr": 18446744071626464192
+    },
+    {
+      "name": "bpf_map_push_elem",
+      "addr": 18446744071617350288
+    },
+    {
+      "name": "bpf_map_pop_elem",
+      "addr": 18446744071617350336
+    },
+    {
+      "name": "bpf_sk_fullsock",
+      "addr": 18446744071626411776
+    },
+    {
+      "name": "bpf_override_return",
+      "addr": 18446744071617001648
+    },
+    {
+      "name": "bpf_send_signal",
+      "addr": 18446744071617006640
+    },
+    {
+      "name": "bpf_seq_write",
+      "addr": 18446744071617002736
+    },
+    {
+      "name": "bpf_copy_from_user",
+      "addr": 18446744071617352896
+    },
+    {
+      "name": "bpf_jiffies64",
+      "addr": 18446744071617350576
+    },
+    {
+      "name": "bpf_sk_assign",
+      "addr": 18446744071626467232
+    },
+    {
+      "name": "bpf_get_current_task_btf",
+      "addr": 18446744071617005792
+    },
+    {
+      "name": "bpf_ima_inode_hash",
+      "addr": 18446744071617660928
+    },
+    {
+      "name": "bpf_get_attach_cookie",
+      "addr": 18446744071617660880
+    },
+    {
+      "name": "bpf_task_pt_regs",
+      "addr": 18446744071616999184
+    },
+    {
+      "name": "bpf_loop",
+      "addr": 18446744071617391344
+    },
+    {
+      "name": "bpf_ima_file_hash",
+      "addr": 18446744071617660976
+    },
+    {
+      "name": "bpf_set_hash",
+      "addr": 18446744071626412320
+    },
+    {
+      "name": "bpf_redirect_neigh",
+      "addr": 18446744071626488896
+    },
+    {
+      "name": "bpf_redirect_peer",
+      "addr": 18446744071626487472
+    },
+    {
+      "name": "bpf_get_prandom_u32",
+      "addr": 18446744071617114688
+    },
+    {
+      "name": "bpf_fib_lookup",
+      "addr": 18446744071626480512
+    },
+    {
+      "name": "bpf_redirect_map",
+      "addr": 18446744071626412368
+    },
+    {
+      "name": "bpf_skc_lookup_tcp",
+      "addr": 18446744071626465680
+    },
+    {
+      "name": "memset",
+      "addr": 18446744071629197984
+    },
+    {
+      "name": "memcpy",
+      "addr": 18446744071629197184
+    },
+    {
+      "name": "memmove",
+      "addr": 18446744071629197536
+    }
+  ],
+  "maps": [
+    {
+      "name": "ch_rings",
+      "addr": 0
+    },
+    {
+      "name": "ctl_array",
+      "addr": 0
+    },
+    {
+      "name": "decap_vip_stats",
+      "addr": 0
+    },
+    {
+      "name": "fallback_cache",
+      "addr": 0
+    },
+    {
+      "name": "lru_mapping",
+      "addr": 0
+    },
+    {
+      "name": "lru_miss_stats",
+      "addr": 0
+    },
+    {
+      "name": "quic_stats_map",
+      "addr": 0
+    },
+    {
+      "name": "reals",
+      "addr": 0
+    },
+    {
+      "name": "reals_stats",
+      "addr": 0
+    },
+    {
+      "name": "server_id_map",
+      "addr": 0
+    },
+    {
+      "name": "server_id_stats",
+      "addr": 0
+    },
+    {
+      "name": "stable_rt_stats",
+      "addr": 0
+    },
+    {
+      "name": "stats",
+      "addr": 0
+    },
+    {
+      "name": "tpr_stats_map",
+      "addr": 0
+    },
+    {
+      "name": "vip_map",
+      "addr": 0
+    },
+    {
+      "name": "vip_miss_stats",
+      "addr": 0
+    },
+    {
+      "name": "vip_to_down_rea",
+      "addr": 0
+    },
+    {
+      "name": "vip_to_down_reals_map",
+      "addr": 0
+    }
+  ],
+  "lookup_sites": [
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "hash",
+      "target_addr": 18446744071617407440,
+      "key_offset": 72,
+      "max_entries": 0,
+      "elem_size": 0,
+      "index_mask": 0,
+      "value_offset": 0,
+      "percpu_base_addr": 0,
+      "map_name": "vip_map"
+    },
+    {
+      "kind": "hash",
+      "target_addr": 18446744071617407440,
+      "key_offset": 72,
+      "max_entries": 0,
+      "elem_size": 0,
+      "index_mask": 0,
+      "value_offset": 0,
+      "percpu_base_addr": 0,
+      "map_name": "vip_map"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "call",
+      "target_addr": 18446744071617426816,
+      "key_offset": 0,
+      "max_entries": 0,
+      "elem_size": 0,
+      "index_mask": 0,
+      "value_offset": 0,
+      "percpu_base_addr": 0,
+      "map_name": "lru_mapping"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "hash",
+      "target_addr": 18446744071617407440,
+      "key_offset": 72,
+      "max_entries": 0,
+      "elem_size": 0,
+      "index_mask": 0,
+      "value_offset": 0,
+      "percpu_base_addr": 0,
+      "map_name": "vip_map"
+    },
+    {
+      "kind": "hash",
+      "target_addr": 18446744071617407440,
+      "key_offset": 72,
+      "max_entries": 0,
+      "elem_size": 0,
+      "index_mask": 0,
+      "value_offset": 0,
+      "percpu_base_addr": 0,
+      "map_name": "vip_map"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "call",
+      "target_addr": 18446744071617426816,
+      "key_offset": 0,
+      "max_entries": 0,
+      "elem_size": 0,
+      "index_mask": 0,
+      "value_offset": 0,
+      "percpu_base_addr": 0,
+      "map_name": "lru_mapping"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1,
+      "elem_size": 8,
+      "index_mask": 0,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "quic_stats_map"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1,
+      "elem_size": 8,
+      "index_mask": 0,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "quic_stats_map"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 512,
+      "elem_size": 8,
+      "index_mask": 511,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "server_id_stats"
+    },
+    {
+      "kind": "call",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 0,
+      "elem_size": 0,
+      "index_mask": 0,
+      "value_offset": 0,
+      "percpu_base_addr": 0
+    },
+    {
+      "kind": "array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 4096,
+      "elem_size": 24,
+      "index_mask": 4095,
+      "value_offset": 304,
+      "percpu_base_addr": 0,
+      "map_name": "reals"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "hash_of_maps",
+      "target_addr": 18446744071617407440,
+      "key_offset": 72,
+      "max_entries": 0,
+      "elem_size": 0,
+      "index_mask": 0,
+      "value_offset": 0,
+      "percpu_base_addr": 0,
+      "map_name": "vip_to_down_rea"
+    },
+    {
+      "kind": "call",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 0,
+      "elem_size": 0,
+      "index_mask": 0,
+      "value_offset": 0,
+      "percpu_base_addr": 0
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 16,
+      "elem_size": 8,
+      "index_mask": 15,
+      "value_offset": 304,
+      "percpu_base_addr": 0,
+      "map_name": "ctl_array"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 4096,
+      "elem_size": 8,
+      "index_mask": 4095,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "reals_stats"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 33554944,
+      "elem_size": 8,
+      "index_mask": 67108863,
+      "value_offset": 304,
+      "percpu_base_addr": 0,
+      "map_name": "ch_rings"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 4096,
+      "elem_size": 24,
+      "index_mask": 4095,
+      "value_offset": 304,
+      "percpu_base_addr": 0,
+      "map_name": "reals"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1,
+      "elem_size": 24,
+      "index_mask": 0,
+      "value_offset": 304,
+      "percpu_base_addr": 0,
+      "map_name": "vip_miss_stats"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 4096,
+      "elem_size": 8,
+      "index_mask": 4095,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "lru_miss_stats"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 16777214,
+      "elem_size": 8,
+      "index_mask": 16777215,
+      "value_offset": 304,
+      "percpu_base_addr": 0,
+      "map_name": "server_id_map"
+    },
+    {
+      "kind": "array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 4096,
+      "elem_size": 24,
+      "index_mask": 4095,
+      "value_offset": 304,
+      "percpu_base_addr": 0,
+      "map_name": "reals"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "call",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 0,
+      "elem_size": 0,
+      "index_mask": 0,
+      "value_offset": 0,
+      "percpu_base_addr": 0
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 512,
+      "elem_size": 8,
+      "index_mask": 511,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "server_id_stats"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 512,
+      "elem_size": 8,
+      "index_mask": 511,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "server_id_stats"
+    },
+    {
+      "kind": "array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 16777214,
+      "elem_size": 8,
+      "index_mask": 16777215,
+      "value_offset": 304,
+      "percpu_base_addr": 0,
+      "map_name": "server_id_map"
+    },
+    {
+      "kind": "array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 4096,
+      "elem_size": 24,
+      "index_mask": 4095,
+      "value_offset": 304,
+      "percpu_base_addr": 0,
+      "map_name": "reals"
+    },
+    {
+      "kind": "call",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 0,
+      "elem_size": 0,
+      "index_mask": 0,
+      "value_offset": 0,
+      "percpu_base_addr": 0
+    },
+    {
+      "kind": "array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 4096,
+      "elem_size": 24,
+      "index_mask": 4095,
+      "value_offset": 304,
+      "percpu_base_addr": 0,
+      "map_name": "reals"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "hash_of_maps",
+      "target_addr": 18446744071617407440,
+      "key_offset": 72,
+      "max_entries": 0,
+      "elem_size": 0,
+      "index_mask": 0,
+      "value_offset": 0,
+      "percpu_base_addr": 0,
+      "map_name": "vip_to_down_rea"
+    },
+    {
+      "kind": "call",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 0,
+      "elem_size": 0,
+      "index_mask": 0,
+      "value_offset": 0,
+      "percpu_base_addr": 0
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 16,
+      "elem_size": 8,
+      "index_mask": 15,
+      "value_offset": 304,
+      "percpu_base_addr": 0,
+      "map_name": "ctl_array"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 4096,
+      "elem_size": 8,
+      "index_mask": 4095,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "reals_stats"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 33554944,
+      "elem_size": 8,
+      "index_mask": 67108863,
+      "value_offset": 304,
+      "percpu_base_addr": 0,
+      "map_name": "ch_rings"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 4096,
+      "elem_size": 24,
+      "index_mask": 4095,
+      "value_offset": 304,
+      "percpu_base_addr": 0,
+      "map_name": "reals"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1,
+      "elem_size": 24,
+      "index_mask": 0,
+      "value_offset": 304,
+      "percpu_base_addr": 0,
+      "map_name": "vip_miss_stats"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 4096,
+      "elem_size": 8,
+      "index_mask": 4095,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "lru_miss_stats"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "call",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 0,
+      "elem_size": 0,
+      "index_mask": 0,
+      "value_offset": 0,
+      "percpu_base_addr": 0
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 512,
+      "elem_size": 8,
+      "index_mask": 511,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "server_id_stats"
+    }
+  ],
+  "lookup_maps": [
+    {
+      "name": "ch_rings",
+      "kind": "array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 33554944,
+      "elem_size": 8,
+      "index_mask": 67108863,
+      "value_offset": 304,
+      "percpu_base_addr": 0,
+      "map_name": "ch_rings"
+    },
+    {
+      "name": "ctl_array",
+      "kind": "array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 16,
+      "elem_size": 8,
+      "index_mask": 15,
+      "value_offset": 304,
+      "percpu_base_addr": 0,
+      "map_name": "ctl_array"
+    },
+    {
+      "name": "decap_vip_stats",
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 512,
+      "elem_size": 8,
+      "index_mask": 511,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "decap_vip_stats"
+    },
+    {
+      "name": "fallback_cache",
+      "kind": "lru_hash",
+      "target_addr": 18446744071617407440,
+      "key_offset": 88,
+      "max_entries": 0,
+      "elem_size": 0,
+      "index_mask": 0,
+      "value_offset": 35,
+      "percpu_base_addr": 0,
+      "map_name": "fallback_cache"
+    },
+    {
+      "name": "lru_mapping",
+      "kind": "call",
+      "target_addr": 18446744071617426816,
+      "key_offset": 0,
+      "max_entries": 0,
+      "elem_size": 0,
+      "index_mask": 0,
+      "value_offset": 0,
+      "percpu_base_addr": 0,
+      "map_name": "lru_mapping"
+    },
+    {
+      "name": "lru_miss_stats",
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 4096,
+      "elem_size": 8,
+      "index_mask": 4095,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "lru_miss_stats"
+    },
+    {
+      "name": "quic_stats_map",
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1,
+      "elem_size": 8,
+      "index_mask": 0,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "quic_stats_map"
+    },
+    {
+      "name": "reals",
+      "kind": "array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 4096,
+      "elem_size": 24,
+      "index_mask": 4095,
+      "value_offset": 304,
+      "percpu_base_addr": 0,
+      "map_name": "reals"
+    },
+    {
+      "name": "reals_stats",
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 4096,
+      "elem_size": 8,
+      "index_mask": 4095,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "reals_stats"
+    },
+    {
+      "name": "server_id_map",
+      "kind": "array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 16777214,
+      "elem_size": 8,
+      "index_mask": 16777215,
+      "value_offset": 304,
+      "percpu_base_addr": 0,
+      "map_name": "server_id_map"
+    },
+    {
+      "name": "server_id_stats",
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 512,
+      "elem_size": 8,
+      "index_mask": 511,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "server_id_stats"
+    },
+    {
+      "name": "stable_rt_stats",
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1,
+      "elem_size": 8,
+      "index_mask": 0,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stable_rt_stats"
+    },
+    {
+      "name": "stats",
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1024,
+      "elem_size": 8,
+      "index_mask": 1023,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "stats"
+    },
+    {
+      "name": "tpr_stats_map",
+      "kind": "percpu_array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1,
+      "elem_size": 8,
+      "index_mask": 0,
+      "value_offset": 304,
+      "percpu_base_addr": 18446744071665549352,
+      "map_name": "tpr_stats_map"
+    },
+    {
+      "name": "vip_map",
+      "kind": "hash",
+      "target_addr": 18446744071617407440,
+      "key_offset": 72,
+      "max_entries": 0,
+      "elem_size": 0,
+      "index_mask": 0,
+      "value_offset": 0,
+      "percpu_base_addr": 0,
+      "map_name": "vip_map"
+    },
+    {
+      "name": "vip_miss_stats",
+      "kind": "array",
+      "target_addr": 18446744071617350144,
+      "key_offset": 0,
+      "max_entries": 1,
+      "elem_size": 24,
+      "index_mask": 0,
+      "value_offset": 304,
+      "percpu_base_addr": 0,
+      "map_name": "vip_miss_stats"
+    },
+    {
+      "name": "vip_to_down_rea",
+      "kind": "hash_of_maps",
+      "target_addr": 18446744071617407440,
+      "key_offset": 72,
+      "max_entries": 0,
+      "elem_size": 0,
+      "index_mask": 0,
+      "value_offset": 0,
+      "percpu_base_addr": 0,
+      "map_name": "vip_to_down_rea"
+    },
+    {
+      "name": "vip_to_down_reals_map",
+      "kind": "hash_of_maps",
+      "target_addr": 18446744071617407440,
+      "key_offset": 72,
+      "max_entries": 0,
+      "elem_size": 0,
+      "index_mask": 0,
+      "value_offset": 0,
+      "percpu_base_addr": 0,
+      "map_name": "vip_to_down_reals_map"
+    }
+  ],
+  "update_sites": [
+    {
+      "kind": "call",
+      "target_addr": 18446744071617350192,
+      "max_entries": 0,
+      "elem_size": 0,
+      "value_size": 0,
+      "value_offset": 0,
+      "percpu_base_addr": 0
+    },
+    {
+      "kind": "call",
+      "target_addr": 18446744071617350192,
+      "max_entries": 0,
+      "elem_size": 0,
+      "value_size": 0,
+      "value_offset": 0,
+      "percpu_base_addr": 0
+    },
+    {
+      "kind": "call",
+      "target_addr": 18446744071617350192,
+      "max_entries": 0,
+      "elem_size": 0,
+      "value_size": 0,
+      "value_offset": 0,
+      "percpu_base_addr": 0
+    },
+    {
+      "kind": "call",
+      "target_addr": 18446744071617350192,
+      "max_entries": 0,
+      "elem_size": 0,
+      "value_size": 0,
+      "value_offset": 0,
+      "percpu_base_addr": 0
+    }
+  ],
+  "kernel_layout": {
+    "array": {
+      "map_type": 56,
+      "max_entries": 68,
+      "elem_size": 288,
+      "index_mask": 292,
+      "value": 304,
+      "array_type": 2
+    },
+    "hash": {
+      "key_size": 60,
+      "buckets": 448,
+      "n_buckets": 824,
+      "hashrnd": 832,
+      "bucket_size": 16,
+      "head": 0,
+      "first": 0,
+      "node": 0,
+      "next": 0,
+      "hash": 40,
+      "key": 48
+    },
+    "lpm": {
+      "map_type": 56,
+      "lpm_type": 11,
+      "root": 288,
+      "max_prefixlen": 384,
+      "data_size": 392,
+      "child": 0,
+      "child_stride": 8,
+      "node_prefixlen": 16,
+      "node_flags": 20,
+      "node_data": 24,
+      "key_prefixlen": 0,
+      "key_data": 4
+    },
+    "probe_read": {
+      "user_helper": 18446744071617001680,
+      "kernel_helper": 18446744071617001872,
+      "nmi_uaccess_okay": 18446744071615123888,
+      "kernel_allowed": 18446744071615124096,
+      "current_task": 18446744071665549336,
+      "user_ptr_max": 18446744071665763936,
+      "boot_cpu_data": 18446744071655819872,
+      "pagefault_disabled": 9388,
+      "x86_capability": 48
+    }
+  }
+}

@@ -62,3 +62,10 @@ is claimed. The existing fixed-frequency pair starts21:17:36Z and continues,
 with its own per-arm observation directories already created. Its actual
 application/counter outcomes will be retained. No smoke failure or missing
 supplementary observation discards the scheduled measurements.
+
+Completed22:17:26Z: fixed-frequency counter pair gives1.015468x per call and
+0.994092x throughput after A/A normalization; installed11048B. The subsequent
+profile on C loader image5f60 matches10448 unmasked payload bytes and measures
+59.348604→68.159874 sampled program-text ns/call. Code shrinks but measured
+speed does not improve. Full compact receipt, timed plan and cache metadata:
+`katran-c-hdr-20261115/word-hash-lto/`. Targets remain open.
