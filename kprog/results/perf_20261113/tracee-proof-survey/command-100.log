@@ -1,0 +1,3 @@
+native-link: entry=trace_ret_dup2 (8448 bytes), 1 reachable symbol(s) total
+  - trace_ret_dup2 (vaddr 0x0, 8448 bytes) [entry]
+Error: nested PC32 code relocation in section:SectionIndex(9):.rodata has no relative jump-table base

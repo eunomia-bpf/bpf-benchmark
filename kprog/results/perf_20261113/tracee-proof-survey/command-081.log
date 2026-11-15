@@ -1,0 +1,3 @@
+native-link: entry=syscall_checker (9230 bytes), 1 reachable symbol(s) total
+  - syscall_checker (vaddr 0x0, 9230 bytes) [entry]
+native-link: wrote proof object 9772 bytes, 279 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

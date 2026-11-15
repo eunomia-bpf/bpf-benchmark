@@ -1,0 +1,3 @@
+native-link: entry=trace_security_socket_recvmsg (5306 bytes), 1 reachable symbol(s) total
+  - trace_security_socket_recvmsg (vaddr 0x0, 5306 bytes) [entry]
+native-link: wrote proof object 5723 bytes, 160 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

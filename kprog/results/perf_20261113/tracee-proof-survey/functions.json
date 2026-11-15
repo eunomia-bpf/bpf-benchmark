@@ -1,0 +1,1206 @@
+[
+  {
+    "symbol": "murmur32",
+    "section": ".text",
+    "address": 0,
+    "bytes": 482,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "hash_u32_and_u64",
+    "section": ".text",
+    "address": 496,
+    "bytes": 166,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "hash_task_id",
+    "section": ".text",
+    "address": 672,
+    "bytes": 198,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "cgroup_skb_egress",
+    "section": "cgroup_skb/egress",
+    "address": 0,
+    "bytes": 5538,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "cgroup_skb_ingress",
+    "section": "cgroup_skb/ingress",
+    "address": 0,
+    "bytes": 5538,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "cgroup_bpf_run_filter_skb",
+    "section": "kprobe/__cgroup_bpf_run_filter_skb",
+    "address": 0,
+    "bytes": 3450,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace___debugfs_create_file",
+    "section": "kprobe/__debugfs_create_file",
+    "address": 0,
+    "bytes": 5775,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_kernel_write",
+    "section": "kprobe/__kernel_write",
+    "address": 0,
+    "bytes": 111,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "kernel_write_magic_enter",
+    "section": "kprobe/__kernel_write",
+    "address": 112,
+    "bytes": 208,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace___register_chrdev",
+    "section": "kprobe/__register_chrdev",
+    "address": 0,
+    "bytes": 111,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_arch_prctl",
+    "section": "kprobe/arch_prctl",
+    "address": 0,
+    "bytes": 1399,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_bpf_check",
+    "section": "kprobe/bpf_check",
+    "address": 0,
+    "bytes": 4219,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_call_usermodehelper",
+    "section": "kprobe/call_usermodehelper",
+    "address": 0,
+    "bytes": 18075,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_cap_capable",
+    "section": "kprobe/cap_capable",
+    "address": 0,
+    "bytes": 5037,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_check_helper_call",
+    "section": "kprobe/check_helper_call",
+    "address": 0,
+    "bytes": 4433,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_check_map_func_compatibility",
+    "section": "kprobe/check_map_func_compatibility",
+    "address": 0,
+    "bytes": 4438,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_chmod_common",
+    "section": "kprobe/chmod_common",
+    "address": 0,
+    "bytes": 10856,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_commit_creds",
+    "section": "kprobe/commit_creds",
+    "address": 0,
+    "bytes": 6814,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_debugfs_create_dir",
+    "section": "kprobe/debugfs_create_dir",
+    "address": 0,
+    "bytes": 5598,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_device_add",
+    "section": "kprobe/device_add",
+    "address": 0,
+    "bytes": 5259,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_do_exit",
+    "section": "kprobe/do_exit",
+    "address": 0,
+    "bytes": 5018,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_do_init_module",
+    "section": "kprobe/do_init_module",
+    "address": 0,
+    "bytes": 111,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_do_mmap",
+    "section": "kprobe/do_mmap",
+    "address": 0,
+    "bytes": 111,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_do_sigaction",
+    "section": "kprobe/do_sigaction",
+    "address": 0,
+    "bytes": 6525,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_do_splice",
+    "section": "kprobe/do_splice",
+    "address": 0,
+    "bytes": 111,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_do_truncate",
+    "section": "kprobe/do_truncate",
+    "address": 0,
+    "bytes": 5787,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_dup",
+    "section": "kprobe/dup",
+    "address": 0,
+    "bytes": 1399,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_dup2",
+    "section": "kprobe/dup2",
+    "address": 0,
+    "bytes": 1399,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_dup3",
+    "section": "kprobe/dup3",
+    "address": 0,
+    "bytes": 1399,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "empty_kprobe",
+    "section": "kprobe/empty_kprobe",
+    "address": 0,
+    "bytes": 3,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_exec_binprm",
+    "section": "kprobe/exec_binprm",
+    "address": 0,
+    "bytes": 11145,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_fd_install",
+    "section": "kprobe/fd_install",
+    "address": 0,
+    "bytes": 10212,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_file_modified",
+    "section": "kprobe/file_modified",
+    "address": 0,
+    "bytes": 341,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_file_update_time",
+    "section": "kprobe/file_update_time",
+    "address": 0,
+    "bytes": 341,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_filldir64",
+    "section": "kprobe/filldir64",
+    "address": 0,
+    "bytes": 5076,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_filp_close",
+    "section": "kprobe/filp_close",
+    "address": 0,
+    "bytes": 10139,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_inotify_find_inode",
+    "section": "kprobe/inotify_find_inode",
+    "address": 0,
+    "bytes": 111,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_kallsyms_lookup_name",
+    "section": "kprobe/kallsyms_lookup_name",
+    "address": 0,
+    "bytes": 111,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_load_elf_phdrs",
+    "section": "kprobe/load_elf_phdrs",
+    "address": 0,
+    "bytes": 11878,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_proc_create",
+    "section": "kprobe/proc_create",
+    "address": 0,
+    "bytes": 5147,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "process_execute_failed_tail",
+    "section": "kprobe/process_execute_failed_tail",
+    "address": 0,
+    "bytes": 7150,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_process_vm_writev",
+    "section": "kprobe/process_vm_writev",
+    "address": 0,
+    "bytes": 1399,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ptrace",
+    "section": "kprobe/ptrace",
+    "address": 0,
+    "bytes": 1399,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_register_kprobe",
+    "section": "kprobe/register_kprobe",
+    "address": 0,
+    "bytes": 111,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_bpf",
+    "section": "kprobe/security_bpf",
+    "address": 0,
+    "bytes": 10694,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_bpf_map",
+    "section": "kprobe/security_bpf_map",
+    "address": 0,
+    "bytes": 5168,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_bpf_prog",
+    "section": "kprobe/security_bpf_prog",
+    "address": 0,
+    "bytes": 6271,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_bprm_check",
+    "section": "kprobe/security_bprm_check",
+    "address": 0,
+    "bytes": 24531,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_bprm_creds_for_exec",
+    "section": "kprobe/security_bprm_creds_for_exec",
+    "address": 0,
+    "bytes": 11163,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_file_ioctl",
+    "section": "kprobe/security_file_ioctl",
+    "address": 0,
+    "bytes": 6782,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_file_mprotect",
+    "section": "kprobe/security_file_mprotect",
+    "address": 0,
+    "bytes": 22863,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_file_open",
+    "section": "kprobe/security_file_open",
+    "address": 0,
+    "bytes": 13133,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_file_permission",
+    "section": "kprobe/security_file_permission",
+    "address": 0,
+    "bytes": 5581,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_inode_mknod",
+    "section": "kprobe/security_inode_mknod",
+    "address": 0,
+    "bytes": 5635,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_inode_rename",
+    "section": "kprobe/security_inode_rename",
+    "address": 0,
+    "bytes": 6571,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_inode_symlink",
+    "section": "kprobe/security_inode_symlink",
+    "address": 0,
+    "bytes": 5598,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_inode_unlink",
+    "section": "kprobe/security_inode_unlink",
+    "address": 0,
+    "bytes": 6114,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_kernel_post_read_file",
+    "section": "kprobe/security_kernel_post_read_file",
+    "address": 0,
+    "bytes": 11767,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_kernel_read_file",
+    "section": "kprobe/security_kernel_read_file",
+    "address": 0,
+    "bytes": 11632,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_mmap_alert",
+    "section": "kprobe/security_mmap_addr",
+    "address": 0,
+    "bytes": 13218,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_mmap_file",
+    "section": "kprobe/security_mmap_file",
+    "address": 0,
+    "bytes": 22424,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_path_notify",
+    "section": "kprobe/security_path_notify",
+    "address": 0,
+    "bytes": 11181,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_sb_mount",
+    "section": "kprobe/security_sb_mount",
+    "address": 0,
+    "bytes": 11351,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_sb_umount",
+    "section": "kprobe/security_sb_umount",
+    "address": 0,
+    "bytes": 5777,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_settime64",
+    "section": "kprobe/security_settime64",
+    "address": 0,
+    "bytes": 5371,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_sk_clone",
+    "section": "kprobe/security_sk_clone",
+    "address": 0,
+    "bytes": 233,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_socket_accept",
+    "section": "kprobe/security_socket_accept",
+    "address": 0,
+    "bytes": 6928,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_socket_bind",
+    "section": "kprobe/security_socket_bind",
+    "address": 0,
+    "bytes": 6404,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_socket_connect",
+    "section": "kprobe/security_socket_connect",
+    "address": 0,
+    "bytes": 6248,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_socket_create",
+    "section": "kprobe/security_socket_create",
+    "address": 0,
+    "bytes": 5277,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_socket_listen",
+    "section": "kprobe/security_socket_listen",
+    "address": 0,
+    "bytes": 6537,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_socket_recvmsg",
+    "section": "kprobe/security_socket_recvmsg",
+    "address": 0,
+    "bytes": 5306,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_socket_sendmsg",
+    "section": "kprobe/security_socket_sendmsg",
+    "address": 0,
+    "bytes": 5306,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_socket_setsockopt",
+    "section": "kprobe/security_socket_setsockopt",
+    "address": 0,
+    "bytes": 6792,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_task_prctl",
+    "section": "kprobe/security_task_prctl",
+    "address": 0,
+    "bytes": 28852,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_security_task_setrlimit",
+    "section": "kprobe/security_task_setrlimit",
+    "address": 0,
+    "bytes": 5320,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "send_bin",
+    "section": "kprobe/send_bin",
+    "address": 0,
+    "bytes": 668,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_set_fs_pwd",
+    "section": "kprobe/set_fs_pwd",
+    "address": 0,
+    "bytes": 11649,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_sock_alloc_file",
+    "section": "kprobe/sock_alloc_file",
+    "address": 0,
+    "bytes": 237,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_switch_task_namespaces",
+    "section": "kprobe/switch_task_namespaces",
+    "address": 0,
+    "bytes": 6674,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "sys_dup_exit_tail",
+    "section": "kprobe/sys_dup",
+    "address": 0,
+    "bytes": 6325,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "syscall_checker",
+    "section": "kprobe/syscall_checker",
+    "address": 0,
+    "bytes": 9230,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_tracepoint_probe_register_prio_may_exist",
+    "section": "kprobe/tracepoint_probe_register_prio_may_exist",
+    "address": 0,
+    "bytes": 6061,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_utimes_common",
+    "section": "kprobe/utimes_common",
+    "address": 0,
+    "bytes": 11746,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_vfs_read",
+    "section": "kprobe/vfs_read",
+    "address": 0,
+    "bytes": 111,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_vfs_readv",
+    "section": "kprobe/vfs_readv",
+    "address": 0,
+    "bytes": 111,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_vfs_utimes",
+    "section": "kprobe/vfs_utimes",
+    "address": 0,
+    "bytes": 11746,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_vfs_write",
+    "section": "kprobe/vfs_write",
+    "address": 0,
+    "bytes": 111,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "vfs_write_magic_enter",
+    "section": "kprobe/vfs_write",
+    "address": 112,
+    "bytes": 208,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_vfs_writev",
+    "section": "kprobe/vfs_writev",
+    "address": 0,
+    "bytes": 111,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "vfs_writev_magic_enter",
+    "section": "kprobe/vfs_writev",
+    "address": 112,
+    "bytes": 208,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_kernel_write",
+    "section": "kretprobe/__kernel_write",
+    "address": 0,
+    "bytes": 12338,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "kernel_write_magic_return",
+    "section": "kretprobe/__kernel_write",
+    "address": 12352,
+    "bytes": 14291,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_kernel_write_tail",
+    "section": "kretprobe/__kernel_write_tail",
+    "address": 0,
+    "bytes": 20097,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret__register_chrdev",
+    "section": "kretprobe/__register_chrdev",
+    "address": 0,
+    "bytes": 5529,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_arch_prctl",
+    "section": "kretprobe/arch_prctl",
+    "address": 0,
+    "bytes": 8448,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_do_init_module",
+    "section": "kretprobe/do_init_module",
+    "address": 0,
+    "bytes": 9322,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_do_mmap",
+    "section": "kretprobe/do_mmap",
+    "address": 0,
+    "bytes": 11995,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_do_splice",
+    "section": "kretprobe/do_splice",
+    "address": 0,
+    "bytes": 12890,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_dup",
+    "section": "kretprobe/dup",
+    "address": 0,
+    "bytes": 8448,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_dup2",
+    "section": "kretprobe/dup2",
+    "address": 0,
+    "bytes": 8448,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_dup3",
+    "section": "kretprobe/dup3",
+    "address": 0,
+    "bytes": 8448,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_execute_finished",
+    "section": "kretprobe/execute_finished",
+    "address": 0,
+    "bytes": 19097,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_file_modified",
+    "section": "kretprobe/file_modified",
+    "address": 0,
+    "bytes": 12254,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_file_update_time",
+    "section": "kretprobe/file_update_time",
+    "address": 0,
+    "bytes": 12254,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_inotify_find_inode",
+    "section": "kretprobe/inotify_find_inode",
+    "address": 0,
+    "bytes": 11366,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_kallsyms_lookup_name",
+    "section": "kretprobe/kallsyms_lookup_name",
+    "address": 0,
+    "bytes": 5267,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_process_vm_writev",
+    "section": "kretprobe/process_vm_writev",
+    "address": 0,
+    "bytes": 8448,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_ptrace",
+    "section": "kretprobe/ptrace",
+    "address": 0,
+    "bytes": 8448,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_register_kprobe",
+    "section": "kretprobe/register_kprobe",
+    "address": 0,
+    "bytes": 5471,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_sock_alloc_file",
+    "section": "kretprobe/sock_alloc_file",
+    "address": 0,
+    "bytes": 5187,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_vfs_read",
+    "section": "kretprobe/vfs_read",
+    "address": 0,
+    "bytes": 12338,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_vfs_read_tail",
+    "section": "kretprobe/vfs_read_tail",
+    "address": 0,
+    "bytes": 12281,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_vfs_readv",
+    "section": "kretprobe/vfs_readv",
+    "address": 0,
+    "bytes": 12338,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_vfs_readv_tail",
+    "section": "kretprobe/vfs_readv_tail",
+    "address": 0,
+    "bytes": 12264,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_vfs_write",
+    "section": "kretprobe/vfs_write",
+    "address": 0,
+    "bytes": 12335,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "vfs_write_magic_return",
+    "section": "kretprobe/vfs_write",
+    "address": 12336,
+    "bytes": 14291,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_vfs_write_tail",
+    "section": "kretprobe/vfs_write_tail",
+    "address": 0,
+    "bytes": 20097,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_vfs_writev",
+    "section": "kretprobe/vfs_writev",
+    "address": 0,
+    "bytes": 12338,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "vfs_writev_magic_return",
+    "section": "kretprobe/vfs_writev",
+    "address": 12352,
+    "bytes": 14330,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_ret_vfs_writev_tail",
+    "section": "kretprobe/vfs_writev_tail",
+    "address": 0,
+    "bytes": 20515,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "lsm_file_open_test",
+    "section": "lsm/file_open",
+    "address": 0,
+    "bytes": 4911,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "tracepoint__cgroup__cgroup_attach_task",
+    "section": "raw_tracepoint/cgroup_attach_task",
+    "address": 0,
+    "bytes": 5336,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "tracepoint__cgroup__cgroup_mkdir",
+    "section": "raw_tracepoint/cgroup_mkdir",
+    "address": 0,
+    "bytes": 5335,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "cgroup_mkdir_signal",
+    "section": "raw_tracepoint/cgroup_mkdir_signal",
+    "address": 0,
+    "bytes": 646,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "tracepoint__cgroup__cgroup_rmdir",
+    "section": "raw_tracepoint/cgroup_rmdir",
+    "address": 0,
+    "bytes": 5335,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "cgroup_rmdir_signal",
+    "section": "raw_tracepoint/cgroup_rmdir_signal",
+    "address": 0,
+    "bytes": 618,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "tracepoint__exec_test",
+    "section": "raw_tracepoint/exec_test",
+    "address": 0,
+    "bytes": 38880,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "tracepoint__module__module_free",
+    "section": "raw_tracepoint/module_free",
+    "address": 0,
+    "bytes": 5771,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "tracepoint__module__module_load",
+    "section": "raw_tracepoint/module_load",
+    "address": 0,
+    "bytes": 12365,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "tracepoint__sched__sched_process_exec",
+    "section": "raw_tracepoint/sched_process_exec",
+    "address": 0,
+    "bytes": 13563,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "sched_process_exec_signal",
+    "section": "raw_tracepoint/sched_process_exec",
+    "address": 13568,
+    "bytes": 15607,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "sched_process_exec_event_submit_tail",
+    "section": "raw_tracepoint/sched_process_exec_event_submit_tail",
+    "address": 0,
+    "bytes": 14544,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "tracepoint__sched__sched_process_exit",
+    "section": "raw_tracepoint/sched_process_exit",
+    "address": 0,
+    "bytes": 5402,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "sched_process_exit_signal",
+    "section": "raw_tracepoint/sched_process_exit",
+    "address": 5408,
+    "bytes": 793,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "tracepoint__sched__sched_process_fork",
+    "section": "raw_tracepoint/sched_process_fork",
+    "address": 0,
+    "bytes": 12121,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "sched_process_fork_signal",
+    "section": "raw_tracepoint/sched_process_fork",
+    "address": 12128,
+    "bytes": 2844,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "tracepoint__sched__sched_process_free",
+    "section": "raw_tracepoint/sched_process_free",
+    "address": 0,
+    "bytes": 166,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "tracepoint__sched__sched_switch",
+    "section": "raw_tracepoint/sched_switch",
+    "address": 0,
+    "bytes": 5538,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "send_bin_tp",
+    "section": "raw_tracepoint/send_bin_tp",
+    "address": 0,
+    "bytes": 668,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "tracepoint__raw_syscalls__sys_enter",
+    "section": "raw_tracepoint/sys_enter",
+    "address": 0,
+    "bytes": 93,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "sys_enter_init",
+    "section": "raw_tracepoint/sys_enter_init",
+    "address": 0,
+    "bytes": 1456,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "sys_enter_submit",
+    "section": "raw_tracepoint/sys_enter_submit",
+    "address": 0,
+    "bytes": 11690,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "syscall__execve_enter",
+    "section": "raw_tracepoint/sys_execve",
+    "address": 0,
+    "bytes": 16302,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "syscall__execve_exit",
+    "section": "raw_tracepoint/sys_execve",
+    "address": 16304,
+    "bytes": 16390,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "syscall__execveat_enter",
+    "section": "raw_tracepoint/sys_execveat",
+    "address": 0,
+    "bytes": 16483,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "syscall__execveat_exit",
+    "section": "raw_tracepoint/sys_execveat",
+    "address": 16496,
+    "bytes": 16566,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "tracepoint__raw_syscalls__sys_exit",
+    "section": "raw_tracepoint/sys_exit",
+    "address": 0,
+    "bytes": 123,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "sys_exit_init",
+    "section": "raw_tracepoint/sys_exit_init",
+    "address": 0,
+    "bytes": 1318,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "sys_exit_submit",
+    "section": "raw_tracepoint/sys_exit_submit",
+    "address": 0,
+    "bytes": 8436,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "syscall__init_module",
+    "section": "raw_tracepoint/sys_init_module",
+    "address": 0,
+    "bytes": 461,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "syscall__accept4",
+    "section": "raw_tracepoint/syscall__accept4",
+    "address": 0,
+    "bytes": 5658,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "tracepoint__task__task_rename",
+    "section": "raw_tracepoint/task_rename",
+    "address": 0,
+    "bytes": 5239,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_sys_enter",
+    "section": "raw_tracepoint/trace_sys_enter",
+    "address": 0,
+    "bytes": 5089,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "trace_sys_exit",
+    "section": "raw_tracepoint/trace_sys_exit",
+    "address": 0,
+    "bytes": 5108,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "heartbeat_capture",
+    "section": "uprobe/capture_heartbeat",
+    "address": 0,
+    "bytes": 94,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "uprobe__features_fallback_arena_tailcall",
+    "section": "uprobe/features_fallback_arena_tailcall",
+    "address": 0,
+    "bytes": 1193,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "uprobe__features_fallback_helper_tailcall",
+    "section": "uprobe/features_fallback_helper_tailcall",
+    "address": 0,
+    "bytes": 1193,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "uprobe__features_fallback_minimal_tailcall",
+    "section": "uprobe/features_fallback_minimal_tailcall",
+    "address": 0,
+    "bytes": 1193,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "uprobe__features_fallback_arena",
+    "section": "uprobe/features_fallback_test",
+    "address": 0,
+    "bytes": 2271,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "uprobe__features_fallback_helper",
+    "section": "uprobe/features_fallback_test",
+    "address": 2272,
+    "bytes": 2271,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "uprobe__features_fallback_minimal",
+    "section": "uprobe/features_fallback_test",
+    "address": 4544,
+    "bytes": 2266,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "uprobe_lkm_seeker",
+    "section": "uprobe/lkm_seeker",
+    "address": 0,
+    "bytes": 2985,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "lkm_seeker_kset_tail",
+    "section": "uprobe/lkm_seeker_kset_tail",
+    "address": 0,
+    "bytes": 64846,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "lkm_seeker_mod_tree_tail",
+    "section": "uprobe/lkm_seeker_mod_tree_tail",
+    "address": 0,
+    "bytes": 421,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "lkm_seeker_modtree_loop",
+    "section": "uprobe/lkm_seeker_modtree_loop_tail",
+    "address": 0,
+    "bytes": 74200,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "lkm_seeker_new_mod_only_tail",
+    "section": "uprobe/lkm_seeker_new_mod_only_tail",
+    "address": 0,
+    "bytes": 2404,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "lkm_seeker_proc_tail",
+    "section": "uprobe/lkm_seeker_proc_tail",
+    "address": 0,
+    "bytes": 60411,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "uprobe_lkm_seeker_submitter",
+    "section": "uprobe/lkm_seeker_submitter",
+    "address": 0,
+    "bytes": 3796,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "uprobe_syscall_table_check",
+    "section": "uprobe/syscall_table_check",
+    "address": 0,
+    "bytes": 71470,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "uprobe_mem_dump_trigger",
+    "section": "uprobe/trigger_mem_dump_event",
+    "address": 0,
+    "bytes": 4187,
+    "binding": "STB_GLOBAL"
+  },
+  {
+    "symbol": "uprobe_seq_ops_trigger",
+    "section": "uprobe/trigger_seq_ops_event",
+    "address": 0,
+    "bytes": 4561,
+    "binding": "STB_GLOBAL"
+  }
+]

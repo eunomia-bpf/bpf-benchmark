@@ -1,0 +1,3 @@
+native-link: entry=uprobe__features_fallback_arena (2271 bytes), 1 reachable symbol(s) total
+  - uprobe__features_fallback_arena (vaddr 0x0, 2271 bytes) [entry]
+native-link: wrote proof object 2688 bytes, 80 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

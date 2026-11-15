@@ -1,0 +1,2007 @@
+
+vendor/build/native-bpf/x86/7.0.0-rc2+/native/tracee/tracee.native.o:	file format elf64-x86-64
+
+Disassembly of section kretprobe/dup:
+
+0000000000000000 <trace_ret_dup>:
+       0: 55                           	pushq	%rbp
+       1: 41 57                        	pushq	%r15
+       3: 41 56                        	pushq	%r14
+       5: 41 55                        	pushq	%r13
+       7: 41 54                        	pushq	%r12
+       9: 53                           	pushq	%rbx
+       a: 48 81 ec b8 00 00 00         	subq	$0xb8, %rsp
+      11: 49 89 ff                     	movq	%rdi, %r15
+      14: c7 84 24 9c 00 00 00 00 00 00 00     	movl	$0x0, 0x9c(%rsp)
+      1f: 48 8d 3d 00 00 00 00         	leaq	(%rip), %rdi            # 0x26 <trace_ret_dup+0x26>
+		0000000000000022:  R_X86_64_PC32	event_data_map-0x4
+      26: 48 8d b4 24 9c 00 00 00      	leaq	0x9c(%rsp), %rsi
+      2e: e8 00 00 00 00               	callq	0x33 <trace_ret_dup+0x33>
+		000000000000002f:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+      33: 48 85 c0                     	testq	%rax, %rax
+      36: 0f 84 7c 20 00 00            	je	0x20b8 <trace_ret_dup+0x20b8>
+      3c: 49 89 c6                     	movq	%rax, %r14
+      3f: 48 8d 3d 00 00 00 00         	leaq	(%rip), %rdi            # 0x46 <trace_ret_dup+0x46>
+		0000000000000042:  R_X86_64_PC32	config_map-0x4
+      46: 48 8d b4 24 9c 00 00 00      	leaq	0x9c(%rsp), %rsi
+      4e: e8 00 00 00 00               	callq	0x53 <trace_ret_dup+0x53>
+		000000000000004f:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+      53: 48 85 c0                     	testq	%rax, %rax
+      56: 0f 84 5c 20 00 00            	je	0x20b8 <trace_ret_dup+0x20b8>
+      5c: 49 89 c4                     	movq	%rax, %r12
+      5f: 66 41 c7 86 8a 7d 00 00 00 00	movw	$0x0, 0x7d8a(%r14)
+      69: 41 c6 86 88 00 00 00 00      	movb	$0x0, 0x88(%r14)
+      71: 49 c7 86 8c 7d 00 00 ff ff ff ff     	movq	$-0x1, 0x7d8c(%r14)
+      7c: 49 c7 86 94 7d 00 00 ff ff ff ff     	movq	$-0x1, 0x7d94(%r14)
+      87: 49 c7 86 9c 7d 00 00 ff ff ff ff     	movq	$-0x1, 0x7d9c(%r14)
+      92: 49 c7 86 a4 7d 00 00 ff ff ff ff     	movq	$-0x1, 0x7da4(%r14)
+      9d: 49 c7 86 ac 7d 00 00 ff ff ff ff     	movq	$-0x1, 0x7dac(%r14)
+      a8: 49 c7 86 b4 7d 00 00 ff ff ff ff     	movq	$-0x1, 0x7db4(%r14)
+      b3: 49 c7 86 bc 7d 00 00 ff ff ff ff     	movq	$-0x1, 0x7dbc(%r14)
+      be: 49 c7 86 c4 7d 00 00 ff ff ff ff     	movq	$-0x1, 0x7dc4(%r14)
+      c9: e8 00 00 00 00               	callq	0xce <trace_ret_dup+0xce>
+		00000000000000ca:  R_X86_64_PLT32	bpf_get_current_task-0x4
+      ce: 49 89 86 d0 7d 00 00         	movq	%rax, 0x7dd0(%r14)
+      d5: 49 c7 46 08 00 00 00 00      	movq	$0x0, 0x8(%r14)
+      dd: 49 c7 46 10 00 00 00 00      	movq	$0x0, 0x10(%r14)
+      e5: 49 c7 46 18 00 00 00 00      	movq	$0x0, 0x18(%r14)
+      ed: 49 c7 46 20 00 00 00 00      	movq	$0x0, 0x20(%r14)
+      f5: 49 c7 46 28 00 00 00 00      	movq	$0x0, 0x28(%r14)
+      fd: 49 c7 46 30 00 00 00 00      	movq	$0x0, 0x30(%r14)
+     105: 49 c7 46 38 00 00 00 00      	movq	$0x0, 0x38(%r14)
+     10d: 49 c7 46 40 00 00 00 00      	movq	$0x0, 0x40(%r14)
+     115: 49 c7 46 48 00 00 00 00      	movq	$0x0, 0x48(%r14)
+     11d: 49 c7 46 50 00 00 00 00      	movq	$0x0, 0x50(%r14)
+     125: 49 c7 46 58 00 00 00 00      	movq	$0x0, 0x58(%r14)
+     12d: 49 c7 46 60 00 00 00 00      	movq	$0x0, 0x60(%r14)
+     135: 49 c7 46 68 00 00 00 00      	movq	$0x0, 0x68(%r14)
+     13d: e8 00 00 00 00               	callq	0x142 <trace_ret_dup+0x142>
+		000000000000013e:  R_X86_64_PLT32	bpf_get_current_pid_tgid-0x4
+     142: 41 89 46 28                  	movl	%eax, 0x28(%r14)
+     146: 48 c1 e8 20                  	shrq	$0x20, %rax
+     14a: 41 89 46 24                  	movl	%eax, 0x24(%r14)
+     14e: 41 c7 46 70 20 00 00 00      	movl	$0x20, 0x70(%r14)
+     156: e8 00 00 00 00               	callq	0x15b <trace_ret_dup+0x15b>
+		0000000000000157:  R_X86_64_PLT32	bpf_ktime_get_boot_ns-0x4
+     15b: 49 89 06                     	movq	%rax, (%r14)
+     15e: e8 00 00 00 00               	callq	0x163 <trace_ret_dup+0x163>
+		000000000000015f:  R_X86_64_PLT32	bpf_get_smp_processor_id-0x4
+     163: 66 41 89 46 7c               	movw	%ax, 0x7c(%r14)
+     168: e8 00 00 00 00               	callq	0x16d <trace_ret_dup+0x16d>
+		0000000000000169:  R_X86_64_PLT32	bpf_get_current_task-0x4
+     16d: 48 89 c3                     	movq	%rax, %rbx
+     170: 48 8d 50 04                  	leaq	0x4(%rax), %rdx
+     174: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     179: be 04 00 00 00               	movl	$0x4, %esi
+     17e: e8 00 00 00 00               	callq	0x183 <trace_ret_dup+0x183>
+		000000000000017f:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     183: f7 44 24 10 00 00 20 00      	testl	$0x200000, 0x10(%rsp)   # imm = 0x200000
+     18b: b8 ff ff ff ff               	movl	$0xffffffff, %eax       # imm = 0xFFFFFFFF
+     190: 75 66                        	jne	0x1f8 <trace_ret_dup+0x1f8>
+     192: e8 00 00 00 00               	callq	0x197 <trace_ret_dup+0x197>
+		0000000000000193:  R_X86_64_PLT32	bpf_get_current_task_btf-0x4
+     197: 48 89 c7                     	movq	%rax, %rdi
+     19a: e8 00 00 00 00               	callq	0x19f <trace_ret_dup+0x19f>
+		000000000000019b:  R_X86_64_PLT32	bpf_task_pt_regs-0x4
+     19f: 48 8d 50 78                  	leaq	0x78(%rax), %rdx
+     1a3: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     1a8: be 08 00 00 00               	movl	$0x8, %esi
+     1ad: e8 00 00 00 00               	callq	0x1b2 <trace_ret_dup+0x1b2>
+		00000000000001ae:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     1b2: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+     1b6: 89 44 24 60                  	movl	%eax, 0x60(%rsp)
+     1ba: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     1bf: be 04 00 00 00               	movl	$0x4, %esi
+     1c4: 48 89 da                     	movq	%rbx, %rdx
+     1c7: e8 00 00 00 00               	callq	0x1cc <trace_ret_dup+0x1cc>
+		00000000000001c8:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     1cc: f6 44 24 10 02               	testb	$0x2, 0x10(%rsp)
+     1d1: 75 06                        	jne	0x1d9 <trace_ret_dup+0x1d9>
+     1d3: 8b 44 24 60                  	movl	0x60(%rsp), %eax
+     1d7: eb 1f                        	jmp	0x1f8 <trace_ret_dup+0x1f8>
+     1d9: 48 8d 3d 00 00 00 00         	leaq	(%rip), %rdi            # 0x1e0 <trace_ret_dup+0x1e0>
+		00000000000001dc:  R_X86_64_PC32	sys_32_to_64_map-0x4
+     1e0: 48 8d 74 24 60               	leaq	0x60(%rsp), %rsi
+     1e5: e8 00 00 00 00               	callq	0x1ea <trace_ret_dup+0x1ea>
+		00000000000001e6:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     1ea: 48 85 c0                     	testq	%rax, %rax
+     1ed: 74 04                        	je	0x1f3 <trace_ret_dup+0x1f3>
+     1ef: 8b 00                        	movl	(%rax), %eax
+     1f1: eb 05                        	jmp	0x1f8 <trace_ret_dup+0x1f8>
+     1f3: b8 ff ff ff ff               	movl	$0xffffffff, %eax       # imm = 0xFFFFFFFF
+     1f8: 41 89 46 74                  	movl	%eax, 0x74(%r14)
+     1fc: 41 8b 46 24                  	movl	0x24(%r14), %eax
+     200: 89 84 24 98 00 00 00         	movl	%eax, 0x98(%rsp)
+     207: 48 8d 3d 00 00 00 00         	leaq	(%rip), %rdi            # 0x20e <trace_ret_dup+0x20e>
+		000000000000020a:  R_X86_64_PC32	proc_info_map-0x4
+     20e: 48 8d b4 24 98 00 00 00      	leaq	0x98(%rsp), %rsi
+     216: e8 00 00 00 00               	callq	0x21b <trace_ret_dup+0x21b>
+		0000000000000217:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     21b: 48 89 84 24 88 00 00 00      	movq	%rax, 0x88(%rsp)
+     223: 48 85 c0                     	testq	%rax, %rax
+     226: 74 51                        	je	0x279 <trace_ret_dup+0x279>
+     228: 41 8b 46 28                  	movl	0x28(%r14), %eax
+     22c: 89 84 24 94 00 00 00         	movl	%eax, 0x94(%rsp)
+     233: 48 8d 3d 00 00 00 00         	leaq	(%rip), %rdi            # 0x23a <trace_ret_dup+0x23a>
+		0000000000000236:  R_X86_64_PC32	task_info_map-0x4
+     23a: 48 8d b4 24 94 00 00 00      	leaq	0x94(%rsp), %rsi
+     242: e8 00 00 00 00               	callq	0x247 <trace_ret_dup+0x247>
+		0000000000000243:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     247: 48 89 c5                     	movq	%rax, %rbp
+     24a: 48 85 c0                     	testq	%rax, %rax
+     24d: 4c 89 bc 24 a0 00 00 00      	movq	%r15, 0xa0(%rsp)
+     255: 4c 89 a4 24 b0 00 00 00      	movq	%r12, 0xb0(%rsp)
+     25d: 0f 84 a8 00 00 00            	je	0x30b <trace_ret_dup+0x30b>
+     263: 41 f6 44 24 04 20            	testb	$0x20, 0x4(%r12)
+     269: 0f 85 cf 04 00 00            	jne	0x73e <trace_ret_dup+0x73e>
+     26f: e8 00 00 00 00               	callq	0x274 <trace_ret_dup+0x274>
+		0000000000000270:  R_X86_64_PLT32	bpf_get_current_cgroup_id-0x4
+     274: e9 42 05 00 00               	jmp	0x7bb <trace_ret_dup+0x7bb>
+     279: 4d 89 e5                     	movq	%r12, %r13
+     27c: 4d 89 fc                     	movq	%r15, %r12
+     27f: 8b 84 24 98 00 00 00         	movl	0x98(%rsp), %eax
+     286: 89 44 24 60                  	movl	%eax, 0x60(%rsp)
+     28a: c7 44 24 78 00 00 00 00      	movl	$0x0, 0x78(%rsp)
+     292: 48 8d 3d 00 00 00 00         	leaq	(%rip), %rdi            # 0x299 <trace_ret_dup+0x299>
+		0000000000000295:  R_X86_64_PC32	scratch_map-0x4
+     299: 48 8d 74 24 78               	leaq	0x78(%rsp), %rsi
+     29e: e8 00 00 00 00               	callq	0x2a3 <trace_ret_dup+0x2a3>
+		000000000000029f:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     2a3: 48 85 c0                     	testq	%rax, %rax
+     2a6: 0f 84 0c 1e 00 00            	je	0x20b8 <trace_ret_dup+0x20b8>
+     2ac: 48 89 c3                     	movq	%rax, %rbx
+     2af: 8b 44 24 60                  	movl	0x60(%rsp), %eax
+     2b3: 89 44 24 10                  	movl	%eax, 0x10(%rsp)
+     2b7: ba 70 01 00 00               	movl	$0x170, %edx            # imm = 0x170
+     2bc: 48 89 df                     	movq	%rbx, %rdi
+     2bf: 31 f6                        	xorl	%esi, %esi
+     2c1: e8 00 00 00 00               	callq	0x2c6 <trace_ret_dup+0x2c6>
+		00000000000002c2:  R_X86_64_PLT32	memset-0x4
+     2c6: 4c 8d 3d 00 00 00 00         	leaq	(%rip), %r15            # 0x2cd <trace_ret_dup+0x2cd>
+		00000000000002c9:  R_X86_64_PC32	proc_info_map-0x4
+     2cd: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     2d2: b9 01 00 00 00               	movl	$0x1, %ecx
+     2d7: 4c 89 ff                     	movq	%r15, %rdi
+     2da: 48 89 da                     	movq	%rbx, %rdx
+     2dd: e8 00 00 00 00               	callq	0x2e2 <trace_ret_dup+0x2e2>
+		00000000000002de:  R_X86_64_PLT32	bpf_map_update_elem-0x4
+     2e2: 48 8d 74 24 60               	leaq	0x60(%rsp), %rsi
+     2e7: 4c 89 ff                     	movq	%r15, %rdi
+     2ea: e8 00 00 00 00               	callq	0x2ef <trace_ret_dup+0x2ef>
+		00000000000002eb:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     2ef: 48 89 84 24 88 00 00 00      	movq	%rax, 0x88(%rsp)
+     2f7: 48 85 c0                     	testq	%rax, %rax
+     2fa: 4d 89 e7                     	movq	%r12, %r15
+     2fd: 4d 89 ec                     	movq	%r13, %r12
+     300: 0f 85 22 ff ff ff            	jne	0x228 <trace_ret_dup+0x228>
+     306: e9 ad 1d 00 00               	jmp	0x20b8 <trace_ret_dup+0x20b8>
+     30b: 8b 84 24 94 00 00 00         	movl	0x94(%rsp), %eax
+     312: 89 44 24 60                  	movl	%eax, 0x60(%rsp)
+     316: c7 44 24 78 00 00 00 00      	movl	$0x0, 0x78(%rsp)
+     31e: 48 8d 3d 00 00 00 00         	leaq	(%rip), %rdi            # 0x325 <trace_ret_dup+0x325>
+		0000000000000321:  R_X86_64_PC32	scratch_map-0x4
+     325: 48 8d 74 24 78               	leaq	0x78(%rsp), %rsi
+     32a: e8 00 00 00 00               	callq	0x32f <trace_ret_dup+0x32f>
+		000000000000032b:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     32f: 48 85 c0                     	testq	%rax, %rax
+     332: 0f 84 80 1d 00 00            	je	0x20b8 <trace_ret_dup+0x20b8>
+     338: 48 89 c3                     	movq	%rax, %rbx
+     33b: 8b 44 24 60                  	movl	0x60(%rsp), %eax
+     33f: 89 44 24 10                  	movl	%eax, 0x10(%rsp)
+     343: ba c8 00 00 00               	movl	$0xc8, %edx
+     348: 48 89 df                     	movq	%rbx, %rdi
+     34b: 31 f6                        	xorl	%esi, %esi
+     34d: e8 00 00 00 00               	callq	0x352 <trace_ret_dup+0x352>
+		000000000000034e:  R_X86_64_PLT32	memset-0x4
+     352: 4c 8d 3d 00 00 00 00         	leaq	(%rip), %r15            # 0x359 <trace_ret_dup+0x359>
+		0000000000000355:  R_X86_64_PC32	task_info_map-0x4
+     359: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     35e: b9 01 00 00 00               	movl	$0x1, %ecx
+     363: 4c 89 ff                     	movq	%r15, %rdi
+     366: 48 89 da                     	movq	%rbx, %rdx
+     369: e8 00 00 00 00               	callq	0x36e <trace_ret_dup+0x36e>
+		000000000000036a:  R_X86_64_PLT32	bpf_map_update_elem-0x4
+     36e: 48 8d 74 24 60               	leaq	0x60(%rsp), %rsi
+     373: 4c 89 ff                     	movq	%r15, %rdi
+     376: e8 00 00 00 00               	callq	0x37b <trace_ret_dup+0x37b>
+		0000000000000377:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     37b: 48 85 c0                     	testq	%rax, %rax
+     37e: 0f 84 34 1d 00 00            	je	0x20b8 <trace_ret_dup+0x20b8>
+     384: 48 89 c5                     	movq	%rax, %rbp
+     387: 49 8b 9e d0 7d 00 00         	movq	0x7dd0(%r14), %rbx
+     38e: 4c 8d 63 28                  	leaq	0x28(%rbx), %r12
+     392: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     397: be 08 00 00 00               	movl	$0x8, %esi
+     39c: 4c 89 e2                     	movq	%r12, %rdx
+     39f: e8 00 00 00 00               	callq	0x3a4 <trace_ret_dup+0x3a4>
+		00000000000003a0:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     3a4: 48 8b 44 24 10               	movq	0x10(%rsp), %rax
+     3a9: 48 89 44 24 08               	movq	%rax, 0x8(%rsp)
+     3ae: 48 8d 50 20                  	leaq	0x20(%rax), %rdx
+     3b2: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     3b7: be 08 00 00 00               	movl	$0x8, %esi
+     3bc: e8 00 00 00 00               	callq	0x3c1 <trace_ret_dup+0x3c1>
+		00000000000003bd:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     3c1: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+     3c6: 48 83 c2 28                  	addq	$0x28, %rdx
+     3ca: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     3cf: be 08 00 00 00               	movl	$0x8, %esi
+     3d4: e8 00 00 00 00               	callq	0x3d9 <trace_ret_dup+0x3d9>
+		00000000000003d5:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     3d9: 4c 8b 6c 24 10               	movq	0x10(%rsp), %r13
+     3de: 49 8d 55 14                  	leaq	0x14(%r13), %rdx
+     3e2: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     3e7: be 04 00 00 00               	movl	$0x4, %esi
+     3ec: e8 00 00 00 00               	callq	0x3f1 <trace_ret_dup+0x3f1>
+		00000000000003ed:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     3f1: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+     3f5: 89 45 24                     	movl	%eax, 0x24(%rbp)
+     3f8: 48 89 5c 24 68               	movq	%rbx, 0x68(%rsp)
+     3fd: 4c 8d 7b 30                  	leaq	0x30(%rbx), %r15
+     401: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     406: be 08 00 00 00               	movl	$0x8, %esi
+     40b: 4c 89 fa                     	movq	%r15, %rdx
+     40e: e8 00 00 00 00               	callq	0x413 <trace_ret_dup+0x413>
+		000000000000040f:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     413: 48 8b 5c 24 10               	movq	0x10(%rsp), %rbx
+     418: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     41d: be 04 00 00 00               	movl	$0x4, %esi
+     422: 48 89 da                     	movq	%rbx, %rdx
+     425: e8 00 00 00 00               	callq	0x42a <trace_ret_dup+0x42a>
+		0000000000000426:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     42a: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+     42e: 48 c1 e0 04                  	shlq	$0x4, %rax
+     432: 48 8d 14 03                  	leaq	(%rbx,%rax), %rdx
+     436: 48 83 c2 08                  	addq	$0x8, %rdx
+     43a: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     43f: be 04 00 00 00               	movl	$0x4, %esi
+     444: e8 00 00 00 00               	callq	0x449 <trace_ret_dup+0x449>
+		0000000000000445:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     449: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+     44d: 89 45 14                     	movl	%eax, 0x14(%rbp)
+     450: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     455: be 08 00 00 00               	movl	$0x8, %esi
+     45a: 4c 89 e2                     	movq	%r12, %rdx
+     45d: e8 00 00 00 00               	callq	0x462 <trace_ret_dup+0x462>
+		000000000000045e:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     462: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+     467: 48 83 c2 30                  	addq	$0x30, %rdx
+     46b: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     470: be 08 00 00 00               	movl	$0x8, %esi
+     475: e8 00 00 00 00               	callq	0x47a <trace_ret_dup+0x47a>
+		0000000000000476:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     47a: 48 8b 5c 24 10               	movq	0x10(%rsp), %rbx
+     47f: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     484: be 04 00 00 00               	movl	$0x4, %esi
+     489: 48 89 da                     	movq	%rbx, %rdx
+     48c: e8 00 00 00 00               	callq	0x491 <trace_ret_dup+0x491>
+		000000000000048d:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     491: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+     495: 48 c1 e0 04                  	shlq	$0x4, %rax
+     499: 48 8d 14 03                  	leaq	(%rbx,%rax), %rdx
+     49d: 48 83 c2 08                  	addq	$0x8, %rdx
+     4a1: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     4a6: be 04 00 00 00               	movl	$0x4, %esi
+     4ab: e8 00 00 00 00               	callq	0x4b0 <trace_ret_dup+0x4b0>
+		00000000000004ac:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     4b0: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+     4b4: 89 45 10                     	movl	%eax, 0x10(%rbp)
+     4b7: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     4bc: be 08 00 00 00               	movl	$0x8, %esi
+     4c1: 4c 89 fa                     	movq	%r15, %rdx
+     4c4: e8 00 00 00 00               	callq	0x4c9 <trace_ret_dup+0x4c9>
+		00000000000004c5:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     4c9: 48 8b 5c 24 10               	movq	0x10(%rsp), %rbx
+     4ce: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     4d3: be 04 00 00 00               	movl	$0x4, %esi
+     4d8: 48 89 da                     	movq	%rbx, %rdx
+     4db: e8 00 00 00 00               	callq	0x4e0 <trace_ret_dup+0x4e0>
+		00000000000004dc:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     4e0: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+     4e4: 48 c1 e0 04                  	shlq	$0x4, %rax
+     4e8: 48 8d 14 03                  	leaq	(%rbx,%rax), %rdx
+     4ec: 48 83 c2 10                  	addq	$0x10, %rdx
+     4f0: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     4f5: be 08 00 00 00               	movl	$0x8, %esi
+     4fa: e8 00 00 00 00               	callq	0x4ff <trace_ret_dup+0x4ff>
+		00000000000004fb:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     4ff: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+     504: 48 83 c2 0c                  	addq	$0xc, %rdx
+     508: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     50d: be 04 00 00 00               	movl	$0x4, %esi
+     512: e8 00 00 00 00               	callq	0x517 <trace_ret_dup+0x517>
+		0000000000000513:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     517: 44 8b 64 24 10               	movl	0x10(%rsp), %r12d
+     51c: 4c 89 6c 24 70               	movq	%r13, 0x70(%rsp)
+     521: 4d 8d 7d 30                  	leaq	0x30(%r13), %r15
+     525: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     52a: be 08 00 00 00               	movl	$0x8, %esi
+     52f: 4c 89 fa                     	movq	%r15, %rdx
+     532: e8 00 00 00 00               	callq	0x537 <trace_ret_dup+0x537>
+		0000000000000533:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     537: 48 8b 5c 24 10               	movq	0x10(%rsp), %rbx
+     53c: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     541: be 04 00 00 00               	movl	$0x4, %esi
+     546: 48 89 da                     	movq	%rbx, %rdx
+     549: e8 00 00 00 00               	callq	0x54e <trace_ret_dup+0x54e>
+		000000000000054a:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     54e: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+     552: 48 c1 e0 04                  	shlq	$0x4, %rax
+     556: 48 8d 14 03                  	leaq	(%rbx,%rax), %rdx
+     55a: 48 83 c2 10                  	addq	$0x10, %rdx
+     55e: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     563: be 08 00 00 00               	movl	$0x8, %esi
+     568: e8 00 00 00 00               	callq	0x56d <trace_ret_dup+0x56d>
+		0000000000000569:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     56d: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+     572: 48 83 c2 0c                  	addq	$0xc, %rdx
+     576: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     57b: be 04 00 00 00               	movl	$0x4, %esi
+     580: e8 00 00 00 00               	callq	0x585 <trace_ret_dup+0x585>
+		0000000000000581:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     585: 44 3b 64 24 10               	cmpl	0x10(%rsp), %r12d
+     58a: 75 4f                        	jne	0x5db <trace_ret_dup+0x5db>
+     58c: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     591: be 08 00 00 00               	movl	$0x8, %esi
+     596: 4c 89 fa                     	movq	%r15, %rdx
+     599: e8 00 00 00 00               	callq	0x59e <trace_ret_dup+0x59e>
+		000000000000059a:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     59e: 48 8b 5c 24 10               	movq	0x10(%rsp), %rbx
+     5a3: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     5a8: be 04 00 00 00               	movl	$0x4, %esi
+     5ad: 48 89 da                     	movq	%rbx, %rdx
+     5b0: e8 00 00 00 00               	callq	0x5b5 <trace_ret_dup+0x5b5>
+		00000000000005b1:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     5b5: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+     5b9: 48 c1 e0 04                  	shlq	$0x4, %rax
+     5bd: 48 8d 14 03                  	leaq	(%rbx,%rax), %rdx
+     5c1: 48 83 c2 08                  	addq	$0x8, %rdx
+     5c5: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     5ca: be 04 00 00 00               	movl	$0x4, %esi
+     5cf: e8 00 00 00 00               	callq	0x5d4 <trace_ret_dup+0x5d4>
+		00000000000005d0:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     5d4: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+     5d8: 89 45 18                     	movl	%eax, 0x18(%rbp)
+     5db: 44 89 65 30                  	movl	%r12d, 0x30(%rbp)
+     5df: 48 8b 5c 24 68               	movq	0x68(%rsp), %rbx
+     5e4: 4c 8d bb 90 00 00 00         	leaq	0x90(%rbx), %r15
+     5eb: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     5f0: be 08 00 00 00               	movl	$0x8, %esi
+     5f5: 4c 89 fa                     	movq	%r15, %rdx
+     5f8: e8 00 00 00 00               	callq	0x5fd <trace_ret_dup+0x5fd>
+		00000000000005f9:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     5fd: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+     602: 48 83 c2 10                  	addq	$0x10, %rdx
+     606: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     60b: be 08 00 00 00               	movl	$0x8, %esi
+     610: e8 00 00 00 00               	callq	0x615 <trace_ret_dup+0x615>
+		0000000000000611:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     615: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+     61a: 48 8d 7c 24 60               	leaq	0x60(%rsp), %rdi
+     61f: be 04 00 00 00               	movl	$0x4, %esi
+     624: e8 00 00 00 00               	callq	0x629 <trace_ret_dup+0x629>
+		0000000000000625:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     629: 8b 44 24 60                  	movl	0x60(%rsp), %eax
+     62d: 89 45 2c                     	movl	%eax, 0x2c(%rbp)
+     630: e8 00 00 00 00               	callq	0x635 <trace_ret_dup+0x635>
+		0000000000000631:  R_X86_64_PLT32	bpf_get_current_uid_gid-0x4
+     635: 89 45 28                     	movl	%eax, 0x28(%rbp)
+     638: 48 8d 53 50                  	leaq	0x50(%rbx), %rdx
+     63c: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     641: be 08 00 00 00               	movl	$0x8, %esi
+     646: e8 00 00 00 00               	callq	0x64b <trace_ret_dup+0x64b>
+		0000000000000647:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     64b: 48 8b 44 24 10               	movq	0x10(%rsp), %rax
+     650: 48 89 45 00                  	movq	%rax, (%rbp)
+     654: 48 8b 54 24 08               	movq	0x8(%rsp), %rdx
+     659: 48 83 c2 50                  	addq	$0x50, %rdx
+     65d: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     662: be 08 00 00 00               	movl	$0x8, %esi
+     667: e8 00 00 00 00               	callq	0x66c <trace_ret_dup+0x66c>
+		0000000000000668:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     66c: 48 8b 44 24 10               	movq	0x10(%rsp), %rax
+     671: 48 89 45 58                  	movq	%rax, 0x58(%rbp)
+     675: 48 8b 54 24 70               	movq	0x70(%rsp), %rdx
+     67a: 48 83 c2 50                  	addq	$0x50, %rdx
+     67e: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     683: be 08 00 00 00               	movl	$0x8, %esi
+     688: e8 00 00 00 00               	callq	0x68d <trace_ret_dup+0x68d>
+		0000000000000689:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     68d: 48 8b 44 24 10               	movq	0x10(%rsp), %rax
+     692: 48 89 45 60                  	movq	%rax, 0x60(%rbp)
+     696: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     69b: be 04 00 00 00               	movl	$0x4, %esi
+     6a0: 48 89 da                     	movq	%rbx, %rdx
+     6a3: e8 00 00 00 00               	callq	0x6a8 <trace_ret_dup+0x6a8>
+		00000000000006a4:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     6a8: f6 44 24 10 02               	testb	$0x2, 0x10(%rsp)
+     6ad: 4c 8b a4 24 b0 00 00 00      	movq	0xb0(%rsp), %r12
+     6b5: 74 04                        	je	0x6bb <trace_ret_dup+0x6bb>
+     6b7: 80 4d 54 02                  	orb	$0x2, 0x54(%rbp)
+     6bb: 48 8d 7d 34                  	leaq	0x34(%rbp), %rdi
+     6bf: 48 c7 45 3c 00 00 00 00      	movq	$0x0, 0x3c(%rbp)
+     6c7: 48 c7 45 34 00 00 00 00      	movq	$0x0, 0x34(%rbp)
+     6cf: be 10 00 00 00               	movl	$0x10, %esi
+     6d4: e8 00 00 00 00               	callq	0x6d9 <trace_ret_dup+0x6d9>
+		00000000000006d5:  R_X86_64_PLT32	bpf_get_current_comm-0x4
+     6d9: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     6de: be 08 00 00 00               	movl	$0x8, %esi
+     6e3: 4c 89 fa                     	movq	%r15, %rdx
+     6e6: e8 00 00 00 00               	callq	0x6eb <trace_ret_dup+0x6eb>
+		00000000000006e7:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     6eb: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+     6f0: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     6f5: be 08 00 00 00               	movl	$0x8, %esi
+     6fa: e8 00 00 00 00               	callq	0x6ff <trace_ret_dup+0x6ff>
+		00000000000006fb:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     6ff: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+     704: 48 8d 5c 24 10               	leaq	0x10(%rsp), %rbx
+     709: 48 89 df                     	movq	%rbx, %rdi
+     70c: be 41 00 00 00               	movl	$0x41, %esi
+     711: e8 00 00 00 00               	callq	0x716 <trace_ret_dup+0x716>
+		0000000000000712:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     716: 48 89 ef                     	movq	%rbp, %rdi
+     719: 48 83 c7 44                  	addq	$0x44, %rdi
+     71d: be 10 00 00 00               	movl	$0x10, %esi
+     722: 48 89 da                     	movq	%rbx, %rdx
+     725: e8 00 00 00 00               	callq	0x72a <trace_ret_dup+0x72a>
+		0000000000000726:  R_X86_64_PLT32	bpf_probe_read_kernel_str-0x4
+     72a: 4c 8b bc 24 a0 00 00 00      	movq	0xa0(%rsp), %r15
+     732: 41 f6 44 24 04 20            	testb	$0x20, 0x4(%r12)
+     738: 0f 84 31 fb ff ff            	je	0x26f <trace_ret_dup+0x26f>
+     73e: ba 98 00 00 00               	movl	$0x98, %edx
+     743: 49 03 96 d0 7d 00 00         	addq	0x7dd0(%r14), %rdx
+     74a: 48 8d 7c 24 60               	leaq	0x60(%rsp), %rdi
+     74f: be 08 00 00 00               	movl	$0x8, %esi
+     754: e8 00 00 00 00               	callq	0x759 <trace_ret_dup+0x759>
+		0000000000000755:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     759: 48 8b 54 24 60               	movq	0x60(%rsp), %rdx
+     75e: 48 8d 7c 24 78               	leaq	0x78(%rsp), %rdi
+     763: be 08 00 00 00               	movl	$0x8, %esi
+     768: e8 00 00 00 00               	callq	0x76d <trace_ret_dup+0x76d>
+		0000000000000769:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     76d: 48 8b 54 24 78               	movq	0x78(%rsp), %rdx
+     772: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     777: be 08 00 00 00               	movl	$0x8, %esi
+     77c: e8 00 00 00 00               	callq	0x781 <trace_ret_dup+0x781>
+		000000000000077d:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     781: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+     786: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     78b: be 08 00 00 00               	movl	$0x8, %esi
+     790: e8 00 00 00 00               	callq	0x795 <trace_ret_dup+0x795>
+		0000000000000791:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     795: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+     79a: 48 85 d2                     	testq	%rdx, %rdx
+     79d: 74 1a                        	je	0x7b9 <trace_ret_dup+0x7b9>
+     79f: 48 83 c2 08                  	addq	$0x8, %rdx
+     7a3: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     7a8: be 08 00 00 00               	movl	$0x8, %esi
+     7ad: e8 00 00 00 00               	callq	0x7b2 <trace_ret_dup+0x7b2>
+		00000000000007ae:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     7b2: 48 8b 44 24 10               	movq	0x10(%rsp), %rax
+     7b7: eb 02                        	jmp	0x7bb <trace_ret_dup+0x7bb>
+     7b9: 31 c0                        	xorl	%eax, %eax
+     7bb: 49 89 46 10                  	movq	%rax, 0x10(%r14)
+     7bf: 48 89 45 08                  	movq	%rax, 0x8(%rbp)
+     7c3: 89 44 24 60                  	movl	%eax, 0x60(%rsp)
+     7c7: 48 8d 3d 00 00 00 00         	leaq	(%rip), %rdi            # 0x7ce <trace_ret_dup+0x7ce>
+		00000000000007ca:  R_X86_64_PC32	containers_map-0x4
+     7ce: 48 8d 74 24 60               	leaq	0x60(%rsp), %rsi
+     7d3: e8 00 00 00 00               	callq	0x7d8 <trace_ret_dup+0x7d8>
+		00000000000007d4:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     7d8: 48 85 c0                     	testq	%rax, %rax
+     7db: 74 16                        	je	0x7f3 <trace_ret_dup+0x7f3>
+     7dd: 0f b6 00                     	movzbl	(%rax), %eax
+     7e0: 88 85 b1 00 00 00            	movb	%al, 0xb1(%rbp)
+     7e6: 83 c8 02                     	orl	$0x2, %eax
+     7e9: 83 f8 03                     	cmpl	$0x3, %eax
+     7ec: 75 05                        	jne	0x7f3 <trace_ret_dup+0x7f3>
+     7ee: 41 80 4e 5c 01               	orb	$0x1, 0x5c(%r14)
+     7f3: 41 0f b7 46 7e               	movzwl	0x7e(%r14), %eax
+     7f8: 66 41 3b 44 24 0e            	cmpw	0xe(%r12), %ax
+     7fe: 0f 85 c8 18 00 00            	jne	0x20cc <trace_ret_dup+0x20cc>
+     804: 49 c7 86 d8 7d 00 00 00 00 00 00     	movq	$0x0, 0x7dd8(%r14)
+     80f: c7 44 24 10 20 00 00 00      	movl	$0x20, 0x10(%rsp)
+     817: 66 89 44 24 78               	movw	%ax, 0x78(%rsp)
+     81c: 48 8d 3d 00 00 00 00         	leaq	(%rip), %rdi            # 0x823 <trace_ret_dup+0x823>
+		000000000000081f:  R_X86_64_PC32	events_map_version-0x4
+     823: 48 8d 74 24 78               	leaq	0x78(%rsp), %rsi
+     828: e8 00 00 00 00               	callq	0x82d <trace_ret_dup+0x82d>
+		0000000000000829:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     82d: 48 85 c0                     	testq	%rax, %rax
+     830: 74 69                        	je	0x89b <trace_ret_dup+0x89b>
+     832: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     837: 48 89 c7                     	movq	%rax, %rdi
+     83a: e8 00 00 00 00               	callq	0x83f <trace_ret_dup+0x83f>
+		000000000000083b:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     83f: 48 85 c0                     	testq	%rax, %rax
+     842: 74 57                        	je	0x89b <trace_ret_dup+0x89b>
+     844: 48 8b 48 08                  	movq	0x8(%rax), %rcx
+     848: 49 89 8e e0 7d 00 00         	movq	%rcx, 0x7de0(%r14)
+     84f: 48 8b 08                     	movq	(%rax), %rcx
+     852: 49 89 8e d8 7d 00 00         	movq	%rcx, 0x7dd8(%r14)
+     859: 48 8b 48 10                  	movq	0x10(%rax), %rcx
+     85d: 48 8b 50 18                  	movq	0x18(%rax), %rdx
+     861: 49 89 8e e8 7d 00 00         	movq	%rcx, 0x7de8(%r14)
+     868: 49 89 96 f0 7d 00 00         	movq	%rdx, 0x7df0(%r14)
+     86f: 48 8b 48 20                  	movq	0x20(%rax), %rcx
+     873: 49 89 8e f8 7d 00 00         	movq	%rcx, 0x7df8(%r14)
+     87a: 48 8b 48 28                  	movq	0x28(%rax), %rcx
+     87e: 49 89 8e 00 7e 00 00         	movq	%rcx, 0x7e00(%r14)
+     885: 48 8b 48 30                  	movq	0x30(%rax), %rcx
+     889: 49 89 8e 08 7e 00 00         	movq	%rcx, 0x7e08(%r14)
+     890: 48 8b 40 38                  	movq	0x38(%rax), %rax
+     894: 49 89 86 10 7e 00 00         	movq	%rax, 0x7e10(%r14)
+     89b: 49 8b 86 d8 7d 00 00         	movq	0x7dd8(%r14), %rax
+     8a2: 49 89 86 80 00 00 00         	movq	%rax, 0x80(%r14)
+     8a9: c6 85 b0 00 00 00 00         	movb	$0x0, 0xb0(%rbp)
+     8b0: 41 8b 0c 24                  	movl	(%r12), %ecx
+     8b4: 41 3b 4e 24                  	cmpl	0x24(%r14), %ecx
+     8b8: 48 89 6c 24 08               	movq	%rbp, 0x8(%rsp)
+     8bd: 75 18                        	jne	0x8d7 <trace_ret_dup+0x8d7>
+     8bf: 45 31 e4                     	xorl	%r12d, %r12d
+     8c2: 4c 21 e0                     	andq	%r12, %rax
+     8c5: 49 89 86 80 00 00 00         	movq	%rax, 0x80(%r14)
+     8cc: 0f 85 8f 07 00 00            	jne	0x1061 <trace_ret_dup+0x1061>
+     8d2: e9 cd 17 00 00               	jmp	0x20a4 <trace_ret_dup+0x20a4>
+     8d7: 49 8b 86 50 7e 00 00         	movq	0x7e50(%r14), %rax
+     8de: 48 85 c0                     	testq	%rax, %rax
+     8e1: 0f 84 9d 01 00 00            	je	0xa84 <trace_ret_dup+0xa84>
+     8e7: 0f b6 8d b1 00 00 00         	movzbl	0xb1(%rbp), %ecx
+     8ee: 80 e1 fd                     	andb	$-0x3, %cl
+     8f1: 45 31 e4                     	xorl	%r12d, %r12d
+     8f4: 80 f9 01                     	cmpb	$0x1, %cl
+     8f7: 41 0f 94 c4                  	sete	%r12b
+     8fb: 48 f7 d0                     	notq	%rax
+     8fe: 49 f7 dc                     	negq	%r12
+     901: 4d 33 a6 c0 7e 00 00         	xorq	0x7ec0(%r14), %r12
+     908: 49 09 c4                     	orq	%rax, %r12
+     90b: 49 8b 86 58 7e 00 00         	movq	0x7e58(%r14), %rax
+     912: 48 85 c0                     	testq	%rax, %rax
+     915: 74 1f                        	je	0x936 <trace_ret_dup+0x936>
+     917: 31 c9                        	xorl	%ecx, %ecx
+     919: 80 bd b1 00 00 00 03         	cmpb	$0x3, 0xb1(%rbp)
+     920: 0f 94 c1                     	sete	%cl
+     923: 48 f7 d0                     	notq	%rax
+     926: 48 f7 d9                     	negq	%rcx
+     929: 49 33 8e c8 7e 00 00         	xorq	0x7ec8(%r14), %rcx
+     930: 48 09 c1                     	orq	%rax, %rcx
+     933: 49 21 cc                     	andq	%rcx, %r12
+     936: 49 8b 86 60 7e 00 00         	movq	0x7e60(%r14), %rax
+     93d: 48 85 c0                     	testq	%rax, %rax
+     940: 74 1a                        	je	0x95c <trace_ret_dup+0x95c>
+     942: 41 8b 4e 5c                  	movl	0x5c(%r14), %ecx
+     946: 48 f7 d0                     	notq	%rax
+     949: 83 e1 01                     	andl	$0x1, %ecx
+     94c: 48 f7 d9                     	negq	%rcx
+     94f: 49 33 8e d0 7e 00 00         	xorq	0x7ed0(%r14), %rcx
+     956: 48 09 c1                     	orq	%rax, %rcx
+     959: 49 21 cc                     	andq	%rcx, %r12
+     95c: 49 8b 86 68 7e 00 00         	movq	0x7e68(%r14), %rax
+     963: 48 89 ea                     	movq	%rbp, %rdx
+     966: 48 85 c0                     	testq	%rax, %rax
+     969: 74 1f                        	je	0x98a <trace_ret_dup+0x98a>
+     96b: 48 f7 d0                     	notq	%rax
+     96e: 48 8b 8c 24 88 00 00 00      	movq	0x88(%rsp), %rcx
+     976: 48 0f be 09                  	movsbq	(%rcx), %rcx
+     97a: 48 f7 d9                     	negq	%rcx
+     97d: 49 33 8e d8 7e 00 00         	xorq	0x7ed8(%r14), %rcx
+     984: 48 09 c1                     	orq	%rax, %rcx
+     987: 49 21 cc                     	andq	%rcx, %r12
+     98a: 41 0f b7 6e 7e               	movzwl	0x7e(%r14), %ebp
+     98f: 4d 8b be 20 7e 00 00         	movq	0x7e20(%r14), %r15
+     996: 4d 85 ff                     	testq	%r15, %r15
+     999: 66 89 6c 24 68               	movw	%bp, 0x68(%rsp)
+     99e: 0f 84 fc 00 00 00            	je	0xaa0 <trace_ret_dup+0xaa0>
+     9a4: 49 8b 86 90 7e 00 00         	movq	0x7e90(%r14), %rax
+     9ab: 48 89 84 24 a8 00 00 00      	movq	%rax, 0xa8(%rsp)
+     9b3: 49 8b 86 08 7f 00 00         	movq	0x7f08(%r14), %rax
+     9ba: 48 89 44 24 70               	movq	%rax, 0x70(%rsp)
+     9bf: 49 8b 86 10 7f 00 00         	movq	0x7f10(%r14), %rax
+     9c6: 48 89 84 24 80 00 00 00      	movq	%rax, 0x80(%rsp)
+     9ce: 66 89 6c 24 10               	movw	%bp, 0x10(%rsp)
+     9d3: 48 8d 3d 00 00 00 00         	leaq	(%rip), %rdi            # 0x9da <trace_ret_dup+0x9da>
+		00000000000009d6:  R_X86_64_PC32	pid_filter_version-0x4
+     9da: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     9df: e8 00 00 00 00               	callq	0x9e4 <trace_ret_dup+0x9e4>
+		00000000000009e0:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     9e4: 48 89 c3                     	movq	%rax, %rbx
+     9e7: 41 8b 46 24                  	movl	0x24(%r14), %eax
+     9eb: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+     9f0: 49 c7 c5 ff ff ff ff         	movq	$-0x1, %r13
+     9f7: 48 85 db                     	testq	%rbx, %rbx
+     9fa: 74 1e                        	je	0xa1a <trace_ret_dup+0xa1a>
+     9fc: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     a01: 48 89 df                     	movq	%rbx, %rdi
+     a04: e8 00 00 00 00               	callq	0xa09 <trace_ret_dup+0xa09>
+		0000000000000a05:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     a09: 48 85 c0                     	testq	%rax, %rax
+     a0c: 74 0c                        	je	0xa1a <trace_ret_dup+0xa1a>
+     a0e: 48 8b 28                     	movq	(%rax), %rbp
+     a11: 4c 8b 68 08                  	movq	0x8(%rax), %r13
+     a15: 49 f7 d5                     	notq	%r13
+     a18: eb 02                        	jmp	0xa1c <trace_ret_dup+0xa1c>
+     a1a: 31 ed                        	xorl	%ebp, %ebp
+     a1c: 48 8b 94 24 80 00 00 00      	movq	0x80(%rsp), %rdx
+     a24: 48 8b 74 24 70               	movq	0x70(%rsp), %rsi
+     a29: 48 8b 44 24 10               	movq	0x10(%rsp), %rax
+     a2e: 48 ff ce                     	decq	%rsi
+     a31: 48 39 c6                     	cmpq	%rax, %rsi
+     a34: 72 16                        	jb	0xa4c <trace_ret_dup+0xa4c>
+     a36: 48 83 fa ff                  	cmpq	$-0x1, %rdx
+     a3a: 74 05                        	je	0xa41 <trace_ret_dup+0xa41>
+     a3c: 48 39 d0                     	cmpq	%rdx, %rax
+     a3f: 76 0b                        	jbe	0xa4c <trace_ret_dup+0xa4c>
+     a41: 4c 23 ac 24 a8 00 00 00      	andq	0xa8(%rsp), %r13
+     a49: 4c 09 ed                     	orq	%r13, %rbp
+     a4c: 41 8b 46 28                  	movl	0x28(%r14), %eax
+     a50: 48 89 44 24 10               	movq	%rax, 0x10(%rsp)
+     a55: 49 c7 c5 ff ff ff ff         	movq	$-0x1, %r13
+     a5c: 48 85 db                     	testq	%rbx, %rbx
+     a5f: 74 51                        	je	0xab2 <trace_ret_dup+0xab2>
+     a61: 48 89 74 24 70               	movq	%rsi, 0x70(%rsp)
+     a66: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     a6b: 48 89 df                     	movq	%rbx, %rdi
+     a6e: e8 00 00 00 00               	callq	0xa73 <trace_ret_dup+0xa73>
+		0000000000000a6f:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     a73: 48 85 c0                     	testq	%rax, %rax
+     a76: 74 4b                        	je	0xac3 <trace_ret_dup+0xac3>
+     a78: 48 8b 08                     	movq	(%rax), %rcx
+     a7b: 4c 8b 68 08                  	movq	0x8(%rax), %r13
+     a7f: 49 f7 d5                     	notq	%r13
+     a82: eb 41                        	jmp	0xac5 <trace_ret_dup+0xac5>
+     a84: 49 c7 c4 ff ff ff ff         	movq	$-0x1, %r12
+     a8b: 49 8b 86 58 7e 00 00         	movq	0x7e58(%r14), %rax
+     a92: 48 85 c0                     	testq	%rax, %rax
+     a95: 0f 85 7c fe ff ff            	jne	0x917 <trace_ret_dup+0x917>
+     a9b: e9 96 fe ff ff               	jmp	0x936 <trace_ret_dup+0x936>
+     aa0: 48 89 d5                     	movq	%rdx, %rbp
+     aa3: 49 83 be 18 7e 00 00 00      	cmpq	$0x0, 0x7e18(%r14)
+     aab: 75 64                        	jne	0xb11 <trace_ret_dup+0xb11>
+     aad: e9 0e 01 00 00               	jmp	0xbc0 <trace_ret_dup+0xbc0>
+     ab2: 31 c9                        	xorl	%ecx, %ecx
+     ab4: 49 f7 d7                     	notq	%r15
+     ab7: 48 8b 44 24 10               	movq	0x10(%rsp), %rax
+     abc: 48 39 c6                     	cmpq	%rax, %rsi
+     abf: 73 1e                        	jae	0xadf <trace_ret_dup+0xadf>
+     ac1: eb 32                        	jmp	0xaf5 <trace_ret_dup+0xaf5>
+     ac3: 31 c9                        	xorl	%ecx, %ecx
+     ac5: 48 8b 94 24 80 00 00 00      	movq	0x80(%rsp), %rdx
+     acd: 48 8b 74 24 70               	movq	0x70(%rsp), %rsi
+     ad2: 49 f7 d7                     	notq	%r15
+     ad5: 48 8b 44 24 10               	movq	0x10(%rsp), %rax
+     ada: 48 39 c6                     	cmpq	%rax, %rsi
+     add: 72 16                        	jb	0xaf5 <trace_ret_dup+0xaf5>
+     adf: 48 83 fa ff                  	cmpq	$-0x1, %rdx
+     ae3: 74 05                        	je	0xaea <trace_ret_dup+0xaea>
+     ae5: 48 39 d0                     	cmpq	%rdx, %rax
+     ae8: 76 0b                        	jbe	0xaf5 <trace_ret_dup+0xaf5>
+     aea: 4c 23 ac 24 a8 00 00 00      	andq	0xa8(%rsp), %r13
+     af2: 4c 09 e9                     	orq	%r13, %rcx
+     af5: 4c 09 fd                     	orq	%r15, %rbp
+     af8: 48 09 cd                     	orq	%rcx, %rbp
+     afb: 49 21 ec                     	andq	%rbp, %r12
+     afe: 48 8b 6c 24 08               	movq	0x8(%rsp), %rbp
+     b03: 49 83 be 18 7e 00 00 00      	cmpq	$0x0, 0x7e18(%r14)
+     b0b: 0f 84 af 00 00 00            	je	0xbc0 <trace_ret_dup+0xbc0>
+     b11: e8 00 00 00 00               	callq	0xb16 <trace_ret_dup+0xb16>
+		0000000000000b12:  R_X86_64_PLT32	bpf_get_current_uid_gid-0x4
+     b16: 41 89 46 30                  	movl	%eax, 0x30(%r14)
+     b1a: 49 8b 9e 18 7e 00 00         	movq	0x7e18(%r14), %rbx
+     b21: 49 8b 86 88 7e 00 00         	movq	0x7e88(%r14), %rax
+     b28: 48 89 44 24 70               	movq	%rax, 0x70(%rsp)
+     b2d: 49 8b ae f8 7e 00 00         	movq	0x7ef8(%r14), %rbp
+     b34: 4d 8b ae 00 7f 00 00         	movq	0x7f00(%r14), %r13
+     b3b: 0f b7 44 24 68               	movzwl	0x68(%rsp), %eax
+     b40: 66 89 44 24 10               	movw	%ax, 0x10(%rsp)
+     b45: 48 8d 3d 00 00 00 00         	leaq	(%rip), %rdi            # 0xb4c <trace_ret_dup+0xb4c>
+		0000000000000b48:  R_X86_64_PC32	uid_filter_version-0x4
+     b4c: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     b51: e8 00 00 00 00               	callq	0xb56 <trace_ret_dup+0xb56>
+		0000000000000b52:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     b56: 41 8b 4e 30                  	movl	0x30(%r14), %ecx
+     b5a: 48 89 4c 24 10               	movq	%rcx, 0x10(%rsp)
+     b5f: 49 c7 c7 ff ff ff ff         	movq	$-0x1, %r15
+     b66: 48 85 c0                     	testq	%rax, %rax
+     b69: 74 1e                        	je	0xb89 <trace_ret_dup+0xb89>
+     b6b: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     b70: 48 89 c7                     	movq	%rax, %rdi
+     b73: e8 00 00 00 00               	callq	0xb78 <trace_ret_dup+0xb78>
+		0000000000000b74:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     b78: 48 85 c0                     	testq	%rax, %rax
+     b7b: 74 0c                        	je	0xb89 <trace_ret_dup+0xb89>
+     b7d: 48 8b 08                     	movq	(%rax), %rcx
+     b80: 4c 8b 78 08                  	movq	0x8(%rax), %r15
+     b84: 49 f7 d7                     	notq	%r15
+     b87: eb 02                        	jmp	0xb8b <trace_ret_dup+0xb8b>
+     b89: 31 c9                        	xorl	%ecx, %ecx
+     b8b: 48 f7 d3                     	notq	%rbx
+     b8e: 48 8b 44 24 10               	movq	0x10(%rsp), %rax
+     b93: 48 ff cd                     	decq	%rbp
+     b96: 48 39 c5                     	cmpq	%rax, %rbp
+     b99: 73 07                        	jae	0xba2 <trace_ret_dup+0xba2>
+     b9b: 48 8b 6c 24 08               	movq	0x8(%rsp), %rbp
+     ba0: eb 18                        	jmp	0xbba <trace_ret_dup+0xbba>
+     ba2: 49 83 fd ff                  	cmpq	$-0x1, %r13
+     ba6: 48 8b 6c 24 08               	movq	0x8(%rsp), %rbp
+     bab: 74 05                        	je	0xbb2 <trace_ret_dup+0xbb2>
+     bad: 4c 39 e8                     	cmpq	%r13, %rax
+     bb0: 76 08                        	jbe	0xbba <trace_ret_dup+0xbba>
+     bb2: 4c 23 7c 24 70               	andq	0x70(%rsp), %r15
+     bb7: 4c 09 f9                     	orq	%r15, %rcx
+     bba: 48 09 d9                     	orq	%rbx, %rcx
+     bbd: 49 21 cc                     	andq	%rcx, %r12
+     bc0: 49 83 be 28 7e 00 00 00      	cmpq	$0x0, 0x7e28(%r14)
+     bc8: 0f 84 b2 00 00 00            	je	0xc80 <trace_ret_dup+0xc80>
+     bce: ba 90 00 00 00               	movl	$0x90, %edx
+     bd3: 49 03 96 d0 7d 00 00         	addq	0x7dd0(%r14), %rdx
+     bda: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     bdf: be 08 00 00 00               	movl	$0x8, %esi
+     be4: e8 00 00 00 00               	callq	0xbe9 <trace_ret_dup+0xbe9>
+		0000000000000be5:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     be9: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+     bee: 48 83 c2 10                  	addq	$0x10, %rdx
+     bf2: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     bf7: be 08 00 00 00               	movl	$0x8, %esi
+     bfc: e8 00 00 00 00               	callq	0xc01 <trace_ret_dup+0xc01>
+		0000000000000bfd:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     c01: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+     c06: 48 8d 7c 24 60               	leaq	0x60(%rsp), %rdi
+     c0b: be 04 00 00 00               	movl	$0x4, %esi
+     c10: e8 00 00 00 00               	callq	0xc15 <trace_ret_dup+0xc15>
+		0000000000000c11:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     c15: 8b 44 24 60                  	movl	0x60(%rsp), %eax
+     c19: 41 89 46 34                  	movl	%eax, 0x34(%r14)
+     c1d: 49 8b 9e 28 7e 00 00         	movq	0x7e28(%r14), %rbx
+     c24: 4d 8b be 98 7e 00 00         	movq	0x7e98(%r14), %r15
+     c2b: 48 f7 d3                     	notq	%rbx
+     c2e: 0f b7 44 24 68               	movzwl	0x68(%rsp), %eax
+     c33: 66 89 44 24 10               	movw	%ax, 0x10(%rsp)
+     c38: 48 8d 3d 00 00 00 00         	leaq	(%rip), %rdi            # 0xc3f <trace_ret_dup+0xc3f>
+		0000000000000c3b:  R_X86_64_PC32	mnt_ns_filter_version-0x4
+     c3f: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     c44: e8 00 00 00 00               	callq	0xc49 <trace_ret_dup+0xc49>
+		0000000000000c45:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     c49: 49 c7 c5 ff ff ff ff         	movq	$-0x1, %r13
+     c50: 48 85 c0                     	testq	%rax, %rax
+     c53: 74 1d                        	je	0xc72 <trace_ret_dup+0xc72>
+     c55: 49 8d 76 34                  	leaq	0x34(%r14), %rsi
+     c59: 48 89 c7                     	movq	%rax, %rdi
+     c5c: e8 00 00 00 00               	callq	0xc61 <trace_ret_dup+0xc61>
+		0000000000000c5d:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     c61: 48 85 c0                     	testq	%rax, %rax
+     c64: 74 0c                        	je	0xc72 <trace_ret_dup+0xc72>
+     c66: 48 8b 08                     	movq	(%rax), %rcx
+     c69: 4c 8b 68 08                  	movq	0x8(%rax), %r13
+     c6d: 49 f7 d5                     	notq	%r13
+     c70: eb 02                        	jmp	0xc74 <trace_ret_dup+0xc74>
+     c72: 31 c9                        	xorl	%ecx, %ecx
+     c74: 48 09 cb                     	orq	%rcx, %rbx
+     c77: 4d 21 fd                     	andq	%r15, %r13
+     c7a: 49 09 dd                     	orq	%rbx, %r13
+     c7d: 4d 21 ec                     	andq	%r13, %r12
+     c80: 49 83 be 30 7e 00 00 00      	cmpq	$0x0, 0x7e30(%r14)
+     c88: 0f 84 d3 00 00 00            	je	0xd61 <trace_ret_dup+0xd61>
+     c8e: 49 8b 96 d0 7d 00 00         	movq	0x7dd0(%r14), %rdx
+     c95: 48 83 c2 30                  	addq	$0x30, %rdx
+     c99: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     c9e: be 08 00 00 00               	movl	$0x8, %esi
+     ca3: e8 00 00 00 00               	callq	0xca8 <trace_ret_dup+0xca8>
+		0000000000000ca4:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     ca8: 48 8b 5c 24 10               	movq	0x10(%rsp), %rbx
+     cad: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     cb2: be 04 00 00 00               	movl	$0x4, %esi
+     cb7: 48 89 da                     	movq	%rbx, %rdx
+     cba: e8 00 00 00 00               	callq	0xcbf <trace_ret_dup+0xcbf>
+		0000000000000cbb:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     cbf: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+     cc3: 48 c1 e0 04                  	shlq	$0x4, %rax
+     cc7: 48 8d 14 03                  	leaq	(%rbx,%rax), %rdx
+     ccb: 48 83 c2 10                  	addq	$0x10, %rdx
+     ccf: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     cd4: be 08 00 00 00               	movl	$0x8, %esi
+     cd9: e8 00 00 00 00               	callq	0xcde <trace_ret_dup+0xcde>
+		0000000000000cda:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     cde: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+     ce3: 48 83 c2 0c                  	addq	$0xc, %rdx
+     ce7: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     cec: be 04 00 00 00               	movl	$0x4, %esi
+     cf1: e8 00 00 00 00               	callq	0xcf6 <trace_ret_dup+0xcf6>
+		0000000000000cf2:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     cf6: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+     cfa: 41 89 46 38                  	movl	%eax, 0x38(%r14)
+     cfe: 49 8b 9e 30 7e 00 00         	movq	0x7e30(%r14), %rbx
+     d05: 4d 8b be a0 7e 00 00         	movq	0x7ea0(%r14), %r15
+     d0c: 48 f7 d3                     	notq	%rbx
+     d0f: 0f b7 44 24 68               	movzwl	0x68(%rsp), %eax
+     d14: 66 89 44 24 10               	movw	%ax, 0x10(%rsp)
+     d19: 48 8d 3d 00 00 00 00         	leaq	(%rip), %rdi            # 0xd20 <trace_ret_dup+0xd20>
+		0000000000000d1c:  R_X86_64_PC32	pid_ns_filter_version-0x4
+     d20: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     d25: e8 00 00 00 00               	callq	0xd2a <trace_ret_dup+0xd2a>
+		0000000000000d26:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     d2a: 49 c7 c5 ff ff ff ff         	movq	$-0x1, %r13
+     d31: 48 85 c0                     	testq	%rax, %rax
+     d34: 74 1d                        	je	0xd53 <trace_ret_dup+0xd53>
+     d36: 49 8d 76 38                  	leaq	0x38(%r14), %rsi
+     d3a: 48 89 c7                     	movq	%rax, %rdi
+     d3d: e8 00 00 00 00               	callq	0xd42 <trace_ret_dup+0xd42>
+		0000000000000d3e:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     d42: 48 85 c0                     	testq	%rax, %rax
+     d45: 74 0c                        	je	0xd53 <trace_ret_dup+0xd53>
+     d47: 48 8b 08                     	movq	(%rax), %rcx
+     d4a: 4c 8b 68 08                  	movq	0x8(%rax), %r13
+     d4e: 49 f7 d5                     	notq	%r13
+     d51: eb 02                        	jmp	0xd55 <trace_ret_dup+0xd55>
+     d53: 31 c9                        	xorl	%ecx, %ecx
+     d55: 48 09 cb                     	orq	%rcx, %rbx
+     d58: 4d 21 fd                     	andq	%r15, %r13
+     d5b: 49 09 dd                     	orq	%rbx, %r13
+     d5e: 4d 21 ec                     	andq	%r13, %r12
+     d61: 49 83 be 38 7e 00 00 00      	cmpq	$0x0, 0x7e38(%r14)
+     d69: 0f 84 c1 00 00 00            	je	0xe30 <trace_ret_dup+0xe30>
+     d6f: ba 90 00 00 00               	movl	$0x90, %edx
+     d74: 49 03 96 d0 7d 00 00         	addq	0x7dd0(%r14), %rdx
+     d7b: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     d80: be 08 00 00 00               	movl	$0x8, %esi
+     d85: e8 00 00 00 00               	callq	0xd8a <trace_ret_dup+0xd8a>
+		0000000000000d86:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     d8a: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+     d8f: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+     d94: be 08 00 00 00               	movl	$0x8, %esi
+     d99: e8 00 00 00 00               	callq	0xd9e <trace_ret_dup+0xd9e>
+		0000000000000d9a:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     d9e: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+     da3: 4c 8d 7c 24 10               	leaq	0x10(%rsp), %r15
+     da8: 4c 89 ff                     	movq	%r15, %rdi
+     dab: be 41 00 00 00               	movl	$0x41, %esi
+     db0: e8 00 00 00 00               	callq	0xdb5 <trace_ret_dup+0xdb5>
+		0000000000000db1:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+     db5: 49 8d 5e 4c                  	leaq	0x4c(%r14), %rbx
+     db9: 48 89 df                     	movq	%rbx, %rdi
+     dbc: be 10 00 00 00               	movl	$0x10, %esi
+     dc1: 4c 89 fa                     	movq	%r15, %rdx
+     dc4: e8 00 00 00 00               	callq	0xdc9 <trace_ret_dup+0xdc9>
+		0000000000000dc5:  R_X86_64_PLT32	bpf_probe_read_kernel_str-0x4
+     dc9: 4d 8b be 38 7e 00 00         	movq	0x7e38(%r14), %r15
+     dd0: 4d 8b ae a8 7e 00 00         	movq	0x7ea8(%r14), %r13
+     dd7: 49 f7 d7                     	notq	%r15
+     dda: 0f b7 44 24 68               	movzwl	0x68(%rsp), %eax
+     ddf: 66 89 44 24 10               	movw	%ax, 0x10(%rsp)
+     de4: 48 8d 3d 00 00 00 00         	leaq	(%rip), %rdi            # 0xdeb <trace_ret_dup+0xdeb>
+		0000000000000de7:  R_X86_64_PC32	uts_ns_filter_version-0x4
+     deb: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     df0: e8 00 00 00 00               	callq	0xdf5 <trace_ret_dup+0xdf5>
+		0000000000000df1:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     df5: 48 c7 c5 ff ff ff ff         	movq	$-0x1, %rbp
+     dfc: 48 85 c0                     	testq	%rax, %rax
+     dff: 74 1c                        	je	0xe1d <trace_ret_dup+0xe1d>
+     e01: 48 89 c7                     	movq	%rax, %rdi
+     e04: 48 89 de                     	movq	%rbx, %rsi
+     e07: e8 00 00 00 00               	callq	0xe0c <trace_ret_dup+0xe0c>
+		0000000000000e08:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     e0c: 48 85 c0                     	testq	%rax, %rax
+     e0f: 74 0c                        	je	0xe1d <trace_ret_dup+0xe1d>
+     e11: 48 8b 08                     	movq	(%rax), %rcx
+     e14: 48 8b 68 08                  	movq	0x8(%rax), %rbp
+     e18: 48 f7 d5                     	notq	%rbp
+     e1b: eb 02                        	jmp	0xe1f <trace_ret_dup+0xe1f>
+     e1d: 31 c9                        	xorl	%ecx, %ecx
+     e1f: 49 09 cf                     	orq	%rcx, %r15
+     e22: 4c 21 ed                     	andq	%r13, %rbp
+     e25: 4c 09 fd                     	orq	%r15, %rbp
+     e28: 49 21 ec                     	andq	%rbp, %r12
+     e2b: 48 8b 6c 24 08               	movq	0x8(%rsp), %rbp
+     e30: 49 83 be 40 7e 00 00 00      	cmpq	$0x0, 0x7e40(%r14)
+     e38: 74 78                        	je	0xeb2 <trace_ret_dup+0xeb2>
+     e3a: 49 8d 5e 3c                  	leaq	0x3c(%r14), %rbx
+     e3e: 48 89 df                     	movq	%rbx, %rdi
+     e41: be 10 00 00 00               	movl	$0x10, %esi
+     e46: e8 00 00 00 00               	callq	0xe4b <trace_ret_dup+0xe4b>
+		0000000000000e47:  R_X86_64_PLT32	bpf_get_current_comm-0x4
+     e4b: 4d 8b be 40 7e 00 00         	movq	0x7e40(%r14), %r15
+     e52: 4d 8b ae b0 7e 00 00         	movq	0x7eb0(%r14), %r13
+     e59: 49 f7 d7                     	notq	%r15
+     e5c: 0f b7 44 24 68               	movzwl	0x68(%rsp), %eax
+     e61: 66 89 44 24 10               	movw	%ax, 0x10(%rsp)
+     e66: 48 8d 3d 00 00 00 00         	leaq	(%rip), %rdi            # 0xe6d <trace_ret_dup+0xe6d>
+		0000000000000e69:  R_X86_64_PC32	comm_filter_version-0x4
+     e6d: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     e72: e8 00 00 00 00               	callq	0xe77 <trace_ret_dup+0xe77>
+		0000000000000e73:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     e77: 48 c7 c5 ff ff ff ff         	movq	$-0x1, %rbp
+     e7e: 48 85 c0                     	testq	%rax, %rax
+     e81: 74 1c                        	je	0xe9f <trace_ret_dup+0xe9f>
+     e83: 48 89 c7                     	movq	%rax, %rdi
+     e86: 48 89 de                     	movq	%rbx, %rsi
+     e89: e8 00 00 00 00               	callq	0xe8e <trace_ret_dup+0xe8e>
+		0000000000000e8a:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     e8e: 48 85 c0                     	testq	%rax, %rax
+     e91: 74 0c                        	je	0xe9f <trace_ret_dup+0xe9f>
+     e93: 48 8b 08                     	movq	(%rax), %rcx
+     e96: 48 8b 68 08                  	movq	0x8(%rax), %rbp
+     e9a: 48 f7 d5                     	notq	%rbp
+     e9d: eb 02                        	jmp	0xea1 <trace_ret_dup+0xea1>
+     e9f: 31 c9                        	xorl	%ecx, %ecx
+     ea1: 49 09 cf                     	orq	%rcx, %r15
+     ea4: 4c 21 ed                     	andq	%r13, %rbp
+     ea7: 4c 09 fd                     	orq	%r15, %rbp
+     eaa: 49 21 ec                     	andq	%rbp, %r12
+     ead: 48 8b 6c 24 08               	movq	0x8(%rsp), %rbp
+     eb2: 49 8b 9e 48 7e 00 00         	movq	0x7e48(%r14), %rbx
+     eb9: 48 85 db                     	testq	%rbx, %rbx
+     ebc: 74 65                        	je	0xf23 <trace_ret_dup+0xf23>
+     ebe: 41 8b 46 10                  	movl	0x10(%r14), %eax
+     ec2: 89 44 24 10                  	movl	%eax, 0x10(%rsp)
+     ec6: 4d 8b be b8 7e 00 00         	movq	0x7eb8(%r14), %r15
+     ecd: 48 f7 d3                     	notq	%rbx
+     ed0: 0f b7 44 24 68               	movzwl	0x68(%rsp), %eax
+     ed5: 66 89 44 24 60               	movw	%ax, 0x60(%rsp)
+     eda: 48 8d 3d 00 00 00 00         	leaq	(%rip), %rdi            # 0xee1 <trace_ret_dup+0xee1>
+		0000000000000edd:  R_X86_64_PC32	cgroup_id_filter_version-0x4
+     ee1: 48 8d 74 24 60               	leaq	0x60(%rsp), %rsi
+     ee6: e8 00 00 00 00               	callq	0xeeb <trace_ret_dup+0xeeb>
+		0000000000000ee7:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     eeb: 49 c7 c5 ff ff ff ff         	movq	$-0x1, %r13
+     ef2: 48 85 c0                     	testq	%rax, %rax
+     ef5: 74 1e                        	je	0xf15 <trace_ret_dup+0xf15>
+     ef7: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     efc: 48 89 c7                     	movq	%rax, %rdi
+     eff: e8 00 00 00 00               	callq	0xf04 <trace_ret_dup+0xf04>
+		0000000000000f00:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     f04: 48 85 c0                     	testq	%rax, %rax
+     f07: 74 0c                        	je	0xf15 <trace_ret_dup+0xf15>
+     f09: 48 8b 08                     	movq	(%rax), %rcx
+     f0c: 4c 8b 68 08                  	movq	0x8(%rax), %r13
+     f10: 49 f7 d5                     	notq	%r13
+     f13: eb 02                        	jmp	0xf17 <trace_ret_dup+0xf17>
+     f15: 31 c9                        	xorl	%ecx, %ecx
+     f17: 48 09 cb                     	orq	%rcx, %rbx
+     f1a: 4d 21 fd                     	andq	%r15, %r13
+     f1d: 49 09 dd                     	orq	%rbx, %r13
+     f20: 4d 21 ec                     	andq	%r13, %r12
+     f23: 49 8b 9e 70 7e 00 00         	movq	0x7e70(%r14), %rbx
+     f2a: 48 85 db                     	testq	%rbx, %rbx
+     f2d: 74 5c                        	je	0xf8b <trace_ret_dup+0xf8b>
+     f2f: 4d 8b be e0 7e 00 00         	movq	0x7ee0(%r14), %r15
+     f36: 48 f7 d3                     	notq	%rbx
+     f39: 0f b7 44 24 68               	movzwl	0x68(%rsp), %eax
+     f3e: 66 89 44 24 10               	movw	%ax, 0x10(%rsp)
+     f43: 48 8d 3d 00 00 00 00         	leaq	(%rip), %rdi            # 0xf4a <trace_ret_dup+0xf4a>
+		0000000000000f46:  R_X86_64_PC32	process_tree_map_version-0x4
+     f4a: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     f4f: e8 00 00 00 00               	callq	0xf54 <trace_ret_dup+0xf54>
+		0000000000000f50:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     f54: 49 c7 c5 ff ff ff ff         	movq	$-0x1, %r13
+     f5b: 48 85 c0                     	testq	%rax, %rax
+     f5e: 74 1d                        	je	0xf7d <trace_ret_dup+0xf7d>
+     f60: 49 8d 76 24                  	leaq	0x24(%r14), %rsi
+     f64: 48 89 c7                     	movq	%rax, %rdi
+     f67: e8 00 00 00 00               	callq	0xf6c <trace_ret_dup+0xf6c>
+		0000000000000f68:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     f6c: 48 85 c0                     	testq	%rax, %rax
+     f6f: 74 0c                        	je	0xf7d <trace_ret_dup+0xf7d>
+     f71: 48 8b 08                     	movq	(%rax), %rcx
+     f74: 4c 8b 68 08                  	movq	0x8(%rax), %r13
+     f78: 49 f7 d5                     	notq	%r13
+     f7b: eb 02                        	jmp	0xf7f <trace_ret_dup+0xf7f>
+     f7d: 31 c9                        	xorl	%ecx, %ecx
+     f7f: 48 09 cb                     	orq	%rcx, %rbx
+     f82: 4d 21 fd                     	andq	%r15, %r13
+     f85: 49 09 dd                     	orq	%rbx, %r13
+     f88: 4d 21 ec                     	andq	%r13, %r12
+     f8b: 4d 8b be 78 7e 00 00         	movq	0x7e78(%r14), %r15
+     f92: 4d 85 ff                     	testq	%r15, %r15
+     f95: 0f 84 85 00 00 00            	je	0x1020 <trace_ret_dup+0x1020>
+     f9b: 4d 8b ae e8 7e 00 00         	movq	0x7ee8(%r14), %r13
+     fa2: 49 f7 d7                     	notq	%r15
+     fa5: 0f b7 44 24 68               	movzwl	0x68(%rsp), %eax
+     faa: 66 89 44 24 10               	movw	%ax, 0x10(%rsp)
+     faf: 48 8d 3d 00 00 00 00         	leaq	(%rip), %rdi            # 0xfb6 <trace_ret_dup+0xfb6>
+		0000000000000fb2:  R_X86_64_PC32	binary_filter_version-0x4
+     fb6: 48 8d 74 24 10               	leaq	0x10(%rsp), %rsi
+     fbb: e8 00 00 00 00               	callq	0xfc0 <trace_ret_dup+0xfc0>
+		0000000000000fbc:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     fc0: 48 c7 c5 ff ff ff ff         	movq	$-0x1, %rbp
+     fc7: 48 85 c0                     	testq	%rax, %rax
+     fca: 74 41                        	je	0x100d <trace_ret_dup+0x100d>
+     fcc: 48 89 c3                     	movq	%rax, %rbx
+     fcf: 48 8b 84 24 88 00 00 00      	movq	0x88(%rsp), %rax
+     fd7: 48 8d 70 14                  	leaq	0x14(%rax), %rsi
+     fdb: 48 89 df                     	movq	%rbx, %rdi
+     fde: e8 00 00 00 00               	callq	0xfe3 <trace_ret_dup+0xfe3>
+		0000000000000fdf:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     fe3: 48 85 c0                     	testq	%rax, %rax
+     fe6: 75 19                        	jne	0x1001 <trace_ret_dup+0x1001>
+     fe8: 48 8b 84 24 88 00 00 00      	movq	0x88(%rsp), %rax
+     ff0: 48 8d 70 10                  	leaq	0x10(%rax), %rsi
+     ff4: 48 89 df                     	movq	%rbx, %rdi
+     ff7: e8 00 00 00 00               	callq	0xffc <trace_ret_dup+0xffc>
+		0000000000000ff8:  R_X86_64_PLT32	bpf_map_lookup_elem-0x4
+     ffc: 48 85 c0                     	testq	%rax, %rax
+     fff: 74 0c                        	je	0x100d <trace_ret_dup+0x100d>
+    1001: 48 8b 08                     	movq	(%rax), %rcx
+    1004: 48 8b 68 08                  	movq	0x8(%rax), %rbp
+    1008: 48 f7 d5                     	notq	%rbp
+    100b: eb 02                        	jmp	0x100f <trace_ret_dup+0x100f>
+    100d: 31 c9                        	xorl	%ecx, %ecx
+    100f: 4c 09 f9                     	orq	%r15, %rcx
+    1012: 4c 21 ed                     	andq	%r13, %rbp
+    1015: 48 09 cd                     	orq	%rcx, %rbp
+    1018: 49 21 ec                     	andq	%rbp, %r12
+    101b: 48 8b 6c 24 08               	movq	0x8(%rsp), %rbp
+    1020: 49 8b 86 80 7e 00 00         	movq	0x7e80(%r14), %rax
+    1027: 48 85 c0                     	testq	%rax, %rax
+    102a: 4c 8b bc 24 a0 00 00 00      	movq	0xa0(%rsp), %r15
+    1032: 74 0f                        	je	0x1043 <trace_ret_dup+0x1043>
+    1034: 48 8b 8c 24 88 00 00 00      	movq	0x88(%rsp), %rcx
+    103c: 48 23 41 08                  	andq	0x8(%rcx), %rax
+    1040: 49 09 c4                     	orq	%rax, %r12
+    1043: 4d 23 a6 f0 7e 00 00         	andq	0x7ef0(%r14), %r12
+    104a: 49 8b 86 80 00 00 00         	movq	0x80(%r14), %rax
+    1051: 4c 21 e0                     	andq	%r12, %rax
+    1054: 49 89 86 80 00 00 00         	movq	%rax, 0x80(%r14)
+    105b: 0f 84 43 10 00 00            	je	0x20a4 <trace_ret_dup+0x20a4>
+    1061: 49 8b 47 50                  	movq	0x50(%r15), %rax
+    1065: 48 89 85 a8 00 00 00         	movq	%rax, 0xa8(%rbp)
+    106c: 49 8b 8e e0 7d 00 00         	movq	0x7de0(%r14), %rcx
+    1073: 48 85 c9                     	testq	%rcx, %rcx
+    1076: 0f 84 7d 10 00 00            	je	0x20f9 <trace_ret_dup+0x20f9>
+    107c: 0f b6 c1                     	movzbl	%cl, %eax
+    107f: 83 f8 0f                     	cmpl	$0xf, %eax
+    1082: 0f 87 c7 01 00 00            	ja	0x124f <trace_ret_dup+0x124f>
+    1088: 85 c0                        	testl	%eax, %eax
+    108a: 0f 84 bf 01 00 00            	je	0x124f <trace_ret_dup+0x124f>
+    1090: 48 8d 5d 70                  	leaq	0x70(%rbp), %rbx
+    1094: 0f b6 f9                     	movzbl	%cl, %edi
+    1097: 89 f9                        	movl	%edi, %ecx
+    1099: 48 8d 15 00 00 00 00         	leaq	(%rip), %rdx            # 0x10a0 <trace_ret_dup+0x10a0>
+		000000000000109c:  R_X86_64_PC32	.rodata+0x74c
+    10a0: be 01 00 00 00               	movl	$0x1, %esi
+    10a5: c4 e2 c1 f7 f6               	shlxq	%rdi, %rsi, %rsi
+    10aa: 41 b8 80 a8 00 00            	movl	$0xa880, %r8d           # imm = 0xA880
+    10b0: 49 0f a3 f8                  	btq	%rdi, %r8
+    10b4: 73 03                        	jae	0x10b9 <trace_ret_dup+0x10b9>
+    10b6: 48 8b 1b                     	movq	(%rbx), %rbx
+    10b9: 44 8b 3c 8a                  	movl	(%rdx,%rcx,4), %r15d
+    10bd: f7 c6 7e 17 00 00            	testl	$0x177e, %esi           # imm = 0x177E
+    10c3: 74 26                        	je	0x10eb <trace_ret_dup+0x10eb>
+    10c5: 41 8d 47 91                  	leal	-0x6f(%r15), %eax
+    10c9: 83 f8 92                     	cmpl	$-0x6e, %eax
+    10cc: 0f 82 7d 01 00 00            	jb	0x124f <trace_ret_dup+0x124f>
+    10d2: 41 0f b7 8e 8a 7d 00 00      	movzwl	0x7d8a(%r14), %ecx
+    10da: 81 f9 ff 7c 00 00            	cmpl	$0x7cff, %ecx           # imm = 0x7CFF
+    10e0: 0f 86 23 01 00 00            	jbe	0x1209 <trace_ret_dup+0x1209>
+    10e6: e9 64 01 00 00               	jmp	0x124f <trace_ret_dup+0x124f>
+    10eb: bd 10 00 00 00               	movl	$0x10, %ebp
+    10f0: 83 f8 0f                     	cmpl	$0xf, %eax
+    10f3: 0f 84 f8 00 00 00            	je	0x11f1 <trace_ret_dup+0x11f1>
+    10f9: 83 f8 0d                     	cmpl	$0xd, %eax
+    10fc: 0f 84 98 00 00 00            	je	0x119a <trace_ret_dup+0x119a>
+    1102: 83 f8 0b                     	cmpl	$0xb, %eax
+    1105: 0f 85 ba 00 00 00            	jne	0x11c5 <trace_ret_dup+0x11c5>
+    110b: 41 0f b7 86 8a 7d 00 00      	movzwl	0x7d8a(%r14), %eax
+    1113: 48 3d ff 7c 00 00            	cmpq	$0x7cff, %rax           # imm = 0x7CFF
+    1119: 48 8b 6c 24 08               	movq	0x8(%rsp), %rbp
+    111e: 0f 87 2b 01 00 00            	ja	0x124f <trace_ret_dup+0x124f>
+    1124: 41 c6 84 06 89 00 00 00 00   	movb	$0x0, 0x89(%r14,%rax)
+    112d: 41 0f b7 86 8a 7d 00 00      	movzwl	0x7d8a(%r14), %eax
+    1135: 66 41 89 86 8c 7d 00 00      	movw	%ax, 0x7d8c(%r14)
+    113d: 48 3d fb 6c 00 00            	cmpq	$0x6cfb, %rax           # imm = 0x6CFB
+    1143: 0f 87 06 01 00 00            	ja	0x124f <trace_ret_dup+0x124f>
+    1149: 4a 8d 3c 30                  	leaq	(%rax,%r14), %rdi
+    114d: 48 81 c7 8e 00 00 00         	addq	$0x8e, %rdi
+    1154: be 00 10 00 00               	movl	$0x1000, %esi           # imm = 0x1000
+    1159: 48 89 da                     	movq	%rbx, %rdx
+    115c: e8 00 00 00 00               	callq	0x1161 <trace_ret_dup+0x1161>
+		000000000000115d:  R_X86_64_PLT32	bpf_probe_read_str-0x4
+    1161: 49 89 c4                     	movq	%rax, %r12
+    1164: 45 85 e4                     	testl	%r12d, %r12d
+    1167: 0f 8e e2 00 00 00            	jle	0x124f <trace_ret_dup+0x124f>
+    116d: 41 0f b7 86 8a 7d 00 00      	movzwl	0x7d8a(%r14), %eax
+    1175: 48 3d fb 6c 00 00            	cmpq	$0x6cfb, %rax           # imm = 0x6CFB
+    117b: 0f 87 ce 00 00 00            	ja	0x124f <trace_ret_dup+0x124f>
+    1181: 46 89 a4 30 8a 00 00 00      	movl	%r12d, 0x8a(%rax,%r14)
+    1189: 66 45 03 a6 8a 7d 00 00      	addw	0x7d8a(%r14), %r12w
+    1191: 41 83 c4 05                  	addl	$0x5, %r12d
+    1195: e9 a6 00 00 00               	jmp	0x1240 <trace_ret_dup+0x1240>
+    119a: 48 85 db                     	testq	%rbx, %rbx
+    119d: 74 30                        	je	0x11cf <trace_ret_dup+0x11cf>
+    119f: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    11a4: be 02 00 00 00               	movl	$0x2, %esi
+    11a9: 48 89 da                     	movq	%rbx, %rdx
+    11ac: e8 00 00 00 00               	callq	0x11b1 <trace_ret_dup+0x11b1>
+		00000000000011ad:  R_X86_64_PLT32	bpf_probe_read-0x4
+    11b1: 0f b7 44 24 10               	movzwl	0x10(%rsp), %eax
+    11b6: 83 f8 01                     	cmpl	$0x1, %eax
+    11b9: 74 31                        	je	0x11ec <trace_ret_dup+0x11ec>
+    11bb: 83 f8 0a                     	cmpl	$0xa, %eax
+    11be: 74 25                        	je	0x11e5 <trace_ret_dup+0x11e5>
+    11c0: 83 f8 02                     	cmpl	$0x2, %eax
+    11c3: 74 2c                        	je	0x11f1 <trace_ret_dup+0x11f1>
+    11c5: 48 8b 6c 24 08               	movq	0x8(%rsp), %rbp
+    11ca: e9 f6 fe ff ff               	jmp	0x10c5 <trace_ret_dup+0x10c5>
+    11cf: 66 c7 44 24 10 00 00         	movw	$0x0, 0x10(%rsp)
+    11d6: 48 8b 6c 24 08               	movq	0x8(%rsp), %rbp
+    11db: 48 8d 5c 24 10               	leaq	0x10(%rsp), %rbx
+    11e0: e9 e0 fe ff ff               	jmp	0x10c5 <trace_ret_dup+0x10c5>
+    11e5: bd 1c 00 00 00               	movl	$0x1c, %ebp
+    11ea: eb 05                        	jmp	0x11f1 <trace_ret_dup+0x11f1>
+    11ec: bd 6e 00 00 00               	movl	$0x6e, %ebp
+    11f1: 41 89 ef                     	movl	%ebp, %r15d
+    11f4: 48 8b 6c 24 08               	movq	0x8(%rsp), %rbp
+    11f9: 41 0f b7 8e 8a 7d 00 00      	movzwl	0x7d8a(%r14), %ecx
+    1201: 81 f9 ff 7c 00 00            	cmpl	$0x7cff, %ecx           # imm = 0x7CFF
+    1207: 77 46                        	ja	0x124f <trace_ret_dup+0x124f>
+    1209: 48 8d 41 01                  	leaq	0x1(%rcx), %rax
+    120d: 89 c9                        	movl	%ecx, %ecx
+    120f: 41 c6 84 0e 89 00 00 00 00   	movb	$0x0, 0x89(%r14,%rcx)
+    1218: 45 8d 24 07                  	leal	(%r15,%rax), %r12d
+    121c: 41 81 fc 00 7d 00 00         	cmpl	$0x7d00, %r12d          # imm = 0x7D00
+    1223: 77 2a                        	ja	0x124f <trace_ret_dup+0x124f>
+    1225: 49 8d 3c 06                  	leaq	(%r14,%rax), %rdi
+    1229: 48 81 c7 89 00 00 00         	addq	$0x89, %rdi
+    1230: 44 89 fe                     	movl	%r15d, %esi
+    1233: 48 89 da                     	movq	%rbx, %rdx
+    1236: e8 00 00 00 00               	callq	0x123b <trace_ret_dup+0x123b>
+		0000000000001237:  R_X86_64_PLT32	bpf_probe_read-0x4
+    123b: 48 85 c0                     	testq	%rax, %rax
+    123e: 78 0f                        	js	0x124f <trace_ret_dup+0x124f>
+    1240: 66 45 89 a6 8a 7d 00 00      	movw	%r12w, 0x7d8a(%r14)
+    1248: 41 fe 86 88 00 00 00         	incb	0x88(%r14)
+    124f: 49 8b 8e e0 7d 00 00         	movq	0x7de0(%r14), %rcx
+    1256: 48 c1 e9 08                  	shrq	$0x8, %rcx
+    125a: 0f b6 c1                     	movzbl	%cl, %eax
+    125d: 83 f8 0f                     	cmpl	$0xf, %eax
+    1260: 0f 87 ce 01 00 00            	ja	0x1434 <trace_ret_dup+0x1434>
+    1266: 85 c0                        	testl	%eax, %eax
+    1268: 0f 84 c6 01 00 00            	je	0x1434 <trace_ret_dup+0x1434>
+    126e: 0f b6 f9                     	movzbl	%cl, %edi
+    1271: 89 f9                        	movl	%edi, %ecx
+    1273: 48 8d 15 00 00 00 00         	leaq	(%rip), %rdx            # 0x127a <trace_ret_dup+0x127a>
+		0000000000001276:  R_X86_64_PC32	.rodata+0x74c
+    127a: be 01 00 00 00               	movl	$0x1, %esi
+    127f: c4 e2 c1 f7 f6               	shlxq	%rdi, %rsi, %rsi
+    1284: 48 8d 5d 78                  	leaq	0x78(%rbp), %rbx
+    1288: 41 b8 80 a8 00 00            	movl	$0xa880, %r8d           # imm = 0xA880
+    128e: 49 0f a3 f8                  	btq	%rdi, %r8
+    1292: 73 03                        	jae	0x1297 <trace_ret_dup+0x1297>
+    1294: 48 8b 1b                     	movq	(%rbx), %rbx
+    1297: 44 8b 3c 8a                  	movl	(%rdx,%rcx,4), %r15d
+    129b: f7 c6 7e 17 00 00            	testl	$0x177e, %esi           # imm = 0x177E
+    12a1: 74 26                        	je	0x12c9 <trace_ret_dup+0x12c9>
+    12a3: 41 8d 47 91                  	leal	-0x6f(%r15), %eax
+    12a7: 83 f8 92                     	cmpl	$-0x6e, %eax
+    12aa: 0f 82 84 01 00 00            	jb	0x1434 <trace_ret_dup+0x1434>
+    12b0: 41 0f b7 8e 8a 7d 00 00      	movzwl	0x7d8a(%r14), %ecx
+    12b8: 81 f9 ff 7c 00 00            	cmpl	$0x7cff, %ecx           # imm = 0x7CFF
+    12be: 0f 86 2a 01 00 00            	jbe	0x13ee <trace_ret_dup+0x13ee>
+    12c4: e9 6b 01 00 00               	jmp	0x1434 <trace_ret_dup+0x1434>
+    12c9: 83 f8 0b                     	cmpl	$0xb, %eax
+    12cc: 74 5c                        	je	0x132a <trace_ret_dup+0x132a>
+    12ce: bd 10 00 00 00               	movl	$0x10, %ebp
+    12d3: 83 f8 0f                     	cmpl	$0xf, %eax
+    12d6: 0f 84 fa 00 00 00            	je	0x13d6 <trace_ret_dup+0x13d6>
+    12dc: 83 f8 0d                     	cmpl	$0xd, %eax
+    12df: 0f 85 d8 00 00 00            	jne	0x13bd <trace_ret_dup+0x13bd>
+    12e5: 48 85 db                     	testq	%rbx, %rbx
+    12e8: 0f 84 c3 00 00 00            	je	0x13b1 <trace_ret_dup+0x13b1>
+    12ee: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    12f3: be 02 00 00 00               	movl	$0x2, %esi
+    12f8: 48 89 da                     	movq	%rbx, %rdx
+    12fb: e8 00 00 00 00               	callq	0x1300 <trace_ret_dup+0x1300>
+		00000000000012fc:  R_X86_64_PLT32	bpf_probe_read-0x4
+    1300: 0f b7 44 24 10               	movzwl	0x10(%rsp), %eax
+    1305: 83 f8 01                     	cmpl	$0x1, %eax
+    1308: 0f 84 c3 00 00 00            	je	0x13d1 <trace_ret_dup+0x13d1>
+    130e: 83 f8 02                     	cmpl	$0x2, %eax
+    1311: 0f 84 bf 00 00 00            	je	0x13d6 <trace_ret_dup+0x13d6>
+    1317: 83 f8 0a                     	cmpl	$0xa, %eax
+    131a: 0f 85 9d 00 00 00            	jne	0x13bd <trace_ret_dup+0x13bd>
+    1320: bd 1c 00 00 00               	movl	$0x1c, %ebp
+    1325: e9 ac 00 00 00               	jmp	0x13d6 <trace_ret_dup+0x13d6>
+    132a: 41 0f b7 86 8a 7d 00 00      	movzwl	0x7d8a(%r14), %eax
+    1332: 48 3d ff 7c 00 00            	cmpq	$0x7cff, %rax           # imm = 0x7CFF
+    1338: 0f 87 f6 00 00 00            	ja	0x1434 <trace_ret_dup+0x1434>
+    133e: 41 c6 84 06 89 00 00 00 01   	movb	$0x1, 0x89(%r14,%rax)
+    1347: 41 0f b7 86 8a 7d 00 00      	movzwl	0x7d8a(%r14), %eax
+    134f: 66 41 89 86 8e 7d 00 00      	movw	%ax, 0x7d8e(%r14)
+    1357: 48 3d fb 6c 00 00            	cmpq	$0x6cfb, %rax           # imm = 0x6CFB
+    135d: 0f 87 d1 00 00 00            	ja	0x1434 <trace_ret_dup+0x1434>
+    1363: 4a 8d 3c 30                  	leaq	(%rax,%r14), %rdi
+    1367: 48 81 c7 8e 00 00 00         	addq	$0x8e, %rdi
+    136e: be 00 10 00 00               	movl	$0x1000, %esi           # imm = 0x1000
+    1373: 48 89 da                     	movq	%rbx, %rdx
+    1376: e8 00 00 00 00               	callq	0x137b <trace_ret_dup+0x137b>
+		0000000000001377:  R_X86_64_PLT32	bpf_probe_read_str-0x4
+    137b: 49 89 c4                     	movq	%rax, %r12
+    137e: 45 85 e4                     	testl	%r12d, %r12d
+    1381: 0f 8e ad 00 00 00            	jle	0x1434 <trace_ret_dup+0x1434>
+    1387: 41 0f b7 86 8a 7d 00 00      	movzwl	0x7d8a(%r14), %eax
+    138f: 48 3d fb 6c 00 00            	cmpq	$0x6cfb, %rax           # imm = 0x6CFB
+    1395: 0f 87 99 00 00 00            	ja	0x1434 <trace_ret_dup+0x1434>
+    139b: 46 89 a4 30 8a 00 00 00      	movl	%r12d, 0x8a(%rax,%r14)
+    13a3: 66 45 03 a6 8a 7d 00 00      	addw	0x7d8a(%r14), %r12w
+    13ab: 41 83 c4 05                  	addl	$0x5, %r12d
+    13af: eb 74                        	jmp	0x1425 <trace_ret_dup+0x1425>
+    13b1: 66 c7 44 24 10 00 00         	movw	$0x0, 0x10(%rsp)
+    13b8: 48 8d 5c 24 10               	leaq	0x10(%rsp), %rbx
+    13bd: 48 8b 6c 24 08               	movq	0x8(%rsp), %rbp
+    13c2: 41 8d 47 91                  	leal	-0x6f(%r15), %eax
+    13c6: 83 f8 92                     	cmpl	$-0x6e, %eax
+    13c9: 0f 83 e1 fe ff ff            	jae	0x12b0 <trace_ret_dup+0x12b0>
+    13cf: eb 63                        	jmp	0x1434 <trace_ret_dup+0x1434>
+    13d1: bd 6e 00 00 00               	movl	$0x6e, %ebp
+    13d6: 41 89 ef                     	movl	%ebp, %r15d
+    13d9: 48 8b 6c 24 08               	movq	0x8(%rsp), %rbp
+    13de: 41 0f b7 8e 8a 7d 00 00      	movzwl	0x7d8a(%r14), %ecx
+    13e6: 81 f9 ff 7c 00 00            	cmpl	$0x7cff, %ecx           # imm = 0x7CFF
+    13ec: 77 46                        	ja	0x1434 <trace_ret_dup+0x1434>
+    13ee: 48 8d 41 01                  	leaq	0x1(%rcx), %rax
+    13f2: 89 c9                        	movl	%ecx, %ecx
+    13f4: 41 c6 84 0e 89 00 00 00 01   	movb	$0x1, 0x89(%r14,%rcx)
+    13fd: 45 8d 24 07                  	leal	(%r15,%rax), %r12d
+    1401: 41 81 fc 00 7d 00 00         	cmpl	$0x7d00, %r12d          # imm = 0x7D00
+    1408: 77 2a                        	ja	0x1434 <trace_ret_dup+0x1434>
+    140a: 49 8d 3c 06                  	leaq	(%r14,%rax), %rdi
+    140e: 48 81 c7 89 00 00 00         	addq	$0x89, %rdi
+    1415: 44 89 fe                     	movl	%r15d, %esi
+    1418: 48 89 da                     	movq	%rbx, %rdx
+    141b: e8 00 00 00 00               	callq	0x1420 <trace_ret_dup+0x1420>
+		000000000000141c:  R_X86_64_PLT32	bpf_probe_read-0x4
+    1420: 48 85 c0                     	testq	%rax, %rax
+    1423: 78 0f                        	js	0x1434 <trace_ret_dup+0x1434>
+    1425: 66 45 89 a6 8a 7d 00 00      	movw	%r12w, 0x7d8a(%r14)
+    142d: 41 fe 86 88 00 00 00         	incb	0x88(%r14)
+    1434: 49 8b 8e e0 7d 00 00         	movq	0x7de0(%r14), %rcx
+    143b: 48 c1 e9 10                  	shrq	$0x10, %rcx
+    143f: 0f b6 c1                     	movzbl	%cl, %eax
+    1442: 83 f8 0f                     	cmpl	$0xf, %eax
+    1445: 0f 87 d1 01 00 00            	ja	0x161c <trace_ret_dup+0x161c>
+    144b: 85 c0                        	testl	%eax, %eax
+    144d: 0f 84 c9 01 00 00            	je	0x161c <trace_ret_dup+0x161c>
+    1453: 0f b6 f9                     	movzbl	%cl, %edi
+    1456: 89 f9                        	movl	%edi, %ecx
+    1458: 48 8d 15 00 00 00 00         	leaq	(%rip), %rdx            # 0x145f <trace_ret_dup+0x145f>
+		000000000000145b:  R_X86_64_PC32	.rodata+0x74c
+    145f: be 01 00 00 00               	movl	$0x1, %esi
+    1464: c4 e2 c1 f7 f6               	shlxq	%rdi, %rsi, %rsi
+    1469: 48 8d 9d 80 00 00 00         	leaq	0x80(%rbp), %rbx
+    1470: 41 b8 80 a8 00 00            	movl	$0xa880, %r8d           # imm = 0xA880
+    1476: 49 0f a3 f8                  	btq	%rdi, %r8
+    147a: 73 03                        	jae	0x147f <trace_ret_dup+0x147f>
+    147c: 48 8b 1b                     	movq	(%rbx), %rbx
+    147f: 44 8b 3c 8a                  	movl	(%rdx,%rcx,4), %r15d
+    1483: f7 c6 7e 17 00 00            	testl	$0x177e, %esi           # imm = 0x177E
+    1489: 74 26                        	je	0x14b1 <trace_ret_dup+0x14b1>
+    148b: 41 8d 47 91                  	leal	-0x6f(%r15), %eax
+    148f: 83 f8 92                     	cmpl	$-0x6e, %eax
+    1492: 0f 82 84 01 00 00            	jb	0x161c <trace_ret_dup+0x161c>
+    1498: 41 0f b7 8e 8a 7d 00 00      	movzwl	0x7d8a(%r14), %ecx
+    14a0: 81 f9 ff 7c 00 00            	cmpl	$0x7cff, %ecx           # imm = 0x7CFF
+    14a6: 0f 86 2a 01 00 00            	jbe	0x15d6 <trace_ret_dup+0x15d6>
+    14ac: e9 6b 01 00 00               	jmp	0x161c <trace_ret_dup+0x161c>
+    14b1: 83 f8 0b                     	cmpl	$0xb, %eax
+    14b4: 74 5c                        	je	0x1512 <trace_ret_dup+0x1512>
+    14b6: bd 10 00 00 00               	movl	$0x10, %ebp
+    14bb: 83 f8 0f                     	cmpl	$0xf, %eax
+    14be: 0f 84 fa 00 00 00            	je	0x15be <trace_ret_dup+0x15be>
+    14c4: 83 f8 0d                     	cmpl	$0xd, %eax
+    14c7: 0f 85 d8 00 00 00            	jne	0x15a5 <trace_ret_dup+0x15a5>
+    14cd: 48 85 db                     	testq	%rbx, %rbx
+    14d0: 0f 84 c3 00 00 00            	je	0x1599 <trace_ret_dup+0x1599>
+    14d6: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    14db: be 02 00 00 00               	movl	$0x2, %esi
+    14e0: 48 89 da                     	movq	%rbx, %rdx
+    14e3: e8 00 00 00 00               	callq	0x14e8 <trace_ret_dup+0x14e8>
+		00000000000014e4:  R_X86_64_PLT32	bpf_probe_read-0x4
+    14e8: 0f b7 44 24 10               	movzwl	0x10(%rsp), %eax
+    14ed: 83 f8 01                     	cmpl	$0x1, %eax
+    14f0: 0f 84 c3 00 00 00            	je	0x15b9 <trace_ret_dup+0x15b9>
+    14f6: 83 f8 02                     	cmpl	$0x2, %eax
+    14f9: 0f 84 bf 00 00 00            	je	0x15be <trace_ret_dup+0x15be>
+    14ff: 83 f8 0a                     	cmpl	$0xa, %eax
+    1502: 0f 85 9d 00 00 00            	jne	0x15a5 <trace_ret_dup+0x15a5>
+    1508: bd 1c 00 00 00               	movl	$0x1c, %ebp
+    150d: e9 ac 00 00 00               	jmp	0x15be <trace_ret_dup+0x15be>
+    1512: 41 0f b7 86 8a 7d 00 00      	movzwl	0x7d8a(%r14), %eax
+    151a: 48 3d ff 7c 00 00            	cmpq	$0x7cff, %rax           # imm = 0x7CFF
+    1520: 0f 87 f6 00 00 00            	ja	0x161c <trace_ret_dup+0x161c>
+    1526: 41 c6 84 06 89 00 00 00 02   	movb	$0x2, 0x89(%r14,%rax)
+    152f: 41 0f b7 86 8a 7d 00 00      	movzwl	0x7d8a(%r14), %eax
+    1537: 66 41 89 86 90 7d 00 00      	movw	%ax, 0x7d90(%r14)
+    153f: 48 3d fb 6c 00 00            	cmpq	$0x6cfb, %rax           # imm = 0x6CFB
+    1545: 0f 87 d1 00 00 00            	ja	0x161c <trace_ret_dup+0x161c>
+    154b: 4a 8d 3c 30                  	leaq	(%rax,%r14), %rdi
+    154f: 48 81 c7 8e 00 00 00         	addq	$0x8e, %rdi
+    1556: be 00 10 00 00               	movl	$0x1000, %esi           # imm = 0x1000
+    155b: 48 89 da                     	movq	%rbx, %rdx
+    155e: e8 00 00 00 00               	callq	0x1563 <trace_ret_dup+0x1563>
+		000000000000155f:  R_X86_64_PLT32	bpf_probe_read_str-0x4
+    1563: 49 89 c4                     	movq	%rax, %r12
+    1566: 45 85 e4                     	testl	%r12d, %r12d
+    1569: 0f 8e ad 00 00 00            	jle	0x161c <trace_ret_dup+0x161c>
+    156f: 41 0f b7 86 8a 7d 00 00      	movzwl	0x7d8a(%r14), %eax
+    1577: 48 3d fb 6c 00 00            	cmpq	$0x6cfb, %rax           # imm = 0x6CFB
+    157d: 0f 87 99 00 00 00            	ja	0x161c <trace_ret_dup+0x161c>
+    1583: 46 89 a4 30 8a 00 00 00      	movl	%r12d, 0x8a(%rax,%r14)
+    158b: 66 45 03 a6 8a 7d 00 00      	addw	0x7d8a(%r14), %r12w
+    1593: 41 83 c4 05                  	addl	$0x5, %r12d
+    1597: eb 74                        	jmp	0x160d <trace_ret_dup+0x160d>
+    1599: 66 c7 44 24 10 00 00         	movw	$0x0, 0x10(%rsp)
+    15a0: 48 8d 5c 24 10               	leaq	0x10(%rsp), %rbx
+    15a5: 48 8b 6c 24 08               	movq	0x8(%rsp), %rbp
+    15aa: 41 8d 47 91                  	leal	-0x6f(%r15), %eax
+    15ae: 83 f8 92                     	cmpl	$-0x6e, %eax
+    15b1: 0f 83 e1 fe ff ff            	jae	0x1498 <trace_ret_dup+0x1498>
+    15b7: eb 63                        	jmp	0x161c <trace_ret_dup+0x161c>
+    15b9: bd 6e 00 00 00               	movl	$0x6e, %ebp
+    15be: 41 89 ef                     	movl	%ebp, %r15d
+    15c1: 48 8b 6c 24 08               	movq	0x8(%rsp), %rbp
+    15c6: 41 0f b7 8e 8a 7d 00 00      	movzwl	0x7d8a(%r14), %ecx
+    15ce: 81 f9 ff 7c 00 00            	cmpl	$0x7cff, %ecx           # imm = 0x7CFF
+    15d4: 77 46                        	ja	0x161c <trace_ret_dup+0x161c>
+    15d6: 48 8d 41 01                  	leaq	0x1(%rcx), %rax
+    15da: 89 c9                        	movl	%ecx, %ecx
+    15dc: 41 c6 84 0e 89 00 00 00 02   	movb	$0x2, 0x89(%r14,%rcx)
+    15e5: 45 8d 24 07                  	leal	(%r15,%rax), %r12d
+    15e9: 41 81 fc 00 7d 00 00         	cmpl	$0x7d00, %r12d          # imm = 0x7D00
+    15f0: 77 2a                        	ja	0x161c <trace_ret_dup+0x161c>
+    15f2: 49 8d 3c 06                  	leaq	(%r14,%rax), %rdi
+    15f6: 48 81 c7 89 00 00 00         	addq	$0x89, %rdi
+    15fd: 44 89 fe                     	movl	%r15d, %esi
+    1600: 48 89 da                     	movq	%rbx, %rdx
+    1603: e8 00 00 00 00               	callq	0x1608 <trace_ret_dup+0x1608>
+		0000000000001604:  R_X86_64_PLT32	bpf_probe_read-0x4
+    1608: 48 85 c0                     	testq	%rax, %rax
+    160b: 78 0f                        	js	0x161c <trace_ret_dup+0x161c>
+    160d: 66 45 89 a6 8a 7d 00 00      	movw	%r12w, 0x7d8a(%r14)
+    1615: 41 fe 86 88 00 00 00         	incb	0x88(%r14)
+    161c: 49 8b 8e e0 7d 00 00         	movq	0x7de0(%r14), %rcx
+    1623: 48 c1 e9 18                  	shrq	$0x18, %rcx
+    1627: 0f b6 c1                     	movzbl	%cl, %eax
+    162a: 83 f8 0f                     	cmpl	$0xf, %eax
+    162d: 0f 87 d1 01 00 00            	ja	0x1804 <trace_ret_dup+0x1804>
+    1633: 85 c0                        	testl	%eax, %eax
+    1635: 0f 84 c9 01 00 00            	je	0x1804 <trace_ret_dup+0x1804>
+    163b: 0f b6 f9                     	movzbl	%cl, %edi
+    163e: 89 f9                        	movl	%edi, %ecx
+    1640: 48 8d 15 00 00 00 00         	leaq	(%rip), %rdx            # 0x1647 <trace_ret_dup+0x1647>
+		0000000000001643:  R_X86_64_PC32	.rodata+0x74c
+    1647: be 01 00 00 00               	movl	$0x1, %esi
+    164c: c4 e2 c1 f7 f6               	shlxq	%rdi, %rsi, %rsi
+    1651: 48 8d 9d 88 00 00 00         	leaq	0x88(%rbp), %rbx
+    1658: 41 b8 80 a8 00 00            	movl	$0xa880, %r8d           # imm = 0xA880
+    165e: 49 0f a3 f8                  	btq	%rdi, %r8
+    1662: 73 03                        	jae	0x1667 <trace_ret_dup+0x1667>
+    1664: 48 8b 1b                     	movq	(%rbx), %rbx
+    1667: 44 8b 3c 8a                  	movl	(%rdx,%rcx,4), %r15d
+    166b: f7 c6 7e 17 00 00            	testl	$0x177e, %esi           # imm = 0x177E
+    1671: 74 26                        	je	0x1699 <trace_ret_dup+0x1699>
+    1673: 41 8d 47 91                  	leal	-0x6f(%r15), %eax
+    1677: 83 f8 92                     	cmpl	$-0x6e, %eax
+    167a: 0f 82 84 01 00 00            	jb	0x1804 <trace_ret_dup+0x1804>
+    1680: 41 0f b7 8e 8a 7d 00 00      	movzwl	0x7d8a(%r14), %ecx
+    1688: 81 f9 ff 7c 00 00            	cmpl	$0x7cff, %ecx           # imm = 0x7CFF
+    168e: 0f 86 2a 01 00 00            	jbe	0x17be <trace_ret_dup+0x17be>
+    1694: e9 6b 01 00 00               	jmp	0x1804 <trace_ret_dup+0x1804>
+    1699: 83 f8 0b                     	cmpl	$0xb, %eax
+    169c: 74 5c                        	je	0x16fa <trace_ret_dup+0x16fa>
+    169e: bd 10 00 00 00               	movl	$0x10, %ebp
+    16a3: 83 f8 0f                     	cmpl	$0xf, %eax
+    16a6: 0f 84 fa 00 00 00            	je	0x17a6 <trace_ret_dup+0x17a6>
+    16ac: 83 f8 0d                     	cmpl	$0xd, %eax
+    16af: 0f 85 d8 00 00 00            	jne	0x178d <trace_ret_dup+0x178d>
+    16b5: 48 85 db                     	testq	%rbx, %rbx
+    16b8: 0f 84 c3 00 00 00            	je	0x1781 <trace_ret_dup+0x1781>
+    16be: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    16c3: be 02 00 00 00               	movl	$0x2, %esi
+    16c8: 48 89 da                     	movq	%rbx, %rdx
+    16cb: e8 00 00 00 00               	callq	0x16d0 <trace_ret_dup+0x16d0>
+		00000000000016cc:  R_X86_64_PLT32	bpf_probe_read-0x4
+    16d0: 0f b7 44 24 10               	movzwl	0x10(%rsp), %eax
+    16d5: 83 f8 01                     	cmpl	$0x1, %eax
+    16d8: 0f 84 c3 00 00 00            	je	0x17a1 <trace_ret_dup+0x17a1>
+    16de: 83 f8 02                     	cmpl	$0x2, %eax
+    16e1: 0f 84 bf 00 00 00            	je	0x17a6 <trace_ret_dup+0x17a6>
+    16e7: 83 f8 0a                     	cmpl	$0xa, %eax
+    16ea: 0f 85 9d 00 00 00            	jne	0x178d <trace_ret_dup+0x178d>
+    16f0: bd 1c 00 00 00               	movl	$0x1c, %ebp
+    16f5: e9 ac 00 00 00               	jmp	0x17a6 <trace_ret_dup+0x17a6>
+    16fa: 41 0f b7 86 8a 7d 00 00      	movzwl	0x7d8a(%r14), %eax
+    1702: 48 3d ff 7c 00 00            	cmpq	$0x7cff, %rax           # imm = 0x7CFF
+    1708: 0f 87 f6 00 00 00            	ja	0x1804 <trace_ret_dup+0x1804>
+    170e: 41 c6 84 06 89 00 00 00 03   	movb	$0x3, 0x89(%r14,%rax)
+    1717: 41 0f b7 86 8a 7d 00 00      	movzwl	0x7d8a(%r14), %eax
+    171f: 66 41 89 86 92 7d 00 00      	movw	%ax, 0x7d92(%r14)
+    1727: 48 3d fb 6c 00 00            	cmpq	$0x6cfb, %rax           # imm = 0x6CFB
+    172d: 0f 87 d1 00 00 00            	ja	0x1804 <trace_ret_dup+0x1804>
+    1733: 4a 8d 3c 30                  	leaq	(%rax,%r14), %rdi
+    1737: 48 81 c7 8e 00 00 00         	addq	$0x8e, %rdi
+    173e: be 00 10 00 00               	movl	$0x1000, %esi           # imm = 0x1000
+    1743: 48 89 da                     	movq	%rbx, %rdx
+    1746: e8 00 00 00 00               	callq	0x174b <trace_ret_dup+0x174b>
+		0000000000001747:  R_X86_64_PLT32	bpf_probe_read_str-0x4
+    174b: 49 89 c4                     	movq	%rax, %r12
+    174e: 45 85 e4                     	testl	%r12d, %r12d
+    1751: 0f 8e ad 00 00 00            	jle	0x1804 <trace_ret_dup+0x1804>
+    1757: 41 0f b7 86 8a 7d 00 00      	movzwl	0x7d8a(%r14), %eax
+    175f: 48 3d fb 6c 00 00            	cmpq	$0x6cfb, %rax           # imm = 0x6CFB
+    1765: 0f 87 99 00 00 00            	ja	0x1804 <trace_ret_dup+0x1804>
+    176b: 46 89 a4 30 8a 00 00 00      	movl	%r12d, 0x8a(%rax,%r14)
+    1773: 66 45 03 a6 8a 7d 00 00      	addw	0x7d8a(%r14), %r12w
+    177b: 41 83 c4 05                  	addl	$0x5, %r12d
+    177f: eb 74                        	jmp	0x17f5 <trace_ret_dup+0x17f5>
+    1781: 66 c7 44 24 10 00 00         	movw	$0x0, 0x10(%rsp)
+    1788: 48 8d 5c 24 10               	leaq	0x10(%rsp), %rbx
+    178d: 48 8b 6c 24 08               	movq	0x8(%rsp), %rbp
+    1792: 41 8d 47 91                  	leal	-0x6f(%r15), %eax
+    1796: 83 f8 92                     	cmpl	$-0x6e, %eax
+    1799: 0f 83 e1 fe ff ff            	jae	0x1680 <trace_ret_dup+0x1680>
+    179f: eb 63                        	jmp	0x1804 <trace_ret_dup+0x1804>
+    17a1: bd 6e 00 00 00               	movl	$0x6e, %ebp
+    17a6: 41 89 ef                     	movl	%ebp, %r15d
+    17a9: 48 8b 6c 24 08               	movq	0x8(%rsp), %rbp
+    17ae: 41 0f b7 8e 8a 7d 00 00      	movzwl	0x7d8a(%r14), %ecx
+    17b6: 81 f9 ff 7c 00 00            	cmpl	$0x7cff, %ecx           # imm = 0x7CFF
+    17bc: 77 46                        	ja	0x1804 <trace_ret_dup+0x1804>
+    17be: 48 8d 41 01                  	leaq	0x1(%rcx), %rax
+    17c2: 89 c9                        	movl	%ecx, %ecx
+    17c4: 41 c6 84 0e 89 00 00 00 03   	movb	$0x3, 0x89(%r14,%rcx)
+    17cd: 45 8d 24 07                  	leal	(%r15,%rax), %r12d
+    17d1: 41 81 fc 00 7d 00 00         	cmpl	$0x7d00, %r12d          # imm = 0x7D00
+    17d8: 77 2a                        	ja	0x1804 <trace_ret_dup+0x1804>
+    17da: 49 8d 3c 06                  	leaq	(%r14,%rax), %rdi
+    17de: 48 81 c7 89 00 00 00         	addq	$0x89, %rdi
+    17e5: 44 89 fe                     	movl	%r15d, %esi
+    17e8: 48 89 da                     	movq	%rbx, %rdx
+    17eb: e8 00 00 00 00               	callq	0x17f0 <trace_ret_dup+0x17f0>
+		00000000000017ec:  R_X86_64_PLT32	bpf_probe_read-0x4
+    17f0: 48 85 c0                     	testq	%rax, %rax
+    17f3: 78 0f                        	js	0x1804 <trace_ret_dup+0x1804>
+    17f5: 66 45 89 a6 8a 7d 00 00      	movw	%r12w, 0x7d8a(%r14)
+    17fd: 41 fe 86 88 00 00 00         	incb	0x88(%r14)
+    1804: 49 8b 8e e0 7d 00 00         	movq	0x7de0(%r14), %rcx
+    180b: 48 c1 e9 20                  	shrq	$0x20, %rcx
+    180f: 0f b6 c1                     	movzbl	%cl, %eax
+    1812: 83 f8 0f                     	cmpl	$0xf, %eax
+    1815: 0f 87 d1 01 00 00            	ja	0x19ec <trace_ret_dup+0x19ec>
+    181b: 85 c0                        	testl	%eax, %eax
+    181d: 0f 84 c9 01 00 00            	je	0x19ec <trace_ret_dup+0x19ec>
+    1823: 0f b6 f9                     	movzbl	%cl, %edi
+    1826: 89 f9                        	movl	%edi, %ecx
+    1828: 48 8d 15 00 00 00 00         	leaq	(%rip), %rdx            # 0x182f <trace_ret_dup+0x182f>
+		000000000000182b:  R_X86_64_PC32	.rodata+0x74c
+    182f: be 01 00 00 00               	movl	$0x1, %esi
+    1834: c4 e2 c1 f7 f6               	shlxq	%rdi, %rsi, %rsi
+    1839: 48 8d 9d 90 00 00 00         	leaq	0x90(%rbp), %rbx
+    1840: 41 b8 80 a8 00 00            	movl	$0xa880, %r8d           # imm = 0xA880
+    1846: 49 0f a3 f8                  	btq	%rdi, %r8
+    184a: 73 03                        	jae	0x184f <trace_ret_dup+0x184f>
+    184c: 48 8b 1b                     	movq	(%rbx), %rbx
+    184f: 44 8b 3c 8a                  	movl	(%rdx,%rcx,4), %r15d
+    1853: f7 c6 7e 17 00 00            	testl	$0x177e, %esi           # imm = 0x177E
+    1859: 74 26                        	je	0x1881 <trace_ret_dup+0x1881>
+    185b: 41 8d 47 91                  	leal	-0x6f(%r15), %eax
+    185f: 83 f8 92                     	cmpl	$-0x6e, %eax
+    1862: 0f 82 84 01 00 00            	jb	0x19ec <trace_ret_dup+0x19ec>
+    1868: 41 0f b7 8e 8a 7d 00 00      	movzwl	0x7d8a(%r14), %ecx
+    1870: 81 f9 ff 7c 00 00            	cmpl	$0x7cff, %ecx           # imm = 0x7CFF
+    1876: 0f 86 2a 01 00 00            	jbe	0x19a6 <trace_ret_dup+0x19a6>
+    187c: e9 6b 01 00 00               	jmp	0x19ec <trace_ret_dup+0x19ec>
+    1881: 83 f8 0b                     	cmpl	$0xb, %eax
+    1884: 74 5c                        	je	0x18e2 <trace_ret_dup+0x18e2>
+    1886: bd 10 00 00 00               	movl	$0x10, %ebp
+    188b: 83 f8 0f                     	cmpl	$0xf, %eax
+    188e: 0f 84 fa 00 00 00            	je	0x198e <trace_ret_dup+0x198e>
+    1894: 83 f8 0d                     	cmpl	$0xd, %eax
+    1897: 0f 85 d8 00 00 00            	jne	0x1975 <trace_ret_dup+0x1975>
+    189d: 48 85 db                     	testq	%rbx, %rbx
+    18a0: 0f 84 c3 00 00 00            	je	0x1969 <trace_ret_dup+0x1969>
+    18a6: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    18ab: be 02 00 00 00               	movl	$0x2, %esi
+    18b0: 48 89 da                     	movq	%rbx, %rdx
+    18b3: e8 00 00 00 00               	callq	0x18b8 <trace_ret_dup+0x18b8>
+		00000000000018b4:  R_X86_64_PLT32	bpf_probe_read-0x4
+    18b8: 0f b7 44 24 10               	movzwl	0x10(%rsp), %eax
+    18bd: 83 f8 01                     	cmpl	$0x1, %eax
+    18c0: 0f 84 c3 00 00 00            	je	0x1989 <trace_ret_dup+0x1989>
+    18c6: 83 f8 02                     	cmpl	$0x2, %eax
+    18c9: 0f 84 bf 00 00 00            	je	0x198e <trace_ret_dup+0x198e>
+    18cf: 83 f8 0a                     	cmpl	$0xa, %eax
+    18d2: 0f 85 9d 00 00 00            	jne	0x1975 <trace_ret_dup+0x1975>
+    18d8: bd 1c 00 00 00               	movl	$0x1c, %ebp
+    18dd: e9 ac 00 00 00               	jmp	0x198e <trace_ret_dup+0x198e>
+    18e2: 41 0f b7 86 8a 7d 00 00      	movzwl	0x7d8a(%r14), %eax
+    18ea: 48 3d ff 7c 00 00            	cmpq	$0x7cff, %rax           # imm = 0x7CFF
+    18f0: 0f 87 f6 00 00 00            	ja	0x19ec <trace_ret_dup+0x19ec>
+    18f6: 41 c6 84 06 89 00 00 00 04   	movb	$0x4, 0x89(%r14,%rax)
+    18ff: 41 0f b7 86 8a 7d 00 00      	movzwl	0x7d8a(%r14), %eax
+    1907: 66 41 89 86 94 7d 00 00      	movw	%ax, 0x7d94(%r14)
+    190f: 48 3d fb 6c 00 00            	cmpq	$0x6cfb, %rax           # imm = 0x6CFB
+    1915: 0f 87 d1 00 00 00            	ja	0x19ec <trace_ret_dup+0x19ec>
+    191b: 4a 8d 3c 30                  	leaq	(%rax,%r14), %rdi
+    191f: 48 81 c7 8e 00 00 00         	addq	$0x8e, %rdi
+    1926: be 00 10 00 00               	movl	$0x1000, %esi           # imm = 0x1000
+    192b: 48 89 da                     	movq	%rbx, %rdx
+    192e: e8 00 00 00 00               	callq	0x1933 <trace_ret_dup+0x1933>
+		000000000000192f:  R_X86_64_PLT32	bpf_probe_read_str-0x4
+    1933: 49 89 c4                     	movq	%rax, %r12
+    1936: 45 85 e4                     	testl	%r12d, %r12d
+    1939: 0f 8e ad 00 00 00            	jle	0x19ec <trace_ret_dup+0x19ec>
+    193f: 41 0f b7 86 8a 7d 00 00      	movzwl	0x7d8a(%r14), %eax
+    1947: 48 3d fb 6c 00 00            	cmpq	$0x6cfb, %rax           # imm = 0x6CFB
+    194d: 0f 87 99 00 00 00            	ja	0x19ec <trace_ret_dup+0x19ec>
+    1953: 46 89 a4 30 8a 00 00 00      	movl	%r12d, 0x8a(%rax,%r14)
+    195b: 66 45 03 a6 8a 7d 00 00      	addw	0x7d8a(%r14), %r12w
+    1963: 41 83 c4 05                  	addl	$0x5, %r12d
+    1967: eb 74                        	jmp	0x19dd <trace_ret_dup+0x19dd>
+    1969: 66 c7 44 24 10 00 00         	movw	$0x0, 0x10(%rsp)
+    1970: 48 8d 5c 24 10               	leaq	0x10(%rsp), %rbx
+    1975: 48 8b 6c 24 08               	movq	0x8(%rsp), %rbp
+    197a: 41 8d 47 91                  	leal	-0x6f(%r15), %eax
+    197e: 83 f8 92                     	cmpl	$-0x6e, %eax
+    1981: 0f 83 e1 fe ff ff            	jae	0x1868 <trace_ret_dup+0x1868>
+    1987: eb 63                        	jmp	0x19ec <trace_ret_dup+0x19ec>
+    1989: bd 6e 00 00 00               	movl	$0x6e, %ebp
+    198e: 41 89 ef                     	movl	%ebp, %r15d
+    1991: 48 8b 6c 24 08               	movq	0x8(%rsp), %rbp
+    1996: 41 0f b7 8e 8a 7d 00 00      	movzwl	0x7d8a(%r14), %ecx
+    199e: 81 f9 ff 7c 00 00            	cmpl	$0x7cff, %ecx           # imm = 0x7CFF
+    19a4: 77 46                        	ja	0x19ec <trace_ret_dup+0x19ec>
+    19a6: 48 8d 41 01                  	leaq	0x1(%rcx), %rax
+    19aa: 89 c9                        	movl	%ecx, %ecx
+    19ac: 41 c6 84 0e 89 00 00 00 04   	movb	$0x4, 0x89(%r14,%rcx)
+    19b5: 45 8d 24 07                  	leal	(%r15,%rax), %r12d
+    19b9: 41 81 fc 00 7d 00 00         	cmpl	$0x7d00, %r12d          # imm = 0x7D00
+    19c0: 77 2a                        	ja	0x19ec <trace_ret_dup+0x19ec>
+    19c2: 49 8d 3c 06                  	leaq	(%r14,%rax), %rdi
+    19c6: 48 81 c7 89 00 00 00         	addq	$0x89, %rdi
+    19cd: 44 89 fe                     	movl	%r15d, %esi
+    19d0: 48 89 da                     	movq	%rbx, %rdx
+    19d3: e8 00 00 00 00               	callq	0x19d8 <trace_ret_dup+0x19d8>
+		00000000000019d4:  R_X86_64_PLT32	bpf_probe_read-0x4
+    19d8: 48 85 c0                     	testq	%rax, %rax
+    19db: 78 0f                        	js	0x19ec <trace_ret_dup+0x19ec>
+    19dd: 66 45 89 a6 8a 7d 00 00      	movw	%r12w, 0x7d8a(%r14)
+    19e5: 41 fe 86 88 00 00 00         	incb	0x88(%r14)
+    19ec: 49 8b 8e e0 7d 00 00         	movq	0x7de0(%r14), %rcx
+    19f3: 48 c1 e9 28                  	shrq	$0x28, %rcx
+    19f7: 0f b6 c1                     	movzbl	%cl, %eax
+    19fa: 83 f8 0f                     	cmpl	$0xf, %eax
+    19fd: 0f 87 d1 01 00 00            	ja	0x1bd4 <trace_ret_dup+0x1bd4>
+    1a03: 85 c0                        	testl	%eax, %eax
+    1a05: 0f 84 c9 01 00 00            	je	0x1bd4 <trace_ret_dup+0x1bd4>
+    1a0b: 0f b6 f9                     	movzbl	%cl, %edi
+    1a0e: 89 f9                        	movl	%edi, %ecx
+    1a10: 48 8d 15 00 00 00 00         	leaq	(%rip), %rdx            # 0x1a17 <trace_ret_dup+0x1a17>
+		0000000000001a13:  R_X86_64_PC32	.rodata+0x74c
+    1a17: be 01 00 00 00               	movl	$0x1, %esi
+    1a1c: c4 e2 c1 f7 f6               	shlxq	%rdi, %rsi, %rsi
+    1a21: 48 8d 9d 98 00 00 00         	leaq	0x98(%rbp), %rbx
+    1a28: 41 b8 80 a8 00 00            	movl	$0xa880, %r8d           # imm = 0xA880
+    1a2e: 49 0f a3 f8                  	btq	%rdi, %r8
+    1a32: 73 03                        	jae	0x1a37 <trace_ret_dup+0x1a37>
+    1a34: 48 8b 1b                     	movq	(%rbx), %rbx
+    1a37: 44 8b 3c 8a                  	movl	(%rdx,%rcx,4), %r15d
+    1a3b: f7 c6 7e 17 00 00            	testl	$0x177e, %esi           # imm = 0x177E
+    1a41: 74 26                        	je	0x1a69 <trace_ret_dup+0x1a69>
+    1a43: 41 8d 47 91                  	leal	-0x6f(%r15), %eax
+    1a47: 83 f8 92                     	cmpl	$-0x6e, %eax
+    1a4a: 0f 82 84 01 00 00            	jb	0x1bd4 <trace_ret_dup+0x1bd4>
+    1a50: 41 0f b7 8e 8a 7d 00 00      	movzwl	0x7d8a(%r14), %ecx
+    1a58: 81 f9 ff 7c 00 00            	cmpl	$0x7cff, %ecx           # imm = 0x7CFF
+    1a5e: 0f 86 2a 01 00 00            	jbe	0x1b8e <trace_ret_dup+0x1b8e>
+    1a64: e9 6b 01 00 00               	jmp	0x1bd4 <trace_ret_dup+0x1bd4>
+    1a69: 83 f8 0b                     	cmpl	$0xb, %eax
+    1a6c: 74 5c                        	je	0x1aca <trace_ret_dup+0x1aca>
+    1a6e: bd 10 00 00 00               	movl	$0x10, %ebp
+    1a73: 83 f8 0f                     	cmpl	$0xf, %eax
+    1a76: 0f 84 fa 00 00 00            	je	0x1b76 <trace_ret_dup+0x1b76>
+    1a7c: 83 f8 0d                     	cmpl	$0xd, %eax
+    1a7f: 0f 85 d8 00 00 00            	jne	0x1b5d <trace_ret_dup+0x1b5d>
+    1a85: 48 85 db                     	testq	%rbx, %rbx
+    1a88: 0f 84 c3 00 00 00            	je	0x1b51 <trace_ret_dup+0x1b51>
+    1a8e: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1a93: be 02 00 00 00               	movl	$0x2, %esi
+    1a98: 48 89 da                     	movq	%rbx, %rdx
+    1a9b: e8 00 00 00 00               	callq	0x1aa0 <trace_ret_dup+0x1aa0>
+		0000000000001a9c:  R_X86_64_PLT32	bpf_probe_read-0x4
+    1aa0: 0f b7 44 24 10               	movzwl	0x10(%rsp), %eax
+    1aa5: 83 f8 01                     	cmpl	$0x1, %eax
+    1aa8: 0f 84 c3 00 00 00            	je	0x1b71 <trace_ret_dup+0x1b71>
+    1aae: 83 f8 02                     	cmpl	$0x2, %eax
+    1ab1: 0f 84 bf 00 00 00            	je	0x1b76 <trace_ret_dup+0x1b76>
+    1ab7: 83 f8 0a                     	cmpl	$0xa, %eax
+    1aba: 0f 85 9d 00 00 00            	jne	0x1b5d <trace_ret_dup+0x1b5d>
+    1ac0: bd 1c 00 00 00               	movl	$0x1c, %ebp
+    1ac5: e9 ac 00 00 00               	jmp	0x1b76 <trace_ret_dup+0x1b76>
+    1aca: 41 0f b7 86 8a 7d 00 00      	movzwl	0x7d8a(%r14), %eax
+    1ad2: 48 3d ff 7c 00 00            	cmpq	$0x7cff, %rax           # imm = 0x7CFF
+    1ad8: 0f 87 f6 00 00 00            	ja	0x1bd4 <trace_ret_dup+0x1bd4>
+    1ade: 41 c6 84 06 89 00 00 00 05   	movb	$0x5, 0x89(%r14,%rax)
+    1ae7: 41 0f b7 86 8a 7d 00 00      	movzwl	0x7d8a(%r14), %eax
+    1aef: 66 41 89 86 96 7d 00 00      	movw	%ax, 0x7d96(%r14)
+    1af7: 48 3d fb 6c 00 00            	cmpq	$0x6cfb, %rax           # imm = 0x6CFB
+    1afd: 0f 87 d1 00 00 00            	ja	0x1bd4 <trace_ret_dup+0x1bd4>
+    1b03: 4a 8d 3c 30                  	leaq	(%rax,%r14), %rdi
+    1b07: 48 81 c7 8e 00 00 00         	addq	$0x8e, %rdi
+    1b0e: be 00 10 00 00               	movl	$0x1000, %esi           # imm = 0x1000
+    1b13: 48 89 da                     	movq	%rbx, %rdx
+    1b16: e8 00 00 00 00               	callq	0x1b1b <trace_ret_dup+0x1b1b>
+		0000000000001b17:  R_X86_64_PLT32	bpf_probe_read_str-0x4
+    1b1b: 49 89 c4                     	movq	%rax, %r12
+    1b1e: 45 85 e4                     	testl	%r12d, %r12d
+    1b21: 0f 8e ad 00 00 00            	jle	0x1bd4 <trace_ret_dup+0x1bd4>
+    1b27: 41 0f b7 86 8a 7d 00 00      	movzwl	0x7d8a(%r14), %eax
+    1b2f: 48 3d fb 6c 00 00            	cmpq	$0x6cfb, %rax           # imm = 0x6CFB
+    1b35: 0f 87 99 00 00 00            	ja	0x1bd4 <trace_ret_dup+0x1bd4>
+    1b3b: 46 89 a4 30 8a 00 00 00      	movl	%r12d, 0x8a(%rax,%r14)
+    1b43: 66 45 03 a6 8a 7d 00 00      	addw	0x7d8a(%r14), %r12w
+    1b4b: 41 83 c4 05                  	addl	$0x5, %r12d
+    1b4f: eb 74                        	jmp	0x1bc5 <trace_ret_dup+0x1bc5>
+    1b51: 66 c7 44 24 10 00 00         	movw	$0x0, 0x10(%rsp)
+    1b58: 48 8d 5c 24 10               	leaq	0x10(%rsp), %rbx
+    1b5d: 48 8b 6c 24 08               	movq	0x8(%rsp), %rbp
+    1b62: 41 8d 47 91                  	leal	-0x6f(%r15), %eax
+    1b66: 83 f8 92                     	cmpl	$-0x6e, %eax
+    1b69: 0f 83 e1 fe ff ff            	jae	0x1a50 <trace_ret_dup+0x1a50>
+    1b6f: eb 63                        	jmp	0x1bd4 <trace_ret_dup+0x1bd4>
+    1b71: bd 6e 00 00 00               	movl	$0x6e, %ebp
+    1b76: 41 89 ef                     	movl	%ebp, %r15d
+    1b79: 48 8b 6c 24 08               	movq	0x8(%rsp), %rbp
+    1b7e: 41 0f b7 8e 8a 7d 00 00      	movzwl	0x7d8a(%r14), %ecx
+    1b86: 81 f9 ff 7c 00 00            	cmpl	$0x7cff, %ecx           # imm = 0x7CFF
+    1b8c: 77 46                        	ja	0x1bd4 <trace_ret_dup+0x1bd4>
+    1b8e: 48 8d 41 01                  	leaq	0x1(%rcx), %rax
+    1b92: 89 c9                        	movl	%ecx, %ecx
+    1b94: 41 c6 84 0e 89 00 00 00 05   	movb	$0x5, 0x89(%r14,%rcx)
+    1b9d: 45 8d 24 07                  	leal	(%r15,%rax), %r12d
+    1ba1: 41 81 fc 00 7d 00 00         	cmpl	$0x7d00, %r12d          # imm = 0x7D00
+    1ba8: 77 2a                        	ja	0x1bd4 <trace_ret_dup+0x1bd4>
+    1baa: 49 8d 3c 06                  	leaq	(%r14,%rax), %rdi
+    1bae: 48 81 c7 89 00 00 00         	addq	$0x89, %rdi
+    1bb5: 44 89 fe                     	movl	%r15d, %esi
+    1bb8: 48 89 da                     	movq	%rbx, %rdx
+    1bbb: e8 00 00 00 00               	callq	0x1bc0 <trace_ret_dup+0x1bc0>
+		0000000000001bbc:  R_X86_64_PLT32	bpf_probe_read-0x4
+    1bc0: 48 85 c0                     	testq	%rax, %rax
+    1bc3: 78 0f                        	js	0x1bd4 <trace_ret_dup+0x1bd4>
+    1bc5: 66 45 89 a6 8a 7d 00 00      	movw	%r12w, 0x7d8a(%r14)
+    1bcd: 41 fe 86 88 00 00 00         	incb	0x88(%r14)
+    1bd4: 49 8b 86 e0 7d 00 00         	movq	0x7de0(%r14), %rax
+    1bdb: 48 8b 8d a0 00 00 00         	movq	0xa0(%rbp), %rcx
+    1be2: 49 89 0e                     	movq	%rcx, (%r14)
+    1be5: 41 0f b7 9e 8a 7d 00 00      	movzwl	0x7d8a(%r14), %ebx
+    1bed: 48 81 fb ff 7c 00 00         	cmpq	$0x7cff, %rbx           # imm = 0x7CFF
+    1bf4: 0f 87 9d 00 00 00            	ja	0x1c97 <trace_ret_dup+0x1c97>
+    1bfa: 84 c0                        	testb	%al, %al
+    1bfc: 0f 95 c1                     	setne	%cl
+    1bff: 89 c2                        	movl	%eax, %edx
+    1c01: 81 e2 00 ff 00 00            	andl	$0xff00, %edx           # imm = 0xFF00
+    1c07: 48 83 fa 01                  	cmpq	$0x1, %rdx
+    1c0b: 80 d9 ff                     	sbbb	$-0x1, %cl
+    1c0e: 89 c2                        	movl	%eax, %edx
+    1c10: 81 e2 00 00 ff 00            	andl	$0xff0000, %edx         # imm = 0xFF0000
+    1c16: 48 83 fa 01                  	cmpq	$0x1, %rdx
+    1c1a: 80 d9 ff                     	sbbb	$-0x1, %cl
+    1c1d: 89 c2                        	movl	%eax, %edx
+    1c1f: 81 e2 00 00 00 ff            	andl	$0xff000000, %edx       # imm = 0xFF000000
+    1c25: 48 83 fa 01                  	cmpq	$0x1, %rdx
+    1c29: 80 d9 ff                     	sbbb	$-0x1, %cl
+    1c2c: 48 ba 00 00 00 00 ff 00 00 00	movabsq	$0xff00000000, %rdx     # imm = 0xFF00000000
+    1c36: 48 21 c2                     	andq	%rax, %rdx
+    1c39: 48 83 fa 01                  	cmpq	$0x1, %rdx
+    1c3d: 80 d9 ff                     	sbbb	$-0x1, %cl
+    1c40: 48 ba 00 00 00 00 00 ff 00 00	movabsq	$0xff0000000000, %rdx   # imm = 0xFF0000000000
+    1c4a: 48 21 c2                     	andq	%rax, %rdx
+    1c4d: 48 83 fa 01                  	cmpq	$0x1, %rdx
+    1c51: 80 d9 ff                     	sbbb	$-0x1, %cl
+    1c54: 41 88 8c 1e 89 00 00 00      	movb	%cl, 0x89(%r14,%rbx)
+    1c5c: 81 fb f7 7c 00 00            	cmpl	$0x7cf7, %ebx           # imm = 0x7CF7
+    1c62: 77 33                        	ja	0x1c97 <trace_ret_dup+0x1c97>
+    1c64: 48 8d 95 a8 00 00 00         	leaq	0xa8(%rbp), %rdx
+    1c6b: 4a 8d 3c 33                  	leaq	(%rbx,%r14), %rdi
+    1c6f: 48 81 c7 8a 00 00 00         	addq	$0x8a, %rdi
+    1c76: be 08 00 00 00               	movl	$0x8, %esi
+    1c7b: e8 00 00 00 00               	callq	0x1c80 <trace_ret_dup+0x1c80>
+		0000000000001c7c:  R_X86_64_PLT32	bpf_probe_read-0x4
+    1c80: 48 85 c0                     	testq	%rax, %rax
+    1c83: 78 12                        	js	0x1c97 <trace_ret_dup+0x1c97>
+    1c85: 83 c3 09                     	addl	$0x9, %ebx
+    1c88: 66 41 89 9e 8a 7d 00 00      	movw	%bx, 0x7d8a(%r14)
+    1c90: 41 fe 86 88 00 00 00         	incb	0x88(%r14)
+    1c97: 4d 8b ae d0 7d 00 00         	movq	0x7dd0(%r14), %r13
+    1c9e: 4d 8d 65 28                  	leaq	0x28(%r13), %r12
+    1ca2: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1ca7: be 08 00 00 00               	movl	$0x8, %esi
+    1cac: 4c 89 e2                     	movq	%r12, %rdx
+    1caf: e8 00 00 00 00               	callq	0x1cb4 <trace_ret_dup+0x1cb4>
+		0000000000001cb0:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1cb4: 48 8b 44 24 10               	movq	0x10(%rsp), %rax
+    1cb9: 48 89 44 24 68               	movq	%rax, 0x68(%rsp)
+    1cbe: 48 8d 50 20                  	leaq	0x20(%rax), %rdx
+    1cc2: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1cc7: be 08 00 00 00               	movl	$0x8, %esi
+    1ccc: e8 00 00 00 00               	callq	0x1cd1 <trace_ret_dup+0x1cd1>
+		0000000000001ccd:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1cd1: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+    1cd6: 48 83 c2 28                  	addq	$0x28, %rdx
+    1cda: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1cdf: be 08 00 00 00               	movl	$0x8, %esi
+    1ce4: e8 00 00 00 00               	callq	0x1ce9 <trace_ret_dup+0x1ce9>
+		0000000000001ce5:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1ce9: 48 8b 5c 24 10               	movq	0x10(%rsp), %rbx
+    1cee: 48 8d 53 14                  	leaq	0x14(%rbx), %rdx
+    1cf2: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1cf7: be 04 00 00 00               	movl	$0x4, %esi
+    1cfc: e8 00 00 00 00               	callq	0x1d01 <trace_ret_dup+0x1d01>
+		0000000000001cfd:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1d01: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+    1d05: 41 89 46 2c                  	movl	%eax, 0x2c(%r14)
+    1d09: 4d 8d 7d 30                  	leaq	0x30(%r13), %r15
+    1d0d: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1d12: be 08 00 00 00               	movl	$0x8, %esi
+    1d17: 4c 89 fa                     	movq	%r15, %rdx
+    1d1a: e8 00 00 00 00               	callq	0x1d1f <trace_ret_dup+0x1d1f>
+		0000000000001d1b:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1d1f: 48 8b 6c 24 10               	movq	0x10(%rsp), %rbp
+    1d24: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1d29: be 04 00 00 00               	movl	$0x4, %esi
+    1d2e: 48 89 ea                     	movq	%rbp, %rdx
+    1d31: e8 00 00 00 00               	callq	0x1d36 <trace_ret_dup+0x1d36>
+		0000000000001d32:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1d36: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+    1d3a: 48 c1 e0 04                  	shlq	$0x4, %rax
+    1d3e: 48 8d 14 28                  	leaq	(%rax,%rbp), %rdx
+    1d42: 48 83 c2 08                  	addq	$0x8, %rdx
+    1d46: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1d4b: be 04 00 00 00               	movl	$0x4, %esi
+    1d50: e8 00 00 00 00               	callq	0x1d55 <trace_ret_dup+0x1d55>
+		0000000000001d51:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1d55: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+    1d59: 41 89 46 1c                  	movl	%eax, 0x1c(%r14)
+    1d5d: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1d62: be 08 00 00 00               	movl	$0x8, %esi
+    1d67: 4c 89 e2                     	movq	%r12, %rdx
+    1d6a: e8 00 00 00 00               	callq	0x1d6f <trace_ret_dup+0x1d6f>
+		0000000000001d6b:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1d6f: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+    1d74: 48 83 c2 30                  	addq	$0x30, %rdx
+    1d78: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1d7d: be 08 00 00 00               	movl	$0x8, %esi
+    1d82: e8 00 00 00 00               	callq	0x1d87 <trace_ret_dup+0x1d87>
+		0000000000001d83:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1d87: 4c 8b 64 24 10               	movq	0x10(%rsp), %r12
+    1d8c: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1d91: be 04 00 00 00               	movl	$0x4, %esi
+    1d96: 4c 89 e2                     	movq	%r12, %rdx
+    1d99: e8 00 00 00 00               	callq	0x1d9e <trace_ret_dup+0x1d9e>
+		0000000000001d9a:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1d9e: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+    1da2: 48 c1 e0 04                  	shlq	$0x4, %rax
+    1da6: 49 8d 14 04                  	leaq	(%r12,%rax), %rdx
+    1daa: 48 83 c2 08                  	addq	$0x8, %rdx
+    1dae: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1db3: be 04 00 00 00               	movl	$0x4, %esi
+    1db8: e8 00 00 00 00               	callq	0x1dbd <trace_ret_dup+0x1dbd>
+		0000000000001db9:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1dbd: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+    1dc1: 41 89 46 18                  	movl	%eax, 0x18(%r14)
+    1dc5: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1dca: be 08 00 00 00               	movl	$0x8, %esi
+    1dcf: 4c 89 fa                     	movq	%r15, %rdx
+    1dd2: e8 00 00 00 00               	callq	0x1dd7 <trace_ret_dup+0x1dd7>
+		0000000000001dd3:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1dd7: 4c 8b 7c 24 10               	movq	0x10(%rsp), %r15
+    1ddc: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1de1: be 04 00 00 00               	movl	$0x4, %esi
+    1de6: 4c 89 fa                     	movq	%r15, %rdx
+    1de9: e8 00 00 00 00               	callq	0x1dee <trace_ret_dup+0x1dee>
+		0000000000001dea:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1dee: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+    1df2: 48 c1 e0 04                  	shlq	$0x4, %rax
+    1df6: 49 8d 14 07                  	leaq	(%r15,%rax), %rdx
+    1dfa: 48 83 c2 10                  	addq	$0x10, %rdx
+    1dfe: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1e03: be 08 00 00 00               	movl	$0x8, %esi
+    1e08: e8 00 00 00 00               	callq	0x1e0d <trace_ret_dup+0x1e0d>
+		0000000000001e09:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1e0d: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+    1e12: 48 83 c2 0c                  	addq	$0xc, %rdx
+    1e16: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1e1b: be 04 00 00 00               	movl	$0x4, %esi
+    1e20: e8 00 00 00 00               	callq	0x1e25 <trace_ret_dup+0x1e25>
+		0000000000001e21:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1e25: 8b 6c 24 10                  	movl	0x10(%rsp), %ebp
+    1e29: 4c 8d 7b 30                  	leaq	0x30(%rbx), %r15
+    1e2d: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1e32: be 08 00 00 00               	movl	$0x8, %esi
+    1e37: 4c 89 fa                     	movq	%r15, %rdx
+    1e3a: e8 00 00 00 00               	callq	0x1e3f <trace_ret_dup+0x1e3f>
+		0000000000001e3b:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1e3f: 4c 8b 64 24 10               	movq	0x10(%rsp), %r12
+    1e44: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1e49: be 04 00 00 00               	movl	$0x4, %esi
+    1e4e: 4c 89 e2                     	movq	%r12, %rdx
+    1e51: e8 00 00 00 00               	callq	0x1e56 <trace_ret_dup+0x1e56>
+		0000000000001e52:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1e56: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+    1e5a: 48 c1 e0 04                  	shlq	$0x4, %rax
+    1e5e: 49 8d 14 04                  	leaq	(%r12,%rax), %rdx
+    1e62: 48 83 c2 10                  	addq	$0x10, %rdx
+    1e66: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1e6b: be 08 00 00 00               	movl	$0x8, %esi
+    1e70: e8 00 00 00 00               	callq	0x1e75 <trace_ret_dup+0x1e75>
+		0000000000001e71:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1e75: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+    1e7a: 48 83 c2 0c                  	addq	$0xc, %rdx
+    1e7e: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1e83: be 04 00 00 00               	movl	$0x4, %esi
+    1e88: e8 00 00 00 00               	callq	0x1e8d <trace_ret_dup+0x1e8d>
+		0000000000001e89:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1e8d: 3b 6c 24 10                  	cmpl	0x10(%rsp), %ebp
+    1e91: 75 50                        	jne	0x1ee3 <trace_ret_dup+0x1ee3>
+    1e93: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1e98: be 08 00 00 00               	movl	$0x8, %esi
+    1e9d: 4c 89 fa                     	movq	%r15, %rdx
+    1ea0: e8 00 00 00 00               	callq	0x1ea5 <trace_ret_dup+0x1ea5>
+		0000000000001ea1:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1ea5: 4c 8b 7c 24 10               	movq	0x10(%rsp), %r15
+    1eaa: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1eaf: be 04 00 00 00               	movl	$0x4, %esi
+    1eb4: 4c 89 fa                     	movq	%r15, %rdx
+    1eb7: e8 00 00 00 00               	callq	0x1ebc <trace_ret_dup+0x1ebc>
+		0000000000001eb8:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1ebc: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+    1ec0: 48 c1 e0 04                  	shlq	$0x4, %rax
+    1ec4: 49 8d 14 07                  	leaq	(%r15,%rax), %rdx
+    1ec8: 48 83 c2 08                  	addq	$0x8, %rdx
+    1ecc: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1ed1: be 04 00 00 00               	movl	$0x4, %esi
+    1ed6: e8 00 00 00 00               	callq	0x1edb <trace_ret_dup+0x1edb>
+		0000000000001ed7:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1edb: 8b 44 24 10                  	movl	0x10(%rsp), %eax
+    1edf: 41 89 46 20                  	movl	%eax, 0x20(%r14)
+    1ee3: 4d 8d 7e 08                  	leaq	0x8(%r14), %r15
+    1ee7: 41 89 6e 38                  	movl	%ebp, 0x38(%r14)
+    1eeb: 4d 8d a5 90 00 00 00         	leaq	0x90(%r13), %r12
+    1ef2: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1ef7: be 08 00 00 00               	movl	$0x8, %esi
+    1efc: 4c 89 e2                     	movq	%r12, %rdx
+    1eff: e8 00 00 00 00               	callq	0x1f04 <trace_ret_dup+0x1f04>
+		0000000000001f00:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1f04: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+    1f09: 48 83 c2 10                  	addq	$0x10, %rdx
+    1f0d: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1f12: be 08 00 00 00               	movl	$0x8, %esi
+    1f17: e8 00 00 00 00               	callq	0x1f1c <trace_ret_dup+0x1f1c>
+		0000000000001f18:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1f1c: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+    1f21: 48 8d 7c 24 60               	leaq	0x60(%rsp), %rdi
+    1f26: be 04 00 00 00               	movl	$0x4, %esi
+    1f2b: e8 00 00 00 00               	callq	0x1f30 <trace_ret_dup+0x1f30>
+		0000000000001f2c:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1f30: 8b 44 24 60                  	movl	0x60(%rsp), %eax
+    1f34: 41 89 46 34                  	movl	%eax, 0x34(%r14)
+    1f38: e8 00 00 00 00               	callq	0x1f3d <trace_ret_dup+0x1f3d>
+		0000000000001f39:  R_X86_64_PLT32	bpf_get_current_uid_gid-0x4
+    1f3d: 41 89 46 30                  	movl	%eax, 0x30(%r14)
+    1f41: 49 8d 55 50                  	leaq	0x50(%r13), %rdx
+    1f45: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1f4a: be 08 00 00 00               	movl	$0x8, %esi
+    1f4f: e8 00 00 00 00               	callq	0x1f54 <trace_ret_dup+0x1f54>
+		0000000000001f50:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1f54: 48 8b 44 24 10               	movq	0x10(%rsp), %rax
+    1f59: 49 89 46 08                  	movq	%rax, 0x8(%r14)
+    1f5d: 48 8b 54 24 68               	movq	0x68(%rsp), %rdx
+    1f62: 48 83 c2 50                  	addq	$0x50, %rdx
+    1f66: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1f6b: be 08 00 00 00               	movl	$0x8, %esi
+    1f70: e8 00 00 00 00               	callq	0x1f75 <trace_ret_dup+0x1f75>
+		0000000000001f71:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1f75: 48 8b 44 24 10               	movq	0x10(%rsp), %rax
+    1f7a: 49 89 46 60                  	movq	%rax, 0x60(%r14)
+    1f7e: 48 83 c3 50                  	addq	$0x50, %rbx
+    1f82: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1f87: be 08 00 00 00               	movl	$0x8, %esi
+    1f8c: 48 89 da                     	movq	%rbx, %rdx
+    1f8f: e8 00 00 00 00               	callq	0x1f94 <trace_ret_dup+0x1f94>
+		0000000000001f90:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1f94: 48 8b 44 24 10               	movq	0x10(%rsp), %rax
+    1f99: 49 89 46 68                  	movq	%rax, 0x68(%r14)
+    1f9d: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1fa2: be 04 00 00 00               	movl	$0x4, %esi
+    1fa7: 4c 89 ea                     	movq	%r13, %rdx
+    1faa: e8 00 00 00 00               	callq	0x1faf <trace_ret_dup+0x1faf>
+		0000000000001fab:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1faf: f6 44 24 10 02               	testb	$0x2, 0x10(%rsp)
+    1fb4: 74 05                        	je	0x1fbb <trace_ret_dup+0x1fbb>
+    1fb6: 41 80 4e 5c 02               	orb	$0x2, 0x5c(%r14)
+    1fbb: 49 8d 7e 3c                  	leaq	0x3c(%r14), %rdi
+    1fbf: 49 c7 46 44 00 00 00 00      	movq	$0x0, 0x44(%r14)
+    1fc7: 49 c7 46 3c 00 00 00 00      	movq	$0x0, 0x3c(%r14)
+    1fcf: be 10 00 00 00               	movl	$0x10, %esi
+    1fd4: e8 00 00 00 00               	callq	0x1fd9 <trace_ret_dup+0x1fd9>
+		0000000000001fd5:  R_X86_64_PLT32	bpf_get_current_comm-0x4
+    1fd9: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1fde: be 08 00 00 00               	movl	$0x8, %esi
+    1fe3: 4c 89 e2                     	movq	%r12, %rdx
+    1fe6: e8 00 00 00 00               	callq	0x1feb <trace_ret_dup+0x1feb>
+		0000000000001fe7:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1feb: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+    1ff0: 48 8d 7c 24 10               	leaq	0x10(%rsp), %rdi
+    1ff5: be 08 00 00 00               	movl	$0x8, %esi
+    1ffa: e8 00 00 00 00               	callq	0x1fff <trace_ret_dup+0x1fff>
+		0000000000001ffb:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    1fff: 48 8b 54 24 10               	movq	0x10(%rsp), %rdx
+    2004: 48 8d 5c 24 10               	leaq	0x10(%rsp), %rbx
+    2009: 48 89 df                     	movq	%rbx, %rdi
+    200c: be 41 00 00 00               	movl	$0x41, %esi
+    2011: e8 00 00 00 00               	callq	0x2016 <trace_ret_dup+0x2016>
+		0000000000002012:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    2016: 4c 89 f7                     	movq	%r14, %rdi
+    2019: 48 83 c7 4c                  	addq	$0x4c, %rdi
+    201d: be 10 00 00 00               	movl	$0x10, %esi
+    2022: 48 89 da                     	movq	%rbx, %rdx
+    2025: e8 00 00 00 00               	callq	0x202a <trace_ret_dup+0x202a>
+		0000000000002026:  R_X86_64_PLT32	bpf_probe_read_kernel_str-0x4
+    202a: 48 8b 7c 24 08               	movq	0x8(%rsp), %rdi
+    202f: be 68 00 00 00               	movl	$0x68, %esi
+    2034: 4c 89 fa                     	movq	%r15, %rdx
+    2037: e8 00 00 00 00               	callq	0x203c <trace_ret_dup+0x203c>
+		0000000000002038:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    203c: 48 8b 84 24 b0 00 00 00      	movq	0xb0(%rsp), %rax
+    2044: f6 40 04 08                  	testb	$0x8, 0x4(%rax)
+    2048: 4c 8b bc 24 a0 00 00 00      	movq	0xa0(%rsp), %r15
+    2050: 74 1c                        	je	0x206e <trace_ret_dup+0x206e>
+    2052: 48 8d 35 00 00 00 00         	leaq	(%rip), %rsi            # 0x2059 <trace_ret_dup+0x2059>
+		0000000000002055:  R_X86_64_PC32	stack_addresses-0x4
+    2059: ba 00 01 00 00               	movl	$0x100, %edx            # imm = 0x100
+    205e: 4c 89 ff                     	movq	%r15, %rdi
+    2061: e8 00 00 00 00               	callq	0x2066 <trace_ret_dup+0x2066>
+		0000000000002062:  R_X86_64_PLT32	bpf_get_stackid-0x4
+    2066: 85 c0                        	testl	%eax, %eax
+    2068: 78 04                        	js	0x206e <trace_ret_dup+0x206e>
+    206a: 41 89 46 78                  	movl	%eax, 0x78(%r14)
+    206e: 41 0f b7 86 8a 7d 00 00      	movzwl	0x7d8a(%r14), %eax
+    2076: 3d 00 7d 00 00               	cmpl	$0x7d00, %eax           # imm = 0x7D00
+    207b: b9 00 7d 00 00               	movl	$0x7d00, %ecx           # imm = 0x7D00
+    2080: 0f 42 c8                     	cmovbl	%eax, %ecx
+    2083: 81 c1 89 00 00 00            	addl	$0x89, %ecx
+    2089: 44 0f b7 c1                  	movzwl	%cx, %r8d
+    208d: 48 8d 35 00 00 00 00         	leaq	(%rip), %rsi            # 0x2094 <trace_ret_dup+0x2094>
+		0000000000002090:  R_X86_64_PC32	events-0x4
+    2094: ba ff ff ff ff               	movl	$0xffffffff, %edx       # imm = 0xFFFFFFFF
+    2099: 4c 89 ff                     	movq	%r15, %rdi
+    209c: 4c 89 f1                     	movq	%r14, %rcx
+    209f: e8 00 00 00 00               	callq	0x20a4 <trace_ret_dup+0x20a4>
+		00000000000020a0:  R_X86_64_PLT32	bpf_perf_event_output-0x4
+    20a4: 48 8d 35 00 00 00 00         	leaq	(%rip), %rsi            # 0x20ab <trace_ret_dup+0x20ab>
+		00000000000020a7:  R_X86_64_PC32	generic_sys_exit_tails-0x4
+    20ab: 4c 89 ff                     	movq	%r15, %rdi
+    20ae: ba 20 00 00 00               	movl	$0x20, %edx
+    20b3: e8 00 00 00 00               	callq	0x20b8 <trace_ret_dup+0x20b8>
+		00000000000020b4:  R_X86_64_PLT32	bpf_tail_call-0x4
+    20b8: 31 c0                        	xorl	%eax, %eax
+    20ba: 48 81 c4 b8 00 00 00         	addq	$0xb8, %rsp
+    20c1: 5b                           	popq	%rbx
+    20c2: 41 5c                        	popq	%r12
+    20c4: 41 5d                        	popq	%r13
+    20c6: 41 5e                        	popq	%r14
+    20c8: 41 5f                        	popq	%r15
+    20ca: 5d                           	popq	%rbp
+    20cb: c3                           	retq
+    20cc: 49 8d be 18 7e 00 00         	leaq	0x7e18(%r14), %rdi
+    20d3: 4c 89 e2                     	movq	%r12, %rdx
+    20d6: 48 83 c2 10                  	addq	$0x10, %rdx
+    20da: be 00 01 00 00               	movl	$0x100, %esi            # imm = 0x100
+    20df: e8 00 00 00 00               	callq	0x20e4 <trace_ret_dup+0x20e4>
+		00000000000020e0:  R_X86_64_PLT32	bpf_probe_read_kernel-0x4
+    20e4: 48 85 c0                     	testq	%rax, %rax
+    20e7: 75 cf                        	jne	0x20b8 <trace_ret_dup+0x20b8>
+    20e9: 41 0f b7 44 24 0e            	movzwl	0xe(%r12), %eax
+    20ef: 66 41 89 46 7e               	movw	%ax, 0x7e(%r14)
+    20f4: e9 0b e7 ff ff               	jmp	0x804 <trace_ret_dup+0x804>
+    20f9: 31 c0                        	xorl	%eax, %eax
+    20fb: e9 db fa ff ff               	jmp	0x1bdb <trace_ret_dup+0x1bdb>

@@ -1,0 +1,3 @@
+native-link: entry=trace_debugfs_create_dir (5598 bytes), 1 reachable symbol(s) total
+  - trace_debugfs_create_dir (vaddr 0x0, 5598 bytes) [entry]
+native-link: wrote proof object 6012 bytes, 171 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

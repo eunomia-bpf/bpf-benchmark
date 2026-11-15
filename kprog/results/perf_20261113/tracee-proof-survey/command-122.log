@@ -1,0 +1,3 @@
+native-link: entry=tracepoint__cgroup__cgroup_attach_task (5336 bytes), 1 reachable symbol(s) total
+  - tracepoint__cgroup__cgroup_attach_task (vaddr 0x0, 5336 bytes) [entry]
+native-link: wrote proof object 5753 bytes, 164 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

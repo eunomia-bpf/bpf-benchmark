@@ -1,0 +1,3 @@
+native-link: entry=tracepoint__task__task_rename (5239 bytes), 1 reachable symbol(s) total
+  - tracepoint__task__task_rename (vaddr 0x0, 5239 bytes) [entry]
+native-link: wrote proof object 5656 bytes, 162 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

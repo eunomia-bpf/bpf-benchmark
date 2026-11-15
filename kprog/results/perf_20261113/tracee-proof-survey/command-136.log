@@ -1,0 +1,3 @@
+native-link: entry=sched_process_fork_signal (2844 bytes), 1 reachable symbol(s) total
+  - sched_process_fork_signal (vaddr 0x2f60, 2844 bytes) [entry]
+native-link: wrote proof object 2848 bytes, 69 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

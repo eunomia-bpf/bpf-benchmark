@@ -1,0 +1,3 @@
+native-link: entry=trace_security_task_setrlimit (5320 bytes), 1 reachable symbol(s) total
+  - trace_security_task_setrlimit (vaddr 0x0, 5320 bytes) [entry]
+native-link: wrote proof object 5737 bytes, 166 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

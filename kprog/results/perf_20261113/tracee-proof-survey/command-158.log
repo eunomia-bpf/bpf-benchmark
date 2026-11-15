@@ -1,0 +1,3 @@
+native-link: entry=uprobe__features_fallback_minimal_tailcall (1193 bytes), 1 reachable symbol(s) total
+  - uprobe__features_fallback_minimal_tailcall (vaddr 0x0, 1193 bytes) [entry]
+native-link: wrote proof object 1197 bytes, 49 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

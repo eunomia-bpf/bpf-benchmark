@@ -1,0 +1,3 @@
+native-link: entry=trace_ret_inotify_find_inode (11366 bytes), 1 reachable symbol(s) total
+  - trace_ret_inotify_find_inode (vaddr 0x0, 11366 bytes) [entry]
+native-link: wrote proof object 11790 bytes, 323 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

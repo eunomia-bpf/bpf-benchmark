@@ -1,0 +1,3 @@
+native-link: entry=syscall__execveat_enter (16483 bytes), 1 reachable symbol(s) total
+  - syscall__execveat_enter (vaddr 0x0, 16483 bytes) [entry]
+native-link: wrote proof object 16491 bytes, 328 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

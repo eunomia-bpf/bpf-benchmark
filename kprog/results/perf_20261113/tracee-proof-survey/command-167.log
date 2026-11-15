@@ -1,0 +1,3 @@
+native-link: entry=lkm_seeker_proc_tail (60411 bytes), 1 reachable symbol(s) total
+  - lkm_seeker_proc_tail (vaddr 0x0, 60411 bytes) [entry]
+native-link: wrote proof object 60689 bytes, 1774 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

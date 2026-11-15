@@ -1,0 +1,3 @@
+native-link: entry=trace_ret_vfs_read_tail (12281 bytes), 1 reachable symbol(s) total
+  - trace_ret_vfs_read_tail (vaddr 0x0, 12281 bytes) [entry]
+native-link: wrote proof object 12794 bytes, 335 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

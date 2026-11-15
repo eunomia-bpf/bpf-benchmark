@@ -1,0 +1,3 @@
+native-link: entry=trace_ret_kallsyms_lookup_name (5267 bytes), 1 reachable symbol(s) total
+  - trace_ret_kallsyms_lookup_name (vaddr 0x0, 5267 bytes) [entry]
+native-link: wrote proof object 5684 bytes, 167 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

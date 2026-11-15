@@ -1,0 +1,3 @@
+native-link: entry=trace_do_sigaction (6525 bytes), 1 reachable symbol(s) total
+  - trace_do_sigaction (vaddr 0x0, 6525 bytes) [entry]
+native-link: wrote proof object 6942 bytes, 177 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

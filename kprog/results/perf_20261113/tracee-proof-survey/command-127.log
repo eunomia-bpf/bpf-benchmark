@@ -1,0 +1,3 @@
+native-link: entry=tracepoint__exec_test (38880 bytes), 1 reachable symbol(s) total
+  - tracepoint__exec_test (vaddr 0x0, 38880 bytes) [entry]
+native-link: wrote proof object 39300 bytes, 1031 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o

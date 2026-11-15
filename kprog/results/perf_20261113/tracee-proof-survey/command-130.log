@@ -1,0 +1,3 @@
+native-link: entry=tracepoint__sched__sched_process_exec (13563 bytes), 1 reachable symbol(s) total
+  - tracepoint__sched__sched_process_exec (vaddr 0x0, 13563 bytes) [entry]
+native-link: wrote proof object 14162 bytes, 347 reloc(s) -> /var/tmp/kprog-tmp/perf/native-proof-survey/proof.o
