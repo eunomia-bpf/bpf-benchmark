@@ -1,0 +1,2 @@
+    PID    PPID     ELAPSED   RSS COMMAND
+ 898194  898102       00:42 3110816 /usr/lib/llvm-18/bin/clang -include /workspaces/repository/kprog/stock-path/bin/../include/stock_native_input.h -w -g -O3 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I /workspaces/repository/vendor/libbpf/include/uapi -I /workspaces/repository/vendor/libbpf/src -I /usr/include/x86_64-linux-gnu -emit-llvm -c /var/tmp/kprog-tmp/perf/otel-whole-word-checked/trusted_x86.bpf.i -o /var/tmp/kprog-tmp/perf/otel-whole-word-checked/trusted_x86.bpf.bounds-input.bc

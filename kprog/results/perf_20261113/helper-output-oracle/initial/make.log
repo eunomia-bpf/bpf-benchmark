@@ -1,0 +1,7 @@
+taskset -c 8-11 prlimit --as=8589934592 -- python3 /workspaces/repository/kprog/test/check_load_oracles.py --build /var/tmp/kprog-tmp/perf/load-writeback --output /workspaces/kprog-raw/perf/20261115-helper-output-oracle/current
+x86 mov-load route host cross-check: OK (713 cases)
+x86 stack arm route host cross-check: OK (117782 cases)
+stack output lifetime: 160 pointer/memset/memcpy/helper cases pass
+load writeback: 14 saved-pointer/overlap/RSP/recovery cases pass
+x86 store route host cross-check: OK (1292621 cases)
+stack output lifetime: 160 pointer/memset/memcpy/helper cases pass

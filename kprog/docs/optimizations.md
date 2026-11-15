@@ -290,3 +290,12 @@ match, independent store1,292,621 checks pass. Old removed-helper oracle
 still has its baseline link failure, reported explicitly. All LTO stays
 together; full OTel B/stack/app and runtime claims remain open. Exact
 identities/commands: `../results/perf_20261113/store-writeback/report.md`.
+
+2026-11-15 existing write-helper lifetime validation (0e89749a9/dd9be72a8):
+current x86/ARM64 output oracle passes200 cases each with explicit zero/nonzero
+free inputs, concrete output pointers and caller-fact checks. The retired
+WRITE_ARG_PTR/fault test is replaced; full scoped load/store target now exits0.
+This is validation of existing LTO/helper behavior, no production change or
+speed claim. Earlier failures and corrected kernel-outcome assumption remain
+in `../results/perf_20261113/helper-output-oracle/report.md`; full host-input
+matching, actual OTel B/app and M4–M6 stay open.
