@@ -182,9 +182,6 @@ struct LookupSiteSpec {
     index_mask: u32,
     value_offset: u32,
     percpu_base_addr: u64,
-    /// Optional BPF map name observed at the source helper call. The kernel
-    /// truncates map names to BPF_OBJ_NAME_LEN - 1, so target-specific
-    /// linkers must compare this field using kernel-visible truncation.
 }
 
 #[derive(Clone, Copy, Debug)]
