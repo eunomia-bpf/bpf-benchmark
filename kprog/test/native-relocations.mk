@@ -240,6 +240,7 @@ bmi2-contract:
 	python3 $(ROOT)/kprog/formal/tools/generate_x86_specialization_spec.py --check
 	install -d /var/tmp/kprog-tmp/perf/bmi2-specialization
 	taskset -c 8-11 prlimit --as=8589934592 -- $(MAKE) -C $(ROOT)/kprog/formal -f $(ROOT)/kprog/test/native-relocations.mk bmi2-contract-host ROOT=$(ROOT)
+	$(MAKE) -r -f $(ROOT)/kprog/test/native-relocations.mk bmi2-contract-lean
 
 .PHONY: bmi2-contract-host
 bmi2-contract-host:
@@ -247,4 +248,7 @@ bmi2-contract-host:
 	/var/tmp/kprog-tmp/perf/bmi2-specialization/chain
 	clang-18 -Wall -Wextra -O2 -I. -I../x86 -I../../kprog -I../../vendor/libbpf/src oracles/test_x86_specialization_host.c -o /var/tmp/kprog-tmp/perf/bmi2-specialization/specialization
 	/var/tmp/kprog-tmp/perf/bmi2-specialization/specialization
-	lake build KProgFormal.X86Specialization
+
+.PHONY: bmi2-contract-lean
+bmi2-contract-lean:
+	cd $(ROOT)/kprog/formal && taskset -c 8-11 prlimit --as=8589934592 -- env LEAN_NUM_THREADS=2 lake build KProgFormal.X86Specialization
