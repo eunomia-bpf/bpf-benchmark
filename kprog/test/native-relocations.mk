@@ -494,9 +494,9 @@ $(BUILD)/native-map-relocs: $(ROOT)/kprog/test/native_image_map_reloc.c
 native-map-relocs: $(BUILD)/native-map-relocs
 	install -d $(OUTPUT)
 	sha256sum $(KDIR)/arch/x86/boot/bzImage $(ROOT)/kinsn/module/x86/build/bpf_x86_native_lab.ko $(BUILD)/native-map-relocs $(KERNEL_LAYOUT) > $(OUTPUT)/input-sha256.txt
-	taskset -c 16-17 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --rodir $(OUTPUT)/inputs=$(BUILD) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-native-map-relocs OUTPUT=$(OUTPUT)'
+	taskset -c 16-17 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --rodir $(OUTPUT)/inputs=$(BUILD) --rodir $(OUTPUT)/layout=$(KERNEL_LAYOUT_BUILD) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-native-map-relocs OUTPUT=$(OUTPUT)'
 
 guest-native-map-relocs:
 	mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 	insmod $(ROOT)/kinsn/module/x86/build/bpf_x86_native_lab.ko
-	$(OUTPUT)/inputs/native-map-relocs $$(python3 -c 'import json; print(json.load(open("$(KERNEL_LAYOUT)"))["array"]["value"])') > $(OUTPUT)/result.jsonl 2> $(OUTPUT)/verifier.log
+	$(OUTPUT)/inputs/native-map-relocs $$(python3 -c 'import json; print(json.load(open("$(OUTPUT)/layout/kernel-layout.json"))["array"]["value"])') > $(OUTPUT)/result.jsonl 2> $(OUTPUT)/verifier.log
