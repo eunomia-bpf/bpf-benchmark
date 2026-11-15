@@ -21,7 +21,7 @@ from helper_abi import helper_idents, is_helper_symbol
 from x86_abi import check_definedness
 import kfunc_codegen
 from x86_relative_tables import (NativeEffects, ReadonlyBytes, instruction_effects,
-                                 readonly_code_relocations)
+                                 readonly_code_relocations, lower_relative_tables)
 
 from generated_x86_alu_decode import ALU_AUX
 from generated_x86_full_condition import CC_AUX
@@ -104,6 +104,7 @@ class NativeInsn:
     source_pointer: tuple[bool, str] | None = None
     kernel_function: dict | None = None
     effects: NativeEffects | None = None
+    table_dispatch: tuple[tuple[int, int], ...] | None = None
 
 
 @dataclass(frozen=True)
@@ -1287,7 +1288,8 @@ def indirect_targets(insns: list[NativeInsn], exit_addr: int | None = None,
         outgoing = tuple(outgoing)
         indirect = is_indirect_branch(insn)
         if indirect:
-            values = read(incoming, args[0])
+            values = (frozenset(('code', target) for _, target in insn.table_dispatch)
+                      if insn.table_dispatch is not None else read(incoming, args[0]))
             if values is not None:
                 for kind, target in values:
                     if kind == "code":
@@ -1328,7 +1330,8 @@ def indirect_targets(insns: list[NativeInsn], exit_addr: int | None = None,
             continue
         if insn.addr not in states:
             continue
-        values = read(states[insn.addr], insn.operands[0])
+        values = (frozenset(('code', target) for _, target in insn.table_dispatch)
+                  if insn.table_dispatch is not None else read(states[insn.addr], insn.operands[0]))
         if values is None:
             raise ValueError(f"unresolved finite indirect target at 0x{insn.addr:x}: {insn.raw}")
         for kind, target in values:
@@ -1473,6 +1476,14 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
     branch_macro = "X86_SIM_X86_SUB_JCC" if subroutine else "X86_SIM_X86_JCC"
     jump_macro = "X86_SIM_X86_SUB_JMP" if subroutine else "X86_SIM_X86_JMP"
     return_targets = return_targets or set()
+    if insn.table_dispatch is not None:
+        index = reg_info(insn.operands[0])[0]
+        lines.extend([f'{indent}/* Image-bound relative code table; dead private address computation. */',
+                      f'{indent}switch (X86_SIM_L_READ_REG({index}) << 2) {{'])
+        for offset, target in insn.table_dispatch:
+            lines.append(f'{indent}case {offset}ULL: goto x86_l_{target:x};')
+        lines.extend([f'{indent}default: __x86_sim_unresolved_indirect_target();', f'{indent}}}'])
+        return
     if is_indirect_branch(insn):
         append_indirect(lines, insn, (targets or {}).get(insn.addr, frozenset()), next_addr, indent)
         return
@@ -1764,6 +1775,18 @@ def render_program(name: str, insns: list[NativeInsn],
     insns = source_annotations(insns)
     subfunctions = {symbol: source_annotations(body) for symbol, body in subfunctions.items()}
     all_insns = [*insns, *(i for fn in subfunctions.values() for i in fn)]
+    lowered = {i.addr: i for i in lower_relative_tables(all_insns, rodata16,
+        sys.modules[__name__], exit_addr, {insns[0].addr, *(fn[0].addr for fn in subfunctions.values() if fn)})}
+    insns = [lowered[i.addr] for i in insns if i.addr in lowered]
+    subfunctions = {name: [lowered[i.addr] for i in body if i.addr in lowered]
+                    for name, body in subfunctions.items()}
+    all_insns = [*insns, *(i for fn in subfunctions.values() for i in fn)]
+    referenced_after_lowering = {i.reloc_symbol for i in all_insns}
+    if any(getattr(data, 'code_relocations', ()) and name in referenced_after_lowering
+           for name, data in rodata16.items()):
+        raise ValueError('readonly code relocation is referenced outside a lowered table')
+    rodata16 = {name: data for name, data in rodata16.items()
+                if not getattr(data, 'code_relocations', ()) or name in referenced_after_lowering}
     has_indirect = any(is_indirect_branch(i) for i in all_insns)
     targets = indirect_targets(all_insns, exit_addr, {
         insns[0].addr, *(fn[0].addr for fn in subfunctions.values() if fn)

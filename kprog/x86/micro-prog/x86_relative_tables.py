@@ -1,6 +1,9 @@
 """Image-bound facts for lowering compiler-generated relative code tables."""
 from dataclasses import dataclass
+from dataclasses import replace
+from collections import deque
 import json
+from helper_abi import helper_prototypes
 
 
 @dataclass(frozen=True)
@@ -60,3 +63,176 @@ def readonly_code_relocations(elf, section_index, symbol):
                 raise ValueError('unsupported nested native readonly relocation')
             result.append((offset-start, target['st_value'] + relocation['r_addend'] - (offset-start)))
     return tuple(sorted(result))
+
+
+def lower_relative_tables(insns, rodata, decode, exit_addr, function_starts):
+    """Lower a table's control flow only after its temporary state is dead.
+
+    The native image retains its instructions. Specialization may eliminate
+    private table-base/result/flags definitions whose values cannot be observed
+    after dispatch. Memory, other registers and the original case bodies stay.
+    """
+    if not any(getattr(data, 'code_relocations', ()) for data in rodata.values()):
+        return insns
+    by_addr = {i.addr: i for i in insns}
+    following = {a.addr: b.addr for a, b in zip(insns, insns[1:])}
+    candidates = []
+    for window in zip(insns, insns[1:], insns[2:], insns[3:]):
+        lea, load, add, jump = window
+        if (lea.mnemonic != 'lea' or lea.reloc_symbol not in rodata or
+                not getattr(rodata[lea.reloc_symbol], 'code_relocations', ()) or
+                lea.reloc_type != 'R_X86_64_PC32' or '[rip' not in lea.raw.lower() or
+                load.mnemonic != 'movsxd' or add.mnemonic != 'add' or jump.mnemonic != 'jmp'):
+            continue
+        base = decode.reg_info(lea.operands[0])
+        destination = decode.reg_info(load.operands[0])
+        if base is None or destination is None or base[1] != 64 or destination[1] != 64:
+            continue
+        memory_base, index, scale, displacement = decode.parse_mem_terms(load.operands[1])
+        index_info = next((name for name, info in decode.REGS.items()
+                           if info == (index, 64, 0)), None)
+        if (memory_base != base[0] or index_info is None or index == base[0] or scale != 2 or
+                displacement != 0 or destination[0] == base[0] or
+                base[0] == 'X86_RSP' or destination[0] == 'X86_RSP' or
+                decode.reg_info(add.operands[0]) != destination or
+                decode.reg_info(add.operands[1]) != base or
+                decode.reg_info(jump.operands[0]) != destination):
+            continue
+        candidates.append(dict(window=window, symbol=lea.reloc_symbol,
+                               base=lea.symbol_offset, scratch=(base[0], destination[0]),
+                               index=index_info))
+    entries = set(function_starts)
+    for insn in insns:
+        target = decode.code_address(insn)
+        if target in by_addr:
+            entries.add(target)
+        if insn.mnemonic == 'call' and insn.addr in following:
+            entries.add(following[insn.addr])
+        if insn.mnemonic == 'call' or insn.mnemonic == 'jmp' or insn.mnemonic in decode.CC_AUX:
+            if insn.operands and decode.has_direct_branch_target(insn.operands[0]):
+                entries.add(insn.reloc_target if insn.reloc_target is not None
+                            else decode.branch_target(insn.operands[0]))
+    table_targets = {}
+    for candidate in candidates:
+        base = candidate['base']
+        end = min((c['base'] for c in candidates if c['symbol'] == candidate['symbol'] and c['base'] > base),
+                  default=len(rodata[candidate['symbol']]))
+        choices = []
+        for offset, delta in rodata[candidate['symbol']].code_relocations:
+            if not base <= offset < end:
+                continue
+            if offset != base + 4 * len(choices):
+                break
+            target = delta + base
+            if target not in by_addr:
+                raise ValueError('relative code-table target is not an instruction')
+            choices.append((offset-base, target))
+            entries.add(target)
+        if not choices:
+            raise ValueError('relative code table has no complete relocated entry')
+        candidate['choices'] = tuple(choices)
+        table_targets[candidate['window'][-1].addr] = tuple(target for _, target in choices)
+
+    full = (1 << 64) - 1
+
+    def fused(candidate):
+        lea, _, _, jump = candidate['window']
+        index = candidate['index']
+        return replace(lea, mnemonic='jmp', operands=(index,),
+            reloc_symbol=None, reloc_type=None, reloc_target=None, symbol_offset=0,
+            end_addr=jump.end_addr, table_dispatch=candidate['choices'],
+            effects=NativeEffects(((decode.reg_info(index)[0], full),), (), 0, 0))
+
+    provisional = {c['window'][0].addr: fused(c) for c in candidates}
+    interiors = {i.addr for c in candidates for i in c['window'][1:]}
+    provisional_insns = [provisional.get(i.addr, i) for i in insns if i.addr not in interiors]
+    call_targets = decode.indirect_targets(provisional_insns, exit_addr, function_starts)
+
+    all_flags = (1 << 32) - 1
+    caller_saved = ('X86_RAX', 'X86_RCX', 'X86_RDX', 'X86_RSI', 'X86_RDI',
+                    'X86_R8', 'X86_R9', 'X86_R10', 'X86_R11')
+    arguments = ('X86_RDI', 'X86_RSI', 'X86_RDX', 'X86_RCX', 'X86_R8', 'X86_R9')
+
+    def dead(candidate):
+        scratch = candidate['scratch']
+        add = candidate['window'][2]
+        if add.effects is None:
+            raise ValueError('relative table lowering requires native instruction effects')
+        initial = (full, full, add.effects.flags_written)
+        pending = deque((target, initial) for _, target in candidate['choices'])
+        visited = {}
+        while pending:
+            addr, live = pending.popleft()
+            old = visited.get(addr)
+            merged = live if old is None else tuple(a | b for a, b in zip(old, live))
+            if old == merged:
+                continue
+            visited[addr] = merged
+            live = merged
+            if addr == exit_addr:
+                if any(reg == 'X86_RAX' and mask for reg, mask in zip(scratch, live[:2])):
+                    return False
+                continue
+            insn = by_addr[addr]
+            if insn.effects is None:
+                raise ValueError('relative table liveness lacks image-bound instruction effects')
+            reads, writes = dict(insn.effects.reads), dict(insn.effects.writes)
+            flags_read, flags_written = insn.effects.flags_read, insn.effects.flags_written
+            if insn.mnemonic == 'call':
+                prototype = helper_prototypes().get(insn.reloc_symbol)
+                prototypes = [prototype] if prototype is not None else []
+                if not prototypes:
+                    for kind, target in call_targets.get(insn.addr, ()):
+                        if kind != 'scalar' or target not in decode.helper_idents():
+                            prototypes = []
+                            break
+                        prototypes.append(helper_prototypes()[decode.helper_idents()[target]])
+                if prototypes:
+                    argc = max(0 if p.arguments == 'void' else len(p.arguments.split(',')) for p in prototypes)
+                    flags_read = 0  # The helper ABI has no arithmetic-flag input.
+                else:
+                    argc, flags_read = 6, all_flags
+                for reg in arguments[:argc]:
+                    reads[reg] = full
+                for reg in caller_saved:
+                    writes[reg] = full
+                flags_written = all_flags
+            if (any(reads.get(reg, 0) & mask for reg, mask in zip(scratch, live[:2])) or
+                    flags_read & live[2]):
+                return False
+            live = tuple(mask & ~writes.get(reg, 0) for reg, mask in zip(scratch, live[:2])) + (
+                live[2] & ~flags_written,)
+            if insn.mnemonic == 'ret':
+                if any(reg == 'X86_RAX' and mask for reg, mask in zip(scratch, live[:2])):
+                    return False
+                continue
+            if not any(live):
+                continue
+            if insn.addr in table_targets:
+                children = table_targets[insn.addr]
+            elif insn.mnemonic == 'jmp':
+                if not decode.has_direct_branch_target(insn.operands[0]):
+                    return False
+                children = (insn.reloc_target if insn.reloc_target is not None
+                            else decode.branch_target(insn.operands[0]),)
+            elif insn.mnemonic in decode.CC_AUX and insn.mnemonic.startswith('j'):
+                children = (following[addr], insn.reloc_target if insn.reloc_target is not None
+                            else decode.branch_target(insn.operands[0]))
+            else:
+                children = (following.get(addr, exit_addr),)
+            for child in children:
+                if child != exit_addr and child not in by_addr:
+                    raise ValueError('relative table liveness has an unknown CFG successor')
+                pending.append((child, live))
+        return True
+
+    replacements, removed = {}, set()
+    for candidate in candidates:
+        lea, load, add, jump = candidate['window']
+        if entries.intersection((load.addr, add.addr, jump.addr)):
+            raise ValueError('relative table computation has an external CFG entry')
+        if not dead(candidate):
+            raise ValueError('relative table computation has live register or flag results')
+        replacements[lea.addr] = fused(candidate)
+        removed.update((load.addr, add.addr, jump.addr))
+    return [replacements.get(insn.addr, insn) for insn in insns if insn.addr not in removed]
