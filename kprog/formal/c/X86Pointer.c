@@ -253,3 +253,10 @@ void kprog_x86_store_selectors(struct x86_sim_register_state *state,
     output->displacement=__x86_l_disp;
     output->value=__x86_l_value;
 }
+
+__u8 kprog_x86_xmm0_arm(__u64 stack)
+{
+    __u8 arm;
+    KPROG_X86_XMM0_ARM_INTO(arm,stack);
+    return arm;
+}

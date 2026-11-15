@@ -1732,14 +1732,12 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			void *__x86_l_addr =                              \
 				KPROG_X86_XMM0_ADDS_DISP(                 \
 					__x86_l_base_none, __x86_l_base_form) \
-					? (__u8 *)__x86_l_base_ptr        \
-						  + __x86_l_disp          \
+					? KPROG_PTR_ADD64_NATIVE(__x86_l_base_ptr, __x86_l_disp)          \
 					: __x86_l_base_ptr;               \
 			X86_SIM_L_LOAD_ADDR_TAGGED_INTO(__x86_xmm0_lo, __x86_l_addr,\
 				X86_WIDTH_64, X86_SIM_L_REG_TAG(SRC));                            \
 			X86_SIM_L_LOAD_ADDR_TAGGED_INTO(__x86_xmm0_hi,              \
-				(__u8 *)__x86_l_addr                       \
-					+ KPROG_X86_XMM0_LANE_OFFSET(1),  \
+				KPROG_PTR_ADD64_NATIVE(__x86_l_addr, KPROG_X86_XMM0_LANE_OFFSET(1)),  \
 				X86_WIDTH_64, X86_SIM_L_REG_TAG(SRC));                            \
 			break;                                            \
 		}                                                         \
@@ -1771,14 +1769,12 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			void *__x86_l_addr =                              \
 				KPROG_X86_XMM0_ADDS_DISP(                 \
 					__x86_l_base_none, __x86_l_base_form) \
-					? (__u8 *)__x86_l_base_ptr        \
-						  + __x86_l_disp          \
+					? KPROG_PTR_ADD64_NATIVE(__x86_l_base_ptr, __x86_l_disp)          \
 					: __x86_l_base_ptr;               \
 			X86_SIM_L_STORE_ADDR_TAGGED(__x86_l_addr, X86_WIDTH_64,  \
 					     __x86_xmm0_lo, X86_SIM_L_REG_TAG(DST));              \
 			X86_SIM_L_STORE_ADDR_TAGGED(                             \
-				(__u8 *)__x86_l_addr                       \
-					+ KPROG_X86_XMM0_LANE_OFFSET(1),  \
+				KPROG_PTR_ADD64_NATIVE(__x86_l_addr, KPROG_X86_XMM0_LANE_OFFSET(1)),  \
 				X86_WIDTH_64, __x86_xmm0_hi, X86_SIM_L_REG_TAG(DST));             \
 			break;                                            \
 		}                                                         \

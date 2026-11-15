@@ -16,6 +16,7 @@
 static unsigned long reads,handlers,stores;
 static unsigned draws,copies;
 static int writing;
+static int paired;
 static __u64 choice;
 static const void *expected_source;
 static void *expected_destination;
@@ -33,7 +34,8 @@ __u64 kprog_c_pointer_bits(const void *pointer)
 { (void)pointer; check(0,"unexpected context exposure"); abort(); }
 void __builtin_memcpy_aligned(void *dst,const void *src,size_t size,size_t alignment)
 {
-    check((writing?dst==expected_destination:src==expected_source) && size==expected_size && alignment==1,"physical copy source/destination/size/alignment");
+    size_t lane=paired?copies*8:0;
+    check((writing?dst==(char *)expected_destination+lane:src==(const char *)expected_source+lane) && size==expected_size && alignment==1,"physical copy source/destination/size/alignment");
     copies++; memcpy(dst,src,size);
 }
 static __u64 little(const __u8 *p,unsigned n)
@@ -144,8 +146,9 @@ static void handler_cases(void)
     }
 }
 static const void *fault_address;
+static unsigned fault_draws;
 static void fault(int sig,siginfo_t *info,void *context)
-{ (void)context;_exit(sig==SIGSEGV && info->si_addr==fault_address && !draws?0:1); }
+{ (void)context;_exit(sig==SIGSEGV && info->si_addr==fault_address && draws==fault_draws?0:1); }
 static void guarded(void)
 {
     long page=sysconf(_SC_PAGESIZE);check(page>0,"page size");
@@ -234,9 +237,121 @@ static void store_cases(void)
     }
     check(!munmap(memory_guard,page*2),"store guard unmap");writing=0;
 }
+/* Two distinct lanes, absolute-load/null-store asymmetry, released observations
+ * and complete metadata/state frames. These execute the exported C bodies. */
+static void xmm_cases(void)
+{
+    const unsigned capacities[]={16,64,200,376},tags[]={0,1,2,3,4,6,255};
+    unsigned cases=0;
+    _Alignas(8) __u8 bytes[512],initial_bytes[512],expected_bytes[512];
+    __u8 fact_tags[47],expected_tags[47];void *pointers[47],*expected_pointers[47];
+    struct kprog_x86_stack_fact facts[47];
+    struct kprog_x86_arena arena={.b=bytes+64,.q=(void *)(bytes+64),.w=(void *)(bytes+64),.d=(void *)(bytes+64)};
+    for (unsigned i=0;i<47;i++) { facts[i].tag=&fact_tags[i];facts[i].pointer=&pointers[i]; }
+    for (unsigned c=0;c<4;c++) for (unsigned ti=0;ti<7;ti++)
+    for (unsigned route=0;route<3;route++) for (unsigned index=0;index<2;index++)
+    for (unsigned release=0;release<3;release++) for (unsigned store=0;store<2;store++)
+    for (unsigned odd=0;odd<2;odd++) {
+        if (route==2 && store && !index) continue; /* Null store needs a full-width index. */
+        unsigned capacity=capacities[c],at=capacity==16?0:(odd?1:capacity-16);
+        __s64 off=(__s64)at-capacity,sp=off+(release==0?0:release==1?3:12);
+        unsigned reg=route==0?X86_RSP:route==1?X86_RSI:X86_REG_NONE;
+        struct x86_sim_register_state state,expected;
+        memset(&state,0x6b,sizeof(state));state.is_xdp=0;state.abi_kind=X86_SIM_ABI_KIND_RAW;
+        state.rsp.ptr=(void *)(intptr_t)sp;
+        __u64 aux=X86_MEM_AUX(index?X86_RDX:X86_REG_NONE,0),imm;
+        state.gpr_cells[2].value.ptr=(void *)(intptr_t)1;state.gpr_cells[2].tag=0;
+        if (route==0) imm=(__u64)(off-sp-index);
+        else if (route==1) {
+            state.gpr_cells[6].value.ptr=bytes+64+at-3;state.gpr_cells[6].tag=tags[ti];imm=3-index;
+        } else if (!store) imm=(__u64)(uintptr_t)(bytes+64+at-index);
+        else { imm=3;state.gpr_cells[2].value.ptr=(void *)((uintptr_t)(bytes+64+at)-3); }
+        state.xmm0_lo=0x81a2b3c4d5e6f708ULL;state.xmm0_hi=0x192a3b4c5d6e7f80ULL;
+        for (unsigned i=0;i<512;i++) bytes[i]=(__u8)(i*31+0x35);
+        for (unsigned i=0;i<47;i++) { fact_tags[i]=(i%3)?4:1;pointers[i]=bytes+i; }
+        memcpy(initial_bytes,bytes,sizeof(bytes));memcpy(expected_bytes,bytes,sizeof(bytes));
+        memcpy(expected_tags,fact_tags,sizeof(fact_tags));memcpy(expected_pointers,pointers,sizeof(pointers));
+        memcpy(&expected,&state,sizeof(state));choice=odd?0x1020304050607081ULL:0xf1e2d3c4b5a69788ULL;reset();
+        unsigned recovery=!store && route==1 && tags[ti]==0;
+        unsigned skip=recovery && odd,draw_count=recovery;
+        if (store) {
+            for (unsigned i=0;i<16;i++) {
+                __u64 v=i<8?state.xmm0_lo:state.xmm0_hi;
+                expected_bytes[64+at+i]=(__u8)(v>>(8*(i%8)));
+                if ((route==0 || (route==1 && tags[ti]==4)) && off+i<sp) {
+                    expected_bytes[64+at+i]=(__u8)choice;draw_count++;
+                }
+            }
+            for (unsigned i=0;i<(capacity+7)/8;i++)
+                if (route==2 || (route==1 && tags[ti]==0) ||
+                    ((route==0 || (route==1 && tags[ti]==4)) && i*8<at+16 && i*8+8>at)) {
+                    expected_tags[i]=0;expected_pointers[i]=NULL;
+                }
+        } else if (!skip) {
+            expected.xmm0_lo=little(initial_bytes+64+at,8);expected.xmm0_hi=little(initial_bytes+72+at,8);
+            if (route==0 || (route==1 && tags[ti]==4)) {
+                if (off<sp) { expected.xmm0_lo=choice;draw_count++; }
+                if (off+8<sp) { expected.xmm0_hi=choice;draw_count++; }
+            }
+        }
+        paired=1;writing=store;expected_size=8;expected_source=expected_destination=bytes+64+at;
+        if (store) kprog_x86_store_xmm0(&state,&arena,facts,capacity,reg,aux,imm);
+        else kprog_x86_load_xmm0(&state,&arena,facts,capacity,reg,aux,imm);
+        check(!memcmp(&state,&expected,sizeof(state)) && !memcmp(bytes,expected_bytes,sizeof(bytes)),"XMM low/high address/value/whole frame");
+        if (draws!=draw_count || memcmp(fact_tags,expected_tags,sizeof(fact_tags)) || memcmp(pointers,expected_pointers,sizeof(pointers)))
+            fprintf(stderr,"XMM cap=%u tag=%u route=%u index=%u release=%u store=%u odd=%u draws=%u/%u\n",capacity,tags[ti],route,index,release,store,odd,draws,draw_count);
+        check(draws==draw_count && !memcmp(fact_tags,expected_tags,sizeof(fact_tags)) && !memcmp(pointers,expected_pointers,sizeof(pointers)),"XMM recovery/release/metadata frame");
+        copy_count(route==0 || skip?0:2);cases++;
+    }
+    for (unsigned i=0;i<260;i++) {
+        __u64 value=i<256?i:(1ULL<<(8*(i-255))),probe=value;__u8 arm;
+        KPROG_X86_XMM0_ARM_INTO(arm,probe++);
+        check(arm==(value?0:1) && probe==value+1 && kprog_x86_xmm0_arm(value)==arm,"XMM arm full truth/single capture");
+        uintptr_t imm=0,reg=0;
+        check(KPROG_X86_XMM0_BASE_PTR(1,0,++imm,++reg)==(void *)1 && imm==1 && !reg,"absolute load lazy register");
+        check(!KPROG_X86_XMM0_BASE_PTR(1,1,++imm,++reg) && imm==1 && !reg,"null store lazy operands");
+        check(KPROG_X86_XMM0_BASE_PTR(0,0,++imm,++reg)==(void *)1 && imm==1 && reg==1,"register lazy immediate");
+    }
+    paired=writing=0;printf("XMM: %u two-lane/full-frame cases,260 selector/lazy cases\n",cases);
+}
+/* C execution prefixes only: a second-lane fault must retain the low commit,
+ * draw order and store fact invalidation. ISA exception correspondence is M5. */
+static void xmm_faults(void)
+{
+    long page=sysconf(_SC_PAGESIZE);check(page>0,"XMM fault page");
+    struct prefix { struct x86_sim_register_state state; __u8 tags[2];void *pointers[2]; };
+    struct prefix *p=mmap(NULL,page,PROT_READ|PROT_WRITE,MAP_SHARED|MAP_ANONYMOUS,-1,0);
+    __u8 *mem=mmap(NULL,page*2,PROT_READ|PROT_WRITE,MAP_SHARED|MAP_ANONYMOUS,-1,0);
+    check(p!=MAP_FAILED && mem!=MAP_FAILED && !mprotect(mem+page,page,PROT_NONE),"XMM prefix mappings");
+    for (unsigned store=0;store<2;store++) {
+        memset(p,0,sizeof(*p));memset(mem+page-8,0x35,8);
+        p->state.abi_kind=X86_SIM_ABI_KIND_RAW;p->state.gpr_cells[6].value.ptr=mem+page-8;
+        p->state.gpr_cells[6].tag=X86_SIM_TAG_STACK;
+        p->state.xmm0_lo=0x123456789abcdef0ULL;p->state.xmm0_hi=0xa1b2c3d4e5f60718ULL;
+        for (unsigned i=0;i<2;i++) { p->tags[i]=4;p->pointers[i]=mem; }
+        pid_t pid=fork();check(pid>=0,"XMM prefix fork");
+        if (!pid) {
+            struct sigaction a={0};a.sa_sigaction=fault;a.sa_flags=SA_SIGINFO;
+            if (sigemptyset(&a.sa_mask) || sigaction(SIGSEGV,&a,NULL)) _exit(2);
+            struct kprog_x86_arena arena={.b=mem+page-8};
+            struct kprog_x86_stack_fact facts[2]={{&p->tags[0],&p->pointers[0]},{&p->tags[1],&p->pointers[1]}};
+            fault_address=mem+page;fault_draws=store?8:1;choice=0x8877665544332211ULL;
+            expected_source=expected_destination=mem+page-8;expected_size=8;paired=1;writing=store;reset();
+            if (store) kprog_x86_store_xmm0(&p->state,&arena,facts,16,X86_RSI,X86_MEM_AUX(X86_REG_NONE,0),0);
+            else kprog_x86_load_xmm0(&p->state,&arena,facts,16,X86_RSI,X86_MEM_AUX(X86_REG_NONE,0),0);
+            _exit(3);
+        }
+        int status;check(waitpid(pid,&status,0)==pid && WIFEXITED(status) && !WEXITSTATUS(status),"XMM second-lane fault/draw prefix");
+        check(p->state.xmm0_hi==0xa1b2c3d4e5f60718ULL && p->state.xmm0_lo==(store?0x123456789abcdef0ULL:0x8877665544332211ULL),"XMM low commit/high frame on fault");
+        for (unsigned i=0;i<2;i++) check(p->tags[i]==(store?0:4) && p->pointers[i]==(store?NULL:mem),"XMM erase before second store fault");
+        for (unsigned i=0;i<8;i++) check(mem[page-8+i]==(store?0x11:0x35),"XMM low store/released prefix");
+    }
+    check(!munmap(p,page) && !munmap(mem,page*2),"XMM prefix unmap");
+    puts("XMM: 2 guarded second-lane C-prefix probes");
+}
 int main(void)
 {
-    selector_cases();read_cases();handler_cases();guarded();store_cases();
+    selector_cases();read_cases();handler_cases();guarded();store_cases();xmm_cases();xmm_faults();
     printf("x86 shared memory/MOVBE:260 selector cases,%lu read/frame cases,%lu handler/frame cases,7 read probes,%lu store/frame cases,7 store guard/fault/refusal probes\n",reads,handlers,stores);
     return 0;
 }

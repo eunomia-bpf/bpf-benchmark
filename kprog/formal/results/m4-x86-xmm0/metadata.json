@@ -1,0 +1,11 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/formal/m4-x86-xmm0",
+  "historical_reference": "4c35f49f8",
+  "cpu": 15,
+  "address_space_limit_gib": 32,
+  "lean_threads": 1,
+  "validation_head": "368ba7fd03d809f81f6036c62fc7ac69e0e20d3f",
+  "source_patch": "raw_directory/input.patch",
+  "resource": "ordinary host CPU15; no timing lease or VM/base/image change",
+  "scope": "actual C exports and finite regression cases; no Clight refinement proof"
+}

@@ -63,4 +63,5 @@ __u8 kprog_x86_store_arm(__u64);
 void kprog_x86_store_selectors(struct x86_sim_register_state *,struct kprog_x86_arena *,
                                 __u32,__u64,__u64,__u64,__u64,__u64,
                                 struct kprog_x86_store_selection *);
+__u8 kprog_x86_xmm0_arm(__u64);
 #endif

@@ -21,8 +21,8 @@ def __150 : Ident := identOfString "_150"
 def __151 : Ident := identOfString "_151"
 def __3119 : Ident := identOfString "_3119"
 def __3120 : Ident := identOfString "_3120"
-def __3422 : Ident := identOfString "_3422"
-def __3428 : Ident := identOfString "_3428"
+def __3440 : Ident := identOfString "_3440"
+def __3446 : Ident := identOfString "_3446"
 def ___builtin_ais_annot : Ident := identOfString "__builtin_ais_annot"
 def ___builtin_annot : Ident := identOfString "__builtin_annot"
 def ___builtin_annot_intval : Ident := identOfString "__builtin_annot_intval"
@@ -97,17 +97,34 @@ def ___kprog_x86_partial : Ident := identOfString "__kprog_x86_partial"
 def ___kprog_x86_partial__1 : Ident := identOfString "__kprog_x86_partial__1"
 def ___sk_buff : Ident := identOfString "__sk_buff"
 def ___x86_alias_delta : Ident := identOfString "__x86_alias_delta"
+def ___x86_alias_delta__1 : Ident := identOfString "__x86_alias_delta__1"
+def ___x86_alias_observed : Ident := identOfString "__x86_alias_observed"
+def ___x86_alias_observed__1 : Ident := identOfString "__x86_alias_observed__1"
+def ___x86_alias_offset : Ident := identOfString "__x86_alias_offset"
+def ___x86_alias_offset__1 : Ident := identOfString "__x86_alias_offset__1"
 def ___x86_captured_xdp_value : Ident := identOfString "__x86_captured_xdp_value"
 def ___x86_cbr_addr : Ident := identOfString "__x86_cbr_addr"
 def ___x86_cbr_value : Ident := identOfString "__x86_cbr_value"
 def ___x86_data_observed : Ident := identOfString "__x86_data_observed"
 def ___x86_data_offset : Ident := identOfString "__x86_data_offset"
 def ___x86_l_addr : Ident := identOfString "__x86_l_addr"
+def ___x86_l_arm : Ident := identOfString "__x86_l_arm"
+def ___x86_l_base_form : Ident := identOfString "__x86_l_base_form"
+def ___x86_l_base_none : Ident := identOfString "__x86_l_base_none"
 def ___x86_l_base_ptr : Ident := identOfString "__x86_l_base_ptr"
+def ___x86_l_base_ptr__1 : Ident := identOfString "__x86_l_base_ptr__1"
 def ___x86_l_disp : Ident := identOfString "__x86_l_disp"
 def ___x86_l_read_mem_width : Ident := identOfString "__x86_l_read_mem_width"
 def ___x86_l_value : Ident := identOfString "__x86_l_value"
 def ___x86_l_width : Ident := identOfString "__x86_l_width"
+def ___x86_loss_i : Ident := identOfString "__x86_loss_i"
+def ___x86_loss_i__1 : Ident := identOfString "__x86_loss_i__1"
+def ___x86_loss_off : Ident := identOfString "__x86_loss_off"
+def ___x86_loss_off__1 : Ident := identOfString "__x86_loss_off__1"
+def ___x86_loss_value : Ident := identOfString "__x86_loss_value"
+def ___x86_loss_value__1 : Ident := identOfString "__x86_loss_value__1"
+def ___x86_loss_width : Ident := identOfString "__x86_loss_width"
+def ___x86_loss_width__1 : Ident := identOfString "__x86_loss_width__1"
 def ___x86_release_i : Ident := identOfString "__x86_release_i"
 def ___x86_release_lane : Ident := identOfString "__x86_release_lane"
 def ___x86_release_new : Ident := identOfString "__x86_release_new"
@@ -118,12 +135,57 @@ def ___x86_sr_lane : Ident := identOfString "__x86_sr_lane"
 def ___x86_sr_off : Ident := identOfString "__x86_sr_off"
 def ___x86_sr_value : Ident := identOfString "__x86_sr_value"
 def ___x86_sr_width : Ident := identOfString "__x86_sr_width"
+def ___x86_st_addr : Ident := identOfString "__x86_st_addr"
+def ___x86_st_addr__1 : Ident := identOfString "__x86_st_addr__1"
+def ___x86_st_i : Ident := identOfString "__x86_st_i"
+def ___x86_st_i__1 : Ident := identOfString "__x86_st_i__1"
+def ___x86_st_off : Ident := identOfString "__x86_st_off"
+def ___x86_st_off__1 : Ident := identOfString "__x86_st_off__1"
+def ___x86_st_tag : Ident := identOfString "__x86_st_tag"
+def ___x86_st_tag__1 : Ident := identOfString "__x86_st_tag__1"
+def ___x86_st_value : Ident := identOfString "__x86_st_value"
+def ___x86_st_value__1 : Ident := identOfString "__x86_st_value__1"
+def ___x86_st_width : Ident := identOfString "__x86_st_width"
+def ___x86_st_width__1 : Ident := identOfString "__x86_st_width__1"
 def ___x86_stack_delta : Ident := identOfString "__x86_stack_delta"
 def ___x86_stack_delta__1 : Ident := identOfString "__x86_stack_delta__1"
 def ___x86_state : Ident := identOfString "__x86_state"
 def ___x86_store_reg : Ident := identOfString "__x86_store_reg"
+def ___x86_stw_bytes : Ident := identOfString "__x86_stw_bytes"
+def ___x86_stw_bytes__1 : Ident := identOfString "__x86_stw_bytes__1"
+def ___x86_stw_bytes__2 : Ident := identOfString "__x86_stw_bytes__2"
+def ___x86_stw_bytes__3 : Ident := identOfString "__x86_stw_bytes__3"
+def ___x86_stw_index : Ident := identOfString "__x86_stw_index"
+def ___x86_stw_index__1 : Ident := identOfString "__x86_stw_index__1"
+def ___x86_stw_index__2 : Ident := identOfString "__x86_stw_index__2"
+def ___x86_stw_index__3 : Ident := identOfString "__x86_stw_index__3"
+def ___x86_stw_narrowed : Ident := identOfString "__x86_stw_narrowed"
+def ___x86_stw_narrowed__1 : Ident := identOfString "__x86_stw_narrowed__1"
+def ___x86_stw_narrowed__2 : Ident := identOfString "__x86_stw_narrowed__2"
+def ___x86_stw_narrowed__3 : Ident := identOfString "__x86_stw_narrowed__3"
+def ___x86_stw_width : Ident := identOfString "__x86_stw_width"
+def ___x86_stw_width__1 : Ident := identOfString "__x86_stw_width__1"
+def ___x86_stw_width__2 : Ident := identOfString "__x86_stw_width__2"
+def ___x86_stw_width__3 : Ident := identOfString "__x86_stw_width__3"
 def ___x86_sv_i : Ident := identOfString "__x86_sv_i"
+def ___x86_sv_i__1 : Ident := identOfString "__x86_sv_i__1"
+def ___x86_sv_i__2 : Ident := identOfString "__x86_sv_i__2"
+def ___x86_sv_i__3 : Ident := identOfString "__x86_sv_i__3"
+def ___x86_sv_i__4 : Ident := identOfString "__x86_sv_i__4"
+def ___x86_sv_i__5 : Ident := identOfString "__x86_sv_i__5"
+def ___x86_sv_index : Ident := identOfString "__x86_sv_index"
+def ___x86_sv_index__1 : Ident := identOfString "__x86_sv_index__1"
+def ___x86_sv_index__2 : Ident := identOfString "__x86_sv_index__2"
+def ___x86_sv_index__3 : Ident := identOfString "__x86_sv_index__3"
 def ___x86_sv_sp : Ident := identOfString "__x86_sv_sp"
+def ___x86_sv_start : Ident := identOfString "__x86_sv_start"
+def ___x86_sv_start__1 : Ident := identOfString "__x86_sv_start__1"
+def ___x86_sv_start__2 : Ident := identOfString "__x86_sv_start__2"
+def ___x86_sv_start__3 : Ident := identOfString "__x86_sv_start__3"
+def ___x86_sv_width : Ident := identOfString "__x86_sv_width"
+def ___x86_sv_width__1 : Ident := identOfString "__x86_sv_width__1"
+def ___x86_sv_width__2 : Ident := identOfString "__x86_sv_width__2"
+def ___x86_sv_width__3 : Ident := identOfString "__x86_sv_width__3"
 def ___x86_tag_reg : Ident := identOfString "__x86_tag_reg"
 def ___x86_wr_cell : Ident := identOfString "__x86_wr_cell"
 def ___x86_wr_cell_tag : Ident := identOfString "__x86_wr_cell_tag"
@@ -180,6 +242,7 @@ def _kprog_c_pointer_bits : Ident := identOfString "kprog_c_pointer_bits"
 def _kprog_c_trap : Ident := identOfString "kprog_c_trap"
 def _kprog_x86_arena : Ident := identOfString "kprog_x86_arena"
 def _kprog_x86_bswap_value : Ident := identOfString "kprog_x86_bswap_value"
+def _kprog_x86_load_xmm0 : Ident := identOfString "kprog_x86_load_xmm0"
 def _kprog_x86_mem_load : Ident := identOfString "kprog_x86_mem_load"
 def _kprog_x86_mem_load_fixed : Ident := identOfString "kprog_x86_mem_load_fixed"
 def _kprog_x86_mem_offset : Ident := identOfString "kprog_x86_mem_offset"
@@ -192,6 +255,8 @@ def _kprog_x86_read_recovery_mem : Ident := identOfString "kprog_x86_read_recove
 def _kprog_x86_stack_fact : Ident := identOfString "kprog_x86_stack_fact"
 def _kprog_x86_stack_read : Ident := identOfString "kprog_x86_stack_read"
 def _kprog_x86_store_memory : Ident := identOfString "kprog_x86_store_memory"
+def _kprog_x86_store_xmm0 : Ident := identOfString "kprog_x86_store_xmm0"
+def _kprog_x86_xmm0_arm : Ident := identOfString "kprog_x86_xmm0_arm"
 def _len : Ident := identOfString "len"
 def _local_ip4 : Ident := identOfString "local_ip4"
 def _local_ip6 : Ident := identOfString "local_ip6"
@@ -290,6 +355,7 @@ def _x86_sim_xdp_abi : Ident := identOfString "x86_sim_xdp_abi"
 def _x86_simm : Ident := identOfString "x86_simm"
 def _x86_store_imm_disp : Ident := identOfString "x86_store_imm_disp"
 def _x86_width_effective : Ident := identOfString "x86_width_effective"
+def _x86_width_mask : Ident := identOfString "x86_width_mask"
 def _xdp_abi : Ident := identOfString "xdp_abi"
 def _xdp_md : Ident := identOfString "xdp_md"
 def _xmm0_hi : Ident := identOfString "xmm0_hi"
@@ -297,10 +363,56 @@ def _xmm0_lo : Ident := identOfString "xmm0_lo"
 def _zf : Ident := identOfString "zf"
 def _t'1 : Ident := (Positive.ofNat 128)
 def _t'10 : Ident := (Positive.ofNat 137)
+def _t'100 : Ident := (Positive.ofNat 227)
+def _t'101 : Ident := (Positive.ofNat 228)
+def _t'102 : Ident := (Positive.ofNat 229)
+def _t'103 : Ident := (Positive.ofNat 230)
+def _t'104 : Ident := (Positive.ofNat 231)
+def _t'105 : Ident := (Positive.ofNat 232)
+def _t'106 : Ident := (Positive.ofNat 233)
+def _t'107 : Ident := (Positive.ofNat 234)
+def _t'108 : Ident := (Positive.ofNat 235)
+def _t'109 : Ident := (Positive.ofNat 236)
 def _t'11 : Ident := (Positive.ofNat 138)
+def _t'110 : Ident := (Positive.ofNat 237)
+def _t'111 : Ident := (Positive.ofNat 238)
+def _t'112 : Ident := (Positive.ofNat 239)
+def _t'113 : Ident := (Positive.ofNat 240)
+def _t'114 : Ident := (Positive.ofNat 241)
+def _t'115 : Ident := (Positive.ofNat 242)
+def _t'116 : Ident := (Positive.ofNat 243)
+def _t'117 : Ident := (Positive.ofNat 244)
+def _t'118 : Ident := (Positive.ofNat 245)
+def _t'119 : Ident := (Positive.ofNat 246)
 def _t'12 : Ident := (Positive.ofNat 139)
+def _t'120 : Ident := (Positive.ofNat 247)
+def _t'121 : Ident := (Positive.ofNat 248)
+def _t'122 : Ident := (Positive.ofNat 249)
+def _t'123 : Ident := (Positive.ofNat 250)
+def _t'124 : Ident := (Positive.ofNat 251)
+def _t'125 : Ident := (Positive.ofNat 252)
+def _t'126 : Ident := (Positive.ofNat 253)
+def _t'127 : Ident := (Positive.ofNat 254)
+def _t'128 : Ident := (Positive.ofNat 255)
+def _t'129 : Ident := (Positive.ofNat 256)
 def _t'13 : Ident := (Positive.ofNat 140)
+def _t'130 : Ident := (Positive.ofNat 257)
+def _t'131 : Ident := (Positive.ofNat 258)
+def _t'132 : Ident := (Positive.ofNat 259)
+def _t'133 : Ident := (Positive.ofNat 260)
+def _t'134 : Ident := (Positive.ofNat 261)
+def _t'135 : Ident := (Positive.ofNat 262)
+def _t'136 : Ident := (Positive.ofNat 263)
+def _t'137 : Ident := (Positive.ofNat 264)
+def _t'138 : Ident := (Positive.ofNat 265)
+def _t'139 : Ident := (Positive.ofNat 266)
 def _t'14 : Ident := (Positive.ofNat 141)
+def _t'140 : Ident := (Positive.ofNat 267)
+def _t'141 : Ident := (Positive.ofNat 268)
+def _t'142 : Ident := (Positive.ofNat 269)
+def _t'143 : Ident := (Positive.ofNat 270)
+def _t'144 : Ident := (Positive.ofNat 271)
+def _t'145 : Ident := (Positive.ofNat 272)
 def _t'15 : Ident := (Positive.ofNat 142)
 def _t'16 : Ident := (Positive.ofNat 143)
 def _t'17 : Ident := (Positive.ofNat 144)
@@ -366,8 +478,34 @@ def _t'70 : Ident := (Positive.ofNat 197)
 def _t'71 : Ident := (Positive.ofNat 198)
 def _t'72 : Ident := (Positive.ofNat 199)
 def _t'73 : Ident := (Positive.ofNat 200)
+def _t'74 : Ident := (Positive.ofNat 201)
+def _t'75 : Ident := (Positive.ofNat 202)
+def _t'76 : Ident := (Positive.ofNat 203)
+def _t'77 : Ident := (Positive.ofNat 204)
+def _t'78 : Ident := (Positive.ofNat 205)
+def _t'79 : Ident := (Positive.ofNat 206)
 def _t'8 : Ident := (Positive.ofNat 135)
+def _t'80 : Ident := (Positive.ofNat 207)
+def _t'81 : Ident := (Positive.ofNat 208)
+def _t'82 : Ident := (Positive.ofNat 209)
+def _t'83 : Ident := (Positive.ofNat 210)
+def _t'84 : Ident := (Positive.ofNat 211)
+def _t'85 : Ident := (Positive.ofNat 212)
+def _t'86 : Ident := (Positive.ofNat 213)
+def _t'87 : Ident := (Positive.ofNat 214)
+def _t'88 : Ident := (Positive.ofNat 215)
+def _t'89 : Ident := (Positive.ofNat 216)
 def _t'9 : Ident := (Positive.ofNat 136)
+def _t'90 : Ident := (Positive.ofNat 217)
+def _t'91 : Ident := (Positive.ofNat 218)
+def _t'92 : Ident := (Positive.ofNat 219)
+def _t'93 : Ident := (Positive.ofNat 220)
+def _t'94 : Ident := (Positive.ofNat 221)
+def _t'95 : Ident := (Positive.ofNat 222)
+def _t'96 : Ident := (Positive.ofNat 223)
+def _t'97 : Ident := (Positive.ofNat 224)
+def _t'98 : Ident := (Positive.ofNat 225)
+def _t'99 : Ident := (Positive.ofNat 226)
 
 def f_kprog_x86_bswap_value : Function := {
   fn_return := tulong,
@@ -463,6 +601,45 @@ def f_kprog_x86_bswap_value : Function := {
                                 tulong)))
           Stmt.Sskip)
         (Stmt.Sreturn (some (Expr.Etempvar _swapped tulong)))))))
+}
+
+def f_x86_width_mask : Function := {
+  fn_return := tulong,
+  fn_callconv := cc_default,
+  fn_params := [(_width, tuchar)],
+  fn_vars := [],
+  fn_temps := [(_t'1, tulong)],
+  fn_body :=
+(Stmt.Ssequence
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq (Expr.Etempvar _width tuchar)
+                      (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
+    (Stmt.Sset _t'1
+      (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 255) tulong) tulong))
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq (Expr.Etempvar _width tuchar)
+                        (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
+      (Stmt.Ssequence
+        (Stmt.Sset _t'1
+          (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 65535) tulong)
+            tulong))
+        (Stmt.Sset _t'1 (Expr.Ecast (Expr.Etempvar _t'1 tulong) tulong)))
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq (Expr.Etempvar _width tuchar)
+                          (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'1
+              (Expr.Ecast
+                (Expr.Econst_long (Integers.Int64.repr 4294967295) tulong)
+                tulong))
+            (Stmt.Sset _t'1 (Expr.Ecast (Expr.Etempvar _t'1 tulong) tulong)))
+          (Stmt.Sset _t'1 (Expr.Ecast (Expr.Etempvar _t'1 tulong) tulong)))
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'1
+              (Expr.Ecast
+                (Expr.Econst_long (Integers.Int64.repr (-1)) tulong) tulong))
+            (Stmt.Sset _t'1 (Expr.Ecast (Expr.Etempvar _t'1 tulong) tulong)))
+          (Stmt.Sset _t'1 (Expr.Ecast (Expr.Etempvar _t'1 tulong) tulong))))))
+  (Stmt.Sreturn (some (Expr.Etempvar _t'1 tulong))))
 }
 
 def f_x86_apply_width : Function := {
@@ -2356,7 +2533,7 @@ def s_kprog_x86_movbe_load_4 : Stmt :=
                 [(tptr (tvolatile (tptr tvoid))), (tvolatile (tptr tvoid))]
                 [(Expr.Eaddrof
                    (Expr.Efield
-                     (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3422 noattr)))
+                     (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3440 noattr)))
                      _ptr (tvolatile (tptr tvoid)))
                    (tptr (tvolatile (tptr tvoid)))),
                  (Expr.Etempvar _t'34 (tptr tvoid))]))
@@ -2369,7 +2546,7 @@ def s_kprog_x86_movbe_load_4 : Stmt :=
                   (Expr.Ederef
                     (Expr.Ebinop Binop.Oadd
                       (Expr.Efield
-                        (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3422 noattr)))
+                        (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3440 noattr)))
                         _b (tvolatile (tarray tuchar 8)))
                       (Expr.Econst_int (Integers.Int.repr 1) tint)
                       (tptr tuchar)) tuchar)
@@ -2378,7 +2555,7 @@ def s_kprog_x86_movbe_load_4 : Stmt :=
                   (Expr.Ederef
                     (Expr.Ebinop Binop.Oadd
                       (Expr.Efield
-                        (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3422 noattr)))
+                        (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3440 noattr)))
                         _b (tvolatile (tarray tuchar 8)))
                       (Expr.Econst_int (Integers.Int.repr 0) tint)
                       (tptr tuchar)) tuchar)
@@ -2389,7 +2566,7 @@ def s_kprog_x86_movbe_load_4 : Stmt :=
                     [(tptr (tvolatile (tptr tvoid)))]
                     [(Expr.Eaddrof
                        (Expr.Efield
-                         (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3422 noattr)))
+                         (Expr.Evar ___kprog_x86_partial (tvolatile (Ty.Tunion __3440 noattr)))
                          _ptr (tvolatile (tptr tvoid)))
                        (tptr (tvolatile (tptr tvoid))))])
                   (Stmt.Sset ___kprog_x86_bits
@@ -2586,7 +2763,7 @@ def s_kprog_x86_movbe_load_5 : Stmt :=
                      (tvolatile (tptr tvoid))]
                     [(Expr.Eaddrof
                        (Expr.Efield
-                         (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3428 noattr)))
+                         (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3446 noattr)))
                          _ptr (tvolatile (tptr tvoid)))
                        (tptr (tvolatile (tptr tvoid)))),
                      (Expr.Etempvar _t'28 (tptr tvoid))]))
@@ -2595,7 +2772,7 @@ def s_kprog_x86_movbe_load_5 : Stmt :=
                     [(tptr (tvolatile tushort)), (tvolatile tushort)]
                     [(Expr.Eaddrof
                        (Expr.Efield
-                         (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3428 noattr)))
+                         (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3446 noattr)))
                          _w (tvolatile tushort)) (tptr (tvolatile tushort))),
                      (Expr.Etempvar ___kprog_x86_lane__1 tushort)])
                   (Stmt.Ssequence
@@ -2605,7 +2782,7 @@ def s_kprog_x86_movbe_load_5 : Stmt :=
                         [(tptr (tvolatile (tptr tvoid)))]
                         [(Expr.Eaddrof
                            (Expr.Efield
-                             (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3428 noattr)))
+                             (Expr.Evar ___kprog_x86_partial__1 (tvolatile (Ty.Tunion __3446 noattr)))
                              _ptr (tvolatile (tptr tvoid)))
                            (tptr (tvolatile (tptr tvoid))))])
                       (Stmt.Sset ___kprog_x86_bits__1
@@ -3072,9 +3249,9 @@ def f_kprog_x86_movbe_load : Function := {
                 (_capacity, tuint), (_dst, tulong), (_src, tulong),
                 (_flags, tulong), (_aux, tulong), (_imm, tulong)],
   fn_vars := [(___x86_wr_cell, (Ty.Tunion _x86_sim_gpr noattr)),
-              (___kprog_x86_partial, (tvolatile (Ty.Tunion __3422 noattr))),
+              (___kprog_x86_partial, (tvolatile (Ty.Tunion __3440 noattr))),
               (___kprog_x86_partial__1,
-               (tvolatile (Ty.Tunion __3428 noattr)))],
+               (tvolatile (Ty.Tunion __3446 noattr)))],
   fn_temps := [(___x86_state,
                 (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
                (___x86_l_width, tuchar), (___x86_l_value, tulong),
@@ -3280,6 +3457,4867 @@ def f_kprog_x86_store_memory : Function := {
    (Expr.Etempvar _value tulong)])
 }
 
+def s_kprog_x86_load_xmm0_0 : Stmt :=
+(Stmt.Sset _t'10
+  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuint))
+
+def s_kprog_x86_load_xmm0_1 : Stmt :=
+(Stmt.Sset _t'10
+  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tuint) tuint))
+
+def s_kprog_x86_load_xmm0_2 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Scall (some _t'13)
+      (Expr.Evar _kprog_x86_mem_offset (Ty.Tfunction
+                                         [(tptr (Ty.Tstruct _x86_sim_register_state noattr)),
+                                          (tptr (Ty.Tstruct _kprog_x86_arena noattr)),
+                                          tuint, tulong, tlong] tlong
+                                         cc_default))
+      [(Expr.Etempvar _state (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
+       (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr))),
+       (Expr.Etempvar _capacity tuint), (Expr.Etempvar _aux tulong),
+       (Expr.Econst_int (Integers.Int.repr 0) tint)])
+    (Stmt.Sset _t'12
+      (Expr.Ecast
+        (Expr.Ecast
+          (Expr.Ecast
+            (Expr.Ebinop Binop.Oadd
+              (Expr.Ecast (Expr.Etempvar _imm tulong) tulong)
+              (Expr.Ecast (Expr.Etempvar _t'13 tlong) tulong) tulong) tlong)
+          (tptr tvoid)) (tptr tvoid))))
+  (Stmt.Sset _t'12
+    (Expr.Ecast (Expr.Etempvar _t'12 (tptr tvoid)) (tptr tvoid))))
+
+def s_kprog_x86_load_xmm0_3 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'12
+    (Expr.Ecast
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid))
+      (tptr tvoid)))
+  (Stmt.Sset _t'12
+    (Expr.Ecast (Expr.Etempvar _t'12 (tptr tvoid)) (tptr tvoid))))
+
+def s_kprog_x86_load_xmm0_4 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'33
+    (Expr.Efield
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Ebinop Binop.Oadd
+            (Expr.Efield
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar ___x86_state (tptr (Ty.Tstruct _x86_sim_register_state noattr)))
+                  (Ty.Tstruct _x86_sim_register_state noattr))
+                (Positive.ofNat 18727075383868559167)
+                (Ty.Tunion __3119 noattr)) _gpr_cells
+              (tarray (Ty.Tstruct _x86_sim_gpr_cell noattr) 16))
+            (Expr.Ecast (Expr.Etempvar _src tulong) tuchar)
+            (tptr (Ty.Tstruct _x86_sim_gpr_cell noattr)))
+          (Ty.Tstruct _x86_sim_gpr_cell noattr)) _value
+        (Ty.Tunion _x86_sim_gpr noattr)) _ptr (tptr tvoid)))
+  (Stmt.Sset _t'14
+    (Expr.Ecast (Expr.Etempvar _t'33 (tptr tvoid)) (tptr tvoid))))
+
+def s_kprog_x86_load_xmm0_5 : Stmt :=
+(Stmt.Sset _t'14
+  (Expr.Ecast
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid))
+    (tptr tvoid)))
+
+def s_kprog_x86_load_xmm0_6 : Stmt :=
+(Stmt.Sset _t'15
+  (Expr.Ecast
+    (Expr.Eunop Unop.Onotbool (Expr.Etempvar ___x86_l_base_none tuchar) tint)
+    tuint))
+
+def s_kprog_x86_load_xmm0_7 : Stmt :=
+(Stmt.Sset _t'15
+  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
+
+def s_kprog_x86_load_xmm0_8 : Stmt :=
+(Stmt.Scall (some _t'17)
+  (Expr.Evar _kprog_x86_mem_load (Ty.Tfunction [(tptr tvoid), tuchar] tulong
+                                   cc_default))
+  [(Expr.Etempvar ___x86_l_addr (tptr tvoid)),
+   (Expr.Econst_int (Integers.Int.repr 8) tuint)])
+
+def s_kprog_x86_load_xmm0_9 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Scall (some _t'21)
+    (Expr.Evar _tag_of (Ty.Tfunction
+                         [(tptr (Ty.Tstruct _x86_sim_register_state noattr)),
+                          tulong] tuchar cc_default))
+    [(Expr.Etempvar _state (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
+     (Expr.Etempvar _src tulong)])
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq (Expr.Etempvar _t'21 tuchar)
+                      (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+    (Stmt.Ssequence
+      (Stmt.Sloop
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'32
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr)))
+                  (Ty.Tstruct _kprog_x86_arena noattr)) _b
+                (tptr (tvolatile tuchar))))
+            (Stmt.Sset ___x86_alias_delta
+              (Expr.Ebinop Binop.Osub
+                (Expr.Ecast
+                  (Expr.Ecast (Expr.Etempvar ___x86_l_addr (tptr tvoid))
+                    tlong) tulong)
+                (Expr.Ecast
+                  (Expr.Ecast
+                    (Expr.Ecast
+                      (Expr.Ecast
+                        (Expr.Ecast
+                          (Expr.Ebinop Binop.Oadd
+                            (Expr.Ecast
+                              (Expr.Ecast
+                                (Expr.Ebinop Binop.Oadd
+                                  (Expr.Etempvar _t'32 (tptr (tvolatile tuchar)))
+                                  (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                  (tptr (tvolatile tuchar))) tulong) tulong)
+                            (Expr.Ecast
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Ecast
+                                  (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                  tulong)
+                                (Expr.Ecast (Expr.Etempvar _capacity tuint)
+                                  tulong) tulong) tulong) tulong) tulong)
+                        (tptr tuchar)) (tptr tvoid)) tlong) tulong) tulong)))
+          (Stmt.Sset ___x86_alias_offset
+            (Expr.Ecast (Expr.Etempvar ___x86_alias_delta tulong) tlong)))
+        Stmt.Sbreak)
+      (Stmt.Ssequence
+        (Stmt.Sset _t'31
+          (Expr.Efield
+            (Expr.Efield
+              (Expr.Efield
+                (Expr.Efield
+                  (Expr.Ederef
+                    (Expr.Etempvar ___x86_state (tptr (Ty.Tstruct _x86_sim_register_state noattr)))
+                    (Ty.Tstruct _x86_sim_register_state noattr))
+                  (Positive.ofNat 18727075383868559167)
+                  (Ty.Tunion __3119 noattr))
+                (Positive.ofNat 18727075383868559167)
+                (Ty.Tstruct __3120 noattr)) _rsp
+              (Ty.Tunion _x86_sim_gpr noattr)) _ptr (tptr tvoid)))
+        (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                            (Expr.Etempvar ___x86_alias_offset tlong)
+                            (Expr.Ecast
+                              (Expr.Ecast (Expr.Etempvar _t'31 (tptr tvoid))
+                                tlong) tlong) tint)
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Scall (some _t'18)
+                  (Expr.Evar _native_lab_entry_input (Ty.Tfunction [tuint]
+                                                       tulong cc_default))
+                  [(Expr.Econst_int (Integers.Int.repr 6) tint)])
+                (Stmt.Scall (some _t'19)
+                  (Expr.Evar _x86_width_effective (Ty.Tfunction [tuchar]
+                                                    tuchar cc_default))
+                  [(Expr.Econst_int (Integers.Int.repr 8) tuint)]))
+              (Stmt.Scall (some _t'20)
+                (Expr.Evar _x86_apply_width (Ty.Tfunction [tulong, tuchar]
+                                              tulong cc_default))
+                [(Expr.Etempvar _t'18 tulong), (Expr.Etempvar _t'19 tuchar)]))
+            (Stmt.Sset ___x86_alias_observed (Expr.Etempvar _t'20 tulong)))
+          Stmt.Sskip)))
+    Stmt.Sskip))
+
+def s_kprog_x86_load_xmm0_10 : Stmt :=
+(Stmt.Sassign
+  (Expr.Efield
+    (Expr.Ederef
+      (Expr.Etempvar ___x86_state (tptr (Ty.Tstruct _x86_sim_register_state noattr)))
+      (Ty.Tstruct _x86_sim_register_state noattr)) _xmm0_lo tulong)
+  (Expr.Etempvar ___x86_alias_observed tulong))
+
+def s_kprog_x86_load_xmm0_11 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                        (Expr.Econst_int (Integers.Int.repr 1) tint)
+                        (Expr.Econst_int (Integers.Int.repr 0) tuint) tint)
+      (Stmt.Sset _t'22
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuint))
+      (Stmt.Sset _t'22
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tuint) tuint)))
+    (Stmt.Scall (some _t'23)
+      (Expr.Evar _kprog_x86_mem_load (Ty.Tfunction [(tptr tvoid), tuchar]
+                                       tulong cc_default))
+      [(Expr.Ecast
+         (Expr.Ecast
+           (Expr.Ebinop Binop.Oadd
+             (Expr.Ecast
+               (Expr.Ecast (Expr.Etempvar ___x86_l_addr (tptr tvoid)) tulong)
+               tulong) (Expr.Ecast (Expr.Etempvar _t'22 tuint) tulong)
+             tulong) tulong) (tptr tuchar)),
+       (Expr.Econst_int (Integers.Int.repr 8) tuint)]))
+  (Stmt.Sset ___x86_alias_observed__1 (Expr.Etempvar _t'23 tulong)))
+
+def s_kprog_x86_load_xmm0_12 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Scall (some _t'28)
+      (Expr.Evar _tag_of (Ty.Tfunction
+                           [(tptr (Ty.Tstruct _x86_sim_register_state noattr)),
+                            tulong] tuchar cc_default))
+      [(Expr.Etempvar _state (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
+       (Expr.Etempvar _src tulong)])
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq (Expr.Etempvar _t'28 tuchar)
+                        (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+      (Stmt.Ssequence
+        (Stmt.Sloop
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                  (Expr.Econst_int (Integers.Int.repr 1) tint)
+                                  (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                                  tint)
+                (Stmt.Sset _t'24
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                    tuint))
+                (Stmt.Sset _t'24
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                    tuint)))
+              (Stmt.Ssequence
+                (Stmt.Sset _t'30
+                  (Expr.Efield
+                    (Expr.Ederef
+                      (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr)))
+                      (Ty.Tstruct _kprog_x86_arena noattr)) _b
+                    (tptr (tvolatile tuchar))))
+                (Stmt.Sset ___x86_alias_delta__1
+                  (Expr.Ebinop Binop.Osub
+                    (Expr.Ecast
+                      (Expr.Ecast
+                        (Expr.Ecast
+                          (Expr.Ecast
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Ecast
+                                (Expr.Ecast
+                                  (Expr.Etempvar ___x86_l_addr (tptr tvoid))
+                                  tulong) tulong)
+                              (Expr.Ecast (Expr.Etempvar _t'24 tuint) tulong)
+                              tulong) tulong) (tptr tuchar)) tlong) tulong)
+                    (Expr.Ecast
+                      (Expr.Ecast
+                        (Expr.Ecast
+                          (Expr.Ecast
+                            (Expr.Ecast
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Ecast
+                                  (Expr.Ecast
+                                    (Expr.Ebinop Binop.Oadd
+                                      (Expr.Etempvar _t'30 (tptr (tvolatile tuchar)))
+                                      (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                      (tptr (tvolatile tuchar))) tulong)
+                                  tulong)
+                                (Expr.Ecast
+                                  (Expr.Ebinop Binop.Oadd
+                                    (Expr.Ecast
+                                      (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                      tulong)
+                                    (Expr.Ecast
+                                      (Expr.Etempvar _capacity tuint) tulong)
+                                    tulong) tulong) tulong) tulong)
+                            (tptr tuchar)) (tptr tvoid)) tlong) tulong)
+                    tulong))))
+            (Stmt.Sset ___x86_alias_offset__1
+              (Expr.Ecast (Expr.Etempvar ___x86_alias_delta__1 tulong) tlong)))
+          Stmt.Sbreak)
+        (Stmt.Ssequence
+          (Stmt.Sset _t'29
+            (Expr.Efield
+              (Expr.Efield
+                (Expr.Efield
+                  (Expr.Efield
+                    (Expr.Ederef
+                      (Expr.Etempvar ___x86_state (tptr (Ty.Tstruct _x86_sim_register_state noattr)))
+                      (Ty.Tstruct _x86_sim_register_state noattr))
+                    (Positive.ofNat 18727075383868559167)
+                    (Ty.Tunion __3119 noattr))
+                  (Positive.ofNat 18727075383868559167)
+                  (Ty.Tstruct __3120 noattr)) _rsp
+                (Ty.Tunion _x86_sim_gpr noattr)) _ptr (tptr tvoid)))
+          (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                              (Expr.Etempvar ___x86_alias_offset__1 tlong)
+                              (Expr.Ecast
+                                (Expr.Ecast
+                                  (Expr.Etempvar _t'29 (tptr tvoid)) tlong)
+                                tlong) tint)
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Scall (some _t'25)
+                    (Expr.Evar _native_lab_entry_input (Ty.Tfunction 
+                                                         [tuint] tulong
+                                                         cc_default))
+                    [(Expr.Econst_int (Integers.Int.repr 6) tint)])
+                  (Stmt.Scall (some _t'26)
+                    (Expr.Evar _x86_width_effective (Ty.Tfunction [tuchar]
+                                                      tuchar cc_default))
+                    [(Expr.Econst_int (Integers.Int.repr 8) tuint)]))
+                (Stmt.Scall (some _t'27)
+                  (Expr.Evar _x86_apply_width (Ty.Tfunction [tulong, tuchar]
+                                                tulong cc_default))
+                  [(Expr.Etempvar _t'25 tulong),
+                   (Expr.Etempvar _t'26 tuchar)]))
+              (Stmt.Sset ___x86_alias_observed__1
+                (Expr.Etempvar _t'27 tulong)))
+            Stmt.Sskip)))
+      Stmt.Sskip))
+  (Stmt.Sassign
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar ___x86_state (tptr (Ty.Tstruct _x86_sim_register_state noattr)))
+        (Ty.Tstruct _x86_sim_register_state noattr)) _xmm0_hi tulong)
+    (Expr.Etempvar ___x86_alias_observed__1 tulong)))
+
+def f_kprog_x86_load_xmm0 : Function := {
+  fn_return := tvoid,
+  fn_callconv := cc_default,
+  fn_params := [(_state, (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
+                (_arena, (tptr (Ty.Tstruct _kprog_x86_arena noattr))),
+                (_facts, (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr))),
+                (_capacity, tuint), (_src, tulong), (_aux, tulong),
+                (_imm, tulong)],
+  fn_vars := [],
+  fn_temps := [(___x86_state,
+                (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
+               (___x86_l_disp, tlong), (___x86_l_arm, tuchar),
+               (___x86_l_base_none, tuchar), (___x86_l_base_form, tuchar),
+               (___x86_l_base_ptr, (tptr tvoid)),
+               (___x86_l_base_ptr__1, (tptr tvoid)),
+               (___x86_l_addr, (tptr tvoid)),
+               (___x86_alias_observed, tulong), (___x86_alias_offset, tlong),
+               (___x86_alias_delta, tulong),
+               (___x86_alias_observed__1, tulong),
+               (___x86_alias_offset__1, tlong),
+               (___x86_alias_delta__1, tulong), (_t'28, tuchar),
+               (_t'27, tulong), (_t'26, tuchar), (_t'25, tulong),
+               (_t'24, tuint), (_t'23, tulong), (_t'22, tuint),
+               (_t'21, tuchar), (_t'20, tulong), (_t'19, tuchar),
+               (_t'18, tulong), (_t'17, tulong), (_t'16, (tptr tvoid)),
+               (_t'15, tuint), (_t'14, (tptr tvoid)), (_t'13, tlong),
+               (_t'12, (tptr tvoid)), (_t'11, tulong), (_t'10, tuint),
+               (_t'9, tulong), (_t'8, (tptr tvoid)), (_t'7, tuint),
+               (_t'6, tint), (_t'5, tuchar), (_t'4, tlong), (_t'3, tlong),
+               (_t'2, tint), (_t'1, tlong), (_t'34, (tptr tvoid)),
+               (_t'33, (tptr tvoid)), (_t'32, (tptr (tvolatile tuchar))),
+               (_t'31, (tptr tvoid)), (_t'30, (tptr (tvolatile tuchar))),
+               (_t'29, (tptr tvoid))],
+  fn_body :=
+(Stmt.Ssequence
+  (Stmt.Sset ___x86_state
+    (Expr.Etempvar _state (tptr (Ty.Tstruct _x86_sim_register_state noattr))))
+  (Stmt.Sloop
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Scall (some _t'1)
+            (Expr.Evar _x86_simm (Ty.Tfunction [tulong] tlong cc_default))
+            [(Expr.Etempvar _imm tulong)])
+          (Stmt.Scall (some _t'2)
+            (Expr.Evar _kprog_x86_read_recovery_mem (Ty.Tfunction
+                                                      [(tptr (Ty.Tstruct _x86_sim_register_state noattr)),
+                                                       (tptr (Ty.Tstruct _kprog_x86_arena noattr)),
+                                                       (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)),
+                                                       tuint, tulong, tulong,
+                                                       tulong, tlong] tint
+                                                      cc_default))
+            [(Expr.Etempvar _state (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
+             (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr))),
+             (Expr.Etempvar _facts (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr))),
+             (Expr.Etempvar _capacity tuint), (Expr.Etempvar _src tulong),
+             (Expr.Econst_int (Integers.Int.repr 255) tuint),
+             (Expr.Etempvar _aux tulong), (Expr.Etempvar _t'1 tlong)]))
+        (Stmt.Sifthenelse (Expr.Etempvar _t'2 tint) Stmt.Sbreak Stmt.Sskip))
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Scall (some _t'3)
+              (Expr.Evar _x86_simm (Ty.Tfunction [tulong] tlong cc_default))
+              [(Expr.Etempvar _imm tulong)])
+            (Stmt.Scall (some _t'4)
+              (Expr.Evar _kprog_x86_mem_offset (Ty.Tfunction
+                                                 [(tptr (Ty.Tstruct _x86_sim_register_state noattr)),
+                                                  (tptr (Ty.Tstruct _kprog_x86_arena noattr)),
+                                                  tuint, tulong, tlong] tlong
+                                                 cc_default))
+              [(Expr.Etempvar _state (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
+               (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr))),
+               (Expr.Etempvar _capacity tuint), (Expr.Etempvar _aux tulong),
+               (Expr.Etempvar _t'3 tlong)]))
+          (Stmt.Sset ___x86_l_disp (Expr.Etempvar _t'4 tlong)))
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Scall (some _t'5)
+              (Expr.Evar _kprog_x86_xmm0_arm (Ty.Tfunction [tulong] tuchar
+                                               cc_default))
+              [(Expr.Ebinop Binop.Oeq (Expr.Etempvar _src tulong)
+                 (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)])
+            (Stmt.Sset ___x86_l_arm
+              (Expr.Ecast (Expr.Etempvar _t'5 tuchar) tuchar)))
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                  (Expr.Etempvar _src tulong)
+                                  (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                                  tint)
+                (Stmt.Sset _t'6
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tint)
+                    tint))
+                (Stmt.Sset _t'6
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
+                    tint)))
+              (Stmt.Sset ___x86_l_base_none
+                (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'6 tint) tuchar)
+                  tuchar)))
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Sset _t'7
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                    tuint))
+                (Stmt.Sset ___x86_l_base_form
+                  (Expr.Ecast (Expr.Etempvar _t'7 tuint) tuchar)))
+              (Stmt.Sswitch (Expr.Etempvar ___x86_l_arm tuchar)
+                (LStmts.LScons (some 0)
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                          (Expr.Ecast
+                                            (Expr.Etempvar _src tulong)
+                                            tulong)
+                                          (Expr.Econst_int (Integers.Int.repr 16) tuint)
+                                          tint)
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'34
+                            (Expr.Efield
+                              (Expr.Efield
+                                (Expr.Ederef
+                                  (Expr.Ebinop Binop.Oadd
+                                    (Expr.Efield
+                                      (Expr.Efield
+                                        (Expr.Ederef
+                                          (Expr.Etempvar ___x86_state (tptr (Ty.Tstruct _x86_sim_register_state noattr)))
+                                          (Ty.Tstruct _x86_sim_register_state noattr))
+                                        (Positive.ofNat 18727075383868559167)
+                                        (Ty.Tunion __3119 noattr)) _gpr_cells
+                                      (tarray (Ty.Tstruct _x86_sim_gpr_cell noattr) 16))
+                                    (Expr.Ecast (Expr.Etempvar _src tulong)
+                                      tuchar)
+                                    (tptr (Ty.Tstruct _x86_sim_gpr_cell noattr)))
+                                  (Ty.Tstruct _x86_sim_gpr_cell noattr))
+                                _value (Ty.Tunion _x86_sim_gpr noattr)) _ptr
+                              (tptr tvoid)))
+                          (Stmt.Sset _t'8
+                            (Expr.Ecast (Expr.Etempvar _t'34 (tptr tvoid))
+                              (tptr tvoid))))
+                        (Stmt.Sset _t'8
+                          (Expr.Ecast
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 0) tint)
+                              (tptr tvoid)) (tptr tvoid))))
+                      (Stmt.Sset ___x86_l_base_ptr
+                        (Expr.Etempvar _t'8 (tptr tvoid))))
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Scall (some _t'9)
+                          (Expr.Evar _kprog_x86_stack_read (Ty.Tfunction
+                                                             [(tptr (Ty.Tstruct _x86_sim_register_state noattr)),
+                                                              (tptr (Ty.Tstruct _kprog_x86_arena noattr)),
+                                                              tuint, tlong,
+                                                              tulong] tulong
+                                                             cc_default))
+                          [(Expr.Etempvar _state (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
+                           (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr))),
+                           (Expr.Etempvar _capacity tuint),
+                           (Expr.Ebinop Binop.Oadd
+                             (Expr.Ecast
+                               (Expr.Ecast
+                                 (Expr.Etempvar ___x86_l_base_ptr (tptr tvoid))
+                                 tlong) tlong)
+                             (Expr.Etempvar ___x86_l_disp tlong) tlong),
+                           (Expr.Econst_int (Integers.Int.repr 8) tuint)])
+                        (Stmt.Sassign
+                          (Expr.Efield
+                            (Expr.Ederef
+                              (Expr.Etempvar ___x86_state (tptr (Ty.Tstruct _x86_sim_register_state noattr)))
+                              (Ty.Tstruct _x86_sim_register_state noattr))
+                            _xmm0_lo tulong) (Expr.Etempvar _t'9 tulong)))
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Ssequence
+                            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                (Expr.Econst_int (Integers.Int.repr 1) tint)
+                                                (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                                                tint)
+                              s_kprog_x86_load_xmm0_0
+                              s_kprog_x86_load_xmm0_1)
+                            (Stmt.Scall (some _t'11)
+                              (Expr.Evar _kprog_x86_stack_read (Ty.Tfunction
+                                                                 [(tptr (Ty.Tstruct _x86_sim_register_state noattr)),
+                                                                  (tptr (Ty.Tstruct _kprog_x86_arena noattr)),
+                                                                  tuint,
+                                                                  tlong,
+                                                                  tulong]
+                                                                 tulong
+                                                                 cc_default))
+                              [(Expr.Etempvar _state (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
+                               (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr))),
+                               (Expr.Etempvar _capacity tuint),
+                               (Expr.Ebinop Binop.Oadd
+                                 (Expr.Ebinop Binop.Oadd
+                                   (Expr.Ecast
+                                     (Expr.Ecast
+                                       (Expr.Etempvar ___x86_l_base_ptr (tptr tvoid))
+                                       tlong) tlong)
+                                   (Expr.Etempvar ___x86_l_disp tlong) tlong)
+                                 (Expr.Etempvar _t'10 tuint) tlong),
+                               (Expr.Econst_int (Integers.Int.repr 8) tuint)]))
+                          (Stmt.Sassign
+                            (Expr.Efield
+                              (Expr.Ederef
+                                (Expr.Etempvar ___x86_state (tptr (Ty.Tstruct _x86_sim_register_state noattr)))
+                                (Ty.Tstruct _x86_sim_register_state noattr))
+                              _xmm0_hi tulong) (Expr.Etempvar _t'11 tulong)))
+                        Stmt.Sbreak)))
+                  (LStmts.LScons none
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Sifthenelse (Expr.Etempvar ___x86_l_base_none tuchar)
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                              (Expr.Etempvar ___x86_l_base_form tuchar)
+                                              (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                                              tint)
+                            s_kprog_x86_load_xmm0_2
+                            s_kprog_x86_load_xmm0_3)
+                          (Stmt.Ssequence
+                            (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                                (Expr.Ecast
+                                                  (Expr.Etempvar _src tulong)
+                                                  tulong)
+                                                (Expr.Econst_int (Integers.Int.repr 16) tuint)
+                                                tint)
+                              s_kprog_x86_load_xmm0_4
+                              s_kprog_x86_load_xmm0_5)
+                            (Stmt.Sset _t'12
+                              (Expr.Ecast
+                                (Expr.Ecast
+                                  (Expr.Etempvar _t'14 (tptr tvoid))
+                                  (tptr tvoid)) (tptr tvoid)))))
+                        (Stmt.Sset ___x86_l_base_ptr__1
+                          (Expr.Etempvar _t'12 (tptr tvoid))))
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Ssequence
+                            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                (Expr.Etempvar ___x86_l_base_form tuchar)
+                                                (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                                                tint)
+                              s_kprog_x86_load_xmm0_6
+                              s_kprog_x86_load_xmm0_7)
+                            (Stmt.Sifthenelse (Expr.Etempvar _t'15 tuint)
+                              (Stmt.Sset _t'16
+                                (Expr.Ecast
+                                  (Expr.Ecast
+                                    (Expr.Ecast
+                                      (Expr.Ebinop Binop.Oadd
+                                        (Expr.Ecast
+                                          (Expr.Ecast
+                                            (Expr.Etempvar ___x86_l_base_ptr__1 (tptr tvoid))
+                                            tulong) tulong)
+                                        (Expr.Ecast
+                                          (Expr.Etempvar ___x86_l_disp tlong)
+                                          tulong) tulong) tulong)
+                                    (tptr tuchar)) (tptr tvoid)))
+                              (Stmt.Sset _t'16
+                                (Expr.Ecast
+                                  (Expr.Etempvar ___x86_l_base_ptr__1 (tptr tvoid))
+                                  (tptr tvoid)))))
+                          (Stmt.Sset ___x86_l_addr
+                            (Expr.Etempvar _t'16 (tptr tvoid))))
+                        (Stmt.Ssequence
+                          (Stmt.Sloop
+                            (Stmt.Ssequence
+                              (Stmt.Ssequence
+                                s_kprog_x86_load_xmm0_8
+                                (Stmt.Sset ___x86_alias_observed
+                                  (Expr.Etempvar _t'17 tulong)))
+                              (Stmt.Ssequence
+                                s_kprog_x86_load_xmm0_9
+                                s_kprog_x86_load_xmm0_10))
+                            Stmt.Sbreak)
+                          (Stmt.Ssequence
+                            (Stmt.Sloop
+                              (Stmt.Ssequence
+                                s_kprog_x86_load_xmm0_11
+                                s_kprog_x86_load_xmm0_12)
+                              Stmt.Sbreak)
+                            Stmt.Sbreak))))
+                    LStmts.LSnil))))))))
+    Stmt.Sbreak))
+}
+
+def s_kprog_x86_store_xmm0_0 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Scall (some _t'8)
+    (Expr.Evar _x86_width_effective (Ty.Tfunction [tuchar] tuchar cc_default))
+    [(Expr.Econst_int (Integers.Int.repr 8) tuint)])
+  (Stmt.Sset ___x86_sv_width (Expr.Ecast (Expr.Etempvar _t'8 tuchar) tulong)))
+
+def s_kprog_x86_store_xmm0_1 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___x86_sv_i (Expr.Econst_int (Integers.Int.repr 0) tint))
+  (Stmt.Sloop
+    (Stmt.Ssequence
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                          (Expr.Etempvar ___x86_sv_i tuint)
+                          (Expr.Ebinop Binop.Odiv
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Ecast (Expr.Etempvar _capacity tuint)
+                                tulong)
+                              (Expr.Econst_int (Integers.Int.repr 7) tuint)
+                              tulong)
+                            (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                            tulong) tint)
+        Stmt.Sskip
+        Stmt.Sbreak)
+      (Stmt.Sloop
+        (Stmt.Ssequence
+          (Stmt.Sset ___x86_sv_start
+            (Expr.Ebinop Binop.Omul
+              (Expr.Ecast (Expr.Etempvar ___x86_sv_i tuint) tulong)
+              (Expr.Econst_int (Integers.Int.repr 8) tuint) tulong))
+          (Stmt.Ssequence
+            (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                (Expr.Ebinop Binop.Osub
+                                  (Expr.Etempvar ___x86_sv_index tulong)
+                                  (Expr.Etempvar ___x86_sv_start tulong)
+                                  tulong)
+                                (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                tint)
+              (Stmt.Sset _t'9 (Expr.Econst_int (Integers.Int.repr 1) tint))
+              (Stmt.Sset _t'9
+                (Expr.Ecast
+                  (Expr.Ebinop Binop.Olt
+                    (Expr.Ebinop Binop.Osub
+                      (Expr.Etempvar ___x86_sv_start tulong)
+                      (Expr.Etempvar ___x86_sv_index tulong) tulong)
+                    (Expr.Etempvar ___x86_sv_width tulong) tint) tbool)))
+            (Stmt.Sifthenelse (Expr.Etempvar _t'9 tint)
+              (Stmt.Sloop
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'144
+                      (Expr.Efield
+                        (Expr.Ederef
+                          (Expr.Ebinop Binop.Oadd
+                            (Expr.Etempvar _facts (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)))
+                            (Expr.Etempvar ___x86_sv_i tuint)
+                            (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)))
+                          (Ty.Tstruct _kprog_x86_stack_fact noattr)) _tag
+                        (tptr tuchar)))
+                    (Stmt.Sassign
+                      (Expr.Ederef (Expr.Etempvar _t'144 (tptr tuchar))
+                        tuchar)
+                      (Expr.Econst_int (Integers.Int.repr 0) tuint)))
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'143
+                      (Expr.Efield
+                        (Expr.Ederef
+                          (Expr.Ebinop Binop.Oadd
+                            (Expr.Etempvar _facts (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)))
+                            (Expr.Etempvar ___x86_sv_i tuint)
+                            (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)))
+                          (Ty.Tstruct _kprog_x86_stack_fact noattr)) _pointer
+                        (tptr (tptr tvoid))))
+                    (Stmt.Sassign
+                      (Expr.Ederef (Expr.Etempvar _t'143 (tptr (tptr tvoid)))
+                        (tptr tvoid))
+                      (Expr.Econst_int (Integers.Int.repr 0) tint))))
+                Stmt.Sbreak)
+              Stmt.Sskip)))
+        Stmt.Sbreak))
+    (Stmt.Sset ___x86_sv_i
+      (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_sv_i tuint)
+        (Expr.Econst_int (Integers.Int.repr 1) tint) tuint))))
+
+def s_kprog_x86_store_xmm0_2 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Scall (some _t'10)
+    (Expr.Evar _x86_width_effective (Ty.Tfunction [tuchar] tuchar cc_default))
+    [(Expr.Econst_int (Integers.Int.repr 8) tuint)])
+  (Stmt.Sset ___x86_loss_width
+    (Expr.Ecast (Expr.Etempvar _t'10 tuchar) tuchar)))
+
+def s_kprog_x86_store_xmm0_3 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                    (Expr.Etempvar ___x86_stw_width tuchar)
+                    (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
+  (Stmt.Sset _t'13
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                      (Expr.Etempvar ___x86_stw_width tuchar)
+                      (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
+    (Stmt.Ssequence
+      (Stmt.Sset _t'13
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
+      (Stmt.Sset _t'13 (Expr.Ecast (Expr.Etempvar _t'13 tuint) tuint)))
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                        (Expr.Etempvar ___x86_stw_width tuchar)
+                        (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sset _t'13
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+          (Stmt.Sset _t'13 (Expr.Ecast (Expr.Etempvar _t'13 tuint) tuint)))
+        (Stmt.Sset _t'13 (Expr.Ecast (Expr.Etempvar _t'13 tuint) tuint)))
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sset _t'13
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint)
+              tuint))
+          (Stmt.Sset _t'13 (Expr.Ecast (Expr.Etempvar _t'13 tuint) tuint)))
+        (Stmt.Sset _t'13 (Expr.Ecast (Expr.Etempvar _t'13 tuint) tuint))))))
+
+def s_kprog_x86_store_xmm0_4 : Stmt :=
+(Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+  [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+  [(Expr.Eaddrof
+     (Expr.Ederef
+       (Expr.Ebinop Binop.Oadd
+         (Expr.Etempvar ___x86_stw_bytes (tptr (tvolatile tuchar)))
+         (Expr.Econst_int (Integers.Int.repr 1) tint)
+         (tptr (tvolatile tuchar))) (tvolatile tuchar))
+     (tptr (tvolatile tuchar))),
+   (Expr.Ecast
+     (Expr.Ebinop Binop.Oshr
+       (Expr.Ecast (Expr.Etempvar ___x86_stw_narrowed tulong) tulong)
+       (Expr.Ebinop Binop.Omul (Expr.Econst_int (Integers.Int.repr 8) tuint)
+         (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tint) tuint)
+         tuint) tulong) tuchar)])
+
+def s_kprog_x86_store_xmm0_5 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                      (Expr.Etempvar ___x86_stw_width tuchar)
+                      (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
+    (Stmt.Sset _t'14
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                        (Expr.Etempvar ___x86_stw_width tuchar)
+                        (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
+      (Stmt.Ssequence
+        (Stmt.Sset _t'14
+          (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
+        (Stmt.Sset _t'14 (Expr.Ecast (Expr.Etempvar _t'14 tuint) tuint)))
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                          (Expr.Etempvar ___x86_stw_width tuchar)
+                          (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'14
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint)
+                tuint))
+            (Stmt.Sset _t'14 (Expr.Ecast (Expr.Etempvar _t'14 tuint) tuint)))
+          (Stmt.Sset _t'14 (Expr.Ecast (Expr.Etempvar _t'14 tuint) tuint)))
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'14
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                tuint))
+            (Stmt.Sset _t'14 (Expr.Ecast (Expr.Etempvar _t'14 tuint) tuint)))
+          (Stmt.Sset _t'14 (Expr.Ecast (Expr.Etempvar _t'14 tuint) tuint))))))
+  (Stmt.Sifthenelse (Expr.Ecast
+                      (Expr.Ebinop Binop.Oand
+                        (Expr.Ebinop Binop.Oshr (Expr.Etempvar _t'14 tuint)
+                          (Expr.Econst_int (Integers.Int.repr 2) tint) tuint)
+                        (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint)
+                      tuchar)
+    (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+      [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+      [(Expr.Eaddrof
+         (Expr.Ederef
+           (Expr.Ebinop Binop.Oadd
+             (Expr.Etempvar ___x86_stw_bytes (tptr (tvolatile tuchar)))
+             (Expr.Econst_int (Integers.Int.repr 2) tint)
+             (tptr (tvolatile tuchar))) (tvolatile tuchar))
+         (tptr (tvolatile tuchar))),
+       (Expr.Ecast
+         (Expr.Ebinop Binop.Oshr
+           (Expr.Ecast (Expr.Etempvar ___x86_stw_narrowed tulong) tulong)
+           (Expr.Ebinop Binop.Omul
+             (Expr.Econst_int (Integers.Int.repr 8) tuint)
+             (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 2) tint) tuint)
+             tuint) tulong) tuchar)])
+    Stmt.Sskip))
+
+def s_kprog_x86_store_xmm0_6 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                        (Expr.Etempvar ___x86_stw_width tuchar)
+                        (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
+      (Stmt.Sset _t'15
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                          (Expr.Etempvar ___x86_stw_width tuchar)
+                          (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
+        (Stmt.Ssequence
+          (Stmt.Sset _t'15
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
+          (Stmt.Sset _t'15 (Expr.Ecast (Expr.Etempvar _t'15 tuint) tuint)))
+        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                            (Expr.Etempvar ___x86_stw_width tuchar)
+                            (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                            tint)
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Sset _t'15
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint)
+                  tuint))
+              (Stmt.Sset _t'15
+                (Expr.Ecast (Expr.Etempvar _t'15 tuint) tuint)))
+            (Stmt.Sset _t'15 (Expr.Ecast (Expr.Etempvar _t'15 tuint) tuint)))
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Sset _t'15
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                  tuint))
+              (Stmt.Sset _t'15
+                (Expr.Ecast (Expr.Etempvar _t'15 tuint) tuint)))
+            (Stmt.Sset _t'15 (Expr.Ecast (Expr.Etempvar _t'15 tuint) tuint))))))
+    (Stmt.Sifthenelse (Expr.Ecast
+                        (Expr.Ebinop Binop.Oand
+                          (Expr.Ebinop Binop.Oshr (Expr.Etempvar _t'15 tuint)
+                            (Expr.Econst_int (Integers.Int.repr 3) tint)
+                            tuint)
+                          (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                          tuint) tuchar)
+      (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+        [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+        [(Expr.Eaddrof
+           (Expr.Ederef
+             (Expr.Ebinop Binop.Oadd
+               (Expr.Etempvar ___x86_stw_bytes (tptr (tvolatile tuchar)))
+               (Expr.Econst_int (Integers.Int.repr 3) tint)
+               (tptr (tvolatile tuchar))) (tvolatile tuchar))
+           (tptr (tvolatile tuchar))),
+         (Expr.Ecast
+           (Expr.Ebinop Binop.Oshr
+             (Expr.Ecast (Expr.Etempvar ___x86_stw_narrowed tulong) tulong)
+             (Expr.Ebinop Binop.Omul
+               (Expr.Econst_int (Integers.Int.repr 8) tuint)
+               (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tint)
+                 tuint) tuint) tulong) tuchar)])
+      Stmt.Sskip))
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                          (Expr.Etempvar ___x86_stw_width tuchar)
+                          (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
+        (Stmt.Sset _t'16
+          (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
+        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                            (Expr.Etempvar ___x86_stw_width tuchar)
+                            (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                            tint)
+          (Stmt.Ssequence
+            (Stmt.Sset _t'16
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                tuint))
+            (Stmt.Sset _t'16 (Expr.Ecast (Expr.Etempvar _t'16 tuint) tuint)))
+          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                              (Expr.Etempvar ___x86_stw_width tuchar)
+                              (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                              tint)
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Sset _t'16
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint)
+                    tuint))
+                (Stmt.Sset _t'16
+                  (Expr.Ecast (Expr.Etempvar _t'16 tuint) tuint)))
+              (Stmt.Sset _t'16
+                (Expr.Ecast (Expr.Etempvar _t'16 tuint) tuint)))
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Sset _t'16
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                    tuint))
+                (Stmt.Sset _t'16
+                  (Expr.Ecast (Expr.Etempvar _t'16 tuint) tuint)))
+              (Stmt.Sset _t'16
+                (Expr.Ecast (Expr.Etempvar _t'16 tuint) tuint))))))
+      (Stmt.Sifthenelse (Expr.Ecast
+                          (Expr.Ebinop Binop.Oand
+                            (Expr.Ebinop Binop.Oshr
+                              (Expr.Etempvar _t'16 tuint)
+                              (Expr.Econst_int (Integers.Int.repr 4) tint)
+                              tuint)
+                            (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                            tuint) tuchar)
+        (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+          [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+          [(Expr.Eaddrof
+             (Expr.Ederef
+               (Expr.Ebinop Binop.Oadd
+                 (Expr.Etempvar ___x86_stw_bytes (tptr (tvolatile tuchar)))
+                 (Expr.Econst_int (Integers.Int.repr 4) tint)
+                 (tptr (tvolatile tuchar))) (tvolatile tuchar))
+             (tptr (tvolatile tuchar))),
+           (Expr.Ecast
+             (Expr.Ebinop Binop.Oshr
+               (Expr.Ecast (Expr.Etempvar ___x86_stw_narrowed tulong) tulong)
+               (Expr.Ebinop Binop.Omul
+                 (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                 (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 4) tint)
+                   tuint) tuint) tulong) tuchar)])
+        Stmt.Sskip))
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                            (Expr.Etempvar ___x86_stw_width tuchar)
+                            (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                            tint)
+          (Stmt.Sset _t'17
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
+          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                              (Expr.Etempvar ___x86_stw_width tuchar)
+                              (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                              tint)
+            (Stmt.Ssequence
+              (Stmt.Sset _t'17
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                  tuint))
+              (Stmt.Sset _t'17
+                (Expr.Ecast (Expr.Etempvar _t'17 tuint) tuint)))
+            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                (Expr.Etempvar ___x86_stw_width tuchar)
+                                (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                tint)
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'17
+                    (Expr.Ecast
+                      (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+                  (Stmt.Sset _t'17
+                    (Expr.Ecast (Expr.Etempvar _t'17 tuint) tuint)))
+                (Stmt.Sset _t'17
+                  (Expr.Ecast (Expr.Etempvar _t'17 tuint) tuint)))
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'17
+                    (Expr.Ecast
+                      (Expr.Econst_int (Integers.Int.repr 255) tuint) tuint))
+                  (Stmt.Sset _t'17
+                    (Expr.Ecast (Expr.Etempvar _t'17 tuint) tuint)))
+                (Stmt.Sset _t'17
+                  (Expr.Ecast (Expr.Etempvar _t'17 tuint) tuint))))))
+        (Stmt.Sifthenelse (Expr.Ecast
+                            (Expr.Ebinop Binop.Oand
+                              (Expr.Ebinop Binop.Oshr
+                                (Expr.Etempvar _t'17 tuint)
+                                (Expr.Econst_int (Integers.Int.repr 5) tint)
+                                tuint)
+                              (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                              tuint) tuchar)
+          (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+            [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+            [(Expr.Eaddrof
+               (Expr.Ederef
+                 (Expr.Ebinop Binop.Oadd
+                   (Expr.Etempvar ___x86_stw_bytes (tptr (tvolatile tuchar)))
+                   (Expr.Econst_int (Integers.Int.repr 5) tint)
+                   (tptr (tvolatile tuchar))) (tvolatile tuchar))
+               (tptr (tvolatile tuchar))),
+             (Expr.Ecast
+               (Expr.Ebinop Binop.Oshr
+                 (Expr.Ecast (Expr.Etempvar ___x86_stw_narrowed tulong)
+                   tulong)
+                 (Expr.Ebinop Binop.Omul
+                   (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 5) tint)
+                     tuint) tuint) tulong) tuchar)])
+          Stmt.Sskip))
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                              (Expr.Etempvar ___x86_stw_width tuchar)
+                              (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                              tint)
+            (Stmt.Sset _t'18
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                tuint))
+            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                (Expr.Etempvar ___x86_stw_width tuchar)
+                                (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                tint)
+              (Stmt.Ssequence
+                (Stmt.Sset _t'18
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                    tuint))
+                (Stmt.Sset _t'18
+                  (Expr.Ecast (Expr.Etempvar _t'18 tuint) tuint)))
+              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                  (Expr.Etempvar ___x86_stw_width tuchar)
+                                  (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                  tint)
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'18
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+                    (Stmt.Sset _t'18
+                      (Expr.Ecast (Expr.Etempvar _t'18 tuint) tuint)))
+                  (Stmt.Sset _t'18
+                    (Expr.Ecast (Expr.Etempvar _t'18 tuint) tuint)))
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'18
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                        tuint))
+                    (Stmt.Sset _t'18
+                      (Expr.Ecast (Expr.Etempvar _t'18 tuint) tuint)))
+                  (Stmt.Sset _t'18
+                    (Expr.Ecast (Expr.Etempvar _t'18 tuint) tuint))))))
+          (Stmt.Sifthenelse (Expr.Ecast
+                              (Expr.Ebinop Binop.Oand
+                                (Expr.Ebinop Binop.Oshr
+                                  (Expr.Etempvar _t'18 tuint)
+                                  (Expr.Econst_int (Integers.Int.repr 6) tint)
+                                  tuint)
+                                (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                tuint) tuchar)
+            (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+              [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+              [(Expr.Eaddrof
+                 (Expr.Ederef
+                   (Expr.Ebinop Binop.Oadd
+                     (Expr.Etempvar ___x86_stw_bytes (tptr (tvolatile tuchar)))
+                     (Expr.Econst_int (Integers.Int.repr 6) tint)
+                     (tptr (tvolatile tuchar))) (tvolatile tuchar))
+                 (tptr (tvolatile tuchar))),
+               (Expr.Ecast
+                 (Expr.Ebinop Binop.Oshr
+                   (Expr.Ecast (Expr.Etempvar ___x86_stw_narrowed tulong)
+                     tulong)
+                   (Expr.Ebinop Binop.Omul
+                     (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 6) tint)
+                       tuint) tuint) tulong) tuchar)])
+            Stmt.Sskip))
+        (Stmt.Ssequence
+          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                              (Expr.Etempvar ___x86_stw_width tuchar)
+                              (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                              tint)
+            (Stmt.Sset _t'19
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                tuint))
+            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                (Expr.Etempvar ___x86_stw_width tuchar)
+                                (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                tint)
+              (Stmt.Ssequence
+                (Stmt.Sset _t'19
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                    tuint))
+                (Stmt.Sset _t'19
+                  (Expr.Ecast (Expr.Etempvar _t'19 tuint) tuint)))
+              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                  (Expr.Etempvar ___x86_stw_width tuchar)
+                                  (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                  tint)
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'19
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+                    (Stmt.Sset _t'19
+                      (Expr.Ecast (Expr.Etempvar _t'19 tuint) tuint)))
+                  (Stmt.Sset _t'19
+                    (Expr.Ecast (Expr.Etempvar _t'19 tuint) tuint)))
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'19
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                        tuint))
+                    (Stmt.Sset _t'19
+                      (Expr.Ecast (Expr.Etempvar _t'19 tuint) tuint)))
+                  (Stmt.Sset _t'19
+                    (Expr.Ecast (Expr.Etempvar _t'19 tuint) tuint))))))
+          (Stmt.Sifthenelse (Expr.Ecast
+                              (Expr.Ebinop Binop.Oand
+                                (Expr.Ebinop Binop.Oshr
+                                  (Expr.Etempvar _t'19 tuint)
+                                  (Expr.Econst_int (Integers.Int.repr 7) tint)
+                                  tuint)
+                                (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                tuint) tuchar)
+            (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+              [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+              [(Expr.Eaddrof
+                 (Expr.Ederef
+                   (Expr.Ebinop Binop.Oadd
+                     (Expr.Etempvar ___x86_stw_bytes (tptr (tvolatile tuchar)))
+                     (Expr.Econst_int (Integers.Int.repr 7) tint)
+                     (tptr (tvolatile tuchar))) (tvolatile tuchar))
+                 (tptr (tvolatile tuchar))),
+               (Expr.Ecast
+                 (Expr.Ebinop Binop.Oshr
+                   (Expr.Ecast (Expr.Etempvar ___x86_stw_narrowed tulong)
+                     tulong)
+                   (Expr.Ebinop Binop.Omul
+                     (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 7) tint)
+                       tuint) tuint) tulong) tuchar)])
+            Stmt.Sskip))))))
+
+def s_kprog_x86_store_xmm0_7 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'45
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tint) tint))
+  (Stmt.Sset _t'45 (Expr.Ecast (Expr.Etempvar _t'45 tint) tbool)))
+
+def s_kprog_x86_store_xmm0_8 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'45
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tint))
+  (Stmt.Sset _t'45 (Expr.Ecast (Expr.Etempvar _t'45 tint) tbool)))
+
+def s_kprog_x86_store_xmm0_9 : Stmt :=
+(Stmt.Sset _t'43
+  (Expr.Ecast
+    (Expr.Ebinop Binop.Oeq
+      (Expr.Ebinop Binop.Oand (Expr.Etempvar ___x86_stw_index__1 tulong)
+        (Expr.Econst_int (Integers.Int.repr 3) tuint) tulong)
+      (Expr.Econst_int (Integers.Int.repr 0) tint) tint) tbool))
+
+def s_kprog_x86_store_xmm0_10 : Stmt :=
+(Stmt.Scall (some _t'28)
+  (Expr.Evar _native_lab_entry_input (Ty.Tfunction [tuint] tulong cc_default))
+  [(Expr.Econst_int (Integers.Int.repr 6) tint)])
+
+def s_kprog_x86_store_xmm0_11 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'136
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr)))
+        (Ty.Tstruct _kprog_x86_arena noattr)) _d (tptr (tvolatile tuint))))
+  (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint32)
+    [(tptr (tvolatile tuint)), (tvolatile tuint)]
+    [(Expr.Eaddrof
+       (Expr.Ederef
+         (Expr.Ebinop Binop.Oadd
+           (Expr.Etempvar _t'136 (tptr (tvolatile tuint)))
+           (Expr.Ebinop Binop.Odiv (Expr.Etempvar ___x86_stw_index__1 tulong)
+             (Expr.Econst_int (Integers.Int.repr 4) tuint) tulong)
+           (tptr (tvolatile tuint))) (tvolatile tuint))
+       (tptr (tvolatile tuint))), (Expr.Etempvar _t'28 tulong)]))
+
+def s_kprog_x86_store_xmm0_12 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Scall (some _t'40)
+    (Expr.Evar _x86_width_effective (Ty.Tfunction [tuchar] tuchar cc_default))
+    [(Expr.Econst_int (Integers.Int.repr 1) tuint)])
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq (Expr.Etempvar _t'40 tuchar)
+                      (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
+    (Stmt.Sset _t'41
+      (Expr.Ecast
+        (Expr.Ebinop Binop.Oeq
+          (Expr.Ebinop Binop.Oand (Expr.Etempvar ___x86_stw_index__1 tulong)
+            (Expr.Econst_int (Integers.Int.repr 1) tuint) tulong)
+          (Expr.Econst_int (Integers.Int.repr 0) tint) tint) tbool))
+    (Stmt.Sset _t'41 (Expr.Econst_int (Integers.Int.repr 0) tint))))
+
+def s_kprog_x86_store_xmm0_13 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Scall (some _t'29)
+    (Expr.Evar _native_lab_entry_input (Ty.Tfunction [tuint] tulong
+                                         cc_default))
+    [(Expr.Econst_int (Integers.Int.repr 6) tint)])
+  (Stmt.Ssequence
+    (Stmt.Sset _t'135
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr)))
+          (Ty.Tstruct _kprog_x86_arena noattr)) _w
+        (tptr (tvolatile tushort))))
+    (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint16unsigned)
+      [(tptr (tvolatile tushort)), (tvolatile tushort)]
+      [(Expr.Eaddrof
+         (Expr.Ederef
+           (Expr.Ebinop Binop.Oadd
+             (Expr.Etempvar _t'135 (tptr (tvolatile tushort)))
+             (Expr.Ebinop Binop.Odiv
+               (Expr.Etempvar ___x86_stw_index__1 tulong)
+               (Expr.Econst_int (Integers.Int.repr 2) tuint) tulong)
+             (tptr (tvolatile tushort))) (tvolatile tushort))
+         (tptr (tvolatile tushort))), (Expr.Etempvar _t'29 tulong)])))
+
+def s_kprog_x86_store_xmm0_14 : Stmt :=
+(Stmt.Sset _t'36
+  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+
+def s_kprog_x86_store_xmm0_15 : Stmt :=
+(Stmt.Sset _t'36
+  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint) tuint))
+
+def s_kprog_x86_store_xmm0_16 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'37
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+  (Stmt.Sset _t'37 (Expr.Ecast (Expr.Etempvar _t'37 tuint) tuint)))
+
+def s_kprog_x86_store_xmm0_17 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'37
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint) tuint))
+  (Stmt.Sset _t'37 (Expr.Ecast (Expr.Etempvar _t'37 tuint) tuint)))
+
+def s_kprog_x86_store_xmm0_18 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'38
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+    (Stmt.Sset _t'38 (Expr.Ecast (Expr.Etempvar _t'38 tuint) tuint)))
+  (Stmt.Sset _t'38 (Expr.Ecast (Expr.Etempvar _t'38 tuint) tuint)))
+
+def s_kprog_x86_store_xmm0_19 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'38
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint) tuint))
+    (Stmt.Sset _t'38 (Expr.Ecast (Expr.Etempvar _t'38 tuint) tuint)))
+  (Stmt.Sset _t'38 (Expr.Ecast (Expr.Etempvar _t'38 tuint) tuint)))
+
+def s_kprog_x86_store_xmm0_20 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'39
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+    (Stmt.Sset _t'39 (Expr.Ecast (Expr.Etempvar _t'39 tuint) tuint)))
+  (Stmt.Sset _t'39 (Expr.Ecast (Expr.Etempvar _t'39 tuint) tuint)))
+
+def s_kprog_x86_store_xmm0_21 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'39
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint) tuint))
+    (Stmt.Sset _t'39 (Expr.Ecast (Expr.Etempvar _t'39 tuint) tuint)))
+  (Stmt.Sset _t'39 (Expr.Ecast (Expr.Etempvar _t'39 tuint) tuint)))
+
+def s_kprog_x86_store_xmm0_22 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'134
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr)))
+          (Ty.Tstruct _kprog_x86_arena noattr)) _b (tptr (tvolatile tuchar))))
+    (Stmt.Sset ___x86_stw_bytes__1
+      (Expr.Ebinop Binop.Oadd
+        (Expr.Etempvar _t'134 (tptr (tvolatile tuchar)))
+        (Expr.Etempvar ___x86_stw_index__1 tulong) (tptr (tvolatile tuchar)))))
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Scall (some _t'30)
+        (Expr.Evar _x86_width_effective (Ty.Tfunction [tuchar] tuchar
+                                          cc_default))
+        [(Expr.Econst_int (Integers.Int.repr 1) tuint)])
+      (Stmt.Sset ___x86_stw_width__1
+        (Expr.Ecast (Expr.Etempvar _t'30 tuchar) tuchar)))
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Scall (some _t'31)
+            (Expr.Evar _native_lab_entry_input (Ty.Tfunction [tuint] tulong
+                                                 cc_default))
+            [(Expr.Econst_int (Integers.Int.repr 6) tint)])
+          (Stmt.Scall (some _t'32)
+            (Expr.Evar _x86_width_mask (Ty.Tfunction [tuchar] tulong
+                                         cc_default))
+            [(Expr.Etempvar ___x86_stw_width__1 tuchar)]))
+        (Stmt.Sset ___x86_stw_narrowed__1
+          (Expr.Ebinop Binop.Oand (Expr.Etempvar _t'31 tulong)
+            (Expr.Etempvar _t'32 tulong) tulong)))
+      (Stmt.Ssequence
+        (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+          [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+          [(Expr.Eaddrof
+             (Expr.Ederef
+               (Expr.Ebinop Binop.Oadd
+                 (Expr.Etempvar ___x86_stw_bytes__1 (tptr (tvolatile tuchar)))
+                 (Expr.Econst_int (Integers.Int.repr 0) tint)
+                 (tptr (tvolatile tuchar))) (tvolatile tuchar))
+             (tptr (tvolatile tuchar))),
+           (Expr.Ecast
+             (Expr.Ebinop Binop.Oshr
+               (Expr.Ecast (Expr.Etempvar ___x86_stw_narrowed__1 tulong)
+                 tulong)
+               (Expr.Ebinop Binop.Omul
+                 (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                 (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
+                   tuint) tuint) tulong) tuchar)])
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                (Expr.Etempvar ___x86_stw_width__1 tuchar)
+                                (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                tint)
+              (Stmt.Sset _t'33
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                  tuint))
+              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                  (Expr.Etempvar ___x86_stw_width__1 tuchar)
+                                  (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                  tint)
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'33
+                    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                      tuint))
+                  (Stmt.Sset _t'33
+                    (Expr.Ecast (Expr.Etempvar _t'33 tuint) tuint)))
+                (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                    (Expr.Etempvar ___x86_stw_width__1 tuchar)
+                                    (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                    tint)
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'33
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 15) tuint)
+                          tuint))
+                      (Stmt.Sset _t'33
+                        (Expr.Ecast (Expr.Etempvar _t'33 tuint) tuint)))
+                    (Stmt.Sset _t'33
+                      (Expr.Ecast (Expr.Etempvar _t'33 tuint) tuint)))
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'33
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                          tuint))
+                      (Stmt.Sset _t'33
+                        (Expr.Ecast (Expr.Etempvar _t'33 tuint) tuint)))
+                    (Stmt.Sset _t'33
+                      (Expr.Ecast (Expr.Etempvar _t'33 tuint) tuint))))))
+            (Stmt.Sifthenelse (Expr.Ecast
+                                (Expr.Ebinop Binop.Oand
+                                  (Expr.Ebinop Binop.Oshr
+                                    (Expr.Etempvar _t'33 tuint)
+                                    (Expr.Econst_int (Integers.Int.repr 1) tint)
+                                    tuint)
+                                  (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                  tuint) tuchar)
+              (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                [(Expr.Eaddrof
+                   (Expr.Ederef
+                     (Expr.Ebinop Binop.Oadd
+                       (Expr.Etempvar ___x86_stw_bytes__1 (tptr (tvolatile tuchar)))
+                       (Expr.Econst_int (Integers.Int.repr 1) tint)
+                       (tptr (tvolatile tuchar))) (tvolatile tuchar))
+                   (tptr (tvolatile tuchar))),
+                 (Expr.Ecast
+                   (Expr.Ebinop Binop.Oshr
+                     (Expr.Ecast
+                       (Expr.Etempvar ___x86_stw_narrowed__1 tulong) tulong)
+                     (Expr.Ebinop Binop.Omul
+                       (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                       (Expr.Ecast
+                         (Expr.Econst_int (Integers.Int.repr 1) tint) tuint)
+                       tuint) tulong) tuchar)])
+              Stmt.Sskip))
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                  (Expr.Etempvar ___x86_stw_width__1 tuchar)
+                                  (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                  tint)
+                (Stmt.Sset _t'34
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                    tuint))
+                (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                    (Expr.Etempvar ___x86_stw_width__1 tuchar)
+                                    (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                    tint)
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'34
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
+                    (Stmt.Sset _t'34
+                      (Expr.Ecast (Expr.Etempvar _t'34 tuint) tuint)))
+                  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                      (Expr.Etempvar ___x86_stw_width__1 tuchar)
+                                      (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                      tint)
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'34
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 15) tuint)
+                            tuint))
+                        (Stmt.Sset _t'34
+                          (Expr.Ecast (Expr.Etempvar _t'34 tuint) tuint)))
+                      (Stmt.Sset _t'34
+                        (Expr.Ecast (Expr.Etempvar _t'34 tuint) tuint)))
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'34
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                            tuint))
+                        (Stmt.Sset _t'34
+                          (Expr.Ecast (Expr.Etempvar _t'34 tuint) tuint)))
+                      (Stmt.Sset _t'34
+                        (Expr.Ecast (Expr.Etempvar _t'34 tuint) tuint))))))
+              (Stmt.Sifthenelse (Expr.Ecast
+                                  (Expr.Ebinop Binop.Oand
+                                    (Expr.Ebinop Binop.Oshr
+                                      (Expr.Etempvar _t'34 tuint)
+                                      (Expr.Econst_int (Integers.Int.repr 2) tint)
+                                      tuint)
+                                    (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                    tuint) tuchar)
+                (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                  [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                  [(Expr.Eaddrof
+                     (Expr.Ederef
+                       (Expr.Ebinop Binop.Oadd
+                         (Expr.Etempvar ___x86_stw_bytes__1 (tptr (tvolatile tuchar)))
+                         (Expr.Econst_int (Integers.Int.repr 2) tint)
+                         (tptr (tvolatile tuchar))) (tvolatile tuchar))
+                     (tptr (tvolatile tuchar))),
+                   (Expr.Ecast
+                     (Expr.Ebinop Binop.Oshr
+                       (Expr.Ecast
+                         (Expr.Etempvar ___x86_stw_narrowed__1 tulong)
+                         tulong)
+                       (Expr.Ebinop Binop.Omul
+                         (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                         (Expr.Ecast
+                           (Expr.Econst_int (Integers.Int.repr 2) tint)
+                           tuint) tuint) tulong) tuchar)])
+                Stmt.Sskip))
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                    (Expr.Etempvar ___x86_stw_width__1 tuchar)
+                                    (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                    tint)
+                  (Stmt.Sset _t'35
+                    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                      tuint))
+                  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                      (Expr.Etempvar ___x86_stw_width__1 tuchar)
+                                      (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                      tint)
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'35
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                          tuint))
+                      (Stmt.Sset _t'35
+                        (Expr.Ecast (Expr.Etempvar _t'35 tuint) tuint)))
+                    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                        (Expr.Etempvar ___x86_stw_width__1 tuchar)
+                                        (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                        tint)
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'35
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 15) tuint)
+                              tuint))
+                          (Stmt.Sset _t'35
+                            (Expr.Ecast (Expr.Etempvar _t'35 tuint) tuint)))
+                        (Stmt.Sset _t'35
+                          (Expr.Ecast (Expr.Etempvar _t'35 tuint) tuint)))
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'35
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                              tuint))
+                          (Stmt.Sset _t'35
+                            (Expr.Ecast (Expr.Etempvar _t'35 tuint) tuint)))
+                        (Stmt.Sset _t'35
+                          (Expr.Ecast (Expr.Etempvar _t'35 tuint) tuint))))))
+                (Stmt.Sifthenelse (Expr.Ecast
+                                    (Expr.Ebinop Binop.Oand
+                                      (Expr.Ebinop Binop.Oshr
+                                        (Expr.Etempvar _t'35 tuint)
+                                        (Expr.Econst_int (Integers.Int.repr 3) tint)
+                                        tuint)
+                                      (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                      tuint) tuchar)
+                  (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                    [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                    [(Expr.Eaddrof
+                       (Expr.Ederef
+                         (Expr.Ebinop Binop.Oadd
+                           (Expr.Etempvar ___x86_stw_bytes__1 (tptr (tvolatile tuchar)))
+                           (Expr.Econst_int (Integers.Int.repr 3) tint)
+                           (tptr (tvolatile tuchar))) (tvolatile tuchar))
+                       (tptr (tvolatile tuchar))),
+                     (Expr.Ecast
+                       (Expr.Ebinop Binop.Oshr
+                         (Expr.Ecast
+                           (Expr.Etempvar ___x86_stw_narrowed__1 tulong)
+                           tulong)
+                         (Expr.Ebinop Binop.Omul
+                           (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                           (Expr.Ecast
+                             (Expr.Econst_int (Integers.Int.repr 3) tint)
+                             tuint) tuint) tulong) tuchar)])
+                  Stmt.Sskip))
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                      (Expr.Etempvar ___x86_stw_width__1 tuchar)
+                                      (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                      tint)
+                    (Stmt.Sset _t'36
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
+                    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                        (Expr.Etempvar ___x86_stw_width__1 tuchar)
+                                        (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                        tint)
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'36
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                            tuint))
+                        (Stmt.Sset _t'36
+                          (Expr.Ecast (Expr.Etempvar _t'36 tuint) tuint)))
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                          (Expr.Etempvar ___x86_stw_width__1 tuchar)
+                                          (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                          tint)
+                        (Stmt.Ssequence
+                          (Stmt.Ssequence
+                            s_kprog_x86_store_xmm0_14
+                            (Stmt.Sset _t'36
+                              (Expr.Ecast (Expr.Etempvar _t'36 tuint) tuint)))
+                          (Stmt.Sset _t'36
+                            (Expr.Ecast (Expr.Etempvar _t'36 tuint) tuint)))
+                        (Stmt.Ssequence
+                          (Stmt.Ssequence
+                            s_kprog_x86_store_xmm0_15
+                            (Stmt.Sset _t'36
+                              (Expr.Ecast (Expr.Etempvar _t'36 tuint) tuint)))
+                          (Stmt.Sset _t'36
+                            (Expr.Ecast (Expr.Etempvar _t'36 tuint) tuint))))))
+                  (Stmt.Sifthenelse (Expr.Ecast
+                                      (Expr.Ebinop Binop.Oand
+                                        (Expr.Ebinop Binop.Oshr
+                                          (Expr.Etempvar _t'36 tuint)
+                                          (Expr.Econst_int (Integers.Int.repr 4) tint)
+                                          tuint)
+                                        (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                        tuint) tuchar)
+                    (Stmt.Sbuiltin none
+                      (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                      [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                      [(Expr.Eaddrof
+                         (Expr.Ederef
+                           (Expr.Ebinop Binop.Oadd
+                             (Expr.Etempvar ___x86_stw_bytes__1 (tptr (tvolatile tuchar)))
+                             (Expr.Econst_int (Integers.Int.repr 4) tint)
+                             (tptr (tvolatile tuchar))) (tvolatile tuchar))
+                         (tptr (tvolatile tuchar))),
+                       (Expr.Ecast
+                         (Expr.Ebinop Binop.Oshr
+                           (Expr.Ecast
+                             (Expr.Etempvar ___x86_stw_narrowed__1 tulong)
+                             tulong)
+                           (Expr.Ebinop Binop.Omul
+                             (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                             (Expr.Ecast
+                               (Expr.Econst_int (Integers.Int.repr 4) tint)
+                               tuint) tuint) tulong) tuchar)])
+                    Stmt.Sskip))
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                        (Expr.Etempvar ___x86_stw_width__1 tuchar)
+                                        (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                        tint)
+                      (Stmt.Sset _t'37
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                          tuint))
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                          (Expr.Etempvar ___x86_stw_width__1 tuchar)
+                                          (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                          tint)
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'37
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                              tuint))
+                          (Stmt.Sset _t'37
+                            (Expr.Ecast (Expr.Etempvar _t'37 tuint) tuint)))
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                            (Expr.Etempvar ___x86_stw_width__1 tuchar)
+                                            (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                            tint)
+                          (Stmt.Ssequence
+                            s_kprog_x86_store_xmm0_16
+                            (Stmt.Sset _t'37
+                              (Expr.Ecast (Expr.Etempvar _t'37 tuint) tuint)))
+                          (Stmt.Ssequence
+                            s_kprog_x86_store_xmm0_17
+                            (Stmt.Sset _t'37
+                              (Expr.Ecast (Expr.Etempvar _t'37 tuint) tuint))))))
+                    (Stmt.Sifthenelse (Expr.Ecast
+                                        (Expr.Ebinop Binop.Oand
+                                          (Expr.Ebinop Binop.Oshr
+                                            (Expr.Etempvar _t'37 tuint)
+                                            (Expr.Econst_int (Integers.Int.repr 5) tint)
+                                            tuint)
+                                          (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                          tuint) tuchar)
+                      (Stmt.Sbuiltin none
+                        (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                        [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                        [(Expr.Eaddrof
+                           (Expr.Ederef
+                             (Expr.Ebinop Binop.Oadd
+                               (Expr.Etempvar ___x86_stw_bytes__1 (tptr (tvolatile tuchar)))
+                               (Expr.Econst_int (Integers.Int.repr 5) tint)
+                               (tptr (tvolatile tuchar))) (tvolatile tuchar))
+                           (tptr (tvolatile tuchar))),
+                         (Expr.Ecast
+                           (Expr.Ebinop Binop.Oshr
+                             (Expr.Ecast
+                               (Expr.Etempvar ___x86_stw_narrowed__1 tulong)
+                               tulong)
+                             (Expr.Ebinop Binop.Omul
+                               (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                               (Expr.Ecast
+                                 (Expr.Econst_int (Integers.Int.repr 5) tint)
+                                 tuint) tuint) tulong) tuchar)])
+                      Stmt.Sskip))
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                          (Expr.Etempvar ___x86_stw_width__1 tuchar)
+                                          (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                          tint)
+                        (Stmt.Sset _t'38
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                            tuint))
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                            (Expr.Etempvar ___x86_stw_width__1 tuchar)
+                                            (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                            tint)
+                          (Stmt.Ssequence
+                            (Stmt.Sset _t'38
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                                tuint))
+                            (Stmt.Sset _t'38
+                              (Expr.Ecast (Expr.Etempvar _t'38 tuint) tuint)))
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                              (Expr.Etempvar ___x86_stw_width__1 tuchar)
+                                              (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                              tint)
+                            s_kprog_x86_store_xmm0_18
+                            s_kprog_x86_store_xmm0_19)))
+                      (Stmt.Sifthenelse (Expr.Ecast
+                                          (Expr.Ebinop Binop.Oand
+                                            (Expr.Ebinop Binop.Oshr
+                                              (Expr.Etempvar _t'38 tuint)
+                                              (Expr.Econst_int (Integers.Int.repr 6) tint)
+                                              tuint)
+                                            (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                            tuint) tuchar)
+                        (Stmt.Sbuiltin none
+                          (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                          [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                          [(Expr.Eaddrof
+                             (Expr.Ederef
+                               (Expr.Ebinop Binop.Oadd
+                                 (Expr.Etempvar ___x86_stw_bytes__1 (tptr (tvolatile tuchar)))
+                                 (Expr.Econst_int (Integers.Int.repr 6) tint)
+                                 (tptr (tvolatile tuchar)))
+                               (tvolatile tuchar)) (tptr (tvolatile tuchar))),
+                           (Expr.Ecast
+                             (Expr.Ebinop Binop.Oshr
+                               (Expr.Ecast
+                                 (Expr.Etempvar ___x86_stw_narrowed__1 tulong)
+                                 tulong)
+                               (Expr.Ebinop Binop.Omul
+                                 (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                 (Expr.Ecast
+                                   (Expr.Econst_int (Integers.Int.repr 6) tint)
+                                   tuint) tuint) tulong) tuchar)])
+                        Stmt.Sskip))
+                    (Stmt.Ssequence
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                          (Expr.Etempvar ___x86_stw_width__1 tuchar)
+                                          (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                          tint)
+                        (Stmt.Sset _t'39
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                            tuint))
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                            (Expr.Etempvar ___x86_stw_width__1 tuchar)
+                                            (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                            tint)
+                          (Stmt.Ssequence
+                            (Stmt.Sset _t'39
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                                tuint))
+                            (Stmt.Sset _t'39
+                              (Expr.Ecast (Expr.Etempvar _t'39 tuint) tuint)))
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                              (Expr.Etempvar ___x86_stw_width__1 tuchar)
+                                              (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                              tint)
+                            s_kprog_x86_store_xmm0_20
+                            s_kprog_x86_store_xmm0_21)))
+                      (Stmt.Sifthenelse (Expr.Ecast
+                                          (Expr.Ebinop Binop.Oand
+                                            (Expr.Ebinop Binop.Oshr
+                                              (Expr.Etempvar _t'39 tuint)
+                                              (Expr.Econst_int (Integers.Int.repr 7) tint)
+                                              tuint)
+                                            (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                            tuint) tuchar)
+                        (Stmt.Sbuiltin none
+                          (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                          [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                          [(Expr.Eaddrof
+                             (Expr.Ederef
+                               (Expr.Ebinop Binop.Oadd
+                                 (Expr.Etempvar ___x86_stw_bytes__1 (tptr (tvolatile tuchar)))
+                                 (Expr.Econst_int (Integers.Int.repr 7) tint)
+                                 (tptr (tvolatile tuchar)))
+                               (tvolatile tuchar)) (tptr (tvolatile tuchar))),
+                           (Expr.Ecast
+                             (Expr.Ebinop Binop.Oshr
+                               (Expr.Ecast
+                                 (Expr.Etempvar ___x86_stw_narrowed__1 tulong)
+                                 tulong)
+                               (Expr.Ebinop Binop.Omul
+                                 (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                 (Expr.Ecast
+                                   (Expr.Econst_int (Integers.Int.repr 7) tint)
+                                   tuint) tuint) tulong) tuchar)])
+                        Stmt.Sskip))))))))))))
+
+def s_kprog_x86_store_xmm0_23 : Stmt :=
+Stmt.Sbreak
+
+def s_kprog_x86_store_xmm0_24 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___x86_loss_value
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar ___x86_state (tptr (Ty.Tstruct _x86_sim_register_state noattr)))
+        (Ty.Tstruct _x86_sim_register_state noattr)) _xmm0_lo tulong))
+  (Stmt.Ssequence
+    (Stmt.Sloop
+      (Stmt.Ssequence
+        (Stmt.Sset ___x86_stw_index
+          (Expr.Ebinop Binop.Oadd
+            (Expr.Ecast (Expr.Etempvar ___x86_loss_off tlong) tulong)
+            (Expr.Ecast (Expr.Etempvar _capacity tuint) tulong) tulong))
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Scall (some _t'24)
+                (Expr.Evar _x86_width_effective (Ty.Tfunction [tuchar] tuchar
+                                                  cc_default))
+                [(Expr.Etempvar ___x86_loss_width tuchar)])
+              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                  (Expr.Etempvar _t'24 tuchar)
+                                  (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                  tint)
+                (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                    (Expr.Ebinop Binop.Oand
+                                      (Expr.Ecast
+                                        (Expr.Etempvar ___x86_stw_index tulong)
+                                        tulong)
+                                      (Expr.Econst_int (Integers.Int.repr 7) tuint)
+                                      tulong)
+                                    (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                                    tint)
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'25
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 1) tint) tint))
+                    (Stmt.Sset _t'25
+                      (Expr.Ecast (Expr.Etempvar _t'25 tint) tbool)))
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'25
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 0) tint) tint))
+                    (Stmt.Sset _t'25
+                      (Expr.Ecast (Expr.Etempvar _t'25 tint) tbool))))
+                (Stmt.Sset _t'25
+                  (Expr.Econst_int (Integers.Int.repr 0) tint))))
+            (Stmt.Sifthenelse (Expr.Etempvar _t'25 tint)
+              (Stmt.Sset _t'26
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tint)
+                  tint))
+              (Stmt.Sset _t'26
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
+                  tint))))
+          (Stmt.Sifthenelse (Expr.Ecast (Expr.Etempvar _t'26 tint) tuchar)
+            (Stmt.Ssequence
+              (Stmt.Sset _t'142
+                (Expr.Efield
+                  (Expr.Ederef
+                    (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr)))
+                    (Ty.Tstruct _kprog_x86_arena noattr)) _q
+                  (tptr (tvolatile tulong))))
+              (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint64)
+                [(tptr (tvolatile tulong)), (tvolatile tulong)]
+                [(Expr.Eaddrof
+                   (Expr.Ederef
+                     (Expr.Ebinop Binop.Oadd
+                       (Expr.Etempvar _t'142 (tptr (tvolatile tulong)))
+                       (Expr.Ebinop Binop.Oshr
+                         (Expr.Ecast (Expr.Etempvar ___x86_stw_index tulong)
+                           tulong)
+                         (Expr.Econst_int (Integers.Int.repr 3) tint) tulong)
+                       (tptr (tvolatile tulong))) (tvolatile tulong))
+                   (tptr (tvolatile tulong))),
+                 (Expr.Etempvar ___x86_loss_value tulong)]))
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Scall (some _t'22)
+                  (Expr.Evar _x86_width_effective (Ty.Tfunction [tuchar]
+                                                    tuchar cc_default))
+                  [(Expr.Etempvar ___x86_loss_width tuchar)])
+                (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                    (Expr.Etempvar _t'22 tuchar)
+                                    (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                    tint)
+                  (Stmt.Sset _t'23
+                    (Expr.Ecast
+                      (Expr.Ebinop Binop.Oeq
+                        (Expr.Ebinop Binop.Oand
+                          (Expr.Etempvar ___x86_stw_index tulong)
+                          (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                          tulong)
+                        (Expr.Econst_int (Integers.Int.repr 0) tint) tint)
+                      tbool))
+                  (Stmt.Sset _t'23
+                    (Expr.Econst_int (Integers.Int.repr 0) tint))))
+              (Stmt.Sifthenelse (Expr.Etempvar _t'23 tint)
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'141
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr)))
+                        (Ty.Tstruct _kprog_x86_arena noattr)) _d
+                      (tptr (tvolatile tuint))))
+                  (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint32)
+                    [(tptr (tvolatile tuint)), (tvolatile tuint)]
+                    [(Expr.Eaddrof
+                       (Expr.Ederef
+                         (Expr.Ebinop Binop.Oadd
+                           (Expr.Etempvar _t'141 (tptr (tvolatile tuint)))
+                           (Expr.Ebinop Binop.Odiv
+                             (Expr.Etempvar ___x86_stw_index tulong)
+                             (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                             tulong) (tptr (tvolatile tuint)))
+                         (tvolatile tuint)) (tptr (tvolatile tuint))),
+                     (Expr.Etempvar ___x86_loss_value tulong)]))
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Scall (some _t'20)
+                      (Expr.Evar _x86_width_effective (Ty.Tfunction [tuchar]
+                                                        tuchar cc_default))
+                      [(Expr.Etempvar ___x86_loss_width tuchar)])
+                    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                        (Expr.Etempvar _t'20 tuchar)
+                                        (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                        tint)
+                      (Stmt.Sset _t'21
+                        (Expr.Ecast
+                          (Expr.Ebinop Binop.Oeq
+                            (Expr.Ebinop Binop.Oand
+                              (Expr.Etempvar ___x86_stw_index tulong)
+                              (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                              tulong)
+                            (Expr.Econst_int (Integers.Int.repr 0) tint)
+                            tint) tbool))
+                      (Stmt.Sset _t'21
+                        (Expr.Econst_int (Integers.Int.repr 0) tint))))
+                  (Stmt.Sifthenelse (Expr.Etempvar _t'21 tint)
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'140
+                        (Expr.Efield
+                          (Expr.Ederef
+                            (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr)))
+                            (Ty.Tstruct _kprog_x86_arena noattr)) _w
+                          (tptr (tvolatile tushort))))
+                      (Stmt.Sbuiltin none
+                        (ExtFun.EF_vstore Chunk.Mint16unsigned)
+                        [(tptr (tvolatile tushort)), (tvolatile tushort)]
+                        [(Expr.Eaddrof
+                           (Expr.Ederef
+                             (Expr.Ebinop Binop.Oadd
+                               (Expr.Etempvar _t'140 (tptr (tvolatile tushort)))
+                               (Expr.Ebinop Binop.Odiv
+                                 (Expr.Etempvar ___x86_stw_index tulong)
+                                 (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                 tulong) (tptr (tvolatile tushort)))
+                             (tvolatile tushort)) (tptr (tvolatile tushort))),
+                         (Expr.Etempvar ___x86_loss_value tulong)]))
+                    (Stmt.Sloop
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'139
+                            (Expr.Efield
+                              (Expr.Ederef
+                                (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr)))
+                                (Ty.Tstruct _kprog_x86_arena noattr)) _b
+                              (tptr (tvolatile tuchar))))
+                          (Stmt.Sset ___x86_stw_bytes
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Etempvar _t'139 (tptr (tvolatile tuchar)))
+                              (Expr.Etempvar ___x86_stw_index tulong)
+                              (tptr (tvolatile tuchar)))))
+                        (Stmt.Ssequence
+                          (Stmt.Ssequence
+                            (Stmt.Scall (some _t'11)
+                              (Expr.Evar _x86_width_effective (Ty.Tfunction
+                                                                [tuchar]
+                                                                tuchar
+                                                                cc_default))
+                              [(Expr.Etempvar ___x86_loss_width tuchar)])
+                            (Stmt.Sset ___x86_stw_width
+                              (Expr.Ecast (Expr.Etempvar _t'11 tuchar)
+                                tuchar)))
+                          (Stmt.Ssequence
+                            (Stmt.Ssequence
+                              (Stmt.Scall (some _t'12)
+                                (Expr.Evar _x86_width_mask (Ty.Tfunction
+                                                             [tuchar] tulong
+                                                             cc_default))
+                                [(Expr.Etempvar ___x86_stw_width tuchar)])
+                              (Stmt.Sset ___x86_stw_narrowed
+                                (Expr.Ebinop Binop.Oand
+                                  (Expr.Etempvar ___x86_loss_value tulong)
+                                  (Expr.Etempvar _t'12 tulong) tulong)))
+                            (Stmt.Ssequence
+                              (Stmt.Sbuiltin none
+                                (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                                [(tptr (tvolatile tuchar)),
+                                 (tvolatile tuchar)]
+                                [(Expr.Eaddrof
+                                   (Expr.Ederef
+                                     (Expr.Ebinop Binop.Oadd
+                                       (Expr.Etempvar ___x86_stw_bytes (tptr (tvolatile tuchar)))
+                                       (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                       (tptr (tvolatile tuchar)))
+                                     (tvolatile tuchar))
+                                   (tptr (tvolatile tuchar))),
+                                 (Expr.Ecast
+                                   (Expr.Ebinop Binop.Oshr
+                                     (Expr.Ecast
+                                       (Expr.Etempvar ___x86_stw_narrowed tulong)
+                                       tulong)
+                                     (Expr.Ebinop Binop.Omul
+                                       (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                       (Expr.Ecast
+                                         (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                         tuint) tuint) tulong) tuchar)])
+                              (Stmt.Ssequence
+                                (Stmt.Ssequence
+                                  s_kprog_x86_store_xmm0_3
+                                  (Stmt.Sifthenelse (Expr.Ecast
+                                                      (Expr.Ebinop Binop.Oand
+                                                        (Expr.Ebinop Binop.Oshr
+                                                          (Expr.Etempvar _t'13 tuint)
+                                                          (Expr.Econst_int (Integers.Int.repr 1) tint)
+                                                          tuint)
+                                                        (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                                        tuint) tuchar)
+                                    s_kprog_x86_store_xmm0_4
+                                    Stmt.Sskip))
+                                (Stmt.Ssequence
+                                  s_kprog_x86_store_xmm0_5
+                                  s_kprog_x86_store_xmm0_6))))))
+                      Stmt.Sbreak))))))))
+      Stmt.Sbreak)
+    (Stmt.Ssequence
+      (Stmt.Sset _t'133
+        (Expr.Efield
+          (Expr.Efield
+            (Expr.Efield
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar ___x86_state (tptr (Ty.Tstruct _x86_sim_register_state noattr)))
+                  (Ty.Tstruct _x86_sim_register_state noattr))
+                (Positive.ofNat 18727075383868559167)
+                (Ty.Tunion __3119 noattr))
+              (Positive.ofNat 18727075383868559167)
+              (Ty.Tstruct __3120 noattr)) _rsp
+            (Ty.Tunion _x86_sim_gpr noattr)) _ptr (tptr tvoid)))
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                          (Expr.Etempvar ___x86_loss_off tlong)
+                          (Expr.Ecast
+                            (Expr.Ecast (Expr.Etempvar _t'133 (tptr tvoid))
+                              tlong) tlong) tint)
+        (Stmt.Ssequence
+          (Stmt.Sset ___x86_loss_i
+            (Expr.Econst_int (Integers.Int.repr 0) tint))
+          (Stmt.Sloop
+            (Stmt.Ssequence
+              (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                  (Expr.Etempvar ___x86_loss_i tuint)
+                                  (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                  tint)
+                Stmt.Sskip
+                Stmt.Sbreak)
+              (Stmt.Ssequence
+                (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                    (Expr.Etempvar ___x86_loss_i tuint)
+                                    (Expr.Etempvar ___x86_loss_width tuchar)
+                                    tint)
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'138
+                      (Expr.Efield
+                        (Expr.Efield
+                          (Expr.Efield
+                            (Expr.Efield
+                              (Expr.Ederef
+                                (Expr.Etempvar ___x86_state (tptr (Ty.Tstruct _x86_sim_register_state noattr)))
+                                (Ty.Tstruct _x86_sim_register_state noattr))
+                              (Positive.ofNat 18727075383868559167)
+                              (Ty.Tunion __3119 noattr))
+                            (Positive.ofNat 18727075383868559167)
+                            (Ty.Tstruct __3120 noattr)) _rsp
+                          (Ty.Tunion _x86_sim_gpr noattr)) _ptr (tptr tvoid)))
+                    (Stmt.Sset _t'47
+                      (Expr.Ecast
+                        (Expr.Ebinop Binop.Olt
+                          (Expr.Ebinop Binop.Oadd
+                            (Expr.Etempvar ___x86_loss_off tlong)
+                            (Expr.Etempvar ___x86_loss_i tuint) tlong)
+                          (Expr.Ecast
+                            (Expr.Ecast (Expr.Etempvar _t'138 (tptr tvoid))
+                              tlong) tlong) tint) tbool)))
+                  (Stmt.Sset _t'47
+                    (Expr.Econst_int (Integers.Int.repr 0) tint)))
+                (Stmt.Sifthenelse (Expr.Etempvar _t'47 tint)
+                  (Stmt.Sloop
+                    (Stmt.Ssequence
+                      (Stmt.Sset ___x86_stw_index__1
+                        (Expr.Ebinop Binop.Oadd
+                          (Expr.Ecast
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Etempvar ___x86_loss_off tlong)
+                              (Expr.Etempvar ___x86_loss_i tuint) tlong)
+                            tulong)
+                          (Expr.Ecast (Expr.Etempvar _capacity tuint) tulong)
+                          tulong))
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Ssequence
+                            (Stmt.Scall (some _t'44)
+                              (Expr.Evar _x86_width_effective (Ty.Tfunction
+                                                                [tuchar]
+                                                                tuchar
+                                                                cc_default))
+                              [(Expr.Econst_int (Integers.Int.repr 1) tuint)])
+                            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                (Expr.Etempvar _t'44 tuchar)
+                                                (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                                tint)
+                              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                  (Expr.Ebinop Binop.Oand
+                                                    (Expr.Ecast
+                                                      (Expr.Etempvar ___x86_stw_index__1 tulong)
+                                                      tulong)
+                                                    (Expr.Econst_int (Integers.Int.repr 7) tuint)
+                                                    tulong)
+                                                  (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                                                  tint)
+                                s_kprog_x86_store_xmm0_7
+                                s_kprog_x86_store_xmm0_8)
+                              (Stmt.Sset _t'45
+                                (Expr.Econst_int (Integers.Int.repr 0) tint))))
+                          (Stmt.Sifthenelse (Expr.Etempvar _t'45 tint)
+                            (Stmt.Sset _t'46
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 1) tint)
+                                tint))
+                            (Stmt.Sset _t'46
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                tint))))
+                        (Stmt.Sifthenelse (Expr.Ecast
+                                            (Expr.Etempvar _t'46 tint)
+                                            tuchar)
+                          (Stmt.Ssequence
+                            (Stmt.Scall (some _t'27)
+                              (Expr.Evar _native_lab_entry_input (Ty.Tfunction
+                                                                   [tuint]
+                                                                   tulong
+                                                                   cc_default))
+                              [(Expr.Econst_int (Integers.Int.repr 6) tint)])
+                            (Stmt.Ssequence
+                              (Stmt.Sset _t'137
+                                (Expr.Efield
+                                  (Expr.Ederef
+                                    (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr)))
+                                    (Ty.Tstruct _kprog_x86_arena noattr)) _q
+                                  (tptr (tvolatile tulong))))
+                              (Stmt.Sbuiltin none
+                                (ExtFun.EF_vstore Chunk.Mint64)
+                                [(tptr (tvolatile tulong)),
+                                 (tvolatile tulong)]
+                                [(Expr.Eaddrof
+                                   (Expr.Ederef
+                                     (Expr.Ebinop Binop.Oadd
+                                       (Expr.Etempvar _t'137 (tptr (tvolatile tulong)))
+                                       (Expr.Ebinop Binop.Oshr
+                                         (Expr.Ecast
+                                           (Expr.Etempvar ___x86_stw_index__1 tulong)
+                                           tulong)
+                                         (Expr.Econst_int (Integers.Int.repr 3) tint)
+                                         tulong) (tptr (tvolatile tulong)))
+                                     (tvolatile tulong))
+                                   (tptr (tvolatile tulong))),
+                                 (Expr.Etempvar _t'27 tulong)])))
+                          (Stmt.Ssequence
+                            (Stmt.Ssequence
+                              (Stmt.Scall (some _t'42)
+                                (Expr.Evar _x86_width_effective (Ty.Tfunction
+                                                                  [tuchar]
+                                                                  tuchar
+                                                                  cc_default))
+                                [(Expr.Econst_int (Integers.Int.repr 1) tuint)])
+                              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                  (Expr.Etempvar _t'42 tuchar)
+                                                  (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                                  tint)
+                                s_kprog_x86_store_xmm0_9
+                                (Stmt.Sset _t'43
+                                  (Expr.Econst_int (Integers.Int.repr 0) tint))))
+                            (Stmt.Sifthenelse (Expr.Etempvar _t'43 tint)
+                              (Stmt.Ssequence
+                                s_kprog_x86_store_xmm0_10
+                                s_kprog_x86_store_xmm0_11)
+                              (Stmt.Ssequence
+                                s_kprog_x86_store_xmm0_12
+                                (Stmt.Sifthenelse (Expr.Etempvar _t'41 tint)
+                                  s_kprog_x86_store_xmm0_13
+                                  (Stmt.Sloop
+                                    s_kprog_x86_store_xmm0_22
+                                    s_kprog_x86_store_xmm0_23))))))))
+                    Stmt.Sbreak)
+                  Stmt.Sskip)))
+            (Stmt.Sset ___x86_loss_i
+              (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_loss_i tuint)
+                (Expr.Econst_int (Integers.Int.repr 1) tint) tuint))))
+        Stmt.Sskip))))
+
+def s_kprog_x86_store_xmm0_25 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                      (Expr.Econst_int (Integers.Int.repr 1) tint)
+                      (Expr.Econst_int (Integers.Int.repr 0) tuint) tint)
+    (Stmt.Sset _t'48
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuint))
+    (Stmt.Sset _t'48
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tuint) tuint)))
+  (Stmt.Sset ___x86_sv_index__1
+    (Expr.Ebinop Binop.Oadd
+      (Expr.Ecast
+        (Expr.Ebinop Binop.Oadd
+          (Expr.Ebinop Binop.Oadd
+            (Expr.Ecast
+              (Expr.Ecast (Expr.Etempvar ___x86_l_base_ptr (tptr tvoid))
+                tlong) tlong) (Expr.Etempvar ___x86_l_disp tlong) tlong)
+          (Expr.Etempvar _t'48 tuint) tlong) tulong)
+      (Expr.Ecast (Expr.Etempvar _capacity tuint) tulong) tulong)))
+
+def s_kprog_x86_store_xmm0_26 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Scall (some _t'49)
+      (Expr.Evar _x86_width_effective (Ty.Tfunction [tuchar] tuchar
+                                        cc_default))
+      [(Expr.Econst_int (Integers.Int.repr 8) tuint)])
+    (Stmt.Sset ___x86_sv_width__1
+      (Expr.Ecast (Expr.Etempvar _t'49 tuchar) tulong)))
+  (Stmt.Ssequence
+    (Stmt.Sset ___x86_sv_i__1 (Expr.Econst_int (Integers.Int.repr 0) tint))
+    (Stmt.Sloop
+      (Stmt.Ssequence
+        (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                            (Expr.Etempvar ___x86_sv_i__1 tuint)
+                            (Expr.Ebinop Binop.Odiv
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Ecast (Expr.Etempvar _capacity tuint)
+                                  tulong)
+                                (Expr.Econst_int (Integers.Int.repr 7) tuint)
+                                tulong)
+                              (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                              tulong) tint)
+          Stmt.Sskip
+          Stmt.Sbreak)
+        (Stmt.Sloop
+          (Stmt.Ssequence
+            (Stmt.Sset ___x86_sv_start__1
+              (Expr.Ebinop Binop.Omul
+                (Expr.Ecast (Expr.Etempvar ___x86_sv_i__1 tuint) tulong)
+                (Expr.Econst_int (Integers.Int.repr 8) tuint) tulong))
+            (Stmt.Ssequence
+              (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                  (Expr.Ebinop Binop.Osub
+                                    (Expr.Etempvar ___x86_sv_index__1 tulong)
+                                    (Expr.Etempvar ___x86_sv_start__1 tulong)
+                                    tulong)
+                                  (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                  tint)
+                (Stmt.Sset _t'50
+                  (Expr.Econst_int (Integers.Int.repr 1) tint))
+                (Stmt.Sset _t'50
+                  (Expr.Ecast
+                    (Expr.Ebinop Binop.Olt
+                      (Expr.Ebinop Binop.Osub
+                        (Expr.Etempvar ___x86_sv_start__1 tulong)
+                        (Expr.Etempvar ___x86_sv_index__1 tulong) tulong)
+                      (Expr.Etempvar ___x86_sv_width__1 tulong) tint) tbool)))
+              (Stmt.Sifthenelse (Expr.Etempvar _t'50 tint)
+                (Stmt.Sloop
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'132
+                        (Expr.Efield
+                          (Expr.Ederef
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Etempvar _facts (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)))
+                              (Expr.Etempvar ___x86_sv_i__1 tuint)
+                              (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)))
+                            (Ty.Tstruct _kprog_x86_stack_fact noattr)) _tag
+                          (tptr tuchar)))
+                      (Stmt.Sassign
+                        (Expr.Ederef (Expr.Etempvar _t'132 (tptr tuchar))
+                          tuchar)
+                        (Expr.Econst_int (Integers.Int.repr 0) tuint)))
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'131
+                        (Expr.Efield
+                          (Expr.Ederef
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Etempvar _facts (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)))
+                              (Expr.Etempvar ___x86_sv_i__1 tuint)
+                              (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)))
+                            (Ty.Tstruct _kprog_x86_stack_fact noattr))
+                          _pointer (tptr (tptr tvoid))))
+                      (Stmt.Sassign
+                        (Expr.Ederef
+                          (Expr.Etempvar _t'131 (tptr (tptr tvoid)))
+                          (tptr tvoid))
+                        (Expr.Econst_int (Integers.Int.repr 0) tint))))
+                  Stmt.Sbreak)
+                Stmt.Sskip)))
+          Stmt.Sbreak))
+      (Stmt.Sset ___x86_sv_i__1
+        (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_sv_i__1 tuint)
+          (Expr.Econst_int (Integers.Int.repr 1) tint) tuint)))))
+
+def s_kprog_x86_store_xmm0_27 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                      (Expr.Econst_int (Integers.Int.repr 1) tint)
+                      (Expr.Econst_int (Integers.Int.repr 0) tuint) tint)
+    (Stmt.Sset _t'51
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuint))
+    (Stmt.Sset _t'51
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tuint) tuint)))
+  (Stmt.Sset ___x86_loss_off__1
+    (Expr.Ebinop Binop.Oadd
+      (Expr.Ebinop Binop.Oadd
+        (Expr.Ecast
+          (Expr.Ecast (Expr.Etempvar ___x86_l_base_ptr (tptr tvoid)) tlong)
+          tlong) (Expr.Etempvar ___x86_l_disp tlong) tlong)
+      (Expr.Etempvar _t'51 tuint) tlong)))
+
+def s_kprog_x86_store_xmm0_28 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                      (Expr.Etempvar ___x86_stw_width__2 tuchar)
+                      (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
+    (Stmt.Sset _t'55
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                        (Expr.Etempvar ___x86_stw_width__2 tuchar)
+                        (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
+      (Stmt.Ssequence
+        (Stmt.Sset _t'55
+          (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
+        (Stmt.Sset _t'55 (Expr.Ecast (Expr.Etempvar _t'55 tuint) tuint)))
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                          (Expr.Etempvar ___x86_stw_width__2 tuchar)
+                          (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'55
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint)
+                tuint))
+            (Stmt.Sset _t'55 (Expr.Ecast (Expr.Etempvar _t'55 tuint) tuint)))
+          (Stmt.Sset _t'55 (Expr.Ecast (Expr.Etempvar _t'55 tuint) tuint)))
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'55
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                tuint))
+            (Stmt.Sset _t'55 (Expr.Ecast (Expr.Etempvar _t'55 tuint) tuint)))
+          (Stmt.Sset _t'55 (Expr.Ecast (Expr.Etempvar _t'55 tuint) tuint))))))
+  (Stmt.Sifthenelse (Expr.Ecast
+                      (Expr.Ebinop Binop.Oand
+                        (Expr.Ebinop Binop.Oshr (Expr.Etempvar _t'55 tuint)
+                          (Expr.Econst_int (Integers.Int.repr 1) tint) tuint)
+                        (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint)
+                      tuchar)
+    (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+      [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+      [(Expr.Eaddrof
+         (Expr.Ederef
+           (Expr.Ebinop Binop.Oadd
+             (Expr.Etempvar ___x86_stw_bytes__2 (tptr (tvolatile tuchar)))
+             (Expr.Econst_int (Integers.Int.repr 1) tint)
+             (tptr (tvolatile tuchar))) (tvolatile tuchar))
+         (tptr (tvolatile tuchar))),
+       (Expr.Ecast
+         (Expr.Ebinop Binop.Oshr
+           (Expr.Ecast (Expr.Etempvar ___x86_stw_narrowed__2 tulong) tulong)
+           (Expr.Ebinop Binop.Omul
+             (Expr.Econst_int (Integers.Int.repr 8) tuint)
+             (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tint) tuint)
+             tuint) tulong) tuchar)])
+    Stmt.Sskip))
+
+def s_kprog_x86_store_xmm0_29 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                        (Expr.Etempvar ___x86_stw_width__2 tuchar)
+                        (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
+      (Stmt.Sset _t'56
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                          (Expr.Etempvar ___x86_stw_width__2 tuchar)
+                          (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
+        (Stmt.Ssequence
+          (Stmt.Sset _t'56
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
+          (Stmt.Sset _t'56 (Expr.Ecast (Expr.Etempvar _t'56 tuint) tuint)))
+        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                            (Expr.Etempvar ___x86_stw_width__2 tuchar)
+                            (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                            tint)
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Sset _t'56
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint)
+                  tuint))
+              (Stmt.Sset _t'56
+                (Expr.Ecast (Expr.Etempvar _t'56 tuint) tuint)))
+            (Stmt.Sset _t'56 (Expr.Ecast (Expr.Etempvar _t'56 tuint) tuint)))
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Sset _t'56
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                  tuint))
+              (Stmt.Sset _t'56
+                (Expr.Ecast (Expr.Etempvar _t'56 tuint) tuint)))
+            (Stmt.Sset _t'56 (Expr.Ecast (Expr.Etempvar _t'56 tuint) tuint))))))
+    (Stmt.Sifthenelse (Expr.Ecast
+                        (Expr.Ebinop Binop.Oand
+                          (Expr.Ebinop Binop.Oshr (Expr.Etempvar _t'56 tuint)
+                            (Expr.Econst_int (Integers.Int.repr 2) tint)
+                            tuint)
+                          (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                          tuint) tuchar)
+      (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+        [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+        [(Expr.Eaddrof
+           (Expr.Ederef
+             (Expr.Ebinop Binop.Oadd
+               (Expr.Etempvar ___x86_stw_bytes__2 (tptr (tvolatile tuchar)))
+               (Expr.Econst_int (Integers.Int.repr 2) tint)
+               (tptr (tvolatile tuchar))) (tvolatile tuchar))
+           (tptr (tvolatile tuchar))),
+         (Expr.Ecast
+           (Expr.Ebinop Binop.Oshr
+             (Expr.Ecast (Expr.Etempvar ___x86_stw_narrowed__2 tulong)
+               tulong)
+             (Expr.Ebinop Binop.Omul
+               (Expr.Econst_int (Integers.Int.repr 8) tuint)
+               (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 2) tint)
+                 tuint) tuint) tulong) tuchar)])
+      Stmt.Sskip))
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                          (Expr.Etempvar ___x86_stw_width__2 tuchar)
+                          (Expr.Econst_int (Integers.Int.repr 1) tuint) tint)
+        (Stmt.Sset _t'57
+          (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
+        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                            (Expr.Etempvar ___x86_stw_width__2 tuchar)
+                            (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                            tint)
+          (Stmt.Ssequence
+            (Stmt.Sset _t'57
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                tuint))
+            (Stmt.Sset _t'57 (Expr.Ecast (Expr.Etempvar _t'57 tuint) tuint)))
+          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                              (Expr.Etempvar ___x86_stw_width__2 tuchar)
+                              (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                              tint)
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Sset _t'57
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint)
+                    tuint))
+                (Stmt.Sset _t'57
+                  (Expr.Ecast (Expr.Etempvar _t'57 tuint) tuint)))
+              (Stmt.Sset _t'57
+                (Expr.Ecast (Expr.Etempvar _t'57 tuint) tuint)))
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Sset _t'57
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                    tuint))
+                (Stmt.Sset _t'57
+                  (Expr.Ecast (Expr.Etempvar _t'57 tuint) tuint)))
+              (Stmt.Sset _t'57
+                (Expr.Ecast (Expr.Etempvar _t'57 tuint) tuint))))))
+      (Stmt.Sifthenelse (Expr.Ecast
+                          (Expr.Ebinop Binop.Oand
+                            (Expr.Ebinop Binop.Oshr
+                              (Expr.Etempvar _t'57 tuint)
+                              (Expr.Econst_int (Integers.Int.repr 3) tint)
+                              tuint)
+                            (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                            tuint) tuchar)
+        (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+          [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+          [(Expr.Eaddrof
+             (Expr.Ederef
+               (Expr.Ebinop Binop.Oadd
+                 (Expr.Etempvar ___x86_stw_bytes__2 (tptr (tvolatile tuchar)))
+                 (Expr.Econst_int (Integers.Int.repr 3) tint)
+                 (tptr (tvolatile tuchar))) (tvolatile tuchar))
+             (tptr (tvolatile tuchar))),
+           (Expr.Ecast
+             (Expr.Ebinop Binop.Oshr
+               (Expr.Ecast (Expr.Etempvar ___x86_stw_narrowed__2 tulong)
+                 tulong)
+               (Expr.Ebinop Binop.Omul
+                 (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                 (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tint)
+                   tuint) tuint) tulong) tuchar)])
+        Stmt.Sskip))
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                            (Expr.Etempvar ___x86_stw_width__2 tuchar)
+                            (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                            tint)
+          (Stmt.Sset _t'58
+            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
+          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                              (Expr.Etempvar ___x86_stw_width__2 tuchar)
+                              (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                              tint)
+            (Stmt.Ssequence
+              (Stmt.Sset _t'58
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                  tuint))
+              (Stmt.Sset _t'58
+                (Expr.Ecast (Expr.Etempvar _t'58 tuint) tuint)))
+            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                (Expr.Etempvar ___x86_stw_width__2 tuchar)
+                                (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                tint)
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'58
+                    (Expr.Ecast
+                      (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+                  (Stmt.Sset _t'58
+                    (Expr.Ecast (Expr.Etempvar _t'58 tuint) tuint)))
+                (Stmt.Sset _t'58
+                  (Expr.Ecast (Expr.Etempvar _t'58 tuint) tuint)))
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'58
+                    (Expr.Ecast
+                      (Expr.Econst_int (Integers.Int.repr 255) tuint) tuint))
+                  (Stmt.Sset _t'58
+                    (Expr.Ecast (Expr.Etempvar _t'58 tuint) tuint)))
+                (Stmt.Sset _t'58
+                  (Expr.Ecast (Expr.Etempvar _t'58 tuint) tuint))))))
+        (Stmt.Sifthenelse (Expr.Ecast
+                            (Expr.Ebinop Binop.Oand
+                              (Expr.Ebinop Binop.Oshr
+                                (Expr.Etempvar _t'58 tuint)
+                                (Expr.Econst_int (Integers.Int.repr 4) tint)
+                                tuint)
+                              (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                              tuint) tuchar)
+          (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+            [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+            [(Expr.Eaddrof
+               (Expr.Ederef
+                 (Expr.Ebinop Binop.Oadd
+                   (Expr.Etempvar ___x86_stw_bytes__2 (tptr (tvolatile tuchar)))
+                   (Expr.Econst_int (Integers.Int.repr 4) tint)
+                   (tptr (tvolatile tuchar))) (tvolatile tuchar))
+               (tptr (tvolatile tuchar))),
+             (Expr.Ecast
+               (Expr.Ebinop Binop.Oshr
+                 (Expr.Ecast (Expr.Etempvar ___x86_stw_narrowed__2 tulong)
+                   tulong)
+                 (Expr.Ebinop Binop.Omul
+                   (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 4) tint)
+                     tuint) tuint) tulong) tuchar)])
+          Stmt.Sskip))
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                              (Expr.Etempvar ___x86_stw_width__2 tuchar)
+                              (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                              tint)
+            (Stmt.Sset _t'59
+              (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                tuint))
+            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                (Expr.Etempvar ___x86_stw_width__2 tuchar)
+                                (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                tint)
+              (Stmt.Ssequence
+                (Stmt.Sset _t'59
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                    tuint))
+                (Stmt.Sset _t'59
+                  (Expr.Ecast (Expr.Etempvar _t'59 tuint) tuint)))
+              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                  (Expr.Etempvar ___x86_stw_width__2 tuchar)
+                                  (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                  tint)
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'59
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+                    (Stmt.Sset _t'59
+                      (Expr.Ecast (Expr.Etempvar _t'59 tuint) tuint)))
+                  (Stmt.Sset _t'59
+                    (Expr.Ecast (Expr.Etempvar _t'59 tuint) tuint)))
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'59
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                        tuint))
+                    (Stmt.Sset _t'59
+                      (Expr.Ecast (Expr.Etempvar _t'59 tuint) tuint)))
+                  (Stmt.Sset _t'59
+                    (Expr.Ecast (Expr.Etempvar _t'59 tuint) tuint))))))
+          (Stmt.Sifthenelse (Expr.Ecast
+                              (Expr.Ebinop Binop.Oand
+                                (Expr.Ebinop Binop.Oshr
+                                  (Expr.Etempvar _t'59 tuint)
+                                  (Expr.Econst_int (Integers.Int.repr 5) tint)
+                                  tuint)
+                                (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                tuint) tuchar)
+            (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+              [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+              [(Expr.Eaddrof
+                 (Expr.Ederef
+                   (Expr.Ebinop Binop.Oadd
+                     (Expr.Etempvar ___x86_stw_bytes__2 (tptr (tvolatile tuchar)))
+                     (Expr.Econst_int (Integers.Int.repr 5) tint)
+                     (tptr (tvolatile tuchar))) (tvolatile tuchar))
+                 (tptr (tvolatile tuchar))),
+               (Expr.Ecast
+                 (Expr.Ebinop Binop.Oshr
+                   (Expr.Ecast (Expr.Etempvar ___x86_stw_narrowed__2 tulong)
+                     tulong)
+                   (Expr.Ebinop Binop.Omul
+                     (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 5) tint)
+                       tuint) tuint) tulong) tuchar)])
+            Stmt.Sskip))
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                (Expr.Etempvar ___x86_stw_width__2 tuchar)
+                                (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                tint)
+              (Stmt.Sset _t'60
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                  tuint))
+              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                  (Expr.Etempvar ___x86_stw_width__2 tuchar)
+                                  (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                  tint)
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'60
+                    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                      tuint))
+                  (Stmt.Sset _t'60
+                    (Expr.Ecast (Expr.Etempvar _t'60 tuint) tuint)))
+                (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                    (Expr.Etempvar ___x86_stw_width__2 tuchar)
+                                    (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                    tint)
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'60
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 15) tuint)
+                          tuint))
+                      (Stmt.Sset _t'60
+                        (Expr.Ecast (Expr.Etempvar _t'60 tuint) tuint)))
+                    (Stmt.Sset _t'60
+                      (Expr.Ecast (Expr.Etempvar _t'60 tuint) tuint)))
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'60
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                          tuint))
+                      (Stmt.Sset _t'60
+                        (Expr.Ecast (Expr.Etempvar _t'60 tuint) tuint)))
+                    (Stmt.Sset _t'60
+                      (Expr.Ecast (Expr.Etempvar _t'60 tuint) tuint))))))
+            (Stmt.Sifthenelse (Expr.Ecast
+                                (Expr.Ebinop Binop.Oand
+                                  (Expr.Ebinop Binop.Oshr
+                                    (Expr.Etempvar _t'60 tuint)
+                                    (Expr.Econst_int (Integers.Int.repr 6) tint)
+                                    tuint)
+                                  (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                  tuint) tuchar)
+              (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                [(Expr.Eaddrof
+                   (Expr.Ederef
+                     (Expr.Ebinop Binop.Oadd
+                       (Expr.Etempvar ___x86_stw_bytes__2 (tptr (tvolatile tuchar)))
+                       (Expr.Econst_int (Integers.Int.repr 6) tint)
+                       (tptr (tvolatile tuchar))) (tvolatile tuchar))
+                   (tptr (tvolatile tuchar))),
+                 (Expr.Ecast
+                   (Expr.Ebinop Binop.Oshr
+                     (Expr.Ecast
+                       (Expr.Etempvar ___x86_stw_narrowed__2 tulong) tulong)
+                     (Expr.Ebinop Binop.Omul
+                       (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                       (Expr.Ecast
+                         (Expr.Econst_int (Integers.Int.repr 6) tint) tuint)
+                       tuint) tulong) tuchar)])
+              Stmt.Sskip))
+          (Stmt.Ssequence
+            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                (Expr.Etempvar ___x86_stw_width__2 tuchar)
+                                (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                tint)
+              (Stmt.Sset _t'61
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                  tuint))
+              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                  (Expr.Etempvar ___x86_stw_width__2 tuchar)
+                                  (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                  tint)
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'61
+                    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                      tuint))
+                  (Stmt.Sset _t'61
+                    (Expr.Ecast (Expr.Etempvar _t'61 tuint) tuint)))
+                (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                    (Expr.Etempvar ___x86_stw_width__2 tuchar)
+                                    (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                    tint)
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'61
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 15) tuint)
+                          tuint))
+                      (Stmt.Sset _t'61
+                        (Expr.Ecast (Expr.Etempvar _t'61 tuint) tuint)))
+                    (Stmt.Sset _t'61
+                      (Expr.Ecast (Expr.Etempvar _t'61 tuint) tuint)))
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'61
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                          tuint))
+                      (Stmt.Sset _t'61
+                        (Expr.Ecast (Expr.Etempvar _t'61 tuint) tuint)))
+                    (Stmt.Sset _t'61
+                      (Expr.Ecast (Expr.Etempvar _t'61 tuint) tuint))))))
+            (Stmt.Sifthenelse (Expr.Ecast
+                                (Expr.Ebinop Binop.Oand
+                                  (Expr.Ebinop Binop.Oshr
+                                    (Expr.Etempvar _t'61 tuint)
+                                    (Expr.Econst_int (Integers.Int.repr 7) tint)
+                                    tuint)
+                                  (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                  tuint) tuchar)
+              (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                [(Expr.Eaddrof
+                   (Expr.Ederef
+                     (Expr.Ebinop Binop.Oadd
+                       (Expr.Etempvar ___x86_stw_bytes__2 (tptr (tvolatile tuchar)))
+                       (Expr.Econst_int (Integers.Int.repr 7) tint)
+                       (tptr (tvolatile tuchar))) (tvolatile tuchar))
+                   (tptr (tvolatile tuchar))),
+                 (Expr.Ecast
+                   (Expr.Ebinop Binop.Oshr
+                     (Expr.Ecast
+                       (Expr.Etempvar ___x86_stw_narrowed__2 tulong) tulong)
+                     (Expr.Ebinop Binop.Omul
+                       (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                       (Expr.Ecast
+                         (Expr.Econst_int (Integers.Int.repr 7) tint) tuint)
+                       tuint) tulong) tuchar)])
+              Stmt.Sskip)))))))
+
+def s_kprog_x86_store_xmm0_30 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                    (Expr.Ebinop Binop.Oand
+                      (Expr.Ecast (Expr.Etempvar ___x86_stw_index__3 tulong)
+                        tulong) (Expr.Econst_int (Integers.Int.repr 7) tuint)
+                      tulong) (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                    tint)
+  (Stmt.Ssequence
+    (Stmt.Sset _t'87
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tint) tint))
+    (Stmt.Sset _t'87 (Expr.Ecast (Expr.Etempvar _t'87 tint) tbool)))
+  (Stmt.Ssequence
+    (Stmt.Sset _t'87
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) tint))
+    (Stmt.Sset _t'87 (Expr.Ecast (Expr.Etempvar _t'87 tint) tbool))))
+
+def s_kprog_x86_store_xmm0_31 : Stmt :=
+(Stmt.Scall (some _t'84)
+  (Expr.Evar _x86_width_effective (Ty.Tfunction [tuchar] tuchar cc_default))
+  [(Expr.Econst_int (Integers.Int.repr 1) tuint)])
+
+def s_kprog_x86_store_xmm0_32 : Stmt :=
+(Stmt.Sset _t'85
+  (Expr.Ecast
+    (Expr.Ebinop Binop.Oeq
+      (Expr.Ebinop Binop.Oand (Expr.Etempvar ___x86_stw_index__3 tulong)
+        (Expr.Econst_int (Integers.Int.repr 3) tuint) tulong)
+      (Expr.Econst_int (Integers.Int.repr 0) tint) tint) tbool))
+
+def s_kprog_x86_store_xmm0_33 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Scall (some _t'70)
+    (Expr.Evar _native_lab_entry_input (Ty.Tfunction [tuint] tulong
+                                         cc_default))
+    [(Expr.Econst_int (Integers.Int.repr 6) tint)])
+  (Stmt.Ssequence
+    (Stmt.Sset _t'124
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr)))
+          (Ty.Tstruct _kprog_x86_arena noattr)) _d (tptr (tvolatile tuint))))
+    (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint32)
+      [(tptr (tvolatile tuint)), (tvolatile tuint)]
+      [(Expr.Eaddrof
+         (Expr.Ederef
+           (Expr.Ebinop Binop.Oadd
+             (Expr.Etempvar _t'124 (tptr (tvolatile tuint)))
+             (Expr.Ebinop Binop.Odiv
+               (Expr.Etempvar ___x86_stw_index__3 tulong)
+               (Expr.Econst_int (Integers.Int.repr 4) tuint) tulong)
+             (tptr (tvolatile tuint))) (tvolatile tuint))
+         (tptr (tvolatile tuint))), (Expr.Etempvar _t'70 tulong)])))
+
+def s_kprog_x86_store_xmm0_34 : Stmt :=
+(Stmt.Sset _t'75
+  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+
+def s_kprog_x86_store_xmm0_35 : Stmt :=
+(Stmt.Sset _t'75
+  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint) tuint))
+
+def s_kprog_x86_store_xmm0_36 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'76
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+  (Stmt.Sset _t'76 (Expr.Ecast (Expr.Etempvar _t'76 tuint) tuint)))
+
+def s_kprog_x86_store_xmm0_37 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'76
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint) tuint))
+  (Stmt.Sset _t'76 (Expr.Ecast (Expr.Etempvar _t'76 tuint) tuint)))
+
+def s_kprog_x86_store_xmm0_38 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'77
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+    (Stmt.Sset _t'77 (Expr.Ecast (Expr.Etempvar _t'77 tuint) tuint)))
+  (Stmt.Sset _t'77 (Expr.Ecast (Expr.Etempvar _t'77 tuint) tuint)))
+
+def s_kprog_x86_store_xmm0_39 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'77
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint) tuint))
+    (Stmt.Sset _t'77 (Expr.Ecast (Expr.Etempvar _t'77 tuint) tuint)))
+  (Stmt.Sset _t'77 (Expr.Ecast (Expr.Etempvar _t'77 tuint) tuint)))
+
+def s_kprog_x86_store_xmm0_40 : Stmt :=
+(Stmt.Sset _t'78
+  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
+
+def s_kprog_x86_store_xmm0_41 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'78
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+    (Stmt.Sset _t'78 (Expr.Ecast (Expr.Etempvar _t'78 tuint) tuint)))
+  (Stmt.Sset _t'78 (Expr.Ecast (Expr.Etempvar _t'78 tuint) tuint)))
+
+def s_kprog_x86_store_xmm0_42 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Sset _t'78
+      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint) tuint))
+    (Stmt.Sset _t'78 (Expr.Ecast (Expr.Etempvar _t'78 tuint) tuint)))
+  (Stmt.Sset _t'78 (Expr.Ecast (Expr.Etempvar _t'78 tuint) tuint)))
+
+def s_kprog_x86_store_xmm0_43 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'79
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
+  (Stmt.Sset _t'79 (Expr.Ecast (Expr.Etempvar _t'79 tuint) tuint)))
+
+def s_kprog_x86_store_xmm0_44 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                    (Expr.Etempvar ___x86_stw_width__3 tuchar)
+                    (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'79
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+      (Stmt.Sset _t'79 (Expr.Ecast (Expr.Etempvar _t'79 tuint) tuint)))
+    (Stmt.Sset _t'79 (Expr.Ecast (Expr.Etempvar _t'79 tuint) tuint)))
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'79
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint) tuint))
+      (Stmt.Sset _t'79 (Expr.Ecast (Expr.Etempvar _t'79 tuint) tuint)))
+    (Stmt.Sset _t'79 (Expr.Ecast (Expr.Etempvar _t'79 tuint) tuint))))
+
+def s_kprog_x86_store_xmm0_45 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'80
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
+  (Stmt.Sset _t'80 (Expr.Ecast (Expr.Etempvar _t'80 tuint) tuint)))
+
+def s_kprog_x86_store_xmm0_46 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                    (Expr.Etempvar ___x86_stw_width__3 tuchar)
+                    (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'80
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+      (Stmt.Sset _t'80 (Expr.Ecast (Expr.Etempvar _t'80 tuint) tuint)))
+    (Stmt.Sset _t'80 (Expr.Ecast (Expr.Etempvar _t'80 tuint) tuint)))
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'80
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint) tuint))
+      (Stmt.Sset _t'80 (Expr.Ecast (Expr.Etempvar _t'80 tuint) tuint)))
+    (Stmt.Sset _t'80 (Expr.Ecast (Expr.Etempvar _t'80 tuint) tuint))))
+
+def s_kprog_x86_store_xmm0_47 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'81
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 3) tuint) tuint))
+  (Stmt.Sset _t'81 (Expr.Ecast (Expr.Etempvar _t'81 tuint) tuint)))
+
+def s_kprog_x86_store_xmm0_48 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                    (Expr.Etempvar ___x86_stw_width__3 tuchar)
+                    (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'81
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 15) tuint) tuint))
+      (Stmt.Sset _t'81 (Expr.Ecast (Expr.Etempvar _t'81 tuint) tuint)))
+    (Stmt.Sset _t'81 (Expr.Ecast (Expr.Etempvar _t'81 tuint) tuint)))
+  (Stmt.Ssequence
+    (Stmt.Ssequence
+      (Stmt.Sset _t'81
+        (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 255) tuint) tuint))
+      (Stmt.Sset _t'81 (Expr.Ecast (Expr.Etempvar _t'81 tuint) tuint)))
+    (Stmt.Sset _t'81 (Expr.Ecast (Expr.Etempvar _t'81 tuint) tuint))))
+
+def s_kprog_x86_store_xmm0_49 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Scall (some _t'82)
+      (Expr.Evar _x86_width_effective (Ty.Tfunction [tuchar] tuchar
+                                        cc_default))
+      [(Expr.Econst_int (Integers.Int.repr 1) tuint)])
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq (Expr.Etempvar _t'82 tuchar)
+                        (Expr.Econst_int (Integers.Int.repr 2) tuint) tint)
+      (Stmt.Sset _t'83
+        (Expr.Ecast
+          (Expr.Ebinop Binop.Oeq
+            (Expr.Ebinop Binop.Oand
+              (Expr.Etempvar ___x86_stw_index__3 tulong)
+              (Expr.Econst_int (Integers.Int.repr 1) tuint) tulong)
+            (Expr.Econst_int (Integers.Int.repr 0) tint) tint) tbool))
+      (Stmt.Sset _t'83 (Expr.Econst_int (Integers.Int.repr 0) tint))))
+  (Stmt.Sifthenelse (Expr.Etempvar _t'83 tint)
+    (Stmt.Ssequence
+      (Stmt.Scall (some _t'71)
+        (Expr.Evar _native_lab_entry_input (Ty.Tfunction [tuint] tulong
+                                             cc_default))
+        [(Expr.Econst_int (Integers.Int.repr 6) tint)])
+      (Stmt.Ssequence
+        (Stmt.Sset _t'123
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr)))
+              (Ty.Tstruct _kprog_x86_arena noattr)) _w
+            (tptr (tvolatile tushort))))
+        (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint16unsigned)
+          [(tptr (tvolatile tushort)), (tvolatile tushort)]
+          [(Expr.Eaddrof
+             (Expr.Ederef
+               (Expr.Ebinop Binop.Oadd
+                 (Expr.Etempvar _t'123 (tptr (tvolatile tushort)))
+                 (Expr.Ebinop Binop.Odiv
+                   (Expr.Etempvar ___x86_stw_index__3 tulong)
+                   (Expr.Econst_int (Integers.Int.repr 2) tuint) tulong)
+                 (tptr (tvolatile tushort))) (tvolatile tushort))
+             (tptr (tvolatile tushort))), (Expr.Etempvar _t'71 tulong)])))
+    (Stmt.Sloop
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Sset _t'122
+            (Expr.Efield
+              (Expr.Ederef
+                (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr)))
+                (Ty.Tstruct _kprog_x86_arena noattr)) _b
+              (tptr (tvolatile tuchar))))
+          (Stmt.Sset ___x86_stw_bytes__3
+            (Expr.Ebinop Binop.Oadd
+              (Expr.Etempvar _t'122 (tptr (tvolatile tuchar)))
+              (Expr.Etempvar ___x86_stw_index__3 tulong)
+              (tptr (tvolatile tuchar)))))
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Scall (some _t'72)
+              (Expr.Evar _x86_width_effective (Ty.Tfunction [tuchar] tuchar
+                                                cc_default))
+              [(Expr.Econst_int (Integers.Int.repr 1) tuint)])
+            (Stmt.Sset ___x86_stw_width__3
+              (Expr.Ecast (Expr.Etempvar _t'72 tuchar) tuchar)))
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Scall (some _t'73)
+                  (Expr.Evar _native_lab_entry_input (Ty.Tfunction [tuint]
+                                                       tulong cc_default))
+                  [(Expr.Econst_int (Integers.Int.repr 6) tint)])
+                (Stmt.Scall (some _t'74)
+                  (Expr.Evar _x86_width_mask (Ty.Tfunction [tuchar] tulong
+                                               cc_default))
+                  [(Expr.Etempvar ___x86_stw_width__3 tuchar)]))
+              (Stmt.Sset ___x86_stw_narrowed__3
+                (Expr.Ebinop Binop.Oand (Expr.Etempvar _t'73 tulong)
+                  (Expr.Etempvar _t'74 tulong) tulong)))
+            (Stmt.Ssequence
+              (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                [(Expr.Eaddrof
+                   (Expr.Ederef
+                     (Expr.Ebinop Binop.Oadd
+                       (Expr.Etempvar ___x86_stw_bytes__3 (tptr (tvolatile tuchar)))
+                       (Expr.Econst_int (Integers.Int.repr 0) tint)
+                       (tptr (tvolatile tuchar))) (tvolatile tuchar))
+                   (tptr (tvolatile tuchar))),
+                 (Expr.Ecast
+                   (Expr.Ebinop Binop.Oshr
+                     (Expr.Ecast
+                       (Expr.Etempvar ___x86_stw_narrowed__3 tulong) tulong)
+                     (Expr.Ebinop Binop.Omul
+                       (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                       (Expr.Ecast
+                         (Expr.Econst_int (Integers.Int.repr 0) tint) tuint)
+                       tuint) tulong) tuchar)])
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                      (Expr.Etempvar ___x86_stw_width__3 tuchar)
+                                      (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                      tint)
+                    (Stmt.Sset _t'75
+                      (Expr.Ecast
+                        (Expr.Econst_int (Integers.Int.repr 1) tuint) tuint))
+                    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                        (Expr.Etempvar ___x86_stw_width__3 tuchar)
+                                        (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                        tint)
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'75
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                            tuint))
+                        (Stmt.Sset _t'75
+                          (Expr.Ecast (Expr.Etempvar _t'75 tuint) tuint)))
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                          (Expr.Etempvar ___x86_stw_width__3 tuchar)
+                                          (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                          tint)
+                        (Stmt.Ssequence
+                          (Stmt.Ssequence
+                            s_kprog_x86_store_xmm0_34
+                            (Stmt.Sset _t'75
+                              (Expr.Ecast (Expr.Etempvar _t'75 tuint) tuint)))
+                          (Stmt.Sset _t'75
+                            (Expr.Ecast (Expr.Etempvar _t'75 tuint) tuint)))
+                        (Stmt.Ssequence
+                          (Stmt.Ssequence
+                            s_kprog_x86_store_xmm0_35
+                            (Stmt.Sset _t'75
+                              (Expr.Ecast (Expr.Etempvar _t'75 tuint) tuint)))
+                          (Stmt.Sset _t'75
+                            (Expr.Ecast (Expr.Etempvar _t'75 tuint) tuint))))))
+                  (Stmt.Sifthenelse (Expr.Ecast
+                                      (Expr.Ebinop Binop.Oand
+                                        (Expr.Ebinop Binop.Oshr
+                                          (Expr.Etempvar _t'75 tuint)
+                                          (Expr.Econst_int (Integers.Int.repr 1) tint)
+                                          tuint)
+                                        (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                        tuint) tuchar)
+                    (Stmt.Sbuiltin none
+                      (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                      [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                      [(Expr.Eaddrof
+                         (Expr.Ederef
+                           (Expr.Ebinop Binop.Oadd
+                             (Expr.Etempvar ___x86_stw_bytes__3 (tptr (tvolatile tuchar)))
+                             (Expr.Econst_int (Integers.Int.repr 1) tint)
+                             (tptr (tvolatile tuchar))) (tvolatile tuchar))
+                         (tptr (tvolatile tuchar))),
+                       (Expr.Ecast
+                         (Expr.Ebinop Binop.Oshr
+                           (Expr.Ecast
+                             (Expr.Etempvar ___x86_stw_narrowed__3 tulong)
+                             tulong)
+                           (Expr.Ebinop Binop.Omul
+                             (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                             (Expr.Ecast
+                               (Expr.Econst_int (Integers.Int.repr 1) tint)
+                               tuint) tuint) tulong) tuchar)])
+                    Stmt.Sskip))
+                (Stmt.Ssequence
+                  (Stmt.Ssequence
+                    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                        (Expr.Etempvar ___x86_stw_width__3 tuchar)
+                                        (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                        tint)
+                      (Stmt.Sset _t'76
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                          tuint))
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                          (Expr.Etempvar ___x86_stw_width__3 tuchar)
+                                          (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                          tint)
+                        (Stmt.Ssequence
+                          (Stmt.Sset _t'76
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                              tuint))
+                          (Stmt.Sset _t'76
+                            (Expr.Ecast (Expr.Etempvar _t'76 tuint) tuint)))
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                            (Expr.Etempvar ___x86_stw_width__3 tuchar)
+                                            (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                            tint)
+                          (Stmt.Ssequence
+                            s_kprog_x86_store_xmm0_36
+                            (Stmt.Sset _t'76
+                              (Expr.Ecast (Expr.Etempvar _t'76 tuint) tuint)))
+                          (Stmt.Ssequence
+                            s_kprog_x86_store_xmm0_37
+                            (Stmt.Sset _t'76
+                              (Expr.Ecast (Expr.Etempvar _t'76 tuint) tuint))))))
+                    (Stmt.Sifthenelse (Expr.Ecast
+                                        (Expr.Ebinop Binop.Oand
+                                          (Expr.Ebinop Binop.Oshr
+                                            (Expr.Etempvar _t'76 tuint)
+                                            (Expr.Econst_int (Integers.Int.repr 2) tint)
+                                            tuint)
+                                          (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                          tuint) tuchar)
+                      (Stmt.Sbuiltin none
+                        (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                        [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                        [(Expr.Eaddrof
+                           (Expr.Ederef
+                             (Expr.Ebinop Binop.Oadd
+                               (Expr.Etempvar ___x86_stw_bytes__3 (tptr (tvolatile tuchar)))
+                               (Expr.Econst_int (Integers.Int.repr 2) tint)
+                               (tptr (tvolatile tuchar))) (tvolatile tuchar))
+                           (tptr (tvolatile tuchar))),
+                         (Expr.Ecast
+                           (Expr.Ebinop Binop.Oshr
+                             (Expr.Ecast
+                               (Expr.Etempvar ___x86_stw_narrowed__3 tulong)
+                               tulong)
+                             (Expr.Ebinop Binop.Omul
+                               (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                               (Expr.Ecast
+                                 (Expr.Econst_int (Integers.Int.repr 2) tint)
+                                 tuint) tuint) tulong) tuchar)])
+                      Stmt.Sskip))
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                          (Expr.Etempvar ___x86_stw_width__3 tuchar)
+                                          (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                          tint)
+                        (Stmt.Sset _t'77
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                            tuint))
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                            (Expr.Etempvar ___x86_stw_width__3 tuchar)
+                                            (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                            tint)
+                          (Stmt.Ssequence
+                            (Stmt.Sset _t'77
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                                tuint))
+                            (Stmt.Sset _t'77
+                              (Expr.Ecast (Expr.Etempvar _t'77 tuint) tuint)))
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                              (Expr.Etempvar ___x86_stw_width__3 tuchar)
+                                              (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                              tint)
+                            s_kprog_x86_store_xmm0_38
+                            s_kprog_x86_store_xmm0_39)))
+                      (Stmt.Sifthenelse (Expr.Ecast
+                                          (Expr.Ebinop Binop.Oand
+                                            (Expr.Ebinop Binop.Oshr
+                                              (Expr.Etempvar _t'77 tuint)
+                                              (Expr.Econst_int (Integers.Int.repr 3) tint)
+                                              tuint)
+                                            (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                            tuint) tuchar)
+                        (Stmt.Sbuiltin none
+                          (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                          [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                          [(Expr.Eaddrof
+                             (Expr.Ederef
+                               (Expr.Ebinop Binop.Oadd
+                                 (Expr.Etempvar ___x86_stw_bytes__3 (tptr (tvolatile tuchar)))
+                                 (Expr.Econst_int (Integers.Int.repr 3) tint)
+                                 (tptr (tvolatile tuchar)))
+                               (tvolatile tuchar)) (tptr (tvolatile tuchar))),
+                           (Expr.Ecast
+                             (Expr.Ebinop Binop.Oshr
+                               (Expr.Ecast
+                                 (Expr.Etempvar ___x86_stw_narrowed__3 tulong)
+                                 tulong)
+                               (Expr.Ebinop Binop.Omul
+                                 (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                 (Expr.Ecast
+                                   (Expr.Econst_int (Integers.Int.repr 3) tint)
+                                   tuint) tuint) tulong) tuchar)])
+                        Stmt.Sskip))
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                            (Expr.Etempvar ___x86_stw_width__3 tuchar)
+                                            (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                            tint)
+                          (Stmt.Sset _t'78
+                            (Expr.Ecast
+                              (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                              tuint))
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                              (Expr.Etempvar ___x86_stw_width__3 tuchar)
+                                              (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                              tint)
+                            (Stmt.Ssequence
+                              s_kprog_x86_store_xmm0_40
+                              (Stmt.Sset _t'78
+                                (Expr.Ecast (Expr.Etempvar _t'78 tuint)
+                                  tuint)))
+                            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                (Expr.Etempvar ___x86_stw_width__3 tuchar)
+                                                (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                                tint)
+                              s_kprog_x86_store_xmm0_41
+                              s_kprog_x86_store_xmm0_42)))
+                        (Stmt.Sifthenelse (Expr.Ecast
+                                            (Expr.Ebinop Binop.Oand
+                                              (Expr.Ebinop Binop.Oshr
+                                                (Expr.Etempvar _t'78 tuint)
+                                                (Expr.Econst_int (Integers.Int.repr 4) tint)
+                                                tuint)
+                                              (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                              tuint) tuchar)
+                          (Stmt.Sbuiltin none
+                            (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                            [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                            [(Expr.Eaddrof
+                               (Expr.Ederef
+                                 (Expr.Ebinop Binop.Oadd
+                                   (Expr.Etempvar ___x86_stw_bytes__3 (tptr (tvolatile tuchar)))
+                                   (Expr.Econst_int (Integers.Int.repr 4) tint)
+                                   (tptr (tvolatile tuchar)))
+                                 (tvolatile tuchar))
+                               (tptr (tvolatile tuchar))),
+                             (Expr.Ecast
+                               (Expr.Ebinop Binop.Oshr
+                                 (Expr.Ecast
+                                   (Expr.Etempvar ___x86_stw_narrowed__3 tulong)
+                                   tulong)
+                                 (Expr.Ebinop Binop.Omul
+                                   (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                   (Expr.Ecast
+                                     (Expr.Econst_int (Integers.Int.repr 4) tint)
+                                     tuint) tuint) tulong) tuchar)])
+                          Stmt.Sskip))
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                              (Expr.Etempvar ___x86_stw_width__3 tuchar)
+                                              (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                              tint)
+                            (Stmt.Sset _t'79
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                tuint))
+                            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                (Expr.Etempvar ___x86_stw_width__3 tuchar)
+                                                (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                                tint)
+                              s_kprog_x86_store_xmm0_43
+                              s_kprog_x86_store_xmm0_44))
+                          (Stmt.Sifthenelse (Expr.Ecast
+                                              (Expr.Ebinop Binop.Oand
+                                                (Expr.Ebinop Binop.Oshr
+                                                  (Expr.Etempvar _t'79 tuint)
+                                                  (Expr.Econst_int (Integers.Int.repr 5) tint)
+                                                  tuint)
+                                                (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                                tuint) tuchar)
+                            (Stmt.Sbuiltin none
+                              (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                              [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                              [(Expr.Eaddrof
+                                 (Expr.Ederef
+                                   (Expr.Ebinop Binop.Oadd
+                                     (Expr.Etempvar ___x86_stw_bytes__3 (tptr (tvolatile tuchar)))
+                                     (Expr.Econst_int (Integers.Int.repr 5) tint)
+                                     (tptr (tvolatile tuchar)))
+                                   (tvolatile tuchar))
+                                 (tptr (tvolatile tuchar))),
+                               (Expr.Ecast
+                                 (Expr.Ebinop Binop.Oshr
+                                   (Expr.Ecast
+                                     (Expr.Etempvar ___x86_stw_narrowed__3 tulong)
+                                     tulong)
+                                   (Expr.Ebinop Binop.Omul
+                                     (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                     (Expr.Ecast
+                                       (Expr.Econst_int (Integers.Int.repr 5) tint)
+                                       tuint) tuint) tulong) tuchar)])
+                            Stmt.Sskip))
+                        (Stmt.Ssequence
+                          (Stmt.Ssequence
+                            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                (Expr.Etempvar ___x86_stw_width__3 tuchar)
+                                                (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                                tint)
+                              (Stmt.Sset _t'80
+                                (Expr.Ecast
+                                  (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                  tuint))
+                              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                  (Expr.Etempvar ___x86_stw_width__3 tuchar)
+                                                  (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                                  tint)
+                                s_kprog_x86_store_xmm0_45
+                                s_kprog_x86_store_xmm0_46))
+                            (Stmt.Sifthenelse (Expr.Ecast
+                                                (Expr.Ebinop Binop.Oand
+                                                  (Expr.Ebinop Binop.Oshr
+                                                    (Expr.Etempvar _t'80 tuint)
+                                                    (Expr.Econst_int (Integers.Int.repr 6) tint)
+                                                    tuint)
+                                                  (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                                  tuint) tuchar)
+                              (Stmt.Sbuiltin none
+                                (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                                [(tptr (tvolatile tuchar)),
+                                 (tvolatile tuchar)]
+                                [(Expr.Eaddrof
+                                   (Expr.Ederef
+                                     (Expr.Ebinop Binop.Oadd
+                                       (Expr.Etempvar ___x86_stw_bytes__3 (tptr (tvolatile tuchar)))
+                                       (Expr.Econst_int (Integers.Int.repr 6) tint)
+                                       (tptr (tvolatile tuchar)))
+                                     (tvolatile tuchar))
+                                   (tptr (tvolatile tuchar))),
+                                 (Expr.Ecast
+                                   (Expr.Ebinop Binop.Oshr
+                                     (Expr.Ecast
+                                       (Expr.Etempvar ___x86_stw_narrowed__3 tulong)
+                                       tulong)
+                                     (Expr.Ebinop Binop.Omul
+                                       (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                       (Expr.Ecast
+                                         (Expr.Econst_int (Integers.Int.repr 6) tint)
+                                         tuint) tuint) tulong) tuchar)])
+                              Stmt.Sskip))
+                          (Stmt.Ssequence
+                            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                (Expr.Etempvar ___x86_stw_width__3 tuchar)
+                                                (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                                tint)
+                              (Stmt.Sset _t'81
+                                (Expr.Ecast
+                                  (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                  tuint))
+                              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                  (Expr.Etempvar ___x86_stw_width__3 tuchar)
+                                                  (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                                  tint)
+                                s_kprog_x86_store_xmm0_47
+                                s_kprog_x86_store_xmm0_48))
+                            (Stmt.Sifthenelse (Expr.Ecast
+                                                (Expr.Ebinop Binop.Oand
+                                                  (Expr.Ebinop Binop.Oshr
+                                                    (Expr.Etempvar _t'81 tuint)
+                                                    (Expr.Econst_int (Integers.Int.repr 7) tint)
+                                                    tuint)
+                                                  (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                                  tuint) tuchar)
+                              (Stmt.Sbuiltin none
+                                (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                                [(tptr (tvolatile tuchar)),
+                                 (tvolatile tuchar)]
+                                [(Expr.Eaddrof
+                                   (Expr.Ederef
+                                     (Expr.Ebinop Binop.Oadd
+                                       (Expr.Etempvar ___x86_stw_bytes__3 (tptr (tvolatile tuchar)))
+                                       (Expr.Econst_int (Integers.Int.repr 7) tint)
+                                       (tptr (tvolatile tuchar)))
+                                     (tvolatile tuchar))
+                                   (tptr (tvolatile tuchar))),
+                                 (Expr.Ecast
+                                   (Expr.Ebinop Binop.Oshr
+                                     (Expr.Ecast
+                                       (Expr.Etempvar ___x86_stw_narrowed__3 tulong)
+                                       tulong)
+                                     (Expr.Ebinop Binop.Omul
+                                       (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                       (Expr.Ecast
+                                         (Expr.Econst_int (Integers.Int.repr 7) tint)
+                                         tuint) tuint) tulong) tuchar)])
+                              Stmt.Sskip))))))))))))
+      Stmt.Sbreak)))
+
+def s_kprog_x86_store_xmm0_50 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Scall (some _t'52)
+      (Expr.Evar _x86_width_effective (Ty.Tfunction [tuchar] tuchar
+                                        cc_default))
+      [(Expr.Econst_int (Integers.Int.repr 8) tuint)])
+    (Stmt.Sset ___x86_loss_width__1
+      (Expr.Ecast (Expr.Etempvar _t'52 tuchar) tuchar)))
+  (Stmt.Ssequence
+    (Stmt.Sset ___x86_loss_value__1
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar ___x86_state (tptr (Ty.Tstruct _x86_sim_register_state noattr)))
+          (Ty.Tstruct _x86_sim_register_state noattr)) _xmm0_hi tulong))
+    (Stmt.Ssequence
+      (Stmt.Sloop
+        (Stmt.Ssequence
+          (Stmt.Sset ___x86_stw_index__2
+            (Expr.Ebinop Binop.Oadd
+              (Expr.Ecast (Expr.Etempvar ___x86_loss_off__1 tlong) tulong)
+              (Expr.Ecast (Expr.Etempvar _capacity tuint) tulong) tulong))
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Scall (some _t'66)
+                  (Expr.Evar _x86_width_effective (Ty.Tfunction [tuchar]
+                                                    tuchar cc_default))
+                  [(Expr.Etempvar ___x86_loss_width__1 tuchar)])
+                (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                    (Expr.Etempvar _t'66 tuchar)
+                                    (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                    tint)
+                  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                      (Expr.Ebinop Binop.Oand
+                                        (Expr.Ecast
+                                          (Expr.Etempvar ___x86_stw_index__2 tulong)
+                                          tulong)
+                                        (Expr.Econst_int (Integers.Int.repr 7) tuint)
+                                        tulong)
+                                      (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                                      tint)
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'67
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 1) tint) tint))
+                      (Stmt.Sset _t'67
+                        (Expr.Ecast (Expr.Etempvar _t'67 tint) tbool)))
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'67
+                        (Expr.Ecast
+                          (Expr.Econst_int (Integers.Int.repr 0) tint) tint))
+                      (Stmt.Sset _t'67
+                        (Expr.Ecast (Expr.Etempvar _t'67 tint) tbool))))
+                  (Stmt.Sset _t'67
+                    (Expr.Econst_int (Integers.Int.repr 0) tint))))
+              (Stmt.Sifthenelse (Expr.Etempvar _t'67 tint)
+                (Stmt.Sset _t'68
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tint)
+                    tint))
+                (Stmt.Sset _t'68
+                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
+                    tint))))
+            (Stmt.Sifthenelse (Expr.Ecast (Expr.Etempvar _t'68 tint) tuchar)
+              (Stmt.Ssequence
+                (Stmt.Sset _t'130
+                  (Expr.Efield
+                    (Expr.Ederef
+                      (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr)))
+                      (Ty.Tstruct _kprog_x86_arena noattr)) _q
+                    (tptr (tvolatile tulong))))
+                (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint64)
+                  [(tptr (tvolatile tulong)), (tvolatile tulong)]
+                  [(Expr.Eaddrof
+                     (Expr.Ederef
+                       (Expr.Ebinop Binop.Oadd
+                         (Expr.Etempvar _t'130 (tptr (tvolatile tulong)))
+                         (Expr.Ebinop Binop.Oshr
+                           (Expr.Ecast
+                             (Expr.Etempvar ___x86_stw_index__2 tulong)
+                             tulong)
+                           (Expr.Econst_int (Integers.Int.repr 3) tint)
+                           tulong) (tptr (tvolatile tulong)))
+                       (tvolatile tulong)) (tptr (tvolatile tulong))),
+                   (Expr.Etempvar ___x86_loss_value__1 tulong)]))
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Scall (some _t'64)
+                    (Expr.Evar _x86_width_effective (Ty.Tfunction [tuchar]
+                                                      tuchar cc_default))
+                    [(Expr.Etempvar ___x86_loss_width__1 tuchar)])
+                  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                      (Expr.Etempvar _t'64 tuchar)
+                                      (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                      tint)
+                    (Stmt.Sset _t'65
+                      (Expr.Ecast
+                        (Expr.Ebinop Binop.Oeq
+                          (Expr.Ebinop Binop.Oand
+                            (Expr.Etempvar ___x86_stw_index__2 tulong)
+                            (Expr.Econst_int (Integers.Int.repr 3) tuint)
+                            tulong)
+                          (Expr.Econst_int (Integers.Int.repr 0) tint) tint)
+                        tbool))
+                    (Stmt.Sset _t'65
+                      (Expr.Econst_int (Integers.Int.repr 0) tint))))
+                (Stmt.Sifthenelse (Expr.Etempvar _t'65 tint)
+                  (Stmt.Ssequence
+                    (Stmt.Sset _t'129
+                      (Expr.Efield
+                        (Expr.Ederef
+                          (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr)))
+                          (Ty.Tstruct _kprog_x86_arena noattr)) _d
+                        (tptr (tvolatile tuint))))
+                    (Stmt.Sbuiltin none (ExtFun.EF_vstore Chunk.Mint32)
+                      [(tptr (tvolatile tuint)), (tvolatile tuint)]
+                      [(Expr.Eaddrof
+                         (Expr.Ederef
+                           (Expr.Ebinop Binop.Oadd
+                             (Expr.Etempvar _t'129 (tptr (tvolatile tuint)))
+                             (Expr.Ebinop Binop.Odiv
+                               (Expr.Etempvar ___x86_stw_index__2 tulong)
+                               (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                               tulong) (tptr (tvolatile tuint)))
+                           (tvolatile tuint)) (tptr (tvolatile tuint))),
+                       (Expr.Etempvar ___x86_loss_value__1 tulong)]))
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Scall (some _t'62)
+                        (Expr.Evar _x86_width_effective (Ty.Tfunction
+                                                          [tuchar] tuchar
+                                                          cc_default))
+                        [(Expr.Etempvar ___x86_loss_width__1 tuchar)])
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                          (Expr.Etempvar _t'62 tuchar)
+                                          (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                          tint)
+                        (Stmt.Sset _t'63
+                          (Expr.Ecast
+                            (Expr.Ebinop Binop.Oeq
+                              (Expr.Ebinop Binop.Oand
+                                (Expr.Etempvar ___x86_stw_index__2 tulong)
+                                (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                tulong)
+                              (Expr.Econst_int (Integers.Int.repr 0) tint)
+                              tint) tbool))
+                        (Stmt.Sset _t'63
+                          (Expr.Econst_int (Integers.Int.repr 0) tint))))
+                    (Stmt.Sifthenelse (Expr.Etempvar _t'63 tint)
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'128
+                          (Expr.Efield
+                            (Expr.Ederef
+                              (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr)))
+                              (Ty.Tstruct _kprog_x86_arena noattr)) _w
+                            (tptr (tvolatile tushort))))
+                        (Stmt.Sbuiltin none
+                          (ExtFun.EF_vstore Chunk.Mint16unsigned)
+                          [(tptr (tvolatile tushort)), (tvolatile tushort)]
+                          [(Expr.Eaddrof
+                             (Expr.Ederef
+                               (Expr.Ebinop Binop.Oadd
+                                 (Expr.Etempvar _t'128 (tptr (tvolatile tushort)))
+                                 (Expr.Ebinop Binop.Odiv
+                                   (Expr.Etempvar ___x86_stw_index__2 tulong)
+                                   (Expr.Econst_int (Integers.Int.repr 2) tuint)
+                                   tulong) (tptr (tvolatile tushort)))
+                               (tvolatile tushort))
+                             (tptr (tvolatile tushort))),
+                           (Expr.Etempvar ___x86_loss_value__1 tulong)]))
+                      (Stmt.Sloop
+                        (Stmt.Ssequence
+                          (Stmt.Ssequence
+                            (Stmt.Sset _t'127
+                              (Expr.Efield
+                                (Expr.Ederef
+                                  (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr)))
+                                  (Ty.Tstruct _kprog_x86_arena noattr)) _b
+                                (tptr (tvolatile tuchar))))
+                            (Stmt.Sset ___x86_stw_bytes__2
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Etempvar _t'127 (tptr (tvolatile tuchar)))
+                                (Expr.Etempvar ___x86_stw_index__2 tulong)
+                                (tptr (tvolatile tuchar)))))
+                          (Stmt.Ssequence
+                            (Stmt.Ssequence
+                              (Stmt.Scall (some _t'53)
+                                (Expr.Evar _x86_width_effective (Ty.Tfunction
+                                                                  [tuchar]
+                                                                  tuchar
+                                                                  cc_default))
+                                [(Expr.Etempvar ___x86_loss_width__1 tuchar)])
+                              (Stmt.Sset ___x86_stw_width__2
+                                (Expr.Ecast (Expr.Etempvar _t'53 tuchar)
+                                  tuchar)))
+                            (Stmt.Ssequence
+                              (Stmt.Ssequence
+                                (Stmt.Scall (some _t'54)
+                                  (Expr.Evar _x86_width_mask (Ty.Tfunction
+                                                               [tuchar]
+                                                               tulong
+                                                               cc_default))
+                                  [(Expr.Etempvar ___x86_stw_width__2 tuchar)])
+                                (Stmt.Sset ___x86_stw_narrowed__2
+                                  (Expr.Ebinop Binop.Oand
+                                    (Expr.Etempvar ___x86_loss_value__1 tulong)
+                                    (Expr.Etempvar _t'54 tulong) tulong)))
+                              (Stmt.Ssequence
+                                (Stmt.Sbuiltin none
+                                  (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                                  [(tptr (tvolatile tuchar)),
+                                   (tvolatile tuchar)]
+                                  [(Expr.Eaddrof
+                                     (Expr.Ederef
+                                       (Expr.Ebinop Binop.Oadd
+                                         (Expr.Etempvar ___x86_stw_bytes__2 (tptr (tvolatile tuchar)))
+                                         (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                         (tptr (tvolatile tuchar)))
+                                       (tvolatile tuchar))
+                                     (tptr (tvolatile tuchar))),
+                                   (Expr.Ecast
+                                     (Expr.Ebinop Binop.Oshr
+                                       (Expr.Ecast
+                                         (Expr.Etempvar ___x86_stw_narrowed__2 tulong)
+                                         tulong)
+                                       (Expr.Ebinop Binop.Omul
+                                         (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                         (Expr.Ecast
+                                           (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                           tuint) tuint) tulong) tuchar)])
+                                (Stmt.Ssequence
+                                  s_kprog_x86_store_xmm0_28
+                                  s_kprog_x86_store_xmm0_29)))))
+                        Stmt.Sbreak))))))))
+        Stmt.Sbreak)
+      (Stmt.Ssequence
+        (Stmt.Sset _t'121
+          (Expr.Efield
+            (Expr.Efield
+              (Expr.Efield
+                (Expr.Efield
+                  (Expr.Ederef
+                    (Expr.Etempvar ___x86_state (tptr (Ty.Tstruct _x86_sim_register_state noattr)))
+                    (Ty.Tstruct _x86_sim_register_state noattr))
+                  (Positive.ofNat 18727075383868559167)
+                  (Ty.Tunion __3119 noattr))
+                (Positive.ofNat 18727075383868559167)
+                (Ty.Tstruct __3120 noattr)) _rsp
+              (Ty.Tunion _x86_sim_gpr noattr)) _ptr (tptr tvoid)))
+        (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                            (Expr.Etempvar ___x86_loss_off__1 tlong)
+                            (Expr.Ecast
+                              (Expr.Ecast (Expr.Etempvar _t'121 (tptr tvoid))
+                                tlong) tlong) tint)
+          (Stmt.Ssequence
+            (Stmt.Sset ___x86_loss_i__1
+              (Expr.Econst_int (Integers.Int.repr 0) tint))
+            (Stmt.Sloop
+              (Stmt.Ssequence
+                (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                    (Expr.Etempvar ___x86_loss_i__1 tuint)
+                                    (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                    tint)
+                  Stmt.Sskip
+                  Stmt.Sbreak)
+                (Stmt.Ssequence
+                  (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                      (Expr.Etempvar ___x86_loss_i__1 tuint)
+                                      (Expr.Etempvar ___x86_loss_width__1 tuchar)
+                                      tint)
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'126
+                        (Expr.Efield
+                          (Expr.Efield
+                            (Expr.Efield
+                              (Expr.Efield
+                                (Expr.Ederef
+                                  (Expr.Etempvar ___x86_state (tptr (Ty.Tstruct _x86_sim_register_state noattr)))
+                                  (Ty.Tstruct _x86_sim_register_state noattr))
+                                (Positive.ofNat 18727075383868559167)
+                                (Ty.Tunion __3119 noattr))
+                              (Positive.ofNat 18727075383868559167)
+                              (Ty.Tstruct __3120 noattr)) _rsp
+                            (Ty.Tunion _x86_sim_gpr noattr)) _ptr
+                          (tptr tvoid)))
+                      (Stmt.Sset _t'89
+                        (Expr.Ecast
+                          (Expr.Ebinop Binop.Olt
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Etempvar ___x86_loss_off__1 tlong)
+                              (Expr.Etempvar ___x86_loss_i__1 tuint) tlong)
+                            (Expr.Ecast
+                              (Expr.Ecast (Expr.Etempvar _t'126 (tptr tvoid))
+                                tlong) tlong) tint) tbool)))
+                    (Stmt.Sset _t'89
+                      (Expr.Econst_int (Integers.Int.repr 0) tint)))
+                  (Stmt.Sifthenelse (Expr.Etempvar _t'89 tint)
+                    (Stmt.Sloop
+                      (Stmt.Ssequence
+                        (Stmt.Sset ___x86_stw_index__3
+                          (Expr.Ebinop Binop.Oadd
+                            (Expr.Ecast
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Etempvar ___x86_loss_off__1 tlong)
+                                (Expr.Etempvar ___x86_loss_i__1 tuint) tlong)
+                              tulong)
+                            (Expr.Ecast (Expr.Etempvar _capacity tuint)
+                              tulong) tulong))
+                        (Stmt.Ssequence
+                          (Stmt.Ssequence
+                            (Stmt.Ssequence
+                              (Stmt.Scall (some _t'86)
+                                (Expr.Evar _x86_width_effective (Ty.Tfunction
+                                                                  [tuchar]
+                                                                  tuchar
+                                                                  cc_default))
+                                [(Expr.Econst_int (Integers.Int.repr 1) tuint)])
+                              (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                  (Expr.Etempvar _t'86 tuchar)
+                                                  (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                                  tint)
+                                s_kprog_x86_store_xmm0_30
+                                (Stmt.Sset _t'87
+                                  (Expr.Econst_int (Integers.Int.repr 0) tint))))
+                            (Stmt.Sifthenelse (Expr.Etempvar _t'87 tint)
+                              (Stmt.Sset _t'88
+                                (Expr.Ecast
+                                  (Expr.Econst_int (Integers.Int.repr 1) tint)
+                                  tint))
+                              (Stmt.Sset _t'88
+                                (Expr.Ecast
+                                  (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                  tint))))
+                          (Stmt.Sifthenelse (Expr.Ecast
+                                              (Expr.Etempvar _t'88 tint)
+                                              tuchar)
+                            (Stmt.Ssequence
+                              (Stmt.Scall (some _t'69)
+                                (Expr.Evar _native_lab_entry_input (Ty.Tfunction
+                                                                    [tuint]
+                                                                    tulong
+                                                                    cc_default))
+                                [(Expr.Econst_int (Integers.Int.repr 6) tint)])
+                              (Stmt.Ssequence
+                                (Stmt.Sset _t'125
+                                  (Expr.Efield
+                                    (Expr.Ederef
+                                      (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr)))
+                                      (Ty.Tstruct _kprog_x86_arena noattr))
+                                    _q (tptr (tvolatile tulong))))
+                                (Stmt.Sbuiltin none
+                                  (ExtFun.EF_vstore Chunk.Mint64)
+                                  [(tptr (tvolatile tulong)),
+                                   (tvolatile tulong)]
+                                  [(Expr.Eaddrof
+                                     (Expr.Ederef
+                                       (Expr.Ebinop Binop.Oadd
+                                         (Expr.Etempvar _t'125 (tptr (tvolatile tulong)))
+                                         (Expr.Ebinop Binop.Oshr
+                                           (Expr.Ecast
+                                             (Expr.Etempvar ___x86_stw_index__3 tulong)
+                                             tulong)
+                                           (Expr.Econst_int (Integers.Int.repr 3) tint)
+                                           tulong) (tptr (tvolatile tulong)))
+                                       (tvolatile tulong))
+                                     (tptr (tvolatile tulong))),
+                                   (Expr.Etempvar _t'69 tulong)])))
+                            (Stmt.Ssequence
+                              (Stmt.Ssequence
+                                s_kprog_x86_store_xmm0_31
+                                (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                                    (Expr.Etempvar _t'84 tuchar)
+                                                    (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                                                    tint)
+                                  s_kprog_x86_store_xmm0_32
+                                  (Stmt.Sset _t'85
+                                    (Expr.Econst_int (Integers.Int.repr 0) tint))))
+                              (Stmt.Sifthenelse (Expr.Etempvar _t'85 tint)
+                                s_kprog_x86_store_xmm0_33
+                                s_kprog_x86_store_xmm0_49)))))
+                      Stmt.Sbreak)
+                    Stmt.Sskip)))
+              (Stmt.Sset ___x86_loss_i__1
+                (Expr.Ebinop Binop.Oadd
+                  (Expr.Etempvar ___x86_loss_i__1 tuint)
+                  (Expr.Econst_int (Integers.Int.repr 1) tint) tuint))))
+          Stmt.Sskip)))))
+
+def s_kprog_x86_store_xmm0_51 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Scall (some _t'92)
+    (Expr.Evar _tag_of (Ty.Tfunction
+                         [(tptr (Ty.Tstruct _x86_sim_register_state noattr)),
+                          tulong] tuchar cc_default))
+    [(Expr.Etempvar _state (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
+     (Expr.Etempvar _dst tulong)])
+  (Stmt.Sset ___x86_st_tag (Expr.Ecast (Expr.Etempvar _t'92 tuchar) tuchar)))
+
+def s_kprog_x86_store_xmm0_52 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'119
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Ebinop Binop.Oadd
+          (Expr.Etempvar _facts (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)))
+          (Expr.Etempvar ___x86_sv_i__2 tuint)
+          (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)))
+        (Ty.Tstruct _kprog_x86_stack_fact noattr)) _tag (tptr tuchar)))
+  (Stmt.Sassign (Expr.Ederef (Expr.Etempvar _t'119 (tptr tuchar)) tuchar)
+    (Expr.Econst_int (Integers.Int.repr 0) tuint)))
+
+def s_kprog_x86_store_xmm0_53 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'118
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Ebinop Binop.Oadd
+          (Expr.Etempvar _facts (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)))
+          (Expr.Etempvar ___x86_sv_i__2 tuint)
+          (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)))
+        (Ty.Tstruct _kprog_x86_stack_fact noattr)) _pointer
+      (tptr (tptr tvoid))))
+  (Stmt.Sassign
+    (Expr.Ederef (Expr.Etempvar _t'118 (tptr (tptr tvoid))) (tptr tvoid))
+    (Expr.Econst_int (Integers.Int.repr 0) tint)))
+
+def s_kprog_x86_store_xmm0_54 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset ___x86_st_value
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Etempvar ___x86_state (tptr (Ty.Tstruct _x86_sim_register_state noattr)))
+        (Ty.Tstruct _x86_sim_register_state noattr)) _xmm0_lo tulong))
+  (Stmt.Ssequence
+    (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                        (Expr.Etempvar ___x86_st_tag tuchar)
+                        (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+      (Stmt.Sloop
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sset _t'120
+              (Expr.Efield
+                (Expr.Ederef
+                  (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr)))
+                  (Ty.Tstruct _kprog_x86_arena noattr)) _b
+                (tptr (tvolatile tuchar))))
+            (Stmt.Sset ___x86_sv_index__2
+              (Expr.Ebinop Binop.Osub
+                (Expr.Ecast
+                  (Expr.Ecast (Expr.Etempvar ___x86_st_addr (tptr tvoid))
+                    tlong) tulong)
+                (Expr.Ecast
+                  (Expr.Ecast
+                    (Expr.Ebinop Binop.Oadd
+                      (Expr.Etempvar _t'120 (tptr (tvolatile tuchar)))
+                      (Expr.Econst_int (Integers.Int.repr 0) tint)
+                      (tptr (tvolatile tuchar))) tlong) tulong) tulong)))
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Scall (some _t'93)
+                (Expr.Evar _x86_width_effective (Ty.Tfunction [tuchar] tuchar
+                                                  cc_default))
+                [(Expr.Etempvar ___x86_st_width tuchar)])
+              (Stmt.Sset ___x86_sv_width__2
+                (Expr.Ecast (Expr.Etempvar _t'93 tuchar) tulong)))
+            (Stmt.Ssequence
+              (Stmt.Sset ___x86_sv_i__2
+                (Expr.Econst_int (Integers.Int.repr 0) tint))
+              (Stmt.Sloop
+                (Stmt.Ssequence
+                  (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                      (Expr.Etempvar ___x86_sv_i__2 tuint)
+                                      (Expr.Ebinop Binop.Odiv
+                                        (Expr.Ebinop Binop.Oadd
+                                          (Expr.Ecast
+                                            (Expr.Etempvar _capacity tuint)
+                                            tulong)
+                                          (Expr.Econst_int (Integers.Int.repr 7) tuint)
+                                          tulong)
+                                        (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                        tulong) tint)
+                    Stmt.Sskip
+                    Stmt.Sbreak)
+                  (Stmt.Sloop
+                    (Stmt.Ssequence
+                      (Stmt.Sset ___x86_sv_start__2
+                        (Expr.Ebinop Binop.Omul
+                          (Expr.Ecast (Expr.Etempvar ___x86_sv_i__2 tuint)
+                            tulong)
+                          (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                          tulong))
+                      (Stmt.Ssequence
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                            (Expr.Ebinop Binop.Osub
+                                              (Expr.Etempvar ___x86_sv_index__2 tulong)
+                                              (Expr.Etempvar ___x86_sv_start__2 tulong)
+                                              tulong)
+                                            (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                            tint)
+                          (Stmt.Sset _t'94
+                            (Expr.Econst_int (Integers.Int.repr 1) tint))
+                          (Stmt.Sset _t'94
+                            (Expr.Ecast
+                              (Expr.Ebinop Binop.Olt
+                                (Expr.Ebinop Binop.Osub
+                                  (Expr.Etempvar ___x86_sv_start__2 tulong)
+                                  (Expr.Etempvar ___x86_sv_index__2 tulong)
+                                  tulong)
+                                (Expr.Etempvar ___x86_sv_width__2 tulong)
+                                tint) tbool)))
+                        (Stmt.Sifthenelse (Expr.Etempvar _t'94 tint)
+                          (Stmt.Sloop
+                            (Stmt.Ssequence
+                              s_kprog_x86_store_xmm0_52
+                              s_kprog_x86_store_xmm0_53)
+                            Stmt.Sbreak)
+                          Stmt.Sskip)))
+                    Stmt.Sbreak))
+                (Stmt.Sset ___x86_sv_i__2
+                  (Expr.Ebinop Binop.Oadd
+                    (Expr.Etempvar ___x86_sv_i__2 tuint)
+                    (Expr.Econst_int (Integers.Int.repr 1) tint) tuint))))))
+        Stmt.Sbreak)
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                          (Expr.Etempvar ___x86_st_tag tuchar)
+                          (Expr.Econst_int (Integers.Int.repr 0) tuint) tint)
+        (Stmt.Sloop
+          (Stmt.Ssequence
+            (Stmt.Sset ___x86_sv_i__3
+              (Expr.Econst_int (Integers.Int.repr 0) tint))
+            (Stmt.Sloop
+              (Stmt.Ssequence
+                (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                    (Expr.Etempvar ___x86_sv_i__3 tuint)
+                                    (Expr.Ebinop Binop.Odiv
+                                      (Expr.Ebinop Binop.Oadd
+                                        (Expr.Ecast
+                                          (Expr.Etempvar _capacity tuint)
+                                          tulong)
+                                        (Expr.Econst_int (Integers.Int.repr 7) tuint)
+                                        tulong)
+                                      (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                      tulong) tint)
+                  Stmt.Sskip
+                  Stmt.Sbreak)
+                (Stmt.Sloop
+                  (Stmt.Ssequence
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'117
+                        (Expr.Efield
+                          (Expr.Ederef
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Etempvar _facts (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)))
+                              (Expr.Etempvar ___x86_sv_i__3 tuint)
+                              (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)))
+                            (Ty.Tstruct _kprog_x86_stack_fact noattr)) _tag
+                          (tptr tuchar)))
+                      (Stmt.Sassign
+                        (Expr.Ederef (Expr.Etempvar _t'117 (tptr tuchar))
+                          tuchar)
+                        (Expr.Econst_int (Integers.Int.repr 0) tuint)))
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'116
+                        (Expr.Efield
+                          (Expr.Ederef
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Etempvar _facts (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)))
+                              (Expr.Etempvar ___x86_sv_i__3 tuint)
+                              (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)))
+                            (Ty.Tstruct _kprog_x86_stack_fact noattr))
+                          _pointer (tptr (tptr tvoid))))
+                      (Stmt.Sassign
+                        (Expr.Ederef
+                          (Expr.Etempvar _t'116 (tptr (tptr tvoid)))
+                          (tptr tvoid))
+                        (Expr.Econst_int (Integers.Int.repr 0) tint))))
+                  Stmt.Sbreak))
+              (Stmt.Sset ___x86_sv_i__3
+                (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_sv_i__3 tuint)
+                  (Expr.Econst_int (Integers.Int.repr 1) tint) tuint))))
+          Stmt.Sbreak)
+        Stmt.Sskip))
+    (Stmt.Ssequence
+      (Stmt.Scall none
+        (Expr.Evar _kprog_x86_mem_store (Ty.Tfunction
+                                          [(tptr tvoid), tuchar, tulong]
+                                          tvoid cc_default))
+        [(Expr.Etempvar ___x86_st_addr (tptr tvoid)),
+         (Expr.Etempvar ___x86_st_width tuchar),
+         (Expr.Etempvar ___x86_st_value tulong)])
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                          (Expr.Etempvar ___x86_st_tag tuchar)
+                          (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+        (Stmt.Ssequence
+          (Stmt.Sloop
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Sset _t'115
+                  (Expr.Efield
+                    (Expr.Ederef
+                      (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr)))
+                      (Ty.Tstruct _kprog_x86_arena noattr)) _b
+                    (tptr (tvolatile tuchar))))
+                (Stmt.Sset ___x86_alias_delta
+                  (Expr.Ebinop Binop.Osub
+                    (Expr.Ecast
+                      (Expr.Ecast (Expr.Etempvar ___x86_st_addr (tptr tvoid))
+                        tlong) tulong)
+                    (Expr.Ecast
+                      (Expr.Ecast
+                        (Expr.Ecast
+                          (Expr.Ecast
+                            (Expr.Ecast
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Ecast
+                                  (Expr.Ecast
+                                    (Expr.Ebinop Binop.Oadd
+                                      (Expr.Etempvar _t'115 (tptr (tvolatile tuchar)))
+                                      (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                      (tptr (tvolatile tuchar))) tulong)
+                                  tulong)
+                                (Expr.Ecast
+                                  (Expr.Ebinop Binop.Oadd
+                                    (Expr.Ecast
+                                      (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                      tulong)
+                                    (Expr.Ecast
+                                      (Expr.Etempvar _capacity tuint) tulong)
+                                    tulong) tulong) tulong) tulong)
+                            (tptr tuchar)) (tptr tvoid)) tlong) tulong)
+                    tulong)))
+              (Stmt.Sset ___x86_st_off
+                (Expr.Ecast (Expr.Etempvar ___x86_alias_delta tulong) tlong)))
+            Stmt.Sbreak)
+          (Stmt.Ssequence
+            (Stmt.Sset _t'113
+              (Expr.Efield
+                (Expr.Efield
+                  (Expr.Efield
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar ___x86_state (tptr (Ty.Tstruct _x86_sim_register_state noattr)))
+                        (Ty.Tstruct _x86_sim_register_state noattr))
+                      (Positive.ofNat 18727075383868559167)
+                      (Ty.Tunion __3119 noattr))
+                    (Positive.ofNat 18727075383868559167)
+                    (Ty.Tstruct __3120 noattr)) _rsp
+                  (Ty.Tunion _x86_sim_gpr noattr)) _ptr (tptr tvoid)))
+            (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                (Expr.Etempvar ___x86_st_off tlong)
+                                (Expr.Ecast
+                                  (Expr.Ecast
+                                    (Expr.Etempvar _t'113 (tptr tvoid))
+                                    tlong) tlong) tint)
+              (Stmt.Ssequence
+                (Stmt.Sset ___x86_st_i
+                  (Expr.Econst_int (Integers.Int.repr 0) tint))
+                (Stmt.Sloop
+                  (Stmt.Ssequence
+                    (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                        (Expr.Etempvar ___x86_st_i tuint)
+                                        (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                        tint)
+                      Stmt.Sskip
+                      Stmt.Sbreak)
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Scall (some _t'96)
+                          (Expr.Evar _x86_width_effective (Ty.Tfunction
+                                                            [tuchar] tuchar
+                                                            cc_default))
+                          [(Expr.Etempvar ___x86_st_width tuchar)])
+                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                            (Expr.Etempvar ___x86_st_i tuint)
+                                            (Expr.Etempvar _t'96 tuchar)
+                                            tint)
+                          (Stmt.Ssequence
+                            (Stmt.Sset _t'114
+                              (Expr.Efield
+                                (Expr.Efield
+                                  (Expr.Efield
+                                    (Expr.Efield
+                                      (Expr.Ederef
+                                        (Expr.Etempvar ___x86_state (tptr (Ty.Tstruct _x86_sim_register_state noattr)))
+                                        (Ty.Tstruct _x86_sim_register_state noattr))
+                                      (Positive.ofNat 18727075383868559167)
+                                      (Ty.Tunion __3119 noattr))
+                                    (Positive.ofNat 18727075383868559167)
+                                    (Ty.Tstruct __3120 noattr)) _rsp
+                                  (Ty.Tunion _x86_sim_gpr noattr)) _ptr
+                                (tptr tvoid)))
+                            (Stmt.Sset _t'97
+                              (Expr.Ecast
+                                (Expr.Ebinop Binop.Olt
+                                  (Expr.Ebinop Binop.Oadd
+                                    (Expr.Etempvar ___x86_st_off tlong)
+                                    (Expr.Etempvar ___x86_st_i tuint) tlong)
+                                  (Expr.Ecast
+                                    (Expr.Ecast
+                                      (Expr.Etempvar _t'114 (tptr tvoid))
+                                      tlong) tlong) tint) tbool)))
+                          (Stmt.Sset _t'97
+                            (Expr.Econst_int (Integers.Int.repr 0) tint))))
+                      (Stmt.Sifthenelse (Expr.Etempvar _t'97 tint)
+                        (Stmt.Ssequence
+                          (Stmt.Scall (some _t'95)
+                            (Expr.Evar _native_lab_entry_input (Ty.Tfunction
+                                                                 [tuint]
+                                                                 tulong
+                                                                 cc_default))
+                            [(Expr.Econst_int (Integers.Int.repr 6) tint)])
+                          (Stmt.Sbuiltin none
+                            (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                            [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                            [(Expr.Eaddrof
+                               (Expr.Ederef
+                                 (Expr.Ebinop Binop.Oadd
+                                   (Expr.Ecast
+                                     (Expr.Etempvar ___x86_st_addr (tptr tvoid))
+                                     (tptr (tvolatile tuchar)))
+                                   (Expr.Etempvar ___x86_st_i tuint)
+                                   (tptr (tvolatile tuchar)))
+                                 (tvolatile tuchar))
+                               (tptr (tvolatile tuchar))),
+                             (Expr.Ecast (Expr.Etempvar _t'95 tulong) tuchar)]))
+                        Stmt.Sskip)))
+                  (Stmt.Sset ___x86_st_i
+                    (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_st_i tuint)
+                      (Expr.Econst_int (Integers.Int.repr 1) tint) tuint))))
+              Stmt.Sskip)))
+        Stmt.Sskip))))
+
+def s_kprog_x86_store_xmm0_55 : Stmt :=
+(Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                    (Expr.Econst_int (Integers.Int.repr 1) tint)
+                    (Expr.Econst_int (Integers.Int.repr 0) tuint) tint)
+  (Stmt.Sset _t'98
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tuint) tuint))
+  (Stmt.Sset _t'98
+    (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tuint) tuint)))
+
+def s_kprog_x86_store_xmm0_56 : Stmt :=
+(Stmt.Sset ___x86_st_width__1
+  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 8) tuint) tuchar))
+
+def s_kprog_x86_store_xmm0_57 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'111
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Ebinop Binop.Oadd
+          (Expr.Etempvar _facts (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)))
+          (Expr.Etempvar ___x86_sv_i__4 tuint)
+          (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)))
+        (Ty.Tstruct _kprog_x86_stack_fact noattr)) _tag (tptr tuchar)))
+  (Stmt.Sassign (Expr.Ederef (Expr.Etempvar _t'111 (tptr tuchar)) tuchar)
+    (Expr.Econst_int (Integers.Int.repr 0) tuint)))
+
+def s_kprog_x86_store_xmm0_58 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'110
+    (Expr.Efield
+      (Expr.Ederef
+        (Expr.Ebinop Binop.Oadd
+          (Expr.Etempvar _facts (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)))
+          (Expr.Etempvar ___x86_sv_i__4 tuint)
+          (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)))
+        (Ty.Tstruct _kprog_x86_stack_fact noattr)) _pointer
+      (tptr (tptr tvoid))))
+  (Stmt.Sassign
+    (Expr.Ederef (Expr.Etempvar _t'110 (tptr (tptr tvoid))) (tptr tvoid))
+    (Expr.Econst_int (Integers.Int.repr 0) tint)))
+
+def s_kprog_x86_store_xmm0_59 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Sset _t'106
+    (Expr.Efield
+      (Expr.Efield
+        (Expr.Efield
+          (Expr.Efield
+            (Expr.Ederef
+              (Expr.Etempvar ___x86_state (tptr (Ty.Tstruct _x86_sim_register_state noattr)))
+              (Ty.Tstruct _x86_sim_register_state noattr))
+            (Positive.ofNat 18727075383868559167) (Ty.Tunion __3119 noattr))
+          (Positive.ofNat 18727075383868559167) (Ty.Tstruct __3120 noattr))
+        _rsp (Ty.Tunion _x86_sim_gpr noattr)) _ptr (tptr tvoid)))
+  (Stmt.Sset _t'104
+    (Expr.Ecast
+      (Expr.Ebinop Binop.Olt
+        (Expr.Ebinop Binop.Oadd (Expr.Etempvar ___x86_st_off__1 tlong)
+          (Expr.Etempvar ___x86_st_i__1 tuint) tlong)
+        (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'106 (tptr tvoid)) tlong)
+          tlong) tint) tbool)))
+
+def s_kprog_x86_store_xmm0_60 : Stmt :=
+(Stmt.Ssequence
+  (Stmt.Ssequence
+    (Stmt.Scall (some _t'99)
+      (Expr.Evar _tag_of (Ty.Tfunction
+                           [(tptr (Ty.Tstruct _x86_sim_register_state noattr)),
+                            tulong] tuchar cc_default))
+      [(Expr.Etempvar _state (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
+       (Expr.Etempvar _dst tulong)])
+    (Stmt.Sset ___x86_st_tag__1
+      (Expr.Ecast (Expr.Etempvar _t'99 tuchar) tuchar)))
+  (Stmt.Ssequence
+    (Stmt.Sset ___x86_st_value__1
+      (Expr.Efield
+        (Expr.Ederef
+          (Expr.Etempvar ___x86_state (tptr (Ty.Tstruct _x86_sim_register_state noattr)))
+          (Ty.Tstruct _x86_sim_register_state noattr)) _xmm0_hi tulong))
+    (Stmt.Ssequence
+      (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                          (Expr.Etempvar ___x86_st_tag__1 tuchar)
+                          (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)
+        (Stmt.Sloop
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Sset _t'112
+                (Expr.Efield
+                  (Expr.Ederef
+                    (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr)))
+                    (Ty.Tstruct _kprog_x86_arena noattr)) _b
+                  (tptr (tvolatile tuchar))))
+              (Stmt.Sset ___x86_sv_index__3
+                (Expr.Ebinop Binop.Osub
+                  (Expr.Ecast
+                    (Expr.Ecast
+                      (Expr.Etempvar ___x86_st_addr__1 (tptr tvoid)) tlong)
+                    tulong)
+                  (Expr.Ecast
+                    (Expr.Ecast
+                      (Expr.Ebinop Binop.Oadd
+                        (Expr.Etempvar _t'112 (tptr (tvolatile tuchar)))
+                        (Expr.Econst_int (Integers.Int.repr 0) tint)
+                        (tptr (tvolatile tuchar))) tlong) tulong) tulong)))
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Scall (some _t'100)
+                  (Expr.Evar _x86_width_effective (Ty.Tfunction [tuchar]
+                                                    tuchar cc_default))
+                  [(Expr.Etempvar ___x86_st_width__1 tuchar)])
+                (Stmt.Sset ___x86_sv_width__3
+                  (Expr.Ecast (Expr.Etempvar _t'100 tuchar) tulong)))
+              (Stmt.Ssequence
+                (Stmt.Sset ___x86_sv_i__4
+                  (Expr.Econst_int (Integers.Int.repr 0) tint))
+                (Stmt.Sloop
+                  (Stmt.Ssequence
+                    (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                        (Expr.Etempvar ___x86_sv_i__4 tuint)
+                                        (Expr.Ebinop Binop.Odiv
+                                          (Expr.Ebinop Binop.Oadd
+                                            (Expr.Ecast
+                                              (Expr.Etempvar _capacity tuint)
+                                              tulong)
+                                            (Expr.Econst_int (Integers.Int.repr 7) tuint)
+                                            tulong)
+                                          (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                          tulong) tint)
+                      Stmt.Sskip
+                      Stmt.Sbreak)
+                    (Stmt.Sloop
+                      (Stmt.Ssequence
+                        (Stmt.Sset ___x86_sv_start__3
+                          (Expr.Ebinop Binop.Omul
+                            (Expr.Ecast (Expr.Etempvar ___x86_sv_i__4 tuint)
+                              tulong)
+                            (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                            tulong))
+                        (Stmt.Ssequence
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                              (Expr.Ebinop Binop.Osub
+                                                (Expr.Etempvar ___x86_sv_index__3 tulong)
+                                                (Expr.Etempvar ___x86_sv_start__3 tulong)
+                                                tulong)
+                                              (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                              tint)
+                            (Stmt.Sset _t'101
+                              (Expr.Econst_int (Integers.Int.repr 1) tint))
+                            (Stmt.Sset _t'101
+                              (Expr.Ecast
+                                (Expr.Ebinop Binop.Olt
+                                  (Expr.Ebinop Binop.Osub
+                                    (Expr.Etempvar ___x86_sv_start__3 tulong)
+                                    (Expr.Etempvar ___x86_sv_index__3 tulong)
+                                    tulong)
+                                  (Expr.Etempvar ___x86_sv_width__3 tulong)
+                                  tint) tbool)))
+                          (Stmt.Sifthenelse (Expr.Etempvar _t'101 tint)
+                            (Stmt.Sloop
+                              (Stmt.Ssequence
+                                s_kprog_x86_store_xmm0_57
+                                s_kprog_x86_store_xmm0_58)
+                              Stmt.Sbreak)
+                            Stmt.Sskip)))
+                      Stmt.Sbreak))
+                  (Stmt.Sset ___x86_sv_i__4
+                    (Expr.Ebinop Binop.Oadd
+                      (Expr.Etempvar ___x86_sv_i__4 tuint)
+                      (Expr.Econst_int (Integers.Int.repr 1) tint) tuint))))))
+          Stmt.Sbreak)
+        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                            (Expr.Etempvar ___x86_st_tag__1 tuchar)
+                            (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                            tint)
+          (Stmt.Sloop
+            (Stmt.Ssequence
+              (Stmt.Sset ___x86_sv_i__5
+                (Expr.Econst_int (Integers.Int.repr 0) tint))
+              (Stmt.Sloop
+                (Stmt.Ssequence
+                  (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                      (Expr.Etempvar ___x86_sv_i__5 tuint)
+                                      (Expr.Ebinop Binop.Odiv
+                                        (Expr.Ebinop Binop.Oadd
+                                          (Expr.Ecast
+                                            (Expr.Etempvar _capacity tuint)
+                                            tulong)
+                                          (Expr.Econst_int (Integers.Int.repr 7) tuint)
+                                          tulong)
+                                        (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                        tulong) tint)
+                    Stmt.Sskip
+                    Stmt.Sbreak)
+                  (Stmt.Sloop
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'109
+                          (Expr.Efield
+                            (Expr.Ederef
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Etempvar _facts (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)))
+                                (Expr.Etempvar ___x86_sv_i__5 tuint)
+                                (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)))
+                              (Ty.Tstruct _kprog_x86_stack_fact noattr)) _tag
+                            (tptr tuchar)))
+                        (Stmt.Sassign
+                          (Expr.Ederef (Expr.Etempvar _t'109 (tptr tuchar))
+                            tuchar)
+                          (Expr.Econst_int (Integers.Int.repr 0) tuint)))
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'108
+                          (Expr.Efield
+                            (Expr.Ederef
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Etempvar _facts (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)))
+                                (Expr.Etempvar ___x86_sv_i__5 tuint)
+                                (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr)))
+                              (Ty.Tstruct _kprog_x86_stack_fact noattr))
+                            _pointer (tptr (tptr tvoid))))
+                        (Stmt.Sassign
+                          (Expr.Ederef
+                            (Expr.Etempvar _t'108 (tptr (tptr tvoid)))
+                            (tptr tvoid))
+                          (Expr.Econst_int (Integers.Int.repr 0) tint))))
+                    Stmt.Sbreak))
+                (Stmt.Sset ___x86_sv_i__5
+                  (Expr.Ebinop Binop.Oadd
+                    (Expr.Etempvar ___x86_sv_i__5 tuint)
+                    (Expr.Econst_int (Integers.Int.repr 1) tint) tuint))))
+            Stmt.Sbreak)
+          Stmt.Sskip))
+      (Stmt.Ssequence
+        (Stmt.Scall none
+          (Expr.Evar _kprog_x86_mem_store (Ty.Tfunction
+                                            [(tptr tvoid), tuchar, tulong]
+                                            tvoid cc_default))
+          [(Expr.Etempvar ___x86_st_addr__1 (tptr tvoid)),
+           (Expr.Etempvar ___x86_st_width__1 tuchar),
+           (Expr.Etempvar ___x86_st_value__1 tulong)])
+        (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                            (Expr.Etempvar ___x86_st_tag__1 tuchar)
+                            (Expr.Econst_int (Integers.Int.repr 4) tuint)
+                            tint)
+          (Stmt.Ssequence
+            (Stmt.Sloop
+              (Stmt.Ssequence
+                (Stmt.Ssequence
+                  (Stmt.Sset _t'107
+                    (Expr.Efield
+                      (Expr.Ederef
+                        (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr)))
+                        (Ty.Tstruct _kprog_x86_arena noattr)) _b
+                      (tptr (tvolatile tuchar))))
+                  (Stmt.Sset ___x86_alias_delta__1
+                    (Expr.Ebinop Binop.Osub
+                      (Expr.Ecast
+                        (Expr.Ecast
+                          (Expr.Etempvar ___x86_st_addr__1 (tptr tvoid))
+                          tlong) tulong)
+                      (Expr.Ecast
+                        (Expr.Ecast
+                          (Expr.Ecast
+                            (Expr.Ecast
+                              (Expr.Ecast
+                                (Expr.Ebinop Binop.Oadd
+                                  (Expr.Ecast
+                                    (Expr.Ecast
+                                      (Expr.Ebinop Binop.Oadd
+                                        (Expr.Etempvar _t'107 (tptr (tvolatile tuchar)))
+                                        (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                        (tptr (tvolatile tuchar))) tulong)
+                                    tulong)
+                                  (Expr.Ecast
+                                    (Expr.Ebinop Binop.Oadd
+                                      (Expr.Ecast
+                                        (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                        tulong)
+                                      (Expr.Ecast
+                                        (Expr.Etempvar _capacity tuint)
+                                        tulong) tulong) tulong) tulong)
+                                tulong) (tptr tuchar)) (tptr tvoid)) tlong)
+                        tulong) tulong)))
+                (Stmt.Sset ___x86_st_off__1
+                  (Expr.Ecast (Expr.Etempvar ___x86_alias_delta__1 tulong)
+                    tlong)))
+              Stmt.Sbreak)
+            (Stmt.Ssequence
+              (Stmt.Sset _t'105
+                (Expr.Efield
+                  (Expr.Efield
+                    (Expr.Efield
+                      (Expr.Efield
+                        (Expr.Ederef
+                          (Expr.Etempvar ___x86_state (tptr (Ty.Tstruct _x86_sim_register_state noattr)))
+                          (Ty.Tstruct _x86_sim_register_state noattr))
+                        (Positive.ofNat 18727075383868559167)
+                        (Ty.Tunion __3119 noattr))
+                      (Positive.ofNat 18727075383868559167)
+                      (Ty.Tstruct __3120 noattr)) _rsp
+                    (Ty.Tunion _x86_sim_gpr noattr)) _ptr (tptr tvoid)))
+              (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                  (Expr.Etempvar ___x86_st_off__1 tlong)
+                                  (Expr.Ecast
+                                    (Expr.Ecast
+                                      (Expr.Etempvar _t'105 (tptr tvoid))
+                                      tlong) tlong) tint)
+                (Stmt.Ssequence
+                  (Stmt.Sset ___x86_st_i__1
+                    (Expr.Econst_int (Integers.Int.repr 0) tint))
+                  (Stmt.Sloop
+                    (Stmt.Ssequence
+                      (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                          (Expr.Etempvar ___x86_st_i__1 tuint)
+                                          (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                          tint)
+                        Stmt.Sskip
+                        Stmt.Sbreak)
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Scall (some _t'103)
+                            (Expr.Evar _x86_width_effective (Ty.Tfunction
+                                                              [tuchar] tuchar
+                                                              cc_default))
+                            [(Expr.Etempvar ___x86_st_width__1 tuchar)])
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                              (Expr.Etempvar ___x86_st_i__1 tuint)
+                                              (Expr.Etempvar _t'103 tuchar)
+                                              tint)
+                            s_kprog_x86_store_xmm0_59
+                            (Stmt.Sset _t'104
+                              (Expr.Econst_int (Integers.Int.repr 0) tint))))
+                        (Stmt.Sifthenelse (Expr.Etempvar _t'104 tint)
+                          (Stmt.Ssequence
+                            (Stmt.Scall (some _t'102)
+                              (Expr.Evar _native_lab_entry_input (Ty.Tfunction
+                                                                   [tuint]
+                                                                   tulong
+                                                                   cc_default))
+                              [(Expr.Econst_int (Integers.Int.repr 6) tint)])
+                            (Stmt.Sbuiltin none
+                              (ExtFun.EF_vstore Chunk.Mint8unsigned)
+                              [(tptr (tvolatile tuchar)), (tvolatile tuchar)]
+                              [(Expr.Eaddrof
+                                 (Expr.Ederef
+                                   (Expr.Ebinop Binop.Oadd
+                                     (Expr.Ecast
+                                       (Expr.Etempvar ___x86_st_addr__1 (tptr tvoid))
+                                       (tptr (tvolatile tuchar)))
+                                     (Expr.Etempvar ___x86_st_i__1 tuint)
+                                     (tptr (tvolatile tuchar)))
+                                   (tvolatile tuchar))
+                                 (tptr (tvolatile tuchar))),
+                               (Expr.Ecast (Expr.Etempvar _t'102 tulong)
+                                 tuchar)]))
+                          Stmt.Sskip)))
+                    (Stmt.Sset ___x86_st_i__1
+                      (Expr.Ebinop Binop.Oadd
+                        (Expr.Etempvar ___x86_st_i__1 tuint)
+                        (Expr.Econst_int (Integers.Int.repr 1) tint) tuint))))
+                Stmt.Sskip)))
+          Stmt.Sskip)))))
+
+def f_kprog_x86_store_xmm0 : Function := {
+  fn_return := tvoid,
+  fn_callconv := cc_default,
+  fn_params := [(_state, (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
+                (_arena, (tptr (Ty.Tstruct _kprog_x86_arena noattr))),
+                (_facts, (tptr (Ty.Tstruct _kprog_x86_stack_fact noattr))),
+                (_capacity, tuint), (_dst, tulong), (_aux, tulong),
+                (_imm, tulong)],
+  fn_vars := [],
+  fn_temps := [(___x86_state,
+                (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
+               (___x86_l_disp, tlong), (___x86_l_arm, tuchar),
+               (___x86_l_base_none, tuchar), (___x86_l_base_form, tuchar),
+               (___x86_l_base_ptr, (tptr tvoid)), (___x86_sv_index, tulong),
+               (___x86_sv_width, tulong), (___x86_sv_i, tuint),
+               (___x86_sv_start, tulong), (___x86_loss_off, tlong),
+               (___x86_loss_width, tuchar), (___x86_loss_value, tulong),
+               (___x86_stw_index, tulong),
+               (___x86_stw_bytes, (tptr (tvolatile tuchar))),
+               (___x86_stw_width, tuchar), (___x86_stw_narrowed, tulong),
+               (___x86_loss_i, tuint), (___x86_stw_index__1, tulong),
+               (___x86_stw_bytes__1, (tptr (tvolatile tuchar))),
+               (___x86_stw_width__1, tuchar),
+               (___x86_stw_narrowed__1, tulong),
+               (___x86_sv_index__1, tulong), (___x86_sv_width__1, tulong),
+               (___x86_sv_i__1, tuint), (___x86_sv_start__1, tulong),
+               (___x86_loss_off__1, tlong), (___x86_loss_width__1, tuchar),
+               (___x86_loss_value__1, tulong), (___x86_stw_index__2, tulong),
+               (___x86_stw_bytes__2, (tptr (tvolatile tuchar))),
+               (___x86_stw_width__2, tuchar),
+               (___x86_stw_narrowed__2, tulong), (___x86_loss_i__1, tuint),
+               (___x86_stw_index__3, tulong),
+               (___x86_stw_bytes__3, (tptr (tvolatile tuchar))),
+               (___x86_stw_width__3, tuchar),
+               (___x86_stw_narrowed__3, tulong),
+               (___x86_l_addr, (tptr tvoid)), (___x86_st_addr, (tptr tvoid)),
+               (___x86_st_width, tuchar), (___x86_st_tag, tuchar),
+               (___x86_st_value, tulong), (___x86_sv_index__2, tulong),
+               (___x86_sv_width__2, tulong), (___x86_sv_i__2, tuint),
+               (___x86_sv_start__2, tulong), (___x86_sv_i__3, tuint),
+               (___x86_st_off, tlong), (___x86_alias_delta, tulong),
+               (___x86_st_i, tuint), (___x86_st_addr__1, (tptr tvoid)),
+               (___x86_st_width__1, tuchar), (___x86_st_tag__1, tuchar),
+               (___x86_st_value__1, tulong), (___x86_sv_index__3, tulong),
+               (___x86_sv_width__3, tulong), (___x86_sv_i__4, tuint),
+               (___x86_sv_start__3, tulong), (___x86_sv_i__5, tuint),
+               (___x86_st_off__1, tlong), (___x86_alias_delta__1, tulong),
+               (___x86_st_i__1, tuint), (_t'104, tint), (_t'103, tuchar),
+               (_t'102, tulong), (_t'101, tint), (_t'100, tuchar),
+               (_t'99, tuchar), (_t'98, tuint), (_t'97, tint),
+               (_t'96, tuchar), (_t'95, tulong), (_t'94, tint),
+               (_t'93, tuchar), (_t'92, tuchar), (_t'91, (tptr tvoid)),
+               (_t'90, tuint), (_t'89, tint), (_t'88, tint), (_t'87, tint),
+               (_t'86, tuchar), (_t'85, tint), (_t'84, tuchar),
+               (_t'83, tint), (_t'82, tuchar), (_t'81, tuint),
+               (_t'80, tuint), (_t'79, tuint), (_t'78, tuint),
+               (_t'77, tuint), (_t'76, tuint), (_t'75, tuint),
+               (_t'74, tulong), (_t'73, tulong), (_t'72, tuchar),
+               (_t'71, tulong), (_t'70, tulong), (_t'69, tulong),
+               (_t'68, tint), (_t'67, tint), (_t'66, tuchar), (_t'65, tint),
+               (_t'64, tuchar), (_t'63, tint), (_t'62, tuchar),
+               (_t'61, tuint), (_t'60, tuint), (_t'59, tuint),
+               (_t'58, tuint), (_t'57, tuint), (_t'56, tuint),
+               (_t'55, tuint), (_t'54, tulong), (_t'53, tuchar),
+               (_t'52, tuchar), (_t'51, tuint), (_t'50, tint),
+               (_t'49, tuchar), (_t'48, tuint), (_t'47, tint), (_t'46, tint),
+               (_t'45, tint), (_t'44, tuchar), (_t'43, tint),
+               (_t'42, tuchar), (_t'41, tint), (_t'40, tuchar),
+               (_t'39, tuint), (_t'38, tuint), (_t'37, tuint),
+               (_t'36, tuint), (_t'35, tuint), (_t'34, tuint),
+               (_t'33, tuint), (_t'32, tulong), (_t'31, tulong),
+               (_t'30, tuchar), (_t'29, tulong), (_t'28, tulong),
+               (_t'27, tulong), (_t'26, tint), (_t'25, tint),
+               (_t'24, tuchar), (_t'23, tint), (_t'22, tuchar),
+               (_t'21, tint), (_t'20, tuchar), (_t'19, tuint),
+               (_t'18, tuint), (_t'17, tuint), (_t'16, tuint),
+               (_t'15, tuint), (_t'14, tuint), (_t'13, tuint),
+               (_t'12, tulong), (_t'11, tuchar), (_t'10, tuchar),
+               (_t'9, tint), (_t'8, tuchar), (_t'7, (tptr tvoid)),
+               (_t'6, (tptr tvoid)), (_t'5, tuint), (_t'4, tint),
+               (_t'3, tuchar), (_t'2, tlong), (_t'1, tlong),
+               (_t'145, (tptr tvoid)), (_t'144, (tptr tuchar)),
+               (_t'143, (tptr (tptr tvoid))),
+               (_t'142, (tptr (tvolatile tulong))),
+               (_t'141, (tptr (tvolatile tuint))),
+               (_t'140, (tptr (tvolatile tushort))),
+               (_t'139, (tptr (tvolatile tuchar))), (_t'138, (tptr tvoid)),
+               (_t'137, (tptr (tvolatile tulong))),
+               (_t'136, (tptr (tvolatile tuint))),
+               (_t'135, (tptr (tvolatile tushort))),
+               (_t'134, (tptr (tvolatile tuchar))), (_t'133, (tptr tvoid)),
+               (_t'132, (tptr tuchar)), (_t'131, (tptr (tptr tvoid))),
+               (_t'130, (tptr (tvolatile tulong))),
+               (_t'129, (tptr (tvolatile tuint))),
+               (_t'128, (tptr (tvolatile tushort))),
+               (_t'127, (tptr (tvolatile tuchar))), (_t'126, (tptr tvoid)),
+               (_t'125, (tptr (tvolatile tulong))),
+               (_t'124, (tptr (tvolatile tuint))),
+               (_t'123, (tptr (tvolatile tushort))),
+               (_t'122, (tptr (tvolatile tuchar))), (_t'121, (tptr tvoid)),
+               (_t'120, (tptr (tvolatile tuchar))), (_t'119, (tptr tuchar)),
+               (_t'118, (tptr (tptr tvoid))), (_t'117, (tptr tuchar)),
+               (_t'116, (tptr (tptr tvoid))),
+               (_t'115, (tptr (tvolatile tuchar))), (_t'114, (tptr tvoid)),
+               (_t'113, (tptr tvoid)), (_t'112, (tptr (tvolatile tuchar))),
+               (_t'111, (tptr tuchar)), (_t'110, (tptr (tptr tvoid))),
+               (_t'109, (tptr tuchar)), (_t'108, (tptr (tptr tvoid))),
+               (_t'107, (tptr (tvolatile tuchar))), (_t'106, (tptr tvoid)),
+               (_t'105, (tptr tvoid))],
+  fn_body :=
+(Stmt.Ssequence
+  (Stmt.Sset ___x86_state
+    (Expr.Etempvar _state (tptr (Ty.Tstruct _x86_sim_register_state noattr))))
+  (Stmt.Sloop
+    (Stmt.Ssequence
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Scall (some _t'1)
+            (Expr.Evar _x86_simm (Ty.Tfunction [tulong] tlong cc_default))
+            [(Expr.Etempvar _imm tulong)])
+          (Stmt.Scall (some _t'2)
+            (Expr.Evar _kprog_x86_mem_offset (Ty.Tfunction
+                                               [(tptr (Ty.Tstruct _x86_sim_register_state noattr)),
+                                                (tptr (Ty.Tstruct _kprog_x86_arena noattr)),
+                                                tuint, tulong, tlong] tlong
+                                               cc_default))
+            [(Expr.Etempvar _state (tptr (Ty.Tstruct _x86_sim_register_state noattr))),
+             (Expr.Etempvar _arena (tptr (Ty.Tstruct _kprog_x86_arena noattr))),
+             (Expr.Etempvar _capacity tuint), (Expr.Etempvar _aux tulong),
+             (Expr.Etempvar _t'1 tlong)]))
+        (Stmt.Sset ___x86_l_disp (Expr.Etempvar _t'2 tlong)))
+      (Stmt.Ssequence
+        (Stmt.Ssequence
+          (Stmt.Scall (some _t'3)
+            (Expr.Evar _kprog_x86_xmm0_arm (Ty.Tfunction [tulong] tuchar
+                                             cc_default))
+            [(Expr.Ebinop Binop.Oeq (Expr.Etempvar _dst tulong)
+               (Expr.Econst_int (Integers.Int.repr 4) tuint) tint)])
+          (Stmt.Sset ___x86_l_arm
+            (Expr.Ecast (Expr.Etempvar _t'3 tuchar) tuchar)))
+        (Stmt.Ssequence
+          (Stmt.Ssequence
+            (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                (Expr.Etempvar _dst tulong)
+                                (Expr.Econst_int (Integers.Int.repr 255) tuint)
+                                tint)
+              (Stmt.Sset _t'4
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tint)
+                  tint))
+              (Stmt.Sset _t'4
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
+                  tint)))
+            (Stmt.Sset ___x86_l_base_none
+              (Expr.Ecast (Expr.Ecast (Expr.Etempvar _t'4 tint) tuchar)
+                tuchar)))
+          (Stmt.Ssequence
+            (Stmt.Ssequence
+              (Stmt.Sset _t'5
+                (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                  tuint))
+              (Stmt.Sset ___x86_l_base_form
+                (Expr.Ecast (Expr.Etempvar _t'5 tuint) tuchar)))
+            (Stmt.Ssequence
+              (Stmt.Ssequence
+                (Stmt.Sifthenelse (Expr.Etempvar ___x86_l_base_none tuchar)
+                  (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                      (Expr.Etempvar ___x86_l_base_form tuchar)
+                                      (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                                      tint)
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'6
+                        (Expr.Ecast
+                          (Expr.Ecast
+                            (Expr.Ecast (Expr.Etempvar _imm tulong) tlong)
+                            (tptr tvoid)) (tptr tvoid)))
+                      (Stmt.Sset _t'6
+                        (Expr.Ecast (Expr.Etempvar _t'6 (tptr tvoid))
+                          (tptr tvoid))))
+                    (Stmt.Ssequence
+                      (Stmt.Sset _t'6
+                        (Expr.Ecast
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 0) tint)
+                            (tptr tvoid)) (tptr tvoid)))
+                      (Stmt.Sset _t'6
+                        (Expr.Ecast (Expr.Etempvar _t'6 (tptr tvoid))
+                          (tptr tvoid)))))
+                  (Stmt.Ssequence
+                    (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                        (Expr.Ecast
+                                          (Expr.Etempvar _dst tulong) tulong)
+                                        (Expr.Econst_int (Integers.Int.repr 16) tuint)
+                                        tint)
+                      (Stmt.Ssequence
+                        (Stmt.Sset _t'145
+                          (Expr.Efield
+                            (Expr.Efield
+                              (Expr.Ederef
+                                (Expr.Ebinop Binop.Oadd
+                                  (Expr.Efield
+                                    (Expr.Efield
+                                      (Expr.Ederef
+                                        (Expr.Etempvar ___x86_state (tptr (Ty.Tstruct _x86_sim_register_state noattr)))
+                                        (Ty.Tstruct _x86_sim_register_state noattr))
+                                      (Positive.ofNat 18727075383868559167)
+                                      (Ty.Tunion __3119 noattr)) _gpr_cells
+                                    (tarray (Ty.Tstruct _x86_sim_gpr_cell noattr) 16))
+                                  (Expr.Ecast (Expr.Etempvar _dst tulong)
+                                    tuchar)
+                                  (tptr (Ty.Tstruct _x86_sim_gpr_cell noattr)))
+                                (Ty.Tstruct _x86_sim_gpr_cell noattr)) _value
+                              (Ty.Tunion _x86_sim_gpr noattr)) _ptr
+                            (tptr tvoid)))
+                        (Stmt.Sset _t'7
+                          (Expr.Ecast (Expr.Etempvar _t'145 (tptr tvoid))
+                            (tptr tvoid))))
+                      (Stmt.Sset _t'7
+                        (Expr.Ecast
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 0) tint)
+                            (tptr tvoid)) (tptr tvoid))))
+                    (Stmt.Sset _t'6
+                      (Expr.Ecast
+                        (Expr.Ecast (Expr.Etempvar _t'7 (tptr tvoid))
+                          (tptr tvoid)) (tptr tvoid)))))
+                (Stmt.Sset ___x86_l_base_ptr
+                  (Expr.Etempvar _t'6 (tptr tvoid))))
+              (Stmt.Sswitch (Expr.Etempvar ___x86_l_arm tuchar)
+                (LStmts.LScons (some 0)
+                  (Stmt.Ssequence
+                    (Stmt.Sloop
+                      (Stmt.Ssequence
+                        (Stmt.Sloop
+                          (Stmt.Ssequence
+                            (Stmt.Sset ___x86_sv_index
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Ecast
+                                  (Expr.Ebinop Binop.Oadd
+                                    (Expr.Ecast
+                                      (Expr.Ecast
+                                        (Expr.Etempvar ___x86_l_base_ptr (tptr tvoid))
+                                        tlong) tlong)
+                                    (Expr.Etempvar ___x86_l_disp tlong)
+                                    tlong) tulong)
+                                (Expr.Ecast (Expr.Etempvar _capacity tuint)
+                                  tulong) tulong))
+                            (Stmt.Ssequence
+                              s_kprog_x86_store_xmm0_0
+                              s_kprog_x86_store_xmm0_1))
+                          Stmt.Sbreak)
+                        (Stmt.Sloop
+                          (Stmt.Ssequence
+                            (Stmt.Sset ___x86_loss_off
+                              (Expr.Ebinop Binop.Oadd
+                                (Expr.Ecast
+                                  (Expr.Ecast
+                                    (Expr.Etempvar ___x86_l_base_ptr (tptr tvoid))
+                                    tlong) tlong)
+                                (Expr.Etempvar ___x86_l_disp tlong) tlong))
+                            (Stmt.Ssequence
+                              s_kprog_x86_store_xmm0_2
+                              s_kprog_x86_store_xmm0_24))
+                          Stmt.Sbreak))
+                      Stmt.Sbreak)
+                    (Stmt.Ssequence
+                      (Stmt.Sloop
+                        (Stmt.Ssequence
+                          (Stmt.Sloop
+                            (Stmt.Ssequence
+                              s_kprog_x86_store_xmm0_25
+                              s_kprog_x86_store_xmm0_26)
+                            Stmt.Sbreak)
+                          (Stmt.Sloop
+                            (Stmt.Ssequence
+                              s_kprog_x86_store_xmm0_27
+                              s_kprog_x86_store_xmm0_50)
+                            Stmt.Sbreak))
+                        Stmt.Sbreak)
+                      Stmt.Sbreak))
+                  (LStmts.LScons none
+                    (Stmt.Ssequence
+                      (Stmt.Ssequence
+                        (Stmt.Ssequence
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
+                                              (Expr.Etempvar ___x86_l_base_form tuchar)
+                                              (Expr.Econst_int (Integers.Int.repr 0) tuint)
+                                              tint)
+                            (Stmt.Sset _t'90
+                              (Expr.Ecast
+                                (Expr.Eunop Unop.Onotbool
+                                  (Expr.Etempvar ___x86_l_base_none tuchar)
+                                  tint) tuint))
+                            (Stmt.Sset _t'90
+                              (Expr.Ecast
+                                (Expr.Econst_int (Integers.Int.repr 1) tuint)
+                                tuint)))
+                          (Stmt.Sifthenelse (Expr.Etempvar _t'90 tuint)
+                            (Stmt.Sset _t'91
+                              (Expr.Ecast
+                                (Expr.Ecast
+                                  (Expr.Ecast
+                                    (Expr.Ebinop Binop.Oadd
+                                      (Expr.Ecast
+                                        (Expr.Ecast
+                                          (Expr.Etempvar ___x86_l_base_ptr (tptr tvoid))
+                                          tulong) tulong)
+                                      (Expr.Ecast
+                                        (Expr.Etempvar ___x86_l_disp tlong)
+                                        tulong) tulong) tulong)
+                                  (tptr tuchar)) (tptr tvoid)))
+                            (Stmt.Sset _t'91
+                              (Expr.Ecast
+                                (Expr.Etempvar ___x86_l_base_ptr (tptr tvoid))
+                                (tptr tvoid)))))
+                        (Stmt.Sset ___x86_l_addr
+                          (Expr.Etempvar _t'91 (tptr tvoid))))
+                      (Stmt.Ssequence
+                        (Stmt.Sloop
+                          (Stmt.Ssequence
+                            (Stmt.Sset ___x86_st_addr
+                              (Expr.Etempvar ___x86_l_addr (tptr tvoid)))
+                            (Stmt.Ssequence
+                              (Stmt.Sset ___x86_st_width
+                                (Expr.Ecast
+                                  (Expr.Econst_int (Integers.Int.repr 8) tuint)
+                                  tuchar))
+                              (Stmt.Ssequence
+                                s_kprog_x86_store_xmm0_51
+                                s_kprog_x86_store_xmm0_54)))
+                          Stmt.Sbreak)
+                        (Stmt.Ssequence
+                          (Stmt.Sloop
+                            (Stmt.Ssequence
+                              (Stmt.Ssequence
+                                s_kprog_x86_store_xmm0_55
+                                (Stmt.Sset ___x86_st_addr__1
+                                  (Expr.Ecast
+                                    (Expr.Ecast
+                                      (Expr.Ebinop Binop.Oadd
+                                        (Expr.Ecast
+                                          (Expr.Ecast
+                                            (Expr.Etempvar ___x86_l_addr (tptr tvoid))
+                                            tulong) tulong)
+                                        (Expr.Ecast
+                                          (Expr.Etempvar _t'98 tuint) tulong)
+                                        tulong) tulong) (tptr tuchar))))
+                              (Stmt.Ssequence
+                                s_kprog_x86_store_xmm0_56
+                                s_kprog_x86_store_xmm0_60))
+                            Stmt.Sbreak)
+                          Stmt.Sbreak)))
+                    LStmts.LSnil))))))))
+    Stmt.Sbreak))
+}
+
 def composites : List CompositeDef :=
 [(CompositeDef.Composite __150 SU.Union
    [(Member.Member_plain _flow_keys
@@ -3423,12 +8461,12 @@ def composites : List CompositeDef :=
    [(Member.Member_plain _tag (tptr tuchar)),
     (Member.Member_plain _pointer (tptr (tptr tvoid)))]
    noattr),
- (CompositeDef.Composite __3422 SU.Union
+ (CompositeDef.Composite __3440 SU.Union
    [(Member.Member_plain _ptr (tptr tvoid)),
     (Member.Member_plain _w tushort),
     (Member.Member_plain _b (tarray tuchar 8))]
    noattr),
- (CompositeDef.Composite __3428 SU.Union
+ (CompositeDef.Composite __3446 SU.Union
    [(Member.Member_plain _ptr (tptr tvoid)),
     (Member.Member_plain _w tushort),
     (Member.Member_plain _b (tarray tuchar 8))]
@@ -3730,6 +8768,7 @@ def global_definitions : List (Ident × GlobDef FunDef Ty) :=
                                      cc_default)) [(tptr tvoid)] tulong
      cc_default)),
  (_kprog_x86_bswap_value, GlobDef.Gfun (FunDef.Internal f_kprog_x86_bswap_value)),
+ (_x86_width_mask, GlobDef.Gfun (FunDef.Internal f_x86_width_mask)),
  (_x86_apply_width, GlobDef.Gfun (FunDef.Internal f_x86_apply_width)),
  (_x86_width_effective, GlobDef.Gfun (FunDef.Internal f_x86_width_effective)),
  (_x86_bswap, GlobDef.Gfun (FunDef.Internal f_x86_bswap)),
@@ -3771,17 +8810,26 @@ def global_definitions : List (Ident × GlobDef FunDef Ty) :=
                                      cc_default))
      [(tptr (Ty.Tstruct _x86_sim_register_state noattr)),
       (tptr (Ty.Tstruct _kprog_x86_arena noattr)), tuint, tlong, tulong]
-     tulong cc_default)), (_tag_of, GlobDef.Gfun (FunDef.Internal f_tag_of)),
+     tulong cc_default)),
+ (_kprog_x86_xmm0_arm,
+   GlobDef.Gfun (FunDef.External (ExtFun.EF_external "kprog_x86_xmm0_arm"
+                                   (mksignature [XType.Xlong]
+                                     XType.Xint8unsigned cc_default))
+     [tulong] tuchar cc_default)),
+ (_tag_of, GlobDef.Gfun (FunDef.Internal f_tag_of)),
  (_source_of, GlobDef.Gfun (FunDef.Internal f_source_of)),
  (_kprog_x86_movbe_width, GlobDef.Gfun (FunDef.Internal f_kprog_x86_movbe_width)),
  (_kprog_x86_movbe_arm, GlobDef.Gfun (FunDef.Internal f_kprog_x86_movbe_arm)),
  (_kprog_x86_read_mem_value, GlobDef.Gfun (FunDef.Internal f_kprog_x86_read_mem_value)),
  (_kprog_x86_movbe_load, GlobDef.Gfun (FunDef.Internal f_kprog_x86_movbe_load)),
- (_kprog_x86_store_memory, GlobDef.Gfun (FunDef.Internal f_kprog_x86_store_memory))]
+ (_kprog_x86_store_memory, GlobDef.Gfun (FunDef.Internal f_kprog_x86_store_memory)),
+ (_kprog_x86_load_xmm0, GlobDef.Gfun (FunDef.Internal f_kprog_x86_load_xmm0)),
+ (_kprog_x86_store_xmm0, GlobDef.Gfun (FunDef.Internal f_kprog_x86_store_xmm0))]
 
 def public_idents : List Ident :=
-[_kprog_x86_store_memory, _kprog_x86_movbe_load, _kprog_x86_read_mem_value,
- _kprog_x86_movbe_arm, _kprog_x86_movbe_width, _kprog_x86_stack_read,
+[_kprog_x86_store_xmm0, _kprog_x86_load_xmm0, _kprog_x86_store_memory,
+ _kprog_x86_movbe_load, _kprog_x86_read_mem_value, _kprog_x86_movbe_arm,
+ _kprog_x86_movbe_width, _kprog_x86_xmm0_arm, _kprog_x86_stack_read,
  _kprog_x86_read_recovery_mem, _kprog_x86_mem_offset,
  _native_lab_entry_input, _kprog_c_pointer_bits, _kprog_c_context_pointer,
  _kprog_c_trap, ___builtin_debug, ___builtin_write32_reversed,

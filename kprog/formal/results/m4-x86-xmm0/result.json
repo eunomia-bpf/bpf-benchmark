@@ -1,0 +1,68 @@
+{
+  "status": "component checks passed; M4 incomplete",
+  "historical_reference": "4c35f49f8",
+  "modes": [
+    "historical native",
+    "current native",
+    "current CompCert host adapter"
+  ],
+  "xmm_frame_cases_per_mode": 1848,
+  "selector_lazy_cases_per_mode": 260,
+  "second_lane_c_fault_probes_per_mode": 2,
+  "negative_checks": {
+    "arm-byte": 1,
+    "absolute-index": 1,
+    "high-load-offset": 1,
+    "low-store-value": 1
+  },
+  "make_clight_exit": 0,
+  "targeted_lean_jobs": 40,
+  "ast_functions": {
+    "X86Pointer": 34,
+    "X86Memory": 20
+  },
+  "deterministic": {
+    "X86Pointer": {
+      "equal": true,
+      "bytes": 988925
+    },
+    "X86Memory": {
+      "equal": true,
+      "bytes": 458974
+    }
+  },
+  "axiom_queries": 3,
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "native_fidelity": {
+    "xmm": {
+      "allocated_sections_equal": true,
+      "allocated_relocations_equal": true,
+      "current_stream_equals_normal_build": true,
+      "allocated_section_bytes": {
+        ".text": 0,
+        "socket": 3424,
+        "license": 4
+      },
+      "allocated_relocations": 21
+    },
+    "ordinary": {
+      "allocated_sections_equal": true,
+      "allocated_relocations_equal": true,
+      "current_stream_equals_normal_build": true,
+      "allocated_section_bytes": {
+        ".text": 0,
+        "socket": 1448,
+        "license": 4
+      },
+      "allocated_relocations": 11
+    }
+  },
+  "full_inline_export_exit": 2,
+  "next_obstruction": "DISP_CMOV KPROG_X86_CMOV_WRITEBACK GNU statement expression",
+  "profile_cpp_bytes": 2443837,
+  "refinement_theorems_migrated": 0
+}

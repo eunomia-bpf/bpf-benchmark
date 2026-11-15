@@ -81,3 +81,22 @@ void kprog_x86_store_memory(void *address,__u64 width,__u64 value)
 {
     KPROG_X86_MEM_STORE(address,width,value);
 }
+
+#if defined(__COMPCERT__)
+#undef KPROG_X86_XMM0_ARM
+#define KPROG_X86_XMM0_ARM(STACK) kprog_x86_xmm0_arm(STACK)
+#endif
+void kprog_x86_load_xmm0(struct x86_sim_register_state *state,
+                         struct kprog_x86_arena *arena,struct kprog_x86_stack_fact *facts,
+                         __u32 capacity,__u64 src,__u64 aux,__u64 imm)
+{
+    struct x86_sim_register_state *__x86_state=state;
+    X86_SIM_L_EXEC_LOAD_XMM0(src,aux,imm);
+}
+void kprog_x86_store_xmm0(struct x86_sim_register_state *state,
+                          struct kprog_x86_arena *arena,struct kprog_x86_stack_fact *facts,
+                          __u32 capacity,__u64 dst,__u64 aux,__u64 imm)
+{
+    struct x86_sim_register_state *__x86_state=state;
+    X86_SIM_L_EXEC_STORE_XMM0(dst,aux,imm);
+}

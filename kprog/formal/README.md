@@ -1465,6 +1465,22 @@ retain2272B/13relocs and1680B/5, equal to normal compilation. Full export now
 reaches the XMM0 arm selector's GNU expression. No existing rooted AST changes
 for this syntax-only follow-up; raw: `/workspaces/kprog-raw/formal/m4-x86-store-labels`.
 
+The XMM0 arm now shares declaration/output forms with its native expression
+facade. Both actual load/store bodies export through the existing generic
+arena/fact binding; the existing address-add helper retains BPF pointer operand
+forms and gives host/CompCert the address-bit form for null-base stores.
+Absolute loads still select their immediate/index lazily. Low-before-high
+commits, recovery and released-stack observations are retained. Historical,
+native and CompCert-adapter modes each pass1,848 complete two-lane/state/fact
+frames,260 selector/lazy cases and two guarded second-lane C-prefix probes;
+four mutations are caught. These fault prefixes are C observations, with ISA
+exception correspondence still unproved. `make clight`/40 targeted Lean jobs,
+deterministic988,925B Pointer/458,974B Memory exports and three standard-axiom
+queries pass. Pointer has34 functions and Memory20; these are AST counts.
+XMM3424B/21relocs and ordinary1448B/11 match historical and normal compilation.
+Full inline export now stops at CMOV writeback's GNU expression; profile CPP
+is2,443,837B. [Receipts](results/m4-x86-xmm0/README.md) link the raw evidence.
+
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight
 handler exports and full default compiled-byte coverage remain to do. Preserve

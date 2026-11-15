@@ -381,6 +381,15 @@ static __always_inline __u8 x86_sim_inline_store_arm(__u64 stack)
 #pragma push_macro("KPROG_X86_STORE_ARM")
 #undef KPROG_X86_STORE_ARM
 #define KPROG_X86_STORE_ARM(STACK) x86_sim_inline_store_arm(STACK)
+static __always_inline __u8 x86_sim_inline_xmm0_arm(__u64 stack)
+{
+    __u8 arm;
+    KPROG_X86_XMM0_ARM_INTO(arm,stack);
+    return arm;
+}
+#pragma push_macro("KPROG_X86_XMM0_ARM")
+#undef KPROG_X86_XMM0_ARM
+#define KPROG_X86_XMM0_ARM(STACK) x86_sim_inline_xmm0_arm(STACK)
 #endif
 
 static __always_inline __attribute__((nodebug)) void
@@ -476,6 +485,7 @@ x86_sim_inline_recover(const struct x86_sim_inline_bindings *__x86_bind,
 #pragma pop_macro("X86_SIM_L_STACK_VALUES_CALL_FRAME")
 #pragma pop_macro("X86_SIM_L_STACK_VALUES_CLEAR")
 #if defined(__COMPCERT__)
+#pragma pop_macro("KPROG_X86_XMM0_ARM")
 #pragma pop_macro("KPROG_X86_STORE_ARM")
 #pragma pop_macro("KPROG_X86_STORE_SRC_SHIFT")
 #pragma pop_macro("X86_SIM_L_READ_RECOVERY_MEM")
