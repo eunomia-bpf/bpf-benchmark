@@ -56,6 +56,7 @@ static unsigned draws, calls;
 static void *expected_output;
 static unsigned expected_size;
 static int bad_helper_arguments;
+static int helper_error;
 
 unsigned long native_lab_entry_input(unsigned int kind)
 {
@@ -74,7 +75,12 @@ static long output_comm(void *output, __u32 size)
         bad_helper_arguments = 1;
         return -13;
     }
-    if (!size) return -22; /* get_current_comm's zero-size EINVAL outcome */
+    /* Match the one kernel's comm success and err_clear outcomes. Zero size
+     * is a wrapper boundary here; the stock verifier requires size > 0. */
+    if (helper_error) {
+        memset(output, 0, size);
+        return -22;
+    }
     const unsigned char comm[] = "helper-outcome";
     for (unsigned i = 0; i < size; ++i)
         ((unsigned char *)output)[i] = i+1 < size ? comm[i] : 0;
@@ -82,7 +88,7 @@ static long output_comm(void *output, __u32 size)
 }
 #define bpf_get_current_comm output_comm
 
-static int run(unsigned operation, long offset, unsigned length, unsigned long input)
+static int run(unsigned operation, long offset, unsigned length, unsigned long input, int error)
 {
     choice = input;
     ENTRY();
@@ -98,13 +104,14 @@ static int run(unsigned operation, long offset, unsigned length, unsigned long i
     expected_size = length;
     calls = draws = 0;
     bad_helper_arguments = 0;
+    helper_error = error;
     if (!operation) {
         if (PTR() != expected_output || draws) return 1;
     } else {
         for (unsigned i = 0; i < length; ++i) {
             unsigned at = (unsigned)((long)BIAS+offset+i);
             expected[at] = operation == 1 ? 7U : operation == 2 ?
-                original[BIAS-16+i] : i+1 < length ? (unsigned char)"helper-outcome"[i] : 0;
+                original[BIAS-16+i] : !error && i+1 < length ? (unsigned char)"helper-outcome"[i] : 0;
         }
         /* A call releases callee-owned bytes below the unchanged caller SP.
          * A repeated-byte input gives independent byte/word packing the same
@@ -115,7 +122,7 @@ static int run(unsigned operation, long offset, unsigned length, unsigned long i
         else if (operation == 2) COPY();
         else HELPER(length);
         if (operation == 3) {
-            if (calls != 1 || bad_helper_arguments || RESULT_BITS() != (length ? 0 : (__u64)-22LL) ||
+            if (calls != 1 || bad_helper_arguments || RESULT_BITS() != (error ? (__u64)-22LL : 0) ||
                 RESULT_TAG() != SCALAR_TAG) return 2;
         } else if (calls || RESULT_BITS() != LIBC_RESULT(offset) || RESULT_TAG() != STACK_TAG) return 3;
     }
@@ -156,11 +163,12 @@ int main(void)
     for (unsigned op = 0; op < 4; ++op)
         for (unsigned off = 0; off < sizeof(offsets)/sizeof(offsets[0]); ++off)
             for (unsigned len = 0; len < sizeof(lengths)/sizeof(lengths[0]); ++len)
-                for (unsigned input = 0; input < sizeof(inputs)/sizeof(inputs[0]); ++input) {
-                    int result = run(op, offsets[off], lengths[len], inputs[input]);
+                for (unsigned input = 0; input < sizeof(inputs)/sizeof(inputs[0]); ++input)
+                  for (int error = 0; error < (op == 3 ? 2 : 1); ++error) {
+                    int result = run(op, offsets[off], lengths[len], inputs[input], error);
                     if (result) {
-                        fprintf(stderr, "output lifetime failure op=%u off=%ld len=%u input=%u check=%d\n",
-                                op, offsets[off], lengths[len], input, result);
+                        fprintf(stderr, "output lifetime failure op=%u off=%ld len=%u input=%u error=%d check=%d\n",
+                                op, offsets[off], lengths[len], input, error, result);
                         return 1;
                     }
                     ++cases;
