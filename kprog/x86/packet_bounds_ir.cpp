@@ -17,8 +17,6 @@
 using namespace llvm;
 static cl::opt<std::string> Input(cl::Positional,cl::Required);
 static cl::opt<std::string> Output("o",cl::Required);
-static cl::opt<bool> CanonicalContextLoads("canonical-ctx-loads",cl::init(false));
-static cl::opt<bool> StrictIdentities("strict-identities",cl::init(false));
 static bool tied_identity(CallInst *call,InlineAsm *assembly) {
   return assembly->getAsmString().empty() && assembly->getConstraintString()=="=r,0" &&
       call->arg_size()==1 && call->getType()==call->getArgOperand(0)->getType();
@@ -28,8 +26,7 @@ static Value *origin(Value *value) {
     if (auto *extension=dyn_cast<ZExtInst>(value)) { value=extension->getOperand(0); continue; }
     if (auto *call=dyn_cast<CallInst>(value))
       if (auto *assembly=dyn_cast<InlineAsm>(call->getCalledOperand()))
-        if (assembly->getAsmString().empty() && call->arg_size()==1 && call->getType()==call->getArgOperand(0)->getType() &&
-            (!StrictIdentities || tied_identity(call,assembly))) {
+        if (tied_identity(call,assembly)) {
           value=call->getArgOperand(0); continue;
         }
     return value;
@@ -108,7 +105,7 @@ int main(int argc,char **argv) {
   LLVMContext context;SMDiagnostic error;auto module=parseIRFile(Input,error,context);
   if (!module) { error.print(argv[0],errs());return 1; }
   unsigned unused=remove_unused_private_inputs(*module);
-  unsigned contexts=CanonicalContextLoads?canonical_context_loads(*module):0;
+  unsigned contexts=canonical_context_loads(*module);
   unsigned count=0;
   for (auto &function:*module) {
     if (function.isDeclaration() || function.arg_empty()) continue;
@@ -153,5 +150,5 @@ int main(int argc,char **argv) {
   if (output.os().has_error()) { errs()<<"write packet bounds IR failed\n";return 1; }
   errs()<<"packet length predicates lowered="<<count<<'\n';
   errs()<<"unused private inputs removed="<<unused<<'\n';
-  if (CanonicalContextLoads) errs()<<"constant context loads canonicalized="<<contexts<<'\n';
+  errs()<<"constant context loads canonicalized="<<contexts<<'\n';
 }

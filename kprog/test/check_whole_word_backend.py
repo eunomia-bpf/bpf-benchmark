@@ -1,4 +1,4 @@
-"""Check the normal MIR backend and its remaining all-pairs selection."""
+"""Check that the sole all-pairs MIR route preserves independent-register code."""
 import argparse
 import importlib.util
 import json

@@ -87,7 +87,7 @@ def compile_simulator_from_frontend(clang, source: Path, obj: Path, run, *,
                                     frontend: Path, bounds_compiler) -> None:
     """Continue the normal pipeline from its completed optimized LLVM stage."""
     lowered = source.with_suffix('.bounds.bc')
-    run([bounds_compiler, frontend, '-o', lowered, '--canonical-ctx-loads', '--strict-identities'])
+    run([bounds_compiler, frontend, '-o', lowered])
     _compile_simulator_backend(clang, source, obj, run, compiled_input=lowered)
 
 

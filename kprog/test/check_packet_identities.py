@@ -40,9 +40,9 @@ ret i32 %result
 '''
     before = build/'before.ll'
     before.write_text(source)
-    active = run([tool, before, '-o', build/'strict.bc', '--strict-identities'])
+    active = run([tool, before, '-o', build/'strict.bc'])
     if 'packet length predicates lowered=1' not in active.stderr:
-        raise ValueError('Strict mode must recognize the tied field only')
+        raise ValueError('Normal lowering must recognize the tied field only')
     libraries = {}
     for name, ir in [('before', before), ('strict', build/'strict.bc')]:
         library = build/(name+'.so')
@@ -73,7 +73,7 @@ ret i32 %result
     # reproducible. Exercise the matching rule in BPF's own register domain too.
     bpf = build/'bpf.ll'
     bpf.write_text(source.replace('x86_64-unknown-linux-gnu', 'bpf').replace('={r12},{rdi}', '=r,r'))
-    bpf_result = run([tool, bpf, '-o', build/'bpf-strict.bc', '--strict-identities'])
+    bpf_result = run([tool, bpf, '-o', build/'bpf-strict.bc'])
     if 'packet length predicates lowered=1' not in bpf_result.stderr:
         raise ValueError('BPF untied output received invented field provenance')
     run(['clang-18', '-target', 'bpf', '-mcpu=v4', '-O3', '-c',
@@ -81,7 +81,7 @@ ret i32 %result
     replay = []
     for index, path in enumerate(retained):
         strict = build/f'retained-{index}-strict.bc'
-        run([tool, path, '-o', strict, '--strict-identities'])
+        run([tool, path, '-o', strict])
         replay.append(dict(input=str(path), compiled=True))
     pipeline = build/'pipeline.bpf.c'
     pipeline.write_text('''#include <linux/bpf.h>
@@ -101,9 +101,9 @@ char LICENSE[] SEC("license") = "GPL";
     first = len(calls)
     worker.compile_simulator(str(ROOT/'kprog/stock-path/bin/clang'), pipeline,
                              build/'pipeline.o', run, bounds_compiler=tool)
-    if not any('--strict-identities' in row['command'] and '--canonical-ctx-loads' in row['command']
-               for row in calls[first:]):
-        raise ValueError('Normal service compiler omitted strict identity/context lowering')
+    lowering = [row for row in calls[first:] if row['command'][0] == str(tool)]
+    if len(lowering) != 1 or 'packet length predicates lowered=1' not in lowering[0]['stderr']:
+        raise ValueError('Normal service compiler omitted packet identity lowering')
     result = dict(counterexample=counterexample,
                   execution_cases=len(observations), retained=replay, normal_service_path=True,
                   bpf_untied_output_preserved=True)

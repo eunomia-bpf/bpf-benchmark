@@ -189,7 +189,23 @@ compiler-cleanup-check:
 	$(MAKE) -f $(ROOT)/kprog/test/native-relocations.mk identity-normal-check OUTPUT=$(OUTPUT)
 
 $(CONTEXT_TOOL): $(ROOT)/kprog/x86/packet_bounds_ir.cpp
+	install -d $(dir $@)
 	taskset -c 8-11 prlimit --as=8589934592 -- clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -I$(ROOT)/vendor/libbpf/include/uapi $< -o $@ $$(llvm-config-18 --ldflags --libs core irreader bitwriter analysis support --system-libs)
+
+.PHONY: bounds-single-control bounds-single-check bounds-single-publish
+bounds-single-control:
+	taskset -c 16-19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_packet_identities.py --tool /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds --output $(OUTPUT)/identities
+
+bounds-single-check: $(CONTEXT_TOOL)
+	taskset -c 16-19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_packet_identities.py --tool $(CONTEXT_TOOL) --output $(OUTPUT)/identities
+	taskset -c 16-19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_context_loads.py --tool $(CONTEXT_TOOL) --build /var/tmp/kprog-tmp/perf/context-loads-v2/cases --output $(OUTPUT)/context
+	taskset -c 16-19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_whole_word_backend.py --output $(OUTPUT)/backend --clang $(ROOT)/kprog/stock-path/bin/clang
+
+bounds-single-publish: $(CONTEXT_TOOL)
+	install -d $(OUTPUT)
+	sha256sum /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds > $(OUTPUT)/previous-tool.sha256
+	install -m755 $(CONTEXT_TOOL) /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds
+	sha256sum $(CONTEXT_TOOL) /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds $(ROOT)/kprog/x86/packet_bounds_ir.cpp $(ROOT)/kprog/x86/trusted_specializer.py $(ROOT)/kprog/x86/whole_word_spills.py > $(OUTPUT)/published-tool.sha256
 
 $(CHECKED_TOOL): $(ROOT)/kprog/x86/compile_sim_ir.cpp
 	install -d $(dir $@)

@@ -9,7 +9,7 @@ CODEGEN_ARGS ?=
 REPLAY_ARGS ?=
 REPLAY_BUILD ?= /var/tmp/kprog-tmp/perf/retained-proof-replay
 BACKEND_ARGS ?=
-CONTEXT_BUILD ?= /var/tmp/kprog-tmp/perf/context-loads
+CONTEXT_BUILD ?= /var/tmp/kprog-tmp/perf/context-loads-v2
 IDENTITY_ARGS ?=
 HELPER_SHAPE_BUILD ?= /var/tmp/kprog-tmp/perf/helper-shapes
 SPILL_GROUP_BUILD ?= /var/tmp/kprog-tmp/perf/spill-groups
@@ -64,12 +64,12 @@ context-replay:
 context-build:
 	install -d $(OUTPUT) $(CONTEXT_BUILD)
 	taskset -c 18-19 clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -I$(ROOT)/vendor/libbpf/include/uapi $(ROOT)/kprog/x86/packet_bounds_ir.cpp -o $(CONTEXT_BUILD)/packet-bounds $$(llvm-config-18 --ldflags --libs core irreader bitwriter analysis support --system-libs)
-	taskset -c 18-19 python3 $(ROOT)/kprog/test/check_context_loads.py --tool $(CONTEXT_BUILD)/packet-bounds --legacy /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds --output $(OUTPUT)
-	$(CC) -O2 -g -Wall -Wextra -Werror -I$(LIBBPF)/prefix/include $(ROOT)/kprog/test/context_load_client.c $(LIBBPF)/pic-obj/libbpf.a -lelf -lz -o $(OUTPUT)/context-client
+	taskset -c 18-19 python3 $(ROOT)/kprog/test/check_context_loads.py --tool $(CONTEXT_BUILD)/packet-bounds --build $(CONTEXT_BUILD)/cases --output $(OUTPUT)
+	$(CC) -O2 -g -Wall -Wextra -Werror -I$(LIBBPF)/prefix/include $(ROOT)/kprog/test/context_load_client.c $(LIBBPF)/pic-obj/libbpf.a -lelf -lz -o $(CONTEXT_BUILD)/context-client
 
 context-run:
 	exec 9>/workspaces/.agent-state/kprog-lanes/locks/image; flock -s 9; \
-	taskset -c 22-23 vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec '$(OUTPUT)/context-client $(OUTPUT)/off.o $(OUTPUT)/on.o'
+	taskset -c 22-23 vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(CONTEXT_BUILD) --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec '$(CONTEXT_BUILD)/context-client $(CONTEXT_BUILD)/cases/reference.o $(CONTEXT_BUILD)/cases/canonical.o'
 
 checked-corpus:
 	install -d $(OUTPUT) $(REPLAY_BUILD)
