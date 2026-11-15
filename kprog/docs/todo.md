@@ -8,6 +8,10 @@
 
 ## 0. Lane 目标与待办
 
+**硬性要求（运营者 2026-11-15 00:00 UTC：“所有优化参数必须打开, 重新测试.” “是不是都得想办法关掉, 也得通过调优编译参数做到native 快 50%、代码量少一半. 必须要确保这样, 硬性要求”）**：每个应用的原生程序本体比 JIT 本体快 50% 以上，原生代码大小是 JIT 的一半左右（论文第 3 节的测量：x86 上 eBPF 慢 1.57x，原生代码 0.54x）；靠编译参数、兼容头文件和链接器做到。编译参数：所有优化参数打开（-O3、-march 用唯一目标 CPU、兄弟调用等）；限制优化的参数想办法去掉：-fno-jump-tables 去掉（跳转表的间接跳转由链接器、装载器和模拟器支持），-fPIC 去掉（map 引用改成链接器和装载器直接绑定的重定位），-fno-optimize-sibling-calls 去掉；-mno-red-zone、-mgeneral-regs-only 是内核上下文的正确性要求（中断会写栈下方的红区；内核里用 SSE 要先保存用户的 FPU 状态），内核自己也这样编，JIT 也同样用到这两条，保留。
+
+- [ ] HARD-native（协调者 2026-11-15T00:00:58Z，依据上面的硬性要求）：C 在生产 P 一侧把六个应用的编译参数按上面改好（默认关闭的开关选择，和 C-HDR 一起做）；PERF 让链接器、装载器、checked 编译和模拟器接受跳转表和非 PIC 的重定位；两边一起给出每个应用的两张表：程序本体对本体的速度（按地址拆开内联查找、桩和运行时例程之后）和代码大小（原生对 jited_prog_len）；先 Katran，子集计时每次调用，再其余五个；全部达到再做冻结前的一次全量计时。
+
 **原生一侧怎么构建（运营者 2026-11-13 “我们应该在链接器或者编译 flag 上面做文章”；2026-11-14 “可以往 \"编译里塞头文件\" ... 我没说过不行吧?”；2026-11-15 23:59 UTC “不允许放进编译过程, 不是用头文件兼容吗”）**：上游源码原样，加编译 flag 和 -include 的兼容头文件，直接编成 x86；之后能改的是链接器。编译过程里加我们自己的 IR 改写步骤不允许，现有三处要换掉：Katran 的上下文改写（socket-context-lower，vendor/bpf/Makefile 的 KATRAN_SAME_SOURCE 路线）、CO-RE 的 IR 解析（core-ir-lower，BCC_SAME_SOURCE 路线和计划中的 Tracee、Tetragon 路线）、native_ir_prep 改 IR 的 target-features。做法：Katran 把 xdp_md、__sk_buff 的物理布局放进兼容头文件（-include，先占住上游 bpf.h 的 include guard，源码树里的上游文件保持原样）；用 CO-RE 的应用用唯一内核的 vmlinux.h（include 路径排在前面）和兼容头文件里按唯一内核 BTF 写好的存在性答案。源码里自己定义的 CO-RE flavor 结构（例：Tetragon 的 task_struct___local、cgroup___new）头文件够不到的，每个写成一条 Notice，协调者汇报给运营者。
 
 - [ ] C-HDR（协调者 2026-11-14T23:59:56Z）：C 负责生产 P，把上面三处 IR 改写换成头文件和 flag：先 Katran（换完后两侧输出对照、子集计时），再 BCC、Tracee、Tetragon 的 CO-RE（替代 C-CORE-rebuild 里写的 core-ir-resolve 路线）；每一处记下换前换后原生对象的差别和两侧应用输出的对照。PERF 的 core-audit 对照表照样用来核对每个重建后的对象。

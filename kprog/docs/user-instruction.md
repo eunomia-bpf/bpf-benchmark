@@ -64,6 +64,7 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-14 ~23:52 UTC: "Program body 70.3 74.7 肯定哪里不对. 肯定能有 40% 改进"
 - 2026-11-14 ~23:56 UTC（前半句引用协调者的话）: "Katran 同源路线的原生代码（vendor/bpf/Makefile:196-199）这样生成：先用 eBPF 一侧的前端按 BPF 目标、-O2 产出中间代码，再直接交给 x86 后端出机器码??? 为啥? 不是直接出机器码吗? 为啥变成这样了 另外还缺 -march，又关掉了 jump table（-fno-jump-tables）和尾部调用优化（-fno-optimize-sibling-calls）。 这些都要打开? 组合代码生成是什么? 我们不是说直接生成 x86 / 我们之前测试不是 native 快 50%, 代码量少一半"
 - 2026-11-15 ~23:59 UTC（前半句引用协调者的话）: "11-13 你定了"不改源码"之后，C 把这一步挪到了编译过程里。 不允许放进编译过程, 不是用头文件兼容吗"
+- 2026-11-15 ~00:00 UTC（前半句引用协调者的话）: "native 快 50%、代码量少一半： 有记录，在论文第 3 节。同一个程序走 eBPF 比原生慢 1.57x（x86），原生代码大小是 JIT 的 0.54x。所有优化参数必须打开, 重新测试. [粘贴协调者的表：-march 打开 / 尾部调用优化 打开 / -fno-jump-tables 保留] -fPIC 保留编译参数，多出的读取在链接时去掉 它让每次 map 访问多一次 GOT 读取，链接器绑定 map 时去掉这次读取 是不是都得想办法关掉, 也得通过调优编译参数做到native 快 50%、代码量少一半. 必须要确保这样, 硬性要求"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
