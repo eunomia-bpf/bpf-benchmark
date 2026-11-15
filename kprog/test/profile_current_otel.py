@@ -77,7 +77,7 @@ def main(a):
                  '-emit-llvm','-c',expanded,'-o',initial])
             record.update(completed=True,frontend_completed=True,frontend_bytes=initial.stat().st_size,
                           frontend_sha256=digest(initial))
-    except (ValueError,RuntimeError,subprocess.CalledProcessError) as error:
+    except (OSError,ValueError,RuntimeError,subprocess.CalledProcessError) as error:
         record.update(completed=False,error=str(error));raise
     finally:
         record['wall_seconds']=time.monotonic()-started
