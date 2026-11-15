@@ -1,0 +1,21 @@
+
+/var/tmp/kprog-tmp/perf/native-relocations/non-pic.native.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <entry>:
+   0:	50                   	push   rax
+   1:	48 89 fe             	mov    rsi,rdi
+   4:	48 8d 3d 00 00 00 00 	lea    rdi,[rip+0x0]        # b <entry+0xb>
+			7: R_X86_64_PC32	test_map-0x4
+   b:	b8 01 00 00 00       	mov    eax,0x1
+  10:	ff d0                	call   rax
+  12:	48 85 c0             	test   rax,rax
+  15:	74 05                	je     1c <entry+0x1c>
+  17:	48 8b 00             	mov    rax,QWORD PTR [rax]
+  1a:	59                   	pop    rcx
+  1b:	c3                   	ret
+  1c:	31 c0                	xor    eax,eax
+  1e:	59                   	pop    rcx
+  1f:	c3                   	ret

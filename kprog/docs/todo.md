@@ -53,6 +53,8 @@ PERF checkpoint 2026-11-14T18:40:53Z（65fe9615e / 4df2d82dd）：最新修正 m
 
 **性能目标（运营者 2026-11-14："OTel 读上下文的问题改对后，它只有 0.975x，每次调用 1.004x。为啥会这样? 性能肯定是没有优化好, 还是尽可能优化. 必须继续优化到至少 20%"）**：在同源、等量工作的前提下，原生一侧至少快 20%（六应用几何平均 native/eBPF ≥ 1.20x），每个应用都要往这个方向优化。现状：修好上下文后的 OTel 一次短运行 0.975x，native_tracer_entry 每次调用 5140.8 对 5119.7 ns（x86_kvm_corpus_20261113_033039_387780）；它的时间几乎都在栈展开里，两边调用的 helper（读用户内存、查 map、尾调用）一样多，原生代码生成本身省下的很少。优化只在两处加（design.md「编译流水线」）：生成 P 时的编译 flag，和链接时优化（LTO：链接器绑定并内联 map 查找和 helper、编译器整体再优化），不改源码；先剖析再改：用 kprog/perf/profile 的两阶段剖析把每个应用的时间分成程序本体、各 helper、map 查找、尾调用，再挑对所有程序通用的改法，例如：读用户/内核内存的 helper 换成带异常表恢复的直接读（内核已有 native sites）、array/percpu/hash 的 map 查找按 JIT 一侧验证器的做法内联、尾调用分派的开销。
 
+- [x] P-HARD-map-addresses（0f24c2a7c、815cc0db7；本提交结果）：默认关闭 --non-pic-map-addresses；map 的 R_X86_64_32/32S/64 MOV 与 PC32 LEA 绑定64位live指针，proof复用现有GOT/map-pointer ABI，保留named lookup LTO；35 Rust测试、4种地址形式host执行、实际clang→proof→kernel及6个array边界/值用例通过，22真实对象默认输出重复构建一致。结果 `perf_20261113/non-pic-map-addresses/report.md`；仅host/decoder，无应用性能或完整HARD-native完成宣称。跳转表/absolute memory/整应用仍开。
+
 **lane perf（Codex，gpt-6.1-sol）。目标：每个性能数字都是等量工作、可复现的；六应用几何平均 native/eBPF 达到 1.20x 以上，每个应用不低于 05-29 下限。**
 **lane perf 的大任务：Cilium、Tetragon、OTel 的原生一侧改成同源构建并证明等量工作。** 这三个应用编译与 eBPF 一侧相同、未改动的上游源码，源码差异审核里属于它们的差异（Cilium D01、D02、D08、D09、D10；Tetragon D03、D05–D07、D11、D14；OTel 的上下文读法）全部移进链接器或编译 flag，修正版由默认关闭的开关选择；共用机制也归你：链接器自带 memset/memcpy（P0）、目标内核 BTF 的 CO-RE（P1h），lane C 会用它们。完成标准：每个应用两边的应用输出（Cilium 判决、Tetragon 各类事件、OTel trace 与 metrics）对得上，然后在这三个应用上各计时一轮。
 **lane perf 的领头项（2026-11-14 起）：OTel 在等量工作下优化到至少 1.20x。** 先对 OTel 两个阶段做剖析（kprog/perf/profile），给出程序本体、bpf_probe_read_user/kernel、map 查找、尾调用各占多少；再在链接器或编译 flag 上做通用改法（默认关闭的开关，默认输出不变），每一步在 OTel 上计时 3×180 秒并对照两边的展开计数；Tetragon、Cilium 的同源工作照常并行。
