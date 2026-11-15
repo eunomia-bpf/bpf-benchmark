@@ -117,7 +117,7 @@ mod tests {
         let entry = find_symbol_by_name(&elf, "entry")?;
         rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(), maps,
             &[], &HashMap::new(), &[], proof, false, false, false, false, None,
-            false, None, None, None, false, false, false, false)
+            false, None, None, None, false, false, false)
     }
 
     #[test]

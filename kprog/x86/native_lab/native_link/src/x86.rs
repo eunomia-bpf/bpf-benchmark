@@ -1216,7 +1216,6 @@ pub(super) fn rewrite_x86(
     runtime_probe_read_layout: Option<&RuntimeProbeReadLayout>,
     runtime_hash_layout: Option<&RuntimeHashLayout>,
     runtime_lpm_layout: Option<&RuntimeLpmLayout>,
-    local_memory_routines: bool,
     show: bool,
     runtime_probe_read_strings: bool,
     runtime_percpu_loads: bool,
@@ -1292,9 +1291,7 @@ pub(super) fn rewrite_x86(
         let bytes = read_symbol_bytes(elf, sym)?;
         let mut tail_transfers = x86_direct_tail_transfers(elf, sym)?;
         let mut tail_calls = Vec::new();
-        let memory_constants = if local_memory_routines {
-            memory::constants(&bytes, sym.address)?
-        } else { HashMap::new() };
+        let memory_constants = memory::constants(&bytes, sym.address)?;
         let entry_abi_strip = if is_entry {
             let entry_has_tail_call = x86_symbol_has_immediate_helper_id(&bytes, sym.address, 12)?
                 || helper_call_sites.iter().any(|(key, name)| {
@@ -1450,8 +1447,7 @@ pub(super) fn rewrite_x86(
                             resolved_got_relocations.insert(patch_key);
                             continue;
                         }
-                        let local_memory = local_memory_routines
-                            && matches!(target_name.as_str(), "memset" | "memcpy");
+                        let local_memory = matches!(target_name.as_str(), "memset" | "memcpy");
                         if target_name.starts_with("bpf_") || helper_addrs.contains_key(target_name) || local_memory
                         {
                             let dst_family = x86_gpr64_family(dst).ok_or_else(|| {
@@ -1641,8 +1637,7 @@ pub(super) fn rewrite_x86(
                 if let Some(name) = helper_call_name {
                     clear_x86_call_clobbered_registers(&mut helper_imm_registers);
                     clear_x86_call_clobbered_registers(&mut helper_got_registers);
-                    if let Some(routine) = local_memory_routines.then(||
-                        memory::Routine::at_call(&name, memory_constants.get(&local_ip))).flatten()
+                    if let Some(routine) = memory::Routine::at_call(&name, memory_constants.get(&local_ip))
                     {
                         push_x86_replacement(&mut local, &mut kinds, &mut insn_local_ip,
                             local_ip, build_x86_helper_call_rel32_slot()?,
@@ -4564,12 +4559,8 @@ mod tests {
                 let elf = object::File::parse(data.as_slice())?;
                 let entry = find_symbol_by_name(&elf, "entry")?;
                 let empty = HashMap::new();
-                let helpers = HashMap::from([(name.to_owned(), 0x1234)]);
-                let plain = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &empty, &[],
-                    &HashMap::new(), &[], true, true, false, false, false, None, false, None, None, None, false, false, false, false)?;
-                assert_eq!(plain.proof_relocs.len(), 2, "default remains symbolic");
                 let proof = rewrite_x86(&elf, &entry, &[entry.clone()], &empty, &empty, &[],
-                    &HashMap::new(), &[], true, true, false, false, false, None, false, None, None, None, true, false, false, false)?;
+                    &HashMap::new(), &[], true, true, false, false, false, None, false, None, None, None, false, false, false)?;
                 assert!(proof.proof_relocs.is_empty(), "{name}, form={form}");
                 assert_eq!(proof.proof_symbols.len(), 2, "same length shares one routine");
                 assert!(proof.proof_symbols[1].name.starts_with("__native_link_local_"));
@@ -4583,7 +4574,7 @@ mod tests {
                 let included = discover_reachable(&elf, &entry)?;
                 assert_eq!(included.len(), 2);
                 let result = rewrite_x86(&elf, &entry, &included, &empty, &empty, &[],
-                    &HashMap::new(), &[], false, true, false, false, false, None, false, None, None, None, true, false, false, false)?;
+                    &HashMap::new(), &[], false, true, false, false, false, None, false, None, None, None, false, false, false)?;
                 assert!(result.relocs.is_empty());
                 #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
                 {
@@ -4643,7 +4634,7 @@ mod tests {
                 (true, Some(&array), false), (true, Some(&array), true)] {
                 let result = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers,
                     &HashMap::new(), &[site.clone()], &HashMap::new(), &[],
-                    false, false, false, enabled, false, layout, shared, None, None, None, false, false, false, false)?;
+                    false, false, false, enabled, false, layout, shared, None, None, None, false, false, false)?;
                 let expected = if enabled { 0x1234 } else { 0x5678 };
                 assert!(result.relocs.iter().any(|r| r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32
                     && r.target == expected), "form={form}, enabled={enabled}: actual helper target");
@@ -4814,7 +4805,7 @@ mod tests {
         })]);
         for enabled in [false, true] {
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps,
-                &[], &facts, &[], false, false, false, true, enabled, None, false, None, None, None, false, false, false, false)?;
+                &[], &facts, &[], false, false, false, true, enabled, None, false, None, None, None, false, false, false)?;
             if !enabled {
                 assert!(output.relocs.iter().any(|r| r.target == 0x1234));
                 continue;
@@ -4954,7 +4945,7 @@ mod tests {
         let entry = find_symbol_by_name(&elf, "entry")?;
         for preserve in [false, true] {
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(),
-                &HashMap::new(), &[], &HashMap::new(), &[], true, preserve, false, false, false, None, false, None, None, None, false, false, false, false)?;
+                &HashMap::new(), &[], &HashMap::new(), &[], true, preserve, false, false, false, None, false, None, None, None, false, false, false)?;
             let mut expected = if preserve { vec![0x53, 0x31, 0xc0, 0x5b] } else { vec![0x31, 0xc0] };
             expected.extend_from_slice(&[0xe9, 0, 0, 0, 0]); // Canonical entry exit in proof mode.
             assert_eq!(output.blob, expected);

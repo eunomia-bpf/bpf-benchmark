@@ -7,4 +7,4 @@ case "$(basename -- "$0")" in
     native-link-known-off) known=() ;;
     *) echo 'install as native-link-known-on or native-link-known-off' >&2; exit 1 ;;
 esac
-exec "$payload_dir/native-link.real" --runtime-map-lookups --local-memory-routines "${known[@]}" "$@"
+exec "$payload_dir/native-link.real" --runtime-map-lookups "${known[@]}" "$@"

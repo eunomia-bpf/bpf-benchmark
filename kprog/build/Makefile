@@ -39,7 +39,7 @@ RUNTIME_ARRAY_SECONDS ?= 10
 runtime-array-link-payload: known-map-link-build
 	$(MAKE) -f $(HERE)/Makefile runtime-array-layout BUILD=$(RUNTIME_ARRAY_BUILD)
 	install -d $(RUNTIME_ARRAY_PAYLOAD)
-	install -m755 $(KNOWN_MAP_TARGET)/debug/native-link $(RUNTIME_ARRAY_PAYLOAD)/native-link.real
+	install -m755 $(KNOWN_MAP_TARGET)/release/native-link $(RUNTIME_ARRAY_PAYLOAD)/native-link.real
 	strip --strip-debug $(RUNTIME_ARRAY_PAYLOAD)/native-link.real
 	install -m644 $(RUNTIME_ARRAY_BUILD)/runtime-array-layout.json $(RUNTIME_ARRAY_PAYLOAD)/runtime-array-layout.json
 	install -m755 $(HERE)/native-link-runtime-array.sh $(RUNTIME_ARRAY_PAYLOAD)/native-link-array-on
@@ -120,40 +120,33 @@ MEMORY_FLAGS_LOGS ?= /workspaces/kprog-raw/perf/20261113-memory-flags
 memory-flags:
 	python3 $(HERE)/memory-flags.py --app tracee --only tracee --output $(MEMORY_FLAGS_OUTPUT) --logs $(MEMORY_FLAGS_LOGS)
 
-LINK_MEMORY_TARGET ?= /var/tmp/kprog-tmp/perf/native-link-memory
+LINK_MEMORY_TARGET ?= $(ROOT)/kprog/x86/native_lab/native_link/target
 .PHONY: memory-link-check memory-link-build
 memory-link-check:
-	CARGO_TARGET_DIR=$(LINK_MEMORY_TARGET) CARGO_PROFILE_DEV_OPT_LEVEL=3 CARGO_PROFILE_DEV_DEBUG=0 cargo test --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
+	CARGO_TARGET_DIR=$(LINK_MEMORY_TARGET) cargo test --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
 
 memory-link-build:
-	CARGO_TARGET_DIR=$(LINK_MEMORY_TARGET) CARGO_PROFILE_DEV_OPT_LEVEL=3 CARGO_PROFILE_DEV_DEBUG=0 cargo build --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
+	CARGO_TARGET_DIR=$(LINK_MEMORY_TARGET) cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
 
-KNOWN_MAP_TARGET ?= /var/tmp/kprog-tmp/perf/native-link-known-maps
+KNOWN_MAP_TARGET ?= $(ROOT)/kprog/x86/native_lab/native_link/target
 .PHONY: known-map-link-check known-map-link-build
 known-map-link-check:
-	taskset -c 8-15 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(KNOWN_MAP_TARGET) CARGO_PROFILE_DEV_OPT_LEVEL=3 CARGO_PROFILE_DEV_DEBUG=0 cargo test --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
+	taskset -c 8-15 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(KNOWN_MAP_TARGET) cargo test --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
 
 known-map-link-build:
-	taskset -c 8-15 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(KNOWN_MAP_TARGET) CARGO_PROFILE_DEV_OPT_LEVEL=3 CARGO_PROFILE_DEV_DEBUG=0 cargo build --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
+	taskset -c 8-15 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(KNOWN_MAP_TARGET) cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
 
-.PHONY: known-map-link-evidence
 KNOWN_MAP_RAW ?= /workspaces/kprog-raw/perf/20261114-known-map-linker
-KNOWN_MAP_REFERENCE ?= /var/tmp/kprog-tmp/verified/direct-tail/cargo/debug/native-link
-KNOWN_MAP_EVIDENCE ?= $(KNOWN_MAP_RAW)/evidence
-known-map-link-evidence:
-	python3 $(HERE)/memory-link-evidence.py --candidate $(KNOWN_MAP_TARGET)/debug/native-link --reference $(KNOWN_MAP_REFERENCE) --output $(KNOWN_MAP_EVIDENCE)/default --tracee-object /workspaces/kprog-raw/perf/20261113-memory-flags/tracee.plain.o
-	python3 $(HERE)/memory-link-evidence.py --candidate $(KNOWN_MAP_TARGET)/debug/native-link --reference $(KNOWN_MAP_REFERENCE) --output $(KNOWN_MAP_EVIDENCE)/runtime --runtime-map-lookups --tracee-object /workspaces/kprog-raw/perf/20261113-memory-flags/tracee.plain.o
 
 .PHONY: known-map-link-payload
 KNOWN_MAP_PAYLOAD ?= $(ROOT)/corpus/results/perf-known-map-linker-20261114
 known-map-link-payload:
 	install -d $(KNOWN_MAP_PAYLOAD)
-	install -m755 $(KNOWN_MAP_TARGET)/debug/native-link $(KNOWN_MAP_PAYLOAD)/native-link.real
+	install -m755 $(KNOWN_MAP_TARGET)/release/native-link $(KNOWN_MAP_PAYLOAD)/native-link.real
 	install -m755 $(HERE)/native-link-known-maps.sh $(KNOWN_MAP_PAYLOAD)/native-link-known-on
 	install -m755 $(HERE)/native-link-known-maps.sh $(KNOWN_MAP_PAYLOAD)/native-link-known-off
 	$(KNOWN_MAP_PAYLOAD)/native-link-known-on --help > $(KNOWN_MAP_RAW)/on-help.txt
 	$(KNOWN_MAP_PAYLOAD)/native-link-known-off --help > $(KNOWN_MAP_RAW)/off-help.txt
-	install -m755 $(KNOWN_MAP_REFERENCE) $(KNOWN_MAP_RAW)/reference-native-link
 
 .PHONY: known-map-otel-timing
 KNOWN_MAP_TIMING_RAW ?= /workspaces/kprog-raw/perf/20261114-known-map-otel-timing
@@ -188,31 +181,10 @@ link-audit-otel:
 	env PATH=$(ROOT)/kprog/perf/may29-image/eqcodex-bin:$$PATH EQCODEX_OUT=$(LINK_AUDIT_CAPTURE) EQCODEX_NATIVE_LINK_BINARY=$(LINK_AUDIT_PAYLOAD)/native-link-on \
 		make -f $(ROOT)/kprog/perf/one-image/Makefile corpus APPS=otelcol-ebpf-profiler/profiling SAMPLES=1 WORKLOAD_DURATION=10 CPUS=16-19 VM_CPUS=4 VM_MEM=16G BPFREJIT_CORPUS_BPF_STATS=1 NATIVE_MANIFEST=$(ROOT)/corpus/results/perf-otel-upstream-20261114/manifest-context.json STATE=/var/tmp/kprog-tmp/perf/link-audit-otel LOGS=$(LINK_AUDIT_RAW)/run
 
-LINK_MEMORY_EVIDENCE ?= /workspaces/kprog-raw/perf/20261113-local-memory/objects
-.PHONY: memory-link-evidence
-memory-link-evidence:
-	python3 $(HERE)/memory-link-evidence.py --candidate $(LINK_MEMORY_TARGET)/debug/native-link --reference $(ROOT)/corpus/results/verified-linker-runtime-maps-20261113/native-link.real --output $(LINK_MEMORY_EVIDENCE)
-
-LINK_MEMORY_PAYLOAD ?= $(ROOT)/corpus/results/perf-local-memory-20261113
-LINK_MEMORY_PROFILE ?= /workspaces/kprog-raw/perf/20261113-local-memory/profile-on
-LINK_MEMORY_CAPTURE ?= $(ROOT)/corpus/results/perf-memory-profile-on-20261113
-.PHONY: memory-link-payload memory-profile
-memory-link-payload:
-	install -d $(LINK_MEMORY_PAYLOAD)
-	install -m 755 $(LINK_MEMORY_TARGET)/debug/native-link $(LINK_MEMORY_PAYLOAD)/native-link.real
-	strip --strip-debug $(LINK_MEMORY_PAYLOAD)/native-link.real
-	install -m 755 $(HERE)/native-link-memory.sh $(LINK_MEMORY_PAYLOAD)/native-link-on
-	install -m 755 $(HERE)/native-link-memory.sh $(LINK_MEMORY_PAYLOAD)/native-link-off
-	$(LINK_MEMORY_PAYLOAD)/native-link-on --help > $(LINK_MEMORY_PAYLOAD)/help.txt
-
-memory-profile:
-	env PATH=$(ROOT)/kprog/perf/may29-image/eqcodex-bin:$$PATH EQCODEX_OUT=$(LINK_MEMORY_CAPTURE) EQCODEX_NATIVE_LINK_BINARY=$(LINK_MEMORY_PAYLOAD)/native-link-on \
-		python3 $(ROOT)/kprog/perf/profile/phase-profile.py run --app tracee/monitor --seconds 45 --cpus 16-19 --vcpus 4 --memory 8G --freq 999 --out $(LINK_MEMORY_PROFILE) --annotate 0
-
 OTEL_PROFILE_RAW ?= /workspaces/kprog-raw/perf/20261114-otel-profile/run
 OTEL_PROFILE_CAPTURE ?= $(ROOT)/corpus/results/perf-otel-profile-20261114
 OTEL_PROFILE_MANIFEST ?= $(ROOT)/corpus/results/perf-otel-upstream-20261114/manifest-context.json
-OTEL_PROFILE_LINKER ?= $(LINK_MEMORY_PAYLOAD)/native-link-on
+OTEL_PROFILE_LINKER ?= $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link
 PROFILE_TOOL_BUILD ?= /var/tmp/kprog-tmp/perf/profile-tool
 PROFILE_PERF_SOURCE ?= /workspaces/kprog-raw/perf/20261113-loader-cpu-profile/tool/perf
 OTEL_PROFILE_EVENT ?= cpu-clock
@@ -266,8 +238,8 @@ otel-profile: profile-tool
 
 .PHONY: memory-host-bench
 memory-host-bench:
-	NATIVE_LINK_MEMORY_BENCH_OUTPUT=/workspaces/kprog-raw/perf/20261113-local-memory/host-microbench.json CARGO_TARGET_DIR=$(LINK_MEMORY_TARGET) CARGO_PROFILE_DEV_OPT_LEVEL=3 CARGO_PROFILE_DEV_DEBUG=0 \
-		cargo test --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml memory_host_microbenchmark -- --ignored
+	NATIVE_LINK_MEMORY_BENCH_OUTPUT=/workspaces/kprog-raw/perf/20261113-local-memory/host-microbench.json CARGO_TARGET_DIR=$(LINK_MEMORY_TARGET) \
+		cargo test --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml memory_host_microbenchmark -- --ignored
 
 SOCKET_BUILD ?= /var/tmp/kprog-tmp/perf/socket-context
 CILIUM_UPSTREAM := $(ROOT)/vendor/repos/cilium/bpf
@@ -328,7 +300,7 @@ socket-context-errors: $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/publ
 
 .PHONY: upstream-socket-proof
 upstream-socket-proof: upstream-socket-native
-	python3 $(HERE)/socket-proof.py --input $(SOCKET_BUILD)/upstream-sock.native.o --linker $(LINK_MEMORY_PAYLOAD)/native-link.real --output $(SOCKET_BUILD)/proofs
+	python3 $(HERE)/socket-proof.py --input $(SOCKET_BUILD)/upstream-sock.native.o --linker $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link --output $(SOCKET_BUILD)/proofs
 
 SOCKET_RAW ?= /workspaces/kprog-raw/perf/20261113-socket-context
 SOCKET_RECEIPT ?= $(ROOT)/kprog/results/perf_20261113/socket-context-host.json
@@ -385,11 +357,11 @@ upstream-cilium-native: upstream-cilium-ir $(SOCKET_BUILD)/socket-context-lower 
 
 .PHONY: upstream-cilium-link
 upstream-cilium-link: upstream-cilium-native
-	python3 $(HERE)/socket-proof.py --input $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).native.o --linker $(LINK_MEMORY_PAYLOAD)/native-link.real --output $(CILIUM_IR_BUILD)/$(CILIUM_UNIT)-links --section-prefix tc/ --section-prefix xdp
+	python3 $(HERE)/socket-proof.py --input $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).native.o --linker $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link --output $(CILIUM_IR_BUILD)/$(CILIUM_UNIT)-links --section-prefix tc/ --section-prefix xdp
 
 .PHONY: cilium-kernel-roundtrip
 cilium-kernel-roundtrip:
-	python3 $(HERE)/socket-proof.py --input $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).native.o --linker $(LINK_MEMORY_PAYLOAD)/native-link-off --output $(CILIUM_IR_BUILD)/$(CILIUM_UNIT)-roundtrip --section-prefix tc/ --section-prefix xdp --kernel-roundtrip
+	python3 $(HERE)/socket-proof.py --input $(CILIUM_IR_BUILD)/$(CILIUM_UNIT).native.o --linker $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link --output $(CILIUM_IR_BUILD)/$(CILIUM_UNIT)-roundtrip --section-prefix tc/ --section-prefix xdp --kernel-roundtrip
 
 .PHONY: cilium-object-compare
 cilium-object-compare:
@@ -474,8 +446,8 @@ native-switch-check: $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public
 	python3 $(HERE)/socket-helper-names.py > $(SWITCH_BUILD)/helper-names.json
 	$(SOCKET_BUILD)/socket-context-lower $(SWITCH_BUILD)/input.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(SWITCH_BUILD)/helper-names.json -o $(SWITCH_BUILD)/native.bc
 	$(CC) -target x86_64-linux-gnu -O3 -fPIC -fno-optimize-sibling-calls -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-jump-tables -c $(SWITCH_BUILD)/native.bc -o $(SWITCH_BUILD)/native.o
-	$(LINK_MEMORY_PAYLOAD)/native-link.real --mode proof --input $(SWITCH_BUILD)/native.o --symbol native_switch --output $(SWITCH_BUILD)/proof.o
-	$(LINK_MEMORY_PAYLOAD)/native-link.real --mode kernel --input $(SWITCH_BUILD)/proof.o --symbol native_switch --output $(SWITCH_BUILD)/blob.bin
+	$(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link --mode proof --input $(SWITCH_BUILD)/native.o --symbol native_switch --output $(SWITCH_BUILD)/proof.o
+	$(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link --mode kernel --input $(SWITCH_BUILD)/proof.o --symbol native_switch --output $(SWITCH_BUILD)/blob.bin
 
 .PHONY: native-switch-evidence
 native-switch-evidence:
@@ -514,7 +486,7 @@ upstream-tetragon-ir:
 .PHONY: cilium-helper-replay
 cilium-helper-replay:
 	python3 $(HERE)/socket-helper-names.py > $(CILIUM_HELPER_RAW)/helper-names.json
-	python3 $(HERE)/cilium-helper-replay.py --capture $(CILIUM_HELPER_CAPTURE) --linker $(LINK_MEMORY_PAYLOAD)/native-link-off --helper-names $(CILIUM_HELPER_RAW)/helper-names.json --output $(CILIUM_HELPER_RAW)/replay
+	python3 $(HERE)/cilium-helper-replay.py --capture $(CILIUM_HELPER_CAPTURE) --linker $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link --helper-names $(CILIUM_HELPER_RAW)/helper-names.json --output $(CILIUM_HELPER_RAW)/replay
 
 .PHONY: retain-host-artifacts
 retain-host-artifacts:
@@ -530,7 +502,7 @@ ASM_BUILD ?= /var/tmp/kprog-tmp/perf/bpf-asm
 .PHONY: bpf-asm-check upstream-tetragon-link
 
 TETRAGON_SECTION_ARGS ?= --section-prefix kprobe --section-prefix tracepoint --section-prefix raw_tracepoint --section-prefix uprobe --section-prefix fmod_ret/
-TETRAGON_LINKER ?= $(LINK_MEMORY_PAYLOAD)/native-link-off
+TETRAGON_LINKER ?= $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link
 upstream-tetragon-link: upstream-tetragon-native
 	python3 $(HERE)/socket-proof.py --input $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).native.o --linker $(TETRAGON_LINKER) --output $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT)-links $(TETRAGON_SECTION_ARGS)
 
@@ -570,7 +542,7 @@ config-globals-check: $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/publi
 
 .PHONY: config-globals-roundtrip config-globals-default-check
 config-globals-roundtrip:
-	python3 $(HERE)/socket-proof.py --input $(CONFIG_GLOBALS_BUILD)/native.o --linker $(LINK_MEMORY_PAYLOAD)/native-link-off --output $(CONFIG_GLOBALS_BUILD)/links --section-prefix test/ --kernel-roundtrip
+	python3 $(HERE)/socket-proof.py --input $(CONFIG_GLOBALS_BUILD)/native.o --linker $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link --output $(CONFIG_GLOBALS_BUILD)/links --section-prefix test/ --kernel-roundtrip
 
 config-globals-default-check:
 	install -m755 $(CONFIG_GLOBALS_REFERENCE_TOOL) $(CONFIG_GLOBALS_BUILD)/reference-socket-context-lower
@@ -631,7 +603,7 @@ native-frame-check: $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-
 		$(CC) -target x86_64-linux-gnu -O3 -fPIC -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-jump-tables -c $(NATIVE_FRAME_BUILD)/$$variant.bc -o $(NATIVE_FRAME_BUILD)/$$variant.o; \
 		$(CC) $(NATIVE_FRAME_BUILD)/$$variant.o $(NATIVE_FRAME_BUILD)/driver.o -o $(NATIVE_FRAME_BUILD)/$$variant; \
 		$(NATIVE_FRAME_BUILD)/$$variant; \
-		python3 $(HERE)/socket-proof.py --input $(NATIVE_FRAME_BUILD)/$$variant.o --linker $(LINK_MEMORY_PAYLOAD)/native-link-off --output $(NATIVE_FRAME_BUILD)/$$variant-links --section-prefix frame-test --kernel-roundtrip; \
+		python3 $(HERE)/socket-proof.py --input $(NATIVE_FRAME_BUILD)/$$variant.o --linker $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link --output $(NATIVE_FRAME_BUILD)/$$variant-links --section-prefix frame-test --kernel-roundtrip; \
 	done
 	python3 $(HERE)/check-native-frame.py --build $(NATIVE_FRAME_BUILD)
 
@@ -655,7 +627,7 @@ RUNTIME_PROBE_PAYLOAD ?= $(ROOT)/corpus/results/perf-probe-read-linker-20261114
 .PHONY: runtime-probe-read-payload
 runtime-probe-read-payload: known-map-link-build runtime-probe-read-layout
 	install -d $(RUNTIME_PROBE_PAYLOAD)
-	install -m755 $(KNOWN_MAP_TARGET)/debug/native-link $(RUNTIME_PROBE_PAYLOAD)/native-link.real
+	install -m755 $(KNOWN_MAP_TARGET)/release/native-link $(RUNTIME_PROBE_PAYLOAD)/native-link.real
 	strip --strip-debug $(RUNTIME_PROBE_PAYLOAD)/native-link.real
 	install -m644 $(RUNTIME_PROBE_BUILD)/runtime-probe-read-layout.json $(RUNTIME_PROBE_PAYLOAD)/runtime-probe-read-layout.json
 	install -m755 $(HERE)/native-link-probe-read.sh $(RUNTIME_PROBE_PAYLOAD)/native-link-on
@@ -725,7 +697,7 @@ HASH_KERNEL_CASES := 1-1 2-1 3-1 4-1 5-1 2-5 2-9 2-10 2-13
 .PHONY: runtime-hash-payload hash-lookup-kernel-inputs hash-lookup-kernel guest-hash-lookup
 runtime-hash-payload: known-map-link-build runtime-hash-layout
 	install -d $(RUNTIME_HASH_PAYLOAD)
-	install -m755 $(KNOWN_MAP_TARGET)/debug/native-link $(RUNTIME_HASH_PAYLOAD)/native-link.real
+	install -m755 $(KNOWN_MAP_TARGET)/release/native-link $(RUNTIME_HASH_PAYLOAD)/native-link.real
 	strip --strip-debug $(RUNTIME_HASH_PAYLOAD)/native-link.real
 	install -m644 $(RUNTIME_HASH_BUILD)/runtime-hash-layout.json $(RUNTIME_HASH_PAYLOAD)/runtime-hash-layout.json
 	install -m644 $(RUNTIME_PROBE_PAYLOAD)/runtime-probe-read-layout.json $(RUNTIME_HASH_PAYLOAD)/runtime-probe-read-layout.json
@@ -785,7 +757,7 @@ LPM_KERNEL_OUTPUT ?= /workspaces/kprog-raw/perf/20261114-lpm-lto/kernel
 .PHONY: runtime-lpm-payload lpm-lookup-kernel
 runtime-lpm-payload: known-map-link-build runtime-lpm-layout
 	install -d $(RUNTIME_LPM_PAYLOAD)
-	install -m755 $(KNOWN_MAP_TARGET)/debug/native-link $(RUNTIME_LPM_PAYLOAD)/native-link.real
+	install -m755 $(KNOWN_MAP_TARGET)/release/native-link $(RUNTIME_LPM_PAYLOAD)/native-link.real
 	strip --strip-debug $(RUNTIME_LPM_PAYLOAD)/native-link.real
 	install -m644 $(RUNTIME_LPM_BUILD)/runtime-lpm-layout.json $(RUNTIME_LPM_PAYLOAD)/runtime-lpm-layout.json
 	install -m644 $(RUNTIME_HASH_PAYLOAD)/runtime-hash-layout.json $(RUNTIME_LPM_PAYLOAD)/runtime-hash-layout.json

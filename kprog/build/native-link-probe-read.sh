@@ -6,7 +6,7 @@ layout=${KPROG_PROBE_LAYOUT:-$here/runtime-probe-read-layout.json}
 base=(); read=(--runtime-probe-read-layout "$layout"); abi=()
 case ${0##*/} in
   native-link-on|native-link-off)
-    base=(--runtime-map-lookups --runtime-known-map-lookups --local-memory-routines)
+    base=(--runtime-map-lookups --runtime-known-map-lookups)
     [[ ${0##*/} != native-link-off ]] || read=()
     ;;
 esac

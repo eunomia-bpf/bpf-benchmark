@@ -11,5 +11,5 @@ for arg in "$@"; do
     case $arg in --abi-load-sites|--abi-load-sites=*) present=1;; esac
 done
 (( present )) || abi=(--abi-load-sites true)
-exec "$linker" --runtime-map-lookups --runtime-known-map-lookups --local-memory-routines \
+exec "$linker" --runtime-map-lookups --runtime-known-map-lookups \
     --runtime-probe-read-layout "$probe" "${hash[@]}" "${abi[@]}" "$@"

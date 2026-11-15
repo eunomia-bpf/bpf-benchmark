@@ -158,9 +158,6 @@ struct Args {
     #[arg(long)]
     runtime_lpm_layout: Option<PathBuf>,
 
-    /// Bind x86 memset/memcpy to linker-owned GPR routines in the proof image.
-    #[arg(long)]
-    local_memory_routines: bool,
 
     /// Link mode. `proof` applies canonical ABI/link edits but leaves
     /// verifier-after helper/map lowering symbolic and emits a relocatable
@@ -538,9 +535,6 @@ fn main() -> Result<()> {
     let bytes = fs::read(&args.input).with_context(|| format!("read {}", args.input.display()))?;
     let elf = object::File::parse(&*bytes)
         .with_context(|| format!("parse ELF {}", args.input.display()))?;
-    if args.local_memory_routines && elf.architecture() != object::Architecture::X86_64 {
-        bail!("--local-memory-routines requires x86-64 input");
-    }
     if runtime_lpm_layout.is_some() && elf.architecture()!=object::Architecture::X86_64 {
         bail!("--runtime-lpm-layout requires x86-64 input");
     }
@@ -617,7 +611,6 @@ fn main() -> Result<()> {
                 runtime_probe_read_layout.as_ref(),
                 runtime_hash_layout.as_ref(),
                 runtime_lpm_layout.as_ref(),
-                args.local_memory_routines,
                 args.show, args.runtime_probe_read_strings && !proof_mode, args.runtime_percpu_loads && !proof_mode)?
         }
         object::Architecture::Aarch64 => {
@@ -2713,14 +2706,6 @@ fn disasm_arm64_words(blob: &[u8]) {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn local_memory_routines_require_cli_opt_in() {
-        let argv = ["native-link", "--input", "p.o", "--symbol", "entry", "--output", "p.bin"];
-        assert!(!Args::try_parse_from(argv).unwrap().local_memory_routines);
-        assert!(Args::try_parse_from(argv.into_iter().chain(["--local-memory-routines"]))
-            .unwrap().local_memory_routines);
-    }
 
     #[test]
     fn runtime_map_lookups_require_cli_opt_in() {

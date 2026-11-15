@@ -9,4 +9,4 @@ case "$(basename -- "$0")" in
     *) echo 'install as native-link-array[-shared]-on or -off' >&2; exit 1 ;;
 esac
 exec "$payload_dir/native-link.real" --runtime-map-lookups --runtime-known-map-lookups \
-    --local-memory-routines "${array[@]}" "$@"
+    "${array[@]}" "$@"

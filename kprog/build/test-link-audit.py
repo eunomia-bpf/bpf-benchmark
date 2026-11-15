@@ -9,7 +9,7 @@ import subprocess
 import tempfile
 
 
-FLAGS = ["--runtime-map-lookups", "--local-memory-routines", "--runtime-known-map-lookups"]
+FLAGS = ["--runtime-map-lookups", "--runtime-known-map-lookups"]
 
 
 def main():
