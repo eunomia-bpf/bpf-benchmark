@@ -186,8 +186,10 @@ def compile_checked_simulator(artifacts: dict, native_link: Path, compiler: Path
         run([context_compiler, lowered, '--public-layout', public_layout,
              '--physical-layout', physical_layout, '-o', context_ir])
         lowered = context_ir
-    run([clang, '-target', 'x86_64-linux-gnu', '-O3', '-fPIC', '-mno-red-zone',
+    run([clang, '-target', 'x86_64-linux-gnu', '-O3', '-march=native',
+         '-foptimize-sibling-calls', '-fomit-frame-pointer', '-mno-red-zone',
          '-mgeneral-regs-only', '-fno-stack-protector', '-fno-asynchronous-unwind-tables',
+         '-fno-unwind-tables',
          '-c', lowered, '-o', native])
     run([native_link, '--input', native, '--symbol', artifacts['simulator_program'],
          '--mode', 'proof', '--preserve-entry-abi', '--output', proof])

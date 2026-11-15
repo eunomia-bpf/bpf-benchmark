@@ -9,6 +9,7 @@ OUTPUT ?= /workspaces/kprog-raw/perf/20261115-native-relocations
 BUILD := /var/tmp/kprog-tmp/perf/native-relocations
 TABLE_CONTEXT_BUILD := /var/tmp/kprog-tmp/perf/table-context
 CONTEXT_TOOL := /var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds
+CHECKED_TOOL := /var/tmp/kprog-tmp/perf/checked-compiler/compile-sim-ir
 KERNEL_LAYOUT_BUILD := /var/tmp/kprog-tmp/perf/kernel-layout
 KERNEL_LAYOUT := $(KERNEL_LAYOUT_BUILD)/kernel-layout.json
 KDIR := /workspaces/.agent-state/kprog-ck/build-x86
@@ -62,14 +63,15 @@ preserve-running-linker:
 
 # The queued run_verified_make caller holds image EX before Make starts.
 .PHONY: publish-normal-pair
-publish-normal-pair: $(CONTEXT_TOOL)
+publish-normal-pair: $(CONTEXT_TOOL) $(CHECKED_TOOL)
 	install -d $(OUTPUT)
 	git -C $(ROOT) rev-parse HEAD > $(OUTPUT)/source-head.txt
 	CMAKE_BUILD_PARALLEL_LEVEL=2 $(MAKE) -r -C $(ROOT)/kprog/libnativeloader trusted-service BUILD_DIR=/workspaces/.agent-state/kprog-ck/verified-loader
 	if test -L $(LINKER_TARGET)/release/native-link; then unlink $(LINKER_TARGET)/release/native-link; fi
 	taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
 	install -m755 $(CONTEXT_TOOL) /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds
-	sha256sum $(LINKER_TARGET)/release/native-link /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader /workspaces/.agent-state/kprog-ck/verified-loader/libnative_loader.a /workspaces/.agent-state/kprog-ck/verified-loader/libnative_loader.so /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds > $(OUTPUT)/tool-sha256.txt
+	install -m755 $(CHECKED_TOOL) /workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir
+	sha256sum $(LINKER_TARGET)/release/native-link /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader /workspaces/.agent-state/kprog-ck/verified-loader/libnative_loader.a /workspaces/.agent-state/kprog-ck/verified-loader/libnative_loader.so /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds /workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir > $(OUTPUT)/tool-sha256.txt
 	date -u +%FT%TZ > $(OUTPUT)/published
 
 .PHONY: evidence
@@ -94,6 +96,13 @@ compiler-cleanup-check:
 
 $(CONTEXT_TOOL): $(ROOT)/kprog/x86/packet_bounds_ir.cpp
 	taskset -c 8-11 prlimit --as=8589934592 -- clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -I$(ROOT)/vendor/libbpf/include/uapi $< -o $@ $$(llvm-config-18 --ldflags --libs core irreader bitwriter analysis support --system-libs)
+
+$(CHECKED_TOOL): $(ROOT)/kprog/x86/compile_sim_ir.cpp
+	install -d $(dir $@)
+	taskset -c 8-11 prlimit --as=8589934592 -- clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -I$(ROOT)/vendor/libbpf/include/uapi $< -o $@ $$(llvm-config-18 --ldflags --libs core irreader bitwriter analysis support --system-libs)
+
+.PHONY: checked-compiler-build
+checked-compiler-build: $(CHECKED_TOOL)
 
 .PHONY: identity-normal-check
 identity-normal-check: $(CONTEXT_TOOL)

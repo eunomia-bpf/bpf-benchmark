@@ -86,8 +86,9 @@ int main(int argc,char **argv) {
   for (auto &f:*m) {
     if (!f.hasLocalLinkage()) f.setDSOLocal(false);
     f.removeFnAttr("target-cpu"); f.removeFnAttr("target-features"); f.removeFnAttr("target-abi");
-    f.addFnAttr("frame-pointer","none"); f.addFnAttr("no-jump-tables","true");
-    f.addFnAttr("disable-tail-calls","true");
+    f.addFnAttr("frame-pointer","none");
+    f.removeFnAttr("no-jump-tables");
+    f.removeFnAttr("disable-tail-calls");
     for (auto &i:instructions(f)) if (auto *call=dyn_cast<CallInst>(&i)) calls.push_back(call);
   }
   unsigned lowered=0;
