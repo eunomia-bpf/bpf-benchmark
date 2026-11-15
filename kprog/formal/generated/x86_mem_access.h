@@ -117,6 +117,8 @@ kprog_x86_mem_store(void *address, __u8 width, __u64 value)
     case X86_WIDTH_8:
 #if defined(__bpf__) || defined(__BPF__)
         asm volatile("*(u8 *)(%0 + 0) = %1" : : "r"(address), "r"(value) : "memory");
+#elif defined(__COMPCERT__)
+        KPROG_C_UNALIGNED_STORE(__u8,address,value);
 #else
         *(volatile kprog_x86_unaligned8 *)address = (kprog_x86_unaligned8)value;
 #endif
@@ -124,6 +126,8 @@ kprog_x86_mem_store(void *address, __u8 width, __u64 value)
     case X86_WIDTH_16:
 #if defined(__bpf__) || defined(__BPF__)
         asm volatile("*(u16 *)(%0 + 0) = %1" : : "r"(address), "r"(value) : "memory");
+#elif defined(__COMPCERT__)
+        KPROG_C_UNALIGNED_STORE(__u16,address,value);
 #else
         *(volatile kprog_x86_unaligned16 *)address = (kprog_x86_unaligned16)value;
 #endif
@@ -131,6 +135,8 @@ kprog_x86_mem_store(void *address, __u8 width, __u64 value)
     case X86_WIDTH_32:
 #if defined(__bpf__) || defined(__BPF__)
         asm volatile("*(u32 *)(%0 + 0) = %1" : : "r"(address), "r"(value) : "memory");
+#elif defined(__COMPCERT__)
+        KPROG_C_UNALIGNED_STORE(__u32,address,value);
 #else
         *(volatile kprog_x86_unaligned32 *)address = (kprog_x86_unaligned32)value;
 #endif
@@ -138,6 +144,8 @@ kprog_x86_mem_store(void *address, __u8 width, __u64 value)
     case X86_WIDTH_64:
 #if defined(__bpf__) || defined(__BPF__)
         asm volatile("*(u64 *)(%0 + 0) = %1" : : "r"(address), "r"(value) : "memory");
+#elif defined(__COMPCERT__)
+        KPROG_C_UNALIGNED_STORE(__u64,address,value);
 #else
         *(volatile kprog_x86_unaligned64 *)address = (kprog_x86_unaligned64)value;
 #endif

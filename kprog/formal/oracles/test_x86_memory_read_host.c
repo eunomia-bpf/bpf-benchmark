@@ -13,10 +13,12 @@
 #define X86_SIM_USE_STATE_STRUCT 1
 #include "../c/X86Memory.h"
 
-static unsigned long reads,handlers;
+static unsigned long reads,handlers,stores;
 static unsigned draws,copies;
+static int writing;
 static __u64 choice;
 static const void *expected_source;
+static void *expected_destination;
 static size_t expected_size;
 static void check(int ok,const char *why)
 {
@@ -31,7 +33,7 @@ __u64 kprog_c_pointer_bits(const void *pointer)
 { (void)pointer; check(0,"unexpected context exposure"); abort(); }
 void __builtin_memcpy_aligned(void *dst,const void *src,size_t size,size_t alignment)
 {
-    check(src==expected_source && size==expected_size && alignment==1,"physical copy source/size/alignment");
+    check((writing?dst==expected_destination:src==expected_source) && size==expected_size && alignment==1,"physical copy source/destination/size/alignment");
     copies++; memcpy(dst,src,size);
 }
 static __u64 little(const __u8 *p,unsigned n)
@@ -184,9 +186,57 @@ static void guarded(void)
 #endif
     check(!munmap(mem,page*2),"guard unmap");
 }
+static void store_cases(void)
+{
+    const __u64 widths[]={0,1,2,4,8,256,0x100000008ULL};
+    const __u64 values[]={0,~0ULL,0x123456789abcdef0ULL,0x8000000000000000ULL};
+    __u8 memory[80],expected[80];writing=1;
+    for (unsigned wi=0;wi<7;wi++) for (unsigned offset=0;offset<32;offset++)
+    for (unsigned v=0;v<4;v++) {
+        unsigned n=(__u8)widths[wi];if (!n) n=8;
+        for (unsigned i=0;i<sizeof(memory);i++) memory[i]=(__u8)(i*29+0x51);
+        memcpy(expected,memory,sizeof(memory));
+        for (unsigned i=0;i<n;i++) expected[offset+i]=(__u8)(values[v]>>(8*i));
+        expected_destination=memory+offset;expected_size=n;reset();
+        kprog_x86_store_memory(memory+offset,widths[wi],values[v]);
+        check(!draws && !memcmp(memory,expected,sizeof(memory)),"unaligned physical store width/capture/full byte frame");copy_count(1);stores++;
+    }
+    long page=sysconf(_SC_PAGESIZE);check(page>0,"store page size");
+    __u8 *memory_guard=mmap(NULL,page*2,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
+    check(memory_guard!=MAP_FAILED && !mprotect(memory_guard+page,page,PROT_NONE),"store guard mapping");
+    for (unsigned n=1;n<=8;n*=2) {
+        memset(memory_guard,0x39,page);expected_destination=memory_guard+page-n;expected_size=n;reset();
+        kprog_x86_store_memory(expected_destination,n,0xa1b2c3d4e5f60718ULL);
+        for (unsigned i=0;i<n;i++) check(memory_guard[page-n+i]==(__u8)(0xa1b2c3d4e5f60718ULL>>(8*i)),"guarded selected store bytes");
+        check(memory_guard[page-n-1]==0x39 && !draws,"guarded store prefix/frame");copy_count(1);
+    }
+    pid_t pid=fork();check(pid>=0,"store fault fork");
+    if (!pid) {
+        struct sigaction a={0};a.sa_sigaction=fault;a.sa_flags=SA_SIGINFO;
+        if (sigemptyset(&a.sa_mask) || sigaction(SIGSEGV,&a,NULL)) _exit(2);
+        fault_address=expected_destination=memory_guard+page;expected_size=8;reset();
+        kprog_x86_store_memory(expected_destination,8,~0ULL);_exit(3);
+    }
+    int status;check(waitpid(pid,&status,0)==pid && WIFEXITED(status) && !WEXITSTATUS(status),"store permission fault/no free input");
+    const unsigned invalid[]={3,255};
+    for (unsigned i=0;i<2;i++) {
+        pid=fork();check(pid>=0,"invalid store-width fork");
+        if (!pid) {
+            expected_destination=NULL;expected_size=8;reset();
+            kprog_x86_store_memory(NULL,invalid[i],~0ULL);_exit(3);
+        }
+        check(waitpid(pid,&status,0)==pid,"wait invalid store width");
+#if defined(__COMPCERT__)
+        check(WIFEXITED(status) && WEXITSTATUS(status)==77,"unsupported store width nonreturn fixture");
+#else
+        check(WIFSIGNALED(status) && WTERMSIG(status)==SIGILL,"unsupported store width native trap");
+#endif
+    }
+    check(!munmap(memory_guard,page*2),"store guard unmap");writing=0;
+}
 int main(void)
 {
-    selector_cases();read_cases();handler_cases();guarded();
-    printf("x86 shared memory/MOVBE:260 selector cases,%lu read/frame cases,%lu handler/frame cases,7 guarded/fault probes\n",reads,handlers);
+    selector_cases();read_cases();handler_cases();guarded();store_cases();
+    printf("x86 shared memory/MOVBE:260 selector cases,%lu read/frame cases,%lu handler/frame cases,7 read probes,%lu store/frame cases,7 store guard/fault/refusal probes\n",reads,handlers,stores);
     return 0;
 }

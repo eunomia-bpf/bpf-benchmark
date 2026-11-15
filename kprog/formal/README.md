@@ -1448,6 +1448,13 @@ Lean exports remain those of the preceding validated step. Inspect the pending
 [receipt](results/m4-x86-store-selectors/README.md) and raw waiter results before
 publishing the new exports. M4 and all later milestones remain open.
 
+An independent physical-store source checkpoint reuses Platform's existing
+alignment-one copy adapter in the CompCert branch of the shared x86 store.
+Native volatile/BPF bodies remain, and one C root plus byte-frame/guard/refusal
+checks await the same queued confirmation. The follow-up validator waits for
+the selector job before reusing its outputs. No new AST, tests or byte identity
+are accepted yet; [pending receipt](results/m4-x86-physical-store/README.md).
+
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight
 handler exports and full default compiled-byte coverage remain to do. Preserve

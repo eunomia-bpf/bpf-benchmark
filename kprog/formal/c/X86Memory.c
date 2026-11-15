@@ -75,3 +75,9 @@ void kprog_x86_movbe_load(struct x86_sim_register_state *state,
     struct x86_sim_register_state *__x86_state=state;
     X86_SIM_L_EXEC_MOVBE_LOAD(dst,src,flags,aux,imm);
 }
+
+/* Use the exact shared physical-store helper, including width byte capture. */
+void kprog_x86_store_memory(void *address,__u64 width,__u64 value)
+{
+    KPROG_X86_MEM_STORE(address,width,value);
+}

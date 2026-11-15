@@ -7,4 +7,5 @@ __u64 kprog_x86_read_mem_value(struct x86_sim_register_state *,struct kprog_x86_
                               __u32,__u64,__u64,__u64,__u64,__u64);
 void kprog_x86_movbe_load(struct x86_sim_register_state *,struct kprog_x86_arena *,
                          struct kprog_x86_stack_fact *,__u32,__u64,__u64,__u64,__u64,__u64);
+void kprog_x86_store_memory(void *,__u64,__u64);
 #endif
