@@ -82,4 +82,6 @@ if __name__ == '__main__':
     for name in ('build', 'metadata', 'previous', 'output'):
         parser.add_argument('--'+name, type=Path, required=True)
     parser.add_argument('--frontend', action='store_true')
-    main(parser.parse_args())
+    args = parser.parse_args()
+    args.output = args.output/'otel'
+    main(args)
