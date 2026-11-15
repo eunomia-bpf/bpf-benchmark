@@ -46,7 +46,9 @@ stock verification was repeated after that generated-source/debug-info change.
 The first stock result also passed, but the final receipt binds the final B.
 
 Raw root: `/workspaces/kprog-raw/perf/20261115-table-context`, with `final` and
-`final-stock` terminal. The earlier two-argument table fixture remains useful
+`final-stock` terminal. `collect.py` reduces the complete vector log to counts
+and its raw-file hash for the git receipt; all vectors remain persistent.
+The earlier two-argument table fixture remains useful
 historical evidence; this closes its single-context compilation/stock gap.
 Checked-native installation, absolute and immutable map-pointer tables,
 cross-function tables and actual application rebuilds remain open.
