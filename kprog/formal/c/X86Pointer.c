@@ -205,3 +205,51 @@ void kprog_x86_stack_values_read(struct x86_sim_register_state *state,
 	struct x86_sim_register_state *__x86_state = state;
 	X86_SIM_L_STACK_VALUES_READ_INTO(*output, index, width);
 }
+
+__u8 kprog_x86_store_width(__u64 flags)
+{
+    __u8 width;
+    KPROG_X86_STORE_WIDTH_INTO(width,flags);
+    return width;
+}
+__s64 kprog_x86_store_disp(__u64 immediate,__u64 imm)
+{
+    __s64 displacement;
+    KPROG_X86_STORE_DISP_INTO(displacement,immediate,imm);
+    return displacement;
+}
+__u64 kprog_x86_store_value(__u64 immediate,__u64 imm,__u64 width,__u64 source)
+{
+    __u64 value;
+    KPROG_X86_STORE_VALUE_INTO(value,immediate,imm,width,source);
+    return value;
+}
+__u32 kprog_x86_store_src_shift(__u64 immediate,__u64 aux)
+{
+    __u32 shift;
+    KPROG_X86_STORE_SRC_SHIFT_INTO(shift,immediate,aux);
+    return shift;
+}
+__u64 kprog_x86_store_shifted_value(__u64 value,__u64 shift)
+{
+    __u64 result;
+    KPROG_X86_STORE_SHIFTED_VALUE_INTO(result,value,shift);
+    return result;
+}
+__u8 kprog_x86_store_arm(__u64 stack)
+{
+    __u8 arm;
+    KPROG_X86_STORE_ARM_INTO(arm,stack);
+    return arm;
+}
+void kprog_x86_store_selectors(struct x86_sim_register_state *state,
+                                struct kprog_x86_arena *arena,__u32 capacity,
+                                __u64 op,__u64 src,__u64 flags,__u64 aux,__u64 imm,
+                                struct kprog_x86_store_selection *output)
+{
+    X86_SIM_L_STORE_SELECTORS(op,src,flags,aux,imm);
+    (void)__x86_l_base_ptr;
+    output->width=__x86_l_width;
+    output->displacement=__x86_l_disp;
+    output->value=__x86_l_value;
+}

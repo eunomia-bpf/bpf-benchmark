@@ -1439,6 +1439,15 @@ now stops at MOV-store width/displacement/value GNU selectors. Profile CPP is
 commands/failed harness attempts remain under
 `/workspaces/kprog-raw/formal/m4-x86-memory-read`.
 
+The next source checkpoint shares six store-selector declaration/output bodies
+and adds seven C roots for later export. Its native declaration/initializer
+sequence is retained; the CompCert prefix keeps the register source lazy.
+Checks are queued behind the active18:52 Katran timing window. No new Clight
+AST, tests or byte identity is accepted at this source checkpoint; the current
+Lean exports remain those of the preceding validated step. Inspect the pending
+[receipt](results/m4-x86-store-selectors/README.md) and raw waiter results before
+publishing the new exports. M4 and all later milestones remain open.
+
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight
 handler exports and full default compiled-byte coverage remain to do. Preserve

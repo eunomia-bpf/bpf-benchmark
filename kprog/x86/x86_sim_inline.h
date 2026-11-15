@@ -360,6 +360,27 @@ x86_sim_inline_read_mem_value(const struct x86_sim_inline_bindings *__x86_bind,
 #undef X86_SIM_L_READ_MEM_VALUE
 #define X86_SIM_L_READ_MEM_VALUE(BASE, AUX, IMM, WIDTH, STORE) \
     x86_sim_inline_read_mem_value(__x86_bind,(BASE),(AUX),(IMM),(WIDTH),(STORE))
+
+/* These execution-site arguments are decoded fields. Source register reads
+ * remain inside the shared store declaration's immediate/register branch. */
+static __always_inline __u32 x86_sim_inline_store_src_shift(__u64 immediate,__u64 aux)
+{
+    __u32 shift;
+    KPROG_X86_STORE_SRC_SHIFT_INTO(shift,immediate,aux);
+    return shift;
+}
+#pragma push_macro("KPROG_X86_STORE_SRC_SHIFT")
+#undef KPROG_X86_STORE_SRC_SHIFT
+#define KPROG_X86_STORE_SRC_SHIFT(IMMEDIATE, AUX) x86_sim_inline_store_src_shift(IMMEDIATE,AUX)
+static __always_inline __u8 x86_sim_inline_store_arm(__u64 stack)
+{
+    __u8 arm;
+    KPROG_X86_STORE_ARM_INTO(arm,stack);
+    return arm;
+}
+#pragma push_macro("KPROG_X86_STORE_ARM")
+#undef KPROG_X86_STORE_ARM
+#define KPROG_X86_STORE_ARM(STACK) x86_sim_inline_store_arm(STACK)
 #endif
 
 static __always_inline __attribute__((nodebug)) void
@@ -455,6 +476,8 @@ x86_sim_inline_recover(const struct x86_sim_inline_bindings *__x86_bind,
 #pragma pop_macro("X86_SIM_L_STACK_VALUES_CALL_FRAME")
 #pragma pop_macro("X86_SIM_L_STACK_VALUES_CLEAR")
 #if defined(__COMPCERT__)
+#pragma pop_macro("KPROG_X86_STORE_ARM")
+#pragma pop_macro("KPROG_X86_STORE_SRC_SHIFT")
 #pragma pop_macro("X86_SIM_L_READ_RECOVERY_MEM")
 #pragma pop_macro("X86_SIM_L_READ_MEM_VALUE")
 #pragma pop_macro("KPROG_X86_MOVBE_ARM")

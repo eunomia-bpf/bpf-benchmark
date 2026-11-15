@@ -1,0 +1,20 @@
+{
+  "status": "source checkpoint; validation pending behind Katran timing EX",
+  "source_roots_awaiting_export": [
+    "store_width",
+    "store_disp",
+    "store_value",
+    "store_src_shift",
+    "store_shifted_value",
+    "store_arm",
+    "store_selectors"
+  ],
+  "make_clight_exit": null,
+  "targeted_lean_jobs": null,
+  "native_fidelity": null,
+  "mutations_run": 0,
+  "migrated_theorems": 0,
+  "whole_library_acceptance": false,
+  "last_confirmed_full_inline_blocker": "MOV_STORE width/displacement/value selectors at b9b2d8c3f",
+  "queue_recipe": "/workspaces/kprog-raw/formal/m4-x86-store-selectors/validate.py"
+}

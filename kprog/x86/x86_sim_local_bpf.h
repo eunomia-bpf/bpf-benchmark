@@ -1600,8 +1600,17 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			X86_SIM_L_WRITE_REG_WIDTH((DST), __x86_l_value, __x86_l_write_width); \
 	} while (0)
 
-#define X86_SIM_L_EXEC_STORE(OP, DST, SRC, FLAGS, AUX, IMM)                 \
-	do {                                                               \
+#if defined(__COMPCERT__)
+#define X86_SIM_L_STORE_SELECTORS(OP, SRC, FLAGS, AUX, IMM) \
+    KPROG_X86_STORE_WIDTH_DECL(__x86_l_width, FLAGS); \
+    KPROG_X86_STORE_DISP_DECL(__x86_l_disp, (OP)==X86_OP_MOV_STORE_IMM, IMM); \
+    void *__x86_l_base_ptr=(void *)0; \
+    KPROG_X86_STORE_VALUE_DECL(__x86_l_value, (OP)==X86_OP_MOV_STORE_IMM, IMM, __x86_l_width, X86_SIM_L_READ_REG(SRC)); \
+    __u32 __x86_store_source_shift; \
+    KPROG_X86_STORE_SRC_SHIFT_INTO(__x86_store_source_shift, (OP)==X86_OP_MOV_STORE_IMM, AUX); \
+    KPROG_X86_STORE_SHIFTED_VALUE_INTO(__x86_l_value, __x86_l_value, __x86_store_source_shift)
+#else
+#define X86_SIM_L_STORE_SELECTORS(OP, SRC, FLAGS, AUX, IMM) \
 		const __u8 __x86_l_width = KPROG_X86_STORE_WIDTH(FLAGS);        \
 		__s64 __x86_l_disp =                                      \
 			KPROG_X86_STORE_DISP((OP) == X86_OP_MOV_STORE_IMM, IMM);\
@@ -1613,7 +1622,12 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 		__x86_l_value = KPROG_X86_STORE_SHIFTED_VALUE(            \
 			__x86_l_value,                                    \
 			KPROG_X86_STORE_SRC_SHIFT(                        \
-				(OP) == X86_OP_MOV_STORE_IMM, (AUX)));    \
+				(OP) == X86_OP_MOV_STORE_IMM, (AUX)))
+#endif
+
+#define X86_SIM_L_EXEC_STORE(OP, DST, SRC, FLAGS, AUX, IMM) \
+	do { \
+        X86_SIM_L_STORE_SELECTORS(OP, SRC, FLAGS, AUX, IMM); \
 		__x86_l_disp = X86_SIM_L_MEM_OFFSET((AUX), __x86_l_disp); \
         __s64 __x86_l_meta_disp=__x86_l_disp; \
 		if (X86_SIM_L_REG_TAG(DST) != X86_SIM_TAG_ABI)       \

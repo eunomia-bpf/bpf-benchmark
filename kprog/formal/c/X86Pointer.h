@@ -53,4 +53,14 @@ __u64 kprog_x86_stack_read(struct x86_sim_register_state *, struct kprog_x86_are
 void kprog_x86_stack_values_read(struct x86_sim_register_state *,
                                   struct kprog_x86_stack_fact *, __u32,
                                   __u64, __u64, struct x86_sim_stack_value *);
+struct kprog_x86_store_selection { __u8 width; __s64 displacement; __u64 value; };
+__u8 kprog_x86_store_width(__u64);
+__s64 kprog_x86_store_disp(__u64,__u64);
+__u64 kprog_x86_store_value(__u64,__u64,__u64,__u64);
+__u32 kprog_x86_store_src_shift(__u64,__u64);
+__u64 kprog_x86_store_shifted_value(__u64,__u64);
+__u8 kprog_x86_store_arm(__u64);
+void kprog_x86_store_selectors(struct x86_sim_register_state *,struct kprog_x86_arena *,
+                                __u32,__u64,__u64,__u64,__u64,__u64,
+                                struct kprog_x86_store_selection *);
 #endif
