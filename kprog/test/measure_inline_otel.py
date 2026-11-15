@@ -4,8 +4,10 @@ Generated C and preprocessed tokens travel through pipes. Only measurements,
 commands and diagnostics persist; no second OTel build directory is created.
 """
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -51,16 +53,29 @@ def main(a):
 
     def run(command, data, name):
         command = list(map(str, command))
-        measured = ['/usr/bin/time', '-v', '-o', str(a.output/(name+'.resources.txt')), *command]
         start = time.monotonic()
-        process = subprocess.run(measured, input=data, capture_output=True)
-        (a.output/(name+'.stderr')).write_bytes(process.stderr)
-        record['commands'].append(dict(command=measured, returncode=process.returncode,
+        with (a.output/(name+'.stderr')).open('wb') as errors, ThreadPoolExecutor(max_workers=1) as writer:
+            process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=errors)
+
+            def send():
+                try:
+                    process.stdin.write(data)
+                finally:
+                    process.stdin.close()
+
+            sent = writer.submit(send)
+            stdout = process.stdout.read()
+            _, status, usage = os.wait4(process.pid, 0)
+            process.returncode = os.waitstatus_to_exitcode(status)
+        record['commands'].append(dict(command=command, returncode=process.returncode,
             seconds=time.monotonic()-start, stdin_bytes=len(data), stdin_sha256=sha(data),
-            stdout_bytes=len(process.stdout), stdout_sha256=sha(process.stdout)))
+            stdout_bytes=len(stdout), stdout_sha256=sha(stdout),
+            user_seconds=usage.ru_utime, system_seconds=usage.ru_stime, max_rss_kib=usage.ru_maxrss))
         result.write_text(json.dumps(record, indent=2)+'\n')
-        process.check_returncode()
-        return process.stdout
+        if process.returncode:
+            raise subprocess.CalledProcessError(process.returncode, command)
+        sent.result()
+        return stdout
 
     flags = [str(x) for x in worker.COMPILE_FLAGS]
     clang = ROOT/'kprog/stock-path/bin/clang'
