@@ -417,3 +417,7 @@ frontend-release-image:
 .PHONY: frontend-constants
 frontend-constants:
 	taskset -c 8-11 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/probe_frontend_constants.py --build /var/tmp/kprog-tmp/perf/frontend-constants --output $(OUTPUT)
+
+.PHONY: inline-otel-measure
+inline-otel-measure:
+	taskset -c 8-11 prlimit --as=17179869184 -- python3 $(ROOT)/kprog/test/measure_inline_otel.py --build /var/tmp/kprog-tmp/perf/otel-whole-word-checked --metadata /workspaces/kprog-raw/perf/20261115-otel-hotspot-spills/replay/request__generation.metadata.json --previous /workspaces/kprog-raw/perf/20261115-width-constants/otel-frontend/result.json --output $(OUTPUT) $(INLINE_MEASURE_ARGS)
