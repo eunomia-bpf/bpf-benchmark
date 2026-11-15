@@ -1278,10 +1278,26 @@ Current replay equals normal compilation. The ten read-follow-up discrepancies
 remain identical to the previous header. Raw evidence:
 `/workspaces/kprog-raw/formal/m4-arm64-atomic`.
 
-The coordinator's2026-11-15 decision in [todo section0](../docs/todo.md) ends the
-formal lane after this turn; remaining M4–M6 pass to PERF after its linker work.
+The coordinator paused FORMAL on2026-11-15, then the operator explicitly
+resumed it at14:18 UTC (see [todo section0](../docs/todo.md)). FORMAL again owns
+M4–M6; PERF owns the production inline refactor and its scale measurements.
 The remaining full dispatcher/default-byte coverage, all2,065 refinements,
-recount, archival and whole-package checks are not accepted by this handoff.
+recount, archival and whole-package checks remain open.
+
+PERF's production interpreter now calls inline family functions with constant
+instruction fields. The extraction input [c/X86Inline.c](c/X86Inline.c) roots
+that actual dispatcher and its callees through references to the producer's
+existing cells, flags, arena and ghost facts. Its stack/fact array capacity
+remains a producer profile; an export with one capacity cannot establish all
+profiles. CompCert register-read and tag adapters use the same statement-output
+primitive bodies as the native expression facades, and width resolution reuses
+the existing byte-parameter helper. Native facades retain their folding behavior.
+The new oracle checks580,608 defined-lane/register/tag/origin/frame cases,
+including absent unused references and restoration of the caller's macros.
+`X86Pointer` is regenerated for the current named/indexed register-cell ABI.
+Full inline extraction still fails at the tagged-memory GNU expressions;
+`X86Inline` has no accepted Clight export or refinement yet. Raw probes and
+validation are retained under `/workspaces/kprog-raw/formal/m4-x86-inline`.
 
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight

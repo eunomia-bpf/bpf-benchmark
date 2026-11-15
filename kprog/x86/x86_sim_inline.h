@@ -221,6 +221,37 @@ struct x86_sim_inline_bindings {
 #undef X86_SIM_L_SV_PTR
 #define X86_SIM_L_SV_PTR(I) (*__x86_bind->values[(I)].pointer)
 
+#if defined(__COMPCERT__)
+/* The native expression facades and these standard-C functions use the same
+ * primitive bodies. Pass the binding itself, so unused cells stay unread.
+ * Arguments at the execution sites are decoded fields, not state snapshots. */
+static __always_inline __u64
+x86_sim_inline_read_reg(const struct x86_sim_inline_bindings *__x86_bind,
+    __u64 reg, __u64 width, __u64 shift)
+{
+    __u64 value;
+    X86_SIM_L_READ_REG_WIDTH_SHIFT_INTO(value, reg, width, shift);
+    return value;
+}
+
+static __always_inline __u8
+x86_sim_inline_reg_tag(const struct x86_sim_inline_bindings *__x86_bind,
+    __u64 reg)
+{
+    __u8 tag;
+    X86_SIM_L_REG_TAG_INTO(tag, reg);
+    return tag;
+}
+
+#pragma push_macro("X86_SIM_L_READ_REG_WIDTH_SHIFT")
+#undef X86_SIM_L_READ_REG_WIDTH_SHIFT
+#define X86_SIM_L_READ_REG_WIDTH_SHIFT(REG, WIDTH, SHIFT) \
+    x86_sim_inline_read_reg(__x86_bind, (REG), (WIDTH), (SHIFT))
+#pragma push_macro("X86_SIM_L_REG_TAG")
+#undef X86_SIM_L_REG_TAG
+#define X86_SIM_L_REG_TAG(REG) x86_sim_inline_reg_tag(__x86_bind, (REG))
+#endif
+
 static __always_inline __attribute__((nodebug)) void
 x86_sim_inline_clear_values(const struct x86_sim_inline_bindings *__x86_bind)
 { X86_SIM_L_STACK_VALUES_CLEAR(); }
@@ -313,6 +344,10 @@ x86_sim_inline_recover(const struct x86_sim_inline_bindings *__x86_bind,
 #pragma pop_macro("X86_SIM_L_HELPER_REGISTER_CLOBBERS")
 #pragma pop_macro("X86_SIM_L_STACK_VALUES_CALL_FRAME")
 #pragma pop_macro("X86_SIM_L_STACK_VALUES_CLEAR")
+#if defined(__COMPCERT__)
+#pragma pop_macro("X86_SIM_L_REG_TAG")
+#pragma pop_macro("X86_SIM_L_READ_REG_WIDTH_SHIFT")
+#endif
 #pragma pop_macro("X86_SIM_L_SV_PTR")
 #pragma pop_macro("X86_SIM_L_SV_TAG")
 #pragma pop_macro("__x86_stack_mem")

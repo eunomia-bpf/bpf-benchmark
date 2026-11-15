@@ -216,9 +216,15 @@ union x86_sim_stack_mem {
 /* Capture before resolving, as the byte-parameter helper does. Immutable
  * locals let Clang fold fixed-width gates before SROA builds their SSA graph;
  * both the single evaluation and the unsigned-byte result type matter. */
+#if defined(__COMPCERT__)
+/* The existing function captures the same byte and evaluates the same kernel;
+ * Clight cannot parse the native GNU expression facade. */
+#define X86_SIM_L_EFFECTIVE_WIDTH(WIDTH) x86_width_effective((WIDTH))
+#else
 #define X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)                                    \
 	({ const __u8 __x86_effective_width_code = (WIDTH); \
 	   (__u8)KPROG_X86_WIDTH_EFFECTIVE(__x86_effective_width_code); })
+#endif
 
 #define X86_SIM_L_FOR_EACH_GPR(X)                                           \
 	X(X86_RAX, rax)                                                     \
