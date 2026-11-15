@@ -1,0 +1,34 @@
+   PID   TYPE MODE  PATH
+    -1 OFDLCK READ  
+    -1 OFDLCK READ  
+    -1 OFDLCK READ  
+    -1 OFDLCK READ  
+949672  FLOCK WRITE /workspaces/.agent-state/codex/.sqlite-maintenance.lock
+  8631  FLOCK WRITE /var/lib/docker/containerd/daemon/io.containerd.snapshotter.v1.overlayfs/metadata.db
+949672  POSIX READ  /workspaces/.agent-state/codex/state_5.sqlite
+949672  POSIX READ  /workspaces/.agent-state/codex/state_5.sqlite-shm
+    -1 OFDLCK READ  
+    -1 OFDLCK READ  
+949672  POSIX READ  /workspaces/.agent-state/codex/queue_1.sqlite
+949672  POSIX READ  /workspaces/.agent-state/codex/queue_1.sqlite-shm
+    -1 OFDLCK READ  
+    -1 OFDLCK READ  
+948426  FLOCK WRITE /workspaces/.agent-state/kprog-lanes/locks/timing
+949672  FLOCK WRITE /workspaces/.agent-state/codex/tmp/arg0-linux/codex-arg0FH4hl0/.lock
+949672  FLOCK WRITE /workspaces/.agent-state/codex/thread-writer-locks/01a1db78-ea11-7b41-ac3b-d9d60caaecba.lock
+  8631  FLOCK WRITE /var/lib/docker/containerd/daemon/io.containerd.metadata.v1.bolt/meta.db
+  8631  FLOCK WRITE /run/docker/containerd/daemon/io.containerd.mount-manager.v1.bolt/mounts.db
+    -1 OFDLCK READ  
+    -1 OFDLCK READ  
+  8579  FLOCK WRITE /var/lib/docker/buildkit/history_c8d.db
+  8579  FLOCK WRITE /var/lib/docker/buildkit/cache.db
+  8579  FLOCK WRITE /var/lib/docker/buildkit/containerd-overlayfs/metadata_v2.db
+  8579  FLOCK WRITE /var/lib/docker/volumes/metadata.db
+  8579  FLOCK WRITE /var/lib/docker/image/identity-cache.db
+    -1 OFDLCK READ  
+    -1 OFDLCK READ  
+846965  POSIX READ  /workspaces/.agent-state/omp/agent/agent.db
+846965  POSIX READ  /workspaces/.agent-state/omp/agent/agent.db-shm
+846965  POSIX READ  /workspaces/.agent-state/omp/agent/models.db
+846965  POSIX READ  /workspaces/.agent-state/omp/agent/models.db-shm
+  8579  FLOCK WRITE /var/lib/docker/network/files/local-kv.db

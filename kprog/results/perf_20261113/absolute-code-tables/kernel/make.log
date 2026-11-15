@@ -1,0 +1,95 @@
+install -d /workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel
+git -C /workspaces/repository/vendor/linux-framework rev-parse HEAD > /workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/kernel-source.txt
+sha256sum /workspaces/.agent-state/kprog-ck/build-x86/.config /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage /workspaces/.agent-state/kprog-ck/build-x86/vmlinux > /workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/before-sha256.txt
+make -C /workspaces/repository/vendor/linux-framework O=/workspaces/.agent-state/kprog-ck/build-x86 -j4 bzImage
+make[1]: Entering directory '/workspaces/repository/vendor/linux-framework'
+make[2]: Entering directory '/workspaces/.agent-state/kprog-ck/build-x86'
+  GEN     Makefile
+  DESCEND objtool
+  DESCEND bpf/resolve_btfids
+  INSTALL libsubcmd_headers
+  INSTALL libsubcmd_headers
+  CALL    /workspaces/repository/vendor/linux-framework/scripts/checksyscalls.sh
+  CC      kernel/fork.o
+  CC      arch/x86/net/bpf_jit_comp.o
+  AR      arch/x86/net/built-in.a
+  AR      arch/x86/built-in.a
+  CC      kernel/bpf/core.o
+  CC      kernel/bpf/syscall.o
+  AR      kernel/bpf/built-in.a
+  AR      kernel/built-in.a
+  AR      built-in.a
+  AR      vmlinux.a
+  LD      vmlinux.o
+  GEN     .vmlinux.objs
+  MODPOST vmlinux.symvers
+  UPD     include/generated/utsversion.h
+  CC      init/version-timestamp.o
+  KSYMS   .tmp_vmlinux0.kallsyms.S
+  AS      .tmp_vmlinux0.kallsyms.o
+  LD      .tmp_vmlinux1
+  BTF     .tmp_vmlinux1
+  NM      .tmp_vmlinux1.syms
+  KSYMS   .tmp_vmlinux1.kallsyms.S
+  AS      .tmp_vmlinux1.kallsyms.o
+  LD      .tmp_vmlinux2
+  NM      .tmp_vmlinux2.syms
+  KSYMS   .tmp_vmlinux2.kallsyms.S
+  AS      .tmp_vmlinux2.kallsyms.o
+  LD      vmlinux.unstripped
+  BTFIDS  vmlinux.unstripped
+  NM      System.map
+  SORTTAB vmlinux.unstripped
+  OBJCOPY vmlinux
+  GEN     modules.builtin.modinfo
+  GEN     modules.builtin
+  CC      arch/x86/boot/version.o
+  LDS     arch/x86/boot/compressed/vmlinux.lds
+  VOFFSET arch/x86/boot/compressed/../voffset.h
+  OBJCOPY arch/x86/boot/compressed/vmlinux.bin
+  RELOCS  arch/x86/boot/compressed/vmlinux.relocs
+  CC      arch/x86/boot/compressed/kaslr.o
+  CC      arch/x86/boot/compressed/misc.o
+  GZIP    arch/x86/boot/compressed/vmlinux.bin.gz
+  MKPIGGY arch/x86/boot/compressed/piggy.S
+  AS      arch/x86/boot/compressed/piggy.o
+  LD      arch/x86/boot/compressed/vmlinux
+  ZOFFSET arch/x86/boot/zoffset.h
+  OBJCOPY arch/x86/boot/vmlinux.bin
+  AS      arch/x86/boot/header.o
+  LD      arch/x86/boot/setup.elf
+  OBJCOPY arch/x86/boot/setup.bin
+  BUILD   arch/x86/boot/bzImage
+Kernel: arch/x86/boot/bzImage is ready  (#12)
+make[2]: Leaving directory '/workspaces/.agent-state/kprog-ck/build-x86'
+make[1]: Leaving directory '/workspaces/repository/vendor/linux-framework'
+make -C /workspaces/repository/kprog/stock-path/module KDIR=/workspaces/.agent-state/kprog-ck/build-x86 MO=/workspaces/.agent-state/kprog-ck/verified-module
+make[1]: Entering directory '/workspaces/repository/kprog/stock-path/module'
+install -d /workspaces/.agent-state/kprog-ck/verified-module
+make -C /workspaces/.agent-state/kprog-ck/build-x86 M=/workspaces/repository/kprog/stock-path/module MO=/workspaces/.agent-state/kprog-ck/verified-module modules
+make[2]: Entering directory '/workspaces/.agent-state/kprog-ck/build-x86'
+make[3]: Entering directory '/workspaces/.agent-state/kprog-ck/verified-module'
+  GEN     Makefile
+  CC [M]  kprog_stock.o
+  LD [M]  bpf_x86_native_lab.o
+  MODPOST Module.symvers
+  LD [M]  bpf_x86_native_lab.ko
+  BTF [M] bpf_x86_native_lab.ko
+make[3]: Leaving directory '/workspaces/.agent-state/kprog-ck/verified-module'
+make[2]: Leaving directory '/workspaces/.agent-state/kprog-ck/build-x86'
+make[1]: Leaving directory '/workspaces/repository/kprog/stock-path/module'
+sha256sum /workspaces/.agent-state/kprog-ck/build-x86/.config /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage /workspaces/.agent-state/kprog-ck/build-x86/vmlinux /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko > /workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/after-sha256.txt
+make -r -f /workspaces/repository/kprog/test/native-relocations.mk kernel-layout-boot OUTPUT=/workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/boot
+make[1]: Entering directory '/workspaces/repository'
+install -d /workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/boot /workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/boot/inputs
+taskset -c 16-17 prlimit --as=17179869184 -- vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage --cwd /workspaces/repository --rwdir /workspaces/repository --rwdir /workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/boot --rodir /workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/boot/inputs=/var/tmp/kprog-tmp/perf/kernel-layout --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-kernel-layout OUTPUT=/workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/boot KERNEL_LAYOUT_BUILD=/workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/boot/inputs'
+uname -r > /workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/boot/kernel.release
+cat /proc/kallsyms > /workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/boot/kernel.kallsyms
+cat /sys/kernel/btf/vmlinux > /workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/boot/kernel.btf
+/workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/boot/inputs/facts /sys/kernel/btf/vmlinux /proc/kallsyms > /workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/boot/kernel-layout.json
+make[1]: Leaving directory '/workspaces/repository'
+make -r -f /workspaces/repository/kprog/test/native-relocations.mk kernel-layout BOOT_CAPTURE=/workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/boot
+make[1]: Entering directory '/workspaces/repository'
+taskset -c 8-11 prlimit --as=8589934592 -- /var/tmp/kprog-tmp/perf/kernel-layout/facts /workspaces/.agent-state/kprog-ck/build-x86/vmlinux /workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/boot/kernel.kallsyms > /var/tmp/kprog-tmp/perf/kernel-layout/kernel-layout.json
+make[1]: Leaving directory '/workspaces/repository'
+date -u +%FT%TZ > /workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/published

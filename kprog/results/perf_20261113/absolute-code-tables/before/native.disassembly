@@ -1,0 +1,39 @@
+
+/var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.native.o:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000000000 <absolute_table>:
+   0:	48 8b 07             	mov    rax,QWORD PTR [rdi]
+   3:	48 83 f8 07          	cmp    rax,0x7
+   7:	76 03                	jbe    c <absolute_table+0xc>
+   9:	31 c0                	xor    eax,eax
+   b:	c3                   	ret
+   c:	48 8d 0d 00 00 00 00 	lea    rcx,[rip+0x0]        # 13 <absolute_table+0x13>
+			f: R_X86_64_PC32	.data.rel.ro-0x4
+  13:	ff 24 c1             	jmp    QWORD PTR [rcx+rax*8]
+  16:	48 8b 47 08          	mov    rax,QWORD PTR [rdi+0x8]
+  1a:	48 83 c0 11          	add    rax,0x11
+  1e:	c3                   	ret
+  1f:	b8 00 80 00 00       	mov    eax,0x8000
+  24:	48 0b 47 28          	or     rax,QWORD PTR [rdi+0x28]
+  28:	c3                   	ret
+  29:	b8 34 12 00 00       	mov    eax,0x1234
+  2e:	48 33 47 18          	xor    rax,QWORD PTR [rdi+0x18]
+  32:	c3                   	ret
+  33:	48 8b 47 20          	mov    rax,QWORD PTR [rdi+0x20]
+  37:	48 83 c0 e3          	add    rax,0xffffffffffffffe3
+  3b:	c3                   	ret
+  3c:	48 8b 47 40          	mov    rax,QWORD PTR [rdi+0x40]
+  40:	48 8d 04 80          	lea    rax,[rax+rax*4]
+  44:	c3                   	ret
+  45:	48 8b 47 10          	mov    rax,QWORD PTR [rdi+0x10]
+  49:	48 8d 04 40          	lea    rax,[rax+rax*2]
+  4d:	c3                   	ret
+  4e:	48 8b 47 30          	mov    rax,QWORD PTR [rdi+0x30]
+  52:	25 ff 7f 00 00       	and    eax,0x7fff
+  57:	c3                   	ret
+  58:	48 8b 47 38          	mov    rax,QWORD PTR [rdi+0x38]
+  5c:	48 83 c0 47          	add    rax,0x47
+  60:	c3                   	ret

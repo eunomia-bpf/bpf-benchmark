@@ -1,0 +1,61 @@
+{
+  "utc": "2026-11-15T12:33:26Z",
+  "kernel_commit": "bdfa49b694e139aeb08a4878568f588a89fe5c06",
+  "files": [
+    {
+      "path": "/workspaces/repository/kprog/test/native_absolute_code_table.c",
+      "bytes": 513,
+      "sha256": "2646fbd3c93acf97818103bbde6238791d4aec87cda9b974dea1f114f3a25a18"
+    },
+    {
+      "path": "/workspaces/repository/kprog/test/check_absolute_code_table.py",
+      "bytes": 4662,
+      "sha256": "7ac691a3cab246a3c4087ffaeffde5147196dd06fc100d01ac3b1ee9d0835623"
+    },
+    {
+      "path": "/workspaces/repository/kprog/x86/micro-prog/x86_relative_tables.py",
+      "bytes": 16768,
+      "sha256": "4775749d496b1c356f9c5b56f664b0a41ddfe3932c8bd9e64fa07af317187d17"
+    },
+    {
+      "path": "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py",
+      "bytes": 95739,
+      "sha256": "22f5dabaa2d5e24005857de7f4f9bce30c9d7e2e89870f4f050f567512142e47"
+    },
+    {
+      "path": "/workspaces/repository/kprog/x86/native_lab/native_link/src/x86_readonly_relocs.rs",
+      "bytes": 53231,
+      "sha256": "2fe8e733ca5504b9c35f12661f57c4e8304fb7f5465804fb8a6aecf1f9707357"
+    },
+    {
+      "path": "/workspaces/repository/kinsn/module/include/native_lab_binding.h",
+      "bytes": 1375,
+      "sha256": "e13a237500172020a9b1e60481b048b412452a34a4caab6e80fe5caf9bb3488a"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.native.o",
+      "bytes": 1648,
+      "sha256": "fdf385277f03666abb9cb8598638ad4c479c68574482f52ba8ba37679d4d56d1"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.proof.o",
+      "bytes": 5504,
+      "sha256": "f89c6349f311e3a0377d9931296014a98fec0d63622633757f235428b81b771a"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.bin",
+      "bytes": 197,
+      "sha256": "99285a968da59232def9122f0a8be5804cd7fbcb9e3f723581c6d6ab0e8f0470"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.bpf.c",
+      "bytes": 5781,
+      "sha256": "1fde4b2412b301a64c135ecbe3c26121176801cde24401e651d8c2c4c920ba13"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.bpf.o",
+      "bytes": 26464,
+      "sha256": "21e223e7d3c90d3e87481b58f89e142a8872a588c09940804563f196bc6fa99d"
+    }
+  ]
+}

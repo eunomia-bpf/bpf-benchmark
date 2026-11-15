@@ -1,0 +1,51 @@
+{
+  "utc": "2026-11-15T12:53:33Z",
+  "source_head": "9cf1eb8adafecc9e03cba1101a054fa8485a01e2",
+  "files": [
+    {
+      "path": "/workspaces/repository/kprog/test/check_absolute_code_table.py",
+      "bytes": 6298,
+      "sha256": "f11ec9368b606294aeb392db21cd5e82febe11f31944f23318b576a5b8015856"
+    },
+    {
+      "path": "/workspaces/repository/kprog/test/native-relocations.mk",
+      "bytes": 31988,
+      "sha256": "a9ba3f71ad09d75b73aded69638598efc1075f01a75270a8a9ec18bfc35907ff"
+    },
+    {
+      "path": "/workspaces/repository/kprog/test/scheduled_table_stock.cpp",
+      "bytes": 2903,
+      "sha256": "7bc090d8aed29c5495c1cf80b38caa15bbef90feb5281ff124939c4fdb0e0cac"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.native.o",
+      "bytes": 1648,
+      "sha256": "fdf385277f03666abb9cb8598638ad4c479c68574482f52ba8ba37679d4d56d1"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.proof.o",
+      "bytes": 5504,
+      "sha256": "f89c6349f311e3a0377d9931296014a98fec0d63622633757f235428b81b771a"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.bin",
+      "bytes": 197,
+      "sha256": "99285a968da59232def9122f0a8be5804cd7fbcb9e3f723581c6d6ab0e8f0470"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.bpf.o",
+      "bytes": 26464,
+      "sha256": "21e223e7d3c90d3e87481b58f89e142a8872a588c09940804563f196bc6fa99d"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.relocs",
+      "bytes": 128,
+      "sha256": "1183b3a818bf976090176717d4d73c18320089b4ffdeafdd1c15cb40fb75f224"
+    },
+    {
+      "path": "/var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.abi",
+      "bytes": 222,
+      "sha256": "cd5cd9995aae60325ce5c7299953453a011fb2250f3c17100a41cb230195a0f5"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+install -d /workspaces/kprog-raw/perf/20261115-absolute-code-tables/pair
+git -C /workspaces/repository rev-parse HEAD > /workspaces/kprog-raw/perf/20261115-absolute-code-tables/pair/source-head.txt
+CMAKE_BUILD_PARALLEL_LEVEL=2 make -r -C /workspaces/repository/kprog/libnativeloader trusted-service BUILD_DIR=/workspaces/.agent-state/kprog-ck/verified-loader
+make[1]: Entering directory '/workspaces/repository/kprog/libnativeloader'
+cmake -S . -B "/workspaces/.agent-state/kprog-ck/verified-loader" \
+	-DNATIVE_LOADER_REPO_ROOT="/workspaces/repository" \
+	-DNATIVE_LOADER_LIBBPF_PREFIX="/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/prefix" \
+	-DNATIVE_LOADER_LIBBPF_LIBRARY="/workspaces/repository/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a" \
+	-DNATIVE_LOADER_KERNEL_OFFSETS_INCLUDE="/workspaces/repository/micro/programs/build-x86"
+cmake --build "/workspaces/.agent-state/kprog-ck/verified-loader" --target native_loader native_loader_shared
+cmake --build "/workspaces/.agent-state/kprog-ck/verified-loader" --target trusted-native-loader trusted-service-client
+cc -O2 -fPIC -mno-red-zone -mgeneral-regs-only -fno-stack-protector \
+	-fno-asynchronous-unwind-tables -c ../test/trusted_native.c -o "/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native.o"
+make[1]: Leaving directory '/workspaces/repository/kprog/libnativeloader'
+if test -L /workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link; then unlink /workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link; fi
+taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/workspaces/repository/kprog/x86/native_lab/native_link/target cargo build --release --manifest-path /workspaces/repository/kprog/x86/native_lab/native_link/Cargo.toml
+install -m755 /var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds
+install -m755 /var/tmp/kprog-tmp/perf/checked-compiler/compile-sim-ir /workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir
+sha256sum /workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader /workspaces/.agent-state/kprog-ck/verified-loader/libnative_loader.a /workspaces/.agent-state/kprog-ck/verified-loader/libnative_loader.so /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds /workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir > /workspaces/kprog-raw/perf/20261115-absolute-code-tables/pair/tool-sha256.txt
+date -u +%FT%TZ > /workspaces/kprog-raw/perf/20261115-absolute-code-tables/pair/published

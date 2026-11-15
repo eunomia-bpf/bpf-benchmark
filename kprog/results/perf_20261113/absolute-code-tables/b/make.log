@@ -1,0 +1,8 @@
+taskset -c 16-19 prlimit --as=8589934592 -- python3 /workspaces/repository/kprog/test/check_absolute_code_table.py --build /var/tmp/kprog-tmp/perf/absolute-code-tables --output /workspaces/kprog-raw/perf/20261115-absolute-code-tables/b --bounds /var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/test/check_absolute_code_table.py", line 90, in <module>
+    main(p.parse_args())
+  File "/workspaces/repository/kprog/test/check_absolute_code_table.py", line 27, in main
+    import trusted_specializer as worker
+ModuleNotFoundError: No module named 'trusted_specializer'
+make: *** [kprog/test/native-relocations.mk:126: absolute-table-b] Error 1

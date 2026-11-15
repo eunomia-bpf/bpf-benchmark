@@ -1,0 +1,6 @@
+install -d /var/tmp/kprog-tmp/perf/absolute-code-tables /workspaces/kprog-raw/perf/20261115-absolute-code-tables/before
+clang-18 -target x86_64-linux-gnu -O3 -march=native -foptimize-sibling-calls -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only -fno-stack-protector -c /workspaces/repository/kprog/test/native_absolute_code_table.c -o /var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.native.o
+objdump -dr -Mintel /var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.native.o > /workspaces/kprog-raw/perf/20261115-absolute-code-tables/before/native.disassembly
+readelf -rW /var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.native.o > /workspaces/kprog-raw/perf/20261115-absolute-code-tables/before/native.relocations
+/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link --input /var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.native.o --symbol absolute_table --mode proof --output /var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.proof.o > /workspaces/kprog-raw/perf/20261115-absolute-code-tables/before/proof.stdout 2> /workspaces/kprog-raw/perf/20261115-absolute-code-tables/before/proof.stderr
+make: *** [kprog/test/native-relocations.mk:118: absolute-table-forms] Error 1

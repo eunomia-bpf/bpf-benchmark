@@ -1,0 +1,13 @@
+{
+  "utc": "2026-11-15T12:33:26Z",
+  "incident_start_utc": "2026-11-15T12:23:08Z",
+  "incident_end_utc": "2026-11-15T12:23:57Z",
+  "owned_kernel_launcher": 957999,
+  "other_timing_supervisor": 948426,
+  "other_vng": 948437,
+  "other_qemu": 948456,
+  "image_lock": "/workspaces/.agent-state/kprog-lanes/locks/image",
+  "image_lock_inode": 263463,
+  "error": "Kernel rebuild and 4GiB boot overlapped the live timing guest despite the publisher holding image EX. Explicit live-guest ordering was omitted.",
+  "correction": "Further pair publication waits for entire timing supervisor948426 before taking imageEX; stock guest waits for pair. No C process stopped or raw discarded."
+}

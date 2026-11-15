@@ -1,0 +1,1 @@
+taskset -c 16-19 make -r -f kprog/test/native-relocations.mk absolute-table-source OUTPUT=/workspaces/kprog-raw/perf/20261115-absolute-code-tables/source 

@@ -1,0 +1,460 @@
+{
+  "utc": "2026-11-15T12:33:26Z",
+  "files": [
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/b/exit-code",
+      "bytes": 2,
+      "sha256": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/b/finished",
+      "bytes": 21,
+      "sha256": "501d99a8a5c38d59959ef9928a307172417bade278b3209422ec3ea883fb6240"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/b/launcher.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/b/launcher.pid",
+      "bytes": 7,
+      "sha256": "3ef0f2c53cac45a0340c6ac3957123ab6c66bc6d9c88370dacbd8995fc8a91f9"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/b/make-command.txt",
+      "bytes": 145,
+      "sha256": "5f4e19fd8b616ff2fff288f8581caf95020f254c6f8c39d1f11aa5fbd55c95cb"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/b/make.log",
+      "bytes": 719,
+      "sha256": "5bc5828e74c3e9e2b6f85b16bd8bf2622df1ce59de13f60d05c4fe782d765f54"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/b/started",
+      "bytes": 21,
+      "sha256": "501d99a8a5c38d59959ef9928a307172417bade278b3209422ec3ea883fb6240"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/b-corrected/commands.json",
+      "bytes": 3751,
+      "sha256": "f00fc5c138bf7495a5815a7774a8ae99d73e3f28d74e5452a226ec9f68ad7ecf"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/b-corrected/exit-code",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/b-corrected/finished",
+      "bytes": 21,
+      "sha256": "4b752f67834462a992e5162cd969e085d1582d6f016c260832017115994241d4"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/b-corrected/launcher.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/b-corrected/launcher.pid",
+      "bytes": 7,
+      "sha256": "958192263bde8e3361617594056770825287911786c9fd29f81ece6c88a300ed"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/b-corrected/make-command.txt",
+      "bytes": 155,
+      "sha256": "57f41d74fd734fe0030a514cedef23057847c70dc47423d11bb34704f3487c85"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/b-corrected/make.log",
+      "bytes": 371,
+      "sha256": "dbd7659f216552d5806b769e0d83e47c1edd69ccff357dcc3aeb02f77228d200"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/b-corrected/result.json",
+      "bytes": 140422,
+      "sha256": "cb9268a4a9cb802f7c1414957bcc3ddd1662e6a47a22eae39e37afdf86b65faa"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/b-corrected/started",
+      "bytes": 21,
+      "sha256": "0e1b96f79480266313f9147df108d2f41f7b2745332d46128aa27c1a3d9f6ff9"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/before/exit-code",
+      "bytes": 2,
+      "sha256": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/before/finished",
+      "bytes": 21,
+      "sha256": "db8d3e41963cdf742578fa39d69b1426cae08226bb111f4c5b557af457640d4c"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/before/launcher.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/before/launcher.pid",
+      "bytes": 7,
+      "sha256": "77d11845a1eba2b1beb0773601a3650a76c9bcc8a541c896a0e4047b86bc6f13"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/before/make-command.txt",
+      "bytes": 154,
+      "sha256": "8aac22ce4849d8968dc7c4864453b900a7c1362dd243af218464d436ad649ef8"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/before/make.log",
+      "bytes": 1233,
+      "sha256": "9f27ef36eda28fbdf505aac5b13b48f7f10e742e8b981d56de709a032e75965f"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/before/native.disassembly",
+      "bytes": 1691,
+      "sha256": "ff0d0eadcede250434ac542750c4aef86a072ed10dcdcd6ab0ef75759a675f06"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/before/native.relocations",
+      "bytes": 1373,
+      "sha256": "68678652e41df7f56a23bbbaf236aae14cc6f756012f87c919e88ca7a612b0f6"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/before/proof.stderr",
+      "bytes": 253,
+      "sha256": "487418de0f48010fa738d59d1f4fc865518d2704f576bfea4011b02e27f73b53"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/before/proof.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/before/started",
+      "bytes": 21,
+      "sha256": "db8d3e41963cdf742578fa39d69b1426cae08226bb111f4c5b557af457640d4c"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/compile-command.json",
+      "bytes": 314,
+      "sha256": "760f82b0bc7287843adc8e5d36ee0a438a48bca97affb1541e794bf4b190f13a"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/after-sha256.txt",
+      "bytes": 506,
+      "sha256": "fb8fefe8f2f283c413c20c71ecd014e809028ef8aabe78e56a9ad046806acd5b"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/before-sha256.txt",
+      "bytes": 368,
+      "sha256": "7a21518340fb755c9c8b38fc6ec741adc8d7b69d9b57b5eaa0577246c8c19e7e"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/boot/kernel-layout.json",
+      "bytes": 755,
+      "sha256": "2b3160997118425eed4ef110db3ec2ab11f4770c0395dbb30434f73d97c89af8"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/boot/kernel.btf",
+      "bytes": 5669381,
+      "sha256": "9813a701ef271af39f1d601815d7b5cde04de8cf0124a75a5ba96cc7a8981a22"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/boot/kernel.kallsyms",
+      "bytes": 8354234,
+      "sha256": "7ccef5bd959b9908d3ed34100a02883824430d9a0ed8470d6148c35d0f166dad"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/boot/kernel.release",
+      "bytes": 11,
+      "sha256": "8d6235f6ef49b74f5bbf86f7fb40837bfc8ef90a216fe167033c82c178edd6d1"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/dry-run-corrected.log",
+      "bytes": 996983,
+      "sha256": "c92b6aed428f586205952e9e75d534528cad8969feb6bb0a0feb254aa3e75833"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/dry-run.log",
+      "bytes": 51567,
+      "sha256": "d6025532be21bae7142947aa3c9b6163eab1b7ade41fe95c0f75589563919edd"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/exit-code",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/finished",
+      "bytes": 21,
+      "sha256": "cddec1963d52d2876972deae7fe17c6a765f7be8967bb2239f818a930a4831c3"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/image-lock",
+      "bytes": 49,
+      "sha256": "8e92abb050e4e3bdcb9b30b8fe0da082edd8b3c360b2b7acf6678f5213e35537"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/image-lock-mode",
+      "bytes": 3,
+      "sha256": "ea677ad115dcb3dc7c200051168977d0073e971fe05097c1bd2eaa5b6bd5fd15"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/kernel-source.txt",
+      "bytes": 41,
+      "sha256": "bd3a4e3de9ac4c2ba4bc5f3b8fc6b6391621c6b0d6e1c015b2472e2300aca62a"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/launcher.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/launcher.pid",
+      "bytes": 7,
+      "sha256": "57f1e2c771128db1df3802e25d5b86daf0619049882040a2006de3c042dc0f4a"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/make-command.txt",
+      "bytes": 171,
+      "sha256": "4b8c1e1743a4ace1531b96f4aa501d0a85bc7bd6c59dce0962605d2595457298"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/make.log",
+      "bytes": 6453,
+      "sha256": "c6148424ddd0baf47766e9d28a6efbdac101de055195983705c2396409d4b8fb"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/published",
+      "bytes": 21,
+      "sha256": "cddec1963d52d2876972deae7fe17c6a765f7be8967bb2239f818a930a4831c3"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/started",
+      "bytes": 21,
+      "sha256": "1e407bb428fd27c92d016b7000a731c450758473ec3f1dd4b1f469480105557e"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/pair/dry-run.log",
+      "bytes": 2688,
+      "sha256": "1404264b195778e2f0d133c41a8e7105da8b145262dc7607d512988d19500b9b"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/pair/launcher.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/pair/launcher.pid",
+      "bytes": 7,
+      "sha256": "8527c5735464b015973307dc7b351a8480df0b6fd7998c530d7f02fa09ddad34"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/pair/make-command.txt",
+      "bytes": 151,
+      "sha256": "c4b33d8e4bbbffcf9624e9757a1d39c464c59aecc9b3cc9c277a899e3e97d2d3"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/pair/queued",
+      "bytes": 21,
+      "sha256": "506d3aa96bc8703eb370668bb5562b6cde07da73d4d7fbd8c3e3a97f5b52855c"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/pair/waiting-for.pid",
+      "bytes": 7,
+      "sha256": "2af2aa938f4a9ea2baaa69b8f1dddf1ce5041884e6e00e29182f5f37877ba8d5"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/relative-normal-b/commands.json",
+      "bytes": 3997,
+      "sha256": "93c0f0adeece1509cf99385ecb2f87cfbb14bfa8ded8abd6290a74d80cef25be"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/relative-normal-b/exit-code",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/relative-normal-b/finished",
+      "bytes": 21,
+      "sha256": "7a571cbc3eec8b3ca6d139c2fe278642ebbdb6e451b701a75ecc4197c891ab34"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/relative-normal-b/launcher.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/relative-normal-b/launcher.pid",
+      "bytes": 7,
+      "sha256": "9b88eea53934eb3e0c3a0cd841c25fafc98c9e078ce6223b3e9f33c009a4f491"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/relative-normal-b/make-command.txt",
+      "bytes": 159,
+      "sha256": "e23b3e0c7311f6c09383a02f251e99973cd181f8c6e96f5f8b82905027114cd9"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/relative-normal-b/make.log",
+      "bytes": 299,
+      "sha256": "173bc70f1fe00fda8e95efee827319476f5cc70b52d3904c3fd958fb598c9457"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/relative-normal-b/result.json",
+      "bytes": 6376,
+      "sha256": "d80f193efb9e4c20d6f8de7b8e6f26e36258633818d4cb1884fb276c32d657da"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/relative-normal-b/started",
+      "bytes": 21,
+      "sha256": "1e407bb428fd27c92d016b7000a731c450758473ec3f1dd4b1f469480105557e"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/relative-regression/exit-code",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/relative-regression/finished",
+      "bytes": 21,
+      "sha256": "5cd24567e0821a38ab3eb78aeb63746d1ba68504879ef3f69a53c017046c89f1"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/relative-regression/jump-table.disassembly",
+      "bytes": 1743,
+      "sha256": "556c64b6144eb47958cd742455de31ecf91d8165eff227d32a20c50baed23110"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/relative-regression/jump-table.relocations",
+      "bytes": 1363,
+      "sha256": "860cc84b0f493df146d41941cb089bccf4854b00187d1a0af34677f975234eae"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/relative-regression/jump-tables/commands.json",
+      "bytes": 13678,
+      "sha256": "1d163a58224d4ebf8dbcc4cbd846e1201342e516553cd213a00ed0908d3c9a73"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/relative-regression/jump-tables/result.json",
+      "bytes": 70368,
+      "sha256": "affb762572dcd036116e424be23f75996dfdbce1143f9bce6831785eca07c1b7"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/relative-regression/launcher.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/relative-regression/launcher.pid",
+      "bytes": 7,
+      "sha256": "0e3b969d8da79b714e2e96d2fe0052f48d15166e878d54be3722c982c430215d"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/relative-regression/make-command.txt",
+      "bytes": 163,
+      "sha256": "be9c7f293583cd4db10e8b4bfea55cc4b1cb58dd594d4c3b62cdc2ba0cc87bea"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/relative-regression/make.log",
+      "bytes": 1379,
+      "sha256": "754faca6156792e52fae458b72394482ffe15f8db64d923dce7bf075f6561428"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/relative-regression/started",
+      "bytes": 21,
+      "sha256": "5cd24567e0821a38ab3eb78aeb63746d1ba68504879ef3f69a53c017046c89f1"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/resource-locks.txt",
+      "bytes": 1830,
+      "sha256": "746fad56bb13252357b1466e89257cce4523c127611a95e92b12357cf4f35062"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/resource-overlap.json",
+      "bytes": 680,
+      "sha256": "c4c77298437bb1210961eb3dcfe58f92fd17a0f52b85cd90ec048b491e9fc62f"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/resource-processes.txt",
+      "bytes": 106,
+      "sha256": "809c1a90dd27625e1664f3fcbd1c1a415a90236e066fea849d3225eda131eba2"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/rust-result.json",
+      "bytes": 626,
+      "sha256": "f375e1e4874e243c76517c842ac779c4269c97485d85d13a705dc3626b0fc49c"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/source/exit-code",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/source/finished",
+      "bytes": 21,
+      "sha256": "11d60da4918d30ab9c7164e4fdcb430b427d148d89377613b3244575e497bb53"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/source/launcher.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/source/launcher.pid",
+      "bytes": 7,
+      "sha256": "b8725d5fcc52f4232a23b9af8521c3d93c6083a4b9e72cd041d204a141b29ac8"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/source/make-command.txt",
+      "bytes": 155,
+      "sha256": "cd20c176f1d488861fb48c7fc201bd0c6dd38369e04c5eb5c6f42629c848c6b9"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/source/make.log",
+      "bytes": 4786,
+      "sha256": "63e36e7371294830280f325d3e61c66507ff47ce1306698e40767f2739b164cc"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/source/started",
+      "bytes": 21,
+      "sha256": "b7a2a4ef392f2cc1b9071f15e6120164af75cf654b9f786d279bc90e357b182e"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/source-product-identities.json",
+      "bytes": 2309,
+      "sha256": "f430de9dcfe6fd509664c6ca22c0f5c9ccc2a5c3b4cfa29783ecb1c4cdc5a2e7"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/stock/dry-run.log",
+      "bytes": 1096,
+      "sha256": "0c9cac196acad347d8a9eb2a397f0e5a2be49354c90511d08c7b257041213c44"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/stock/launcher.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/stock/launcher.pid",
+      "bytes": 7,
+      "sha256": "1fd73bef8a9c3a02f20c3fefe876449d440babb49c1f419cdf57f7388c5389e4"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/stock/make-command.txt",
+      "bytes": 153,
+      "sha256": "0de88d46a125defe0aeeb6e42b6ddb9fb7ed2695e6035c40377efdb21f790338"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/stock/queued",
+      "bytes": 21,
+      "sha256": "e6c4ea87e531a46c68486092b592a59eeea1fa446921cb6c123cb0ff0f4563da"
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261115-absolute-code-tables/stock/waiting-for.pid",
+      "bytes": 7,
+      "sha256": "8527c5735464b015973307dc7b351a8480df0b6fd7998c530d7f02fa09ddad34"
+    }
+  ]
+}

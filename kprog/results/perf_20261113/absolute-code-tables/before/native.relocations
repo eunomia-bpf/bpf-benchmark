@@ -1,0 +1,19 @@
+
+Relocation section '.rela.text' at offset 0x1d8 contains 1 entry:
+    Offset             Info             Type               Symbol's Value  Symbol's Name + Addend
+000000000000000f  0000000400000002 R_X86_64_PC32          0000000000000000 .data.rel.ro - 4
+
+Relocation section '.rela.data.rel.ro' at offset 0x1f0 contains 8 entries:
+    Offset             Info             Type               Symbol's Value  Symbol's Name + Addend
+0000000000000000  0000000200000001 R_X86_64_64            0000000000000000 .text + 16
+0000000000000008  0000000200000001 R_X86_64_64            0000000000000000 .text + 45
+0000000000000010  0000000200000001 R_X86_64_64            0000000000000000 .text + 29
+0000000000000018  0000000200000001 R_X86_64_64            0000000000000000 .text + 33
+0000000000000020  0000000200000001 R_X86_64_64            0000000000000000 .text + 1f
+0000000000000028  0000000200000001 R_X86_64_64            0000000000000000 .text + 4e
+0000000000000030  0000000200000001 R_X86_64_64            0000000000000000 .text + 58
+0000000000000038  0000000200000001 R_X86_64_64            0000000000000000 .text + 3c
+
+Relocation section '.rela.eh_frame' at offset 0x2b0 contains 1 entry:
+    Offset             Info             Type               Symbol's Value  Symbol's Name + Addend
+0000000000000020  0000000200000002 R_X86_64_PC32          0000000000000000 .text + 0

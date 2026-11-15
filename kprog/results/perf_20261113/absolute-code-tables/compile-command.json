@@ -1,0 +1,1 @@
+["clang-18","-target","x86_64-linux-gnu","-O3","-march=native","-foptimize-sibling-calls","-fomit-frame-pointer","-mno-red-zone","-mgeneral-regs-only","-fno-stack-protector","-c","/workspaces/repository/kprog/test/native_absolute_code_table.c","-o","/var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.native.o"]

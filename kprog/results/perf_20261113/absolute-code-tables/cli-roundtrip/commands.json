@@ -1,0 +1,41 @@
+[
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.native.o",
+      "--symbol",
+      "absolute_table",
+      "--mode",
+      "proof",
+      "--preserve-entry-abi",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.proof.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "native-link: entry=absolute_table (97 bytes), 1 reachable symbol(s) total\n  - absolute_table (vaddr 0x0, 97 bytes) [entry]\nnative-link: wrote proof object 133 bytes, 1 reloc(s) -> /var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.proof.o\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "--input",
+      "/var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.proof.o",
+      "--symbol",
+      "absolute_table",
+      "--mode",
+      "kernel",
+      "--output",
+      "/var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.bin",
+      "--output-relocs",
+      "/var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.relocs",
+      "--output-map-patches",
+      "/var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.maps",
+      "--link-plan",
+      "/var/tmp/kprog-tmp/perf/absolute-code-tables/absolute-plan.json"
+    ],
+    "returncode": 1,
+    "stdout": "",
+    "stderr": "native-link: entry=absolute_table (133 bytes), 1 reachable symbol(s) total\n  - absolute_table (vaddr 0x0, 133 bytes) [entry]\nnative-link: wrote 197 bytes -> /var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.bin (8 relocs)\nnative-link: wrote 8 relocs -> /var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.relocs\nnative-link: wrote 0 map patch site(s) -> /var/tmp/kprog-tmp/perf/absolute-code-tables/absolute.maps\nError: exception-recovery load sites require --output-abi\n"
+  }
+]
