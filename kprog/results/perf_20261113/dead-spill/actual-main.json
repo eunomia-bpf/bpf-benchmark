@@ -1,0 +1,41 @@
+{
+  "started": "2026-11-15T20:35:06.558438+00:00",
+  "archive": "/workspaces/kprog-raw/perf/20261115-otel-current-app-retry2/service.tar.gz",
+  "member": "service/requests/3.failure.tar.gz",
+  "scope": "Archived pre-PEI MIR diagnostic; no repeated C frontend or kernel submission",
+  "archived_hashes": {
+    "request/generated/commands.jsonl": "0cf50e25362f45084b9f670f876f882b076c10536d3272b4480a9fc144ab358f",
+    "request/generated/trusted_x86.bpf.before.mir": "c79e8f61ef2e93f26ca8498490c9f27b4dee617faf673421ebad68d55e2bf482",
+    "request/generation.metadata.json": "c2946d15ee9a02fde9591c5e329693a2aedb5ad8c3c85aeee2f9f132ced17b55",
+    "request/kernel.entry": "9f87a77eb73efdac4e76cdeac81c13d5156326391c0841e133650da939eb9b26",
+    "request/kernel.facts.json": "3243743f9b9ffd5d224435e99e69c056ba23bb838981e87800a56b949bff6d16",
+    "request/kernel.native.o": "590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915",
+    "request/source-identities.json": "e488e6b4f775dc5c8a0319b71f5ca2b79e11af2182cb554bdf60ae2b5904fedc"
+  },
+  "grouped_mir_sha256": "c00d34e839b17d2aab24275c290239387597d1efe236a48d262ac56877e5b06a",
+  "compiled": true,
+  "sections": [
+    {
+      "name": ".text",
+      "bytes": 0,
+      "frame_access_depth": 0
+    },
+    {
+      "name": "perf_event",
+      "bytes": 991592,
+      "frame_access_depth": 784
+    }
+  ],
+  "object_sha256": "d01e7d574ad3a5e35c62fee0e60ea1e6c6bfc5658938f5f13ab8cd73974295a1",
+  "finished": "2026-11-15T20:35:15.340847+00:00",
+  "wall_seconds": 8.78243217599811,
+  "address_space_limit_bytes": 17179869184,
+  "pairs": 6,
+  "rewritten_accesses": 693,
+  "dead_marked_loads": 1,
+  "original_spill_slot_shapes": {
+    "8byte_aligned8": 40,
+    "4byte_aligned8": 12
+  },
+  "native_stack_object_bytes": 408
+}

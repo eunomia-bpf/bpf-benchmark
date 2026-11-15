@@ -21,3 +21,14 @@ remains the follow-up after the dedicated Katran timing window.
 
 Raw commands and verifier outputs:
 /workspaces/kprog-raw/perf/20261115-dead-spill/{check,kernel}/.
+
+Actual retry2 request3 MIR replay now completes20:35:15Z in8.78s, without
+repeating its C frontend. Six packed pairs rewrite693 accesses, including the
+formerly rejected dead-marked load. llc with machine verification emits991592
+code bytes. The largest actual R10 access is784 bytes: fixing the dead marker
+exposes a separate stack-pressure issue. The retained pre-PEI input has one408B
+native stack object,40 eight-byte spill slots and12 four-byte spill slots.
+This is code generation evidence; stock verification and checked installation
+are still open. `actual-main.json` retains the exact input identities and scope;
+raw `/workspaces/kprog-raw/perf/20261115-otel-main-spill-replay/` keeps every
+command, retained metadata, lowering observation and compiler diagnostic.
