@@ -1,0 +1,1 @@
+taskset -c 8-19 make -r -f kprog/test/native-relocations.mk frontend-stacks COMPILER_PID=911032 OUTPUT=/workspaces/kprog-raw/perf/20261115-store-constants/width-frontend-stacks 

@@ -57,3 +57,10 @@ overwritten while it runs. The queued attempt uses the same canonical
 fingerprints after acquiring imageSH, releasing it before LLVM work. No
 second product build, guest or timing lock. Read both actual completion
 records before drawing any full-compile conclusion.
+
+At10:37UTC, three snapshots of the owned width-only Clang911032 still show
+SROAPass → PromoteMemToReg, now in `simplifyInstruction`. It has reached
+35.8min and roughly11GiB RSS; no completed frontend result. Sampling922459
+exits0; full commands/stacks/status are in `width-frontend-stacks`. Debugger
+pauses are disclosed, so its eventual wall time is not an uninstrumented
+compiler-speed baseline. This is a pass diagnosis, not a time-share estimate.
