@@ -22,6 +22,10 @@ hotspot-spill-replay:
 otel-main-spill-replay:
 	taskset -c 8-11 prlimit --as=17179869184 -- python3 $(ROOT)/kprog/test/replay_hotspot_spills.py --archive /workspaces/kprog-raw/perf/20261115-otel-current-app-retry2/service.tar.gz --member service/requests/3.failure.tar.gz --build /var/tmp/kprog-tmp/perf/otel-main-spill-replay --output $(OUTPUT)
 
+.PHONY: otel-main-backend-choices
+otel-main-backend-choices:
+	taskset -c 8-11 prlimit --as=17179869184 -- python3 $(ROOT)/kprog/test/measure_b_backend_choices.py --archive /workspaces/kprog-raw/perf/20261115-otel-current-app-retry2/service.tar.gz --member service/requests/3.failure.tar.gz --output $(OUTPUT) $(BACKEND_CHOICE_ARGS)
+
 .PHONY: hotspot-spill-lifetimes
 hotspot-spill-lifetimes:
 	install -d $(OUTPUT)
