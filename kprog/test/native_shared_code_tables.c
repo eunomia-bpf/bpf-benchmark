@@ -1,5 +1,8 @@
 /* Two roots share anonymous .rodata; neither root calls the other. */
+#include <linux/bpf.h>
+#include <bpf/bpf_helpers.h>
 #define ROOT(NAME, BIAS) \
+SEC("kprobe/" #NAME) \
 unsigned int NAME(const volatile unsigned long *context) \
 { \
     switch (context[0] & 15) { \
@@ -16,3 +19,4 @@ unsigned int NAME(const volatile unsigned long *context) \
 }
 ROOT(first_table, 17)
 ROOT(second_table, 29)
+char LICENSE[] SEC("license") = "GPL";

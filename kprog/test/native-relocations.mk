@@ -68,6 +68,15 @@ map-table-lookup: check $(CONTEXT_TOOL)
 shared-table-b: $(CONTEXT_TOOL)
 	taskset -c 19 prlimit --as=17179869184 -- python3 $(ROOT)/kprog/test/check_shared_table_b.py --build /var/tmp/kprog-tmp/perf/helper-cfg --output $(OUTPUT) --bounds $(CONTEXT_TOOL)
 
+.PHONY: shared-table-stock guest-shared-table-stock
+shared-table-stock: $(TABLE_CONTEXT_BUILD)/stock-client
+	install -d $(OUTPUT) $(OUTPUT)/inputs $(OUTPUT)/client
+	taskset -c 16-17 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --rodir $(OUTPUT)/inputs=/var/tmp/kprog-tmp/perf/helper-cfg --rodir $(OUTPUT)/client=$(TABLE_CONTEXT_BUILD) --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-shared-table-stock OUTPUT=$(OUTPUT)'
+
+guest-shared-table-stock:
+	uname -r > $(OUTPUT)/kernel.release
+	$(OUTPUT)/client/stock-client $(OUTPUT)/inputs/shared.original.bpf.o $(OUTPUT)/inputs/shared.bpf.o $(OUTPUT)/original.verifier.log $(OUTPUT)/generated.verifier.log second_table shared_model_x86_sim_xdp > $(OUTPUT)/stock.jsonl
+
 build:
 	flock -x /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) bash -eu -c 'if test -L "$(LINKER_TARGET)/release/native-link"; then unlink "$(LINKER_TARGET)/release/native-link"; fi; exec cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml'
 

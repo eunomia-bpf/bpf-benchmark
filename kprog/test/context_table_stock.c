@@ -37,8 +37,8 @@ static int check(const char *path, const char *entry, const char *log_path)
 
 int main(int argc, char **argv)
 {
-    REQUIRE(argc == 5);
-    REQUIRE(check(argv[1], "jump_table", argv[3]) == 0);
-    REQUIRE(check(argv[2], "trusted_x86_x86_sim_xdp", argv[4]) == 0);
+    REQUIRE(argc == 5 || argc == 7);
+    REQUIRE(check(argv[1], argc == 7 ? argv[5] : "jump_table", argv[3]) == 0);
+    REQUIRE(check(argv[2], argc == 7 ? argv[6] : "trusted_x86_x86_sim_xdp", argv[4]) == 0);
     return 0;
 }

@@ -22,6 +22,9 @@ def main(args):
         result.check_returncode()
 
     sys.path[:0] = [str(ROOT/'kprog'), str(ROOT/'kprog/x86'), str(ROOT/'kprog/x86/micro-prog')]
+    run(['clang-18', '-target', 'bpf', '-O2', '-g', '-I/usr/include/x86_64-linux-gnu',
+         '-I'+str(ROOT/'vendor/libbpf/src'), '-c', ROOT/'kprog/test/native_shared_code_tables.c',
+         '-o', args.build/'shared.original.bpf.o'])
     import trusted_specializer as worker
     gen = worker.gen
     body, functions, exit_addr, data = gen.parse_proof_object_program('shared', args.build)

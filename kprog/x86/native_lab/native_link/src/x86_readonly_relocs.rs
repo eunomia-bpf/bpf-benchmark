@@ -238,7 +238,7 @@ mod tests {
         let native = build.join("shared.native.o");
         let command = ["clang-18", "-target", "x86_64-linux-gnu", "-O3", "-march=native",
             "-foptimize-sibling-calls", "-fomit-frame-pointer", "-mno-red-zone", "-mgeneral-regs-only",
-            "-fno-stack-protector", "-c", "/workspaces/repository/kprog/test/native_shared_code_tables.c",
+            "-fno-stack-protector", "-I/workspaces/repository/vendor/libbpf/src", "-c", "/workspaces/repository/kprog/test/native_shared_code_tables.c",
             "-o", native.to_str().ok_or_else(|| anyhow!("shared fixture path is not UTF-8"))?];
         let compiled = std::process::Command::new(command[0]).args(&command[1..]).output()?;
         if !compiled.status.success() { bail!("shared-table clang failed: {}", String::from_utf8_lossy(&compiled.stderr)); }
