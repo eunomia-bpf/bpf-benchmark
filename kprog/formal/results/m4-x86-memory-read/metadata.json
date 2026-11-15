@@ -1,0 +1,12 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/formal/m4-x86-memory-read",
+  "historical_reference": "59605f560",
+  "validation_head": "22b6b7533829f3d98cd47d3980239bfc7cbc1708",
+  "source_patch": "raw_directory/final-input.patch",
+  "cpu": 15,
+  "address_space_limit_gib": 32,
+  "lean_threads": 1,
+  "timing": "Temporary shared timing lease for explicitly reserved18:38 Katran window; released on terminal, not a permanent global-work rule",
+  "cross_TU_callees": "Actual kprog_x86_read_reg/mem_offset/stack_read/read_recovery_mem definitions and exports in X86Pointer; no new arbitrary semantic import",
+  "scope": "actual C kernels/handler and AST with finite host checks; Clight linking/platform/refinement proof pending"
+}

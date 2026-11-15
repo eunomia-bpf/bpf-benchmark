@@ -1414,11 +1414,30 @@ semantic mutations pass their expected outcomes. `make clight`,39 targeted
 Lean jobs, deterministic970,802B export and three standard-axiom queries pass.
 The stack fixture is2856B/8relocs; ordinary1448B/11 and contextXDP360B/TC760B/4
 remain exact against historical headers and normal compilation. Full inline
-export advances to MOVBE width/shared-read GNU expressions. CPP2,593,834B is
+export at that checkpoint advanced to MOVBE width/shared-read GNU expressions. CPP2,593,834B is
 profile extraction only. Native arena-view/volatile/permission/fault relations
 remain proof work. [Small receipts](results/m4-x86-stack-read/README.md) are
 committed; complete raw evidence stays under
 `/workspaces/kprog-raw/formal/m4-x86-stack-read`.
+
+MOVBE width/arm and shared read declarations now have standard output forms
+and CompCert by-reference inline adapters. `X86Memory` exports four roots,
+including the full MOVBE-load body, in15 functions. Its calls name actual
+`X86Pointer` C definitions/exports; Clight linking/type/effect correspondence
+remains M5 work. Unaligned pointer slots use upstream alignment-one copying
+into a volatile pointer local on CompCert; native BPF/host forms remain.
+Historical/current native/adapter modes pass260 selector/51,520 read-frame/
+4,060 handler-composition cases each, seven guarded/nonreturn probes and eight
+mutation checks. The context oracle adds the full shared read to its19,200
+context/frame cases per native/adapter mode. `make clight`,40 targeted Lean
+jobs, deterministic189,714B regeneration and four standard-axiom queries pass.
+Native memory1680B/5relocs, stack2856B/8, ordinary1448B/11 and contextXDP360B/
+TC760B/4 match historical replay and normal compilation. Full inline export
+now stops at MOV-store width/displacement/value GNU selectors. Profile CPP is
+2,442,636B; no whole-default byte/performance or refinement claim follows.
+[Small receipts](results/m4-x86-memory-read/README.md) are committed; raw
+commands/failed harness attempts remain under
+`/workspaces/kprog-raw/formal/m4-x86-memory-read`.
 
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight

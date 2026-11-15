@@ -327,6 +327,39 @@ x86_sim_inline_read_recovery_mem(const struct x86_sim_inline_bindings *__x86_bin
 #undef X86_SIM_L_READ_RECOVERY_MEM
 #define X86_SIM_L_READ_RECOVERY_MEM(BASE, DST, AUX, DISP) \
     x86_sim_inline_read_recovery_mem(__x86_bind, (BASE), (DST), (AUX), (DISP))
+
+static __always_inline __u8 x86_sim_inline_movbe_width(__u64 flags)
+{
+    __u8 width;
+    KPROG_X86_MOVBE_WIDTH_INTO(width,flags);
+    return width;
+}
+#pragma push_macro("KPROG_X86_MOVBE_WIDTH")
+#undef KPROG_X86_MOVBE_WIDTH
+#define KPROG_X86_MOVBE_WIDTH(FLAGS) x86_sim_inline_movbe_width(FLAGS)
+
+static __always_inline __u8 x86_sim_inline_movbe_arm(__u64 stack)
+{
+    __u8 arm;
+    KPROG_X86_MOVBE_ARM_INTO(arm,stack);
+    return arm;
+}
+#pragma push_macro("KPROG_X86_MOVBE_ARM")
+#undef KPROG_X86_MOVBE_ARM
+#define KPROG_X86_MOVBE_ARM(STACK) x86_sim_inline_movbe_arm(STACK)
+
+static __always_inline __u64
+x86_sim_inline_read_mem_value(const struct x86_sim_inline_bindings *__x86_bind,
+    __u64 base, __u64 aux, __u64 imm, __u64 width, __u64 store_disp)
+{
+    __u64 value;
+    X86_SIM_L_READ_MEM_VALUE_INTO(value,base,aux,imm,width,store_disp);
+    return value;
+}
+#pragma push_macro("X86_SIM_L_READ_MEM_VALUE")
+#undef X86_SIM_L_READ_MEM_VALUE
+#define X86_SIM_L_READ_MEM_VALUE(BASE, AUX, IMM, WIDTH, STORE) \
+    x86_sim_inline_read_mem_value(__x86_bind,(BASE),(AUX),(IMM),(WIDTH),(STORE))
 #endif
 
 static __always_inline __attribute__((nodebug)) void
@@ -423,6 +456,9 @@ x86_sim_inline_recover(const struct x86_sim_inline_bindings *__x86_bind,
 #pragma pop_macro("X86_SIM_L_STACK_VALUES_CLEAR")
 #if defined(__COMPCERT__)
 #pragma pop_macro("X86_SIM_L_READ_RECOVERY_MEM")
+#pragma pop_macro("X86_SIM_L_READ_MEM_VALUE")
+#pragma pop_macro("KPROG_X86_MOVBE_ARM")
+#pragma pop_macro("KPROG_X86_MOVBE_WIDTH")
 #pragma pop_macro("X86_SIM_L_READ_RECOVERY")
 #pragma pop_macro("X86_SIM_L_MEM_OFFSET")
 #pragma pop_macro("X86_SIM_L_STACK_VALUES_READ")

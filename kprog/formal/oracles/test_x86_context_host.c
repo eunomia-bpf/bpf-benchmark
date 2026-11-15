@@ -14,6 +14,7 @@
 #define X86_SIM_ENABLE_STACK 1
 #define X86_SIM_USE_STATE_STRUCT 1
 #include "../c/X86Context.h"
+#include "../c/X86Memory.h"
 
 static unsigned long cases;
 static unsigned fields, bits, copies;
@@ -129,6 +130,8 @@ int main(void)
             memset(&state,0x6b,sizeof(state));
             state.helper_abi_base=memory+256; state.helper_ctx=xp?(void *)&xdp:(void *)&skb;
             state.gpr_cells[7].value.ptr=memory+256+deltas[d];
+            state.gpr_cells[7].tag=X86_SIM_TAG_ABI; state.is_xdp=xp;
+            state.abi_kind=xp?KPROG_ABI_KIND_XDP:KPROG_ABI_KIND_SKB;
             memcpy(&before,&state,sizeof(state)); key=state.helper_ctx; kind=xp?KPROG_ABI_KIND_XDP:KPROG_ABI_KIND_SKB;
             expected_source=memory+256+off; expected_size=width;
             __u64 expected=little(expected_source,width);
@@ -147,9 +150,10 @@ int main(void)
             else if (!xp && off>=168 && off+width<=172) expected=(__u64)skb.mark>>((off-168)*8);
             else copy_calls=1;
             if (width!=8) expected&=(1ULL<<(width*8))-1;
-            for (unsigned mode=0;mode<2;mode++) {
+            for (unsigned mode=0;mode<3;mode++) {
                 reset();
-                __u64 value=mode ? native(xp,&state,7,state.gpr_cells[7].value.ptr,(__s64)off-deltas[d],width) :
+                __u64 value=mode==2 ? kprog_x86_read_mem_value(&state,NULL,0,7,X86_MEM_AUX(X86_REG_NONE,0),(__u64)((__s64)off-deltas[d]),width,0) :
+                    mode ? native(xp,&state,7,state.gpr_cells[7].value.ptr,(__s64)off-deltas[d],width) :
                     xp?kprog_x86_xdp_read(&state,state.gpr_cells[7].value.ptr,(__s64)off-deltas[d],width):
                        kprog_x86_skb_read(&state,7,(__s64)off-deltas[d],width);
                 check(value==expected,"context/partial/scalar/cb/fallback value");

@@ -927,7 +927,15 @@ do { \
        X86_SIM_L_NATIVE_DATA_LOAD_TAGGED_INTO(__x86_data_result, BASE, OFF, WIDTH, TAG); \
        __x86_data_result; })
 
-#if defined(__BPF__) || defined(__bpf__)
+#if defined(__COMPCERT__)
+static __always_inline void *x86_sim_clight_load_pointer(const void *address)
+{
+    void * volatile observed;
+    __builtin_memcpy_aligned((void *)&observed,address,sizeof(observed),1);
+    return observed;
+}
+#define X86_SIM_L_LOAD_PTR_ADDR(ADDR) x86_sim_clight_load_pointer(ADDR)
+#elif defined(__BPF__) || defined(__bpf__)
 #define X86_SIM_L_LOAD_PTR_ADDR(ADDR) (*(void * volatile *)(ADDR))
 #else
 /* x86 permits unaligned pointer-width reads; the host C type must too. */
@@ -1350,8 +1358,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
        X86_SIM_L_SKB_WRITE((BASE),(OFF),(WIDTH),(VALUE)); \
       else X86_SIM_L_STORE_ADDR_TAGGED((ADDR),(WIDTH),(VALUE),X86_SIM_L_REG_TAG(BASE)); } while(0)
 
-#define X86_SIM_L_READ_MEM_VALUE(BASE_REG, AUX, IMM, WIDTH, STORE_DISP)      \
-	({                                                                 \
+#define X86_SIM_L_READ_MEM_VALUE_DECL(BASE_REG, AUX, IMM, WIDTH, STORE_DISP)      \
 		void *__x86_l_base_ptr = (void *)0;                      \
 		const __u8 __x86_l_read_mem_width =                            \
 			X86_SIM_L_EFFECTIVE_WIDTH(WIDTH);                \
@@ -1401,9 +1408,13 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 					__x86_l_base_ptr, __x86_l_disp,       \
 					__x86_l_read_mem_width, X86_SIM_L_REG_TAG(BASE_REG));          \
 			break;                                           \
-		}                                                         \
-		__x86_l_value;                                            \
-	})
+		}
+#define X86_SIM_L_READ_MEM_VALUE_INTO(OUTPUT, BASE_REG, AUX, IMM, WIDTH, STORE_DISP) \
+    do { X86_SIM_L_READ_MEM_VALUE_DECL(BASE_REG, AUX, IMM, WIDTH, STORE_DISP) \
+         (OUTPUT)=__x86_l_value; } while (0)
+#define X86_SIM_L_READ_MEM_VALUE(BASE_REG, AUX, IMM, WIDTH, STORE_DISP) \
+    ({ X86_SIM_L_READ_MEM_VALUE_DECL(BASE_REG, AUX, IMM, WIDTH, STORE_DISP) \
+       __x86_l_value; })
 
 /* The existing environment input relates a scalar read to its stock
  * exception outcome. The successful arm retains the ordinary memory access;
