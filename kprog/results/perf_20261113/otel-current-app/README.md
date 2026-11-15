@@ -54,3 +54,17 @@ The in-place kernel/image rebuild and corrected executions remain pending.
 
 All service archives and logs stay under the raw root. The completed scratch
 Docker disk was removed (removed-build-copies.txt); no result data was removed.
+
+Retry1 on kernel099357174783/imagefc5336c2 completed18:24:27Z, Make0 and
+application error "no tracked BPF programs". read_task_struct stock24 and
+checked-native27 install both succeed. Startup next reaches perf_unwind_stop;
+both attempts fail stock verification at a right shift by63 of a nullable
+apm_int_procs map-value pointer. The generated sign flag reaches a PHI only
+on the pointer-equals-null edge; the following recoverable CMP retains earlier
+flags, keeping this speculative computation live through the frontend.
+
+retry1/ retains all three service outcomes and the raw corpus result/metadata
+stay at corpus/results/x86_kvm_corpus_20261115_182251_801435. Full service
+evidence stays at /workspaces/kprog-raw/perf/20261115-otel-current-app-retry1/.
+The next compiler check propagates the exact equality into PHI incoming
+expressions. Whole-app output, equal work and performance continue.

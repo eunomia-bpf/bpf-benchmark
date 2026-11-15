@@ -1,0 +1,123 @@
+{
+  "application": "otelcol-ebpf-profiler/profiling",
+  "application_status": "error",
+  "application_error": "no tracked BPF programs",
+  "service_summary": {
+    "started": "2026-11-15T18:22:02.412727+00:00",
+    "command": [
+      "python3",
+      "/workspaces/repository/kprog/test/verified_corpus.py",
+      "otelcol-ebpf-profiler/profiling",
+      "1",
+      "10",
+      "1"
+    ],
+    "service": {
+      "ready": true,
+      "arch": 1,
+      "endpoint": "/sys/kernel/debug/bpf_x86_native_lab/specializer"
+    },
+    "returncode": 0,
+    "service_returncode": -15,
+    "finished": "2026-11-15T18:24:28.013017+00:00"
+  },
+  "attempts": 3,
+  "loaded": 3,
+  "verified": 1,
+  "installed": 1,
+  "run": 0,
+  "installed_without_counter": [
+    27
+  ],
+  "native_counter_ids_without_install": [],
+  "baseline_counter_programs": 13,
+  "native_counter_programs": 0,
+  "programs": [
+    {
+      "request_id": 1,
+      "source_prog_id": 21,
+      "native_sha256": "590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-15T18:23:21.709263+00:00",
+      "prog_id": 27,
+      "phase": "load",
+      "status": 0,
+      "artifact_archive": "/workspaces/kprog-raw/perf/20261115-otel-current-app-retry1/state/session-3ic5fnep/requests/1.success.tar.gz",
+      "finished": "2026-11-15T18:23:26.081106+00:00",
+      "stock_load": {
+        "request_id": 1,
+        "prog_id": 27,
+        "phase": "load",
+        "status": 0
+      },
+      "stock_verification": {
+        "request_id": 1,
+        "prog_id": 24,
+        "phase": "verify",
+        "status": 0
+      },
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 28,
+      "native_sha256": "590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-15T18:23:26.098601+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'verify', '4', '2', '28', '/workspaces/kprog-raw/perf/20261115-otel-current-app-retry1/state/session-3ic5fnep/requests/request-6_oycz84/generated/request.native.o', 'perf_unwind_stop', '/workspaces/kprog-raw/perf/20261115-otel-current-app-retry1/state/session-3ic5fnep/requests/request-6_oycz84/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261115-otel-current-app-retry1/state/session-3ic5fnep/requests/request-6_oycz84/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'exe_id_to_21_stack_deltas', '272', 'null', 'filter_error_frames', '234', '0', 'exe_id_to_13_stack_deltas', '236', 'null', 'apm_int_procs', '256', 'null', 'perf_progs', '243', 'null', 'stack_delta_page_to_info', '253', 'null', 'inhibit_events', '273', 'null', 'v8_procs', '265', 'null', 'exe_id_to_23_stack_deltas', '261', 'null', 'ruby_procs', '242', 'null', 'exe_id_to_15_stack_deltas', '219', 'null', 'task_stack_offset', '234', '32', 'perl_procs', '254', 'null', 'pid_events', '231', 'null', 'exe_id_to_8_stack_deltas', '222', 'null', 'off_cpu_threshold', '234', '40', 'tpbase_offset', '234', '24', 'kernel_stackmap', '240', 'null', 'hotspot_procs', '252', 'null', 'report_events', '274', 'null', 'custom_context_map', '264', 'null', 'exe_id_to_9_stack_deltas', '228', 'null', 'interpreter_offsets', '239', 'null', 'exe_id_to_10_stack_deltas', '233', 'null', 'exe_id_to_12_stack_deltas', '251', 'null', 'exe_id_to_14_stack_deltas', '268', 'null', 'dotnet_procs', '217', 'null', 'exe_id_to_11_stack_deltas', '245', 'null', 'with_debug_output', '234', '8', 'exe_id_to_16_stack_deltas', '247', 'null', 'stack_ptregs_offset', '234', '36', 'exe_id_to_18_stack_deltas', '259', 'null', 'unwind_info_array', '229', 'null', 'metrics', '223', 'null', 'kprobe_progs', '220', 'null', 'pid_page_to_mapping_info', '255', 'null', 'trace_events', '266', 'null', 'reported_pids', '241', 'null', 'exe_id_to_22_stack_deltas', '225', 'null', 'py_procs', '263', 'null', 'exe_id_to_19_stack_deltas', '270', 'null', 'go_labels_procs', '226', 'null', 'filter_idle_frames', '234', '12', 'php_procs', '262', 'null', 'per_cpu_records', '257', 'null', 'inverse_pac_mask', '234', '16', 'exe_id_to_20_stack_deltas', '238', 'null', 'exe_id_to_17_stack_deltas', '249', 'null']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 240, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 180, in load_service_artifacts\n    verified = load('verify', artifacts)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'verify', '4', '2', '28', '/workspaces/kprog-raw/perf/20261115-otel-current-app-retry1/state/session-3ic5fnep/requests/request-6_oycz84/generated/request.native.o', 'perf_unwind_stop', '/workspaces/kprog-raw/perf/20261115-otel-current-app-retry1/state/session-3ic5fnep/requests/request-6_oycz84/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261115-otel-current-app-retry1/state/session-3ic5fnep/requests/request-6_oycz84/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'exe_id_to_21_stack_deltas', '272', 'null', 'filter_error_frames', '234', '0', 'exe_id_to_13_stack_deltas', '236', 'null', 'apm_int_procs', '256', 'null', 'perf_progs', '243', 'null', 'stack_delta_page_to_info', '253', 'null', 'inhibit_events', '273', 'null', 'v8_procs', '265', 'null', 'exe_id_to_23_stack_deltas', '261', 'null', 'ruby_procs', '242', 'null', 'exe_id_to_15_stack_deltas', '219', 'null', 'task_stack_offset', '234', '32', 'perl_procs', '254', 'null', 'pid_events', '231', 'null', 'exe_id_to_8_stack_deltas', '222', 'null', 'off_cpu_threshold', '234', '40', 'tpbase_offset', '234', '24', 'kernel_stackmap', '240', 'null', 'hotspot_procs', '252', 'null', 'report_events', '274', 'null', 'custom_context_map', '264', 'null', 'exe_id_to_9_stack_deltas', '228', 'null', 'interpreter_offsets', '239', 'null', 'exe_id_to_10_stack_deltas', '233', 'null', 'exe_id_to_12_stack_deltas', '251', 'null', 'exe_id_to_14_stack_deltas', '268', 'null', 'dotnet_procs', '217', 'null', 'exe_id_to_11_stack_deltas', '245', 'null', 'with_debug_output', '234', '8', 'exe_id_to_16_stack_deltas', '247', 'null', 'stack_ptregs_offset', '234', '36', 'exe_id_to_18_stack_deltas', '259', 'null', 'unwind_info_array', '229', 'null', 'metrics', '223', 'null', 'kprobe_progs', '220', 'null', 'pid_page_to_mapping_info', '255', 'null', 'trace_events', '266', 'null', 'reported_pids', '241', 'null', 'exe_id_to_22_stack_deltas', '225', 'null', 'py_procs', '263', 'null', 'exe_id_to_19_stack_deltas', '270', 'null', 'go_labels_procs', '226', 'null', 'filter_idle_frames', '234', '12', 'php_procs', '262', 'null', 'per_cpu_records', '257', 'null', 'inverse_pac_mask', '234', '16', 'exe_id_to_20_stack_deltas', '238', 'null', 'exe_id_to_17_stack_deltas', '249', 'null']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/perf/20261115-otel-current-app-retry1/state/session-3ic5fnep/requests/2.failure.tar.gz",
+      "finished": "2026-11-15T18:23:51.702609+00:00",
+      "stock_load": null,
+      "stock_verification": null,
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    },
+    {
+      "request_id": 3,
+      "source_prog_id": 31,
+      "native_sha256": "590aa121e6b129ddf9e0549a0f072192f323458fefdbbd67835a4bb6304c4915",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-15T18:23:51.769127+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'verify', '4', '3', '31', '/workspaces/kprog-raw/perf/20261115-otel-current-app-retry1/state/session-3ic5fnep/requests/request-viv84t3m/generated/request.native.o', 'perf_unwind_stop', '/workspaces/kprog-raw/perf/20261115-otel-current-app-retry1/state/session-3ic5fnep/requests/request-viv84t3m/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261115-otel-current-app-retry1/state/session-3ic5fnep/requests/request-viv84t3m/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'exe_id_to_21_stack_deltas', '272', 'null', 'filter_error_frames', '234', '0', 'exe_id_to_13_stack_deltas', '236', 'null', 'apm_int_procs', '256', 'null', 'perf_progs', '243', 'null', 'stack_delta_page_to_info', '253', 'null', 'inhibit_events', '273', 'null', 'v8_procs', '265', 'null', 'exe_id_to_23_stack_deltas', '261', 'null', 'ruby_procs', '242', 'null', 'exe_id_to_15_stack_deltas', '219', 'null', 'task_stack_offset', '234', '32', 'perl_procs', '254', 'null', 'pid_events', '231', 'null', 'exe_id_to_8_stack_deltas', '222', 'null', 'off_cpu_threshold', '234', '40', 'tpbase_offset', '234', '24', 'kernel_stackmap', '240', 'null', 'hotspot_procs', '252', 'null', 'report_events', '274', 'null', 'custom_context_map', '264', 'null', 'exe_id_to_9_stack_deltas', '228', 'null', 'interpreter_offsets', '239', 'null', 'exe_id_to_10_stack_deltas', '233', 'null', 'exe_id_to_12_stack_deltas', '251', 'null', 'exe_id_to_14_stack_deltas', '268', 'null', 'dotnet_procs', '217', 'null', 'exe_id_to_11_stack_deltas', '245', 'null', 'with_debug_output', '234', '8', 'exe_id_to_16_stack_deltas', '247', 'null', 'stack_ptregs_offset', '234', '36', 'exe_id_to_18_stack_deltas', '259', 'null', 'unwind_info_array', '229', 'null', 'metrics', '223', 'null', 'kprobe_progs', '220', 'null', 'pid_page_to_mapping_info', '255', 'null', 'trace_events', '266', 'null', 'reported_pids', '241', 'null', 'exe_id_to_22_stack_deltas', '225', 'null', 'py_procs', '263', 'null', 'exe_id_to_19_stack_deltas', '270', 'null', 'go_labels_procs', '226', 'null', 'filter_idle_frames', '234', '12', 'php_procs', '262', 'null', 'per_cpu_records', '257', 'null', 'inverse_pac_mask', '234', '16', 'exe_id_to_20_stack_deltas', '238', 'null', 'exe_id_to_17_stack_deltas', '249', 'null']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 240, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 180, in load_service_artifacts\n    verified = load('verify', artifacts)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader', 'verify', '4', '3', '31', '/workspaces/kprog-raw/perf/20261115-otel-current-app-retry1/state/session-3ic5fnep/requests/request-viv84t3m/generated/request.native.o', 'perf_unwind_stop', '/workspaces/kprog-raw/perf/20261115-otel-current-app-retry1/state/session-3ic5fnep/requests/request-viv84t3m/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261115-otel-current-app-retry1/state/session-3ic5fnep/requests/request-viv84t3m/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'exe_id_to_21_stack_deltas', '272', 'null', 'filter_error_frames', '234', '0', 'exe_id_to_13_stack_deltas', '236', 'null', 'apm_int_procs', '256', 'null', 'perf_progs', '243', 'null', 'stack_delta_page_to_info', '253', 'null', 'inhibit_events', '273', 'null', 'v8_procs', '265', 'null', 'exe_id_to_23_stack_deltas', '261', 'null', 'ruby_procs', '242', 'null', 'exe_id_to_15_stack_deltas', '219', 'null', 'task_stack_offset', '234', '32', 'perl_procs', '254', 'null', 'pid_events', '231', 'null', 'exe_id_to_8_stack_deltas', '222', 'null', 'off_cpu_threshold', '234', '40', 'tpbase_offset', '234', '24', 'kernel_stackmap', '240', 'null', 'hotspot_procs', '252', 'null', 'report_events', '274', 'null', 'custom_context_map', '264', 'null', 'exe_id_to_9_stack_deltas', '228', 'null', 'interpreter_offsets', '239', 'null', 'exe_id_to_10_stack_deltas', '233', 'null', 'exe_id_to_12_stack_deltas', '251', 'null', 'exe_id_to_14_stack_deltas', '268', 'null', 'dotnet_procs', '217', 'null', 'exe_id_to_11_stack_deltas', '245', 'null', 'with_debug_output', '234', '8', 'exe_id_to_16_stack_deltas', '247', 'null', 'stack_ptregs_offset', '234', '36', 'exe_id_to_18_stack_deltas', '259', 'null', 'unwind_info_array', '229', 'null', 'metrics', '223', 'null', 'kprobe_progs', '220', 'null', 'pid_page_to_mapping_info', '255', 'null', 'trace_events', '266', 'null', 'reported_pids', '241', 'null', 'exe_id_to_22_stack_deltas', '225', 'null', 'py_procs', '263', 'null', 'exe_id_to_19_stack_deltas', '270', 'null', 'go_labels_procs', '226', 'null', 'filter_idle_frames', '234', '12', 'php_procs', '262', 'null', 'per_cpu_records', '257', 'null', 'inverse_pac_mask', '234', '16', 'exe_id_to_20_stack_deltas', '238', 'null', 'exe_id_to_17_stack_deltas', '249', 'null']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/perf/20261115-otel-current-app-retry1/state/session-3ic5fnep/requests/3.failure.tar.gz",
+      "finished": "2026-11-15T18:24:25.785613+00:00",
+      "stock_load": null,
+      "stock_verification": null,
+      "generation_returncodes": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "counters": null
+    }
+  ],
+  "raw_directory": "/workspaces/kprog-raw/perf/20261115-otel-current-app-retry1",
+  "corpus_directory": "corpus/results/x86_kvm_corpus_20261115_182251_801435",
+  "make_exit": 0,
+  "scope": "Functional current-image checked OTel; baseline completes and native startup reaches second entry stock verification"
+}
