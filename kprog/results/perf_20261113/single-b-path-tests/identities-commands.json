@@ -1,0 +1,197 @@
+[
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/packet-identities/before.ll",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/packet-identities/strict.bc",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=1\nunused private inputs removed=0\n"
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "/var/tmp/kprog-tmp/perf/packet-identities/before.ll",
+      "/workspaces/repository/kprog/test/packet_choice_call.S",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/packet-identities/before.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "warning: overriding the module target triple with x86_64-pc-linux-gnu [-Woverride-module]\n1 warning generated.\n"
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "-fPIC",
+      "-O2",
+      "/var/tmp/kprog-tmp/perf/packet-identities/strict.bc",
+      "/workspaces/repository/kprog/test/packet_choice_call.S",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/packet-identities/strict.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "warning: overriding the module target triple with x86_64-pc-linux-gnu [-Woverride-module]\n1 warning generated.\n"
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/packet-identities/bpf.ll",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/packet-identities/bpf-strict.bc",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=1\nunused private inputs removed=0\n"
+  },
+  {
+    "command": [
+      "clang-18",
+      "-target",
+      "bpf",
+      "-mcpu=v4",
+      "-O3",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/packet-identities/bpf-strict.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/packet-identities/bpf-strict.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-E",
+      "/var/tmp/kprog-tmp/perf/packet-identities/pipeline.bpf.piece0.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/packet-identities/pipeline.bpf.piece0.i"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-emit-llvm",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/packet-identities/pipeline.bpf.i",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/packet-identities/pipeline.bpf.bounds-input.bc"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+      "/var/tmp/kprog-tmp/perf/packet-identities/pipeline.bpf.bounds-input.bc",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/packet-identities/pipeline.bpf.bounds.bc",
+      "--canonical-ctx-loads",
+      "--strict-identities"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "packet length predicates lowered=1\nunused private inputs removed=0\nconstant context loads canonicalized=0\n"
+  },
+  {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O3",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/var/tmp/kprog-tmp/perf/packet-identities/pipeline.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/packet-identities/pipeline.bpf.before.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/var/tmp/kprog-tmp/perf/packet-identities/pipeline.bpf.before.mir",
+      "/var/tmp/kprog-tmp/perf/packet-identities/pipeline.bpf.packed.mir"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "llc-18",
+      "-O3",
+      "-march=bpf",
+      "-mcpu=v4",
+      "-bpf-stack-size=4096",
+      "-start-before=prologepilog",
+      "-filetype=obj",
+      "/var/tmp/kprog-tmp/perf/packet-identities/pipeline.bpf.packed.mir",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/packet-identities/pipeline.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]
