@@ -20,3 +20,18 @@ Validation: UBSan register dispatch/ABI/independent entry draw ordering 6423 cas
 Failures retained: the first broad route compile found its pre-existing missing __x86_entry_rbp test variable; the oracle now explicitly snapshots/restores the incoming pointer and tag. The first CompCert run rejected a new GNU statement expression in REG_VALUE; the final implementation uses an ordinary conditional expression and passes. The wider CPU suite stopped at its existing unsupported movups encoder case, before any hardware comparisons, and is not marked passing. Its generator had already copied source headers into build-x86/snapshot; those rebuildable copies were removed with per-file SHA receipts. Do not rerun that target until it uses this checkout directly.
 
 This is a 26–31% preprocessing reduction, not a repaired scale limit. The 1K pointer input is still about 61.7 MB; repeated ALU/load logic remains. No 10K/100K job was resumed, no native performance gain or stack acceptance is claimed, and no base/kernel/image was changed. All LTO remains on together.
+
+Follow-up: 511f1ff0d removes source snapshots from both CPU generators, using
+this checkout and recording source SHA identities. The finite-control CPU
+observer executes 35 forms / 8960 cases: 4864 failures, all exclusively in
+released private stack bytes (registers, defined flags, vectors and external
+memory match). The historical pre-cell header at d4a6e8fed reproduces exactly
+the same per-form failure counts; e9ea021fa streams that header in compiler
+stdin and replaces the sole executable, with no historical source tree or
+second retained binary. Both raw traces and mismatches are retained here.
+
+The model's STACK_RELEASE writes explicit unspecified environment words;
+this legacy host observer binds them to zero, while hardware retains return
+addresses below SP. This explains the observed byte class, but the observer
+still fails and is not relabeled passing. A matched free-input observer is an
+open task; it does not invalidate or enlarge the focused passing subsets.
