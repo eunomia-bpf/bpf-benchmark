@@ -1,0 +1,8 @@
+
+Relocation section '.rela.text' at offset 0x150 contains 1 entry:
+    Offset             Info             Type               Symbol's Value  Symbol's Name + Addend
+0000000000000007  0000000400000002 R_X86_64_PC32          0000000000000000 test_map - 4
+
+Relocation section '.rela.eh_frame' at offset 0x168 contains 1 entry:
+    Offset             Info             Type               Symbol's Value  Symbol's Name + Addend
+0000000000000020  0000000200000002 R_X86_64_PC32          0000000000000000 .text + 0

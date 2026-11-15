@@ -1,0 +1,45 @@
+{
+  "image": "bpf-benchmark/kprog:current",
+  "image_linker_sha256": "dbac878459d6d87c5dcef36429e1233b626c351d14337bf6b635cedd8b369570",
+  "repository_linker_sha256": "dbac878459d6d87c5dcef36429e1233b626c351d14337bf6b635cedd8b369570",
+  "native_sha256": "fddc616f76c295d15a95a6dac170d18260f84aff60f768692d3c81728cc5af9e",
+  "proof_sha256": "4d0f221b5d37a9eda340943275f110af89b987555eb7b842ef95fb2512c52334",
+  "pc32_offsets": [
+    7
+  ],
+  "map_address": 140444121986160,
+  "full_pointer_patch_offset": 6,
+  "cases": [
+    {
+      "key": 0,
+      "actual": 101,
+      "expected": 101
+    },
+    {
+      "key": 1,
+      "actual": 202,
+      "expected": 202
+    },
+    {
+      "key": 2,
+      "actual": 303,
+      "expected": 303
+    },
+    {
+      "key": 3,
+      "actual": 0,
+      "expected": 0
+    },
+    {
+      "key": 4,
+      "actual": 0,
+      "expected": 0
+    },
+    {
+      "key": 4294967295,
+      "actual": 0,
+      "expected": 0
+    }
+  ],
+  "scope": "Guest userspace execution of image-linked code; not a kernel map or application load."
+}
