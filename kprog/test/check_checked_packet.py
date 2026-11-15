@@ -1,15 +1,44 @@
 """Catch public packet-pointer truncation and the eight-byte qdisc CB shift."""
 import ctypes as c
+import hashlib
 import json
 from pathlib import Path
 import subprocess
 import sys
+import time
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'kprog'))
 from trusted_service import adapter
 from kernel_function_abi import KernelTypes, Type
 compiler,linker,context,public,physical,native,output,bounds=map(Path,sys.argv[1:])
 output.mkdir(parents=True,exist_ok=True)
+def prepare_generated(directory,kind):
+    if not directory.exists():return
+    # Retain previous evidence, replace only this test's rebuildable products,
+    # and leave specialize()'s fresh-generation directory contract intact.
+    records=Path('/workspaces/kprog-raw/perf/checked-packet-rebuild')/str(time.time_ns())/kind
+    records.mkdir(parents=True)
+    products={'request.native.o','trusted_x86.proof.o','trusted_x86.bpf.c',
+        'trusted_x86.bpf.i','trusted_x86.bpf.o','trusted_x86.bpf.before.mir',
+        'trusted_x86.bpf.packed.mir','trusted_x86.bpf.bounds-input.bc',
+        'trusted_x86.bpf.bounds.bc','checked-simulator.i','checked-simulator.bc',
+        'checked-simulator.context.bc','checked-simulator.native.bc',
+        'checked-simulator.native.o','checked-simulator.proof.o'}
+    rows=[]
+    for path in sorted(directory.iterdir()):
+        with path.open('rb') as stream:digest=hashlib.file_digest(stream,'sha256').hexdigest()
+        rows.append(dict(path=str(path),sha256=digest,bytes=path.stat().st_size,
+            action='replace-build' if path.name in products else 'preserve-data',done=False))
+    manifest=records/'manifest.json'
+    manifest.write_text(json.dumps(rows,indent=2)+'\n')
+    for row in rows:
+        path=Path(row['path'])
+        if row['action']=='replace-build':path.unlink()
+        else:path.rename(records/path.name)
+        row['done']=True
+        manifest.write_text(json.dumps(rows,indent=2)+'\n')
+    directory.rmdir()
+    return str(manifest)
 rules=json.loads(physical.read_text())
 def offset(kind,field):
     rule=next(r for r in rules if r['kind']==kind and r['field']==field)
@@ -37,8 +66,13 @@ try:
 finally:target.close()
 worker=adapter(1)
 rows=[]
+rebuild_records=[]
 for kind,entry,prog_type,section in [('xdp','packet_xdp',6,'xdp'),('tc','packet_tc',3,'tc'),('cgroup_skb','packet_tc',8,'cgroup_skb/egress')]:
     directory=output/kind;directory.mkdir(exist_ok=True)
+    previous=prepare_generated(directory/'generated',kind)
+    if previous:
+        rebuild_records.append(previous)
+        (output/'rebuild-records.json').write_text(json.dumps(rebuild_records,indent=2)+'\n')
     artifact=worker.specialize(native.read_bytes(),entry,dict(version=1,prog_type=prog_type,section=section,maps=[]),directory/'generated',linker,bounds_compiler=bounds)
     result=worker.compile_checked_simulator(artifact,linker,compiler,context_compiler=context,public_layout=public,physical_layout=physical)
     harness=directory/'harness.c'
