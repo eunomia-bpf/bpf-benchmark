@@ -1,0 +1,208 @@
+{
+ "baseline": {
+  "samples": 470686,
+  "bpf_samples": 36878,
+  "bpf_share_of_all": 0.07834947289700565,
+  "buckets": {
+   "bpf_probe_read_compat": [
+    15305,
+    0.41501708335593035
+   ],
+   "program_text": [
+    9360,
+    0.25380985953685126
+   ],
+   "bpf_ringbuf_output": [
+    6792,
+    0.1841748467921254
+   ],
+   "ktime_get_boot_fast_ns": [
+    1467,
+    0.03977981452356418
+   ],
+   "bpf_prog_4057128b981ba091_filter_inet": [
+    1111,
+    0.030126362601008733
+   ],
+   "__htab_map_lookup_elem": [
+    944,
+    0.025597917457562774
+   ],
+   "lookup_nulls_elem_raw": [
+    888,
+    0.02407939693041922
+   ],
+   "bpf_probe_read_kernel": [
+    369,
+    0.010005965616356636
+   ],
+   "bpf_prog_6bc087f73eba9560_do_action": [
+    224,
+    0.006074082108574218
+   ],
+   "htab_map_delete_elem": [
+    120,
+    0.0032539725581647596
+   ],
+   "htab_map_update_elem": [
+    105,
+    0.0028472259883941644
+   ],
+   "asm_sysvec_apic_timer_interrupt": [
+    62,
+    0.0016812191550517924
+   ],
+   "bpf_get_current_pid_tgid": [
+    46,
+    0.0012473561472964912
+   ],
+   "bpf_prog_e70f98f449cafbfa_filter_32ty_map": [
+    33,
+    0.0008948424534953089
+   ],
+   "its_return_thunk": [
+    27,
+    0.0007321438255870709
+   ],
+   "bpf_ktime_get_boot_ns": [
+    17,
+    0.0004609794457400076
+   ],
+   "bpf_prog_9c0efcfc02d14fef_filter_32ty": [
+    8,
+    0.00021693150387765064
+   ]
+  },
+  "categories": {
+   "probe_read": [
+    15674,
+    0.425023048972287
+   ],
+   "program_text": [
+    9360,
+    0.25380985953685126
+   ],
+   "other_helper": [
+    8303,
+    0.22514778458701665
+   ],
+   "map_lookup": [
+    1832,
+    0.049677314387981994
+   ],
+   "ktime_get_ns": [
+    1484,
+    0.04024079396930419
+   ],
+   "map_update": [
+    225,
+    0.006101198546558924
+   ]
+  },
+  "per_program_inclusive": {
+   "generic_kprobe_": [
+    36809,
+    0.9981289657790553
+   ],
+   "generic_retkpro": [
+    65,
+    0.0017625684690059113
+   ],
+   "tag:b1e4e8ba": [
+    3,
+    8.134931395411899e-05
+   ],
+   "execve_send": [
+    1,
+    2.711643798470633e-05
+   ]
+  }
+ },
+ "post_rejit": {
+  "samples": 480715,
+  "bpf_samples": 4237,
+  "bpf_share_of_all": 0.008813954214035344,
+  "buckets": {
+   "program_text": [
+    2701,
+    0.6374793485957045
+   ],
+   "lookup_nulls_elem_raw": [
+    556,
+    0.13122492329478405
+   ],
+   "__htab_map_lookup_elem": [
+    541,
+    0.12768468255841398
+   ],
+   "bpf_probe_read_kernel": [
+    301,
+    0.0710408307764928
+   ],
+   "bpf_get_current_task": [
+    76,
+    0.017937219730941704
+   ],
+   "asm_sysvec_apic_timer_interrupt": [
+    44,
+    0.01038470616001888
+   ],
+   "its_return_thunk": [
+    12,
+    0.0028321925890960587
+   ],
+   "bpf_get_current_pid_tgid": [
+    4,
+    0.0009440641963653528
+   ],
+   "bpf_probe_read_compat": [
+    1,
+    0.0002360160490913382
+   ],
+   "asm_sysvec_call_function_single": [
+    1,
+    0.0002360160490913382
+   ]
+  },
+  "categories": {
+   "program_text": [
+    2701,
+    0.6374793485957045
+   ],
+   "map_lookup": [
+    1097,
+    0.258909605853198
+   ],
+   "probe_read": [
+    302,
+    0.07127684682558413
+   ],
+   "other_helper": [
+    137,
+    0.03233419872551333
+   ]
+  },
+  "per_program_inclusive": {
+   "generic_kprobe_": [
+    4105,
+    0.9688458815199433
+   ],
+   "generic_retkpro": [
+    118,
+    0.02784989379277791
+   ],
+   "tag:b1e4e8ba": [
+    12,
+    0.0028321925890960587
+   ],
+   "event_wake_up_n": [
+    1,
+    0.0002360160490913382
+   ],
+   "execve_send": [
+    1,
+    0.0002360160490913382
+   ]
+  }
+ }
+}

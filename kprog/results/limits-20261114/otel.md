@@ -73,8 +73,9 @@ here for the reason above.
 
 Raw capture:
 `/workspaces/kprog-raw/C/20261115T013715Z-phase-profile-otelcol-ebpf-profiler_profiling`
-(`baseline.data`, `post_rejit.data`, per-phase `kallsyms` and `jit-lines.json`,
-`attribution.json`/`attribution.txt`). Regenerate with
+(`baseline.data`, `post_rejit.data`, per-phase `kallsyms` and `jit-lines.json`).
+Regenerate with
 `python3 kprog/results/limits-20261114/bpf-attribution.py <capture dir>`, and note that
 its BPF share will read 0.00% for both arms — that is the method's limit, not the app's
-cost.
+cost. The per-invocation table comes from
+`corpus/results/x86_kvm_corpus_20261115_013848_695617/details/apps/otelcol-ebpf-profiler__profiling.json`.

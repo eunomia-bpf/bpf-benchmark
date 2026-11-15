@@ -1,0 +1,33 @@
+{
+ "baseline": {
+  "samples": 471388,
+  "bpf_samples": 1,
+  "bpf_share_of_all": 2.1213946897248127e-06,
+  "buckets": {
+   "bpf_perf_event_output_tp": [
+    1,
+    1.0
+   ]
+  },
+  "categories": {
+   "perf_event_output": [
+    1,
+    1.0
+   ]
+  },
+  "per_program_inclusive": {
+   "tracepoint__sch": [
+    1,
+    1.0
+   ]
+  }
+ },
+ "post_rejit": {
+  "samples": 456405,
+  "bpf_samples": 0,
+  "bpf_share_of_all": 0.0,
+  "buckets": {},
+  "categories": {},
+  "per_program_inclusive": {}
+ }
+}

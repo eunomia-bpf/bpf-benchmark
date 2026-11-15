@@ -4,7 +4,7 @@ Both arms of one run, same guest, same workload, `kprog/perf/profile/phase-profi
 run --app tetragon/observer --seconds 60 --cpus 0-7`. Capture
 `/workspaces/kprog-raw/C/20261115T011437Z-phase-profile-tetragon_observer`; corpus run
 `x86_kvm_corpus_20261115_011551_351670` (`status: ok`, 288 native loads of 577);
-attribution `bpf-attribution.py` → `attribution.txt`.
+attribution `bpf-attribution.py` → `tetragon.attribution.json`.
 
 Method as in `katran.md`: BPF time is samples whose callchain contains a frame inside a
 JIT'd program; a sample's bucket is the helper the innermost program frame called.
@@ -85,6 +85,8 @@ it for shares and for the per-invocation counters only.
 
 Raw capture:
 `/workspaces/kprog-raw/C/20261115T011437Z-phase-profile-tetragon_observer`
-(`baseline.data`, `post_rejit.data`, per-phase `kallsyms` and `jit-lines.json`,
-`attribution.json`/`attribution.txt`). Regenerate with
-`python3 kprog/results/limits-20261114/bpf-attribution.py <capture dir>`.
+(`baseline.data`, `post_rejit.data`, per-phase `kallsyms` and `jit-lines.json`).
+Regenerate the shares with
+`python3 kprog/results/limits-20261114/bpf-attribution.py <capture dir>`, which also
+writes `tetragon.attribution.json` beside this file. The per-invocation table above comes
+from `corpus/results/x86_kvm_corpus_20261115_011551_351670/details/apps/tetragon__observer.json`.
