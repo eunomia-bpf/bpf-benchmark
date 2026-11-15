@@ -15,7 +15,7 @@ CHECKED_PACKET_BUILD := /var/tmp/kprog-tmp/perf/checked-packet
 KERNEL_LAYOUT_BUILD := /var/tmp/kprog-tmp/perf/kernel-layout
 KERNEL_LAYOUT := $(KERNEL_LAYOUT_BUILD)/kernel-layout.json
 KDIR := /workspaces/.agent-state/kprog-ck/build-x86
-BOOT_CAPTURE ?= /workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel/boot
+BOOT_CAPTURE ?= /workspaces/kprog-raw/perf/20261115-base-consistency/boot
 LIBBPF_PREFIX := $(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix
 LIBBPF_LIBRARY := $(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a
 
