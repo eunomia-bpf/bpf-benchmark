@@ -1147,34 +1147,51 @@ typedef void *x86_sim_unaligned_ptr __attribute__((aligned(1), may_alias));
 #define X86_SIM_L_LIVE_XDP() (__x86_sim_is_xdp)
 #define X86_SIM_L_XDP_OFFSET(BASE, OFF)                                   \
 	((__s64)((__u64)(long)(BASE) - (__u64)(long)__x86_sim_helper_abi_base + (__u64)(OFF)))
-#define X86_SIM_L_XDP_READ(BASE, OFF, WIDTH)                               \
-	({                                                               \
+#if defined(__COMPCERT__)
+#define X86_SIM_L_XDP_POINTER_FIELD(CTX, FIELD) \
+    ((__u64)(unsigned long)kprog_c_context_pointer((CTX), KPROG_ABI_KIND_XDP, __builtin_offsetof(struct xdp_md, FIELD)))
+#else
+#define X86_SIM_L_XDP_POINTER_FIELD(CTX, FIELD) \
+    ((__u64)(long)(void *)(long)(CTX)->FIELD)
+#endif
+#define X86_SIM_L_XDP_READ_DECL(RESULT, BASE, OFF, WIDTH) \
 		__s64 __x86_xdp_off = X86_SIM_L_XDP_OFFSET((BASE), (OFF)); \
 		volatile struct xdp_md *__x86_xdp_ctx = __x86_sim_helper_ctx;      \
-		__u64 __x86_xdp_value = 0;                                \
+		__u64 RESULT = 0;                                \
 		if ((WIDTH) == X86_WIDTH_64 &&                           \
 		    __x86_xdp_off == KPROG_ABI_XDP_DATA_OFF)              \
-			__x86_xdp_value = (__u64)(long)(void *)(long)     \
-				__x86_xdp_ctx->data;                      \
+			RESULT = X86_SIM_L_XDP_POINTER_FIELD(__x86_xdp_ctx, data);                      \
 		else if ((WIDTH) == X86_WIDTH_64 &&                      \
 			 __x86_xdp_off == KPROG_ABI_XDP_DATA_END_OFF)      \
-			__x86_xdp_value = (__u64)(long)(void *)(long)     \
-				__x86_xdp_ctx->data_end;                  \
+			RESULT = X86_SIM_L_XDP_POINTER_FIELD(__x86_xdp_ctx, data_end);                  \
 		else if ((WIDTH) == X86_WIDTH_64 && __x86_xdp_off == 16) \
-			__x86_xdp_value = (__u64)(long)(void *)(long)     \
-				__x86_xdp_ctx->data_meta;                 \
+			RESULT = X86_SIM_L_XDP_POINTER_FIELD(__x86_xdp_ctx, data_meta);                 \
 		else                                                     \
-			__x86_xdp_value = X86_SIM_L_SKB_NATIVE_READ((BASE), (OFF), (WIDTH));                     \
-		X86_SIM_L_BARRIER_VAR(__x86_xdp_value);                    \
-		__x86_xdp_value;                                         \
-	})
+			X86_SIM_L_SKB_NATIVE_READ_INTO(RESULT, (BASE), (OFF), (WIDTH));                     \
+		X86_SIM_L_BARRIER_VAR(RESULT);
+#define X86_SIM_L_XDP_READ_INTO(OUTPUT, BASE, OFF, WIDTH) \
+    do { X86_SIM_L_XDP_READ_DECL(__x86_captured_xdp_value, BASE, OFF, WIDTH); \
+         (OUTPUT)=__x86_captured_xdp_value; } while (0)
+#define X86_SIM_L_XDP_READ(BASE, OFF, WIDTH) \
+    ({ X86_SIM_L_XDP_READ_DECL(__x86_xdp_value, BASE, OFF, WIDTH); \
+       __x86_xdp_value; })
 
 #if defined(__bpf__) || defined(__BPF__)
 extern void *bpf_cast_to_kern_ctx(void *) __ksym;
 #define X86_SIM_L_CTX_NUMERIC(VALUE) NATIVE_LAB_NUMERIC(VALUE)
+#elif defined(__COMPCERT__)
+static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
+#define X86_SIM_L_CTX_NUMERIC(VALUE) kprog_c_pointer_bits((const void *)(unsigned long)(VALUE))
 #else
 static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 #define X86_SIM_L_CTX_NUMERIC(VALUE) ((__u64)(VALUE))
+#endif
+#if defined(__COMPCERT__)
+#define X86_SIM_L_SKB_NATIVE_READ_INTO(OUTPUT, BASE, OFF, WIDTH) \
+    do { (OUTPUT)=X86_SIM_L_LOAD_ADDR(KPROG_PTR_ADD64_BITS((BASE),(OFF)),(WIDTH)); } while (0)
+#else
+#define X86_SIM_L_SKB_NATIVE_READ_INTO(OUTPUT, BASE, OFF, WIDTH) \
+    OUTPUT=X86_SIM_L_SKB_NATIVE_READ(BASE, OFF, WIDTH)
 #endif
 #define X86_SIM_L_SKB_NATIVE_READ(BASE, OFF, WIDTH) \
  ({ __u64 __x86_snr_value; \
@@ -1196,8 +1213,8 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 #define X86_SIM_L_SKB_FIELD(CTX, FIELD) ((__u64)((CTX)->FIELD))
 #endif
 
-#define X86_SIM_L_SKB_CB_READ_BYTES(CTX, OFF, WIDTH) \
- ({ volatile const __u8 *__x86_cbr_addr=(volatile const __u8 *)(CTX)+(OFF); \
+#define X86_SIM_L_SKB_CB_READ_DECL(CTX, OFF, WIDTH) \
+ volatile const __u8 *__x86_cbr_addr=(volatile const __u8 *)(CTX)+(OFF); \
     __u64 __x86_cbr_value=__x86_cbr_addr[0]; \
     if ((WIDTH) >= X86_WIDTH_16) __x86_cbr_value |= (__u64)__x86_cbr_addr[1] << 8; \
     if ((WIDTH) >= X86_WIDTH_32) __x86_cbr_value |= (__u64)__x86_cbr_addr[2] << 16; \
@@ -1205,8 +1222,12 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
     if ((WIDTH) >= X86_WIDTH_64) __x86_cbr_value |= (__u64)__x86_cbr_addr[4] << 32; \
     if ((WIDTH) >= X86_WIDTH_64) __x86_cbr_value |= (__u64)__x86_cbr_addr[5] << 40; \
     if ((WIDTH) >= X86_WIDTH_64) __x86_cbr_value |= (__u64)__x86_cbr_addr[6] << 48; \
-    if ((WIDTH) >= X86_WIDTH_64) __x86_cbr_value |= (__u64)__x86_cbr_addr[7] << 56; \
-    __x86_cbr_value; })
+    if ((WIDTH) >= X86_WIDTH_64) __x86_cbr_value |= (__u64)__x86_cbr_addr[7] << 56;
+#define X86_SIM_L_SKB_CB_READ_BYTES_INTO(OUTPUT, CTX, OFF, WIDTH) \
+ do { X86_SIM_L_SKB_CB_READ_DECL(CTX, OFF, WIDTH); \
+      (OUTPUT)=__x86_cbr_value; } while (0)
+#define X86_SIM_L_SKB_CB_READ_BYTES(CTX, OFF, WIDTH) \
+ ({ X86_SIM_L_SKB_CB_READ_DECL(CTX, OFF, WIDTH); __x86_cbr_value; })
 #define X86_SIM_L_SKB_CB_WRITE_BYTES(CTX, OFF, WIDTH, VALUE) \
  do { volatile __u8 *__x86_cbw_addr=(volatile __u8 *)(CTX)+(OFF); \
       __u64 __x86_cbw_value=(VALUE); __x86_cbw_addr[0]=(__u8)__x86_cbw_value; \
@@ -1263,21 +1284,35 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
   __u64 __x86_ss_new=(__x86_ss_old & ~__x86_ss_mask) | ((__x86_sw_value << __x86_ss_shift) & __x86_ss_mask); \
   X86_SIM_L_SKB_SCALAR_STORE(((struct __sk_buff *)__x86_sim_helper_ctx),FIELD,__x86_ss_new); \
  }
-#define X86_SIM_L_SKB_READ(BASE, OFF, WIDTH) \
- ({ __u8 __x86_sr_width=(WIDTH); __s64 __x86_sr_off = X86_SIM_L_SKB_OFFSET((BASE), (OFF)); \
+#if defined(__COMPCERT__)
+#define X86_SIM_L_SKB_POINTER_FIELD(CTX, FIELD) \
+    ((__u64)(unsigned long)kprog_c_context_pointer((CTX), KPROG_ABI_KIND_SKB, __builtin_offsetof(struct __sk_buff, FIELD)))
+#define X86_SIM_L_SKB_CB_READ_INTO(OUTPUT, CTX, OFF, WIDTH) \
+    X86_SIM_L_SKB_CB_READ_BYTES_INTO(OUTPUT, CTX, OFF, WIDTH)
+#else
+#define X86_SIM_L_SKB_POINTER_FIELD(CTX, FIELD) X86_SIM_L_SKB_FIELD(CTX, FIELD)
+#define X86_SIM_L_SKB_CB_READ_INTO(OUTPUT, CTX, OFF, WIDTH) \
+    OUTPUT=X86_SIM_L_SKB_CB_READ(CTX, OFF, WIDTH)
+#endif
+#define X86_SIM_L_SKB_READ_DECL(BASE, OFF, WIDTH) \
+ __u8 __x86_sr_width=(WIDTH); __s64 __x86_sr_off = X86_SIM_L_SKB_OFFSET((BASE), (OFF)); \
     struct __sk_buff *__x86_sr_ctx = __x86_sim_helper_ctx; \
     __u64 __x86_sr_value; \
     if (((__x86_sr_off >= X86_SKB_DATA_OFF && __x86_sr_off <= X86_SKB_DATA_OFF + 8 - (WIDTH)) || \
          (__x86_sr_off >= X86_SKB_DATA_END_OFF && __x86_sr_off <= X86_SKB_DATA_END_OFF + 8 - (WIDTH)))) { \
       __s64 __x86_sr_lane; \
-      if (__x86_sr_off >= X86_SKB_DATA_OFF) { __x86_sr_value=X86_SIM_L_SKB_FIELD(__x86_sr_ctx,data); __x86_sr_lane=__x86_sr_off-X86_SKB_DATA_OFF; } \
-      else { __x86_sr_value=X86_SIM_L_SKB_FIELD(__x86_sr_ctx,data_end); __x86_sr_lane=__x86_sr_off-X86_SKB_DATA_END_OFF; } \
+      if (__x86_sr_off >= X86_SKB_DATA_OFF) { __x86_sr_value=X86_SIM_L_SKB_POINTER_FIELD(__x86_sr_ctx,data); __x86_sr_lane=__x86_sr_off-X86_SKB_DATA_OFF; } \
+      else { __x86_sr_value=X86_SIM_L_SKB_POINTER_FIELD(__x86_sr_ctx,data_end); __x86_sr_lane=__x86_sr_off-X86_SKB_DATA_END_OFF; } \
       if ((WIDTH) != X86_WIDTH_64) __x86_sr_value=x86_apply_width(X86_SIM_L_CTX_NUMERIC(__x86_sr_value) >> (__x86_sr_lane*8), (WIDTH)); \
     } else if (__x86_sr_off >= X86_SKB_CB_OFF && __x86_sr_off <= X86_SKB_CB_OFF + 20 - (WIDTH)) \
-      __x86_sr_value=X86_SIM_L_SKB_CB_READ(__x86_sr_ctx, __x86_sr_off-X86_SKB_CB_OFF+(__s64)__builtin_offsetof(struct __sk_buff,cb), (WIDTH)); \
+      X86_SIM_L_SKB_CB_READ_INTO(__x86_sr_value,__x86_sr_ctx, __x86_sr_off-X86_SKB_CB_OFF+(__s64)__builtin_offsetof(struct __sk_buff,cb), (WIDTH)); \
     X86_SIM_L_SKB_SCALAR_FIELDS(X86_SIM_L_SKB_SCALAR_READ_CASE) \
-    else __x86_sr_value=X86_SIM_L_SKB_NATIVE_READ(X86_SIM_L_READ_REG_PTR(BASE),(OFF),(WIDTH)); \
-    __x86_sr_value; })
+    else X86_SIM_L_SKB_NATIVE_READ_INTO(__x86_sr_value,X86_SIM_L_READ_REG_PTR(BASE),(OFF),(WIDTH));
+#define X86_SIM_L_SKB_READ_INTO(OUTPUT, BASE, OFF, WIDTH) \
+ do { X86_SIM_L_SKB_READ_DECL(BASE, OFF, WIDTH); \
+      (OUTPUT)=__x86_sr_value; } while (0)
+#define X86_SIM_L_SKB_READ(BASE, OFF, WIDTH) \
+ ({ X86_SIM_L_SKB_READ_DECL(BASE, OFF, WIDTH); __x86_sr_value; })
 #define X86_SIM_L_SKB_WRITE(BASE, OFF, WIDTH, VALUE) \
  do { __u8 __x86_sw_width=(WIDTH); __s64 __x86_sw_off=X86_SIM_L_SKB_OFFSET((BASE),(OFF)); \
       __u64 __x86_sw_value=x86_apply_width((VALUE),(WIDTH)); \
@@ -1311,12 +1346,12 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			(void *)(unsigned long)__x86_l_disp;              \
 		if (X86_SIM_L_LIVE_XDP() &&                               \
 		    X86_SIM_L_REG_TAG(BASE_REG) == X86_SIM_TAG_ABI)       \
-			__x86_l_value = X86_SIM_L_XDP_READ(              \
+			X86_SIM_L_XDP_READ_INTO(__x86_l_value,               \
 				__x86_l_base_ptr, __x86_l_disp,             \
 				__x86_l_read_mem_width);                   \
 		else if (__x86_sim_abi_kind == KPROG_ABI_KIND_SKB &&    \
 		         X86_SIM_L_REG_TAG(BASE_REG) == X86_SIM_TAG_ABI) \
-			__x86_l_value = X86_SIM_L_SKB_READ((BASE_REG),    \
+			X86_SIM_L_SKB_READ_INTO(__x86_l_value, (BASE_REG),    \
 				__x86_l_disp, __x86_l_read_mem_width);       \
 		else switch (X86_SIM_L_MEM_READ_SRC(BASE_REG,                 \
 					       __x86_l_read_mem_width)) {\
@@ -1425,10 +1460,11 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			(void *)(unsigned long)__x86_l_disp;              \
 		if (__x86_sim_abi_kind == KPROG_ABI_KIND_SKB &&          \
 		    X86_SIM_L_REG_TAG(SRC) == X86_SIM_TAG_ABI) {        \
-			__x86_l_value=X86_SIM_L_SKB_READ((SRC),             \
+			X86_SIM_L_SKB_READ_INTO(__x86_l_value, (SRC),             \
 				__x86_l_disp,__x86_l_mem_width);              \
 			if (__x86_l_arm == KPROG_X86_MOV_LOAD_ARM_ABI_PTR) { \
-				__u8 __x86_skb_tag=KPROG_ABI_LOAD_TAG(        \
+				__u8 __x86_skb_tag; \
+            KPROG_ABI_LOAD_TAG_INTO(__x86_skb_tag,         \
 				 KPROG_ABI_KIND_SKB,X86_SIM_L_SKB_OFFSET((SRC),__x86_l_disp), \
 				 X86_SIM_TAG_SCALAR,X86_SIM_TAG_PACKET,X86_SIM_TAG_PACKET_END); \
 				__x86_l_write_width = X86_WIDTH_64;       \
@@ -1441,10 +1477,12 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			}                                                  \
 		} else if (X86_SIM_L_LIVE_XDP() &&                               \
 		    X86_SIM_L_REG_TAG(SRC) == X86_SIM_TAG_ABI) {          \
-			__u64 __x86_xdp_value = X86_SIM_L_XDP_READ(       \
+			__u64 __x86_xdp_value; \
+            X86_SIM_L_XDP_READ_INTO(__x86_xdp_value,        \
 				__x86_l_base_ptr, __x86_l_disp,             \
 				__x86_l_mem_width);                        \
-			__u8 __x86_xdp_tag = KPROG_ABI_LOAD_TAG(          \
+			__u8 __x86_xdp_tag; \
+            KPROG_ABI_LOAD_TAG_INTO(__x86_xdp_tag,           \
 				KPROG_ABI_KIND_XDP, X86_SIM_L_XDP_OFFSET(  \
 					__x86_l_base_ptr, __x86_l_disp),    \
 				X86_SIM_TAG_SCALAR, X86_SIM_TAG_PACKET,     \
@@ -1482,7 +1520,8 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 					__x86_l_base_ptr, __x86_l_disp, __x86_l_mem_width, X86_SIM_L_REG_TAG(SRC)); \
 				break;                                    \
 			}                                                 \
-			__u8 __x86_l_ptr_tag = KPROG_ABI_LOAD_TAG(       \
+			__u8 __x86_l_ptr_tag; \
+            KPROG_ABI_LOAD_TAG_INTO(__x86_l_ptr_tag,        \
 				__x86_sim_abi_kind, __x86_l_disp,          \
 				X86_SIM_TAG_SCALAR, X86_SIM_TAG_PACKET,    \
 				X86_SIM_TAG_PACKET_END);                   \

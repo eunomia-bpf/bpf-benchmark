@@ -1355,10 +1355,34 @@ byte truth tests, eager flags/tag reads and tag truncation. `make clight`,38
 Lean jobs, deterministic881,269B regeneration and three standard-axiom queries
 pass. The producer-interface fixture remains socket1448B+11 allocated
 relocations, replay equal to normal compilation. Extraction CPP is2,676,915B
-at its explicit profile; full inline export now stops at the SKB context-read
+at its explicit profile; at that checkpoint full inline export stopped at the SKB context-read
 expression. [Small receipts](results/m4-x86-mov-selectors/README.md) are committed;
 full logs/recipes stay under `/workspaces/kprog-raw/formal/m4-x86-mov-selectors`.
 No full-I export or migrated theorem is accepted.
+
+The next slice exports actual SKB/XDP/cb reads and the existing ABI tag
+selector in [X86Context](KProgFormal/Clight/X86Context.lean):four roots and two
+callees. All context-read and adjacent tag consumers use shared statement-output
+bodies. Native fixed-offset/constant-predicate/asm operands are retained; the
+CompCert pointer fields reuse the typed context-pointer/pointer-bits boundary,
+covering full64-bit values rather than a host UAPI32 cast. The sole kernel's
+context conversion source confirms pointer-sized field loads. Native host
+fixtures retain their original32-bit field values; this is not kernel execution
+or proof of entry/view correspondence.
+
+Final native/adapter runs pass19,654 context/partial/scalar/cb/fallback/tag/frame
+cases and six guarded byte probes; historical native reads pass19,584 cases.
+Five mutations catch pointer truncation, wrong UAPI field, byte shift, eager
+fallback and swapped packet/end tags. `make clight`,39 Lean jobs, deterministic
+100,519B regeneration and four standard-axiom queries pass. New BPF consumers
+retain XDP360B/TC760B+4 allocated relocations; the ordinary fixture remains
+1448B+11. Both historical replays equal normal compilation. Extraction CPP is
+2,678,818B at its explicit profile. Full inline export now stops at the memory
+read-source selector. Logical/native context view coherence, actual entry
+bindings and memory/volatile/fault interpretation remain M5 obligations, not
+results of these declarations or finite fixtures. No full-I export or migrated
+theorem is accepted. [Small receipts](results/m4-x86-context/README.md) are
+committed; full logs/recipes stay under `/workspaces/kprog-raw/formal/m4-x86-context`.
 
 M4 remains open: handler expression macros, constant helper function pointers,
 remaining builtin/asm/pragma and platform-memory adaptation, full-state Clight

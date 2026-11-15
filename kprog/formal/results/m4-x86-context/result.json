@@ -1,0 +1,71 @@
+{
+  "status": "component checks passed; M4 incomplete",
+  "clight_module": "X86Context",
+  "clight_functions": 6,
+  "roots": [
+    "skb_read",
+    "xdp_read",
+    "cb_read",
+    "context_tag"
+  ],
+  "context_cases_per_final_mode": 19654,
+  "historical_read_cases": 19584,
+  "guarded_byte_probes": 6,
+  "modes": [
+    "historical native read bodies",
+    "current native",
+    "current CompCert host adapter"
+  ],
+  "pointer_fixture_modes": "Host UAPI pointers are32-bit; adapter checks full64-bit values. This is not a kernel execution.",
+  "negative_checks": {
+    "pointer_truncation": 1,
+    "wrong_UAPI_field": 1,
+    "cb_byte_shift": 1,
+    "eager_physical_read": 1,
+    "swapped_packet_end_tags": 1
+  },
+  "make_clight_exit": 0,
+  "targeted_lean_jobs": 39,
+  "deterministic": {
+    "equal": true,
+    "bytes": 100519
+  },
+  "standard_axiom_queries": 4,
+  "axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "ordinary_fidelity": {
+    "allocated_sections_equal": true,
+    "allocated_relocations_equal": true,
+    "current_stream_equals_normal_build": true,
+    "allocated_section_bytes": {
+      ".text": 0,
+      "socket": 1448,
+      "license": 4
+    },
+    "allocated_relocations": 11
+  },
+  "context_fidelity": {
+    "allocated_sections_equal": true,
+    "allocated_relocations_equal": true,
+    "current_stream_equals_normal_build": true,
+    "allocated_section_bytes": {
+      ".text": 0,
+      "xdp": 360,
+      "tc": 760,
+      "license": 4
+    },
+    "allocated_relocations": 4
+  },
+  "preprocess": {
+    "exit": 0,
+    "bytes": 2678818,
+    "scope": "profile extraction TU only, not full app"
+  },
+  "full_inline_export_exit": 2,
+  "next_blocker": "KPROG_X86_MEM_READ_SRC GNU expression",
+  "migrated_theorems": 0,
+  "whole_library_acceptance": false
+}

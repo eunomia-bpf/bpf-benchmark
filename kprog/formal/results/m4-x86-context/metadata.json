@@ -1,0 +1,13 @@
+{
+  "raw_directory": "/workspaces/kprog-raw/formal/m4-x86-context",
+  "historical_reference": "03bfe20b8",
+  "validation_head": "d743c23ab168c4bb7b3b5b3dae259ef874e613ea",
+  "source_patch": "raw_directory/final-input.patch",
+  "kernel_source_commit": "bdfa49b694e139aeb08a4878568f588a89fe5c06",
+  "kernel_conversion_source": "vendor/linux-framework/net/core/filter.c: bpf_skb_convert_ctx_access and xdp_convert_ctx_access",
+  "cpu": 15,
+  "address_space_limit_gib": 32,
+  "lean_threads": 1,
+  "timing": "CPU15 checks without work timing lease",
+  "scope": "real C read/tag bodies and AST; fixtures interpret platform boundaries, not native kernel memory/view proofs"
+}
