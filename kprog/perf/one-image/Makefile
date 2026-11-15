@@ -98,16 +98,12 @@ STATS ?= 0 1
 
 .PHONY: corpus guest rotate check
 
-.PHONY: host-cpu-probe
-host-cpu-probe:
-	install -d $(LOGS)
-	exec 8>/workspaces/.agent-state/kprog-lanes/locks/timing; flock -x 8; python3 $(HERE)/host_cpu.py --state $(LOGS)/host-cpu-probe.json -- /bin/true
-
 corpus:
 	install -d $(STATE)/var-tmp $(LOGS)
 	ln -sfn $(IMAGE_TAR) $(STATE)/var-tmp/runtime.image.tar
 	ln -sfn $(KINSN_OUT)/bpf_x86_native_lab.ko $(STATE)/var-tmp/bpf_x86_native_lab.ko
-	python3 $(HERE)/host_cpu.py --state $(LOGS)/host-cpu-$$(date -u +%Y%m%dT%H%M%SZ)-$$$$.json -- taskset -c $(CPUS) vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir /var/tmp=$(STATE)/var-tmp --overlay-rwdir /tmp --overlay-rwdir /run --overlay-rwdir /usr/local --disable-monitor $(VNG_FLAGS) --cpus $(VM_CPUS) --memory $(VM_MEM) --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile guest APPS=$(APPS) SAMPLES=$(SAMPLES) WORKLOAD_DURATION=$(WORKLOAD_DURATION) BPFREJIT_CORPUS_BPF_STATS=$(BPFREJIT_CORPUS_BPF_STATS) NATIVE_MANIFEST=$(NATIVE_MANIFEST) BENCH_PASSES=$(BENCH_PASSES) SKIP_REJIT_MODE=$(SKIP_REJIT_MODE) NATIVE_LOADER_MODE=$(NATIVE_LOADER_MODE)'
+	$(MAKE) -C $(ROOT) kvm-host-cpu
+	taskset -c $(CPUS) vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir /var/tmp=$(STATE)/var-tmp --overlay-rwdir /tmp --overlay-rwdir /run --overlay-rwdir /usr/local --disable-monitor $(VNG_FLAGS) --cpus $(VM_CPUS) --memory $(VM_MEM) --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(HERE)/Makefile guest APPS=$(APPS) SAMPLES=$(SAMPLES) WORKLOAD_DURATION=$(WORKLOAD_DURATION) BPFREJIT_CORPUS_BPF_STATS=$(BPFREJIT_CORPUS_BPF_STATS) NATIVE_MANIFEST=$(NATIVE_MANIFEST) BENCH_PASSES=$(BENCH_PASSES) SKIP_REJIT_MODE=$(SKIP_REJIT_MODE) NATIVE_LOADER_MODE=$(NATIVE_LOADER_MODE)'
 	rm -f $(STATE)/var-tmp/bpf-benchmark-docker.img
 
 guest:

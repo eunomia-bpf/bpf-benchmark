@@ -455,10 +455,6 @@ ir-debug-census:
 b-debug-variables-check: $(CONTEXT_TOOL)
 	taskset -c 16-19 prlimit --as=4294967296 -- python3 $(ROOT)/kprog/test/check_b_debug_variables.py --tool $(CONTEXT_TOOL) --previous /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds --build /var/tmp/kprog-tmp/perf/b-debug-variables --output $(OUTPUT)
 
-.PHONY: host-cpu-check
-host-cpu-check:
-	taskset -c 16-19 prlimit --as=536870912 -- python3 $(ROOT)/kprog/test/check_host_cpu.py --build /var/tmp/kprog-tmp/perf/host-cpu-check --output $(OUTPUT)
-
 .PHONY: memory-b-continuation-check
 memory-b-continuation-check: $(CONTEXT_TOOL)
 	taskset -c 16-19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_memory_b_pipeline.py --frontend $(FRONTEND) --object $(REFERENCE_OBJECT) --bounds $(CONTEXT_TOOL) --output $(OUTPUT)
@@ -502,14 +498,11 @@ guest-native-map-relocs:
 	insmod $(ROOT)/kinsn/module/x86/build/bpf_x86_native_lab.ko
 	$(OUTPUT)/inputs/native-map-relocs $$(python3 -c 'import json; print(json.load(open("$(OUTPUT)/layout/kernel-layout.json"))["array"]["value"])') > $(OUTPUT)/result.jsonl 2> $(OUTPUT)/verifier.log
 
-.PHONY: katran-fixed-frequency
-katran-fixed-frequency:
-	prlimit --as=103079215104 -- bash $(ROOT)/kprog/test/run_katran_fixed_frequency.sh $(OUTPUT)
-
 .PHONY: katran-body-profile
 katran-body-profile:
 	install -d $(OUTPUT)
-	flock -x /workspaces/.agent-state/kprog-lanes/locks/timing flock -s /workspaces/.agent-state/kprog-lanes/locks/image prlimit --as=103079215104 -- python3 $(ROOT)/kprog/perf/one-image/host_cpu.py --state $(OUTPUT)/host-cpu.json -- python3 $(ROOT)/kprog/perf/profile/phase-profile.py run --app katran --seconds 60 --cpus 0-7 --vcpus 8 --memory 64G --freq 999 --out $(OUTPUT)/profile --annotate 0 --state-root /var/tmp/kprog-tmp/perf/katran-body-profile --perf /var/tmp/kprog-tmp/C/perf-build/perf --persist-output
+	$(MAKE) -C $(ROOT) kvm-host-cpu
+	flock -x /workspaces/.agent-state/kprog-lanes/locks/timing flock -s /workspaces/.agent-state/kprog-lanes/locks/image prlimit --as=103079215104 -- python3 $(ROOT)/kprog/perf/profile/phase-profile.py run --app katran --seconds 60 --cpus 0-7 --vcpus 8 --memory 64G --freq 999 --out $(OUTPUT)/profile --annotate 0 --state-root /var/tmp/kprog-tmp/perf/katran-body-profile --perf /var/tmp/kprog-tmp/C/perf-build/perf --persist-output
 
 .PHONY: profile-input-smoke
 profile-input-smoke:
