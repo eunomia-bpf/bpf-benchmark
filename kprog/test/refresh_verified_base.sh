@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # Run only under the workspace's exclusive image lock, with guests checkpointed.
 set -euo pipefail
+# The caller's OUTPUT names its evidence directory. Kbuild's host tools also
+# use OUTPUT, so inherit neither it nor command-line Make overrides here.
+# Each submake below supplies its own canonical build/output arguments.
+unset OUTPUT MAKEFLAGS MFLAGS MAKEOVERRIDES
 refresh_output=$1
 refresh_root=/workspaces/repository
 refresh_kernel=/workspaces/.agent-state/kprog-ck/build-x86
