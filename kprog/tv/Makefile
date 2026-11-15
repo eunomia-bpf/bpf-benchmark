@@ -214,16 +214,16 @@ linker-tail-count-bytes:
 linker-entry-abi-check:
 	$(MAKE) linker-default-bytes OUTPUT="$(OUTPUT)/before"
 	$(MAKE) linker-build
-	cargo test --manifest-path ../x86/native_lab/native_link/Cargo.toml
+	cargo test --release --manifest-path ../x86/native_lab/native_link/Cargo.toml
 	$(MAKE) linker-default-bytes OUTPUT="$(OUTPUT)/after" REFERENCE="$(OUTPUT)/before"
 
 .PHONY: linker-tail-count-check
 linker-tail-count-check:
-	cargo test --manifest-path ../x86/native_lab/native_link/Cargo.toml tail_
+	cargo test --release --manifest-path ../x86/native_lab/native_link/Cargo.toml tail_
 
 .PHONY: linker-map-dispatch-check
 linker-map-dispatch-check:
-	cargo test --manifest-path ../x86/native_lab/native_link/Cargo.toml map_lookup
+	cargo test --release --manifest-path ../x86/native_lab/native_link/Cargo.toml map_lookup
 
 
 kernel-check: linker-build

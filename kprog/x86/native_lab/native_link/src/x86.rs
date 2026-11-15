@@ -2626,18 +2626,9 @@ fn apply_elf_relocations(
                         );
                     }
 
-                    // Reserve / reuse a pool entry. For
-                    // per-call-site routed `bpf_map_lookup_elem` we
-                    // always allocate a *fresh* entry (each call site
-                    // can route to a different target), 8 bytes per
-                    // site. For everything else (helpers shared across
-                    // many call sites, map pointers shared across
-                    // load/lookup sequences) one entry is sufficient.
-                    let pool_off = if dedicated_pool_addr.is_some() {
-                        let off = blob.len();
-                        blob.extend_from_slice(&map_addr.to_le_bytes());
-                        off
-                    } else if let Some(&off) = map_pool_entry.get(&target_name) {
+                    // Calls already use direct helper slots. Remaining data
+                    // references share one pool entry per exact symbol.
+                    let pool_off = if let Some(&off) = map_pool_entry.get(&target_name) {
                         off
                     } else {
                         let off = blob.len();
