@@ -10,9 +10,6 @@ LLVM_CONFIG := llvm-config-18
 CXX := clang++-18
 CC := clang-18
 
-$(BUILD)/perf-context-lower: $(HERE)/perf-context-lower.cpp
-	install -d $(BUILD)
-	$(CXX) $$($(LLVM_CONFIG) --cxxflags) -std=c++17 -Wall -Wextra -Wno-unused-parameter $< -o $@ $$($(LLVM_CONFIG) --ldflags --libs core irreader bitwriter analysis support --system-libs)
 
 $(BUILD)/layout: $(HERE)/layout.c $(VMLINUX_DIR)/vmlinux.h
 	install -d $(BUILD)
@@ -55,19 +52,9 @@ runtime-array-otel:
 		$(MAKE) -f $(ROOT)/kprog/perf/one-image/Makefile corpus APPS=otelcol-ebpf-profiler/profiling SAMPLES=1 WORKLOAD_DURATION=$(RUNTIME_ARRAY_SECONDS) CPUS=16-19 VM_CPUS=4 VM_MEM=16G BPFREJIT_CORPUS_BPF_STATS=1 NATIVE_MANIFEST=$(ROOT)/corpus/results/perf-otel-upstream-20261114/manifest-context.json STATE=$(RUNTIME_ARRAY_STATE) LOGS=$(RUNTIME_ARRAY_RAW)/run
 
 .PHONY: all
-all: $(BUILD)/perf-context-lower $(BUILD)/layout.json
 
-$(BUILD)/test-driver.o: $(HERE)/test-perf-context.c
-	install -d $(BUILD)
-	$(CC) -O3 -DTEST_DRIVER -c $< -o $@
 
-$(BUILD)/test.plain: $(HERE)/test-perf-context.c $(BUILD)/test-driver.o
-	$(CC) -O3 $< $(BUILD)/test-driver.o -o $@
 
-$(BUILD)/test.lowered: $(HERE)/test-perf-context.c $(BUILD)/test-driver.o $(BUILD)/perf-context-lower $(BUILD)/layout.json
-	$(CC) -O3 -emit-llvm -c $< -o $(BUILD)/test.bc
-	$(BUILD)/perf-context-lower $(BUILD)/test.bc --layout=$(BUILD)/layout.json -o $(BUILD)/test.lowered.bc
-	$(CC) -O3 $(BUILD)/test.lowered.bc $(BUILD)/test-driver.o -o $@
 
 .PHONY: check
 check: $(BUILD)/test.plain $(BUILD)/test.lowered
@@ -76,23 +63,10 @@ check: $(BUILD)/test.plain $(BUILD)/test.lowered
 
 OUTPUT ?= $(ROOT)/corpus/results/perf-context-20261113
 .PHONY: otel
-otel: all
-	python3 $(HERE)/build-otel.py --build $(BUILD) --output $(OUTPUT)
 
-$(BUILD)/core-flavor-lower: $(HERE)/core-flavor-lower.cpp
-	install -d $(BUILD)
-	$(CXX) $$($(LLVM_CONFIG) --cxxflags) -std=c++17 -Wall -Wextra -Wno-unused-parameter $< -o $@ -l:libclang-cpp.so.18.1 $$($(LLVM_CONFIG) --ldflags --libs --system-libs) -lbpf
 
-$(BUILD)/core.fixture.plain: $(HERE)/test-core-flavor.c
-	install -d $(BUILD)
-	$(CC) -O2 -DMICRO_NATIVE -include $(ROOT)/vendor/bpf/native_compat.h -I$(VMLINUX_DIR) $< -o $@
 
-$(BUILD)/core.fixture.i: $(HERE)/test-core-flavor.c $(HERE)/core-queries.h
-	install -d $(BUILD)
-	$(CC) -DMICRO_NATIVE -DCORE_LOWER -include $(ROOT)/vendor/bpf/native_compat.h -I$(HERE) -I$(VMLINUX_DIR) -E -P $< -o $@
 
-$(BUILD)/core.fixture.lowered.i: $(BUILD)/core.fixture.i $(BUILD)/core-flavor-lower
-	$(BUILD)/core-flavor-lower $< $@ $(KDIR)/vmlinux
 
 $(BUILD)/core.fixture.fixed: $(BUILD)/core.fixture.lowered.i
 	$(CC) -O2 -fms-extensions -Wno-deprecated-non-prototype $< -o $@
@@ -105,8 +79,6 @@ core-check: $(BUILD)/core.fixture.plain $(BUILD)/core.fixture.fixed
 CORE_OUTPUT ?= $(ROOT)/corpus/results/perf-core-20261113
 CORE_SELECTION ?= --only bpf_fork bpf_generic_kprobe_v61
 .PHONY: tetragon-core
-tetragon-core: $(BUILD)/core-flavor-lower
-	python3 $(HERE)/build-tetragon.py --build $(BUILD) --kernel $(KDIR)/vmlinux --output $(CORE_OUTPUT) $(CORE_SELECTION)
 
 OBSERVER_OUTPUT ?= $(ROOT)/corpus/results/perf-observers-20261113
 .PHONY: tetra-observer
@@ -509,75 +481,27 @@ native-switch-check: $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public
 native-switch-evidence:
 	tar -czf $(ROOT)/kprog/results/perf_20261113/native-switch-regression.tar.gz -C /workspaces/kprog-raw/perf 20261113-native-switch
 
-CORE_IR_BUILD ?= /var/tmp/kprog-tmp/perf/core-ir
 $(CORE_IR_BUILD)/libbpf/libbpf.a:
 	$(MAKE) -C $(ROOT)/vendor/libbpf/src BUILD_STATIC_ONLY=1 OBJDIR=$(CORE_IR_BUILD)/libbpf
 
-$(CORE_IR_BUILD)/core-ir-lower: $(HERE)/core-ir-lower.cpp $(CORE_IR_BUILD)/libbpf/libbpf.a
-	$(CXX) $$($(LLVM_CONFIG) --cxxflags) -std=c++17 -Wall -Wextra -Wno-unused-parameter -I$(ROOT)/vendor/libbpf/src -I$(ROOT)/vendor/libbpf/include/uapi $< -o $@ $(CORE_IR_BUILD)/libbpf/libbpf.a -lelf -lz $$($(LLVM_CONFIG) --ldflags --libs core irreader bitwriter passes --system-libs)
 
 .PHONY: core-ir-tool
-core-ir-tool: $(CORE_IR_BUILD)/core-ir-lower
 
 CORE_IR_INPUT ?= $(CORE_IR_BUILD)/input.bc
 CORE_IR_LOCAL_BPF ?= $(CORE_IR_BUILD)/input.bpf.o
 CORE_IR_OUTPUT ?= $(CORE_IR_BUILD)/resolved.bc
 CORE_IR_REPORT ?= $(CORE_IR_BUILD)/resolved.json
 .PHONY: core-ir-resolve
-core-ir-resolve: core-ir-tool
-	prlimit --as=17179869184 -- $(CORE_IR_BUILD)/core-ir-lower $(CORE_IR_INPUT) --local-bpf $(CORE_IR_LOCAL_BPF) --target-btf $(KDIR)/vmlinux --report $(CORE_IR_REPORT) -o $(CORE_IR_OUTPUT)
 
 .PHONY: core-ir-check
-core-ir-check: core-ir-tool $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
-	$(CC) -target bpf -O2 -g -I/usr/include/x86_64-linux-gnu -emit-llvm -c $(HERE)/test-core-ir.c -o $(CORE_IR_BUILD)/fixture.bc
-	$(CC) -target bpf -O2 -g -c $(CORE_IR_BUILD)/fixture.bc -o $(CORE_IR_BUILD)/fixture.bpf.o
-	$(CORE_IR_BUILD)/core-ir-lower $(CORE_IR_BUILD)/fixture.bc --local-bpf $(CORE_IR_BUILD)/fixture.bpf.o --target-btf $(KDIR)/vmlinux --report $(CORE_IR_BUILD)/fixture.json -o $(CORE_IR_BUILD)/fixture.fixed.bc
-	python3 $(HERE)/socket-helper-names.py > $(CORE_IR_BUILD)/helper-names.json
-	$(SOCKET_BUILD)/socket-context-lower $(CORE_IR_BUILD)/fixture.fixed.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(CORE_IR_BUILD)/helper-names.json -o $(CORE_IR_BUILD)/fixture.native.bc
-	$(CC) -O2 -DTEST_DRIVER -I$(VMLINUX_DIR) -c $(HERE)/test-core-ir.c -o $(CORE_IR_BUILD)/driver.o
-	$(CC) -target x86_64-linux-gnu -O2 $(CORE_IR_BUILD)/fixture.native.bc $(CORE_IR_BUILD)/driver.o -o $(CORE_IR_BUILD)/fixture.fixed
-	$(CORE_IR_BUILD)/fixture.fixed
-	$(CC) -target bpf -O2 -g -emit-llvm -c $(HERE)/test-core-ir-ids.c -o $(CORE_IR_BUILD)/ids.bc
-	$(CC) -target bpf -O2 -g -c $(CORE_IR_BUILD)/ids.bc -o $(CORE_IR_BUILD)/ids.bpf.o
-	$(CORE_IR_BUILD)/core-ir-lower $(CORE_IR_BUILD)/ids.bc --local-bpf $(CORE_IR_BUILD)/ids.bpf.o --target-btf $(KDIR)/vmlinux --report $(CORE_IR_BUILD)/ids.json -o $(CORE_IR_BUILD)/ids.fixed.bc
-	$(SOCKET_BUILD)/socket-context-lower $(CORE_IR_BUILD)/ids.fixed.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(CORE_IR_BUILD)/helper-names.json -o $(CORE_IR_BUILD)/ids.native.bc
-	$(CC) -target x86_64-linux-gnu -O2 -DTEST_DRIVER $(HERE)/test-core-ir-ids.c $(CORE_IR_BUILD)/ids.native.bc -lbpf -o $(CORE_IR_BUILD)/ids.fixed
-	$(CORE_IR_BUILD)/ids.fixed $(CORE_IR_BUILD)/ids.bpf.o $(KDIR)/vmlinux
-	$(CC) -target bpf -O2 -g -I/usr/include/x86_64-linux-gnu -DUNGUARDED_MISSING -emit-llvm -c $(HERE)/test-core-ir.c -o $(CORE_IR_BUILD)/unguarded.bc
-	$(CC) -target bpf -O2 -g -c $(CORE_IR_BUILD)/unguarded.bc -o $(CORE_IR_BUILD)/unguarded.bpf.o
-	$(CORE_IR_BUILD)/core-ir-lower $(CORE_IR_BUILD)/unguarded.bc --local-bpf $(CORE_IR_BUILD)/unguarded.bpf.o --target-btf $(KDIR)/vmlinux --report $(CORE_IR_BUILD)/unguarded.json -o $(CORE_IR_BUILD)/unguarded.fixed.bc > $(CORE_IR_BUILD)/unguarded.log 2>&1 && status=0 || status=$$?; test $$status = 1
-	$(CC) -target bpf -O2 -g -I/usr/include/x86_64-linux-gnu -DLOCAL_LAYOUT_SHIFT -c $(HERE)/test-core-ir.c -o $(CORE_IR_BUILD)/shifted.bpf.o
-	$(CORE_IR_BUILD)/core-ir-lower $(CORE_IR_BUILD)/fixture.bc --local-bpf $(CORE_IR_BUILD)/shifted.bpf.o --target-btf $(KDIR)/vmlinux --report $(CORE_IR_BUILD)/shifted.json -o $(CORE_IR_BUILD)/shifted.fixed.bc > $(CORE_IR_BUILD)/shifted.log 2>&1 && status=0 || status=$$?; test $$status = 1
-	$(CC) -target bpf -O2 -g -I/usr/include/x86_64-linux-gnu -DRESIZED_SCALAR -emit-llvm -c $(HERE)/test-core-ir.c -o $(CORE_IR_BUILD)/resized.bc
-	$(CC) -target bpf -O2 -g -c $(CORE_IR_BUILD)/resized.bc -o $(CORE_IR_BUILD)/resized.bpf.o
-	$(CORE_IR_BUILD)/core-ir-lower $(CORE_IR_BUILD)/resized.bc --local-bpf $(CORE_IR_BUILD)/resized.bpf.o --target-btf $(KDIR)/vmlinux --report $(CORE_IR_BUILD)/resized.json -o $(CORE_IR_BUILD)/resized.fixed.bc > $(CORE_IR_BUILD)/resized.log 2>&1 && status=0 || status=$$?; test $$status = 1
 
 .PHONY: core-ir-retain
 CORE_IR_RETAIN_ARGS ?=
-core-ir-retain:
-	python3 $(HERE)/core-ir-retain.py --build $(CORE_IR_BUILD) --raw $(CORE_IR_RAW) --tracee-ir $(CORE_IR_INPUT) --tracee-bpf $(CORE_IR_LOCAL_BPF) --target $(KDIR)/vmlinux --output $(CORE_IR_RECEIPT) $(CORE_IR_RETAIN_ARGS)
 
 .PHONY: core-ir-width-check
-core-ir-width-check: core-ir-tool $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
-	$(CC) -target bpf -O2 -g -emit-llvm -c $(HERE)/test-core-ir-width.c -o $(CORE_IR_BUILD)/width.bc
-	$(CC) -target bpf -O2 -g -c $(CORE_IR_BUILD)/width.bc -o $(CORE_IR_BUILD)/width.bpf.o
-	$(CORE_IR_BUILD)/core-ir-lower $(CORE_IR_BUILD)/width.bc --local-bpf $(CORE_IR_BUILD)/width.bpf.o --target-btf $(KDIR)/vmlinux --report $(CORE_IR_BUILD)/width.json -o $(CORE_IR_BUILD)/width.fixed.bc
-	python3 $(HERE)/socket-helper-names.py > $(CORE_IR_BUILD)/helper-names.json
-	$(SOCKET_BUILD)/socket-context-lower $(CORE_IR_BUILD)/width.fixed.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(CORE_IR_BUILD)/helper-names.json -o $(CORE_IR_BUILD)/width.native.bc
-	$(CC) -O2 -DTEST_DRIVER -I$(VMLINUX_DIR) -c $(HERE)/test-core-ir-width.c -o $(CORE_IR_BUILD)/width.driver.o
-	$(CC) -target x86_64-linux-gnu -O2 $(CORE_IR_BUILD)/width.native.bc $(CORE_IR_BUILD)/width.driver.o -o $(CORE_IR_BUILD)/width.fixed
-	$(CORE_IR_BUILD)/width.fixed
-	$(CC) -target bpf -O2 -g -DWIDE_COMPARE -emit-llvm -c $(HERE)/test-core-ir-width.c -o $(CORE_IR_BUILD)/width-compare.bc
-	$(CC) -target bpf -O2 -g -c $(CORE_IR_BUILD)/width-compare.bc -o $(CORE_IR_BUILD)/width-compare.bpf.o
-	$(CORE_IR_BUILD)/core-ir-lower $(CORE_IR_BUILD)/width-compare.bc --local-bpf $(CORE_IR_BUILD)/width-compare.bpf.o --target-btf $(KDIR)/vmlinux --report $(CORE_IR_BUILD)/width-compare.json -o $(CORE_IR_BUILD)/width-compare.fixed.bc > $(CORE_IR_BUILD)/width-compare.log 2>&1 && status=0 || status=$$?; test $$status = 1
 
-$(CORE_IR_BUILD)/width-bpf-reference: $(HERE)/test-core-width-bpf.c $(CORE_IR_BUILD)/libbpf/libbpf.a
-	$(CC) -O2 -g -I$(ROOT)/vendor/libbpf/src -I$(ROOT)/vendor/libbpf/include -I$(ROOT)/vendor/libbpf/include/uapi $< $(CORE_IR_BUILD)/libbpf/libbpf.a -lelf -lz -o $@
 
 .PHONY: core-ir-width-bpf-check
-core-ir-width-bpf-check: $(CORE_IR_BUILD)/width-bpf-reference
-	$(CORE_IR_BUILD)/width-bpf-reference $(CORE_IR_BUILD)/width.bpf.o $(KDIR)/vmlinux $(CORE_IR_BUILD)/width.patched.bpf.bin 0 > $(CORE_IR_BUILD)/width-bpf-reference.log 2>&1
-	$(CORE_IR_BUILD)/width-bpf-reference $(CORE_IR_BUILD)/resized.bpf.o $(KDIR)/vmlinux $(CORE_IR_BUILD)/signed.patched.bpf.bin 1 > $(CORE_IR_BUILD)/signed-bpf-reference.log 2>&1
 
 TETRAGON_SAME_BUILD ?= /var/tmp/kprog-tmp/perf/tetragon-same-source
 TETRAGON_UNIT ?= bpf_generic_kprobe_v61
@@ -586,12 +510,6 @@ TETRAGON_SOURCE ?= $(ROOT)/vendor/repos/tetragon/bpf/process/bpf_generic_kprobe.
 upstream-tetragon-ir:
 	prlimit --as=17179869184 -- python3 $(HERE)/tetragon-upstream.py --unit $(TETRAGON_UNIT) --source $(TETRAGON_SOURCE) --output $(TETRAGON_SAME_BUILD) --reference $(ROOT)/vendor/build/x86/tetragon/$(TETRAGON_UNIT).o
 
-upstream-tetragon-native: upstream-tetragon-ir core-ir-tool $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
-	prlimit --as=17179869184 -- $(CORE_IR_BUILD)/core-ir-lower $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).bc --local-bpf $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).direct.bpf.o --target-btf $(KDIR)/vmlinux --report $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).core.json -o $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).core.bc
-	$(ASM_BUILD)/bpf-asm-lower $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).core.bc -o $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).asm.bc
-	python3 $(HERE)/socket-helper-names.py > $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).helper-names.json
-	$(SOCKET_BUILD)/socket-context-lower $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).asm.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).helper-names.json -o $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).native.bc
-	prlimit --as=17179869184 -- $(CC) -target x86_64-linux-gnu -O3 -g -fPIC -fno-optimize-sibling-calls -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-jump-tables -c $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).native.bc -o $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).native.o
 
 .PHONY: cilium-helper-replay
 cilium-helper-replay:
@@ -607,37 +525,9 @@ split-host-artifacts:
 	python3 $(HERE)/split-retained-archive.py --receipt $(HOST_ARTIFACT_RECEIPT) --raw-archive $(HOST_ARTIFACT_RAW_ARCHIVE)
 
 ASM_BUILD ?= /var/tmp/kprog-tmp/perf/bpf-asm
-$(ASM_BUILD)/bpf-asm-lower: $(HERE)/bpf-asm-lower.cpp
-	install -d $(ASM_BUILD)
-	$(CXX) $$($(LLVM_CONFIG) --cxxflags) -std=c++17 -Wall -Wextra -Wno-unused-parameter $< -o $@ $$($(LLVM_CONFIG) --ldflags --libs core irreader bitwriter --system-libs)
 
-upstream-tetragon-native: $(ASM_BUILD)/bpf-asm-lower
 
 .PHONY: bpf-asm-check upstream-tetragon-link
-bpf-asm-check: $(ASM_BUILD)/bpf-asm-lower $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
-	$(CC) -target bpf -O2 -g -emit-llvm -c $(HERE)/test-bpf-asm.c -o $(ASM_BUILD)/fixture.bc
-	$(CC) -target bpf -O2 -g -c $(ASM_BUILD)/fixture.bc -o $(ASM_BUILD)/fixture.bpf.o
-	llvm-objdump-18 -d $(ASM_BUILD)/fixture.bpf.o > $(ASM_BUILD)/fixture.bpf.dis
-	$(ASM_BUILD)/bpf-asm-lower $(ASM_BUILD)/fixture.bc -o $(ASM_BUILD)/fixture.lowered.bc
-	python3 $(HERE)/socket-helper-names.py > $(ASM_BUILD)/helper-names.json
-	$(SOCKET_BUILD)/socket-context-lower $(ASM_BUILD)/fixture.lowered.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(ASM_BUILD)/helper-names.json -o $(ASM_BUILD)/fixture.native.bc
-	$(CC) -O2 -DTEST_DRIVER -c $(HERE)/test-bpf-asm.c -o $(ASM_BUILD)/driver.o
-	$(CC) -target x86_64-linux-gnu -O2 $(ASM_BUILD)/fixture.native.bc $(ASM_BUILD)/driver.o -o $(ASM_BUILD)/fixture
-	$(ASM_BUILD)/fixture
-	$(CC) -target bpf -O2 -g -emit-llvm -c $(HERE)/test-bpf-compare.c -o $(ASM_BUILD)/compare.bc
-	$(ASM_BUILD)/bpf-asm-lower $(ASM_BUILD)/compare.bc -o $(ASM_BUILD)/compare.lowered.bc
-	$(SOCKET_BUILD)/socket-context-lower $(ASM_BUILD)/compare.lowered.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(ASM_BUILD)/helper-names.json -o $(ASM_BUILD)/compare.native.bc
-	$(CC) -O2 -DTEST_DRIVER -c $(HERE)/test-bpf-compare.c -o $(ASM_BUILD)/compare.driver.o
-	$(CC) -target x86_64-linux-gnu -O2 $(ASM_BUILD)/compare.native.bc $(ASM_BUILD)/compare.driver.o -o $(ASM_BUILD)/compare
-	$(ASM_BUILD)/compare
-	$(CC) -target bpf -O2 -g -emit-llvm -c $(HERE)/test-bpf-errno-store.c -o $(ASM_BUILD)/errno-store.bc
-	$(CC) -target bpf -O2 -g -c $(HERE)/test-bpf-errno-store.c -o $(ASM_BUILD)/errno-store.bpf.o
-	llvm-objdump-18 -d $(ASM_BUILD)/errno-store.bpf.o > $(ASM_BUILD)/errno-store.bpf.dis
-	$(ASM_BUILD)/bpf-asm-lower $(ASM_BUILD)/errno-store.bc -o $(ASM_BUILD)/errno-store.lowered.bc
-	$(SOCKET_BUILD)/socket-context-lower $(ASM_BUILD)/errno-store.lowered.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(ASM_BUILD)/helper-names.json -o $(ASM_BUILD)/errno-store.native.bc
-	$(CC) -O2 -DTEST_DRIVER -c $(HERE)/test-bpf-errno-store.c -o $(ASM_BUILD)/errno-store.driver.o
-	$(CC) -target x86_64-linux-gnu -O2 $(ASM_BUILD)/errno-store.native.bc $(ASM_BUILD)/errno-store.driver.o -o $(ASM_BUILD)/errno-store
-	$(ASM_BUILD)/errno-store
 
 TETRAGON_SECTION_ARGS ?= --section-prefix kprobe --section-prefix tracepoint --section-prefix raw_tracepoint --section-prefix uprobe --section-prefix fmod_ret/
 TETRAGON_LINKER ?= $(LINK_MEMORY_PAYLOAD)/native-link-off
@@ -645,8 +535,6 @@ upstream-tetragon-link: upstream-tetragon-native
 	python3 $(HERE)/socket-proof.py --input $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT).native.o --linker $(TETRAGON_LINKER) --output $(TETRAGON_SAME_BUILD)/$(TETRAGON_UNIT)-links $(TETRAGON_SECTION_ARGS)
 
 .PHONY: upstream-tetragon-batch
-upstream-tetragon-batch: core-ir-tool $(ASM_BUILD)/bpf-asm-lower $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
-	prlimit --as=17179869184 -- python3 $(HERE)/tetragon-batch.py --manifest $(TETRAGON_BATCH_MANIFEST) --raw $(TETRAGON_BATCH_RAW) --build $(TETRAGON_BATCH_BUILD) --socket-build $(SOCKET_BUILD) $(TETRAGON_BATCH_ARGS)
 
 .PHONY: upstream-tetragon-manifest
 upstream-tetragon-manifest:
@@ -691,25 +579,9 @@ config-globals-default-check:
 	cmp $(CONFIG_GLOBALS_BUILD)/default-before.bc $(CONFIG_GLOBALS_BUILD)/default-after.bc
 
 FROZEN_BUILD ?= /var/tmp/kprog-tmp/perf/frozen-data
-$(FROZEN_BUILD)/frozen-data-lower: $(HERE)/frozen-data-lower.cpp
-	install -d $(FROZEN_BUILD)
-	$(CXX) $$($(LLVM_CONFIG) --cxxflags) -std=c++17 -Wall -Wextra -Wno-unused-parameter $< -o $@ $$($(LLVM_CONFIG) --ldflags --libs core irreader bitwriter analysis --system-libs)
 
 .PHONY: frozen-data-ir frozen-data-check
-frozen-data-ir: $(FROZEN_BUILD)/frozen-data-lower
-	$(FROZEN_BUILD)/frozen-data-lower $(FROZEN_INPUT) --constants $(FROZEN_CONSTANTS) --report $(FROZEN_REPORT) -o $(FROZEN_OUTPUT)
 
-frozen-data-check: $(FROZEN_BUILD)/frozen-data-lower $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
-	$(CC) -target bpf -O2 -g -emit-llvm -c $(HERE)/test-config-globals.c -o $(FROZEN_BUILD)/fixture.bc
-	$(FROZEN_BUILD)/frozen-data-lower $(FROZEN_BUILD)/fixture.bc --constants $(HERE)/test-frozen-data.json --report $(FROZEN_BUILD)/fixture.json -o $(FROZEN_BUILD)/fixture.frozen.bc
-	python3 $(HERE)/socket-helper-names.py > $(FROZEN_BUILD)/helper-names.json
-	$(SOCKET_BUILD)/socket-context-lower $(FROZEN_BUILD)/fixture.frozen.bc --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --native-codegen --helper-names $(FROZEN_BUILD)/helper-names.json -o $(FROZEN_BUILD)/fixture.native.bc
-	$(CC) -target x86_64-linux-gnu -O3 -fPIC -c $(FROZEN_BUILD)/fixture.native.bc -o $(FROZEN_BUILD)/fixture.native.o
-	$(CC) -shared $(FROZEN_BUILD)/fixture.native.o -o $(FROZEN_BUILD)/libfrozen-fixture.so
-	$(CC) -O2 $(HERE)/test-frozen-data-driver.c -L$(FROZEN_BUILD) -lfrozen-fixture -Wl,--export-dynamic -Wl,-rpath,$(FROZEN_BUILD) -o $(FROZEN_BUILD)/check
-	$(FROZEN_BUILD)/check
-	$(FROZEN_BUILD)/frozen-data-lower $(FROZEN_BUILD)/fixture.bc --constants $(HERE)/test-frozen-data-mutable.json --report $(FROZEN_BUILD)/mutable.json -o $(FROZEN_BUILD)/mutable.bc > $(FROZEN_BUILD)/mutable.log 2>&1 && result=0 || result=$$?; test $$result = 1
-	$(FROZEN_BUILD)/frozen-data-lower $(FROZEN_BUILD)/fixture.bc --constants $(HERE)/test-frozen-data-short.json --report $(FROZEN_BUILD)/short.json -o $(FROZEN_BUILD)/short.bc > $(FROZEN_BUILD)/short.log 2>&1 && result=0 || result=$$?; test $$result = 1
 
 .PHONY: frozen-cilium-native
 frozen-cilium-native: frozen-data-ir $(SOCKET_BUILD)/socket-context-lower $(PACKET_BUILD)/public-layout $(PACKET_BUILD)/physical-layout
@@ -731,14 +603,8 @@ upstream-otel-bpf:
 
 OTEL_NATIVE_BUILD ?= /var/tmp/kprog-tmp/perf/otel-original-native
 .PHONY: upstream-otel-native
-upstream-otel-native: all $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
-	install -d $(OTEL_NATIVE_BUILD)
-	python3 $(HERE)/socket-helper-names.py > $(OTEL_NATIVE_BUILD)/helper-names.json
-	prlimit --as=17179869184 -- python3 $(HERE)/otel-native.py --original $(OTEL_UPSTREAM_BUILD)/tracer.linked.bc --output $(OTEL_NATIVE_BUILD) --retarget $(SOCKET_BUILD)/socket-context-lower --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json --perf-context $(BUILD)/perf-context-lower --perf-layout $(BUILD)/layout.json
 
 .PHONY: upstream-otel-link
-upstream-otel-link: upstream-otel-native
-	prlimit --as=17179869184 -- python3 $(HERE)/socket-proof.py --input $(OTEL_NATIVE_BUILD)/tracer.native.o --linker $(LINK_MEMORY_PAYLOAD)/native-link-off --output $(OTEL_NATIVE_BUILD)/links --section-prefix perf_event/ --section-prefix kprobe/ --section-prefix uprobe/ --section-prefix tracepoint/ --section-prefix raw_tracepoint/ --kernel-roundtrip
 
 OTEL_UPSTREAM_PAYLOAD ?= $(ROOT)/corpus/results/perf-otel-upstream-20261114
 .PHONY: upstream-otel-candidate

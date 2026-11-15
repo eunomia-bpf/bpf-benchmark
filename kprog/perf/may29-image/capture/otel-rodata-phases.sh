@@ -1,9 +1,6 @@
 #!/bin/sh
-# Dump OTel's metrics map twice inside EACH phase of one run.
-#
-# Native code installs only at post_rejit (baseline shim log: 0 replacements; post_rejit:
-# 13), so one run contains both arms. Two dumps per phase, 40 s apart, means at least one
-# lands while the counters are warm even though the app restarts at the phase boundary.
+# Read the live .rodata.var map in both phases of one OTel run, and dump the metrics map
+# in each phase too, so a nonzero rodata read can be tied to a working unwind.
 O=$1
 cd /workspaces/repository
 make -f kprog/perf/one-image/Makefile guest APPS=otelcol-ebpf-profiler/profiling SAMPLES=1 \
@@ -16,15 +13,13 @@ for _ in $(seq 1 150); do
   sleep 5
 done
 for ph in baseline post_rejit; do
-  # wait for this phase's measurement to begin
   for _ in $(seq 1 120); do
     grep -q "\"event\": \"measurement_start\", \"phase\": \"$ph\"" "$O/guest.log" 2>/dev/null && break
     sleep 5
   done
-  for k in 1 2; do
-    sleep 35
-    kprog/perf/may29-image/map-dump.sh metrics "$O/$ph-$k" 200 10 >> "$O/map.log" 2>&1
-    echo "$ph-$k $(date -u +%FT%TZ)" >> "$O/dump-times.txt"
-  done
+  sleep 40
+  kprog/perf/may29-image/capture/rodata-read.sh > "$O/$ph-rodata.txt" 2>&1
+  kprog/perf/may29-image/map-dump.sh metrics "$O/$ph" 200 20 >> "$O/map.log" 2>&1
+  echo "$ph $(date -u +%FT%TZ)" >> "$O/dump-times.txt"
 done
 wait $G

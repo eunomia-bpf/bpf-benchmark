@@ -62,9 +62,6 @@
  * accesses must be done through this macro to ensure the loader's dead code
  * elimination can recognize them.
  */
-#ifdef MICRO_NATIVE
-#define CONFIG(name) (__config_##name)
-#else
 #define CONFIG(name)	\
 (*({			\
 	void *out;	\
@@ -84,4 +81,3 @@
 			: "=r"(out));	\
 	(typeof(__config_##name) *)out;	\
 }))
-#endif

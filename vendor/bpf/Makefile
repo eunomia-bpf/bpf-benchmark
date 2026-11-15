@@ -41,17 +41,11 @@ TRACEE_LSM_SUPPORT_SRCS := kprobe_check lsm_check
 NATIVE_TARGET_FLAGS := $(if $(filter arm64 aarch64,$(ARCH)),--target=aarch64-linux-gnu)
 NATIVE_ARCH_CFLAGS := $(if $(filter x86,$(ARCH)),-march=native -mno-red-zone -mgeneral-regs-only) \
 	$(if $(filter arm64 aarch64,$(ARCH)),-mtune=neoverse-n1 -mgeneral-regs-only)
-NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c -DMICRO_NATIVE \
+# One compile-flag set for every app (operator 2026-11-15: "编译参数所有 app 统一.", "所有优化参数必须打开").
+NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -c \
 	-fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
-	-fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
-	-fno-optimize-sibling-calls \
-	-Wno-unknown-attributes -mllvm -switch-to-lookup=false
-KATRAN_NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c -DMICRO_NATIVE \
-	-fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
-	-fno-asynchronous-unwind-tables -fno-unwind-tables -fno-jump-tables \
-	-fno-optimize-sibling-calls \
-	-Wno-unknown-attributes -Wno-compare-distinct-pointer-types \
-	-mllvm -switch-to-lookup=false
+	-fno-asynchronous-unwind-tables -fno-unwind-tables \
+	-Wno-unknown-attributes -Wno-compare-distinct-pointer-types
 KATRAN_NATIVE_OBJS := $(patsubst %,$(NATIVE_OUT)/katran/%.native.o,$(KATRAN_OBJS))
 KATRAN_NATIVE_PROOF_MARKERS := $(patsubst %,$(NATIVE_OUT)/katran/%.proof.ok,$(KATRAN_OBJS))
 BCC_NATIVE_OBJS := $(patsubst %,$(NATIVE_OUT)/bcc/%.native.o,$(BCC_TOOLS))
@@ -175,109 +169,20 @@ tracee:
 			-o "$(OUT)/tracee/lsm_support/$${src}.bpf.o"; \
 	done
 
-# Katran from the untouched upstream sources, behind a switch that defaults off.
-#
-# Katran's only behaviour-changing source difference is the XDP/TC context layout: this
-# tree's katran/lib/linux_includes/bpf.h redefines struct xdp_md/__sk_buff under
-# MICRO_NATIVE so the native body reads physical offsets, where the source reads the UAPI
-# mirror and the kernel's converter rewrites each access. With KATRAN_SAME_SOURCE=1 the
-# source and its headers stay as upstream: the eBPF arm's own frontend produces IR, lane
-# perf's context lowering replaces each public access with the physical one, and codegen
-# follows. Leaving it at 0 keeps the rule below exactly as before, so the default objects
-# are unchanged. Two codegen details are load-bearing and documented in
-# kprog/results/katran-samesource-20261113/README.md: -fPIC at the frontend (keeps .maps
-# globals non-dso_local so a map reference lowers to the GOTPCRELX load the loader patches)
-# and stripping the IR's +sse,+sse2 target-features (else memset/memcpy expand to SSE).
-KATRAN_SAME_SOURCE ?= 0
-KATRAN_CONTEXT_BUILD ?= /var/tmp/kprog-tmp/C/ctx/packet-context
-KATRAN_CONTEXT_LOWER ?= /var/tmp/kprog-tmp/C/ctx/socket-context/socket-context-lower
-KATRAN_SAME_SOURCE_FRONTEND := -I"$(CURDIR)/katran" -I"$(CURDIR)/katran/katran/lib/linux_includes" \
-	-DDEBUG -D__KERNEL__ -Wno-unused-value -Wno-pointer-sign \
-	-Wno-compare-distinct-pointer-types -O2 -emit-llvm -c -g -fPIC
-KATRAN_SAME_SOURCE_CODEGEN := -target x86_64-linux-gnu -O3 -g -fPIC \
-	-fno-optimize-sibling-calls -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only \
-	-fno-stack-protector -fno-jump-tables
-
 $(NATIVE_OUT)/katran/%.native.o: katran/katran/lib/bpf/%.c
 	install -d "$(dir $@)"
-	if [ "$(KATRAN_SAME_SOURCE)" = 1 ]; then \
-		set -e; \
-		stem="$*"; \
-		"$(CLANG)" $(KATRAN_SAME_SOURCE_FRONTEND) -o "$(dir $@)$${stem}.bc" "$<"; \
-		"$(KATRAN_CONTEXT_LOWER)" "$(dir $@)$${stem}.bc" \
-			--public-layout "$(KATRAN_CONTEXT_BUILD)/public-layout.json" \
-			--physical-layout "$(KATRAN_CONTEXT_BUILD)/physical-layout.json" \
-			-o "$(dir $@)$${stem}.lowered.bc"; \
-		"$(LLVM_DIS)" "$(dir $@)$${stem}.lowered.bc" -o "$(dir $@)$${stem}.lowered.ll"; \
-		python3 "$(NATIVE_IR_PREP)" \
-			"$(dir $@)$${stem}.lowered.ll" "$(dir $@)$${stem}.notf.ll"; \
-		"$(CLANG)" $(KATRAN_SAME_SOURCE_CODEGEN) -c "$(dir $@)$${stem}.notf.ll" -o "$@"; \
-	else \
-		"$(CLANG)" $(KATRAN_NATIVE_CFLAGS) \
-			-I"$(CURDIR)/katran" -I"$(CURDIR)/katran/katran/lib/linux_includes" \
-			-I/usr/include -I/usr/include/x86_64-linux-gnu \
-			-o "$@" "$<"; \
-	fi
+	"$(CLANG)" $(NATIVE_CFLAGS) -DDEBUG -D__KERNEL__ \
+		-I"$(CURDIR)/katran" -I"$(CURDIR)/katran/katran/lib/linux_includes" \
+		-I/usr/include -I/usr/include/x86_64-linux-gnu \
+		-o "$@" "$<"
 
-# BCC from the untouched upstream sources, behind a switch that defaults off.
-#
-# Measured 2026-11-13: all eight shipped tools compile from vendor/repos/bcc to code
-# byte-identical to the image's objects (same AX size, `cmp` on the section bytes). The one
-# difference left is tcplife's .rodata layout: this tree's copy adds a MICRO_NATIVE-only
-# aligned(2|4) attribute that packs four globals at 2/2060-style offsets (section 4106),
-# where upstream gives 16/2064/4112/4116 (section 4118). The BPF object's .rodata — the
-# map's value_size — is 4106, so the loader's default congruent-section rule would reject
-# the upstream layout; the loader's `objects[].kernel_data_layout` option resolves each
-# symbol by name against the loaded map's BTF instead, which fits. With the switch off this
-# rule is unchanged and the default objects stay byte-identical.
-BCC_SAME_SOURCE ?= 0
-# lane perf's CO-RE resolver: resolves the frontend IR's CO-RE queries against the
-# sole kernel's BTF before codegen, so a native object reads the real offsets
-# (without it runqlat reads task+0xb78 where the kernel has task+0xaf0).
-# Lane perf's CO-RE resolver, pinned in this lane's own scratch so a rebuild of
-# lane perf's default output cannot change what this recipe runs (they reported a
-# "Permission denied" from exactly that race at 2026-11-13T10:31).
-CORE_IR_LOWER ?= /var/tmp/kprog-tmp/perf/core-ir/core-ir-lower
-NATIVE_IR_PREP ?= $(CURDIR)/../../kprog/build/native-ir-prep.py
-KATRAN_TARGET_BTF ?= /workspaces/.agent-state/kprog-ck/build-x86/vmlinux
-# The BCC same-source route needs the SOLE kernel's release and BTF.  vendor/bpf
-# defaults both to the host ($(uname -r), /sys/kernel/btf/vmlinux), and `make -B`
-# there regenerates the tracked vmlinux headers from the host BTF — which on this
-# host is 7.3.0-070300rc3 while the sole kernel is 7.0.0-rc2+.  Set these along
-# with BCC_SAME_SOURCE=1:
-#   KERNEL_RELEASE=$(cat /workspaces/.agent-state/kprog-ck/build-x86/include/config/kernel.release)
-
-$(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c bcc/libbpf-tools/x86/vmlinux.h native_compat.h
+$(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c bcc/libbpf-tools/x86/vmlinux.h
 	install -d "$(dir $@)"
-	if [ "$(BCC_SAME_SOURCE)" = 1 ]; then \
-		set -e; \
-		stem="$*"; \
-		src="$(CURDIR)/../repos/bcc/libbpf-tools/$${stem}.bpf.c"; \
-		inc="-I$(CURDIR)/../repos/bcc/libbpf-tools -I$(CURDIR)/bcc/libbpf-tools/x86 \
-			-I$(CURDIR)/../repos/bcc/src/cc/libbpf/include/uapi \
-			-I/usr/include -I/usr/include/x86_64-linux-gnu"; \
-		"$(CLANG)" -target bpf -O2 -g -mcpu=v2 -D__TARGET_ARCH_x86 $$inc \
-			-emit-llvm -c "$${src}" -o "$(dir $@)$${stem}.bc"; \
-		"$(CLANG)" -target bpf -O2 -g -mcpu=v2 -D__TARGET_ARCH_x86 $$inc \
-			-c "$(dir $@)$${stem}.bc" -o "$(dir $@)$${stem}.bpf.o"; \
-		"$(CORE_IR_LOWER)" "$(dir $@)$${stem}.bc" \
-			--local-bpf "$(dir $@)$${stem}.bpf.o" \
-			--target-btf "$(KATRAN_TARGET_BTF)" \
-			--report "$(dir $@)$${stem}.core.json" \
-			-o "$(dir $@)$${stem}.resolved.bc"; \
-		"$(LLVM_DIS)" "$(dir $@)$${stem}.resolved.bc" -o "$(dir $@)$${stem}.resolved.ll"; \
-		python3 "$(NATIVE_IR_PREP)" \
-			"$(dir $@)$${stem}.resolved.ll" "$(dir $@)$${stem}.notf.ll" --name-helpers \
-			--kconfig "$(patsubst %/,%,$(dir $(KATRAN_TARGET_BTF)))"; \
-		"$(CLANG)" $(NATIVE_CFLAGS) -include "$(CURDIR)/native_compat.h" $$inc \
-			-o "$@" "$(dir $@)$${stem}.notf.ll"; \
-	else \
-		"$(CLANG)" $(NATIVE_CFLAGS) -include "$(CURDIR)/native_compat.h" \
-			-I"$(CURDIR)/bcc/libbpf-tools" -I"$(CURDIR)/bcc/libbpf-tools/x86" \
-			-I"$(CURDIR)/bcc/src/cc/libbpf/include/uapi" \
-			-I/usr/include -I/usr/include/x86_64-linux-gnu \
-			-o "$@" "$<"; \
-	fi
+	"$(CLANG)" $(NATIVE_CFLAGS) \
+		-I"$(CURDIR)/bcc/libbpf-tools" -I"$(CURDIR)/bcc/libbpf-tools/x86" \
+		-I"$(CURDIR)/bcc/src/cc/libbpf/include/uapi" \
+		-I/usr/include -I/usr/include/x86_64-linux-gnu \
+		-o "$@" "$<"
 
 $(NATIVE_OUT)/cilium/bpf_lxc.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_LXC_OPTIONS)
 $(NATIVE_OUT)/cilium/bpf_overlay.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_OVERLAY_OPTIONS)
@@ -287,10 +192,9 @@ $(NATIVE_OUT)/cilium/bpf_wireguard.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_M
 $(NATIVE_OUT)/cilium/bpf_xdp.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_XDP_OPTIONS)
 $(NATIVE_OUT)/cilium/bpf_alignchecker.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_SIMPLE_OPTIONS)
 
-$(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c native_compat.h
+$(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c
 	install -d "$(dir $@)"
 	"$(CLANG)" $(CILIUM_NATIVE_OPTIONS) $(NATIVE_CFLAGS) \
-		-include "$(CURDIR)/native_compat.h" \
 		-I"$(CURDIR)/cilium/bpf" -I"$(CURDIR)/cilium/bpf/include" \
 		-I"$(CURDIR)/cilium/bpf/include/bpf" \
 		-I"$(CURDIR)/cilium/bpf/include/linux" \
@@ -312,19 +216,17 @@ $(OTEL_NATIVE_OBJECT): $(OTEL_NATIVE_UNIT_OBJS)
 	install -d "$(dir $@)"
 	"$(CLANG)" -r -o "$@" $(OTEL_NATIVE_UNIT_OBJS)
 
-$(TRACEE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinux.h native_compat.h
+$(TRACEE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinux.h
 	install -d "$(dir $@)"
-	"$(CLANG)" $(NATIVE_CFLAGS) -DMICRO_NATIVE_HELPER_MACROS \
-		-include "$(CURDIR)/native_compat.h" \
+	"$(CLANG)" $(NATIVE_CFLAGS) \
 		-D__TARGET_ARCH_x86 -D__BPF_TRACING__ -DCORE -DCOMMON_BUILD \
 		-I"$(CURDIR)/tracee/pkg/ebpf/c" \
 		-I/usr/include -I/usr/include/x86_64-linux-gnu \
 		-o "$@" "$<"
 
-$(NATIVE_OUT)/tracee/lsm_support/%.native.o: tracee/pkg/ebpf/c/lsmsupport/%.bpf.c tracee/pkg/ebpf/c/vmlinux.h native_compat.h
+$(NATIVE_OUT)/tracee/lsm_support/%.native.o: tracee/pkg/ebpf/c/lsmsupport/%.bpf.c tracee/pkg/ebpf/c/vmlinux.h
 	install -d "$(dir $@)"
-	"$(CLANG)" $(NATIVE_CFLAGS) -DMICRO_NATIVE_HELPER_MACROS \
-		-include "$(CURDIR)/native_compat.h" \
+	"$(CLANG)" $(NATIVE_CFLAGS) \
 		-D__TARGET_ARCH_x86 -D__BPF_TRACING__ \
 		-I"$(CURDIR)/tracee/pkg/ebpf/c/lsmsupport" \
 		-I"$(CURDIR)/tracee/pkg/ebpf/c" \
@@ -484,16 +386,15 @@ native-tracee: $(TRACEE_NATIVE_OBJS) $(TRACEE_NATIVE_PROOF_MARKERS)
 		--object "$(TRACEE_NATIVE_STAGE_OUT)/tracee.native.o" \
 		$(foreach src,$(TRACEE_LSM_SUPPORT_SRCS),--object "$(TRACEE_NATIVE_STAGE_OUT)/$(src).native.o")
 
-native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h native_compat.h $(NATIVE_LINK)
+native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h $(NATIVE_LINK)
 	install -d "$(NATIVE_OUT)/tetragon"
 	install -d "$(TETRAGON_NATIVE_STAGE_OUT)"
 	rm -f "$(NATIVE_OUT)/tetragon"/*.native.o "$(NATIVE_OUT)/tetragon"/*.proof.o "$(NATIVE_OUT)/tetragon"/*.proof.ok
 	rm -f "$(TETRAGON_NATIVE_STAGE_OUT)"/*.native.o
 	native_out="$(NATIVE_OUT)/tetragon"; \
 	stage_out="$(TETRAGON_NATIVE_STAGE_OUT)"; \
-	common_flags=($(NATIVE_CFLAGS) -fms-extensions -DMICRO_NATIVE_HELPER_MACROS -DMICRO_NATIVE_TETRAGON \
+	common_flags=($(NATIVE_CFLAGS) -fms-extensions \
 		-D__TARGET_ARCH_x86 \
-		-include "$(CURDIR)/native_compat.h" \
 		-I"$(CURDIR)/tetragon/bpf" \
 		-I"$(CURDIR)/tetragon/bpf/include" \
 		-I"$(CURDIR)/tetragon/bpf/lib" \
