@@ -28,6 +28,8 @@
 
 - [x] P-SPECIALIZE-10K（9fc382606、cc83b5d48；本提交结果）：四种 10K 形状正常 B/实际栈帧完成，前端 11.6–26.3s、峰值 399–920MiB；B 328–200624B、帧 0–40B，详见 `perf_20261113/inline-families/scale-10k/`。旧同名 scalar/direct 70.47GiB/SIGKILL 的实际失败已能完成；不跨不同编译管线宣称独立加速比。100K 继续。
 
+**协调者 2026-11-15T23:48:15Z（运营者“原生一侧装不上 为啥”）**：Tracee 原生一侧装载失败的原因（corpus/results/x86_kvm_corpus_20261115_222107_219897/details/shim-logs/tracee__monitor.post_rejit.log）：链接 sys_enter_submit 时 native-link 报 “x86 helper call bpf_probe_read has no helper address”，native loader 因此失败，Tracee 收到 invalid argument。头文件路线保留上游源码的 bpf_probe_read（buffer.h 12 处、filesystem.h 3 处、tracee.bpf.c 4 处），对象里留下未定义符号 bpf_probe_read、bpf_probe_read_str；loader 给链接器的地址表按内核函数名取地址（native_loader.cpp 277–278：helper 4 → bpf_probe_read_compat，45 → bpf_probe_read_compat_str），两边名字对不上。内核里 bpf_probe_read_compat 在（System.map ffffffff814653f0），eBPF 一侧调的就是它。11-15 之前 native_compat.h 把读内存都改成 bpf_probe_read_kernel，名字和内核一致，所以没出现；05-29 的对象里没有这类未定义符号。PERF 在链接器或 loader 里按 helper 编号把对象里的 helper 名解析到 eBPF 一侧调用的同一个内核函数，一次覆盖所有名字和内核函数名不同的 helper；C 的源码保持上游原样。C 的广度一轮里 Tracee 先记为这个错误。
+
 **协调者 2026-11-15T23:11:08Z（运营者 2026-11-15 约 22:59–23:08 的话）**：
 - 已删（运营者“你去删掉. 立刻删掉.”）：host_cpu.py、observe_runtime.py 和 observe-bin、三个 run.sh、queue-under-timing.sh、scripts/queue-timing.sh、check_host_cpu.py、run_katran_fixed_frequency.sh（c257337d0）。one-image 的 corpus 先执行冻结 Makefile 的 kvm-host-cpu，再直接起 vng（f1338ad13）。
 - 和之前的版本对比（运营者“你要不要对比之前的版本?”）：镜像里的原生对象和 05-29 构建（/workspaces/kprog-raw/paper-tree-untracked）逐段比较可执行代码。Katran 的 balancer 和 05-29 逐字节相同（xdp 段 7 965 字节），4 个对象 3 个相同；BCC 8 个 7 个相同；Cilium 7 个 5 个相同；OTel 相同；Tracee 3 个全变（1 615 175 → 1 457 903 字节）；Tetragon 88 个是 05-29 之后新加的。11-14 编译中改写 IR 的旧路线，Katran 是 7 535 字节，和 05-29 不同。Katran 现在和 05-29 的差别全在 P 之后：链接器 LTO、装载器、内核、计时方法。
