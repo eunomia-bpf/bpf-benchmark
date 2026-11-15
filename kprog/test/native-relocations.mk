@@ -126,17 +126,18 @@ absolute-table-b: $(CONTEXT_TOOL)
 	taskset -c 16-19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_absolute_code_table.py --build $(ABSOLUTE_TABLE_BUILD) --output $(OUTPUT) --bounds $(CONTEXT_TOOL)
 
 # Caller holds image EX across the in-place rebuild and its short boot check.
+ABSOLUTE_KERNEL_OUTPUT ?= /workspaces/kprog-raw/perf/20261115-absolute-code-tables/kernel
 .PHONY: absolute-image-kernel
 absolute-image-kernel:
-	install -d $(OUTPUT)
-	git -C $(ROOT)/vendor/linux-framework rev-parse HEAD > $(OUTPUT)/kernel-source.txt
-	sha256sum $(KDIR)/.config $(KDIR)/arch/x86/boot/bzImage $(KDIR)/vmlinux > $(OUTPUT)/before-sha256.txt
+	install -d $(ABSOLUTE_KERNEL_OUTPUT)
+	git -C $(ROOT)/vendor/linux-framework rev-parse HEAD > $(ABSOLUTE_KERNEL_OUTPUT)/kernel-source.txt
+	sha256sum $(KDIR)/.config $(KDIR)/arch/x86/boot/bzImage $(KDIR)/vmlinux > $(ABSOLUTE_KERNEL_OUTPUT)/before-sha256.txt
 	$(MAKE) -C $(ROOT)/vendor/linux-framework O=$(KDIR) -j4 bzImage
 	$(MAKE) -C $(ROOT)/kprog/stock-path/module KDIR=$(KDIR) MO=/workspaces/.agent-state/kprog-ck/verified-module
-	sha256sum $(KDIR)/.config $(KDIR)/arch/x86/boot/bzImage $(KDIR)/vmlinux /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko > $(OUTPUT)/after-sha256.txt
-	$(MAKE) -r -f $(ROOT)/kprog/test/native-relocations.mk kernel-layout-boot OUTPUT=$(OUTPUT)/boot
-	$(MAKE) -r -f $(ROOT)/kprog/test/native-relocations.mk kernel-layout BOOT_CAPTURE=$(OUTPUT)/boot
-	date -u +%FT%TZ > $(OUTPUT)/published
+	sha256sum $(KDIR)/.config $(KDIR)/arch/x86/boot/bzImage $(KDIR)/vmlinux /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko > $(ABSOLUTE_KERNEL_OUTPUT)/after-sha256.txt
+	$(MAKE) -r -f $(ROOT)/kprog/test/native-relocations.mk kernel-layout-boot OUTPUT=$(ABSOLUTE_KERNEL_OUTPUT)/boot
+	$(MAKE) -r -f $(ROOT)/kprog/test/native-relocations.mk kernel-layout BOOT_CAPTURE=$(ABSOLUTE_KERNEL_OUTPUT)/boot
+	date -u +%FT%TZ > $(ABSOLUTE_KERNEL_OUTPUT)/published
 
 .PHONY: jump-table-check
 jump-table-check: $(LINKER_BINARY) jump-table-forms $(KERNEL_LAYOUT)
