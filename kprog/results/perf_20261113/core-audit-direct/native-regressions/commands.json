@@ -1,0 +1,163 @@
+[
+  {
+    "command": [
+      "clang-18",
+      "-target",
+      "bpf",
+      "-O2",
+      "-g",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "-c",
+      "/workspaces/repository/kprog/test/core_audit_fixture.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/core-audit/fixture.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-target",
+      "bpf",
+      "-O2",
+      "-g",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "-c",
+      "/workspaces/repository/kprog/test/core_audit_fixture.c",
+      "-DAUDIT_TARGET",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/core-audit/fixture-target.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/core-audit/core-reference",
+      "/var/tmp/kprog-tmp/perf/core-audit/fixture.bpf.o",
+      "/var/tmp/kprog-tmp/perf/core-audit/fixture-target.bpf.o"
+    ],
+    "returncode": 0,
+    "stdout": "section\tinsn_off\tlocal_type_id\troot\tkind\taccess\tspec\toriginal\tresolved\tpoison\toriginal_bytes\ttarget_bytes\tfail_memsz_adjust\tpatched_code\tpatched_offset\tpatched_immediate\tstatus\nsocket/field_offset\t0\t5\taudit_record\t0\t0:0\t<byte_off> [5] struct audit_record.field (0:0 @ offset 0)\t0\t8\t0\t4\t8\t1\t183\t0\t8\tresolved\nsocket/field_size\t0\t5\taudit_record\t1\t0:0\t<byte_sz> [5] struct audit_record.field (0:0 @ offset 0)\t4\t8\t0\t0\t0\t0\t183\t0\t8\tresolved\nsocket/field_exists\t0\t5\taudit_record\t2\t0:0\t<field_exists> [5] struct audit_record.field (0:0 @ offset 0)\t1\t1\t0\t0\t0\t0\t183\t0\t1\tresolved\nsocket/field_absent\t0\t5\taudit_record\t2\t0:2\t<field_exists> [5] struct audit_record.absent (0:2 @ offset 8)\t1\t0\t0\t0\t0\t0\t183\t0\t0\tresolved\nsocket/field_signed\t0\t5\taudit_record\t3\t0:1\t<signed> [5] struct audit_record.bits (0:1 @ offset 4)\t1\t0\t0\t0\t0\t0\t183\t0\t0\tresolved\nsocket/field_lshift\t0\t5\taudit_record\t4\t0:1\t<lshift_u64> [5] struct audit_record.bits (0:1 @ offset 4)\t61\t59\t0\t0\t0\t0\t183\t0\t59\tresolved\nsocket/field_rshift\t0\t5\taudit_record\t5\t0:1\t<rshift_u64> [5] struct audit_record.bits (0:1 @ offset 4)\t61\t59\t0\t0\t0\t0\t183\t0\t59\tresolved\nsocket/type_local\t0\t5\taudit_record\t6\t0\t<local_type_id> [5] struct audit_record\t5\t5\t0\t0\t0\t0\t24\t0\t5\tresolved\nsocket/type_target\t0\t5\taudit_record\t7\t0\t<target_type_id> [5] struct audit_record\t5\t2\t0\t0\t0\t0\t24\t0\t2\tresolved\nsocket/type_exists\t0\t5\taudit_record\t8\t0\t<type_exists> [5] struct audit_record\t1\t1\t0\t0\t0\t0\t183\t0\t1\tresolved\nsocket/type_absent\t0\t26\taudit_missing\t8\t0\t<type_exists> [26] struct audit_missing\t1\t0\t0\t0\t0\t0\t183\t0\t0\tresolved\nsocket/type_size\t0\t5\taudit_record\t9\t0\t<type_size> [5] struct audit_record\t12\t24\t0\t0\t0\t0\t183\t0\t24\tresolved\nsocket/enum_exists\t0\t31\taudit_enum\t10\t0\t<enumval_exists> [31] enum audit_enum::AUDIT_VALUE = 3\t1\t1\t0\t0\t0\t0\t24\t0\t1\tresolved\nsocket/enum_absent\t0\t31\taudit_enum\t10\t1\t<enumval_exists> [31] enum audit_enum::AUDIT_ABSENT = 4\t1\t0\t0\t0\t0\t0\t24\t0\t0\tresolved\nsocket/enum_value\t0\t31\taudit_enum\t11\t0\t<enumval_value> [31] enum audit_enum::AUDIT_VALUE = 3\t3\t47\t0\t0\t0\t0\t24\t0\t47\tresolved\nsocket/type_matches\t0\t5\taudit_record\t12\t0\t<type_matches> [5] struct audit_record\t1\t0\t0\t0\t0\t0\t183\t0\t0\tresolved\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-O3",
+      "-g",
+      "-march=native",
+      "-foptimize-sibling-calls",
+      "-fomit-frame-pointer",
+      "-mno-red-zone",
+      "-mgeneral-regs-only",
+      "-fno-stack-protector",
+      "-DAUDIT_LOCAL_ID=5",
+      "-DAUDIT_TARGET_ID=2",
+      "-c",
+      "/workspaces/repository/kprog/test/core_audit_native.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/core-audit/audit-native.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "/var/tmp/kprog-tmp/perf/core-audit/audit-native.o",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/core-audit/audit-native.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "make",
+      "-r",
+      "-f",
+      "/workspaces/repository/kprog/test/core-audit.mk",
+      "audit",
+      "OUTPUT=/workspaces/kprog-raw/perf/20261115-core-audit-direct/native-regressions/correct",
+      "TARGET=/var/tmp/kprog-tmp/perf/core-audit/fixture-target.bpf.o",
+      "AUDIT_ARGS=--inventory /workspaces/kprog-raw/perf/20261115-core-audit-direct/native-regressions/correct/input.json"
+    ],
+    "returncode": 0,
+    "stdout": "make[1]: Entering directory '/workspaces/repository'\ntaskset -c 19 prlimit --as=4294967296 -- python3 /workspaces/repository/kprog/test/audit_core_objects.py --build /var/tmp/kprog-tmp/perf/core-audit --output /workspaces/kprog-raw/perf/20261115-core-audit-direct/native-regressions/correct --target /var/tmp/kprog-tmp/perf/core-audit/fixture-target.bpf.o --inventory /workspaces/kprog-raw/perf/20261115-core-audit-direct/native-regressions/correct/input.json\nfixture audit-native.o {'relocations': 16, 'equal': 16, 'different': 0, 'unobserved': 0}\nmake[1]: Leaving directory '/workspaces/repository'\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-O3",
+      "-g",
+      "-march=native",
+      "-foptimize-sibling-calls",
+      "-fomit-frame-pointer",
+      "-mno-red-zone",
+      "-mgeneral-regs-only",
+      "-fno-stack-protector",
+      "-DAUDIT_LOCAL_ID=5",
+      "-DAUDIT_TARGET_ID=2",
+      "-DAUDIT_WRONG_ANSWERS",
+      "-c",
+      "/workspaces/repository/kprog/test/core_audit_native.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/core-audit/audit-native.o"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "clang-18",
+      "-shared",
+      "/var/tmp/kprog-tmp/perf/core-audit/audit-native.o",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/core-audit/audit-native.so"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "make",
+      "-r",
+      "-f",
+      "/workspaces/repository/kprog/test/core-audit.mk",
+      "audit",
+      "OUTPUT=/workspaces/kprog-raw/perf/20261115-core-audit-direct/native-regressions/wrong",
+      "TARGET=/var/tmp/kprog-tmp/perf/core-audit/fixture-target.bpf.o",
+      "AUDIT_ARGS=--inventory /workspaces/kprog-raw/perf/20261115-core-audit-direct/native-regressions/wrong/input.json"
+    ],
+    "returncode": 0,
+    "stdout": "make[1]: Entering directory '/workspaces/repository'\ntaskset -c 19 prlimit --as=4294967296 -- python3 /workspaces/repository/kprog/test/audit_core_objects.py --build /var/tmp/kprog-tmp/perf/core-audit --output /workspaces/kprog-raw/perf/20261115-core-audit-direct/native-regressions/wrong --target /var/tmp/kprog-tmp/perf/core-audit/fixture-target.bpf.o --inventory /workspaces/kprog-raw/perf/20261115-core-audit-direct/native-regressions/wrong/input.json\nfixture audit-native.o {'relocations': 16, 'equal': 14, 'different': 2, 'unobserved': 0}\nmake[1]: Leaving directory '/workspaces/repository'\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "make",
+      "-r",
+      "-f",
+      "/workspaces/repository/kprog/test/core-audit.mk",
+      "audit",
+      "OUTPUT=/workspaces/kprog-raw/perf/20261115-core-audit-direct/native-regressions/unobserved",
+      "TARGET=/var/tmp/kprog-tmp/perf/core-audit/fixture-target.bpf.o",
+      "AUDIT_ARGS=--inventory /workspaces/kprog-raw/perf/20261115-core-audit-direct/native-regressions/unobserved/input.json"
+    ],
+    "returncode": 0,
+    "stdout": "make[1]: Entering directory '/workspaces/repository'\ntaskset -c 19 prlimit --as=4294967296 -- python3 /workspaces/repository/kprog/test/audit_core_objects.py --build /var/tmp/kprog-tmp/perf/core-audit --output /workspaces/kprog-raw/perf/20261115-core-audit-direct/native-regressions/unobserved --target /var/tmp/kprog-tmp/perf/core-audit/fixture-target.bpf.o --inventory /workspaces/kprog-raw/perf/20261115-core-audit-direct/native-regressions/unobserved/input.json\nfixture audit-native.o {'relocations': 16, 'equal': 0, 'different': 0, 'unobserved': 16}\nmake[1]: Leaving directory '/workspaces/repository'\n",
+    "stderr": ""
+  }
+]

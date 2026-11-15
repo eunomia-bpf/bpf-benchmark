@@ -1,0 +1,16 @@
+{
+  "apps": {
+    "fixture": {
+      "objects": 1,
+      "errors": 0,
+      "relocations": 16,
+      "equal": 16,
+      "different": 0,
+      "unobserved": 0
+    }
+  },
+  "failures": [],
+  "target": "/var/tmp/kprog-tmp/perf/core-audit/fixture-target.bpf.o",
+  "target_sha256": "78276d7e52b0d84e85c01cf065776d87974341aa42013370facd3ada273e528a",
+  "scope": "Explicit source/native inventory, actual ELF CO-RE resolved directly by libbpf. Missing observations remain unobserved; DWARF does not prove header/code answers. No program load, execution, load-path check or performance claim."
+}

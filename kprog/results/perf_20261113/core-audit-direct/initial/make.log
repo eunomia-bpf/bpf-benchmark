@@ -1,0 +1,19 @@
+taskset -c 19 prlimit --as=4294967296 -- python3 /workspaces/repository/kprog/test/check_core_mechanism.py --build /var/tmp/kprog-tmp/perf/core-audit --output /workspaces/kprog-raw/perf/20261115-core-audit-direct/mechanism
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/test/check_core_mechanism.py", line 78, in <module>
+    main(parser.parse_args())
+  File "/workspaces/repository/kprog/test/check_core_mechanism.py", line 39, in main
+    types = json.loads(run(['bpftool', '-j', 'btf', 'dump', 'file', path, 'format', 'raw']))['types']
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/repository/kprog/test/check_core_mechanism.py", line 18, in run
+    result = subprocess.run(command, cwd=ROOT, text=True, capture_output=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'bpftool'
+make: *** [kprog/test/core-audit.mk:33: mechanism-check] Error 1

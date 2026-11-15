@@ -1,0 +1,140 @@
+{
+  "cases": [
+    {
+      "name": "field_offset",
+      "kind": 0,
+      "value": 8
+    },
+    {
+      "name": "field_size",
+      "kind": 1,
+      "value": 8
+    },
+    {
+      "name": "field_exists",
+      "kind": 2,
+      "value": 1
+    },
+    {
+      "name": "field_absent",
+      "kind": 2,
+      "value": 0
+    },
+    {
+      "name": "field_signed",
+      "kind": 3,
+      "value": 0
+    },
+    {
+      "name": "field_lshift",
+      "kind": 4,
+      "value": 59
+    },
+    {
+      "name": "field_rshift",
+      "kind": 5,
+      "value": 59
+    },
+    {
+      "name": "type_local",
+      "kind": 6,
+      "value": 5
+    },
+    {
+      "name": "type_target",
+      "kind": 7,
+      "value": 2
+    },
+    {
+      "name": "type_exists",
+      "kind": 8,
+      "value": 1
+    },
+    {
+      "name": "type_absent",
+      "kind": 8,
+      "value": 0
+    },
+    {
+      "name": "type_size",
+      "kind": 9,
+      "value": 24
+    },
+    {
+      "name": "enum_exists",
+      "kind": 10,
+      "value": 1
+    },
+    {
+      "name": "enum_absent",
+      "kind": 10,
+      "value": 0
+    },
+    {
+      "name": "enum_value",
+      "kind": 11,
+      "value": 47
+    },
+    {
+      "name": "type_matches",
+      "kind": 12,
+      "value": 0
+    }
+  ],
+  "kinds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "source_sha256": "d852008c204515d8ff19d3ace489ba1a5f7a9d9d50a8612c75c89a06827afdb7",
+  "target_sha256": "78276d7e52b0d84e85c01cf065776d87974341aa42013370facd3ada273e528a",
+  "libbpf_library": "/workspaces/.agent-state/kprog-ck/verified-loader/libnative_loader.so",
+  "libbpf_library_sha256": "f2c3375096b3bca214a2d42f7a8693d713a0fa4eb00d57df50c47c3b1fdc9f6e",
+  "stale_witness_rejected": true,
+  "native_audits": [
+    {
+      "mode": "correct",
+      "counts": {
+        "objects": 1,
+        "errors": 0,
+        "relocations": 16,
+        "equal": 16,
+        "different": 0,
+        "unobserved": 0
+      }
+    },
+    {
+      "mode": "wrong",
+      "counts": {
+        "objects": 1,
+        "errors": 0,
+        "relocations": 16,
+        "equal": 14,
+        "different": 2,
+        "unobserved": 0
+      }
+    },
+    {
+      "mode": "unobserved",
+      "counts": {
+        "objects": 1,
+        "errors": 0,
+        "relocations": 16,
+        "equal": 0,
+        "different": 0,
+        "unobserved": 16
+      }
+    }
+  ],
+  "scope": "Actual ELF records/libbpf candidate selection and instruction patches; no IR rewrite or program load."
+}

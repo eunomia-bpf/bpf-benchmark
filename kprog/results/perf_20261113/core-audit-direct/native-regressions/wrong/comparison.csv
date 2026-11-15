@@ -1,0 +1,17 @@
+section,insn_off,root,kind,access,spec,kernel_answer,kernel_poison,observed_answer,observed_poison,comparison,layout_answer,layout_status
+socket/field_offset,0,audit_record,0,0:0,<byte_off> [5] struct audit_record.field (0:0 @ offset 0),8,False,0,False,different,8,native_layout
+socket/field_size,0,audit_record,1,0:0,<byte_sz> [5] struct audit_record.field (0:0 @ offset 0),8,False,8,False,equal,8,native_layout
+socket/field_exists,0,audit_record,2,0:0,<field_exists> [5] struct audit_record.field (0:0 @ offset 0),1,False,1,False,equal,1,native_layout
+socket/field_absent,0,audit_record,2,0:2,<field_exists> [5] struct audit_record.absent (0:2 @ offset 8),0,False,1,False,different,0,native_layout
+socket/field_signed,0,audit_record,3,0:1,<signed> [5] struct audit_record.bits (0:1 @ offset 4),0,False,0,False,equal,0,native_layout
+socket/field_lshift,0,audit_record,4,0:1,<lshift_u64> [5] struct audit_record.bits (0:1 @ offset 4),59,False,59,False,equal,59,native_layout
+socket/field_rshift,0,audit_record,5,0:1,<rshift_u64> [5] struct audit_record.bits (0:1 @ offset 4),59,False,59,False,equal,59,native_layout
+socket/type_local,0,audit_record,6,0,<local_type_id> [5] struct audit_record,5,False,5,False,equal,5,native_layout
+socket/type_target,0,audit_record,7,0,<target_type_id> [5] struct audit_record,2,False,2,False,equal,4,native_layout
+socket/type_exists,0,audit_record,8,0,<type_exists> [5] struct audit_record,1,False,1,False,equal,1,native_layout
+socket/type_absent,0,audit_missing,8,0,<type_exists> [26] struct audit_missing,0,False,0,False,equal,,native_layout_absent
+socket/type_size,0,audit_record,9,0,<type_size> [5] struct audit_record,24,False,24,False,equal,24,native_layout
+socket/enum_exists,0,audit_enum,10,0,<enumval_exists> [31] enum audit_enum::AUDIT_VALUE = 3,1,False,1,False,equal,,native_layout_absent
+socket/enum_absent,0,audit_enum,10,1,<enumval_exists> [31] enum audit_enum::AUDIT_ABSENT = 4,0,False,0,False,equal,,native_layout_absent
+socket/enum_value,0,audit_enum,11,0,<enumval_value> [31] enum audit_enum::AUDIT_VALUE = 3,47,False,47,False,equal,,native_layout_absent
+socket/type_matches,0,audit_record,12,0,<type_matches> [5] struct audit_record,0,False,0,False,equal,0,native_layout
