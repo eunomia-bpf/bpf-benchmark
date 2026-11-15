@@ -279,6 +279,10 @@ frontend-resume-host: $(CONTEXT_TOOL)
 tracee-proof-survey:
 	taskset -c 16-19 prlimit --as=4294967296 -- python3 $(ROOT)/kprog/test/survey_native_proofs.py --native $(ROOT)/vendor/build/native-bpf/x86/$$(cat $(KDIR)/include/config/kernel.release)/native/tracee/tracee.native.o --linker $(LINKER_BINARY) --build /var/tmp/kprog-tmp/perf/native-proof-survey --output $(OUTPUT)
 
+.PHONY: scalar-rodata-check
+scalar-rodata-check: $(KERNEL_LAYOUT)
+	taskset -c 16-19 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) cargo test --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml anonymous_section_data_reference_excludes_unrelated_code_tables -- --nocapture
+
 .PHONY: frontend-debugger frontend-stacks
 frontend-debugger:
 	install -d $(OUTPUT)

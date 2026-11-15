@@ -248,6 +248,61 @@ mod tests {
     use super::*;
 
     #[test]
+    fn anonymous_section_data_reference_excludes_unrelated_code_tables() -> Result<()> {
+        let build = std::path::Path::new("/var/tmp/kprog-tmp/perf/scalar-rodata");
+        fs::create_dir_all(build)?;
+        let native = build.join("scalar.native.o");
+        let command = ["clang-18", "-c", "/workspaces/repository/kprog/test/native_scalar_rodata.S",
+            "-o", native.to_str().ok_or_else(|| anyhow!("scalar fixture path is not UTF-8"))?];
+        let output = std::process::Command::new(command[0]).args(&command[1..]).output()?;
+        if !output.status.success() { bail!("scalar fixture failed: {}", String::from_utf8_lossy(&output.stderr)); }
+        fs::write(build.join("compile-command.json"), serde_json::to_vec(&command)?)?;
+        let source = fs::read(native)?;
+        let original = object::File::parse(source.as_slice())?;
+        let data = original.section_by_name(".rodata").ok_or_else(|| anyhow!("fixture has no rodata"))?;
+        assert_eq!(data.relocations().count(), 4);
+        let layout: KernelLayout = serde_json::from_slice(&fs::read(
+            "/var/tmp/kprog-tmp/perf/kernel-layout/kernel-layout.json")?)?;
+        let mut rows = Vec::new();
+        for (name, mask, bias) in [("scalar_lookup", 15u64, 0u32), ("scalar_interior_lookup", 7, 1)] {
+            let entry = find_symbol_by_name(&original, name)?;
+            let section = original.section_by_index(entry.section_index)?;
+            let references: Vec<_> = section.relocations().filter(|(at, _)|
+                *at >= entry.address && *at < entry.address + entry.size).collect();
+            assert_eq!(references.len(), 1);
+            let RelocationTarget::Symbol(index) = references[0].1.target() else { bail!("fixture target is not a symbol") };
+            assert_eq!(original.symbol_by_index(index)?.kind(), SymbolKind::Section);
+            let included = discover_reachable(&original, &entry)?;
+            assert_eq!(included.len(), 1);
+            let proof = rewrite_x86(&original, &entry, &included, &HashMap::new(), &HashMap::new(),
+                &HashMap::new(), &[], true, true, None, None, None, None, false)?;
+            assert!(proof.proof_data_relocs.is_empty(), "scalar root copied another root's code entries");
+            let values: Vec<_> = proof.proof_relocs.iter().filter_map(|r| r.data.as_ref()).collect();
+            assert_eq!(values.len(), 1);
+            assert_eq!(values[0].len(), 64, "did not retain the containing object extent");
+            let path = build.join("scalar.proof.o");
+            write_proof_object(&path, object::Architecture::X86_64, name, &proof.blob,
+                &proof.proof_symbols, &proof.proof_relocs, &proof.proof_data_relocs, proof.callee_saved_mask)?;
+            let bytes = fs::read(path)?;
+            let elf = object::File::parse(bytes.as_slice())?;
+            let entry = find_symbol_by_name(&elf, name)?;
+            let linked = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(), &HashMap::new(),
+                &HashMap::new(), &[], false, true, Some(&layout.array), Some(&layout.probe_read),
+                Some(&layout.hash), Some(&layout.lpm), false)?;
+            assert!(linked.relocs.is_empty() && linked.map_patches.is_empty());
+            let mut code = linked.blob; code.push(0xc3);
+            for index in (0..32u64).chain((0..32).map(|i| i + (1u64 << 63))) {
+                let mut context = [index];
+                let actual = memory::call_blob(&code, context.as_mut_ptr().cast(), 0, 0) as usize as u32;
+                assert_eq!(actual, 0x12340000 + (((index & mask) as u32) + bias) * 0x101);
+            }
+            rows.push(serde_json::json!({"symbol":name,"data_bytes":64,"proof_code_slots":0,"native_host_cases":64}));
+        }
+        fs::write(build.join("rust-result.json"), serde_json::to_vec_pretty(&rows)?)?;
+        Ok(())
+    }
+
+    #[test]
     fn scheduled_code_identity_survives_index_overwrite_before_jump() -> Result<()> {
         let build = std::path::Path::new("/var/tmp/kprog-tmp/perf/scheduled-table");
         fs::create_dir_all(build)?;
