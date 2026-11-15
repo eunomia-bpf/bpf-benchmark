@@ -1531,8 +1531,23 @@ helper/libc calls and program control wrappers remain separate; these results
 are extraction checks, not migrated refinements.
 [ARM receipts](results/m4-arm64-execute/README.md) retain complete scope and failures.
 
-M4 remains open for ARM helper/control wrappers, remaining producer/storage
-profiles, platform correspondence and full default compiled-byte coverage. The
+The actual ARM libc/clobber and branch/link/return wrapper roots now bring
+`Arm64Addressing` to43 functions/20,619,432B and `Arm64Numeric` to21/171,547B.
+The shared branch predicate retains native capture order; extraction reuses
+existing C reads at their original sites. Historical/native/adapter modes
+agree on11,543 complete frames/25,444,240B each, including2,160 libc and28 full
+clobber states. Six new mutations and one independent adapter read-refusal
+prefix pass their intended checks. Final `make clight`, all ten Clight modules/
+47 jobs, deterministic exports and eight standard-axiom queries pass; the
+expanded native fixture is exact at11,104B/five relocations. The return-to root
+has an empty continuation table; actual program label/PC bindings and the
+inherited ARM RET discrepancies remain explicit. These are C extraction checks,
+with no migrated refinement count.
+[Wrapper receipts](results/m4-arm64-wrappers/README.md) record the precise scope.
+
+M4 remains open for the ARM helper registry and entry/continuation bindings,
+remaining producer/storage profiles, platform correspondence and full default
+compiled-byte coverage. The
 stated x86 inline profile and ARM instruction dispatcher clear their earlier
 syntax/code-generation obstructions. Preserve
 unaligned memory and real context-pointer domains when binding the Clight

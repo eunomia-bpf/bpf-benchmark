@@ -283,3 +283,143 @@ void kprog_arm64_execute(struct kprog_arm64_addressing *addressing,
 	REGISTERS();
 	ARM64_SIM_L_EXEC(op, dst, src, src2, src3, flags, aux, imm);
 }
+
+/* Bind the original named caller-saved fields to the same live GPR cells. */
+#define __a64_x1 (*__a64_cells[KPROG_ARM64_GPR_CELL(ARM64_X1)])
+#define __a64_x1_tag (*__a64_tag_cells[KPROG_ARM64_GPR_CELL(ARM64_X1)])
+#define __a64_x2 (*__a64_cells[KPROG_ARM64_GPR_CELL(ARM64_X2)])
+#define __a64_x2_tag (*__a64_tag_cells[KPROG_ARM64_GPR_CELL(ARM64_X2)])
+#define __a64_x3 (*__a64_cells[KPROG_ARM64_GPR_CELL(ARM64_X3)])
+#define __a64_x3_tag (*__a64_tag_cells[KPROG_ARM64_GPR_CELL(ARM64_X3)])
+#define __a64_x4 (*__a64_cells[KPROG_ARM64_GPR_CELL(ARM64_X4)])
+#define __a64_x4_tag (*__a64_tag_cells[KPROG_ARM64_GPR_CELL(ARM64_X4)])
+#define __a64_x5 (*__a64_cells[KPROG_ARM64_GPR_CELL(ARM64_X5)])
+#define __a64_x5_tag (*__a64_tag_cells[KPROG_ARM64_GPR_CELL(ARM64_X5)])
+#define __a64_x6 (*__a64_cells[KPROG_ARM64_GPR_CELL(ARM64_X6)])
+#define __a64_x6_tag (*__a64_tag_cells[KPROG_ARM64_GPR_CELL(ARM64_X6)])
+#define __a64_x7 (*__a64_cells[KPROG_ARM64_GPR_CELL(ARM64_X7)])
+#define __a64_x7_tag (*__a64_tag_cells[KPROG_ARM64_GPR_CELL(ARM64_X7)])
+#define __a64_x8 (*__a64_cells[KPROG_ARM64_GPR_CELL(ARM64_X8)])
+#define __a64_x8_tag (*__a64_tag_cells[KPROG_ARM64_GPR_CELL(ARM64_X8)])
+#define __a64_x9 (*__a64_cells[KPROG_ARM64_GPR_CELL(ARM64_X9)])
+#define __a64_x9_tag (*__a64_tag_cells[KPROG_ARM64_GPR_CELL(ARM64_X9)])
+#define __a64_x10 (*__a64_cells[KPROG_ARM64_GPR_CELL(ARM64_X10)])
+#define __a64_x10_tag (*__a64_tag_cells[KPROG_ARM64_GPR_CELL(ARM64_X10)])
+#define __a64_x11 (*__a64_cells[KPROG_ARM64_GPR_CELL(ARM64_X11)])
+#define __a64_x11_tag (*__a64_tag_cells[KPROG_ARM64_GPR_CELL(ARM64_X11)])
+#define __a64_x12 (*__a64_cells[KPROG_ARM64_GPR_CELL(ARM64_X12)])
+#define __a64_x12_tag (*__a64_tag_cells[KPROG_ARM64_GPR_CELL(ARM64_X12)])
+#define __a64_x13 (*__a64_cells[KPROG_ARM64_GPR_CELL(ARM64_X13)])
+#define __a64_x13_tag (*__a64_tag_cells[KPROG_ARM64_GPR_CELL(ARM64_X13)])
+#define __a64_x14 (*__a64_cells[KPROG_ARM64_GPR_CELL(ARM64_X14)])
+#define __a64_x14_tag (*__a64_tag_cells[KPROG_ARM64_GPR_CELL(ARM64_X14)])
+#define __a64_x15 (*__a64_cells[KPROG_ARM64_GPR_CELL(ARM64_X15)])
+#define __a64_x15_tag (*__a64_tag_cells[KPROG_ARM64_GPR_CELL(ARM64_X15)])
+#define __a64_x16 (*__a64_cells[KPROG_ARM64_GPR_CELL(ARM64_X16)])
+#define __a64_x16_tag (*__a64_tag_cells[KPROG_ARM64_GPR_CELL(ARM64_X16)])
+#define __a64_x17 (*__a64_cells[KPROG_ARM64_GPR_CELL(ARM64_X17)])
+#define __a64_x17_tag (*__a64_tag_cells[KPROG_ARM64_GPR_CELL(ARM64_X17)])
+#define __a64_x18 (*__a64_cells[KPROG_ARM64_GPR_CELL(ARM64_X18)])
+#define __a64_x18_tag (*__a64_tag_cells[KPROG_ARM64_GPR_CELL(ARM64_X18)])
+
+#if defined(__COMPCERT__)
+/* Keep reads at their original value-expression site, after destination
+ * resolution in memcpy; passing a pre-read value to the writer reorders it. */
+#undef ARM64_SIM_L_MEM_READ
+#define ARM64_SIM_L_MEM_READ(BASE, INDEX, AUX, IMM, EXTRA, WIDTH) kprog_arm64_memory_read(addressing, (BASE), (INDEX), (AUX), (IMM), (EXTRA), (WIDTH))
+#undef KPROG_ARM64_FLAG_RHS
+#define KPROG_ARM64_FLAG_RHS(OP, IMM, REG) kprog_arm64_flag_rhs((OP), (IMM), (REG))
+#undef KPROG_ARM64_BRANCH_TEST
+#define KPROG_ARM64_BRANCH_TEST(KIND, VALUE, BIT) kprog_arm64_branch_test((KIND), (VALUE), (BIT))
+static __u64 execute_raw(struct kprog_arm64_addressing *addressing, __u64 reg)
+{
+	REGISTERS();
+	__u64 result; ARM64_SIM_L_READ_REG_RAW_INTO(result, reg); return result;
+}
+#undef ARM64_SIM_L_READ_REG_RAW
+#define ARM64_SIM_L_READ_REG_RAW(REG) execute_raw(addressing, (REG))
+#endif
+
+void kprog_arm64_helper_clobbers(struct kprog_arm64_addressing *addressing,
+                                 struct kprog_arm64_vector *vectors,
+                                 __u8 *n, __u8 *z, __u8 *c, __u8 *v)
+{
+	REGISTERS();
+	ARM64_SIM_L_HELPER_CLOBBERS();
+}
+void kprog_arm64_libc_memset(struct kprog_arm64_addressing *addressing,
+                             struct kprog_arm64_vector *vectors,
+                             __u8 *n, __u8 *z, __u8 *c, __u8 *v)
+{
+	REGISTERS();
+	ARM64_SIM_LIBC_MEMSET();
+}
+void kprog_arm64_libc_memcpy(struct kprog_arm64_addressing *addressing,
+                             struct kprog_arm64_vector *vectors,
+                             __u8 *n, __u8 *z, __u8 *c, __u8 *v)
+{
+	REGISTERS();
+	ARM64_SIM_LIBC_MEMCPY();
+}
+int kprog_arm64_jcc(struct kprog_arm64_addressing *addressing,
+                    __u8 *n, __u8 *z, __u8 *c, __u8 *v,
+                    __u64 cond, __u64 current, __u64 target)
+{
+	REGISTERS();
+	ARM64_SIM_A64_JCC(cond, current, target, taken);
+	return 0;
+taken: return 1;
+}
+int kprog_arm64_cbz_x(struct kprog_arm64_addressing *addressing, __u64 reg,
+                      __u64 kind, __u64 current, __u64 target)
+{
+	REGISTERS();
+	ARM64_SIM_A64_CBZ_IMPL(reg, kind, current, target, taken, 0);
+	return 0;
+taken: return 1;
+}
+int kprog_arm64_cbz_w(struct kprog_arm64_addressing *addressing, __u64 reg,
+                      __u64 kind, __u64 current, __u64 target)
+{
+	REGISTERS();
+	ARM64_SIM_A64_CBZ_VALUE_IMPL((__u32)ARM64_SIM_L_READ_REG(reg), kind, current, target, taken, 0);
+	return 0;
+taken: return 1;
+}
+int kprog_arm64_tbz(struct kprog_arm64_addressing *addressing, __u64 reg,
+                    __u64 bit, __u64 kind, __u64 current, __u64 target)
+{
+	REGISTERS();
+	ARM64_SIM_A64_TBZ_IMPL(reg, bit, kind, current, target, taken, 0);
+	return 0;
+taken: return 1;
+}
+int kprog_arm64_cmp_gt(struct kprog_arm64_addressing *addressing,
+                       __u8 *n, __u8 *z, __u8 *c, __u8 *v, __u32 op,
+                       __u64 lhs, __u64 rhs, __u8 width, __u32 aux, __u64 imm)
+{
+	REGISTERS();
+	ARM64_SIM_A64_CMP_GT(op, lhs, rhs, width, aux, imm, taken);
+	return 0;
+taken: return 1;
+}
+__u64 kprog_arm64_link(struct kprog_arm64_addressing *addressing, __u64 address)
+{
+	REGISTERS();
+	__u64 __a64_lr;
+	ARM64_SIM_A64_LINK(address);
+	return __a64_lr;
+}
+__u32 kprog_arm64_exit(struct kprog_arm64_addressing *addressing)
+{
+	REGISTERS();
+	ARM64_SIM_RET();
+}
+__u32 kprog_arm64_return_to(struct kprog_arm64_addressing *addressing, __u64 reg)
+{
+	REGISTERS();
+	__u64 __a64_lr;
+	/* This root has no internal continuation cases. Actual program cases
+	 * require their own label/PC binding; no unknown target is accepted. */
+	ARM64_SIM_A64_RET_TO(reg, );
+}

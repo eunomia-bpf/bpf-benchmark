@@ -744,7 +744,7 @@ clight: clightgen
 	./build/test_arm64_memory_binding_host
 	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -DADAPTER=1 -DDISPATCH=1 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_arm64_memory_binding_host.c build/arm64_addressing_binding.o build/arm64_address_binding.o build/arm64_numeric_binding.o -o build/test_arm64_memory_binding_host
 	./build/test_arm64_memory_binding_host
-	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_arm64_execute_host.c build/arm64_addressing_binding.o build/arm64_address_binding.o build/arm64_numeric_binding.o -o build/test_arm64_execute_host
+	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -DADAPTER=1 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_arm64_execute_host.c build/arm64_addressing_binding.o build/arm64_address_binding.o build/arm64_numeric_binding.o -o build/test_arm64_execute_host
 	./build/test_arm64_execute_host
 	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -c c/Arm64Addressing.c -o build/arm64_addressing_binding.o
 	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_arm64_addressing_host.c build/arm64_addressing_binding.o build/arm64_address_binding.o build/arm64_numeric_binding.o -o build/test_arm64_addressing_host

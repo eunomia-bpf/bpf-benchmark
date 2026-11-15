@@ -18,6 +18,18 @@ struct kprog_arm64_addressing {
 };
 /* The production state holds32 anonymous {lo,hi} vector cells. */
 struct kprog_arm64_vector { __u64 lo, hi; };
+int kprog_arm64_branch_test(__u64, __u64, __u64);
+void kprog_arm64_helper_clobbers(struct kprog_arm64_addressing *, struct kprog_arm64_vector *, __u8 *, __u8 *, __u8 *, __u8 *);
+void kprog_arm64_libc_memset(struct kprog_arm64_addressing *, struct kprog_arm64_vector *, __u8 *, __u8 *, __u8 *, __u8 *);
+void kprog_arm64_libc_memcpy(struct kprog_arm64_addressing *, struct kprog_arm64_vector *, __u8 *, __u8 *, __u8 *, __u8 *);
+int kprog_arm64_jcc(struct kprog_arm64_addressing *, __u8 *, __u8 *, __u8 *, __u8 *, __u64, __u64, __u64);
+int kprog_arm64_cbz_x(struct kprog_arm64_addressing *, __u64, __u64, __u64, __u64);
+int kprog_arm64_cbz_w(struct kprog_arm64_addressing *, __u64, __u64, __u64, __u64);
+int kprog_arm64_tbz(struct kprog_arm64_addressing *, __u64, __u64, __u64, __u64, __u64);
+int kprog_arm64_cmp_gt(struct kprog_arm64_addressing *, __u8 *, __u8 *, __u8 *, __u8 *, __u32, __u64, __u64, __u8, __u32, __u64);
+__u64 kprog_arm64_link(struct kprog_arm64_addressing *, __u64);
+__u32 kprog_arm64_exit(struct kprog_arm64_addressing *);
+__u32 kprog_arm64_return_to(struct kprog_arm64_addressing *, __u64);
 __u64 kprog_arm64_mov_path(__u64, __u64);
 __u64 kprog_arm64_csel_path(__u64, __u64);
 __u8 kprog_arm64_alu_source(__u64);

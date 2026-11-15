@@ -1,0 +1,125 @@
+{
+  "status": "ARM libc/clobber and branch/link/return C extraction checks pass; M4 incomplete",
+  "addressing": {
+    "functions": 43,
+    "bytes": 20619432,
+    "initial_lean_seconds": 216
+  },
+  "numeric": {
+    "functions": 21,
+    "bytes": 171547
+  },
+  "frames": {
+    "historical": {
+      "capture_bytes": 25444240,
+      "summary": "ARM wrappers: 28 clobber and 2160 libc complete frames\nARM wrappers: 5035 control/link/return complete frames\nARM execute: 4320 complete frames, frame_bytes=1776; selectors/CNT lanes pass"
+    },
+    "native": {
+      "capture_bytes": 25444240,
+      "summary": "ARM wrappers: 28 clobber and 2160 libc complete frames\nARM wrappers: 5035 control/link/return complete frames\nARM execute: 4320 complete frames, frame_bytes=1776; selectors/CNT lanes pass"
+    },
+    "adapter": {
+      "capture_bytes": 25444240,
+      "summary": "ARM wrappers: 28 clobber and 2160 libc complete frames\nARM wrappers: 5035 control/link/return complete frames\nARM execute: 4320 complete frames, frame_bytes=1776; selectors/CNT lanes pass"
+    },
+    "comparison": "all capture bytes identical; no masks",
+    "before": "4a2b31f48347c9e970aa5a11ebbf5196de80173d"
+  },
+  "capture_metadata": {
+    "frames": 11543,
+    "bytes": 25444240,
+    "max_callbacks": 494,
+    "frame_bytes": 1776,
+    "all_records_consumed": true
+  },
+  "final_guarded_capture": {
+    "equal": true,
+    "bytes": 25444240,
+    "scope": "final guarded oracle with original512-slot input capacity; same complete serialized observations as historical/native/adapter comparison",
+    "additional_test": "adapter-only physical-read refusal independently checks process-local pointer state, outside capture"
+  },
+  "new_mutations": [
+    {
+      "mutation": "branch-kind-truncation",
+      "exit": 1,
+      "assertion": "ARM wrappers: 28 clobber and 2160 libc complete frames\nARM execute: CBZ W/X and TBZ full-kind/masked-bit predicate"
+    },
+    {
+      "mutation": "branch-bit31-mask",
+      "exit": 1,
+      "assertion": "ARM execute: branch predicate full-width/capture/mask"
+    },
+    {
+      "mutation": "branch-capture-order",
+      "exit": 1,
+      "assertion": "ARM execute: branch predicate full-width/capture/mask"
+    },
+    {
+      "mutation": "clobber-vector31-high",
+      "exit": 1,
+      "assertion": "ARM execute: helper clobber full GPR/flags/vector/byte/tag/payload frame"
+    },
+    {
+      "mutation": "return-early-result-read",
+      "exit": 1,
+      "assertion": "ARM wrappers: 28 clobber and 2160 libc complete frames\nARM execute: RET full frame and ordered rejection prefix"
+    },
+    {
+      "mutation": "memcpy-wrong-source",
+      "exit": 1,
+      "assertion": "ARM execute: libc forward bytes/overlap/provenance/release/clobber full frame"
+    }
+  ],
+  "native_fidelity": {
+    "allocated_sections_equal": true,
+    "allocated_relocations_equal": true,
+    "current_stream_equals_normal_build": true,
+    "allocated_section_bytes": {
+      ".text": 0,
+      "socket": 11104,
+      "license": 4
+    },
+    "allocated_relocations": 5
+  },
+  "confirmation": {
+    "make-clight": {
+      "exit": 0,
+      "seconds": 76.46866358199622
+    },
+    "all-clight-lean": {
+      "exit": 0,
+      "seconds": 0.6956546180008445
+    },
+    "deterministic-Arm64Addressing": {
+      "exit": 0,
+      "seconds": 6.098474250989966,
+      "equal": true,
+      "bytes": 20619432,
+      "functions": 43
+    },
+    "deterministic-Arm64Numeric": {
+      "exit": 0,
+      "seconds": 0.05211144799250178,
+      "equal": true,
+      "bytes": 171547,
+      "functions": 21
+    },
+    "preprocess": {
+      "exit": 0,
+      "seconds": 0.07656139097525738,
+      "bytes": 2179412
+    },
+    "axioms": {
+      "exit": 0,
+      "seconds": 0.7762776509916876
+    }
+  },
+  "resource_limits": {
+    "cpu": 15,
+    "address_space_gib": 32,
+    "lean_workers": 1
+  },
+  "refinements_migrated": 0,
+  "full_library_lake_build": "not run in this M4 step",
+  "make_check": "pending ordered M5/M6 completion"
+}

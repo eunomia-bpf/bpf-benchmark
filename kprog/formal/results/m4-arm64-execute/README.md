@@ -65,6 +65,11 @@ historical/current headers in RAM and replaces one ordinary set of build
 products. Full commands, logs, complete binary frames and failed attempts are
 under `/workspaces/kprog-raw/formal/m4-arm64-execute`.
 
+The common comparison recipe was extended by the subsequent
+[wrapper step](../m4-arm64-wrappers/README.md). It now also runs the wrapper
+frames and six additional negative cases; the five original mutations and
+this step's original raw captures remain retained.
+
 M4 remains open for helper/libc/control wrappers, real producer/storage profile
 coverage, platform correspondence and whole-default compiled bytes. Then M5
 must migrate all2,065 actual Clight-vs-LNSym/x86lean refinements and recount

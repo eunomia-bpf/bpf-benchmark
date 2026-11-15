@@ -128,3 +128,10 @@ __u64 kprog_arm64_adrp(__u64 op)
 	KPROG_ARM64_ADRP_TAG_INTO(result, op, ARM64_SIM_L_UNSUPPORTED_OPCODE());
 	return result;
 }
+
+int kprog_arm64_branch_test(__u64 kind, __u64 value, __u64 bit)
+{
+	int result;
+	KPROG_ARM64_BRANCH_TEST_INTO(result, kind, value, bit);
+	return result;
+}

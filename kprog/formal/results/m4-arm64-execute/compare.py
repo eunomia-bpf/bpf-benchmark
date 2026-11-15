@@ -19,12 +19,13 @@ parser.add_argument('--mutations-only',action='store_true')
 a=parser.parse_args()
 a.output.mkdir(parents=True,exist_ok=False)
 revision=subprocess.check_output(['git','rev-parse',a.before],cwd=ROOT,text=True).strip()
-changed=['arm64_alu_operand','arm64_alu_operand_select','arm64_cond','arm64_csel_ptr','arm64_flag_operand','arm64_mov','arm64_movk','arm64_orn','arm64_reduction']
+changed=['arm64_alu_operand','arm64_alu_operand_select','arm64_cond','arm64_csel_ptr','arm64_flag_operand','arm64_mov','arm64_movk','arm64_orn','arm64_reduction','arm64_branch']
 local=ROOT/'kprog/arm64/arm64_sim_local_bpf.h'
 headers=[local,local.with_name('arm64_sim.h')]+[FORMAL/f'generated/{h}.h' for h in changed]
 past={p:subprocess.check_output(['git','show',f'{revision}:{p.relative_to(ROOT)}'],cwd=ROOT,text=True) for p in headers}
 inline={FORMAL/'c/Arm64Addressing.h',FORMAL/'c/Arm64Address.h',*headers}
 shims='\n'.join('#define '+out+'(OUTPUT, '+params+') do { (OUTPUT)='+old+'('+args+'); } while (0)' for out,params,old,args in [
+ ('KPROG_ARM64_BRANCH_TEST_INTO','KIND, VALUE, BIT','KPROG_ARM64_BRANCH_TEST','KIND, VALUE, BIT'),
  ('KPROG_ARM64_MOV_PTR_TAG_PATH_INTO','OP, WIDTH, UNSUPPORTED','KPROG_ARM64_MOV_PTR_TAG_PATH','OP, WIDTH, UNSUPPORTED'),
  ('KPROG_ARM64_CSEL_PTR_TAG_PATH_INTO','OP, WIDTH, UNSUPPORTED','KPROG_ARM64_CSEL_PTR_TAG_PATH','OP, WIDTH, UNSUPPORTED'),
  ('KPROG_ARM64_ALU_OPERAND_SELECT_INTO','OP','KPROG_ARM64_ALU_OPERAND_SELECT','OP'),
@@ -66,7 +67,7 @@ if not a.mutations_only:
         if phase=='adapter':run('address-adapter',flags+extra+['-c','c/Arm64Address.c','-o',objects[1]])
         for filename,index in [('Arm64Numeric',2),('Arm64Addressing',0)]:
             run(phase+'-'+filename,flags+extra+['-x','c','-c','-','-o',objects[index]],source(FORMAL/f'c/{filename}.c',phase=='historical'))
-        run(phase+'-oracle',flags+['oracles/test_arm64_execute_host.c']+objects+['-o','build/test_arm64_execute_host'])
+        run(phase+'-oracle',flags+(['-DADAPTER=1'] if phase=='adapter' else [])+['oracles/test_arm64_execute_host.c']+objects+['-o','build/test_arm64_execute_host'])
         capture=a.output/(phase+'.bin')
         run(phase+'-frames',['./build/test_arm64_execute_host','--capture'],capture=capture)
         results[phase]={'capture_bytes':capture.stat().st_size,'summary':(a.output/(phase+'-frames.log')).read_text().strip()}
@@ -83,25 +84,33 @@ if not a.mutations_only:
 
 
 # Each mutation has an independent expected-value, callback-order or lane check.
-# Recompile only the affected numeric root and the real oracle, in place.
+# Recompile the affected roots and the real oracle in place.
 mutants=[
- ('mov-width-truncation','arm64_mov','__u64 __kprog_a64_mov_width = (WIDTH);','__u64 __kprog_a64_mov_width = (__u8)(WIDTH);'),
- ('flag-register-not-observed','arm64_flag_operand','__u64 NAME = (REG);','__u64 NAME = 0;'),
- ('condition-raw-flag-booleanized','arm64_cond','ARM64_COND_EQ) NAME=(Z);','ARM64_COND_EQ) NAME=!!(Z);'),
- ('movk-wrong-column','arm64_movk','__kprog_a64_movk_mask = 0xffffULL << 16U;','__kprog_a64_movk_mask = 0xffffULL << 0U;'),
- ('cnt-high-byte-lost','arm64_reduction','KPROG_ARM64_POPCOUNT_BYTE((__kprog_a64_red_value >> 56) & 0xffULL)','KPROG_ARM64_POPCOUNT_BYTE(0)')]
+ ('branch-kind-truncation',FORMAL/'generated/arm64_branch.h','__u64 __kprog_a64_br_kind = (KIND);','__u64 __kprog_a64_br_kind = (__u8)(KIND);'),
+ ('branch-bit31-mask',FORMAL/'generated/arm64_branch.h','(BIT) & 63ULL','(BIT) & 31ULL'),
+ ('branch-capture-order',FORMAL/'generated/arm64_branch.h','__u64 __kprog_a64_br_kind = (KIND); '+chr(92)+'\n\t\t__u64 __kprog_a64_br_value = (VALUE);','__u64 __kprog_a64_br_value = (VALUE); '+chr(92)+'\n\t\t__u64 __kprog_a64_br_kind = (KIND);'),
+ ('clobber-vector31-high',local,'__a64_vectors[31].hi = ARM64_SIM_L_UNSPECIFIED();','__a64_vectors[31].lo = ARM64_SIM_L_UNSPECIFIED();'),
+ ('return-early-result-read',local,'if (__a64_sp != 0) ARM64_SIM_L_REJECT_PC();','__u32 early_result = (__u32)ARM64_SIM_L_READ_REG(ARM64_X0); if (__a64_sp != 0) ARM64_SIM_L_REJECT_PC();'),
+ ('memcpy-wrong-source',FORMAL/'c/Arm64Addressing.c','kprog_arm64_memory_read(addressing, (BASE), (INDEX), (AUX), (IMM), (EXTRA), (WIDTH))','kprog_arm64_memory_read(addressing, ARM64_X0, (INDEX), (AUX), (IMM), (EXTRA), (WIDTH))'),
+ ('mov-width-truncation',FORMAL/'generated/arm64_mov.h','__u64 __kprog_a64_mov_width = (WIDTH);','__u64 __kprog_a64_mov_width = (__u8)(WIDTH);'),
+ ('flag-register-not-observed',FORMAL/'generated/arm64_flag_operand.h','__u64 NAME = (REG);','__u64 NAME = 0;'),
+ ('condition-raw-flag-booleanized',FORMAL/'generated/arm64_cond.h','ARM64_COND_EQ) NAME=(Z);','ARM64_COND_EQ) NAME=!!(Z);'),
+ ('movk-wrong-column',FORMAL/'generated/arm64_movk.h','__kprog_a64_movk_mask = 0xffffULL << 16U;','__kprog_a64_movk_mask = 0xffffULL << 0U;'),
+ ('cnt-high-byte-lost',FORMAL/'generated/arm64_reduction.h','KPROG_ARM64_POPCOUNT_BYTE((__kprog_a64_red_value >> 56) & 0xffULL)','KPROG_ARM64_POPCOUNT_BYTE(0)')]
 # Check the exact spelling before any compile; a missing mutant is an error.
 mutation_results=[]
-for label,header,before,after in mutants:
-    mutation=(FORMAL/f'generated/{header}.h',before,after)
+for label,path,before,after in mutants:
+    mutation=(path,before,after)
     run(label+'-numeric',flags+['-D__COMPCERT__','-include','oracles/compcert_memory_host.h','-x','c','-c','-','-o',objects[2]],source(FORMAL/'c/Arm64Numeric.c',mutant=mutation))
-    run(label+'-oracle',flags+['-x','c','-','-x','none']+objects+['-o','build/test_arm64_execute_host'],source(FORMAL/'oracles/test_arm64_execute_host.c',mutant=mutation))
+    run(label+'-addressing',flags+['-D__COMPCERT__','-include','oracles/compcert_memory_host.h','-x','c','-c','-','-o',objects[0]],source(FORMAL/'c/Arm64Addressing.c',mutant=mutation))
+    run(label+'-oracle',flags+['-DADAPTER=1','-x','c','-','-x','none']+objects+['-o','build/test_arm64_execute_host'],source(FORMAL/'oracles/test_arm64_execute_host.c',mutant=mutation))
     with (a.output/(label+'-run.log')).open('w') as log:
         r=subprocess.run(['./build/test_arm64_execute_host'],cwd=FORMAL,stdout=log,stderr=log)
     if r.returncode!=1:raise SystemExit(f'{label}: expected assertion exit1, got {r.returncode}')
     mutation_results.append({'mutation':label,'exit':r.returncode,'assertion':(a.output/(label+'-run.log')).read_text().strip()})
+run('restore-addressing',flags+['-D__COMPCERT__','-include','oracles/compcert_memory_host.h','-c','c/Arm64Addressing.c','-o',objects[0]])
 run('restore-numeric',flags+['-D__COMPCERT__','-include','oracles/compcert_memory_host.h','-c','c/Arm64Numeric.c','-o',objects[2]])
-run('restore-oracle',flags+['oracles/test_arm64_execute_host.c']+objects+['-o','build/test_arm64_execute_host'])
+run('restore-oracle',flags+['-DADAPTER=1','oracles/test_arm64_execute_host.c']+objects+['-o','build/test_arm64_execute_host'])
 run('restored-baseline',['./build/test_arm64_execute_host'])
 (a.output/'mutations.json').write_text(json.dumps(mutation_results,indent=2)+'\n')
 print(json.dumps(mutation_results,indent=2))

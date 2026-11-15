@@ -87,6 +87,10 @@ def ___kprog_a64_bf_sign : Ident := identOfString "__kprog_a64_bf_sign"
 def ___kprog_a64_bf_src : Ident := identOfString "__kprog_a64_bf_src"
 def ___kprog_a64_bf_src_l : Ident := identOfString "__kprog_a64_bf_src_l"
 def ___kprog_a64_bf_src_r : Ident := identOfString "__kprog_a64_bf_src_r"
+def ___kprog_a64_br_bit : Ident := identOfString "__kprog_a64_br_bit"
+def ___kprog_a64_br_kind : Ident := identOfString "__kprog_a64_br_kind"
+def ___kprog_a64_br_taken : Ident := identOfString "__kprog_a64_br_taken"
+def ___kprog_a64_br_value : Ident := identOfString "__kprog_a64_br_value"
 def ___kprog_a64_cneg_op : Ident := identOfString "__kprog_a64_cneg_op"
 def ___kprog_a64_cneg_result : Ident := identOfString "__kprog_a64_cneg_result"
 def ___kprog_a64_cneg_taken : Ident := identOfString "__kprog_a64_cneg_taken"
@@ -162,6 +166,7 @@ def ___kprog_alu64_res : Ident := identOfString "__kprog_alu64_res"
 def _addend : Ident := identOfString "addend"
 def _amount : Ident := identOfString "amount"
 def _arm64_sim_unsupported_opcode : Ident := identOfString "arm64_sim_unsupported_opcode"
+def _bit : Ident := identOfString "bit"
 def _bits : Ident := identOfString "bits"
 def _dir : Ident := identOfString "dir"
 def _dst : Ident := identOfString "dst"
@@ -171,6 +176,7 @@ def _kprog_arm64_adrp : Ident := identOfString "kprog_arm64_adrp"
 def _kprog_arm64_alu_result : Ident := identOfString "kprog_arm64_alu_result"
 def _kprog_arm64_alu_source : Ident := identOfString "kprog_arm64_alu_source"
 def _kprog_arm64_bitfield : Ident := identOfString "kprog_arm64_bitfield"
+def _kprog_arm64_branch_test : Ident := identOfString "kprog_arm64_branch_test"
 def _kprog_arm64_cneg : Ident := identOfString "kprog_arm64_cneg"
 def _kprog_arm64_csel : Ident := identOfString "kprog_arm64_csel"
 def _kprog_arm64_csel_path : Ident := identOfString "kprog_arm64_csel_path"
@@ -2866,6 +2872,78 @@ def f_kprog_arm64_adrp : Function := {
   (Stmt.Sreturn (some (Expr.Etempvar _result tuchar))))
 }
 
+def f_kprog_arm64_branch_test : Function := {
+  fn_return := tint,
+  fn_callconv := cc_default,
+  fn_params := [(_kind, tulong), (_value, tulong), (_bit, tulong)],
+  fn_vars := [],
+  fn_temps := [(_result, tint), (___kprog_a64_br_kind, tulong),
+               (___kprog_a64_br_value, tulong),
+               (___kprog_a64_br_bit, tulong), (___kprog_a64_br_taken, tint)],
+  fn_body :=
+(Stmt.Ssequence
+  (Stmt.Sloop
+    (Stmt.Ssequence
+      (Stmt.Sset ___kprog_a64_br_kind (Expr.Etempvar _kind tulong))
+      (Stmt.Ssequence
+        (Stmt.Sset ___kprog_a64_br_value (Expr.Etempvar _value tulong))
+        (Stmt.Ssequence
+          (Stmt.Sset ___kprog_a64_br_bit
+            (Expr.Ebinop Binop.Oand (Expr.Etempvar _bit tulong)
+              (Expr.Econst_long (Integers.Int64.repr 63) tulong) tulong))
+          (Stmt.Ssequence
+            (Stmt.Sset ___kprog_a64_br_taken
+              (Expr.Econst_int (Integers.Int.repr 0) tint))
+            (Stmt.Ssequence
+              (Stmt.Sswitch (Expr.Etempvar ___kprog_a64_br_kind tulong)
+                (LStmts.LScons (some 0)
+                  (Stmt.Ssequence
+                    (Stmt.Sset ___kprog_a64_br_taken
+                      (Expr.Ebinop Binop.Oeq
+                        (Expr.Etempvar ___kprog_a64_br_value tulong)
+                        (Expr.Econst_int (Integers.Int.repr 0) tint) tint))
+                    Stmt.Sbreak)
+                  (LStmts.LScons (some 1)
+                    (Stmt.Ssequence
+                      (Stmt.Sset ___kprog_a64_br_taken
+                        (Expr.Ebinop Binop.One
+                          (Expr.Etempvar ___kprog_a64_br_value tulong)
+                          (Expr.Econst_int (Integers.Int.repr 0) tint) tint))
+                      Stmt.Sbreak)
+                    (LStmts.LScons (some 2)
+                      (Stmt.Ssequence
+                        (Stmt.Sset ___kprog_a64_br_taken
+                          (Expr.Ebinop Binop.Oeq
+                            (Expr.Ebinop Binop.Oand
+                              (Expr.Ebinop Binop.Oshr
+                                (Expr.Etempvar ___kprog_a64_br_value tulong)
+                                (Expr.Etempvar ___kprog_a64_br_bit tulong)
+                                tulong)
+                              (Expr.Econst_long (Integers.Int64.repr 1) tulong)
+                              tulong)
+                            (Expr.Econst_int (Integers.Int.repr 0) tint)
+                            tint))
+                        Stmt.Sbreak)
+                      (LStmts.LScons (some 3)
+                        (Stmt.Ssequence
+                          (Stmt.Sset ___kprog_a64_br_taken
+                            (Expr.Ebinop Binop.One
+                              (Expr.Ebinop Binop.Oand
+                                (Expr.Ebinop Binop.Oshr
+                                  (Expr.Etempvar ___kprog_a64_br_value tulong)
+                                  (Expr.Etempvar ___kprog_a64_br_bit tulong)
+                                  tulong)
+                                (Expr.Econst_long (Integers.Int64.repr 1) tulong)
+                                tulong)
+                              (Expr.Econst_int (Integers.Int.repr 0) tint)
+                              tint))
+                          Stmt.Sbreak)
+                        LStmts.LSnil)))))
+              (Stmt.Sset _result (Expr.Etempvar ___kprog_a64_br_taken tint)))))))
+    Stmt.Sbreak)
+  (Stmt.Sreturn (some (Expr.Etempvar _result tint))))
+}
+
 def composites : List CompositeDef :=
 []
 
@@ -3172,17 +3250,18 @@ def global_definitions : List (Ident × GlobDef FunDef Ty) :=
    GlobDef.Gfun (FunDef.External (ExtFun.EF_external "arm64_sim_unsupported_opcode"
                                    (mksignature [] XType.Xvoid cc_default))
      [] tvoid cc_default)),
- (_kprog_arm64_adrp, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_adrp))]
+ (_kprog_arm64_adrp, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_adrp)),
+ (_kprog_arm64_branch_test, GlobDef.Gfun (FunDef.Internal f_kprog_arm64_branch_test))]
 
 def public_idents : List Ident :=
-[_kprog_arm64_adrp, _arm64_sim_unsupported_opcode, _kprog_arm64_imm_operand,
- _kprog_arm64_fmov_dest, _kprog_arm64_fmov, _kprog_arm64_cneg,
- _kprog_arm64_csel, _kprog_arm64_unary, _kprog_arm64_extrev,
- _kprog_arm64_mul, _kprog_arm64_bitfield, _kprog_arm64_shift,
- _kprog_arm64_mod, _kprog_arm64_alu_result, _kprog_arm64_reduction,
- _kprog_arm64_movk, _kprog_arm64_flag_rhs, _kprog_arm64_alu_source,
- _kprog_arm64_csel_path, _kprog_arm64_mov_path, ___builtin_debug,
- ___builtin_write32_reversed, ___builtin_write16_reversed,
+[_kprog_arm64_branch_test, _kprog_arm64_adrp, _arm64_sim_unsupported_opcode,
+ _kprog_arm64_imm_operand, _kprog_arm64_fmov_dest, _kprog_arm64_fmov,
+ _kprog_arm64_cneg, _kprog_arm64_csel, _kprog_arm64_unary,
+ _kprog_arm64_extrev, _kprog_arm64_mul, _kprog_arm64_bitfield,
+ _kprog_arm64_shift, _kprog_arm64_mod, _kprog_arm64_alu_result,
+ _kprog_arm64_reduction, _kprog_arm64_movk, _kprog_arm64_flag_rhs,
+ _kprog_arm64_alu_source, _kprog_arm64_csel_path, _kprog_arm64_mov_path,
+ ___builtin_debug, ___builtin_write32_reversed, ___builtin_write16_reversed,
  ___builtin_read32_reversed, ___builtin_read16_reversed, ___builtin_fnmsub,
  ___builtin_fnmadd, ___builtin_fmsub, ___builtin_fmadd, ___builtin_fmin,
  ___builtin_fmax, ___builtin_expect, ___builtin_unreachable,
