@@ -3,14 +3,15 @@
 use super::*;
 
 fn relative_table_bases(
-    elf: &object::File, layouts: &[SymbolLayout], data_section: object::SectionIndex,
-) -> Result<Vec<u64>> {
+    elf: &object::File, symbols: &[&SymInfo], data_section: object::SectionIndex,
+) -> Result<(Vec<u64>, HashSet<LocalSiteKey>)> {
     let mut bases = Vec::new();
+    let mut sites = HashSet::new();
     let data = elf.section_by_index(data_section)?;
-    for layout in layouts {
-        let section = elf.section_by_index(layout.sym.section_index)?;
-        let bytes = read_symbol_bytes(elf, &layout.sym)?;
-        let instructions: Vec<_> = Decoder::with_ip(64, &bytes, layout.sym.address,
+    for sym in symbols {
+        let section = elf.section_by_index(sym.section_index)?;
+        let bytes = read_symbol_bytes(elf, sym)?;
+        let instructions: Vec<_> = Decoder::with_ip(64, &bytes, sym.address,
             DecoderOptions::NONE).into_iter().collect();
         for window in instructions.windows(4) {
             let [lea, load, add, jump] = window else { unreachable!() };
@@ -34,7 +35,7 @@ fn relative_table_bases(
                 let RelocationTarget::Symbol(index) = relocation.target() else { continue; };
                 let target = elf.symbol_by_index(index)?;
                 if target.section_index() != Some(data_section) { continue; }
-                let mut decoder = Decoder::with_ip(64, &bytes[(lea.ip()-layout.sym.address) as usize..],
+                let mut decoder = Decoder::with_ip(64, &bytes[(lea.ip()-sym.address) as usize..],
                     lea.ip(), DecoderOptions::NONE);
                 let decoded = decoder.decode();
                 let offsets = decoder.get_constant_offsets(&decoded);
@@ -46,23 +47,43 @@ fn relative_table_bases(
                 let base = u64::try_from(address).map_err(|_| anyhow!("relative table base out of range"))?;
                 if base >= data.size() { bail!("relative table base exceeds data section"); }
                 bases.push(base);
+                sites.insert(local_site_key(sym, jump.ip() - sym.address));
             }
         }
     }
     bases.sort_unstable();
     bases.dedup();
-    Ok(bases)
+    Ok((bases, sites))
 }
 
-pub(super) fn proof_relocations(
+pub(super) fn indirect_sites(elf: &object::File, included: &[SymInfo])
+    -> Result<HashSet<LocalSiteKey>> {
+    let symbols: Vec<_> = included.iter().collect();
+    let mut sites = HashSet::new();
+    for section in elf.sections().filter(|section|
+        section.kind() == SectionKind::ReadOnlyData && section.relocations().next().is_some())
+    {
+        sites.extend(relative_table_bases(elf, &symbols, section.index())?.1);
+    }
+    Ok(sites)
+}
+
+pub(super) struct CodeReloc {
+    pub proof: ProofDataReloc,
+    pub target_offset: u64,
+    pub table_offset: u64,
+}
+
+pub(super) fn code_relocations(
     elf: &object::File, layouts: &[SymbolLayout], section_index: object::SectionIndex,
     start: u64, size: u64, owner: &str,
-) -> Result<Vec<ProofDataReloc>> {
+) -> Result<Vec<CodeReloc>> {
     let section = elf.section_by_index(section_index)?;
     let end = start.checked_add(size).ok_or_else(|| anyhow!("proof data range overflow"))?;
     let relocations: Vec<_> = section.relocations().filter(|(at, _)| *at >= start && *at < end).collect();
     if relocations.is_empty() { return Ok(Vec::new()); }
-    let bases = relative_table_bases(elf, layouts, section_index)?;
+    let symbols: Vec<_> = layouts.iter().map(|layout| &layout.sym).collect();
+    let bases = relative_table_bases(elf, &symbols, section_index)?.0;
     let mut result = Vec::new();
     for (at, relocation) in relocations {
         if !matches!(relocation.flags(), RelocationFlags::Elf { r_type: 2 }) ||
@@ -85,8 +106,13 @@ pub(super) fn proof_relocations(
             .ok_or_else(|| anyhow!("relative jump table {owner} targets a removed or interior instruction"))?;
         let encoded = destination.new_offset_in_sym[index];
         if encoded == u32::MAX { bail!("relative jump-table target has no rewritten instruction"); }
-        result.push(ProofDataReloc { owner: owner.to_owned(), offset: at - start, r_type: 2,
-            symbol: destination.sym.name.clone(), addend: i64::try_from(u64::from(encoded) + at - base)? });
+        result.push(CodeReloc {
+            proof: ProofDataReloc { owner: owner.to_owned(), offset: at - start, r_type: 2,
+                symbol: destination.sym.name.clone(), addend: i64::try_from(u64::from(encoded) + at - base)? },
+            target_offset: u64::try_from(destination.base_in_blob)?.checked_add(u64::from(encoded))
+                .ok_or_else(|| anyhow!("relative table code offset overflow"))?,
+            table_offset: base - start,
+        });
     }
     Ok(result)
 }
@@ -126,11 +152,13 @@ mod tests {
                 insn_local_ip: vec![0,7,11,14,16,21,22,27],
                 new_offset_in_sym: vec![0,7,11,14,30,35,40,45] };
             let data = elf.section_by_name(".rodata").unwrap();
-            let result = proof_relocations(&elf, &[layout], data.index(), base, 8, "table");
+            let result = code_relocations(&elf, &[layout], data.index(), base, 8, "table");
             if interior { assert!(result.is_err()); continue; }
             let result = result?;
-            assert_eq!(result.iter().map(|r| (r.offset, r.symbol.as_str(), r.addend)).collect::<Vec<_>>(),
+            assert_eq!(result.iter().map(|r| (r.proof.offset, r.proof.symbol.as_str(), r.proof.addend)).collect::<Vec<_>>(),
                 vec![(0,"entry",30),(4,"entry",44)]);
+            assert_eq!(result.iter().map(|r| (r.target_offset,r.table_offset)).collect::<Vec<_>>(),
+                vec![(129,0),(139,0)]);
         }
         Ok(())
     }

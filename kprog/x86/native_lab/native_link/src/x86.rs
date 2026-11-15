@@ -1224,6 +1224,9 @@ pub(super) fn rewrite_x86(
     let absolute_maps = non_pic::references(elf, included, map_addrs)?;
     let pc_relative_relocations = scan_x86_pc_relative_relocations(elf, included)?;
     let writable_references = writable_data::references(elf, included)?;
+    let table_indirect_sites = if proof_mode { HashSet::new() } else {
+        readonly_relocs::indirect_sites(elf, included)?
+    };
     let proof_input = elf.section_by_name(".native_link_abi").is_some();
     let proof_entry_end_target = if !proof_mode && proof_input {
         included.iter().map(|sym| sym.address + sym.size).max()
@@ -1490,7 +1493,8 @@ pub(super) fn rewrite_x86(
                 }
             }
 
-            if !proof_mode {
+            if !proof_mode && !(insn.flow_control() == FlowControl::IndirectBranch &&
+                table_indirect_sites.contains(&site_key)) {
                 validate_no_external_refs(&insn, &included_ranges, |off| {
                     pc_relative_relocations.contains(&local_site_key(sym, local_ip + off))
                 })?;
@@ -2540,9 +2544,10 @@ fn collect_x86_proof_relocs(
                         layout.base_in_blob + layout.new_offset_in_sym[insn_idx] as usize;
                     let off_within_insn =
                         (local_patch_off - layout.insn_local_ip[insn_idx]) as usize;
-                    for reloc in readonly_relocs::proof_relocations(elf, layouts,
+                    for reloc in readonly_relocs::code_relocations(elf, layouts,
                         target_section_idx, if sym_size == 0 { 0 } else { sym_off_in_sec },
                         sym_bytes.len() as u64, &data_symbol_name)? {
+                        let reloc = reloc.proof;
                         let key = (reloc.owner.clone(), reloc.offset);
                         if let Some(previous) = nested.insert(key, reloc.clone()) {
                             if previous != reloc { bail!("conflicting nested read-only relocations"); }
@@ -2998,6 +3003,17 @@ fn apply_elf_relocations(
                     } else {
                         let off = blob.len();
                         blob.extend_from_slice(&sym_bytes);
+                        for relocation in readonly_relocs::code_relocations(elf, layouts,
+                            target_section_idx, if sym_size == 0 { 0 } else { sym_off_in_sec },
+                            sym_bytes.len() as u64, &data_symbol_name)? {
+                            let displacement = i128::from(relocation.target_offset) -
+                                i128::try_from(off)? - i128::from(relocation.table_offset);
+                            let displacement = i32::try_from(displacement)
+                                .map_err(|_| anyhow!("relative jump-table displacement exceeds i32"))?;
+                            let field = off.checked_add(usize::try_from(relocation.proof.offset)?)
+                                .ok_or_else(|| anyhow!("relative jump-table patch offset overflow"))?;
+                            blob[field..field + 4].copy_from_slice(&displacement.to_le_bytes());
+                        }
                         local_data_embed.insert(data_symbol_name, off);
                         off
                     };

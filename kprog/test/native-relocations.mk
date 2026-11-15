@@ -22,3 +22,7 @@ jump-table-forms:
 	clang-18 -target x86_64-linux-gnu -O3 -march=native -foptimize-sibling-calls -fomit-frame-pointer -mno-red-zone -mgeneral-regs-only -fno-stack-protector -c $(ROOT)/kprog/test/native_jump_table.c -o $(BUILD)/jump-table.native.o
 	objdump -dr -Mintel $(BUILD)/jump-table.native.o > $(OUTPUT)/jump-table.disassembly
 	readelf -rW $(BUILD)/jump-table.native.o > $(OUTPUT)/jump-table.relocations
+
+.PHONY: jump-table-check
+jump-table-check: build jump-table-forms
+	taskset -c 8-11 prlimit --as=12884901888 -- python3 $(ROOT)/kprog/test/check_native_jump_tables.py --build $(BUILD) --output $(OUTPUT) --linker $(LINKER_TARGET)/release/native-link
