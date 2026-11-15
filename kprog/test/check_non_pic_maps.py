@@ -97,8 +97,8 @@ def main():
     run(['clang-18', *flags, '-c', ROOT/'kprog/test/non_pic_map.c', '-o', native])
     disassembly = run(['objdump', '-dr', '-Mintel', native]).stdout
     (args.output/'native.disassembly').write_text(disassembly)
-    if 'R_X86_64_32\ttest_map' not in disassembly:
-        raise ValueError('Clang fixture did not exercise a non-PIC 32-bit map relocation')
+    if not any(kind+'\ttest_map' in disassembly for kind in ['R_X86_64_32', 'R_X86_64_PC32']):
+        raise ValueError('Clang fixture did not exercise a direct map-address relocation')
     values = (ctypes.c_uint64*7)(0, 0, 0, 0, 101, 202, 303)
     address = ctypes.addressof(values)
     if address <= 0xffffffff:

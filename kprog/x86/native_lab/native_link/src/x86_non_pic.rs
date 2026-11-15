@@ -28,7 +28,7 @@ pub(super) fn references(
         for (at, reloc) in section.relocations().filter(|(at, _)|
             *at >= sym.address && *at < sym.address + sym.size)
         {
-            let RelocationFlags::Elf { r_type: kind @ (1 | 10 | 11) } = reloc.flags() else { continue; };
+            let RelocationFlags::Elf { r_type: kind @ (1 | 2 | 10 | 11) } = reloc.flags() else { continue; };
             let RelocationTarget::Symbol(index) = reloc.target() else { continue; };
             let target = elf.symbol_by_index(index)?;
             let name = target.name()?;
@@ -37,22 +37,33 @@ pub(super) fn references(
                 .map(|s| s.name().map(|n| n == ".maps" || n == "maps"))
                 .transpose()?.unwrap_or(false);
             if !is_map { continue; }
-            if reloc.addend() != 0 || reloc.has_implicit_addend() {
-                bail!("non-PIC map address {name} requires an explicit zero addend");
-            }
             let (insn, offsets) = decoded.iter().find(|(i, _)| i.ip() <= at && at < i.next_ip())
                 .ok_or_else(|| anyhow!("non-PIC map relocation outside {}", sym.name))?;
+            // PC-relative data reads/writes keep their existing DATASEC path.
+            if kind == 2 && insn.mnemonic() != Mnemonic::Lea { continue; }
+            let addend = i128::from(reloc.addend()) + if kind == 2 {
+                i128::from(insn.next_ip() - at)
+            } else { 0 };
+            if addend != 0 || reloc.has_implicit_addend() {
+                bail!("non-PIC map address {name} requires an explicit zero address addend");
+            }
             let register = x86_gpr64_family(insn.op0_register())
                 .ok_or_else(|| anyhow!("non-PIC map address {name} requires a GPR destination"))?;
             let expected = if kind == 1 { 8 } else { 4 };
-            if insn.mnemonic() != Mnemonic::Mov || insn.op_count() != 2 ||
-                insn.op0_kind() != OpKind::Register ||
-                !matches!(insn.op1_kind(), OpKind::Immediate32 | OpKind::Immediate32to64 | OpKind::Immediate64) ||
-                at != insn.ip() + offsets.immediate_offset() as u64 ||
-                offsets.immediate_size() != expected ||
-                (kind == 1 && insn.op1_kind() != OpKind::Immediate64) ||
-                (kind == 10 && insn.op1_kind() != OpKind::Immediate32) ||
-                (kind == 11 && insn.op1_kind() != OpKind::Immediate32to64)
+            let valid = if kind == 2 {
+                insn.mnemonic() == Mnemonic::Lea && insn.is_ip_rel_memory_operand() &&
+                insn.op0_register() == register && offsets.displacement_size() == 4 &&
+                at == insn.ip() + offsets.displacement_offset() as u64
+            } else {
+                insn.mnemonic() == Mnemonic::Mov &&
+                matches!(insn.op1_kind(), OpKind::Immediate32 | OpKind::Immediate32to64 | OpKind::Immediate64) &&
+                at == insn.ip() + offsets.immediate_offset() as u64 &&
+                offsets.immediate_size() == expected &&
+                (kind != 1 || insn.op1_kind() == OpKind::Immediate64) &&
+                (kind != 10 || insn.op1_kind() == OpKind::Immediate32) &&
+                (kind != 11 || insn.op1_kind() == OpKind::Immediate32to64)
+            };
+            if !valid || insn.op_count() != 2 || insn.op0_kind() != OpKind::Register
             {
                 bail!("unsupported non-PIC map address {name}: relocation {kind} at {at:#x} in {}", sym.name);
             }
@@ -109,14 +120,17 @@ mod tests {
     fn non_pic_maps_preserve_high_pointer_bits_and_existing_proof_abi() -> Result<()> {
         // Bug: applying an ELF32 immediate literally truncates a live kernel map
         // pointer. Cover zero-extension, sign-extension and large-code-model MOV.
-        for (kind, bytes, offset) in [
-            (10, vec![0xb8, 0, 0, 0, 0, 0xc3], 1),
-            (11, vec![0x48, 0xc7, 0xc0, 0, 0, 0, 0, 0xc3], 3),
-            (1, vec![0x48, 0xb8, 0, 0, 0, 0, 0, 0, 0, 0, 0xc3], 2),
+        for (kind, bytes, offset, addend) in [
+            (10, vec![0xb8, 0, 0, 0, 0, 0xc3], 1, 0),
+            (11, vec![0x48, 0xc7, 0xc0, 0, 0, 0, 0, 0xc3], 3, 0),
+            (1, vec![0x48, 0xb8, 0, 0, 0, 0, 0, 0, 0, 0, 0xc3], 2, 0),
+            (2, vec![0x48, 0x8d, 0x05, 0, 0, 0, 0, 0xc3], 3, -4),
         ] {
-            let data = fixture(kind, &bytes, offset, 0)?;
+            let data = fixture(kind, &bytes, offset, addend)?;
             let maps = HashMap::from([("map".to_owned(), 0xffff_8880_1234_5678)]);
-            assert!(link(&data, false, false, &maps).is_err(), "default path must stay unchanged");
+            if kind != 2 {
+                assert!(link(&data, false, false, &maps).is_err(), "default path must stay unchanged");
+            }
             let kernel = link(&data, false, true, &maps)?;
             assert_eq!(kernel.map_patches.len(), 1);
             let patch = &kernel.map_patches[0];

@@ -2634,7 +2634,7 @@ fn apply_elf_relocations(
             // Local offset of the patch site within the owning symbol.
             let local_patch_off = reloc_offset - layout.sym.address;
 
-            if matches!(r_type, 1 | 10 | 11) && resolved_got_relocations
+            if matches!(r_type, 1 | 2 | 10 | 11) && resolved_got_relocations
                 .contains(&local_site_key(&layout.sym, local_patch_off)) {
                 continue;
             }
