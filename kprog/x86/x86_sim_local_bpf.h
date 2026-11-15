@@ -2170,9 +2170,9 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 	do { \
         if (X86_SIM_L_READ_RECOVERY_MEM(SRC, DST, (AUX), x86_store_imm_disp(IMM))) break; \
 		const __u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
-		const __u8 __x86_l_mem_width = X86_MEM_AUX_MEM_WIDTH(AUX);     \
-		if (!__x86_l_mem_width)                                  \
-			__x86_l_mem_width = __x86_l_width;                \
+		const __u8 __x86_l_raw_mem_width = X86_MEM_AUX_MEM_WIDTH(AUX); \
+		const __u8 __x86_l_mem_width = __x86_l_raw_mem_width ? \
+			__x86_l_raw_mem_width : __x86_l_width;            \
 		__u64 __x86_l_lhs = X86_SIM_L_READ_MEM_VALUE((SRC),      \
 			(AUX), (IMM), __x86_l_mem_width,\
 			1);                                              \
