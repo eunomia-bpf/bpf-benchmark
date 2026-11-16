@@ -1,3 +1,4 @@
+import KProgFormal.ClightRefinement.StepEquations
 import KProgFormal.Clight.Arm64Address
 import KProgFormal.ClightRefinement.InternalExecution
 import KProgFormal.ClightRefinement.Arm64Width
@@ -378,8 +379,6 @@ private theorem body_eq : Arm64Address.f_kprog_arm64_materialize.fn_body =
 
 private theorem return_type : Arm64Address.f_kprog_arm64_materialize.fn_return = CC.tulong := rfl
 
-/-- Constructor-specific definitional equations keep an unknown intermediate
-state opaque instead of expanding every interpreter branch. -/
 private theorem step_materialize (m : CC.Mem) (ptr value tag : CC.Val) (k : CC.Cont) :
     CC.doStep ge (.Callstate (.Internal Arm64Address.f_kprog_arm64_materialize)
       [ptr, value, tag] k m) = some (CC.E0,
@@ -387,64 +386,6 @@ private theorem step_materialize (m : CC.Mem) (ptr value tag : CC.Val) (k : CC.C
           k CC.emptyEnv (materializeTemps ptr value tag) m) := by
   simp only [CC.doStep, materialize_entry, body_eq]
 
-private theorem step_seq (f : CC.Function) (s1 s2 : CC.Stmt) (k : CC.Cont)
-    (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) :
-    CC.doStep ge (.State f (.Ssequence s1 s2) k e le m) =
-      some (CC.E0, .State f s1 (.Kseq s2 k) e le m) := rfl
-
-private theorem step_loop (f : CC.Function) (s1 s2 : CC.Stmt) (k : CC.Cont)
-    (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) :
-    CC.doStep ge (.State f (.Sloop s1 s2) k e le m) =
-      some (CC.E0, .State f s1 (.Kloop1 s1 s2 k) e le m) := rfl
-
-private theorem step_skip_seq (f : CC.Function) (s : CC.Stmt) (k : CC.Cont)
-    (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) :
-    CC.doStep ge (.State f .Sskip (.Kseq s k) e le m) =
-      some (CC.E0, .State f s k e le m) := rfl
-
-private theorem step_skip_loop (f : CC.Function) (s1 s2 : CC.Stmt) (k : CC.Cont)
-    (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) :
-    CC.doStep ge (.State f .Sskip (.Kloop1 s1 s2 k) e le m) =
-      some (CC.E0, .State f s2 (.Kloop2 s1 s2 k) e le m) := rfl
-
-private theorem step_break_loop (f : CC.Function) (s1 s2 : CC.Stmt) (k : CC.Cont)
-    (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) :
-    CC.doStep ge (.State f .Sbreak (.Kloop2 s1 s2 k) e le m) =
-      some (CC.E0, .State f .Sskip k e le m) := rfl
-
-private theorem step_set (f : CC.Function) (id : CC.Ident) (a : CC.Expr) (k : CC.Cont)
-    (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) :
-    CC.doStep ge (.State f (.Sset id a) k e le m) =
-      (CC.doEvalExpr ge e le m a).map (fun v =>
-        (CC.E0, .State f .Sskip k e (le.set id v) m)) := by
-  cases he : CC.doEvalExpr ge e le m a <;> simp [CC.doStep, he]
-
-private theorem step_if (f : CC.Function) (a : CC.Expr) (s1 s2 : CC.Stmt) (k : CC.Cont)
-    (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) :
-    CC.doStep ge (.State f (.Sifthenelse a s1 s2) k e le m) =
-      (CC.doEvalExpr ge e le m a).bind (fun v =>
-        (CC.Cop.boolVal v (CC.typeof a) m).map (fun cond =>
-          (CC.E0, .State f (if cond then s1 else s2) k e le m))) := by
-  cases he : CC.doEvalExpr ge e le m a with
-  | none => simp [CC.doStep, he]
-  | some v =>
-    cases hb : CC.Cop.boolVal v (CC.typeof a) m <;> simp [CC.doStep, he, hb]
-
-private theorem step_return (f : CC.Function) (a : CC.Expr) (k : CC.Cont)
-    (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) :
-    CC.doStep ge (.State f (.Sreturn (some a)) k e le m) =
-      (CC.doEvalExpr ge e le m a).bind (fun v =>
-        (CC.Cop.semCast v (CC.typeof a) f.fn_return m).bind (fun result =>
-          (CC.Mem.freeList m (CC.blocksOfEnv ge.genv_cenv e)).map (fun after =>
-            (CC.E0, .Returnstate result (CC.callCont k) after)))) := by
-  cases he : CC.doEvalExpr ge e le m a with
-  | none => simp [CC.doStep, he]
-  | some v =>
-    cases hc : CC.Cop.semCast v (CC.typeof a) f.fn_return m with
-    | none => simp [CC.doStep, he, hc]
-    | some value =>
-      cases hf : CC.Mem.freeList m (CC.blocksOfEnv ge.genv_cenv e) <;>
-        simp [CC.doStep, he, hc, hf]
 
 private theorem narrow_mask (tag : BitVec 8) :
     tag.setWidth 32 &&& (255#32) = tag.setWidth 32 := by

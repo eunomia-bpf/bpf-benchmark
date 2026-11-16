@@ -1,3 +1,4 @@
+import KProgFormal.ClightRefinement.StepEquations
 import KProgFormal.ClightRefinement.Arm64Registers
 
 namespace KProgFormal.ClightRefinement.Arm64RegisterReads
@@ -402,5 +403,132 @@ theorem sp_tag_return_unique (entry : CC.Val) (m : CC.Mem)
       (.Returnstate result .Kstop after)) :
     trace = CC.E0 ∧ result = .Vint (4#32) ∧ after = m :=
   stopped_return (sp_tag_returns entry m .Kstop) observed
+
+private def readHandler := Arm64Program.f_kprog_arm64_program_read
+
+private structure ReadParts where
+  outer : CC.Stmt
+  raw : CC.Stmt
+  tags : CC.Stmt
+  materialize : CC.Stmt
+  ret : CC.Stmt
+
+private def unpackRead : Option ReadParts :=
+  match readHandler.fn_body with
+  | .Ssequence (.Sloop (outer@(.Ssequence raw (.Ssequence tags materialize))) .Sbreak) ret =>
+      some ⟨outer, raw, tags, materialize, ret⟩
+  | _ => none
+
+private def readParts : ReadParts := by
+  run_tac do
+    let term ← Lean.Elab.Term.elabTerm (← `(unpackRead.get (by decide +kernel)))
+      (some (← Lean.Elab.Tactic.getMainTarget))
+    let value ← Lean.Meta.withTransparency .all (Lean.Meta.whnf term)
+    Lean.Elab.Tactic.closeMainGoal `read_body value
+
+private def readTemps (entry : CC.Val) (reg : BitVec 64) : CC.TempEnv :=
+  ((CC.createUndefTemps readHandler.fn_temps).set Arm64Program._entry entry).set
+    Arm64Program._reg (.Vlong reg)
+
+private theorem read_names :
+    CC.listNorepet (CC.varNames readHandler.fn_vars) ∧
+    CC.listNorepet (CC.varNames readHandler.fn_params) ∧
+    CC.listDisjoint (CC.varNames readHandler.fn_params) (CC.varNames readHandler.fn_temps) := by
+  decide +kernel
+
+private theorem read_entry (m : CC.Mem) (entry : CC.Val) (reg : BitVec 64) :
+    CC.doFunctionEntry2 ge readHandler [entry, .Vlong reg] m =
+      some (CC.emptyEnv, readTemps entry reg, m) := by
+  unfold CC.doFunctionEntry2
+  rw [ite_eq_left read_names]
+  rfl
+
+private theorem step_read (entry : CC.Val) (reg : BitVec 64) (m : CC.Mem) (k : CC.Cont) :
+    CC.doStep ge (.Callstate (.Internal readHandler) [entry, .Vlong reg] k m) =
+      some (CC.E0, .State readHandler
+        (.Ssequence (.Sloop readParts.outer .Sbreak) readParts.ret) k CC.emptyEnv
+        (readTemps entry reg) m) := by
+  simp only [CC.doStep, read_entry]
+  rfl
+
+private def readCont (k : CC.Cont) : CC.Cont :=
+  .Kloop1 readParts.outer .Sbreak (.Kseq readParts.ret k)
+
+private def gprReadTemps (entry cells cell tags tagCell value : CC.Val)
+    (reg : BitVec 64) (tag : BitVec 8) : CC.TempEnv :=
+  let vtag := CC.Val.Vint (tag.setWidth 32)
+  ((((((((((((((readTemps entry reg).set Arm64Program.___a64_l_reg (.Vlong reg)).set
+    Arm64Program._t'18 cells).set Arm64Program._t'19 cell).set Arm64Program._t'20 value).set
+    Arm64Program._t'1 value).set Arm64Program._t'1 value).set Arm64Program.___a64_read_value value).set
+    Arm64Program.___a64_l_reg__1 (.Vlong reg)).set Arm64Program._t'15 tags).set
+    Arm64Program._t'16 tagCell).set Arm64Program._t'17 vtag).set Arm64Program._t'2 vtag).set
+    Arm64Program._t'2 vtag).set Arm64Program.___a64_read_tag vtag
+
+private theorem read_tag_mask (tag : BitVec 8) :
+    tag.setWidth 32 &&& (255#32) = tag.setWidth 32 := by
+  change tag.setWidth 32 &&& (BitVec.allOnes 8).setWidth 32 = tag.setWidth 32
+  rw [← BitVec.setWidth_and, BitVec.and_allOnes]
+
+/-- The actual combined reader reaches its materialization stage after 55 internal
+transitions, with the raw value and tag loaded from the supplied entry tables.
+This prefix does not claim a complete handler refinement. -/
+theorem gpr_read_prefix (i : Fin 31) (b cb vb tb kb : CC.Block)
+    (ofs co vo to ko : CC.Integers.Ptrofs) (m : CC.Mem) (k : CC.Cont)
+    (value : CC.Val) (tag : BitVec 8)
+    (cells : CC.Mem.loadv CC.Mptr m (.Vptr b ofs) = some (.Vptr cb co))
+    (cellSlot : CC.Mem.loadv CC.Mptr m (.Vptr cb (CC.Integers.Ptrofs.add co
+      (CC.Integers.Ptrofs.repr (8 * (i.val : CC.Z))))) = some (.Vptr vb vo))
+    (tags : CC.Mem.loadv CC.Mptr m (.Vptr b (CC.Integers.Ptrofs.add ofs
+      (CC.Integers.Ptrofs.repr 8))) = some (.Vptr tb to))
+    (tagSlot : CC.Mem.loadv CC.Mptr m (.Vptr tb (CC.Integers.Ptrofs.add to
+      (CC.Integers.Ptrofs.repr (8 * (i.val : CC.Z))))) = some (.Vptr kb ko))
+    (cell : CC.Mem.loadv .Mint64 m (.Vptr vb vo) = some value)
+    (kind : CC.Mem.loadv .Mint8unsigned m (.Vptr kb ko) = some (.Vint (tag.setWidth 32)))
+    (valueCast : CC.Cop.semCast value CC.tulong CC.tulong m = some value) :
+    steps ge 55 (.Callstate (.Internal readHandler)
+      [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m) =
+      some (CC.E0, .State readHandler readParts.materialize (readCont k) CC.emptyEnv
+        (gprReadTemps (.Vptr b ofs) (.Vptr cb co) (.Vptr vb vo) (.Vptr tb to) (.Vptr kb ko)
+          value (BitVec.ofNat 64 i.val) tag) m) ∧
+    InternalPath ge 55 (.Callstate (.Internal readHandler)
+      [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m) := by
+  have bound := i.isLt
+  have ne : BitVec.ofNat 64 i.val ≠ (32#64) := by
+    intro h
+    have eq := congrArg BitVec.toNat h
+    rw [index_nat] at eq
+    simp only [BitVec.toNat_ofNat] at eq
+    omega
+  have lt : (BitVec.ofNat 64 i.val).ult (31#64) = true := by
+    rw [BitVec.ult_eq_decide, index_nat]
+    simp only [BitVec.toNat_ofNat]
+    simp [bound]
+  have cast := index_cast i m
+  simp [CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
+    CC.tulong, CC.tuchar, CC.Integers.Int.repr, CC.Integers.MI.repr,
+    CC.Integers.Int64.unsigned, CC.Integers.MI.unsigned,
+    CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
+    BitVec.toNat_ofNat, Int.natCast_emod, Option.some.injEq, CC.Val.Vint.injEq] at cast
+  simp only [CC.Cop.semCast, CC.Cop.classifyCast, CC.tulong, CC.Archi.ptr64,
+    ↓reduceIte] at valueCast
+  simp only [CC.Mptr, CC.Archi.ptr64, ↓reduceIte] at cells cellSlot tags tagSlot
+  simp +decide [steps, InternalPath, InternalState, step_read, readParts, readCont,
+    step_seq, step_loop, step_skip_seq, step_skip_loop, step_break_loop, step_set, step_if,
+    readTemps, gprReadTemps, CC.PTree.gso, CC.doEvalExpr, CC.lvalOfField, CC.doDerefLoc,
+    CC.typeof, CC.typeconv, CC.removeAttributes, CC.tattr, CC.accessMode,
+    layouts.1, layouts.2.1, layouts.2.2.1, layouts.2.2.2.1, layouts.2.2.2.2,
+    CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp, CC.Cop.semBinarith,
+    CC.Cop.classifyBinarith, CC.Cop.binarithType, CC.Cop.semAdd, CC.Cop.classifyAdd,
+    CC.Cop.semAddPtrInt, CC.Cop.ptrofsOfInt, index_offset, cast,
+    CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt, CC.Cop.castIntLong,
+    CC.Cop.boolVal, CC.Cop.classifyBool, CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse,
+    CC.Integers.Int64.cmpu, CC.Integers.Int64.eq, CC.Integers.MI.cmpu,
+    CC.Integers.Int.eq, CC.Integers.Int.zero, CC.Integers.Int.one,
+    CC.Integers.MI.zero, CC.Integers.MI.one, CC.Integers.MI.eq, CC.Integers.MI.ltu, ne, lt,
+    CC.Integers.Int.repr, CC.Integers.Int64.repr, CC.Integers.MI.repr,
+    CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext, CC.Integers.Int64.unsigned,
+    CC.Integers.Int.unsigned, CC.Integers.MI.unsigned, offset_zero, read_tag_mask,
+    CC.Mptr, CC.Archi.ptr64, CC.tptr, CC.sizeof, CC.tuchar, CC.tint, CC.tuint, CC.tlong, CC.tulong,
+    CC.emptyEnv, CC.E0, CC.Eapp, cells, cellSlot, tags, tagSlot, cell, kind, valueCast]
 
 end KProgFormal.ClightRefinement.Arm64RegisterReads
