@@ -28,6 +28,13 @@
 
 - [x] P-SPECIALIZE-10K（9fc382606、cc83b5d48；本提交结果）：四种 10K 形状正常 B/实际栈帧完成，前端 11.6–26.3s、峰值 399–920MiB；B 328–200624B、帧 0–40B，详见 `perf_20261113/inline-families/scale-10k/`。旧同名 scalar/direct 70.47GiB/SIGKILL 的实际失败已能完成；不跨不同编译管线宣称独立加速比。100K 继续。
 
+**协调者 2026-11-16T00:19:56Z（审核 21Z 已核实）**：
+- 第 1 条成立：Katran 在 11-12（1.218x，装上 10 196 字节）和 11-14（1.187x）的收益主要来自 map 查找（11-14 剖析每百万次调用 51.348 对 20.787），程序本体几乎一样（73.174 对 71.620）。perf 23:31 用 05-29 的链接器重放同一份 P，装上 10 164 字节。PERF 在广度一轮之后，用同一入口、默认设置给 05-29 链接器的输出和现在的 LTO 输出各计时一次，并核对 05-29 链接器的 LRU 查找是否设置引用位（是否等量工作）；结果写进 kprog/results。
+- 第 2 条成立：Katran 每次调用里本体约占三分之一，时钟约占 28%（来宾的 kvm-clock，两边一样），所以只靠本体，每次调用最多到约 1.13x。协调者 20:38 的“差距在本体”收回。
+- 第 3 条成立，已处理：4 个停住的 clang 已结束（e2d9df21b）；OTel 在广度一轮里按镜像自带的清单走直接原生路径计时，和 B 的验证分开（运营者 11-09“我们优化和 verifier 目前还是暂时分开”）。
+- 第 4 条成立，已处理：A/A+A/B 协议 22:57 收回（e217d2670）；6584e1127 的提交信息把它记在运营者名下，那是协调者的决定，提交历史保持原样，在此更正。
+- 原话对照 6 处：第 1 处成立，perf 提示词、本 todo 两处和每小时检查的提示词改回运营者原话“native 快 50%”；第 2 处成立，20:38 的小时报告末尾已加更正；第 3 处同第 4 条；第 4 处现在的 perf 提示词第 16 行已经是“no default-off switch keeps a second path alive”，和原话一致；第 5 处 C 已提交两周的运行摘要（4e11104b1），未跟踪目录从 490 降到 171，剩下的由各 lane 提交小文件；第 6 处通知用正面写法、加空格写成可读的句子。
+
 **协调者 2026-11-15T23:48:15Z（运营者“原生一侧装不上 为啥”）**：Tracee 原生一侧装载失败的原因（corpus/results/x86_kvm_corpus_20261115_222107_219897/details/shim-logs/tracee__monitor.post_rejit.log）：链接 sys_enter_submit 时 native-link 报 “x86 helper call bpf_probe_read has no helper address”，native loader 因此失败，Tracee 收到 invalid argument。头文件路线保留上游源码的 bpf_probe_read（buffer.h 12 处、filesystem.h 3 处、tracee.bpf.c 4 处），对象里留下未定义符号 bpf_probe_read、bpf_probe_read_str；loader 给链接器的地址表按内核函数名取地址（native_loader.cpp 277–278：helper 4 → bpf_probe_read_compat，45 → bpf_probe_read_compat_str），两边名字对不上。内核里 bpf_probe_read_compat 在（System.map ffffffff814653f0），eBPF 一侧调的就是它。11-15 之前 native_compat.h 把读内存都改成 bpf_probe_read_kernel，名字和内核一致，所以没出现；05-29 的对象里没有这类未定义符号。PERF 在链接器或 loader 里按 helper 编号把对象里的 helper 名解析到 eBPF 一侧调用的同一个内核函数，一次覆盖所有名字和内核函数名不同的 helper；C 的源码保持上游原样。C 的广度一轮里 Tracee 先记为这个错误。
 
 **协调者 2026-11-15T23:11:08Z（运营者 2026-11-15 约 22:59–23:08 的话）**：
@@ -66,7 +73,7 @@
 **协调者 2026-11-15T06:58:33Z（依据 PERF 72fb8a71a 的 A/A）**：两臂都用镜像里同一份 eBPF 对象、原生关掉，Katran 吞吐后一臂对前一臂 1.172593x（+17.26%），前一臂三个样本 2.52M、2.98M、3.22M pps 逐个上升，后一臂 3.54M、3.17M、3.51M。冻结的 driver 先跑基线后跑原生，吞吐比里带着这份次序偏差。决定：(1) 吞吐数字只和同一应用的 A/A 一起报，报的是除以 A/A 之后的值；Katran 的 1.076x 在 A/A 的 1.17x 之内，算作吞吐收益为零，此前写进结果的 Katran、Cilium、Tetragon 吞吐比和 05-29 的吞吐数字同样带这份偏差。(2) 每次调用（程序自身计数）是主指标，它也要一次 A/A：这次 A/A 里 bpf_stats 打开但两臂 bpf={}，每个程序的计数没有采到，PERF 先修好采集，再给 Katran 做每次调用的 A/A。(3) 冻结前，六个应用各做一次 A/A（每个约 20 分钟），在计时锁上单独跑。benchmark 设置保持原样，这些只是对已有输出的分析。
 
 **协调者 2026-11-15T06:06:55Z（审核 03Z 已核实，四条处理如下）**
-- 硬性要求保持运营者原话（每个应用原生本体比 JIT 本体快 50% 以上、代码约为一半）。审核给出的各应用程序本体在 BPF 时间里的份额（BCC 9%、Tracee 12%、Tetragon 25%、Katran 38%）说明每次调用的提升主要在 helper：PERF 每次调用的 LTO 按 helper 份额排序，先 bpf_probe_read（Tracee、Tetragon 41–46%）、bpf_ktime_get_ns（Katran）、bpf_perf_event_output。
+- 硬性要求保持运营者原话（“也得通过调优编译参数做到native 快 50%、代码量少一半. 必须要确保这样, 硬性要求”）。审核给出的各应用程序本体在 BPF 时间里的份额（BCC 9%、Tracee 12%、Tetragon 25%、Katran 38%）说明每次调用的提升主要在 helper：PERF 每次调用的 LTO 按 helper 份额排序，先 bpf_probe_read（Tracee、Tetragon 41–46%）、bpf_ktime_get_ns（Katran）、bpf_perf_event_output。
 - 规模问题在生产路径上成立：976679b25，1 万条指令的用例编译到 74 GB、5693 秒被杀，生成的 C 预处理后膨胀 278 倍（1.07 MB 到 297 MB）。00:33 的“撤回”更正为“生产路径上成立”。PERF 停掉 10K/100K 编译，直接处理预处理膨胀（helper 分派宏展开）。
 - 普查 guest（24 GB，跑在已拆掉的旧构建路线的对象上）由 PERF 停掉，空出的资源先跑 A/A 和计时隔离；新路线有对象后普查重跑。
 - C 在 05:34 把头文件路线的编译接上了（723a69562：CO-RE 答案按唯一内核 BTF 生成，core-compat.h，统一参数，BCC 9 个、Tracee 1 个、Tetragon 88 个对象编译通过）。其中给 Tetragon、Tracee 的 17 个 vendored 源码文件加的 __bpf__ 分支属于改源码，协调者已拆掉（本提交，unifdef -D__bpf__，17 个文件回到 723a69562 之前的上游文本，eBPF 一侧不变）。这些汇编差异放进兼容头文件：头文件里的汇编宏，用兼容头文件先占住上游头文件的 include guard，给出原生版本；写在 .c 函数体里的，C 在头文件、编译参数、链接器三者里定办法并记下。
@@ -80,7 +87,7 @@
 - **C 现在的顺序**：每个应用的兼容头文件（Katran 上下文布局、CO-RE 按唯一内核 BTF、LINUX_KERNEL_VERSION 和 __kconfig 值）和 vendor/bpf/Makefile 里的配方，全部用统一参数；先 Katran、BCC，再 Tracee、Tetragon、Cilium、OTel；每个应用两侧输出对照，再测本体和代码大小。
 - **审核 21Z（已核实）**：Cilium 1.285x、Tetragon 1.275x 记为第 1 阶段“两边应用输出一致”未通过（Cilium host 程序次数 C fe1bc6c52；Tetragon CO-RE 108 个答案不同 d92e5d43e），两项从结果里撤下；OTel 引用 stats 开的每次调用 1.129x 并列出三个样本，1.161x 撤下；计时期间其他 guest 停在 locks/timing 外，A/A 一次约 20 分钟；规模扫描“问题坐实”一句撤回（那是旧编译路径的数字）；包处理类应用的份额按瓶颈 CPU 算（Katran 约 43–44%，审核 detour-20261109T21Z 已核实），23:41 写的“5–9%、吞吐到不了 30%”撤回。
 
-**硬性要求（运营者 2026-11-15 00:00 UTC：“所有优化参数必须打开, 重新测试.” “是不是都得想办法关掉, 也得通过调优编译参数做到native 快 50%、代码量少一半. 必须要确保这样, 硬性要求”）**：每个应用的原生程序本体比 JIT 本体快 50% 以上，原生代码大小是 JIT 的一半左右（论文第 3 节的测量：x86 上 eBPF 慢 1.57x，原生代码 0.54x）；靠编译参数、兼容头文件和链接器做到。编译参数：所有优化参数打开（-O3、-march 用唯一目标 CPU、兄弟调用等）；限制优化的参数想办法去掉：-fno-jump-tables 去掉（跳转表的间接跳转由链接器、装载器和模拟器支持），-fPIC 保留（C 7016a65d7：有无 -fPIC 代码逐字节相同，只差重定位形式），-fno-optimize-sibling-calls 去掉；-mno-red-zone、-mgeneral-regs-only 是内核上下文的正确性要求（中断会写栈下方的红区；内核里用 SSE 要先保存用户的 FPU 状态），内核自己也这样编，JIT 也同样用到这两条，保留。
+**硬性要求（运营者 2026-11-15 00:00 UTC：“所有优化参数必须打开, 重新测试.” “是不是都得想办法关掉, 也得通过调优编译参数做到native 快 50%、代码量少一半. 必须要确保这样, 硬性要求”）**：运营者原话是 “也得通过调优编译参数做到native 快 50%、代码量少一半. 必须要确保这样, 硬性要求”；协调者此前写成“每个应用的原生程序本体比 JIT 本体快 50% 以上”，那是协调者的理解，收窄了他的话，收回（审核 21Z）。原生代码大小是 JIT 的一半左右（论文第 3 节的测量：x86 上 eBPF 慢 1.57x，原生代码 0.54x）；靠编译参数、兼容头文件和链接器做到。编译参数：所有优化参数打开（-O3、-march 用唯一目标 CPU、兄弟调用等）；限制优化的参数想办法去掉：-fno-jump-tables 去掉（跳转表的间接跳转由链接器、装载器和模拟器支持），-fPIC 保留（C 7016a65d7：有无 -fPIC 代码逐字节相同，只差重定位形式），-fno-optimize-sibling-calls 去掉；-mno-red-zone、-mgeneral-regs-only 是内核上下文的正确性要求（中断会写栈下方的红区；内核里用 SSE 要先保存用户的 FPU 状态），内核自己也这样编，JIT 也同样用到这两条，保留。
 
 - [ ] HARD-native（协调者 2026-11-15T00:00:58Z，依据上面的硬性要求）：C 在生产 P 一侧把六个应用的编译参数按上面改好（替换旧参数，旧的删掉，和 C-HDR 一起做）；PERF 让链接器、装载器、checked 编译和模拟器接受跳转表和非 PIC 的重定位；两边一起给出每个应用的两张表：程序本体对本体的速度（按地址拆开内联查找、桩和运行时例程之后）和代码大小（原生对 jited_prog_len）；六个应用按运营者 2026-11-11“广度优先”各计时一轮；全部达到再做冻结前的一次全量计时。 **统一（运营者 2026-11-15 00:21 UTC：“编译参数所有 app 统一.”）**：六个应用用同一组编译参数，放在 vendor/bpf/Makefile 的一个变量里（-O3、-march 用唯一目标 CPU、兄弟调用打开、-fomit-frame-pointer、-mno-red-zone、-mgeneral-regs-only、-fno-stack-protector；去掉 -fno-jump-tables、-fPIC、-fno-optimize-sibling-calls）。每个应用只多出它上游 eBPF 构建本来就传的 include 路径和 -D 宏，以及它的兼容头文件（-include）；现在各应用各自的参数变量（NATIVE_CFLAGS、KATRAN_NATIVE_CFLAGS、KATRAN_SAME_SOURCE_CODEGEN、CILIUM_NATIVE_OPTIONS 等）合成这一个。
 
