@@ -30,6 +30,7 @@ typedef unsigned long long __u64;
  * decode, so it is included after that decode rather than alone. */
 #define X86_SIM_ENABLE_STACK 1
 #include "../x86/x86_sim_local_bpf.h"
+#include "arm64_entry_environment_host.h"
 
 #include <stdio.h>
 

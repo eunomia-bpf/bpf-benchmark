@@ -7,6 +7,7 @@ typedef signed long long __s64;
 typedef signed int __s32;
 #define __always_inline inline
 #include "../arm64/arm64_sim_local_bpf.h"
+#include "arm64_entry_environment_host.h"
 #include <stdio.h>
 #include <stdlib.h>
 

@@ -24,7 +24,7 @@ static unsigned long fresh(void) { ++draws; return fresh_value; }
 #define READ(O,W) X86_SIM_L_STACK_READ((O),(W))
 #define BYTE(I) __x86_stack_mem.b[X86_SIM_STACK_BYTES+(I)]
 #endif
-unsigned long native_lab_entry_input(unsigned int kind) { return 0; }
+#include "arm64_entry_environment_host.h"
 #ifndef TEST_ARM64
 #undef X86_SIM_L_ARCHITECTURAL_FAULT
 #define X86_SIM_L_ARCHITECTURAL_FAULT() return 99

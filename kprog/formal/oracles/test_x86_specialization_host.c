@@ -55,6 +55,7 @@ typedef signed int __s32;
 
 #include "x86_helper_environment_host.h"
 #include "../x86/x86_sim_local_bpf.h"
+#include "arm64_entry_environment_host.h"
 #include "x86_helper_failure_host.h"
 #include "generated/x86_specialization.h"
 

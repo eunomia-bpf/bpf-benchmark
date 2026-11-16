@@ -33,6 +33,7 @@ typedef signed long long __s64;
 
 #define X86_SIM_ENABLE_STACK 1
 #include "../x86/x86_sim_local_bpf.h"
+#include "arm64_entry_environment_host.h"
 
 #undef bpf_get_current_pid_tgid
 #undef bpf_get_current_uid_gid

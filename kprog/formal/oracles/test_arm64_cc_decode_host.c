@@ -41,6 +41,7 @@ typedef signed long long __s64;
 #define __always_inline inline
 
 #include "../arm64/arm64_sim.h"
+#include "arm64_entry_environment_host.h"
 #include "generated/arm64_cc_decode.h"
 
 #include <stdio.h>

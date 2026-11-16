@@ -14,7 +14,7 @@ def main():
     args = parser.parse_args()
     command = shlex.split(args.cc) + [
         "-O2", "-I.", "-I../x86", "-I../../kprog", "-I../../vendor/libbpf/src",
-        "-c", "oracles/test_x86_helper_dispatch_route_host.c",
+        "-c", "oracles/test_x86_helper_specialization.c",
         "-o", "build/helper-error.o"]
     # A real armed constant must eliminate the failure arm and compile.
     result = subprocess.run(command + ["-DORA_NEGATIVE_HELPER=5ULL"],

@@ -25,6 +25,7 @@ typedef int __s32;
 typedef long long __s64;
 #define __always_inline inline
 #include "../x86/x86_sim.h"
+#include "arm64_entry_environment_host.h"
 
 #include <stdio.h>
 

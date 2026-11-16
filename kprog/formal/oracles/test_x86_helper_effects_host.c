@@ -4,7 +4,7 @@
 #define X86_SIM_ENABLE_STACK 1
 #define X86_SIM_STACK_BYTES 320U
 #include "kprog/x86/x86_sim_local_bpf.h"
-unsigned long native_lab_entry_input(unsigned int kind) { return 0; }
+#include "arm64_entry_environment_host.h"
 #define bpf_ktime_get_ns() 42ULL
 #define bpf_get_current_task_btf() ((void *)0x1234)
 #define bpf_map_update_elem(MAP, KEY, VALUE, FLAGS) (memcpy((MAP), (VALUE), 8), 0)

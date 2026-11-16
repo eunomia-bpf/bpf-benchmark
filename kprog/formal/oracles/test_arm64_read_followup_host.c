@@ -12,7 +12,7 @@ typedef signed int __s32;
 #include <stdlib.h>
 #include <string.h>
 #include <setjmp.h>
-unsigned long native_lab_entry_input(unsigned int kind) { (void)kind; return 0; }
+#include "arm64_entry_environment_host.h"
 static unsigned draw, visits, faults, failures, cases;
 static jmp_buf fault_return;
 static unsigned long outcome(void) { ++visits; return draw; }
@@ -70,13 +70,12 @@ static void copy_source(unsigned tag, unsigned length)
     ARM64_SIM_L_WRITE_REG_WIDTH(ARM64_X2,length,ARM64_WIDTH_64);
     faults=0; draw=0;
     if (setjmp(fault_return)==0) ARM64_SIM_LIBC_MEMCPY();
-    if (tag==ARM64_SIM_TAG_SCALAR) {
-        CHECK(faults==1,"SCALAR memcpy source selects architectural fault");
-        for (unsigned i=0;i<sizeof(dst);++i) CHECK(dst[i]==0x5a,"copy fault precedes memory effects");
-    } else {
-        CHECK(faults==0,"typed memcpy source selects transfer");
-        CHECK(memcmp(dst,src,length)==0,"typed memcpy transfers source bytes");
-    }
+    /* A mapped source remains readable with a scalar tag. A zero-length copy
+     * touches no bytes; provenance alone is not an architectural fault. */
+    CHECK(faults==0,"mapped memcpy source selects transfer");
+    CHECK(memcmp(dst,src,length)==0,"memcpy transfers source bytes");
+    for (unsigned i=length;i<sizeof(dst);++i)
+        CHECK(dst[i]==0x5a,"memcpy preserves bytes outside its length");
 }
 static void vector_read(unsigned op, unsigned flags, unsigned via, unsigned selected)
 {

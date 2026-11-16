@@ -643,6 +643,7 @@ static unsigned part5(void)
 #include <stdlib.h>
 #define X86_SIM_ENABLE_STACK 1
 #include "../x86/x86_sim_local_bpf.h"
+#include "arm64_entry_environment_host.h"
 static unsigned long production_frames;
 static void production_pointer_frame(unsigned op,unsigned dst,__u32 aux,__u8 flags,__u64 value,unsigned fs,unsigned profile,unsigned direct)
 {
@@ -660,7 +661,10 @@ static void production_pointer_frame(unsigned op,unsigned dst,__u32 aux,__u8 fla
  __x86_xmm0_lo=0x0123456789abcdefULL;__x86_xmm0_hi=0xfedcba9876543210ULL;
  for(unsigned r=0;r<16;r++){raw[r]=(__u64)(long)X86_SIM_L_REG_VALUE(r);numeric[r]=X86_SIM_L_READ_REG(r);tags[r]=X86_SIM_L_REG_TAG(r);}
  if(direct)X86_SIM_L_EXEC_PTR_LOAD(op,dst,aux,value);
- else X86_SIM_L_EXEC(op,dst,flags^0xffU,flags,aux,value);
+ /* The current emitter supplies a known opcode to the generic body. */
+ else if(op==X86_OP_MOV_LOAD_MAP_PTR)X86_SIM_L_EXEC(X86_OP_MOV_LOAD_MAP_PTR,dst,flags^0xffU,flags,aux,value);
+ else if(op==X86_OP_MOV_LOAD_HELPER_ID)X86_SIM_L_EXEC(X86_OP_MOV_LOAD_HELPER_ID,dst,flags^0xffU,flags,aux,value);
+ else abort();
  const __u8 selected_tag=op==0x2cU?((aux&1)?6:5):7;
  for(unsigned r=0;r<16;r++){
   __u64 expected_raw=r==dst?value-(r==4?__x86_native_stack_base:0):raw[r];

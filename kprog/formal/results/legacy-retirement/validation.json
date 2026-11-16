@@ -1,0 +1,37 @@
+{
+  "recorded_utc": "2026-11-16T21:30:54.382949+00:00",
+  "full_lake": {
+    "command": "lake build",
+    "jobs": 270,
+    "exit": 0,
+    "log": "/workspaces/kprog-raw/formal/legacy-retirement/lake-final1.log"
+  },
+  "full_check": {
+    "command": "make -C kprog/formal check",
+    "exit": 0,
+    "log": "/workspaces/kprog-raw/formal/legacy-retirement/make-check6.log"
+  },
+  "arm_protocol": {
+    "exit": 0,
+    "memory_exclusive_exit": 0
+  },
+  "helper_compile_exit": 0,
+  "standalone_input_fixtures": {
+    "exit_and_stack_both_arches": "passed in input-fixtures.log",
+    "arm_read_and_x86_helper_exit": 0
+  },
+  "exports": {
+    "baseline": "9c617740f",
+    "count": 23,
+    "identical": true
+  },
+  "m5_combined_reader": {
+    "internal_steps": 73,
+    "nonrelative_tags": 254,
+    "focused_jobs": 141,
+    "query_exit": 0,
+    "complete_ISA_handler_increment": 0
+  },
+  "raw_directory": "/workspaces/kprog-raw/formal/legacy-retirement",
+  "pending": "M5 relative-tag/SP and producer/compact/PC/origin/cache/native-memory/control correspondence; O1/O2/O4 recount; remaining M6 closure."
+}

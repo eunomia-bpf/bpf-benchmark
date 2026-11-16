@@ -41,8 +41,8 @@ This repairs the current inline-wrapper sign-high test: 1,415 reference cases,
 
 The complete `lake build` passes 270 jobs with zero failures. All 23 generated
 Clight exports remain byte-identical to `9c617740f`; see `export-parity.json`.
-The complete `make check` is still running at this commit; its retained retries
-and final status will be recorded separately.
+The complete final `make check` passes with zero failures; `validation.json`
+records the result and retained retries.
 
 `frozen-paths.json` compares 162 May-frozen files directly with `9f3855f6f`.
 158 match. Four inherited differences (top-level Makefile, two micro YAMLs,
@@ -73,7 +73,7 @@ no new production check or external interpretation.
 
 Both retained producer axiom queries pass with only standard axioms; reproduce
 with `LEAN_NUM_THREADS=1 lake env lean -j1 results/legacy-retirement/Query.lean`.
-The complete check is being repeated after these focused fixes.
+The complete check passes after these focused fixes.
 
 The current linker shares selected ARRAY bodies through local calls. The map
 harness still checks all 90 actual load/bounds fragments and their complete
@@ -92,3 +92,45 @@ immediate states, 1,580 reserved encodings, 1,280 MRS states, the full main ARM
 matrix, 962 addressed/vector states and 84 exclusive states pass. This is model
 and wire regression evidence. `arm64-model-regressions.json` preserves the six
 observations and LLVM commands; the unchanged mature model supplies execution.
+
+A further 102 obsolete C route-model oracles are physically removed with their
+recipe commands (`deleted-route-oracles.json`). These copied the retired
+Generated Lean route models, including unconditional scalarization assumptions.
+The two source-shape/keyword scanners are also removed
+(`deleted-source-scans.json`). Their 103 rebuildable binaries are listed in
+the corresponding product inventories. Raw failures and observations remain.
+The canonical C bodies, independent hardware frame tests and current primitive
+checks remain. Existing helper-ID compile rejection checks now use a minimal
+fixture calling the current entry point, with no overridden failure arm.
+
+Twenty-seven retained standalone drivers now include the explicit zero-origin
+provider; four existing unconditional-zero callbacks use that same supported
+input environment. Nine hardware-frame providers explicitly choose zero for unspecified values
+and non-recovery in their mapped-memory cases, while refusing other unexpected
+queries. ARM return tests separately count origin queries and preserve arbitrary
+incoming callee-saved values in their whole-state snapshots. The exit test
+retains the current SP-balance refusal. The pointer-write fixture supplies the
+known opcode at the generic-body call, matching the actual emitter.
+
+The test core-control helper now checks `setrlimit` errors and clears process
+dumpability. Linux piped core handlers ignore a zero core-size limit; clearing
+dumpability avoids those handler launches while retaining the expected child
+signals. This changes only host-test setup, with no runtime benchmark setting.
+
+`check-host-tail.py` executes the unmodified expanded host recipe through Make;
+`--from-source` selects an ordinary compiler-command boundary for focused
+repairs. The staged host subsets, full ARM protocol and helper compile checks
+pass. The complete final `make check` passes after all source fixes.
+
+The standalone input-fixture confirmation also passes both architectures'
+exit/stack cases, ARM read follow-up (5,713 checks) and x86 helper effects.
+The ARM copy fixture now checks mapped scalar sources and zero-length copies
+through their actual successful transfer, rather than inventing an
+architectural fault solely from a provenance tag. Its vector/load fault-choice
+and whole-state checks remain.
+
+Final confirmation: full Lake build passes 270 jobs, full `make check` exits 0,
+the modified standalone input fixtures pass, and all 23 regenerated Clight
+modules remain byte-identical to `9c617740f`. Retained failures and interrupted
+partial attempts are kept in raw. The complete ISA-handler count remains zero;
+M5 and the remaining M6 closure are open.

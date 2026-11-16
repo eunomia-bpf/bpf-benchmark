@@ -44,6 +44,7 @@ typedef signed long long __s64;
 
 #define X86_SIM_ENABLE_STACK 1
 #include "../x86/x86_sim.h"
+#include "arm64_entry_environment_host.h"
 #include "../x86/x86_sim_local_bpf.h"
 #include "generated/x86_imul_flags.h"
 

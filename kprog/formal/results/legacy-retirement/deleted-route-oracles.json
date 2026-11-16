@@ -1,0 +1,512 @@
+[
+  {
+    "path": "oracles/a64_route_host.c",
+    "bytes": 76604,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/btmem_index_route_host.c",
+    "bytes": 9010,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/ccmp_decode_route_host.c",
+    "bytes": 2522,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/cmov_step_route_host.c",
+    "bytes": 18688,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/flag_route_host.c",
+    "bytes": 12420,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/fmov_route_host.c",
+    "bytes": 18546,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/helper_route_host.c",
+    "bytes": 39715,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/ldrsx_route_host.c",
+    "bytes": 23323,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/mul_route_host.c",
+    "bytes": 6498,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/pair_route_host.c",
+    "bytes": 21013,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/reduction_route_host.c",
+    "bytes": 13842,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/stlxr_route_host.c",
+    "bytes": 19233,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_adrp_route_host.c",
+    "bytes": 6713,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_alu_operand_select_route_host.c",
+    "bytes": 18850,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_aux_route_host.c",
+    "bytes": 7032,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_branch_emit_route_host.c",
+    "bytes": 7630,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_call_ret_route_host.c",
+    "bytes": 7937,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_cbz_tbz_route_host.c",
+    "bytes": 6357,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_cneg_route_host.c",
+    "bytes": 7831,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_csel_route_host.c",
+    "bytes": 7219,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_dispatch_family_route_host.c",
+    "bytes": 17825,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_dispatch_singleton_route_host.c",
+    "bytes": 34367,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_dq_mem_extra_route_host.c",
+    "bytes": 24405,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_dq_mem_route_host.c",
+    "bytes": 22501,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_extrev_route_host.c",
+    "bytes": 9902,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_flag_route_host.c",
+    "bytes": 8502,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_helper_arg_ptr_route_host.c",
+    "bytes": 9367,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_imm_operand_route_host.c",
+    "bytes": 17101,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_ldrsx_op_route_host.c",
+    "bytes": 23195,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_mem_base_src_route_host.c",
+    "bytes": 14289,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_mem_index_route_host.c",
+    "bytes": 9496,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_mem_index_value_route_host.c",
+    "bytes": 9058,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_mem_prepost_route_host.c",
+    "bytes": 24359,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_mem_write_arm_route_host.c",
+    "bytes": 11207,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_mul_route_host.c",
+    "bytes": 7601,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_orn_route_host.c",
+    "bytes": 7858,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_pair_mem_route_host.c",
+    "bytes": 24978,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_reduction_route_host.c",
+    "bytes": 6413,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_reg_dispatch_route_host.c",
+    "bytes": 8589,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_reg_presence_route_host.c",
+    "bytes": 9393,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_stack_arena_route_host.c",
+    "bytes": 10422,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_stack_arm_route_host.c",
+    "bytes": 11778,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_stack_read_tag_source_route_host.c",
+    "bytes": 9837,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_stack_write_lanes_route_host.c",
+    "bytes": 10796,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_stack_write_tag_action_route_host.c",
+    "bytes": 10760,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_stlxr_route_host.c",
+    "bytes": 6151,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_store_bytes_route_host.c",
+    "bytes": 5583,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_unary_route_host.c",
+    "bytes": 7066,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_vreg_field_route_host.c",
+    "bytes": 25604,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_vreg_route_host.c",
+    "bytes": 26832,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_width_effective_route_host.c",
+    "bytes": 16202,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_arm64_write_arm_route_host.c",
+    "bytes": 7557,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_control_flow_trace_route_host.c",
+    "bytes": 9204,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_alu_flag_arm_route_host.c",
+    "bytes": 13500,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_alu_mem_result_route_host.c",
+    "bytes": 38145,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_alu_result_route_host.c",
+    "bytes": 21906,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_andn_route_host.c",
+    "bytes": 13913,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_branch_emit_route_host.c",
+    "bytes": 7799,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_bswap_route_host.c",
+    "bytes": 16325,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_bt_route_host.c",
+    "bytes": 13965,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_bzhi_flags_route_host.c",
+    "bytes": 9926,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_bzhi_route_host.c",
+    "bytes": 14720,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_call_ret_route_host.c",
+    "bytes": 16743,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_callmem_route_host.c",
+    "bytes": 9194,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_cmov_route_host.c",
+    "bytes": 26370,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_cmp_mem_route_host.c",
+    "bytes": 22841,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_cmpop_route_host.c",
+    "bytes": 15196,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_dispatch_family_route_host.c",
+    "bytes": 25585,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_dispatch_singleton_route_host.c",
+    "bytes": 74809,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_div_route_host.c",
+    "bytes": 12087,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_doubleshift_arm_route_host.c",
+    "bytes": 11838,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_helper_dispatch_route_host.c",
+    "bytes": 9788,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_imul_route_host.c",
+    "bytes": 23128,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_lea_route_host.c",
+    "bytes": 23356,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_mem_dispatch_route_host.c",
+    "bytes": 15925,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_mem_index_route_host.c",
+    "bytes": 6242,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_mem_offset_route_host.c",
+    "bytes": 5544,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_mov_load_route_host.c",
+    "bytes": 15749,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_mov_reg_arm_route_host.c",
+    "bytes": 11197,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_mov_route_host.c",
+    "bytes": 22726,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_movbe_route_host.c",
+    "bytes": 17786,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_movx_route_host.c",
+    "bytes": 13902,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_movx_shape_route_host.c",
+    "bytes": 10785,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_mulx_arm_route_host.c",
+    "bytes": 8978,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_popcnt_flags_route_host.c",
+    "bytes": 7792,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_pushpop_route_host.c",
+    "bytes": 19190,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_reg_dispatch_route_host.c",
+    "bytes": 10890,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_reg_presence_route_host.c",
+    "bytes": 24121,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_rep_movs_route_host.c",
+    "bytes": 9607,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_setcc_mem_route_host.c",
+    "bytes": 15818,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_setcc_route_host.c",
+    "bytes": 9787,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_shift_flags_route_host.c",
+    "bytes": 9221,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_shiftx_rorx_route_host.c",
+    "bytes": 25221,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_stack_arm_route_host.c",
+    "bytes": 6581,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_stack_write_lanes_route_host.c",
+    "bytes": 9323,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_store_route_host.c",
+    "bytes": 16492,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_width_effective_route_host.c",
+    "bytes": 37200,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_write_width_arm_route_host.c",
+    "bytes": 9752,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_xchg_route_host.c",
+    "bytes": 9743,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/test_x86_xmm0_route_host.c",
+    "bytes": 13943,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/value_route_host.c",
+    "bytes": 14132,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  },
+  {
+    "path": "oracles/x86_route_host.c",
+    "bytes": 55328,
+    "reason": "Retired generated-Lean route model copied into C; current mature/Clight and hardware checks remain."
+  }
+]

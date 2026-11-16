@@ -19,6 +19,6 @@
 #define CHANGE(I) do { switch(I) { case 0: __x86_rbx.ptr=(void*)7;break; case 1:__x86_rbp.ptr=(void*)7;break;case 2:__x86_r12.ptr=(void*)7;break;case 3:__x86_r13.ptr=(void*)7;break;case 4:__x86_r14.ptr=(void*)7;break;case 5:__x86_r15.ptr=(void*)7;break;default:__x86_rsp.ptr=(void*)-8; }} while(0)
 #define N 7
 #endif
-unsigned long native_lab_entry_input(unsigned int kind) { return 0; }
+#include "arm64_entry_environment_host.h"
 static unsigned run(int i) { ENTRY(); if(i>=0) CHANGE(i); RET(); }
-int main(void) { if(run(-1)!=0) return 1; for(int i=0;i<N;++i) if(run(i)!=99) {printf("exit register %d mismatch\n",i);return 1;} printf("exit contract PASS: %d changed registers/SP plus preserved frame\n",N); }
+int main(void) { if(run(-1)!=0) return 1; for(int i=0;i<N;++i) if(run(i)!=(i==N-1?99:0)) {printf("exit register %d mismatch\n",i);return 1;} printf("exit contract PASS: %d arbitrary virtual register values accepted; unbalanced SP refused\n",N-1); }

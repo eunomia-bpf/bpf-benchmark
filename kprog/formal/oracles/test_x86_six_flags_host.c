@@ -2,6 +2,7 @@
  * and CMP accidentally writing data in the production register/imm handlers. */
 #define X86_SIM_USE_STATE_STRUCT
 #include "../x86/x86_sim_local_bpf.h"
+#include "arm64_entry_environment_host.h"
 #include <stdio.h>
 #include <stdlib.h>
 

@@ -88,6 +88,7 @@ typedef signed int __s32;
 #define bpf_ima_file_hash bpf_ima_file_hash_defs
 #define bpf_map_lookup_percpu_elem bpf_map_lookup_percpu_elem_defs
 #include "../arm64/arm64_sim_local_bpf.h"
+#include "arm64_entry_environment_host.h"
 #undef bpf_map_lookup_elem
 #undef bpf_map_update_elem
 #undef bpf_map_delete_elem

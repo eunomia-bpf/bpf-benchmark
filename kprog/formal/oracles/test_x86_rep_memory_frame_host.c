@@ -19,7 +19,9 @@ typedef signed int __s32;
 #include <string.h>
 #define BYTES 2048U
 static __u8 source[BYTES],destination[BYTES],native_source[BYTES],native_destination[BYTES],native_stack[BYTES];
-unsigned long native_lab_entry_input(unsigned kind){(void)kind;abort();}
+/* Plant the frame explicitly; these mapped-memory fixtures choose zero for
+ * unspecified values and select the non-recovery outcome. */
+unsigned long native_lab_entry_input(unsigned kind){if(kind==NATIVE_LAB_INPUT_UNSPECIFIED)return 0;fprintf(stderr,"unexpected frame entry input %u\n",kind);abort();}
 unsigned long native_lab_exclusive_failure_choice(unsigned site){(void)site;abort();}
 static __u64 flagword(unsigned seed){return ((seed&1)?1:0)|((seed&2)?4:0)|((seed&4)?16:0)|((seed&8)?64:0)|((seed&16)?128:0)|((seed&32)?2048:0);}
 static __u64 cell(unsigned r){return 0x1020304050607080ULL+r*0x100020003ULL;}

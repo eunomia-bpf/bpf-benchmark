@@ -32,6 +32,7 @@ typedef int __s32;
 typedef long long __s64;
 
 #include "../arm64/arm64_sim.h"
+#include "arm64_entry_environment_host.h"
 
 #include <stdio.h>
 #include <string.h>

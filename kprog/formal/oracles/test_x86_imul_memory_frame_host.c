@@ -21,7 +21,9 @@ static __u8 heap[512],native_stack[512];
 static const __u64 values[]={0,1,15,16,31,32,63,64,255,256,0x7f,0x80,0x7fff,0x8000,0x7fffffff,0x80000000ULL,0x7fffffffffffffffULL,0x8000000000000000ULL,0xffffffffffffffffULL};
 #define NVALUES (sizeof(values)/sizeof(values[0]))
 static const __u32 immediates[]={0,1,0xffffffffU,127,0xffffff80U,128,32767,0xffff8000U,0x7fffffffU,0x80000000U};
-unsigned long native_lab_entry_input(unsigned kind){(void)kind;abort();}
+/* Plant the frame explicitly; these mapped-memory fixtures choose zero for
+ * unspecified values and select the non-recovery outcome. */
+unsigned long native_lab_entry_input(unsigned kind){if(kind==NATIVE_LAB_INPUT_UNSPECIFIED)return 0;fprintf(stderr,"unexpected frame entry input %u\n",kind);abort();}
 unsigned long native_lab_exclusive_failure_choice(unsigned site){(void)site;abort();}
 static __u64 flagword(unsigned seed){return ((seed&1)?1:0)|((seed&2)?4:0)|((seed&4)?16:0)|((seed&8)?64:0)|((seed&16)?128:0)|((seed&32)?2048:0);}
 static void put(__u8 *p,unsigned width,__u64 value){for(unsigned i=0;i<width;i++)p[i]=value>>(i*8);}

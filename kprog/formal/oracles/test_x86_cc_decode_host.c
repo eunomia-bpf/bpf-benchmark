@@ -45,6 +45,7 @@ typedef signed int __s32;
 #define __always_inline inline
 
 #include "../x86/x86_sim.h"
+#include "arm64_entry_environment_host.h"
 #include "generated/x86_cond.h"
 #include "generated/x86_cc_decode.h"
 

@@ -18,17 +18,19 @@ typedef signed long long __s64;
 #include <setjmp.h>
 
 struct snapshot { __u64 regs[31],vectors[64],sp,lr; __u8 tags[31],flags[4],context[sizeof(struct __sk_buff)]; __u32 mirror[5]; };
-struct result { struct snapshot before,after; int route; __u64 target; __u32 value; unsigned inputs; };
+struct result { struct snapshot before,after; int route; __u64 target; __u32 value; unsigned origin_inputs; };
 struct frame { union arm64_sim_gpr *const *cells; __u8 *const *tags; __u8 **flags; void *vectors; __s64 *sp; __u64 *lr; struct arm64_sim_skb_abi *mirror; };
 static struct result out;
 static struct frame *active;
 static struct __sk_buff context;
 static jmp_buf refused;
-static unsigned inputs;
+static unsigned origin_inputs;
 static const __u64 stack_base=0x123456789abcdef0ULL,return_base=0xfedcba9876543210ULL;
 unsigned long native_lab_entry_input(unsigned kind)
 {
- inputs++;if(kind==1)return stack_base;if(kind==3)return return_base;abort();
+ /* Declaration choices precede the fully planted frame; count origins only. */
+ if(kind==NATIVE_LAB_INPUT_UNSPECIFIED)return 0;
+ origin_inputs++;if(kind==1)return stack_base;if(kind==3)return return_base;abort();
 }
 unsigned long native_lab_exclusive_failure_choice(unsigned site) { (void)site;abort(); }
 static void capture(struct frame *f,struct snapshot *s)
@@ -39,10 +41,10 @@ static void capture(struct frame *f,struct snapshot *s)
  memcpy(s->vectors,f->vectors,sizeof(s->vectors));s->sp=(__u64)*f->sp;s->lr=*f->lr;
  memcpy(s->context,&context,sizeof(context));memcpy(s->mirror,f->mirror->cb,sizeof(s->mirror));
 }
-static void close_frame(struct frame *f) { capture(f,&out.after);out.inputs=inputs; }
+static void close_frame(struct frame *f) { capture(f,&out.after);out.origin_inputs=origin_inputs; }
 void arm64_sim_unsupported_opcode(void)
 {
- out.route=-1;capture(active,&out.after);out.inputs=inputs;longjmp(refused,1);
+ out.route=-1;capture(active,&out.after);out.origin_inputs=origin_inputs;longjmp(refused,1);
 }
 #define CASES_ONE case 0ULL: goto target_zero;
 #define CASES_FOUR case 0ULL: goto target_zero;case 1ULL: goto target_one;case 256ULL: goto target_256;case 0xffffffffffffffffULL: goto target_max;
@@ -67,7 +69,7 @@ static __u32 execute(unsigned src,unsigned tag,__u64 target,unsigned table,unsig
  for(unsigned i=0;i<5;i++)__a64_sim_abi.cb[i]=0x12345678U+i*0x12121212U+pattern;
  __u8 *flags[]={&__a64_n,&__a64_z,&__a64_c,&__a64_v};
  struct frame f __attribute__((cleanup(close_frame)))={__a64_cells,__a64_tag_cells,flags,__a64_vectors,&__a64_sp,&__a64_lr,&__a64_sim_abi};
- active=&f;inputs=0;memset(&out,0,sizeof(out));capture(&f,&out.before);
+ active=&f;origin_inputs=0;memset(&out,0,sizeof(out));capture(&f,&out.before);
  switch(table){
  case 0:ARM64_SIM_A64_RET_TO(src,);break;
  case 1:ARM64_SIM_A64_RET_TO(src,CASES_ONE);break;
@@ -95,9 +97,9 @@ int main(void)
   int denied=invoke(src,tag,values[vi],table,skb,pattern);
   __u64 target=src==31?0:values[vi];unsigned effective_tag=src==31?0:tag;
   int member=table==1?target==0:table==2&&(target==0||target==1||target==256||target==0xffffffffffffffffULL);
+  /* Incoming callee-saved values are arbitrary; the complete snapshot below
+   * checks their preservation. Zero is not a native ABI precondition. */
   int frame_ok=out.before.sp==0;
-  for(unsigned i=19;i<=29;i++)
-   frame_ok=frame_ok&&out.before.regs[i]==0&&out.before.tags[i]==0;
   int expected=target==0&&effective_tag==10?(frame_ok?0:-1):effective_tag==9&&member?1:-1;
   if(out.route!=expected||!!denied!=(expected==-1)){fprintf(stderr,"route src=%u tag=%u value=%llu table=%u profile=%u got=%d want=%d denied=%d\n",src,tag,(unsigned long long)target,table,pattern,out.route,expected,denied);return 1;}
   struct snapshot want=out.before;want.lr=target;
@@ -109,7 +111,7 @@ int main(void)
    outer++;
   }else if(expected==1){if(out.target!=target||out.value!=0xa0b0c0d0U)return 1;internal++;}
   else rejections++;
-  if(memcmp(&want,&out.after,sizeof(want))||out.inputs!=input_count){fprintf(stderr,"frame src=%u tag=%u table=%u profile=%u\n",src,tag,table,skb);return 1;}
+  if(memcmp(&want,&out.after,sizeof(want))||out.origin_inputs!=input_count){fprintf(stderr,"frame src=%u tag=%u table=%u profile=%u\n",src,tag,table,skb);return 1;}
   cases++;
  }
  printf("arm64 RET token host cross-check: OK (%lu cases; outer=%lu internal=%lu refused=%lu)\n",cases,outer,internal,rejections);
