@@ -827,6 +827,20 @@ double-execution cause and no confirmed Cilium packet fix. Those remain open. Th
     selects a reachable entry, so a smaller temporary ELF does not itself
     establish the operator's installed half-size target or any per-call gain.
 
+    The existing launcher already addresses process-boundary cost:
+    `src/native_loader_subprocess.hpp:27–53` uses posix_spawn and synchronously
+    reaps the child with waitpid, retrying interrupted waits. It removes the
+    preload variable from the child environment at :14–23. This keeps the
+    compiler/linker outside the intercepted application's shim and avoids
+    ordinary fork-based duplication of its address space. The context-LTO
+    caller at native_loader_context_lto.hpp:46 waits for this function before
+    publishing the result at :55. Thus repeated module optimization and
+    emission remain the concrete source cost in this item. A compiler from
+    that invocation has completed when the launcher returns successfully;
+    overlapping independent loads are a separate question. Retain this
+    existing launch mechanism while trimming actual LLVM work, with load-time
+    measurements distinct from native per-call timing.
+
 22. **Local memory call redirection deletes observable function-address loads.**
 
     For an ordinary helper GOT load, `x86.rs:1267–1271` materializes the
