@@ -1,21 +1,28 @@
 {
-  "time_utc": "2026-11-16T09:30:12Z",
+  "time_utc": "2026-11-16T09:38:54Z",
   "current_pair": {
     "pid": 1444229,
     "raw": "/workspaces/kprog-raw/perf/20261116-katran-linker-after-rerun",
-    "caveat": "Coordinator reports peer OTel guest on CPUs0-7 from09:13 to09:20; retain data."
+    "caveat": "Coordinator reports peer OTel guest on CPUs0-7 from09:13 to09:20; retain data.",
+    "status": "ended",
+    "exit_code": 2,
+    "run_codes": "current katran stats0 rc2; no May measurement",
+    "additional_errors": "Native arm terminated; driver subsequently reported unexpected EOF after a live script edit. Original raw logs retained."
   },
   "repeat": {
     "pid": 1451238,
     "waits_for": 1444229,
     "raw": "/workspaces/kprog-raw/perf/20261116-katran-linker-repeat-after-overlap",
-    "log": "/workspaces/kprog-raw/perf/20261116-perf-entry-roots/repeat-controller.log"
+    "log": "/workspaces/kprog-raw/perf/20261116-perf-entry-roots/repeat-controller.log",
+    "status": "running since09:27:25Z"
   },
   "round": {
     "pid": 1451239,
     "waits_for": 1451238,
-    "log": "/workspaces/kprog-raw/one-image-runs/rotate-20261116T0924Z-after-repeat-perf.log"
+    "log": "/workspaces/kprog-raw/one-image-runs/rotate-20261116T0924Z-after-repeat-perf.log",
+    "status": "waiting for repeat and its successful current-image rebuild"
   },
   "protocol": "Stats0 current/May pair, unchanged entry defaults3x180, current-image rebuild, then default rotate. timingEX for guest timing; imageEX for replacements; imageSH for guests.",
-  "hard_address_space_bytes": 103079215104
+  "hard_address_space_bytes": 103079215104,
+  "current_image_after_original": "sha256:dc5065912019c74d8283cdd369f8c165f860f1348112795bca23a9ff079997d9"
 }
