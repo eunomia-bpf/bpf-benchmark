@@ -65,6 +65,20 @@ code-pointer-check: check
 	cp /var/tmp/kprog-tmp/perf/perf-context-lto/cel-0.native.o $(OUTPUT)/cel-input.native.o
 	taskset -c $(CHECK_CPUS) prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=1 CARGO_TARGET_DIR=$(LINKER_TARGET) NATIVE_LINK_CODE_POINTER_INPUT=$(OUTPUT)/cel-input.native.o NATIVE_LINK_CODE_POINTER_OUTPUT=$(OUTPUT) cargo test --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml retained_cel_code_pointer_executes -- --ignored --nocapture
 
+CODE_POINTER_B := /var/tmp/kprog-tmp/perf/code-pointer-b
+CODE_POINTER_PROOF ?= /workspaces/kprog-raw/perf/20261116-code-pointer-check-retry1
+.PHONY: code-pointer-b code-pointer-stock guest-code-pointer-stock
+code-pointer-b:
+	install -d $(CODE_POINTER_B) $(OUTPUT)
+	status=0; taskset -c $(CHECK_CPUS) prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/build_numeric_helper_tail_b.py --build $(CODE_POINTER_B) --output $(OUTPUT) --name cel --proof-directory $(CODE_POINTER_PROOF) || status=$$?; tar -C $(CODE_POINTER_B) -czf $(OUTPUT)/b-build.tar.gz .; exit $$status
+
+code-pointer-stock: code-pointer-b $(TABLE_CONTEXT_BUILD)/stock-client
+	install -d $(OUTPUT)/inputs $(OUTPUT)/loader
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c $(CHECK_CPUS) prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rodir $(OUTPUT)/inputs=$(CODE_POINTER_B) --rodir $(OUTPUT)/loader=$(TABLE_CONTEXT_BUILD) --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-code-pointer-stock OUTPUT=$(OUTPUT)'
+
+guest-code-pointer-stock:
+	$(OUTPUT)/loader/stock-client $(OUTPUT)/inputs/trusted_x86.bpf.o trusted_x86_x86_sim_xdp $(OUTPUT)/verifier.log > $(OUTPUT)/stock.json
+
 .PHONY: helper-register-abi
 helper-register-abi:
 	taskset -c 16-17 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/check_tetragon_helper_registers.py --build /var/tmp/kprog-tmp/perf/helper-register-abi --output $(OUTPUT)

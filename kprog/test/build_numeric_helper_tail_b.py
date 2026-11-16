@@ -1,4 +1,4 @@
-"""Generate B from the compiler fixture's production-linked tail proof."""
+"""Generate B from a native proof through the shared simulator and compiler."""
 import argparse
 import json
 from pathlib import Path
@@ -12,9 +12,12 @@ import trusted_specializer as worker
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--build', type=Path, required=True)
 parser.add_argument('--output', type=Path, required=True)
+parser.add_argument('--name', default='numeric-tail')
+parser.add_argument('--proof-directory', type=Path)
 args = parser.parse_args()
 args.output.mkdir(parents=True, exist_ok=True)
-body, subprograms, end, data = worker.gen.parse_proof_object_program('numeric-tail', args.build)
+proof_directory = args.build if args.proof_directory is None else args.proof_directory
+body, subprograms, end, data = worker.gen.parse_proof_object_program(args.name, proof_directory)
 source = args.build/'trusted_x86.bpf.c'
 text = worker.gen.render_program('trusted_x86', body, subprograms, kind='raw',
     program_section='kprobe/trusted', exit_addr=end, rodata16=data, trusted_map_bindings=[])
@@ -40,4 +43,4 @@ worker.compile_simulator(str(ROOT/'kprog/stock-path/bin/clang'), source,
     gpl_compatible=1), indent=2)+'\n')
 (args.output/'result.json').write_text(json.dumps(dict(instructions=len(body),
     subprograms=len(subprograms), b_generated=True,
-    scope='Compiler-generated numeric helper tails through production proof parser, shared I and B compiler; stock check is separate.'), indent=2)+'\n')
+    scope='Native proof through production proof parser, shared I and B compiler; stock check is separate.'), indent=2)+'\n')
