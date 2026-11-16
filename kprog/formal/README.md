@@ -2027,3 +2027,10 @@ in 580 internal transitions. It derives the stage memory from actual execution,
 frames all caller blocks and retains the allocated frame's permissions and
 frontier. Later input calls, header construction and the consumer continuation
 remain open.
+
+The [first producer-input proof](results/m5-producer-input/README.md) reaches
+the actual kind-6 call in 594 internal transitions with the caches still cold.
+Each stated scalar provider outcome then resumes the real continuation and
+writes x0's declaration initializer and tag in nine transitions. The provider
+trace/post-memory and explicit local-permission ABI binding are retained;
+this does not establish the final architectural register or native origin.

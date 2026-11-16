@@ -15,6 +15,7 @@ import KProgFormal.ClightRefinement.Arm64OriginCache
 import KProgFormal.ClightRefinement.Arm64RegisterReads
 import KProgFormal.ClightRefinement.Arm64Producer
 import KProgFormal.ClightRefinement.Arm64ProducerPrefix
+import KProgFormal.ClightRefinement.Arm64ProducerInputs
 import KProgFormal.ClightRefinement.Arm64Registers
 import KProgFormal.ClightRefinement.Arm64Width
 import KProgFormal.ClightRefinement.Deallocation

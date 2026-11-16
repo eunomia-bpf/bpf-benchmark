@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.Arm64ProducerInputs
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.producer_input_binding
+#check KProgFormal.ClightRefinement.Arm64Producer.producer_input_binding
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.setup_register_input
+#check KProgFormal.ClightRefinement.Arm64Producer.setup_register_input
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.first_input_ready
+#check KProgFormal.ClightRefinement.Arm64Producer.first_input_ready
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.first_input_returns
+#check KProgFormal.ClightRefinement.Arm64Producer.first_input_returns
+#check KProgFormal.ClightRefinement.Arm64Producer.firstInputTemps
+#check KProgFormal.ClightRefinement.Arm64Producer.nextRegisterStage
