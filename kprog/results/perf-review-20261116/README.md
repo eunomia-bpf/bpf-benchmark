@@ -1069,3 +1069,28 @@ double-execution cause and no confirmed Cilium packet fix. Those remain open. Th
     cache or runtime admission test. This is load-time correctness work;
     ordinary cache hits already avoid rescanning, and per-call native timing
     and installed bytes are separate from this finding.
+
+    Filesystem construction has a related same-key race. Context LTO checks
+    its final object at native_loader_context_lto.hpp:33–36, then uses only
+    the process PID to distinguish its temporary at :37. Native linking does
+    the same at native_loader.cpp:3384–3392. Two cold loads of the same key
+    within one process therefore share the temporary object or proof/blob/
+    reloc/map/ABI file names and compiler logs. Existing parallel entry from
+    the shim makes this a real interface precondition, with application
+    interleaving still to establish.
+
+    For example, both callers can miss the cache and open/truncate the same
+    temporary. One publishes it through rename while the other's open file
+    can still write that inode. The final path can then expose an object
+    being written; the second publisher can also find its source path moved.
+    `publish_cache_file` at :3241–3253 attempts rename then copy from that
+    same source, so publication alone does not isolate the construction.
+    Native-stub BTF metadata uses a PID-only temporary as well (:934–936).
+
+    Give one in-flight construction ownership of a cache key, and let other
+    consumers reuse its completed immutable product. Keep independent keys
+    parallel and retain failed-build diagnostics. This matches the existing
+    one-build/product rule and avoids duplicated cold work. The fix belongs
+    to cache construction, separate from new artifact-admission checks or
+    whole-program-load serialization. Runtime occurrence, load-time savings
+    and current image behavior remain measurement work.
