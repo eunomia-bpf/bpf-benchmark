@@ -1,0 +1,461 @@
+[
+  {
+    "name": "native-compile",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-include",
+      "oracles/compcert_memory_host.h",
+      "-include",
+      "oracles/x86_program_environment_host.h",
+      "-c",
+      "/workspaces/repository/kprog/formal/build/x86_program_profile.bpf.c",
+      "-o",
+      "build/x86_program_profile_host.o"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "native-link",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "oracles/test_x86_program_profile_host.c",
+      "build/x86_program_profile_host.o",
+      "-o",
+      "build/test_x86_program_profile_host"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "native",
+    "argv": [
+      "./build/test_x86_program_profile_host",
+      "--capture"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "bound-compile",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-D__COMPCERT__",
+      "-DKPROG_X86_PROGRAM_EXPORT=1",
+      "-include",
+      "oracles/compcert_memory_host.h",
+      "-include",
+      "oracles/x86_program_environment_host.h",
+      "-c",
+      "/workspaces/repository/kprog/formal/build/x86_program_profile.bpf.c",
+      "-o",
+      "build/x86_program_profile_host.o"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "bound-link",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "oracles/test_x86_program_profile_host.c",
+      "build/x86_program_profile_host.o",
+      "-o",
+      "build/test_x86_program_profile_host"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "bound",
+    "argv": [
+      "./build/test_x86_program_profile_host",
+      "--capture"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "missing-tail-helper-compile",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-D__COMPCERT__",
+      "-DKPROG_X86_PROGRAM_EXPORT=1",
+      "-include",
+      "oracles/compcert_memory_host.h",
+      "-include",
+      "oracles/x86_program_environment_host.h",
+      "-x",
+      "c",
+      "-c",
+      "-",
+      "-o",
+      "build/x86_program_profile_host.o"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "missing-tail-helper-link",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "oracles/test_x86_program_profile_host.c",
+      "build/x86_program_profile_host.o",
+      "-o",
+      "build/test_x86_program_profile_host"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "missing-tail-helper",
+    "argv": [
+      "./build/test_x86_program_profile_host"
+    ],
+    "exit": 1
+  },
+  {
+    "name": "unknown-return-case-compile",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-D__COMPCERT__",
+      "-DKPROG_X86_PROGRAM_EXPORT=1",
+      "-include",
+      "oracles/compcert_memory_host.h",
+      "-include",
+      "oracles/x86_program_environment_host.h",
+      "-x",
+      "c",
+      "-c",
+      "-",
+      "-o",
+      "build/x86_program_profile_host.o"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "unknown-return-case-link",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "oracles/test_x86_program_profile_host.c",
+      "build/x86_program_profile_host.o",
+      "-o",
+      "build/test_x86_program_profile_host"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "unknown-return-case",
+    "argv": [
+      "./build/test_x86_program_profile_host"
+    ],
+    "exit": 1
+  },
+  {
+    "name": "wrong-helper-id-compile",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-D__COMPCERT__",
+      "-DKPROG_X86_PROGRAM_EXPORT=1",
+      "-include",
+      "oracles/compcert_memory_host.h",
+      "-include",
+      "oracles/x86_program_environment_host.h",
+      "-x",
+      "c",
+      "-c",
+      "-",
+      "-o",
+      "build/x86_program_profile_host.o"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "wrong-helper-id-link",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "oracles/test_x86_program_profile_host.c",
+      "build/x86_program_profile_host.o",
+      "-o",
+      "build/test_x86_program_profile_host"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "wrong-helper-id",
+    "argv": [
+      "./build/test_x86_program_profile_host"
+    ],
+    "exit": 1
+  },
+  {
+    "name": "stack-base-low32-compile",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-D__COMPCERT__",
+      "-DKPROG_X86_PROGRAM_EXPORT=1",
+      "-include",
+      "oracles/compcert_memory_host.h",
+      "-include",
+      "oracles/x86_program_environment_host.h",
+      "-x",
+      "c",
+      "-c",
+      "-",
+      "-o",
+      "build/x86_program_profile_host.o"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "stack-base-low32-link",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "oracles/test_x86_program_profile_host.c",
+      "build/x86_program_profile_host.o",
+      "-o",
+      "build/test_x86_program_profile_host"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "stack-base-low32",
+    "argv": [
+      "./build/test_x86_program_profile_host"
+    ],
+    "exit": 1
+  },
+  {
+    "name": "missing-ret-release-compile",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-D__COMPCERT__",
+      "-DKPROG_X86_PROGRAM_EXPORT=1",
+      "-include",
+      "oracles/compcert_memory_host.h",
+      "-include",
+      "oracles/x86_program_environment_host.h",
+      "-x",
+      "c",
+      "-c",
+      "-",
+      "-o",
+      "build/x86_program_profile_host.o"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "missing-ret-release-link",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "oracles/test_x86_program_profile_host.c",
+      "build/x86_program_profile_host.o",
+      "-o",
+      "build/test_x86_program_profile_host"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "missing-ret-release",
+    "argv": [
+      "./build/test_x86_program_profile_host"
+    ],
+    "exit": 1
+  },
+  {
+    "name": "callee-abi-negative",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-x",
+      "c",
+      "-c",
+      "-",
+      "-o",
+      "build/test_x86_program_callee_abi.o"
+    ],
+    "exit": 1
+  },
+  {
+    "name": "restore-abi",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-c",
+      "/workspaces/repository/kprog/formal/oracles/test_x86_program_callee_abi.c",
+      "-o",
+      "build/test_x86_program_callee_abi.o"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "restore-program",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-D__COMPCERT__",
+      "-DKPROG_X86_PROGRAM_EXPORT=1",
+      "-include",
+      "oracles/compcert_memory_host.h",
+      "-include",
+      "oracles/x86_program_environment_host.h",
+      "-c",
+      "/workspaces/repository/kprog/formal/build/x86_program_profile.bpf.c",
+      "-o",
+      "build/x86_program_profile_host.o"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "restore-link",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "oracles/test_x86_program_profile_host.c",
+      "build/x86_program_profile_host.o",
+      "-o",
+      "build/test_x86_program_profile_host"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "restore",
+    "argv": [
+      "./build/test_x86_program_profile_host",
+      "--capture"
+    ],
+    "exit": 0
+  }
+]

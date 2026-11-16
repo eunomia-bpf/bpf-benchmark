@@ -3033,6 +3033,7 @@ def _x86_l_33 : Ident := identOfString "x86_l_33"
 def _x86_l_34 : Ident := identOfString "x86_l_34"
 def _x86_l_39 : Ident := identOfString "x86_l_39"
 def _x86_l_3a : Ident := identOfString "x86_l_3a"
+def _x86_l_3f : Ident := identOfString "x86_l_3f"
 def _x86_l_5 : Ident := identOfString "x86_l_5"
 def _x86_l_a : Ident := identOfString "x86_l_a"
 def _x86_l_f : Ident := identOfString "x86_l_f"
@@ -380695,7 +380696,7 @@ def f___x86_instruction_X86_OP_PUSH : Function := {
        (Expr.Evar ___x86_inline_bindings (Ty.Tstruct _x86_sim_inline_bindings noattr))
        (tptr (Ty.Tstruct _x86_sim_inline_bindings noattr))),
      (Expr.Econst_long (Integers.Int64.repr 24) tulong)])
-  (Stmt.Sgoto _x86_l_34))
+  (Stmt.Sgoto _x86_l_3a))
 
 @[noinline] def s_x86_program_profile_x86_sim_xdp_24 : Stmt :=
 Stmt.Sbreak
@@ -380737,6 +380738,11 @@ Stmt.Sbreak
    (Expr.Ecast (Expr.Econst_long (Integers.Int64.repr 0) tulong) tulong)])
 
 @[noinline] def s_x86_program_profile_x86_sim_xdp_26 : Stmt :=
+(Stmt.Scall none
+  (Expr.Evar ___x86_sim_unresolved_indirect_target (Ty.Tfunction [] tvoid
+                                                     cc_default)) [])
+
+@[noinline] def s_x86_program_profile_x86_sim_xdp_27 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Slabel _x86_l_1c
     (Stmt.Scall none
@@ -380896,7 +380902,7 @@ Stmt.Sbreak
                            (tptr (Ty.Tstruct _x86_sim_inline_bindings noattr)))])
                       (Stmt.Sreturn (some (Expr.Etempvar _t'42 tuint)))))
                   (Stmt.Ssequence
-                    (Stmt.Slabel _x86_l_3a
+                    (Stmt.Slabel _x86_l_3f
                       (Stmt.Ssequence
                         (Stmt.Scall (some _t'43)
                           (Expr.Evar _x86_sim_inline_return (Ty.Tfunction
@@ -380939,22 +380945,51 @@ Stmt.Sbreak
                                    (tptr (Ty.Tstruct _x86_sim_inline_bindings noattr)))])
                               (Stmt.Sgoto _x86_sim_ret_dispatch))
                             Stmt.Sbreak))
-                        (Stmt.Slabel _x86_sim_ret_dispatch
+                        (Stmt.Ssequence
+                          (Stmt.Slabel _x86_l_3a
+                            (Stmt.Scall none
+                              (Expr.Evar ___x86_instruction_X86_OP_CALL_HELPER 
+                              (Ty.Tfunction
+                                [(tptr (Ty.Tstruct _x86_sim_inline_bindings noattr)),
+                                 tuchar, tuchar, tuchar, tuint, tulong] tvoid
+                                cc_default))
+                              [(Expr.Eaddrof
+                                 (Expr.Evar ___x86_inline_bindings (Ty.Tstruct _x86_sim_inline_bindings noattr))
+                                 (tptr (Ty.Tstruct _x86_sim_inline_bindings noattr))),
+                               (Expr.Econst_int (Integers.Int.repr 255) tuint),
+                               (Expr.Econst_int (Integers.Int.repr 255) tuint),
+                               (Expr.Econst_int (Integers.Int.repr 8) tuint),
+                               (Expr.Econst_int (Integers.Int.repr 0) tint),
+                               (Expr.Ecast
+                                 (Expr.Econst_long (Integers.Int64.repr 5) tulong)
+                                 tulong)]))
                           (Stmt.Ssequence
-                            (Stmt.Sset _t'44
-                              (Expr.Evar ___x86_sim_ret_addr tulong))
-                            (Stmt.Sswitch (Expr.Etempvar _t'44 tulong)
-                              (LStmts.LScons (some 15)
-                                (Stmt.Sgoto _x86_l_f)
-                                (LStmts.LScons (some 24)
-                                  (Stmt.Sgoto _x86_l_18)
-                                  (LStmts.LScons none
-                                    (Stmt.Scall none
-                                      (Expr.Evar ___x86_sim_unresolved_indirect_target 
-                                      (Ty.Tfunction [] tvoid cc_default)) [])
-                                    LStmts.LSnil))))))))))))))))))
+                            (Stmt.Sloop
+                              (Stmt.Ssequence
+                                (Stmt.Scall none
+                                  (Expr.Evar _x86_sim_inline_subret (Ty.Tfunction
+                                                                    [(tptr (Ty.Tstruct _x86_sim_inline_bindings noattr))]
+                                                                    tvoid
+                                                                    cc_default))
+                                  [(Expr.Eaddrof
+                                     (Expr.Evar ___x86_inline_bindings (Ty.Tstruct _x86_sim_inline_bindings noattr))
+                                     (tptr (Ty.Tstruct _x86_sim_inline_bindings noattr)))])
+                                (Stmt.Sgoto _x86_sim_ret_dispatch))
+                              Stmt.Sbreak)
+                            (Stmt.Slabel _x86_sim_ret_dispatch
+                              (Stmt.Ssequence
+                                (Stmt.Sset _t'44
+                                  (Expr.Evar ___x86_sim_ret_addr tulong))
+                                (Stmt.Sswitch (Expr.Etempvar _t'44 tulong)
+                                  (LStmts.LScons (some 15)
+                                    (Stmt.Sgoto _x86_l_f)
+                                    (LStmts.LScons (some 24)
+                                      (Stmt.Sgoto _x86_l_18)
+                                      (LStmts.LScons none
+                                        s_x86_program_profile_x86_sim_xdp_26
+                                        LStmts.LSnil))))))))))))))))))))
 
-@[noinline] def s_x86_program_profile_x86_sim_xdp_27 : Stmt :=
+@[noinline] def s_x86_program_profile_x86_sim_xdp_28 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Efield
@@ -381172,9 +381207,9 @@ Stmt.Sbreak
                                 (Stmt.Ssequence
                                   (Stmt.Slabel _x86_l_18
                                     s_x86_program_profile_x86_sim_xdp_25)
-                                  s_x86_program_profile_x86_sim_xdp_26)))))))))))))))))
+                                  s_x86_program_profile_x86_sim_xdp_27)))))))))))))))))
 
-@[noinline] def s_x86_program_profile_x86_sim_xdp_28 : Stmt :=
+@[noinline] def s_x86_program_profile_x86_sim_xdp_29 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Efield
@@ -381377,9 +381412,9 @@ Stmt.Sbreak
                                     (tptr tuchar)))
                                 (Stmt.Ssequence
                                   s_x86_program_profile_x86_sim_xdp_21
-                                  s_x86_program_profile_x86_sim_xdp_27)))))))))))))))))
+                                  s_x86_program_profile_x86_sim_xdp_28)))))))))))))))))
 
-@[noinline] def s_x86_program_profile_x86_sim_xdp_29 : Stmt :=
+@[noinline] def s_x86_program_profile_x86_sim_xdp_30 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Scall (some _t'33)
@@ -381514,9 +381549,9 @@ Stmt.Sbreak
                                     (tptr (tvolatile (Ty.Tunion _x86_sim_stack_mem noattr)))))
                                 (Stmt.Ssequence
                                   s_x86_program_profile_x86_sim_xdp_20
-                                  s_x86_program_profile_x86_sim_xdp_28)))))))))))))))))
+                                  s_x86_program_profile_x86_sim_xdp_29)))))))))))))))))
 
-@[noinline] def s_x86_program_profile_x86_sim_xdp_30 : Stmt :=
+@[noinline] def s_x86_program_profile_x86_sim_xdp_31 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Ssequence
     (Stmt.Sifthenelse (Expr.Ebinop Binop.Oeq
@@ -381801,9 +381836,9 @@ Stmt.Sbreak
                                   (Expr.Econst_int (Integers.Int.repr 0) tuint))
                                 (Stmt.Ssequence
                                   s_x86_program_profile_x86_sim_xdp_19
-                                  s_x86_program_profile_x86_sim_xdp_29)))))))))))))))))
+                                  s_x86_program_profile_x86_sim_xdp_30)))))))))))))))))
 
-@[noinline] def s_x86_program_profile_x86_sim_xdp_31 : Stmt :=
+@[noinline] def s_x86_program_profile_x86_sim_xdp_32 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sset ___x86_sim_helper_abi_base
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
@@ -382072,9 +382107,9 @@ Stmt.Sbreak
                                     (Expr.Etempvar _t'15 (tptr tvoid))))
                                 (Stmt.Ssequence
                                   s_x86_program_profile_x86_sim_xdp_15
-                                  s_x86_program_profile_x86_sim_xdp_30)))))))))))))))))
+                                  s_x86_program_profile_x86_sim_xdp_31)))))))))))))))))
 
-@[noinline] def s_x86_program_profile_x86_sim_xdp_32 : Stmt :=
+@[noinline] def s_x86_program_profile_x86_sim_xdp_33 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Efield
@@ -382137,9 +382172,9 @@ Stmt.Sbreak
                                     tuchar))
                                 (Stmt.Ssequence
                                   s_x86_program_profile_x86_sim_xdp_11
-                                  s_x86_program_profile_x86_sim_xdp_31)))))))))))))))))
+                                  s_x86_program_profile_x86_sim_xdp_32)))))))))))))))))
 
-@[noinline] def s_x86_program_profile_x86_sim_xdp_33 : Stmt :=
+@[noinline] def s_x86_program_profile_x86_sim_xdp_34 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Ederef
@@ -382297,9 +382332,9 @@ Stmt.Sbreak
                                   (Expr.Econst_int (Integers.Int.repr 0) tint))
                                 (Stmt.Ssequence
                                   s_x86_program_profile_x86_sim_xdp_10
-                                  s_x86_program_profile_x86_sim_xdp_32)))))))))))))))))
+                                  s_x86_program_profile_x86_sim_xdp_33)))))))))))))))))
 
-@[noinline] def s_x86_program_profile_x86_sim_xdp_34 : Stmt :=
+@[noinline] def s_x86_program_profile_x86_sim_xdp_35 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Ederef
@@ -382457,9 +382492,9 @@ Stmt.Sbreak
                                   (Expr.Econst_int (Integers.Int.repr 0) tint))
                                 (Stmt.Ssequence
                                   s_x86_program_profile_x86_sim_xdp_9
-                                  s_x86_program_profile_x86_sim_xdp_33)))))))))))))))))
+                                  s_x86_program_profile_x86_sim_xdp_34)))))))))))))))))
 
-@[noinline] def s_x86_program_profile_x86_sim_xdp_35 : Stmt :=
+@[noinline] def s_x86_program_profile_x86_sim_xdp_36 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Ederef
@@ -382617,9 +382652,9 @@ Stmt.Sbreak
                                   (Expr.Econst_int (Integers.Int.repr 0) tint))
                                 (Stmt.Ssequence
                                   s_x86_program_profile_x86_sim_xdp_8
-                                  s_x86_program_profile_x86_sim_xdp_34)))))))))))))))))
+                                  s_x86_program_profile_x86_sim_xdp_35)))))))))))))))))
 
-@[noinline] def s_x86_program_profile_x86_sim_xdp_36 : Stmt :=
+@[noinline] def s_x86_program_profile_x86_sim_xdp_37 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Ederef
@@ -382777,9 +382812,9 @@ Stmt.Sbreak
                                   (Expr.Econst_int (Integers.Int.repr 0) tint))
                                 (Stmt.Ssequence
                                   s_x86_program_profile_x86_sim_xdp_7
-                                  s_x86_program_profile_x86_sim_xdp_35)))))))))))))))))
+                                  s_x86_program_profile_x86_sim_xdp_36)))))))))))))))))
 
-@[noinline] def s_x86_program_profile_x86_sim_xdp_37 : Stmt :=
+@[noinline] def s_x86_program_profile_x86_sim_xdp_38 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Ederef
@@ -382937,9 +382972,9 @@ Stmt.Sbreak
                                   (Expr.Econst_int (Integers.Int.repr 0) tint))
                                 (Stmt.Ssequence
                                   s_x86_program_profile_x86_sim_xdp_6
-                                  s_x86_program_profile_x86_sim_xdp_36)))))))))))))))))
+                                  s_x86_program_profile_x86_sim_xdp_37)))))))))))))))))
 
-@[noinline] def s_x86_program_profile_x86_sim_xdp_38 : Stmt :=
+@[noinline] def s_x86_program_profile_x86_sim_xdp_39 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Ederef
@@ -383097,9 +383132,9 @@ Stmt.Sbreak
                                   (Expr.Econst_int (Integers.Int.repr 0) tint))
                                 (Stmt.Ssequence
                                   s_x86_program_profile_x86_sim_xdp_5
-                                  s_x86_program_profile_x86_sim_xdp_37)))))))))))))))))
+                                  s_x86_program_profile_x86_sim_xdp_38)))))))))))))))))
 
-@[noinline] def s_x86_program_profile_x86_sim_xdp_39 : Stmt :=
+@[noinline] def s_x86_program_profile_x86_sim_xdp_40 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Ederef
@@ -383256,9 +383291,9 @@ Stmt.Sbreak
                                   (Expr.Econst_int (Integers.Int.repr 0) tint))
                                 (Stmt.Ssequence
                                   s_x86_program_profile_x86_sim_xdp_4
-                                  s_x86_program_profile_x86_sim_xdp_38)))))))))))))))))
+                                  s_x86_program_profile_x86_sim_xdp_39)))))))))))))))))
 
-@[noinline] def s_x86_program_profile_x86_sim_xdp_40 : Stmt :=
+@[noinline] def s_x86_program_profile_x86_sim_xdp_41 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Ederef
@@ -383412,9 +383447,9 @@ Stmt.Sbreak
                                     (tptr tvoid)))
                                 (Stmt.Ssequence
                                   s_x86_program_profile_x86_sim_xdp_3
-                                  s_x86_program_profile_x86_sim_xdp_39)))))))))))))))))
+                                  s_x86_program_profile_x86_sim_xdp_40)))))))))))))))))
 
-@[noinline] def s_x86_program_profile_x86_sim_xdp_41 : Stmt :=
+@[noinline] def s_x86_program_profile_x86_sim_xdp_42 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Ederef
@@ -383572,9 +383607,9 @@ Stmt.Sbreak
                                   (Expr.Econst_int (Integers.Int.repr 0) tint))
                                 (Stmt.Ssequence
                                   s_x86_program_profile_x86_sim_xdp_2
-                                  s_x86_program_profile_x86_sim_xdp_40)))))))))))))))))
+                                  s_x86_program_profile_x86_sim_xdp_41)))))))))))))))))
 
-@[noinline] def s_x86_program_profile_x86_sim_xdp_42 : Stmt :=
+@[noinline] def s_x86_program_profile_x86_sim_xdp_43 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Ederef
@@ -383732,7 +383767,7 @@ Stmt.Sbreak
                                   (Expr.Econst_int (Integers.Int.repr 0) tint))
                                 (Stmt.Ssequence
                                   s_x86_program_profile_x86_sim_xdp_1
-                                  s_x86_program_profile_x86_sim_xdp_41)))))))))))))))))
+                                  s_x86_program_profile_x86_sim_xdp_42)))))))))))))))))
 
 def f_x86_program_profile_x86_sim_xdp : Function := {
   fn_return := tint,
@@ -383927,7 +383962,7 @@ def f_x86_program_profile_x86_sim_xdp : Function := {
                                 (Expr.Econst_int (Integers.Int.repr 0) tint))
                               (Stmt.Ssequence
                                 s_x86_program_profile_x86_sim_xdp_0
-                                s_x86_program_profile_x86_sim_xdp_42))))))))))))))))
+                                s_x86_program_profile_x86_sim_xdp_43))))))))))))))))
 }
 
 def v_LICENSE : GlobVar Ty := {

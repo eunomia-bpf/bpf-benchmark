@@ -1,0 +1,19 @@
+{
+  "native": {
+    "bytes": 42496,
+    "summary": "x86 producer program: 32 high64 return cases and 32 helper-refusal prefixes"
+  },
+  "bound": {
+    "bytes": 42496,
+    "summary": "x86 producer program: 32 high64 return cases and 32 helper-refusal prefixes"
+  },
+  "negatives": [
+    "missing-tail-helper",
+    "unknown-return-case",
+    "wrong-helper-id",
+    "stack-base-low32",
+    "missing-ret-release",
+    "callee-abi-negative"
+  ],
+  "comparison": "all return/callee/input/prefix bytes equal; no masks; normal products restored"
+}

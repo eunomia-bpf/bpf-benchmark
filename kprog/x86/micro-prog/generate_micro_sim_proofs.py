@@ -303,6 +303,9 @@ def normalize_native_link_entry_returns(
     for insn in insns:
         if (
             insn.mnemonic == "jmp"
+            # An external relocation owns the target; its placeholder can
+            # coincidentally disassemble to the local end-of-blob address.
+            and insn.reloc_symbol is None
             and insn.operands
             and branch_target(insn.operands[0]) == blob_len
         ):

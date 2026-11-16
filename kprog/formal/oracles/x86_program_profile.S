@@ -1,4 +1,4 @@
-/* Two real return sites share a helper-calling subroutine. */
+/* Two real return sites exercise ordinary and tail helper subroutines. */
 .intel_syntax noprefix
 .text
 .globl x86_program_profile
@@ -9,7 +9,7 @@ x86_program_profile:
     lea rbx, [rsp+16]
     call x86_program_inner
     mov [rsp], rax
-    call x86_program_inner
+    call x86_program_tail
     mov rcx, [rsp]
     xor rax, rcx
     mov rcx, rbx
@@ -26,4 +26,8 @@ x86_program_inner:
     call bpf_ktime_get_ns
     ret
 .size x86_program_inner, .-x86_program_inner
+.type x86_program_tail,@function
+x86_program_tail:
+    jmp bpf_ktime_get_ns
+.size x86_program_tail, .-x86_program_tail
 .section .note.GNU-stack,"",@progbits

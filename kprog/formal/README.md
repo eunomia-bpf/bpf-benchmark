@@ -1872,3 +1872,8 @@ selector and upstream alignment-1 copy adapter. Its 124 Clight bodies, initial
 readonly memory, native byte parity and explicitly scoped host checks are
 recorded in [the M4 readonly receipt](results/m4-x86-readonly/README.md).
 M4 remains in progress; these checks add no migrated refinement count.
+
+The existing x86 CALL profile also covers a helper-tail subroutine. A symbolic
+helper relocation must survive return normalization even when its placeholder
+looks like an end-of-object branch. The [helper-tail receipt](results/m4-x86-helper-tail/README.md)
+records the regression, actual Clight call/return sequence and six negatives.

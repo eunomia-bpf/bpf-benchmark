@@ -46,13 +46,17 @@ expanded={program,inline,callees,calls,abi}
 def source(path,mutation):
     body=path.read_text()
     if path==mutation[0]:
-        assert body.count(mutation[1])==1,(path,mutation[1],body.count(mutation[1]))
+        expected_count = 2 if mutation[1] == "X86_SIM_HELPER_bpf_ktime_get_ns" else 1
+        assert body.count(mutation[1])==expected_count,(path,mutation[1],body.count(mutation[1]))
         body=body.replace(mutation[1],mutation[2])
     def include(m):
         child=(path.parent/m[1]).resolve()
         return source(child,mutation) if child in expanded else '#include "'+str(child)+'"'
     return '#line 1 "'+str(path)+'"\n'+re.sub(r'^\s*#include "([^"]+)"',include,body,flags=re.M)
 mutants={
+    'missing-tail-helper':((program,
+        'x86_l_3a:\n\tX86_SIM_RUN_OP(X86_OP_CALL_HELPER, X86_REG_NONE, X86_REG_NONE, X86_WIDTH_64, 0, X86_SIM_HELPER_bpf_ktime_get_ns);',
+        'x86_l_3a:'), 'x86 producer program mismatch'),
     'unknown-return-case':((program,'case 0xfULL: goto x86_l_f;','case 0x10ULL: goto x86_l_f;'),
                            'unexpected x86 return continuation'),
     'wrong-helper-id':((program,'X86_SIM_HELPER_bpf_ktime_get_ns','X86_SIM_HELPER_bpf_get_prandom_u32'),

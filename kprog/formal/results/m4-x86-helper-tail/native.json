@@ -1,0 +1,19 @@
+{
+  "ordinary_source_exact": true,
+  "historical_tail_helper_calls": 1,
+  "corrected_tail_helper_calls": 2,
+  "ordinary_section_bytes": {
+    ".text": 0,
+    "socket": 1704,
+    "license": 4
+  },
+  "tail_section_bytes": {
+    ".text": 0,
+    "socket": 1952,
+    "license": 4
+  },
+  "ordinary_relocations": 3,
+  "tail_relocations": 8,
+  "current_source_restored": true,
+  "scope": "Different fixture control graphs have different BPF code; ordinary C is unchanged, and the previously erased helper tail is repaired."
+}

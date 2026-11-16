@@ -35,6 +35,18 @@ private def checkProgram : IO Unit := do
     unless first == CC.identOfString "x86_l_f" && second == CC.identOfString "x86_l_18" do
       throw (IO.userError "x86 return cases select the wrong actual labels")
   | _ => throw (IO.userError "x86 actual producer return table changed")
-  IO.println "x86 actual producer program: frame 48, typed clock and two real return continuations"
+  match CC.findLabel (CC.identOfString "x86_l_3a") entry.fn_body .Kstop with
+  | some (.Scall none (.Evar helper _) args,
+      .Kseq (.Ssequence (.Sloop (.Ssequence (.Scall none (.Evar subret _) _)
+        (.Sgoto dispatch)) .Sbreak) _) _) =>
+    let correctId := match args.getLast? with
+      | some (.Ecast (.Econst_long value _) _) => value == CC.Integers.Int64.repr 5
+      | _ => false
+    unless helper == CC.identOfString "__x86_instruction_X86_OP_CALL_HELPER" && correctId &&
+        subret == CC.identOfString "x86_sim_inline_subret" &&
+        dispatch == CC.identOfString "x86_sim_ret_dispatch" do
+      throw (IO.userError "x86 helper tail loses its clock or subroutine return")
+  | _ => throw (IO.userError "x86 actual helper-tail call/return sequence changed")
+  IO.println "x86 actual producer program: frame 48, typed clock, ordinary/tail helpers and two return continuations"
 
 #eval checkProgram
