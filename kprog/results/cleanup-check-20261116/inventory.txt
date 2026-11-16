@@ -1,0 +1,69 @@
+== compare_code.py (image 6641a7e1 stage against 2026-05-29)
+bcc: objects code-identical=7 differ=1 only-0529=0 only-now=0 code-bytes 0529=8001 now=8015
+   changed: biosnoop.native.o(1293->1307)
+cilium: objects code-identical=4 differ=3 only-0529=0 only-now=0 code-bytes 0529=275813 now=275868
+   changed: bpf_host.native.o(69136->69056) bpf_lxc.native.o(81225->81110) bpf_xdp.native.o(23964->24214)
+katran: objects code-identical=3 differ=1 only-0529=0 only-now=0 code-bytes 0529=9887 now=9830
+   changed: healthchecking.native.o(1154->1097)
+otelcol-ebpf-profiler: objects code-identical=0 differ=1 only-0529=0 only-now=0 code-bytes 0529=575240 now=547799
+   changed: otelcol-ebpf-profiler.native.o(575240->547799)
+tracee: objects code-identical=0 differ=3 only-0529=0 only-now=0 code-bytes 0529=1615175 now=1457903
+   changed: kprobe_check.native.o(48->44) lsm_check.native.o(48->44) tracee.native.o(1615079->1457815)
+tetragon: only now, 88 objects
+katran balancer: 05-29 vs header route identical: True {'.text': 319, 'xdp': 7965} {'.text': 319, 'xdp': 7965}
+katran balancer: 05-29 vs 11-14 map-sink route identical: False {'.text': 252, 'xdp': 7535}
+
+== otel corpus/results/x86_kvm_corpus_20261116_163206_529710 status=completed
+== x86_kvm_corpus_20261116_163206_529710 (otelcol-ebpf-profiler__profiling.json): 1 active programs, median native/eBPF run ratio 1.043
+   programs whose counts track the median: 1 of 1
+per call: corpus/results/x86_kvm_corpus_20261116_163206_529710 ns/inv eBPF 3574.8 (1/13 progs) native 3746.4 (1/13) speedup 0.954x
+throughput: corpus/results/x86_kvm_corpus_20261116_163206_529710 throughput native/eBPF 1.061x  eBPF [35646472] native [37826279] per-sample [1.061] errors 0
+installed: x86_kvm_corpus_20261116_163206_529710 programs 14 JIT 167706 B native 304503 B ratio 1.82x
+shim native lines: 14, fallback/err lines: 0
+
+== bcc corpus/results/x86_kvm_corpus_20261116_163548_274084 status=completed
+== x86_kvm_corpus_20261116_163548_274084 (bcc__set.json): 9 active programs, median native/eBPF run ratio 0.707
+   DIFFERENT sched_switch: eBPF 2,060,393  native 506,326  ratio 0.246
+   DIFFERENT sched_wakeup: eBPF 1,031,965  native 254,217  ratio 0.246
+   programs whose counts track the median: 7 of 9
+per call: corpus/results/x86_kvm_corpus_20261116_163548_274084 ns/inv eBPF 112.8 (14/25 progs) native 129.7 (13/25) speedup 0.870x
+throughput: corpus/results/x86_kvm_corpus_20261116_163548_274084 throughput native/eBPF 0.818x  eBPF [464524] native [379929] per-sample [0.818] errors 0
+installed: x86_kvm_corpus_20261116_163548_274084 programs 21 JIT 6938 B native 10860 B ratio 1.57x
+shim native lines: 25, fallback/err lines: 0
+
+== cilium corpus/results/x86_kvm_corpus_20261116_163855_372136 status=completed
+== x86_kvm_corpus_20261116_163855_372136 (cilium__agent.json): 3 active programs, median native/eBPF run ratio 1.093
+   DIFFERENT cil_to_host: eBPF 2  native 12,178,921  ratio 6089460.500
+   DIFFERENT cil_from_host: eBPF 1  native 12,178,920  ratio 12178920.000
+   programs whose counts track the median: 1 of 3
+per call: corpus/results/x86_kvm_corpus_20261116_163855_372136 ns/inv eBPF 865.1 (2/53 progs) native 247.0 (4/53) speedup 3.503x
+throughput: corpus/results/x86_kvm_corpus_20261116_163855_372136 throughput native/eBPF 1.097x  eBPF [1118428] native [1227324] per-sample [1.097] errors 0
+installed: x86_kvm_corpus_20261116_163855_372136 programs 18 JIT 77967 B native 98318 B ratio 1.26x
+shim native lines: 113, fallback/err lines: 0
+
+== tetragon corpus/results/x86_kvm_corpus_20261116_164202_038065 status=error
+== x86_kvm_corpus_20261116_164202_038065 (tetragon__observer.json): 3 active programs, median native/eBPF run ratio nan
+   DIFFERENT generic_kprobe_: eBPF 18,921,187  native 0  ratio 0.000
+   DIFFERENT generic_retkpro: eBPF 7,003,203  native 0  ratio 0.000
+   DIFFERENT generic_tracepo: eBPF 5,215,421  native 0  ratio 0.000
+   programs whose counts track the median: 0 of 3
+per call: corpus/results/x86_kvm_corpus_20261116_164202_038065 ns/inv eBPF 1277.6 (16/216 progs) native nan (0/0) speedup nanx
+throughput: 
+installed: x86_kvm_corpus_20261116_164202_038065 programs 9 JIT 31553 B native 31425 B ratio 1.00x
+shim native lines: 13, fallback/err lines: 4
+
+== tracee corpus/results/x86_kvm_corpus_20261116_164517_019844 status=completed
+== x86_kvm_corpus_20261116_164517_019844 (tracee__monitor.json): 24 active programs, median native/eBPF run ratio 1.259
+   programs whose counts track the median: 24 of 24
+per call: corpus/results/x86_kvm_corpus_20261116_164517_019844 ns/inv eBPF 477.6 (40/167 progs) native 364.0 (40/167) speedup 1.312x
+throughput: corpus/results/x86_kvm_corpus_20261116_164517_019844 throughput native/eBPF 1.310x  eBPF [246953] native [323623] per-sample [1.31] errors 0
+installed: x86_kvm_corpus_20261116_164517_019844 programs 110 JIT 1237382 B native 1065131 B ratio 0.86x
+shim native lines: 169, fallback/err lines: 0
+
+== katran corpus/results/x86_kvm_corpus_20261116_165007_017475 status=completed
+== x86_kvm_corpus_20261116_165007_017475 (katran.json): 1 active programs, median native/eBPF run ratio 1.092
+   programs whose counts track the median: 1 of 1
+per call: corpus/results/x86_kvm_corpus_20261116_165007_017475 ns/inv eBPF 200.0 (1/1 progs) native 179.1 (1/1) speedup 1.116x
+throughput: corpus/results/x86_kvm_corpus_20261116_165007_017475 throughput native/eBPF 1.091x  eBPF [2180697] native [2378395] per-sample [1.091] errors 56360260
+installed: x86_kvm_corpus_20261116_165007_017475 programs 1 JIT 13641 B native 10546 B ratio 0.77x
+shim native lines: 1, fallback/err lines: 1
