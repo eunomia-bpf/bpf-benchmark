@@ -81,3 +81,34 @@ regression exercise two equal shapes and a different value offset, checking
 actual returns for in-range and out-of-range keys. Distinct per-CPU offsets
 must also produce distinct bodies. Existing ELF execution tests continue to
 cover ordinary named lookup lowering. Dynamic map dispatch remains separate.
+
+
+Shared-body subset passes (source 9bf2953a7, controller 1867992): 51 linker
+tests, zero failures, three existing ignored; production linker and loader
+builds pass. The batch ended 19:53:04Z, exit 0. All raw attempts remain.
+
+| Host replay with bound facts | Previous payload B | Shared-body payload B | Reduction B |
+|---|---:|---:|---:|
+| Katran balancer_ingress | 10,528 | 9,424 | 1,104 |
+| OTel native_tracer_entry | 7,604 | 7,300 | 304 |
+| OTel perf_unwind_v8 | 37,115 | 36,027 | 1,088 |
+| OTel perf_unwind_native | 30,956 | 30,383 | 573 |
+
+The native unwinder now has three selected ARRAY bodies (32, 32 and 27 B).
+Its genuine dynamic inner-map lookups retain the ARRAY/LPM chain, so those
+shared generic routines remain. Against the no-named-fact host variant,
+retaining all named facts still costs 163 B; no per-call benefit is inferred
+from that difference. Installed bytes and runtime effects need the affected-app
+run after coherent publication. The shared routines add no type check and
+preserve the selected bounds; their local CALL/RET cost is part of that future
+measurement, not claimed free.
+
+Next map-return work should use actual map types rather than call ordinals.
+The compiler selects outer maps from a constant pointer table at native
+unwinder +0x2a7, then preserves the returned inner pointer through registers
+and stack (+0x2c3, +0x313, +0x35a). The repeated calls at +0x31b, +0x35f and
+later sites are ARRAY inner lookups in captured request 3. Native control-flow
+provenance must prove that type across the pointer table, returns and joins;
+removing its generic dispatch based on a source-order guess would be unsound.
+The existing trusted IR LTO sees the constant table/SSA before register spills
+and may provide a simpler place to perform this type-preserving specialization.
