@@ -87,3 +87,13 @@ Reports and commands are in proofs-report.json, emission-report.json and
 tracee-inputs.json. Large ELF/blob/profile captures stay under the persistent
 raw root and the existing corpus result mount. Reproduce emission using the
 result Makefile; use a new EMISSION_OUTPUT directory to retain prior output.
+
+Remaining Tetragon load failure
+
+`capture-tetragon` uses the same delegated linker capture and existing profile
+contract on 20-23, adding vng --verbose to retain the kernel console when a
+native load kills the guest. It captures the unresolved current-image failure
+that C's stats-on run also encounters. No production image, source tool or
+frozen entry changes. Its controller has the same 48 GiB AS cap. The recorded
+Tracee index is fixed explicitly, so later Tetragon captures cannot enter its
+replay inputs by sharing the capture directory.

@@ -21,3 +21,10 @@ emission-dry-run:
 
 emission:
 	python3 $(HERE)/emission.py $(RAW) $(EMISSION_OUTPUT)
+
+.PHONY: capture-tetragon
+capture-tetragon:
+	DEBUGINFOD_URLS= flock -s /workspaces/.agent-state/kprog-lanes/locks/image \
+		python3 $(HERE)/tetragon.py run --app tetragon/observer \
+		--cpus 20-23 --vcpus 4 --memory 32G --seconds 60 --freq 199 --host-event cycles:G \
+		--state-root /var/tmp/kprog-tmp/perf/tetragon-load-diagnostic --persist-output --out $(RAW)/tetragon-capture
