@@ -128,3 +128,12 @@ callee-check: compiler
 	date -u +%FT%TZ > $(OUTPUT)/callee-abi-finished
 
 -include $(BUILD)/bpf-callee-ir.compile.d $(BUILD)/bpf-callee-ir.link.d
+
+.PHONY: upstream-cel-check
+upstream-cel-check: compiler
+	cd $(ROOT)/vendor/repos/tetragon && GOMAXPROCS=1 GOFLAGS=-p=1 go build -mod=vendor -o $(BUILD)/upstream-cel-export $(ROOT)/kprog/test/export_tetragon_cel.go
+	$(BUILD)/upstream-cel-export > $(OUTPUT)/upstream-cel.json
+	$(CC) $(FLAGS) -Xclang -fembed-bitcode=all -c $(ROOT)/kprog/test/tetragon_cel_native.c -o $(BUILD)/tetragon-cel-input.o
+	python3 $(ROOT)/kprog/test/check_tetragon_cel.py --build $(BUILD) --output $(OUTPUT) --compiler $(BUILD)/perf-context-lto --kernel $(KERNEL)/vmlinux --linker $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link
+	tar -C $(BUILD) -czf $(OUTPUT)/upstream-cel-build.tar.gz .
+	date -u +%FT%TZ > $(OUTPUT)/upstream-cel-finished
