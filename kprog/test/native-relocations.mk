@@ -59,6 +59,12 @@ lto-ranges-audit:
 	taskset -c $(CHECK_CPUS) prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=1 CARGO_TARGET_DIR=$(LINKER_TARGET) NATIVE_LINK_LTO_AUDIT_REPORT=/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/report.json cargo test --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml retained_lto_diagnostics_preserve_payload_bytes -- --ignored --nocapture 2>&1 | tee $(OUTPUT)/ranges.log
 	python3 $(ROOT)/kprog/results/perf_20261113/lto_range_analysis.py --log $(OUTPUT)/ranges.log --output $(OUTPUT)/ranges.json
 
+.PHONY: code-pointer-check
+code-pointer-check: check
+	install -d $(OUTPUT)
+	cp /var/tmp/kprog-tmp/perf/perf-context-lto/cel-0.native.o $(OUTPUT)/cel-input.native.o
+	taskset -c $(CHECK_CPUS) prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=1 CARGO_TARGET_DIR=$(LINKER_TARGET) NATIVE_LINK_CODE_POINTER_INPUT=$(OUTPUT)/cel-input.native.o NATIVE_LINK_CODE_POINTER_OUTPUT=$(OUTPUT) cargo test --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml retained_cel_code_pointer_executes -- --ignored --nocapture
+
 .PHONY: helper-register-abi
 helper-register-abi:
 	taskset -c 16-17 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/check_tetragon_helper_registers.py --build /var/tmp/kprog-tmp/perf/helper-register-abi --output $(OUTPUT)

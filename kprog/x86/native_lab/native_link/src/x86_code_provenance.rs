@@ -93,6 +93,21 @@ fn analyze(bytes: &[u8], base: u64, seeds: &HashSet<u64>) -> HashSet<u64> {
 mod tests {
     use super::*;
 
+    fn roundtrip(elf: &object::File, entry: &SymInfo, path: &std::path::Path) -> Result<RewriteResult> {
+        let included=discover_reachable(elf,entry)?;
+        let empty=HashMap::new();
+        let proof=rewrite_x86(elf,entry,&included,&empty,&empty,&empty,&[],true,true,
+                              None,None,None,None,false)?;
+        write_proof_object(path,object::Architecture::X86_64,&entry.name,&proof.blob,&proof.proof_symbols,
+            &proof.proof_relocs,&proof.proof_data_relocs,proof.callee_saved_mask)?;
+        let bytes=fs::read(path)?;
+        let elf=object::File::parse(bytes.as_slice())?;
+        let entry=find_symbol_by_name(&elf,&entry.name)?;
+        let included=discover_reachable(&elf,&entry)?;
+        rewrite_x86(&elf,&entry,&included,&empty,&empty,&empty,&[],false,true,
+                    None,None,None,None,false)
+    }
+
     #[test]
     fn stack_code_identity_is_lost_on_aliases_partial_writes_calls_and_joins() {
         let seed = [0x48,0x8d,0x05,0,0,0,0];
@@ -145,20 +160,9 @@ mod tests {
         assert_eq!(included.len(),2);
         assert_eq!(calls(&elf,&entry,&[entry.clone()])?,HashSet::new(),"same address in a different section is not the target");
         assert_eq!(calls(&elf,&entry,&included)?,HashSet::from([21]));
-        let empty=HashMap::new();
-        let proof=rewrite_x86(&elf,&entry,&included,&empty,&empty,&empty,&[],true,true,
-                              None,None,None,None,false)?;
         let directory=std::path::Path::new("/var/tmp/kprog-tmp/perf/code-pointer");
         fs::create_dir_all(directory)?;
-        let path=directory.join("entry.proof.o");
-        write_proof_object(&path,object::Architecture::X86_64,"entry",&proof.blob,&proof.proof_symbols,
-            &proof.proof_relocs,&proof.proof_data_relocs,proof.callee_saved_mask)?;
-        let bytes=fs::read(path)?;
-        let elf=object::File::parse(bytes.as_slice())?;
-        let entry=find_symbol_by_name(&elf,"entry")?;
-        let included=discover_reachable(&elf,&entry)?;
-        let result=rewrite_x86(&elf,&entry,&included,&empty,&empty,&empty,&[],false,true,
-                               None,None,None,None,false)?;
+        let result=roundtrip(&elf,&entry,&directory.join("entry.proof.o"))?;
         assert!(result.relocs.is_empty());
         #[cfg(all(target_arch="x86_64",target_os="linux"))]
         {
@@ -168,6 +172,30 @@ mod tests {
                 assert_eq!(memory::call_blob(&code,data.as_mut_ptr(),offset,0),
                            data.as_mut_ptr().wrapping_add(offset));
             }
+        }
+        Ok(())
+    }
+
+    #[test]
+    #[ignore = "uses the retained upstream CEL compiler output"]
+    fn retained_cel_code_pointer_executes() -> Result<()> {
+        let input=std::env::var("NATIVE_LINK_CODE_POINTER_INPUT")?;
+        let output=PathBuf::from(std::env::var("NATIVE_LINK_CODE_POINTER_OUTPUT")?);
+        let bytes=fs::read(input)?;
+        let elf=object::File::parse(bytes.as_slice())?;
+        let entry=find_symbol_by_name(&elf,"native_cel_stock")?;
+        let result=roundtrip(&elf,&entry,&output.join("cel.proof.o"))?;
+        assert!(result.relocs.is_empty());
+        #[cfg(all(target_arch="x86_64",target_os="linux"))]
+        {
+            let mut code=result.blob;code.push(0xc3);
+            for value in 0..64u64 {
+                let mut context=[value,17,29];
+                assert_eq!(memory::call_blob(&code,context.as_mut_ptr().cast(),0,0) as usize,
+                           usize::from(value==42),"actual upstream CEL input {value}");
+            }
+            fs::write(output.join("cel-execution.json"),
+                "{\"actual_upstream_cel_vectors\":64,\"proof_kernel_roundtrip\":true,\"stock_checked\":false}\n")?;
         }
         Ok(())
     }
