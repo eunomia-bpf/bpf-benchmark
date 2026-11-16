@@ -1,0 +1,51 @@
+'KProgFormal.ClightRefinement.Arm64EntryMemory.load_pointer' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64EntryMemory.gpr_loads' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_returns' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64RegisterReads.register_return_corresponds' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_returns : ∀
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins) (frontier b : CC.Block)
+  (ofs : CC.Integers.Ptrofs) (i : Fin 31) (m : CC.Mem) (k : CC.Cont) (value : CC.Val) (raw : BitVec 64)
+  (tag : BitVec 8),
+  KProgFormal.ClightRefinement.Arm64EntryMemory.gpr frontier m (CC.Val.Vptr b ofs) ↑i =
+      some (value, CC.Val.Vint (BitVec.setWidth 32 tag)) →
+    KProgFormal.ClightRefinement.Arm64Registers.ValueRep addresses value raw →
+      KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.Arm64RegisterReads.ge 28
+          (CC.State.Callstate (CC.FunDef.Internal (KProgFormal.ClightRefinement.Arm64RegisterReads.reader false))
+            [CC.Val.Vptr b ofs, CC.Val.Vlong (BitVec.ofNat 64 ↑i)] k m)
+          (CC.State.Returnstate value (CC.callCont k) m) ∧
+        KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.Arm64RegisterReads.ge 28
+          (CC.State.Callstate (CC.FunDef.Internal (KProgFormal.ClightRefinement.Arm64RegisterReads.reader true))
+            [CC.Val.Vptr b ofs, CC.Val.Vlong (BitVec.ofNat 64 ↑i)] k m)
+          (CC.State.Returnstate (CC.Val.Vint (BitVec.setWidth 32 tag)) (CC.callCont k) m)
+KProgFormal.ClightRefinement.Arm64RegisterReads.register_return_corresponds : ∀
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.AArch64.Origins) (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs)
+  (i : KProgFormal.Reference.AArch64.Gpr) (m : CC.Mem) (native : KProgFormal.Reference.AArch64.State),
+  KProgFormal.ClightRefinement.Arm64Registers.Represents addresses origins (fun reg => ↑reg) frontier m
+      (CC.Val.Vptr b ofs) native →
+    ∀ (rawTrace tagTrace : CC.Trace) (rawValue tagValue : CC.Val) (rawMemory tagMemory : CC.Mem),
+      CC.Star (CC.Step2 KProgFormal.ClightRefinement.Arm64RegisterReads.ge)
+          (CC.State.Callstate (CC.FunDef.Internal (KProgFormal.ClightRefinement.Arm64RegisterReads.reader false))
+            [CC.Val.Vptr b ofs, CC.Val.Vlong (BitVec.ofNat 64 ↑i)] CC.Cont.Kstop m)
+          rawTrace (CC.State.Returnstate rawValue CC.Cont.Kstop rawMemory) →
+        CC.Star (CC.Step2 KProgFormal.ClightRefinement.Arm64RegisterReads.ge)
+            (CC.State.Callstate (CC.FunDef.Internal (KProgFormal.ClightRefinement.Arm64RegisterReads.reader true))
+              [CC.Val.Vptr b ofs, CC.Val.Vlong (BitVec.ofNat 64 ↑i)] CC.Cont.Kstop m)
+            tagTrace (CC.State.Returnstate tagValue CC.Cont.Kstop tagMemory) →
+          rawTrace = CC.E0 ∧
+            tagTrace = CC.E0 ∧
+              rawMemory = m ∧
+                tagMemory = m ∧
+                  ∃ bits tag,
+                    KProgFormal.ClightRefinement.Arm64Registers.ValueRep addresses rawValue bits ∧
+                      tagValue = CC.Val.Vint (BitVec.setWidth 32 tag) ∧
+                        KProgFormal.Reference.AArch64.gpr native i =
+                          KProgFormal.Reference.Provenance.AArch64.materialize origins bits tag

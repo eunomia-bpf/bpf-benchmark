@@ -1952,3 +1952,10 @@ Clight pointer and retain its existing native block-origin binding. Scalar
 relative cases reuse the warm-cache laws; relative payloads being scalar
 remains an explicit producer condition. Every return at `Kstop` preserves
 the complete memory and represents the M3 materialized native bits.
+
+The [actual GPR-reader proof](results/m5-register-reads/README.md) now connects
+the exported raw-value and tag functions to the checked entry observations.
+For every GPR index 0–30, each call completes 28 internal transitions and
+preserves all memory. Every pair of returns at `Kstop` agrees with the
+represented native GPR through the default export's actual cell selection.
+Producer initialization and compact source-profile bindings remain open.

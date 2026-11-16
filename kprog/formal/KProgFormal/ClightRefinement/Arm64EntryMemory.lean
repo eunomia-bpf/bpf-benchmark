@@ -115,6 +115,51 @@ theorem cell_layout :
     CC.sizeof composites (CC.tptr CC.tvoid) = 8 := by
   decide +kernel
 
+/-- A successful checked read is the imported load at an actual pointer.
+The caller frontier is a proof-side ownership condition, not a new load rule. -/
+theorem load_pointer {frontier : CC.Block} {chunk : CC.Chunk} {m : CC.Mem}
+    {address value : CC.Val} (read : load frontier chunk m address = some value) :
+    ∃ block offset, address = .Vptr block offset ∧ block.toNat < frontier.toNat ∧
+      CC.Mem.loadv chunk m (.Vptr block offset) = some value := by
+  cases address <;> simp only [load] at read
+  all_goals try contradiction
+  rename_i block offset
+  split at read
+  next owned => exact ⟨block, offset, rfl, owned, read⟩
+  next => contradiction
+
+/-- Decompose the actual two pointer-table walks into their imported loads.
+All cell locations remain individually supplied pointers, including aliases. -/
+theorem gpr_loads {frontier : CC.Block} {m : CC.Mem} {entry value kind : CC.Val}
+    {index : Nat} (read : gpr frontier m entry index = some (value, kind)) :
+    ∃ cb co vb vo tb to kb ko,
+      field frontier CC.Mptr m entry Arm64Program._cells = some (.Vptr cb co) ∧
+      CC.Mem.loadv CC.Mptr m (.Vptr cb
+        (CC.Integers.Ptrofs.add co (CC.Integers.Ptrofs.repr (8 * index)))) = some (.Vptr vb vo) ∧
+      field frontier CC.Mptr m entry Arm64Program._tag_cells = some (.Vptr tb to) ∧
+      CC.Mem.loadv CC.Mptr m (.Vptr tb
+        (CC.Integers.Ptrofs.add to (CC.Integers.Ptrofs.repr (8 * index)))) = some (.Vptr kb ko) ∧
+      CC.Mem.loadv .Mint64 m (.Vptr vb vo) = some value ∧
+      CC.Mem.loadv .Mint8unsigned m (.Vptr kb ko) = some kind := by
+  simp only [gpr, bind, pure, Option.bind_eq_some_iff] at read
+  obtain ⟨cells, hc, cell, hv, tags, ht, tag, hk, v, hvalue, k, hkind, result⟩ := read
+  cases Option.some.inj result
+  obtain ⟨vb, vo, rfl, _, hvalue⟩ := load_pointer hvalue
+  obtain ⟨kb, ko, rfl, _, hkind⟩ := load_pointer hkind
+  cases cells <;> simp only [pointerSlot, CC.Val.offsetPtr, load] at hv
+  all_goals try contradiction
+  rename_i cb co
+  cases tags <;> simp only [pointerSlot, CC.Val.offsetPtr, load] at hk
+  all_goals try contradiction
+  rename_i tb to
+  refine ⟨cb, co, vb, vo, tb, to, kb, ko, hc, ?_, ht, ?_, hvalue, hkind⟩
+  · split at hv
+    next => exact hv
+    next => contradiction
+  · split at hk
+    next => exact hk
+    next => contradiction
+
 /-- Stability includes failure and undef, without synthesizing a scalar or
 discarding a pointer tag when an observation cannot be decoded. -/
 theorem load_frame {frontier : CC.Block} {before after : CC.Mem}

@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64RegisterReads
+#print axioms KProgFormal.ClightRefinement.Arm64EntryMemory.load_pointer
+#print axioms KProgFormal.ClightRefinement.Arm64EntryMemory.gpr_loads
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_returns
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterReads.register_return_corresponds
+#check @KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_returns
+#check @KProgFormal.ClightRefinement.Arm64RegisterReads.register_return_corresponds
