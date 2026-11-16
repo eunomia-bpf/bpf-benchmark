@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64OriginCache
+#print axioms KProgFormal.ClightRefinement.Arm64OriginCache.input_binding
+#print axioms KProgFormal.ClightRefinement.Arm64OriginCache.cache_stores
+#print axioms KProgFormal.ClightRefinement.Arm64OriginCache.reader_cold_returns
+#check @KProgFormal.ClightRefinement.Arm64OriginCache.input_binding
+#check @KProgFormal.ClightRefinement.Arm64OriginCache.cache_stores
+#check @KProgFormal.ClightRefinement.Arm64OriginCache.reader_cold_returns

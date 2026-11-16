@@ -1,0 +1,61 @@
+'KProgFormal.ClightRefinement.Arm64OriginCache.input_binding' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64OriginCache.cache_stores' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64OriginCache.reader_cold_returns' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.Arm64OriginCache.input_binding : KProgFormal.ClightRefinement.Arm64OriginCache.ge.genv_genv.findSymbol
+      Arm64Address._native_lab_entry_input =
+    some (CC.Positive.ofNat 57) ∧
+  KProgFormal.ClightRefinement.Arm64OriginCache.ge.genv_genv.findFunctPtr (CC.Positive.ofNat 57) =
+    some KProgFormal.ClightRefinement.Arm64OriginCache.inputFunction
+KProgFormal.ClightRefinement.Arm64OriginCache.cache_stores : ∀ (returns : Bool) (b : CC.Block)
+  (ofs : CC.Integers.Ptrofs) (m : CC.Mem) (base : BitVec 64),
+  m.validAccess CC.Chunk.Mint64 b (ofs.add (CC.Integers.Ptrofs.repr (if returns = true then 8 else 0))).unsigned
+        CC.Permission.Writable =
+      true →
+    m.validAccess CC.Chunk.Mint8unsigned b
+          (ofs.add (CC.Integers.Ptrofs.repr (if returns = true then 25 else 24))).unsigned CC.Permission.Writable =
+        true →
+      ∃ middle after,
+        CC.Mem.storev CC.Chunk.Mint64 m
+              (KProgFormal.ClightRefinement.Arm64OriginCache.pointer b ofs (if returns = true then 8 else 0))
+              (CC.Val.Vlong base) =
+            some middle ∧
+          CC.Mem.storev CC.Chunk.Mint8unsigned middle
+                (KProgFormal.ClightRefinement.Arm64OriginCache.pointer b ofs (if returns = true then 25 else 24))
+                (CC.Val.Vint 1#32) =
+              some after ∧
+            KProgFormal.ClightRefinement.Arm64OriginCache.WarmCache returns b ofs after base ∧
+              after.access = m.access ∧ after.nextblock = m.nextblock
+KProgFormal.ClightRefinement.Arm64OriginCache.reader_cold_returns : ∀ (returns : Bool) (b : CC.Block)
+  (ofs : CC.Integers.Ptrofs) (before supplied : CC.Mem) (k : CC.Cont) (base : BitVec 64) (trace : CC.Trace),
+  CC.Mem.loadv CC.Chunk.Mint8unsigned before
+        (KProgFormal.ClightRefinement.Arm64OriginCache.pointer b ofs (if returns = true then 25 else 24)) =
+      some (CC.Val.Vint 0#32) →
+    CC.externalCall KProgFormal.ClightRefinement.Arm64OriginCache.inputEF
+        KProgFormal.ClightRefinement.Arm64OriginCache.ge.genv_genv.toSenv
+        [CC.Val.Vint (KProgFormal.ClightRefinement.Arm64OriginCache.inputKind returns)] before trace (CC.Val.Vlong base)
+        supplied →
+      supplied.validAccess CC.Chunk.Mint64 b
+            (ofs.add (CC.Integers.Ptrofs.repr (if returns = true then 8 else 0))).unsigned CC.Permission.Writable =
+          true →
+        supplied.validAccess CC.Chunk.Mint8unsigned b
+              (ofs.add (CC.Integers.Ptrofs.repr (if returns = true then 25 else 24))).unsigned CC.Permission.Writable =
+            true →
+          ∃ middle after,
+            CC.Star (CC.Step2 KProgFormal.ClightRefinement.Arm64OriginCache.ge)
+                (CC.State.Callstate (CC.FunDef.Internal (KProgFormal.ClightRefinement.Arm64OriginCache.reader returns))
+                  [CC.Val.Vptr b ofs] k before)
+                trace (CC.State.Returnstate (CC.Val.Vlong base) (CC.callCont k) after) ∧
+              CC.Mem.storev CC.Chunk.Mint64 supplied
+                    (KProgFormal.ClightRefinement.Arm64OriginCache.pointer b ofs (if returns = true then 8 else 0))
+                    (CC.Val.Vlong base) =
+                  some middle ∧
+                CC.Mem.storev CC.Chunk.Mint8unsigned middle
+                      (KProgFormal.ClightRefinement.Arm64OriginCache.pointer b ofs (if returns = true then 25 else 24))
+                      (CC.Val.Vint 1#32) =
+                    some after ∧
+                  KProgFormal.ClightRefinement.Arm64OriginCache.WarmCache returns b ofs after base ∧
+                    after.access = supplied.access ∧ after.nextblock = supplied.nextblock

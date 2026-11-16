@@ -119,6 +119,222 @@ def WarmCache (returns : Bool) (b : CC.Block) (ofs : CC.Integers.Ptrofs)
       some (.Vint (valid.setWidth 32)) ∧
     CC.Mem.loadv .Mint64 m (pointer b ofs (if returns then 8 else 0)) = some (.Vlong base)
 
+private theorem cache_fields_disjoint (returns : Bool) (ofs : CC.Integers.Ptrofs) :
+    CC.Integers.Ptrofs.unsigned
+        (CC.Integers.Ptrofs.add ofs (CC.Integers.Ptrofs.repr (if returns then 8 else 0))) + 8 ≤
+      CC.Integers.Ptrofs.unsigned
+        (CC.Integers.Ptrofs.add ofs (CC.Integers.Ptrofs.repr (if returns then 25 else 24))) ∨
+    CC.Integers.Ptrofs.unsigned
+        (CC.Integers.Ptrofs.add ofs (CC.Integers.Ptrofs.repr (if returns then 25 else 24))) + 1 ≤
+      CC.Integers.Ptrofs.unsigned
+        (CC.Integers.Ptrofs.add ofs (CC.Integers.Ptrofs.repr (if returns then 8 else 0))) := by
+  let word : BitVec 64 := ofs
+  have bound := BitVec.isLt word
+  cases returns
+  · change ((word + (0#64)).toNat : Int) + 8 ≤ ((word + (24#64)).toNat : Int) ∨
+      ((word + (24#64)).toNat : Int) + 1 ≤ ((word + (0#64)).toNat : Int)
+    simp only [BitVec.add_zero, BitVec.toNat_add, BitVec.toNat_ofNat]
+    omega
+  · change ((word + (8#64)).toNat : Int) + 8 ≤ ((word + (25#64)).toNat : Int) ∨
+      ((word + (25#64)).toNat : Int) + 1 ≤ ((word + (8#64)).toNat : Int)
+    simp only [BitVec.toNat_add, BitVec.toNat_ofNat]
+    omega
+
+private theorem store_exists (chunk : CC.Chunk) (m : CC.Mem) (b : CC.Block)
+    (ofs : CC.Z) (value : CC.Val)
+    (writable : CC.Mem.validAccess m chunk b ofs .Writable = true) :
+    ∃ after, CC.Mem.store chunk m b ofs value = some after := by
+  unfold CC.Mem.store
+  rw [writable]
+  exact ⟨_, rfl⟩
+
+/-- The two real typed cache stores exist on writable fields, establish a
+warm cache, and retain all permissions and allocation identity. Field
+separation is proved even for wrapping pointer offsets; no sample heap or
+caller-supplied successful-store equation is needed. -/
+theorem cache_stores (returns : Bool) (b : CC.Block) (ofs : CC.Integers.Ptrofs)
+    (m : CC.Mem) (base : BitVec 64)
+    (baseWritable : CC.Mem.validAccess m .Mint64 b
+      (CC.Integers.Ptrofs.unsigned
+        (CC.Integers.Ptrofs.add ofs (CC.Integers.Ptrofs.repr (if returns then 8 else 0))))
+      .Writable = true)
+    (validWritable : CC.Mem.validAccess m .Mint8unsigned b
+      (CC.Integers.Ptrofs.unsigned
+        (CC.Integers.Ptrofs.add ofs (CC.Integers.Ptrofs.repr (if returns then 25 else 24))))
+      .Writable = true) :
+    ∃ middle after,
+      CC.Mem.storev .Mint64 m (pointer b ofs (if returns then 8 else 0)) (.Vlong base) = some middle ∧
+      CC.Mem.storev .Mint8unsigned middle (pointer b ofs (if returns then 25 else 24))
+        (.Vint (1#32)) = some after ∧
+      WarmCache returns b ofs after base ∧ after.access = m.access ∧ after.nextblock = m.nextblock := by
+  obtain ⟨middle, storeBase⟩ := store_exists _ _ _ _ (.Vlong base) baseWritable
+  have validMiddle := (CC.Mem.validAccess_store_eq storeBase .Mint8unsigned b _ .Writable).trans
+    validWritable
+  obtain ⟨after, storeValid⟩ := store_exists _ _ _ _ (.Vint (1#32)) validMiddle
+  refine ⟨middle, after, storeBase, storeValid, ?_,
+    (CC.Mem.store_access storeValid).trans (CC.Mem.store_access storeBase),
+    (CC.Mem.store_nextblock storeValid).trans (CC.Mem.store_nextblock storeBase)⟩
+  refine ⟨1#8, by decide, ?_, ?_⟩
+  · simpa [pointer, CC.Mem.loadv, CC.Val.loadResult, CC.Integers.Int.zero_ext,
+      CC.Integers.MI.zero_ext] using CC.Mem.load_store_same storeValid
+  · have disjoint := cache_fields_disjoint returns ofs
+    have old := CC.Mem.load_store_other storeValid .Mint64 b
+      (CC.Integers.Ptrofs.unsigned
+        (CC.Integers.Ptrofs.add ofs (CC.Integers.Ptrofs.repr (if returns then 8 else 0))))
+      (by simpa only [CC.sizeChunk] using Or.inr disjoint)
+    simpa only [pointer, CC.Mem.loadv, CC.Val.loadResult] using
+      old.trans (CC.Mem.load_store_same storeBase)
+
+def inputKind (returns : Bool) : BitVec 32 := if returns then 3 else 1
+
+private structure ColdReaderParts where
+  body : CC.Stmt
+  storeBase : CC.Stmt
+  storeValid : CC.Stmt
+  readBase : CC.Stmt
+  ret : CC.Stmt
+
+private def unpackColdReader (returns : Bool) : Option ColdReaderParts :=
+  match (reader returns).fn_body with
+  | .Ssequence (.Sloop
+      (body@(.Ssequence (.Ssequence _ (.Sifthenelse _
+        (.Ssequence (.Ssequence _ storeBase) storeValid) .Sskip)) readBase)) .Sbreak) ret =>
+    some ⟨body, storeBase, storeValid, readBase, ret⟩
+  | _ => none
+
+private def coldStackParts : ColdReaderParts := by
+  run_tac do
+    let term ← Lean.Elab.Term.elabTerm (← `((unpackColdReader false).get (by decide +kernel)))
+      (some (← Lean.Elab.Tactic.getMainTarget))
+    let value ← Lean.Meta.withTransparency .all (Lean.Meta.whnf term)
+    Lean.Elab.Tactic.closeMainGoal `cold_stack_body value
+
+private def coldReturnParts : ColdReaderParts := by
+  run_tac do
+    let term ← Lean.Elab.Term.elabTerm (← `((unpackColdReader true).get (by decide +kernel)))
+      (some (← Lean.Elab.Tactic.getMainTarget))
+    let value ← Lean.Meta.withTransparency .all (Lean.Meta.whnf term)
+    Lean.Elab.Tactic.closeMainGoal `cold_return_body value
+
+private def coldParts (returns : Bool) : ColdReaderParts :=
+  if returns then coldReturnParts else coldStackParts
+
+private def coldTemps (returns : Bool) (b : CC.Block) (ofs : CC.Integers.Ptrofs) : CC.TempEnv :=
+  ((CC.createUndefTemps (reader returns).fn_temps).set
+    Arm64Address._coordinates (.Vptr b ofs)).set Arm64Address._t'2 (.Vint (0#32))
+
+/-- The real continuation captured at the native-input call, retaining all
+actual pending cache stores, base read, loop and return statements. -/
+private def inputContinuation (returns : Bool) (b : CC.Block) (ofs : CC.Integers.Ptrofs)
+    (k : CC.Cont) : CC.Cont :=
+  let parts := coldParts returns
+  .Kcall (some Arm64Address._t'1) (reader returns) CC.emptyEnv (coldTemps returns b ofs)
+    (.Kseq parts.storeBase (.Kseq parts.storeValid
+      (.Kseq parts.readBase (.Kloop1 parts.body .Sbreak (.Kseq parts.ret k)))))
+
+private theorem cold_prefix (returns : Bool) (b : CC.Block) (ofs : CC.Integers.Ptrofs)
+    (m : CC.Mem) (k : CC.Cont)
+    (cold : CC.Mem.loadv .Mint8unsigned m (pointer b ofs (if returns then 25 else 24)) =
+      some (.Vint (0#32))) :
+    steps ge 11 (.Callstate (.Internal (reader returns)) [.Vptr b ofs] k m) =
+      some (CC.E0, .Callstate inputFunction [.Vint (inputKind returns)]
+        (inputContinuation returns b ofs k) m) ∧
+    InternalPath ge 11 (.Callstate (.Internal (reader returns)) [.Vptr b ofs] k m) := by
+  have cr : Arm64Address._coordinates ≠ Arm64Address._result := by decide
+  have ct1 : Arm64Address._coordinates ≠ Arm64Address._t'1 := by decide
+  have ct2 : Arm64Address._coordinates ≠ Arm64Address._t'2 := by decide
+  simp only [pointer] at cold
+  cases returns <;> simp only [Bool.false_eq_true, ite_false, ite_true] at cold
+  all_goals
+    simp [reader, steps, InternalPath, InternalState, CC.doStep, CC.doFunctionEntry2,
+      Arm64Address.f_kprog_arm64_stack_base, Arm64Address.f_kprog_arm64_return_base,
+      CC.listNorepet, CC.varNames, CC.listDisjoint, CC.doAllocVariables, CC.bindParameterTemps,
+      CC.createUndefTemps, CC.PTree.gso, cr, ct1, ct2, ct2.symm,
+      CC.doEvalExpr, CC.doEvalLvalue, CC.doEvalExprlist, CC.lvalOfField, CC.lvalOfVar, CC.doDerefLoc,
+      CC.typeof, CC.typeconv, CC.removeAttributes, CC.tattr, CC.accessMode,
+      coordinates_binding, offsets.2.2.1, offsets.2.2.2, cold,
+      input_binding.1, input_binding.2, CC.Genv.findFunct, CC.typeOfFundef, inputFunction, inputEF,
+      CC.Integers.Ptrofs.eq, CC.Integers.Ptrofs.zero,
+      CC.Cop.classifyFun, CC.Cop.semUnaryOperation, CC.Cop.semNotbool,
+      CC.Cop.boolVal, CC.Cop.classifyBool, CC.Cop.semCast, CC.Cop.classifyCast,
+      CC.Cop.castIntInt, CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse,
+      CC.Integers.Int.eq, CC.Integers.MI.eq, CC.Integers.Int.zero, CC.Integers.Int.one,
+      CC.Integers.MI.zero, CC.Integers.MI.one, CC.Integers.Int.repr, CC.Integers.MI.repr,
+      CC.tuchar, CC.tint, CC.tuint, CC.tulong, CC.emptyEnv, CC.E0, CC.Eapp,
+      inputContinuation, coldTemps, coldParts, coldStackParts, coldReturnParts, inputKind]
+
+private theorem cold_suffix (returns : Bool) (b : CC.Block) (ofs : CC.Integers.Ptrofs)
+    (supplied middle after : CC.Mem) (k : CC.Cont) (base : BitVec 64)
+    (storeBase : CC.Mem.storev .Mint64 supplied (pointer b ofs (if returns then 8 else 0))
+      (.Vlong base) = some middle)
+    (storeValid : CC.Mem.storev .Mint8unsigned middle (pointer b ofs (if returns then 25 else 24))
+      (.Vint (1#32)) = some after)
+    (readBase : CC.Mem.loadv .Mint64 after (pointer b ofs (if returns then 8 else 0)) =
+      some (.Vlong base)) :
+    steps ge 11 (.Returnstate (.Vlong base) (inputContinuation returns b ofs k) supplied) =
+      some (CC.E0, .Returnstate (.Vlong base) (CC.callCont k) after) ∧
+    InternalPath ge 11 (.Returnstate (.Vlong base) (inputContinuation returns b ofs k) supplied) := by
+  have ct1 : Arm64Address._t'1 ≠ Arm64Address._coordinates := by decide
+  have ct2 : Arm64Address._t'2 ≠ Arm64Address._coordinates := by decide
+  have empty : (CC.PTree.empty : CC.Env).elements = [] := rfl
+  simp only [pointer] at storeBase storeValid readBase
+  cases returns <;> simp only [Bool.false_eq_true, ite_false, ite_true] at storeBase storeValid readBase
+  all_goals
+    simp [reader, steps, InternalPath, InternalState, CC.doStep,
+      inputContinuation, coldTemps, coldParts, coldStackParts, coldReturnParts,
+      Arm64Address.f_kprog_arm64_stack_base, Arm64Address.f_kprog_arm64_return_base,
+      CC.setOpttemp, CC.PTree.gso, ct1, ct2, CC.doEvalExpr, CC.doEvalLvalue,
+      CC.doDerefLoc, CC.doAssignLoc, CC.lvalOfField, CC.typeof, CC.accessMode,
+      coordinates_binding, offsets.1, offsets.2.1, offsets.2.2.1, offsets.2.2.2,
+      storeBase, storeValid, readBase,
+      CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
+      CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
+      CC.tuchar, CC.tint, CC.tulong, CC.blocksOfEnv, CC.Mem.freeList, CC.emptyEnv,
+      CC.E0, CC.Eapp, empty]
+
+/-- A cold reader executes the actual external input call, then caches its
+returned scalar and marks that cache valid. The external trace and complete
+post-call memory are retained, not assumed pure. Writable field premises
+construct both successful stores. The premise is the actual external-call
+relation, not a new provider axiom or a claimed native-origin binding. -/
+theorem reader_cold_returns (returns : Bool) (b : CC.Block) (ofs : CC.Integers.Ptrofs)
+    (before supplied : CC.Mem) (k : CC.Cont) (base : BitVec 64) (trace : CC.Trace)
+    (cold : CC.Mem.loadv .Mint8unsigned before (pointer b ofs (if returns then 25 else 24)) =
+      some (.Vint (0#32)))
+    (provider : CC.externalCall inputEF (CC.Genv.toSenv ge.genv_genv)
+      [.Vint (inputKind returns)] before trace (.Vlong base) supplied)
+    (baseWritable : CC.Mem.validAccess supplied .Mint64 b
+      (CC.Integers.Ptrofs.unsigned
+        (CC.Integers.Ptrofs.add ofs (CC.Integers.Ptrofs.repr (if returns then 8 else 0))))
+      .Writable = true)
+    (validWritable : CC.Mem.validAccess supplied .Mint8unsigned b
+      (CC.Integers.Ptrofs.unsigned
+        (CC.Integers.Ptrofs.add ofs (CC.Integers.Ptrofs.repr (if returns then 25 else 24))))
+      .Writable = true) :
+    ∃ middle after, CC.Star (CC.Step2 ge)
+      (.Callstate (.Internal (reader returns)) [.Vptr b ofs] k before) trace
+      (.Returnstate (.Vlong base) (CC.callCont k) after) ∧
+      CC.Mem.storev .Mint64 supplied (pointer b ofs (if returns then 8 else 0)) (.Vlong base) =
+        some middle ∧
+      CC.Mem.storev .Mint8unsigned middle (pointer b ofs (if returns then 25 else 24))
+        (.Vint (1#32)) = some after ∧
+      WarmCache returns b ofs after base ∧ after.access = supplied.access ∧
+      after.nextblock = supplied.nextblock := by
+  obtain ⟨middle, after, storeBase, storeValid, warm, permissions, allocations⟩ :=
+    cache_stores returns b ofs supplied base baseWritable validWritable
+  have readBase := warm.choose_spec.2.2
+  have beforeCall := cold_prefix returns b ofs before k cold
+  have suffix := cold_suffix returns b ofs supplied middle after k base storeBase storeValid readBase
+  have call : CC.Star (CC.Step2 ge)
+      (.Callstate inputFunction [.Vint (inputKind returns)] (inputContinuation returns b ofs k) before)
+      trace (.Returnstate (.Vlong base) (inputContinuation returns b ofs k) supplied) :=
+    .step _ _ _ _ _ _ (.external_function _ _ _ _ _ _ _ _ _ _ provider) (.refl _)
+      (by simp [CC.Eapp, CC.E0])
+  refine ⟨middle, after, ?_, storeBase, storeValid, warm, permissions, allocations⟩
+  simpa only [CC.E0, CC.Eapp, List.nil_append, List.append_nil] using
+    star_trans (star_trans (internalRun_of_steps beforeCall.2 beforeCall.1).sound call)
+      (internalRun_of_steps suffix.2 suffix.1).sound
+
 def materializeSteps (tag : BitVec 8) : Nat :=
   if tag = 4 then 30 else if tag = 10 then 31 else 18
 

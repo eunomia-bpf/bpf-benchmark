@@ -1938,3 +1938,10 @@ coordinate function. Every nonzero validity byte is covered; only a selected
 STACK or RETURN cache needs a warm-cache premise. Calls preserve all memory,
 and every materializer return at `Kstop` has the specified result. Cold input
 calls, pointer-valued materialization and producer admissibility remain open.
+
+The [cold-cache proof](results/m5-cold-cache/README.md) now binds the actual
+exported input function and executes both cold base readers through its real
+external-call relation. Writable-field premises construct the two cache stores
+and establish `WarmCache`, preserving the provider outcome's trace and memory
+before those writes. Relating that provider to native origins, pointer-valued
+materialization and producer admissibility remain open M5 obligations.
