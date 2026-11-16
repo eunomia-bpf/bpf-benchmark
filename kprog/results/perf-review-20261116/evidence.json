@@ -790,5 +790,28 @@
     "whole_module_emission": "perf_context_lto.cpp:152",
     "selected_entry_handling": "perf_context_lto.cpp:72-79 keeps selected entry external without internalizing unrelated entries",
     "scope": "Source repeated compilation cost. No elapsed/memory/post-change-byte measurement, no installed-size or per-call improvement claim."
+  },
+  "local_memory_address_observation": {
+    "recorded_at": "2026-11-16T16:29:26Z",
+    "dropped_definition": "x86.rs:1261-1275 local_memory marks GOT handled without replacement",
+    "ordinary_helper_contrast": "x86.rs:1267-1271 emits movabs for other helper addresses",
+    "call_redirection": "x86.rs:1444-1453",
+    "provenance": "x86_helper_provenance.rs:27-33 tracks callee value, not all observation liveness",
+    "source_counterexample": "RAX=0; RAX=memcpy@GOT; test RAX; branch on zero; CALL RAX on nonzero path. Dropped GOT load changes branch.",
+    "scope": "Source reasoning only, no actual app occurrence/new execution or measured performance effect."
+  },
+  "local_memory_size_scope": {
+    "fixed_limit_bytes": 512,
+    "routine_dedup_key": [
+      "copy/fill",
+      "constant length or dynamic",
+      "zero-fill status"
+    ],
+    "fixed_calls_retain_call_ret": true,
+    "dynamic_copy_chunks": [
+      32,
+      8
+    ],
+    "scope": "Source structure, not isolated size/speed attribution."
   }
 }

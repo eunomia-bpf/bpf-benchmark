@@ -700,3 +700,40 @@ double-execution cause and no confirmed Cilium packet fix. Those remain open. Th
     bytes have not been measured for this change. The installed P linker already
     selects a reachable entry, so a smaller temporary ELF does not itself
     establish the operator's installed half-size target or any per-call gain.
+
+22. **Local memory call redirection deletes observable function-address loads.**
+
+    For an ordinary helper GOT load, `x86.rs:1267–1271` materializes the
+    actual resolved helper address. For memcpy/memset, :1261–1275 instead
+    marks the relocation handled and continues without emitting the load or
+    any replacement for its destination register. There is no use restriction
+    at that decision. This happens in proof mode as well as kernel mode.
+
+    `x86_helper_provenance.rs:27–33` recognizes the original GOT value as a
+    function symbol, and `x86.rs:1444–1453` can later redirect its indirect call
+    to a linker-owned routine. Call-target provenance is not proof that the
+    earlier pointer value is unobserved. A source-derived instruction sequence
+    makes the difference explicit: initialize RAX to zero, load memcpy@GOT
+    into RAX, test RAX and branch on zero, then call RAX on the nonzero path.
+    Original linking supplies a nonzero function address; dropping the load
+    leaves zero and takes the other branch, despite the call itself having a
+    valid redirect. A store/comparison of the pointer has the same problem.
+    No actual current app occurrence or fresh execution is claimed here.
+
+    Preserve a consistent linker-bound address when the value is observed,
+    using existing image-address relocation machinery and the canonical
+    memory-function binding. Specialized call bodies can still be direct
+    targets, but dropping a value definition requires its existing use facts,
+    not merely recognizing the callee name. Do not add a runtime pointer check
+    or another compatibility switch.
+
+    Separately, the memory routines remain calls even for constant small
+    sizes: :1447 emits an E8 slot, and x86_memory.rs:94–103 unrolls constant
+    lengths up to512 before a RET. The key at :6–10 distinguishes function,
+    constant length and zero-fill status; :1676–1686 deduplicates only that
+    complete routine key within one program. This avoids a universal size
+    dispatcher but retains CALL/RET for tiny copies and can grow code across
+    many lengths/programs. Inline small fixed operations or share larger
+    routines only with actual per-call/installed-byte evidence. This review
+    supplies no isolated gain and does not assume byte-at-a-time copying:
+    the dynamic implementation already uses32-byte then8-byte chunks.
