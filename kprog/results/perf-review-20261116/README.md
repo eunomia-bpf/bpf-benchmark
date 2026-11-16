@@ -197,6 +197,31 @@ to the source read during this review; subsequent cleanup may move them.
    whether it produces the observed host path. The finding needs no new
    runtime check or benchmark change.
 
+   Two adjacent virtual-field differences belong in the same context fix.
+   `lib/overloadable_skb.h:21–24` clears tc_classid only under __bpf__.
+   Kernel `net/core/filter.c:9888–9901` translates that field to the 16-bit
+   qdisc prefix at skb+46. Native currently clears it accidentally through its
+   misplaced cb[1] store. After correcting cb to +48, that accidental clear
+   disappears: the intended tc_classid write must also be represented explicitly.
+   This is source parity, not a new validation check.
+
+   Native `ctx/skb.h:143–146` also substitutes ctx->len for ctx->wire_len.
+   Kernel `net/core/filter.c:10087–10095` instead reads qdisc_skb_cb.pkt_len,
+   at skb+40. These are distinct fields, so len is not a general semantic
+   replacement. `lib/edt.h:93` and `lib/token_bucket.h:46–47` consume wire_len.
+   This review has not established that these branches execute in the benchmark
+   or that the two lengths differ for its packets; it is a class-level context
+   correctness gap, not a measured explanation for the current throughput.
+
+   Conversely, `ctx/skb.h:180–188` checks dev for NULL when obtaining ifindex.
+   The eBPF conversion at `net/core/filter.c:9797–9804` performs the same
+   check. It is not an extra native-only guard to remove. Native data_end at
+   `ctx/skb.h:80–83` recomputes data+(len-data_len), whereas the eBPF conversion
+   at `net/core/filter.c:9917–9924` reads the pointer precomputed by
+   `include/linux/filter.h:897–903`. Choosing the same already-maintained
+   virtual view can avoid extra field loads/arithmetic; this is a source cost,
+   with no isolated per-call gain claimed.
+
    **Separate configuration lead, not a confirmed loaded-value mismatch:**
 
    `vendor/bpf/Makefile:81–104` compiles a maximum-feature native variant,

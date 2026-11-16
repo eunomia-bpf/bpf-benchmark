@@ -572,5 +572,26 @@
     ],
     "payload": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/34/0.blob",
     "scope": "BTF layout, kernel access-conversion source and retained machine stores agree on this mismatch. Packet host-route causality not measured."
+  },
+  "cilium_adjacent_virtual_fields": {
+    "recorded_at": "2026-11-16T15:47:35Z",
+    "tc_classid": {
+      "kernel_skb_offset": 46,
+      "width_bits": 16,
+      "native_source": "vendor/bpf/cilium/bpf/lib/overloadable_skb.h:21-24",
+      "finding": "Explicit clear omitted under native; current misplaced cb[1] happens to clear it. Correct cb mapping also needs the intended explicit clear."
+    },
+    "wire_len": {
+      "kernel_skb_offset": 40,
+      "kernel_field": "qdisc_skb_cb.pkt_len",
+      "native_field": "sk_buff.len",
+      "finding": "Distinct fields. Benchmark branch activity and unequal runtime values not established."
+    },
+    "ifindex": {
+      "finding": "Native dev NULL check matches eBPF conversion, not native-only overhead."
+    },
+    "data_end": {
+      "finding": "Native recomputes data+(len-data_len); eBPF reads the already maintained bpf_skb_data_end pointer. No isolated speed measurement."
+    }
   }
 }
