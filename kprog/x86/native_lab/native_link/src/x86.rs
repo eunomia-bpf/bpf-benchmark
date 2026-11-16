@@ -489,12 +489,12 @@ fn x86_direct_tail_transfers(
     let mut decoder = Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE);
     while decoder.can_decode() {
         let insn = decoder.decode();
-        if insn.flow_control() != FlowControl::UnconditionalBranch
+        if !(insn.flow_control() == FlowControl::UnconditionalBranch || insn.is_jcc_short_or_near())
             || !matches!(insn.op0_kind(), OpKind::NearBranch64) { continue; }
         let local_ip = insn.ip() - sym.address;
-        // Relocation targets are authoritative: an unlinked E9 disp32=0
-        // otherwise appears to jump to the following instruction.
-        if let Some(reloc) = relocations.get(&(insn.ip() + 1)) {
+        let displacement = insn.ip() + decoder.get_constant_offsets(&insn).immediate_offset() as u64;
+        // Relocation targets are authoritative for both JMP and Jcc.
+        if let Some(reloc) = relocations.get(&displacement) {
             if matches!(reloc.flags(), RelocationFlags::Elf { r_type: 2 | 4 }) {
                 let target_index = match reloc.target() {
                     RelocationTarget::Symbol(index) => index,
@@ -517,7 +517,7 @@ fn x86_direct_tail_transfers(
                     (target.name()?.to_owned(), reloc.addend(), None)
                 };
                 transfers.insert(local_ip, DirectTailTransfer {
-                    symbol, addend, defined: callee, relocation_offset: Some(insn.ip() + 1 - sym.address),
+                    symbol, addend, defined: callee, relocation_offset: Some(displacement - sym.address),
                 });
                 continue;
             }
@@ -1203,6 +1203,15 @@ pub(super) fn rewrite_x86(
                 }
             }
             if let Some(tail) = tail_transfers.remove(&local_ip) {
+                let conditional = insn.is_jcc_short_or_near();
+                if conditional {
+                    // Preserve the original decision around the existing tail rewrite.
+                    let mut guard = insn;
+                    guard.negate_condition_code();
+                    guard.set_near_branch64(insn.next_ip() - sym.address);
+                    push_x86_replacement(&mut local, &mut kinds, &mut insn_local_ip,
+                        local_ip, guard, None);
+                }
                 let mut jump = Instruction::default();
                 jump.set_code(Code::Jmp_rel32_64);
                 jump.set_op0_kind(OpKind::NearBranch64);
@@ -1219,8 +1228,14 @@ pub(super) fn rewrite_x86(
                     Some(PatchKind::HelperBranchRel32 { target_addr, opcode: 0xe9 })
                 } else { None };
                 let index = local.len();
-                push_x86_replacement(&mut local, &mut kinds, &mut insn_local_ip,
-                    local_ip, jump, kind);
+                if conditional {
+                    push_x86_synthetic(&mut local, &mut kinds, &mut insn_local_ip,
+                        &mut next_synthetic_ip, jump)?;
+                    kinds[index] = kind;
+                } else {
+                    push_x86_replacement(&mut local, &mut kinds, &mut insn_local_ip,
+                        local_ip, jump, kind);
+                }
                 if let Some(offset) = tail.relocation_offset {
                     canonicalized_relocations.insert(local_site_key(sym, offset));
                 }

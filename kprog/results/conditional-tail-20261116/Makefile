@@ -16,3 +16,8 @@ replay:
 host:
 	cd $(ROOT)/kprog/x86/native_lab/native_link && cargo test --release -- --test-threads=1 > $(RAW)/linker-tests.log 2>&1
 	cd $(ROOT)/kprog/x86/native_lab/native_link && cargo build --release > $(RAW)/linker-build.log 2>&1
+
+.PHONY: corpus
+corpus:
+	$(MAKE) -f $(ROOT)/kprog/results/host-link-replay-20261116/Makefile proofs RAW=$(RAW)/corpus
+	$(MAKE) -f $(ROOT)/kprog/results/host-link-replay-20261116/Makefile emission RAW=$(RAW)/corpus

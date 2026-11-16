@@ -11,7 +11,7 @@ linker = root / 'kprog/x86/native_lab/native_link/target/release/native-link'
 plan = root / 'corpus/results/shared-hash-regression-20261116/captures/link-ie2fmz97/link-plan.json'
 source, output = map(Path, sys.argv[1:])
 rows = []
-for symbol in ['entry', 'choose']:
+for symbol in ['entry', 'choose', 'choose_near', 'choose_reloc']:
     row = dict(symbol=symbol)
     proof = output / (symbol + '.proof.o')
     blob = output / (symbol + '.blob')
@@ -19,7 +19,7 @@ for symbol in ['entry', 'choose']:
         command = [str(linker), '--input', str(src), '--symbol', symbol,
                    '--mode', mode, '--output', str(dest)]
         if mode == 'kernel':
-            command += ['--link-plan', str(plan)]
+            command += ['--link-plan', str(plan), '--output-abi', str(output / (symbol + '.abi'))]
         with (output / (symbol + '.' + mode + '.log')).open('w') as log:
             child = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT)
         row[mode] = dict(command=command, returncode=child.returncode)

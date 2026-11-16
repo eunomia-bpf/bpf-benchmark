@@ -1,0 +1,48 @@
+{
+  "proofs-initial": {
+    "summary": {
+      "bcc": {
+        "ok": 34
+      },
+      "cilium": {
+        "ok": 80
+      },
+      "katran": {
+        "ok": 3
+      },
+      "otelcol-ebpf-profiler": {
+        "ok": 30
+      },
+      "tetragon": {
+        "ok": 154
+      },
+      "tracee": {
+        "ok": 174
+      }
+    },
+    "failures": []
+  },
+  "emission-initial": {
+    "summary": {
+      "bcc": {
+        "ok": 25
+      },
+      "cilium": {
+        "ok": 28
+      },
+      "katran": {
+        "ok": 1
+      },
+      "otelcol-ebpf-profiler": {
+        "ok": 14
+      },
+      "tetragon": {
+        "ok": 2
+      },
+      "tracee": {
+        "ok": 169
+      }
+    },
+    "failures": []
+  }
+}

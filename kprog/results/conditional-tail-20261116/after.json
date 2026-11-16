@@ -1,0 +1,197 @@
+{
+  "scope": "Host control-flow execution; no app timing or B stock claim",
+  "entries": [
+    {
+      "symbol": "entry",
+      "proof": {
+        "command": [
+          "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+          "--input",
+          "/var/tmp/kprog-tmp/perf/conditional-tail/fixture.o",
+          "--symbol",
+          "entry",
+          "--mode",
+          "proof",
+          "--output",
+          "/workspaces/kprog-raw/perf/20261116-conditional-tail/after-abi/entry.proof.o"
+        ],
+        "returncode": 0
+      },
+      "kernel": {
+        "command": [
+          "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+          "--input",
+          "/workspaces/kprog-raw/perf/20261116-conditional-tail/after-abi/entry.proof.o",
+          "--symbol",
+          "entry",
+          "--mode",
+          "kernel",
+          "--output",
+          "/workspaces/kprog-raw/perf/20261116-conditional-tail/after-abi/entry.blob",
+          "--link-plan",
+          "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ie2fmz97/link-plan.json",
+          "--output-abi",
+          "/workspaces/kprog-raw/perf/20261116-conditional-tail/after-abi/entry.abi"
+        ],
+        "returncode": 0
+      },
+      "returns": [
+        22,
+        11,
+        11,
+        11
+      ],
+      "expected": [
+        22,
+        11,
+        11,
+        11
+      ],
+      "code_bytes": 31
+    },
+    {
+      "symbol": "choose",
+      "proof": {
+        "command": [
+          "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+          "--input",
+          "/var/tmp/kprog-tmp/perf/conditional-tail/fixture.o",
+          "--symbol",
+          "choose",
+          "--mode",
+          "proof",
+          "--output",
+          "/workspaces/kprog-raw/perf/20261116-conditional-tail/after-abi/choose.proof.o"
+        ],
+        "returncode": 0
+      },
+      "kernel": {
+        "command": [
+          "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+          "--input",
+          "/workspaces/kprog-raw/perf/20261116-conditional-tail/after-abi/choose.proof.o",
+          "--symbol",
+          "choose",
+          "--mode",
+          "kernel",
+          "--output",
+          "/workspaces/kprog-raw/perf/20261116-conditional-tail/after-abi/choose.blob",
+          "--link-plan",
+          "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ie2fmz97/link-plan.json",
+          "--output-abi",
+          "/workspaces/kprog-raw/perf/20261116-conditional-tail/after-abi/choose.abi"
+        ],
+        "returncode": 0
+      },
+      "returns": [
+        22,
+        11,
+        11,
+        11
+      ],
+      "expected": [
+        22,
+        11,
+        11,
+        11
+      ],
+      "code_bytes": 39
+    },
+    {
+      "symbol": "choose_near",
+      "proof": {
+        "command": [
+          "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+          "--input",
+          "/var/tmp/kprog-tmp/perf/conditional-tail/fixture.o",
+          "--symbol",
+          "choose_near",
+          "--mode",
+          "proof",
+          "--output",
+          "/workspaces/kprog-raw/perf/20261116-conditional-tail/after-abi/choose_near.proof.o"
+        ],
+        "returncode": 0
+      },
+      "kernel": {
+        "command": [
+          "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+          "--input",
+          "/workspaces/kprog-raw/perf/20261116-conditional-tail/after-abi/choose_near.proof.o",
+          "--symbol",
+          "choose_near",
+          "--mode",
+          "kernel",
+          "--output",
+          "/workspaces/kprog-raw/perf/20261116-conditional-tail/after-abi/choose_near.blob",
+          "--link-plan",
+          "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ie2fmz97/link-plan.json",
+          "--output-abi",
+          "/workspaces/kprog-raw/perf/20261116-conditional-tail/after-abi/choose_near.abi"
+        ],
+        "returncode": 0
+      },
+      "returns": [
+        22,
+        11,
+        11,
+        11
+      ],
+      "expected": [
+        22,
+        11,
+        11,
+        11
+      ],
+      "code_bytes": 39
+    },
+    {
+      "symbol": "choose_reloc",
+      "proof": {
+        "command": [
+          "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+          "--input",
+          "/var/tmp/kprog-tmp/perf/conditional-tail/fixture.o",
+          "--symbol",
+          "choose_reloc",
+          "--mode",
+          "proof",
+          "--output",
+          "/workspaces/kprog-raw/perf/20261116-conditional-tail/after-abi/choose_reloc.proof.o"
+        ],
+        "returncode": 0
+      },
+      "kernel": {
+        "command": [
+          "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+          "--input",
+          "/workspaces/kprog-raw/perf/20261116-conditional-tail/after-abi/choose_reloc.proof.o",
+          "--symbol",
+          "choose_reloc",
+          "--mode",
+          "kernel",
+          "--output",
+          "/workspaces/kprog-raw/perf/20261116-conditional-tail/after-abi/choose_reloc.blob",
+          "--link-plan",
+          "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ie2fmz97/link-plan.json",
+          "--output-abi",
+          "/workspaces/kprog-raw/perf/20261116-conditional-tail/after-abi/choose_reloc.abi"
+        ],
+        "returncode": 0
+      },
+      "returns": [
+        22,
+        11,
+        11,
+        11
+      ],
+      "expected": [
+        22,
+        11,
+        11,
+        11
+      ],
+      "code_bytes": 39
+    }
+  ]
+}
