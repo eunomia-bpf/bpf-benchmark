@@ -1,0 +1,1467 @@
+{
+  "cases": [
+    {
+      "label": "stats-off",
+      "run": "corpus/results/x86_kvm_corpus_20261116_023729_285383",
+      "status": "ok",
+      "error": "",
+      "bpf_stats": false,
+      "samples": 3,
+      "workload_seconds": 180.0,
+      "arms": {
+        "baseline": {
+          "samples": [
+            {
+              "index": 0,
+              "threads": [
+                {
+                  "thread": 0,
+                  "sent": 159596856,
+                  "errors": 99549103,
+                  "attempts": 259145959,
+                  "usec": 179971760,
+                  "reported_pps": 886788,
+                  "sent_pps": 886788.3272353396,
+                  "attempt_pps": 1439925.6805623283,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@0",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 0,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 1,
+                  "sent": 49820834,
+                  "errors": 34526956,
+                  "attempts": 84347790,
+                  "usec": 179980548,
+                  "reported_pps": 276812,
+                  "sent_pps": 276812.32529639814,
+                  "attempt_pps": 468649.4787203337,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@1",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 1,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 2,
+                  "sent": 153815390,
+                  "errors": 94372505,
+                  "attempts": 248187895,
+                  "usec": 179980314,
+                  "reported_pps": 854623,
+                  "sent_pps": 854623.4117582437,
+                  "attempt_pps": 1378972.452509445,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@2",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 2,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 3,
+                  "sent": 145379974,
+                  "errors": 90160381,
+                  "attempts": 235540355,
+                  "usec": 179980212,
+                  "reported_pps": 807755,
+                  "sent_pps": 807755.3214572278,
+                  "attempt_pps": 1308701.3976847632,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@3",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 3,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                }
+              ],
+              "sent": 508613054,
+              "errors": 318608945,
+              "attempts": 827221999,
+              "reported_pps": 2825978,
+              "sent_pps": 2825979.385747209,
+              "attempt_pps": 4596249.00947687,
+              "rate_acceptance": 0.6148447092227609,
+              "count_acceptance": 0.6148446905605082,
+              "wall_seconds": 180.03682456900003
+            },
+            {
+              "index": 1,
+              "threads": [
+                {
+                  "thread": 0,
+                  "sent": 136628753,
+                  "errors": 72519296,
+                  "attempts": 209148049,
+                  "usec": 179940467,
+                  "reported_pps": 759299,
+                  "sent_pps": 759299.757735985,
+                  "attempt_pps": 1162318.0293291113,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@0",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 0,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 1,
+                  "sent": 52720981,
+                  "errors": 30814819,
+                  "attempts": 83535800,
+                  "usec": 179940401,
+                  "reported_pps": 292991,
+                  "sent_pps": 292991.3499525879,
+                  "attempt_pps": 464241.4907144727,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@1",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 1,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 2,
+                  "sent": 168741416,
+                  "errors": 89527216,
+                  "attempts": 258268632,
+                  "usec": 179940467,
+                  "reported_pps": 937762,
+                  "sent_pps": 937762.4656270343,
+                  "attempt_pps": 1435300.4430070752,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@2",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 2,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 3,
+                  "sent": 163746251,
+                  "errors": 86594867,
+                  "attempts": 250341118,
+                  "usec": 179940317,
+                  "reported_pps": 910003,
+                  "sent_pps": 910003.1262032288,
+                  "attempt_pps": 1391245.2871804156,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@3",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 3,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                }
+              ],
+              "sent": 521837401,
+              "errors": 279456198,
+              "attempts": 801293599,
+              "reported_pps": 2900055,
+              "sent_pps": 2900056.699518836,
+              "attempt_pps": 4453105.250231075,
+              "rate_acceptance": 0.6512436909880694,
+              "count_acceptance": 0.6512436910156822,
+              "wall_seconds": 180.11434573000003
+            },
+            {
+              "index": 2,
+              "threads": [
+                {
+                  "thread": 0,
+                  "sent": 176978075,
+                  "errors": 88715047,
+                  "attempts": 265693122,
+                  "usec": 179897436,
+                  "reported_pps": 983772,
+                  "sent_pps": 983772.081109594,
+                  "attempt_pps": 1476914.4458512461,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@0",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 0,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 1,
+                  "sent": 30789497,
+                  "errors": 18903207,
+                  "attempts": 49692704,
+                  "usec": 179897433,
+                  "reported_pps": 171150,
+                  "sent_pps": 171150.28539623466,
+                  "attempt_pps": 276227.9770829193,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@1",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 1,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 2,
+                  "sent": 158690627,
+                  "errors": 77401544,
+                  "attempts": 236092171,
+                  "usec": 179897366,
+                  "reported_pps": 882117,
+                  "sent_pps": 882117.5680804576,
+                  "attempt_pps": 1312371.471853568,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@2",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 2,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 3,
+                  "sent": 155339645,
+                  "errors": 81179551,
+                  "attempts": 236519196,
+                  "usec": 179897516,
+                  "reported_pps": 863489,
+                  "sent_pps": 863489.6604130988,
+                  "attempt_pps": 1314744.090185214,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@3",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 3,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                }
+              ],
+              "sent": 521797844,
+              "errors": 266199349,
+              "attempts": 787997193,
+              "reported_pps": 2900528,
+              "sent_pps": 2900529.594999385,
+              "attempt_pps": 4380257.984972947,
+              "rate_acceptance": 0.6621823657305196,
+              "count_acceptance": 0.6621823638907303,
+              "wall_seconds": 180.015431369
+            }
+          ],
+          "sent": 1552248299,
+          "errors": 864264492,
+          "attempts": 2416512791,
+          "attempt_error_fraction": 0.3576494588478261,
+          "count_acceptance": 0.6423505411521738,
+          "xdp_runs": null,
+          "xdp_minus_sent": null,
+          "bpf_time_ns": null,
+          "ns_per_invocation": null,
+          "median_pps": 2900055,
+          "median_sample": 1
+        },
+        "post_rejit": {
+          "samples": [
+            {
+              "index": 0,
+              "threads": [
+                {
+                  "thread": 0,
+                  "sent": 175911192,
+                  "errors": 104382416,
+                  "attempts": 280293608,
+                  "usec": 180000109,
+                  "reported_pps": 977283,
+                  "sent_pps": 977283.8082003606,
+                  "attempt_pps": 1557185.7681486183,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@0",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 0,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 1,
+                  "sent": 30226826,
+                  "errors": 23563117,
+                  "attempts": 53789943,
+                  "usec": 179947478,
+                  "reported_pps": 167975,
+                  "sent_pps": 167975.82459032853,
+                  "attempt_pps": 298920.2382708581,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@1",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 1,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 2,
+                  "sent": 151492388,
+                  "errors": 90298449,
+                  "attempts": 241790837,
+                  "usec": 179950389,
+                  "reported_pps": 841856,
+                  "sent_pps": 841856.4074346069,
+                  "attempt_pps": 1343652.760872887,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@2",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 2,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 3,
+                  "sent": 151807071,
+                  "errors": 89699223,
+                  "attempts": 241506294,
+                  "usec": 179997352,
+                  "reported_pps": 843385,
+                  "sent_pps": 843385.0237974612,
+                  "attempt_pps": 1341721.3715455104,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@3",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 3,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                }
+              ],
+              "sent": 509437477,
+              "errors": 307943205,
+              "attempts": 817380682,
+              "reported_pps": 2830499,
+              "sent_pps": 2830501.064022757,
+              "attempt_pps": 4541480.138837874,
+              "rate_acceptance": 0.6232551893856918,
+              "count_acceptance": 0.6232560766587826,
+              "wall_seconds": 180.02743885999996
+            },
+            {
+              "index": 1,
+              "threads": [
+                {
+                  "thread": 0,
+                  "sent": 109296588,
+                  "errors": 65691086,
+                  "attempts": 174987674,
+                  "usec": 179934355,
+                  "reported_pps": 607424,
+                  "sent_pps": 607424.7911134035,
+                  "attempt_pps": 972508.4128597899,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@0",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 0,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 1,
+                  "sent": 103840065,
+                  "errors": 65191689,
+                  "attempts": 169031754,
+                  "usec": 179934571,
+                  "reported_pps": 577099,
+                  "sent_pps": 577099.0222884961,
+                  "attempt_pps": 939406.7691416565,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@1",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 1,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 2,
+                  "sent": 154923997,
+                  "errors": 91546947,
+                  "attempts": 246470944,
+                  "usec": 179934483,
+                  "reported_pps": 861002,
+                  "sent_pps": 861002.2626958058,
+                  "attempt_pps": 1369781.5998948906,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@2",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 2,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 3,
+                  "sent": 137367424,
+                  "errors": 82443064,
+                  "attempts": 219810488,
+                  "usec": 179934493,
+                  "reported_pps": 763430,
+                  "sent_pps": 763430.1890077296,
+                  "attempt_pps": 1221613.957030462,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@3",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 3,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                }
+              ],
+              "sent": 505428074,
+              "errors": 304872786,
+              "attempts": 810300860,
+              "reported_pps": 2808955,
+              "sent_pps": 2808956.265105435,
+              "attempt_pps": 4503310.738926799,
+              "rate_acceptance": 0.623753595510233,
+              "count_acceptance": 0.6237535944365158,
+              "wall_seconds": 180.0078866839999
+            },
+            {
+              "index": 2,
+              "threads": [
+                {
+                  "thread": 0,
+                  "sent": 105115771,
+                  "errors": 59768651,
+                  "attempts": 164884422,
+                  "usec": 179921095,
+                  "reported_pps": 584232,
+                  "sent_pps": 584232.610411803,
+                  "attempt_pps": 916426.2923144171,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@0",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 0,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 1,
+                  "sent": 80060066,
+                  "errors": 53419136,
+                  "attempts": 133479202,
+                  "usec": 179921010,
+                  "reported_pps": 444973,
+                  "sent_pps": 444973.413610784,
+                  "attempt_pps": 741876.6824396995,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@1",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 1,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 2,
+                  "sent": 172059041,
+                  "errors": 103304495,
+                  "attempts": 275363536,
+                  "usec": 179918176,
+                  "reported_pps": 956318,
+                  "sent_pps": 956318.2821506595,
+                  "attempt_pps": 1530493.150397434,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@2",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 2,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 3,
+                  "sent": 162715851,
+                  "errors": 98582336,
+                  "attempts": 261298187,
+                  "usec": 179921094,
+                  "reported_pps": 904373,
+                  "sent_pps": 904373.3971515313,
+                  "attempt_pps": 1452293.2313873102,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@3",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 3,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                }
+              ],
+              "sent": 519950729,
+              "errors": 315074618,
+              "attempts": 835025347,
+              "reported_pps": 2889896,
+              "sent_pps": 2889897.703324778,
+              "attempt_pps": 4641089.356538861,
+              "rate_acceptance": 0.622676591919779,
+              "count_acceptance": 0.6226765820558977,
+              "wall_seconds": 180.04929485000002
+            }
+          ],
+          "sent": 1534816280,
+          "errors": 927890609,
+          "attempts": 2462706889,
+          "attempt_error_fraction": 0.37677671392586093,
+          "count_acceptance": 0.623223286074139,
+          "xdp_runs": null,
+          "xdp_minus_sent": null,
+          "bpf_time_ns": null,
+          "ns_per_invocation": null,
+          "median_pps": 2830499,
+          "median_sample": 0
+        }
+      },
+      "throughput_native_over_bpf": 0.9760156272898273,
+      "per_call_bpf_over_native": null,
+      "programs": {
+        "baseline": [
+          {
+            "bytes_jited": 13641,
+            "bytes_xlated": 23840,
+            "id": 9,
+            "name": "balancer_ingres",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "xdp"
+          }
+        ],
+        "post_rejit": [
+          {
+            "bytes_jited": 12990,
+            "bytes_xlated": 16,
+            "id": 16,
+            "name": "balancer_ingres",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "xdp"
+          }
+        ]
+      },
+      "installed_code_bytes": {
+        "baseline": 13641,
+        "post_rejit": 12990
+      }
+    },
+    {
+      "label": "stats-on",
+      "run": "corpus/results/x86_kvm_corpus_20261116_072549_683704",
+      "status": "ok",
+      "error": "",
+      "bpf_stats": true,
+      "samples": 3,
+      "workload_seconds": 180.0,
+      "arms": {
+        "baseline": {
+          "samples": [
+            {
+              "index": 0,
+              "threads": [
+                {
+                  "thread": 0,
+                  "sent": 120104533,
+                  "errors": 143434705,
+                  "attempts": 263539238,
+                  "usec": 179970192,
+                  "reported_pps": 667357,
+                  "sent_pps": 667357.920027112,
+                  "attempt_pps": 1464349.374034118,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@0",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 0,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 1,
+                  "sent": 55404822,
+                  "errors": 74100738,
+                  "attempts": 129505560,
+                  "usec": 179925488,
+                  "reported_pps": 307932,
+                  "sent_pps": 307932.0368440518,
+                  "attempt_pps": 719773.287484428,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@1",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 1,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 2,
+                  "sent": 119002374,
+                  "errors": 143405301,
+                  "attempts": 262407675,
+                  "usec": 179985351,
+                  "reported_pps": 661178,
+                  "sent_pps": 661178.1088784275,
+                  "attempt_pps": 1457939.0686078668,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@2",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 2,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 3,
+                  "sent": 125367432,
+                  "errors": 146158135,
+                  "attempts": 271525567,
+                  "usec": 179928325,
+                  "reported_pps": 696763,
+                  "sent_pps": 696763.1805609261,
+                  "attempt_pps": 1509076.2780123698,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@3",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 3,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                }
+              ],
+              "sent": 419879161,
+              "errors": 507098879,
+              "attempts": 926978040,
+              "reported_pps": 2333230,
+              "sent_pps": 2333231.246310517,
+              "attempt_pps": 5151138.008138782,
+              "rate_acceptance": 0.4529545204620841,
+              "count_acceptance": 0.452954808940242,
+              "wall_seconds": 180.04361208399996
+            },
+            {
+              "index": 1,
+              "threads": [
+                {
+                  "thread": 0,
+                  "sent": 113696875,
+                  "errors": 140053734,
+                  "attempts": 253750609,
+                  "usec": 179957071,
+                  "reported_pps": 631799,
+                  "sent_pps": 631799.9863422982,
+                  "attempt_pps": 1410061.8974844285,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@0",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 0,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 1,
+                  "sent": 75119231,
+                  "errors": 100300025,
+                  "attempts": 175419256,
+                  "usec": 179962741,
+                  "reported_pps": 417415,
+                  "sent_pps": 417415.4637931415,
+                  "attempt_pps": 974753.1907174052,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@1",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 1,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 2,
+                  "sent": 109127009,
+                  "errors": 137405034,
+                  "attempts": 246532043,
+                  "usec": 179960052,
+                  "reported_pps": 606395,
+                  "sent_pps": 606395.7405391281,
+                  "attempt_pps": 1369926.4934642273,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@2",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 2,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 3,
+                  "sent": 108806165,
+                  "errors": 136408940,
+                  "attempts": 245215105,
+                  "usec": 179954204,
+                  "reported_pps": 604632,
+                  "sent_pps": 604632.5263954378,
+                  "attempt_pps": 1362652.8280495186,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@3",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 3,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                }
+              ],
+              "sent": 406749280,
+              "errors": 514167733,
+              "attempts": 920917013,
+              "reported_pps": 2260241,
+              "sent_pps": 2260243.7170700054,
+              "attempt_pps": 5117394.40971558,
+              "rate_acceptance": 0.44167862316393697,
+              "count_acceptance": 0.4416785380856027,
+              "wall_seconds": 180.02545244499998
+            },
+            {
+              "index": 2,
+              "threads": [
+                {
+                  "thread": 0,
+                  "sent": 111853210,
+                  "errors": 139708307,
+                  "attempts": 251561517,
+                  "usec": 179984727,
+                  "reported_pps": 621459,
+                  "sent_pps": 621459.4530568141,
+                  "attempt_pps": 1397682.5766999663,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@0",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 0,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 1,
+                  "sent": 79250879,
+                  "errors": 103035671,
+                  "attempts": 182286550,
+                  "usec": 179974805,
+                  "reported_pps": 440344,
+                  "sent_pps": 440344.2970809164,
+                  "attempt_pps": 1012844.8256965746,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@1",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 1,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 2,
+                  "sent": 113507657,
+                  "errors": 142096464,
+                  "attempts": 255604121,
+                  "usec": 179969164,
+                  "reported_pps": 630706,
+                  "sent_pps": 630706.1414143147,
+                  "attempt_pps": 1420266.2018255529,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@2",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 2,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 3,
+                  "sent": 107087825,
+                  "errors": 138150000,
+                  "attempts": 245237825,
+                  "usec": 179972082,
+                  "reported_pps": 595024,
+                  "sent_pps": 595024.6494342383,
+                  "attempt_pps": 1362643.70715009,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@3",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 3,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                }
+              ],
+              "sent": 411699571,
+              "errors": 522990442,
+              "attempts": 934690013,
+              "reported_pps": 2287533,
+              "sent_pps": 2287534.5409862837,
+              "attempt_pps": 5193437.311372184,
+              "rate_acceptance": 0.4404663816731202,
+              "count_acceptance": 0.4404664276647193,
+              "wall_seconds": 180.0662119430001
+            }
+          ],
+          "sent": 1238328012,
+          "errors": 1544257054,
+          "attempts": 2782585066,
+          "attempt_error_fraction": 0.5549720915522228,
+          "count_acceptance": 0.4450279084477772,
+          "xdp_runs": 1238328013,
+          "xdp_minus_sent": 1,
+          "bpf_time_ns": 236843726911,
+          "ns_per_invocation": 191.26089729426155,
+          "median_pps": 2287533,
+          "median_sample": 2
+        },
+        "post_rejit": {
+          "samples": [
+            {
+              "index": 0,
+              "threads": [
+                {
+                  "thread": 0,
+                  "sent": 121467183,
+                  "errors": 139004977,
+                  "attempts": 260472160,
+                  "usec": 179896897,
+                  "reported_pps": 675204,
+                  "sent_pps": 675204.4366835299,
+                  "attempt_pps": 1447896.9028576408,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@0",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 0,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 1,
+                  "sent": 74186856,
+                  "errors": 84992378,
+                  "attempts": 159179234,
+                  "usec": 179996930,
+                  "reported_pps": 412156,
+                  "sent_pps": 412156.22955347074,
+                  "attempt_pps": 884344.1607587418,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@1",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 1,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 2,
+                  "sent": 115544579,
+                  "errors": 133517563,
+                  "attempts": 249062142,
+                  "usec": 179936866,
+                  "reported_pps": 642139,
+                  "sent_pps": 642139.5546591325,
+                  "attempt_pps": 1384164.0545189888,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@2",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 2,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 3,
+                  "sent": 112424736,
+                  "errors": 131046503,
+                  "attempts": 243471239,
+                  "usec": 179926884,
+                  "reported_pps": 624835,
+                  "sent_pps": 624835.6749178183,
+                  "attempt_pps": 1353167.6511443392,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@3",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 3,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                }
+              ],
+              "sent": 423623354,
+              "errors": 488561421,
+              "attempts": 912184775,
+              "reported_pps": 2354334,
+              "sent_pps": 2354335.8958139513,
+              "attempt_pps": 5069572.769279711,
+              "rate_acceptance": 0.46440518816114307,
+              "count_acceptance": 0.4644052012378742,
+              "wall_seconds": 180.00575313700006
+            },
+            {
+              "index": 1,
+              "threads": [
+                {
+                  "thread": 0,
+                  "sent": 124961284,
+                  "errors": 156603035,
+                  "attempts": 281564319,
+                  "usec": 179941516,
+                  "reported_pps": 694454,
+                  "sent_pps": 694454.991698525,
+                  "attempt_pps": 1564754.6228297865,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@0",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 0,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 1,
+                  "sent": 89873883,
+                  "errors": 117322590,
+                  "attempts": 207196473,
+                  "usec": 179941576,
+                  "reported_pps": 499461,
+                  "sent_pps": 499461.4640921006,
+                  "attempt_pps": 1151465.256700875,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@1",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 1,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 2,
+                  "sent": 101502253,
+                  "errors": 125373491,
+                  "attempts": 226875744,
+                  "usec": 179941478,
+                  "reported_pps": 564084,
+                  "sent_pps": 564084.8020599231,
+                  "attempt_pps": 1260830.7240868611,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@2",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 2,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 3,
+                  "sent": 92676179,
+                  "errors": 119380475,
+                  "attempts": 212056654,
+                  "usec": 179941344,
+                  "reported_pps": 515035,
+                  "sent_pps": 515035.4940107594,
+                  "attempt_pps": 1178476.5484468094,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@3",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 3,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                }
+              ],
+              "sent": 409013599,
+              "errors": 518679591,
+              "attempts": 927693190,
+              "reported_pps": 2273034,
+              "sent_pps": 2273036.7518613082,
+              "attempt_pps": 5155527.152064332,
+              "rate_acceptance": 0.44089317829529,
+              "count_acceptance": 0.4408931782715792,
+              "wall_seconds": 180.14311829100006
+            },
+            {
+              "index": 2,
+              "threads": [
+                {
+                  "thread": 0,
+                  "sent": 100593775,
+                  "errors": 113647449,
+                  "attempts": 214241224,
+                  "usec": 179949160,
+                  "reported_pps": 559012,
+                  "sent_pps": 559012.1954445356,
+                  "attempt_pps": 1190565.2907743498,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@0",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 0,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 1,
+                  "sent": 102620937,
+                  "errors": 112690844,
+                  "attempts": 215311781,
+                  "usec": 179951890,
+                  "reported_pps": 570268,
+                  "sent_pps": 570268.736827382,
+                  "attempt_pps": 1196496.3579987963,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@1",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 1,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 2,
+                  "sent": 137106194,
+                  "errors": 148805316,
+                  "attempts": 285911510,
+                  "usec": 179942039,
+                  "reported_pps": 761946,
+                  "sent_pps": 761946.4287608746,
+                  "attempt_pps": 1588908.9152757684,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@2",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 2,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                },
+                {
+                  "thread": 3,
+                  "sent": 92909989,
+                  "errors": 106766226,
+                  "attempts": 199676215,
+                  "usec": 179952000,
+                  "reported_pps": 516304,
+                  "sent_pps": 516304.2866986752,
+                  "attempt_pps": 1109608.2010758424,
+                  "config": {
+                    "clone_skb": 0,
+                    "dst_ip": "10.100.1.1",
+                    "dst_port": 8080,
+                    "iface": "rtlb0@3",
+                    "namespace": "katran-router",
+                    "pkt_size": 64,
+                    "proto": 17,
+                    "shared_skb": false,
+                    "src_ip": "10.0.0.2",
+                    "thread_id": 3,
+                    "tool": "kernel_pktgen",
+                    "xmit_mode": "start_xmit"
+                  }
+                }
+              ],
+              "sent": 433230895,
+              "errors": 481909835,
+              "attempts": 915140730,
+              "reported_pps": 2407530,
+              "sent_pps": 2407531.647731467,
+              "attempt_pps": 5085578.765124757,
+              "rate_acceptance": 0.4734036692620976,
+              "count_acceptance": 0.4734035769558634,
+              "wall_seconds": 180.38542622600016
+            }
+          ],
+          "sent": 1265867848,
+          "errors": 1489150847,
+          "attempts": 2755018695,
+          "attempt_error_fraction": 0.54052295532608,
+          "count_acceptance": 0.4594770446739201,
+          "xdp_runs": 1265867848,
+          "xdp_minus_sent": 0,
+          "bpf_time_ns": 232659397535,
+          "ns_per_invocation": 183.7943809873904,
+          "median_pps": 2354334,
+          "median_sample": 0
+        }
+      },
+      "throughput_native_over_bpf": 1.0292022016731561,
+      "per_call_bpf_over_native": 1.040624290398646,
+      "programs": {
+        "baseline": [
+          {
+            "bytes_jited": 13641,
+            "bytes_xlated": 23840,
+            "id": 9,
+            "name": "balancer_ingres",
+            "run_cnt_delta": 1238328013,
+            "run_time_ns_delta": 236843726911,
+            "type": "xdp"
+          }
+        ],
+        "post_rejit": [
+          {
+            "bytes_jited": 12990,
+            "bytes_xlated": 16,
+            "id": 16,
+            "name": "balancer_ingres",
+            "run_cnt_delta": 1265867848,
+            "run_time_ns_delta": 232659397535,
+            "type": "xdp"
+          }
+        ]
+      },
+      "installed_code_bytes": {
+        "baseline": 13641,
+        "post_rejit": 12990
+      }
+    }
+  ],
+  "scope": "Read-only analysis: median reported successful pktgen pps per arm; all recorded program code bytes. No run discarded. Stats-off per-call/body timing is not measured."
+}

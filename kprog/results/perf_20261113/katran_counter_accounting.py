@@ -8,7 +8,7 @@ import shutil
 import statistics
 
 
-def phase(raw):
+def phase(raw, stats=True):
     samples=[]
     for index, workload in enumerate(raw['workloads']):
         threads=[]
@@ -41,7 +41,8 @@ def phase(raw):
     middle=sorted(samples,key=lambda s:s['reported_pps'])[len(samples)//2]
     return dict(samples=samples,sent=sent,errors=errors,attempts=sent+errors,
         attempt_error_fraction=errors/(sent+errors),count_acceptance=sent/(sent+errors),
-        xdp_runs=runs,xdp_minus_sent=runs-sent,bpf_time_ns=nanos,ns_per_invocation=nanos/runs,
+        xdp_runs=runs if stats else None,xdp_minus_sent=runs-sent if stats else None,
+        bpf_time_ns=nanos if stats else None,ns_per_invocation=nanos/runs if stats else None,
         median_pps=statistics.median(s['reported_pps'] for s in samples),median_sample=middle['index'])
 
 

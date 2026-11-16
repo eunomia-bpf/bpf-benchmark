@@ -25,3 +25,5 @@ Raw: /workspaces/kprog-raw/perf/20261116-rooted-image.
 
 The shipped CLI, native loader SO and shim also match their canonical packaged
 build outputs exactly (tool-inventory.json). This is artifact identity only.
+
+2026-11-16T09:50:16Z comparison analysis is ready through katran-accounting.mk comparison-analysis. It reuses the existing pktgen counter parser, reproduces the old stats-off0.976015627x and stats-on1.029202202x throughput plus1.040624290x per call, and explicitly leaves stats-off per-call timing unmeasured. This validates analysis against existing runs; it is not a new timing result. See analysis-check.json.
