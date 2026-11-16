@@ -1,0 +1,20 @@
+{
+  "timestamp": "2026-11-16T01:29:01Z",
+  "launcher_pid": 1290695,
+  "script_pid": 1290700,
+  "wait_pid": 1290703,
+  "state": "Waiting on the timing lock behind the breadth round",
+  "log": "/workspaces/kprog-raw/perf/20261116-reference-linker-timing/launcher.log",
+  "raw": "/workspaces/kprog-raw/perf/20261116-reference-linker-timing",
+  "script": "kprog/test/run_katran_reference_comparison.sh",
+  "script_sha256": "baffb2e27c179ed7bc137e61a471a38f0bbbc534608a1f86ffbbb76b3d6b8158",
+  "entry": "make -f kprog/perf/one-image/Makefile corpus APPS=katran BPFREJIT_CORPUS_BPF_STATS=<0|1>",
+  "samples": 3,
+  "workload_duration": 180,
+  "cpus": "0-7",
+  "address_space_limit_bytes": 103079215104,
+  "publication_address_space_limit_bytes": 34359738368,
+  "current_image": "fc408f640ba1b0caaed406fe9f736893c25b5249bd27f7c4b0e84fb8d5c16cff",
+  "reference": "May-build archive 0dc2098e; sole canonical linker replacement, then current source rebuild",
+  "scope": "Queued only; no reference timing result yet. Current-LTO comparison comes from the active breadth round. Frozen entry/settings unchanged."
+}

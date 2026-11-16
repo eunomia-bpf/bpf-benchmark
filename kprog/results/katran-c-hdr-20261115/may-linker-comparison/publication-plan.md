@@ -49,3 +49,5 @@ remain. Shell sessions record their exact launcher PIDs and redirect logs to
 persistent /workspaces storage. Results retain the observed LRU work difference
 from lru-reference.md and all application errors/counters. The native1.50x and
 code-size goals remain open.
+
+2026-11-16T01:29:01Z: committed job 9c01aa597/dc8110750 launched as PID1290695 (shell1290700), currently waiting on timing behind the breadth round. Logs and 96GiB address-space receipt are under /workspaces/kprog-raw/perf/20261116-reference-linker-timing. The script publishes under image EX, uses the unchanged entry at stats0/1, and rebuilds current source after both successful or failed timed Make invocations. queued-timing.json records the exact state; no reference timing has completed yet.
