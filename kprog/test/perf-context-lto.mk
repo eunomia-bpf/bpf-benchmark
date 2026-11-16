@@ -112,3 +112,9 @@ function-shim-live-kvm: function-live-inputs
 
 guest-function-shim-live: FUNCTION_LIVE_ENV = env FUNCTION_CAPTURE_SHIM=1 BPFREJIT_SHIM_DIR=$(OUTPUT)/live BPFREJIT_SHIM_LOG=$(OUTPUT)/live/shim.log LD_PRELOAD=$(ROOT)/bpfopt/shim/libbpfrejit_shim.so
 guest-function-shim-live: guest-function-live
+
+.PHONY: callee-ir
+callee-ir: $(BUILD)/kprog-bpf-callee-ir
+$(BUILD)/kprog-bpf-callee-ir: $(ROOT)/kprog/x86/bpf_callee_ir.cpp $(ROOT)/kprog/test/build_callee_ir.py $(ROOT)/runner/build-llvmbpf/CMakeFiles/micro_exec.dir/link.txt
+	install -d $(BUILD)
+	taskset -c $(CPUS) prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/build_callee_ir.py --root $(ROOT) --build $(BUILD)
