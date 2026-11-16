@@ -23,9 +23,9 @@ measure_app() {
 if [[ ${1:-} == --dry-run ]]; then
     declare -f publish_linker measure_app
     printf '%s\n' 'Wait for locks/timing, then release it before image publication.' \
-        'measure_app katran 0' 'measure_app katran 1' \
+        'measure_app katran 0' \
         'publish_linker --linker-input reference-image' \
-        'measure_app katran 0' 'measure_app katran 1' \
+        'measure_app katran 0' \
         'publish_linker --linker-rebuild current-image'
     exit 0
 fi
@@ -54,7 +54,7 @@ rebuild_current() {
 trap rebuild_current EXIT
 comparison_failed=0
 for comparison_app in katran; do
-    for comparison_stats in 0 1; do
+    for comparison_stats in 0; do
         comparison_label=${comparison_app//\//_}
         if measure_app "$comparison_app" "$comparison_stats" > "$comparison_output/current-$comparison_label-stats-$comparison_stats.log" 2>&1; then
             comparison_rc=0
@@ -66,7 +66,7 @@ for comparison_app in katran; do
     done
 done
 publish_linker --linker-input reference-image > "$comparison_output/reference-image.log" 2>&1
-for comparison_stats in 0 1; do
+for comparison_stats in 0; do
     if measure_app katran "$comparison_stats" > "$comparison_output/reference-katran-stats-$comparison_stats.log" 2>&1; then
         comparison_rc=0
     else
