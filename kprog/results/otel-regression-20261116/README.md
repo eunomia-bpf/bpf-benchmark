@@ -97,3 +97,7 @@ external map sample. These facts explain the need for a different sampler.
 Host guest-only PMU preflight passed; controller 1850880 started at
 19:06:56Z with raw output in `otel-regression/pmu`. Its native recording began
 at 19:13:00Z. It uses the same diagnostic CPU/memory scope as the software run.
+Both PMU guest arms completed at 19:15:05Z; the controller returned zero at
+19:15:07Z. The 37 MiB host recording is retained for offline guest-kernel
+decoding with the recorded clock pairs and symbols. The regression cause and
+production optimization remain open.
