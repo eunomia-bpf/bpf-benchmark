@@ -96,6 +96,7 @@ static int shim_native_loader_is_libbpf_probe(const struct prog_entry *prog) {
          strcmp(name, "probe_fmod_ret") == 0 ||
          strcmp(name, "probe_sys_fmod_") == 0 ||
          strcmp(name, "probe_get_func_") == 0 ||
+         strcmp(name, "probe_lsm_file_") == 0 ||
          strcmp(name, "uprobe_regs") == 0) &&
         insn_cnt <= 6)
         return 1;
