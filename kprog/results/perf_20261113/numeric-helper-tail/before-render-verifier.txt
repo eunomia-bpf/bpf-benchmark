@@ -1,0 +1,14 @@
+trusted-native-loader: service simulator verification failed before native compilation: Permission denied
+0: R1=ctx() R10=fp0
+0: (7a) *(u64 *)(r10 -8) = 9          ; R10=fp0 fp-8=9
+1: (79) r1 = *(u64 *)(r1 +0)          ; R1=scalar()
+2: (b4) w2 = 0                        ; R2=0
+3: (56) if w2 != 0x0 goto pc+6        ; R2=0
+4: (15) if r1 == 0x0 goto pc+5        ; R1=scalar(umin=1)
+5: (b4) w1 = 7                        ; R1=7
+6: (bc) w1 = w1                       ; R1=7
+7: (b7) r0 = 0                        ; R0=0
+8: (7b) *(u64 *)(r0 +0) = r0
+R0 invalid mem access 'scalar'
+processed 9 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0
+

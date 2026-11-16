@@ -7,10 +7,17 @@ enum Value { Id(u64), Symbol(String) }
 type Values = BTreeSet<Value>;
 type State = HashMap<Register, Values>;
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub(super) struct Calls {
     pub single: HashMap<u64, String>,
     pub numeric_joins: HashMap<u64, Vec<(u64, String)>>,
+    pub tails: HashSet<u64>,
+}
+
+fn indirect_register(insn: &Instruction) -> Option<Register> {
+    if !matches!(insn.flow_control(), FlowControl::IndirectCall | FlowControl::IndirectBranch)
+        || insn.op0_kind() != OpKind::Register { return None; }
+    x86_gpr64_family(insn.op0_register())
 }
 
 pub(super) fn calls(elf: &object::File, sym: &SymInfo,
@@ -25,6 +32,9 @@ pub(super) fn calls(elf: &object::File, sym: &SymInfo,
         (name.starts_with("bpf_") || helpers.contains_key(name) || matches!(name.as_str(), "memcpy" | "memset"))
             .then(|| Value::Symbol(name.clone()))
     })?;
+    let tails: HashSet<_> = Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE)
+        .into_iter().filter(|i| i.flow_control() == FlowControl::IndirectBranch)
+        .map(|i| i.ip()).collect();
     let mut result=Calls::default();
     for (ip, alternatives) in values {
         let mut names=BTreeSet::new();
@@ -46,6 +56,7 @@ pub(super) fn calls(elf: &object::File, sym: &SymInfo,
         } else if numeric.len()==alternatives.len() {
             result.numeric_joins.insert(ip-sym.address,numeric);
         }
+        if tails.contains(&ip) { result.tails.insert(ip-sym.address); }
     }
     Ok(result)
 }
@@ -95,7 +106,9 @@ fn analyze(bytes: &[u8], base: u64, tables: &HashMap<u64, Vec<u64>>,
             FlowControl::UnconditionalBranch => successors.push(insn.near_branch_target()),
             FlowControl::IndirectBranch => {
                 if let Some(targets) = tables.get(&insn.ip()) { successors.extend(targets); }
-                else { successors.extend(insns.iter().map(Instruction::ip)); }
+                else if !indirect_register(insn).is_some_and(|reg| state.contains_key(&reg)) {
+                    successors.extend(insns.iter().map(Instruction::ip));
+                }
             }
             _ => {}
         }
@@ -117,8 +130,8 @@ fn analyze(bytes: &[u8], base: u64, tables: &HashMap<u64, Vec<u64>>,
         }
     }
     Ok(insns.iter().enumerate().filter_map(|(i, insn)| {
-        if insn.flow_control() != FlowControl::IndirectCall { return None; }
-        let reg = x86_indirect_call_register(insn)?;
+        if tables.contains_key(&insn.ip()) { return None; }
+        let reg = indirect_register(insn)?;
         states[i].as_ref()?.get(&reg).cloned().map(|value| (insn.ip(), value))
     }).collect())
 }
@@ -126,6 +139,121 @@ fn analyze(bytes: &[u8], base: u64, tables: &HashMap<u64, Vec<u64>>,
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn compiler_emitted_kprobe_helper_tails_produce_symbolic_proof() -> Result<()> {
+        let build=std::path::Path::new("/var/tmp/kprog-tmp/perf/helper-cfg");
+        fs::create_dir_all(build)?;
+        let native=build.join("numeric-tail.native.o");
+        let command=["clang-18","-O3","-g","-fPIC","-fomit-frame-pointer","-march=native",
+            "-mno-red-zone","-mgeneral-regs-only","-fno-stack-protector","-fno-asynchronous-unwind-tables",
+            "-fno-unwind-tables","-c","/workspaces/repository/kprog/test/native_numeric_helper_tail.c",
+            "-o",native.to_str().unwrap()];
+        let output=std::process::Command::new(command[0]).args(&command[1..]).output()?;
+        if !output.status.success() { bail!("helper-tail fixture: {}",String::from_utf8_lossy(&output.stderr)); }
+        let source=fs::read(native)?;
+        let elf=object::File::parse(source.as_slice())?;
+        let entry=find_symbol_by_name(&elf,"numeric_tail")?;
+        let included=discover_reachable(&elf,&entry)?;
+        let facts=calls(&elf,&entry,&HashMap::new(),&HashMap::new())?;
+        assert!(!facts.tails.is_empty(),"compiler fixture no longer exercises numeric tail exits");
+        let proof=rewrite_x86(&elf,&entry,&included,&HashMap::new(),&HashMap::new(),&HashMap::new(),&[],
+            true,true,None,None,None,None,false)?;
+        write_proof_object(&build.join("numeric-tail.proof.o"),object::Architecture::X86_64,"numeric_tail",
+            &proof.blob,&proof.proof_symbols,&proof.proof_relocs,&proof.proof_data_relocs,proof.callee_saved_mask)?;
+        assert!(proof.proof_relocs.iter().any(|r|r.symbol=="bpf_get_prandom_u32"));
+        assert!(proof.proof_relocs.iter().any(|r|r.symbol=="bpf_get_smp_processor_id"));
+        Ok(())
+    }
+
+    #[test]
+    fn numeric_helper_tails_keep_arguments_and_return_through_entry_and_caller() -> Result<()> {
+        use object::write::{Object, Symbol, SymbolSection};
+        let build=std::path::Path::new("/var/tmp/kprog-tmp/perf/helper-cfg");
+        fs::create_dir_all(build)?;
+        let helpers=HashMap::from([("bpf_redirect".into(),0x1234), ("bpf_redirect_peer".into(),0x5678)]);
+        let singleton=vec![0xb8,23,0,0,0,0xff,0xe0];
+        let joined=vec![0x85,0xff,0x74,7,0xb8,23,0,0,0,0xeb,5,0xb8,155,0,0,0,0xff,0xe0];
+        let mut cases=0;
+        for (name,body) in [("singleton",singleton),("joined",joined)] {
+            for caller in [false,true] {
+                let mut object=Object::new(object::BinaryFormat::Elf,object::Architecture::X86_64,object::Endianness::Little);
+                let section=object.add_section(Vec::new(),b".text".to_vec(),SectionKind::Text);
+                // The caller aligns its stack, calls the tail-exiting subprogram,
+                // then observes the helper result after the subprogram returns.
+                let prefix=if caller {vec![0x48,0x83,0xec,8,0xe8,9,0,0,0,
+                    0x48,0x83,0xc4,8,0x48,0x83,0xc0,7,0xc3]} else {Vec::new()};
+                let mut code=prefix.clone();code.extend_from_slice(&body);
+                object.append_section_data(section,&code,1);
+                for (symbol,offset,size) in if caller {
+                    vec![("entry",0,prefix.len()),("callee",prefix.len(),body.len())]
+                } else {vec![("entry",0,body.len())]} {
+                    object.add_symbol(Symbol {name:symbol.as_bytes().to_vec(),value:offset as u64,size:size as u64,
+                        kind:SymbolKind::Text,scope:SymbolScope::Linkage,weak:false,
+                        section:SymbolSection::Section(section),flags:SymbolFlags::None});
+                }
+                let bytes=object.write()?;
+                let elf=object::File::parse(bytes.as_slice())?;
+                let entry=find_symbol_by_name(&elf,"entry")?;
+                let included=discover_reachable(&elf,&entry)?;
+                let proof=rewrite_x86(&elf,&entry,&included,&helpers,&HashMap::new(),&HashMap::new(),&[],
+                    true,true,None,None,None,None,false)?;
+                assert_eq!(proof.proof_relocs.iter().filter(|r| r.symbol.starts_with("bpf_")).count(),
+                    if name=="joined" {2}else {1});
+                let path=build.join(format!("{name}-{caller}.tail.proof.o"));
+                write_proof_object(&path,object::Architecture::X86_64,"entry",&proof.blob,
+                    &proof.proof_symbols,&proof.proof_relocs,&proof.proof_data_relocs,proof.callee_saved_mask)?;
+                let roundtrip=fs::read(path)?;
+                let linked_elf=object::File::parse(roundtrip.as_slice())?;
+                let linked_entry=find_symbol_by_name(&linked_elf,"entry")?;
+                let linked_symbols=discover_reachable(&linked_elf,&linked_entry)?;
+                // Old proofs could retain an unwrapped numeric helper JMP.
+                // Include that exact form rather than accepting a skipped JIT exit.
+                let path=build.join(format!("{name}-{caller}.legacy-tail.proof.o"));
+                let symbols:Vec<_>=included.iter().map(|s| ProofSymbol {name:s.name.clone(),
+                    offset:s.address,size:s.size}).collect();
+                write_proof_object(&path,object::Architecture::X86_64,"entry",&code,&symbols,&[],&[],0)?;
+                let legacy=fs::read(path)?;
+                let legacy_elf=object::File::parse(legacy.as_slice())?;
+                let legacy_entry=find_symbol_by_name(&legacy_elf,"entry")?;
+                let legacy_symbols=discover_reachable(&legacy_elf,&legacy_entry)?;
+                for (elf,entry,included) in [(&elf,&entry,&included),(&linked_elf,&linked_entry,&linked_symbols),
+                    (&legacy_elf,&legacy_entry,&legacy_symbols)] {
+                    let linked=rewrite_x86(elf,entry,included,&helpers,&HashMap::new(),&HashMap::new(),&[],
+                        false,true,None,None,None,None,false)?;
+                    // An observable epilogue distinguishes returning through
+                    // the JIT exit from incorrectly returning straight to C.
+                    let mut image=linked.blob;image.extend_from_slice(&[0x48,0x05,0,1,0,0,0xc3]);
+                    let mut stubs=HashMap::new();
+                    for (target,value) in [(0x1234,0x1000u32),(0x5678,0x2000)] {
+                        stubs.insert(target,image.len());
+                        // A real SysV callee enters with RSP mod 16 == 8.
+                        // Return zero on a misaligned call instead of hiding it.
+                        image.extend_from_slice(&[0x48,0x89,0xe0,0x83,0xe0,15,0x83,0xf8,8,
+                            0x74,3,0x31,0xc0,0xc3]);
+                        image.extend_from_slice(&[0x48,0x8d,0x84,0x37]);
+                        image.extend_from_slice(&value.to_le_bytes());image.push(0xc3);
+                    }
+                    for relocation in linked.relocs {
+                        let at=relocation.offset as usize;
+                        let displacement=i32::try_from(stubs[&relocation.target] as i64-(at+5) as i64)?;
+                        image[at+1..at+5].copy_from_slice(&displacement.to_le_bytes());
+                    }
+                    for selector in [0usize,1,7,128] {
+                        let expected=if name=="joined" && selector==0 {0x2000}else {0x1000};
+                        assert_eq!(memory::call_blob(&image,selector as *mut u8,19,0) as usize,
+                            expected+selector+19+256+if caller {7}else {0});
+                        cases+=1;
+                    }
+                }
+            }
+        }
+        assert_eq!(cases,48);
+        // Unknown and partial writes must not become a helper tail fact.
+        assert!(analyze(&[0xff,0xe0],0,&HashMap::new(),|_|None)?.is_empty());
+        assert!(analyze(&[0xb8,23,0,0,0,0xb0,155,0xff,0xe0],0,&HashMap::new(),|_|None)?.is_empty());
+        Ok(())
+    }
     fn ids(bytes: &[u8]) -> Result<HashMap<u64, Value>> {
         Ok(analyze(bytes, 0, &HashMap::new(), |_| None)?.into_iter()
             .filter_map(|(ip,values)| (values.len()==1).then(|| (ip,values.into_iter().next().unwrap())))

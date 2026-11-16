@@ -117,6 +117,18 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
             return FULL
         reg, width, shift = parsed
         return state.defined[reg] >> shift & (1 << width) - 1
+    def return_from(state):
+        destinations = state.pointers.get(state.aliases[rsp])
+        for destination in destinations if isinstance(destinations, frozenset) else ():
+            if destination.target is not None:
+                if return_sites is not None:
+                    return_sites.add(destination.target)
+                returned_alias = list(state.aliases)
+                returned_alias[rsp] += 8
+                push(destination.context, destination.target, State(
+                    state.defined, tuple(returned_alias), state.flags,
+                    state.opaque, state.pointers, state.constants))
+
     while queue:
         context, addr = queue.popleft()
         incoming = states[context, addr]
@@ -502,7 +514,7 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
         state = State(tuple(bits), tuple(alias), flags, opaque, pointers, tuple(constants))
         next_pc = following.get(addr)
         direct = insn.reloc_target if insn.reloc_target is not None else decode.branch_target(args[0]) if args else None
-        if op == 'call':
+        if op == 'call' or (op == 'jmp' and decode.is_helper_symbol(insn.reloc_symbol)):
             if insn.kernel_function is not None:
                 function = insn.kernel_function
                 for arg, reg in zip(function.get('arguments', []), ('rdi', 'rsi', 'rdx', 'rcx', 'r8', 'r9')):
@@ -580,7 +592,11 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
                 bits[rax] = FULL
                 alias[rax] = False
                 constants[rax] = None
-                push(context, next_pc, State(tuple(bits), tuple(alias), 0, opaque, pointers, tuple(constants)))
+                after_helper = State(tuple(bits), tuple(alias), 0, opaque, pointers, tuple(constants))
+                if op == 'jmp':
+                    return_from(after_helper)
+                else:
+                    push(context, next_pc, after_helper)
             code = [v for kind, v in choices if kind == 'code']
             if not choices and (not names):
                 code = [direct]
@@ -598,16 +614,7 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
                     pointers[alias[rsp]] = frozenset({ReturnAddress(context, next_pc)})
                 push(child, target, State(tuple(bits), tuple(alias), flags, opaque, pointers, tuple(constants)))
         elif op == 'ret':
-            destinations = pointers.get(alias[rsp])
-            for destination in destinations if isinstance(destinations, frozenset) else ():
-                if destination.target is None:
-                    pass
-                else:
-                    if return_sites is not None:
-                        return_sites.add(destination.target)
-                    returned_alias = list(alias)
-                    returned_alias[rsp] += 8
-                    push(destination.context, destination.target, State(tuple(bits), tuple(returned_alias), flags, opaque, pointers, tuple(constants)))
+            return_from(state)
         elif op == 'jmp':
             for target in [v for kind, v in targets.get(addr, ()) if kind == 'code'] if decode.is_indirect_branch(insn) else [direct]:
                 push(context, target, state, backedge=target <= addr)

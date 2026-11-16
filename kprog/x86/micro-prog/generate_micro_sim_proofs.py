@@ -1553,6 +1553,13 @@ def append_branch_or_ret(lines: list[str], insn: NativeInsn, addrs: set[int],
             raise ValueError(f"unsupported external branch target in {insn.raw}")
         return
     if insn.mnemonic == "jmp":
+        if is_helper_symbol(insn.reloc_symbol):
+            # A sibling helper call returns to this function's caller, rather
+            # than the placeholder displacement carried by the proof ELF.
+            encoded = encode(replace(insn, mnemonic="call"), rodata_idents or {})
+            append_encoded_step(lines, encoded, indent, step_macro)
+            lines.append(f"{indent}{ret_statement}")
+            return
         if len(insn.operands) != 1 or not has_direct_branch_target(insn.operands[0]):
             raise ValueError(f"unsupported indirect jump target in {insn.raw}")
         lines.append(f"{indent}/* 0x{insn.addr:x}: {c_comment(insn.raw)} */")

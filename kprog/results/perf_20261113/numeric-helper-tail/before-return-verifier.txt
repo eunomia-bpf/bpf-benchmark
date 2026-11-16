@@ -1,0 +1,19 @@
+trusted-native-loader: service simulator verification failed before native compilation: Invalid argument
+0: R1=ctx() R10=fp0
+0: (7a) *(u64 *)(r10 -8) = 9          ; R10=fp0 fp-8=9
+1: (79) r1 = *(u64 *)(r1 +0)          ; R1=scalar()
+2: (b4) w2 = 0                        ; R2=0
+3: (56) if w2 != 0x0 goto pc+5        ; R2=0
+4: (15) if r1 == 0x0 goto pc+4        ; R1=scalar(umin=1)
+5: (b4) w1 = 7                        ; R1=7
+6: (bc) w1 = w1                       ; R1=7
+7: (85) call bpf_get_prandom_u32#7    ; R0=scalar()
+8: (05) goto pc+3
+12: (79) r1 = *(u64 *)(r10 -8)        ; R1=9 R10=fp0 fp-8=9
+13: (18) r1 = 0xffff89a507739f30      ; R1=map_value(map=kprog_unspec,ks=4,vs=8)
+15: (79) r1 = *(u64 *)(r1 +0)         ; R1=scalar()
+16: (7b) *(u64 *)(r10 -8) = r1        ; R1=scalar(id=1) R10=fp0 fp-8=scalar(id=1)
+17: (85) call unknown#-1
+invalid func unknown#-1
+processed 14 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0
+

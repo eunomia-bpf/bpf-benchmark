@@ -1061,7 +1061,9 @@ pub(super) fn rewrite_x86(
         None
     };
 
-    let wrap_entry = proof_mode && !proof_input && !x86_direct_tail_transfers(elf, entry)?.is_empty();
+    let entry_helpers = helper_provenance::calls(elf, entry, &got_relocations, helper_addrs)?;
+    let wrap_entry = !entry_helpers.tails.is_empty()
+        || (!proof_input && !x86_direct_tail_transfers(elf, entry)?.is_empty());
     let entry_body_name = if wrap_entry {
         let names = elf.symbols().map(|s| s.name().map(str::to_owned))
             .collect::<std::result::Result<HashSet<_>, _>>()?;
@@ -1101,7 +1103,14 @@ pub(super) fn rewrite_x86(
         let mut tail_transfers = x86_direct_tail_transfers(elf, sym)?;
         let mut tail_calls = Vec::new();
         let memory_constants = memory::constants(&bytes, sym.address)?;
-        let helper_calls = helper_provenance::calls(elf, sym, &got_relocations, helper_addrs)?;
+        let helper_calls = if symbol_key(sym) == symbol_key(entry) { entry_helpers.clone() }
+            else { helper_provenance::calls(elf, sym, &got_relocations, helper_addrs)? };
+        for ip in &helper_calls.tails {
+            if let Some(name) = helper_calls.single.get(ip) {
+                tail_transfers.insert(*ip, DirectTailTransfer { symbol: name.clone(), addend: -4,
+                    defined: None, relocation_offset: None });
+            }
+        }
         let proven_helpers = &helper_calls.single;
         let entry_abi_strip = if is_entry {
             let entry_has_tail_call = proven_helpers.values().any(|name| name == "bpf_tail_call")
@@ -1167,6 +1176,16 @@ pub(super) fn rewrite_x86(
                 remap_x86_entry_registers(&mut insn, &entry_abi_strip.register_renames)?;
             }
 
+            if helper_calls.tails.contains(&local_ip) {
+                if let Some(alternatives) = helper_calls.numeric_joins.get(&local_ip) {
+                    append_x86_numeric_helper_dispatch(&mut local, &mut kinds,
+                        &mut insn_local_ip, &mut next_synthetic_ip, local_ip,
+                        insn.next_ip()-sym.address, x86_gpr64_family(insn.op0_register()).unwrap(),
+                        alternatives, helper_addrs, true, proof_mode, &mut tail_calls)?;
+                    resolved_helper_call_sites.insert(site_key);
+                    continue;
+                }
+            }
             if let Some(tail) = tail_transfers.remove(&local_ip) {
                 let mut jump = Instruction::default();
                 jump.set_code(Code::Jmp_rel32_64);
@@ -1399,7 +1418,8 @@ pub(super) fn rewrite_x86(
                     } else {
                         append_x86_numeric_helper_dispatch(&mut local,&mut kinds,
                             &mut insn_local_ip,&mut next_synthetic_ip,local_ip,
-                            insn.next_ip()-sym.address,call_reg.unwrap(),alternatives,helper_addrs)?;
+                            insn.next_ip()-sym.address,call_reg.unwrap(),alternatives,helper_addrs,
+                            false, false, &mut tail_calls)?;
                     }
                     resolved_helper_call_sites.insert(site_key);
                     continue;
@@ -3685,6 +3705,7 @@ fn append_x86_numeric_helper_dispatch(
     source_ips: &mut Vec<u64>, next_ip: &mut u64, source_ip: u64,
     continuation: u64, register: Register, alternatives: &[(u64,String)],
     helpers: &HashMap<String,u64>,
+    tail: bool, proof: bool, proof_tails: &mut Vec<(usize,DirectTailTransfer)>,
 ) -> Result<()> {
     let registers=[Register::RAX,Register::RCX,Register::RDX,Register::RBX,
         Register::RSP,Register::RBP,Register::RSI,Register::RDI,
@@ -3703,10 +3724,12 @@ fn append_x86_numeric_helper_dispatch(
             bytes.extend_from_slice(&(*id as u32).to_le_bytes());
             Some(append_x86_jcc_rel32(&mut bytes,0x85))
         };
-        calls.insert(bytes.len(),runtime_call_target(name,helpers,"finite helper call")?);
-        bytes.extend_from_slice(&[0xe8,0,0,0,0]);
+        calls.insert(bytes.len(),(name, if proof { 0 } else {
+            runtime_call_target(name,helpers,"finite helper call")?
+        }));
+        bytes.extend_from_slice(&[if tail {0xe9} else {0xe8},0,0,0,0]);
         if let Some(next)=next {
-            returns.insert(bytes.len());bytes.extend_from_slice(&[0xe9,0,0,0,0]);
+            if !tail { returns.insert(bytes.len());bytes.extend_from_slice(&[0xe9,0,0,0,0]); }
             let destination=bytes.len();patch_x86_rel32(&mut bytes,next,destination)?;
         }
     }
@@ -3714,9 +3737,13 @@ fn append_x86_numeric_helper_dispatch(
     for (index,mut instruction) in Decoder::with_ip(64,&bytes,base,DecoderOptions::NONE).into_iter().enumerate() {
         let offset=(instruction.ip()-base) as usize;
         if returns.contains(&offset) { instruction.set_near_branch64(continuation); }
-        let kind=calls.get(&offset).map(|target| PatchKind::HelperBranchRel32 {
-            target_addr:*target,opcode:0xe8 });
-        if kind.is_some() { instruction=build_x86_helper_call_rel32_slot()?; }
+        let kind=calls.get(&offset).filter(|_| !proof).map(|(_,target)| PatchKind::HelperBranchRel32 {
+            target_addr:*target,opcode:if tail {0xe9} else {0xe8} });
+        if let Some((name,_)) = calls.get(&offset).filter(|_| tail) {
+            instruction.set_near_branch64(X86_JMP_END_PLACEHOLDER_TARGET);
+            if proof { proof_tails.push((local.len(),DirectTailTransfer { symbol:(*name).clone(),
+                addend:-4,defined:None,relocation_offset:None })); }
+        } else if kind.is_some() { instruction=build_x86_helper_call_rel32_slot()?; }
         if index==0 {
             push_x86_replacement(local,kinds,source_ips,source_ip,instruction,kind);
         } else {

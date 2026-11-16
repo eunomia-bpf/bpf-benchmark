@@ -66,6 +66,23 @@ helper-join-proof:
 	python3 -c 'import pathlib,tarfile; archive=tarfile.open("/workspaces/kprog-raw/perf/20261116-checked-six-apps/tetragon/state/session-sxeysh3e/requests/1.success.tar.gz"); name=next(n for n in archive.getnames() if n.endswith(".link-plan.json")); pathlib.Path("$(OUTPUT)/link-plan.json").write_bytes(archive.extractfile(name).read())'
 	$(LINKER_BINARY) --input $(OUTPUT)/helper-join.proof.o --symbol helper_join --mode kernel --link-plan $(OUTPUT)/link-plan.json --output $(OUTPUT)/blob.bin --output-relocs $(OUTPUT)/relocs.bin --output-map-patches $(OUTPUT)/maps.tsv --output-abi $(OUTPUT)/abi.tsv
 
+.PHONY: numeric-tail-b numeric-tail-stock guest-numeric-tail-stock
+NUMERIC_TAIL_BUILD := /var/tmp/kprog-tmp/perf/helper-cfg
+numeric-tail-b:
+	clang-18 -target bpf -O2 -g -c $(ROOT)/kprog/test/native_numeric_helper_tail.c -o $(NUMERIC_TAIL_BUILD)/numeric-tail.source.bpf.o
+	taskset -c 16 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/build_numeric_helper_tail_b.py --build $(NUMERIC_TAIL_BUILD) --output $(OUTPUT)
+	tar -C $(NUMERIC_TAIL_BUILD) -czf $(OUTPUT)/build.tar.gz .
+
+numeric-tail-stock:
+	install -d $(OUTPUT) $(OUTPUT)/inputs
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 16 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(OUTPUT) --rodir $(OUTPUT)/inputs=$(NUMERIC_TAIL_BUILD) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-numeric-tail-stock OUTPUT=$(OUTPUT)'
+
+guest-numeric-tail-stock:
+	mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf
+	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
+	python3 $(ROOT)/kprog/test/verify_retained_proof.py --native $(OUTPUT)/inputs/numeric-tail.native.o --metadata $(OUTPUT)/inputs/metadata.json --context $(OUTPUT)/inputs/context.json --source $(OUTPUT)/inputs/numeric-tail.source.bpf.o --proof $(OUTPUT)/inputs/trusted_x86.bpf.o --symbol numeric_tail --linker $(LINKER_BINARY) --output $(OUTPUT)/replay
+
 .PHONY: check build
 check: $(KERNEL_LAYOUT)
 	taskset -c $(CHECK_CPUS) prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) NATIVE_LINK_HASH_TEST_OUTPUT=$(OUTPUT)/hash-execution cargo test --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
