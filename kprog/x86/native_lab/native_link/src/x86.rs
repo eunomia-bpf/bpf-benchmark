@@ -56,6 +56,8 @@ mod non_pic;
 mod readonly_relocs;
 #[path = "x86_helper_provenance.rs"]
 mod helper_provenance;
+#[path = "x86_code_provenance.rs"]
+mod code_provenance;
 
 #[path = "x86_effects.rs"]
 mod effects;
@@ -1121,6 +1123,7 @@ pub(super) fn rewrite_x86(
             }
         }
         let proven_helpers = &helper_calls.single;
+        let defined_code_calls = code_provenance::calls(elf, sym, included)?;
         let entry_abi_strip = if is_entry {
             let entry_has_tail_call = proven_helpers.values().any(|name| name == "bpf_tail_call")
                 || helper_calls.numeric_joins.values().flatten().any(|(_,name)| name=="bpf_tail_call")
@@ -1609,7 +1612,7 @@ pub(super) fn rewrite_x86(
                     )?;
                     resolved_helper_call_sites.insert(site_key);
                     continue;
-                } else if let Some(reg) = call_reg {
+                } else if let Some(reg) = call_reg.filter(|_| !defined_code_calls.contains(&local_ip)) {
                     bail!(
                         "x86 unresolved register-indirect call in {} at local offset {:#x} through {:?}; helper calls must be rewritten before kernel load",
                         sym.name,
