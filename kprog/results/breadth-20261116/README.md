@@ -350,3 +350,28 @@ recorded a full 287-program baseline arm, so the failure is at the native arm.
 89-96 invocations per sample across these runs, below the `min_runs ≥ 100`
 filter `rejit/docs/evaluation.md` §5 uses, so its 0.297x is 6-10 timings of a
 single ~4 µs tail and is not quoted as a ratio anywhere above.
+
+## Installed bytes: native/JIT per app on this image
+
+The coordinator's target is native/JIT installed bytes ≤ 0.5 per app. Measured
+from `bytes_jited` summed over every program each arm carries, in both modes
+(the ratio is a property of the payload, so stats on and off agree):
+
+| app | JIT bytes | native bytes | native/JIT | programs JIT → native |
+|---|---|---|---|---|
+| tracee/monitor | 2 068 774 | 1 693 847 | **0.819** | 167 → 167 |
+| katran | 13 641 | 10 546 | **0.773** | 1 → 1 |
+| cilium/agent | 233 900 | 289 145 | **1.236** | 53 → 56 |
+| bcc/set | 7 965 | 11 952 | **1.501** | 25 → 25 |
+| otelcol-ebpf-profiler/profiling | 167 504 | 303 930 | **1.814** | 13 → 13 |
+
+At stats off Cilium is 1.182 (238 732 → 282 132), so its 1.236 at stats on is
+the 56-program arm carrying three extra programs, not a different payload.
+**No app is at or below 0.5, and the two that pass it in spirit — Tracee and
+Katran — do so by 0.77-0.82, not by 2x.** So the byte target is currently met
+by nothing, and the three apps above 1.0 (Cilium, BCC, OTel) are the ones whose
+native bodies are *larger* than the JIT they replace. That is the same set that
+falls short on throughput, with one inversion worth naming: Tracee has the best
+byte ratio and the worst per-call behaviour on its low-count programs, and OTel
+has the worst byte ratio and — on `053859_493069` — the best per-call gain in
+the whole round, so bytes and per-call cost are not the same axis.
