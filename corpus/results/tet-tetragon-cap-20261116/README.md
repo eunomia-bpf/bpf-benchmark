@@ -133,3 +133,32 @@ shape seen at offset 0x30 sets `%rax` (the helper id register for the call)
 to 4 while the id is in `%rcx`, which is not the shape the kernel's JIT emits
 for a direct helper call. That site is the first thing to compare against the
 intercepted BPF original.
+
+## Why the odd call shape is a lead and not yet the bug
+
+`native-link` refuses to emit code with an unresolved register-indirect call:
+`kprog/x86/native_lab/native_link/src/x86.rs:1585` bails with "x86 unresolved
+register-indirect call in <sym> at local offset <n> through <reg>; helper calls
+must be rewritten before kernel load". Since the load succeeded and the
+replacement went in, every indirect call in this object *was* resolved — the
+shim's `native-loader replaced` line would not exist otherwise.
+
+So the shape difference is not an unresolved site. It narrows the question to
+what the resolved target was:
+
+- every other app's objects put the id in `%rax` (`movl $0x1,%eax; callq
+  *%rax` in `balancer.native.o`, and `biosnoop.native.o` has no indirect calls
+  at all), matching the helper-id-in-`%rax` convention;
+- this object has the id in `%rcx` at 20 sites and `%rax` holding something
+  else (`movl $0x4,%eax; movl $0x71,%ecx; movl $0x4,%esi; callq *%rcx`), where
+  `0x71` is `bpf_probe_read_kernel` and the arguments read as
+  `probe_read_kernel(dst, 4, src)`.
+
+The provenance pass follows register families (`x86_gpr64_family`), so a
+`%ecx`-held id should bind to the same helper as a `%eax`-held one — which is
+exactly the thing to verify with `native-link`'s own output rather than by
+reading the pass. `native-link` has a `show` path that prints
+`native-link-helper-site {symbol, input_offset, helper, map, proof_mode}`, and
+running the fork object through it is a single command outside the guest; it
+answers whether the site bound to `bpf_probe_read_kernel` or to something else.
+That is the next step, and it does not need a VM.
