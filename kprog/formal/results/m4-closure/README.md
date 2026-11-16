@@ -44,3 +44,10 @@ are committed here; raw commands/logs remain under
 multiline origin comment; its diagnostic is retained, and the final complete
 promotion/preprocessing comparison passes. The one checkout, sole image/base,
 peer jobs and frozen benchmark stay preserved.
+
+A subsequent M5 entry proof exposed the concrete canonical-identifier overflow
+in the normalized export. The [identifier repair](../m4-clight-identifiers/README.md)
+records the kernel-proved old entry refusal, the imported frontend/codec repair
+and regenerated exports. Their temporary IDs intentionally change in that
+forward repair; the unchanged-AST statement above describes the earlier
+comment-only closure step. Canonical simulator C and frozen paths stay intact.

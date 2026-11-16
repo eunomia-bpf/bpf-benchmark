@@ -93,10 +93,10 @@ def _shifted : Ident := identOfString "shifted"
 def _value : Ident := identOfString "value"
 def _width : Ident := identOfString "width"
 def _x86_alu_result : Ident := identOfString "x86_alu_result"
-def _t'1 : Ident := (Positive.ofNat 128)
-def _t'2 : Ident := (Positive.ofNat 129)
-def _t'3 : Ident := (Positive.ofNat 130)
-def _t'4 : Ident := (Positive.ofNat 131)
+def _t'1 : Ident := (Positive.ofNat 110220187581639404130389322663063742220938559423)
+def _t'2 : Ident := (Positive.ofNat 110220187581639404130389322663063742220938559424)
+def _t'3 : Ident := (Positive.ofNat 110220187581639404130389322663063742220938559425)
+def _t'4 : Ident := (Positive.ofNat 110220187581639404130389322663063742220938559426)
 
 def f_kprog_x86_shl_result : Function := {
   fn_return := tulong,

@@ -1881,6 +1881,13 @@ helper relocation must survive return normalization even when its placeholder
 looks like an end-of-object branch. The [helper-tail receipt](results/m4-x86-helper-tail/README.md)
 records the regression, actual Clight call/return sequence and six negatives.
 
+M5 entry checking exposed a [Clight identifier defect](results/m4-clight-identifiers/README.md):
+the old canonical temporary interval overflowed and made the generic ARM
+function's `op` both a parameter and a temporary. The imported frontend now
+allocates above actual named/local IDs, and Lean uses the exact canonical
+identifier encoding. All exports are regenerated; canonical simulator C and
+benchmark settings remain unchanged.
+
 M5 now has a [Clight execution foundation](results/m5-clight-execution/README.md):
 upstream step composition and a complete relational call of the actual exported
 ARM width function for every byte input and arbitrary memory. The theorem

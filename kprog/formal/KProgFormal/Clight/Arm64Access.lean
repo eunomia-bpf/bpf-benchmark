@@ -97,9 +97,9 @@ def _offset : Ident := identOfString "offset"
 def _result : Ident := identOfString "result"
 def _value : Ident := identOfString "value"
 def _width : Ident := identOfString "width"
-def _t'1 : Ident := (Positive.ofNat 128)
-def _t'2 : Ident := (Positive.ofNat 129)
-def _t'3 : Ident := (Positive.ofNat 130)
+def _t'1 : Ident := (Positive.ofNat 130201982281812506086315186773807711471641146965)
+def _t'2 : Ident := (Positive.ofNat 130201982281812506086315186773807711471641146966)
+def _t'3 : Ident := (Positive.ofNat 130201982281812506086315186773807711471641146967)
 
 def f_kprog_arm64_access_read : Function := {
   fn_return := tulong,
