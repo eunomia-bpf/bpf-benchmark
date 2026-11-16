@@ -534,6 +534,18 @@ katran-hot-instructions:
 relative-schedule-replay:
 	taskset -c 16-18 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/replay_relative_schedule.py --archive $(SCHEDULE_ARCHIVE) --build /var/tmp/kprog-tmp/perf/relative-schedule --output $(OUTPUT)
 
+.PHONY: generator-profile
+generator-profile:
+	taskset -c 16-18 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/profile_sim_generation.py --archive $(SCHEDULE_ARCHIVE) --build /var/tmp/kprog-tmp/perf/relative-schedule --output $(OUTPUT)
+
+.PHONY: loop-pointer-analysis
+loop-pointer-analysis:
+	taskset -c 16-18 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_loop_pointer_analysis.py --build /var/tmp/kprog-tmp/perf/loop-pointer-analysis --output $(OUTPUT) --linker $(LINKER_BINARY) $(LOOP_POINTER_ARGS)
+
+.PHONY: loop-pointer-debug
+loop-pointer-debug:
+	taskset -c 16-18 prlimit --as=8589934592 -- gdb --batch -ex run -ex 'thread apply all bt' --args python3 $(ROOT)/kprog/test/check_loop_pointer_analysis.py --build /var/tmp/kprog-tmp/perf/loop-pointer-analysis --output $(OUTPUT) --linker $(LINKER_BINARY) $(LOOP_POINTER_ARGS)
+
 .PHONY: relative-schedule-b
 relative-schedule-b: $(CONTEXT_TOOL)
 	taskset -c 16-18 prlimit --as=17179869184 -- python3 $(ROOT)/kprog/test/replay_relative_schedule.py --archive $(SCHEDULE_ARCHIVE) --build /var/tmp/kprog-tmp/perf/relative-schedule --output $(OUTPUT) --compile --bounds $(CONTEXT_TOOL)

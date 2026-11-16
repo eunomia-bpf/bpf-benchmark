@@ -56,7 +56,7 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
     def same(a, b):
         return type(a) is type(b) and a == b
 
-    def joined_pointer(a, b):
+    def joined_pointer(a, b, widen=False):
         if isinstance(a, frozenset) and isinstance(b, frozenset):
             return a | b
         if same(a, b):
@@ -74,6 +74,12 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
             return None
         left, right = (alternatives(a), alternatives(b))
         if left is not None and right is not None:
+            # A loop increment can enumerate offsets forever (including the
+            # linker's local memcpy/memset loops). Forget the growing exact
+            # pointer set at a backedge using the existing unknown element.
+            # Concrete return-address sets retain their separate finite join.
+            if widen and not right.offsets <= left.offsets:
+                return None
             return PointerAlternatives(left.offsets | right.offsets, left.external or right.external)
         return None
 
@@ -84,13 +90,13 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
             return PointerAlternatives(frozenset((offset + displacement for offset in value.offsets)), value.external)
         return value
 
-    def joined(a, b):
+    def joined(a, b, widen=False):
         opaque = {p: a.opaque.get(p, 255) & b.opaque.get(p, 255) for p in a.opaque.keys() | b.opaque.keys()}
         opaque = {p: v for p, v in opaque.items() if v != 255}
-        pointers = {p: joined_pointer(a.pointers.get(p, False), b.pointers.get(p, False)) for p in a.pointers.keys() | b.pointers.keys()}
-        return State(tuple((x & y for x, y in zip(a.defined, b.defined))), tuple((joined_pointer(x, y) for x, y in zip(a.aliases, b.aliases))), a.flags & b.flags, opaque, pointers, tuple((x if x == y else None for x, y in zip(a.constants, b.constants))))
+        pointers = {p: joined_pointer(a.pointers.get(p, False), b.pointers.get(p, False), widen) for p in a.pointers.keys() | b.pointers.keys()}
+        return State(tuple((x & y for x, y in zip(a.defined, b.defined))), tuple((joined_pointer(x, y, widen) for x, y in zip(a.aliases, b.aliases))), a.flags & b.flags, opaque, pointers, tuple((x if x == y else None for x, y in zip(a.constants, b.constants))))
 
-    def push(context, addr, state):
+    def push(context, addr, state, backedge=False):
         nonlocal lowest_stack
         if type(state.aliases[rsp]) is int:
             lowest_stack = min(lowest_stack, state.aliases[rsp])
@@ -100,7 +106,7 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
             raise ValueError(f'ABI CFG target 0x{addr:x} is not an instruction')
         key = (context, addr)
         old = states.get(key)
-        merged = state if old is None else joined(old, state)
+        merged = state if old is None else joined(old, state, backedge)
         if old != merged:
             states[key] = merged
             queue.append(key)
@@ -604,10 +610,10 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
                     push(destination.context, destination.target, State(tuple(bits), tuple(returned_alias), flags, opaque, pointers, tuple(constants)))
         elif op == 'jmp':
             for target in [v for kind, v in targets.get(addr, ()) if kind == 'code'] if decode.is_indirect_branch(insn) else [direct]:
-                push(context, target, state)
+                push(context, target, state, backedge=target <= addr)
         else:
             if op in decode.CC_AUX and op.startswith('j'):
-                push(context, direct, state)
+                push(context, direct, state, backedge=direct <= addr)
             if next_pc is not None:
                 push(context, next_pc, state)
     return -lowest_stack
