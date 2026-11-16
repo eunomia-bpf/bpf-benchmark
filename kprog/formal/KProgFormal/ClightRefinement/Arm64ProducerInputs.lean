@@ -65,7 +65,7 @@ private def setupNames : List CC.Ident :=
   [Arm64Entry.___a64_sim_is_xdp, Arm64Entry.___a64_sim_helper_ctx,
    Arm64Entry.___a64_sim_helper_abi_base]
 
-private theorem scalar_local (m : CC.Mem) (id : CC.Ident) (ty : CC.Ty) (chunk : CC.Chunk)
+theorem scalar_local (m : CC.Mem) (id : CC.Ident) (ty : CC.Ty) (chunk : CC.Chunk)
     (present : (id, ty) ∈ producer.fn_vars)
     (size : CC.sizeof ge.genv_cenv ty = CC.sizeChunk chunk)
     (align : (0 : Int) % CC.alignChunk chunk = 0) :
@@ -78,7 +78,7 @@ private theorem scalar_local (m : CC.Mem) (id : CC.Ident) (ty : CC.Ty) (chunk : 
   simpa only [CC.Mem.validAccess, size, Int.zero_add, align, beq_self_eq_true,
     Bool.and_true] using writable
 
-private theorem create_store (m memory : CC.Mem) (chunk : CC.Chunk) (block : CC.Block)
+theorem create_store (m memory : CC.Mem) (chunk : CC.Chunk) (block : CC.Block)
     (value : CC.Val) (access : memory.access = (allocation m).2.access)
     (writable : CC.Mem.validAccess (allocation m).2 chunk block 0 .Writable = true) :
     ∃ after, CC.Mem.store chunk memory block 0 value = some after ∧
@@ -200,9 +200,9 @@ theorem first_input_ready (m : CC.Mem) (ctx continuation : CC.Val) (k : CC.Cont)
 def firstInputTemps (le : CC.TempEnv) (value : BitVec 64) : CC.TempEnv :=
   (le.set Arm64Entry._t'2 (.Vlong value)).set Arm64Entry._t'1 (.Vlong value)
 
-private def gprComposite : CC.Composite :=
+def gprComposite : CC.Composite :=
   (ge.genv_cenv.get Arm64Entry._arm64_sim_gpr).get (by decide +kernel)
-private theorem x0_layout :
+theorem x0_layout :
     ge.genv_cenv.get Arm64Entry._arm64_sim_gpr = some gprComposite ∧
     CC.unionFieldOffset ge.genv_cenv Arm64Entry._x gprComposite.co_members = .OK (0, .Full) := by
   decide +kernel

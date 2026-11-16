@@ -1,0 +1,77 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-producer-registers",
+  "focused_build": {
+    "exit": 0,
+    "jobs": 148,
+    "log": "exec4.log"
+  },
+  "whole_lake_build": {
+    "exit": 0,
+    "jobs": 275,
+    "log": "lake-build.log",
+    "timing_lock": "shared flock for entire full build"
+  },
+  "public_queries": {
+    "exit": 0,
+    "theorems": 7,
+    "log": "query.log",
+    "source_axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "execution_axioms": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "external_determinism": "not assumed"
+  },
+  "actual_declarations": {
+    "source_type_branch_equations": 31,
+    "successor_equations": 30,
+    "provider_initializers": 30,
+    "zero_initializers": 1,
+    "previous_first_writeback_endpoint": "actual declaration 1",
+    "raw_prefix_connection": "shared declaration 0 continuation"
+  },
+  "actual_internal_transition_counts": {
+    "each_provider_initializer_before_call": 5,
+    "each_provider_initializer_after_external_outcome": 9,
+    "register30_zero_initializer": 10,
+    "raw_producer_call_to_first_input": 594
+  },
+  "provider_scope": {
+    "premises": [
+      "stated scalar outcome of actual kind-6 external relation",
+      "supplied post-memory access equals actual producer allocation access"
+    ],
+    "preservation": "two real stores preserve other declared-local loads and old caller blocks relative to supplied post-memory",
+    "existence_purity_final_register_native_origin": "not claimed"
+  },
+  "zero_initializer_scope": "actual zero word and scalar tag only; later return-tag assignment remains separate",
+  "proof_limits": {
+    "heartbeats": 200000,
+    "recursion_depth": 512,
+    "workers": 1,
+    "address_space_GiB": 32,
+    "declaration_elaboration": "synchronous"
+  },
+  "export_comparison": {
+    "baseline": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_byte_identical": true
+  },
+  "canonical_C_external_semantics_frozen_paths": "unchanged by this step",
+  "last_complete_make_check": {
+    "exit": 0,
+    "commit": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "rerun": "not needed for Lean-only proofs"
+  },
+  "complete_ISA_handler_refinements": 0,
+  "M5": "open",
+  "M6": "open"
+}

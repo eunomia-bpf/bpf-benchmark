@@ -2034,3 +2034,10 @@ Each stated scalar provider outcome then resumes the real continuation and
 writes x0's declaration initializer and tag in nine transitions. The provider
 trace/post-memory and explicit local-permission ABI binding are retained;
 this does not establish the final architectural register or native origin.
+
+The [remaining register declaration proof](results/m5-producer-registers/README.md)
+binds all 31 actual blocks and their successor chain. The shared execution law
+covers x0--x29's real provider calls and writebacks; x30's zero branch completes
+without a provider. Each writeback retains the explicit provider post-memory
+permission premise and preserves other local loads relative to that memory.
+The shared first continuation is connected to the existing raw-producer prefix.
