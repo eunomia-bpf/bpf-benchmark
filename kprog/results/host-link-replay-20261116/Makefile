@@ -1,6 +1,7 @@
 ROOT := /workspaces/repository
 RAW := /workspaces/kprog-raw/perf/20261116-host-link-replay
 HERE := $(ROOT)/kprog/results/host-link-replay-20261116
+EMISSION_OUTPUT ?= $(RAW)/emission-initial
 
 .PHONY: capture-tracee
 capture-tracee:
@@ -19,4 +20,4 @@ emission-dry-run:
 	python3 $(HERE)/emission.py $(RAW) --dry-run
 
 emission:
-	python3 $(HERE)/emission.py $(RAW)
+	python3 $(HERE)/emission.py $(RAW) $(EMISSION_OUTPUT)

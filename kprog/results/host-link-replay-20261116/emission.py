@@ -40,7 +40,7 @@ for i, entry in enumerate(inventory):
     elif entry['app'] == 'katran' and entry['symbol'] == 'balancer_ingress':
         plans = [str(captures / 'link-ie2fmz97/link-plan.json')]
     else:
-        plans = [str(old / str(i) / (str(j) + '.link-plan.json')) for j in range(len(entry['kernel_replays']))]
+        plans = [r['command'][r['command'].index('--link-plan') + 1] for r in entry['kernel_replays']]
     for j, plan in enumerate(plans):
         requests.append(dict(index=i, request=j, app=entry['app'], symbol=entry['symbol'],
             native=entry['native'], plan=plan, proof_status=proofs[i]['status']))
@@ -49,7 +49,7 @@ if len(sys.argv) > 2 and sys.argv[2] == '--dry-run':
     print(json.dumps(dict(requests=dict(Counter(r['app'] for r in requests)),
                          fresh_tracee=len(tracee), unmatched_tracee=unknown), indent=2))
     sys.exit(0)
-output = raw / 'emission-initial'
+output = Path(sys.argv[2]) if len(sys.argv) > 2 else raw / 'emission-initial'
 output.mkdir(exist_ok=False)
 
 
