@@ -597,3 +597,10 @@ participate in the cache key. Host original-offset/name extraction, two body
 values across 48 ABI vectors, cache identity/reuse, and three 256-context
 regressions pass. Real capture/app installation and nonconstant CEL remain
 open; the active benchmark image is unchanged. Receipts: runtime-bpf-functions/loader-report.json.
+
+2026-11-16T10:59:46Z — Phase 1 live binding evidence: 701d034e9/649692654 exercises
+original func_info offsets against live BTF on the sole kernel. Original BPF
+execution and the native artifact from its captured constant callee both return
+9. Empty BTF Params does not replace the actual native prototype. Fixture-only
+I/O/semantic evidence, with no app performance or native-kernel installation
+claim; image and timing entry unchanged. runtime-bpf-functions/live-report.json.

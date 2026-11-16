@@ -1,0 +1,24 @@
+{
+  "time": "2026-11-16T10:59:46Z",
+  "source": "701d034e9",
+  "guest_mapping_fix": "649692654",
+  "kernel": {
+    "prog_id": 3,
+    "btf_id": 27,
+    "bpf_result": 9,
+    "source_function_offset": 4
+  },
+  "execution": "BPF and native result both 9",
+  "finished": "2026-11-16T10:59:10Z",
+  "recipe": "make -r -f kprog/test/perf-context-lto.mk function-live-kvm CPUS=16 OUTPUT=/workspaces/kprog-raw/perf/20261116-live-function-facts",
+  "resources": {
+    "cpu": 16,
+    "vcpus": 1,
+    "guest_gib": 2,
+    "address_space_gib": 8,
+    "lease": "image shared, no timing lock"
+  },
+  "raw": "/workspaces/kprog-raw/perf/20261116-live-function-facts",
+  "initial_failure": "Temporary build path was absent in the guest; initial job.log retained. Forward recipe maps existing build read-only beneath persistent output/inputs; no second build or source copy.",
+  "scope": "Live kernel BTF/source-func_info binding and original BPF versus host-native execution of a constructed constant callee; no Tetragon app install, native kernel install or checked B claim."
+}

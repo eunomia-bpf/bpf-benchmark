@@ -47,3 +47,23 @@ loader-report.json records the result. This host subset uses constructed BTF
 and does not claim live-kernel BTF I/O or real Tetragon installation. C's
 capture writer, actual app replay and nonconstant CEL compilation stay open.
 The current image and running default rotate are unchanged.
+
+
+2026-11-16T10:59:46Z: committed live-BTF regression 701d034e9 with input-mapping correction
+649692654 passes on the sole kernel, CPU 16, one vCPU/2 GiB guest/8 GiB AS,
+imageSH without timing lock. The fixture loads original BTF and six original
+BPF instructions, with func_info at offsets 0 and 4. The loaded program's real
+ID/BTF ID locate the per-program sidecar and live BTF; the consumer extracts
+the two supplied callee instructions. Original BPF test execution and the
+native artifact compiled from those same bytes both return 9. The callee BTF
+has empty Params while its native declaration takes two arguments.
+
+Raw: /workspaces/kprog-raw/perf/20261116-live-function-facts, including initial
+job.log (guest temporary path missing), corrected job-mapped.log, actual
+original bytecode/metadata, kernel.json, native output and live-build.tar.gz.
+Only the recipe's input mount changed after the initial failure; no source
+copy, second build, image/base publication or benchmark-entry edit was needed.
+This exercises actual live BTF I/O and original function offsets. The source
+is a constructed regression fixture, not a Tetragon capture. Native code ran
+in userspace; native kernel installation, actual app capture, nonconstant CEL
+and checked B acceptance remain separate. live-report.json records scope.
