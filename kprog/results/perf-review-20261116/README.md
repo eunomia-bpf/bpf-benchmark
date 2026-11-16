@@ -54,6 +54,26 @@ to the source read during this review; subsequent cleanup may move them.
    map operation at link time, retaining that operation's semantics; no new
    wrapper, selector or per-call validation is needed.
 
+   Existing source support makes this a smaller implementation than a new
+   map-type/function-name resolver. The direct module's
+   `bpf_x86_native_lab.c:754–775` gets the map by FD and returns its actual
+   ops->map_update_elem. Lines 801–804 route the FD request, and :880–881
+   publish the map_update_elem file. The stock-path module has the same
+   operation in `kprog_stock.c:197–218`, :244–247 and :296. These are source
+   capabilities; the current image's endpoint behavior needs its functional
+   check when implementation resumes.
+
+   Loader `src/native_loader.cpp:435–480` already has the common FD-query
+   reader, with map-pointer and direct-value callers at :483–492. It can
+   consume the existing update query using the map FD established by the
+   original-source binding. Thread the result through the existing map/link
+   facts and select it by actual native argument provenance. Extend the same
+   module query machinery for delete. This avoids another symbol catalogue
+   and the source/native ordinal pairing identified above. The existing
+   stub map-reference array at :1152–1177 and registered map bindings at
+   :4071 keep their lifetime role; querying a function address is a load-time
+   operation, separate from those references and from each measured call.
+
    Retained relocation records for BCC `sys_enter` contain one generic update
    call, one pid/tgid helper call, one fast-clock call and one cgroup helper
    call. `sys_exit` also retains a generic update call. Relocation presence is
