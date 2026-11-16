@@ -567,3 +567,34 @@ double-execution cause and no confirmed Cilium packet fix. Those remain open. Th
     specialized copy, restrict it by actual proven call facts and retain all
     relevant semantics; value size alone does not prove flags or map-record
     behavior. Per-call and installed-byte effects remain unmeasured.
+
+18. **Retained Cilium baseline headers demonstrate an audit-policy difference.**
+
+    The latest stats round's exact generated headers have not been compared,
+    but historical baseline artifacts are available and should not be ignored.
+    The capture manifest at
+    `/workspaces/kprog-raw/perf/20261113-cilium-context-runtime-retry1/baseline-state/capture.json`
+    identifies state/globals/node_config.h and the template ep_config.h
+    archived beside its bpf_lxc.o. The template endpoint header defines
+    ENABLE_ROUTING at line3 and POLICY_AUDIT_MODE at line9. The node header
+    defines ENABLE_NODEPORT at line35 and contains no ENABLE_HOST_ROUTING,
+    ENABLE_HOST_FIREWALL or ENABLE_DSR definitions.
+
+    The current native maximum-feature recipe explicitly enables
+    HOST_ROUTING, HOST_FIREWALL and DSR (`vendor/bpf/Makefile:81–90`), and
+    neither it nor the checked-in dummy ep_config.h defines POLICY_AUDIT_MODE.
+    The current frozen runner explicitly requests --policy-audit-mode=true
+    (`runner/libs/app_runners/cilium.py:313`). This gives a concrete semantic
+    reason the native producer must consume the agent's actual headers:
+    `lib/policy.h:400–405` and :461–466 convert a negative policy verdict
+    into CTX_ACT_OK with audited=1 only in audit mode. With that macro absent,
+    the same denied-policy result stays negative. The actual benchmark packet
+    may already be allowed; this does not prove its recorded route cause.
+
+    The old capture also contradicts treating NODEPORT as universally absent:
+    it is explicitly1 there. It is a November13 capture, not proof of the
+    November16 round's generated flags. Do not remove NODEPORT merely from an
+    inferred generic configuration or apply the old headers as current ones.
+    Derive current flags from the actual agent build, retaining this historical
+    evidence and the current runner intent. No source/benchmark change or
+    guest was needed to locate these facts.

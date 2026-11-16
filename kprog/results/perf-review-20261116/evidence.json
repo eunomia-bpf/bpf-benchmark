@@ -721,5 +721,32 @@
       }
     ],
     "scope": "Source and emitted opcode reasoning, no fresh execution or proof these inputs occur in the frozen benchmark. No source implementation change."
+  },
+  "historical_cilium_header_features": {
+    "recorded_at": "2026-11-16T16:13:16Z",
+    "capture_date": "2026-11-13",
+    "manifest": "/workspaces/kprog-raw/perf/20261113-cilium-context-runtime-retry1/baseline-state/capture.json",
+    "node_header": "/workspaces/kprog-raw/perf/20261113-cilium-context-runtime-retry1/baseline-state/state/globals/node_config.h",
+    "node_definitions": [
+      {
+        "line": 35,
+        "text": "#define ENABLE_NODEPORT 1"
+      }
+    ],
+    "endpoint_template_header": "/workspaces/kprog-raw/perf/20261113-cilium-context-runtime-retry1/baseline-state/state/templates/853ca05cfa602fd2ffb7e02059251e10b149507262b889a53a5aa8db23bcd2c7/ep_config.h",
+    "endpoint_definitions": [
+      {
+        "line": 3,
+        "text": "#define ENABLE_ROUTING 1"
+      },
+      {
+        "line": 9,
+        "text": "#define POLICY_AUDIT_MODE 1"
+      }
+    ],
+    "current_runner_intent": "runner/libs/app_runners/cilium.py:313 --policy-audit-mode=true",
+    "current_native_audit_mode_defined": false,
+    "semantic_effect": "policy.h:400 and461 turn policy error into audited allow only with POLICY_AUDIT_MODE",
+    "scope": "Historical captured baseline plus current source. Current round headers and actual packet policy decision not compared."
   }
 }
