@@ -1,6 +1,6 @@
-# Tetragon's native arm dies once the replacement count reaches 3
+# Tetragon's native arm dies on `event_wake_up_n`
 
-Measured 2026-11-16 06:10-06:38Z on the one image (`bpf-benchmark/kprog:current`,
+Measured 2026-11-16 06:10-06:52Z on the one image (`bpf-benchmark/kprog:current`,
 `d9e29630`), kernel `7.0.0-rc2+`, one 10 s sample per run on CPUs 16-23, the
 rotate on 0-7 untouched. Every run below is a full `make -f
 kprog/perf/one-image/Makefile corpus APPS=tetragon/observer`, varying only
@@ -14,53 +14,81 @@ guest, which invalidated an earlier attempt).
 | `manifest-noentry.json` (drops `tg_kp_bprm_comm`) | 93 | 6 | dies |
 | `manifest-six.json` | 6 | 6 | dies |
 | `manifest-four.json` | 4 | 4 | dies |
-| `manifest-three.json` | 3 | 3 | **dies** |
-| `manifest-two.json` | 2 | 2 | **ok** |
+| `manifest-three.json` | 3 | 3 | dies |
+| `manifest-wake.json` (`event_wake_up_n` alone) | 1 | 1 | **dies** |
+| `manifest-acctwake.json` (`event_exit_acct` + `event_wake_up_n`) | 2 | 2 | dies |
+| `manifest-two.json` (`event_exit_acct` + `event_exit_disa`) | 2 | 2 | ok |
 | `manifest-1entry.json` (`event_exit_disa`) | 1 | 1 | ok |
 | `manifest-acct.json` (`event_exit_acct`) | 1 | 1 | ok |
 | `manifest-empty.json` (no match) | 0 | 0 | error, EINVAL on `event_exit_acct_process` |
 
-The crash depends on **how many programs were replaced**, not on which programs
-they are: the canonical entry set dies at 6, an arbitrary 4 die, an arbitrary 3
-die, two arbitrary entries are fine, and either of two single entries alone is
-fine. The first suspect — the `tg_kp_bprm_comm` entry, whose manifest entry
-carries `source_lacks_helper: 174`, helper 174 being `get_attach_cookie` — is
-not the cause: dropping that entry still dies at 6.
+**`event_wake_up_n` is the trigger.** Across all twelve runs the separation is
+perfect: every failing set contains it, no passing set does. An earlier reading
+of this table as a *replacement-count* ceiling (3 and up die, 2 and below pass)
+was a coincidence of how the sets were built — every set with three or more
+entries contained `event_wake_up_n` because it sorts into the first three.
 
-The death is silent. No `result.json`, no `details/apps/`, no kernel message: a
-guest `dmesg -c` stream written into the repository captured the boot through
-`[34.4 s]` and nothing at the crash, and the host `dmesg` shows no fault at the
-crash times. The shim log ends on a complete line, mid-load sequence:
+## The failure is in execution, not in load
+
+`manifest-wake.json` replaces one program and then dies ~6 s later, on a
+completely different program's load:
 
 ```
-native-loader no manifest match for prog=generic_kprobe_ ...
-  PROG_LOAD -> fd=477 errno=0 kernel_prog_id=417
-BPF_PROG_LOAD type=2 (kprobe) name=generic_kprobe_ insn_cnt=3634 ...
+[126.586053 pid=1949 tid=1956] native-loader replaced prog=event_wake_up_n original_fd=71 native_fd=87 ...
+[132.676577 pid=1949 tid=1964]   PROG_LOAD -> fd=476 errno=0 kernel_prog_id=416
+[132.677990 pid=1949 tid=1964] BPF_PROG_LOAD type=2 (kprobe) name=generic_kprobe_ insn_cnt=2919 ...
 ```
 
-with no `PROG_LOAD ->` for that load. In every failing run the last completed
-action is the Nth replacement and the next `BPF_PROG_LOAD` is the one that
-never returns; the program in flight differs between runs (`tg_kp_bprm_comm`
-with the canonical manifest, `execve_map_upda` with the no-entry one,
-`generic_kprobe_` with three), which is what rules out a single program.
+Replacement and attachment both succeed; the native program then runs under
+`stress_ng_tetragon_policy_hot` for about six seconds before the VM stops. So
+the fault is in the replaced program's native code or in what the shim left
+behind after swapping it — not in the loader's load path, which is where the
+search was pointed by the earlier count reading.
 
-The vng invocation carries `--append '... oops=panic'`, so a guest kernel oops
-would terminate the VM — consistent with the whole run vanishing rather than the
-app exiting. That the app's own stderr never appears, and that the `make` level
-reports only `Error 255` with no driver traceback, point the same way.
+The replacement itself looks successful by the shim's own report:
 
-Checked with the monitor on and `oops=panic` removed
-(`/workspaces/kprog-raw/one-image-runs/tet-monitor.log`, run
-`corpus/results/x86_kvm_corpus_20261116_064048_412955`, three entries): the run
-still died at the fourth load, 3 replacements, and no `Oops`, `panic`, `RIP:`,
-`BUG:` or trace appears in the captured output. So the VM-level silence is not
-an artifact of `--disable-monitor` and not a suppressed-oops print; the console
-simply carries nothing.
+```
+native-loader jit-info original fd=71 id=335 type=2 name=event_wake_up_n tag=edddb22551cf50f2 jited_len=7339 ...
+native-loader jit-info native   fd=87 id=336 type=2 name=event_wake_up_n tag=59f4a931744dcdc6 jited_len=4900 ...
+```
 
-Not explained yet: why the count matters, and what the shim or loader does on
-the (N+1)-th load that it does not do earlier. Two next steps: the console is a
-dead end, so the next signal has to come from the process itself — a wrapper
-that catches the death and reports the last shim entry point entered, or the
-loader run under a debugger in the guest; and tetragon's baseline arm exercises
-the same 94-load sequence without dying, which bounds the fault to the
-replacement path rather than tetragon's load sequence.
+Its manifest entry is the one entry in the 94 that maps to
+`bpf_fork_v511.native.o`:
+
+```json
+{"native_object": "bpf_fork_v511.native.o",
+ "program": "event_wake_up_n",
+ "source_lacks_helper": 174,
+ "symbol": "event_wake_up_new_task"}
+```
+
+`source_lacks_helper: 174` is `get_attach_cookie`: the object's source does not
+call that helper, so the linker had to prove a helper call away or leave one
+unbound. The other seven entries carrying `source_lacks_helper: 174`
+(`event_execve`, `event_exit_acct`, `event_exit_disa`, `execve_map_upda`,
+`execve_rate`, `execve_send`, and the generic families) do not die, and
+`event_exit_acct`/`event_exit_disa` were each verified alone. So the helper is
+necessary context but not sufficient to explain it; what is unique to
+`event_wake_up_n` is the `bpf_fork_v511` object and the `event_wake_up_new_task`
+symbol.
+
+## Silence
+
+No `result.json`, no `details/apps/`, no kernel message. A guest `dmesg -c`
+stream written into the repository captured the boot through `[34.4 s]` and
+nothing at the crash; the host `dmesg` shows no fault at the crash times; and a
+monitor-enabled run with `oops=panic` removed
+(`/workspaces/kprog-raw/one-image-runs/tet-monitor.log`, 3 entries) died the
+same way with no `Oops`, `panic`, `RIP:`, `BUG:` or trace in the captured
+output. The vng invocation normally carries `oops=panic`, so a guest oops
+would take the VM down whole — which is what the run looks like — but nothing
+prints it, even with the monitor on.
+
+## Next
+
+The trigger is now one program with one native object, so the shortest path is
+out of the guest: run the `bpf_fork_v511.native.o` build of
+`event_wake_up_n` in the simulator against its intercepted BPF original
+(`kprog/x86/`), and compare the two instruction streams at the
+`get_attach_cookie`-shaped site. Anything that reproduces the death outside the
+VM turns a silent VM crash into a comparable trace.
