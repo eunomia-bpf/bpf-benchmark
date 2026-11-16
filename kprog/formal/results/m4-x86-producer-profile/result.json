@@ -1,0 +1,102 @@
+{
+  "step": "M4 actual x86 producer frame and named fact profiles",
+  "status": "validated; M4 remains open",
+  "raw": "/workspaces/kprog-raw/formal/m4-x86-producer-profile",
+  "production_simulator_changes": false,
+  "fixture": "oracles/x86_stack_profile.S",
+  "profiles": {
+    "200": {
+      "frame_bytes": 200,
+      "named_facts": 25,
+      "instructions": 14,
+      "subfunctions": 0,
+      "export": {
+        "equal": true,
+        "bytes": 24688374,
+        "functions": 122,
+        "preprocessed_bytes": 2820197,
+        "producer_c_bytes": 3056
+      },
+      "program_cases_per_mode": 32,
+      "live_fact_reads_per_mode": 800,
+      "inputs_per_program_case": 49,
+      "native_fidelity": {
+        "allocated_sections_equal": true,
+        "allocated_relocations_equal": true,
+        "current_stream_equals_normal_build": true,
+        "allocated_section_bytes": {
+          ".text": 0,
+          "socket": 4832,
+          "license": 4
+        },
+        "allocated_relocations": 24
+      }
+    },
+    "376": {
+      "frame_bytes": 376,
+      "named_facts": 47,
+      "instructions": 14,
+      "subfunctions": 0,
+      "export": {
+        "equal": true,
+        "bytes": 28917884,
+        "functions": 122,
+        "preprocessed_bytes": 3083582,
+        "producer_c_bytes": 3194
+      },
+      "program_cases_per_mode": 32,
+      "live_fact_reads_per_mode": 1504,
+      "inputs_per_program_case": 71,
+      "native_fidelity": {
+        "allocated_sections_equal": true,
+        "allocated_relocations_equal": true,
+        "current_stream_equals_normal_build": true,
+        "allocated_section_bytes": {
+          ".text": 0,
+          "socket": 5184,
+          "license": 4
+        },
+        "allocated_relocations": 24
+      }
+    }
+  },
+  "validation": {
+    "make_clight": 0,
+    "all_clight_modules": 17,
+    "lean_jobs": 54,
+    "clight_layout": 0,
+    "axiom_queries": 8,
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "prior_15_exports_unchanged": true
+  },
+  "comparison": {
+    "200-native": {
+      "capture_bytes": 19200,
+      "summary": "x86 producer profile 200: 32 high64 return/input cases and 800 live fact reads"
+    },
+    "200-adapter": {
+      "capture_bytes": 19200,
+      "summary": "x86 producer profile 200: 32 high64 return/input cases and 800 live fact reads"
+    },
+    "376-native": {
+      "capture_bytes": 27648,
+      "summary": "x86 producer profile 376: 32 high64 return/input cases and 1504 live fact reads"
+    },
+    "376-adapter": {
+      "capture_bytes": 27648,
+      "summary": "x86 producer profile 376: 32 high64 return/input cases and 1504 live fact reads"
+    },
+    "mutations": [
+      "fact-references-alias-zero",
+      "handler-pointer-slot-zero",
+      "native-stack-base-low32"
+    ],
+    "comparison": "all native/adapter capture bytes equal per profile; normal product restored"
+  },
+  "native_header_baseline": "b7d97f2a9",
+  "scope": "Actual RAW producer programs and all inline C bodies at 200/376 with scalar facts. Helpers, arbitrary programs/platform and whole-default byte closure remain open. Zero M5 refinements migrated."
+}

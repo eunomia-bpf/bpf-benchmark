@@ -1594,6 +1594,15 @@ three mature linker computations pass. Native fixture sections and relocations
 remain exact. [Producer-layout receipts](results/m4-arm64-payload-profile/README.md)
 record the current export sizes and distinguish these checks from refinements.
 
+The x86 producer's 200-byte and 376-byte scalar-fact profiles now export as
+`Clight/X86StackProfile200.lean` and `Clight/X86StackProfile376.lean`. The actual
+parser and renderer consume the assembled `oracles/x86_stack_profile.S`; they
+derive 25 and 47 separately named fact cells. No production interpreter change
+is needed. The host oracle checks each live reference, pointer recovery and
+clearing, along with a closed program return depending on high stack-base bits.
+[Profile receipts](results/m4-x86-producer-profile/README.md) distinguish these
+actual producer declarations from arbitrary-profile refinements.
+
 M4 remains open for arbitrary producer program/return tables, remaining producer/storage
 profiles, platform correspondence and full default compiled-byte coverage. The
 stated x86 inline profile and ARM instruction dispatcher clear their earlier

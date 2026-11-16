@@ -731,6 +731,21 @@ clight: clightgen
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Context.lean c/X86Context.c
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Memory.lean c/X86Memory.c
 	external/clean/clightgen -fstruct-passing -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Inline.lean c/X86Inline.c
+	for frame in 200 376; do \
+	  ../stock-path/bin/clang -DFRAME=$$frame -c oracles/x86_stack_profile.S -o build/x86_stack_profile_$$frame.proof.o && \
+	  python3 tools/export_x86_stack_fixture.py --name x86_stack_profile_$$frame --object-dir build --output build/x86_stack_profile_$$frame.bpf.c && \
+	  external/clean/clightgen -fstruct-passing -lean -normalize -include c/ProgramSections.h -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86StackProfile$$frame.lean build/x86_stack_profile_$$frame.bpf.c || exit $$?; \
+	done
+	for frame in 200 376; do for adapter in 0 1; do \
+	  flags=; if test $$adapter = 1; then flags=-D__COMPCERT__; fi; \
+	  $(CC) -std=c11 -Wall -Wextra -O1 -fsanitize=undefined -fno-sanitize-recover=undefined \
+	    $$flags -include oracles/compcert_memory_host.h \
+	    -DPROFILE=$$frame -DKPROG_X86_PROGRAM_SOURCE=\"../build/x86_stack_profile_$$frame.bpf.c\" \
+	    -DKPROG_X86_PROGRAM_ENTRY=x86_stack_profile_$${frame}_x86_sim_xdp \
+	    -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src \
+	    oracles/test_x86_producer_profile_host.c -o build/test_x86_producer_profile_host && \
+	  ./build/test_x86_producer_profile_host || exit $$?; \
+	done; done
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64Address.lean c/Arm64Address.c
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64Stack.lean c/Arm64Stack.c
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64Access.lean c/Arm64Access.c
