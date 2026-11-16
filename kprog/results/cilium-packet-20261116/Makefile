@@ -1,6 +1,7 @@
 ROOT := /workspaces/repository
 HERE := $(ROOT)/kprog/results/cilium-packet-20261116
 RAW := /workspaces/kprog-raw/perf/20261116-cilium-packet
+CASE ?= retry1
 STATE := /var/tmp/kprog-tmp/perf/cilium-packet
 
 .PHONY: prepare run
@@ -11,4 +12,4 @@ prepare:
 	python3 -c 'import ast,pathlib; [ast.parse(p.read_text()) for p in pathlib.Path("$(HERE)").glob("*.py")]'
 
 run:
-	DEBUGINFOD_URLS= flock -s /workspaces/.agent-state/kprog-lanes/locks/image python3 $(HERE)/profile.py run --app cilium/agent --cpus 20-23 --vcpus 4 --memory 32G --seconds 60 --freq 199 --host-event cycles:G --state-root $(STATE)/guest --persist-output --out $(RAW)/run
+	DEBUGINFOD_URLS= flock -s /workspaces/.agent-state/kprog-lanes/locks/timing flock -s /workspaces/.agent-state/kprog-lanes/locks/image python3 $(HERE)/profile.py run --app cilium/agent --cpus 20-23 --vcpus 4 --memory 32G --seconds 60 --freq 199 --host-event cycles:G --state-root $(STATE)/guest --persist-output --out $(RAW)/$(CASE)

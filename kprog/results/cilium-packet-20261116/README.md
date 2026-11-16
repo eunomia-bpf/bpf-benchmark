@@ -37,3 +37,18 @@ Run with the result-local Makefile. Raw output is retained under
 /workspaces/kprog-raw/perf/20261116-cilium-packet; no shared Makefile target is
 added. The existing phase-profile guest/host machinery owns execution and
 cleanup, with this callback inserted only in the experiment's local wrapper.
+
+2026-11-16T23:35:30Z: First callback run ends with packet.rc1: the IP-specific AF_PACKET
+socket times out before capturing a frame; no BPF test call occurs. Pairing
+and actual TCX attachment discovery succeed (original275/native279 on if13).
+The sole kernel dev.c:5996-6015 dispatches ETH_P_ALL taps before ingress TC,
+whereas protocol-specific delivery follows it. The retry selects ETH_P_ALL
+and decodes incoming IPv4 UDP frames, retaining the same real packet source.
+First run outputs remain intact; retry uses a fresh raw directory and timing
+SH outside image SH under coordinator23:27.
+
+Scope caveat: the retained original entry shares the live program-array maps
+with its native replacement. Those maps may contain native callees, so this
+is an entry comparison in the same live pipeline, not a complete standalone
+eBPF-arm proof. The separate two-arm program counts and later workload
+comparisons remain necessary evidence; no equal-work gate is introduced.

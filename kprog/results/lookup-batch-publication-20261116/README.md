@@ -100,3 +100,5 @@ for Tetragon; a53922beb retained LPM symbol for OTel/Cilium. Full host replay
 this check controller to exit and uses a fresh persistent raw directory:
 /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 C starts its next breadth round after the corrected image check succeeds.
+
+2026-11-16T23:35:30Z: Following coordinator23:27, future builds take timing SH before image EX; functional/timing check takes timing EX before image SH. Timing SH is released before the following check requests EX, avoiding a lock upgrade deadlock. Existing completed jobs are unchanged.

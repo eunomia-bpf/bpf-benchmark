@@ -11,6 +11,8 @@ publish_batch() {
     date -u +%FT%TZ > "$raw/started"
     printf '%s\n' "$wait_pid" > "$raw/waited-guest.pid"
     while [ -d "/proc/$wait_pid" ]; do sleep 5; done
+    exec 8>"$locks/timing"
+    flock -s 8
     exec 9>"$locks/image"
     flock -x 9
     date -u +%FT%TZ > "$raw/image.started"
@@ -33,6 +35,7 @@ publish_batch() {
     cat /workspaces/.agent-state/kprog-ck/build-x86/include/config/kernel.release > "$raw/kernel.release"
     date -u +%FT%TZ > "$raw/image.finished"
     flock -u 9
+    flock -u 8
     make -f kprog/results/lookup-batch-publication-20261116/Makefile check RAW="$raw"
     date -u +%FT%TZ > "$raw/finished"
 }

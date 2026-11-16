@@ -14,7 +14,7 @@ publish:
 
 check:
 	date -u +%FT%TZ > $(RAW)/check.started
-	flock -s /workspaces/.agent-state/kprog-lanes/locks/image flock -x /workspaces/.agent-state/kprog-lanes/locks/timing $(MAKE) -f $(ROOT)/kprog/perf/one-image/Makefile check LOGS=$(RAW)/check > $(RAW)/check.controller.log 2>&1
+	flock -x /workspaces/.agent-state/kprog-lanes/locks/timing flock -s /workspaces/.agent-state/kprog-lanes/locks/image $(MAKE) -f $(ROOT)/kprog/perf/one-image/Makefile check LOGS=$(RAW)/check > $(RAW)/check.controller.log 2>&1
 	date -u +%FT%TZ > $(RAW)/check.finished
 	$(MAKE) -f $(HERE)/Makefile summarize > $(RAW)/summary.log 2>&1
 
@@ -23,4 +23,4 @@ summarize:
 
 .PHONY: loader
 loader:
-	$(MAKE) -C $(ROOT)/kprog/libnativeloader > $(RAW)/lpm-loader-build.log 2>&1
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/timing $(MAKE) -C $(ROOT)/kprog/libnativeloader > $(RAW)/lpm-loader-build.log 2>&1

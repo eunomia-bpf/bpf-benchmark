@@ -46,12 +46,12 @@ def main(out):
     original = pairs(log.read_text())[native]
     (out / 'packet-programs.json').write_text(json.dumps(dict(original=original, native=native,
         interface=interface, ifindex=ifindex, shim_log=str(log)), indent=2) + '\n')
-    with socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.htons(0x0800)) as capture:
+    with socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.htons(0x0003)) as capture:
         capture.bind((interface, 0))
         capture.settimeout(15)
         while True:
             data, address = capture.recvfrom(65535)
-            if address[2] != socket.PACKET_OUTGOING and len(data) >= 34 and data[23] == 17:
+            if address[2] != socket.PACKET_OUTGOING and len(data) >= 34 and data[12:14] == b'\x08\x00' and data[23] == 17:
                 break
     packet = out / 'packet.bin'
     packet.write_bytes(data)
