@@ -4237,7 +4237,7 @@ mod tests {
         let report: serde_json::Value = serde_json::from_slice(&fs::read(report)?)?;
         for (app, symbol) in [("bcc", "sys_enter"), ("bcc", "sys_exit"),
             ("otelcol-ebpf-profiler", "native_tracer_entry"),
-            ("otelcol-ebpf-profiler", "perf_unwind_native")] {
+            ("otelcol-ebpf-profiler", "perf_unwind_v8")] {
             let row = report["entries"].as_array().unwrap().iter().find(|r|
                 r["app"] == app && r["symbol"] == symbol).unwrap();
             let command = row["kernel_replays"][0]["command"].as_array().unwrap();

@@ -10,9 +10,10 @@ args = parser.parse_args()
 programs = []
 for line in args.log.read_text().splitlines():
     for prefix in ('native-link-lto-audit ', 'native-link-lto-range '):
-        if not line.startswith(prefix):
+        _, marker, payload = line.partition(prefix)
+        if not marker:
             continue
-        record = json.loads(line[len(prefix):])
+        record = json.loads(payload)
         if prefix == 'native-link-lto-audit ':
             programs.append(dict(**record, ranges=[], appended_bytes_by_piece={}))
         else:
