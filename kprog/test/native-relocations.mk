@@ -55,7 +55,9 @@ guest-kernel-layout:
 CHECK_CPUS ?= 8-11
 .PHONY: lto-ranges-audit
 lto-ranges-audit:
-	taskset -c $(CHECK_CPUS) prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=1 CARGO_TARGET_DIR=$(LINKER_TARGET) NATIVE_LINK_LTO_AUDIT_REPORT=/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/report.json cargo test --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml retained_lto_diagnostics_preserve_payload_bytes -- --ignored --nocapture
+	install -d $(OUTPUT)
+	taskset -c $(CHECK_CPUS) prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=1 CARGO_TARGET_DIR=$(LINKER_TARGET) NATIVE_LINK_LTO_AUDIT_REPORT=/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/report.json cargo test --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml retained_lto_diagnostics_preserve_payload_bytes -- --ignored --nocapture 2>&1 | tee $(OUTPUT)/ranges.log
+	python3 $(ROOT)/kprog/results/perf_20261113/lto_range_analysis.py --log $(OUTPUT)/ranges.log --output $(OUTPUT)/ranges.json
 
 .PHONY: helper-register-abi
 helper-register-abi:
