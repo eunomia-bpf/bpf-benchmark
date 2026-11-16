@@ -116,8 +116,9 @@ BTF` on `sys_enter_submit`.
 
 ### Stats on
 
-Stats on is the only mode with per-call BPF time. Four of the six have it;
-tetragon never gets there and tracee gets only its baseline arm.
+Stats on is the only mode with per-call BPF time. The rotate finished all six
+here: four rows are complete, one dies before its native arm, one measures only
+its baseline.
 
 | app | run | status | throughput | per-call | 05-29 floor |
 |---|---|---|---|---|---|
@@ -126,7 +127,13 @@ tetragon never gets there and tracee gets only its baseline arm.
 | cilium/agent | `x86_kvm_corpus_20261116_063056_107201` | ok | **1.212x** | **2.29x** (845.8 → 369.7 ns) | 1.319x |
 | tetragon/observer | — | died, `event_wake_up_n` | — | — | 1.009x |
 | tracee/monitor | `x86_kvm_corpus_20261116_071110_996499` | error (BTF), baseline only | — | — | 0.948x |
-| katran | — | running | — | — | 1.113x |
+| katran | `x86_kvm_corpus_20261116_072549_683704` | ok | **1.029x** | **1.041x** (191.3 → 183.8 ns) | 1.113x |
+
+Every measurable per-call number is on the right side of 1.0: OTel 14.4x, Cilium
+2.29x, BCC 1.134x, Katran 1.041x. The native arm never costs more per call than
+the eBPF arm on any app that completes. Two rows still miss their floor, and
+neither is a per-call regression: Cilium's is the eBPF arm having improved
+(decomposed above), Katran's is throughput at essentially equal per-call cost.
 
 - **OTel** — workload units eBPF 40 774 750 / 39 759 786 / 40 450 832, native
   75 471 022 / 75 117 432 / 78 452 133; 0 workload errors, 13 replacements.
@@ -181,6 +188,14 @@ tetragon never gets there and tracee gets only its baseline arm.
   `native-loader failed prog=sys_enter_submi ... error=BPF data map
   .rodata.str1.1 lacks BTF`. Four replacements went in first, so this is a
   per-program BTF gap, not a load-order effect.
+- **Katran, stats on** — pps 2 333 230 / 2 260 241 / 2 287 533 against
+  2 354 334 / 2 273 034 / 2 407 530, one replacement (`balancer_ingres`),
+  zero loader failures. Per-call 191.3 to 183.8 ns over 1.2 billion
+  invocations in each arm: the native arm is 1.041x cheaper per call and the
+  throughput difference is inside the pps noise (pktgen reports 80-117 M
+  errors per sample in both arms). Katran's 1.113x floor is therefore a
+  throughput target the current code does not meet; it is not a per-call
+  regression.
 
 ## The original OTel ELF and `source_bpf_object`
 
