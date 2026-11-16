@@ -62,3 +62,13 @@ shapes. Use these for the next host replay. Source bsearch_step
 That is separate from recovering named-map facts: treating the inner pointer
 as a particular named map remains unsound. The captured outer HASH_OF_MAPS
 inner ARRAY shapes can support the remaining map-return dataflow work.
+
+
+Native-unwinder replay (unwinder-report.json) succeeds from actual request 3
+metadata. Its 110 static lookup sites have 38 named arguments and 72 dynamic
+arguments. With named lookup facts omitted, payload is 30,220 B; with captured
+named facts, it is 30,956 B. This 736-byte growth comes from repeated known
+ARRAY/PERCPU_ARRAY expansions while dynamic inner-map sites retain dispatch.
+The plan deliberately contains zero map-object pointers, so it is never a
+loadable image. The next size fix shares identical selected ARRAY routines
+within the linked program; per-call and installed-byte effects remain pending.

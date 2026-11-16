@@ -1,0 +1,2281 @@
+{
+  "scope": "Reconstruct a host-only native-unwinder plan from its captured map metadata.\n\nMap names, IDs and shapes come from request 3, including declared inner shapes.\nKernel helpers/layout come from request 13 in the same guest. No kernel object\naddresses were captured for request 3: map pointer patches remain zero and the\nresult must not be loaded. Compare absent versus retained named layout facts.\n",
+  "archive": "/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/service.tar.gz",
+  "request": "service/requests/3.success.tar.gz",
+  "map_shapes": [
+    {
+      "name": "interpreter_offsets",
+      "value_offset": null,
+      "map_flags": 0,
+      "value_size": 40,
+      "max_entries": 32,
+      "key_size": 8,
+      "map_type": 1
+    },
+    {
+      "name": "exe_id_to_12_stack_deltas",
+      "value_offset": null,
+      "map_flags": 0,
+      "value_size": 4,
+      "max_entries": 65536,
+      "key_size": 8,
+      "map_type": 13,
+      "inner_map": {
+        "map_flags": 0,
+        "value_size": 4,
+        "max_entries": 4096,
+        "key_size": 4,
+        "map_type": 2
+      }
+    },
+    {
+      "name": "exe_id_to_15_stack_deltas",
+      "value_offset": null,
+      "map_flags": 0,
+      "value_size": 4,
+      "max_entries": 65536,
+      "key_size": 8,
+      "map_type": 13,
+      "inner_map": {
+        "map_flags": 0,
+        "value_size": 4,
+        "max_entries": 32768,
+        "key_size": 4,
+        "map_type": 2
+      }
+    },
+    {
+      "name": "exe_id_to_21_stack_deltas",
+      "value_offset": null,
+      "map_flags": 0,
+      "value_size": 4,
+      "max_entries": 65536,
+      "key_size": 8,
+      "map_type": 13,
+      "inner_map": {
+        "map_flags": 0,
+        "value_size": 4,
+        "max_entries": 2097152,
+        "key_size": 4,
+        "map_type": 2
+      }
+    },
+    {
+      "name": "exe_id_to_23_stack_deltas",
+      "value_offset": null,
+      "map_flags": 0,
+      "value_size": 4,
+      "max_entries": 65536,
+      "key_size": 8,
+      "map_type": 13,
+      "inner_map": {
+        "map_flags": 0,
+        "value_size": 4,
+        "max_entries": 8388608,
+        "key_size": 4,
+        "map_type": 2
+      }
+    },
+    {
+      "name": "pid_page_to_mapping_info",
+      "value_offset": null,
+      "map_flags": 1,
+      "value_size": 16,
+      "max_entries": 1048576,
+      "key_size": 16,
+      "map_type": 11
+    },
+    {
+      "name": "perf_progs",
+      "value_offset": null,
+      "map_flags": 0,
+      "value_size": 4,
+      "max_entries": 10,
+      "key_size": 4,
+      "map_type": 3
+    },
+    {
+      "name": "stack_delta_page_to_info",
+      "value_offset": null,
+      "map_flags": 0,
+      "value_size": 8,
+      "max_entries": 65536,
+      "key_size": 16,
+      "map_type": 1
+    },
+    {
+      "name": "per_cpu_records",
+      "value_offset": null,
+      "map_flags": 0,
+      "value_size": 5000,
+      "max_entries": 1,
+      "key_size": 4,
+      "map_type": 6
+    },
+    {
+      "name": "exe_id_to_17_stack_deltas",
+      "value_offset": null,
+      "map_flags": 0,
+      "value_size": 4,
+      "max_entries": 65536,
+      "key_size": 8,
+      "map_type": 13,
+      "inner_map": {
+        "map_flags": 0,
+        "value_size": 4,
+        "max_entries": 131072,
+        "key_size": 4,
+        "map_type": 2
+      }
+    },
+    {
+      "name": "exe_id_to_20_stack_deltas",
+      "value_offset": null,
+      "map_flags": 0,
+      "value_size": 4,
+      "max_entries": 65536,
+      "key_size": 8,
+      "map_type": 13,
+      "inner_map": {
+        "map_flags": 0,
+        "value_size": 4,
+        "max_entries": 1048576,
+        "key_size": 4,
+        "map_type": 2
+      }
+    },
+    {
+      "name": "with_debug_output",
+      "value_offset": 40,
+      "map_flags": 128,
+      "value_size": 44,
+      "max_entries": 1,
+      "key_size": 4,
+      "map_type": 2
+    },
+    {
+      "name": "exe_id_to_22_stack_deltas",
+      "value_offset": null,
+      "map_flags": 0,
+      "value_size": 4,
+      "max_entries": 65536,
+      "key_size": 8,
+      "map_type": 13,
+      "inner_map": {
+        "map_flags": 0,
+        "value_size": 4,
+        "max_entries": 4194304,
+        "key_size": 4,
+        "map_type": 2
+      }
+    },
+    {
+      "name": "exe_id_to_13_stack_deltas",
+      "value_offset": null,
+      "map_flags": 0,
+      "value_size": 4,
+      "max_entries": 65536,
+      "key_size": 8,
+      "map_type": 13,
+      "inner_map": {
+        "map_flags": 0,
+        "value_size": 4,
+        "max_entries": 8192,
+        "key_size": 4,
+        "map_type": 2
+      }
+    },
+    {
+      "name": "unwind_info_array",
+      "value_offset": null,
+      "map_flags": 0,
+      "value_size": 12,
+      "max_entries": 16384,
+      "key_size": 4,
+      "map_type": 2
+    },
+    {
+      "name": "exe_id_to_10_stack_deltas",
+      "value_offset": null,
+      "map_flags": 0,
+      "value_size": 4,
+      "max_entries": 65536,
+      "key_size": 8,
+      "map_type": 13,
+      "inner_map": {
+        "map_flags": 0,
+        "value_size": 4,
+        "max_entries": 1024,
+        "key_size": 4,
+        "map_type": 2
+      }
+    },
+    {
+      "name": "exe_id_to_9_stack_deltas",
+      "value_offset": null,
+      "map_flags": 0,
+      "value_size": 4,
+      "max_entries": 65536,
+      "key_size": 8,
+      "map_type": 13,
+      "inner_map": {
+        "map_flags": 0,
+        "value_size": 4,
+        "max_entries": 512,
+        "key_size": 4,
+        "map_type": 2
+      }
+    },
+    {
+      "name": "exe_id_to_19_stack_deltas",
+      "value_offset": null,
+      "map_flags": 0,
+      "value_size": 4,
+      "max_entries": 65536,
+      "key_size": 8,
+      "map_type": 13,
+      "inner_map": {
+        "map_flags": 0,
+        "value_size": 4,
+        "max_entries": 524288,
+        "key_size": 4,
+        "map_type": 2
+      }
+    },
+    {
+      "name": "exe_id_to_8_stack_deltas",
+      "value_offset": null,
+      "map_flags": 0,
+      "value_size": 4,
+      "max_entries": 65536,
+      "key_size": 8,
+      "map_type": 13,
+      "inner_map": {
+        "map_flags": 0,
+        "value_size": 4,
+        "max_entries": 256,
+        "key_size": 4,
+        "map_type": 2
+      }
+    },
+    {
+      "name": "metrics",
+      "value_offset": null,
+      "map_flags": 0,
+      "value_size": 8,
+      "max_entries": 99,
+      "key_size": 4,
+      "map_type": 6
+    },
+    {
+      "name": "exe_id_to_14_stack_deltas",
+      "value_offset": null,
+      "map_flags": 0,
+      "value_size": 4,
+      "max_entries": 65536,
+      "key_size": 8,
+      "map_type": 13,
+      "inner_map": {
+        "map_flags": 0,
+        "value_size": 4,
+        "max_entries": 16384,
+        "key_size": 4,
+        "map_type": 2
+      }
+    },
+    {
+      "name": "exe_id_to_11_stack_deltas",
+      "value_offset": null,
+      "map_flags": 0,
+      "value_size": 4,
+      "max_entries": 65536,
+      "key_size": 8,
+      "map_type": 13,
+      "inner_map": {
+        "map_flags": 0,
+        "value_size": 4,
+        "max_entries": 2048,
+        "key_size": 4,
+        "map_type": 2
+      }
+    },
+    {
+      "name": "exe_id_to_16_stack_deltas",
+      "value_offset": null,
+      "map_flags": 0,
+      "value_size": 4,
+      "max_entries": 65536,
+      "key_size": 8,
+      "map_type": 13,
+      "inner_map": {
+        "map_flags": 0,
+        "value_size": 4,
+        "max_entries": 65536,
+        "key_size": 4,
+        "map_type": 2
+      }
+    },
+    {
+      "name": "exe_id_to_18_stack_deltas",
+      "value_offset": null,
+      "map_flags": 0,
+      "value_size": 4,
+      "max_entries": 65536,
+      "key_size": 8,
+      "map_type": 13,
+      "inner_map": {
+        "map_flags": 0,
+        "value_size": 4,
+        "max_entries": 262144,
+        "key_size": 4,
+        "map_type": 2
+      }
+    }
+  ],
+  "variants": {
+    "no-named-facts": {
+      "payload_bytes": 30220,
+      "generic_helper_relocations": 1,
+      "helper_sites": [
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 51,
+          "map": "per_cpu_records",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 109,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 335,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 636,
+          "map": "stack_delta_page_to_info",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 696,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 795,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 863,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 928,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 996,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1061,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1129,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1194,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1262,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1327,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1395,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1460,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1528,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1593,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1661,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1726,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1790,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1894,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 2022,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 2322,
+          "map": "unwind_info_array",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 2553,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 2810,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 3177,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 3560,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 3775,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 3819,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 3851,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 3935,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 5478,
+          "map": "pid_page_to_mapping_info",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 5606,
+          "map": "interpreter_offsets",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 6807,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 6894,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 7286,
+          "map": "stack_delta_page_to_info",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 7361,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 7458,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 7536,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 7617,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 7698,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 7779,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 7860,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 7941,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 8022,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 8103,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 8184,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 8265,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 8346,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 8427,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 8508,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 8589,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 8666,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 8755,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 8866,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 8963,
+          "map": "unwind_info_array",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 9191,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 9436,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 9664,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 10067,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 10351,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 11610,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 11661,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 12346,
+          "map": "pid_page_to_mapping_info",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 12473,
+          "map": "interpreter_offsets",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 13340,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 13424,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 13816,
+          "map": "stack_delta_page_to_info",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 13898,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 13996,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 14072,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 14150,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 14228,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 14306,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 14384,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 14462,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 14540,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 14618,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 14696,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 14774,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 14852,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 14930,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 15008,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 15086,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 15160,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 15246,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 15356,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 15588,
+          "map": "unwind_info_array",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 15816,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 16061,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 16289,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 16692,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 16976,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 18133,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 18184,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 18468,
+          "map": "pid_page_to_mapping_info",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 18595,
+          "map": "interpreter_offsets",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 19636,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 19720,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 20112,
+          "map": "stack_delta_page_to_info",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 20194,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 20292,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 20368,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 20446,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 20524,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 20602,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 20680,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 20758,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 20836,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 20914,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 20992,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 21070,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 21148,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 21226,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 21304,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 21382,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 21456,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 21542,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 21689,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 22132,
+          "map": "per_cpu_records",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 22195,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_tail_call",
+          "input_offset": 22280,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 22883,
+          "map": "unwind_info_array",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 23111,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 23171,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 23565,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 23793,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 24196,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 24488,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 25753,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 25804,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 25953,
+          "map": "pid_page_to_mapping_info",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 26077,
+          "map": "interpreter_offsets",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 27505,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        }
+      ],
+      "appended_ranges": [
+        {
+          "bytes": 67,
+          "end": 29564,
+          "piece": "runtime_array",
+          "start": 29497
+        },
+        {
+          "bytes": 326,
+          "end": 29890,
+          "piece": "probe_read",
+          "start": 29564
+        },
+        {
+          "bytes": 330,
+          "end": 30220,
+          "piece": "lpm_lookup",
+          "start": 29890
+        }
+      ]
+    },
+    "captured-named-facts": {
+      "payload_bytes": 30956,
+      "generic_helper_relocations": 1,
+      "helper_sites": [
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 51,
+          "map": "per_cpu_records",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 109,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 335,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 636,
+          "map": "stack_delta_page_to_info",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 696,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 795,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 863,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 928,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 996,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1061,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1129,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1194,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1262,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1327,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1395,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1460,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1528,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1593,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1661,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1726,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1790,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1894,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 2022,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 2322,
+          "map": "unwind_info_array",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 2553,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 2810,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 3177,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 3560,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 3775,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 3819,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 3851,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 3935,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 5478,
+          "map": "pid_page_to_mapping_info",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 5606,
+          "map": "interpreter_offsets",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 6807,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 6894,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 7286,
+          "map": "stack_delta_page_to_info",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 7361,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 7458,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 7536,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 7617,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 7698,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 7779,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 7860,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 7941,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 8022,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 8103,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 8184,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 8265,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 8346,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 8427,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 8508,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 8589,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 8666,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 8755,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 8866,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 8963,
+          "map": "unwind_info_array",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 9191,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 9436,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 9664,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 10067,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 10351,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 11610,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 11661,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 12346,
+          "map": "pid_page_to_mapping_info",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 12473,
+          "map": "interpreter_offsets",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 13340,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 13424,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 13816,
+          "map": "stack_delta_page_to_info",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 13898,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 13996,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 14072,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 14150,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 14228,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 14306,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 14384,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 14462,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 14540,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 14618,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 14696,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 14774,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 14852,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 14930,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 15008,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 15086,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 15160,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 15246,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 15356,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 15588,
+          "map": "unwind_info_array",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 15816,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 16061,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 16289,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 16692,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 16976,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 18133,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 18184,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 18468,
+          "map": "pid_page_to_mapping_info",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 18595,
+          "map": "interpreter_offsets",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 19636,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 19720,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 20112,
+          "map": "stack_delta_page_to_info",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 20194,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 20292,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 20368,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 20446,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 20524,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 20602,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 20680,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 20758,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 20836,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 20914,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 20992,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 21070,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 21148,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 21226,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 21304,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 21382,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 21456,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 21542,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 21689,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 22132,
+          "map": "per_cpu_records",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 22195,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_tail_call",
+          "input_offset": 22280,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 22883,
+          "map": "unwind_info_array",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 23111,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 23171,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 23565,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 23793,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 24196,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 24488,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_probe_read_user",
+          "input_offset": 25753,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 25804,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 25953,
+          "map": "pid_page_to_mapping_info",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 26077,
+          "map": "interpreter_offsets",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 27505,
+          "map": "metrics",
+          "proof_mode": false,
+          "symbol": "perf_unwind_native"
+        }
+      ],
+      "appended_ranges": [
+        {
+          "bytes": 67,
+          "end": 30300,
+          "piece": "runtime_array",
+          "start": 30233
+        },
+        {
+          "bytes": 326,
+          "end": 30626,
+          "piece": "probe_read",
+          "start": 30300
+        },
+        {
+          "bytes": 330,
+          "end": 30956,
+          "piece": "lpm_lookup",
+          "start": 30626
+        }
+      ]
+    }
+  },
+  "installed_bytes": "unmeasured",
+  "runtime_gain": "unmeasured"
+}
