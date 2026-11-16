@@ -25,6 +25,21 @@ static bool tied_identity(CallInst *call,InlineAsm *assembly) {
   return assembly->getAsmString().empty() && assembly->getConstraintString()=="=r,0" &&
       call->arg_size()==1 && call->getType()==call->getArgOperand(0)->getType();
 }
+// Empty memory-only templates are compiler barriers, with no architectural
+// operation. Real helper/memory asm keeps its clobbers and ordering effects.
+static unsigned remove_empty_memory_barriers(Module &module) {
+  SmallVector<CallInst *,16> barriers;
+  for (auto &function:module) for (auto &instruction:instructions(function)) {
+    auto *call=dyn_cast<CallInst>(&instruction);
+    if (!call || !call->getType()->isVoidTy() || call->arg_size()!=0) continue;
+    auto *assembly=dyn_cast<InlineAsm>(call->getCalledOperand());
+    if (assembly && assembly->getAsmString().empty() &&
+        assembly->getConstraintString()=="~{memory}" &&
+        !assembly->isAlignStack() && !assembly->canThrow()) barriers.push_back(call);
+  }
+  for (auto *barrier:barriers) barrier->eraseFromParent();
+  return barriers.size();
+}
 // The interpreter's private arena is a local memory block. Clight volatile
 // accesses to this block have ordinary Mem load/store semantics and trace E0;
 // volatile global/context accesses remain externally observable. Expose only
@@ -239,6 +254,7 @@ int main(int argc,char **argv) {
   if (!module) { error.print(argv[0],errs());return 1; }
   unsigned constants=fold_constant_identities(*module);
   unsigned live_identities=normalize_live_integer_identities(*module);
+  unsigned memory_barriers=remove_empty_memory_barriers(*module);
   unsigned private_stack=normalize_private_stack_accesses(*module);
   unsigned unused=remove_unused_private_inputs(*module);
   unsigned contexts=canonical_context_loads(*module);
@@ -293,5 +309,6 @@ int main(int argc,char **argv) {
   errs()<<"equality-edge PHI expressions folded="<<equality_edges<<'\n';
   errs()<<"tied integer constant identities folded="<<constants<<'\n';
   errs()<<"live integer identities normalized="<<live_identities<<'\n';
+  errs()<<"empty memory barriers removed="<<memory_barriers<<'\n';
   errs()<<"private stack accesses normalized="<<private_stack<<'\n';
 }

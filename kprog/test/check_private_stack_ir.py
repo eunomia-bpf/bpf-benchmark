@@ -29,7 +29,9 @@ define i64 @private(ptr %ctx, i64 %seed, i1 %choose, ptr %helper) {
 %b = getelementptr %union.x86_sim_stack_mem, ptr %arena, i64 0, i32 0, i64 3
 %selected = select i1 %choose, ptr %a, ptr %b
 store volatile i64 %seed, ptr %selected, align 8
+call void asm sideeffect "", "~{memory}"()
 call void %helper(ptr %selected)
+call void asm sideeffect "", "~{memory}"()
 %value = load volatile i64, ptr %selected, align 8
 %external = load volatile i64, ptr %ctx, align 8
 %sum = add i64 %value, %external
@@ -59,6 +61,10 @@ store atomic volatile i64 %seed, ptr %arena seq_cst, align 8
 %value = load atomic volatile i64, ptr %arena seq_cst, align 8
 ret i64 %value
 }
+define i64 @real_assembly(i64 %seed) {
+call void asm sideeffect "nop", "~{memory}"()
+ret i64 %seed
+}
 '''
     before = build/'before.ll'
     before.write_text(source)
@@ -66,7 +72,14 @@ ret i64 %value
     result = run([tool, before, '-o', transformed])
     if 'private stack accesses normalized=2' not in result.stderr:
         raise ValueError('Only the two proven private-arena accesses may normalize')
+    if 'empty memory barriers removed=2' not in result.stderr:
+        raise ValueError('Expected exactly the two empty barriers around the real helper')
     ir = run(['llvm-dis-18', transformed, '-o', '-']).stdout
+    private_body = ir.split('@private(', 1)[1].split('\n}', 1)[0]
+    if 'asm' in private_body or 'call void %helper' not in private_body:
+        raise ValueError('Barrier normalization changed the real helper call')
+    if 'asm sideeffect "nop", "~{memory}"' not in ir:
+        raise ValueError('Barrier normalization removed a real asm operation')
     for name, expected in [('private', 1), ('mixed', 2), ('other_local', 2),
                            ('global_access', 2), ('atomic_private', 2)]:
         body = ir.split('@'+name+'(', 1)[1].split('\n}', 1)[0]
@@ -105,7 +118,7 @@ ret i64 %value
                 expected_context = 0x123456789abcdef0 if choose else seed
                 if context.value != expected_context:
                     raise ValueError('Mixed alias lost its external store')
-            for name in ('other_local', 'global_access', 'atomic_private'):
+            for name in ('other_local', 'global_access', 'atomic_private', 'real_assembly'):
                 function = getattr(dll, name)
                 function.argtypes = [c.c_uint64]
                 function.restype = c.c_uint64
@@ -113,7 +126,8 @@ ret i64 %value
                     raise ValueError('Preserved access changed bits: '+name)
     record = dict(private_helper_executions=len(observations),
                   mixed_alias_executions=len(observations),
-                  other_access_executions=30, normalized_accesses=2,
+                  other_access_executions=40, normalized_accesses=2,
+                  empty_barriers_removed=2,
                   helper_observations=observations,
                   scope='Real host loads/stores and external helper mutation; IR boundaries for nonlocal/mixed/atomic/other-local accesses. Actual app/frame acceptance is separate.')
     (output/'result.json').write_text(json.dumps(record, indent=2)+'\n')
