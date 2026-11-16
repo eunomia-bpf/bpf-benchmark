@@ -45,3 +45,10 @@ the new focused regression. This is a source-size delta, not an installed-byte
 measurement. In registered loads without original source FD facts, and wherever
 native map identity is unknown, update/delete remain generic; no address is
 guessed from a truncated name or source call ordinal.
+
+2026-11-16T18:33:44Z: The coordinator's 18:24 notice requests one shared null
+test for update/delete pointer selection. All four module copies now select
+the requested ops pointer first and reuse that existing refusal. The delete
+binding stays. Both active x86 module syntax checks pass; raw receipt is
+`/workspaces/kprog-raw/perf/20261116-map-ops-binding/shared-null-check`.
+This changes load-time metadata handling, with no per-call instruction change.

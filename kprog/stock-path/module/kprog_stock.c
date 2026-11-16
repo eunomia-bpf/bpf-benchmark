@@ -210,18 +210,15 @@ static ssize_t map_ptr_query_write(struct file *file, const char __user *ubuf,
 		if (err)
 			goto out_put;
 		ptr = (unsigned long)value;
-	} else if (helper_id == BPF_FUNC_map_update_elem) {
-		if (!map->ops || !map->ops->map_update_elem) {
+	} else if (helper_id == BPF_FUNC_map_update_elem ||
+		   helper_id == BPF_FUNC_map_delete_elem) {
+		ptr = map->ops ? (helper_id == BPF_FUNC_map_update_elem ?
+			(unsigned long)map->ops->map_update_elem :
+			(unsigned long)map->ops->map_delete_elem) : 0;
+		if (!ptr) {
 			err = -EOPNOTSUPP;
 			goto out_put;
 		}
-		ptr = (unsigned long)map->ops->map_update_elem;
-	} else if (helper_id == BPF_FUNC_map_delete_elem) {
-		if (!map->ops || !map->ops->map_delete_elem) {
-			err = -EOPNOTSUPP;
-			goto out_put;
-		}
-		ptr = (unsigned long)map->ops->map_delete_elem;
 	}
 
 	if (direct_value)
