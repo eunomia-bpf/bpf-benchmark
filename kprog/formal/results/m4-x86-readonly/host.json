@@ -1,0 +1,13 @@
+{
+  "positive-0": "readonly: 124 window/width/identity frames, ordered captures, four width refusals and 16 complete native-matched producer returns",
+  "positive-1": "readonly: 124 window/width/identity frames, ordered captures, four width refusals and 16 complete native-matched producer returns",
+  "missing-zero-init": {
+    "rejected": true
+  },
+  "lost-output": {
+    "rejected": true
+  },
+  "copy-width-eight": {
+    "rejected": true
+  }
+}

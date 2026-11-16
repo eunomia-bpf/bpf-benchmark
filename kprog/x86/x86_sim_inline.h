@@ -225,6 +225,20 @@ struct x86_sim_inline_bindings {
 #define X86_SIM_L_SV_PTR(I) (*__x86_bind->values[(I)].pointer)
 
 #if defined(__COMPCERT__)
+#ifdef X86_SIM_L_NATIVE_DATA_LOAD_INTO
+/* Producer readonly selection shares its declaration body with native C. */
+static __always_inline __u64
+x86_sim_inline_native_data_load(const void *base, __u64 offset, __u8 width)
+{
+    __u64 value;
+    X86_SIM_L_NATIVE_DATA_LOAD_INTO(value, base, offset, width);
+    return value;
+}
+#pragma push_macro("X86_SIM_L_NATIVE_DATA_LOAD")
+#undef X86_SIM_L_NATIVE_DATA_LOAD
+#define X86_SIM_L_NATIVE_DATA_LOAD(BASE, OFF, WIDTH) \
+    x86_sim_inline_native_data_load((BASE), (OFF), (WIDTH))
+#endif
 /* The native expression facades and these standard-C functions use the same
  * primitive bodies. Pass the binding itself, so unused cells stay unread.
  * Arguments at the execution sites are decoded fields, not state snapshots. */
@@ -516,6 +530,9 @@ x86_sim_inline_recover(const struct x86_sim_inline_bindings *__x86_bind,
 #pragma pop_macro("X86_SIM_L_STACK_VALUES_CALL_FRAME")
 #pragma pop_macro("X86_SIM_L_STACK_VALUES_CLEAR")
 #if defined(__COMPCERT__)
+#ifdef X86_SIM_L_NATIVE_DATA_LOAD_INTO
+#pragma pop_macro("X86_SIM_L_NATIVE_DATA_LOAD")
+#endif
 #pragma pop_macro("KPROG_X86_SETCC_MEM_ARM")
 #pragma pop_macro("KPROG_X86_SETCC_MEM_BASE")
 #pragma pop_macro("KPROG_X86_SETCC_LANE")

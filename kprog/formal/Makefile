@@ -733,6 +733,17 @@ clight: clightgen
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Helpers.lean c/X86Helpers.c
 	external/clean/clightgen -fstruct-passing -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Inline.lean c/X86Inline.c
 	external/clean/clightgen -fstruct-passing -lean -normalize -DKPROG_X86_PROGRAM_EXPORT=1 -include c/ProgramSections.h -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86TetragonWake.lean c/TetragonWake.c
+	../stock-path/bin/clang -c oracles/x86_readonly_profile.S -o build/x86_readonly_profile.native.o
+	../x86/native_lab/native_link/target/release/native-link --input build/x86_readonly_profile.native.o --symbol x86_readonly_profile --mode proof --preserve-entry-abi --output build/x86_readonly_profile.proof.o
+	python3 tools/export_x86_stack_fixture.py --name x86_readonly_profile --object-dir build --output build/x86_readonly_profile.bpf.c
+	external/clean/clightgen -fstruct-passing -lean -normalize -DKPROG_X86_PROGRAM_EXPORT=1 -include c/ProgramSections.h -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86ReadonlyProfile.lean build/x86_readonly_profile.bpf.c
+	for adapter in 0 1; do \
+	  flags=; if test $$adapter = 1; then flags=-D__COMPCERT__; fi; \
+	  $(CC) -std=c11 -Wall -Wextra -O1 -fsanitize=undefined -fno-sanitize-recover=undefined \
+	    $$flags -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src \
+	    oracles/test_x86_readonly_host.c build/x86_readonly_profile.native.o -o build/test_x86_readonly_host && \
+	  ./build/test_x86_readonly_host || exit $$?; \
+	done
 	for abi in xdp tc; do \
 	  name=x86_context_xdp; module=X86ContextXdp; skb=0; \
 	  if test $$abi = tc; then name=x86_context_skb; module=X86ContextSkb; skb=1; fi; \

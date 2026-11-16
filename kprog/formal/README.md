@@ -1866,3 +1866,9 @@ Actual x86 XDP and SKB producer entries now export through the same bindings,
 including context reads before and after a typed helper call. The
 [context-program receipts](results/m4-x86-context-program/README.md) record
 the entry layouts, full-pointer adapter checks and their explicit limits.
+
+The actual linked readonly producer profile now also exports through the shared
+selector and upstream alignment-1 copy adapter. Its 124 Clight bodies, initial
+readonly memory, native byte parity and explicitly scoped host checks are
+recorded in [the M4 readonly receipt](results/m4-x86-readonly/README.md).
+M4 remains in progress; these checks add no migrated refinement count.

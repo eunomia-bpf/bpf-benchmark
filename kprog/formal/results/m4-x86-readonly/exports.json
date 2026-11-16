@@ -1,0 +1,31 @@
+{
+  "bytes": 19988248,
+  "functions": 124,
+  "deterministic": true,
+  "preprocessed_bytes": 2551815,
+  "producer_c_bytes": 11924,
+  "prior_exports_unchanged": [
+    "Arm64Access.lean",
+    "Arm64Address.lean",
+    "Arm64Addressing.lean",
+    "Arm64Entry.lean",
+    "Arm64Numeric.lean",
+    "Arm64PayloadProfile.lean",
+    "Arm64Program.lean",
+    "Arm64ProgramContext.lean",
+    "Arm64ProgramFixture.lean",
+    "Arm64Stack.lean",
+    "X86Context.lean",
+    "X86ContextSkb.lean",
+    "X86ContextXdp.lean",
+    "X86Helpers.lean",
+    "X86Inline.lean",
+    "X86Memory.lean",
+    "X86Numeric.lean",
+    "X86Pointer.lean",
+    "X86ProgramProfile.lean",
+    "X86StackProfile200.lean",
+    "X86StackProfile376.lean",
+    "X86TetragonWake.lean"
+  ]
+}

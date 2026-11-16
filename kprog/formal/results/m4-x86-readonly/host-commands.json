@@ -1,0 +1,199 @@
+[
+  {
+    "name": "positive-0-compile",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-iquote",
+      "/workspaces/repository/kprog/formal/oracles",
+      "-iquote",
+      "/workspaces/repository/kprog/formal/build",
+      "/workspaces/repository/kprog/formal/oracles/test_x86_readonly_host.c",
+      "build/x86_readonly_profile.native.o",
+      "-o",
+      "build/test_x86_readonly_host"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "positive-0",
+    "argv": [
+      "./build/test_x86_readonly_host"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "positive-1-compile",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-iquote",
+      "/workspaces/repository/kprog/formal/oracles",
+      "-iquote",
+      "/workspaces/repository/kprog/formal/build",
+      "-D__COMPCERT__",
+      "/workspaces/repository/kprog/formal/oracles/test_x86_readonly_host.c",
+      "build/x86_readonly_profile.native.o",
+      "-o",
+      "build/test_x86_readonly_host"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "positive-1",
+    "argv": [
+      "./build/test_x86_readonly_host"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "missing-zero-init-compile",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-iquote",
+      "/workspaces/repository/kprog/formal/oracles",
+      "-iquote",
+      "/workspaces/repository/kprog/formal/build",
+      "-D__COMPCERT__",
+      "-x",
+      "c",
+      "-",
+      "-x",
+      "none",
+      "build/x86_readonly_profile.native.o",
+      "-o",
+      "build/test_x86_readonly_host"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "missing-zero-init",
+    "argv": [
+      "./build/test_x86_readonly_host"
+    ],
+    "exit": 1
+  },
+  {
+    "name": "lost-output-compile",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-iquote",
+      "/workspaces/repository/kprog/formal/oracles",
+      "-iquote",
+      "/workspaces/repository/kprog/formal/build",
+      "-D__COMPCERT__",
+      "-x",
+      "c",
+      "-",
+      "-x",
+      "none",
+      "build/x86_readonly_profile.native.o",
+      "-o",
+      "build/test_x86_readonly_host"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "lost-output",
+    "argv": [
+      "./build/test_x86_readonly_host"
+    ],
+    "exit": 1
+  },
+  {
+    "name": "copy-width-eight-compile",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-iquote",
+      "/workspaces/repository/kprog/formal/oracles",
+      "-iquote",
+      "/workspaces/repository/kprog/formal/build",
+      "-D__COMPCERT__",
+      "-x",
+      "c",
+      "-",
+      "-x",
+      "none",
+      "build/x86_readonly_profile.native.o",
+      "-o",
+      "build/test_x86_readonly_host"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "copy-width-eight",
+    "argv": [
+      "./build/test_x86_readonly_host"
+    ],
+    "exit": 1
+  },
+  {
+    "name": "restore-compile",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-iquote",
+      "/workspaces/repository/kprog/formal/oracles",
+      "-iquote",
+      "/workspaces/repository/kprog/formal/build",
+      "-D__COMPCERT__",
+      "/workspaces/repository/kprog/formal/oracles/test_x86_readonly_host.c",
+      "build/x86_readonly_profile.native.o",
+      "-o",
+      "build/test_x86_readonly_host"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "restore",
+    "argv": [
+      "./build/test_x86_readonly_host"
+    ],
+    "exit": 0
+  }
+]

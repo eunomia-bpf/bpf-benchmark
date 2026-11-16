@@ -1693,8 +1693,8 @@ def readonly_load_declarations(objects: list[tuple[str, bytes]]) -> list[str]:
                 lines.extend([
                     f"\tcase {offset}: {{",
                     "\t\t__u64 value = 0;",
-                    f"\t\t__builtin_memcpy(&value, {name} + {offset}, {width});",
-                    '\t\t__asm__("" : "+r"(value));',
+                    f"\t\tKPROG_C_COPY_BYTES(&value, {name} + {offset}, {width});",
+                    '\t\tKPROG_C_VALUE_BARRIER_VAR(value);',
                     "\t\treturn value;", "\t}",
                 ])
             lines.append("\t} break;")
@@ -1705,23 +1705,28 @@ def readonly_load_declarations(objects: list[tuple[str, bytes]]) -> list[str]:
         ])
     if objects:
         lines.extend([
-            "#undef X86_SIM_L_NATIVE_DATA_LOAD",
-            "#define X86_SIM_L_NATIVE_DATA_LOAD(BASE, OFF, WIDTH) \\",
-            "({ const void *__x86_ro_base = (BASE); __u64 __x86_ro_off = (OFF); \\",
-            "   __u8 __x86_ro_width = (WIDTH); __u64 __x86_ro_value; \\",
+            "#define X86_SIM_L_NATIVE_DATA_LOAD_DECL(RESULT, BASE, OFF, WIDTH) \\",
+            "   const void *__x86_ro_base = (BASE); __u64 __x86_ro_off = (OFF); \\",
+            "   __u8 __x86_ro_width = (WIDTH); __u64 RESULT; \\",
         ])
         for name, _ in objects:
             lines.extend([
                 "   if (__builtin_constant_p((__u64)(long)__x86_ro_base - "
                 f"(__u64)(long){name})) \\",
-                f"       __x86_ro_value = {name}_value("
+                f"       RESULT = {name}_value("
                 f"(__u64)(long)__x86_ro_base - (__u64)(long){name} + "
                 "__x86_ro_off, __x86_ro_width); else \\",
             ])
         lines.extend([
-            "       __x86_ro_value = KPROG_X86_MEM_LOAD("
-            "KPROG_PTR_ADD64_BITS(__x86_ro_base, __x86_ro_off), __x86_ro_width); \\",
-            "   __x86_ro_value; })", "",
+            "       RESULT = KPROG_X86_MEM_LOAD("
+            "KPROG_PTR_ADD64_BITS(__x86_ro_base, __x86_ro_off), __x86_ro_width);",
+            "#define X86_SIM_L_NATIVE_DATA_LOAD_INTO(OUTPUT, BASE, OFF, WIDTH) \\",
+            "   do { X86_SIM_L_NATIVE_DATA_LOAD_DECL(__x86_ro_into, BASE, OFF, WIDTH) \\",
+            "        (OUTPUT) = __x86_ro_into; } while (0)",
+            "#undef X86_SIM_L_NATIVE_DATA_LOAD",
+            "#define X86_SIM_L_NATIVE_DATA_LOAD(BASE, OFF, WIDTH) \\",
+            "   ({ X86_SIM_L_NATIVE_DATA_LOAD_DECL(__x86_ro_value, BASE, OFF, WIDTH) \\",
+            "      __x86_ro_value; })", "",
         ])
     return lines
 

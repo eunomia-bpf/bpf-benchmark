@@ -1,0 +1,95 @@
+[
+  {
+    "name": "deterministic-export",
+    "argv": [
+      "external/clean/clightgen",
+      "-fstruct-passing",
+      "-lean",
+      "-normalize",
+      "-DKPROG_X86_PROGRAM_EXPORT=1",
+      "-include",
+      "c/ProgramSections.h",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-o",
+      "KProgFormal/Clight/X86ReadonlyProfile.lean",
+      "build/x86_readonly_profile.bpf.c"
+    ],
+    "exit": 0,
+    "seconds": 6.468970121990424
+  },
+  {
+    "name": "preprocess",
+    "argv": [
+      "external/clean/clightgen",
+      "-fstruct-passing",
+      "-lean",
+      "-normalize",
+      "-DKPROG_X86_PROGRAM_EXPORT=1",
+      "-include",
+      "c/ProgramSections.h",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-E",
+      "build/x86_readonly_profile.bpf.c"
+    ],
+    "exit": 0,
+    "seconds": 0.1519271720026154
+  },
+  {
+    "name": "all-clight",
+    "argv": [
+      "lake",
+      "build",
+      "KProgFormal.Clight.Arm64Access",
+      "KProgFormal.Clight.Arm64Address",
+      "KProgFormal.Clight.Arm64Addressing",
+      "KProgFormal.Clight.Arm64Entry",
+      "KProgFormal.Clight.Arm64Numeric",
+      "KProgFormal.Clight.Arm64PayloadProfile",
+      "KProgFormal.Clight.Arm64Program",
+      "KProgFormal.Clight.Arm64ProgramContext",
+      "KProgFormal.Clight.Arm64ProgramFixture",
+      "KProgFormal.Clight.Arm64Stack",
+      "KProgFormal.Clight.X86Context",
+      "KProgFormal.Clight.X86ContextSkb",
+      "KProgFormal.Clight.X86ContextXdp",
+      "KProgFormal.Clight.X86Helpers",
+      "KProgFormal.Clight.X86Inline",
+      "KProgFormal.Clight.X86Memory",
+      "KProgFormal.Clight.X86Numeric",
+      "KProgFormal.Clight.X86Pointer",
+      "KProgFormal.Clight.X86ProgramProfile",
+      "KProgFormal.Clight.X86ReadonlyProfile",
+      "KProgFormal.Clight.X86StackProfile200",
+      "KProgFormal.Clight.X86StackProfile376",
+      "KProgFormal.Clight.X86TetragonWake"
+    ],
+    "exit": 0,
+    "seconds": 1.710349610017147
+  },
+  {
+    "name": "readonly-clight",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "oracles/test_x86_readonly.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.214137203001883
+  },
+  {
+    "name": "axioms",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "build/X86ReadonlyAxioms.lean"
+    ],
+    "exit": 0,
+    "seconds": 0.9582276860019192
+  }
+]
