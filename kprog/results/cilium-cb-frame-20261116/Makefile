@@ -5,7 +5,7 @@ KDIR := /workspaces/.agent-state/kprog-ck/build-x86
 RELEASE := $(shell cat $(KDIR)/include/config/kernel.release)
 ANSWERS := $(ROOT)/vendor/build/native-bpf/x86/$(RELEASE)/answers/cilium.h
 
-.PHONY: host dry-run
+.PHONY: host linker dry-run
 host:
 	install -d $(TMP) $(RAW)
 	date -u +%FT%TZ > $(RAW)/started
@@ -15,10 +15,15 @@ host:
 	clang-18 -O2 -DKERNEL_VIEW -I$(ROOT)/vendor/bpf/targets/x86/$(RELEASE) \
 		$(ROOT)/kprog/results/cilium-cb-frame-20261116/layout.c $(TMP)/native-view.o -o $(TMP)/layout
 	$(TMP)/layout > $(RAW)/layout.json
+	$(MAKE) -f $(ROOT)/kprog/results/cilium-cb-frame-20261116/Makefile linker RAW=$(RAW)
 	cd $(ROOT)/kprog/x86/native_lab/native_link && cargo test --release -- --test-threads=1 > $(RAW)/native-link-tests.log 2>&1
 	$(MAKE) -C $(ROOT)/kprog/libnativeloader > $(RAW)/loader-build.log 2>&1
 	$(MAKE) -B -C $(ROOT)/vendor/bpf native-cilium > $(RAW)/native-cilium-build.log 2>&1
 	date -u +%FT%TZ > $(RAW)/finished
+
+linker:
+	install -d $(RAW)
+	cd $(ROOT)/kprog/x86/native_lab/native_link && cargo build --release > $(RAW)/production-linker-build.log 2>&1
 
 dry-run:
 	$(MAKE) -n -C $(ROOT)/vendor/bpf $(ANSWERS)

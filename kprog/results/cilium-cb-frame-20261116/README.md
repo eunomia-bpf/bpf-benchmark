@@ -25,6 +25,10 @@ Host subset, CPUs 16–19 with a 12 GiB address-space limit:
 - Loader build passes; all seven Cilium native objects and their proof
   markers rebuild through the existing producer target.
 
+The first successful host run built the linker test binary. A subsequent
+production-linker build refreshes the normal CLI before the next load-plan
+replay; its progress is retained in retry1/production-linker-build.log.
+
 The first diagnostic run stopped at a libc/kernel wchar_t typedef collision
 in the fixture. Its complete output remains in the parent raw directory.
 The correction uses the existing physical-layout tool's header convention.
