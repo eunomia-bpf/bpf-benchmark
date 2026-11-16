@@ -39,6 +39,8 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-16T23:36:46Z（运营者“内核公共路径 为啥改? 我觉得内核是不是应该几乎不要修改, 整体 patch 也要少于 500 loc?”）**：内核补丁对 stock c23719abc330 共 13 个文件 +423/-4，在 500 行以内。公共路径里 kernel/fork.c、include/linux/sched.h 这 10 行（74d1097af561，每个任务一个待绑定镜像槽）拿掉：镜像只经 BPF_PROG_LOAD 里已有的显式字段绑定。内核从此只减不加；x86/arm64 mm/fault.c 的 15 行（SMAP 缺页沿用 BPF 异常恢复，冷路径）保留。
+
 **协调者 2026-11-16T23:27:56Z（运营者“你看看数据, 是不是越来越慢了? 为啥这样?”“你到底这周在干啥? 反思一下?”“要不要从 5/29 的基础上重新改?”“你要看看你都在调啥”；数据见 kprog/results/trend-20261116）**：
 1. 计时环境：C 跑计时的时候，Workspace 里的重活（镜像和工具构建、内核构建、全量 lake build、诊断来宾）在两轮之间做；重活用 `flock -s /workspaces/.agent-state/kprog-lanes/locks/timing` 包起来，计时持 -x，两边自然错开。依据：11-16 起 eBPF 一侧本身变慢 24–28%，逐样本波动从约 2% 变成 15–30%。
 2. 每一项修改先只在它针对的那个应用上用冻结入口单独量（corpus APPS=<app>，stats 开），量到了再和别的修改一起进镜像。
