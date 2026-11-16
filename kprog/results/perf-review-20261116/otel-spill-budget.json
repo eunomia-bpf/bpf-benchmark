@@ -1,0 +1,77 @@
+{
+  "reviewed_at": "2026-11-16T17:01:09Z",
+  "scope": "Retained November15 compiler diagnostic; current inputs and stock acceptance remain to evaluate.",
+  "retained_result": "/workspaces/kprog-raw/perf/20261115-otel-main-spill-replay/result.json",
+  "result_sha256": "0bd564ea4a4d52addf540c910e0350e431227634f50bba932fe2a1b2e15ef340",
+  "archive": "/workspaces/kprog-raw/perf/20261115-otel-current-app-retry2/service.tar.gz",
+  "request_member": "service/requests/3.failure.tar.gz",
+  "archived_mir_member": "request/generated/trusted_x86.bpf.before.mir",
+  "archived_mir_sha256": "c79e8f61ef2e93f26ca8498490c9f27b4dee617faf673421ebad68d55e2bf482",
+  "native_stack_object": {
+    "id": 0,
+    "type": "default",
+    "size": 408,
+    "alignment": 8,
+    "source": "MIR header streamed from retained nested archive"
+  },
+  "spill_object_counts_by_size": {
+    "8": 40,
+    "4": 12
+  },
+  "spill_alignment": 8,
+  "packed_pairs": [
+    {
+      "low": 51,
+      "high": 52,
+      "rewritten_accesses": 9
+    },
+    {
+      "low": 49,
+      "high": 50,
+      "rewritten_accesses": 12
+    },
+    {
+      "low": 46,
+      "high": 48,
+      "rewritten_accesses": 15
+    },
+    {
+      "low": 44,
+      "high": 45,
+      "rewritten_accesses": 16
+    },
+    {
+      "low": 41,
+      "high": 43,
+      "rewritten_accesses": 118
+    },
+    {
+      "low": 35,
+      "high": 39,
+      "rewritten_accesses": 523
+    }
+  ],
+  "rewritten_accesses": 693,
+  "rewritten_stores": 396,
+  "rewritten_loads": 297,
+  "live_register_save_events": 9,
+  "shared_scratch_slot_ids": [
+    52
+  ],
+  "compiled": true,
+  "compiled_sections": [
+    {
+      "name": ".text",
+      "bytes": 0,
+      "frame_access_depth": 0
+    },
+    {
+      "name": "perf_event",
+      "bytes": 991592,
+      "frame_access_depth": 784
+    }
+  ],
+  "compiled_object_sha256": "d01e7d574ad3a5e35c62fee0e60ea1e6c6bfc5658938f5f13ab8cd73974295a1",
+  "inventory_arena_plus_eight_byte_spills_bytes": 728,
+  "interpretation": "Declared storage accounting; lifetime analysis/scalar replacement/slot reuse can change the budget. Per-call and native installed-size effects are separate."
+}

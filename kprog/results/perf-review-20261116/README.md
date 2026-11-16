@@ -925,3 +925,38 @@ double-execution cause and no confirmed Cilium packet fix. Those remain open. Th
     representation has its own uses, so apply native emission cleanup at
     the appropriate stage. Installed-byte and per-call deltas remain to
     measure after cleanup.
+
+26. **The retained OTel frame needs work beyond more u32 spill pairing.**
+
+    The November15 main replay provides a concrete phase-1 storage inventory
+    (`20261115-otel-main-spill-replay/result.json`). Its archived pre-PEI MIR
+    declares a 408-byte default stack object plus forty eight-byte and twelve
+    four-byte spill objects, each aligned to eight. The small objects are
+    paired six ways. The report records 693 rewritten accesses: 396 stores
+    and 297 loads. Nine save/restore events use one shared scratch slot.
+    Compiled perf_event code is 991592 bytes with deepest frame access 784.
+    `otel-spill-budget.json` preserves these counts and the input hashes.
+
+    The 408-byte arena plus the forty full-word spill declarations already
+    totals 728 bytes of storage in that inventory, before the packed small
+    words. This identifies the limitation of working only on the twelve
+    small slots. It is a declared-storage accounting observation, not a
+    lower bound after arbitrary lifetime analysis, scalar replacement or
+    slot reuse. The 784-byte figure is the actual retained compiled depth;
+    newer P/context/frontend inputs still need their own generation result.
+
+    Current `whole_word_spills.py:299–303` pairs eligible slots after register
+    allocation. Each packed store becomes a full-word read/modify/write
+    sequence using scratch registers (:125–158), with live-register saves
+    when needed; loads extract a half (:166–172), and entry initialization
+    makes the packed words readable (:180–185). This makes private scalar
+    storage verifier-friendly, with real code and scratch cost. The current
+    scalar-narrowing step (:293) already expands eligibility, so this is a
+    request to examine the remaining live storage, preserving that work.
+
+    Reuse the existing LLVM pipeline to shorten temporary lifetimes and
+    eliminate dead native-stack/private-input state before register allocation
+    (including item16's late pruning opportunity). Identify which remaining
+    full-word spills carry pointers versus scalars before changing widths.
+    This review establishes the retained storage bottleneck; stock acceptance,
+    a smaller generated object and current whole-app completion remain open.
