@@ -2007,3 +2007,9 @@ complete GPR/SP reader return. It retains the provider trace and post-memory,
 constructing a warm cache from explicit writable storage and pointer/range
 bindings. The provider may change cache pointers; its native-origin binding
 and the cold RETURN Program path remain open.
+
+The [cold RETURN Program-reader proof](results/m5-program-return/README.md)
+completes the other relative GPR branch through the real kind-3 provider
+and borrowed cache stores. It shares the checked stage extraction and storage
+constructor with STACK while retaining RETURN's own continuation. Native
+provider/origin, producer storage and full-handler bindings remain M5.
