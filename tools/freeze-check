@@ -1,0 +1,21 @@
+#!/bin/bash
+# Operator 2026-11-16: "需要有东西冻结并且明确禁止修改, 除了删除死代码".
+# Input: `git diff --numstat` lines. A change to a frozen path may delete lines only.
+# Open for performance work (design: compiler flags when P is produced, and LTO):
+#   vendor/bpf/Makefile and vendor/bpf/*compat*.h (P flags and headers),
+#   kprog/x86/native_lab/native_link/ (linker LTO), the loader's LTO and link-plan headers.
+# Open for records: kprog/results, kprog/docs, corpus/results, micro/results. Proof track: kprog/formal.
+FROZEN='^(kprog/|kinsn/|bpfopt/shim/|runner/|vendor/bpf/|micro/|corpus/|e2e/|Makefile$)'
+OPEN='^(kprog/results/|kprog/docs/|corpus/results/|micro/results/|kprog/formal/|kprog/x86/native_lab/native_link/|kprog/libnativeloader/src/native_loader_(lto|link_plan|link_schema|context_lto)\.hpp$|vendor/bpf/Makefile$|vendor/bpf/[^/]*compat[^/]*\.h$)'
+bad=0
+while IFS=$'\t' read -r add del path; do
+  [ -n "$path" ] || continue
+  case $path in *' => '*) path=${path##* => }; path=${path//\}/}; path=${path//\{/} ;; esac
+  [[ $path =~ $OPEN ]] && continue
+  [[ $path =~ $FROZEN ]] || continue
+  if [ "$add" != 0 ]; then
+    echo "frozen: $path adds lines ($add). Operator 2026-11-16: only dead-code deletion here." >&2
+    bad=1
+  fi
+done
+exit $bad
