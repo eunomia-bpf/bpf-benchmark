@@ -42,3 +42,23 @@ and keeps the old generic behavior for unresolved indirect jumps. Regression
 edges target block starts and calls that bypass either load, preventing facts
 from leaking across those joins. The host replay now also includes retained
 OTel V8. Each attempt uses a distinct raw output directory.
+
+
+Resolved-table subset result: source e8960af11 passes 50 linker tests, zero
+failures and three existing ignored tests. Linker and loader builds pass;
+controller 1861331 finished 19:39:44Z, exit 0. Host fact variants give Katran
+10,528 / 10,528 B, OTel entry 8,001 / 7,604 B, and V8 37,512 / 37,115 B.
+The 397-byte reductions measure dispatch removal in these replays, not the
+separate gain from recovering map facts across switch tables.
+
+The hot perf_unwind_native lacks a kernel-link plan in the earlier replay
+inventory because B generation stopped first. Its actual load facts do exist
+in service/requests/3.success.tar.gz inside
+/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/service.tar.gz:
+request/kernel.metadata.json binds names to actual map IDs and shapes;
+request/kernel.facts.json and generation.metadata.json also retain inner-map
+shapes. Use these for the next host replay. Source bsearch_step
+(native_stack_trace.ebpf.c:121-134) repeatedly looks up a dynamic inner ARRAY.
+That is separate from recovering named-map facts: treating the inner pointer
+as a particular named map remains unsound. The captured outer HASH_OF_MAPS
+inner ARRAY shapes can support the remaining map-return dataflow work.

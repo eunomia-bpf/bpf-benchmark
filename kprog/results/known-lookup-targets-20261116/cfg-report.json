@@ -1,0 +1,512 @@
+{
+  "scope": "Compare lookup facts with one current linker, without running old code.\n\nRetained proof and load plans are host replay inputs. OTel's added LPM target\nuses its source declaration and a symbol delta from the captured same kernel;\nthis is not a new capture of loader-generated facts or installed code.\n",
+  "programs": [
+    {
+      "app": "katran",
+      "symbol": "balancer_ingress",
+      "variants": {
+        "generic-call-facts": {
+          "payload_bytes": 10528,
+          "generic_calls": 1,
+          "call_targets": [
+            {
+              "offset": 1875,
+              "target": 18446744071617407440
+            },
+            {
+              "offset": 2624,
+              "target": 18446744071617407440
+            },
+            {
+              "offset": 2982,
+              "target": 18446744071617407440
+            },
+            {
+              "offset": 3550,
+              "target": 18446744071617407440
+            },
+            {
+              "offset": 4375,
+              "target": 18446744071616304016
+            },
+            {
+              "offset": 4577,
+              "target": 18446744071616304016
+            },
+            {
+              "offset": 4659,
+              "target": 18446744071617407440
+            },
+            {
+              "offset": 5034,
+              "target": 18446744071626439344
+            },
+            {
+              "offset": 5405,
+              "target": 18446744071616304016
+            },
+            {
+              "offset": 5777,
+              "target": 18446744071617350192
+            },
+            {
+              "offset": 5921,
+              "target": 18446744071626439344
+            },
+            {
+              "offset": 6638,
+              "target": 18446744071616304016
+            },
+            {
+              "offset": 7053,
+              "target": 18446744071616304016
+            },
+            {
+              "offset": 7264,
+              "target": 18446744071616304016
+            },
+            {
+              "offset": 7346,
+              "target": 18446744071617407440
+            },
+            {
+              "offset": 7735,
+              "target": 18446744071626439344
+            },
+            {
+              "offset": 8005,
+              "target": 18446744071616304016
+            },
+            {
+              "offset": 8382,
+              "target": 18446744071617350192
+            },
+            {
+              "offset": 8893,
+              "target": 18446744071626439344
+            },
+            {
+              "offset": 9513,
+              "target": 18446744071617350192
+            },
+            {
+              "offset": 9618,
+              "target": 18446744071616304016
+            },
+            {
+              "offset": 9793,
+              "target": 18446744071617350192
+            },
+            {
+              "offset": 10518,
+              "target": 18446744071617350144
+            }
+          ]
+        },
+        "bound-call-facts": {
+          "payload_bytes": 10528,
+          "generic_calls": 1,
+          "call_targets": [
+            {
+              "offset": 1875,
+              "target": 18446744071617407440
+            },
+            {
+              "offset": 2092,
+              "target": 18446744071617426816
+            },
+            {
+              "offset": 2624,
+              "target": 18446744071617407440
+            },
+            {
+              "offset": 2982,
+              "target": 18446744071617407440
+            },
+            {
+              "offset": 3201,
+              "target": 18446744071617426816
+            },
+            {
+              "offset": 3550,
+              "target": 18446744071617407440
+            },
+            {
+              "offset": 4375,
+              "target": 18446744071616304016
+            },
+            {
+              "offset": 4577,
+              "target": 18446744071616304016
+            },
+            {
+              "offset": 4659,
+              "target": 18446744071617407440
+            },
+            {
+              "offset": 5034,
+              "target": 18446744071626439344
+            },
+            {
+              "offset": 5405,
+              "target": 18446744071616304016
+            },
+            {
+              "offset": 5777,
+              "target": 18446744071617350192
+            },
+            {
+              "offset": 5921,
+              "target": 18446744071626439344
+            },
+            {
+              "offset": 6638,
+              "target": 18446744071616304016
+            },
+            {
+              "offset": 7053,
+              "target": 18446744071616304016
+            },
+            {
+              "offset": 7264,
+              "target": 18446744071616304016
+            },
+            {
+              "offset": 7346,
+              "target": 18446744071617407440
+            },
+            {
+              "offset": 7735,
+              "target": 18446744071626439344
+            },
+            {
+              "offset": 8005,
+              "target": 18446744071616304016
+            },
+            {
+              "offset": 8382,
+              "target": 18446744071617350192
+            },
+            {
+              "offset": 8893,
+              "target": 18446744071626439344
+            },
+            {
+              "offset": 9513,
+              "target": 18446744071617350192
+            },
+            {
+              "offset": 9618,
+              "target": 18446744071616304016
+            },
+            {
+              "offset": 9793,
+              "target": 18446744071617350192
+            },
+            {
+              "offset": 10518,
+              "target": 18446744071617350144
+            }
+          ]
+        }
+      }
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "symbol": "native_tracer_entry",
+      "variants": {
+        "generic-call-facts": {
+          "payload_bytes": 8001,
+          "generic_calls": 1,
+          "call_targets": [
+            {
+              "offset": 25,
+              "target": 18446744072422657344
+            },
+            {
+              "offset": 51,
+              "target": 18446744072421610384
+            },
+            {
+              "offset": 391,
+              "target": 18446744072422657920
+            },
+            {
+              "offset": 524,
+              "target": 18446744072421610384
+            },
+            {
+              "offset": 867,
+              "target": 18446744072422657920
+            },
+            {
+              "offset": 1002,
+              "target": 18446744072422926912
+            },
+            {
+              "offset": 1383,
+              "target": 18446744072422713808
+            },
+            {
+              "offset": 1421,
+              "target": 18446744072421610384
+            },
+            {
+              "offset": 1726,
+              "target": 18446744072422656560
+            },
+            {
+              "offset": 1874,
+              "target": 18446744072422926912
+            },
+            {
+              "offset": 2133,
+              "target": 18446744072422656560
+            },
+            {
+              "offset": 2577,
+              "target": 18446744072422656560
+            },
+            {
+              "offset": 2961,
+              "target": 18446744072422316208
+            },
+            {
+              "offset": 4475,
+              "target": 18446744072422713808
+            },
+            {
+              "offset": 7440,
+              "target": 18446744072420430464
+            },
+            {
+              "offset": 7991,
+              "target": 18446744072422656512
+            }
+          ]
+        },
+        "bound-call-facts": {
+          "payload_bytes": 7604,
+          "generic_calls": 0,
+          "call_targets": [
+            {
+              "offset": 25,
+              "target": 18446744072422657344
+            },
+            {
+              "offset": 51,
+              "target": 18446744072421610384
+            },
+            {
+              "offset": 391,
+              "target": 18446744072422657920
+            },
+            {
+              "offset": 524,
+              "target": 18446744072421610384
+            },
+            {
+              "offset": 867,
+              "target": 18446744072422657920
+            },
+            {
+              "offset": 1002,
+              "target": 18446744072422926912
+            },
+            {
+              "offset": 1242,
+              "target": 18446744072422747360
+            },
+            {
+              "offset": 1383,
+              "target": 18446744072422713808
+            },
+            {
+              "offset": 1421,
+              "target": 18446744072421610384
+            },
+            {
+              "offset": 1726,
+              "target": 18446744072422656560
+            },
+            {
+              "offset": 1874,
+              "target": 18446744072422926912
+            },
+            {
+              "offset": 2133,
+              "target": 18446744072422656560
+            },
+            {
+              "offset": 2577,
+              "target": 18446744072422656560
+            },
+            {
+              "offset": 2961,
+              "target": 18446744072422316208
+            },
+            {
+              "offset": 4334,
+              "target": 18446744072422747360
+            },
+            {
+              "offset": 4475,
+              "target": 18446744072422713808
+            },
+            {
+              "offset": 7373,
+              "target": 18446744072420430464
+            }
+          ]
+        }
+      }
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "symbol": "perf_unwind_v8",
+      "variants": {
+        "generic-call-facts": {
+          "payload_bytes": 37512,
+          "generic_calls": 1,
+          "call_targets": [
+            {
+              "offset": 141,
+              "target": 18446744072422713808
+            },
+            {
+              "offset": 3068,
+              "target": 18446744072422713808
+            },
+            {
+              "offset": 9910,
+              "target": 18446744072422713808
+            },
+            {
+              "offset": 13730,
+              "target": 18446744072422713808
+            },
+            {
+              "offset": 17801,
+              "target": 18446744072422713808
+            },
+            {
+              "offset": 24159,
+              "target": 18446744072422713808
+            },
+            {
+              "offset": 28096,
+              "target": 18446744072422713808
+            },
+            {
+              "offset": 32033,
+              "target": 18446744072422713808
+            },
+            {
+              "offset": 36001,
+              "target": 18446744072422713808
+            },
+            {
+              "offset": 36905,
+              "target": 18446744072420430256
+            },
+            {
+              "offset": 37502,
+              "target": 18446744072422656512
+            }
+          ]
+        },
+        "bound-call-facts": {
+          "payload_bytes": 37115,
+          "generic_calls": 0,
+          "call_targets": [
+            {
+              "offset": 141,
+              "target": 18446744072422713808
+            },
+            {
+              "offset": 2932,
+              "target": 18446744072422747360
+            },
+            {
+              "offset": 3068,
+              "target": 18446744072422713808
+            },
+            {
+              "offset": 9774,
+              "target": 18446744072422747360
+            },
+            {
+              "offset": 9910,
+              "target": 18446744072422713808
+            },
+            {
+              "offset": 13594,
+              "target": 18446744072422747360
+            },
+            {
+              "offset": 13730,
+              "target": 18446744072422713808
+            },
+            {
+              "offset": 17432,
+              "target": 18446744072422747360
+            },
+            {
+              "offset": 17801,
+              "target": 18446744072422713808
+            },
+            {
+              "offset": 23790,
+              "target": 18446744072422747360
+            },
+            {
+              "offset": 24159,
+              "target": 18446744072422713808
+            },
+            {
+              "offset": 27727,
+              "target": 18446744072422747360
+            },
+            {
+              "offset": 28096,
+              "target": 18446744072422713808
+            },
+            {
+              "offset": 31664,
+              "target": 18446744072422747360
+            },
+            {
+              "offset": 32033,
+              "target": 18446744072422713808
+            },
+            {
+              "offset": 35632,
+              "target": 18446744072422747360
+            },
+            {
+              "offset": 36001,
+              "target": 18446744072422713808
+            },
+            {
+              "offset": 36838,
+              "target": 18446744072420430256
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "installed_bytes": "pending publication",
+  "per_call_body_helper_map": "pending affected-app measurement",
+  "host_validation": {
+    "source_commit": "e8960af11",
+    "linker_tests_passed": 50,
+    "linker_tests_failed": 0,
+    "existing_ignored": 3,
+    "production_linker_build": "passed",
+    "loader_build": "passed",
+    "controller_pid": 1861331,
+    "finished": "2026-11-16T19:39:44Z",
+    "exit_code": 0
+  }
+}
