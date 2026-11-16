@@ -35,6 +35,12 @@
 
 - [x] P-SPECIALIZE-10K（9fc382606、cc83b5d48；本提交结果）：四种 10K 形状正常 B/实际栈帧完成，前端 11.6–26.3s、峰值 399–920MiB；B 328–200624B、帧 0–40B，详见 `perf_20261113/inline-families/scale-10k/`。旧同名 scalar/direct 70.47GiB/SIGKILL 的实际失败已能完成；不跨不同编译管线宣称独立加速比。100K 继续。
 
+**协调者 2026-11-16T15:37:44Z（运营者“顺便 codex 继续去审核源代码也来继续看性能问题”“发现问题你自己主动推进清理整改, 别的 lane 停下来, 清理整理好再继续”）**：清理期间 PERF 只审核、不改代码；清理完成后 PERF 按这个顺序修，每项一个提交，量每次调用和装进去的大小，不加任何检查：
+1. 一个帧约定（kprog/results/perf-review-20261116 第 1 条）：内核 bpf_jit_comp.c 3799–3817 总是保存并恢复四个 callee 寄存器，native_link x86.rs 3875–3877 只弹 callee_saved_mask 再弹两个尾调用计数槽；mask 为 0 时这两次弹栈吃掉的是保存的寄存器。内核按 bpf_native.h 的 callee_saved_mask 发帧，direct-native 模块 402 行填上这个字段，原生代码自己不再重复保存；尾调用切换按同一个帧。Cilium 原生一侧每个包多走 cil_to_host、cil_from_host 很可能出自这里，修完用 BPF_PROG_TEST_RUN 对比 cil_from_container 两版的返回码和重定向。
+2. map update/delete 在链接时绑定到具体 map 的 ops（第 2 条）：native_loader.cpp 3117–3150 只特化小 ARRAY 的 update，HASH update 和 delete 走通用 bpf_map_update_elem（RCU 检查加间接调用）；eBPF 一侧 verifier 23944/23947 直接打到 ops。BCC sys_enter/sys_exit 占基线时间 73%。
+3. 审核子代理确认的问题：Cilium 原生编译开关取自 agent 自己的 node_config.h 和 endpoint 头（去掉 NODEPORT、HOST_ROUTING、DSR、HOST_FIREWALL，加 POLICY_AUDIT_MODE，删没用的 -DMICRO_NATIVE_CILIUM）；原生 __sk_buff 的 cb 偏移按 BTF 推出；loader 只按程序自己的 map 绑定；每次调用的 runtime array 查找常量内联、去掉类型判断和每次调用的 SMAP 检查，OTel 专用的 LPM 路径改成通用的；编译开关统一，删掉 MICRO_NATIVE_CORE_REG_PROBE_READS 的死分支；OTel 的 IR 链接一步对照“不允许放进编译过程”复核。
+4. 哈希例程共用内核那一份（f45bb2485）进镜像。
+
 **协调者 2026-11-16T15:07:59Z（运营者“你自己去清理和删除不必要的 deadcode 和过度设计 ... 旧的都你(claude)主线程来直接清理”）**：清理进行中，协调者在主线程直接做；C、formal 停着，perf 只审核源代码、看性能问题（运营者“顺便 codex 继续去审核源代码也来继续看性能问题”）。已删：1ed4cbc6c（另一内核 6.15.11 的 vmlinux.h、kprog/perf/art），清理 2（kprog/tv 116 个文件 43 376 行及其构建树；direct-native 只留模块构建；fidelity 的 negative、stage2、bound-probe 流程），93dedd0e8（旧的独立 Rust 装载器 kprog/loader 及构建树）。计时模块用唯一内核重新编译通过。下一批：kprog/x86、kprog/arm64 Makefile 里依赖旧装载器的 build/run 目标和硬编码模拟器（冻结 benchmark 的镜像构建会调 kprog/x86 的 micro-proofs-build，这个目标保持原样）；普查工具和 kprog/selftests；kprog/test 里没人用的一次性脚本（*.bpf.c 由 kprog/test/Makefile 的通配编译，保留）；然后按审核报告处理核心代码里的过度设计；formal 的 oracles、tools 等 formal 恢复后一起做。
 
 **协调者 2026-11-16T14:20:22Z（运营者“去审核代码. 禁止加任何额外的 check. 内核不必要的 check 也需要拆掉一部分, 确保这些被内联进去了. 也检查为啥会有性能问题, 让 codex 看看 …… 这个明显不对 …… 为啥多走???”）**：PERF（Codex）按这个顺序做，C 配合：
