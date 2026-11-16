@@ -1,0 +1,23 @@
+{
+  "app": "tetragon/observer",
+  "run": "corpus/results/x86_kvm_corpus_20261116_232540_669421",
+  "status": "ok",
+  "error": "",
+  "replacement_events": 288,
+  "native_failure_events": 0,
+  "scope": "Frozen one-sample 10-second functional check; not official timing",
+  "phases": {
+    "baseline": {
+      "programs": 287,
+      "installed_bytes": 2471824,
+      "calls": 66081472,
+      "time_ns": 39323784661
+    },
+    "post_rejit": {
+      "programs": 225,
+      "installed_bytes": 1491465,
+      "calls": 64149047,
+      "time_ns": 32730345185
+    }
+  }
+}

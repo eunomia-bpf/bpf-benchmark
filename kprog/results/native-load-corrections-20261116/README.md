@@ -31,3 +31,10 @@ calls across those programs. The two cil_from_container records have
 all selected path records are in cilium.json. This is a diagnostic window,
 not yet an official timing or proof that every packet takes equal work.
 The same-load paired packet test is the next correctness check.
+
+2026-11-16T23:30:36Z: Tetragon232540_669421 completes app ok with288 native replacement
+events and zero native-load failures. Both measurement arms have287 records.
+This confirms the conditional-Jcc closure fix in the real policy/CEL load
+context, which was absent from the earlier239 retained kernel plans. Raw
+phase counters and installed bytes are retained in tetragon.json. B generation
+and stock verification are separate and remain unmeasured in this check.
