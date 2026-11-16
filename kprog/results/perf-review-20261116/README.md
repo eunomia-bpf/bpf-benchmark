@@ -960,3 +960,34 @@ double-execution cause and no confirmed Cilium packet fix. Those remain open. Th
     full-word spills carry pointers versus scalars before changing widths.
     This review establishes the retained storage bottleneck; stock acceptance,
     a smaller generated object and current whole-app completion remain open.
+
+27. **PERF_EVENT context conversion covers direct entry loads, with callee uses still open.**
+
+    `perf_context_lto.cpp:96` runs O3 to expose context reads, then :113–117
+    collects LoadInst only from the selected entry F when its underlying
+    pointer object equals F's argument zero. The lowering at :131–135 changes
+    those loads to use the physical registers/data pointers. Helpers and tail
+    calls intentionally keep the physical context (:137), and a second O3
+    pipeline runs at :147.
+
+    Inlining is therefore part of the current coverage assumption. Consider
+    an external, defined noinline function read_period(p) whose body loads
+    p->sample_period, called by the selected entry with its context argument.
+    Its ABI/body can survive O3. The entry has the call while the public-field
+    load remains in the callee. The collector above visits the entry alone,
+    so that callee retains a public-structure offset on a physical kernel
+    context. A context memcpy retained as a memory intrinsic also lies outside
+    this LoadInst collector. These are source-derived coverage cases, with
+    actual current OTel occurrence and execution still to establish. They
+    leave the measured unwind counters as their own evidence.
+
+    Extend the existing LLVM context-origin/reference traversal through real
+    call arguments and memory operations. Shared callees need their actual
+    argument origins distinguished before conversion; blindly rewriting every
+    pointer argument would change ordinary-memory calls. Keep physical context
+    operands for kernel helpers/tail calls while translating public field
+    operations at their actual use. Reuse existing compiler infrastructure for
+    this context class, preserving the operator's load-time placement. A new
+    per-call context test, copied public context or app-specific compiler is
+    unnecessary. Current installed bytes, stock-generation coverage and timing
+    effects remain measurement work after cleanup.
