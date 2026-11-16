@@ -277,6 +277,31 @@ to the source read during this review; subsequent cleanup may move them.
    virtual view can avoid extra field loads/arithmetic; this is a source cost,
    with no isolated per-call gain claimed.
 
+   Two more field semantics belong to that public-context translation.
+   Native `include/linux/bpf.h:6093` makes queue_mapping a u16, while the
+   public declaration at :6163 is u32. A native assignment therefore truncates
+   its value before a later pass can recover it. The sole kernel's
+   `filter.c:9835–9845` instead preserves the old mapping for values at least
+   65535. For an existing mapping of7, assigning65536 leaves7 on that kernel
+   path but writes0 through the native u16 field. This is a source-derived
+   boundary example, with benchmark occurrence still open. Cilium's
+   `lib/edt.h:44–49` contains the assignment under ENABLE_BANDWIDTH_MANAGER.
+   Existing packet-physical-layout.c:29 already records store_max_exclusive
+   for this field, and socket-context-lower.cpp:176–181 applies that kernel
+   store behavior before truncation. Reuse those public-width/semantic facts.
+
+   Timestamp access also carries program-specific semantics. With the sole
+   kernel's CONFIG_NET_XGRESS=y, `filter.c:9687–9711` returns zero for an
+   ingress delivery timestamp when the program has not read tstamp_type.
+   Writes at :9722–9745 then clear the timestamp-type bits at ingress for
+   such a program. Native's physical tstamp field at header :6086 performs
+   a plain read/store. Cilium EDT reads it at :90 and writes it at :107;
+   reachability and actual timestamp state in the benchmark still need
+   evidence. These observations extend the context class beyond offset
+   generation: retain public operand width and the original program's field
+   access semantics while binding physical fields from the sole kernel.
+   They are source parity cases, with current throughput attribution open.
+
    **Separate configuration lead, not a confirmed loaded-value mismatch:**
 
    `vendor/bpf/Makefile:81–104` compiles a maximum-feature native variant,
