@@ -668,5 +668,31 @@
     "native_counter_access": "x86.rs:3855-3877 RBP-16 and two counter-slot pops",
     "existing_native_fact": "Tail count relocation kind 10",
     "status": "Source-contract defect for native tail-calling P on registered fallback; no new execution, not asserted to explain timing Cilium path."
+  },
+  "dead_private_input_tail": {
+    "recorded_at": "2026-11-16T16:06:09Z",
+    "existing_pruner": "kprog/x86/packet_bounds_ir.cpp:250-266, called once at323",
+    "producer": "x86_sim_local_bpf.h:776-790 released-stack choices",
+    "artifact": "/workspaces/kprog-raw/perf/20261116-generator-indirect-spills/stock/b-build.tar.gz",
+    "verifier_log": "/workspaces/kprog-raw/perf/20261116-generator-indirect-spills/stock-map-binding/verifier.log",
+    "dead_load_instruction_slots": [
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49
+    ],
+    "private_address_instruction_slots": [
+      39,
+      40
+    ],
+    "total_b_instruction_slots": 55,
+    "candidate_dead_tail_slots": 11,
+    "candidate_dead_tail_bytes": 88,
+    "scope": "Static retained B listing; no new compilation, verifier timing or actual reduced object size. Does not execute on installed native P path."
   }
 }

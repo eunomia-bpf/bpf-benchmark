@@ -499,3 +499,38 @@ double-execution cause and no confirmed Cilium packet fix. Those remain open. Th
     tail cleanup and target entry consistent without an added per-call check
     or another optional compatibility path. This belongs with the pending
     frame/phase-1 correction after coordinator cleanup.
+
+16. **Private-input pruning runs before later dead-store elimination exposes waste.**
+
+    There is already a narrowly scoped removal pass; adding a second general
+    volatile-load rule would be unnecessary. `packet_bounds_ir.cpp:250–266`
+    removes unused, non-atomic, volatile i64 loads from the specific private
+    kprog_unspecified_input extern. It preserves live choices and other memory.
+    Main invokes it once at :323, before the later backend compilation in
+    `trusted_specializer.py:94–100` and whole-word spill lowering.
+
+    The shared I deliberately makes released stack bytes arbitrary:
+    `x86_sim_local_bpf.h:776–790` draws private choices into each released
+    word/byte. The stock input header :20 turns each draw into a volatile map
+    load, which normal LLVM dead-store elimination cannot itself remove.
+    In the retained CEL build, the return's ADD RSP,72 releases nine words.
+    Later optimization removes those dead private stores, while nine now-dead
+    volatile loads remain in the final B.
+
+    The exact retained verifier listing shows instruction39/40 loading the
+    private map-value address into R1, followed by nine consecutive i64 loads
+    at41–49 from that same address. Their destination registers are overwritten
+    without use; none affects the final result at50–54. In archived
+    trusted_x86.bpf.before.mir, the corresponding nine volatile LLVM loads
+    remain on the return edge even though their stores have disappeared.
+    This is a static nine-load tail plus a two-slot address load, 11 of the
+    55 B instruction slots (88 of440 executable bytes). It is not a measured
+    post-fix object size or verifier-time reduction.
+
+    Reuse the existing private-input pruner after the optimization that makes
+    those reads dead. Do not strip volatile from arbitrary context/map reads,
+    coalesce live independent choices, replace the entry stack base by zero,
+    or remove released-stack semantics from I. This needs compiler ordering
+    work after cleanup, not another runtime check or a new proof gate.
+    It affects B generation/verification cost and byte size; the native P
+    installed for timing does not execute these B instructions.
