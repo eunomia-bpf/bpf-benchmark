@@ -57,6 +57,15 @@ CHECK_CPUS ?= 8-11
 helper-register-abi:
 	taskset -c 16-17 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/check_tetragon_helper_registers.py --build /var/tmp/kprog-tmp/perf/helper-register-abi --output $(OUTPUT)
 
+.PHONY: helper-join-proof
+helper-join-proof:
+	install -d $(OUTPUT) $(BUILD)
+	clang-18 -O3 -g -fPIC -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -I$(ROOT)/vendor/libbpf/include/uapi -D__KPROG_CORE_ANSWERS='"$(ROOT)/vendor/build/native-bpf/x86/$(shell cat $(KDIR)/include/config/kernel.release)/answers/tetragon.h"' -c $(ROOT)/kprog/test/tetragon_helper_join.c -o $(BUILD)/helper-join.o
+	llvm-objdump-18 -dr $(BUILD)/helper-join.o > $(OUTPUT)/helper-join.dis
+	$(LINKER_BINARY) --input $(BUILD)/helper-join.o --symbol helper_join --mode proof --preserve-entry-abi --output $(OUTPUT)/helper-join.proof.o
+	python3 -c 'import pathlib,tarfile; archive=tarfile.open("/workspaces/kprog-raw/perf/20261116-checked-six-apps/tetragon/state/session-sxeysh3e/requests/1.success.tar.gz"); name=next(n for n in archive.getnames() if n.endswith(".link-plan.json")); pathlib.Path("$(OUTPUT)/link-plan.json").write_bytes(archive.extractfile(name).read())'
+	$(LINKER_BINARY) --input $(OUTPUT)/helper-join.proof.o --symbol helper_join --mode kernel --link-plan $(OUTPUT)/link-plan.json --output $(OUTPUT)/blob.bin --output-relocs $(OUTPUT)/relocs.bin --output-map-patches $(OUTPUT)/maps.tsv --output-abi $(OUTPUT)/abi.tsv
+
 .PHONY: check build
 check: $(KERNEL_LAYOUT)
 	taskset -c $(CHECK_CPUS) prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) NATIVE_LINK_HASH_TEST_OUTPUT=$(OUTPUT)/hash-execution cargo test --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml

@@ -1,0 +1,18 @@
+
+/var/tmp/kprog-tmp/perf/native-relocations/helper-join.o:	file format elf64-x86-64
+
+Disassembly of section kprobe/test:
+
+0000000000000000 <helper_join>:
+       0: 48 89 f8                     	movq	%rdi, %rax
+       3: 48 83 3f 00                  	cmpq	$0x0, (%rdi)
+       7: 48 8b 7f 08                  	movq	0x8(%rdi), %rdi
+       b: 48 8b 50 10                  	movq	0x10(%rax), %rdx
+       f: be 04 00 00 00               	movl	$0x4, %esi
+      14: 74 08                        	je	0x1e <helper_join+0x1e>
+      16: b8 71 00 00 00               	movl	$0x71, %eax
+      1b: ff d0                        	callq	*%rax
+      1d: c3                           	retq
+      1e: b8 70 00 00 00               	movl	$0x70, %eax
+      23: ff d0                        	callq	*%rax
+      25: c3                           	retq

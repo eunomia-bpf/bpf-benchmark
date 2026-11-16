@@ -785,21 +785,48 @@ extern int bpf_iter_num_new(struct bpf_iter_num *it, int start, int end) __attri
 extern int *bpf_iter_num_next(struct bpf_iter_num *it) __attribute__((weak)) __attribute__((section(".ksyms")));
 extern void bpf_iter_num_destroy(struct bpf_iter_num *it) __attribute__((weak)) __attribute__((section(".ksyms")));
 
-/* Tetragon's api.h uses bare helper names. Ordinary typed C calls expose
- * every SysV caller-saved register and stack alignment requirement to clang.
- * native-link resolves their numeric helper identities, including CFG joins. */
+/* Explicit helper call sites use the SysV argument registers as read-write
+ * operands. A helper may destroy every caller-saved register, including its
+ * argument registers and RAX even when the caller ignores the return value. */
 #define __KPROG_TG_HELPER0(rettype, id) \
-    (((rettype (*)(void))(unsigned long)(id))())
+    (__extension__({ unsigned long __r = (unsigned long)(id); \
+       asm volatile("call *%%rax" : "+a"(__r) \
+                    : : "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10", "r11", "memory", "cc"); (rettype)__r; }))
 #define __KPROG_TG_HELPER1(rettype, id, a0) \
-    (((rettype (*)(unsigned long))(unsigned long)(id))((unsigned long)(a0)))
+    (__extension__({ unsigned long __r = (unsigned long)(id); \
+       register unsigned long __a0 __asm__("rdi") = (unsigned long)(a0); \
+       asm volatile("call *%%rax" : "+a"(__r), "+D"(__a0) \
+                    : : "rcx", "rdx", "rsi", "r8", "r9", "r10", "r11", "memory", "cc"); (rettype)__r; }))
 #define __KPROG_TG_HELPER2(rettype, id, a0, a1) \
-    (((rettype (*)(unsigned long, unsigned long))(unsigned long)(id))((unsigned long)(a0), (unsigned long)(a1)))
+    (__extension__({ unsigned long __r = (unsigned long)(id); \
+       register unsigned long __a0 __asm__("rdi") = (unsigned long)(a0); \
+       register unsigned long __a1 __asm__("rsi") = (unsigned long)(a1); \
+       asm volatile("call *%%rax" : "+a"(__r), "+D"(__a0), "+S"(__a1) \
+                    : : "rcx", "rdx", "r8", "r9", "r10", "r11", "memory", "cc"); (rettype)__r; }))
 #define __KPROG_TG_HELPER3(rettype, id, a0, a1, a2) \
-    (((rettype (*)(unsigned long, unsigned long, unsigned long))(unsigned long)(id))((unsigned long)(a0), (unsigned long)(a1), (unsigned long)(a2)))
+    (__extension__({ unsigned long __r = (unsigned long)(id); \
+       register unsigned long __a0 __asm__("rdi") = (unsigned long)(a0); \
+       register unsigned long __a1 __asm__("rsi") = (unsigned long)(a1); \
+       register unsigned long __a2 __asm__("rdx") = (unsigned long)(a2); \
+       asm volatile("call *%%rax" : "+a"(__r), "+D"(__a0), "+S"(__a1), "+d"(__a2) \
+                    : : "rcx", "r8", "r9", "r10", "r11", "memory", "cc"); (rettype)__r; }))
 #define __KPROG_TG_HELPER4(rettype, id, a0, a1, a2, a3) \
-    (((rettype (*)(unsigned long, unsigned long, unsigned long, unsigned long))(unsigned long)(id))((unsigned long)(a0), (unsigned long)(a1), (unsigned long)(a2), (unsigned long)(a3)))
+    (__extension__({ unsigned long __r = (unsigned long)(id); \
+       register unsigned long __a0 __asm__("rdi") = (unsigned long)(a0); \
+       register unsigned long __a1 __asm__("rsi") = (unsigned long)(a1); \
+       register unsigned long __a2 __asm__("rdx") = (unsigned long)(a2); \
+       register unsigned long __a3 __asm__("rcx") = (unsigned long)(a3); \
+       asm volatile("call *%%rax" : "+a"(__r), "+D"(__a0), "+S"(__a1), "+d"(__a2), "+r"(__a3) \
+                    : : "r8", "r9", "r10", "r11", "memory", "cc"); (rettype)__r; }))
 #define __KPROG_TG_HELPER5(rettype, id, a0, a1, a2, a3, a4) \
-    (((rettype (*)(unsigned long, unsigned long, unsigned long, unsigned long, unsigned long))(unsigned long)(id))((unsigned long)(a0), (unsigned long)(a1), (unsigned long)(a2), (unsigned long)(a3), (unsigned long)(a4)))
+    (__extension__({ unsigned long __r = (unsigned long)(id); \
+       register unsigned long __a0 __asm__("rdi") = (unsigned long)(a0); \
+       register unsigned long __a1 __asm__("rsi") = (unsigned long)(a1); \
+       register unsigned long __a2 __asm__("rdx") = (unsigned long)(a2); \
+       register unsigned long __a3 __asm__("rcx") = (unsigned long)(a3); \
+       register unsigned long __a4 __asm__("r8") = (unsigned long)(a4); \
+       asm volatile("call *%%rax" : "+a"(__r), "+D"(__a0), "+S"(__a1), "+d"(__a2), "+r"(__a3), "+r"(__a4) \
+                    : : "r9", "r10", "r11", "memory", "cc"); (rettype)__r; }))
 
 #undef map_lookup_elem
 #define map_lookup_elem(map, key) \
@@ -854,7 +881,7 @@ extern void bpf_iter_num_destroy(struct bpf_iter_num *it) __attribute__((weak)) 
     __KPROG_TG_HELPER5(int, NATIVE_BPF_FUNC_perf_event_output, \
                        (ctx), (map), (flags), (data), (size))
 #define __KPROG_TG_HELPER3V(id, a0, a1, a2) \
-    __KPROG_TG_HELPER3(void, (id), (a0), (a1), (a2))
+    ((void)__KPROG_TG_HELPER3(unsigned long, (id), (a0), (a1), (a2)))
 #undef tail_call
 #define tail_call(ctx, map, index) \
     (__KPROG_TG_HELPER3V(NATIVE_BPF_FUNC_tail_call, (ctx), (map), (index)), (void)0)
