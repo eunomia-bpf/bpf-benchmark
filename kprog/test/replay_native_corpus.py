@@ -14,8 +14,16 @@ def request_plans(request, origin):
         return
     symbol = request.extractfile('request/kernel.entry').read().decode()
     facts = json.load(request.extractfile('request/kernel.facts.json'))
+    with request.extractfile('request/kernel.native.o') as stream:
+        source_files = elf_source_files(ELFFile(io.BytesIO(stream.read())))
     for plan in sorted(name for name in names if name.endswith('.link-plan.json')):
-        yield symbol, dict(**origin, plan=plan, context=facts), request.extractfile(plan).read()
+        yield symbol, dict(**origin, plan=plan, context=facts,
+                           source_files=source_files), request.extractfile(plan).read()
+
+
+def elf_source_files(elf):
+    return sorted(symbol.name for symbol in elf.get_section_by_name('.symtab').iter_symbols()
+                  if symbol['st_info']['type'] == 'STT_FILE')
 
 
 def captured_requests(source):
@@ -87,9 +95,11 @@ def main():
                 elf = ELFFile(stream)
                 function, = elf.get_section_by_name('.symtab').get_symbol_by_name(key[1])
                 section = elf.get_section(function['st_shndx']).name
+                source_files = elf_source_files(elf)
             row = dict(app=app, native=str(native), symbol=key[1],
                        captured_contexts=[record for record, _ in contexts.get(key[1], [])],
-                       section=section, context_lto=None, proof=None, kernel_replays=[])
+                       source_files=source_files, section=section, context_lto=None,
+                       proof=None, kernel_replays=[], different_source_captures=[])
             rows.append(row)
             if not args.inventory:
                 directory = args.output / str(index)
@@ -113,6 +123,14 @@ def main():
                     failures += result.returncode != 0
                     if result.returncode == 0:
                         for number, (record, data) in enumerate(contexts.get(key[1], [])):
+                            # Cilium reuses full function names across distinct
+                            # upstream translation units with different maps.
+                            # Keep their facts visible, without pretending they
+                            # describe this candidate object.
+                            if (record.get('source_files') and source_files and
+                                    record['source_files'] != source_files):
+                                row['different_source_captures'].append(record)
+                                continue
                             plan = directory / f'{number}.link-plan.json'
                             plan.write_bytes(data)
                             command = [str(args.linker), '--input', str(proof), '--symbol', key[1],
