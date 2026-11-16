@@ -145,19 +145,20 @@ context-run:
 
 CHECKED_APP ?= otelcol-ebpf-profiler/profiling
 CHECKED_LOADER ?= /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader
+CHECKED_BOUNDS_COMPILER ?= /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds
 CHECKED_APPS ?= otelcol-ebpf-profiler/profiling bcc/set cilium/agent tetragon/observer tracee/monitor katran
 CHECKED_HOST_CPUS ?= 16-17
 CHECKED_VM_MEMORY ?= 48G
 CHECKED_VM_ADDRESS_SPACE ?= 85899345920
 checked-corpus:
-	install -d $(OUTPUT) $(OUTPUT)/loader-inputs $(REPLAY_BUILD)
+	install -d $(OUTPUT) $(OUTPUT)/loader-inputs $(OUTPUT)/bounds-inputs $(REPLAY_BUILD)
 	date -u +%FT%TZ > $(OUTPUT)/started
 	exec 9>/workspaces/.agent-state/kprog-lanes/locks/image; flock -s 9; \
 	status=0; taskset -c $(CHECKED_HOST_CPUS) prlimit --as=$(CHECKED_VM_ADDRESS_SPACE) -- vng --run $(KDIR)/arch/x86/boot/bzImage \
-		--cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --rwdir /var/tmp=$(REPLAY_BUILD) --rodir $(OUTPUT)/loader-inputs=$(dir $(CHECKED_LOADER)) \
+		--cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --rwdir /var/tmp=$(REPLAY_BUILD) --rodir $(OUTPUT)/loader-inputs=$(dir $(CHECKED_LOADER)) --rodir $(OUTPUT)/bounds-inputs=$(dir $(CHECKED_BOUNDS_COMPILER)) \
 		--overlay-rwdir /tmp --overlay-rwdir /run --overlay-rwdir /usr/local \
 		--disable-monitor --verbose --cpus 2 --memory $(CHECKED_VM_MEMORY) --append 'loglevel=4 panic=30 oops=panic' \
-		--exec 'bash $(ROOT)/kprog/test/run_checked_otel.sh $(OUTPUT) $(CHECKED_APP) $(OUTPUT)/loader-inputs/$(notdir $(CHECKED_LOADER))' || status=$$?; \
+		--exec 'bash $(ROOT)/kprog/test/run_checked_otel.sh $(OUTPUT) $(CHECKED_APP) $(OUTPUT)/loader-inputs/$(notdir $(CHECKED_LOADER)) $(OUTPUT)/bounds-inputs/$(notdir $(CHECKED_BOUNDS_COMPILER))' || status=$$?; \
 	printf '%s\n' "$$status" > $(OUTPUT)/exit-code; date -u +%FT%TZ > $(OUTPUT)/finished; \
 	if test -f $(REPLAY_BUILD)/bpf-benchmark-docker.img; then stat --printf='%s bytes %n\n' $(REPLAY_BUILD)/bpf-benchmark-docker.img >> $(OUTPUT)/removed-build-copies.txt; rm -f $(REPLAY_BUILD)/bpf-benchmark-docker.img; printf -- '- %s PERF checked-corpus: removed completed guest Docker disk build in %s; raw service/run evidence kept at %s.\n' "$$(date -u +%FT%TZ)" '$(REPLAY_BUILD)' '$(OUTPUT)' >> $(ROOT)/kprog/docs/cleanup-log.md; fi; exit $$status
 
