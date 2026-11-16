@@ -39,8 +39,8 @@ Thumbs.db
 *.a
 *.so
 build/
-# kprog/build is the same-source build pipeline (tracked source); only its
-# own output directories are ignored.
+# kprog/build holds the checked-sim-c context tool sources built by
+# kprog/libnativeloader checked-sim-stage.
 !kprog/build/
 kprog/build/build-*/
 /build-arm64/
