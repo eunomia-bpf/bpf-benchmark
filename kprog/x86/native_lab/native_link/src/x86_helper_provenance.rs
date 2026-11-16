@@ -12,6 +12,7 @@ pub(super) struct Calls {
     pub single: HashMap<u64, String>,
     pub numeric_joins: HashMap<u64, Vec<(u64, String)>>,
     pub tails: HashSet<u64>,
+    pub branch_targets: HashMap<u64, Vec<u64>>,
 }
 
 fn indirect_register(insn: &Instruction) -> Option<Register> {
@@ -35,7 +36,7 @@ pub(super) fn calls(elf: &object::File, sym: &SymInfo,
     let tails: HashSet<_> = Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE)
         .into_iter().filter(|i| i.flow_control() == FlowControl::IndirectBranch)
         .map(|i| i.ip()).collect();
-    let mut result=Calls::default();
+    let mut result=Calls { branch_targets: tables, ..Calls::default() };
     for (ip, alternatives) in values {
         let mut names=BTreeSet::new();
         let mut numeric=Vec::new();

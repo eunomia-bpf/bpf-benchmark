@@ -1156,7 +1156,8 @@ pub(super) fn rewrite_x86(
         // to a per-symbol IP=0 layout before encoding.
         let mut decoder = Decoder::with_ip(64, &bytes, sym.address, DecoderOptions::NONE);
         let proven_maps = if !proof_mode {
-            known_maps::arguments(&bytes, sym, &got_relocations, &absolute_maps, map_addrs)?
+            known_maps::arguments(&bytes, sym, &got_relocations, &absolute_maps, map_addrs,
+                                  &helper_calls.branch_targets)?
         } else { HashMap::new() };
 
         // Side table: per-entry patch kind, paired with each kept Instruction

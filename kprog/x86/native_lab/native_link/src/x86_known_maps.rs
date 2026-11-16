@@ -8,6 +8,7 @@ pub(super) fn arguments(
     bytes: &[u8], sym: &SymInfo, got: &HashMap<LocalSiteKey, String>,
     absolute: &HashMap<LocalSiteKey, non_pic::Reference>,
     maps: &HashMap<String, u64>,
+    branch_targets: &HashMap<u64, Vec<u64>>,
 ) -> Result<HashMap<u64, String>> {
     let mut decoder = Decoder::with_ip(64, bytes, sym.address, DecoderOptions::NONE);
     let mut instructions = Vec::new();
@@ -16,11 +17,14 @@ pub(super) fn arguments(
         if insn.is_invalid() { bail!("invalid x86 map-provenance instruction in {}", sym.name); }
         instructions.push(insn);
     }
-    // An unresolved jump table may enter any block; keep those lookups generic.
-    if instructions.iter().any(|i| i.flow_control() == FlowControl::IndirectBranch) {
+    // Reuse the helper analysis's resolved code-table destinations. Only an
+    // unresolved indirect branch may enter an arbitrary instruction.
+    if instructions.iter().any(|i| i.flow_control() == FlowControl::IndirectBranch
+        && !branch_targets.get(&i.ip()).is_some_and(|targets| !targets.is_empty())) {
         return Ok(HashMap::new());
     }
     let mut boundaries = HashSet::from([sym.address]);
+    boundaries.extend(branch_targets.values().flatten().copied());
     for insn in &instructions {
         if !matches!(insn.flow_control(), FlowControl::Next | FlowControl::Call | FlowControl::IndirectCall) {
             boundaries.insert(insn.next_ip());
@@ -81,7 +85,7 @@ mod tests {
         let sym = SymInfo { name: "entry".into(), section_index: object::SectionIndex(1),
                             address: 0, size: bytes.len() as u64 };
         arguments(bytes, &sym, &HashMap::from([((sym.section_index, 0, 3), "map".into())]), &HashMap::new(),
-                  &HashMap::from([("map".into(), 0x1000)]))
+                  &HashMap::from([("map".into(), 0x1000)]), &HashMap::new())
     }
 
     #[test]
@@ -116,9 +120,36 @@ mod tests {
         let sym = SymInfo { name: "entry".into(), section_index: object::SectionIndex(1),
                             address: 0, size: bytes.len() as u64 };
         assert!(arguments(&bytes, &sym, &HashMap::from([((sym.section_index,0,5),"map".into())]), &HashMap::new(),
-                          &HashMap::from([("map".into(),0x1000)]))?.is_empty());
+                          &HashMap::from([("map".into(),0x1000)]), &HashMap::new())?.is_empty());
         // Unknown jump-table successors cannot reuse any linear-flow fact.
         assert!(track(&[load.as_slice(), &[0xe8,0,0,0,0, 0xff,0xe0]].concat())?.is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn resolved_jump_tables_keep_local_loads_but_erase_joined_map_facts() -> Result<()> {
+        // Two blocks each load a named map then call. The first ends in an
+        // indirect jump; a table edge may bypass either map load entirely.
+        let bytes = [0x48,0x8b,0x3d,0,0,0,0, 0xe8,0,0,0,0, 0xff,0xe0,
+                     0x48,0x8b,0x3d,0,0,0,0, 0xe8,0,0,0,0, 0xc3];
+        let sym = SymInfo { name: "entry".into(), section_index: object::SectionIndex(1),
+                            address: 0x1000, size: bytes.len() as u64 };
+        let got = HashMap::from([(local_site_key(&sym,3),"map".into()),
+                                 (local_site_key(&sym,17),"map".into())]);
+        let maps = HashMap::from([("map".into(),0x2000)]);
+        for (targets, expected) in [
+            (vec![sym.address+14], vec![7,21]),
+            (vec![sym.address+7,sym.address+14], vec![21]),
+            (vec![sym.address+7,sym.address+21], vec![]),
+        ] {
+            let sites = arguments(&bytes, &sym, &got, &HashMap::new(), &maps,
+                &HashMap::from([(sym.address+12,targets)]))?;
+            let mut actual: Vec<_> = sites.into_keys().collect();
+            actual.sort_unstable();
+            assert_eq!(actual, expected);
+        }
+        assert!(arguments(&bytes, &sym, &got, &HashMap::new(), &maps,
+                          &HashMap::new())?.is_empty());
         Ok(())
     }
 }

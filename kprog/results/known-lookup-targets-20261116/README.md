@@ -34,3 +34,11 @@ existed. The real controller creates RAW and passed; no benchmark input changed.
 The dominant native unwinder has jump tables, which currently erase all named
 map facts in that function. Recovering facts using the already-resolved table
 destinations is the next source subset; targets must clear facts at each join.
+
+
+The next source subset shares the helper analysis's already-resolved branch
+destinations with map provenance. It clears map identities at each destination
+and keeps the old generic behavior for unresolved indirect jumps. Regression
+edges target block starts and calls that bypass either load, preventing facts
+from leaking across those joins. The host replay now also includes retained
+OTel V8. Each attempt uses a distinct raw output directory.

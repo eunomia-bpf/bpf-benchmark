@@ -22,12 +22,12 @@ for line in Path('/workspaces/kprog-raw/perf/20261116-otel-regression/pmu/profil
     if len(fields) >= 3:
         kallsyms[fields[2]] = int(fields[0], 16)
 rows = []
-for index in [114, 130]:
+for index in [114, 130, 140]:
     entry = inventory['entries'][index]
     before = json.loads((retained / str(index) / '0.link-plan.json').read_text())
     generic = next(h['addr'] for h in before['helpers'] if h['name'] == 'bpf_map_lookup_elem')
     after = copy.deepcopy(before)
-    if index == 130:
+    if entry['app'] == 'otelcol-ebpf-profiler':
         target = generic + kallsyms['trie_lookup_elem'] - kallsyms['bpf_map_lookup_elem']
         for fact in after['lookup_maps']:
             if fact['name'] in ['pid_page_to_map', 'pid_page_to_mapping_info']:
