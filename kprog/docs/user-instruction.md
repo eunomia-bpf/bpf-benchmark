@@ -120,6 +120,7 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-16 ~14:19 UTC（后半引用协调者的两句）: "去审核代码. 禁止加任何额外的 check. 内核不必要的 check 也需要拆掉一部分, 确保这些被内联进去了. 也检查为啥会有性能问题, 让 codex 看看 不一致：原生一侧每个包多走 cil_to_host 和 cil_from_host，各 7.4 亿次. 这个明显不对.部分不一致：sched_switch、sched_wakeup 在原生一侧多跑了 2.5 倍 为啥多走???"
 - 2026-11-16 ~14:22 UTC: "你要让 codex 自己去看代码."
 - 2026-11-16 ~14:23 UTC: "你自己让一个 subagent 也去审核完整系统和代码, 看看代码实现问题. 现在代码量?"
+- 2026-11-16 ~14:26 UTC: "为啥这么大? 是不是哪里不对? 你去仔细看看? 我觉得代码量比我想得大了 10x, 是不是非常混乱?"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
