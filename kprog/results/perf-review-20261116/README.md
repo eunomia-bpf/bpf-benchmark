@@ -1036,3 +1036,36 @@ double-execution cause and no confirmed Cilium packet fix. Those remain open. Th
     per-call context test, copied public context or app-specific compiler is
     unnecessary. Current installed bytes, stock-generation coverage and timing
     effects remain measurement work after cleanup.
+
+28. **The kernel-symbol cache can publish partially initialized state to parallel loads.**
+
+    Ordinary symbol lookups reuse a cache: loader
+    `src/native_loader.cpp:1462–1467` holds a function-static unordered_map
+    and returns it whenever it is nonempty. Population occurs afterward,
+    inserting entries during the kallsyms scan at :1496–1524. C++ protects
+    construction of that map object, while the following mutations and
+    nonempty test have their own synchronization requirement.
+
+    A source-level interleaving illustrates the gap: one loader inserts its
+    first symbol and continues scanning; another sees a nonempty map and
+    calls find while population is still running. That second lookup can
+    see an incomplete symbol set, and the concurrent container read/write
+    itself is a data race. Concurrent first callers can also both start
+    populating an initially empty table.
+
+    The shim's native-load scope uses a read lock
+    (`libbpfrejit_shim.c:477–481`), which allows simultaneous load readers;
+    its recursion flag is thread-local (:136). The call at :590 reaches the
+    shared-library loader through shim_native_loader.h:306, and the exported
+    entry at native_loader.cpp:4335–4354 calls load_from_fd directly. Thus the
+    reviewed call chain supplies concurrent entry rather than an exclusive
+    cache-initialization boundary. Current application race occurrence and
+    failure frequency remain to establish.
+
+    Build and publish the complete immutable table through C++'s existing
+    function-static initialization, then reuse it for lookups. This keeps
+    unrelated loads parallel and preserves existing resolution/error behavior.
+    It needs neither a mutex around whole program loading nor another symbol
+    cache or runtime admission test. This is load-time correctness work;
+    ordinary cache hits already avoid rescanning, and per-call native timing
+    and installed bytes are separate from this finding.
