@@ -84,5 +84,12 @@
     }
   },
   "preprocessed_bytes": 316867,
-  "scope": "Entry segment with live borrowed locals and typed continuation; no arbitrary program/PC/helper-target closure or migrated refinement theorem."
+  "scope": "Entry segment with live borrowed locals and typed continuation; no arbitrary program/PC/helper-target closure or migrated refinement theorem.",
+  "program_probe": {
+    "source": "oracles/arm64_execute_compile.bpf.c",
+    "exit": 2,
+    "first_obstruction": "GNU expression facade KPROG_ARM64_MOV_PTR_TAG_PATH inside actual RUN_OP expansion",
+    "preprocessed_fixture_bytes": 26822809,
+    "scope": "Existing complete fixture with nonempty CALL/RET_TO table; root-only adapters do not yet apply here. Not an application expansion factor or a successful export."
+  }
 }

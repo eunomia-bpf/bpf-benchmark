@@ -35,3 +35,10 @@ This is an entry-segment export with an explicit continuation hole. It does not
 bind arbitrary producer label/PC tables or migrate a refinement theorem. Only
 the default entry profile is exported; other profile checks execute host C.
 M4 remains open, followed by all 2,065 M5 refinements/recount and M6 retirement.
+
+A direct export probe of the existing complete `arm64_execute_compile.bpf.c`
+fixture still exits2 at the GNU `KPROG_ARM64_MOV_PTR_TAG_PATH` expression inside
+`RUN_OP`. The numerical facade used by the instruction root has not yet been
+bound in this program context. Its preprocessed fixture is26,822,809B; this is
+not an application scale result. `program-probe.log` and
+`program-preprocess.log` retain the failure and expansion for the next M4 step.
