@@ -116,16 +116,16 @@ BTF` on `sys_enter_submit`.
 
 ### Stats on
 
-Stats on is the only mode with per-call BPF time, and the rotate had reached
-BCC when this was written.
+Stats on is the only mode with per-call BPF time. Two of the six have it so
+far; tetragon and tracee cannot reach it while their failures stand.
 
 | app | run | status | throughput | per-call | 05-29 floor |
 |---|---|---|---|---|---|
 | bcc/set | `x86_kvm_corpus_20261116_060435_731340` | ok | **1.268x** | **1.134x** (122.51 → 107.98 ns) | 0.985x |
+| cilium/agent | `x86_kvm_corpus_20261116_063056_107201` | ok | **1.212x** | **2.29x** (845.8 → 369.7 ns) | 1.319x |
 | otelcol-ebpf-profiler/profiling | — | running | — | — | 1.849x |
-| cilium/agent | — | running | — | — | 1.319x |
-| tetragon/observer | — | blocked by the replacement ceiling | — | — | 1.009x |
-| tracee/monitor | — | blocked by the BTF gap | — | — | 0.948x |
+| tetragon/observer | — | blocked, `event_wake_up_n` | — | — | 1.009x |
+| tracee/monitor | — | blocked, BTF gap | — | — | 0.948x |
 | katran | — | queued | — | — | 1.113x |
 
 - **OTel** — workload units eBPF 40 774 750 / 39 759 786 / 40 450 832, native
@@ -152,6 +152,16 @@ BCC when this was written.
   / 2 916 733, one replacement (`balancer_ingres`), zero loader failures.
   pktgen reports 80-117 M errors per sample in both arms, so the number is pps
   alone. 1.002x against the 05-29 floor 1.113x.
+- **Cilium, stats on** — 1 188 402 / 1 090 127 / 1 118 865 against 1 355 682 /
+  1 350 554 / 1 408 943, 113 replacements, zero failures. That closes the
+  question the stats-off row left open: on `cil_from_container`, the one
+  program with real counts in both arms, per-call BPF time is 845.8 to 369.7 ns
+  — **the native arm is 2.29x cheaper per call**. So the native code is not
+  slow; the 1.212x throughput ratio at stats on (1.262x at stats off) is what
+  that per-call gain yields once the program's share of the packet path is
+  accounted for. `cil_from_host` and `cil_to_host` show 6.1x and 34x but have
+  `run_cnt` 2 in the baseline sample, so they are not per-call evidence and are
+  not quoted as such.
 - **BCC, stats on** — 410 168 / 401 184 / 467 953 against 525 896 / 520 143 /
   444 167, 25 programs in both arms, zero failures. Per-call BPF time 122.51 to
   107.98 ns, so the native arm does the same work 1.134x cheaper; the
