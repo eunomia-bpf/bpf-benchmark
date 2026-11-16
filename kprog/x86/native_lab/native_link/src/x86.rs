@@ -4249,7 +4249,7 @@ mod tests {
             let elf = object::File::parse(bytes.as_slice())?;
             let entry = find_symbol_by_name(&elf, symbol)?;
             let included = discover_reachable(&elf, &entry)?;
-            let facts = load_link_plan(std::path::Path::new(argument("--link-plan")))?;
+            let facts = load_link_plan(&PathBuf::from(argument("--link-plan")))?;
             let layout = facts.kernel_layout.as_ref().unwrap();
             let rewrite = |show| rewrite_x86(&elf, &entry, &included,
                 &facts.helper_addrs, &facts.map_addrs, &facts.lookup_maps, &facts.update_sites,
