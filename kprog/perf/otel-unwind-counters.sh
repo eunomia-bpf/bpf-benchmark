@@ -36,10 +36,14 @@ case "$O" in
 esac
 install -d "$O" "$STATE/var-tmp"
 
-# Pin the image the dumps belong to. The sole image is swapped between the May
-# reference and the current source (several times a round), so a run started
-# after a swap reads a different arm than the one a reader expects. Record the
-# ID with the dumps; otel-metrics.py refuses a pair taken on different IDs.
+exec 9>"$LOCK"
+flock 9
+
+# Pin the image the dumps belong to, read *after* the lock is held. The sole
+# image is swapped between the May reference and the current source several
+# times a round, so a queued run must record the image it actually booted, not
+# the one that was current when it was queued. otel-metrics.py refuses a pair
+# whose IDs differ.
 IMAGE_ID=$(docker images --format '{{.ID}}' bpf-benchmark/kprog:current)
 printf '%s\n' "$IMAGE_ID" > "$O/image-id.txt"
 echo "image: $IMAGE_ID" >&2
@@ -47,8 +51,6 @@ echo "image: $IMAGE_ID" >&2
 ln -sfn "$REPO/.cache/container-images/x86_64-runner-runtime.image.tar" "$STATE/var-tmp/runtime.image.tar"
 ln -sfn "$REPO/kinsn/module/x86/build/bpf_x86_native_lab.ko" "$STATE/var-tmp/bpf_x86_native_lab.ko"
 
-exec 9>"$LOCK"
-flock 9
 echo "guest: $(date -u +%FT%TZ) samples=$SAMPLES duration=$DURATION" >&2
 taskset -c 0-7 vng --run "$KDIR/arch/x86/boot/bzImage" --cwd "$REPO" \
   --rwdir "$REPO" --rwdir "/var/tmp=$STATE/var-tmp" \
