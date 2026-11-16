@@ -2,7 +2,7 @@
   "scope": "Katran's per-thread packetgen series and separately scoped arm counters.\n\nThe frozen runner snapshots BPF counters once around the whole sample loop.\nIt does not retain per-sample ns/call. Packetgen errors are reported attempts,\nnot established BPF drops; keep their raw counts separate from throughput.\n",
   "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_192946_405839",
   "app_status": "ok",
-  "stamp": "2026-11-16T21:35:34Z",
+  "stamp": "2026-11-16T21:47:00Z",
   "bpf_stats": false,
   "samples": 3,
   "workload_seconds": 180.0,
@@ -17,6 +17,11 @@
               "reported_pps": 537420,
               "reported_errors": 79525548,
               "reported_packets": 96679346,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
               "reported_kernel_duration_us": 179895118,
               "wrapper_duration_s": 180.019768559,
               "component_returncode": 0
@@ -26,6 +31,11 @@
               "reported_pps": 474129,
               "reported_errors": 72810616,
               "reported_packets": 85322304,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
               "reported_kernel_duration_us": 179955655,
               "wrapper_duration_s": 180.019768559,
               "component_returncode": 0
@@ -35,6 +45,11 @@
               "reported_pps": 523417,
               "reported_errors": 78842465,
               "reported_packets": 94162197,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
               "reported_kernel_duration_us": 179898823,
               "wrapper_duration_s": 180.019768559,
               "component_returncode": 0
@@ -44,6 +59,11 @@
               "reported_pps": 556232,
               "reported_errors": 81389482,
               "reported_packets": 100098713,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
               "reported_kernel_duration_us": 179958543,
               "wrapper_duration_s": 180.019768559,
               "component_returncode": 0
@@ -61,6 +81,11 @@
               "reported_pps": 947725,
               "reported_errors": 113352462,
               "reported_packets": 170521704,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
               "reported_kernel_duration_us": 179927360,
               "wrapper_duration_s": 180.07561140999996,
               "component_returncode": 0
@@ -70,6 +95,11 @@
               "reported_pps": 351340,
               "reported_errors": 43504898,
               "reported_packets": 63215678,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
               "reported_kernel_duration_us": 179927220,
               "wrapper_duration_s": 180.07561140999996,
               "component_returncode": 0
@@ -79,6 +109,11 @@
               "reported_pps": 846011,
               "reported_errors": 95551540,
               "reported_packets": 152220674,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
               "reported_kernel_duration_us": 179927366,
               "wrapper_duration_s": 180.07561140999996,
               "component_returncode": 0
@@ -88,6 +123,11 @@
               "reported_pps": 821997,
               "reported_errors": 93585635,
               "reported_packets": 147899894,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
               "reported_kernel_duration_us": 179927353,
               "wrapper_duration_s": 180.07561140999996,
               "component_returncode": 0
@@ -105,6 +145,11 @@
               "reported_pps": 935808,
               "reported_errors": 109219467,
               "reported_packets": 168439110,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
               "reported_kernel_duration_us": 179993216,
               "wrapper_duration_s": 180.13878210999997,
               "component_returncode": 0
@@ -114,6 +159,11 @@
               "reported_pps": 258669,
               "reported_errors": 33966051,
               "reported_packets": 46558740,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
               "reported_kernel_duration_us": 179993431,
               "wrapper_duration_s": 180.13878210999997,
               "component_returncode": 0
@@ -123,6 +173,11 @@
               "reported_pps": 821358,
               "reported_errors": 94578388,
               "reported_packets": 147838948,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
               "reported_kernel_duration_us": 179993208,
               "wrapper_duration_s": 180.13878210999997,
               "component_returncode": 0
@@ -132,6 +187,11 @@
               "reported_pps": 888751,
               "reported_errors": 106335985,
               "reported_packets": 159969233,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
               "reported_kernel_duration_us": 179993222,
               "wrapper_duration_s": 180.13878210999997,
               "component_returncode": 0
@@ -169,6 +229,11 @@
               "reported_pps": 669008,
               "reported_errors": 76010796,
               "reported_packets": 120372405,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
               "reported_kernel_duration_us": 179926556,
               "wrapper_duration_s": 180.11072650699998,
               "component_returncode": 0
@@ -178,6 +243,11 @@
               "reported_pps": 558930,
               "reported_errors": 64226106,
               "reported_packets": 100564839,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
               "reported_kernel_duration_us": 179923711,
               "wrapper_duration_s": 180.11072650699998,
               "component_returncode": 0
@@ -187,6 +257,11 @@
               "reported_pps": 825331,
               "reported_errors": 97330772,
               "reported_packets": 148498939,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
               "reported_kernel_duration_us": 179926375,
               "wrapper_duration_s": 180.11072650699998,
               "component_returncode": 0
@@ -196,6 +271,11 @@
               "reported_pps": 826852,
               "reported_errors": 98580998,
               "reported_packets": 148772641,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
               "reported_kernel_duration_us": 179926471,
               "wrapper_duration_s": 180.11072650699998,
               "component_returncode": 0
@@ -213,6 +293,11 @@
               "reported_pps": 784120,
               "reported_errors": 102075867,
               "reported_packets": 141088981,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
               "reported_kernel_duration_us": 179932793,
               "wrapper_duration_s": 180.11382701899993,
               "component_returncode": 0
@@ -222,6 +307,11 @@
               "reported_pps": 529538,
               "reported_errors": 72528567,
               "reported_packets": 95309384,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
               "reported_kernel_duration_us": 179985650,
               "wrapper_duration_s": 180.11382701899993,
               "component_returncode": 0
@@ -231,6 +321,11 @@
               "reported_pps": 711764,
               "reported_errors": 93536261,
               "reported_packets": 128071691,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
               "reported_kernel_duration_us": 179935604,
               "wrapper_duration_s": 180.11382701899993,
               "component_returncode": 0
@@ -240,6 +335,11 @@
               "reported_pps": 629003,
               "reported_errors": 84719429,
               "reported_packets": 113223775,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
               "reported_kernel_duration_us": 180005091,
               "wrapper_duration_s": 180.11382701899993,
               "component_returncode": 0
@@ -257,6 +357,11 @@
               "reported_pps": 602560,
               "reported_errors": 73016353,
               "reported_packets": 108453063,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
               "reported_kernel_duration_us": 179986920,
               "wrapper_duration_s": 180.1075452350001,
               "component_returncode": 0
@@ -266,6 +371,11 @@
               "reported_pps": 538766,
               "reported_errors": 67401763,
               "reported_packets": 96954869,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
               "reported_kernel_duration_us": 179957214,
               "wrapper_duration_s": 180.1075452350001,
               "component_returncode": 0
@@ -275,6 +385,11 @@
               "reported_pps": 499452,
               "reported_errors": 63122652,
               "reported_packets": 89884808,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
               "reported_kernel_duration_us": 179966738,
               "wrapper_duration_s": 180.1075452350001,
               "component_returncode": 0
@@ -284,6 +399,11 @@
               "reported_pps": 633561,
               "reported_errors": 76044359,
               "reported_packets": 114010366,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
               "reported_kernel_duration_us": 179951410,
               "wrapper_duration_s": 180.1075452350001,
               "component_returncode": 0

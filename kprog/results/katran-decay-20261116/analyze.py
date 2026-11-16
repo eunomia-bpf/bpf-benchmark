@@ -29,8 +29,11 @@ for phase in ['baseline', 'post_rejit']:
             pps = int(re.findall(r'(\d+)pps\b', stdout)[-1])
             errors = int(re.findall(r'\berrors:\s*(\d+)', stdout)[-1])
             elapsed, packets = re.findall(r'Result: OK:\s*(\d+)\(c\d+\+d\d+\) usec,\s*(\d+)', stdout)[-1]
+            queue_min, queue_max = re.findall(r'queue_map_min:\s*(\d+)\s+queue_map_max:\s*(\d+)', stdout)[-1]
             threads.append(dict(thread=component['config']['thread_id'], reported_pps=pps,
                 reported_errors=errors, reported_packets=int(packets),
+                queue_map_range=[int(queue_min), int(queue_max)],
+                current_queue=int(re.findall(r'cur_queue_map:\s*(\d+)', stdout)[-1]),
                 reported_kernel_duration_us=int(elapsed), wrapper_duration_s=component['duration_s'],
                 component_returncode=component['returncode']))
         samples.append(dict(index=index, threads=threads,
