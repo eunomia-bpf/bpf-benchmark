@@ -1613,6 +1613,15 @@ the mature helper/read link and native fixture byte comparisons pass.
 [Helper receipts](results/m4-x86-helpers/README.md) state the remaining callee
 interpretation and whole-program obligations.
 
+An assembled x86 program now passes through the actual producer with one
+subroutine, two return sites and a clock helper. The formal export hook binds
+public helper types to named platform callees before the inline C bodies are
+compiled; native expansion is unchanged. `Clight/X86ProgramProfile.lean` has
+126 internal functions. The actual label/layout/callee checks, all 19 Clight
+modules, native/bound return and refusal-prefix captures and five negatives pass.
+[Program receipts](results/m4-x86-program/README.md) preserve the scope and
+separate the platform-callee interpretation from a refinement theorem.
+
 M4 remains open for arbitrary producer program/return tables, remaining producer/storage
 profiles, platform correspondence and full default compiled-byte coverage. The
 stated x86 inline profile and ARM instruction dispatcher clear their earlier

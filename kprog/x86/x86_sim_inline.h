@@ -7,6 +7,9 @@
  * Internal temporaries have no debugger identity: keep -g and program BTF,
  * without cloning thousands of interpreter variable descriptions per step. */
 #include "x86_sim_local_bpf.h"
+#ifdef KPROG_X86_PROGRAM_EXPORT
+#include "../formal/c/X86ProgramCallees.h"
+#endif
 
 struct x86_sim_inline_value { __u8 *tag; void **pointer; };
 struct x86_sim_inline_bindings {

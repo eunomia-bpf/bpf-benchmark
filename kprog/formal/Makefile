@@ -732,6 +732,20 @@ clight: clightgen
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Memory.lean c/X86Memory.c
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Helpers.lean c/X86Helpers.c
 	external/clean/clightgen -fstruct-passing -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Inline.lean c/X86Inline.c
+	../stock-path/bin/clang -c oracles/x86_program_profile.S -o build/x86_program_profile.proof.o
+	python3 tools/export_x86_stack_fixture.py --name x86_program_profile --object-dir build --output build/x86_program_profile.bpf.c
+	external/clean/clightgen -fstruct-passing -lean -normalize -DKPROG_X86_PROGRAM_EXPORT=1 -include c/ProgramSections.h -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86ProgramProfile.lean build/x86_program_profile.bpf.c
+	$(CC) -std=c11 -Wall -Wextra -O1 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -c oracles/test_x86_program_callee_abi.c -o build/test_x86_program_callee_abi.o
+	for bound in 0 1; do \
+	  flags=; if test $$bound = 1; then flags='-D__COMPCERT__ -DKPROG_X86_PROGRAM_EXPORT=1'; fi; \
+	  $(CC) -std=c11 -Wall -Wextra -O1 -fsanitize=undefined -fno-sanitize-recover=undefined \
+	    $$flags -include oracles/compcert_memory_host.h -include oracles/x86_program_environment_host.h \
+	    -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src \
+	    -c build/x86_program_profile.bpf.c -o build/x86_program_profile_host.o && \
+	  $(CC) -std=c11 -Wall -Wextra -O1 -fsanitize=undefined -fno-sanitize-recover=undefined \
+	    oracles/test_x86_program_profile_host.c build/x86_program_profile_host.o -o build/test_x86_program_profile_host && \
+	  ./build/test_x86_program_profile_host || exit $$?; \
+	done
 	for frame in 200 376; do \
 	  ../stock-path/bin/clang -DFRAME=$$frame -c oracles/x86_stack_profile.S -o build/x86_stack_profile_$$frame.proof.o && \
 	  python3 tools/export_x86_stack_fixture.py --name x86_stack_profile_$$frame --object-dir build --output build/x86_stack_profile_$$frame.bpf.c && \
@@ -866,6 +880,7 @@ clight: clightgen
 	./build/test_x86_context_host
 	../stock-path/bin/clang -g -O2 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c oracles/x86_inline_compile.bpf.c -o build/x86_inline_compile.bpf.o
 	../stock-path/bin/clang -g -O2 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c oracles/x86_helpers_compile.bpf.c -o build/x86_helpers_compile.bpf.o
+	../stock-path/bin/clang -g -O2 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c build/x86_program_profile.bpf.c -o build/x86_program_profile.bpf.o
 	../stock-path/bin/clang -g -O2 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c oracles/x86_context_compile.bpf.c -o build/x86_context_compile.bpf.o
 	../stock-path/bin/clang -g -O2 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c oracles/x86_stack_read_compile.bpf.c -o build/x86_stack_read_compile.bpf.o
 	../stock-path/bin/clang -g -O2 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c oracles/x86_memory_read_compile.bpf.c -o build/x86_memory_read_compile.bpf.o
