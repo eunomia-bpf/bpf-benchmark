@@ -15,3 +15,17 @@ profile:
 
 archive:
 	tar -cJf $(RAW)/stage-artifacts.tar.xz -C $(TMP) .
+
+.PHONY: costs
+costs:
+	DEBUGINFOD_URLS= python3 $(ROOT)/kprog/results/otel-regression-20261116/costs.py $(RAW) > $(RAW)/costs.log 2>&1
+
+.PHONY: pmu-preflight pmu-profile
+pmu-preflight:
+	/var/tmp/kprog-tmp/C/perf-build/perf stat -e cycles:G -- true > $(RAW)/pmu-preflight.log 2>&1
+
+pmu-profile:
+	DEBUGINFOD_URLS= flock -s /workspaces/.agent-state/kprog-lanes/locks/image \
+		python3 $(ROOT)/kprog/perf/profile/phase-profile.py run --app otelcol-ebpf-profiler/profiling \
+		--cpus 20-23 --vcpus 4 --memory 32G --seconds 60 --freq 199 --host-event cycles:G \
+		--state-root /var/tmp/kprog-tmp/perf/otel-regression-profile --persist-output --out $(RAW)/profile

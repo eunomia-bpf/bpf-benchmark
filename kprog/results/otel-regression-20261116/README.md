@@ -72,3 +72,18 @@ Integer-loop sum ratios differ from other throughput summaries; audit.json
 labels its exact calculation and retains each language's series. The existing
 official May-comparison metric is unchanged. No body/helper/map split is
 fabricated from aggregate program counters or instruction counts.
+
+The software CPU-clock profile completed (controller 1842845, exit 0). Its
+counter-window analysis exposes a sampling limitation: the recorded BPF runtime
+is about 103–132 seconds, but virtually no root samples land in BPF text.
+The resulting near-zero attributed costs are not estimates of absent work.
+OTel's BPF executes in perf-event context; that context is a concrete explanation
+for why this guest software-event sampler cannot provide the requested split.
+Both recordings, JIT bytes and counter windows remain retained.
+
+The next diagnostic uses the existing host guest-only `cycles:G` mode on CPUs
+20-23, with the same four-vCPU 60-second workload profile, image SH and a hard
+address-space limit. It does not change C's official timing entry or round.
+Offline decoding disables remote debuginfo lookup; the guest's recorded symbols
+and JIT bytes are the relevant identities. The ordinary profile reporter spent
+several minutes in debuginfod lookup and then completed; no process was stopped.
