@@ -74,3 +74,11 @@ no new production check or external interpretation.
 Both retained producer axiom queries pass with only standard axioms; reproduce
 with `LEAN_NUM_THREADS=1 lake env lean -j1 results/legacy-retirement/Query.lean`.
 The complete check is being repeated after these focused fixes.
+
+The current linker shares selected ARRAY bodies through local calls. The map
+harness still checks all 90 actual load/bounds fragments and their complete
+state, ordered reads and faults; local calls must target that fragment and no
+external helper relocation is present. Wrapper CALL/RET stack effects are
+explicitly outside these fragment observations, as wrapper entry/exit were
+before sharing. They remain a general-control refinement obligation; this
+receipt does not infer their performance or whole-wrapper equivalence.
