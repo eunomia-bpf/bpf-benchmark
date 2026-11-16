@@ -1,0 +1,1450 @@
+{
+  "runs": [
+    {
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_060435_731340",
+      "status": "ok",
+      "samples": 3,
+      "workload_seconds": 180.0,
+      "phases": {
+        "baseline": {
+          "samples": [
+            {
+              "command": [
+                "/usr/bin/stress-ng",
+                "--syscall",
+                "1",
+                "--syscall-method",
+                "fast75",
+                "--cap",
+                "1",
+                "--set",
+                "1",
+                "--sockfd",
+                "1",
+                "--sockfd-port",
+                "14694",
+                "--timeout",
+                "180s",
+                "--metrics-brief",
+                "--temp-path",
+                "/var/tmp/bpfrejit-runtime/9703fc4f"
+              ],
+              "duration": 185.179653046,
+              "metrics": {
+                "syscall": {
+                  "ops": 514.0,
+                  "seconds": 185.15,
+                  "cpu_seconds": 0.09999999999999999,
+                  "wall_rate": 2.78,
+                  "cpu_rate": 5062.34
+                },
+                "cap": {
+                  "ops": 45971050.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 162.95,
+                  "wall_rate": 255394.17,
+                  "cpu_rate": 282109.41
+                },
+                "set": {
+                  "ops": 3694591.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 168.36,
+                  "wall_rate": 20525.5,
+                  "cpu_rate": 21943.98
+                },
+                "sockfd": {
+                  "ops": 24165119.0,
+                  "seconds": 180.01,
+                  "cpu_seconds": 157.71,
+                  "wall_rate": 134245.61,
+                  "cpu_rate": 153221.73
+                }
+              }
+            },
+            {
+              "command": [
+                "/usr/bin/stress-ng",
+                "--syscall",
+                "1",
+                "--syscall-method",
+                "fast75",
+                "--cap",
+                "1",
+                "--set",
+                "1",
+                "--sockfd",
+                "1",
+                "--sockfd-port",
+                "15206",
+                "--timeout",
+                "180s",
+                "--metrics-brief",
+                "--temp-path",
+                "/var/tmp/bpfrejit-runtime/9703fc4f"
+              ],
+              "duration": 181.69390562500007,
+              "metrics": {
+                "syscall": {
+                  "ops": 514.0,
+                  "seconds": 181.67,
+                  "cpu_seconds": 0.02,
+                  "wall_rate": 2.83,
+                  "cpu_rate": 19543.73
+                },
+                "cap": {
+                  "ops": 46097793.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 162.97,
+                  "wall_rate": 256098.83,
+                  "cpu_rate": 282870.54
+                },
+                "set": {
+                  "ops": 3638749.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 167.33,
+                  "wall_rate": 20215.27,
+                  "cpu_rate": 21746.45
+                },
+                "sockfd": {
+                  "ops": 22476183.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 141.19,
+                  "wall_rate": 124866.69,
+                  "cpu_rate": 159187.51
+                }
+              }
+            },
+            {
+              "command": [
+                "/usr/bin/stress-ng",
+                "--syscall",
+                "1",
+                "--syscall-method",
+                "fast75",
+                "--cap",
+                "1",
+                "--set",
+                "1",
+                "--sockfd",
+                "1",
+                "--sockfd-port",
+                "15718",
+                "--timeout",
+                "180s",
+                "--metrics-brief",
+                "--temp-path",
+                "/var/tmp/bpfrejit-runtime/9703fc4f"
+              ],
+              "duration": 180.70562976400004,
+              "metrics": {
+                "syscall": {
+                  "ops": 514.0,
+                  "seconds": 180.69,
+                  "cpu_seconds": 0.02,
+                  "wall_rate": 2.84,
+                  "cpu_rate": 19494.8
+                },
+                "cap": {
+                  "ops": 49427137.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 174.28,
+                  "wall_rate": 274595.2,
+                  "cpu_rate": 283608.73
+                },
+                "set": {
+                  "ops": 3881842.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 174.53,
+                  "wall_rate": 21565.78,
+                  "cpu_rate": 22242.44
+                },
+                "sockfd": {
+                  "ops": 30922238.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 204.73,
+                  "wall_rate": 171789.36,
+                  "cpu_rate": 151036.15
+                }
+              }
+            }
+          ],
+          "stressor_totals": {
+            "syscall": {
+              "ops": 1542.0,
+              "cpu_seconds": 0.13999999999999999
+            },
+            "cap": {
+              "ops": 141495980.0,
+              "cpu_seconds": 500.2
+            },
+            "set": {
+              "ops": 11215182.0,
+              "cpu_seconds": 510.22
+            },
+            "sockfd": {
+              "ops": 77563540.0,
+              "cpu_seconds": 503.63
+            }
+          },
+          "program_groups": {
+            "tracing/fentry_vfs_read": {
+              "ids": [
+                23
+              ],
+              "calls": 1547996,
+              "ns": 124630247
+            },
+            "tracing/fentry_vfs_writ": {
+              "ids": [
+                25
+              ],
+              "calls": 1733907,
+              "ns": 139020396
+            },
+            "tracing/fentry_vfs_fsyn": {
+              "ids": [
+                27
+              ],
+              "calls": 141,
+              "ns": 13121
+            },
+            "tracing/fentry_vfs_open": {
+              "ids": [
+                29
+              ],
+              "calls": 78509972,
+              "ns": 3786241389
+            },
+            "tracing/fentry_vfs_crea": {
+              "ids": [
+                31
+              ],
+              "calls": 42,
+              "ns": 3244
+            },
+            "tracepoint/inet_sock_set_s": {
+              "ids": [
+                38
+              ],
+              "calls": 0,
+              "ns": 0
+            },
+            "kprobe/blk_account_io_": {
+              "ids": [
+                44
+              ],
+              "calls": 209,
+              "ns": 83872
+            },
+            "kprobe/kprobe__cap_cap": {
+              "ids": [
+                49,
+                60
+              ],
+              "calls": 248640198,
+              "ns": 51802354497
+            },
+            "tracepoint/sys_enter": {
+              "ids": [
+                51
+              ],
+              "calls": 2809617249,
+              "ns": 240146630489
+            },
+            "tracepoint/tracepoint__sys": {
+              "ids": [
+                52,
+                68,
+                70,
+                72
+              ],
+              "calls": 157019044,
+              "ns": 134688199469
+            },
+            "tracing/block_rq_insert": {
+              "ids": [
+                53
+              ],
+              "calls": 0,
+              "ns": 0
+            },
+            "kprobe/tcp_v4_connect": {
+              "ids": [
+                54
+              ],
+              "calls": 0,
+              "ns": 0
+            },
+            "tracepoint/sys_exit": {
+              "ids": [
+                58
+              ],
+              "calls": 2809617254,
+              "ns": 317709277557
+            },
+            "kprobe/tcp_v4_connect_": {
+              "ids": [
+                61
+              ],
+              "calls": 0,
+              "ns": 0
+            },
+            "tracing/block_rq_issue": {
+              "ids": [
+                62
+              ],
+              "calls": 1732,
+              "ns": 3283308
+            },
+            "tracing/block_rq_comple": {
+              "ids": [
+                66
+              ],
+              "calls": 1806,
+              "ns": 31075560
+            },
+            "tracing/sched_wakeup": {
+              "ids": [
+                69
+              ],
+              "calls": 35181774,
+              "ns": 3925392405
+            },
+            "kprobe/tcp_v6_connect": {
+              "ids": [
+                73
+              ],
+              "calls": 0,
+              "ns": 0
+            },
+            "tracing/sched_wakeup_ne": {
+              "ids": [
+                74
+              ],
+              "calls": 129,
+              "ns": 47190
+            },
+            "kprobe/tcp_v6_connect_": {
+              "ids": [
+                75
+              ],
+              "calls": 0,
+              "ns": 0
+            },
+            "tracing/sched_switch": {
+              "ids": [
+                76
+              ],
+              "calls": 70242816,
+              "ns": 8716062141
+            }
+          },
+          "switches_per_sockfd_operation": 0.9056164275122048
+        },
+        "post_rejit": {
+          "samples": [
+            {
+              "command": [
+                "/usr/bin/stress-ng",
+                "--syscall",
+                "1",
+                "--syscall-method",
+                "fast75",
+                "--cap",
+                "1",
+                "--set",
+                "1",
+                "--sockfd",
+                "1",
+                "--sockfd-port",
+                "16742",
+                "--timeout",
+                "180s",
+                "--metrics-brief",
+                "--temp-path",
+                "/var/tmp/bpfrejit-runtime/9703fc4f"
+              ],
+              "duration": 180.0466669540001,
+              "metrics": {
+                "syscall": {
+                  "ops": 514.0,
+                  "seconds": 180.03,
+                  "cpu_seconds": 0.02,
+                  "wall_rate": 2.86,
+                  "cpu_rate": 19127.72
+                },
+                "cap": {
+                  "ops": 51618845.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 179.68,
+                  "wall_rate": 286771.35,
+                  "cpu_rate": 287280.77
+                },
+                "set": {
+                  "ops": 3978942.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 177.44,
+                  "wall_rate": 22105.22,
+                  "cpu_rate": 22424.49
+                },
+                "sockfd": {
+                  "ops": 39065184.0,
+                  "seconds": 180.01,
+                  "cpu_seconds": 272.47,
+                  "wall_rate": 217016.22,
+                  "cpu_rate": 143371.52
+                }
+              }
+            },
+            {
+              "command": [
+                "/usr/bin/stress-ng",
+                "--syscall",
+                "1",
+                "--syscall-method",
+                "fast75",
+                "--cap",
+                "1",
+                "--set",
+                "1",
+                "--sockfd",
+                "1",
+                "--sockfd-port",
+                "17254",
+                "--timeout",
+                "180s",
+                "--metrics-brief",
+                "--temp-path",
+                "/var/tmp/bpfrejit-runtime/9703fc4f"
+              ],
+              "duration": 180.01677515100005,
+              "metrics": {
+                "syscall": {
+                  "ops": 7334.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 0.05,
+                  "wall_rate": 40.74,
+                  "cpu_rate": 149171.16
+                },
+                "cap": {
+                  "ops": 51154688.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 178.79999999999998,
+                  "wall_rate": 284192.72,
+                  "cpu_rate": 286101.79
+                },
+                "set": {
+                  "ops": 3926994.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 176.44,
+                  "wall_rate": 21816.63,
+                  "cpu_rate": 22257.21
+                },
+                "sockfd": {
+                  "ops": 38536895.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 268.21999999999997,
+                  "wall_rate": 214092.81,
+                  "cpu_rate": 143675.8
+                }
+              }
+            },
+            {
+              "command": [
+                "/usr/bin/stress-ng",
+                "--syscall",
+                "1",
+                "--syscall-method",
+                "fast75",
+                "--cap",
+                "1",
+                "--set",
+                "1",
+                "--sockfd",
+                "1",
+                "--sockfd-port",
+                "17766",
+                "--timeout",
+                "180s",
+                "--metrics-brief",
+                "--temp-path",
+                "/var/tmp/bpfrejit-runtime/9703fc4f"
+              ],
+              "duration": 181.0168368159998,
+              "metrics": {
+                "syscall": {
+                  "ops": 514.0,
+                  "seconds": 181.0,
+                  "cpu_seconds": 0.02,
+                  "wall_rate": 2.84,
+                  "cpu_rate": 21001.88
+                },
+                "cap": {
+                  "ops": 46973084.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 167.49,
+                  "wall_rate": 260961.58,
+                  "cpu_rate": 280447.32
+                },
+                "set": {
+                  "ops": 3718247.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 171.45999999999998,
+                  "wall_rate": 20656.54,
+                  "cpu_rate": 21685.93
+                },
+                "sockfd": {
+                  "ops": 29258892.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 196.6,
+                  "wall_rate": 162545.78,
+                  "cpu_rate": 148826.73
+                }
+              }
+            }
+          ],
+          "stressor_totals": {
+            "syscall": {
+              "ops": 8362.0,
+              "cpu_seconds": 0.09
+            },
+            "cap": {
+              "ops": 149746617.0,
+              "cpu_seconds": 525.97
+            },
+            "set": {
+              "ops": 11624183.0,
+              "cpu_seconds": 525.3399999999999
+            },
+            "sockfd": {
+              "ops": 106860971.0,
+              "cpu_seconds": 737.29
+            }
+          },
+          "program_groups": {
+            "kprobe/kprobe__cap_cap": {
+              "ids": [
+                128,
+                146
+              ],
+              "calls": 257830413,
+              "ns": 50648717119
+            },
+            "tracing/fentry_vfs_read": {
+              "ids": [
+                129
+              ],
+              "calls": 2000879,
+              "ns": 182397358
+            },
+            "kprobe/tcp_v4_connect": {
+              "ids": [
+                130
+              ],
+              "calls": 0,
+              "ns": 0
+            },
+            "tracepoint/sys_enter": {
+              "ids": [
+                131
+              ],
+              "calls": 3174498794,
+              "ns": 262454545249
+            },
+            "tracepoint/inet_sock_set_s": {
+              "ids": [
+                132
+              ],
+              "calls": 0,
+              "ns": 0
+            },
+            "kprobe/blk_account_io_": {
+              "ids": [
+                142
+              ],
+              "calls": 165,
+              "ns": 44224
+            },
+            "tracing/fentry_vfs_writ": {
+              "ids": [
+                143
+              ],
+              "calls": 2090048,
+              "ns": 185520436
+            },
+            "kprobe/tcp_v4_connect_": {
+              "ids": [
+                148
+              ],
+              "calls": 0,
+              "ns": 0
+            },
+            "tracepoint/sys_exit": {
+              "ids": [
+                149
+              ],
+              "calls": 3174498797,
+              "ns": 280084586953
+            },
+            "tracing/fentry_vfs_fsyn": {
+              "ids": [
+                151
+              ],
+              "calls": 42,
+              "ns": 5248
+            },
+            "tracing/fentry_vfs_open": {
+              "ids": [
+                154
+              ],
+              "calls": 107901719,
+              "ns": 4317808265
+            },
+            "kprobe/tcp_v6_connect": {
+              "ids": [
+                155
+              ],
+              "calls": 0,
+              "ns": 0
+            },
+            "tracing/block_rq_insert": {
+              "ids": [
+                157
+              ],
+              "calls": 0,
+              "ns": 0
+            },
+            "tracing/fentry_vfs_crea": {
+              "ids": [
+                160
+              ],
+              "calls": 199,
+              "ns": 17434
+            },
+            "kprobe/tcp_v6_connect_": {
+              "ids": [
+                161
+              ],
+              "calls": 0,
+              "ns": 0
+            },
+            "tracing/block_rq_issue": {
+              "ids": [
+                162
+              ],
+              "calls": 423,
+              "ns": 749611
+            },
+            "tracing/block_rq_comple": {
+              "ids": [
+                165
+              ],
+              "calls": 447,
+              "ns": 2527658
+            },
+            "tracepoint/tracepoint__sys": {
+              "ids": [
+                166,
+                169,
+                171,
+                174
+              ],
+              "calls": 215801850,
+              "ns": 143886566548
+            },
+            "tracing/sched_wakeup": {
+              "ids": [
+                173
+              ],
+              "calls": 88247785,
+              "ns": 7571847576
+            },
+            "tracing/sched_wakeup_ne": {
+              "ids": [
+                178
+              ],
+              "calls": 122,
+              "ns": 45274
+            },
+            "tracing/sched_switch": {
+              "ids": [
+                180
+              ],
+              "calls": 176296084,
+              "ns": 28004327041
+            }
+          },
+          "switches_per_sockfd_operation": 1.6497705602918393
+        }
+      },
+      "native_over_baseline_calls": {
+        "tracing/fentry_vfs_read": 1.2925608334905259,
+        "tracing/fentry_vfs_writ": 1.2053979827061083,
+        "tracing/fentry_vfs_fsyn": 0.2978723404255319,
+        "tracing/fentry_vfs_open": 1.3743696023735685,
+        "tracing/fentry_vfs_crea": 4.738095238095238,
+        "tracepoint/inet_sock_set_s": null,
+        "kprobe/blk_account_io_": 0.7894736842105263,
+        "kprobe/kprobe__cap_cap": 1.0369619034811097,
+        "tracepoint/sys_enter": 1.1298687730970718,
+        "tracepoint/tracepoint__sys": 1.374367366546952,
+        "tracing/block_rq_insert": null,
+        "kprobe/tcp_v4_connect": null,
+        "tracepoint/sys_exit": 1.1298687721541163,
+        "kprobe/tcp_v4_connect_": null,
+        "tracing/block_rq_issue": 0.24422632794457275,
+        "tracing/block_rq_comple": 0.24750830564784054,
+        "tracing/sched_wakeup": 2.5083381241662233,
+        "kprobe/tcp_v6_connect": null,
+        "tracing/sched_wakeup_ne": 0.9457364341085271,
+        "kprobe/tcp_v6_connect_": null,
+        "tracing/sched_switch": 2.509809458664072
+      },
+      "native_over_baseline_stressor_totals": {
+        "syscall": {
+          "ops": 5.422827496757458,
+          "cpu_seconds": 0.6428571428571429
+        },
+        "cap": {
+          "ops": 1.0583100452747844,
+          "cpu_seconds": 1.0515193922431028
+        },
+        "set": {
+          "ops": 1.03646851205803,
+          "cpu_seconds": 1.029634275410607
+        },
+        "sockfd": {
+          "ops": 1.3777216846987643,
+          "cpu_seconds": 1.4639517105811806
+        }
+      }
+    },
+    {
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_131847_109569",
+      "status": "ok",
+      "samples": 3,
+      "workload_seconds": 180.0,
+      "phases": {
+        "baseline": {
+          "samples": [
+            {
+              "command": [
+                "/usr/bin/stress-ng",
+                "--syscall",
+                "1",
+                "--syscall-method",
+                "fast75",
+                "--cap",
+                "1",
+                "--set",
+                "1",
+                "--sockfd",
+                "1",
+                "--sockfd-port",
+                "14692",
+                "--timeout",
+                "180s",
+                "--metrics-brief",
+                "--temp-path",
+                "/var/tmp/bpfrejit-runtime/3b9e89c1"
+              ],
+              "duration": 181.047879475,
+              "metrics": {
+                "syscall": {
+                  "ops": 514.0,
+                  "seconds": 181.03,
+                  "cpu_seconds": 0.02,
+                  "wall_rate": 2.84,
+                  "cpu_rate": 20046.8
+                },
+                "cap": {
+                  "ops": 48058356.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 167.55,
+                  "wall_rate": 266990.85,
+                  "cpu_rate": 286821.67
+                },
+                "set": {
+                  "ops": 3799776.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 171.43,
+                  "wall_rate": 21109.8,
+                  "cpu_rate": 22165.84
+                },
+                "sockfd": {
+                  "ops": 25576092.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 165.66,
+                  "wall_rate": 142087.3,
+                  "cpu_rate": 154389.76
+                }
+              }
+            },
+            {
+              "command": [
+                "/usr/bin/stress-ng",
+                "--syscall",
+                "1",
+                "--syscall-method",
+                "fast75",
+                "--cap",
+                "1",
+                "--set",
+                "1",
+                "--sockfd",
+                "1",
+                "--sockfd-port",
+                "15204",
+                "--timeout",
+                "180s",
+                "--metrics-brief",
+                "--temp-path",
+                "/var/tmp/bpfrejit-runtime/3b9e89c1"
+              ],
+              "duration": 182.14206936500005,
+              "metrics": {
+                "syscall": {
+                  "ops": 514.0,
+                  "seconds": 182.11,
+                  "cpu_seconds": 0.02,
+                  "wall_rate": 2.82,
+                  "cpu_rate": 20421.95
+                },
+                "cap": {
+                  "ops": 46750518.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 164.05,
+                  "wall_rate": 259725.1,
+                  "cpu_rate": 284974.94
+                },
+                "set": {
+                  "ops": 3769710.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 168.85999999999999,
+                  "wall_rate": 20942.7,
+                  "cpu_rate": 22325.02
+                },
+                "sockfd": {
+                  "ops": 22142482.0,
+                  "seconds": 180.01,
+                  "cpu_seconds": 139.59,
+                  "wall_rate": 123009.51,
+                  "cpu_rate": 158622.38
+                }
+              }
+            },
+            {
+              "command": [
+                "/usr/bin/stress-ng",
+                "--syscall",
+                "1",
+                "--syscall-method",
+                "fast75",
+                "--cap",
+                "1",
+                "--set",
+                "1",
+                "--sockfd",
+                "1",
+                "--sockfd-port",
+                "15716",
+                "--timeout",
+                "180s",
+                "--metrics-brief",
+                "--temp-path",
+                "/var/tmp/bpfrejit-runtime/3b9e89c1"
+              ],
+              "duration": 182.26223874699997,
+              "metrics": {
+                "syscall": {
+                  "ops": 514.0,
+                  "seconds": 182.24,
+                  "cpu_seconds": 0.02,
+                  "wall_rate": 2.82,
+                  "cpu_rate": 18603.64
+                },
+                "cap": {
+                  "ops": 47879570.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 167.14,
+                  "wall_rate": 265997.6,
+                  "cpu_rate": 286458.88
+                },
+                "set": {
+                  "ops": 3805118.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 169.95,
+                  "wall_rate": 21139.52,
+                  "cpu_rate": 22388.8
+                },
+                "sockfd": {
+                  "ops": 23148663.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 145.35,
+                  "wall_rate": 128603.17,
+                  "cpu_rate": 159255.94
+                }
+              }
+            }
+          ],
+          "stressor_totals": {
+            "syscall": {
+              "ops": 1542.0,
+              "cpu_seconds": 0.06
+            },
+            "cap": {
+              "ops": 142688444.0,
+              "cpu_seconds": 498.74
+            },
+            "set": {
+              "ops": 11374604.0,
+              "cpu_seconds": 510.24
+            },
+            "sockfd": {
+              "ops": 70867237.0,
+              "cpu_seconds": 450.6
+            }
+          },
+          "program_groups": {
+            "tracepoint/inet_sock_set_s": {
+              "ids": [
+                33
+              ],
+              "calls": 0,
+              "ns": 0
+            },
+            "tracing/fentry_vfs_read": {
+              "ids": [
+                35
+              ],
+              "calls": 1464162,
+              "ns": 120056331
+            },
+            "tracing/fentry_vfs_writ": {
+              "ids": [
+                37
+              ],
+              "calls": 1666263,
+              "ns": 133533767
+            },
+            "kprobe/kprobe__cap_cap": {
+              "ids": [
+                38,
+                49
+              ],
+              "calls": 252204951,
+              "ns": 51403620188
+            },
+            "tracing/fentry_vfs_fsyn": {
+              "ids": [
+                42
+              ],
+              "calls": 76,
+              "ns": 6493
+            },
+            "tracepoint/tracepoint__sys": {
+              "ids": [
+                46,
+                56,
+                58,
+                59
+              ],
+              "calls": 143683888,
+              "ns": 133780247666
+            },
+            "tracing/fentry_vfs_open": {
+              "ids": [
+                47
+              ],
+              "calls": 71842395,
+              "ns": 3733101995
+            },
+            "tracing/sched_wakeup": {
+              "ids": [
+                48
+              ],
+              "calls": 27285677,
+              "ns": 3312059888
+            },
+            "tracing/fentry_vfs_crea": {
+              "ids": [
+                51
+              ],
+              "calls": 42,
+              "ns": 2437
+            },
+            "kprobe/tcp_v4_connect": {
+              "ids": [
+                54
+              ],
+              "calls": 0,
+              "ns": 0
+            },
+            "tracing/sched_wakeup_ne": {
+              "ids": [
+                57
+              ],
+              "calls": 125,
+              "ns": 49162
+            },
+            "tracing/sched_switch": {
+              "ids": [
+                60
+              ],
+              "calls": 54485576,
+              "ns": 7063957332
+            },
+            "kprobe/tcp_v4_connect_": {
+              "ids": [
+                64
+              ],
+              "calls": 0,
+              "ns": 0
+            },
+            "kprobe/blk_account_io_": {
+              "ids": [
+                65
+              ],
+              "calls": 162,
+              "ns": 49647
+            },
+            "kprobe/tcp_v6_connect": {
+              "ids": [
+                68
+              ],
+              "calls": 0,
+              "ns": 0
+            },
+            "tracepoint/sys_enter": {
+              "ids": [
+                70
+              ],
+              "calls": 2779239268,
+              "ns": 238448423950
+            },
+            "kprobe/tcp_v6_connect_": {
+              "ids": [
+                72
+              ],
+              "calls": 0,
+              "ns": 0
+            },
+            "tracing/block_rq_insert": {
+              "ids": [
+                73
+              ],
+              "calls": 0,
+              "ns": 0
+            },
+            "tracepoint/sys_exit": {
+              "ids": [
+                74
+              ],
+              "calls": 2779239269,
+              "ns": 313306731094
+            },
+            "tracing/block_rq_issue": {
+              "ids": [
+                75
+              ],
+              "calls": 1028,
+              "ns": 1499864
+            },
+            "tracing/block_rq_comple": {
+              "ids": [
+                76
+              ],
+              "calls": 1069,
+              "ns": 16289502
+            }
+          },
+          "switches_per_sockfd_operation": 0.7688401341229093
+        },
+        "post_rejit": {
+          "samples": [
+            {
+              "command": [
+                "/usr/bin/stress-ng",
+                "--syscall",
+                "1",
+                "--syscall-method",
+                "fast75",
+                "--cap",
+                "1",
+                "--set",
+                "1",
+                "--sockfd",
+                "1",
+                "--sockfd-port",
+                "16740",
+                "--timeout",
+                "180s",
+                "--metrics-brief",
+                "--temp-path",
+                "/var/tmp/bpfrejit-runtime/3b9e89c1"
+              ],
+              "duration": 182.06714791700006,
+              "metrics": {
+                "syscall": {
+                  "ops": 514.0,
+                  "seconds": 182.05,
+                  "cpu_seconds": 0.02,
+                  "wall_rate": 2.82,
+                  "cpu_rate": 20167.14
+                },
+                "cap": {
+                  "ops": 47268243.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 167.07,
+                  "wall_rate": 262601.35,
+                  "cpu_rate": 282925.48
+                },
+                "set": {
+                  "ops": 3836456.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 172.63,
+                  "wall_rate": 21313.64,
+                  "cpu_rate": 22222.5
+                },
+                "sockfd": {
+                  "ops": 22488618.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 141.51000000000002,
+                  "wall_rate": 124936.01,
+                  "cpu_rate": 158923.18
+                }
+              }
+            },
+            {
+              "command": [
+                "/usr/bin/stress-ng",
+                "--syscall",
+                "1",
+                "--syscall-method",
+                "fast75",
+                "--cap",
+                "1",
+                "--set",
+                "1",
+                "--sockfd",
+                "1",
+                "--sockfd-port",
+                "17252",
+                "--timeout",
+                "180s",
+                "--metrics-brief",
+                "--temp-path",
+                "/var/tmp/bpfrejit-runtime/3b9e89c1"
+              ],
+              "duration": 183.056845393,
+              "metrics": {
+                "syscall": {
+                  "ops": 514.0,
+                  "seconds": 183.03,
+                  "cpu_seconds": 0.04,
+                  "wall_rate": 2.81,
+                  "cpu_rate": 13909.56
+                },
+                "cap": {
+                  "ops": 46381322.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 166.12,
+                  "wall_rate": 257673.86,
+                  "cpu_rate": 279203.94
+                },
+                "set": {
+                  "ops": 3770092.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 171.42,
+                  "wall_rate": 20944.95,
+                  "cpu_rate": 21993.15
+                },
+                "sockfd": {
+                  "ops": 21085162.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 133.03,
+                  "wall_rate": 117139.43,
+                  "cpu_rate": 158501.55
+                }
+              }
+            },
+            {
+              "command": [
+                "/usr/bin/stress-ng",
+                "--syscall",
+                "1",
+                "--syscall-method",
+                "fast75",
+                "--cap",
+                "1",
+                "--set",
+                "1",
+                "--sockfd",
+                "1",
+                "--sockfd-port",
+                "17764",
+                "--timeout",
+                "180s",
+                "--metrics-brief",
+                "--temp-path",
+                "/var/tmp/bpfrejit-runtime/3b9e89c1"
+              ],
+              "duration": 180.08676121100007,
+              "metrics": {
+                "syscall": {
+                  "ops": 514.0,
+                  "seconds": 180.07,
+                  "cpu_seconds": 0.02,
+                  "wall_rate": 2.85,
+                  "cpu_rate": 21714.33
+                },
+                "cap": {
+                  "ops": 47595932.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 168.75,
+                  "wall_rate": 264421.85,
+                  "cpu_rate": 282047.76
+                },
+                "set": {
+                  "ops": 3772958.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 171.17000000000002,
+                  "wall_rate": 20960.79,
+                  "cpu_rate": 22041.62
+                },
+                "sockfd": {
+                  "ops": 25794918.0,
+                  "seconds": 180.0,
+                  "cpu_seconds": 164.6,
+                  "wall_rate": 143304.65,
+                  "cpu_rate": 156714.78
+                }
+              }
+            }
+          ],
+          "stressor_totals": {
+            "syscall": {
+              "ops": 1542.0,
+              "cpu_seconds": 0.08
+            },
+            "cap": {
+              "ops": 141245497.0,
+              "cpu_seconds": 501.94
+            },
+            "set": {
+              "ops": 11379506.0,
+              "cpu_seconds": 515.22
+            },
+            "sockfd": {
+              "ops": 69368698.0,
+              "cpu_seconds": 439.14
+            }
+          },
+          "program_groups": {
+            "tracing/fentry_vfs_read": {
+              "ids": [
+                128
+              ],
+              "calls": 1440600,
+              "ns": 124298805
+            },
+            "tracing/fentry_vfs_writ": {
+              "ids": [
+                130
+              ],
+              "calls": 1652517,
+              "ns": 146503423
+            },
+            "tracing/fentry_vfs_fsyn": {
+              "ids": [
+                132
+              ],
+              "calls": 47,
+              "ns": 4684
+            },
+            "tracing/fentry_vfs_open": {
+              "ids": [
+                134
+              ],
+              "calls": 70342944,
+              "ns": 3775183473
+            },
+            "tracing/fentry_vfs_crea": {
+              "ids": [
+                136
+              ],
+              "calls": 43,
+              "ns": 2418
+            },
+            "kprobe/blk_account_io_": {
+              "ids": [
+                137
+              ],
+              "calls": 154,
+              "ns": 33388
+            },
+            "tracepoint/sys_enter": {
+              "ids": [
+                140
+              ],
+              "calls": 2754463469,
+              "ns": 240146656844
+            },
+            "tracing/block_rq_insert": {
+              "ids": [
+                141
+              ],
+              "calls": 0,
+              "ns": 0
+            },
+            "tracepoint/sys_exit": {
+              "ids": [
+                145
+              ],
+              "calls": 2754463473,
+              "ns": 319425266271
+            },
+            "tracepoint/inet_sock_set_s": {
+              "ids": [
+                146
+              ],
+              "calls": 0,
+              "ns": 0
+            },
+            "tracing/block_rq_issue": {
+              "ids": [
+                147
+              ],
+              "calls": 444,
+              "ns": 788869
+            },
+            "tracing/block_rq_comple": {
+              "ids": [
+                151
+              ],
+              "calls": 470,
+              "ns": 17789903
+            },
+            "kprobe/tcp_v4_connect": {
+              "ids": [
+                152
+              ],
+              "calls": 0,
+              "ns": 0
+            },
+            "tracepoint/tracepoint__sys": {
+              "ids": [
+                154,
+                166,
+                170,
+                178
+              ],
+              "calls": 140684982,
+              "ns": 131176907823
+            },
+            "kprobe/kprobe__cap_cap": {
+              "ids": [
+                158,
+                172
+              ],
+              "calls": 252312008,
+              "ns": 50662380778
+            },
+            "kprobe/tcp_v4_connect_": {
+              "ids": [
+                160
+              ],
+              "calls": 0,
+              "ns": 0
+            },
+            "tracing/sched_wakeup": {
+              "ids": [
+                162
+              ],
+              "calls": 23546695,
+              "ns": 3140586785
+            },
+            "kprobe/tcp_v6_connect": {
+              "ids": [
+                171
+              ],
+              "calls": 0,
+              "ns": 0
+            },
+            "tracing/sched_wakeup_ne": {
+              "ids": [
+                174
+              ],
+              "calls": 124,
+              "ns": 48812
+            },
+            "kprobe/tcp_v6_connect_": {
+              "ids": [
+                176
+              ],
+              "calls": 0,
+              "ns": 0
+            },
+            "tracing/sched_switch": {
+              "ids": [
+                181
+              ],
+              "calls": 47023142,
+              "ns": 8473611604
+            }
+          },
+          "switches_per_sockfd_operation": 0.6778726335616102
+        }
+      },
+      "native_over_baseline_calls": {
+        "tracepoint/inet_sock_set_s": null,
+        "tracing/fentry_vfs_read": 0.9839075184303376,
+        "tracing/fentry_vfs_writ": 0.9917504019473516,
+        "kprobe/kprobe__cap_cap": 1.0004244841331447,
+        "tracing/fentry_vfs_fsyn": 0.618421052631579,
+        "tracepoint/tracepoint__sys": 0.9791284461901532,
+        "tracing/fentry_vfs_open": 0.9791286050527687,
+        "tracing/sched_wakeup": 0.8629690588215935,
+        "tracing/fentry_vfs_crea": 1.0238095238095237,
+        "kprobe/tcp_v4_connect": null,
+        "tracing/sched_wakeup_ne": 0.992,
+        "tracing/sched_switch": 0.8630383571608016,
+        "kprobe/tcp_v4_connect_": null,
+        "kprobe/blk_account_io_": 0.9506172839506173,
+        "kprobe/tcp_v6_connect": null,
+        "tracepoint/sys_enter": 0.9910854026548678,
+        "kprobe/tcp_v6_connect_": null,
+        "tracing/block_rq_insert": null,
+        "tracepoint/sys_exit": 0.9910854037375074,
+        "tracing/block_rq_issue": 0.43190661478599224,
+        "tracing/block_rq_comple": 0.43966323666978485
+      },
+      "native_over_baseline_stressor_totals": {
+        "syscall": {
+          "ops": 1.0,
+          "cpu_seconds": 1.3333333333333335
+        },
+        "cap": {
+          "ops": 0.989887429145979,
+          "cpu_seconds": 1.006416168745238
+        },
+        "set": {
+          "ops": 1.000430960058038,
+          "cpu_seconds": 1.0097601128880527
+        },
+        "sockfd": {
+          "ops": 0.9788542764832218,
+          "cpu_seconds": 0.9745672436750998
+        }
+      }
+    }
+  ],
+  "image": "/workspaces/repository/.cache/container-images/x86_64-runner-runtime.image.tar",
+  "current_image_package": {
+    "Package": "stress-ng",
+    "Architecture": "amd64",
+    "Version": "0.17.06-1build1"
+  },
+  "source": "https://github.com/ColinIanKing/stress-ng/blob/V0.17.06/stress-sockfd.c",
+  "scope": "All recorded program identities retained in type/name groups; no threshold or exclusions. Ratios show changed work, not historical per-task attribution. Current image package status is read without executing it."
+}

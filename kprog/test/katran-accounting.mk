@@ -41,3 +41,7 @@ bcc-series:
 .PHONY: lto-piece-audit
 lto-piece-audit:
 	python3 $(ROOT)/kprog/results/perf_20261113/lto_piece_audit.py --output $(OUTPUT)
+
+.PHONY: bcc-scheduler-analysis
+bcc-scheduler-analysis:
+	taskset -c 16 prlimit --as=4294967296 -- python3 $(ROOT)/kprog/results/perf_20261113/bcc_scheduler_analysis.py --run $(ROOT)/corpus/results/x86_kvm_corpus_20261116_060435_731340 --run $(ROOT)/corpus/results/x86_kvm_corpus_20261116_131847_109569 --image $(ROOT)/.cache/container-images/x86_64-runner-runtime.image.tar --output $(OUTPUT)
