@@ -27,7 +27,8 @@ from elftools.elf.elffile import ELFFile
 
 CHOICES = {'normal': [], 'basic': ['-regalloc=basic'], 'pbqp': ['-regalloc=pbqp'],
            'source': ['-misched=source'], 'no-machine-licm': ['-disable-machine-licm'],
-           'no-misched': ['-enable-misched=false']}
+           'no-misched': ['-enable-misched=false'],
+           'no-slot-sharing': ['-no-stack-slot-sharing']}
 
 
 def storage_observation(path, fds):
