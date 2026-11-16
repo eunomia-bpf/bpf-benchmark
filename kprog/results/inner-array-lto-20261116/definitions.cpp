@@ -21,7 +21,9 @@ int main(int argc, char **argv) try {
     bind_original_source_maps(argv[1],"entry",code,load);
     if (load.map_addr_ids.at("outer")!=501 || load.maps[0].inner_type!=BPF_MAP_TYPE_ARRAY ||
         load.maps[0].inner_value_size!=4) return 1;
-    Object otel(bpf_object__open_file(argv[2],nullptr),bpf_object__close);
+    SourceBpfMaps original(argv[2]);
+    const auto bytes=original.map_definitions(argv[2]);
+    Object otel(bpf_object__open_mem(bytes.data(),bytes.size(),nullptr),bpf_object__close);
     if (!otel) return 1;
     unsigned count=0;
     bpf_map *map;

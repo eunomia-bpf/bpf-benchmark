@@ -14,6 +14,7 @@ class SourceBpfMaps {
     struct Code { std::vector<bpf_insn> insns; std::map<size_t, Relocation> relocs; };
     ScopedFd fd_;
     std::unique_ptr<Elf, decltype(&elf_end)> elf_{nullptr, elf_end};
+    GElf_Ehdr header_{};
     std::vector<Function> functions_;
     std::map<size_t, Code> code_;
 
@@ -29,8 +30,7 @@ public:
         if (fd_.get() < 0) fail("open original BPF object " + path.string() + ": " + std::strerror(errno));
         if (elf_version(EV_CURRENT) == EV_NONE) fail("libelf initialization failed");
         elf_.reset(elf_begin(fd_.get(), ELF_C_READ, nullptr));
-        GElf_Ehdr header{};
-        if (!elf_ || !gelf_getehdr(elf_.get(), &header) || header.e_machine != EM_BPF)
+        if (!elf_ || !gelf_getehdr(elf_.get(), &header_) || header_.e_machine != EM_BPF)
             fail("original source object is not BPF ELF: " + path.string());
         size_t strings;
         if (elf_getshdrstrndx(elf_.get(), &strings)) fail("read original BPF section strings");
@@ -100,6 +100,21 @@ public:
         }
     }
 
+    std::vector<uint8_t> map_definitions(const std::filesystem::path &path) const {
+        auto bytes = read_binary_file(path);
+        const bool wide = gelf_getclass(elf_.get()) == ELFCLASS64;
+        const size_t flag_offset = wide ? offsetof(Elf64_Shdr, sh_flags) : offsetof(Elf32_Shdr, sh_flags);
+        const size_t flag_byte = header_.e_ident[EI_DATA] == ELFDATA2MSB ? (wide ? 7 : 3) : 0;
+        // libbpf need only parse maps/BTF here. Some original upstream objects
+        // have static program entries that its program loader rejects. Hide
+        // executable discovery in this in-memory metadata view; instruction
+        // bytes, symbols, maps/BTF and the original source file stay exact.
+        for (const auto &f : functions_)
+            bytes.at(header_.e_shoff + f.section * header_.e_shentsize + flag_offset + flag_byte)
+                &= static_cast<uint8_t>(~SHF_EXECINSTR);
+        return bytes;
+    }
+
     std::vector<SourceMapRelocation> bind(const std::string &entry,
                                       const std::vector<bpf_insn> &loaded,
                                       const std::unordered_set<std::string> *needed = nullptr) const {
@@ -156,7 +171,8 @@ void bind_original_source_maps(const std::filesystem::path &object, const std::s
                                const std::unordered_set<std::string> *needed = nullptr)
 {
     std::map<std::string, uint32_t> identities;
-    const auto bindings = SourceBpfMaps(object).bind(entry, insns, needed);
+    SourceBpfMaps source(object);
+    const auto bindings = source.bind(entry, insns, needed);
     bool has_inner = false;
     for (const auto &binding : bindings) {
         const auto found = load.source_maps_by_fd.find(binding.fd);
@@ -172,7 +188,8 @@ void bind_original_source_maps(const std::filesystem::path &object, const std::s
         has_inner |= meta.type == BPF_MAP_TYPE_ARRAY_OF_MAPS || meta.type == BPF_MAP_TYPE_HASH_OF_MAPS;
     }
     if (!has_inner) return;
-    bpf_object *raw = bpf_object__open_file(object.c_str(), nullptr);
+    const auto bytes = source.map_definitions(object);
+    bpf_object *raw = bpf_object__open_mem(bytes.data(), bytes.size(), nullptr);
     const auto error = libbpf_get_error(raw);
     if (error || !raw) fail("open original map definitions: " + libbpf_error_string(error ? error : -errno));
     std::unique_ptr<bpf_object, decltype(&bpf_object__close)> definitions(raw, bpf_object__close);
