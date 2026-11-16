@@ -67,4 +67,11 @@ void kprog_arm64_atomic_add(struct kprog_arm64_addressing *, __u64, __u64, __u64
 void kprog_arm64_atomic_set(struct kprog_arm64_addressing *, __u64, __u64, __u64, __u32, __u8);
 void kprog_arm64_atomic_clear(struct kprog_arm64_addressing *, __u64, __u64, __u64, __u32, __u8);
 void kprog_arm64_memory_tags(struct kprog_arm64_addressing *, __s64, __u8, __s64, __u8, __u64, __u8);
+/* A symbolic function pointer is supplied by the platform binding. Its type
+ * matches libbpf; the production helper's numeric identity stays unchanged. */
+#define KPROG_ARM64_HELPER(ID, NAME, RESULT, ARGS) \
+void kprog_arm64_helper_##NAME(struct kprog_arm64_addressing *, struct kprog_arm64_vector *, \
+                               __u8 *, __u8 *, __u8 *, __u8 *, RESULT (*NAME) ARGS);
+#include "Arm64HelperCalls.h"
+#undef KPROG_ARM64_HELPER
 #endif

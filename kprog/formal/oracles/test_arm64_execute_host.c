@@ -6,8 +6,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <setjmp.h>
+#include <stdarg.h>
 #include "../c/Arm64Addressing.h"
 
+/* Compile-time ABI regression: every callee parameter must match libbpf. */
+#define KPROG_ARM64_HELPER(ID, NAME, RESULT, ARGS) \
+typedef void (*helper_abi_##NAME)(struct kprog_arm64_addressing *, struct kprog_arm64_vector *, \
+                                 __u8 *, __u8 *, __u8 *, __u8 *, __typeof__(NAME)); \
+_Static_assert(__builtin_types_compatible_p(__typeof__(&kprog_arm64_helper_##NAME), helper_abi_##NAME), "libbpf helper ABI mismatch: " #NAME);
+#include "../c/Arm64HelperCalls.h"
+#undef KPROG_ARM64_HELPER
+static void helper_input_phase(void);
+static const void *helper_context_key;
+static __u64 helper_context_values[2];
+static unsigned helper_context_visits,helper_context_refuse;
 static jmp_buf rejected;
 static unsigned copy_visits,copy_refusal;
 static unsigned events[512],count,selector_mode,failures,rejection_armed;
@@ -16,7 +28,7 @@ static void check(int ok,const char *why)
 { if (!ok) { fprintf(stderr,"ARM execute: %s\n",why);exit(1); } }
 unsigned long native_lab_entry_input(unsigned kind)
 {
-	check(count<512,"input overflow");
+	check(count<512,"input overflow");helper_input_phase();
 	entropy^=entropy<<13;entropy^=entropy>>7;entropy^=entropy<<17;
 	__u64 value=kind==1?0x10000:kind==3?0x20000:entropy;
 	check(kind==1 || kind==3 || kind==6,"unexpected input");
@@ -28,7 +40,13 @@ void arm64_sim_unsupported_opcode(void)
 { failures++;if (!selector_mode) { check(rejection_armed,"unexpected rejection outside guarded call");longjmp(rejected,1); } }
 void kprog_c_trap(void) { check(0,"unselected platform trap");abort(); }
 void *kprog_c_context_pointer(const void *ctx,__u8 kind,__u32 offset)
-{ (void)ctx;(void)kind;(void)offset;check(0,"unselected context input");return NULL; }
+{
+	check(ctx==helper_context_key && ctx && kind==KPROG_ABI_KIND_XDP && (offset==0 || offset==4),"helper refresh context/field identity");
+	check(offset==helper_context_visits*4 && count<512,"helper refresh data-before-end order");
+	helper_context_visits++;events[count]=0x20000+offset;values[count++]=helper_context_values[offset/4];
+	if(helper_context_visits==helper_context_refuse)longjmp(rejected,4);
+	return (void *)(uintptr_t)helper_context_values[offset/4];
+}
 __u64 kprog_c_pointer_bits(const void *p)
 { (void)p;check(0,"unselected pointer exposure");return 0; }
 __u64 kprog_c_atomic_fetch(void *p,__u64 v,__u32 w,__u32 op,__u32 order)
@@ -209,6 +227,158 @@ static void libc_read_refusal(void)
 	fprintf(stderr,"ARM wrappers: one adapter-only physical-read refusal prefix\n");
 }
 #endif
+/* Real production helper bodies execute supplied, typed platform callees.
+ * Expectations concern the ABI and surrounding C effects, not kernel helpers. */
+static struct frame helper_before;
+static unsigned helper_id,helper_calls,helper_refuse,helper_inflight,helper_returned;
+static __u64 helper_result,helper_raw_return;
+static unsigned helper_result_tag;
+static __u64 helper_args[5];
+static void helper_input_phase(void)
+{
+	if(helper_inflight && helper_returned)check(f.registers[0].x==helper_raw_return && f.tags[0]==helper_result_tag,"helper result committed before any clobber draw");
+}
+static void want_event(unsigned event,__u64 value)
+{ check(wanted_count<512,"expected helper event overflow");wanted_events[wanted_count]=event;wanted_values[wanted_count++]=value; }
+static void enter_helper(unsigned id)
+{
+	check(helper_inflight && id==helper_id && !helper_calls && !memcmp(&f,&helper_before,sizeof(f)),"typed callee identity/precall frame");
+	check(!count,"callee precedes clobber inputs");helper_calls++;events[count]=0x10000+id;values[count++]=0;
+}
+static void leave_helper(void)
+{ if(helper_refuse)longjmp(rejected,3);helper_returned=1; }
+static __u64 call_clock(void) { enter_helper(5);leave_helper();return helper_result; }
+static __u32 call_random(void) { enter_helper(7);leave_helper();return (__u32)helper_result; }
+static void *call_lookup(void *map,const void *key)
+{ enter_helper(1);check(map==(void *)0x50000 && key==f.bytes+8,"lookup exact map/key pointers");leave_helper();return (void *)(uintptr_t)helper_raw_return; }
+static long call_update(void *map,const void *key,const void *value,__u64 flags)
+{ enter_helper(2);check(map==(void *)0x50000 && key==f.bytes+8 && value==f.bytes+16 && flags==helper_args[3],"update map/key/value/full flags ABI");leave_helper();return (long)helper_result; }
+static long call_trace(const char *format,__u32 size,...)
+{
+	enter_helper(6);check(format==(const char *)f.bytes+16 && size==(__u32)helper_args[1],"trace format/size ABI");
+	va_list args;va_start(args,size);for(unsigned i=2;i<5;i++)check(va_arg(args,__u64)==helper_args[i],"trace variadic64 argument ABI");va_end(args);leave_helper();return (long)helper_result;
+}
+static long call_probe(void *dst,__u32 size,const void *src)
+{
+	enter_helper(4);check(dst==f.bytes+16 && src==f.bytes+64 && size==helper_args[1],"probe captured pointer/length ABI");
+	unsigned n=helper_refuse && size?1:size;check(n<=16,"probe fixture footprint");
+	for(unsigned i=0;i<n;i++)((__u8 *)dst)[i]=helper_result?0xdd:((const __u8 *)src)[i];leave_helper();return (long)helper_result;
+}
+static long call_dyn_read(void *dst,__u64 len,const struct bpf_dynptr *src,__u64 offset,__u64 flags)
+{
+	enter_helper(201);check(dst==f.bytes+16 && src==(const struct bpf_dynptr *)(f.bytes+64) && len==helper_args[1] && offset==helper_args[3] && flags==helper_args[4],"dynptr five-argument read ABI");
+	unsigned n=helper_refuse && len?1:(unsigned)len;check(n<=16,"dynptr fixture footprint");for(unsigned i=0;i<n;i++)((__u8 *)dst)[i]=0xc0+i;
+	leave_helper();return (long)helper_result;
+}
+static long call_dyn_write(const struct bpf_dynptr *dst,__u64 offset,void *src,__u64 len,__u64 flags)
+{ enter_helper(202);check(dst==(const struct bpf_dynptr *)(f.bytes+64) && src==f.bytes+16 && offset==helper_args[1] && len==helper_args[3] && flags==helper_args[4],"dynptr five-argument full-width write ABI");leave_helper();return (long)helper_result; }
+static void call_submit(void *ptr,__u64 flags)
+{ enter_helper(132);check(ptr==(void *)0x40000 && flags==helper_args[1],"ringbuf submit pointer/flags ABI");leave_helper(); }
+static void call_discard(void *ptr,__u64 flags)
+{ enter_helper(133);check(ptr==(void *)0x40000 && flags==helper_args[1],"ringbuf discard pointer/flags ABI");leave_helper(); }
+static void call_dyn_submit(struct bpf_dynptr *ptr,__u64 flags)
+{ enter_helper(199);check(ptr==(struct bpf_dynptr *)(f.bytes+64) && flags==helper_args[1],"dynptr submit pointer/flags ABI");leave_helper(); }
+static void call_dyn_discard(struct bpf_dynptr *ptr,__u64 flags)
+{ enter_helper(200);check(ptr==(struct bpf_dynptr *)(f.bytes+64) && flags==helper_args[1],"dynptr discard pointer/flags ABI");leave_helper(); }
+static void want_transfer(struct frame *g,unsigned dst,unsigned src,unsigned len,unsigned copy,unsigned released)
+{
+	for(unsigned i=0;i<len;i++)if(!i || !((dst+i)&7)){
+		unsigned tag=0;if(copy && src+i>=released && dst+i>=released && !((dst+i)&7) && len-i>=8 && !((src+i)&7)){
+			tag=g->stack_tags[(src+i)/8];if(tag==4 || tag==10)g->payload[(dst+i)/8]=g->payload[(src+i)/8];
+		}g->stack_tags[(dst+i)/8]=tag;
+	}
+}
+static void registry_helpers(int capture)
+{
+#define KPROG_ARM64_HELPER(ID, NAME, RESULT, ARGS) check((uintptr_t)NAME==ID,"libbpf helper numeric identity drift: " #NAME);
+#include "../c/Arm64HelperCalls.h"
+#undef KPROG_ARM64_HELPER
+	const unsigned ids[]={5,7,1,2,6,4,201,202,132,133,199,200},capacities[]={160,200,376,160};
+	const __s64 biases[]={96,160,280,0x100000100LL};const __u64 returns[]={0,1,~0ULL,0x8000000000000001ULL};
+	const unsigned lengths[]={0,1,7,8,16};unsigned cases=0;
+	for(unsigned which=0;which<12;which++)for(unsigned p=0;p<4;p++)for(unsigned ri=0;ri<4;ri++)for(unsigned li=0;li<(which==5 || which==6?5:1);li++)for(unsigned released=0;released<2;released++)for(unsigned refuse=0;refuse<2;refuse++){
+		struct kprog_arm64_addressing a=wrapper_frame(capacities[p],biases[p],cases);unsigned lost=released?24:0;f.coordinates.stack_offset=(__s64)lost-biases[p];
+		for(unsigned i=0;i<5;i++){f.registers[i].x=0xfedcba9876543210ULL+i;f.tags[i]=0;}
+		if(which==2 || which==3){f.registers[0].ptr=(void *)0x50000;f.tags[0]=5;f.registers[1].x=(__u64)(8-biases[p]);f.tags[1]=4;f.registers[2].x=(__u64)(16-biases[p]);f.tags[2]=4;}
+		if(which==4){f.registers[0].x=(__u64)(16-biases[p]);f.tags[0]=4;f.registers[1].x=0x100000008ULL;}
+		if(which==5 || which==6){f.registers[0].x=(__u64)(16-biases[p]);f.tags[0]=4;f.registers[1].x=lengths[li];f.registers[2].x=(__u64)(64-biases[p]);f.tags[2]=4;}
+		if(which==7){f.registers[0].x=(__u64)(64-biases[p]);f.tags[0]=4;f.registers[2].x=(__u64)(16-biases[p]);f.tags[2]=4;f.registers[3].x=0x100000008ULL;}
+		if(which==8 || which==9){f.registers[0].ptr=(void *)0x40000;f.tags[0]=6;}
+		if(which>=10){f.registers[0].x=(__u64)(64-biases[p]);f.tags[0]=4;}
+		for(unsigned i=0;i<5;i++)helper_args[i]=f.registers[i].x;
+		helper_id=ids[which];helper_calls=helper_returned=0;helper_refuse=refuse;helper_inflight=1;helper_result=returns[ri];
+		helper_raw_return=which==1?(__u32)helper_result:which==2?(ri?0x40000:0):which>=8?0:helper_result;helper_result_tag=which==2?6:0;helper_before=f;
+		struct frame expected=f;want_event(0x10000+helper_id,0);
+		if(which==5 || which==6){unsigned n=refuse && lengths[li]?1:lengths[li];for(unsigned i=0;i<n;i++)expected.bytes[16+i]=which==6?0xc0+i:helper_result?0xdd:expected.bytes[64+i];}
+		if(!refuse){expected.registers[0].x=helper_raw_return;expected.tags[0]=helper_result_tag;want_clobbers(&expected,capacities[p],biases[p]);
+			if(which==5 || which==6)want_transfer(&expected,16,64,lengths[li],which==5 && !helper_result,lost);
+			if(which>=10)want_transfer(&expected,64,0,16,0,lost);
+		}
+		int trapped=setjmp(rejected);
+		if(!trapped)switch(which){
+#define CALL(NAME,FN) kprog_arm64_helper_##NAME(&a,f.vectors,&f.flags[0],&f.flags[1],&f.flags[2],&f.flags[3],FN)
+		case 0:CALL(bpf_ktime_get_ns,call_clock);break;case 1:CALL(bpf_get_prandom_u32,call_random);break;
+		case 2:CALL(bpf_map_lookup_elem,call_lookup);break;case 3:CALL(bpf_map_update_elem,call_update);break;
+		case 4:CALL(bpf_trace_printk,call_trace);break;case 5:CALL(bpf_probe_read,call_probe);break;
+		case 6:CALL(bpf_dynptr_read,call_dyn_read);break;case 7:CALL(bpf_dynptr_write,call_dyn_write);break;
+		case 8:CALL(bpf_ringbuf_submit,call_submit);break;case 9:CALL(bpf_ringbuf_discard,call_discard);break;
+		case 10:CALL(bpf_ringbuf_submit_dynptr,call_dyn_submit);break;case 11:CALL(bpf_ringbuf_discard_dynptr,call_dyn_discard);break;
+		default:check(0,"helper case");
+#undef CALL
+		}
+		helper_inflight=0;check(trapped==(refuse?3:0) && helper_calls==1 && !failures,"one typed helper call, return or refusal");
+		wrapper_equal(&expected,"helper argument/result/effect/tag/ordered-clobber complete frame");wrapper_capture(32+which,cases++,capacities[p],trapped,helper_raw_return,capture);
+	}
+	fprintf(stderr,"ARM helpers: 95 libbpf signatures, %u complete typed-callee frames across12 helpers\n",cases);
+}
+/* A full64-bit length is observed before a callee refuses; no huge local
+ * arena or narrowed successful-access premise is needed for this ABI check. */
+static void helper_wide_length(void)
+{
+	struct kprog_arm64_addressing a=wrapper_frame(160,96,0);f.coordinates.stack_offset=-96;
+	f.registers[0].x=(__u64)-80;f.tags[0]=4;f.registers[1].x=0x100000008ULL;f.tags[1]=0;
+	f.registers[2].x=(__u64)-32;f.tags[2]=4;f.registers[3].x=0x123456789abcdef0ULL;f.tags[3]=0;f.registers[4].x=~0ULL;f.tags[4]=0;
+	for(unsigned i=0;i<5;i++)helper_args[i]=f.registers[i].x;
+	helper_id=201;helper_calls=helper_returned=0;helper_refuse=helper_inflight=1;helper_result=helper_raw_return=0;helper_result_tag=0;helper_before=f;
+	struct frame expected=f;expected.bytes[16]=0xc0;want_event(0x10000+201,0);
+	int trapped=setjmp(rejected);if(!trapped)kprog_arm64_helper_bpf_dynptr_read(&a,f.vectors,&f.flags[0],&f.flags[1],&f.flags[2],&f.flags[3],call_dyn_read);
+	helper_inflight=0;check(trapped==3 && helper_calls==1 && !failures,"full64 length delivered before refusal");wrapper_equal(&expected,"wide-length refusal effect/argument/frame");
+	fprintf(stderr,"ARM helpers: one independent full64-length refusal prefix\n");
+}
+static struct xdp_md helper_xdp;
+static long call_xdp(struct xdp_md *ctx,int delta)
+{
+	enter_helper(helper_id);check(ctx==&helper_xdp && delta==(int)0x80000007U,"adjust helper real context/signed delta ABI");
+	helper_xdp.data=0x12345000;helper_xdp.data_end=0x12346000;leave_helper();return (long)helper_result;
+}
+static void refresh_helpers(void)
+{
+	const unsigned ids[]={44,54,65};unsigned cases=0;
+	for(unsigned which=0;which<3;which++)for(unsigned error=0;error<2;error++)for(unsigned fail=0;fail<3;fail++){
+#if !ADAPTER
+		if(fail)continue;
+#endif
+		struct arm64_sim_xdp_abi abi={(void *)0x11111111,(void *)0x22222222,(void *)0x33333333},expected_abi=abi;
+		memset(&helper_xdp,0,sizeof(helper_xdp));struct kprog_arm64_addressing a=wrapper_frame(160,96,cases);
+		f.coordinates.stack_offset=-96;a.helper_context=&helper_xdp;a.helper_abi_base=&abi;a.abi_kind=KPROG_ABI_KIND_XDP;a.is_xdp=1;
+		f.registers[0].ptr=&abi;f.tags[0]=1;f.registers[1].x=0xffffffff80000007ULL;f.tags[1]=0;
+		helper_context_key=&helper_xdp;helper_context_visits=0;helper_context_refuse=fail;helper_context_values[0]=0xabcd000012345000ULL;helper_context_values[1]=0xbcde000012346000ULL;
+		helper_id=ids[which];helper_calls=helper_returned=helper_refuse=0;helper_inflight=1;helper_result=error?(__u64)-22:0;helper_raw_return=helper_result;helper_result_tag=0;helper_before=f;
+		struct frame expected=f;want_event(0x10000+helper_id,0);expected.registers[0].x=helper_result;expected.tags[0]=0;want_clobbers(&expected,160,96);
+#if ADAPTER
+		want_event(0x20000,helper_context_values[0]);if(fail!=1){expected_abi.data=(void *)(uintptr_t)helper_context_values[0];want_event(0x20004,helper_context_values[1]);if(fail!=2)expected_abi.data_end=(void *)(uintptr_t)helper_context_values[1];}
+#else
+		expected_abi.data=(void *)0x12345000;expected_abi.data_end=(void *)0x12346000;
+#endif
+		int trapped=setjmp(rejected);if(!trapped){
+			if(which==0)kprog_arm64_helper_bpf_xdp_adjust_head(&a,f.vectors,&f.flags[0],&f.flags[1],&f.flags[2],&f.flags[3],call_xdp);
+			else if(which==1)kprog_arm64_helper_bpf_xdp_adjust_meta(&a,f.vectors,&f.flags[0],&f.flags[1],&f.flags[2],&f.flags[3],call_xdp);
+			else kprog_arm64_helper_bpf_xdp_adjust_tail(&a,f.vectors,&f.flags[0],&f.flags[1],&f.flags[2],&f.flags[3],call_xdp);
+		}
+		helper_inflight=0;check(trapped==(fail?4:0) && helper_calls==1 && !memcmp(&abi,&expected_abi,sizeof(abi)),"refresh full pointer/field order/partial commit after helper success or error");wrapper_equal(&expected,"refresh whole frame/clobber before context reads");cases++;
+	}
+	helper_context_key=NULL;helper_context_refuse=0;fprintf(stderr,"ARM helpers: %u independent physical-context refresh frames\n",cases);
+}
 static int want_condition(unsigned cond,const __u8 *flags)
 {
 	int n=flags[0],z=flags[1],c=flags[2],v=flags[3];
@@ -269,6 +439,9 @@ int main(int argc,char **argv)
 	selectors();
 	lazy_flags();
 	helper_wrappers(capture);
+	registry_helpers(capture);
+	helper_wide_length();
+	refresh_helpers();
 	control_wrappers(capture);
 #if ADAPTER
 	libc_read_refusal();

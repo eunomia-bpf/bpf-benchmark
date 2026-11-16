@@ -1545,9 +1545,22 @@ inherited ARM RET discrepancies remain explicit. These are C extraction checks,
 with no migrated refinement count.
 [Wrapper receipts](results/m4-arm64-wrappers/README.md) record the precise scope.
 
-M4 remains open for the ARM helper registry and entry/continuation bindings,
-remaining producer/storage profiles, platform correspondence and full default
-compiled-byte coverage. The
+All95 ARM helper macros now have typed-callee extraction roots, bringing
+`Arm64Addressing` to138 functions/22,050,154B. The explicit parameter table
+matches pinned libbpf types and IDs; native helper selection remains unchanged.
+Four void-call forms retain their native expression while CompCert uses standard
+statements. XDP refresh reuses the existing full-pointer context boundary with
+ordered partial commits. Final historical/native/adapter captures match12,823
+states/28,557,200B each, with1,280 typed-helper cases, six new negative checks
+and independent full-width-length/context refusal probes. `make clight`, all
+ten Clight modules/47 jobs, deterministic exports and eight standard-axiom
+queries pass; native socket11,104B/XDP15,320B/eight relocations are exact.
+Typed callees still require an actual helper binding/effect relation in M5;
+this is C extraction and ABI coverage, not kernel-helper correctness.
+[Helper receipts](results/m4-arm64-helpers/README.md) retain the scope.
+
+M4 remains open for entry/continuation bindings, remaining producer/storage
+profiles, platform correspondence and full default compiled-byte coverage. The
 stated x86 inline profile and ARM instruction dispatcher clear their earlier
 syntax/code-generation obstructions. Preserve
 unaligned memory and real context-pointer domains when binding the Clight

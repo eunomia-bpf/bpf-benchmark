@@ -423,3 +423,24 @@ __u32 kprog_arm64_return_to(struct kprog_arm64_addressing *addressing, __u64 reg
 	 * require their own label/PC binding; no unknown target is accepted. */
 	ARM64_SIM_A64_RET_TO(reg, );
 }
+
+/* Existing helper bodies resolve a typed callee instead of a BPF-only numeric
+ * function address. No helper behavior is implemented by this binding. */
+#undef ARM64_SIM_L_HELPER_CLOBBERS
+#define ARM64_SIM_L_HELPER_CLOBBERS() kprog_arm64_helper_clobbers(addressing, vectors, n, z, c, v)
+#if defined(__COMPCERT__)
+#undef ARM64_SIM_L_HELPER_ARG_PTR
+#define ARM64_SIM_L_HELPER_ARG_PTR(REG) kprog_arm64_helper_argument(addressing, (REG))
+#undef ARM64_SIM_L_HELPER_CTX_PTR
+#define ARM64_SIM_L_HELPER_CTX_PTR(REG) kprog_arm64_helper_context(addressing, (REG))
+#define HELPER_REGISTERS()
+#else
+#define HELPER_REGISTERS() REGISTERS()
+#endif
+#define KPROG_ARM64_HELPER(ID, NAME, RESULT, ARGS) \
+void kprog_arm64_helper_##NAME(struct kprog_arm64_addressing *addressing, \
+                               struct kprog_arm64_vector *vectors, \
+                               __u8 *n, __u8 *z, __u8 *c, __u8 *v, RESULT (*NAME) ARGS) \
+{ HELPER_REGISTERS(); ARM64_SIM_BPF_CALL_##NAME(); }
+#include "Arm64HelperCalls.h"
+#undef KPROG_ARM64_HELPER

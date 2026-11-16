@@ -53,3 +53,32 @@ callee:
 
 }
 char LICENSE[] SEC("license")="GPL";
+
+/* Compile all four changed void forms and three native XDP refresh paths. */
+SEC("xdp") int arm64_helper_compile(struct xdp_md *ctx)
+{
+	ARM64_SIM_ENTRY_XDP(ctx);
+	__a64_sp=-32;__u64 observed=0;
+	ARM64_SIM_L_WRITE_REG_PTR_TAG(ARM64_X0,(void *)ctx,ARM64_SIM_TAG_MAP_VALUE);
+	ARM64_SIM_RUN_OP(ARM64_OP_MOV_IMM,1,255,8,0,ctx->rx_queue_index);
+	ARM64_SIM_BPF_CALL_bpf_ringbuf_submit();observed^=__a64_vectors[31].hi;
+	ARM64_SIM_L_WRITE_REG_PTR_TAG(ARM64_X0,(void *)ctx,ARM64_SIM_TAG_MAP_VALUE);
+	ARM64_SIM_RUN_OP(ARM64_OP_MOV_IMM,1,255,8,0,ctx->rx_queue_index);
+	ARM64_SIM_BPF_CALL_bpf_ringbuf_discard();observed^=__a64_vectors[31].hi;
+	ARM64_SIM_L_WRITE_REG_PTR_TAG(ARM64_X0,(void *)(long)-16,ARM64_SIM_TAG_STACK);
+	ARM64_SIM_RUN_OP(ARM64_OP_MOV_IMM,1,255,8,0,ctx->rx_queue_index);
+	ARM64_SIM_BPF_CALL_bpf_ringbuf_submit_dynptr();observed^=__a64_vectors[31].hi;
+	ARM64_SIM_L_WRITE_REG_PTR_TAG(ARM64_X0,(void *)(long)-16,ARM64_SIM_TAG_STACK);
+	ARM64_SIM_RUN_OP(ARM64_OP_MOV_IMM,1,255,8,0,ctx->rx_queue_index);
+	ARM64_SIM_BPF_CALL_bpf_ringbuf_discard_dynptr();observed^=__a64_vectors[31].hi;
+	ARM64_SIM_L_WRITE_REG_PTR_TAG(ARM64_X0,__a64_sim_helper_abi_base,ARM64_SIM_TAG_ABI);
+	ARM64_SIM_RUN_OP(ARM64_OP_MOV_IMM,1,255,8,0,ctx->rx_queue_index);
+	ARM64_SIM_BPF_CALL_bpf_xdp_adjust_head();observed^=ARM64_SIM_L_XDP_NUMERIC((__u64)(long)__a64_sim_abi.data);
+	ARM64_SIM_L_WRITE_REG_PTR_TAG(ARM64_X0,__a64_sim_helper_abi_base,ARM64_SIM_TAG_ABI);
+	ARM64_SIM_RUN_OP(ARM64_OP_MOV_IMM,1,255,8,0,ctx->rx_queue_index);
+	ARM64_SIM_BPF_CALL_bpf_xdp_adjust_meta();observed^=ARM64_SIM_L_XDP_NUMERIC((__u64)(long)__a64_sim_abi.data_end);
+	ARM64_SIM_L_WRITE_REG_PTR_TAG(ARM64_X0,__a64_sim_helper_abi_base,ARM64_SIM_TAG_ABI);
+	ARM64_SIM_RUN_OP(ARM64_OP_MOV_IMM,1,255,8,0,ctx->rx_queue_index);
+	ARM64_SIM_BPF_CALL_bpf_xdp_adjust_tail();observed^=ARM64_SIM_L_XDP_NUMERIC((__u64)(long)__a64_sim_abi.data);
+	return (__u32)observed;
+}

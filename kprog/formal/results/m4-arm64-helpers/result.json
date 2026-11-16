@@ -1,0 +1,120 @@
+{
+  "status": "95 typed ARM helper C roots and focused ABI/effect checks pass; M4 incomplete",
+  "helper_roots": 95,
+  "libbpf_signatures_checked": 95,
+  "libbpf_numeric_identities_checked": 95,
+  "private_helper_frames": 1280,
+  "prior_frames": 11543,
+  "total_complete_capture_frames_per_mode": 12823,
+  "frames": {
+    "historical": {
+      "capture_bytes": 28557200,
+      "summary": "ARM wrappers: 28 clobber and 2160 libc complete frames\nARM helpers: 95 libbpf signatures, 1280 complete typed-callee frames across12 helpers\nARM helpers: one independent full64-length refusal prefix\nARM helpers: 6 independent physical-context refresh frames\nARM wrappers: 5035 control/link/return complete frames\nARM execute: 4320 complete frames, frame_bytes=1776; selectors/CNT lanes pass"
+    },
+    "native": {
+      "capture_bytes": 28557200,
+      "summary": "ARM wrappers: 28 clobber and 2160 libc complete frames\nARM helpers: 95 libbpf signatures, 1280 complete typed-callee frames across12 helpers\nARM helpers: one independent full64-length refusal prefix\nARM helpers: 6 independent physical-context refresh frames\nARM wrappers: 5035 control/link/return complete frames\nARM execute: 4320 complete frames, frame_bytes=1776; selectors/CNT lanes pass"
+    },
+    "adapter": {
+      "capture_bytes": 28557200,
+      "summary": "ARM wrappers: 28 clobber and 2160 libc complete frames\nARM helpers: 95 libbpf signatures, 1280 complete typed-callee frames across12 helpers\nARM helpers: one independent full64-length refusal prefix\nARM helpers: 18 independent physical-context refresh frames\nARM wrappers: 5035 control/link/return complete frames\nARM wrappers: one adapter-only physical-read refusal prefix\nARM execute: 4320 complete frames, frame_bytes=1776; selectors/CNT lanes pass"
+    },
+    "comparison": "all capture bytes identical; no masks",
+    "before": "4a2b31f48347c9e970aa5a11ebbf5196de80173d"
+  },
+  "independent_cases": {
+    "wide_length_refusal": 1,
+    "physical_xdp_refresh_native": 6,
+    "physical_xdp_refresh_adapter": 18,
+    "prior_adapter_memory_read_refusal": 1
+  },
+  "new_negatives": [
+    {
+      "mutation": "helper-callee-return-width",
+      "exit": 1,
+      "phase": "compile",
+      "assertion": "libbpf helper ABI mismatch"
+    },
+    {
+      "mutation": "helper-void-before-call",
+      "exit": 1,
+      "assertion": "ARM wrappers: 28 clobber and 2160 libc complete frames\nARM execute: typed callee identity/precall frame"
+    },
+    {
+      "mutation": "helper-void-wrong-result",
+      "exit": 1,
+      "assertion": "ARM wrappers: 28 clobber and 2160 libc complete frames\nARM execute: helper result committed before any clobber draw"
+    },
+    {
+      "mutation": "helper-refresh-wrong-field",
+      "exit": 1,
+      "assertion": "ARM wrappers: 28 clobber and 2160 libc complete frames\nARM helpers: 95 libbpf signatures, 1280 complete typed-callee frames across12 helpers\nARM helpers: one independent full64-length refusal prefix\nARM execute: helper refresh data-before-end order"
+    },
+    {
+      "mutation": "helper-refresh-truncate",
+      "exit": 1,
+      "assertion": "ARM wrappers: 28 clobber and 2160 libc complete frames\nARM helpers: 95 libbpf signatures, 1280 complete typed-callee frames across12 helpers\nARM helpers: one independent full64-length refusal prefix\nARM execute: refresh full pointer/field order/partial commit after helper success or error"
+    },
+    {
+      "mutation": "helper-update-arg-swap",
+      "exit": 1,
+      "assertion": "ARM wrappers: 28 clobber and 2160 libc complete frames\nARM execute: update map/key/value/full flags ABI"
+    }
+  ],
+  "retained_negatives_passed": 11,
+  "native_fidelity": {
+    "allocated_sections_equal": true,
+    "allocated_relocations_equal": true,
+    "current_stream_equals_normal_build": true,
+    "allocated_section_bytes": {
+      ".text": 0,
+      "socket": 11104,
+      "xdp": 15320,
+      "license": 4
+    },
+    "allocated_relocations": 8
+  },
+  "confirmation": {
+    "final-comparison": {
+      "exit": 0,
+      "seconds": 97.34593018100713
+    },
+    "make-clight": {
+      "exit": 0,
+      "seconds": 109.05556997400708
+    },
+    "all-clight-lean": {
+      "exit": 0,
+      "seconds": 231.66696288198
+    },
+    "deterministic-Arm64Addressing": {
+      "exit": 0,
+      "seconds": 6.082490953995148,
+      "equal": true,
+      "bytes": 22050154,
+      "functions": 138
+    },
+    "deterministic-Arm64Numeric": {
+      "exit": 0,
+      "seconds": 0.07141022200812586,
+      "equal": true,
+      "bytes": 171547,
+      "functions": 21
+    },
+    "preprocess": {
+      "exit": 0,
+      "seconds": 0.11478720500599593,
+      "bytes": 2306299
+    },
+    "axioms": {
+      "exit": 0,
+      "seconds": 0.8235452430089936
+    }
+  },
+  "cpu": 15,
+  "address_space_gib": 32,
+  "lean_workers": 1,
+  "refinements_migrated": 0,
+  "full_library_lake_build": "not run in this M4 step",
+  "make_check": "pending ordered M5/M6 completion"
+}

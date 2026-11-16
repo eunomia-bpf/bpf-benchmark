@@ -77,3 +77,7 @@ remaining producer/storage profiles, platform correspondence and whole-default
 compiled-byte coverage. M5 must then migrate all2,065 actual exported Clight
 handler refinements against LNSym/x86lean and recount O1/O2/O4. M6 retirement
 and whole-library `lake build` plus `make check` follow in that order.
+
+The subsequent [typed helper step](../m4-arm64-helpers/README.md) extends the
+common recipe with95 ABI checks and focused helper negatives. The43-function
+counts and original captures above describe this wrapper checkpoint.
