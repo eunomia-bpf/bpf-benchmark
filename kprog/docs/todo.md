@@ -35,6 +35,12 @@
 
 - [x] P-SPECIALIZE-10K（9fc382606、cc83b5d48；本提交结果）：四种 10K 形状正常 B/实际栈帧完成，前端 11.6–26.3s、峰值 399–920MiB；B 328–200624B、帧 0–40B，详见 `perf_20261113/inline-families/scale-10k/`。旧同名 scalar/direct 70.47GiB/SIGKILL 的实际失败已能完成；不跨不同编译管线宣称独立加速比。100K 继续。
 
+**协调者 2026-11-16T14:20:22Z（运营者“去审核代码. 禁止加任何额外的 check. 内核不必要的 check 也需要拆掉一部分, 确保这些被内联进去了. 也检查为啥会有性能问题, 让 codex 看看 …… 这个明显不对 …… 为啥多走???”）**：PERF（Codex）按这个顺序做，C 配合：
+1. Cilium 两臂路径不同：原生一侧每个包多走 cil_to_host、cil_from_host（各 740 557 968 次）。PERF 接手 C 12:17 起的这一项：对 cil_from_container 的 eBPF 版和原生版各跑一次 BPF_PROG_TEST_RUN，比较返回码、重定向目标、ifindex 和两边读到的配置值（原生对象是对着 Cilium 自带的示例 ep_config.h、node_config.h 编的，原生 CONFIG() 直接读 __config_ 全局变量），找到出错的那一行，按整类修。C 提供构建事实，需要重编时由 C 编。
+2. BCC 的 tracing 程序多跑：runqlat 的 sched_switch、sched_wakeup 在原生一侧是 eBPF 一侧的 2.51 倍，其余程序 1.293 倍；用已知次数的事件在来宾里对比两版的 run_cnt 和直方图总数，找出原生一侧 tracing 程序为什么每个事件多跑（或多记）一次，按 tracing 这一类修。
+3. 审核原生执行路径上的检查：每次调用都会走到的代码（内核 JIT 里 kinsn 发出的原生镜像、direct-native 模块发出的代码、LTO 生成的哈希和 map 快速路径、读内存包装、链接器插入的 guard）逐条列出检查、它在装载时还是每次调用时执行、设计是否需要。运营者的话是“禁止加任何额外的 check”“内核不必要的 check 也需要拆掉一部分, 确保这些被内联进去了”：verifier 已经保证的、每次调用重复做的检查拆掉；要保留的 helper 快速路径内联进原生代码，只保留与 eBPF 一侧同样的语义。每一项用新提交，并量每次调用和装进去的大小。
+4. 之后是哈希例程共用一份。
+
 **协调者 2026-11-16T14:11:00Z（运营者“为啥一直路径不同?什么原因?哪里出bug?”“我们是不是所有程序都走一样的路径? 路径正确吗?”）**：逐程序比两臂的调用次数（kprog/results/arm-paths-20261116）：OTel、Katran、Tracee 两臂走同样的程序；Cilium 原生一侧每个包多走 cil_to_host、cil_from_host；BCC 的 sched_switch、sched_wakeup 在原生一侧多 2.51 倍（各只有一个实例；它们是 runqlat 的 tracing 程序，只往 map 里记直方图、不发事件；2.51 ÷ 1.293 ≈ 1.94，更可能是原生一侧这类程序每个事件跑了或记了两次；“上下文切换多 2.5 倍”是协调者读错了，2026-11-16T14:18:50Z 更正）；Tetragon 还没有原生一侧装上的 stats 开运行。Cilium 的线索：原生对象是对着 Cilium 源码树自带的示例 ep_config.h、node_config.h 预先编出来的，eBPF 一侧是 cilium-agent 用这个端点自己的配置装的；原生一侧 CONFIG() 直接读 __config_ 全局变量，没走装载时的配置映射的那部分就是示例值。C 第一件事：用基准自己的一个包对 cil_from_container 的 eBPF 版和原生版各跑一次 BPF_PROG_TEST_RUN，比较返回码、重定向目标和 ifindex，再对照两边实际用到的配置值，找到出错的那一处。PERF：查原生一侧 tracing（tp_btf）程序每个事件是不是跑了两次：用已知次数的事件（例如固定次数的 sched_yield 循环）在来宾里各跑一次 eBPF 版和原生版，比 run_cnt 和直方图总数。每小时报告加“两臂逐程序调用次数”一列（用这份脚本）。
 
 **协调者 2026-11-16T12:20:16Z（审核 09Z 已核实）**：
