@@ -54,5 +54,392 @@
     "seconds": 489.6094738309912,
     "finished_utc": "2026-11-16T12:19:33.969358+00:00",
     "as_bytes": 34359738368
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "17",
+      "lake",
+      "build",
+      "KProgFormal.Clight.Arm64Program"
+    ],
+    "exit": 0,
+    "seconds": 177.20192761500948,
+    "finished_utc": "2026-11-16T12:11:24.359520+00:00",
+    "as_bytes": 34359738368
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "18",
+      "lake",
+      "build",
+      "KProgFormal.Clight.X86TetragonWake"
+    ],
+    "exit": 0,
+    "seconds": 300.097192805988,
+    "finished_utc": "2026-11-16T12:13:27.257607+00:00",
+    "as_bytes": 34359738368
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "18",
+      "lake",
+      "build",
+      "KProgFormal.Clight.X86StackProfile376"
+    ],
+    "exit": 0,
+    "seconds": 236.31277510500513,
+    "finished_utc": "2026-11-16T12:17:23.570699+00:00",
+    "as_bytes": 34359738368
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "18",
+      "lake",
+      "build",
+      "KProgFormal.Clight.X86StackProfile200"
+    ],
+    "exit": 0,
+    "seconds": 216.16248932798044,
+    "finished_utc": "2026-11-16T12:20:59.733530+00:00",
+    "as_bytes": 34359738368
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "18",
+      "lake",
+      "build",
+      "KProgFormal.Clight.X86ProgramProfile"
+    ],
+    "exit": 0,
+    "seconds": 190.35121118000825,
+    "finished_utc": "2026-11-16T12:24:10.085106+00:00",
+    "as_bytes": 34359738368
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "17",
+      "lake",
+      "build",
+      "KProgFormal.Clight.Arm64Addressing"
+    ],
+    "exit": 0,
+    "seconds": 276.9888379400072,
+    "finished_utc": "2026-11-16T12:24:10.958694+00:00",
+    "as_bytes": 34359738368
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "18",
+      "lake",
+      "build",
+      "KProgFormal.Clight.X86ContextSkb"
+    ],
+    "exit": 0,
+    "seconds": 174.14037153800018,
+    "finished_utc": "2026-11-16T12:27:04.225780+00:00",
+    "as_bytes": 34359738368
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "17",
+      "lake",
+      "build",
+      "KProgFormal.Clight.X86ContextXdp"
+    ],
+    "exit": 0,
+    "seconds": 184.66569886900834,
+    "finished_utc": "2026-11-16T12:27:15.624692+00:00",
+    "as_bytes": 34359738368
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "18",
+      "lake",
+      "build",
+      "KProgFormal.Clight.X86ReadonlyProfile"
+    ],
+    "exit": 0,
+    "seconds": 172.0859046340047,
+    "finished_utc": "2026-11-16T12:29:56.311996+00:00",
+    "as_bytes": 34359738368
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "17",
+      "lake",
+      "build",
+      "KProgFormal.Clight.X86Inline"
+    ],
+    "exit": 0,
+    "seconds": 181.28872880799463,
+    "finished_utc": "2026-11-16T12:30:16.913758+00:00",
+    "as_bytes": 34359738368
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "17",
+      "lake",
+      "build",
+      "KProgFormal.Clight.Arm64PayloadProfile"
+    ],
+    "exit": 0,
+    "seconds": 29.10342010500608,
+    "finished_utc": "2026-11-16T12:30:46.017480+00:00",
+    "as_bytes": 34359738368
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "18",
+      "lake",
+      "build",
+      "KProgFormal.Clight.X86Helpers"
+    ],
+    "exit": 0,
+    "seconds": 54.326523921015905,
+    "finished_utc": "2026-11-16T12:30:50.638829+00:00",
+    "as_bytes": 34359738368
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "17",
+      "lake",
+      "build",
+      "KProgFormal.Clight.Arm64ProgramContext"
+    ],
+    "exit": 0,
+    "seconds": 17.800891537975986,
+    "finished_utc": "2026-11-16T12:31:03.818691+00:00",
+    "as_bytes": 34359738368
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "18",
+      "lake",
+      "build",
+      "KProgFormal.Clight.X86Memory"
+    ],
+    "exit": 0,
+    "seconds": 14.882385117001832,
+    "finished_utc": "2026-11-16T12:31:05.521505+00:00",
+    "as_bytes": 34359738368
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "18",
+      "lake",
+      "build",
+      "KProgFormal.Clight.Arm64Entry"
+    ],
+    "exit": 0,
+    "seconds": 7.184111030015629,
+    "finished_utc": "2026-11-16T12:31:12.705934+00:00",
+    "as_bytes": 34359738368
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "17",
+      "lake",
+      "build",
+      "KProgFormal.Clight.X86Pointer"
+    ],
+    "exit": 0,
+    "seconds": 9.407065495994175,
+    "finished_utc": "2026-11-16T12:31:13.226089+00:00",
+    "as_bytes": 34359738368
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "17",
+      "lake",
+      "build",
+      "KProgFormal.Clight.Arm64Stack"
+    ],
+    "exit": 0,
+    "seconds": 3.994278102007229,
+    "finished_utc": "2026-11-16T12:31:17.220657+00:00",
+    "as_bytes": 34359738368
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "18",
+      "lake",
+      "build",
+      "KProgFormal.Clight.Arm64ProgramFixture"
+    ],
+    "exit": 0,
+    "seconds": 6.255369061982492,
+    "finished_utc": "2026-11-16T12:31:18.961609+00:00",
+    "as_bytes": 34359738368
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "17",
+      "lake",
+      "build",
+      "KProgFormal.Clight.Arm64Address"
+    ],
+    "exit": 0,
+    "seconds": 3.065803331992356,
+    "finished_utc": "2026-11-16T12:31:20.286752+00:00",
+    "as_bytes": 34359738368
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "18",
+      "lake",
+      "build",
+      "KProgFormal.Clight.Arm64Numeric"
+    ],
+    "exit": 0,
+    "seconds": 2.3676349250017665,
+    "finished_utc": "2026-11-16T12:31:21.329538+00:00",
+    "as_bytes": 34359738368
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "17",
+      "lake",
+      "build",
+      "KProgFormal.Clight.X86Context"
+    ],
+    "exit": 0,
+    "seconds": 2.036424794001505,
+    "finished_utc": "2026-11-16T12:31:22.323463+00:00",
+    "as_bytes": 34359738368
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "18",
+      "lake",
+      "build",
+      "KProgFormal.Clight.X86Numeric"
+    ],
+    "exit": 0,
+    "seconds": 1.4120899040135555,
+    "finished_utc": "2026-11-16T12:31:22.741930+00:00",
+    "as_bytes": 34359738368
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "17",
+      "lake",
+      "build",
+      "KProgFormal.Clight.Arm64Access"
+    ],
+    "exit": 0,
+    "seconds": 1.3060156989959069,
+    "finished_utc": "2026-11-16T12:31:23.629777+00:00",
+    "as_bytes": 34359738368
+  },
+  {
+    "argv": [
+      "lake",
+      "build",
+      "KProgFormal.Clight.Arm64Access",
+      "KProgFormal.Clight.Arm64Address",
+      "KProgFormal.Clight.Arm64Addressing",
+      "KProgFormal.Clight.Arm64Entry",
+      "KProgFormal.Clight.Arm64Numeric",
+      "KProgFormal.Clight.Arm64PayloadProfile",
+      "KProgFormal.Clight.Arm64Program",
+      "KProgFormal.Clight.Arm64ProgramContext",
+      "KProgFormal.Clight.Arm64ProgramFixture",
+      "KProgFormal.Clight.Arm64Stack",
+      "KProgFormal.Clight.X86Context",
+      "KProgFormal.Clight.X86ContextSkb",
+      "KProgFormal.Clight.X86ContextXdp",
+      "KProgFormal.Clight.X86Helpers",
+      "KProgFormal.Clight.X86Inline",
+      "KProgFormal.Clight.X86Memory",
+      "KProgFormal.Clight.X86Numeric",
+      "KProgFormal.Clight.X86Pointer",
+      "KProgFormal.Clight.X86ProgramProfile",
+      "KProgFormal.Clight.X86ReadonlyProfile",
+      "KProgFormal.Clight.X86StackProfile200",
+      "KProgFormal.Clight.X86StackProfile376",
+      "KProgFormal.Clight.X86TetragonWake",
+      "KProgFormal.ClightRefinement.Execution",
+      "KProgFormal.ClightRefinement.Arm64Width",
+      "KProgFormal.ClightRefinement.Globalenv",
+      "KProgFormal.ClightRefinement.Arm64Nop",
+      "KProgFormal.ClightRefinement.Frame",
+      "KProgFormal.ClightRefinement.Arm64NopDeclarations",
+      "KProgFormal.ClightRefinement.Deallocation",
+      "KProgFormal.ClightRefinement.Arm64NopCall"
+    ],
+    "exit": 0,
+    "seconds": 1.8443601680046413
+  },
+  {
+    "name": "source-preservation",
+    "argv": [
+      "git",
+      "diff",
+      "--exit-code",
+      "ac0f772d1",
+      "--",
+      "kprog/formal/KProgFormal/Clight",
+      "kprog/formal/c",
+      "kprog/arm64",
+      "kprog/x86/x86_sim*.h",
+      "runner/libs/workload.py",
+      "runner/libs/app_runners",
+      "corpus/driver.py",
+      "corpus/config",
+      "micro/driver.py",
+      "micro/config",
+      "micro/programs",
+      "Makefile",
+      "micro/Makefile",
+      "runner/mk",
+      "kprog/perf/one-image/Makefile"
+    ],
+    "exit": 0
   }
 ]

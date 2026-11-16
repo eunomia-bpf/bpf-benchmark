@@ -59,5 +59,10 @@ NOP procedure build passes, and 18 axiom queries plus printed public types
 confirm the removed premises. New map laws use only `propext`; deallocation
 uses standard Lean axioms, and procedure relations additionally expose the
 existing opaque external/assembly relations. No new axiom, native checker,
-admission or external determinism assumption. The final unchanged-export
-batch is recorded after it finishes; its logs stay in the raw jobs directory.
+admission or external determinism assumption. The unchanged-export batch and final combined build pass all 23 export
+modules and eight proof modules (141 Lake jobs). All 18 axiom queries and the public type prints
+pass. Export/C/frozen source comparison against `ac0f772d1` is exact. Expensive
+models rebuilt once in two workers on CPUs 17/18, each 32 GiB AS/-j1; metadata
+used CPU 19. Default recursion and heartbeat limits are unchanged. No native
+compiler, guest, image/base or benchmark check was needed for this proof-only
+change; their existing evidence is not recounted as a new measurement.
