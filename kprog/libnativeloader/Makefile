@@ -731,8 +731,8 @@ checked-compiler-replay:
 
 .PHONY: source-maps-type-kvm
 source-maps-type-kvm: source-maps-check
-	install -d "$(SOURCE_MAP_KERNEL_OUTPUT)"
-	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 16-19 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage --cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(SOURCE_MAP_KERNEL_OUTPUT)" --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec '$(SOURCE_MAP_BUILD)/source-maps kernel-type-ownership > $(SOURCE_MAP_KERNEL_OUTPUT)/ownership.json 2> $(SOURCE_MAP_KERNEL_OUTPUT)/ownership.stderr'
+	install -d "$(SOURCE_MAP_KERNEL_OUTPUT)" "$(SOURCE_MAP_KERNEL_OUTPUT)/inputs"
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 16-19 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage --cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rodir "$(SOURCE_MAP_KERNEL_OUTPUT)/inputs=$(SOURCE_MAP_BUILD)" --rwdir "$(SOURCE_MAP_KERNEL_OUTPUT)" --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec '$(SOURCE_MAP_KERNEL_OUTPUT)/inputs/source-maps kernel-type-ownership > $(SOURCE_MAP_KERNEL_OUTPUT)/ownership.json 2> $(SOURCE_MAP_KERNEL_OUTPUT)/ownership.stderr'
 
 # Keep virtme.exec short: x86 COMMAND_LINE_SIZE is 2048 including base64 exec.
 .PHONY: entry-data-mutable-kvm guest-entry-data-mutable
