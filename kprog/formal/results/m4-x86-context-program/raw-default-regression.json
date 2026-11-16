@@ -1,0 +1,16 @@
+{
+  "before_commit": "d934e015d",
+  "default_raw_source_equal": true,
+  "bytes": 3804,
+  "argv": [
+    "python3",
+    "/workspaces/repository/kprog/formal/tools/export_x86_stack_fixture.py",
+    "--name",
+    "x86_program_profile",
+    "--object-dir",
+    "/workspaces/repository/kprog/formal/build",
+    "--output",
+    "/workspaces/repository/kprog/formal/build/x86_program_profile.bpf.c"
+  ],
+  "exit": 0
+}

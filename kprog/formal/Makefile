@@ -733,9 +733,29 @@ clight: clightgen
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Helpers.lean c/X86Helpers.c
 	external/clean/clightgen -fstruct-passing -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Inline.lean c/X86Inline.c
 	external/clean/clightgen -fstruct-passing -lean -normalize -DKPROG_X86_PROGRAM_EXPORT=1 -include c/ProgramSections.h -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86TetragonWake.lean c/TetragonWake.c
+	for abi in xdp tc; do \
+	  name=x86_context_xdp; module=X86ContextXdp; skb=0; \
+	  if test $$abi = tc; then name=x86_context_skb; module=X86ContextSkb; skb=1; fi; \
+	  ../stock-path/bin/clang -DSKB=$$skb -c oracles/x86_context_profile.S -o build/$$name.proof.o && \
+	  python3 tools/export_x86_stack_fixture.py --name $$name --kind $$abi --object-dir build --output build/$$name.bpf.c && \
+	  external/clean/clightgen -fstruct-passing -lean -normalize -DKPROG_X86_PROGRAM_EXPORT=1 -include c/ProgramSections.h -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/$$module.lean build/$$name.bpf.c || exit $$?; \
+	done
 	../stock-path/bin/clang -c oracles/x86_program_profile.S -o build/x86_program_profile.proof.o
 	python3 tools/export_x86_stack_fixture.py --name x86_program_profile --object-dir build --output build/x86_program_profile.bpf.c
 	external/clean/clightgen -fstruct-passing -lean -normalize -DKPROG_X86_PROGRAM_EXPORT=1 -include c/ProgramSections.h -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86ProgramProfile.lean build/x86_program_profile.bpf.c
+	for skb in 0 1; do for adapter in 0 1; do \
+	  name=x86_context_xdp; if test $$skb = 1; then name=x86_context_skb; fi; \
+	  flags=; if test $$adapter = 1; then flags=-D__COMPCERT__; fi; \
+	  $(CC) -std=c11 -O1 -fsanitize=undefined -fno-sanitize-recover=undefined \
+	    -DKPROG_X86_PROGRAM_EXPORT=1 -D__bpf_fastcall= $$flags \
+	    -include oracles/compcert_memory_host.h -include oracles/x86_program_environment_host.h \
+	    -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src \
+	    -c build/$$name.bpf.c -o build/x86_context_program_host.o && \
+	  $(CC) -std=c11 -Wall -Wextra -O1 -fsanitize=undefined -fno-sanitize-recover=undefined \
+	    -DSKB=$$skb -DADAPTER=$$adapter oracles/test_x86_context_program_host.c \
+	    build/x86_context_program_host.o -o build/test_x86_context_program_host && \
+	  ./build/test_x86_context_program_host || exit $$?; \
+	done; done
 	$(CC) -std=c11 -Wall -Wextra -O1 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -c oracles/test_x86_program_callee_abi.c -o build/test_x86_program_callee_abi.o
 	for bound in 0 1; do \
 	  flags=; if test $$bound = 1; then flags='-D__COMPCERT__ -DKPROG_X86_PROGRAM_EXPORT=1'; fi; \

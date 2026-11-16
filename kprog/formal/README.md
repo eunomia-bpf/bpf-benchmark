@@ -1861,3 +1861,8 @@ indirect target reads and conditional branches use the shared C adapters;
 call-only helper aliases preserve public struct tags. See the
 [retained-program receipts](results/m4-x86-retained-program/README.md) for
 selected host paths, exact native code comparisons and remaining M4/M5 limits.
+
+Actual x86 XDP and SKB producer entries now export through the same bindings,
+including context reads before and after a typed helper call. The
+[context-program receipts](results/m4-x86-context-program/README.md) record
+the entry layouts, full-pointer adapter checks and their explicit limits.

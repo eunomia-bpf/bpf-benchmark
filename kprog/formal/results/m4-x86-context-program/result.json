@@ -1,0 +1,155 @@
+{
+  "step": "M4 actual x86 XDP/SKB producer entries",
+  "status": "validated; M4 remains in progress",
+  "raw": "/workspaces/kprog-raw/formal/m4-x86-context-program",
+  "profiles": {
+    "xdp": {
+      "native_instructions": 30,
+      "frame_bytes": 48,
+      "facts": 6,
+      "context_abi_bytes": 40
+    },
+    "skb": {
+      "native_instructions": 30,
+      "frame_bytes": 48,
+      "facts": 6,
+      "context_abi_bytes": 216
+    }
+  },
+  "export": {
+    "exports": {
+      "X86ContextXdp": {
+        "bytes": 20863158,
+        "functions": 123,
+        "deterministic": true,
+        "preprocessed_bytes": 2605362,
+        "producer_c_bytes": 4642
+      },
+      "X86ContextSkb": {
+        "bytes": 20948882,
+        "functions": 123,
+        "deterministic": true,
+        "preprocessed_bytes": 2605333,
+        "producer_c_bytes": 4660
+      }
+    },
+    "prior_exports_unchanged": [
+      "Arm64Access.lean",
+      "Arm64Address.lean",
+      "Arm64Addressing.lean",
+      "Arm64Entry.lean",
+      "Arm64Numeric.lean",
+      "Arm64PayloadProfile.lean",
+      "Arm64Program.lean",
+      "Arm64ProgramContext.lean",
+      "Arm64ProgramFixture.lean",
+      "Arm64Stack.lean",
+      "X86Context.lean",
+      "X86Helpers.lean",
+      "X86Inline.lean",
+      "X86Memory.lean",
+      "X86Numeric.lean",
+      "X86Pointer.lean",
+      "X86ProgramProfile.lean",
+      "X86StackProfile200.lean",
+      "X86StackProfile376.lean",
+      "X86TetragonWake.lean"
+    ]
+  },
+  "validation": {
+    "exit": 0,
+    "modules": 22,
+    "axiom_queries": 6,
+    "make_clight": 0,
+    "lean_jobs": 59,
+    "leaf_seconds": {
+      "X86ContextXdp": 195,
+      "X86ContextSkb": 181
+    },
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "host": {
+    "cases_per_combination": {
+      "complete_returns": 16,
+      "helper_refusal_prefixes": 16
+    },
+    "combinations": 4,
+    "input_counts": {
+      "return": 46,
+      "refusal": 24
+    },
+    "all_entry_and_observer_modes_ubsan": true,
+    "comparison": {
+      "positive-0-0": {
+        "returns": 16,
+        "refusal_prefixes": 16
+      },
+      "positive-0-1": {
+        "returns": 16,
+        "refusal_prefixes": 16
+      },
+      "positive-1-0": {
+        "returns": 16,
+        "refusal_prefixes": 16
+      },
+      "positive-1-1": {
+        "returns": 16,
+        "refusal_prefixes": 16
+      },
+      "pointer-low32-0": {
+        "rejected": true
+      },
+      "wrong-helper-context-0": {
+        "rejected": true
+      },
+      "pointer-low32-1": {
+        "rejected": true
+      },
+      "wrong-helper-context-1": {
+        "rejected": true
+      }
+    },
+    "limits": "Controlled helper effects and selected entry profiles; native UAPI fields and full-pointer adapters have independent expectations. No full private state, kernel helper, cross-mode capture or migrated refinement claim."
+  },
+  "default_raw": {
+    "before_commit": "d934e015d",
+    "default_raw_source_equal": true,
+    "bytes": 3804,
+    "argv": [
+      "python3",
+      "/workspaces/repository/kprog/formal/tools/export_x86_stack_fixture.py",
+      "--name",
+      "x86_program_profile",
+      "--object-dir",
+      "/workspaces/repository/kprog/formal/build",
+      "--output",
+      "/workspaces/repository/kprog/formal/build/x86_program_profile.bpf.c"
+    ],
+    "exit": 0
+  },
+  "bpf_compilation": {
+    "xdp": {
+      "allocated_section_bytes": {
+        ".text": 0,
+        "xdp": 736,
+        "license": 4
+      },
+      "allocated_relocations": 2
+    },
+    "skb": {
+      "allocated_section_bytes": {
+        ".text": 0,
+        "tc": 1072,
+        "license": 4
+      },
+      "allocated_relocations": 2
+    }
+  },
+  "production_simulator_c_changes": false,
+  "m5_migrated_refinements": 0,
+  "next": "Probe the actual readonly-data emission hook before closing M4; then M5 all 2065 refinements/recount and M6/final whole checks."
+}

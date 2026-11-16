@@ -1,0 +1,46 @@
+[
+  {
+    "abi": "xdp",
+    "argv": [
+      "../stock-path/bin/clang",
+      "-g",
+      "-O2",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-c",
+      "build/x86_context_xdp.bpf.c",
+      "-o",
+      "build/x86_context_xdp.bpf.o"
+    ],
+    "exit": 0
+  },
+  {
+    "abi": "skb",
+    "argv": [
+      "../stock-path/bin/clang",
+      "-g",
+      "-O2",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-c",
+      "build/x86_context_skb.bpf.c",
+      "-o",
+      "build/x86_context_skb.bpf.o"
+    ],
+    "exit": 0
+  }
+]
