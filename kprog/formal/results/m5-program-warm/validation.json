@@ -1,0 +1,40 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-program-warm",
+  "focused_build": {
+    "exit": 0,
+    "jobs": 141,
+    "log": "all2.log"
+  },
+  "whole_lake_build": {
+    "exit": 0,
+    "jobs": 270,
+    "log": "lake-build.log"
+  },
+  "public_queries": {
+    "exit": 0,
+    "declarations": 3,
+    "log": "query.log",
+    "axioms": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "external_boundary_executed": false
+  },
+  "export_comparison": {
+    "baseline": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_byte_identical": true
+  },
+  "canonical_C_and_frozen_paths": "unchanged from 5236c0e96",
+  "make_check": {
+    "status": "previous complete run passed; no C/native changes in this step",
+    "commit": "5236c0e9677f635526fdd515cde5195b2ba0810c"
+  },
+  "complete_ISA_handler_refinements": 0,
+  "M5": "open",
+  "M6": "open"
+}

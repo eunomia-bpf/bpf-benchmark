@@ -1987,3 +1987,10 @@ actual exported GPR `program_read` call for the 254 non-relative tags. Its
 represented scalar or pointer and all memory. Every Kstop return has the M3
 materialized bits. STACK/RETURN caches, SP and producer/native-memory bindings
 remain open; these helper laws add no complete ISA-handler count.
+
+The [warm combined-reader proof](results/m5-program-warm/README.md) completes
+STACK and RETURN GPR paths through the actual borrowed cache cells in 91/92
+internal transitions. Its all-tag return law represents M3 materialization
+and preserves complete memory, with explicit scalar-relative-payload and
+selected-origin-cache producer conditions. Cold Program paths, SP and the
+producer/native-memory/control bindings remain open.

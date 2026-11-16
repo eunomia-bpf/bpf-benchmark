@@ -626,4 +626,274 @@ theorem gpr_read_return_corresponds (addresses : Arm64Registers.PointerOrigins)
   simpa only [Reference.Provenance.AArch64.materialize,
     ite_eq_right notStack, ite_eq_right notReturn] using represented
 
+/-- Warm caller-owned cache cells of the actual Program entry. The header
+contains pointers to each cell; no flat cache layout or alias exclusion is
+assumed for this read-only path. -/
+def WarmEntryCache (returns : Bool) (frontier : CC.Block) (m : CC.Mem)
+    (entry : CC.Val) (base : BitVec 64) : Prop :=
+  ∃ valid : BitVec 8, valid ≠ 0 ∧
+    Arm64EntryMemory.borrowed frontier .Mint8unsigned m entry
+      (if returns then Arm64Program._return_valid else Arm64Program._sp_valid) =
+        some (.Vint (valid.setWidth 32)) ∧
+    Arm64EntryMemory.borrowed frontier .Mint64 m entry
+      (if returns then Arm64Program._return_base else Arm64Program._sp_base) = some (.Vlong base)
+
+private theorem cache_offsets (returns : Bool) :
+    CC.fieldOffset ge.genv_cenv
+      (if returns then Arm64Program._return_valid else Arm64Program._sp_valid)
+      entryComposite.co_members = .OK ((if returns then 56 else 48), .Full) ∧
+    CC.fieldOffset ge.genv_cenv
+      (if returns then Arm64Program._return_base else Arm64Program._sp_base)
+      entryComposite.co_members = .OK ((if returns then 24 else 16), .Full) := by
+  cases returns <;> decide +kernel
+
+private theorem borrowed_loads {frontier : CC.Block} {chunk : CC.Chunk} {m : CC.Mem}
+    {entry value : CC.Val} {name : CC.Ident}
+    (read : Arm64EntryMemory.borrowed frontier chunk m entry name = some value) :
+    ∃ block offset,
+      Arm64EntryMemory.field frontier CC.Mptr m entry name = some (.Vptr block offset) ∧
+      CC.Mem.loadv chunk m (.Vptr block offset) = some value := by
+  unfold Arm64EntryMemory.borrowed at read
+  obtain ⟨pointer, header, cell⟩ := Option.bind_eq_some_iff.mp read
+  obtain ⟨block, offset, rfl, _, actual⟩ := Arm64EntryMemory.load_pointer cell
+  exact ⟨block, offset, header, actual⟩
+
+private theorem read_warm_tail_stack (b vb bb : CC.Block)
+    (ofs vo bo : CC.Integers.Ptrofs) (m : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
+    (value base : BitVec 64) (valid : BitVec 8) (nonzero : valid ≠ 0)
+    (entryRead : le.get Arm64Program._entry = some (.Vptr b ofs))
+    (valueRead : le.get Arm64Program.___a64_read_value = some (.Vlong value))
+    (tagRead : le.get Arm64Program.___a64_read_tag =
+      some (.Vint 4#32))
+    (validHeader : CC.Mem.loadv CC.Mptr m (.Vptr b (CC.Integers.Ptrofs.add ofs
+      (CC.Integers.Ptrofs.repr 48))) = some (.Vptr vb vo))
+    (validRead : CC.Mem.loadv .Mint8unsigned m (.Vptr vb vo) = some (.Vint (valid.setWidth 32)))
+    (baseHeader : CC.Mem.loadv CC.Mptr m (.Vptr b (CC.Integers.Ptrofs.add ofs
+      (CC.Integers.Ptrofs.repr 16))) = some (.Vptr bb bo))
+    (baseRead : CC.Mem.loadv .Mint64 m (.Vptr bb bo) = some (.Vlong base)) :
+    steps ge 36
+      (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m) =
+      some (CC.E0, .Returnstate (.Vlong (value + base)) (CC.callCont k) m) ∧
+    InternalPath ge 36
+      (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m) := by
+  have widened : valid.setWidth 32 ≠ (0#32) := by
+    intro h; apply nonzero
+    simpa using congrArg (fun x : BitVec 32 => x.setWidth 8) h
+  have empty : (CC.PTree.empty : CC.Env).elements = [] := rfl
+  have offsets := cache_offsets false
+  simp only [CC.Mptr, CC.Archi.ptr64, ↓reduceIte] at validHeader baseHeader
+  try simp only [Bool.false_eq_true, ↓reduceIte] at offsets validHeader baseHeader tagRead
+  simp +decide [steps, InternalPath, InternalState, readParts, readCont,
+      step_seq, step_loop, step_skip_seq, step_skip_loop, step_break_loop, step_set,
+      step_if, step_return, read_return_type, CC.PTree.gso,
+      Arm64Program.s_kprog_arm64_program_read_1, Arm64Program.s_kprog_arm64_program_read_2,
+      CC.doEvalExpr, CC.lvalOfField, CC.doDerefLoc, CC.typeof, CC.typeconv,
+      CC.removeAttributes, CC.tattr, CC.accessMode, layouts.1, offsets.1, offsets.2,
+      CC.Cop.semUnaryOperation, CC.Cop.semNotbool, CC.Cop.boolVal, CC.Cop.classifyBool,
+      CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp,
+      CC.Cop.semAdd, CC.Cop.classifyAdd, CC.Cop.semBinarith, CC.Cop.classifyBinarith,
+      CC.Cop.binarithType, CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
+      CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse, CC.Integers.Int.eq, CC.Integers.MI.eq,
+      CC.Integers.Int.cmpu, CC.Integers.MI.cmpu, CC.Integers.Int.zero, CC.Integers.Int.one,
+      CC.Integers.MI.zero, CC.Integers.MI.one, CC.Integers.Int.repr, CC.Integers.MI.repr,
+      CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
+      CC.Integers.Int64.add, CC.tuchar, CC.tint, CC.tuint, CC.tulong,
+      CC.Mptr, CC.Archi.ptr64, CC.tptr, CC.blocksOfEnv, CC.Mem.freeList, CC.emptyEnv,
+      CC.E0, CC.Eapp, empty, widened, entryRead, valueRead, tagRead,
+      validHeader, validRead, baseHeader, baseRead] <;> rfl
+
+private theorem read_warm_tail_return (b vb bb : CC.Block)
+    (ofs vo bo : CC.Integers.Ptrofs) (m : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
+    (value base : BitVec 64) (valid : BitVec 8) (nonzero : valid ≠ 0)
+    (entryRead : le.get Arm64Program._entry = some (.Vptr b ofs))
+    (valueRead : le.get Arm64Program.___a64_read_value = some (.Vlong value))
+    (tagRead : le.get Arm64Program.___a64_read_tag =
+      some (.Vint 10#32))
+    (validHeader : CC.Mem.loadv CC.Mptr m (.Vptr b (CC.Integers.Ptrofs.add ofs
+      (CC.Integers.Ptrofs.repr 56))) = some (.Vptr vb vo))
+    (validRead : CC.Mem.loadv .Mint8unsigned m (.Vptr vb vo) = some (.Vint (valid.setWidth 32)))
+    (baseHeader : CC.Mem.loadv CC.Mptr m (.Vptr b (CC.Integers.Ptrofs.add ofs
+      (CC.Integers.Ptrofs.repr 24))) = some (.Vptr bb bo))
+    (baseRead : CC.Mem.loadv .Mint64 m (.Vptr bb bo) = some (.Vlong base)) :
+    steps ge 37
+      (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m) =
+      some (CC.E0, .Returnstate (.Vlong (value + base)) (CC.callCont k) m) ∧
+    InternalPath ge 37
+      (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m) := by
+  have widened : valid.setWidth 32 ≠ (0#32) := by
+    intro h; apply nonzero
+    simpa using congrArg (fun x : BitVec 32 => x.setWidth 8) h
+  have empty : (CC.PTree.empty : CC.Env).elements = [] := rfl
+  have offsets := cache_offsets true
+  simp only [CC.Mptr, CC.Archi.ptr64, ↓reduceIte] at validHeader baseHeader
+  try simp only [Bool.false_eq_true, ↓reduceIte] at offsets validHeader baseHeader tagRead
+  simp +decide [steps, InternalPath, InternalState, readParts, readCont,
+      step_seq, step_loop, step_skip_seq, step_skip_loop, step_break_loop, step_set,
+      step_if, step_return, read_return_type, CC.PTree.gso,
+      Arm64Program.s_kprog_arm64_program_read_1, Arm64Program.s_kprog_arm64_program_read_2,
+      CC.doEvalExpr, CC.lvalOfField, CC.doDerefLoc, CC.typeof, CC.typeconv,
+      CC.removeAttributes, CC.tattr, CC.accessMode, layouts.1, offsets.1, offsets.2,
+      CC.Cop.semUnaryOperation, CC.Cop.semNotbool, CC.Cop.boolVal, CC.Cop.classifyBool,
+      CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp,
+      CC.Cop.semAdd, CC.Cop.classifyAdd, CC.Cop.semBinarith, CC.Cop.classifyBinarith,
+      CC.Cop.binarithType, CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
+      CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse, CC.Integers.Int.eq, CC.Integers.MI.eq,
+      CC.Integers.Int.cmpu, CC.Integers.MI.cmpu, CC.Integers.Int.zero, CC.Integers.Int.one,
+      CC.Integers.MI.zero, CC.Integers.MI.one, CC.Integers.Int.repr, CC.Integers.MI.repr,
+      CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
+      CC.Integers.Int64.add, CC.tuchar, CC.tint, CC.tuint, CC.tulong,
+      CC.Mptr, CC.Archi.ptr64, CC.tptr, CC.blocksOfEnv, CC.Mem.freeList, CC.emptyEnv,
+      CC.E0, CC.Eapp, empty, widened, entryRead, valueRead, tagRead,
+      validHeader, validRead, baseHeader, baseRead] <;> rfl
+
+private theorem read_warm_tail (returns : Bool) (b vb bb : CC.Block)
+    (ofs vo bo : CC.Integers.Ptrofs) (m : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
+    (value base : BitVec 64) (valid : BitVec 8) (nonzero : valid ≠ 0)
+    (entryRead : le.get Arm64Program._entry = some (.Vptr b ofs))
+    (valueRead : le.get Arm64Program.___a64_read_value = some (.Vlong value))
+    (tagRead : le.get Arm64Program.___a64_read_tag =
+      some (.Vint (if returns then 10#32 else 4#32)))
+    (validHeader : CC.Mem.loadv CC.Mptr m (.Vptr b (CC.Integers.Ptrofs.add ofs
+      (CC.Integers.Ptrofs.repr (if returns then 56 else 48)))) = some (.Vptr vb vo))
+    (validRead : CC.Mem.loadv .Mint8unsigned m (.Vptr vb vo) = some (.Vint (valid.setWidth 32)))
+    (baseHeader : CC.Mem.loadv CC.Mptr m (.Vptr b (CC.Integers.Ptrofs.add ofs
+      (CC.Integers.Ptrofs.repr (if returns then 24 else 16)))) = some (.Vptr bb bo))
+    (baseRead : CC.Mem.loadv .Mint64 m (.Vptr bb bo) = some (.Vlong base)) :
+    steps ge (if returns then 37 else 36)
+      (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m) =
+      some (CC.E0, .Returnstate (.Vlong (value + base)) (CC.callCont k) m) ∧
+    InternalPath ge (if returns then 37 else 36)
+      (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m) := by
+  cases returns
+  · exact read_warm_tail_stack b vb bb ofs vo bo m k le value base valid nonzero
+      entryRead valueRead tagRead validHeader validRead baseHeader baseRead
+  · exact read_warm_tail_return b vb bb ofs vo bo m k le value base valid nonzero
+      entryRead valueRead tagRead validHeader validRead baseHeader baseRead
+
+private theorem warm_entry_finishes (returns : Bool) (frontier b : CC.Block)
+    (ofs : CC.Integers.Ptrofs) (m : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
+    (value base : BitVec 64)
+    (entryRead : le.get Arm64Program._entry = some (.Vptr b ofs))
+    (valueRead : le.get Arm64Program.___a64_read_value = some (.Vlong value))
+    (tagRead : le.get Arm64Program.___a64_read_tag =
+      some (.Vint (if returns then 10#32 else 4#32)))
+    (cache : WarmEntryCache returns frontier m (.Vptr b ofs) base) :
+    InternalRun ge (if returns then 37 else 36)
+      (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m)
+      (.Returnstate (.Vlong (value + base)) (CC.callCont k) m) := by
+  obtain ⟨valid, nz, validObserved, baseObserved⟩ := cache
+  obtain ⟨vb, vo, validHeader, validRead⟩ := borrowed_loads validObserved
+  obtain ⟨bb, bo, baseHeader, baseRead⟩ := borrowed_loads baseObserved
+  have offsets := cache_offsets returns
+  have exec := read_warm_tail returns b vb bb ofs vo bo m k le value base valid nz
+    entryRead valueRead tagRead
+    (field_load frontier b ofs m _ _ _ offsets.1 validHeader) validRead
+    (field_load frontier b ofs m _ _ _ offsets.2 baseHeader) baseRead
+  exact internalRun_of_steps exec.2 exec.1
+
+/-- The complete actual combined reader materializes a relative GPR word
+through its selected borrowed warm cache. STACK takes 91 transitions and RETURN
+92. All header/cell loads are imported Clight loads; the entire memory is kept. -/
+theorem gpr_read_warm (returns : Bool) (frontier b : CC.Block)
+    (ofs : CC.Integers.Ptrofs) (i : Fin 31) (m : CC.Mem) (k : CC.Cont)
+    (value base : BitVec 64)
+    (observed : Arm64EntryMemory.gpr frontier m (.Vptr b ofs) i.val =
+      some (.Vlong value, .Vint ((if returns then 10#8 else 4#8).setWidth 32)))
+    (cache : WarmEntryCache returns frontier m (.Vptr b ofs) base) :
+    InternalRun ge (if returns then 92 else 91)
+      (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
+        [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m)
+      (.Returnstate (.Vlong (value + base)) (CC.callCont k) m) := by
+  obtain ⟨cb, co, vb, vo, tb, to, kb, ko, cells, slot, tags, tagSlot, cell, kind⟩ :=
+    Arm64EntryMemory.gpr_loads observed
+  have cellsLoad := field_load frontier b ofs m _ 0 _ layouts.2.2.1 cells
+  simp only [offset_zero] at cellsLoad
+  have beforeCall := gpr_read_prefix i b cb vb tb kb ofs co vo to ko m k (.Vlong value)
+    (if returns then 10#8 else 4#8) cellsLoad slot
+    (field_load frontier b ofs m _ 8 _ layouts.2.2.2.1 tags) tagSlot cell kind rfl
+  have entryRead : (gprReadTemps (.Vptr b ofs) (.Vptr cb co) (.Vptr vb vo)
+      (.Vptr tb to) (.Vptr kb ko) (.Vlong value) (BitVec.ofNat 64 i.val)
+      (if returns then 10#8 else 4#8)).get Arm64Program._entry = some (.Vptr b ofs) := by
+    simp +decide [gprReadTemps, readTemps, CC.PTree.gso]
+  have valueRead : (gprReadTemps (.Vptr b ofs) (.Vptr cb co) (.Vptr vb vo)
+      (.Vptr tb to) (.Vptr kb ko) (.Vlong value) (BitVec.ofNat 64 i.val)
+      (if returns then 10#8 else 4#8)).get Arm64Program.___a64_read_value = some (.Vlong value) := by
+    simp +decide [gprReadTemps, CC.PTree.gso]
+  have tagRead : (gprReadTemps (.Vptr b ofs) (.Vptr cb co) (.Vptr vb vo)
+      (.Vptr tb to) (.Vptr kb ko) (.Vlong value) (BitVec.ofNat 64 i.val)
+      (if returns then 10#8 else 4#8)).get Arm64Program.___a64_read_tag =
+      some (.Vint (if returns then 10#32 else 4#32)) := by
+    cases returns <;> simp +decide [gprReadTemps, CC.PTree.gso]
+  have afterRead := warm_entry_finishes returns frontier b ofs m k _ value base
+    entryRead valueRead tagRead cache
+  have run := (internalRun_of_steps beforeCall.2 beforeCall.1).trans afterRead
+  cases returns <;> exact run
+
+/-- Every represented GPR tag follows the actual combined reader. Relative
+payloads must be scalar and the selected cache must already contain its bound
+invocation origin. These are producer obligations, not inferred from a tag. -/
+theorem gpr_read_materializes (addresses : Arm64Registers.PointerOrigins)
+    (origins : Reference.Provenance.AArch64.Origins)
+    (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs) (i : Fin 31)
+    (m : CC.Mem) (k : CC.Cont) (value : CC.Val) (raw : BitVec 64) (tag : BitVec 8)
+    (observed : Arm64EntryMemory.gpr frontier m (.Vptr b ofs) i.val =
+      some (value, .Vint (tag.setWidth 32)))
+    (represented : Arm64Registers.ValueRep addresses value raw)
+    (relativeScalar : tag = 4 ∨ tag = 10 → value = .Vlong raw)
+    (stack : tag = 4 → WarmEntryCache false frontier m (.Vptr b ofs) origins.stack)
+    (ret : tag = 10 → WarmEntryCache true frontier m (.Vptr b ofs) origins.returnAddress) :
+    ∃ result,
+      InternalRun ge (if tag = 4 then 91 else if tag = 10 then 92 else 73)
+        (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
+          [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m)
+        (.Returnstate result (CC.callCont k) m) ∧
+      Arm64Registers.ValueRep addresses result
+        (Reference.Provenance.AArch64.materialize origins raw tag) := by
+  by_cases hs : tag = 4
+  · have scalar := relativeScalar (.inl hs)
+    subst value
+    have run := gpr_read_warm false frontier b ofs i m k raw origins.stack
+      (by simpa [hs] using observed) (stack hs)
+    refine ⟨.Vlong (raw + origins.stack), ?_, ?_⟩
+    · simpa [hs] using run
+    · simp [Arm64Registers.ValueRep, Reference.Provenance.AArch64.materialize, hs]
+  · by_cases hr : tag = 10
+    · have scalar := relativeScalar (.inr hr)
+      subst value
+      have run := gpr_read_warm true frontier b ofs i m k raw origins.returnAddress
+        (by simpa [hr] using observed) (ret hr)
+      refine ⟨.Vlong (raw + origins.returnAddress), ?_, ?_⟩
+      · simpa [hs, hr] using run
+      · simp [Arm64Registers.ValueRep, Reference.Provenance.AArch64.materialize, hs, hr]
+    · refine ⟨value, ?_, ?_⟩
+      · simpa only [ite_eq_right hs, ite_eq_right hr] using gpr_read_nonrelative addresses frontier b ofs i m k
+          value raw tag observed represented hs hr
+      · simpa only [Reference.Provenance.AArch64.materialize,
+          ite_eq_right hs, ite_eq_right hr] using represented
+
+/-- Every actual Kstop return agrees with M3 materialization for every tag,
+under the stated producer/scalar and selected warm-cache bindings. The run
+cannot emit a trace or change any memory; no provider outcome is assumed. -/
+theorem gpr_read_all_tags_return_corresponds (addresses : Arm64Registers.PointerOrigins)
+    (origins : Reference.Provenance.AArch64.Origins)
+    (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs) (i : Fin 31)
+    (m : CC.Mem) (value : CC.Val) (raw : BitVec 64) (tag : BitVec 8)
+    (observed : Arm64EntryMemory.gpr frontier m (.Vptr b ofs) i.val =
+      some (value, .Vint (tag.setWidth 32)))
+    (represented : Arm64Registers.ValueRep addresses value raw)
+    (relativeScalar : tag = 4 ∨ tag = 10 → value = .Vlong raw)
+    (stack : tag = 4 → WarmEntryCache false frontier m (.Vptr b ofs) origins.stack)
+    (ret : tag = 10 → WarmEntryCache true frontier m (.Vptr b ofs) origins.returnAddress)
+    (trace : CC.Trace) (result : CC.Val) (after : CC.Mem)
+    (returned : CC.Star (CC.Step2 ge)
+      (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
+        [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] .Kstop m)
+      trace (.Returnstate result .Kstop after)) :
+    trace = CC.E0 ∧ after = m ∧ Arm64Registers.ValueRep addresses result
+      (Reference.Provenance.AArch64.materialize origins raw tag) := by
+  obtain ⟨expected, run, rep⟩ := gpr_read_materializes addresses origins frontier b ofs i m
+    .Kstop value raw tag observed represented relativeScalar stack ret
+  obtain ⟨rfl, rfl, rfl⟩ := stopped_return run returned
+  exact ⟨rfl, rfl, rep⟩
+
 end KProgFormal.ClightRefinement.Arm64RegisterReads
