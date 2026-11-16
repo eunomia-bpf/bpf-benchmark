@@ -167,6 +167,9 @@ def narrow_scalar_storage(document):
         r'  - \{ id: (\d+),[^\n]*type: spill-slot,[^\n]*size: 8, alignment: 8,', head)}
     narrowed = []
     for slot in sorted(slots):
+        declaration = r'^  - \{ id: '+str(slot)+r','
+        if len(re.findall(declaration, head, re.M)) != 1:
+            continue
         operand = re.compile(r'%stack\.'+str(slot)+r'(?!\d)')
         uses = [line for line in body.splitlines() if operand.search(line)]
         direct = (r'\s*(?:STW32 (?:killed )?\$w\d+, '
@@ -175,9 +178,7 @@ def narrow_scalar_storage(document):
         if not uses or not all(re.fullmatch(direct, line) for line in uses):
             continue
         pattern = r'(  - \{ id: '+str(slot)+r',[^\n]*type: spill-slot,[^\n]*size:) 8,'
-        head, count = re.subn(pattern, r'\g<1> 4,', head)
-        if count != 1:
-            raise ValueError('Scalar spill declaration is not unique')
+        head = re.sub(pattern, r'\g<1> 4,', head)
         narrowed.append(slot)
     return head+'body:             |'+body, narrowed
 

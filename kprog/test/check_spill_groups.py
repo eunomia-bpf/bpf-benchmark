@@ -146,6 +146,12 @@ def check(args):
         _, selected = spills.narrow_scalar_storage(variant)
         if 0 in selected:
             raise ValueError('Wide/offset/escaping access lost its original spill allocation')
+    header, body = wide.split('body:             |', 1)
+    definition = header.split("  - { id: 0,", 1)[1].split("  - { id: 1,", 1)[0]
+    ambiguous = header+"  - { id: 0,"+definition+'body:             |'+body
+    retained, selected = spills.narrow_scalar_storage(ambiguous)
+    if 0 in selected or retained.count("id: 0, name: '', type: spill-slot, offset: 0, size: 8,") != 2:
+        raise ValueError('An ambiguous declaration must retain its original width without refusal')
     mir = args.build/'fixture.mir'
     mir.write_text(wide)
     normalizations = []
