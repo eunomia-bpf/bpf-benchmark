@@ -19,6 +19,16 @@ Operator, 2026-11-11: "确保需要的功能 merge 到一起之后, 删掉所有
 
 The operator's words are recorded verbatim in kprog/docs/user-instruction.md (operator, 2026-11-14: "确保没有做错, 并且每一个原话都记录下来"). Standing words for every Workspace: "不新建 worktree, 不能 clone, 不能有多个编译产物", "结果一出来就提交, 有更改就提交 git, 但不能改论文", "不许 revert 提交". A rule that is his words keeps its wording; any rule is relaxed only when it blocks the work ("要不还是不要放宽, 除非 blovk 了").
 
+## Freeze (operator 2026-11-16, recorded 2026-11-16T23:42:48Z)
+
+Operator: "需要有东西冻结并且明确禁止修改, 除了删除死代码. 是不是? 性能优化为啥没有做?"; "这些是不是应该你去看看回退到一个稳定版本并且禁止修改? 5/29?"; "我觉得内核是不是应该几乎不要修改, 整体 patch 也要少于 500 loc?"
+
+- Frozen at the tree that built image 603cacfb442a (checked 2026-11-16): kprog/ (simulator, specializers, verify path, loader core, modules, perf, test, build, fidelity, stock-path), kinsn/, bpfopt/shim/, runner/, micro/, corpus/ configs, vendor/bpf/ upstream sources, the timing entry kprog/perf/one-image/Makefile, and the kernel vendor/linux-framework (stock c23719abc330 + 423 lines). In these paths a commit may delete dead code and nothing else.
+- Open for performance work, the two places of the design (compiler flags when P is produced, and LTO): vendor/bpf/Makefile and vendor/bpf/*compat*.h, kprog/x86/native_lab/native_link/, and the loader headers native_loader_lto.hpp, native_loader_link_plan.hpp, native_loader_link_schema.hpp, native_loader_context_lto.hpp.
+- Open for records and proofs: kprog/results, kprog/docs, corpus/results, micro/results, kprog/formal.
+- Enforced by tools/freeze-check from .git/hooks/pre-commit and pre-push, and by a deletion-only pre-commit hook in the kernel repository. Hooks are never skipped.
+- The 05-29 files stay a reference (kprog/results/compare-0529-20261115). Restoring them would bring back the unequal work (OTel context, Katran LRU) and the compile-time IR rewriting the operator removed on 2026-11-15.
+
 ## Working Agreement
 
 Inside this project's already-authorized goals, continue and deliver
