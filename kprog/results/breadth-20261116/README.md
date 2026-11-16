@@ -116,17 +116,17 @@ BTF` on `sys_enter_submit`.
 
 ### Stats on
 
-Stats on is the only mode with per-call BPF time. Two of the six have it so
-far; tetragon and tracee cannot reach it while their failures stand.
+Stats on is the only mode with per-call BPF time. Four of the six have it;
+tetragon never gets there and tracee gets only its baseline arm.
 
 | app | run | status | throughput | per-call | 05-29 floor |
 |---|---|---|---|---|---|
+| otelcol-ebpf-profiler/profiling | `x86_kvm_corpus_20261116_053859_493069` | ok | **2.020x** | **14.4x** (3448.6 → 239.6 ns) | 1.849x |
 | bcc/set | `x86_kvm_corpus_20261116_060435_731340` | ok | **1.268x** | **1.134x** (122.51 → 107.98 ns) | 0.985x |
 | cilium/agent | `x86_kvm_corpus_20261116_063056_107201` | ok | **1.212x** | **2.29x** (845.8 → 369.7 ns) | 1.319x |
-| otelcol-ebpf-profiler/profiling | — | running | — | — | 1.849x |
-| tetragon/observer | — | blocked, `event_wake_up_n` | — | — | 1.009x |
-| tracee/monitor | — | blocked, BTF gap | — | — | 0.948x |
-| katran | — | queued | — | — | 1.113x |
+| tetragon/observer | — | died, `event_wake_up_n` | — | — | 1.009x |
+| tracee/monitor | `x86_kvm_corpus_20261116_071110_996499` | error (BTF), baseline only | — | — | 0.948x |
+| katran | — | running | — | — | 1.113x |
 
 - **OTel** — workload units eBPF 40 774 750 / 39 759 786 / 40 450 832, native
   75 471 022 / 75 117 432 / 78 452 133; 0 workload errors, 13 replacements.
@@ -167,6 +167,20 @@ far; tetragon and tracee cannot reach it while their failures stand.
   107.98 ns, so the native arm does the same work 1.134x cheaper; the
   throughput spread is wider than the per-call gain, so pps is the noisy side
   of that row.
+- **OTel, stats on** — 36 558 926 / 36 948 900 / 39 052 673 against 63 427 701
+  / 74 649 808 / 75 372 187, 13 replacements, 2.020x against the 1.849x
+  floor. Per-call: `native_tracer_e` 3448.6 to 239.6 ns, **14.4x cheaper**.
+  `custom__generic` fails twice here with `BPF_PROG_LOAD native_lab stub:
+  Invalid argument` because this run used the image's default manifest, which
+  predates the `source_bpf_object` publication; with the corpus manifest the
+  same program replaces successfully (section below).
+- **Tracee, stats on** — the baseline arm measured 317 680 / 325 022 / 316 350,
+  then the app exited before the native arm ran: `Tracee exited before BPF
+  programs were tracked by shim`. The shim log names the cause twice on
+  `sys_enter_submit` (`details/shim-logs/tracee__monitor.post_rejit.log`):
+  `native-loader failed prog=sys_enter_submi ... error=BPF data map
+  .rodata.str1.1 lacks BTF`. Four replacements went in first, so this is a
+  per-program BTF gap, not a load-order effect.
 
 ## The original OTel ELF and `source_bpf_object`
 
