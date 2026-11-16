@@ -1,0 +1,24 @@
+{
+  "time": "2026-11-16T06:33:59Z",
+  "pid": 1386206,
+  "status": "running",
+  "app": "bcc/set",
+  "purpose": "Whole-app checked confirmation of BTF extern and scalar spill repairs",
+  "source_commit": "5271f9149",
+  "image": "d9e29630",
+  "raw": "/workspaces/kprog-raw/perf/20261116-bcc-all-stock",
+  "log": "/workspaces/kprog-raw/perf/20261116-bcc-all-stock/launcher.log",
+  "host_cpu": "16",
+  "guest_cpus": 2,
+  "guest_memory": "8G",
+  "address_space_bytes": 17179869184,
+  "functional_samples": 1,
+  "functional_duration_seconds": 10,
+  "stats": 1,
+  "loader": "/var/tmp/kprog-tmp/verified/direct-recovery/recovery",
+  "bounds_compiler": "/var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds",
+  "locks": [
+    "image shared"
+  ],
+  "timing_claim": false
+}
