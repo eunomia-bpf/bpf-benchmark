@@ -107,3 +107,43 @@ names a symbol was proved again with a linker built at 08:39 from current source
 301 of 301. The 54 entries across five apps that carry no `symbol` field are a
 pre-existing manifest shape — the old `tet-manifest-ab-20261116` manifest has
 the same 17 missing in tetragon alone — not a producer change.
+
+## Timing: this payload costs OTel its whole gain
+
+Measured on the rotate's 10:24 stats-off OTel run,
+`x86_kvm_corpus_20261116_102445_806916`: **1.021x**, with post_rejit
+throughput *below* baseline (324,431,106 against 369,715,211 median ops).
+Against `010841_344218`, still 1.854x (632,045,385 against 381,112,434).
+
+The program that differs is `custom__generic`, the per-event kprobe. Diffing
+`bytes_jited` program by program against the 2.020x run
+(`053859_493069`), it is the only program added — absent there, 9257 B here —
+while five others move by 27-2032 B and the remaining seven are byte-identical.
+Every full-throughput run, keyed by that program's native size:
+
+| native `custom__generic` | runs | ratio |
+|---|---|---|
+| 6452 B | `20261110_173026`, `20261110_231509` | 1.832x, 1.885x |
+| 9400 B | `20261114_174202`, `20261114_180807` | 1.060x, 1.161x |
+| 9257 B | `20261116_102445` | 1.021x |
+
+Its original is 3679 B, so every native version triples the body — and the
+6.4 kB version keeps OTel's 1.85x while the ~9.3 kB one loses essentially all
+of it.
+
+Two explanations that do **not** hold, checked: the eleven programs sharing tag
+`26449268576adffc` share it in the healthy 1.854x run too, so that is
+pre-existing; and `custom__generic` was also linked and replaced in
+`20261110_173026` (1.832x), so replacement alone costs nothing.
+
+So this payload should not be counted as a win until `custom__generic` comes
+out near its previous size. The OTel number to quote stays 1.854x.
+
+## Repairing the stale image line above
+
+`d9e29630` was replaced on 2026-11-16 by `3a1906ab1d4f` (09:04:03Z), which
+carries this payload: the guest's
+`/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o`
+is `9c074c02bebc2ccc0ca56f9537002b8d`, the staged object, and the shim is the
+one with `probe_lsm_file_` (`7ec409df99c953dfa606dfe541da71ee`).
+
