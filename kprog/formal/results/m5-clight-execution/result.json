@@ -1,0 +1,17 @@
+{
+  "milestone": "M5 in progress",
+  "clight_modules": 23,
+  "proof_modules": 2,
+  "lake_jobs": 62,
+  "component_exit": 0,
+  "complete_c_function_specifications": 1,
+  "isa_handler_refinements": 0,
+  "old_theorems_to_migrate": 2065,
+  "native_proof_tactic_removed": true,
+  "platform_relations": [
+    "CC.externalFunctionsSem",
+    "CC.inlineAssemblySem"
+  ],
+  "whole_package_build": "pending M5/M6",
+  "make_check": "pending ordered retirement"
+}

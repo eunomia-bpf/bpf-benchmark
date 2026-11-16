@@ -1,0 +1,16 @@
+'KProgFormal.ClightRefinement.steps_sound' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Width.executes' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Width.returns' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+'CC.doStep_sound' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

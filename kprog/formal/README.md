@@ -1,6 +1,6 @@
 # Native simulator verification
 
-## External-base migration (M1–M4 complete, M5 next)
+## External-base migration (M1–M4 complete, M5 in progress)
 
 The operator's replacement plan is in [todo section 4](../docs/todo.md).
 The external bases are forks, pinned as Git submodules; changes needed by
@@ -1880,3 +1880,9 @@ The existing x86 CALL profile also covers a helper-tail subroutine. A symbolic
 helper relocation must survive return normalization even when its placeholder
 looks like an end-of-object branch. The [helper-tail receipt](results/m4-x86-helper-tail/README.md)
 records the regression, actual Clight call/return sequence and six negatives.
+
+M5 now has a [Clight execution foundation](results/m5-clight-execution/README.md):
+upstream step composition and a complete relational call of the actual exported
+ARM width function for every byte input and arbitrary memory. The theorem
+preserves all memory and emits no events. Its C-helper law does not add an
+ISA-handler refinement count; all 2,065 migrations and O1/O2/O4 recount remain.
