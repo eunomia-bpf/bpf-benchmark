@@ -2894,7 +2894,7 @@ std::vector<std::pair<std::string, uint64_t>> native_kernel_function_targets(
 }
 
 void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
-                                  CompanionLoad &load, bool kernel_data_layout = false,
+                                  CompanionLoad &load,
                                   const std::unordered_set<std::string> *entry_symbols = nullptr)
 {
     std::unordered_map<uint32_t, std::unique_ptr<btf, decltype(&btf__free)>> data_types;
@@ -2971,30 +2971,24 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
             if (!native_data_section_supported(section)) {
                 continue;
             }
-            if (sym.st_value < target_shdr.sh_addr) {
-                fail("native data symbol " + std::string(name) + " is below section base");
-            }
-            uint64_t off = sym.st_value - target_shdr.sh_addr;
-            const uint64_t symbol_end = off + sym.st_size;
-            const uint64_t section_end =
-                std::max<uint64_t>(target_shdr.sh_size, symbol_end);
-            const MapMeta *map = find_array_data_map(load, section, kernel_data_layout ? 0 : section_end);
+            const MapMeta *map = find_array_data_map(load, section, 0);
             if (!map) {
                 continue;
             }
-            if (kernel_data_layout) {
-                auto types = data_types.find(map->btf_id);
-                if (types == data_types.end()) {
-                    if (!map->btf_id) fail("BPF data map " + map->name + " lacks BTF");
-                    std::unique_ptr<btf, decltype(&btf__free)> loaded(
-                        btf__load_from_kernel_by_id(map->btf_id), btf__free);
-                    const long error = libbpf_get_error(loaded.get());
-                    if (error || !loaded)
-                        fail("load BPF data map BTF: " + libbpf_error_string(error ? error : -errno));
-                    types = data_types.emplace(map->btf_id, std::move(loaded)).first;
-                }
-                off = native_data_symbol_offset(types->second.get(), map->btf_value_type_id, section, name);
+            // Source DATASEC names bind globals to their loaded map layout;
+            // native compiler alignment does not describe that layout.
+            auto types = data_types.find(map->btf_id);
+            if (types == data_types.end()) {
+                if (!map->btf_id) fail("BPF data map " + map->name + " lacks BTF");
+                std::unique_ptr<btf, decltype(&btf__free)> loaded(
+                    btf__load_from_kernel_by_id(map->btf_id), btf__free);
+                const long error = libbpf_get_error(loaded.get());
+                if (error || !loaded)
+                    fail("load BPF data map BTF: " + libbpf_error_string(error ? error : -errno));
+                types = data_types.emplace(map->btf_id, std::move(loaded)).first;
             }
+            const uint64_t off = native_data_symbol_offset(
+                types->second.get(), map->btf_value_type_id, section, name);
             if (off + sym.st_size > map->value_size) {
                 fail("native data symbol " + std::string(name) +
                      " exceeds BPF data map value_size for " + map->name);
@@ -4134,7 +4128,6 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     std::string symbol_name = options.symbol_name;
     std::vector<NativeMapRule> map_rules;
     bool kernel_helper_context = false;
-    bool kernel_data_layout = false;
     bool kernel_kfunc_context = false;
     std::filesystem::path kernel_kfunc_btf;
     std::filesystem::path source_bpf_object;
@@ -4159,7 +4152,6 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         native_object_path = resolution->native_object_path;
         symbol_name = resolution->symbol_name;
         kernel_helper_context = resolution->kernel_helper_context;
-        kernel_data_layout = resolution->kernel_data_layout;
         kernel_kfunc_context = resolution->kernel_kfunc_context;
         kernel_kfunc_btf = resolution->kernel_kfunc_btf;
         source_bpf_object = resolution->source_bpf_object;
@@ -4189,18 +4181,13 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         companion.kernel_functions = native_kernel_function_targets(native_object_path, local.get(), kernel.get());
     }
     const auto data_symbols_start = diagnostic_now();
-    std::filesystem::path entry_proof;
-    std::optional<std::unordered_set<std::string>> entry_symbols;
-    if (kernel_data_layout || !source_bpf_object.empty()) {
-        entry_proof = cached_native_entry_proof(options.native_link_path, native_object_path, symbol_name);
-        entry_symbols = native_entry_symbol_names(entry_proof);
-    }
+    const auto entry_proof = cached_native_entry_proof(options.native_link_path, native_object_path, symbol_name);
+    const auto entry_symbols = native_entry_symbol_names(entry_proof);
     if (!source_bpf_object.empty()) {
         if (source_insns.empty()) fail("source_bpf_object requires intercepted source instructions");
-        bind_original_source_maps(source_bpf_object, symbol_name, source_insns, companion, &*entry_symbols);
+        bind_original_source_maps(source_bpf_object, symbol_name, source_insns, companion, &entry_symbols);
     }
-    add_native_data_symbol_addrs(native_object_path, companion, kernel_data_layout,
-                                entry_symbols ? &*entry_symbols : nullptr);
+    add_native_data_symbol_addrs(native_object_path, companion, &entry_symbols);
     const auto data_symbols_end = diagnostic_now();
     const auto with_common_timings = [&](LoadedProgram result) {
         if (collecting_timings()) {

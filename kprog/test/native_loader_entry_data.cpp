@@ -68,7 +68,7 @@ static int kernel_mutable(const char *native,const char *linker,const char *dire
         const auto actual_name=prog_info_name_or_stub(load_prog_info(bpf_program__fd(program)));
         std::ofstream config(manifest);
         config << "{\"objects\":[{\"program\":\"" << actual_name << "\",\"symbol\":\"" << name
-               << "\",\"native_object\":\"" << native << "\",\"kernel_data_layout\":true}]}";
+               << "\",\"native_object\":\"" << native << "\"}]}";
         config.close();
         native_loader::FdLoadOptions request;request.original_prog_fd=bpf_program__fd(program);
         request.source_insns.assign(bpf_program__insns(program),
@@ -164,11 +164,8 @@ try {
     require(!bpf_map_update_elem(map.get(), &key, values, 0), "write application config");
     CompanionLoad source;
     add_map_meta(source, load_map_meta_from_fd(map.get()));
-    auto legacy = source;
-    add_native_data_symbol_addrs(argv[2], legacy);
-    require(legacy.native_data_symbols.contains("other_value"), "default data layout unexpectedly filtered globals");
     auto load = source;
-    add_native_data_symbol_addrs(argv[2], load, true, &entry_names);
+    add_native_data_symbol_addrs(argv[2], load, &entry_names);
     require(load.native_data_symbols.contains("live_value") &&
             !load.native_data_symbols.contains("other_value"), "unused global became a capability");
     const auto &meta = source.maps.at(0);
@@ -177,7 +174,7 @@ try {
     for (const auto *selection : {static_cast<const std::unordered_set<std::string> *>(nullptr), &other_names}) {
         bool rejected = false;
         auto invalid = source;
-        try { add_native_data_symbol_addrs(argv[2], invalid, true, selection); }
+        try { add_native_data_symbol_addrs(argv[2], invalid, selection); }
         catch (const std::runtime_error &error) {
             rejected = std::string(error.what()).find("lacks native symbol other_value") != std::string::npos;
         }

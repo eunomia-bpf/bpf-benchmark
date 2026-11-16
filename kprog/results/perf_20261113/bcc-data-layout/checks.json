@@ -1,0 +1,72 @@
+{
+  "timestamp": "2026-11-16T02:20:09Z",
+  "native_section_bytes": 4118,
+  "loaded_map_value_bytes": 4106,
+  "native_offsets": {
+    "filter_sport": 0,
+    "filter_dport": 1,
+    "target_sports": 16,
+    "target_dports": 2064,
+    "target_pid": 4112,
+    "target_family": 4116
+  },
+  "source_offsets": {
+    "filter_sport": 0,
+    "filter_dport": 1,
+    "target_sports": 2,
+    "target_dports": 2050,
+    "target_pid": 4100,
+    "target_family": 4104
+  },
+  "failing_run": "corpus/results/x86_kvm_corpus_20261116_013455_495442",
+  "error": "GOT-relative reloc against unknown symbol target_family",
+  "binding_checks": [
+    {
+      "section": ".rodata",
+      "symbol": "enabled",
+      "map_id": 1,
+      "offset": 0
+    },
+    {
+      "section": ".rodata",
+      "symbol": "threshold",
+      "map_id": 1,
+      "offset": 4
+    },
+    {
+      "section": ".rodata",
+      "symbol": "ports",
+      "map_id": 1,
+      "offset": 8
+    },
+    {
+      "section": ".data",
+      "symbol": "counter",
+      "map_id": 2,
+      "offset": 0
+    },
+    {
+      "section": ".data",
+      "symbol": "limit",
+      "map_id": 2,
+      "offset": 4
+    },
+    {
+      "section": ".bss",
+      "symbol": "tracker",
+      "map_id": 3,
+      "offset": 0
+    },
+    {
+      "section": ".bss",
+      "symbol": "generation",
+      "map_id": 3,
+      "offset": 8
+    }
+  ],
+  "entry_host_pass": true,
+  "entry_kernel_pass": true,
+  "real_proof": "vendor/build/native-bpf/x86/stage/bcc/tcplife.inet_sock_set_state.proof.o",
+  "raw": "/workspaces/kprog-raw/perf/20261116-bcc-data-layout",
+  "scope": "Host and actual kernel class checks; full BCC startup/default timing follows the breadth round."
+}

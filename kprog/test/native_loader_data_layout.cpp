@@ -67,23 +67,8 @@ try {
     catch (const std::runtime_error &) { missing = true; }
     require(missing, "missing BTF symbol unexpectedly bound");
 
-    // Manifest selection must leave the established data layout off by default.
-    const auto manifest = output / "data-manifest.json";
-    bpf_prog_info program{};
-    std::strcpy(program.name, "entry");
-    program.type = BPF_PROG_TYPE_XDP;
-    for (const std::string setting : {"", ",\"kernel_data_layout\":false", ",\"kernel_data_layout\":true"}) {
-        std::ofstream stream(manifest);
-        stream << "{\"objects\":[{\"program\":\"entry\",\"native_object\":\"" << argv[2] << "\"" << setting << "}]}";
-        stream.close();
-        require(static_cast<bool>(stream), "write fixture manifest");
-        const auto match = resolve_native_manifest(manifest, program, std::vector<bpf_insn>(1),
-            [](int) -> bpf_map_info { fail("unexpected manifest map lookup"); });
-        require(match && match->kernel_data_layout == (setting.find("true") != std::string::npos),
-                "data layout manifest default/selection changed");
-    }
     if (!kernel) {
-        std::cout << "host BTF offsets/array/missing symbol/default-off manifest: PASS\n";
+        std::cout << "host BTF offsets/array/missing symbol: PASS\n";
         return 0;
     }
 
@@ -108,11 +93,7 @@ try {
         maps.push_back(std::move(fd));
         values.push_back(std::move(value));
     }
-    CompanionLoad legacy = load;
-    add_native_data_symbol_addrs(argv[2], legacy);
-    require(!legacy.map_addrs.contains("threshold") && !legacy.map_addrs.contains("limit") &&
-            !legacy.map_addrs.contains("generation"), "fixture did not expose native padding mismatch");
-    add_native_data_symbol_addrs(argv[2], load, true);
+    add_native_data_symbol_addrs(argv[2], load);
     std::ofstream report(output / "data-layout.jsonl");
     require(static_cast<bool>(report), "open data layout report");
     for (size_t i = 0; i < sections.size(); ++i) {
@@ -141,7 +122,7 @@ try {
     for (auto &map : invalid.maps) map.btf_value_type_id = word;
     const auto before = fd_count();
     bool rejected = false;
-    try { add_native_data_symbol_addrs(argv[2], invalid, true); }
+    try { add_native_data_symbol_addrs(argv[2], invalid); }
     catch (const std::runtime_error &) { rejected = true; }
     require(rejected && fd_count() == before, "invalid metadata succeeded or leaked descriptors");
     std::cout << "kernel production binding: 7 symbols/3 maps, configured bytes preserved: PASS\n";

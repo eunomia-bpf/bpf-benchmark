@@ -391,7 +391,7 @@ entry-data-kernel-kvm:
 	install -m 0755 "$(ENTRY_DATA_BUILD)/entry-data" "$(ENTRY_DATA_KERNEL_OUTPUT)/entry-data"
 	install -m 0644 "$(ENTRY_DATA_BUILD)/fixture.o" "$(ENTRY_DATA_KERNEL_OUTPUT)/fixture.o"
 	install -m 0644 "$(ENTRY_DATA_REAL_PROOF)" "$(ENTRY_DATA_KERNEL_OUTPUT)/existing.proof.o"
-	taskset -c 13 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+	taskset -c 18-19 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
 		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(ENTRY_DATA_KERNEL_OUTPUT)" --overlay-rwdir /tmp \
 		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
 		--exec 'make -C kprog/libnativeloader guest-entry-data ENTRY_DATA_KERNEL_OUTPUT=$(ENTRY_DATA_KERNEL_OUTPUT) ENTRY_DATA_LINKER=$(ENTRY_DATA_LINKER)'
@@ -420,7 +420,7 @@ data-layout-kernel-kvm:
 	install -d "$(DATA_LAYOUT_KERNEL_OUTPUT)"
 	install -m 0755 "$(DATA_LAYOUT_BUILD)/data-layout" "$(DATA_LAYOUT_KERNEL_OUTPUT)/data-layout"
 	install -m 0644 "$(DATA_LAYOUT_BUILD)/fixture.o" "$(DATA_LAYOUT_KERNEL_OUTPUT)/fixture.o"
-	taskset -c 13 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+	taskset -c 16-17 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
 		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(DATA_LAYOUT_KERNEL_OUTPUT)" --overlay-rwdir /tmp \
 		--disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' \
 		--exec 'make -C kprog/libnativeloader guest-data-layout DATA_LAYOUT_KERNEL_OUTPUT=$(DATA_LAYOUT_KERNEL_OUTPUT)'
