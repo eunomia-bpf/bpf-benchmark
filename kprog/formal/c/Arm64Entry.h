@@ -5,6 +5,13 @@
 #ifndef KPROG_ARM64_ENTRY_H
 #define KPROG_ARM64_ENTRY_H
 #include "../../arm64/arm64_sim_local_bpf.h"
+/* Compile the active producer layout, including its compact rank expressions.
+ * These bodies access only the supplied storage; declaring the view reads none.
+ */
+static inline __u64 kprog_arm64_payload_load(volatile __u64 *__a64_stack_payload, __u64 index)
+{ return ARM64_SIM_L_STACK_PAYLOAD_LOAD(index); }
+static inline void kprog_arm64_payload_store(volatile __u64 *__a64_stack_payload, __u64 index, __u64 value)
+{ ARM64_SIM_L_STACK_PAYLOAD_STORE(index, value); }
 struct kprog_arm64_entry {
 	union arm64_sim_gpr *const *cells;
 	__u8 *const *tag_cells;
@@ -15,6 +22,8 @@ struct kprog_arm64_entry {
 	__u64 *vector_lo[32], *vector_hi[32];
 	volatile __u8 *b;
 	volatile __u64 *q, *payload;
+	__u64 (*payload_load)(volatile __u64 *, __u64);
+	void (*payload_store)(volatile __u64 *, __u64, __u64);
 	__u8 *stack_tags;
 	__u32 capacity, payload_words, tag_bytes;
 	__s64 bias;
@@ -36,6 +45,7 @@ __u32 kprog_arm64_entry_skb(struct __sk_buff *, void *(*)(void *), kprog_arm64_e
 		.n = &__a64_n, .z = &__a64_z, .c = &__a64_c, .v = &__a64_v, \
 		.b = __a64_stack.b, .q = __a64_stack.q, \
 		.payload = __a64_stack_payload, .stack_tags = __a64_stack_tag, \
+		.payload_load = kprog_arm64_payload_load, .payload_store = kprog_arm64_payload_store, \
 		.capacity = sizeof(__a64_stack.b), .bias = ARM64_SIM_STACK_BIAS, \
 		.payload_words = sizeof(__a64_stack_payload) / sizeof(__a64_stack_payload[0]), \
 		.tag_bytes = sizeof(__a64_stack_tag), \

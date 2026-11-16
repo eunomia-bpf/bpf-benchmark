@@ -10,6 +10,11 @@
 #define __a64_stack (*entry)
 #define __a64_stack_tag (entry->stack_tags)
 #define __a64_stack_payload (entry->payload)
+#undef ARM64_SIM_L_STACK_PAYLOAD_LOAD
+#undef ARM64_SIM_L_STACK_PAYLOAD_STORE
+#define ARM64_SIM_L_STACK_PAYLOAD_LOAD(INDEX) entry->payload_load(entry->payload, (INDEX))
+#define ARM64_SIM_L_STACK_PAYLOAD_STORE(INDEX, VALUE) \
+    entry->payload_store(entry->payload, (INDEX), (VALUE))
 #define __a64_sp (*entry->sp)
 #define __a64_numeric_sp (*entry->sp_base)
 #define __a64_numeric_return (*entry->return_base)

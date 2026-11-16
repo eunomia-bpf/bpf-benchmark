@@ -3,6 +3,8 @@
 #define KPROG_ARM64_PROGRAM_H
 #include "Arm64Entry.h"
 #include "Arm64Addressing.h"
+__u64 kprog_arm64_shift(__u64, __u64, __u64, __u64);
+__u64 kprog_arm64_imm_operand(__u64, __u64, __u64);
 __u64 kprog_arm64_program_raw(struct kprog_arm64_entry *, __u64);
 void *kprog_arm64_program_pointer(struct kprog_arm64_entry *, __u64);
 __u32 kprog_arm64_program_tag(struct kprog_arm64_entry *, __u64);

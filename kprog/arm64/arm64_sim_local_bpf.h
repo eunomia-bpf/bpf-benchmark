@@ -2857,4 +2857,10 @@ ARM64_SIM_CONCAT(__a64_sim_tb_fallthrough_, ID):                             \
 
 #include "arm64_sim_direct.h"
 
+/* The formal whole-program frontend binds after the actual producer profile
+ * definitions. Component exports and native builds retain their own bindings. */
+#if defined(KPROG_ARM64_PROGRAM_EXPORT)
+#include "../formal/c/Arm64ProgramBinding.h"
+#endif
+
 #endif

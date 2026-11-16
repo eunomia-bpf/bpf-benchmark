@@ -1,0 +1,127 @@
+{
+  "step": "M4 actual producer compact payload callbacks",
+  "status": "validated; M4 remains open",
+  "raw": "/workspaces/kprog-raw/formal/m4-arm64-payload-profile",
+  "native_header_baseline": "7a89a1f51",
+  "frame_header_baseline": "4a2b31f48347c9e970aa5a11ebbf5196de80173d",
+  "producer": {
+    "input": "oracles/arm64_payload_profile.S",
+    "bias": 32,
+    "logical_slots": [
+      0,
+      1,
+      3
+    ],
+    "physical_payload_words": 3,
+    "callbacks": "C bodies compiled from active producer LOAD and STORE macros",
+    "frame_bytes": 32
+  },
+  "exports": {
+    "Arm64Entry": {
+      "bytes": 844157,
+      "functions": 5,
+      "deterministic": true,
+      "preprocessed_tu_bytes": 317633
+    },
+    "Arm64Program": {
+      "bytes": 11542084,
+      "functions": 111,
+      "deterministic": true,
+      "preprocessed_tu_bytes": 1409417
+    },
+    "Arm64ProgramFixture": {
+      "bytes": 672547,
+      "functions": 4,
+      "deterministic": true,
+      "preprocessed_tu_bytes": 390676
+    },
+    "Arm64ProgramContext": {
+      "bytes": 1868340,
+      "functions": 4,
+      "deterministic": true,
+      "preprocessed_tu_bytes": 524049
+    },
+    "Arm64PayloadProfile": {
+      "bytes": 2938946,
+      "functions": 4,
+      "deterministic": true,
+      "preprocessed_tu_bytes": 624115
+    }
+  },
+  "validation": {
+    "make_clight": 0,
+    "all_15_clight_modules": {
+      "exit": 0,
+      "jobs": 52
+    },
+    "axiom_queries": 7,
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "sparse_cases_per_mode": 16,
+    "sparse_capture_bytes_per_mode": 58560,
+    "inputs_per_sparse_case": 304,
+    "sparse_modes": [
+      "native",
+      "bound-native",
+      "bound-adapter"
+    ],
+    "full_frame_cases_per_mode": 12823,
+    "full_frame_capture_bytes_per_mode": 28557200,
+    "closed_RAW_cases_per_mode": 840,
+    "closed_RAW_capture_bytes_per_mode": 4042080,
+    "full_frame_modes": 5,
+    "new_negatives": [
+      "logical-index-zero",
+      "load-high32-lost",
+      "store-high32-lost"
+    ],
+    "comparison": "all observation bytes identical, no masks",
+    "link_computations": {
+      "exit": 0,
+      "programs": 3,
+      "internal_definitions_each": 136,
+      "count_preservation_checked": true
+    }
+  },
+  "native_fidelity": {
+    "fidelity-producer": {
+      "allocated_sections_equal": true,
+      "allocated_relocations_equal": true,
+      "current_stream_equals_normal_build": true,
+      "allocated_section_bytes": {
+        ".text": 0,
+        "socket": 4232,
+        "license": 4
+      },
+      "allocated_relocations": 4
+    },
+    "fidelity-arm64_context_compile": {
+      "allocated_sections_equal": true,
+      "allocated_relocations_equal": true,
+      "current_stream_equals_normal_build": true,
+      "allocated_section_bytes": {
+        ".text": 0,
+        "xdp": 1152,
+        "tc": 1896,
+        "license": 4
+      },
+      "allocated_relocations": 4
+    },
+    "fidelity-arm64_execute_compile": {
+      "allocated_sections_equal": true,
+      "allocated_relocations_equal": true,
+      "current_stream_equals_normal_build": true,
+      "allocated_section_bytes": {
+        ".text": 0,
+        "socket": 11104,
+        "xdp": 15320,
+        "license": 4
+      },
+      "allocated_relocations": 8
+    }
+  },
+  "scope": "Actual producer direct-handler fixture plus full and compact payload C callbacks. Real remaining layouts/platform/default-byte closure and M5 refinements are still open."
+}

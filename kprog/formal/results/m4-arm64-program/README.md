@@ -63,3 +63,9 @@ The frame and closed-program comparisons stream canonical headers from
 `4a2b31f48` into the current fixture/oracle. Native allocated-section comparisons
 use the immediately preceding `776e46a27` header. These two baselines are
 recorded separately in `result.json` and in the full raw commands.
+
+The subsequent [producer-layout step](../m4-arm64-payload-profile/README.md)
+replaces the full-payload restriction with callbacks compiled from the active
+producer macros. It adds an actual compact-layout program and preserves the
+earlier frame/native-byte checks; the numerical receipts above describe this
+step's earlier publication.

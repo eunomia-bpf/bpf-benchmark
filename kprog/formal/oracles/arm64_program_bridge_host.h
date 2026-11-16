@@ -12,6 +12,7 @@
  .return_valid = &(A)->coordinates->return_valid, .lr = &(__u64){0}, \
  .n = (N), .z = (Z), .c = (C), .v = (V), \
  .b = (A)->b, .q = (A)->q, .payload = (A)->payload, .stack_tags = (A)->stack_tags, \
+ .payload_load = kprog_arm64_payload_load, .payload_store = kprog_arm64_payload_store, \
  .capacity = (A)->capacity, .bias = (A)->bias, \
  .helper_context = &(A)->helper_context, .helper_abi_base = &(A)->helper_abi_base, \
  .is_xdp = &(A)->is_xdp, .abi_kind = &(A)->abi_kind, \

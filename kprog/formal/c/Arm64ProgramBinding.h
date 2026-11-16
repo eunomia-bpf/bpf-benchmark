@@ -1,4 +1,4 @@
-/* Extraction binding for programs with full payload storage.
+/* Extraction binding selected after the producer's profile definitions.
  * Opcode/register/width operands come from decoded instructions. Actual labels,
  * CALL/RET tables and entry declarations remain in the program source.
  */

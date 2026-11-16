@@ -3,6 +3,7 @@ import KProgFormal.Clight.Arm64Program
 import KProgFormal.Clight.Arm64ProgramFixture
 import KProgFormal.Clight.Arm64ProgramContext
 import KProgFormal.Clight.Arm64Numeric
+import KProgFormal.Clight.Arm64PayloadProfile
 
 -- Check actual exported definitions and declared signatures with the mature
 -- library linker. This is computation, not a handler refinement theorem.
@@ -20,7 +21,10 @@ private def checkLinked (name : String) (p : CC.Program) : IO Unit := do
     let ids := internalIds Arm64Program.prog ++ internalIds Arm64Numeric.prog ++ internalIds p
     unless ids.all (CC.Link.hasInternal linked) do
       throw (IO.userError s!"ARM {name}: canonical C body did not resolve")
-    IO.println s!"ARM {name}: {ids.length} actual Clight definitions linked"
+    unless (internalIds linked).length == ids.length do
+      throw (IO.userError s!"ARM {name}: internal definition count changed during linking")
+    IO.println s!"ARM {name}: {(internalIds linked).length} actual Clight definitions linked"
 
 #eval checkLinked "CALL/RET fixture" Arm64ProgramFixture.prog
 #eval checkLinked "XDP/SKB fixture" Arm64ProgramContext.prog
+#eval checkLinked "producer sparse payload profile" Arm64_payload_profile_bpf.prog

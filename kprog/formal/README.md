@@ -1583,6 +1583,17 @@ now records actual declaration sizes; its current export is 3 functions/837,600B
 cases from retained control-root cases and describe the full-payload profile.
 This supplies concrete C program composition, not a migrated refinement theorem.
 
+Payload callbacks now compile the actual producer LOAD/STORE macros after its
+profile declarations, so compact ranks reach the shared C handlers. An assembled
+ARM input passed through the real producer selects logical slots 0,1,3 in a
+32-byte frame and stores their payloads in 3 words. Two copies exercise the
+nonidentity mapping in both directions. Three C modes agree on 16 high64/return/
+input cases; index and truncation negatives fail as intended. `make clight`, all
+15 Clight modules/52 jobs, deterministic exports, standard-axiom queries and
+three mature linker computations pass. Native fixture sections and relocations
+remain exact. [Producer-layout receipts](results/m4-arm64-payload-profile/README.md)
+record the current export sizes and distinguish these checks from refinements.
+
 M4 remains open for arbitrary producer program/return tables, remaining producer/storage
 profiles, platform correspondence and full default compiled-byte coverage. The
 stated x86 inline profile and ARM instruction dispatcher clear their earlier
