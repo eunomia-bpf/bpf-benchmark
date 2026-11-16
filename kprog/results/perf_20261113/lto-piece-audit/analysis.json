@@ -1,0 +1,4605 @@
+{
+  "runs": [
+    {
+      "app": "bcc",
+      "configuration": "current-stats-off",
+      "source": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_105138_635552/details/apps/bcc__set.json",
+      "phases": {
+        "baseline": {
+          "programs": {
+            "31": {
+              "bytes_jited": 1501,
+              "bytes_xlated": 2240,
+              "id": 31,
+              "name": "inet_sock_set_s",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "36": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 36,
+              "name": "fentry_vfs_read",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "38": {
+              "bytes_jited": 143,
+              "bytes_xlated": 232,
+              "id": 38,
+              "name": "kprobe__cap_cap",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "40": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 40,
+              "name": "fentry_vfs_writ",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "45": {
+              "bytes_jited": 121,
+              "bytes_xlated": 200,
+              "id": 45,
+              "name": "blk_account_io_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "46": {
+              "bytes_jited": 383,
+              "bytes_xlated": 616,
+              "id": 46,
+              "name": "kprobe__cap_cap",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "47": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 47,
+              "name": "fentry_vfs_fsyn",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "51": {
+              "bytes_jited": 141,
+              "bytes_xlated": 240,
+              "id": 51,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "53": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 53,
+              "name": "fentry_vfs_open",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "54": {
+              "bytes_jited": 354,
+              "bytes_xlated": 648,
+              "id": 54,
+              "name": "block_rq_insert",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "55": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 55,
+              "name": "fentry_vfs_crea",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "57": {
+              "bytes_jited": 110,
+              "bytes_xlated": 184,
+              "id": 57,
+              "name": "tcp_v4_connect",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "59": {
+              "bytes_jited": 108,
+              "bytes_xlated": 168,
+              "id": 59,
+              "name": "sys_enter",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "61": {
+              "bytes_jited": 440,
+              "bytes_xlated": 824,
+              "id": 61,
+              "name": "block_rq_issue",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "62": {
+              "bytes_jited": 141,
+              "bytes_xlated": 240,
+              "id": 62,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "64": {
+              "bytes_jited": 602,
+              "bytes_xlated": 792,
+              "id": 64,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "65": {
+              "bytes_jited": 493,
+              "bytes_xlated": 752,
+              "id": 65,
+              "name": "tcp_v4_connect_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "66": {
+              "bytes_jited": 110,
+              "bytes_xlated": 184,
+              "id": 66,
+              "name": "tcp_v6_connect",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "67": {
+              "bytes_jited": 406,
+              "bytes_xlated": 656,
+              "id": 67,
+              "name": "sys_exit",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "68": {
+              "bytes_jited": 602,
+              "bytes_xlated": 792,
+              "id": 68,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "70": {
+              "bytes_jited": 437,
+              "bytes_xlated": 712,
+              "id": 70,
+              "name": "block_rq_comple",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "71": {
+              "bytes_jited": 496,
+              "bytes_xlated": 752,
+              "id": 71,
+              "name": "tcp_v6_connect_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "72": {
+              "bytes_jited": 121,
+              "bytes_xlated": 184,
+              "id": 72,
+              "name": "sched_wakeup",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "74": {
+              "bytes_jited": 121,
+              "bytes_xlated": 184,
+              "id": 74,
+              "name": "sched_wakeup_ne",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "77": {
+              "bytes_jited": 935,
+              "bytes_xlated": 1632,
+              "id": 77,
+              "name": "sched_switch",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            }
+          },
+          "count": 25,
+          "installed_bytes": 7965,
+          "named_groups": {
+            "inet_sock_set_s": {
+              "ids": [
+                31
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 1501,
+              "ns_per_call": null
+            },
+            "fentry_vfs_read": {
+              "ids": [
+                36
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 40,
+              "ns_per_call": null
+            },
+            "kprobe__cap_cap": {
+              "ids": [
+                38,
+                46
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 526,
+              "ns_per_call": null
+            },
+            "fentry_vfs_writ": {
+              "ids": [
+                40
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 40,
+              "ns_per_call": null
+            },
+            "blk_account_io_": {
+              "ids": [
+                45
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 121,
+              "ns_per_call": null
+            },
+            "fentry_vfs_fsyn": {
+              "ids": [
+                47
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 40,
+              "ns_per_call": null
+            },
+            "tracepoint__sys": {
+              "ids": [
+                51,
+                62,
+                64,
+                68
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 1486,
+              "ns_per_call": null
+            },
+            "fentry_vfs_open": {
+              "ids": [
+                53
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 40,
+              "ns_per_call": null
+            },
+            "block_rq_insert": {
+              "ids": [
+                54
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 354,
+              "ns_per_call": null
+            },
+            "fentry_vfs_crea": {
+              "ids": [
+                55
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 40,
+              "ns_per_call": null
+            },
+            "tcp_v4_connect": {
+              "ids": [
+                57
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 110,
+              "ns_per_call": null
+            },
+            "sys_enter": {
+              "ids": [
+                59
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 108,
+              "ns_per_call": null
+            },
+            "block_rq_issue": {
+              "ids": [
+                61
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 440,
+              "ns_per_call": null
+            },
+            "tcp_v4_connect_": {
+              "ids": [
+                65
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 493,
+              "ns_per_call": null
+            },
+            "tcp_v6_connect": {
+              "ids": [
+                66
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 110,
+              "ns_per_call": null
+            },
+            "sys_exit": {
+              "ids": [
+                67
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 406,
+              "ns_per_call": null
+            },
+            "block_rq_comple": {
+              "ids": [
+                70
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 437,
+              "ns_per_call": null
+            },
+            "tcp_v6_connect_": {
+              "ids": [
+                71
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 496,
+              "ns_per_call": null
+            },
+            "sched_wakeup": {
+              "ids": [
+                72
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 121,
+              "ns_per_call": null
+            },
+            "sched_wakeup_ne": {
+              "ids": [
+                74
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 121,
+              "ns_per_call": null
+            },
+            "sched_switch": {
+              "ids": [
+                77
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 935,
+              "ns_per_call": null
+            }
+          }
+        },
+        "post_rejit": {
+          "programs": {
+            "128": {
+              "bytes_jited": 48,
+              "bytes_xlated": 16,
+              "id": 128,
+              "name": "fentry_vfs_read",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "129": {
+              "bytes_jited": 185,
+              "bytes_xlated": 16,
+              "id": 129,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "130": {
+              "bytes_jited": 153,
+              "bytes_xlated": 16,
+              "id": 130,
+              "name": "sys_enter",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "131": {
+              "bytes_jited": 4295,
+              "bytes_xlated": 16,
+              "id": 131,
+              "name": "inet_sock_set_s",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "136": {
+              "bytes_jited": 185,
+              "bytes_xlated": 16,
+              "id": 136,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "141": {
+              "bytes_jited": 2991,
+              "bytes_xlated": 16,
+              "id": 141,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "142": {
+              "bytes_jited": 49,
+              "bytes_xlated": 16,
+              "id": 142,
+              "name": "fentry_vfs_writ",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "143": {
+              "bytes_jited": 3483,
+              "bytes_xlated": 16,
+              "id": 143,
+              "name": "sys_exit",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "147": {
+              "bytes_jited": 2991,
+              "bytes_xlated": 16,
+              "id": 147,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "148": {
+              "bytes_jited": 49,
+              "bytes_xlated": 16,
+              "id": 148,
+              "name": "fentry_vfs_fsyn",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "151": {
+              "bytes_jited": 49,
+              "bytes_xlated": 16,
+              "id": 151,
+              "name": "fentry_vfs_open",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "153": {
+              "bytes_jited": 49,
+              "bytes_xlated": 16,
+              "id": 153,
+              "name": "fentry_vfs_crea",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "154": {
+              "bytes_jited": 160,
+              "bytes_xlated": 16,
+              "id": 154,
+              "name": "sched_wakeup",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "155": {
+              "bytes_jited": 175,
+              "bytes_xlated": 16,
+              "id": 155,
+              "name": "kprobe__cap_cap",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "160": {
+              "bytes_jited": 159,
+              "bytes_xlated": 16,
+              "id": 160,
+              "name": "blk_account_io_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "161": {
+              "bytes_jited": 140,
+              "bytes_xlated": 16,
+              "id": 161,
+              "name": "tcp_v4_connect",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "166": {
+              "bytes_jited": 160,
+              "bytes_xlated": 16,
+              "id": 166,
+              "name": "sched_wakeup_ne",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "168": {
+              "bytes_jited": 3054,
+              "bytes_xlated": 16,
+              "id": 168,
+              "name": "kprobe__cap_cap",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "169": {
+              "bytes_jited": 3102,
+              "bytes_xlated": 16,
+              "id": 169,
+              "name": "block_rq_insert",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "170": {
+              "bytes_jited": 3443,
+              "bytes_xlated": 16,
+              "id": 170,
+              "name": "tcp_v4_connect_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "171": {
+              "bytes_jited": 3916,
+              "bytes_xlated": 16,
+              "id": 171,
+              "name": "sched_switch",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "174": {
+              "bytes_jited": 140,
+              "bytes_xlated": 16,
+              "id": 174,
+              "name": "tcp_v6_connect",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "175": {
+              "bytes_jited": 3150,
+              "bytes_xlated": 16,
+              "id": 175,
+              "name": "block_rq_issue",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "178": {
+              "bytes_jited": 3225,
+              "bytes_xlated": 16,
+              "id": 178,
+              "name": "block_rq_comple",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "179": {
+              "bytes_jited": 3490,
+              "bytes_xlated": 16,
+              "id": 179,
+              "name": "tcp_v6_connect_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            }
+          },
+          "count": 25,
+          "installed_bytes": 38841,
+          "named_groups": {
+            "fentry_vfs_read": {
+              "ids": [
+                128
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 48,
+              "ns_per_call": null
+            },
+            "tracepoint__sys": {
+              "ids": [
+                129,
+                136,
+                141,
+                147
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 6352,
+              "ns_per_call": null
+            },
+            "sys_enter": {
+              "ids": [
+                130
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 153,
+              "ns_per_call": null
+            },
+            "inet_sock_set_s": {
+              "ids": [
+                131
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 4295,
+              "ns_per_call": null
+            },
+            "fentry_vfs_writ": {
+              "ids": [
+                142
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 49,
+              "ns_per_call": null
+            },
+            "sys_exit": {
+              "ids": [
+                143
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 3483,
+              "ns_per_call": null
+            },
+            "fentry_vfs_fsyn": {
+              "ids": [
+                148
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 49,
+              "ns_per_call": null
+            },
+            "fentry_vfs_open": {
+              "ids": [
+                151
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 49,
+              "ns_per_call": null
+            },
+            "fentry_vfs_crea": {
+              "ids": [
+                153
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 49,
+              "ns_per_call": null
+            },
+            "sched_wakeup": {
+              "ids": [
+                154
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 160,
+              "ns_per_call": null
+            },
+            "kprobe__cap_cap": {
+              "ids": [
+                155,
+                168
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 3229,
+              "ns_per_call": null
+            },
+            "blk_account_io_": {
+              "ids": [
+                160
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 159,
+              "ns_per_call": null
+            },
+            "tcp_v4_connect": {
+              "ids": [
+                161
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 140,
+              "ns_per_call": null
+            },
+            "sched_wakeup_ne": {
+              "ids": [
+                166
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 160,
+              "ns_per_call": null
+            },
+            "block_rq_insert": {
+              "ids": [
+                169
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 3102,
+              "ns_per_call": null
+            },
+            "tcp_v4_connect_": {
+              "ids": [
+                170
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 3443,
+              "ns_per_call": null
+            },
+            "sched_switch": {
+              "ids": [
+                171
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 3916,
+              "ns_per_call": null
+            },
+            "tcp_v6_connect": {
+              "ids": [
+                174
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 140,
+              "ns_per_call": null
+            },
+            "block_rq_issue": {
+              "ids": [
+                175
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 3150,
+              "ns_per_call": null
+            },
+            "block_rq_comple": {
+              "ids": [
+                178
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 3225,
+              "ns_per_call": null
+            },
+            "tcp_v6_connect_": {
+              "ids": [
+                179
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 3490,
+              "ns_per_call": null
+            }
+          }
+        }
+      },
+      "native_over_jit_installed_bytes": 4.876459510357815
+    },
+    {
+      "app": "bcc",
+      "configuration": "retained-stats-on",
+      "source": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_060435_731340/details/apps/bcc__set.json",
+      "phases": {
+        "baseline": {
+          "programs": {
+            "23": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 23,
+              "name": "fentry_vfs_read",
+              "run_cnt_delta": 1547996,
+              "run_time_ns_delta": 124630247,
+              "type": "tracing"
+            },
+            "25": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 25,
+              "name": "fentry_vfs_writ",
+              "run_cnt_delta": 1733907,
+              "run_time_ns_delta": 139020396,
+              "type": "tracing"
+            },
+            "27": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 27,
+              "name": "fentry_vfs_fsyn",
+              "run_cnt_delta": 141,
+              "run_time_ns_delta": 13121,
+              "type": "tracing"
+            },
+            "29": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 29,
+              "name": "fentry_vfs_open",
+              "run_cnt_delta": 78509972,
+              "run_time_ns_delta": 3786241389,
+              "type": "tracing"
+            },
+            "31": {
+              "bytes_jited": 40,
+              "bytes_xlated": 48,
+              "id": 31,
+              "name": "fentry_vfs_crea",
+              "run_cnt_delta": 42,
+              "run_time_ns_delta": 3244,
+              "type": "tracing"
+            },
+            "38": {
+              "bytes_jited": 1501,
+              "bytes_xlated": 2240,
+              "id": 38,
+              "name": "inet_sock_set_s",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "44": {
+              "bytes_jited": 121,
+              "bytes_xlated": 200,
+              "id": 44,
+              "name": "blk_account_io_",
+              "run_cnt_delta": 209,
+              "run_time_ns_delta": 83872,
+              "type": "kprobe"
+            },
+            "49": {
+              "bytes_jited": 143,
+              "bytes_xlated": 232,
+              "id": 49,
+              "name": "kprobe__cap_cap",
+              "run_cnt_delta": 124320100,
+              "run_time_ns_delta": 8517596775,
+              "type": "kprobe"
+            },
+            "51": {
+              "bytes_jited": 108,
+              "bytes_xlated": 168,
+              "id": 51,
+              "name": "sys_enter",
+              "run_cnt_delta": 2809617249,
+              "run_time_ns_delta": 240146630489,
+              "type": "tracepoint"
+            },
+            "52": {
+              "bytes_jited": 141,
+              "bytes_xlated": 240,
+              "id": 52,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "53": {
+              "bytes_jited": 354,
+              "bytes_xlated": 648,
+              "id": 53,
+              "name": "block_rq_insert",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "54": {
+              "bytes_jited": 110,
+              "bytes_xlated": 184,
+              "id": 54,
+              "name": "tcp_v4_connect",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "58": {
+              "bytes_jited": 406,
+              "bytes_xlated": 656,
+              "id": 58,
+              "name": "sys_exit",
+              "run_cnt_delta": 2809617254,
+              "run_time_ns_delta": 317709277557,
+              "type": "tracepoint"
+            },
+            "60": {
+              "bytes_jited": 383,
+              "bytes_xlated": 616,
+              "id": 60,
+              "name": "kprobe__cap_cap",
+              "run_cnt_delta": 124320098,
+              "run_time_ns_delta": 43284757722,
+              "type": "kprobe"
+            },
+            "61": {
+              "bytes_jited": 493,
+              "bytes_xlated": 752,
+              "id": 61,
+              "name": "tcp_v4_connect_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "62": {
+              "bytes_jited": 440,
+              "bytes_xlated": 824,
+              "id": 62,
+              "name": "block_rq_issue",
+              "run_cnt_delta": 1732,
+              "run_time_ns_delta": 3283308,
+              "type": "tracing"
+            },
+            "66": {
+              "bytes_jited": 437,
+              "bytes_xlated": 712,
+              "id": 66,
+              "name": "block_rq_comple",
+              "run_cnt_delta": 1806,
+              "run_time_ns_delta": 31075560,
+              "type": "tracing"
+            },
+            "68": {
+              "bytes_jited": 141,
+              "bytes_xlated": 240,
+              "id": 68,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 78509522,
+              "run_time_ns_delta": 6199414134,
+              "type": "tracepoint"
+            },
+            "69": {
+              "bytes_jited": 121,
+              "bytes_xlated": 184,
+              "id": 69,
+              "name": "sched_wakeup",
+              "run_cnt_delta": 35181774,
+              "run_time_ns_delta": 3925392405,
+              "type": "tracing"
+            },
+            "70": {
+              "bytes_jited": 602,
+              "bytes_xlated": 792,
+              "id": 70,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "72": {
+              "bytes_jited": 602,
+              "bytes_xlated": 792,
+              "id": 72,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 78509522,
+              "run_time_ns_delta": 128488785335,
+              "type": "tracepoint"
+            },
+            "73": {
+              "bytes_jited": 110,
+              "bytes_xlated": 184,
+              "id": 73,
+              "name": "tcp_v6_connect",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "74": {
+              "bytes_jited": 121,
+              "bytes_xlated": 184,
+              "id": 74,
+              "name": "sched_wakeup_ne",
+              "run_cnt_delta": 129,
+              "run_time_ns_delta": 47190,
+              "type": "tracing"
+            },
+            "75": {
+              "bytes_jited": 496,
+              "bytes_xlated": 752,
+              "id": 75,
+              "name": "tcp_v6_connect_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "76": {
+              "bytes_jited": 935,
+              "bytes_xlated": 1632,
+              "id": 76,
+              "name": "sched_switch",
+              "run_cnt_delta": 70242816,
+              "run_time_ns_delta": 8716062141,
+              "type": "tracing"
+            }
+          },
+          "count": 25,
+          "installed_bytes": 7965,
+          "named_groups": {
+            "fentry_vfs_read": {
+              "ids": [
+                23
+              ],
+              "calls": 1547996,
+              "ns": 124630247,
+              "bytes": 40,
+              "ns_per_call": 80.51070351602976
+            },
+            "fentry_vfs_writ": {
+              "ids": [
+                25
+              ],
+              "calls": 1733907,
+              "ns": 139020396,
+              "bytes": 40,
+              "ns_per_call": 80.17753893374905
+            },
+            "fentry_vfs_fsyn": {
+              "ids": [
+                27
+              ],
+              "calls": 141,
+              "ns": 13121,
+              "bytes": 40,
+              "ns_per_call": 93.05673758865248
+            },
+            "fentry_vfs_open": {
+              "ids": [
+                29
+              ],
+              "calls": 78509972,
+              "ns": 3786241389,
+              "bytes": 40,
+              "ns_per_call": 48.22624811278751
+            },
+            "fentry_vfs_crea": {
+              "ids": [
+                31
+              ],
+              "calls": 42,
+              "ns": 3244,
+              "bytes": 40,
+              "ns_per_call": 77.23809523809524
+            },
+            "inet_sock_set_s": {
+              "ids": [
+                38
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 1501,
+              "ns_per_call": null
+            },
+            "blk_account_io_": {
+              "ids": [
+                44
+              ],
+              "calls": 209,
+              "ns": 83872,
+              "bytes": 121,
+              "ns_per_call": 401.30143540669854
+            },
+            "kprobe__cap_cap": {
+              "ids": [
+                49,
+                60
+              ],
+              "calls": 248640198,
+              "ns": 51802354497,
+              "bytes": 526,
+              "ns_per_call": 208.3426369255063
+            },
+            "sys_enter": {
+              "ids": [
+                51
+              ],
+              "calls": 2809617249,
+              "ns": 240146630489,
+              "bytes": 108,
+              "ns_per_call": 85.47307665286903
+            },
+            "tracepoint__sys": {
+              "ids": [
+                52,
+                68,
+                70,
+                72
+              ],
+              "calls": 157019044,
+              "ns": 134688199469,
+              "bytes": 1486,
+              "ns_per_call": 857.7825723419893
+            },
+            "block_rq_insert": {
+              "ids": [
+                53
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 354,
+              "ns_per_call": null
+            },
+            "tcp_v4_connect": {
+              "ids": [
+                54
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 110,
+              "ns_per_call": null
+            },
+            "sys_exit": {
+              "ids": [
+                58
+              ],
+              "calls": 2809617254,
+              "ns": 317709277557,
+              "bytes": 406,
+              "ns_per_call": 113.07920219548879
+            },
+            "tcp_v4_connect_": {
+              "ids": [
+                61
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 493,
+              "ns_per_call": null
+            },
+            "block_rq_issue": {
+              "ids": [
+                62
+              ],
+              "calls": 1732,
+              "ns": 3283308,
+              "bytes": 440,
+              "ns_per_call": 1895.674364896074
+            },
+            "block_rq_comple": {
+              "ids": [
+                66
+              ],
+              "calls": 1806,
+              "ns": 31075560,
+              "bytes": 437,
+              "ns_per_call": 17206.8438538206
+            },
+            "sched_wakeup": {
+              "ids": [
+                69
+              ],
+              "calls": 35181774,
+              "ns": 3925392405,
+              "bytes": 121,
+              "ns_per_call": 111.5746012409721
+            },
+            "tcp_v6_connect": {
+              "ids": [
+                73
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 110,
+              "ns_per_call": null
+            },
+            "sched_wakeup_ne": {
+              "ids": [
+                74
+              ],
+              "calls": 129,
+              "ns": 47190,
+              "bytes": 121,
+              "ns_per_call": 365.8139534883721
+            },
+            "tcp_v6_connect_": {
+              "ids": [
+                75
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 496,
+              "ns_per_call": null
+            },
+            "sched_switch": {
+              "ids": [
+                76
+              ],
+              "calls": 70242816,
+              "ns": 8716062141,
+              "bytes": 935,
+              "ns_per_call": 124.08474826806489
+            }
+          }
+        },
+        "post_rejit": {
+          "programs": {
+            "128": {
+              "bytes_jited": 175,
+              "bytes_xlated": 16,
+              "id": 128,
+              "name": "kprobe__cap_cap",
+              "run_cnt_delta": 128915205,
+              "run_time_ns_delta": 8613824524,
+              "type": "kprobe"
+            },
+            "129": {
+              "bytes_jited": 48,
+              "bytes_xlated": 16,
+              "id": 129,
+              "name": "fentry_vfs_read",
+              "run_cnt_delta": 2000879,
+              "run_time_ns_delta": 182397358,
+              "type": "tracing"
+            },
+            "130": {
+              "bytes_jited": 140,
+              "bytes_xlated": 16,
+              "id": 130,
+              "name": "tcp_v4_connect",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "131": {
+              "bytes_jited": 153,
+              "bytes_xlated": 16,
+              "id": 131,
+              "name": "sys_enter",
+              "run_cnt_delta": 3174498794,
+              "run_time_ns_delta": 262454545249,
+              "type": "tracepoint"
+            },
+            "132": {
+              "bytes_jited": 4295,
+              "bytes_xlated": 16,
+              "id": 132,
+              "name": "inet_sock_set_s",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "142": {
+              "bytes_jited": 159,
+              "bytes_xlated": 16,
+              "id": 142,
+              "name": "blk_account_io_",
+              "run_cnt_delta": 165,
+              "run_time_ns_delta": 44224,
+              "type": "kprobe"
+            },
+            "143": {
+              "bytes_jited": 49,
+              "bytes_xlated": 16,
+              "id": 143,
+              "name": "fentry_vfs_writ",
+              "run_cnt_delta": 2090048,
+              "run_time_ns_delta": 185520436,
+              "type": "tracing"
+            },
+            "146": {
+              "bytes_jited": 3054,
+              "bytes_xlated": 16,
+              "id": 146,
+              "name": "kprobe__cap_cap",
+              "run_cnt_delta": 128915208,
+              "run_time_ns_delta": 42034892595,
+              "type": "kprobe"
+            },
+            "148": {
+              "bytes_jited": 3443,
+              "bytes_xlated": 16,
+              "id": 148,
+              "name": "tcp_v4_connect_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "149": {
+              "bytes_jited": 3483,
+              "bytes_xlated": 16,
+              "id": 149,
+              "name": "sys_exit",
+              "run_cnt_delta": 3174498797,
+              "run_time_ns_delta": 280084586953,
+              "type": "tracepoint"
+            },
+            "151": {
+              "bytes_jited": 49,
+              "bytes_xlated": 16,
+              "id": 151,
+              "name": "fentry_vfs_fsyn",
+              "run_cnt_delta": 42,
+              "run_time_ns_delta": 5248,
+              "type": "tracing"
+            },
+            "154": {
+              "bytes_jited": 49,
+              "bytes_xlated": 16,
+              "id": 154,
+              "name": "fentry_vfs_open",
+              "run_cnt_delta": 107901719,
+              "run_time_ns_delta": 4317808265,
+              "type": "tracing"
+            },
+            "155": {
+              "bytes_jited": 140,
+              "bytes_xlated": 16,
+              "id": 155,
+              "name": "tcp_v6_connect",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "157": {
+              "bytes_jited": 3102,
+              "bytes_xlated": 16,
+              "id": 157,
+              "name": "block_rq_insert",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracing"
+            },
+            "160": {
+              "bytes_jited": 49,
+              "bytes_xlated": 16,
+              "id": 160,
+              "name": "fentry_vfs_crea",
+              "run_cnt_delta": 199,
+              "run_time_ns_delta": 17434,
+              "type": "tracing"
+            },
+            "161": {
+              "bytes_jited": 3490,
+              "bytes_xlated": 16,
+              "id": 161,
+              "name": "tcp_v6_connect_",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "162": {
+              "bytes_jited": 3150,
+              "bytes_xlated": 16,
+              "id": 162,
+              "name": "block_rq_issue",
+              "run_cnt_delta": 423,
+              "run_time_ns_delta": 749611,
+              "type": "tracing"
+            },
+            "165": {
+              "bytes_jited": 3225,
+              "bytes_xlated": 16,
+              "id": 165,
+              "name": "block_rq_comple",
+              "run_cnt_delta": 447,
+              "run_time_ns_delta": 2527658,
+              "type": "tracing"
+            },
+            "166": {
+              "bytes_jited": 185,
+              "bytes_xlated": 16,
+              "id": 166,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "169": {
+              "bytes_jited": 185,
+              "bytes_xlated": 16,
+              "id": 169,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 107900925,
+              "run_time_ns_delta": 6924280118,
+              "type": "tracepoint"
+            },
+            "171": {
+              "bytes_jited": 2991,
+              "bytes_xlated": 16,
+              "id": 171,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "173": {
+              "bytes_jited": 160,
+              "bytes_xlated": 16,
+              "id": 173,
+              "name": "sched_wakeup",
+              "run_cnt_delta": 88247785,
+              "run_time_ns_delta": 7571847576,
+              "type": "tracing"
+            },
+            "174": {
+              "bytes_jited": 2991,
+              "bytes_xlated": 16,
+              "id": 174,
+              "name": "tracepoint__sys",
+              "run_cnt_delta": 107900925,
+              "run_time_ns_delta": 136962286430,
+              "type": "tracepoint"
+            },
+            "178": {
+              "bytes_jited": 160,
+              "bytes_xlated": 16,
+              "id": 178,
+              "name": "sched_wakeup_ne",
+              "run_cnt_delta": 122,
+              "run_time_ns_delta": 45274,
+              "type": "tracing"
+            },
+            "180": {
+              "bytes_jited": 3916,
+              "bytes_xlated": 16,
+              "id": 180,
+              "name": "sched_switch",
+              "run_cnt_delta": 176296084,
+              "run_time_ns_delta": 28004327041,
+              "type": "tracing"
+            }
+          },
+          "count": 25,
+          "installed_bytes": 38841,
+          "named_groups": {
+            "kprobe__cap_cap": {
+              "ids": [
+                128,
+                146
+              ],
+              "calls": 257830413,
+              "ns": 50648717119,
+              "bytes": 3229,
+              "ns_per_call": 196.44198110561922
+            },
+            "fentry_vfs_read": {
+              "ids": [
+                129
+              ],
+              "calls": 2000879,
+              "ns": 182397358,
+              "bytes": 48,
+              "ns_per_call": 91.15861478880032
+            },
+            "tcp_v4_connect": {
+              "ids": [
+                130
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 140,
+              "ns_per_call": null
+            },
+            "sys_enter": {
+              "ids": [
+                131
+              ],
+              "calls": 3174498794,
+              "ns": 262454545249,
+              "bytes": 153,
+              "ns_per_call": 82.67590012793686
+            },
+            "inet_sock_set_s": {
+              "ids": [
+                132
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 4295,
+              "ns_per_call": null
+            },
+            "blk_account_io_": {
+              "ids": [
+                142
+              ],
+              "calls": 165,
+              "ns": 44224,
+              "bytes": 159,
+              "ns_per_call": 268.0242424242424
+            },
+            "fentry_vfs_writ": {
+              "ids": [
+                143
+              ],
+              "calls": 2090048,
+              "ns": 185520436,
+              "bytes": 49,
+              "ns_per_call": 88.76372025905626
+            },
+            "tcp_v4_connect_": {
+              "ids": [
+                148
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 3443,
+              "ns_per_call": null
+            },
+            "sys_exit": {
+              "ids": [
+                149
+              ],
+              "calls": 3174498797,
+              "ns": 280084586953,
+              "bytes": 3483,
+              "ns_per_call": 88.22954578457822
+            },
+            "fentry_vfs_fsyn": {
+              "ids": [
+                151
+              ],
+              "calls": 42,
+              "ns": 5248,
+              "bytes": 49,
+              "ns_per_call": 124.95238095238095
+            },
+            "fentry_vfs_open": {
+              "ids": [
+                154
+              ],
+              "calls": 107901719,
+              "ns": 4317808265,
+              "bytes": 49,
+              "ns_per_call": 40.01612119821743
+            },
+            "tcp_v6_connect": {
+              "ids": [
+                155
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 140,
+              "ns_per_call": null
+            },
+            "block_rq_insert": {
+              "ids": [
+                157
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 3102,
+              "ns_per_call": null
+            },
+            "fentry_vfs_crea": {
+              "ids": [
+                160
+              ],
+              "calls": 199,
+              "ns": 17434,
+              "bytes": 49,
+              "ns_per_call": 87.60804020100502
+            },
+            "tcp_v6_connect_": {
+              "ids": [
+                161
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 3490,
+              "ns_per_call": null
+            },
+            "block_rq_issue": {
+              "ids": [
+                162
+              ],
+              "calls": 423,
+              "ns": 749611,
+              "bytes": 3150,
+              "ns_per_call": 1772.1300236406619
+            },
+            "block_rq_comple": {
+              "ids": [
+                165
+              ],
+              "calls": 447,
+              "ns": 2527658,
+              "bytes": 3225,
+              "ns_per_call": 5654.715883668904
+            },
+            "tracepoint__sys": {
+              "ids": [
+                166,
+                169,
+                171,
+                174
+              ],
+              "calls": 215801850,
+              "ns": 143886566548,
+              "bytes": 6352,
+              "ns_per_call": 666.75316522078
+            },
+            "sched_wakeup": {
+              "ids": [
+                173
+              ],
+              "calls": 88247785,
+              "ns": 7571847576,
+              "bytes": 160,
+              "ns_per_call": 85.80212609302319
+            },
+            "sched_wakeup_ne": {
+              "ids": [
+                178
+              ],
+              "calls": 122,
+              "ns": 45274,
+              "bytes": 160,
+              "ns_per_call": 371.0983606557377
+            },
+            "sched_switch": {
+              "ids": [
+                180
+              ],
+              "calls": 176296084,
+              "ns": 28004327041,
+              "bytes": 3916,
+              "ns_per_call": 158.84826483723825
+            }
+          }
+        }
+      },
+      "native_over_jit_installed_bytes": 4.876459510357815
+    },
+    {
+      "app": "otel",
+      "configuration": "named-array",
+      "source": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_030302_441920/details/apps/otelcol-ebpf-profiler__profiling.json",
+      "phases": {
+        "baseline": {
+          "programs": {
+            "10": {
+              "bytes_jited": 14983,
+              "bytes_xlated": 24736,
+              "id": 10,
+              "name": "perf_unwind_php",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "11": {
+              "bytes_jited": 19605,
+              "bytes_xlated": 33208,
+              "id": 11,
+              "name": "perf_unwind_pyt",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "12": {
+              "bytes_jited": 17840,
+              "bytes_xlated": 30280,
+              "id": 12,
+              "name": "perf_unwind_rub",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "13": {
+              "bytes_jited": 20215,
+              "bytes_xlated": 33448,
+              "id": 13,
+              "name": "perf_unwind_v8",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "14": {
+              "bytes_jited": 22797,
+              "bytes_xlated": 37440,
+              "id": 14,
+              "name": "perf_unwind_dot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "15": {
+              "bytes_jited": 1572,
+              "bytes_xlated": 2504,
+              "id": 15,
+              "name": "perf_go_labels",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "16": {
+              "bytes_jited": 792,
+              "bytes_xlated": 1320,
+              "id": 16,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 8644,
+              "run_time_ns_delta": 13256749,
+              "type": "tracepoint"
+            },
+            "17": {
+              "bytes_jited": 3815,
+              "bytes_xlated": 5904,
+              "id": 17,
+              "name": "native_tracer_e",
+              "run_cnt_delta": 417763291,
+              "run_time_ns_delta": 1053438631361,
+              "type": "perf_event"
+            },
+            "18": {
+              "bytes_jited": 3679,
+              "bytes_xlated": 5712,
+              "id": 18,
+              "name": "custom__generic",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "6": {
+              "bytes_jited": 3650,
+              "bytes_xlated": 6144,
+              "id": 6,
+              "name": "perf_unwind_sto",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "7": {
+              "bytes_jited": 21868,
+              "bytes_xlated": 37024,
+              "id": 7,
+              "name": "perf_unwind_nat",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "8": {
+              "bytes_jited": 18424,
+              "bytes_xlated": 28080,
+              "id": 8,
+              "name": "perf_unwind_hot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "9": {
+              "bytes_jited": 18264,
+              "bytes_xlated": 29640,
+              "id": 9,
+              "name": "perf_unwind_per",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            }
+          },
+          "count": 13,
+          "installed_bytes": 167504,
+          "named_groups": {
+            "perf_unwind_php": {
+              "ids": [
+                10
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 14983,
+              "ns_per_call": null
+            },
+            "perf_unwind_pyt": {
+              "ids": [
+                11
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 19605,
+              "ns_per_call": null
+            },
+            "perf_unwind_rub": {
+              "ids": [
+                12
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 17840,
+              "ns_per_call": null
+            },
+            "perf_unwind_v8": {
+              "ids": [
+                13
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 20215,
+              "ns_per_call": null
+            },
+            "perf_unwind_dot": {
+              "ids": [
+                14
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 22797,
+              "ns_per_call": null
+            },
+            "perf_go_labels": {
+              "ids": [
+                15
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 1572,
+              "ns_per_call": null
+            },
+            "tracepoint__sch": {
+              "ids": [
+                16
+              ],
+              "calls": 8644,
+              "ns": 13256749,
+              "bytes": 792,
+              "ns_per_call": 1533.6359324386858
+            },
+            "native_tracer_e": {
+              "ids": [
+                17
+              ],
+              "calls": 417763291,
+              "ns": 1053438631361,
+              "bytes": 3815,
+              "ns_per_call": 2521.6160779454412
+            },
+            "custom__generic": {
+              "ids": [
+                18
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 3679,
+              "ns_per_call": null
+            },
+            "perf_unwind_sto": {
+              "ids": [
+                6
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 3650,
+              "ns_per_call": null
+            },
+            "perf_unwind_nat": {
+              "ids": [
+                7
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 21868,
+              "ns_per_call": null
+            },
+            "perf_unwind_hot": {
+              "ids": [
+                8
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 18424,
+              "ns_per_call": null
+            },
+            "perf_unwind_per": {
+              "ids": [
+                9
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 18264,
+              "ns_per_call": null
+            }
+          }
+        },
+        "post_rejit": {
+          "programs": {
+            "26": {
+              "bytes_jited": 7477,
+              "bytes_xlated": 24,
+              "id": 26,
+              "name": "perf_unwind_sto",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "28": {
+              "bytes_jited": 30485,
+              "bytes_xlated": 24,
+              "id": 28,
+              "name": "perf_unwind_nat",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "30": {
+              "bytes_jited": 39924,
+              "bytes_xlated": 24,
+              "id": 30,
+              "name": "perf_unwind_hot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "32": {
+              "bytes_jited": 36468,
+              "bytes_xlated": 24,
+              "id": 32,
+              "name": "perf_unwind_per",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "34": {
+              "bytes_jited": 33339,
+              "bytes_xlated": 24,
+              "id": 34,
+              "name": "perf_unwind_php",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "36": {
+              "bytes_jited": 20209,
+              "bytes_xlated": 24,
+              "id": 36,
+              "name": "perf_unwind_pyt",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "38": {
+              "bytes_jited": 26990,
+              "bytes_xlated": 24,
+              "id": 38,
+              "name": "perf_unwind_rub",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "40": {
+              "bytes_jited": 34013,
+              "bytes_xlated": 24,
+              "id": 40,
+              "name": "perf_unwind_v8",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "42": {
+              "bytes_jited": 35780,
+              "bytes_xlated": 24,
+              "id": 42,
+              "name": "perf_unwind_dot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "44": {
+              "bytes_jited": 2961,
+              "bytes_xlated": 16,
+              "id": 44,
+              "name": "perf_go_labels",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "46": {
+              "bytes_jited": 1311,
+              "bytes_xlated": 16,
+              "id": 46,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 8944,
+              "run_time_ns_delta": 13655440,
+              "type": "tracepoint"
+            },
+            "48": {
+              "bytes_jited": 6768,
+              "bytes_xlated": 24,
+              "id": 48,
+              "name": "native_tracer_e",
+              "run_cnt_delta": 423441833,
+              "run_time_ns_delta": 1159191279251,
+              "type": "perf_event"
+            }
+          },
+          "count": 12,
+          "installed_bytes": 275725,
+          "named_groups": {
+            "perf_unwind_sto": {
+              "ids": [
+                26
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 7477,
+              "ns_per_call": null
+            },
+            "perf_unwind_nat": {
+              "ids": [
+                28
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 30485,
+              "ns_per_call": null
+            },
+            "perf_unwind_hot": {
+              "ids": [
+                30
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 39924,
+              "ns_per_call": null
+            },
+            "perf_unwind_per": {
+              "ids": [
+                32
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 36468,
+              "ns_per_call": null
+            },
+            "perf_unwind_php": {
+              "ids": [
+                34
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 33339,
+              "ns_per_call": null
+            },
+            "perf_unwind_pyt": {
+              "ids": [
+                36
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 20209,
+              "ns_per_call": null
+            },
+            "perf_unwind_rub": {
+              "ids": [
+                38
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 26990,
+              "ns_per_call": null
+            },
+            "perf_unwind_v8": {
+              "ids": [
+                40
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 34013,
+              "ns_per_call": null
+            },
+            "perf_unwind_dot": {
+              "ids": [
+                42
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 35780,
+              "ns_per_call": null
+            },
+            "perf_go_labels": {
+              "ids": [
+                44
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 2961,
+              "ns_per_call": null
+            },
+            "tracepoint__sch": {
+              "ids": [
+                46
+              ],
+              "calls": 8944,
+              "ns": 13655440,
+              "bytes": 1311,
+              "ns_per_call": 1526.7710196779965
+            },
+            "native_tracer_e": {
+              "ids": [
+                48
+              ],
+              "calls": 423441833,
+              "ns": 1159191279251,
+              "bytes": 6768,
+              "ns_per_call": 2737.5454877435313
+            }
+          }
+        }
+      },
+      "native_over_jit_installed_bytes": 1.6460800936097049
+    },
+    {
+      "app": "otel",
+      "configuration": "typed-hash",
+      "source": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_033202_840307/details/apps/otelcol-ebpf-profiler__profiling.json",
+      "phases": {
+        "baseline": {
+          "programs": {
+            "10": {
+              "bytes_jited": 14983,
+              "bytes_xlated": 24736,
+              "id": 10,
+              "name": "perf_unwind_php",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "11": {
+              "bytes_jited": 19605,
+              "bytes_xlated": 33208,
+              "id": 11,
+              "name": "perf_unwind_pyt",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "12": {
+              "bytes_jited": 17840,
+              "bytes_xlated": 30280,
+              "id": 12,
+              "name": "perf_unwind_rub",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "13": {
+              "bytes_jited": 20215,
+              "bytes_xlated": 33448,
+              "id": 13,
+              "name": "perf_unwind_v8",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "14": {
+              "bytes_jited": 22797,
+              "bytes_xlated": 37440,
+              "id": 14,
+              "name": "perf_unwind_dot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "15": {
+              "bytes_jited": 1572,
+              "bytes_xlated": 2504,
+              "id": 15,
+              "name": "perf_go_labels",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "16": {
+              "bytes_jited": 792,
+              "bytes_xlated": 1320,
+              "id": 16,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 8801,
+              "run_time_ns_delta": 13620436,
+              "type": "tracepoint"
+            },
+            "17": {
+              "bytes_jited": 3815,
+              "bytes_xlated": 5904,
+              "id": 17,
+              "name": "native_tracer_e",
+              "run_cnt_delta": 423729022,
+              "run_time_ns_delta": 1054064392749,
+              "type": "perf_event"
+            },
+            "18": {
+              "bytes_jited": 3679,
+              "bytes_xlated": 5712,
+              "id": 18,
+              "name": "custom__generic",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "6": {
+              "bytes_jited": 3650,
+              "bytes_xlated": 6144,
+              "id": 6,
+              "name": "perf_unwind_sto",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "7": {
+              "bytes_jited": 21868,
+              "bytes_xlated": 37024,
+              "id": 7,
+              "name": "perf_unwind_nat",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "8": {
+              "bytes_jited": 18424,
+              "bytes_xlated": 28080,
+              "id": 8,
+              "name": "perf_unwind_hot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "9": {
+              "bytes_jited": 18264,
+              "bytes_xlated": 29640,
+              "id": 9,
+              "name": "perf_unwind_per",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            }
+          },
+          "count": 13,
+          "installed_bytes": 167504,
+          "named_groups": {
+            "perf_unwind_php": {
+              "ids": [
+                10
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 14983,
+              "ns_per_call": null
+            },
+            "perf_unwind_pyt": {
+              "ids": [
+                11
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 19605,
+              "ns_per_call": null
+            },
+            "perf_unwind_rub": {
+              "ids": [
+                12
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 17840,
+              "ns_per_call": null
+            },
+            "perf_unwind_v8": {
+              "ids": [
+                13
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 20215,
+              "ns_per_call": null
+            },
+            "perf_unwind_dot": {
+              "ids": [
+                14
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 22797,
+              "ns_per_call": null
+            },
+            "perf_go_labels": {
+              "ids": [
+                15
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 1572,
+              "ns_per_call": null
+            },
+            "tracepoint__sch": {
+              "ids": [
+                16
+              ],
+              "calls": 8801,
+              "ns": 13620436,
+              "bytes": 792,
+              "ns_per_call": 1547.6009544369958
+            },
+            "native_tracer_e": {
+              "ids": [
+                17
+              ],
+              "calls": 423729022,
+              "ns": 1054064392749,
+              "bytes": 3815,
+              "ns_per_call": 2487.590743192002
+            },
+            "custom__generic": {
+              "ids": [
+                18
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 3679,
+              "ns_per_call": null
+            },
+            "perf_unwind_sto": {
+              "ids": [
+                6
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 3650,
+              "ns_per_call": null
+            },
+            "perf_unwind_nat": {
+              "ids": [
+                7
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 21868,
+              "ns_per_call": null
+            },
+            "perf_unwind_hot": {
+              "ids": [
+                8
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 18424,
+              "ns_per_call": null
+            },
+            "perf_unwind_per": {
+              "ids": [
+                9
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 18264,
+              "ns_per_call": null
+            }
+          }
+        },
+        "post_rejit": {
+          "programs": {
+            "26": {
+              "bytes_jited": 7520,
+              "bytes_xlated": 24,
+              "id": 26,
+              "name": "perf_unwind_sto",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "28": {
+              "bytes_jited": 30557,
+              "bytes_xlated": 24,
+              "id": 28,
+              "name": "perf_unwind_nat",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "30": {
+              "bytes_jited": 39969,
+              "bytes_xlated": 24,
+              "id": 30,
+              "name": "perf_unwind_hot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "32": {
+              "bytes_jited": 36477,
+              "bytes_xlated": 24,
+              "id": 32,
+              "name": "perf_unwind_per",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "34": {
+              "bytes_jited": 33348,
+              "bytes_xlated": 24,
+              "id": 34,
+              "name": "perf_unwind_php",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "36": {
+              "bytes_jited": 20218,
+              "bytes_xlated": 24,
+              "id": 36,
+              "name": "perf_unwind_pyt",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "38": {
+              "bytes_jited": 26999,
+              "bytes_xlated": 24,
+              "id": 38,
+              "name": "perf_unwind_rub",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "40": {
+              "bytes_jited": 34094,
+              "bytes_xlated": 24,
+              "id": 40,
+              "name": "perf_unwind_v8",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "42": {
+              "bytes_jited": 35843,
+              "bytes_xlated": 24,
+              "id": 42,
+              "name": "perf_unwind_dot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "44": {
+              "bytes_jited": 2970,
+              "bytes_xlated": 16,
+              "id": 44,
+              "name": "perf_go_labels",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "46": {
+              "bytes_jited": 1361,
+              "bytes_xlated": 16,
+              "id": 46,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 8661,
+              "run_time_ns_delta": 14026814,
+              "type": "tracepoint"
+            },
+            "48": {
+              "bytes_jited": 6802,
+              "bytes_xlated": 24,
+              "id": 48,
+              "name": "native_tracer_e",
+              "run_cnt_delta": 416793382,
+              "run_time_ns_delta": 1155265872308,
+              "type": "perf_event"
+            }
+          },
+          "count": 12,
+          "installed_bytes": 276158,
+          "named_groups": {
+            "perf_unwind_sto": {
+              "ids": [
+                26
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 7520,
+              "ns_per_call": null
+            },
+            "perf_unwind_nat": {
+              "ids": [
+                28
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 30557,
+              "ns_per_call": null
+            },
+            "perf_unwind_hot": {
+              "ids": [
+                30
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 39969,
+              "ns_per_call": null
+            },
+            "perf_unwind_per": {
+              "ids": [
+                32
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 36477,
+              "ns_per_call": null
+            },
+            "perf_unwind_php": {
+              "ids": [
+                34
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 33348,
+              "ns_per_call": null
+            },
+            "perf_unwind_pyt": {
+              "ids": [
+                36
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 20218,
+              "ns_per_call": null
+            },
+            "perf_unwind_rub": {
+              "ids": [
+                38
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 26999,
+              "ns_per_call": null
+            },
+            "perf_unwind_v8": {
+              "ids": [
+                40
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 34094,
+              "ns_per_call": null
+            },
+            "perf_unwind_dot": {
+              "ids": [
+                42
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 35843,
+              "ns_per_call": null
+            },
+            "perf_go_labels": {
+              "ids": [
+                44
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 2970,
+              "ns_per_call": null
+            },
+            "tracepoint__sch": {
+              "ids": [
+                46
+              ],
+              "calls": 8661,
+              "ns": 14026814,
+              "bytes": 1361,
+              "ns_per_call": 1619.5374668052189
+            },
+            "native_tracer_e": {
+              "ids": [
+                48
+              ],
+              "calls": 416793382,
+              "ns": 1155265872308,
+              "bytes": 6802,
+              "ns_per_call": 2771.7951440697298
+            }
+          }
+        }
+      },
+      "native_over_jit_installed_bytes": 1.6486651065049194
+    },
+    {
+      "app": "otel",
+      "configuration": "read-hash-array-lpm",
+      "source": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_112435_142525/details/apps/otelcol-ebpf-profiler__profiling.json",
+      "phases": {
+        "baseline": {
+          "programs": {
+            "10": {
+              "bytes_jited": 14983,
+              "bytes_xlated": 24736,
+              "id": 10,
+              "name": "perf_unwind_php",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "11": {
+              "bytes_jited": 19605,
+              "bytes_xlated": 33208,
+              "id": 11,
+              "name": "perf_unwind_pyt",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "12": {
+              "bytes_jited": 17840,
+              "bytes_xlated": 30280,
+              "id": 12,
+              "name": "perf_unwind_rub",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "13": {
+              "bytes_jited": 20215,
+              "bytes_xlated": 33448,
+              "id": 13,
+              "name": "perf_unwind_v8",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "14": {
+              "bytes_jited": 22797,
+              "bytes_xlated": 37440,
+              "id": 14,
+              "name": "perf_unwind_dot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "15": {
+              "bytes_jited": 1572,
+              "bytes_xlated": 2504,
+              "id": 15,
+              "name": "perf_go_labels",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "16": {
+              "bytes_jited": 792,
+              "bytes_xlated": 1320,
+              "id": 16,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 8806,
+              "run_time_ns_delta": 14562482,
+              "type": "tracepoint"
+            },
+            "17": {
+              "bytes_jited": 3815,
+              "bytes_xlated": 5904,
+              "id": 17,
+              "name": "native_tracer_e",
+              "run_cnt_delta": 430105539,
+              "run_time_ns_delta": 1035262334268,
+              "type": "perf_event"
+            },
+            "18": {
+              "bytes_jited": 3679,
+              "bytes_xlated": 5712,
+              "id": 18,
+              "name": "custom__generic",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "6": {
+              "bytes_jited": 3650,
+              "bytes_xlated": 6144,
+              "id": 6,
+              "name": "perf_unwind_sto",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "7": {
+              "bytes_jited": 21868,
+              "bytes_xlated": 37024,
+              "id": 7,
+              "name": "perf_unwind_nat",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "8": {
+              "bytes_jited": 18424,
+              "bytes_xlated": 28080,
+              "id": 8,
+              "name": "perf_unwind_hot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "9": {
+              "bytes_jited": 18264,
+              "bytes_xlated": 29640,
+              "id": 9,
+              "name": "perf_unwind_per",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            }
+          },
+          "count": 13,
+          "installed_bytes": 167504,
+          "named_groups": {
+            "perf_unwind_php": {
+              "ids": [
+                10
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 14983,
+              "ns_per_call": null
+            },
+            "perf_unwind_pyt": {
+              "ids": [
+                11
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 19605,
+              "ns_per_call": null
+            },
+            "perf_unwind_rub": {
+              "ids": [
+                12
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 17840,
+              "ns_per_call": null
+            },
+            "perf_unwind_v8": {
+              "ids": [
+                13
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 20215,
+              "ns_per_call": null
+            },
+            "perf_unwind_dot": {
+              "ids": [
+                14
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 22797,
+              "ns_per_call": null
+            },
+            "perf_go_labels": {
+              "ids": [
+                15
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 1572,
+              "ns_per_call": null
+            },
+            "tracepoint__sch": {
+              "ids": [
+                16
+              ],
+              "calls": 8806,
+              "ns": 14562482,
+              "bytes": 792,
+              "ns_per_call": 1653.6999772882125
+            },
+            "native_tracer_e": {
+              "ids": [
+                17
+              ],
+              "calls": 430105539,
+              "ns": 1035262334268,
+              "bytes": 3815,
+              "ns_per_call": 2406.9960518876273
+            },
+            "custom__generic": {
+              "ids": [
+                18
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 3679,
+              "ns_per_call": null
+            },
+            "perf_unwind_sto": {
+              "ids": [
+                6
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 3650,
+              "ns_per_call": null
+            },
+            "perf_unwind_nat": {
+              "ids": [
+                7
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 21868,
+              "ns_per_call": null
+            },
+            "perf_unwind_hot": {
+              "ids": [
+                8
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 18424,
+              "ns_per_call": null
+            },
+            "perf_unwind_per": {
+              "ids": [
+                9
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 18264,
+              "ns_per_call": null
+            }
+          }
+        },
+        "post_rejit": {
+          "programs": {
+            "26": {
+              "bytes_jited": 9973,
+              "bytes_xlated": 24,
+              "id": 26,
+              "name": "perf_unwind_sto",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "28": {
+              "bytes_jited": 33141,
+              "bytes_xlated": 24,
+              "id": 28,
+              "name": "perf_unwind_nat",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "30": {
+              "bytes_jited": 42553,
+              "bytes_xlated": 24,
+              "id": 30,
+              "name": "perf_unwind_hot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "32": {
+              "bytes_jited": 38930,
+              "bytes_xlated": 24,
+              "id": 32,
+              "name": "perf_unwind_per",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "34": {
+              "bytes_jited": 35932,
+              "bytes_xlated": 24,
+              "id": 34,
+              "name": "perf_unwind_php",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "36": {
+              "bytes_jited": 22671,
+              "bytes_xlated": 24,
+              "id": 36,
+              "name": "perf_unwind_pyt",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "38": {
+              "bytes_jited": 29452,
+              "bytes_xlated": 24,
+              "id": 38,
+              "name": "perf_unwind_rub",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "40": {
+              "bytes_jited": 36678,
+              "bytes_xlated": 24,
+              "id": 40,
+              "name": "perf_unwind_v8",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "42": {
+              "bytes_jited": 38427,
+              "bytes_xlated": 24,
+              "id": 42,
+              "name": "perf_unwind_dot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "44": {
+              "bytes_jited": 5168,
+              "bytes_xlated": 16,
+              "id": 44,
+              "name": "perf_go_labels",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "46": {
+              "bytes_jited": 3619,
+              "bytes_xlated": 16,
+              "id": 46,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 8818,
+              "run_time_ns_delta": 15376031,
+              "type": "tracepoint"
+            },
+            "48": {
+              "bytes_jited": 9315,
+              "bytes_xlated": 24,
+              "id": 48,
+              "name": "native_tracer_e",
+              "run_cnt_delta": 419359036,
+              "run_time_ns_delta": 1134395939975,
+              "type": "perf_event"
+            }
+          },
+          "count": 12,
+          "installed_bytes": 305859,
+          "named_groups": {
+            "perf_unwind_sto": {
+              "ids": [
+                26
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 9973,
+              "ns_per_call": null
+            },
+            "perf_unwind_nat": {
+              "ids": [
+                28
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 33141,
+              "ns_per_call": null
+            },
+            "perf_unwind_hot": {
+              "ids": [
+                30
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 42553,
+              "ns_per_call": null
+            },
+            "perf_unwind_per": {
+              "ids": [
+                32
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 38930,
+              "ns_per_call": null
+            },
+            "perf_unwind_php": {
+              "ids": [
+                34
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 35932,
+              "ns_per_call": null
+            },
+            "perf_unwind_pyt": {
+              "ids": [
+                36
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 22671,
+              "ns_per_call": null
+            },
+            "perf_unwind_rub": {
+              "ids": [
+                38
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 29452,
+              "ns_per_call": null
+            },
+            "perf_unwind_v8": {
+              "ids": [
+                40
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 36678,
+              "ns_per_call": null
+            },
+            "perf_unwind_dot": {
+              "ids": [
+                42
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 38427,
+              "ns_per_call": null
+            },
+            "perf_go_labels": {
+              "ids": [
+                44
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 5168,
+              "ns_per_call": null
+            },
+            "tracepoint__sch": {
+              "ids": [
+                46
+              ],
+              "calls": 8818,
+              "ns": 15376031,
+              "bytes": 3619,
+              "ns_per_call": 1743.7095713313677
+            },
+            "native_tracer_e": {
+              "ids": [
+                48
+              ],
+              "calls": 419359036,
+              "ns": 1134395939975,
+              "bytes": 9315,
+              "ns_per_call": 2705.070935862701
+            }
+          }
+        }
+      },
+      "native_over_jit_installed_bytes": 1.8259802750979082
+    },
+    {
+      "app": "otel",
+      "configuration": "combined-codegen-lto",
+      "source": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_145101_018174/details/apps/otelcol-ebpf-profiler__profiling.json",
+      "phases": {
+        "baseline": {
+          "programs": {
+            "10": {
+              "bytes_jited": 14983,
+              "bytes_xlated": 24736,
+              "id": 10,
+              "name": "perf_unwind_php",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "11": {
+              "bytes_jited": 19605,
+              "bytes_xlated": 33208,
+              "id": 11,
+              "name": "perf_unwind_pyt",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "12": {
+              "bytes_jited": 17840,
+              "bytes_xlated": 30280,
+              "id": 12,
+              "name": "perf_unwind_rub",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "13": {
+              "bytes_jited": 20215,
+              "bytes_xlated": 33448,
+              "id": 13,
+              "name": "perf_unwind_v8",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "14": {
+              "bytes_jited": 22797,
+              "bytes_xlated": 37440,
+              "id": 14,
+              "name": "perf_unwind_dot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "15": {
+              "bytes_jited": 1572,
+              "bytes_xlated": 2504,
+              "id": 15,
+              "name": "perf_go_labels",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "16": {
+              "bytes_jited": 792,
+              "bytes_xlated": 1320,
+              "id": 16,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 8906,
+              "run_time_ns_delta": 13475662,
+              "type": "tracepoint"
+            },
+            "17": {
+              "bytes_jited": 3815,
+              "bytes_xlated": 5904,
+              "id": 17,
+              "name": "native_tracer_e",
+              "run_cnt_delta": 430187544,
+              "run_time_ns_delta": 1027741428969,
+              "type": "perf_event"
+            },
+            "18": {
+              "bytes_jited": 3679,
+              "bytes_xlated": 5712,
+              "id": 18,
+              "name": "custom__generic",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "6": {
+              "bytes_jited": 3650,
+              "bytes_xlated": 6144,
+              "id": 6,
+              "name": "perf_unwind_sto",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "7": {
+              "bytes_jited": 21868,
+              "bytes_xlated": 37024,
+              "id": 7,
+              "name": "perf_unwind_nat",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "8": {
+              "bytes_jited": 18424,
+              "bytes_xlated": 28080,
+              "id": 8,
+              "name": "perf_unwind_hot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "9": {
+              "bytes_jited": 18264,
+              "bytes_xlated": 29640,
+              "id": 9,
+              "name": "perf_unwind_per",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            }
+          },
+          "count": 13,
+          "installed_bytes": 167504,
+          "named_groups": {
+            "perf_unwind_php": {
+              "ids": [
+                10
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 14983,
+              "ns_per_call": null
+            },
+            "perf_unwind_pyt": {
+              "ids": [
+                11
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 19605,
+              "ns_per_call": null
+            },
+            "perf_unwind_rub": {
+              "ids": [
+                12
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 17840,
+              "ns_per_call": null
+            },
+            "perf_unwind_v8": {
+              "ids": [
+                13
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 20215,
+              "ns_per_call": null
+            },
+            "perf_unwind_dot": {
+              "ids": [
+                14
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 22797,
+              "ns_per_call": null
+            },
+            "perf_go_labels": {
+              "ids": [
+                15
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 1572,
+              "ns_per_call": null
+            },
+            "tracepoint__sch": {
+              "ids": [
+                16
+              ],
+              "calls": 8906,
+              "ns": 13475662,
+              "bytes": 792,
+              "ns_per_call": 1513.0992589265663
+            },
+            "native_tracer_e": {
+              "ids": [
+                17
+              ],
+              "calls": 430187544,
+              "ns": 1027741428969,
+              "bytes": 3815,
+              "ns_per_call": 2389.054363157014
+            },
+            "custom__generic": {
+              "ids": [
+                18
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 3679,
+              "ns_per_call": null
+            },
+            "perf_unwind_sto": {
+              "ids": [
+                6
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 3650,
+              "ns_per_call": null
+            },
+            "perf_unwind_nat": {
+              "ids": [
+                7
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 21868,
+              "ns_per_call": null
+            },
+            "perf_unwind_hot": {
+              "ids": [
+                8
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 18424,
+              "ns_per_call": null
+            },
+            "perf_unwind_per": {
+              "ids": [
+                9
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 18264,
+              "ns_per_call": null
+            }
+          }
+        },
+        "post_rejit": {
+          "programs": {
+            "26": {
+              "bytes_jited": 9985,
+              "bytes_xlated": 24,
+              "id": 26,
+              "name": "perf_unwind_sto",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "28": {
+              "bytes_jited": 31310,
+              "bytes_xlated": 24,
+              "id": 28,
+              "name": "perf_unwind_nat",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "30": {
+              "bytes_jited": 42928,
+              "bytes_xlated": 24,
+              "id": 30,
+              "name": "perf_unwind_hot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "32": {
+              "bytes_jited": 38934,
+              "bytes_xlated": 24,
+              "id": 32,
+              "name": "perf_unwind_per",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "34": {
+              "bytes_jited": 35927,
+              "bytes_xlated": 24,
+              "id": 34,
+              "name": "perf_unwind_php",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "36": {
+              "bytes_jited": 22760,
+              "bytes_xlated": 24,
+              "id": 36,
+              "name": "perf_unwind_pyt",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "38": {
+              "bytes_jited": 29456,
+              "bytes_xlated": 24,
+              "id": 38,
+              "name": "perf_unwind_rub",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "40": {
+              "bytes_jited": 36582,
+              "bytes_xlated": 24,
+              "id": 40,
+              "name": "perf_unwind_v8",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "42": {
+              "bytes_jited": 38439,
+              "bytes_xlated": 24,
+              "id": 42,
+              "name": "perf_unwind_dot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "44": {
+              "bytes_jited": 5162,
+              "bytes_xlated": 16,
+              "id": 44,
+              "name": "perf_go_labels",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "46": {
+              "bytes_jited": 3619,
+              "bytes_xlated": 16,
+              "id": 46,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 8906,
+              "run_time_ns_delta": 16053560,
+              "type": "tracepoint"
+            },
+            "48": {
+              "bytes_jited": 9434,
+              "bytes_xlated": 24,
+              "id": 48,
+              "name": "native_tracer_e",
+              "run_cnt_delta": 430616062,
+              "run_time_ns_delta": 924017870094,
+              "type": "perf_event"
+            }
+          },
+          "count": 12,
+          "installed_bytes": 304536,
+          "named_groups": {
+            "perf_unwind_sto": {
+              "ids": [
+                26
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 9985,
+              "ns_per_call": null
+            },
+            "perf_unwind_nat": {
+              "ids": [
+                28
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 31310,
+              "ns_per_call": null
+            },
+            "perf_unwind_hot": {
+              "ids": [
+                30
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 42928,
+              "ns_per_call": null
+            },
+            "perf_unwind_per": {
+              "ids": [
+                32
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 38934,
+              "ns_per_call": null
+            },
+            "perf_unwind_php": {
+              "ids": [
+                34
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 35927,
+              "ns_per_call": null
+            },
+            "perf_unwind_pyt": {
+              "ids": [
+                36
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 22760,
+              "ns_per_call": null
+            },
+            "perf_unwind_rub": {
+              "ids": [
+                38
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 29456,
+              "ns_per_call": null
+            },
+            "perf_unwind_v8": {
+              "ids": [
+                40
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 36582,
+              "ns_per_call": null
+            },
+            "perf_unwind_dot": {
+              "ids": [
+                42
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 38439,
+              "ns_per_call": null
+            },
+            "perf_go_labels": {
+              "ids": [
+                44
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 5162,
+              "ns_per_call": null
+            },
+            "tracepoint__sch": {
+              "ids": [
+                46
+              ],
+              "calls": 8906,
+              "ns": 16053560,
+              "bytes": 3619,
+              "ns_per_call": 1802.555580507523
+            },
+            "native_tracer_e": {
+              "ids": [
+                48
+              ],
+              "calls": 430616062,
+              "ns": 924017870094,
+              "bytes": 9434,
+              "ns_per_call": 2145.8044686080475
+            }
+          }
+        }
+      },
+      "native_over_jit_installed_bytes": 1.818081956251791
+    },
+    {
+      "app": "otel",
+      "configuration": "corrected-all-lto",
+      "source": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_174202_766748/details/apps/otelcol-ebpf-profiler__profiling.json",
+      "phases": {
+        "baseline": {
+          "programs": {
+            "10": {
+              "bytes_jited": 14983,
+              "bytes_xlated": 24736,
+              "id": 10,
+              "name": "perf_unwind_php",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "11": {
+              "bytes_jited": 19605,
+              "bytes_xlated": 33208,
+              "id": 11,
+              "name": "perf_unwind_pyt",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "12": {
+              "bytes_jited": 17840,
+              "bytes_xlated": 30280,
+              "id": 12,
+              "name": "perf_unwind_rub",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "13": {
+              "bytes_jited": 20215,
+              "bytes_xlated": 33448,
+              "id": 13,
+              "name": "perf_unwind_v8",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "14": {
+              "bytes_jited": 22797,
+              "bytes_xlated": 37440,
+              "id": 14,
+              "name": "perf_unwind_dot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "15": {
+              "bytes_jited": 1572,
+              "bytes_xlated": 2504,
+              "id": 15,
+              "name": "perf_go_labels",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "16": {
+              "bytes_jited": 792,
+              "bytes_xlated": 1320,
+              "id": 16,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 8936,
+              "run_time_ns_delta": 14888216,
+              "type": "tracepoint"
+            },
+            "17": {
+              "bytes_jited": 3815,
+              "bytes_xlated": 5904,
+              "id": 17,
+              "name": "native_tracer_e",
+              "run_cnt_delta": 431280017,
+              "run_time_ns_delta": 1001950346159,
+              "type": "perf_event"
+            },
+            "18": {
+              "bytes_jited": 3679,
+              "bytes_xlated": 5712,
+              "id": 18,
+              "name": "custom__generic",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "6": {
+              "bytes_jited": 3650,
+              "bytes_xlated": 6144,
+              "id": 6,
+              "name": "perf_unwind_sto",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "7": {
+              "bytes_jited": 21868,
+              "bytes_xlated": 37024,
+              "id": 7,
+              "name": "perf_unwind_nat",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "8": {
+              "bytes_jited": 18424,
+              "bytes_xlated": 28080,
+              "id": 8,
+              "name": "perf_unwind_hot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "9": {
+              "bytes_jited": 18264,
+              "bytes_xlated": 29640,
+              "id": 9,
+              "name": "perf_unwind_per",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            }
+          },
+          "count": 13,
+          "installed_bytes": 167504,
+          "named_groups": {
+            "perf_unwind_php": {
+              "ids": [
+                10
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 14983,
+              "ns_per_call": null
+            },
+            "perf_unwind_pyt": {
+              "ids": [
+                11
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 19605,
+              "ns_per_call": null
+            },
+            "perf_unwind_rub": {
+              "ids": [
+                12
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 17840,
+              "ns_per_call": null
+            },
+            "perf_unwind_v8": {
+              "ids": [
+                13
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 20215,
+              "ns_per_call": null
+            },
+            "perf_unwind_dot": {
+              "ids": [
+                14
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 22797,
+              "ns_per_call": null
+            },
+            "perf_go_labels": {
+              "ids": [
+                15
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 1572,
+              "ns_per_call": null
+            },
+            "tracepoint__sch": {
+              "ids": [
+                16
+              ],
+              "calls": 8936,
+              "ns": 14888216,
+              "bytes": 792,
+              "ns_per_call": 1666.0940017905102
+            },
+            "native_tracer_e": {
+              "ids": [
+                17
+              ],
+              "calls": 431280017,
+              "ns": 1001950346159,
+              "bytes": 3815,
+              "ns_per_call": 2323.2014159352993
+            },
+            "custom__generic": {
+              "ids": [
+                18
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 3679,
+              "ns_per_call": null
+            },
+            "perf_unwind_sto": {
+              "ids": [
+                6
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 3650,
+              "ns_per_call": null
+            },
+            "perf_unwind_nat": {
+              "ids": [
+                7
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 21868,
+              "ns_per_call": null
+            },
+            "perf_unwind_hot": {
+              "ids": [
+                8
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 18424,
+              "ns_per_call": null
+            },
+            "perf_unwind_per": {
+              "ids": [
+                9
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 18264,
+              "ns_per_call": null
+            }
+          }
+        },
+        "post_rejit": {
+          "programs": {
+            "26": {
+              "bytes_jited": 9985,
+              "bytes_xlated": 24,
+              "id": 26,
+              "name": "perf_unwind_sto",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "28": {
+              "bytes_jited": 31321,
+              "bytes_xlated": 24,
+              "id": 28,
+              "name": "perf_unwind_nat",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "30": {
+              "bytes_jited": 42939,
+              "bytes_xlated": 24,
+              "id": 30,
+              "name": "perf_unwind_hot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "32": {
+              "bytes_jited": 38934,
+              "bytes_xlated": 24,
+              "id": 32,
+              "name": "perf_unwind_per",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "34": {
+              "bytes_jited": 35938,
+              "bytes_xlated": 24,
+              "id": 34,
+              "name": "perf_unwind_php",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "36": {
+              "bytes_jited": 22760,
+              "bytes_xlated": 24,
+              "id": 36,
+              "name": "perf_unwind_pyt",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "38": {
+              "bytes_jited": 29456,
+              "bytes_xlated": 24,
+              "id": 38,
+              "name": "perf_unwind_rub",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "40": {
+              "bytes_jited": 36593,
+              "bytes_xlated": 24,
+              "id": 40,
+              "name": "perf_unwind_v8",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "42": {
+              "bytes_jited": 38450,
+              "bytes_xlated": 24,
+              "id": 42,
+              "name": "perf_unwind_dot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "44": {
+              "bytes_jited": 5162,
+              "bytes_xlated": 16,
+              "id": 44,
+              "name": "perf_go_labels",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "46": {
+              "bytes_jited": 3630,
+              "bytes_xlated": 16,
+              "id": 46,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 8950,
+              "run_time_ns_delta": 14369615,
+              "type": "tracepoint"
+            },
+            "48": {
+              "bytes_jited": 9445,
+              "bytes_xlated": 24,
+              "id": 48,
+              "name": "native_tracer_e",
+              "run_cnt_delta": 431443078,
+              "run_time_ns_delta": 887795352922,
+              "type": "perf_event"
+            },
+            "50": {
+              "bytes_jited": 9400,
+              "bytes_xlated": 24,
+              "id": 50,
+              "name": "custom__generic",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            }
+          },
+          "count": 13,
+          "installed_bytes": 314013,
+          "named_groups": {
+            "perf_unwind_sto": {
+              "ids": [
+                26
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 9985,
+              "ns_per_call": null
+            },
+            "perf_unwind_nat": {
+              "ids": [
+                28
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 31321,
+              "ns_per_call": null
+            },
+            "perf_unwind_hot": {
+              "ids": [
+                30
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 42939,
+              "ns_per_call": null
+            },
+            "perf_unwind_per": {
+              "ids": [
+                32
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 38934,
+              "ns_per_call": null
+            },
+            "perf_unwind_php": {
+              "ids": [
+                34
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 35938,
+              "ns_per_call": null
+            },
+            "perf_unwind_pyt": {
+              "ids": [
+                36
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 22760,
+              "ns_per_call": null
+            },
+            "perf_unwind_rub": {
+              "ids": [
+                38
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 29456,
+              "ns_per_call": null
+            },
+            "perf_unwind_v8": {
+              "ids": [
+                40
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 36593,
+              "ns_per_call": null
+            },
+            "perf_unwind_dot": {
+              "ids": [
+                42
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 38450,
+              "ns_per_call": null
+            },
+            "perf_go_labels": {
+              "ids": [
+                44
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 5162,
+              "ns_per_call": null
+            },
+            "tracepoint__sch": {
+              "ids": [
+                46
+              ],
+              "calls": 8950,
+              "ns": 14369615,
+              "bytes": 3630,
+              "ns_per_call": 1605.5435754189944
+            },
+            "native_tracer_e": {
+              "ids": [
+                48
+              ],
+              "calls": 431443078,
+              "ns": 887795352922,
+              "bytes": 9445,
+              "ns_per_call": 2057.7346078594405
+            },
+            "custom__generic": {
+              "ids": [
+                50
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 9400,
+              "ns_per_call": null
+            }
+          }
+        }
+      },
+      "native_over_jit_installed_bytes": 1.8746597096188748
+    },
+    {
+      "app": "otel",
+      "configuration": "current-stats-off",
+      "source": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_102445_806916/details/apps/otelcol-ebpf-profiler__profiling.json",
+      "phases": {
+        "baseline": {
+          "programs": {
+            "10": {
+              "bytes_jited": 14983,
+              "bytes_xlated": 24736,
+              "id": 10,
+              "name": "perf_unwind_php",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "11": {
+              "bytes_jited": 19605,
+              "bytes_xlated": 33208,
+              "id": 11,
+              "name": "perf_unwind_pyt",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "12": {
+              "bytes_jited": 17840,
+              "bytes_xlated": 30280,
+              "id": 12,
+              "name": "perf_unwind_rub",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "13": {
+              "bytes_jited": 20215,
+              "bytes_xlated": 33448,
+              "id": 13,
+              "name": "perf_unwind_v8",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "14": {
+              "bytes_jited": 22797,
+              "bytes_xlated": 37440,
+              "id": 14,
+              "name": "perf_unwind_dot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "15": {
+              "bytes_jited": 1572,
+              "bytes_xlated": 2504,
+              "id": 15,
+              "name": "perf_go_labels",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "16": {
+              "bytes_jited": 792,
+              "bytes_xlated": 1320,
+              "id": 16,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "17": {
+              "bytes_jited": 3815,
+              "bytes_xlated": 5904,
+              "id": 17,
+              "name": "native_tracer_e",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "18": {
+              "bytes_jited": 3679,
+              "bytes_xlated": 5712,
+              "id": 18,
+              "name": "custom__generic",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            },
+            "6": {
+              "bytes_jited": 3650,
+              "bytes_xlated": 6144,
+              "id": 6,
+              "name": "perf_unwind_sto",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "7": {
+              "bytes_jited": 21868,
+              "bytes_xlated": 37024,
+              "id": 7,
+              "name": "perf_unwind_nat",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "8": {
+              "bytes_jited": 18424,
+              "bytes_xlated": 28080,
+              "id": 8,
+              "name": "perf_unwind_hot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "9": {
+              "bytes_jited": 18264,
+              "bytes_xlated": 29640,
+              "id": 9,
+              "name": "perf_unwind_per",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            }
+          },
+          "count": 13,
+          "installed_bytes": 167504,
+          "named_groups": {
+            "perf_unwind_php": {
+              "ids": [
+                10
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 14983,
+              "ns_per_call": null
+            },
+            "perf_unwind_pyt": {
+              "ids": [
+                11
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 19605,
+              "ns_per_call": null
+            },
+            "perf_unwind_rub": {
+              "ids": [
+                12
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 17840,
+              "ns_per_call": null
+            },
+            "perf_unwind_v8": {
+              "ids": [
+                13
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 20215,
+              "ns_per_call": null
+            },
+            "perf_unwind_dot": {
+              "ids": [
+                14
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 22797,
+              "ns_per_call": null
+            },
+            "perf_go_labels": {
+              "ids": [
+                15
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 1572,
+              "ns_per_call": null
+            },
+            "tracepoint__sch": {
+              "ids": [
+                16
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 792,
+              "ns_per_call": null
+            },
+            "native_tracer_e": {
+              "ids": [
+                17
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 3815,
+              "ns_per_call": null
+            },
+            "custom__generic": {
+              "ids": [
+                18
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 3679,
+              "ns_per_call": null
+            },
+            "perf_unwind_sto": {
+              "ids": [
+                6
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 3650,
+              "ns_per_call": null
+            },
+            "perf_unwind_nat": {
+              "ids": [
+                7
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 21868,
+              "ns_per_call": null
+            },
+            "perf_unwind_hot": {
+              "ids": [
+                8
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 18424,
+              "ns_per_call": null
+            },
+            "perf_unwind_per": {
+              "ids": [
+                9
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 18264,
+              "ns_per_call": null
+            }
+          }
+        },
+        "post_rejit": {
+          "programs": {
+            "26": {
+              "bytes_jited": 10955,
+              "bytes_xlated": 24,
+              "id": 26,
+              "name": "perf_unwind_sto",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "28": {
+              "bytes_jited": 30252,
+              "bytes_xlated": 24,
+              "id": 28,
+              "name": "perf_unwind_nat",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "30": {
+              "bytes_jited": 41278,
+              "bytes_xlated": 24,
+              "id": 30,
+              "name": "perf_unwind_hot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "32": {
+              "bytes_jited": 43063,
+              "bytes_xlated": 24,
+              "id": 32,
+              "name": "perf_unwind_per",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "34": {
+              "bytes_jited": 39420,
+              "bytes_xlated": 24,
+              "id": 34,
+              "name": "perf_unwind_php",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "36": {
+              "bytes_jited": 23143,
+              "bytes_xlated": 24,
+              "id": 36,
+              "name": "perf_unwind_pyt",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "38": {
+              "bytes_jited": 32966,
+              "bytes_xlated": 24,
+              "id": 38,
+              "name": "perf_unwind_rub",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "40": {
+              "bytes_jited": 39988,
+              "bytes_xlated": 24,
+              "id": 40,
+              "name": "perf_unwind_v8",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "42": {
+              "bytes_jited": 39584,
+              "bytes_xlated": 24,
+              "id": 42,
+              "name": "perf_unwind_dot",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "44": {
+              "bytes_jited": 6141,
+              "bytes_xlated": 16,
+              "id": 44,
+              "name": "perf_go_labels",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "46": {
+              "bytes_jited": 4290,
+              "bytes_xlated": 16,
+              "id": 46,
+              "name": "tracepoint__sch",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "tracepoint"
+            },
+            "48": {
+              "bytes_jited": 10477,
+              "bytes_xlated": 24,
+              "id": 48,
+              "name": "native_tracer_e",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "perf_event"
+            },
+            "50": {
+              "bytes_jited": 9257,
+              "bytes_xlated": 24,
+              "id": 50,
+              "name": "custom__generic",
+              "run_cnt_delta": 0,
+              "run_time_ns_delta": 0,
+              "type": "kprobe"
+            }
+          },
+          "count": 13,
+          "installed_bytes": 330814,
+          "named_groups": {
+            "perf_unwind_sto": {
+              "ids": [
+                26
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 10955,
+              "ns_per_call": null
+            },
+            "perf_unwind_nat": {
+              "ids": [
+                28
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 30252,
+              "ns_per_call": null
+            },
+            "perf_unwind_hot": {
+              "ids": [
+                30
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 41278,
+              "ns_per_call": null
+            },
+            "perf_unwind_per": {
+              "ids": [
+                32
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 43063,
+              "ns_per_call": null
+            },
+            "perf_unwind_php": {
+              "ids": [
+                34
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 39420,
+              "ns_per_call": null
+            },
+            "perf_unwind_pyt": {
+              "ids": [
+                36
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 23143,
+              "ns_per_call": null
+            },
+            "perf_unwind_rub": {
+              "ids": [
+                38
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 32966,
+              "ns_per_call": null
+            },
+            "perf_unwind_v8": {
+              "ids": [
+                40
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 39988,
+              "ns_per_call": null
+            },
+            "perf_unwind_dot": {
+              "ids": [
+                42
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 39584,
+              "ns_per_call": null
+            },
+            "perf_go_labels": {
+              "ids": [
+                44
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 6141,
+              "ns_per_call": null
+            },
+            "tracepoint__sch": {
+              "ids": [
+                46
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 4290,
+              "ns_per_call": null
+            },
+            "native_tracer_e": {
+              "ids": [
+                48
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 10477,
+              "ns_per_call": null
+            },
+            "custom__generic": {
+              "ids": [
+                50
+              ],
+              "calls": 0,
+              "ns": 0,
+              "bytes": 9257,
+              "ns_per_call": null
+            }
+          }
+        }
+      },
+      "native_over_jit_installed_bytes": 1.974961791957207
+    }
+  ],
+  "scope": "Every recorded program retained, no run-count filter. Named groups preserve colliding IDs. Installed bytes are BPF info bytes_jited; historical configurations are not isolated component comparisons."
+}

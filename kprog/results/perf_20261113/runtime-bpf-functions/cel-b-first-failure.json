@@ -1,0 +1,45 @@
+{
+  "time": "2026-11-16T12:32:02Z",
+  "controller": 1504177,
+  "commands": [
+    {
+      "command": [
+        "/var/tmp/kprog-tmp/perf/perf-context-lto/perf-context-lto",
+        "/var/tmp/kprog-tmp/perf/perf-context-lto/cel-stock-input.o",
+        "--symbol",
+        "native_cel_stock",
+        "--prog-type",
+        "2",
+        "--kernel-btf",
+        "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+        "--bpf-function-bodies",
+        "/workspaces/kprog-raw/perf/20261116-upstream-cel-b/cel-0.json",
+        "-o",
+        "/var/tmp/kprog-tmp/perf/perf-context-lto/cel-0.native.o"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--input",
+        "/var/tmp/kprog-tmp/perf/perf-context-lto/cel-0.native.o",
+        "--symbol",
+        "native_cel_stock",
+        "--mode",
+        "proof",
+        "--preserve-entry-abi",
+        "--output",
+        "/var/tmp/kprog-tmp/perf/perf-context-lto/cel-0.proof.o"
+      ],
+      "returncode": 1,
+      "stdout": "",
+      "stderr": "native-link: entry=native_cel_stock (91 bytes), 2 reachable symbol(s) total\n  - native_cel_stock (vaddr 0x0, 91 bytes) [entry]\n  - cel_expression (vaddr 0x0, 20 bytes) [entry]\nError: x86 unresolved register-indirect call in native_cel_stock at local offset 0x54 through RAX; helper calls must be rewritten before kernel load\n"
+    }
+  ],
+  "b_generated": false,
+  "stock_accepted": false,
+  "scope": "Actual upstream CEL body in a constructed KPROBE wrapper; unresolved indirect call after stack spill/reload at native +0x54. No app installation or stock result."
+}
