@@ -1,0 +1,11 @@
+{
+  "raw": "/workspaces/kprog-raw/perf/20261116-helper-memory/main",
+  "described_helper_calls": 134,
+  "code_bytes": 288400,
+  "stack_bytes": {
+    "trusted_x86_x86_sim_xdp": 824
+  },
+  "spill_slots": 52,
+  "guards_retained": 243,
+  "scope": "Normal retained frontend/backend; code and frame unchanged from empty-barrier candidate. Base compiler unpromoted; phase 1 open."
+}
