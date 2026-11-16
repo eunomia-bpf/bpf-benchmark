@@ -631,3 +631,5 @@ numeric/boundary vectors through runtime native LTO and native proof extraction.
 All pass. This is source/ABI coverage, not app installation, simulator-B stock
 acceptance or performance. One flag set and the published image remain intact.
 Receipts: runtime-bpf-functions/upstream-cel-report.json.
+
+2026-11-16T12:20:01Z — Phase 1 CEL verification coverage: add a focused runtime-context/stack/indirect-call wrapper around the four distinct actual upstream CEL bodies, then generate B from that same P through shared I and the normal B compiler. The existing stock loader gains a single-object invocation. Tests are ready; stock acceptance and actual app installation remain open. Production code, the unified producer flags and the frozen benchmark stay unchanged.
