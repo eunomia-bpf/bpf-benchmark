@@ -541,5 +541,36 @@
       "value": 0
     }
   },
-  "cilium_native_initial_values_scope": "Initial ELF values only; loaded map binding can replace them. This is not proof of an observed packet config mismatch."
+  "cilium_native_initial_values_scope": "Initial ELF values only; loaded map binding can replace them. This is not proof of an observed packet config mismatch.",
+  "cilium_cb_translation": {
+    "kernel_sk_buff_cb_offset": 40,
+    "kernel_qdisc_skb_cb_data_offset": 8,
+    "translated_ebpf_cb_offset": 48,
+    "native_cb_offset": 40,
+    "public_cb_bytes": 20,
+    "native_declared_cb_bytes": 48,
+    "native_clear_instruction_offsets": [
+      "0x45",
+      "0x4c",
+      "0x53",
+      "0x5a",
+      "0x61"
+    ],
+    "native_clear_skb_offsets": [
+      40,
+      44,
+      48,
+      52,
+      56
+    ],
+    "expected_clear_skb_offsets": [
+      48,
+      52,
+      56,
+      60,
+      64
+    ],
+    "payload": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/34/0.blob",
+    "scope": "BTF layout, kernel access-conversion source and retained machine stores agree on this mismatch. Packet host-route causality not measured."
+  }
 }

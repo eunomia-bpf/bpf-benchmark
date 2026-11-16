@@ -170,7 +170,34 @@ to the source read during this review; subsequent cleanup may move them.
    | Probe policy/fault handling | Per read | Dynamic semantics, with avoidable general-routine overhead as item 5. |
    | `include/linux/filter.h:707–720` stats accounting; `kernel/trace/bpf_trace.c:2079` recursion/RCU protection | Per event | Existing common kernel execution envelope, not a new native-only validation loop. |
 
-8. **Cilium: confirmed mechanisms, with packet causality still open.**
+8. **Confirmed Cilium cb translation bug; exact packet causality still open.**
+
+   Native `vendor/bpf/cilium/bpf/include/linux/bpf.h:6081` lays out next/prev,
+   dev/sk and tstamp before `__u32 cb[12]`, so native cb[0] is physical byte 40.
+   The sole kernel BTF confirms sk_buff.cb=40, but that is not the translation
+   of the public eBPF cb field. `net/core/filter.c:9868–9884` adds both
+   offsetof(sk_buff, cb) and offsetof(qdisc_skb_cb, data). Kernel BTF gives
+   the latter as 8, hence eBPF cb[0] means physical byte **48**, not 40.
+   `include/linux/filter.h:947–964` documents why this qdisc prefix exists.
+
+   Native ctx_store_meta/ctx_load_meta at `ctx/skb.h:153–161` index the wrong
+   member directly. `lib/overloadable_skb.h:15–19` clears indices 0–4.
+   This is visible in actual retained cil_from_container payload 34/0.blob:
+   instruction offsets 0x45,0x4c,0x53,0x5a,0x61 store zero at skb+40,44,48,52,56.
+   The translated eBPF range is 48,52,56,60,64. Native therefore clears the
+   qdisc packet-length/segments/classid prefix and leaves the last two public
+   metadata words uncleared. Other native metadata reads/writes have the same
+   8-byte displacement. This is a demonstrated source/object semantic mismatch,
+   unlike the rejected tail-mask hypothesis. A hybrid native context needs the
+   public cb[5] view mapped to qdisc data, preserving the physical offsets of
+   all following fields; simply copying sk_buff.cb's BTF offset repeats the bug.
+
+   This explains a concrete way native can corrupt or misread packet metadata;
+   the one-packet return/redirect comparison is still required to establish
+   whether it produces the observed host path. The finding needs no new
+   runtime check or benchmark change.
+
+   **Separate configuration lead, not a confirmed loaded-value mismatch:**
 
    `vendor/bpf/Makefile:81–104` compiles a maximum-feature native variant,
    including HOST_ROUTING/ROUTING; lines 266–275 include the checked-in headers.
@@ -255,4 +282,4 @@ to the source read during this review; subsequent cleanup may move them.
 The highest-value next source changes are leaner consistent frame saving, direct
 map-specific update/delete calls, and actual frozen-value LTO. Current data
 provide no isolated per-piece speedup, no half-size result, no proven tracing
-double-execution cause and no confirmed Cilium packet fix. Those remain open.
+double-execution cause and no confirmed Cilium packet fix. Those remain open. The cb access displacement above is confirmed independently of that packet attribution.
