@@ -1,0 +1,66 @@
+{
+  "scope": "Retained hash code and LRU caller audit; no runtime cost claim.",
+  "source_revision": "f45bb2485",
+  "lru_postprocess_text_equal": true,
+  "native_postprocess_file": "kprog/x86/native_lab/native_link/src/x86.rs",
+  "kernel_file": "vendor/linux-framework/kernel/bpf/hashtab.c",
+  "kernel_observation": "Raw __htab_map_lookup_elem returns htab_elem without ref marking; JIT generator and LRU map ops mark ref in their caller paths.",
+  "copied_bodies_equal": true,
+  "programs": [
+    {
+      "app": "katran",
+      "reference": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/114/0.blob",
+      "range": [
+        10198,
+        12642
+      ],
+      "bytes": 2444,
+      "fallback_offset": 2434,
+      "load_sites": 123,
+      "lru_maps": [
+        {
+          "name": "fallback_cache",
+          "kind": "lru_hash",
+          "target_addr": 18446744071617407440,
+          "key_offset": 88,
+          "max_entries": 0,
+          "elem_size": 0,
+          "index_mask": 0,
+          "value_offset": 35,
+          "percpu_base_addr": 0,
+          "map_name": "fallback_cache"
+        }
+      ],
+      "explicit_ref_cmp_encodings": 0,
+      "explicit_ref_store_encodings": 0
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "reference": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/130/0.blob",
+      "range": [
+        7685,
+        10129
+      ],
+      "bytes": 2444,
+      "fallback_offset": 2434,
+      "load_sites": 123,
+      "lru_maps": [
+        {
+          "name": "reported_pids",
+          "kind": "lru_hash",
+          "target_addr": 18446744072422713808,
+          "key_offset": 56,
+          "max_entries": 0,
+          "elem_size": 0,
+          "index_mask": 0,
+          "value_offset": 35,
+          "percpu_base_addr": 0,
+          "map_name": "reported_pids"
+        }
+      ],
+      "explicit_ref_cmp_encodings": 1,
+      "explicit_ref_store_encodings": 1
+    }
+  ],
+  "conclusion": "f45 preserves the native LRU caller sequence. Retained Katran has no explicit typed LRU ref sequence; its dynamic LRU lookups use generic map ops, which mark ref. Actual guest path/cost comparison remains required."
+}

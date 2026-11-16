@@ -1,0 +1,106 @@
+{
+  "scope": "Exercise real lowered ARRAY machine code and the captured OTel inner shapes.",
+  "fixture": [
+    {
+      "name": "table",
+      "symbol": "entry",
+      "lowered": 1,
+      "execution_vectors": 360
+    },
+    {
+      "name": "select",
+      "symbol": "entry_select",
+      "lowered": 1,
+      "execution_vectors": 360
+    },
+    {
+      "name": "numeric",
+      "symbol": "entry_numeric",
+      "lowered": 1,
+      "execution_vectors": 0
+    },
+    {
+      "name": "mixed",
+      "symbol": "entry",
+      "lowered": 0,
+      "execution_vectors": 360
+    },
+    {
+      "name": "unknown",
+      "symbol": "entry",
+      "lowered": 0,
+      "execution_vectors": 360
+    },
+    {
+      "name": "mutable",
+      "symbol": "entry_mutable",
+      "lowered": 0,
+      "execution_vectors": 360
+    },
+    {
+      "name": "arithmetic",
+      "symbol": "entry_arithmetic",
+      "lowered": 0,
+      "execution_vectors": 0
+    },
+    {
+      "name": "barrier",
+      "symbol": "entry_barrier",
+      "lowered": 1,
+      "execution_vectors": 360
+    },
+    {
+      "name": "nonempty-barrier",
+      "symbol": "entry_nonempty_barrier",
+      "lowered": 0,
+      "execution_vectors": 0
+    },
+    {
+      "name": "narrow",
+      "symbol": "entry_narrow_handle",
+      "lowered": 0,
+      "execution_vectors": 0
+    },
+    {
+      "name": "value-size",
+      "symbol": "entry",
+      "lowered": 1,
+      "execution_vectors": 360
+    }
+  ],
+  "otel": {
+    "baseline": {
+      "selected_function_bytes": 27689,
+      "payload_bytes": 30383,
+      "lowered": 0
+    },
+    "typed": {
+      "selected_function_bytes": 27893,
+      "payload_bytes": 30410,
+      "lowered": 68
+    }
+  },
+  "fact_provenance": "Captured checked-six-apps OTel request 3 inner shapes, not current FD-query execution",
+  "installed_bytes": "unmeasured",
+  "per_call_body_helpers_maps": "pending publication",
+  "validation": {
+    "fixture_cases": 11,
+    "execution_vectors": 2520,
+    "compiler_build": "passed",
+    "loader_build": "passed in maps-only controller1896386",
+    "active_x86_module_syntax": "passed in maps-only controller1896386",
+    "original_fd_binding_and_otel_inner_templates": "passed: substituted resource ID501 and 16 ARRAY/value-size4 definitions",
+    "module_changes": "none: all four match3c5384aed",
+    "source_section_byte_preservation": "passed: every source section payload, including instructions/symbols/BTF, stays byte-identical",
+    "earlier_attempts": [
+      "initial compiler fixture subset passed but OTel0 sites; helper-ID barrier fixed ec4aaeca6",
+      "libbpf harness include path corrected c5f5e0a53; original static entries required maps-only metadata view4aa983499",
+      "section preservation test iterator arity corrected a74c11526"
+    ],
+    "final_subset": {
+      "controller": 1900127,
+      "exit_code": 0,
+      "finished": "2026-11-16T20:48:53Z"
+    }
+  }
+}
