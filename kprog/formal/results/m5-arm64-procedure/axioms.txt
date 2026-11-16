@@ -1,0 +1,31 @@
+'KProgFormal.ClightRefinement.FrameBelow.alloc' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ClightRefinement.FrameBelow.allocVariables' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ClightRefinement.FrameBelow.freeList' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ClightRefinement.FrameBelow.load' depends on axioms: [propext, Classical.choice, Quot.sound]
+'CC.allocVariables_env_other' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64NopDeclarations.vars_norepet' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64NopDeclarations.params_norepet' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64NopDeclarations.params_temps_disjoint' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64NopDeclarations.width_not_local' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Nop.entry_valid' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Nop.entry_unshadowed' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Nop.entry_frame' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Nop.call_returns' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Nop.return_frame' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Nop.call_corresponds' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

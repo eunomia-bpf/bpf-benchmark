@@ -1900,3 +1900,12 @@ and the full native wrapper state. It proves one conditional body correspondence
 under explicit binding, entry and representation conditions. Concrete heap
 representation, function frames and compiled-label/all-behaviors obligations
 remain before it can count as a complete handler refinement.
+
+The [NOP procedure proof](results/m5-arm64-procedure/README.md) now discharges
+actual function entry for every initial memory and flags byte, with all nine
+parameter bindings and 266 real local allocations. It reuses the imported
+local-shadowing lemma. The complete call/return witness preserves exact bytes
+and permissions on every pre-existing block, under explicit successful-free,
+local-enumeration freshness and decoder-stability conditions. Concrete
+representation, deallocation and all-behaviors/control obligations still keep
+the complete-handler count at zero; M5 and M6 remain open.
