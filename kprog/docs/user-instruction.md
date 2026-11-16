@@ -117,6 +117,7 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-16 ~14:09 UTC（前面引用协调者对 BCC 0.917x 的解释：原生一侧 CPU 时间逐样本减少、按 CPU 时间折算 0.987/0.991/1.016、“所以这次是环境问题”）: "=== 这个你改了 benchmark 吗"
 - 2026-11-16 ~14:10 UTC: "我们是不是所有程序都走一样的路径? 路径正确吗?"
 - 2026-11-16 ~14:17 UTC（引用协调者的话）: "原生一侧虚拟机里的上下文切换多了 2.5 倍???"
+- 2026-11-16 ~14:19 UTC（后半引用协调者的两句）: "去审核代码. 禁止加任何额外的 check. 内核不必要的 check 也需要拆掉一部分, 确保这些被内联进去了. 也检查为啥会有性能问题, 让 codex 看看 不一致：原生一侧每个包多走 cil_to_host 和 cil_from_host，各 7.4 亿次. 这个明显不对.部分不一致：sched_switch、sched_wakeup 在原生一侧多跑了 2.5 倍 为啥多走???"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
