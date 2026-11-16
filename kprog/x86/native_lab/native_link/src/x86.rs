@@ -122,11 +122,7 @@ fn select_lookup_site(
     // reach RDI. Native/BPF call order and truncated names are not identities.
     if let Some(name) = native_map_name {
         if let Some(spec) = lookup_maps.get(name) {
-            if matches!(spec.kind, LookupKind::Array | LookupKind::PerCpuArray |
-                LookupKind::Hash | LookupKind::LruHash | LookupKind::PerCpuHash |
-                LookupKind::HashOfMaps) {
-                return Ok((format!("runtime-map:{name}"), spec.clone()));
-            }
+            return Ok((format!("runtime-map:{name}"), spec.clone()));
         }
     }
     // A dynamic map retains its actual pointer and generic helper semantics;
@@ -4431,7 +4427,7 @@ mod tests {
             maps.get_mut("known_map").unwrap().target_addr = 0x5678;
             for name in [None, Some("unknown"), Some("known_map")] {
                 let (_, spec) = select_lookup_site(&maps, 0, name, "entry", 0x1234)?;
-                let specialized = name == Some("known_map") && kind != LookupKind::Call;
+                let specialized = name == Some("known_map");
                 assert_eq!(spec.kind, if specialized { kind } else { LookupKind::Call });
                 assert_eq!(spec.target_addr, if specialized { 0x5678 } else { 0x1234 });
             }
@@ -4547,6 +4543,23 @@ mod tests {
                 assert_eq!(munmap(memory, 4096), 0);
             }
         }
+        // A complete map-ops call is also a named binding, not a request to
+        // replace its target with the generic lookup helper. Runtime dispatch
+        // sharing must leave this distinct target alone.
+        let mut facts = facts;
+        let spec = facts.get_mut("known_map").unwrap();
+        spec.kind = LookupKind::Call;
+        spec.target_addr = 0x5678;
+        let array_layout = RuntimeArrayLayout { map_type: 12, max_entries: 24,
+            elem_size: 32, index_mask: 36, value: 64, array_type: 2 };
+        let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps,
+            &facts, &[], false, false, Some(&array_layout), None, None, false)?;
+        assert_eq!(output.relocs.len(), 1);
+        assert_eq!(output.relocs[0].target, 0x5678,
+                   "named operation must bypass generic ARRAY dispatch");
+        let direct = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps,
+            &facts, &[], false, false, None, None, None, false)?;
+        assert_eq!(output.blob, direct.blob, "no generic dispatcher is needed");
         Ok(())
     }
 

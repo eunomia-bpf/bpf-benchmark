@@ -2754,6 +2754,13 @@ bool configure_lookup_site_for_shape(CompanionLoad::LookupSite &site,
         site.target_addr = array_of_map_lookup_elem_kernel_addr();
         return true;
     }
+    if (t == BPF_MAP_TYPE_LPM_TRIE) {
+        // This is lpm_trie_map_ops.map_lookup_elem on the sole kernel,
+        // selected once from the loaded map type, as in the BPF verifier.
+        site.kind = CompanionLoad::LookupSite::Kind::Call;
+        site.target_addr = kallsyms_lookup("trie_lookup_elem");
+        return true;
+    }
 
     return false;
 }
