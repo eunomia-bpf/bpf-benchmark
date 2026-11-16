@@ -82,10 +82,12 @@ theorem record_window (resolve : Resolution) (image : Image) (chunk : Chunk)
     window (applyRecord resolve image record) chunk.start =
       applyRecord resolve (window image chunk.start) (localize chunk record) := by
   funext i
-  simp only [applyRecord, localize]
-  split
-  · rfl
-  · change (if record.offset.toNat ≤ chunk.start+i ∧ chunk.start+i < record.offset.toNat+8 then _ else _) =
+  simp only [applyRecord, show (localize chunk record).kind = record.kind from rfl]
+  by_cases kind : record.kind = 8
+  · simp only [kind, ite_true]
+  · simp only [kind, ite_false]
+    simp only [localize]
+    change (if record.offset.toNat ≤ chunk.start+i ∧ chunk.start+i < record.offset.toNat+8 then _ else _) =
       (if (BitVec.ofNat 32 (record.offset.toNat-chunk.start)).toNat ≤ i ∧
         i < (BitVec.ofNat 32 (record.offset.toNat-chunk.start)).toNat+8 then _ else _)
     have exactOffset := local_offset chunk record

@@ -12,8 +12,14 @@ Clight imports are [generated build products](results/clight-build/README.md).
 `lake build` generates them from C before module-input processing;
 `make clight-sources` runs that build step directly. The seven profile C
 snapshots live in `c/`, with build symlinks preserving their original export
-metadata. Edit C directly. The current M5 export/refinement subset is checked
-separately; unchanged legacy proof failures keep the whole-package result open.
+metadata. Edit C directly. The current proof route is `ClightRefinement` over those exports and the mature
+ISA bindings. On the coordinator’s 2026-11-16 19:19 instruction, the superseded
+JSON/generated-contract proof route and its generators were deleted; see
+[the retirement inventory](results/legacy-retirement/README.md). Historical
+counts and migration checkpoints below describe the earlier route, whose
+source is retained in Git history. They are not current refinement coverage.
+Full build validation is recorded with that inventory; M5 correspondence and
+O1/O2/O4 recount remain open.
 
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|

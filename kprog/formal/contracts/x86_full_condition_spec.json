@@ -1,8 +1,0 @@
-{
-  "schema_version": 1,
-  "operation": "x86FullCondition",
-  "parity": [
-    {"name": "p", "code": 10, "invert": false, "alias": "pe"},
-    {"name": "np", "code": 11, "invert": true, "alias": "po"}
-  ]
-}

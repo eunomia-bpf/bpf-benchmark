@@ -24,13 +24,30 @@ def command(argv):
     return result.stdout
 
 
+def layout_fixture():
+    """Synthetic ABI data, not a boot-BTF assertion.
+
+    The checked paths below use the exact named ARRAY facts. Unrelated runtime
+    dispatch routines need the complete link-plan schema but are not executed
+    by these instruction-fragment observations.
+    """
+    return dict(
+        array=dict(map_type=12,max_entries=24,elem_size=32,index_mask=36,value=64,array_type=2),
+        lpm=dict(map_type=12,lpm_type=11,root=64,max_prefixlen=72,data_size=80,
+                 child=0,child_stride=8,node_prefixlen=16,node_flags=20,node_data=24,
+                 key_prefixlen=0,key_data=4),
+        probe_read=dict(user_helper=0x2000,kernel_helper=0x3000,nmi_uaccess_okay=0x4000,
+                        kernel_allowed=0x5000,current_task=0,user_ptr_max=0x10000000,
+                        boot_cpu_data=0x6000,pagefault_disabled=4,x86_capability=0))
+
+
 def main():
     out=ROOT/'build/map-reference'
     out.mkdir(parents=True,exist_ok=True)
-    env=dict(os.environ,CARGO_TARGET_DIR=str(ROOT/'build/native-link'))
+    env=dict(os.environ,CARGO_TARGET_DIR=str(ROOT.parent/'x86/native_lab/native_link/target'))
     subprocess.run(['cargo','build','--locked','--quiet','--jobs','1','--manifest-path',
         str(ROOT.parent/'x86/native_lab/native_link/Cargo.toml'),'--bin','native-link'],env=env,check=True)
-    linker=ROOT/'build/native-link/debug/native-link'
+    linker=ROOT.parent/'x86/native_lab/native_link/target/debug/native-link'
     source=out/'lookup.c'
     source.write_text('typedef void *(*lookup_fn)(void*,const void*);\nextern char fixture_map[];\n'
         'void *map_lookup(void *m,const void *k){return ((lookup_fn)1)(fixture_map,k); }\n'
@@ -54,19 +71,22 @@ uint64_t add64(uint64_t a,uint64_t b){uint64_t f;__asm__ volatile("addq %2,%1;pu
     for kind,elem_size in [(k,8) for k in ('array','percpu_array','hash','lru_hash','percpu_hash','call')]+[('array',32),('percpu_array',32),('array',12),('percpu_array',12)]:
         name=kind if elem_size==8 else kind+'-stride'+str(elem_size)
         plan=dict(version=1,helpers=[dict(name='bpf_map_lookup_elem',addr=0x1000)],
-            maps=[dict(name='fixture_map',addr=0x400000000000)],lookup_sites=[dict(
+            maps=[dict(name='fixture_map',addr=0x400000000000)],lookup_maps=[dict(
             kind=kind,target_addr=0x12345000,key_offset=48,max_entries=16,elem_size=elem_size,index_mask=15,
-            value_offset=128,percpu_base_addr=0x20,map_name='fixture_map')])
+            value_offset=128,percpu_base_addr=0x20,name='fixture_map')],
+            kernel_layout=layout_fixture())
         plan_path=out/(name+'.json');plan_path.write_text(json.dumps(plan)+'\n')
         blob_path=out/(name+'.bin');reloc_path=out/(name+'.relocs')
         command([linker,'--input',out/'lookup.proof.o','--symbol','map_lookup','--output',blob_path,
-            '--link-plan',plan_path,'--output-relocs',reloc_path,'--output-map-patches',out/(name+'.maps')])
+            '--link-plan',plan_path,'--output-relocs',reloc_path,'--output-map-patches',out/(name+'.maps'),
+            '--output-abi',out/(name+'.abi.json')])
         patches=[line.split('\t') for line in (out/(name+'.maps')).read_text().splitlines()]
         assert patches and all(map_name=='fixture_map' for map_name,_ in patches),(name,patches)
         if kind in ('array','percpu_array') and elem_size==8:
             dynamic=out/(name+'.dynamic.bin');dynamic_reloc=out/(name+'.dynamic.relocs')
             command([linker,'--input',out/'lookup.dynamic.proof.o','--symbol','map_lookup_dynamic',
-                '--output',dynamic,'--link-plan',plan_path,'--output-relocs',dynamic_reloc])
+                '--output',dynamic,'--link-plan',plan_path,'--output-relocs',dynamic_reloc,
+                '--output-abi',out/(name+'.dynamic.abi.json')])
             records=dynamic_reloc.read_bytes();assert len(records)==16,(name,records)
             offset,reloc_kind,target=struct.unpack('<IIQ',records)
             assert dynamic.read_bytes()[offset]==0xE8 and target==0x1000,(name,offset,reloc_kind,target)

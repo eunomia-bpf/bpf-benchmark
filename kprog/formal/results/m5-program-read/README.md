@@ -12,11 +12,12 @@ The ordinary constructor equations shared with `Arm64OriginCache` now live in
 unchanged. Extraction of the stages is checked from the generated function
 body by the kernel.
 
-The focused build passes 143 jobs at default limits. Raw attempts are retained
+The focused build passes 143 jobs at default limits. The public axiom query
+reports only `propext`, `Classical.choice` and `Quot.sound`. Raw attempts are retained
 under `/workspaces/kprog-raw/formal/m5-program-read`. The full combined call,
 its warm/cold cache and invocation-origin binding remain M5. This is a prefix
 law and adds zero complete ISA-handler refinements.
 
 Reproduce: `lake build KProgFormal.ClightRefinement.Arm64RegisterReads
 KProgFormal.ClightRefinement.Arm64OriginCache`, then
-`lake env lean results/m5-program-read/Query.lean` from `kprog/formal`.
+`LEAN_NUM_THREADS=1 lake env lean -j1 results/m5-program-read/Query.lean` from `kprog/formal`.

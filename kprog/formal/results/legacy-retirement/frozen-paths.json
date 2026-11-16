@@ -1,0 +1,29 @@
+{
+  "baseline": "9f3855f6f",
+  "files": 162,
+  "different": [
+    "Makefile",
+    "micro/config/micro_pure_jit.yaml",
+    "micro/config/micro_stage2.yaml",
+    "runner/mk/build.mk"
+  ],
+  "inherited_differences": [
+    {
+      "path": "Makefile",
+      "unchanged_from_2be755991": true
+    },
+    {
+      "path": "micro/config/micro_pure_jit.yaml",
+      "unchanged_from_2be755991": true
+    },
+    {
+      "path": "micro/config/micro_stage2.yaml",
+      "unchanged_from_2be755991": true
+    },
+    {
+      "path": "runner/mk/build.mk",
+      "unchanged_from_2be755991": true
+    }
+  ],
+  "timing_entry_unchanged_from_2be755991": true
+}

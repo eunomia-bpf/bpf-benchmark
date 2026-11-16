@@ -219,7 +219,6 @@ theorem selected_field_image (before after : List Byte) (block : EncodedBlock)
       block.bytes[instruction.toNat+field+i]? := by
   constructor
   · simp only [selectedField, selected, Option.map_some]
-    rfl
   · intro i inside
     rw [producer_field_position _ _ _ _ _ conversion, List.append_assoc,
       List.getElem?_append_right (by omega)]
