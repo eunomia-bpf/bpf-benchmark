@@ -28,6 +28,17 @@
 
 - [x] P-SPECIALIZE-10K（9fc382606、cc83b5d48；本提交结果）：四种 10K 形状正常 B/实际栈帧完成，前端 11.6–26.3s、峰值 399–920MiB；B 328–200624B、帧 0–40B，详见 `perf_20261113/inline-families/scale-10k/`。旧同名 scalar/direct 70.47GiB/SIGKILL 的实际失败已能完成；不跨不同编译管线宣称独立加速比。100K 继续。
 
+**协调者 2026-11-16T02:59:45Z（运营者“13 个程序跑在原生一侧? 也要确保弄好, 想办法改进我们的 sim generate 的过程, 确保能 verify, verify 不了的也需要跑 native 先.”）**：
+- 广度一轮 stats 关的原生装载：OTel 14 个程序 13 个原生；BCC、Cilium、Tetragon、Tracee 各有一个程序装原生失败，整个应用因此报错。按类：
+  - A. GOT 相对重定位指向全局变量（BCC tcplife 的 target_family、Tetragon execve_send 的 CONFIG_ITER_NUM）：PERF 按 BTF 名字绑定 DATASEC，已在源码里，主机和内核子集通过。
+  - B. 经过寄存器的间接调用（Cilium tail_ipv4_policy，偏移 0x16bd，经 RAX）：C 查清是哪个调用，PERF 在链接器里解析。
+  - C. 模块容量（Tracee lkm_seeker_modtree 需要 627 个块，direct-native 模块 NATIVE_LAB_MAX_BLOBS 是 512）：PERF 按需分配，按整类处理。
+  - D. native_lab stub 被 verifier 拒（OTel custom__generic）：PERF 按它的 verifier 日志处理。
+  - E. Tetragon 有 4 个程序在清单里找不到对应（probe_lsm_file_ 和 3 个名字为空的）：C 补清单。
+- 原生优先：每个应用的每个程序都在直接原生路径上跑通，这是计时的前提；验证不过的程序照样走直接原生（运营者“verify 不了的也需要跑 native 先”）。验证配置里 B 没通过 stock verifier 的程序也走直接原生，并在表里列出。
+- 这一轮在 Katran stats 关跑完后停下（rotate 的 STOP），stats 开那一半会碰到同样的四处失败。PERF 先把 A–D 的修复和 B 编译的修复发布进底座和镜像，然后重跑整轮；Katran 两种链接器的对比排在重跑之后。
+- verify：PERF 改进 sim 的生成过程（generate_micro_sim_proofs.py、trusted_specializer.py 生成 sim C 这一步），让每个程序的 B 都能过 stock verifier；每个应用给出程序数、原生装上数、B 生成数、B 通过 stock 数。现在已知的卡点是 OTel main 的 B 栈帧 824 字节和 10 万条指令指针类用例的前端内存。
+
 **协调者 2026-11-16T02:08:03Z（运营者“功能正常吗? 我们的功能修复也都在?”“还有新的 verify 修复也在? verify 也要继续做”）**：
 - 广度一轮里的装载情况：OTel 13 个程序装成原生、custom__generic 两次失败（native_lab stub 被 verifier 拒，“BPF_PROG_LOAD native_lab stub: Invalid”），应用照常跑完；BCC 24 个原生、tcplife 的 inet_sock_set_state 失败，应用报错；Cilium（还在跑）164 个原生、tail_ipv4_policy 36 次失败（“x86 unresolved register-indirect call ... through RAX; helper calls must be rewritten before kernel load”）。
 - 功能修复盘点（kprog/results/fix-survival-20261116）：05-29 以来 343 个修复类提交，159 个的代码在 HEAD 里留下不到 60%，其中一部分是 11-15 按“旧的拆掉”删掉的整个文件，其余是后来的重写。逐行统计分不清丢失和重写，所以以每个应用原生一侧能否端到端跑通为准，每个失败追到原因：Tracee 的 helper 名字是 11-15 拆掉 native_compat.h 带出来的，已修（00a402b4c）；BCC 的 target_family 对象和 05-29 相同、11-14 能装，属于 11-14 之后链接器或 loader 的退步（PERF）；Cilium tail_ipv4_policy、OTel custom__generic 的原因由 C、PERF 查。
