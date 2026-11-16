@@ -1,0 +1,18 @@
+== x86_kvm_corpus_20261116_125155_179400 (otelcol-ebpf-profiler__profiling.json): 1 active programs, median native/eBPF run ratio 0.943
+   programs whose counts track the median: 1 of 1
+== x86_kvm_corpus_20261116_053859_493069 (otelcol-ebpf-profiler__profiling.json): 1 active programs, median native/eBPF run ratio 1.048
+   programs whose counts track the median: 1 of 1
+== x86_kvm_corpus_20261116_060435_731340 (bcc__set.json): 11 active programs, median native/eBPF run ratio 1.293
+   DIFFERENT sched_switch: eBPF 70,242,816  native 176,296,084  ratio 2.510
+   DIFFERENT sched_wakeup: eBPF 35,181,774  native 88,247,785  ratio 2.508
+   DIFFERENT block_rq_comple: eBPF 1,806  native 447  ratio 0.248
+   DIFFERENT block_rq_issue: eBPF 1,732  native 423  ratio 0.244
+   programs whose counts track the median: 7 of 11
+== x86_kvm_corpus_20261116_063056_107201 (cilium__agent.json): 3 active programs, median native/eBPF run ratio 1.211
+   DIFFERENT cil_to_host: eBPF 4  native 740,557,969  ratio 185139492.250
+   DIFFERENT cil_from_host: eBPF 2  native 740,557,968  ratio 370278984.000
+   programs whose counts track the median: 1 of 3
+== x86_kvm_corpus_20261116_072549_683704 (katran.json): 1 active programs, median native/eBPF run ratio 1.022
+   programs whose counts track the median: 1 of 1
+== x86_kvm_corpus_20261114_085217_843248 (tracee__monitor.json): 24 active programs, median native/eBPF run ratio 0.984
+   programs whose counts track the median: 24 of 24

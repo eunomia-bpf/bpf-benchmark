@@ -35,6 +35,8 @@
 
 - [x] P-SPECIALIZE-10K（9fc382606、cc83b5d48；本提交结果）：四种 10K 形状正常 B/实际栈帧完成，前端 11.6–26.3s、峰值 399–920MiB；B 328–200624B、帧 0–40B，详见 `perf_20261113/inline-families/scale-10k/`。旧同名 scalar/direct 70.47GiB/SIGKILL 的实际失败已能完成；不跨不同编译管线宣称独立加速比。100K 继续。
 
+**协调者 2026-11-16T14:11:00Z（运营者“为啥一直路径不同?什么原因?哪里出bug?”“我们是不是所有程序都走一样的路径? 路径正确吗?”）**：逐程序比两臂的调用次数（kprog/results/arm-paths-20261116）：OTel、Katran、Tracee 两臂走同样的程序；Cilium 原生一侧每个包多走 cil_to_host、cil_from_host；BCC 的 sched_switch、sched_wakeup 在原生一侧多 2.5 倍（来宾里的上下文切换多 2.5 倍）；Tetragon 还没有原生一侧装上的 stats 开运行。Cilium 的线索：原生对象是对着 Cilium 源码树自带的示例 ep_config.h、node_config.h 预先编出来的，eBPF 一侧是 cilium-agent 用这个端点自己的配置装的；原生一侧 CONFIG() 直接读 __config_ 全局变量，没走装载时的配置映射的那部分就是示例值。C 第一件事：用基准自己的一个包对 cil_from_container 的 eBPF 版和原生版各跑一次 BPF_PROG_TEST_RUN，比较返回码、重定向目标和 ifindex，再对照两边实际用到的配置值，找到出错的那一处。PERF：查 BCC 原生一侧来宾里多出的上下文切换是谁产生的。每小时报告加“两臂逐程序调用次数”一列（用这份脚本）。
+
 **协调者 2026-11-16T12:20:16Z（审核 09Z 已核实）**：
 - 第 1 条成立：Cilium 原生一侧每个包都多走 cil_to_host、cil_from_host（063056_107201：两者各 740 557 968 次，对 eBPF 一侧的 2 次），从 11-10 起每次都这样，05-29 的 1.319x 也是。Cilium 写“两臂路径不同，不计”。C 用基准自己的包对 cil_from_container 的 eBPF 版和原生版各跑一次 BPF_PROG_TEST_RUN，比较返回码、重定向目标和 ifindex，用 CPU 8-23，找出原因后修。
 - 第 2 条成立：BCC stats 开吞吐 1.268x 高于每次调用 1.134x，原生一侧调用多 16%，属于环境差。lane 的 agent 进程原来可以跑在 CPU 0-7：协调者把 C、perf、formal、审核循环和它们的 agent 进程限定在 CPU 8-23，循环脚本启动时自己设好，计时来宾照旧钉在 0-7。报告格式写进每小时检查的说明。
