@@ -39,6 +39,13 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-16T23:27:56Z（运营者“你看看数据, 是不是越来越慢了? 为啥这样?”“你到底这周在干啥? 反思一下?”“要不要从 5/29 的基础上重新改?”“你要看看你都在调啥”；数据见 kprog/results/trend-20261116）**：
+1. 计时环境：C 跑计时的时候，Workspace 里的重活（镜像和工具构建、内核构建、全量 lake build、诊断来宾）在两轮之间做；重活用 `flock -s /workspaces/.agent-state/kprog-lanes/locks/timing` 包起来，计时持 -x，两边自然错开。依据：11-16 起 eBPF 一侧本身变慢 24–28%，逐样本波动从约 2% 变成 15–30%。
+2. 每一项修改先只在它针对的那个应用上用冻结入口单独量（corpus APPS=<app>，stats 开），量到了再和别的修改一起进镜像。
+3. 先把 Tetragon 修回来：11-11/12 它在原生一侧跑到 1.25–1.33x，11-16 起每次都出错。
+4. 内核（vendor/linux-framework）属于不该改的地方：后面的修改放在链接器、装载器和模块里；83e0fabe355d 这一处保留在当前镜像，协调者每小时报告内核仓库自己的提交。
+5. 代码基础保持当前这一份：05-29 的高数字里 OTel、Katran 两个来自工作量不同（读错上下文、跳过 LRU 查找），11-11 已经从 05-29 重新开始过一次；05-29 的对象作为逐应用对照（compare_code.py），哪个应用 05-29 的原生代码在工作量相同时更快，就直接用那一份的做法。
+
 **协调者 2026-11-16T22:20:02Z**：C 在 6641a7e1 上的基线一轮在 Katran stats 开结束后完成。之后 PERF 用冻结配方 `make -f kprog/perf/one-image/Makefile image`（持 image 锁）发一个镜像，带上已在主机上验证的这一批：e4264fa35+35da4bdd4（map update/delete 绑定，检查条数回到原来）、25ee76410（具名查找目标、链接时选 LPM）、e8960af11（复用已解出的跳转表目标）、9bf2953a7（同一镜像共用相同的 ARRAY 查找体）、f0add8697/4aa983499（内层 ARRAY 类型取自 libbpf）；跑 `check`，结果提交；然后 C 在新镜像上开下一轮广度计时。OTel 诊断（211320_080784）里每次调用 JIT 4 156 ns、原生 5 286 ns，原生一侧大头是 LPM 4 334、用户态 probe 读 2 393、ARRAY 1 430 周期/次，共用哈希只占 2.5%（3a4144ece），所以这一批正对着 OTel 的热点。Katran 逐样本变慢落在 pktgen 四个 worker 共用 veth rq0 的发包一侧（8303538ab），属于冻结负载本身。
 
 **协调者 2026-11-16T20:20:01Z**：
