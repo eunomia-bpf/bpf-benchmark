@@ -1886,3 +1886,10 @@ upstream step composition and a complete relational call of the actual exported
 ARM width function for every byte input and arbitrary memory. The theorem
 preserves all memory and emits no events. Its C-helper law does not add an
 ISA-handler refinement count; all 2,065 migrations and O1/O2/O4 recount remain.
+
+The [generic ARM NOP body proof](results/m5-arm64-nop/README.md) now composes the
+actual internal width call and statement completion with LNSym's checked step
+and the full native wrapper state. It proves one conditional body correspondence
+under explicit binding, entry and representation conditions. Concrete heap
+representation, function frames and compiled-label/all-behaviors obligations
+remain before it can count as a complete handler refinement.

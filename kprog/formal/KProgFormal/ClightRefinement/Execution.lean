@@ -38,4 +38,19 @@ theorem steps_sound (ge : CC.CGenv) (n : Nat) (s : CC.State)
         exact .step s u mid v last' _ (CC.doStep_sound ge s u mid hs)
           (ih mid v last' ht) rfl
 
+/-- Composition preserves the full Clight trace and state. -/
+theorem star_trans {R : CC.State → CC.Trace → CC.State → Prop}
+    {s : CC.State} {t : CC.Trace} {mid : CC.State} (h : CC.Star R s t mid) :
+    ∀ {last : CC.State} {u : CC.Trace}, CC.Star R mid u last →
+      CC.Star R s (CC.Eapp t u) last := by
+  induction h with
+  | refl s =>
+    intro last u h'
+    simpa [CC.Eapp, CC.E0] using h'
+  | step s1 t1 s2 t2 s3 t h12 _ ht ih =>
+    intro last u h'
+    subst t
+    exact .step s1 t1 s2 (CC.Eapp t2 u) last _ h12 (ih h')
+      (by simp [CC.Eapp, List.append_assoc])
+
 end KProgFormal.ClightRefinement

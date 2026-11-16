@@ -1,0 +1,42 @@
+{
+  "milestone": "M5 in progress",
+  "clight_modules": 23,
+  "proof_modules": 4,
+  "axiom_queries": [
+    "KProgFormal.ClightRefinement.star_trans",
+    "KProgFormal.ClightRefinement.Arm64Width.cast_argument",
+    "KProgFormal.ClightRefinement.findDef_before_next",
+    "KProgFormal.ClightRefinement.findFunctPtr_next",
+    "KProgFormal.ClightRefinement.Arm64Nop.programBinding",
+    "KProgFormal.ClightRefinement.Arm64Nop.decode_native",
+    "KProgFormal.ClightRefinement.Arm64Nop.native_step",
+    "KProgFormal.ClightRefinement.Arm64Nop.reference_step",
+    "KProgFormal.ClightRefinement.Arm64Nop.body_returns",
+    "KProgFormal.ClightRefinement.Arm64Nop.corresponds"
+  ],
+  "component_exit": 0,
+  "all_23_ast_unchanged": true,
+  "nop_body_segments": [
+    4,
+    6,
+    7
+  ],
+  "native_encoding": "0xd503201f",
+  "arbitrary_memory": true,
+  "whole_native_wrapper_state": true,
+  "concrete_width_global_block": 66,
+  "lookup_proof": "kernel checked; unchanged default limits",
+  "conditional_handler_body_correspondences": 1,
+  "complete_isa_handler_refinements": 0,
+  "remaining": [
+    "concrete entry-memory decoder",
+    "function-frame allocation/freeing",
+    "compiled-label/PC embedding",
+    "all-behaviors refinement",
+    "remaining 2065 old theorem migrations and recount",
+    "M6 retirement and whole-package checks"
+  ],
+  "lake_jobs": 137,
+  "leaf_seconds": 21,
+  "conditional_scope": "body entry/completion, exact full native-wrapper representation, normal native entry/fetch; concrete decoder, function frames and all-behaviors/compiled-label correspondence remain"
+}

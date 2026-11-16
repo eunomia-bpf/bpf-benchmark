@@ -1,0 +1,18 @@
+'KProgFormal.ClightRefinement.star_trans' depends on axioms: [propext]
+'KProgFormal.ClightRefinement.Arm64Width.cast_argument' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.findDef_before_next' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ClightRefinement.findFunctPtr_next' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Nop.programBinding' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Nop.decode_native' does not depend on any axioms
+'KProgFormal.ClightRefinement.Arm64Nop.native_step' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Nop.reference_step' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Nop.body_returns' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Nop.corresponds' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]

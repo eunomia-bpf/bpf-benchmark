@@ -9,6 +9,14 @@ def argument (code : BitVec 8) : CC.Val := .Vint (code.setWidth 32)
 def result (code : BitVec 8) : CC.Val :=
   argument (if code == 0 then 8 else code)
 
+/-- Byte arguments and results survive the actual unsigned ABI cast. -/
+theorem cast_argument (code : BitVec 8) (m : CC.Mem) :
+    CC.Cop.semCast (argument code) CC.tuchar CC.tuchar m = some (argument code) := by
+  simp [argument, CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
+    CC.tuchar, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext]
+  change code.setWidth 32 &&& (BitVec.allOnes 8).setWidth 32 = code.setWidth 32
+  rw [← BitVec.setWidth_and, BitVec.and_allOnes]
+
 /-- Complete call of the actual exported width function, with arbitrary memory
 and continuation. No memory, input stream or platform effect is supplied. -/
 theorem executes (ge : CC.CGenv) (code : BitVec 8) (k : CC.Cont) (m : CC.Mem) :
