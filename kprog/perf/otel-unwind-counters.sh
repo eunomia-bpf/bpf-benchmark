@@ -23,12 +23,17 @@ set -eu
 O=${1:?output directory under the repository, e.g. corpus/results/otel-counters-DATE}
 REPO=/workspaces/repository
 KDIR=/workspaces/.agent-state/kprog-ck/build-x86
-STATE=/var/tmp/kprog-tmp/one-image-otel-counters
+STATE=${STATE:-/var/tmp/kprog-tmp/one-image-otel-counters}
 PORT=${PORT:-0}
-SETTLE=${SETTLE:-40}
 LOCK=/workspaces/.agent-state/kprog-lanes/locks/timing
 SAMPLES=${SAMPLES:-1}
 DURATION=${DURATION:-120}
+# The counters are counts, not times, so they do not need the timing CPUs or
+# the timing lock: a run on its own CPU set reports the same numbers while a
+# rotate holds the lock for hours. Set BOTH to run off-lock, and only when the
+# CPUs are free of the timing set — otherwise the run perturbs the rotate.
+CPUS=${CPUS:-0-7}
+USE_LOCK=${USE_LOCK:-1}
 
 case "$O" in
     /*) ;;
@@ -36,8 +41,10 @@ case "$O" in
 esac
 install -d "$O" "$STATE/var-tmp"
 
-exec 9>"$LOCK"
-flock 9
+if [ "$USE_LOCK" = 1 ]; then
+    exec 9>"$LOCK"
+    flock 9
+fi
 
 # Pin the image the dumps belong to, read *after* the lock is held. The sole
 # image is swapped between the May reference and the current source several
@@ -46,13 +53,13 @@ flock 9
 # whose IDs differ.
 IMAGE_ID=$(docker images --format '{{.ID}}' bpf-benchmark/kprog:current)
 printf '%s\n' "$IMAGE_ID" > "$O/image-id.txt"
-echo "image: $IMAGE_ID" >&2
+echo "image: $IMAGE_ID cpus: $CPUS lock: $USE_LOCK" >&2
 
 ln -sfn "$REPO/.cache/container-images/x86_64-runner-runtime.image.tar" "$STATE/var-tmp/runtime.image.tar"
 ln -sfn "$REPO/kinsn/module/x86/build/bpf_x86_native_lab.ko" "$STATE/var-tmp/bpf_x86_native_lab.ko"
 
 echo "guest: $(date -u +%FT%TZ) samples=$SAMPLES duration=$DURATION" >&2
-taskset -c 0-7 vng --run "$KDIR/arch/x86/boot/bzImage" --cwd "$REPO" \
+taskset -c "$CPUS" vng --run "$KDIR/arch/x86/boot/bzImage" --cwd "$REPO" \
   --rwdir "$REPO" --rwdir "/var/tmp=$STATE/var-tmp" \
   --overlay-rwdir /tmp --overlay-rwdir /run --overlay-rwdir /usr/local \
   --disable-monitor --cpus 8 --memory 64G \
