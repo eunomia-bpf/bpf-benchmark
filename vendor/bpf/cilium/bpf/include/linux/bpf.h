@@ -6084,7 +6084,12 @@ struct __sk_buff {
 	void *dev;
 	void *sk;
 	__u64 tstamp;
-	__u32 cb[12];
+	__u8 __native_qdisc_prefix[__KPROG_SKB_TC_CLASSID_OFFSET - 40];
+	__u16 tc_classid;
+	__u8 __native_cb_prefix[__KPROG_SKB_PUBLIC_CB_OFFSET -
+			      __KPROG_SKB_TC_CLASSID_OFFSET - 2];
+	__u32 cb[5];
+	__u8 __native_cb_suffix[88 - __KPROG_SKB_PUBLIC_CB_OFFSET - 20];
 	__u8 __native_pad88[24];
 	__u32 len;
 	__u32 data_len;

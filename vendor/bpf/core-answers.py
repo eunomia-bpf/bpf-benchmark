@@ -466,7 +466,7 @@ def main() -> None:
     # An app that makes no CO-RE query still gets a table: every lookup macro
     # exists, so a query it starts to make fails the compile instead of
     # silently picking up a default.
-    btf = Btf(args.bpftool, args.btf) if queries else None
+    btf = Btf(args.bpftool, args.btf)
     report = []
     unresolved = []
     answered: dict[tuple[str, str], tuple[int, str]] = {}
@@ -491,7 +491,12 @@ def main() -> None:
 
     report = [{"kind": k, "query": q, "answer": v, "tu": tu}
               for (k, q), (v, tu) in sorted(answered.items())]
-    out = [TABLE_HEADER]
+    skb_cb = btf.member("sk_buff", ["cb"])[1] // 8
+    qdisc_data = btf.member("qdisc_skb_cb", ["data"])[1] // 8
+    qdisc_classid = btf.member("qdisc_skb_cb", ["tc_classid"])[1] // 8
+    out = [TABLE_HEADER,
+           f"#define __KPROG_SKB_PUBLIC_CB_OFFSET {skb_cb + qdisc_data}",
+           f"#define __KPROG_SKB_TC_CLASSID_OFFSET {skb_cb + qdisc_classid}"]
     for kind in sorted({entry["kind"] for entry in report}):
         entries = [e for e in report if e["kind"] == kind]
         # Nested, fully parenthesised: a bare `a ? b : c ? d : e` chain reads as

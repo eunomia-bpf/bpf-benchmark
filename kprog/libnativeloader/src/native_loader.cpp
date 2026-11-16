@@ -395,7 +395,7 @@ constexpr const char *kX86TailCallOffsetKey = "__native_x86_tail_call_offset";
 constexpr const char *kArm64ThreadInfoCpuOffsetHelperKey =
     "__native_arm64_thread_info_cpu_offset";
 constexpr const char *kNativeLinkCacheDir = "/tmp/native_kernel_link_cache";
-constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v42";
+constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v43";
 constexpr const char *kNativeStubBtfCachePath = "/tmp/native_kernel_stub_btf.tsv";
 constexpr const char *kNativeStubBtfCacheVersion = "native-stub-btf-cache-v1";
 constexpr const char *kHtabLookupElemSymbol = "__htab_map_lookup_elem";
@@ -1055,7 +1055,6 @@ int bpf_prog_load_native_stub_raw(uint32_t prog_type_value,
 }
 
 int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
-                   uint32_t callee_saved_mask,
                    uint32_t prog_type_value,
                    const StubLoadAttrs &attrs,
                    bool tail_call_reachable,
@@ -1064,9 +1063,6 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
 {
     if (chunks == 0) {
         fail("chunks must be > 0");
-    }
-    if (callee_saved_mask > 0xf) {
-        fail("native_kernel callee-saved mask exceeds 4 bits");
     }
     ScopedFd tail_call_map_fd;
     if (tail_call_reachable) {
@@ -3465,6 +3461,11 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
     {
         NativeLabUploadLock upload_lock;
         ensure_debugfs_mounted();
+#if defined(__x86_64__)
+        const auto mask = std::to_string(linked.callee_saved_mask) + "\n";
+        write_binary_file(std::filesystem::path(kNativeLabTarget.debugfs_dir) / "callee_saved_mask",
+                          reinterpret_cast<const uint8_t *>(mask.data()), mask.size());
+#endif
         relocs = parse_native_lab_relocs(linked.relocs, linked.blob.size());
         chunks = plan_blob_chunks(linked.blob.size(), relocs, linked.load_sites);
         upload_blob(linked.blob, chunks);
@@ -3480,7 +3481,6 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
                 stub_btf.kfunc_btf_id,
                 mod_btf_fd.get(),
                 static_cast<uint32_t>(chunks.size()),
-                linked.callee_saved_mask,
                 prog_type,
                 attrs,
                 tail_call_reachable,

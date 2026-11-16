@@ -1468,8 +1468,7 @@ pub(super) fn rewrite_x86(
                         }
                         let (tail_stub, tail_count_field) = build_x86_tail_call_inline(
                             helper_addrs,
-                            // The one kernel's frame saves rbx, r13, r14 and r15 around P.
-                            0xf,
+                            callee_saved_mask,
                             &entry_abi_strip.tail_call_cleanup_bytes,
                             entry_abi_strip.tail_call_bpf_rbp_rsp_offset,
                             entry_abi_strip.tail_call_bpf_rbp_is_live,
@@ -2979,9 +2978,8 @@ fn plan_x86_entry_abi_strip(
         }
     }
 
-    // The runner encodes `callee_saved_mask` in the kinsn sidecar, and the
-    // native_lab proof uses it to force the x86 BPF JIT prologue to save the
-    // same host registers we strip here. The total stack movement before the
+    // The image carries `callee_saved_mask` to the x86 BPF JIT prologue,
+    // which saves the same host registers we strip here. Stack movement before the
     // function body is therefore unchanged, so adding an extra alignment pad
     // would break compiler-emitted aligned stack accesses such as `movaps`.
     let mut preserved_regs: HashSet<Register> = strip_set
@@ -4703,6 +4701,7 @@ mod tests {
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers,
                 &HashMap::new(), &HashMap::new(), &[], false, false, None, None, None, false,)?;
             assert_eq!(output.relocs.len(), 1, "immediate={immediate}");
+            assert_eq!(output.callee_saved_mask, 0);
             let relocation = output.relocs[0];
             assert_eq!(relocation.kind, NATIVE_LAB_RELOC_X86_TAIL_COUNT);
             assert_eq!(relocation.target, 0);
@@ -4712,6 +4711,9 @@ mod tests {
             let mut patched = output.blob;
             patched[offset..offset + 4].copy_from_slice(&(-32i32).to_le_bytes());
             let decoded = decode_x86(&patched)?;
+            assert!(!decoded.iter().any(|i| i.mnemonic() == Mnemonic::Pop
+                && matches!(i.op0_register(), Register::RBX | Register::R13 |
+                    Register::R14 | Register::R15)), "tail pops must match the image mask");
             assert!(decoded.iter().any(|i| i.mnemonic() == Mnemonic::Mov
                 && i.op0_register() == Register::RAX && i.memory_base() == Register::RBP
                 && i.memory_displacement64() as i64 == -32));

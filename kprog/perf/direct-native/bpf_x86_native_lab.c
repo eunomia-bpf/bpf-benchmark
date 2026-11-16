@@ -84,6 +84,7 @@ struct native_blob {
 
 static struct native_blob *blobs;
 static size_t blob_count;
+static u32 callee_saved_mask;
 static DEFINE_MUTEX(blobs_lock);
 static struct dentry *debugfs_root;
 
@@ -405,6 +406,7 @@ static int native_lab_arm_chunks(void)
 	image->nr_relocs = nr;
 	image->sites = sites;
 	image->nr_sites = ns;
+	image->callee_saved_mask = callee_saved_mask;
 	bpf_native_image_arm(image);
 	return 0;
 }
@@ -879,6 +881,7 @@ static int __init bpf_x86_native_lab_init(void)
 			    &map_value_ptr_fops);
 	debugfs_create_file("map_update_elem", 0600, debugfs_root, NULL,
 			    &map_update_elem_fops);
+	debugfs_create_u32("callee_saved_mask", 0600, debugfs_root, &callee_saved_mask);
 
 	err = native_lab_add_blob();
 	if (err) {
