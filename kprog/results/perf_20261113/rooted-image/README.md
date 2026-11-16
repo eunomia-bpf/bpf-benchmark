@@ -22,3 +22,6 @@ peer process was stopped. Image publication makes no new equal-work or timing
 claim; the requested Katran stats0 pair is running next.
 
 Raw: /workspaces/kprog-raw/perf/20261116-rooted-image.
+
+The shipped CLI, native loader SO and shim also match their canonical packaged
+build outputs exactly (tool-inventory.json). This is artifact identity only.

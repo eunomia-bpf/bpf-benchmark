@@ -1,0 +1,46 @@
+{
+  "image": "/workspaces/repository/.cache/container-images/x86_64-runner-runtime.image.tar",
+  "config": "blobs/sha256/e2105a9d48e704ad9aa427634173a984b80a095f352b92f6eabac2d5f9697b03",
+  "tools": [
+    {
+      "path": "/usr/local/bin/native-link",
+      "shipped": {
+        "bytes": 2918808,
+        "sha256": "72372bbaa2af0a6f6476057abb3b2f02e5250e1a8e87bbc9d4f7bb49db9a87bc"
+      },
+      "built": "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "current": {
+        "bytes": 2918808,
+        "sha256": "72372bbaa2af0a6f6476057abb3b2f02e5250e1a8e87bbc9d4f7bb49db9a87bc"
+      },
+      "equal": true
+    },
+    {
+      "path": "/usr/local/lib/bpfrejit/libnative_loader.so",
+      "shipped": {
+        "bytes": 809584,
+        "sha256": "ca6bfde674e18f7630275d800e9c198b811b65c3bcb2218e3e6d690796d1413d"
+      },
+      "built": "/workspaces/repository/runner/build-llvmbpf/native_loader/libnative_loader.so",
+      "current": {
+        "bytes": 809584,
+        "sha256": "ca6bfde674e18f7630275d800e9c198b811b65c3bcb2218e3e6d690796d1413d"
+      },
+      "equal": true
+    },
+    {
+      "path": "/usr/local/lib/bpfrejit/libbpfrejit_shim.so",
+      "shipped": {
+        "bytes": 463672,
+        "sha256": "10660f4544b5f85e56ee7e47ec9790dd311f023be0b3f02661e55b7e159debfc"
+      },
+      "built": "/workspaces/repository/bpfopt/shim/build-x86/libbpfrejit_shim.so",
+      "current": {
+        "bytes": 463672,
+        "sha256": "10660f4544b5f85e56ee7e47ec9790dd311f023be0b3f02661e55b7e159debfc"
+      },
+      "equal": true
+    }
+  ],
+  "scope": "Artifact identity only; not application execution or performance."
+}

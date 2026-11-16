@@ -23,3 +23,7 @@ reference-comparison:
 .PHONY: rotate-after-pair
 rotate-after-pair:
 	prlimit --as=103079215104 -- bash -eu -o pipefail -c 'tail --pid="$(PAIR_PID)" -f /dev/null; cat "$(PAIR_OUTPUT)/current-rebuilt"; exec flock -x /workspaces/.agent-state/kprog-lanes/locks/timing flock -s /workspaces/.agent-state/kprog-lanes/locks/image make -f $(ROOT)/kprog/perf/one-image/Makefile rotate'
+
+.PHONY: rerun-after-pair
+rerun-after-pair:
+	prlimit --as=103079215104 -- bash -eu -o pipefail -c 'tail --pid="$(PAIR_PID)" -f /dev/null; cat "$(PAIR_OUTPUT)/current-rebuilt"; exec env KPROG_KATRAN_REFERENCE_OUTPUT="$(RERUN_OUTPUT)" make -r -f $(ROOT)/kprog/test/katran-accounting.mk reference-comparison'

@@ -3,7 +3,7 @@
 # published loader and frozen entry defaults for both linker outputs.
 set -euo pipefail
 comparison_root=/workspaces/repository
-comparison_output=/workspaces/kprog-raw/perf/20261116-katran-linker-after-rerun
+comparison_output=${KPROG_KATRAN_REFERENCE_OUTPUT:-/workspaces/kprog-raw/perf/20261116-katran-linker-after-rerun}
 comparison_reference=/workspaces/kprog-raw/paper-tree-untracked/native-sim/x86/native_lab/native_link/target/release/native-link
 comparison_locks=/workspaces/.agent-state/kprog-lanes/locks
 
