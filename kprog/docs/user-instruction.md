@@ -114,6 +114,7 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-16 ~02:58 UTC（前半句引用协调者说 OTel “13 个程序跑在原生一侧”）: "13 个程序跑在原生一侧? 也要确保弄好, 想办法改进我们的 sim generate 的过程, 确保能 verify, verify 不了的也需要跑 native 先."
 - 2026-11-16 ~14:06 UTC（读了协调者 13:19 的汇报后）: "解释一下, 为啥慢?"
 - 2026-11-16 ~14:07 UTC（说 Cilium 两臂路径不同）: "为啥一直路径不同?什么原因?哪里出bug?"
+- 2026-11-16 ~14:09 UTC（前面引用协调者对 BCC 0.917x 的解释：原生一侧 CPU 时间逐样本减少、按 CPU 时间折算 0.987/0.991/1.016、“所以这次是环境问题”）: "=== 这个你改了 benchmark 吗"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
