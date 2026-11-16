@@ -1,0 +1,71 @@
+{
+  "scope": "Host control-flow execution; no app timing or B stock claim",
+  "entries": [
+    {
+      "symbol": "entry",
+      "proof": {
+        "command": [
+          "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+          "--input",
+          "/var/tmp/kprog-tmp/perf/conditional-tail/fixture.o",
+          "--symbol",
+          "entry",
+          "--mode",
+          "proof",
+          "--output",
+          "/workspaces/kprog-raw/perf/20261116-conditional-tail/before/entry.proof.o"
+        ],
+        "returncode": 0
+      },
+      "kernel": {
+        "command": [
+          "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+          "--input",
+          "/workspaces/kprog-raw/perf/20261116-conditional-tail/before/entry.proof.o",
+          "--symbol",
+          "entry",
+          "--mode",
+          "kernel",
+          "--output",
+          "/workspaces/kprog-raw/perf/20261116-conditional-tail/before/entry.blob",
+          "--link-plan",
+          "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ie2fmz97/link-plan.json"
+        ],
+        "returncode": 1
+      }
+    },
+    {
+      "symbol": "choose",
+      "proof": {
+        "command": [
+          "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+          "--input",
+          "/var/tmp/kprog-tmp/perf/conditional-tail/fixture.o",
+          "--symbol",
+          "choose",
+          "--mode",
+          "proof",
+          "--output",
+          "/workspaces/kprog-raw/perf/20261116-conditional-tail/before/choose.proof.o"
+        ],
+        "returncode": 0
+      },
+      "kernel": {
+        "command": [
+          "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+          "--input",
+          "/workspaces/kprog-raw/perf/20261116-conditional-tail/before/choose.proof.o",
+          "--symbol",
+          "choose",
+          "--mode",
+          "kernel",
+          "--output",
+          "/workspaces/kprog-raw/perf/20261116-conditional-tail/before/choose.blob",
+          "--link-plan",
+          "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ie2fmz97/link-plan.json"
+        ],
+        "returncode": 1
+      }
+    }
+  ]
+}
