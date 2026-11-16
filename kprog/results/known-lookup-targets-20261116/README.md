@@ -18,3 +18,19 @@ same-kernel symbol delta; actual loader capture remains a guest measurement.
 Image 6641a7e1 remains in use for C's baseline round. Installed bytes, per-call
 time and the body/helper/map split after publication remain open. The PMU
 baseline and its attribution limits are in ../otel-regression-20261116/.
+
+
+Host subset passes: 49 linker tests, zero failures, three existing ignored;
+production linker and loader builds pass. Controller 1858500 finished with
+exit 0 at 19:35:41Z. OTel sampling-entry replay shrinks 8,001 to 7,604 payload
+bytes by removing the 67-byte ARRAY dispatcher and 330-byte LPM routine; its
+last generic lookup relocation disappears. Katran remains 10,528 bytes because
+its genuine dynamic inner lookups still need the dispatchers, while two outer
+lookups now bind to their supplied operation. The two additional bound call
+relocations replace local dispatcher calls. No per-call gain is claimed.
+
+The first make -n preflight exposed recursive Make redirection before RAW
+existed. The real controller creates RAW and passed; no benchmark input changed.
+The dominant native unwinder has jump tables, which currently erase all named
+map facts in that function. Recovering facts using the already-resolved table
+destinations is the next source subset; targets must clear facts at each join.
