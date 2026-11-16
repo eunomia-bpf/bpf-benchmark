@@ -1,0 +1,16 @@
+{
+  "actual_upstream_cel_vectors": 64,
+  "proof_kernel_roundtrip": true,
+  "stock_checked": false,
+  "time": "2026-11-16T13:06:47Z",
+  "rust_passed": 51,
+  "rust_ignored": 3,
+  "constructed_native_vectors": 32,
+  "source_commits": [
+    "643fbf278",
+    "d3833a6e9",
+    "b5f88b9d2"
+  ],
+  "raw": "/workspaces/kprog-raw/perf/20261116-code-pointer-check-retry1",
+  "scope": "Actual retained upstream CEL P plus constructed pointer-transfer ABI cases; production proof/kernel rewrites and userspace execution. No stock B verification, actual app installation or performance claim."
+}
