@@ -1,0 +1,4734 @@
+[
+  {
+    "app": "tracee",
+    "symbol": "lkm_seeker_new_mod_only_tail",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-04mya4zp",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-04mya4zp/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/e23073e834dd1f50.tmp.28010.proof.o",
+        "--symbol",
+        "lkm_seeker_new_mod_only_tail",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/e23073e834dd1f50.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/e23073e834dd1f50.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/e23073e834dd1f50.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/e23073e834dd1f50.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/e23073e834dd1f50.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_vfs_readv",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-04tjlygv",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-04tjlygv/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/0b3b876189556684.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_vfs_readv",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/0b3b876189556684.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/0b3b876189556684.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/0b3b876189556684.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/0b3b876189556684.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/0b3b876189556684.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "syscall_checker",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-0cm_gto9",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-0cm_gto9/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/a2b6cf8c679794e7.tmp.28010.proof.o",
+        "--symbol",
+        "syscall_checker",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/a2b6cf8c679794e7.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/a2b6cf8c679794e7.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/a2b6cf8c679794e7.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/a2b6cf8c679794e7.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/a2b6cf8c679794e7.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_utimes_common",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-0qlj87km",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-0qlj87km/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/c94762f086375033.tmp.28010.proof.o",
+        "--symbol",
+        "trace_utimes_common",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/c94762f086375033.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/c94762f086375033.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/c94762f086375033.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/c94762f086375033.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/c94762f086375033.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "sched_process_fork_signal",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-12e7yw8g",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-12e7yw8g/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/d6c89ea38248f45f.tmp.28010.proof.o",
+        "--symbol",
+        "sched_process_fork_signal",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/d6c89ea38248f45f.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/d6c89ea38248f45f.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/d6c89ea38248f45f.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/d6c89ea38248f45f.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/d6c89ea38248f45f.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "sys_enter_submit",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-12p0m7pg",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-12p0m7pg/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/99f6eb34c07c3717.tmp.28010.proof.o",
+        "--symbol",
+        "sys_enter_submit",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/99f6eb34c07c3717.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/99f6eb34c07c3717.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/99f6eb34c07c3717.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/99f6eb34c07c3717.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/99f6eb34c07c3717.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_kernel_read_file",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-12rf8dae",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-12rf8dae/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/d9f70d4d04e8f9f0.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_kernel_read_file",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/d9f70d4d04e8f9f0.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/d9f70d4d04e8f9f0.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/d9f70d4d04e8f9f0.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/d9f70d4d04e8f9f0.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/d9f70d4d04e8f9f0.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_ptrace",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-1fx4fawn",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-1fx4fawn/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/9e6c8b0c575ed7a6.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_ptrace",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/9e6c8b0c575ed7a6.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/9e6c8b0c575ed7a6.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/9e6c8b0c575ed7a6.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/9e6c8b0c575ed7a6.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/9e6c8b0c575ed7a6.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_socket_accept",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-1w1qhz6k",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-1w1qhz6k/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/3ba67a90d4a70cae.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_socket_accept",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/3ba67a90d4a70cae.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/3ba67a90d4a70cae.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/3ba67a90d4a70cae.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/3ba67a90d4a70cae.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/3ba67a90d4a70cae.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_vfs_readv",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-239y4lo6",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-239y4lo6/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/60d72dc1e4330f3b.tmp.28010.proof.o",
+        "--symbol",
+        "trace_vfs_readv",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/60d72dc1e4330f3b.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/60d72dc1e4330f3b.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/60d72dc1e4330f3b.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/60d72dc1e4330f3b.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/60d72dc1e4330f3b.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "uprobe_syscall_table_check",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-2i4ibffp",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-2i4ibffp/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/3fb5233d7fa422d9.tmp.28010.proof.o",
+        "--symbol",
+        "uprobe_syscall_table_check",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/3fb5233d7fa422d9.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/3fb5233d7fa422d9.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/3fb5233d7fa422d9.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/3fb5233d7fa422d9.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/3fb5233d7fa422d9.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_do_init_module",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-2lo442mt",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-2lo442mt/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/3806dc5a3010087d.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_do_init_module",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/3806dc5a3010087d.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/3806dc5a3010087d.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/3806dc5a3010087d.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/3806dc5a3010087d.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/3806dc5a3010087d.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_inotify_find_inode",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-2rgpjlsh",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-2rgpjlsh/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/c42142df9fc27135.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_inotify_find_inode",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/c42142df9fc27135.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/c42142df9fc27135.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/c42142df9fc27135.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/c42142df9fc27135.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/c42142df9fc27135.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_inode_mknod",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-30574ynh",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-30574ynh/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/26059f520171944f.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_inode_mknod",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/26059f520171944f.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/26059f520171944f.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/26059f520171944f.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/26059f520171944f.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/26059f520171944f.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_bpf",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-32dcevwg",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-32dcevwg/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/7b53ba636b0dce71.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_bpf",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/7b53ba636b0dce71.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/7b53ba636b0dce71.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/7b53ba636b0dce71.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/7b53ba636b0dce71.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/7b53ba636b0dce71.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_do_sigaction",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-3dblc6e4",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-3dblc6e4/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/eb881d64e78d87b7.tmp.28010.proof.o",
+        "--symbol",
+        "trace_do_sigaction",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/eb881d64e78d87b7.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/eb881d64e78d87b7.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/eb881d64e78d87b7.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/eb881d64e78d87b7.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/eb881d64e78d87b7.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "syscall__init_module",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-3ksc3u7t",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-3ksc3u7t/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/4d66f2af05419f82.tmp.28010.proof.o",
+        "--symbol",
+        "syscall__init_module",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/4d66f2af05419f82.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/4d66f2af05419f82.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/4d66f2af05419f82.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/4d66f2af05419f82.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/4d66f2af05419f82.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "cgroup_mkdir_signal",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-47m7r4t7",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-47m7r4t7/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/8edadfd61d0ae779.tmp.28010.proof.o",
+        "--symbol",
+        "cgroup_mkdir_signal",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/8edadfd61d0ae779.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/8edadfd61d0ae779.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/8edadfd61d0ae779.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/8edadfd61d0ae779.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/8edadfd61d0ae779.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "uprobe__features_fallback_minimal_tailcall",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-4wuvzw_7",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-4wuvzw_7/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/7263ac3ab2c0fce5.tmp.28010.proof.o",
+        "--symbol",
+        "uprobe__features_fallback_minimal_tailcall",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/7263ac3ab2c0fce5.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/7263ac3ab2c0fce5.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/7263ac3ab2c0fce5.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/7263ac3ab2c0fce5.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/7263ac3ab2c0fce5.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_socket_listen",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-5wu28ap7",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-5wu28ap7/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/bf535deff88cab84.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_socket_listen",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/bf535deff88cab84.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/bf535deff88cab84.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/bf535deff88cab84.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/bf535deff88cab84.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/bf535deff88cab84.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret__register_chrdev",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-60x9c_z7",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-60x9c_z7/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/9838fe275b8953bb.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret__register_chrdev",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/9838fe275b8953bb.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/9838fe275b8953bb.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/9838fe275b8953bb.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/9838fe275b8953bb.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/9838fe275b8953bb.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_sys_enter",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-638o_kma",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-638o_kma/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/2f50d1e2be1b1fa6.tmp.28010.proof.o",
+        "--symbol",
+        "trace_sys_enter",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/2f50d1e2be1b1fa6.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/2f50d1e2be1b1fa6.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/2f50d1e2be1b1fa6.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/2f50d1e2be1b1fa6.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/2f50d1e2be1b1fa6.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "syscall__execveat_enter",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-6dq_jjwy",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-6dq_jjwy/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/ace0820a94554221.tmp.28010.proof.o",
+        "--symbol",
+        "syscall__execveat_enter",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/ace0820a94554221.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/ace0820a94554221.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/ace0820a94554221.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/ace0820a94554221.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/ace0820a94554221.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ptrace",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-6ip6nukx",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-6ip6nukx/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/08acf5b98058e448.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ptrace",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/08acf5b98058e448.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/08acf5b98058e448.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/08acf5b98058e448.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/08acf5b98058e448.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/08acf5b98058e448.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "cgroup_skb_ingress",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-6t6qxh86",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-6t6qxh86/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/3570b9f495bfc1be.tmp.28010.proof.o",
+        "--symbol",
+        "cgroup_skb_ingress",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/3570b9f495bfc1be.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/3570b9f495bfc1be.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/3570b9f495bfc1be.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/3570b9f495bfc1be.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/3570b9f495bfc1be.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "tracepoint__task__task_rename",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-6u42nelh",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-6u42nelh/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/5a564f46ae02c487.tmp.28010.proof.o",
+        "--symbol",
+        "tracepoint__task__task_rename",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/5a564f46ae02c487.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/5a564f46ae02c487.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/5a564f46ae02c487.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/5a564f46ae02c487.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/5a564f46ae02c487.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_filp_close",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-6udcz6yj",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-6udcz6yj/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/90f2b7c8b4540ce3.tmp.28010.proof.o",
+        "--symbol",
+        "trace_filp_close",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/90f2b7c8b4540ce3.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/90f2b7c8b4540ce3.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/90f2b7c8b4540ce3.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/90f2b7c8b4540ce3.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/90f2b7c8b4540ce3.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_do_mmap",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-6wyllh5d",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-6wyllh5d/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/414139f5027d524d.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_do_mmap",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/414139f5027d524d.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/414139f5027d524d.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/414139f5027d524d.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/414139f5027d524d.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/414139f5027d524d.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_do_splice",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-6zjome3t",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-6zjome3t/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/c08f44f132accbab.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_do_splice",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/c08f44f132accbab.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/c08f44f132accbab.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/c08f44f132accbab.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/c08f44f132accbab.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/c08f44f132accbab.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_bpf_prog",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-7gqz1qlo",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-7gqz1qlo/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/0bc8c1be97e145d0.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_bpf_prog",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/0bc8c1be97e145d0.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/0bc8c1be97e145d0.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/0bc8c1be97e145d0.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/0bc8c1be97e145d0.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/0bc8c1be97e145d0.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_sys_exit",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-7snl2kwk",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-7snl2kwk/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/df1ac0be07ff5deb.tmp.28010.proof.o",
+        "--symbol",
+        "trace_sys_exit",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/df1ac0be07ff5deb.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/df1ac0be07ff5deb.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/df1ac0be07ff5deb.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/df1ac0be07ff5deb.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/df1ac0be07ff5deb.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_arch_prctl",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-7vbt6oo8",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-7vbt6oo8/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/40bae2f50f7aa90b.tmp.28010.proof.o",
+        "--symbol",
+        "trace_arch_prctl",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/40bae2f50f7aa90b.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/40bae2f50f7aa90b.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/40bae2f50f7aa90b.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/40bae2f50f7aa90b.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/40bae2f50f7aa90b.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_file_update_time",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-85c_fpug",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-85c_fpug/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/1f8acbe545069d64.tmp.28010.proof.o",
+        "--symbol",
+        "trace_file_update_time",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/1f8acbe545069d64.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/1f8acbe545069d64.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/1f8acbe545069d64.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/1f8acbe545069d64.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/1f8acbe545069d64.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "lsm_file_open_test",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-8bfudqkd",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-8bfudqkd/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/2144b1338cdd475d.tmp.28010.proof.o",
+        "--symbol",
+        "lsm_file_open_test",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/2144b1338cdd475d.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/2144b1338cdd475d.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/2144b1338cdd475d.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/2144b1338cdd475d.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/2144b1338cdd475d.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_path_notify",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-8ckqqwy6",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-8ckqqwy6/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/b537212df91951e7.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_path_notify",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/b537212df91951e7.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/b537212df91951e7.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/b537212df91951e7.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/b537212df91951e7.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/b537212df91951e7.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "sched_process_exec_signal",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-8f0tlpml",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-8f0tlpml/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/b5696b7a29ade271.tmp.28010.proof.o",
+        "--symbol",
+        "sched_process_exec_signal",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/b5696b7a29ade271.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/b5696b7a29ade271.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/b5696b7a29ade271.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/b5696b7a29ade271.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/b5696b7a29ade271.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_kallsyms_lookup_name",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-8hc8jppr",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-8hc8jppr/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/1d56cade5014cb9f.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_kallsyms_lookup_name",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/1d56cade5014cb9f.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/1d56cade5014cb9f.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/1d56cade5014cb9f.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/1d56cade5014cb9f.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/1d56cade5014cb9f.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_bprm_check",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-8svkjumu",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-8svkjumu/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/f9899c5b943bd083.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_bprm_check",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/f9899c5b943bd083.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/f9899c5b943bd083.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/f9899c5b943bd083.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/f9899c5b943bd083.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/f9899c5b943bd083.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_file_permission",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-9sraxhxv",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-9sraxhxv/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/71262ad23430cae6.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_file_permission",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/71262ad23430cae6.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/71262ad23430cae6.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/71262ad23430cae6.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/71262ad23430cae6.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/71262ad23430cae6.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_vfs_read_tail",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-_4tt46op",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-_4tt46op/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/567495cb76fce85a.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_vfs_read_tail",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/567495cb76fce85a.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/567495cb76fce85a.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/567495cb76fce85a.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/567495cb76fce85a.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/567495cb76fce85a.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_vfs_writev",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-_mfvcufa",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-_mfvcufa/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/c44baa85100dbbc2.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_vfs_writev",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/c44baa85100dbbc2.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/c44baa85100dbbc2.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/c44baa85100dbbc2.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/c44baa85100dbbc2.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/c44baa85100dbbc2.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_kernel_write",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-_sjz8tx7",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-_sjz8tx7/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/b7fa281dcc961253.tmp.28010.proof.o",
+        "--symbol",
+        "trace_kernel_write",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/b7fa281dcc961253.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/b7fa281dcc961253.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/b7fa281dcc961253.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/b7fa281dcc961253.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/b7fa281dcc961253.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_settime64",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-aggadbdi",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-aggadbdi/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/d81b97157eeef932.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_settime64",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/d81b97157eeef932.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/d81b97157eeef932.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/d81b97157eeef932.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/d81b97157eeef932.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/d81b97157eeef932.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "kernel_write_magic_return",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-agn5715a",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-agn5715a/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/508ad4d696ba73bd.tmp.28010.proof.o",
+        "--symbol",
+        "kernel_write_magic_return",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/508ad4d696ba73bd.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/508ad4d696ba73bd.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/508ad4d696ba73bd.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/508ad4d696ba73bd.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/508ad4d696ba73bd.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_fd_install",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-agufik7e",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-agufik7e/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/6033daa5bf9be733.tmp.28010.proof.o",
+        "--symbol",
+        "trace_fd_install",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/6033daa5bf9be733.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/6033daa5bf9be733.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/6033daa5bf9be733.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/6033daa5bf9be733.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/6033daa5bf9be733.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_set_fs_pwd",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-atijpufu",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-atijpufu/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/baf4dbe9e4df2777.tmp.28010.proof.o",
+        "--symbol",
+        "trace_set_fs_pwd",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/baf4dbe9e4df2777.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/baf4dbe9e4df2777.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/baf4dbe9e4df2777.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/baf4dbe9e4df2777.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/baf4dbe9e4df2777.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "empty_kprobe",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-bi0lc2ox",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-bi0lc2ox/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/ad3e6dcf85627a62.tmp.28010.proof.o",
+        "--symbol",
+        "empty_kprobe",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/ad3e6dcf85627a62.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/ad3e6dcf85627a62.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/ad3e6dcf85627a62.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/ad3e6dcf85627a62.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/ad3e6dcf85627a62.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_call_usermodehelper",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-bj42nsbv",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-bj42nsbv/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/5e4a6c077e698470.tmp.28010.proof.o",
+        "--symbol",
+        "trace_call_usermodehelper",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/5e4a6c077e698470.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/5e4a6c077e698470.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/5e4a6c077e698470.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/5e4a6c077e698470.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/5e4a6c077e698470.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_dup3",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-c0x07xcv",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-c0x07xcv/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/2189576602fbec67.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_dup3",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/2189576602fbec67.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/2189576602fbec67.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/2189576602fbec67.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/2189576602fbec67.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/2189576602fbec67.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "sys_exit_submit",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-c25ugwms",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-c25ugwms/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/9dd0156b6987a6a0.tmp.28010.proof.o",
+        "--symbol",
+        "sys_exit_submit",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/9dd0156b6987a6a0.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/9dd0156b6987a6a0.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/9dd0156b6987a6a0.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/9dd0156b6987a6a0.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/9dd0156b6987a6a0.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_sock_alloc_file",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-c27gv36m",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-c27gv36m/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/0b16d8bb7dbb4b26.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_sock_alloc_file",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/0b16d8bb7dbb4b26.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/0b16d8bb7dbb4b26.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/0b16d8bb7dbb4b26.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/0b16d8bb7dbb4b26.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/0b16d8bb7dbb4b26.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_kernel_write_tail",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-cg29240j",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-cg29240j/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/d19a4bb67b9020f0.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_kernel_write_tail",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/d19a4bb67b9020f0.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/d19a4bb67b9020f0.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/d19a4bb67b9020f0.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/d19a4bb67b9020f0.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/d19a4bb67b9020f0.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_sock_alloc_file",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-d1066pcn",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-d1066pcn/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/94c3155e84bfcb79.tmp.28010.proof.o",
+        "--symbol",
+        "trace_sock_alloc_file",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/94c3155e84bfcb79.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/94c3155e84bfcb79.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/94c3155e84bfcb79.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/94c3155e84bfcb79.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/94c3155e84bfcb79.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_dup2",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-d60h_30y",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-d60h_30y/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/ec2e5e1a5ea9e412.tmp.28010.proof.o",
+        "--symbol",
+        "trace_dup2",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/ec2e5e1a5ea9e412.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/ec2e5e1a5ea9e412.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/ec2e5e1a5ea9e412.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/ec2e5e1a5ea9e412.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/ec2e5e1a5ea9e412.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_exec_binprm",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-dfykqhy_",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-dfykqhy_/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/b936188c9b21611f.tmp.28010.proof.o",
+        "--symbol",
+        "trace_exec_binprm",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/b936188c9b21611f.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/b936188c9b21611f.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/b936188c9b21611f.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/b936188c9b21611f.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/b936188c9b21611f.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_dup",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-dgbs73vf",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-dgbs73vf/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/104d06de59f8ec07.tmp.28010.proof.o",
+        "--symbol",
+        "trace_dup",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/104d06de59f8ec07.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/104d06de59f8ec07.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/104d06de59f8ec07.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/104d06de59f8ec07.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/104d06de59f8ec07.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "uprobe_mem_dump_trigger",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-dmhz9ysh",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-dmhz9ysh/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/0ab10a7ef034c7d4.tmp.28010.proof.o",
+        "--symbol",
+        "uprobe_mem_dump_trigger",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/0ab10a7ef034c7d4.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/0ab10a7ef034c7d4.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/0ab10a7ef034c7d4.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/0ab10a7ef034c7d4.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/0ab10a7ef034c7d4.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_do_mmap",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-dtiq1ybf",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-dtiq1ybf/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/cef2247c68e43674.tmp.28010.proof.o",
+        "--symbol",
+        "trace_do_mmap",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/cef2247c68e43674.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/cef2247c68e43674.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/cef2247c68e43674.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/cef2247c68e43674.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/cef2247c68e43674.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "lkm_seeker_kset_tail",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-dts3qyum",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-dts3qyum/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/8ddce86636bc0510.tmp.28010.proof.o",
+        "--symbol",
+        "lkm_seeker_kset_tail",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/8ddce86636bc0510.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/8ddce86636bc0510.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/8ddce86636bc0510.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/8ddce86636bc0510.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/8ddce86636bc0510.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_proc_create",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-dwulqf3j",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-dwulqf3j/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/5e8f7ca2b3ce503c.tmp.28010.proof.o",
+        "--symbol",
+        "trace_proc_create",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/5e8f7ca2b3ce503c.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/5e8f7ca2b3ce503c.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/5e8f7ca2b3ce503c.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/5e8f7ca2b3ce503c.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/5e8f7ca2b3ce503c.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "uprobe_lkm_seeker",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-efn6qbsu",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-efn6qbsu/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/80a5711fa20d21ef.tmp.28010.proof.o",
+        "--symbol",
+        "uprobe_lkm_seeker",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/80a5711fa20d21ef.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/80a5711fa20d21ef.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/80a5711fa20d21ef.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/80a5711fa20d21ef.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/80a5711fa20d21ef.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_switch_task_namespaces",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-eks6tbdf",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-eks6tbdf/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/64ecfcf619657cd9.tmp.28010.proof.o",
+        "--symbol",
+        "trace_switch_task_namespaces",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/64ecfcf619657cd9.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/64ecfcf619657cd9.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/64ecfcf619657cd9.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/64ecfcf619657cd9.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/64ecfcf619657cd9.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_inode_unlink",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-eoay5sp5",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-eoay5sp5/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/5cf43451f2868dfc.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_inode_unlink",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/5cf43451f2868dfc.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/5cf43451f2868dfc.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/5cf43451f2868dfc.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/5cf43451f2868dfc.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/5cf43451f2868dfc.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "tracepoint__raw_syscalls__sys_enter",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-erzm9ual",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-erzm9ual/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/94686109a12bb18d.tmp.28010.proof.o",
+        "--symbol",
+        "tracepoint__raw_syscalls__sys_enter",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/94686109a12bb18d.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/94686109a12bb18d.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/94686109a12bb18d.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/94686109a12bb18d.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/94686109a12bb18d.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "syscall__execve_enter",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-frcoqz_y",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-frcoqz_y/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/dcdeb12d9cf80dc8.tmp.28010.proof.o",
+        "--symbol",
+        "syscall__execve_enter",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/dcdeb12d9cf80dc8.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/dcdeb12d9cf80dc8.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/dcdeb12d9cf80dc8.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/dcdeb12d9cf80dc8.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/dcdeb12d9cf80dc8.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "tracepoint__module__module_load",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ft2vp4qd",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ft2vp4qd/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/c5b9f1a2407037d9.tmp.28010.proof.o",
+        "--symbol",
+        "tracepoint__module__module_load",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/c5b9f1a2407037d9.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/c5b9f1a2407037d9.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/c5b9f1a2407037d9.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/c5b9f1a2407037d9.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/c5b9f1a2407037d9.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_execute_finished",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-fuep2_hb",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-fuep2_hb/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/183c7c9cf7b41068.tmp.28010.proof.o",
+        "--symbol",
+        "trace_execute_finished",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/183c7c9cf7b41068.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/183c7c9cf7b41068.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/183c7c9cf7b41068.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/183c7c9cf7b41068.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/183c7c9cf7b41068.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "lkm_seeker_proc_tail",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-fugjltic",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-fugjltic/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/ebe4badb67bc0da9.tmp.28010.proof.o",
+        "--symbol",
+        "lkm_seeker_proc_tail",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/ebe4badb67bc0da9.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/ebe4badb67bc0da9.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/ebe4badb67bc0da9.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/ebe4badb67bc0da9.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/ebe4badb67bc0da9.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_sb_umount",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-g6dflw1a",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-g6dflw1a/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/3a733a540059518a.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_sb_umount",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/3a733a540059518a.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/3a733a540059518a.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/3a733a540059518a.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/3a733a540059518a.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/3a733a540059518a.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "send_bin",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-g85prc2t",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-g85prc2t/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/1df4d3cf82de25b7.tmp.28010.proof.o",
+        "--symbol",
+        "send_bin",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/1df4d3cf82de25b7.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/1df4d3cf82de25b7.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/1df4d3cf82de25b7.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/1df4d3cf82de25b7.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/1df4d3cf82de25b7.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "tracepoint__cgroup__cgroup_mkdir",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-gag13hni",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-gag13hni/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/b4cc7a23e5c15143.tmp.28010.proof.o",
+        "--symbol",
+        "tracepoint__cgroup__cgroup_mkdir",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/b4cc7a23e5c15143.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/b4cc7a23e5c15143.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/b4cc7a23e5c15143.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/b4cc7a23e5c15143.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/b4cc7a23e5c15143.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_dup2",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-gvdewoyw",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-gvdewoyw/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/dfd15f1cb79eb5c4.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_dup2",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/dfd15f1cb79eb5c4.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/dfd15f1cb79eb5c4.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/dfd15f1cb79eb5c4.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/dfd15f1cb79eb5c4.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/dfd15f1cb79eb5c4.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_vfs_read",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-gymt048a",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-gymt048a/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/2a1df71fef571999.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_vfs_read",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/2a1df71fef571999.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/2a1df71fef571999.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/2a1df71fef571999.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/2a1df71fef571999.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/2a1df71fef571999.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_cap_capable",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-hh8c8c2_",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-hh8c8c2_/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/806c9a93d563b096.tmp.28010.proof.o",
+        "--symbol",
+        "trace_cap_capable",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/806c9a93d563b096.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/806c9a93d563b096.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/806c9a93d563b096.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/806c9a93d563b096.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/806c9a93d563b096.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_sb_mount",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-hk8882ly",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-hk8882ly/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/68f61d49505f46b6.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_sb_mount",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/68f61d49505f46b6.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/68f61d49505f46b6.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/68f61d49505f46b6.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/68f61d49505f46b6.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/68f61d49505f46b6.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "lsm_bpf_check",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-i5ygi7fe",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-i5ygi7fe/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/f23c1e625294ba14.tmp.28010.proof.o",
+        "--symbol",
+        "lsm_bpf_check",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/f23c1e625294ba14.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/f23c1e625294ba14.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/f23c1e625294ba14.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/f23c1e625294ba14.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/f23c1e625294ba14.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_process_vm_writev",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ii6ijkms",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ii6ijkms/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/1ff79913b7831623.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_process_vm_writev",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/1ff79913b7831623.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/1ff79913b7831623.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/1ff79913b7831623.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/1ff79913b7831623.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/1ff79913b7831623.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_inode_rename",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-iki7eaal",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-iki7eaal/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/33cfc8c1759b2ce3.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_inode_rename",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/33cfc8c1759b2ce3.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/33cfc8c1759b2ce3.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/33cfc8c1759b2ce3.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/33cfc8c1759b2ce3.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/33cfc8c1759b2ce3.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "cgroup_bpf_run_filter_skb",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ip8d2fi0",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ip8d2fi0/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/a37d2e79e02289ce.tmp.28010.proof.o",
+        "--symbol",
+        "cgroup_bpf_run_filter_skb",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/a37d2e79e02289ce.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/a37d2e79e02289ce.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/a37d2e79e02289ce.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/a37d2e79e02289ce.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/a37d2e79e02289ce.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_arch_prctl",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-j30a4ohv",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-j30a4ohv/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/f2edc57e2a56bc7b.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_arch_prctl",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/f2edc57e2a56bc7b.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/f2edc57e2a56bc7b.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/f2edc57e2a56bc7b.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/f2edc57e2a56bc7b.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/f2edc57e2a56bc7b.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "tracepoint__sched__sched_process_exit",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-j9vifq28",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-j9vifq28/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/c073197f5c9fba41.tmp.28010.proof.o",
+        "--symbol",
+        "tracepoint__sched__sched_process_exit",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/c073197f5c9fba41.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/c073197f5c9fba41.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/c073197f5c9fba41.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/c073197f5c9fba41.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/c073197f5c9fba41.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_process_vm_writev",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-jlx7ot7t",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-jlx7ot7t/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/7ee4a119b85eca7f.tmp.28010.proof.o",
+        "--symbol",
+        "trace_process_vm_writev",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/7ee4a119b85eca7f.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/7ee4a119b85eca7f.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/7ee4a119b85eca7f.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/7ee4a119b85eca7f.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/7ee4a119b85eca7f.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_register_kprobe",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-jsq1gu14",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-jsq1gu14/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/277ccdb7e1576472.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_register_kprobe",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/277ccdb7e1576472.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/277ccdb7e1576472.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/277ccdb7e1576472.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/277ccdb7e1576472.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/277ccdb7e1576472.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_chmod_common",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-jx4fxuei",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-jx4fxuei/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/4b21adc88ae6e160.tmp.28010.proof.o",
+        "--symbol",
+        "trace_chmod_common",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/4b21adc88ae6e160.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/4b21adc88ae6e160.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/4b21adc88ae6e160.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/4b21adc88ae6e160.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/4b21adc88ae6e160.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "sys_exit_init",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-k4wqgby7",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-k4wqgby7/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/88567cf9908f58fc.tmp.28010.proof.o",
+        "--symbol",
+        "sys_exit_init",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/88567cf9908f58fc.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/88567cf9908f58fc.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/88567cf9908f58fc.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/88567cf9908f58fc.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/88567cf9908f58fc.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "syscall__execve_exit",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-l45_bbjv",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-l45_bbjv/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/29e602a84fc663e1.tmp.28010.proof.o",
+        "--symbol",
+        "syscall__execve_exit",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/29e602a84fc663e1.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/29e602a84fc663e1.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/29e602a84fc663e1.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/29e602a84fc663e1.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/29e602a84fc663e1.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_socket_setsockopt",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-lex1zlwp",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-lex1zlwp/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/e153274b54eb7fd6.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_socket_setsockopt",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/e153274b54eb7fd6.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/e153274b54eb7fd6.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/e153274b54eb7fd6.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/e153274b54eb7fd6.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/e153274b54eb7fd6.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_kernel_write",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-lkuntcho",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-lkuntcho/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/c34e45a5c1577858.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_kernel_write",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/c34e45a5c1577858.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/c34e45a5c1577858.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/c34e45a5c1577858.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/c34e45a5c1577858.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/c34e45a5c1577858.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "uprobe__features_fallback_arena_tailcall",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-m6zxplhu",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-m6zxplhu/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/83373014b81663b3.tmp.28010.proof.o",
+        "--symbol",
+        "uprobe__features_fallback_arena_tailcall",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/83373014b81663b3.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/83373014b81663b3.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/83373014b81663b3.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/83373014b81663b3.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/83373014b81663b3.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_check_helper_call",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-maecpucw",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-maecpucw/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/96573cf5e263f6e7.tmp.28010.proof.o",
+        "--symbol",
+        "trace_check_helper_call",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/96573cf5e263f6e7.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/96573cf5e263f6e7.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/96573cf5e263f6e7.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/96573cf5e263f6e7.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/96573cf5e263f6e7.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_do_exit",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-mep1kb0b",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-mep1kb0b/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/8d7a4cec8d34bebf.tmp.28010.proof.o",
+        "--symbol",
+        "trace_do_exit",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/8d7a4cec8d34bebf.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/8d7a4cec8d34bebf.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/8d7a4cec8d34bebf.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/8d7a4cec8d34bebf.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/8d7a4cec8d34bebf.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "tracepoint__exec_test",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-mhmcgyxs",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-mhmcgyxs/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/fb085c8d28422543.tmp.28010.proof.o",
+        "--symbol",
+        "tracepoint__exec_test",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/fb085c8d28422543.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/fb085c8d28422543.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/fb085c8d28422543.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/fb085c8d28422543.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/fb085c8d28422543.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "uprobe_lkm_seeker_submitter",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-mlwiu3p9",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-mlwiu3p9/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/6d1b2742b88bb8c5.tmp.28010.proof.o",
+        "--symbol",
+        "uprobe_lkm_seeker_submitter",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/6d1b2742b88bb8c5.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/6d1b2742b88bb8c5.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/6d1b2742b88bb8c5.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/6d1b2742b88bb8c5.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/6d1b2742b88bb8c5.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "tracepoint__sched__sched_process_free",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-mo35txhk",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-mo35txhk/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/02e6e60a61394180.tmp.28010.proof.o",
+        "--symbol",
+        "tracepoint__sched__sched_process_free",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/02e6e60a61394180.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/02e6e60a61394180.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/02e6e60a61394180.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/02e6e60a61394180.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/02e6e60a61394180.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_task_setrlimit",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-msfpas1q",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-msfpas1q/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/343df6c2311fe64d.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_task_setrlimit",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/343df6c2311fe64d.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/343df6c2311fe64d.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/343df6c2311fe64d.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/343df6c2311fe64d.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/343df6c2311fe64d.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "sys_dup_exit_tail",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-n89xmb_w",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-n89xmb_w/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/69245e8a6f1b4f1b.tmp.28010.proof.o",
+        "--symbol",
+        "sys_dup_exit_tail",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/69245e8a6f1b4f1b.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/69245e8a6f1b4f1b.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/69245e8a6f1b4f1b.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/69245e8a6f1b4f1b.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/69245e8a6f1b4f1b.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "tracepoint__raw_syscalls__sys_exit",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-nf970j1t",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-nf970j1t/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/cd77a42bad323656.tmp.28010.proof.o",
+        "--symbol",
+        "tracepoint__raw_syscalls__sys_exit",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/cd77a42bad323656.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/cd77a42bad323656.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/cd77a42bad323656.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/cd77a42bad323656.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/cd77a42bad323656.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_tracepoint_probe_register_prio_may_exist",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-nh7sf3cn",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-nh7sf3cn/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/4ae2868cd039fbc0.tmp.28010.proof.o",
+        "--symbol",
+        "trace_tracepoint_probe_register_prio_may_exist",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/4ae2868cd039fbc0.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/4ae2868cd039fbc0.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/4ae2868cd039fbc0.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/4ae2868cd039fbc0.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/4ae2868cd039fbc0.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_file_modified",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-nib7qsa8",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-nib7qsa8/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/a2394941e05a608d.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_file_modified",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/a2394941e05a608d.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/a2394941e05a608d.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/a2394941e05a608d.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/a2394941e05a608d.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/a2394941e05a608d.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_file_modified",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-nq0y7wuz",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-nq0y7wuz/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/4fbf539b3eae00cf.tmp.28010.proof.o",
+        "--symbol",
+        "trace_file_modified",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/4fbf539b3eae00cf.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/4fbf539b3eae00cf.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/4fbf539b3eae00cf.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/4fbf539b3eae00cf.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/4fbf539b3eae00cf.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_socket_sendmsg",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ojudcmm_",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ojudcmm_/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/851d93061250a8db.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_socket_sendmsg",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/851d93061250a8db.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/851d93061250a8db.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/851d93061250a8db.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/851d93061250a8db.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/851d93061250a8db.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "vfs_writev_magic_enter",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-oz4w2rp2",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-oz4w2rp2/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/3fc354dd1b5e66ec.tmp.28010.proof.o",
+        "--symbol",
+        "vfs_writev_magic_enter",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/3fc354dd1b5e66ec.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/3fc354dd1b5e66ec.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/3fc354dd1b5e66ec.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/3fc354dd1b5e66ec.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/3fc354dd1b5e66ec.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_register_kprobe",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-p1p8pr6x",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-p1p8pr6x/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/924df29f8d53c0b2.tmp.28010.proof.o",
+        "--symbol",
+        "trace_register_kprobe",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/924df29f8d53c0b2.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/924df29f8d53c0b2.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/924df29f8d53c0b2.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/924df29f8d53c0b2.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/924df29f8d53c0b2.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_check_map_func_compatibility",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-p6pi5syy",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-p6pi5syy/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/5ab7ed7b03431da3.tmp.28010.proof.o",
+        "--symbol",
+        "trace_check_map_func_compatibility",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/5ab7ed7b03431da3.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/5ab7ed7b03431da3.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/5ab7ed7b03431da3.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/5ab7ed7b03431da3.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/5ab7ed7b03431da3.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "heartbeat_capture",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-pa1eyibg",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-pa1eyibg/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/bfb6d612276ec14d.tmp.28010.proof.o",
+        "--symbol",
+        "heartbeat_capture",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/bfb6d612276ec14d.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/bfb6d612276ec14d.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/bfb6d612276ec14d.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/bfb6d612276ec14d.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/bfb6d612276ec14d.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_socket_recvmsg",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-pfd337w0",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-pfd337w0/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/f33164d7687a39f5.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_socket_recvmsg",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/f33164d7687a39f5.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/f33164d7687a39f5.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/f33164d7687a39f5.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/f33164d7687a39f5.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/f33164d7687a39f5.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "send_bin_tp",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-pich6q90",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-pich6q90/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/29cdef95ae4f655b.tmp.28010.proof.o",
+        "--symbol",
+        "send_bin_tp",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/29cdef95ae4f655b.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/29cdef95ae4f655b.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/29cdef95ae4f655b.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/29cdef95ae4f655b.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/29cdef95ae4f655b.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_bpf_map",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-q04162gp",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-q04162gp/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/ff850b4c11cf2896.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_bpf_map",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/ff850b4c11cf2896.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/ff850b4c11cf2896.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/ff850b4c11cf2896.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/ff850b4c11cf2896.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/ff850b4c11cf2896.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_dup",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-q41i6m2y",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-q41i6m2y/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/2482c2b4c6195883.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_dup",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/2482c2b4c6195883.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/2482c2b4c6195883.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/2482c2b4c6195883.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/2482c2b4c6195883.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/2482c2b4c6195883.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "security_bpf_kprobe",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-q6patdlm",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-q6patdlm/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/70a866dff18fa3c1.tmp.28010.proof.o",
+        "--symbol",
+        "security_bpf_kprobe",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/70a866dff18fa3c1.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/70a866dff18fa3c1.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/70a866dff18fa3c1.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/70a866dff18fa3c1.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/70a866dff18fa3c1.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_sk_clone",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-qept1gba",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-qept1gba/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/c0ce95de8cee63e0.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_sk_clone",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/c0ce95de8cee63e0.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/c0ce95de8cee63e0.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/c0ce95de8cee63e0.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/c0ce95de8cee63e0.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/c0ce95de8cee63e0.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "cgroup_skb_egress",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-qj_j41f8",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-qj_j41f8/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/0b09e5c89ad02286.tmp.28010.proof.o",
+        "--symbol",
+        "cgroup_skb_egress",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/0b09e5c89ad02286.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/0b09e5c89ad02286.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/0b09e5c89ad02286.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/0b09e5c89ad02286.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/0b09e5c89ad02286.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "tracepoint__sched__sched_process_exec",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-qks20stf",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-qks20stf/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/05763a92b764adb8.tmp.28010.proof.o",
+        "--symbol",
+        "tracepoint__sched__sched_process_exec",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/05763a92b764adb8.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/05763a92b764adb8.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/05763a92b764adb8.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/05763a92b764adb8.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/05763a92b764adb8.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_vfs_writev_tail",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-qtm3l5ah",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-qtm3l5ah/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/3bea73bb4e24f7e6.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_vfs_writev_tail",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/3bea73bb4e24f7e6.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/3bea73bb4e24f7e6.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/3bea73bb4e24f7e6.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/3bea73bb4e24f7e6.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/3bea73bb4e24f7e6.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_kernel_post_read_file",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-qydw2nwz",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-qydw2nwz/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/f47f9c0af56b2981.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_kernel_post_read_file",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/f47f9c0af56b2981.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/f47f9c0af56b2981.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/f47f9c0af56b2981.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/f47f9c0af56b2981.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/f47f9c0af56b2981.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "sched_process_exec_event_submit_tail",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-qyy7_fmb",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-qyy7_fmb/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/79779cf18f296e08.tmp.28010.proof.o",
+        "--symbol",
+        "sched_process_exec_event_submit_tail",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/79779cf18f296e08.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/79779cf18f296e08.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/79779cf18f296e08.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/79779cf18f296e08.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/79779cf18f296e08.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "process_execute_failed_tail",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-r14zxj4f",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-r14zxj4f/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/0ce43ad4d270570b.tmp.28010.proof.o",
+        "--symbol",
+        "process_execute_failed_tail",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/0ce43ad4d270570b.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/0ce43ad4d270570b.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/0ce43ad4d270570b.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/0ce43ad4d270570b.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/0ce43ad4d270570b.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "lkm_seeker_modtree_loop",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-r244abd4",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-r244abd4/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/bae5edd2d6b2521b.tmp.28010.proof.o",
+        "--symbol",
+        "lkm_seeker_modtree_loop",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/bae5edd2d6b2521b.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/bae5edd2d6b2521b.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/bae5edd2d6b2521b.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/bae5edd2d6b2521b.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/bae5edd2d6b2521b.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "vfs_writev_magic_return",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-r5x2f_ns",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-r5x2f_ns/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/b910aa1967892727.tmp.28010.proof.o",
+        "--symbol",
+        "vfs_writev_magic_return",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/b910aa1967892727.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/b910aa1967892727.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/b910aa1967892727.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/b910aa1967892727.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/b910aa1967892727.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_bprm_creds_for_exec",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-raomn09b",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-raomn09b/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/9d6e363cccd200f2.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_bprm_creds_for_exec",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/9d6e363cccd200f2.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/9d6e363cccd200f2.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/9d6e363cccd200f2.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/9d6e363cccd200f2.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/9d6e363cccd200f2.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_do_splice",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-rg8bc51k",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-rg8bc51k/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/b3e603baccba50d9.tmp.28010.proof.o",
+        "--symbol",
+        "trace_do_splice",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/b3e603baccba50d9.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/b3e603baccba50d9.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/b3e603baccba50d9.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/b3e603baccba50d9.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/b3e603baccba50d9.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_debugfs_create_dir",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-rt2i6w0p",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-rt2i6w0p/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/9089720aecd72d64.tmp.28010.proof.o",
+        "--symbol",
+        "trace_debugfs_create_dir",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/9089720aecd72d64.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/9089720aecd72d64.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/9089720aecd72d64.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/9089720aecd72d64.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/9089720aecd72d64.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_socket_bind",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-rw1tnq8i",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-rw1tnq8i/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/f264b2285bfa930e.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_socket_bind",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/f264b2285bfa930e.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/f264b2285bfa930e.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/f264b2285bfa930e.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/f264b2285bfa930e.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/f264b2285bfa930e.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_load_elf_phdrs",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ryacpef6",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ryacpef6/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/142c15e49006bf3f.tmp.28010.proof.o",
+        "--symbol",
+        "trace_load_elf_phdrs",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/142c15e49006bf3f.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/142c15e49006bf3f.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/142c15e49006bf3f.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/142c15e49006bf3f.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/142c15e49006bf3f.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_commit_creds",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-s0lspfhb",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-s0lspfhb/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/c523ee60b7201fbd.tmp.28010.proof.o",
+        "--symbol",
+        "trace_commit_creds",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/c523ee60b7201fbd.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/c523ee60b7201fbd.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/c523ee60b7201fbd.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/c523ee60b7201fbd.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/c523ee60b7201fbd.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "cgroup_rmdir_signal",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-s5tb4tb9",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-s5tb4tb9/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/c600d46076ed80f0.tmp.28010.proof.o",
+        "--symbol",
+        "cgroup_rmdir_signal",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/c600d46076ed80f0.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/c600d46076ed80f0.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/c600d46076ed80f0.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/c600d46076ed80f0.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/c600d46076ed80f0.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "syscall__accept4",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-sbvf466_",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-sbvf466_/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/e653f32425840b2c.tmp.28010.proof.o",
+        "--symbol",
+        "syscall__accept4",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/e653f32425840b2c.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/e653f32425840b2c.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/e653f32425840b2c.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/e653f32425840b2c.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/e653f32425840b2c.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "tracepoint__module__module_free",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-scwjpaqp",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-scwjpaqp/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/22bf186f76fb2634.tmp.28010.proof.o",
+        "--symbol",
+        "tracepoint__module__module_free",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/22bf186f76fb2634.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/22bf186f76fb2634.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/22bf186f76fb2634.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/22bf186f76fb2634.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/22bf186f76fb2634.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "uprobe__features_fallback_helper_tailcall",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-sion26vu",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-sion26vu/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/adabc27213025d7b.tmp.28010.proof.o",
+        "--symbol",
+        "uprobe__features_fallback_helper_tailcall",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/adabc27213025d7b.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/adabc27213025d7b.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/adabc27213025d7b.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/adabc27213025d7b.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/adabc27213025d7b.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "uprobe__features_fallback_arena",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-sx5p6brc",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-sx5p6brc/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/f65d2cd042e79193.tmp.28010.proof.o",
+        "--symbol",
+        "uprobe__features_fallback_arena",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/f65d2cd042e79193.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/f65d2cd042e79193.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/f65d2cd042e79193.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/f65d2cd042e79193.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/f65d2cd042e79193.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "vfs_write_magic_enter",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-sy53tgjj",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-sy53tgjj/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/bf292dabe16c90ff.tmp.28010.proof.o",
+        "--symbol",
+        "vfs_write_magic_enter",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/bf292dabe16c90ff.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/bf292dabe16c90ff.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/bf292dabe16c90ff.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/bf292dabe16c90ff.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/bf292dabe16c90ff.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace___debugfs_create_file",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-t8mhwnkq",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-t8mhwnkq/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/f3f1a9d355056448.tmp.28010.proof.o",
+        "--symbol",
+        "trace___debugfs_create_file",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/f3f1a9d355056448.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/f3f1a9d355056448.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/f3f1a9d355056448.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/f3f1a9d355056448.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/f3f1a9d355056448.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "kernel_write_magic_enter",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-tbzg0xrx",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-tbzg0xrx/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/16c21551a5b6f61e.tmp.28010.proof.o",
+        "--symbol",
+        "kernel_write_magic_enter",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/16c21551a5b6f61e.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/16c21551a5b6f61e.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/16c21551a5b6f61e.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/16c21551a5b6f61e.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/16c21551a5b6f61e.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_vfs_writev",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-tmwxpk6d",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-tmwxpk6d/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/1cdd894f6f7c6325.tmp.28010.proof.o",
+        "--symbol",
+        "trace_vfs_writev",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/1cdd894f6f7c6325.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/1cdd894f6f7c6325.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/1cdd894f6f7c6325.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/1cdd894f6f7c6325.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/1cdd894f6f7c6325.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_file_update_time",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-tpsdyqgu",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-tpsdyqgu/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/0e5727ba7696360e.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_file_update_time",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/0e5727ba7696360e.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/0e5727ba7696360e.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/0e5727ba7696360e.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/0e5727ba7696360e.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/0e5727ba7696360e.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace___register_chrdev",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-tsz7t_6s",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-tsz7t_6s/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/01bbdf2ea1150381.tmp.28010.proof.o",
+        "--symbol",
+        "trace___register_chrdev",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/01bbdf2ea1150381.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/01bbdf2ea1150381.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/01bbdf2ea1150381.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/01bbdf2ea1150381.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/01bbdf2ea1150381.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "sys_enter_init",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-u7cqm681",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-u7cqm681/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/186204ced3327067.tmp.28010.proof.o",
+        "--symbol",
+        "sys_enter_init",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/186204ced3327067.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/186204ced3327067.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/186204ced3327067.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/186204ced3327067.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/186204ced3327067.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "syscall__execveat_exit",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ug7qupf3",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ug7qupf3/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/fca4b3c149e083ba.tmp.28010.proof.o",
+        "--symbol",
+        "syscall__execveat_exit",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/fca4b3c149e083ba.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/fca4b3c149e083ba.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/fca4b3c149e083ba.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/fca4b3c149e083ba.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/fca4b3c149e083ba.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "tracepoint__sched__sched_process_fork",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-uglcdx1g",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-uglcdx1g/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/5fa2b65de8e9fa34.tmp.28010.proof.o",
+        "--symbol",
+        "tracepoint__sched__sched_process_fork",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/5fa2b65de8e9fa34.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/5fa2b65de8e9fa34.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/5fa2b65de8e9fa34.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/5fa2b65de8e9fa34.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/5fa2b65de8e9fa34.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_vfs_utimes",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ugt1j9bt",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ugt1j9bt/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/4a5c0456a535e7ec.tmp.28010.proof.o",
+        "--symbol",
+        "trace_vfs_utimes",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/4a5c0456a535e7ec.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/4a5c0456a535e7ec.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/4a5c0456a535e7ec.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/4a5c0456a535e7ec.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/4a5c0456a535e7ec.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_socket_connect",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-uhit4lml",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-uhit4lml/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/644f17f1c85cbdf6.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_socket_connect",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/644f17f1c85cbdf6.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/644f17f1c85cbdf6.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/644f17f1c85cbdf6.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/644f17f1c85cbdf6.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/644f17f1c85cbdf6.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "uprobe_seq_ops_trigger",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ui6c16zq",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ui6c16zq/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/fdec14c4894acb62.tmp.28010.proof.o",
+        "--symbol",
+        "uprobe_seq_ops_trigger",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/fdec14c4894acb62.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/fdec14c4894acb62.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/fdec14c4894acb62.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/fdec14c4894acb62.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/fdec14c4894acb62.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_dup3",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-upa0f0_b",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-upa0f0_b/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/c85e2605307ee32f.tmp.28010.proof.o",
+        "--symbol",
+        "trace_dup3",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/c85e2605307ee32f.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/c85e2605307ee32f.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/c85e2605307ee32f.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/c85e2605307ee32f.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/c85e2605307ee32f.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_do_init_module",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-uywb1oi7",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-uywb1oi7/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/55e31893594f8b5d.tmp.28010.proof.o",
+        "--symbol",
+        "trace_do_init_module",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/55e31893594f8b5d.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/55e31893594f8b5d.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/55e31893594f8b5d.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/55e31893594f8b5d.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/55e31893594f8b5d.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_vfs_read",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-v5cehjv9",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-v5cehjv9/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/296fc3081654b7e0.tmp.28010.proof.o",
+        "--symbol",
+        "trace_vfs_read",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/296fc3081654b7e0.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/296fc3081654b7e0.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/296fc3081654b7e0.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/296fc3081654b7e0.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/296fc3081654b7e0.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_mmap_file",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-vcr2uli_",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-vcr2uli_/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/bea15095af960bae.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_mmap_file",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/bea15095af960bae.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/bea15095af960bae.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/bea15095af960bae.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/bea15095af960bae.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/bea15095af960bae.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "sched_process_exit_signal",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-vgl_prof",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-vgl_prof/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/ea0713c17e80adfb.tmp.28010.proof.o",
+        "--symbol",
+        "sched_process_exit_signal",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/ea0713c17e80adfb.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/ea0713c17e80adfb.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/ea0713c17e80adfb.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/ea0713c17e80adfb.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/ea0713c17e80adfb.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_file_open",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-vp3ivnl_",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-vp3ivnl_/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/6a2ecfc5ad0b28d9.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_file_open",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/6a2ecfc5ad0b28d9.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/6a2ecfc5ad0b28d9.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/6a2ecfc5ad0b28d9.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/6a2ecfc5ad0b28d9.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/6a2ecfc5ad0b28d9.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_vfs_write_tail",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-vtj7_web",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-vtj7_web/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/d7f55b8a5bd2f863.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_vfs_write_tail",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/d7f55b8a5bd2f863.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/d7f55b8a5bd2f863.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/d7f55b8a5bd2f863.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/d7f55b8a5bd2f863.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/d7f55b8a5bd2f863.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_do_truncate",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-vymgry_p",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-vymgry_p/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/4e58f8018feff7a4.tmp.28010.proof.o",
+        "--symbol",
+        "trace_do_truncate",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/4e58f8018feff7a4.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/4e58f8018feff7a4.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/4e58f8018feff7a4.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/4e58f8018feff7a4.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/4e58f8018feff7a4.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_inode_symlink",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-w2o90pnl",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-w2o90pnl/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/2eb6860be70ea77b.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_inode_symlink",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/2eb6860be70ea77b.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/2eb6860be70ea77b.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/2eb6860be70ea77b.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/2eb6860be70ea77b.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/2eb6860be70ea77b.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "tracepoint__sched__sched_switch",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-w334nyii",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-w334nyii/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/d9b637fc930e358d.tmp.28010.proof.o",
+        "--symbol",
+        "tracepoint__sched__sched_switch",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/d9b637fc930e358d.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/d9b637fc930e358d.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/d9b637fc930e358d.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/d9b637fc930e358d.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/d9b637fc930e358d.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_file_ioctl",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-w7r3s34d",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-w7r3s34d/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/20e4b69e954b818b.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_file_ioctl",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/20e4b69e954b818b.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/20e4b69e954b818b.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/20e4b69e954b818b.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/20e4b69e954b818b.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/20e4b69e954b818b.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_task_prctl",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-wn1xt1c4",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-wn1xt1c4/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/092010eb3e2e5c22.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_task_prctl",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/092010eb3e2e5c22.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/092010eb3e2e5c22.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/092010eb3e2e5c22.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/092010eb3e2e5c22.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/092010eb3e2e5c22.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_socket_create",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-wnfzofyr",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-wnfzofyr/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/19852676aba42ed7.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_socket_create",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/19852676aba42ed7.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/19852676aba42ed7.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/19852676aba42ed7.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/19852676aba42ed7.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/19852676aba42ed7.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_inotify_find_inode",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-wyklisw6",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-wyklisw6/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/b2ba8de1d4c3e568.tmp.28010.proof.o",
+        "--symbol",
+        "trace_inotify_find_inode",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/b2ba8de1d4c3e568.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/b2ba8de1d4c3e568.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/b2ba8de1d4c3e568.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/b2ba8de1d4c3e568.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/b2ba8de1d4c3e568.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "lkm_seeker_mod_tree_tail",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-wzy5od5g",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-wzy5od5g/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/48e2ec675cc2c056.tmp.28010.proof.o",
+        "--symbol",
+        "lkm_seeker_mod_tree_tail",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/48e2ec675cc2c056.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/48e2ec675cc2c056.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/48e2ec675cc2c056.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/48e2ec675cc2c056.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/48e2ec675cc2c056.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "tracepoint__cgroup__cgroup_attach_task",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-xgsw3q5k",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-xgsw3q5k/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/6a9222a41078f29d.tmp.28010.proof.o",
+        "--symbol",
+        "tracepoint__cgroup__cgroup_attach_task",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/6a9222a41078f29d.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/6a9222a41078f29d.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/6a9222a41078f29d.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/6a9222a41078f29d.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/6a9222a41078f29d.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_vfs_write",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-xh0com8x",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-xh0com8x/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/c1fd8bb59837ca4a.tmp.28010.proof.o",
+        "--symbol",
+        "trace_vfs_write",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/c1fd8bb59837ca4a.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/c1fd8bb59837ca4a.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/c1fd8bb59837ca4a.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/c1fd8bb59837ca4a.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/c1fd8bb59837ca4a.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_device_add",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-xkmszuxi",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-xkmszuxi/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/4dbd41e920b793fe.tmp.28010.proof.o",
+        "--symbol",
+        "trace_device_add",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/4dbd41e920b793fe.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/4dbd41e920b793fe.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/4dbd41e920b793fe.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/4dbd41e920b793fe.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/4dbd41e920b793fe.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "tracepoint__cgroup__cgroup_rmdir",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-xskdnvjs",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-xskdnvjs/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/633be69be5294d28.tmp.28010.proof.o",
+        "--symbol",
+        "tracepoint__cgroup__cgroup_rmdir",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/633be69be5294d28.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/633be69be5294d28.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/633be69be5294d28.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/633be69be5294d28.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/633be69be5294d28.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_filldir64",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-xw125slh",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-xw125slh/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/defbd539c4f071d9.tmp.28010.proof.o",
+        "--symbol",
+        "trace_filldir64",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/defbd539c4f071d9.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/defbd539c4f071d9.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/defbd539c4f071d9.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/defbd539c4f071d9.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/defbd539c4f071d9.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "vfs_write_magic_return",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-y17ygwm_",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-y17ygwm_/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/9b6586d66d217ca2.tmp.28010.proof.o",
+        "--symbol",
+        "vfs_write_magic_return",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/9b6586d66d217ca2.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/9b6586d66d217ca2.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/9b6586d66d217ca2.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/9b6586d66d217ca2.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/9b6586d66d217ca2.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_vfs_write",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-y3fdedmx",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-y3fdedmx/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/1205344c688be2ef.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_vfs_write",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/1205344c688be2ef.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/1205344c688be2ef.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/1205344c688be2ef.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/1205344c688be2ef.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/1205344c688be2ef.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_kallsyms_lookup_name",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ymgh0668",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ymgh0668/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/8612098244b4b5d5.tmp.28010.proof.o",
+        "--symbol",
+        "trace_kallsyms_lookup_name",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/8612098244b4b5d5.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/8612098244b4b5d5.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/8612098244b4b5d5.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/8612098244b4b5d5.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/8612098244b4b5d5.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_mmap_alert",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ywtrsxow",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ywtrsxow/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/6a709a9ad3a65263.tmp.28010.proof.o",
+        "--symbol",
+        "trace_mmap_alert",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/6a709a9ad3a65263.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/6a709a9ad3a65263.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/6a709a9ad3a65263.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/6a709a9ad3a65263.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/6a709a9ad3a65263.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_bpf_check",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-yz4821x3",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-yz4821x3/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/8d5a61acdbf6590e.tmp.28010.proof.o",
+        "--symbol",
+        "trace_bpf_check",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/8d5a61acdbf6590e.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/8d5a61acdbf6590e.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/8d5a61acdbf6590e.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/8d5a61acdbf6590e.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/8d5a61acdbf6590e.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_security_file_mprotect",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-yzyufnux",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-yzyufnux/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/fbd885d8f493f430.tmp.28010.proof.o",
+        "--symbol",
+        "trace_security_file_mprotect",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/fbd885d8f493f430.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/fbd885d8f493f430.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/fbd885d8f493f430.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/fbd885d8f493f430.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/fbd885d8f493f430.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  },
+  {
+    "app": "tracee",
+    "symbol": "trace_ret_vfs_readv_tail",
+    "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-znnajhcz",
+    "plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-znnajhcz/link-plan.json",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/353cdeff4f5e4ce3.tmp.28010.proof.o",
+        "--symbol",
+        "trace_ret_vfs_readv_tail",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/353cdeff4f5e4ce3.tmp.28010.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/353cdeff4f5e4ce3.tmp.28010.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/353cdeff4f5e4ce3.tmp.28010.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/353cdeff4f5e4ce3.tmp.28010.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/353cdeff4f5e4ce3.tmp.28010.link-plan.json"
+      ],
+      "redirected_calls": 0
+    }
+  }
+]
