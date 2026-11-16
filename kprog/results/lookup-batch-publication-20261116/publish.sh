@@ -5,7 +5,7 @@ publish_batch() {
     local root=/workspaces/repository
     local raw=/workspaces/kprog-raw/perf/20261116-lookup-batch-publication
     local locks=/workspaces/.agent-state/kprog-lanes/locks
-    local wait_pid=$1 old_image new_image stamp
+    local wait_pid=$1 old_image new_image
     trap 'rc=$?; printf "%s\n" "$rc" > /workspaces/kprog-raw/perf/20261116-lookup-batch-publication/exit-code; date -u +%FT%TZ > /workspaces/kprog-raw/perf/20261116-lookup-batch-publication/controller.finished' EXIT
     cd "$root"
     date -u +%FT%TZ > "$raw/started"
@@ -23,19 +23,9 @@ publish_batch() {
     new_image=$(docker image inspect --format '{{.Id}}' bpf-benchmark/kprog:current)
     printf '%s\n' "$new_image" > "$raw/image.id"
     cat /workspaces/.agent-state/kprog-ck/build-x86/include/config/kernel.release > "$raw/kernel.release"
-    if [ "$old_image" != "$new_image" ]; then
-        docker image rm --no-prune "$old_image" > "$raw/image-cleanup.log" 2>&1
-        stamp=$(date -u +%FT%TZ)
-        printf '\n- %s PERF publication: replaced the one current image %s with %s and removed only the old image object; the base was rebuilt in place and all raw runs stay. Receipt %s.\n' \
-            "$stamp" "$old_image" "$new_image" "$raw/image-cleanup.log" >> kprog/docs/cleanup-log.md
-    fi
     date -u +%FT%TZ > "$raw/image.finished"
     flock -u 9
-    date -u +%FT%TZ > "$raw/check.started"
-    flock -s "$locks/image" flock -x "$locks/timing" \
-        make -f kprog/perf/one-image/Makefile check LOGS="$raw/check" > "$raw/check.controller.log" 2>&1
-    date -u +%FT%TZ > "$raw/check.finished"
-    make -f kprog/results/lookup-batch-publication-20261116/Makefile summarize > "$raw/summary.log" 2>&1
+    make -f kprog/results/lookup-batch-publication-20261116/Makefile check
     date -u +%FT%TZ > "$raw/finished"
 }
 publish_batch "$@"

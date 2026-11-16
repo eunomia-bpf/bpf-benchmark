@@ -9,7 +9,8 @@ kernel are built together; all existing LTO stays enabled. Entry extraction
 The committed controller waits for C's already running old-image OTel counter
 guest, then takes image EX and uses the unchanged one-image image recipe.
 JOBS=8 is build parallelism only. The base is rebuilt in place, current tag and
-canonical tar are replaced, and only the superseded image object is removed.
+canonical tar are replaced; the superseded image object was already absent
+after this build.
 Raw data stays. No alternate source/build/image/base is kept.
 
 After publication, the exact one-image check entry runs under image SH and
@@ -30,3 +31,11 @@ remained 16:21 UTC, and the current image remained 6641a7e1. Its output stays in
 the raw directory. Preflight now parses the shell/Python and prints only the
 result-local publish command; it does not recurse into the kernel recipe.
 The real rebuild runs after the existing guest exits, under image EX.
+
+Publication completed as image 96a677d6826f at 22:44 UTC. The controller then
+stopped on an unnecessary explicit removal of the already absent old image.
+Docker's image inventory contains only current; the actor that removed the
+old object is not established by the build log. The redundant removal is
+deleted forward, and the result-local check target resumes the unchanged
+frozen check on this finished image. The first controller's failure and log
+remain retained. No rebuild is needed to resume the check.
