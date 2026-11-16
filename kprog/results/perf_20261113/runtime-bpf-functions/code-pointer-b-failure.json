@@ -1,0 +1,12 @@
+{
+  "recorded_at": "2026-11-16T13:48:32Z",
+  "status": "failed_before_b_generation",
+  "source_commit": "0924b7f1a",
+  "raw_directory": "/workspaces/kprog-raw/perf/20261116-code-pointer-stock",
+  "controller_pid": 1521357,
+  "stage": "generate_micro_sim_proofs.indirect_targets",
+  "error": "unresolved finite indirect target at 0x54: call rax",
+  "input_proof": "/workspaces/kprog-raw/perf/20261116-code-pointer-check-retry1/cel.proof.o",
+  "scope": "Same actual CEL proof that passed host proof/kernel round-trip execution; simulator generation still loses the spilled code address. No B compiled, stock verification or application installation result.",
+  "next_step": "Carry finite defined-code targets through stack aliases in simulator generation without guessing targets."
+}
