@@ -4,10 +4,12 @@ import argparse
 import json
 from pathlib import Path
 import statistics
+from collections import defaultdict
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--run', type=Path, required=True)
 parser.add_argument('--output', type=Path, required=True)
+parser.add_argument('--reference', type=Path, action='append', default=[])
 args = parser.parse_args()
 app = json.loads((args.run/'details/apps/bcc__set.json').read_text())
 phases = {}
@@ -45,6 +47,35 @@ result = dict(run=str(args.run), status=app['status'], error=app['error'], phase
               replacement_last_boot_seconds=max(times),
               programs={p:len(app[p]['bpf']) for p in phases},
               scope='Stats off; no per-program time or scheduler/steal attribution. Stress-ng CPU times include its own accounting and rounding.')
+references = []
+for run in args.reference:
+    captured = json.loads((run/'details/apps/bcc__set.json').read_text())
+    metadata = json.loads((run/'details/result.json').read_text())
+    groups = defaultdict(dict)
+    raw_programs = {}
+    for phase in ['baseline', 'post_rejit']:
+        raw_programs[phase] = list((captured.get(phase) or {}).get('bpf', {}).values())
+        grouped = defaultdict(list)
+        for program in raw_programs[phase]:
+            grouped[(program['type'], program['name'])].append(program)
+        for key, programs in grouped.items():
+            calls = sum(p['run_cnt_delta'] for p in programs)
+            ns = sum(p['run_time_ns_delta'] for p in programs)
+            groups[key][phase] = dict(program_ids=[p['id'] for p in programs],
+                                     calls=calls, time_ns=ns, ns_per_call=ns/calls if calls else None)
+    rows = []
+    for (kind, name), values in groups.items():
+        b, n = values.get('baseline'), values.get('post_rejit')
+        rows.append(dict(type=kind, name=name, arms=values,
+                         native_over_baseline_calls=n['calls']/b['calls'] if b and n and b['calls'] else None,
+                         baseline_over_native_ns_per_call=b['ns_per_call']/n['ns_per_call']
+                         if b and n and b['ns_per_call'] and n['ns_per_call'] else None))
+    references.append(dict(run=str(run), status=captured['status'], error=captured['error'],
+                           bpf_stats=metadata['bpf_stats'], samples=metadata['samples'],
+                           workload_seconds=metadata['workload_seconds'],
+                           programs=raw_programs, name_groups=rows,
+                           name_scope='Kernel names are truncated; equal type/name rows are groups, not unique bodies. All original program records are retained.'))
+result['stats_on_references'] = references
 args.output.mkdir(parents=True, exist_ok=True)
 (args.output/'analysis.json').write_text(json.dumps(result,indent=2)+'\n')
 print(json.dumps({k:result[k] for k in ['ratio_of_phase_median_total_wall_rate',
