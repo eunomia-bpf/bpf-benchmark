@@ -92,3 +92,44 @@ out of the guest: run the `bpf_fork_v511.native.o` build of
 (`kprog/x86/`), and compare the two instruction streams at the
 `get_attach_cookie`-shaped site. Anything that reproduces the death outside the
 VM turns a silent VM crash into a comparable trace.
+## What the object shows
+
+`bpf_fork_v511.native.o` (942 624 B, stage, built 2026-11-15 20:13Z) has one
+code section, `kprobe/wake_up_new_task`, 0xc95 bytes, and no undefined helper
+symbols: only `memcpy` and `memset` are undefined, and the 34 relocations are
+`execve_map`/`execve_val`/`execve_map_stats`/`tg_conf_map`/`tg_cgtracker_map`/
+`cgroup_rate*_map` GOTPCRELX plus the two libc calls. So the helper calls are
+not ELF relocations; every one is an indirect call through a register that was
+just loaded with the helper id as an immediate:
+
+```
+30: b8 04 00 00 00   movl $0x4, %eax
+35: b9 71 00 00 00   movl $0x71, %ecx
+3a: be 04 00 00 00   movl $0x4, %esi
+3f: ff d1            callq *%rcx
+```
+
+`0x71` is helper 113, `bpf_probe_read_kernel`; the object uses it 20 times and
+id 1 (`bpf_map_lookup_elem`) 20 times. Helper 174 (`bpf_get_attach_cookie`,
+the `source_lacks_helper: 174` marker) never appears as an immediate — 174 is
+0xae and no `movl $0xae` exists in the object.
+
+All 94 manifest entries carry `"patches": []`, so no entry patches a call site;
+the loader resolves helper ids to addresses itself through the kernel's
+`helper_targets` debugfs query (all 212 canonical helpers, one query per
+program) and the native-link plan binds them by name. Two consequences:
+
+- The `source_lacks_helper: 174` marker is a *selection* filter, not a claim
+  about this object's code: it only decides which tetragon program each entry
+  may bind to.
+- The helper id immediates are exactly what a BTF-typed `call` instruction
+  compiles to, so an unresolved one would call a user-space address with a
+  kernel calling convention. That is a silent tri-fault or a corrupted return,
+  not an error return — consistent with the guest dying with no printed oops.
+
+Worth noting for whoever picks this up: `0x71`-immediate call sites exist in
+the object 20 times, and the `movl $0x4,%eax; movl $0x71,%ecx; callq *%rcx`
+shape seen at offset 0x30 sets `%rax` (the helper id register for the call)
+to 4 while the id is in `%rcx`, which is not the shape the kernel's JIT emits
+for a direct helper call. That site is the first thing to compare against the
+intercepted BPF original.
