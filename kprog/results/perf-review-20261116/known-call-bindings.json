@@ -1,0 +1,91 @@
+{
+  "reviewed_at": "2026-11-16T16:43:56Z",
+  "scope": "Retained host replay and source review; execution frequency and current installed-code effects remain to measure.",
+  "specialized_call_map_rows": [
+    {
+      "plan": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/114/0.link-plan.json",
+      "map_name": "lru_mapping",
+      "target": "0xffffffff834cb580",
+      "generic_target": "0xffffffff834b8a00"
+    },
+    {
+      "plan": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/67/0.link-plan.json",
+      "map_name": "cilium_policyst",
+      "target": "0xffffffffb84c8450",
+      "generic_target": "0xffffffffb84b8a00"
+    },
+    {
+      "plan": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/67/0.link-plan.json",
+      "map_name": "cilium_policystats",
+      "target": "0xffffffffb84c8450",
+      "generic_target": "0xffffffffb84b8a00"
+    },
+    {
+      "plan": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/86/0.link-plan.json",
+      "map_name": "cilium_policyst",
+      "target": "0xffffffffb84c8450",
+      "generic_target": "0xffffffffb84b8a00"
+    },
+    {
+      "plan": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/86/0.link-plan.json",
+      "map_name": "cilium_policystats",
+      "target": "0xffffffffb84c8450",
+      "generic_target": "0xffffffffb84b8a00"
+    },
+    {
+      "plan": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/87/0.link-plan.json",
+      "map_name": "cilium_policyst",
+      "target": "0xffffffffb84c8450",
+      "generic_target": "0xffffffffb84b8a00"
+    },
+    {
+      "plan": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/87/0.link-plan.json",
+      "map_name": "cilium_policystats",
+      "target": "0xffffffffb84c8450",
+      "generic_target": "0xffffffffb84b8a00"
+    }
+  ],
+  "katran": {
+    "app": "katran",
+    "symbol": "balancer_ingress",
+    "replay": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/114",
+    "plan_origin": "20261115-word-hash-lto/timing/ab retained loader plan",
+    "proof_sha256": "19ae21fd2e9707b4d45a7897568d696a1c130bc01ece15b00fc05d4dcf77089e",
+    "blob_sha256": "b5191e7b8dce245788816787e82994028b425f0303dee198107822258acb85c9",
+    "proven_named_map": "lru_mapping",
+    "proof_map_load_offsets": [
+      "0x79a",
+      "0xb1a"
+    ],
+    "proof_call_offsets": [
+      "0x7ae",
+      "0xb2e"
+    ],
+    "blob_calls": [
+      {
+        "offset": "0x82c",
+        "target": "0x2793",
+        "bytes": "e8621f0000"
+      },
+      {
+        "offset": "0xc81",
+        "target": "0x2793",
+        "bytes": "e80d1b0000"
+      },
+      {
+        "offset": "0x27cc",
+        "target": "0x3162",
+        "bytes": "e891090000"
+      }
+    ],
+    "generic_relocations": [
+      {
+        "offset": "0x32a2",
+        "kind": 1,
+        "target": "0xffffffff834b8a00"
+      }
+    ],
+    "specialized_target": "0xffffffff834cb580",
+    "specialized_target_relocations": []
+  }
+}

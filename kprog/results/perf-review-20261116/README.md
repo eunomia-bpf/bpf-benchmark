@@ -786,3 +786,48 @@ double-execution cause and no confirmed Cilium packet fix. Those remain open. Th
     improvement candidate, with the speed target still open. Known-map
     update/delete binding and immutable configuration folding remain the
     separate opportunities identified above.
+
+24. **Known complete lookup targets are discarded by the map selector.**
+
+    This extends item 4 with a concrete retained Katran path. Loader
+    `src/native_loader.cpp:2785–2788` binds known LRU_PERCPU_HASH to
+    htab_lru_percpu_map_lookup_elem, and :2797–2800 binds ARRAY_OF_MAPS to
+    array_of_map_lookup_elem. Both use kind=call because the kernel function
+    returns the complete value. `x86.rs:114–120` accepts six inline/raw-result
+    kinds for a proven map name, then :124–128 substitutes the generic
+    bpf_map_lookup_elem target for kind=call. The existing test at :4507–4514
+    explicitly encodes this substitution even with an exact map identity.
+
+    Retained replay 114 is Katran balancer_ingress in
+    `/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication`.
+    Its plan supplies lru_mapping with kind=call and target
+    0xffffffff834cb580, the relocated array_of_map_lookup_elem. The original
+    proof loads lru_mapping directly into RDI at +0x79a and +0xb1a, followed
+    by argument setup and helper calls at +0x7ae/+0xb2e in the same blocks.
+    There is a direct named-map fact at each call; these are the outer map
+    accesses, separate from the dynamic inner-map sites in P-map-CFG.
+
+    The emitted blob instead contains calls at +0x82c/+0xc81 to +0x2793.
+    That routine tests map type ARRAY, then its fallback calls +0x3162 at
+    +0x27cc. The second routine tests LPM, then calls the generic helper
+    through relocation +0x32a2. The specialized array_of_map_lookup_elem
+    target has zero relocation records in that blob. Thus each execution
+    of either outer lookup takes two extra local CALL/RET boundaries and
+    map-type tests before generic map-ops dispatch. The kernel's own
+    ARRAY_OF_MAPS JIT generator already emits direct address arithmetic
+    and the inner-pointer load (`arraymap.c:1413–1441`).
+
+    `known-call-bindings.json` preserves the plan rows, blob/proof hashes,
+    call offsets and targets. The retained corpus contains seven named
+    kind=call rows with specialized targets: Katran's lru_mapping and two
+    aliases of Cilium's policystats map in each of three program plans.
+    These are seven map rows, with execution frequency still to measure;
+    Cilium's exact native argument provenance needs its own site inspection.
+
+    Reuse the complete bound target for an exact native map identity, or
+    the existing direct shape emitter where appropriate. That bypasses
+    redundant generic dispatch while keeping runtime dispatch for dynamic
+    maps. This is a source and retained-machine-code finding. Current-image
+    installed bytes and the per-call benefit remain measurement work after
+    cleanup; the older replay's offsets identify evidence, not current code
+    addresses or workload branch counts.
