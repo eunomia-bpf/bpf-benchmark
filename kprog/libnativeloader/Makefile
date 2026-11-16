@@ -14,6 +14,7 @@ HELPER_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-helper-context/k
 HELPER_KERNEL_MODULE ?= /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
 REFRESH_OUTPUT ?= /workspaces/kprog-raw/verified/20261113-shared-refresh
 REFRESH_OPERATION ?= full
+REFRESH_LINKER_INPUT ?=
 IMAGE_INVENTORY_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-kfunc-refresh/native-inputs.json
 
 DATA_LAYOUT_BUILD ?= /var/tmp/kprog-tmp/verified/data-layout
@@ -499,7 +500,7 @@ resident-census-checkpoint:
 		$(foreach queue,$(CENSUS_CHECKPOINT_QUEUES),--queue "$(queue)")
 
 shared-base-refresh:
-	bash ../test/refresh_verified_base.sh "$(REFRESH_OUTPUT)" "$(REFRESH_OPERATION)" "$(DIRECT_RECOVERY_BUILD)/module/bpf_x86_native_lab.ko"
+	bash ../test/refresh_verified_base.sh "$(REFRESH_OUTPUT)" "$(REFRESH_OPERATION)" "$(DIRECT_RECOVERY_BUILD)/module/bpf_x86_native_lab.ko" "$(REFRESH_LINKER_INPUT)"
 
 shared-base-finalize:
 	bash ../test/refresh_verified_base.sh "$(REFRESH_OUTPUT)" --finalize

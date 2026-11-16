@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run only under the workspace's exclusive image lock, with guests checkpointed.
+# The caller holds image EX; guest readers hold image SH.
 set -euo pipefail
 # The caller's OUTPUT names its evidence directory. Kbuild's host tools also
 # use OUTPUT, so inherit neither it nor command-line Make overrides here.
@@ -46,12 +46,13 @@ finalize_refresh() {
 }
 
 refresh_operation=${2:-full}
+printf '%s\n' "$refresh_operation" > "$refresh_output/operation"
 if [[ $refresh_operation == --finalize ]]; then
     refresh_old_image=$(cat "$refresh_output/old-image")
     refresh_new_image=$(docker image inspect --format '{{.Id}}' "$refresh_image")
     finalize_refresh
     exit 0
-elif [[ $refresh_operation != full && $refresh_operation != --modules-only && $refresh_operation != --loader-only && $refresh_operation != --direct-recovery ]]; then
+elif [[ $refresh_operation != full && $refresh_operation != --modules-only && $refresh_operation != --loader-only && $refresh_operation != --direct-recovery && $refresh_operation != --linker-input && $refresh_operation != --linker-rebuild ]]; then
     printf 'Unknown refresh operation: %s\n' "$2" >&2
     exit 1
 fi
@@ -61,6 +62,21 @@ refresh_old_image=$(docker image inspect --format '{{.Id}}' "$refresh_image")
 printf '%s\n' "$refresh_old_image" > "$refresh_output/old-image"
 make -C "$refresh_root/kprog/libnativeloader" shared-image-artifact-inventory \
     IMAGE_INVENTORY_OUTPUT="$refresh_output/native-inputs-before.json"
+
+if [[ $refresh_operation == --linker-input || $refresh_operation == --linker-rebuild ]]; then
+    sha256sum "$refresh_linker" > "$refresh_output/linker-before-sha256"
+    stat --printf='%s bytes %n\n' "$refresh_linker" > "$refresh_output/replaced-linker.txt"
+    # Replacing the canonical output leaves the recorded reference archive
+    # intact. Removing this output also makes Cargo recreate it on rebuild.
+    rm -f "$refresh_linker"
+    if [[ $refresh_operation == --linker-input ]]; then
+        printf '%s\n' "${4:-}" > "$refresh_output/linker-input"
+        install -m 0755 "${4:-}" "$refresh_linker"
+        sha256sum "$refresh_linker" > "$refresh_output/linker-after-sha256"
+    fi
+    printf -- '- %s PERF linker publication: replaced the sole canonical linker (%s); the original input archive stays intact, with replacement logs in %s.\n' \
+        "$(date -u +%FT%TZ)" "$refresh_operation" "$refresh_output" >> "$refresh_root/kprog/docs/cleanup-log.md"
+fi
 
 if [[ $refresh_operation == full || $refresh_operation == --loader-only ]]; then
 # A caller's implicit Make rule can replace vmlinux without replacing the boot.
@@ -149,8 +165,10 @@ fi
 
 # The frozen image recipe below skips stable Rust artifacts. Rebuild the
 # canonical linker explicitly so a loader refresh cannot package the old one.
-if [[ $refresh_operation != --modules-only && $refresh_operation != --direct-recovery ]]; then
-    sha256sum "$refresh_linker" > "$refresh_output/linker-before-sha256"
+if [[ $refresh_operation != --modules-only && $refresh_operation != --direct-recovery && $refresh_operation != --linker-input ]]; then
+    if [[ $refresh_operation != --linker-rebuild ]]; then
+        sha256sum "$refresh_linker" > "$refresh_output/linker-before-sha256"
+    fi
     env -u CARGO_TARGET_DIR CARGO_BUILD_JOBS=1 make -C "$refresh_root" host-rust-x86 JOBS=1
     sha256sum "$refresh_linker" > "$refresh_output/linker-after-sha256"
 fi
