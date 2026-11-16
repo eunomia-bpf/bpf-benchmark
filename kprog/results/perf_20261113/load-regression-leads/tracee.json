@@ -1,0 +1,18 @@
+{
+  "timestamp": "2026-11-16T02:43:40Z",
+  "run": "corpus/results/x86_kvm_corpus_20261116_022318_630666",
+  "status": "error",
+  "earlier_helper_fix_confirmed": {
+    "program": "sys_enter_submi",
+    "original_id": 206,
+    "native_id": 207,
+    "installed": true
+  },
+  "failing_program": "lkm_seeker_modt",
+  "required_chunks": 627,
+  "existing_max_chunks": 512,
+  "chunk_bytes": 128,
+  "loader": "kprog/libnativeloader/src/native_loader.cpp:611",
+  "module": "kprog/perf/direct-native/bpf_x86_native_lab.c:48",
+  "scope": "Real app log reaches the next existing upload-size limit. No app-success claim or program exclusion. Module is C-owned; loader is PERF-owned."
+}
