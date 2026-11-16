@@ -1,0 +1,288 @@
+{
+  "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_105138_635552",
+  "status": "ok",
+  "error": "",
+  "phases": {
+    "baseline": [
+      {
+        "metrics": {
+          "syscall": {
+            "ops": 514.0,
+            "seconds": 180.02,
+            "user_seconds": 0.02,
+            "system_seconds": 0.0,
+            "wall_ops_per_second": 2.86,
+            "cpu_ops_per_second": 22817.06,
+            "cpu_seconds": 0.02
+          },
+          "cap": {
+            "ops": 63493233.0,
+            "seconds": 180.0,
+            "user_seconds": 16.5,
+            "system_seconds": 149.87,
+            "wall_ops_per_second": 352740.18,
+            "cpu_ops_per_second": 381649.39,
+            "cpu_seconds": 166.37
+          },
+          "set": {
+            "ops": 4955654.0,
+            "seconds": 180.0,
+            "user_seconds": 12.6,
+            "system_seconds": 156.31,
+            "wall_ops_per_second": 27531.41,
+            "cpu_ops_per_second": 29339.47,
+            "cpu_seconds": 168.91
+          },
+          "sockfd": {
+            "ops": 31688920.0,
+            "seconds": 180.0,
+            "user_seconds": 7.56,
+            "system_seconds": 171.46,
+            "wall_ops_per_second": 176049.01,
+            "cpu_ops_per_second": 177009.98,
+            "cpu_seconds": 179.02
+          }
+        },
+        "total_wall_ops_per_second": 556323.46
+      },
+      {
+        "metrics": {
+          "syscall": {
+            "ops": 514.0,
+            "seconds": 183.27,
+            "user_seconds": 0.02,
+            "system_seconds": 0.01,
+            "wall_ops_per_second": 2.8,
+            "cpu_ops_per_second": 18609.7,
+            "cpu_seconds": 0.03
+          },
+          "cap": {
+            "ops": 66050747.0,
+            "seconds": 180.0,
+            "user_seconds": 15.93,
+            "system_seconds": 156.43,
+            "wall_ops_per_second": 366948.58,
+            "cpu_ops_per_second": 383219.54,
+            "cpu_seconds": 172.36
+          },
+          "set": {
+            "ops": 5057079.0,
+            "seconds": 180.0,
+            "user_seconds": 12.7,
+            "system_seconds": 160.23,
+            "wall_ops_per_second": 28094.78,
+            "cpu_ops_per_second": 29243.63,
+            "cpu_seconds": 172.92999999999998
+          },
+          "sockfd": {
+            "ops": 33052915.0,
+            "seconds": 180.0,
+            "user_seconds": 7.54,
+            "system_seconds": 179.41,
+            "wall_ops_per_second": 183626.14,
+            "cpu_ops_per_second": 176798.19,
+            "cpu_seconds": 186.95
+          }
+        },
+        "total_wall_ops_per_second": 578672.3
+      },
+      {
+        "metrics": {
+          "syscall": {
+            "ops": 514.0,
+            "seconds": 181.04,
+            "user_seconds": 0.02,
+            "system_seconds": 0.01,
+            "wall_ops_per_second": 2.84,
+            "cpu_ops_per_second": 15912.82,
+            "cpu_seconds": 0.03
+          },
+          "cap": {
+            "ops": 64900480.0,
+            "seconds": 180.0,
+            "user_seconds": 16.34,
+            "system_seconds": 154.18,
+            "wall_ops_per_second": 360556.41,
+            "cpu_ops_per_second": 380604.77,
+            "cpu_seconds": 170.52
+          },
+          "set": {
+            "ops": 5007496.0,
+            "seconds": 180.0,
+            "user_seconds": 12.12,
+            "system_seconds": 159.05,
+            "wall_ops_per_second": 27819.4,
+            "cpu_ops_per_second": 29255.19,
+            "cpu_seconds": 171.17000000000002
+          },
+          "sockfd": {
+            "ops": 31928075.0,
+            "seconds": 180.0,
+            "user_seconds": 7.02,
+            "system_seconds": 170.43,
+            "wall_ops_per_second": 177377.42,
+            "cpu_ops_per_second": 179922.56,
+            "cpu_seconds": 177.45000000000002
+          }
+        },
+        "total_wall_ops_per_second": 565756.07
+      }
+    ],
+    "post_rejit": [
+      {
+        "metrics": {
+          "syscall": {
+            "ops": 514.0,
+            "seconds": 181.7,
+            "user_seconds": 0.03,
+            "system_seconds": 0.02,
+            "wall_ops_per_second": 2.83,
+            "cpu_ops_per_second": 10388.04,
+            "cpu_seconds": 0.05
+          },
+          "cap": {
+            "ops": 64482338.0,
+            "seconds": 180.0,
+            "user_seconds": 16.77,
+            "system_seconds": 151.09,
+            "wall_ops_per_second": 358235.21,
+            "cpu_ops_per_second": 384136.68,
+            "cpu_seconds": 167.86
+          },
+          "set": {
+            "ops": 5041313.0,
+            "seconds": 180.0,
+            "user_seconds": 12.03,
+            "system_seconds": 158.07,
+            "wall_ops_per_second": 28007.16,
+            "cpu_ops_per_second": 29638.07,
+            "cpu_seconds": 170.1
+          },
+          "sockfd": {
+            "ops": 31314898.0,
+            "seconds": 180.0,
+            "user_seconds": 6.7,
+            "system_seconds": 166.29,
+            "wall_ops_per_second": 173970.84,
+            "cpu_ops_per_second": 181021.32,
+            "cpu_seconds": 172.98999999999998
+          }
+        },
+        "total_wall_ops_per_second": 560216.04
+      },
+      {
+        "metrics": {
+          "syscall": {
+            "ops": 514.0,
+            "seconds": 180.03,
+            "user_seconds": 0.01,
+            "system_seconds": 0.01,
+            "wall_ops_per_second": 2.86,
+            "cpu_ops_per_second": 22857.65,
+            "cpu_seconds": 0.02
+          },
+          "cap": {
+            "ops": 63189740.0,
+            "seconds": 180.0,
+            "user_seconds": 16.06,
+            "system_seconds": 148.45,
+            "wall_ops_per_second": 351054.11,
+            "cpu_ops_per_second": 384119.94,
+            "cpu_seconds": 164.51
+          },
+          "set": {
+            "ops": 4935458.0,
+            "seconds": 180.0,
+            "user_seconds": 11.45,
+            "system_seconds": 157.03,
+            "wall_ops_per_second": 27419.2,
+            "cpu_ops_per_second": 29294.61,
+            "cpu_seconds": 168.48
+          },
+          "sockfd": {
+            "ops": 25275971.0,
+            "seconds": 180.0,
+            "user_seconds": 4.97,
+            "system_seconds": 131.14,
+            "wall_ops_per_second": 140420.01,
+            "cpu_ops_per_second": 185703.12,
+            "cpu_seconds": 136.10999999999999
+          }
+        },
+        "total_wall_ops_per_second": 518896.18
+      },
+      {
+        "metrics": {
+          "syscall": {
+            "ops": 514.0,
+            "seconds": 183.12,
+            "user_seconds": 0.01,
+            "system_seconds": 0.02,
+            "wall_ops_per_second": 2.81,
+            "cpu_ops_per_second": 15269.9,
+            "cpu_seconds": 0.03
+          },
+          "cap": {
+            "ops": 57198065.0,
+            "seconds": 180.0,
+            "user_seconds": 14.96,
+            "system_seconds": 135.89,
+            "wall_ops_per_second": 317767.02,
+            "cpu_ops_per_second": 379153.42,
+            "cpu_seconds": 150.85
+          },
+          "set": {
+            "ops": 4572483.0,
+            "seconds": 180.0,
+            "user_seconds": 10.79,
+            "system_seconds": 144.84,
+            "wall_ops_per_second": 25402.35,
+            "cpu_ops_per_second": 29381.12,
+            "cpu_seconds": 155.63
+          },
+          "sockfd": {
+            "ops": 25152039.0,
+            "seconds": 180.0,
+            "user_seconds": 4.95,
+            "system_seconds": 131.79,
+            "wall_ops_per_second": 139730.17,
+            "cpu_ops_per_second": 183943.1,
+            "cpu_seconds": 136.73999999999998
+          }
+        },
+        "total_wall_ops_per_second": 482902.35000000003
+      }
+    ]
+  },
+  "native_last_over_first": {
+    "syscall": {
+      "wall_ops_per_second": 0.9929328621908127,
+      "cpu_ops_per_second": 1.4699500579512592,
+      "cpu_seconds": 0.6
+    },
+    "cap": {
+      "wall_ops_per_second": 0.8870345826698609,
+      "cpu_ops_per_second": 0.9870273778593598,
+      "cpu_seconds": 0.8986655546288572
+    },
+    "set": {
+      "wall_ops_per_second": 0.9069948541730043,
+      "cpu_ops_per_second": 0.9913304071418955,
+      "cpu_seconds": 0.9149323927101705
+    },
+    "sockfd": {
+      "wall_ops_per_second": 0.803181556173437,
+      "cpu_ops_per_second": 1.016140529745336,
+      "cpu_seconds": 0.7904503150471125
+    }
+  },
+  "ratio_of_phase_median_total_wall_rate": 0.9171729788069265,
+  "replacement_count": 25,
+  "replacement_first_boot_seconds": 831.373238,
+  "replacement_last_boot_seconds": 831.470017,
+  "programs": {
+    "baseline": 25,
+    "post_rejit": 25
+  },
+  "scope": "Stats off; no per-program time or scheduler/steal attribution. Stress-ng CPU times include its own accounting and rounding."
+}

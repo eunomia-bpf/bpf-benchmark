@@ -88,3 +88,37 @@ build archives remain at /workspaces/kprog-raw/perf/20261116-shim-function-facts
 Source and inputs are a constructed regression fixture. Nonconstant CEL,
 actual Tetragon installation and checked B acceptance remain open. No image,
 base, application flag or benchmark entry was changed for this check.
+
+
+2026-11-16T11:31:29Z: 3e7355e51/63547fcfe extend runtime materialization to nonconstant
+captured bodies through the existing canonical BPF lowering. A companion
+compiler reuses the canonical runner's four LLVM/BPF object files and emits
+unoptimized textual LLVM IR. It replaces the kernel-entry R2–R5 zero stores
+with all five actual caller arguments before promotion/optimization. The
+existing LLVM 18 native LTO tool parses that text, links the same supplied
+body, preserves pointer/scalar return ABI and target/GPR/no-red-zone flags,
+and then runs its existing optimization/codegen pipeline. Helper IDs remain
+numeric for the normal native linker; selected program boundaries remain
+separate. No vendor compiler, producer flag, second library build or benchmark
+entry changed. 89330803f tracks canonical object/header dependencies normally.
+
+6095819c3 preserves alignment 1 for ordinary BPF loads/stores, since access
+width does not promise address alignment. Native execution and proof extraction
+pass for seven nonconstant functions and 256 vectors each: R1–R5, aligned and
+unaligned loads, stack, backward-loop byte summation, signed branching, narrow
+arithmetic and side-effect stores. Producer absent-facts output remains
+byte-identical; six constant values by 48 ABI vectors and nine combined
+producer/runtime failure cases pass. Public, loader/cache and static PERF_EVENT
+regressions each pass 256 contexts. The actual shim/live-BTF test now captures
+MOV R0,R1; ADD R0,R2; EXIT: both stock original BPF and the generated userspace
+native artifact return 13, with original stride 16 and function offsets 0/4.
+
+Raw logs/inputs/build archives: /workspaces/kprog-raw/perf/20261116-bpf-callee-ir,
+including alignment/ for the final memory-access subset. nonconstant-report.json
+records the result. Only test input semantics changed from the earlier constant
+9 fixture; old raw/receipts remain. This is compiler, ABI and live-capture
+coverage, not actual Tetragon installation or full checked-B acceptance. Runtime
+package staging now includes kprog-bpf-callee-ir; publication remains deferred
+while the current round holds imageSH. Generated body facts participate in both
+P and B through the same entry proof/request; cache identity also includes the
+companion compiler when present.

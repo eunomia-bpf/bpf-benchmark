@@ -613,3 +613,14 @@ both 9, original stride 16). Host tests cover same-code/different-table records
 and output errors. This closes the capture component; nonconstant CEL and real
 app installation remain open. No runtime gain or image publication is claimed.
 Receipts: runtime-bpf-functions/shim-capture-report.json.
+
+2026-11-16T11:31:29Z — Phase 1 nonconstant captured bodies: 3e7355e51/63547fcfe reuse
+canonical BPF lowering through a text-IR process boundary, preserve actual
+R1–R5 before optimization, and link bodies into the existing native LTO tool.
+6095819c3 preserves unaligned load/store semantics; 89330803f tracks normal
+canonical object/header dependencies. Seven functions x256 native vectors and
+proof entries pass, as do constant/default-output and three context regressions.
+Actual shim/live-BTF R1+R2 execution returns 13 in BPF and native. One producer
+flag set remains; no new library build, vendor edit, benchmark change or image
+publication. Actual app installation and checked-B acceptance remain open.
+Receipts: runtime-bpf-functions/nonconstant-report.json.
