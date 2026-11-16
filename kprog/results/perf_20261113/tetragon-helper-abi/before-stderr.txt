@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/test/check_tetragon_helper_registers.py", line 40, in <module>
+    execute(args.execute)
+  File "/workspaces/repository/kprog/test/check_tetragon_helper_registers.py", line 22, in execute
+    raise ValueError(f'arity{arity}: input{value}, actual{actual}, expected{expected}')
+ValueError: arity1: input1, actual23, expected24

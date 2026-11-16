@@ -1,0 +1,43 @@
+[  825.825144] BUG: unable to handle page fault for address: ffffd052c015c000
+[  825.826188] #PF: supervisor write access in kernel mode
+[  825.827068] #PF: error_code(0x0002) - not-present page
+[  825.827945] PGD 100000067 P4D 100000067 PUD 10027d067 PMD 100286067 PTE 0
+[  825.829092] Oops: Oops: 0002 [#1] SMP NOPTI
+[  825.829820] CPU: 0 UID: 0 PID: 2067 Comm: native-link Tainted: G           OE       7.0.0-rc2+ #14 PREEMPT(lazy) 
+[  825.831511] Tainted: [O]=OOT_MODULE, [E]=UNSIGNED_MODULE
+[  825.832418] Hardware name: QEMU Ubuntu 24.04 PC v2 (i440FX + PIIX, arch_caps fix, 1996), BIOS 1.16.3-debian-1.16.3-2 04/01/2014
+[  825.834299] RIP: 0010:bpf_prog_26449268576adffc_event_execve+0x2a5c/0x35e6
+[  825.835465] Code: ff 83 ac 24 00 00 4c 89 e7 4c 89 f6 44 89 e9 41 bb 01 00 00 00 83 f9 08 0f 82 23 00 00 00 48 8b 06 45 85 db 0f 84 42 00 00 00 <48> 89 07 48 83 c7 08 48 83 c6 08 83 e9 08 83 f9 08 0f 83 dd ff ff
+[  825.838474] RSP: 0018:ffffd052c015bbb0 EFLAGS: 00010202
+[  825.839253] RAX: d7d7d7d7d7d7d7d7 RBX: ffff8c6dc6832a40 RCX: 00000000c68335c8
+[  825.840498] RDX: 0000000000000001 RSI: ffff8c6e406b0480 RDI: ffffd052c015c000
+[  825.841554] RBP: 0000000000000801 R08: 0000000000000000 R09: 0000000000000001
+[  825.842613] R10: 00000000000007f6 R11: 0000000000000001 R12: ffffd052c015bbf8
+[  825.843670] R13: 00000000c68339d0 R14: ffff8c6e406b0078 R15: ffff8c6dcaba6098
+[  825.844742] FS:  0000000000000000(0000) GS:ffff8c7d19968000(0000) knlGS:0000000000000000
+[  825.845916] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[  825.846778] CR2: ffffd052c015c000 CR3: 0000000181da3004 CR4: 0000000000772ef0
+[  825.847833] PKRU: 55555554
+[  825.848252] Call Trace:
+[  825.848648]  <TASK>
+[  825.848981]  ? bpf_prog_26449268576adffc_event_execve+0x1cd5/0x35e6
+[  825.849902]  </TASK>
+[  825.850245] Modules linked in: bpf_preload xfrm_user(E) xfrm_algo(E) xt_set(E) ip_set(E) nft_chain_nat(E) nf_nat(E) xt_addrtype(E) nft_compat(E) nf_tables(E) nfnetlink(E) bpf_x86_native_lab(OE) sr_mod(E) cdrom(E) sg(E) ghash_clmulni_intel(E) kvm_intel(E) ata_piix(E) mousedev(E) kvm(E) libata(E) i2c_piix4(E) psmouse(E) scsi_mod(E) i2c_smbus(E) irqbypass(E) scsi_common(E) i2c_core(E) button(E) atkbd(E) vivaldi_fmap(E) libps2(E) i8042(E) serio(E) virtio_mmio(E) virtiofs(E) fuse(E)
+[  825.856244] CR2: ffffd052c015c000
+[  825.856760] ---[ end trace 0000000000000000 ]---
+[  825.857450] RIP: 0010:bpf_prog_26449268576adffc_event_execve+0x2a5c/0x35e6
+[  825.858449] Code: ff 83 ac 24 00 00 4c 89 e7 4c 89 f6 44 89 e9 41 bb 01 00 00 00 83 f9 08 0f 82 23 00 00 00 48 8b 06 45 85 db 0f 84 42 00 00 00 <48> 89 07 48 83 c7 08 48 83 c6 08 83 e9 08 83 f9 08 0f 83 dd ff ff
+[  825.861111] RSP: 0018:ffffd052c015bbb0 EFLAGS: 00010202
+[  825.861889] RAX: d7d7d7d7d7d7d7d7 RBX: ffff8c6dc6832a40 RCX: 00000000c68335c8
+[  825.862954] RDX: 0000000000000001 RSI: ffff8c6e406b0480 RDI: ffffd052c015c000
+[  825.864016] RBP: 0000000000000801 R08: 0000000000000000 R09: 0000000000000001
+[  825.865069] R10: 00000000000007f6 R11: 0000000000000001 R12: ffffd052c015bbf8
+[  825.866124] R13: 00000000c68339d0 R14: ffff8c6e406b0078 R15: ffff8c6dcaba6098
+[  825.867187] FS:  0000000000000000(0000) GS:ffff8c7d19968000(0000) knlGS:0000000000000000
+[  825.868377] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[  825.869238] CR2: ffffd052c015c000 CR3: 0000000181da3004 CR4: 0000000000772ef0
+[  825.870302] PKRU: 55555554
+[  825.870731] Kernel panic - not syncing: Fatal exception
+[  825.872248] Kernel Offset: 0x22000000 from 0xffffffff81000000 (relocation range: 0xffffffff80000000-0xffffffffbfffffff)
+[  825.873792] Rebooting in 30 seconds..
+make: *** [kprog/perf/one-image/Makefile:106: corpus] Error 255

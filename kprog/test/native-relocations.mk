@@ -53,6 +53,10 @@ guest-kernel-layout:
 	$(KERNEL_LAYOUT_BUILD)/facts /sys/kernel/btf/vmlinux /proc/kallsyms > $(OUTPUT)/kernel-layout.json
 
 CHECK_CPUS ?= 8-11
+.PHONY: helper-register-abi
+helper-register-abi:
+	taskset -c 16-17 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/check_tetragon_helper_registers.py --build /var/tmp/kprog-tmp/perf/helper-register-abi --output $(OUTPUT)
+
 .PHONY: check build
 check: $(KERNEL_LAYOUT)
 	taskset -c $(CHECK_CPUS) prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) NATIVE_LINK_HASH_TEST_OUTPUT=$(OUTPUT)/hash-execution cargo test --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
