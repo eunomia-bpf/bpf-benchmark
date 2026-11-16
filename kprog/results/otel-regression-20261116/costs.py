@@ -4,7 +4,6 @@ from collections import Counter
 import importlib.util
 import json
 from pathlib import Path
-import struct
 import subprocess
 import sys
 

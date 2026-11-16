@@ -1,0 +1,37 @@
+{
+  "scope": "Diagnostic software CPU-clock sampling limitation; not a body/helper/map cost estimate",
+  "raw": "/workspaces/kprog-raw/perf/20261116-otel-regression/costs.json",
+  "profile_controller_exit": 0,
+  "phases": {
+    "baseline": {
+      "counter_window_seconds": [
+        [
+          150.827597,
+          221.452452
+        ]
+      ],
+      "samples": 55978,
+      "calls": 24092147,
+      "counter_total_ns": 102548952102,
+      "counter_ns_per_call": 4256.530233772855,
+      "period_ns_attributed_to_program_text": 0,
+      "total_attributed_period_ns": 0,
+      "installed_bytes": 167504
+    },
+    "post_rejit": {
+      "counter_window_seconds": [
+        [
+          389.670038,
+          460.712346
+        ]
+      ],
+      "samples": 55849,
+      "calls": 23107650,
+      "counter_total_ns": 132432485333,
+      "counter_ns_per_call": 5731.110058054367,
+      "period_ns_attributed_to_program_text": 0,
+      "total_attributed_period_ns": 5025125,
+      "installed_bytes": 303930
+    }
+  }
+}
