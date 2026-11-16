@@ -162,3 +162,33 @@ reading the pass. `native-link` has a `show` path that prints
 running the fork object through it is a single command outside the guest; it
 answers whether the site bound to `bpf_probe_read_kernel` or to something else.
 That is the next step, and it does not need a VM.
+
+## The call shape is not the bug
+
+Ran the object through `native-link` itself (release binary,
+`kprog/x86/native_lab/native_link/target/release/native-link`), proof mode so
+the helper sites print:
+
+```
+native-link --input vendor/build/native-bpf/x86/stage/tetragon/bpf_fork_v511.native.o \
+  --symbol event_wake_up_new_task --output /tmp/nl-dbg/proof.o --mode proof --show
+```
+
+Result: `wrote proof object 3531 bytes, 30 reloc(s)`, and **75**
+`native-link-helper-site` lines, every one resolving to a real helper:
+
+```
+{"helper":"bpf_probe_read_kernel","input_offset":63,...}
+{"helper":"bpf_probe_read_kernel","input_offset":105,...}
+{"helper":"bpf_map_lookup_elem","input_offset":173,...}
+...
+```
+
+So the `%rcx`-held ids bind correctly, the linker's provenance pass handles the
+register family as it should, and the odd shape I flagged above is a red
+herring. All 75 sites are proven, no site is left unresolved, and the link
+step is not where this dies.
+
+That leaves the replaced program's *runtime* behaviour, which matches the
+timing evidence: replacement at 126.586 s, death at 132.678 s, six seconds of
+the program actually executing under the workload.
