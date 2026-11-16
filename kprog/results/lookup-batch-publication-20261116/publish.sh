@@ -3,10 +3,10 @@
 publish_batch() {
     set -euo pipefail
     local root=/workspaces/repository
-    local raw=/workspaces/kprog-raw/perf/20261116-lookup-batch-publication
+    local raw=$2
     local locks=/workspaces/.agent-state/kprog-lanes/locks
     local wait_pid=$1 old_image new_image
-    trap 'rc=$?; printf "%s\n" "$rc" > /workspaces/kprog-raw/perf/20261116-lookup-batch-publication/exit-code; date -u +%FT%TZ > /workspaces/kprog-raw/perf/20261116-lookup-batch-publication/controller.finished' EXIT
+    trap 'rc=$?; printf "%s\n" "$rc" > "$kprog_publication_raw/exit-code"; date -u +%FT%TZ > "$kprog_publication_raw/controller.finished"' EXIT
     cd "$root"
     date -u +%FT%TZ > "$raw/started"
     printf '%s\n' "$wait_pid" > "$raw/waited-guest.pid"
@@ -25,7 +25,8 @@ publish_batch() {
     cat /workspaces/.agent-state/kprog-ck/build-x86/include/config/kernel.release > "$raw/kernel.release"
     date -u +%FT%TZ > "$raw/image.finished"
     flock -u 9
-    make -f kprog/results/lookup-batch-publication-20261116/Makefile check
+    make -f kprog/results/lookup-batch-publication-20261116/Makefile check RAW="$raw"
     date -u +%FT%TZ > "$raw/finished"
 }
+kprog_publication_raw=$2
 publish_batch "$@"

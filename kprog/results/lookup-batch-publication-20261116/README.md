@@ -62,3 +62,8 @@ calls and 13761318318/13633217882 ns; installed 7965/7962 B. This is the
 frozen functional check, not the next official three-sample timing result.
 Tetragon 225559_070245 repeats the conditional-tail error at IP0x3a4, already
 fixed in source by 3940c4bee. Tracee and Katran still follow in the check.
+
+2026-11-16T22:59:48Z: The publication controller now accepts an explicit persistent raw
+directory, so a follow-up publication preserves this first build/check rather
+than overwriting its logs. Script parsing and the result-local dry-run pass.
+This changes only experiment bookkeeping, not the frozen recipe or entry.

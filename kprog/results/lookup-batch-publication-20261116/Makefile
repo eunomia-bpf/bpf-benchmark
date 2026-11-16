@@ -9,7 +9,8 @@ dry-run:
 	$(MAKE) -n -f $(HERE)/Makefile publish WAIT_PID=$(WAIT_PID)
 
 publish:
-	bash $(HERE)/publish.sh $(WAIT_PID)
+	install -d $(RAW)
+	bash $(HERE)/publish.sh $(WAIT_PID) $(RAW)
 
 check:
 	date -u +%FT%TZ > $(RAW)/check.started
