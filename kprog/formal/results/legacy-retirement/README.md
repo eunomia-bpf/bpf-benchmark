@@ -82,3 +82,13 @@ external helper relocation is present. Wrapper CALL/RET stack effects are
 explicitly outside these fragment observations, as wrapper entry/exit were
 before sharing. They remain a general-control refinement obligation; this
 receipt does not infer their performance or whole-wrapper equivalence.
+
+The complete current ARM protocol checks pass. Reserved logical-immediate
+encodings now require LNSym's explicit `StateError.Illegal` refusal, replacing
+retired local-decoder messages. Six formerly rejected legal words are retained
+as fixed complete-state positives (plus both outcomes of BC.HI). LLVM decodes
+them independently; FP16 and HBC assumptions are explicit. All 48,384 logical
+immediate states, 1,580 reserved encodings, 1,280 MRS states, the full main ARM
+matrix, 962 addressed/vector states and 84 exclusive states pass. This is model
+and wire regression evidence. `arm64-model-regressions.json` preserves the six
+observations and LLVM commands; the unchanged mature model supplies execution.

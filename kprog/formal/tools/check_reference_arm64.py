@@ -108,7 +108,8 @@ def check_logical_immediates(base):
         assert process.wait() == 0, process.stderr.read()
     rejected = 0
     # All invalid N/sf/imms combinations, with low/high rotation positions and
-    # all four operations. These are decoder rejects, never synthetic faults.
+    # all four operations. These are LNSym illegal-encoding refusals, never
+    # synthetic architectural faults.
     for width in (32, 64):
         for n in (0, 1):
             for imms in range(64):
@@ -122,9 +123,8 @@ def check_logical_immediates(base):
                         request['native_bytes'] = list(word.to_bytes(4, 'little'))
                         result = subprocess.run([binary], input=json.dumps(request) + '\n',
                                                 text=True, capture_output=True)
-                        assert result.returncode == 1 and result.stderr.startswith((
-                            'reference: reserved logical-immediate',
-                            'reference: reserved all-ones logical immediate')), (word, result)
+                        assert result.returncode == 1 and not result.stdout and result.stderr.startswith(
+                            'reference: external AArch64 model refusal: StateError.Illegal'), (word, result)
                         rejected += 1
     print(f'AArch64 logical-immediate reference: {len(words)} LLVM-decoded raw encodings, '
           f'{completed} complete states, {rejected} reserved-field rejects PASS')
@@ -220,6 +220,34 @@ def main():
     # Encoding words were independently assembled with GNU AArch64 as. Expected
     # results are fixed boundary examples, not an alternate ISA interpreter.
     cases = []
+    # These former local-model negatives are legal forms handled by the mature
+    # model. LLVM independently decodes them (FMOV H needs FP16; BC needs HBC).
+    # Fixed complete-state goldens retain the exact words and frame, rather
+    # than weakening the remaining illegal-encoding rejection checks.
+    for word, vector_result, register1, flags in [
+            (0x1EE70020, 1, None, None),        # FMOV H0,W1 (low16)
+            (0x9EAE0001, None, 1 << 63, None), # FMOV X1,V0.D[1]
+            (0x2E703800, 17, None, None),      # UADDLV S0,V0.4H
+            (0x6EB03800, 0x80000011, None, None), # UADDLV D0,V0.4S
+            (0x3A5F0825, None, None, 0),       # CCMN W1,#31,#5,EQ
+            (0x54000118, None, None, None)]:   # BC.HI +32, not taken
+        request = copy.deepcopy(base)
+        request['native_bytes'] = list(word.to_bytes(4, 'little'))
+        expected = copy.deepcopy(request['state'])
+        expected.update(pc=0x1004, defined_flags=(1 << 64) - 1, events=[], fault=None)
+        if vector_result is not None:
+            expected['vector0'] = vector_result
+        if register1 is not None:
+            expected['registers'][1] = register1
+        if flags is not None:
+            expected['flags'] = flags
+        cases.append((request, expected))
+    request = copy.deepcopy(base)
+    request['native_bytes'] = list((0x54000118).to_bytes(4, 'little'))
+    request['state']['flags'] = 0x20000000     # BC.HI: C=1,Z=0, taken
+    expected = copy.deepcopy(request['state'])
+    expected.update(pc=0x1020, defined_flags=(1 << 64) - 1, events=[], fault=None)
+    cases.append((request, expected))
     # Formerly classified as a reserved MOVK mutation, this exact word is
     # legal ANDS W0,W20,#0xc000ffff. Retain it as a full-state positive case.
     request = copy.deepcopy(base)
@@ -999,13 +1027,13 @@ def main():
                  0x1AE22020, 0x53207C20, 0x131FFC20, 0x0A028020, 0x6A228020,
                  0x72C24680, 0x72E24680, 0x12C24680, 0x12E24680,
                  0x52C24680, 0x52E24680, 0x32824680,
-                 0x1EE70020, 0x9EAE0001, 0x0E205801, 0x4E205820,
-                 0x2E303801, 0x6E303820, 0x2E703800, 0x6EB03800,
-                 0x7A5F0835, 0x7A5F0C25, 0x5A5F0825, 0x3A5F0825,
+                 0x0E205801, 0x4E205820,
+                 0x2E303801, 0x6E303820,
+                 0x7A5F0835, 0x7A5F0C25, 0x5A5F0825,
                  0x91800420, 0xD1800420, 0x31800420, 0xF1800420,
                  0x0BC20020, 0x8BC20020, 0x0B028020, 0x0B828020, 0x6BC20020,
                  0x8B221420, 0x0B221820, 0x6B22FC20, 0xEB2277FF, 0x4B2117E0,
-                 0x54000118, 0xD4000108, 0xD503203F,
+                 0xD4000108, 0xD503203F,
                  0xB9C00020, 0xF9C00020, 0xB8C00020, 0xF8C00020,
                  0xA9402008, 0x29402008, 0xA9407C1F):
         request = copy.deepcopy(base)
