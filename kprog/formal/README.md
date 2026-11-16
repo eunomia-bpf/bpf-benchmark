@@ -1,11 +1,12 @@
 # Native simulator verification
 
-## External-base migration (M1–M3 complete, M4 in progress)
+## External-base migration (M1–M4 complete, M5 next)
 
 The operator's replacement plan is in [todo section 4](../docs/todo.md).
 The external bases are forks, pinned as Git submodules; changes needed by
-kprog belong in those forks. M3 replaced the local ISA bodies; M4 adapts the
-shared simulator C for Clight export, as described below.
+kprog belong in those forks. M3 replaced the local ISA bodies; M4 adapted the
+shared simulator C for Clight export. M5 now proves the exported handlers
+against those bases; its counts must be recomputed.
 
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|
@@ -22,9 +23,11 @@ hypothesis; its theorem statement and instruction semantics are unchanged.
 Build output and the earlier failed attempts are retained in
 `/workspaces/kprog-raw/formal/m1-compat-2` and `m1-compat-1`.
 The main package now uses Lean 4.35.0 and the same three pinned external
-path dependencies as the M1 integration package. M3 is complete; M4 is in
-progress. The legacy counts below describe the old
-foundation, not proofs against these external bases. Retirement occurs at M6.
+path dependencies as the M1 integration package. M1–M4 are complete; the
+[M4 closure review](results/m4-closure/README.md) maps the canonical C, 23
+exports, bindings, native preservation checks and PERF expansion evidence.
+The legacy counts below describe the old foundation, not migrated
+Clight-to-external-ISA proofs. Retirement occurs at M6.
 
 LNSym and x86lean retain their Apache-2.0 licenses. Clean retains its own
 [LICENSE](external/clean/LICENSE): its tree is under INRIA non-commercial
@@ -1622,10 +1625,10 @@ modules, native/bound return and refusal-prefix captures and five negatives pass
 [Program receipts](results/m4-x86-program/README.md) preserve the scope and
 separate the platform-callee interpretation from a refinement theorem.
 
-M4 remains open for arbitrary producer program/return tables, remaining producer/storage
-profiles, platform correspondence and full default compiled-byte coverage. The
-stated x86 inline profile and ARM instruction dispatcher clear their earlier
-syntax/code-generation obstructions. Preserve
+M4's [closure review](results/m4-closure/README.md) supersedes the earlier
+open-ended producer/storage status notes. The shared C and current exports
+clear the source/frontend tasks; M5 must prove representation, platform and
+control composition against the external steps. Preserve
 unaligned memory and real context-pointer domains when binding the Clight
 memory/ABI semantics; header parsing does not establish those relations.
 The old generator's `--check` still expects its historical C rendering and
@@ -1871,7 +1874,7 @@ The actual linked readonly producer profile now also exports through the shared
 selector and upstream alignment-1 copy adapter. Its 124 Clight bodies, initial
 readonly memory, native byte parity and explicitly scoped host checks are
 recorded in [the M4 readonly receipt](results/m4-x86-readonly/README.md).
-M4 remains in progress; these checks add no migrated refinement count.
+These checks add no migrated refinement count; M4 closure is recorded separately.
 
 The existing x86 CALL profile also covers a helper-tail subroutine. A symbolic
 helper relocation must survive return normalization even when its placeholder

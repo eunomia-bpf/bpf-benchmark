@@ -1,0 +1,170 @@
+[
+  {
+    "phase": "before-final",
+    "argv": [
+      "../stock-path/bin/clang",
+      "-g",
+      "-O2",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-E",
+      "build/x86_program_profile.bpf.c"
+    ],
+    "exit": 0,
+    "preprocessed_bytes": 3726664
+  },
+  {
+    "phase": "before-final",
+    "argv": [
+      "../stock-path/bin/clang",
+      "-g",
+      "-O2",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-E",
+      "c/TetragonWake.c"
+    ],
+    "exit": 0,
+    "preprocessed_bytes": 4577893
+  },
+  {
+    "phase": "before-final",
+    "argv": [
+      "../stock-path/bin/clang",
+      "-g",
+      "-O2",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-E",
+      "oracles/arm64_execute_compile.bpf.c"
+    ],
+    "exit": 0,
+    "preprocessed_bytes": 31931025
+  },
+  {
+    "phase": "before-final",
+    "argv": [
+      "../stock-path/bin/clang",
+      "-g",
+      "-O2",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-E",
+      "build/arm64_payload_profile.bpf.c"
+    ],
+    "exit": 0,
+    "preprocessed_bytes": 1027780
+  },
+  {
+    "phase": "after-final",
+    "argv": [
+      "../stock-path/bin/clang",
+      "-g",
+      "-O2",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-E",
+      "build/x86_program_profile.bpf.c"
+    ],
+    "exit": 0,
+    "preprocessed_bytes": 3726664
+  },
+  {
+    "phase": "after-final",
+    "argv": [
+      "../stock-path/bin/clang",
+      "-g",
+      "-O2",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-E",
+      "c/TetragonWake.c"
+    ],
+    "exit": 0,
+    "preprocessed_bytes": 4577893
+  },
+  {
+    "phase": "after-final",
+    "argv": [
+      "../stock-path/bin/clang",
+      "-g",
+      "-O2",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-E",
+      "oracles/arm64_execute_compile.bpf.c"
+    ],
+    "exit": 0,
+    "preprocessed_bytes": 31931025
+  },
+  {
+    "phase": "after-final",
+    "argv": [
+      "../stock-path/bin/clang",
+      "-g",
+      "-O2",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-I/usr/include/x86_64-linux-gnu",
+      "-E",
+      "build/arm64_payload_profile.bpf.c"
+    ],
+    "exit": 0,
+    "preprocessed_bytes": 1027780
+  }
+]

@@ -1,0 +1,117 @@
+[
+  {
+    "module": "Arm64Access",
+    "bytes": 35984,
+    "functions": 3
+  },
+  {
+    "module": "Arm64Address",
+    "bytes": 291155,
+    "functions": 8
+  },
+  {
+    "module": "Arm64Addressing",
+    "bytes": 22050154,
+    "functions": 138
+  },
+  {
+    "module": "Arm64Entry",
+    "bytes": 844157,
+    "functions": 5
+  },
+  {
+    "module": "Arm64Numeric",
+    "bytes": 171547,
+    "functions": 21
+  },
+  {
+    "module": "Arm64PayloadProfile",
+    "bytes": 2938946,
+    "functions": 4
+  },
+  {
+    "module": "Arm64Program",
+    "bytes": 11542084,
+    "functions": 111
+  },
+  {
+    "module": "Arm64ProgramContext",
+    "bytes": 1868340,
+    "functions": 4
+  },
+  {
+    "module": "Arm64ProgramFixture",
+    "bytes": 672547,
+    "functions": 4
+  },
+  {
+    "module": "Arm64Stack",
+    "bytes": 371161,
+    "functions": 6
+  },
+  {
+    "module": "X86Context",
+    "bytes": 100627,
+    "functions": 6
+  },
+  {
+    "module": "X86ContextSkb",
+    "bytes": 20948882,
+    "functions": 123
+  },
+  {
+    "module": "X86ContextXdp",
+    "bytes": 20863158,
+    "functions": 123
+  },
+  {
+    "module": "X86Helpers",
+    "bytes": 8069666,
+    "functions": 83
+  },
+  {
+    "module": "X86Inline",
+    "bytes": 19451654,
+    "functions": 115
+  },
+  {
+    "module": "X86Memory",
+    "bytes": 1809735,
+    "functions": 28
+  },
+  {
+    "module": "X86Numeric",
+    "bytes": 54037,
+    "functions": 6
+  },
+  {
+    "module": "X86Pointer",
+    "bytes": 989508,
+    "functions": 34
+  },
+  {
+    "module": "X86ProgramProfile",
+    "bytes": 21214912,
+    "functions": 126
+  },
+  {
+    "module": "X86ReadonlyProfile",
+    "bytes": 19988248,
+    "functions": 124
+  },
+  {
+    "module": "X86StackProfile200",
+    "bytes": 24712103,
+    "functions": 122
+  },
+  {
+    "module": "X86StackProfile376",
+    "bytes": 28941613,
+    "functions": 122
+  },
+  {
+    "module": "X86TetragonWake",
+    "bytes": 31607645,
+    "functions": 144
+  }
+]

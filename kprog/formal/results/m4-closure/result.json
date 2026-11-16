@@ -1,0 +1,14 @@
+{
+  "milestone": "M4",
+  "status": "complete",
+  "make_clight": 0,
+  "clight_modules": 23,
+  "lake_jobs": 60,
+  "all_ast_unchanged": true,
+  "native_preprocess_equal_units": 4,
+  "ownership_comments": 97,
+  "semantic_refinement": "M5 pending; zero exported-handler ISA refinements counted",
+  "retirement": "M6 after M5",
+  "whole_lake_build": "pending migration",
+  "make_check": "pending M6 retirement"
+}
