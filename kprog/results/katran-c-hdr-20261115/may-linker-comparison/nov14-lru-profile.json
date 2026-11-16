@@ -1,0 +1,269 @@
+{
+  "scope": "Observe the retained November 14 LRU paths without inventing branch counts.\n\nThe reference replay matches the installed payload with relocation immediates\nmasked. Explicit ranges identify the three ARRAY expansions in that replay.\nCPU-clock samples measure sampled activity, not execution or branch frequency.\n",
+  "capture": "/workspaces/kprog-raw/C/limits/katran",
+  "payload_match": {
+    "capture": "/workspaces/kprog-raw/C/limits/katran/post_rejit.jit-lines.json",
+    "program": 16,
+    "installed_bytes": 10196,
+    "installed_sha256": "3148a44deecb1cb1e0ffef20b3da840f04a58edc4f57074da7fa665fa8bbe773",
+    "payload_start": 19,
+    "payload_bytes": 10164,
+    "unmasked_bytes": 9560,
+    "relocation_masked_bytes": 604,
+    "matched_unmasked_bytes": true,
+    "retained_source_intervals": [],
+    "scope": "Only exactly joined retained instructions; expanded/synthetic instructions remain unmapped. Relocated immediates are masked; this does not prove their runtime values."
+  },
+  "event": "cpu-clock",
+  "branch_stack_recorded": false,
+  "total_root_samples": 435681,
+  "native_program_root_samples": 15549,
+  "sites": [
+    {
+      "source_offset": 5304,
+      "payload_start": 6334,
+      "payload_end": 6367,
+      "installed_start": 6353,
+      "root_samples": 0,
+      "sampled_period_ns": 0
+    },
+    {
+      "source_offset": 5743,
+      "payload_start": 6916,
+      "payload_end": 6949,
+      "installed_start": 6935,
+      "root_samples": 0,
+      "sampled_period_ns": 0
+    },
+    {
+      "source_offset": 5831,
+      "payload_start": 7037,
+      "payload_end": 7070,
+      "installed_start": 7056,
+      "root_samples": 6,
+      "sampled_period_ns": 6006006
+    }
+  ],
+  "exact_branch_counts": null,
+  "actual_external_calls": [
+    {
+      "payload_offset": 1869,
+      "actual_target": 18446744072187832768,
+      "actual_symbol": "__htab_map_lookup_elem",
+      "replay_helper_names": []
+    },
+    {
+      "payload_offset": 2086,
+      "actual_target": 18446744072187852144,
+      "actual_symbol": "array_of_map_lookup_elem",
+      "replay_helper_names": []
+    },
+    {
+      "payload_offset": 2610,
+      "actual_target": 18446744072187832768,
+      "actual_symbol": "__htab_map_lookup_elem",
+      "replay_helper_names": []
+    },
+    {
+      "payload_offset": 2966,
+      "actual_target": 18446744072187832768,
+      "actual_symbol": "__htab_map_lookup_elem",
+      "replay_helper_names": []
+    },
+    {
+      "payload_offset": 3185,
+      "actual_target": 18446744072187852144,
+      "actual_symbol": "array_of_map_lookup_elem",
+      "replay_helper_names": []
+    },
+    {
+      "payload_offset": 3523,
+      "actual_target": 18446744072187832768,
+      "actual_symbol": "__htab_map_lookup_elem",
+      "replay_helper_names": []
+    },
+    {
+      "payload_offset": 4316,
+      "actual_target": 18446744072187775472,
+      "actual_symbol": "bpf_map_lookup_elem",
+      "replay_helper_names": [
+        "bpf_map_lookup_elem"
+      ]
+    },
+    {
+      "payload_offset": 4344,
+      "actual_target": 18446744072187776544,
+      "actual_symbol": "bpf_ktime_get_ns",
+      "replay_helper_names": [
+        "bpf_ktime_get_ns"
+      ]
+    },
+    {
+      "payload_offset": 4541,
+      "actual_target": 18446744072187776544,
+      "actual_symbol": "bpf_ktime_get_ns",
+      "replay_helper_names": [
+        "bpf_ktime_get_ns"
+      ]
+    },
+    {
+      "payload_offset": 4624,
+      "actual_target": 18446744072187832768,
+      "actual_symbol": "__htab_map_lookup_elem",
+      "replay_helper_names": []
+    },
+    {
+      "payload_offset": 4658,
+      "actual_target": 18446744072187775472,
+      "actual_symbol": "bpf_map_lookup_elem",
+      "replay_helper_names": [
+        "bpf_map_lookup_elem"
+      ]
+    },
+    {
+      "payload_offset": 4986,
+      "actual_target": 18446744072196864688,
+      "actual_symbol": "bpf_xdp_adjust_head",
+      "replay_helper_names": [
+        "bpf_xdp_adjust_head"
+      ]
+    },
+    {
+      "payload_offset": 5350,
+      "actual_target": 18446744072187776544,
+      "actual_symbol": "bpf_ktime_get_ns",
+      "replay_helper_names": [
+        "bpf_ktime_get_ns"
+      ]
+    },
+    {
+      "payload_offset": 5736,
+      "actual_target": 18446744072187775520,
+      "actual_symbol": "bpf_map_update_elem",
+      "replay_helper_names": [
+        "bpf_map_update_elem"
+      ]
+    },
+    {
+      "payload_offset": 5870,
+      "actual_target": 18446744072196864688,
+      "actual_symbol": "bpf_xdp_adjust_head",
+      "replay_helper_names": [
+        "bpf_xdp_adjust_head"
+      ]
+    },
+    {
+      "payload_offset": 6622,
+      "actual_target": 18446744072187776544,
+      "actual_symbol": "bpf_ktime_get_ns",
+      "replay_helper_names": [
+        "bpf_ktime_get_ns"
+      ]
+    },
+    {
+      "payload_offset": 7093,
+      "actual_target": 18446744072187776544,
+      "actual_symbol": "bpf_ktime_get_ns",
+      "replay_helper_names": [
+        "bpf_ktime_get_ns"
+      ]
+    },
+    {
+      "payload_offset": 7302,
+      "actual_target": 18446744072187776544,
+      "actual_symbol": "bpf_ktime_get_ns",
+      "replay_helper_names": [
+        "bpf_ktime_get_ns"
+      ]
+    },
+    {
+      "payload_offset": 7385,
+      "actual_target": 18446744072187832768,
+      "actual_symbol": "__htab_map_lookup_elem",
+      "replay_helper_names": []
+    },
+    {
+      "payload_offset": 7419,
+      "actual_target": 18446744072187775472,
+      "actual_symbol": "bpf_map_lookup_elem",
+      "replay_helper_names": [
+        "bpf_map_lookup_elem"
+      ]
+    },
+    {
+      "payload_offset": 7762,
+      "actual_target": 18446744072196864688,
+      "actual_symbol": "bpf_xdp_adjust_head",
+      "replay_helper_names": [
+        "bpf_xdp_adjust_head"
+      ]
+    },
+    {
+      "payload_offset": 8020,
+      "actual_target": 18446744072187776544,
+      "actual_symbol": "bpf_ktime_get_ns",
+      "replay_helper_names": [
+        "bpf_ktime_get_ns"
+      ]
+    },
+    {
+      "payload_offset": 8414,
+      "actual_target": 18446744072187775520,
+      "actual_symbol": "bpf_map_update_elem",
+      "replay_helper_names": [
+        "bpf_map_update_elem"
+      ]
+    },
+    {
+      "payload_offset": 8934,
+      "actual_target": 18446744072196864688,
+      "actual_symbol": "bpf_xdp_adjust_head",
+      "replay_helper_names": [
+        "bpf_xdp_adjust_head"
+      ]
+    },
+    {
+      "payload_offset": 9548,
+      "actual_target": 18446744072187775520,
+      "actual_symbol": "bpf_map_update_elem",
+      "replay_helper_names": [
+        "bpf_map_update_elem"
+      ]
+    },
+    {
+      "payload_offset": 9643,
+      "actual_target": 18446744072187776544,
+      "actual_symbol": "bpf_ktime_get_ns",
+      "replay_helper_names": [
+        "bpf_ktime_get_ns"
+      ]
+    },
+    {
+      "payload_offset": 9826,
+      "actual_target": 18446744072187775520,
+      "actual_symbol": "bpf_map_update_elem",
+      "replay_helper_names": [
+        "bpf_map_update_elem"
+      ]
+    }
+  ],
+  "interpretation": "The capture has no branch-stack or instruction trace. Sample counts cannot recover execution counts, taken fractions, or a zero-frequency claim for a path with no samples. Full capture includes warmup; measured-only BPF counters are a different window.",
+  "commands": [
+    [
+      "/var/tmp/kprog-tmp/C/perf-build/perf",
+      "evlist",
+      "-v",
+      "-i",
+      "/workspaces/kprog-raw/C/limits/katran/post_rejit.data"
+    ],
+    [
+      "/var/tmp/kprog-tmp/C/perf-build/perf",
+      "script",
+      "-i",
+      "/workspaces/kprog-raw/C/limits/katran/post_rejit.data",
+      "-F",
+      "time,period,ip",
+      "--no-inline"
+    ]
+  ]
+}

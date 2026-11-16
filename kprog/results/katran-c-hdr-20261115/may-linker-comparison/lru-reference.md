@@ -31,3 +31,5 @@ requested default-entry timing after C's round will retain the work difference
 alongside throughput, per-call counters and code sizes. The historical
 measurements remain recorded. The operator's hard target is native1.50x and
 about half the code; the coordinator's pure-body target was withdrawn00:19.
+
+2026-11-16T01:26:05Z: November 14 live code now matches the reference replay on 9,560 unmasked bytes and all 27 external call classes. The three expansions receive 0/0/6 CPU-clock root samples. The capture lacks branch-stack/instruction trace, so exact branch frequency cannot be reconstructed. See nov14-lru-profile.md/json.
