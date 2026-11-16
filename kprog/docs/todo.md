@@ -37,6 +37,7 @@
 
 **协调者 2026-11-16T18:24:20Z**：
 1. PERF 先查 OTel 在镜像 6641a7e1 上的退步：stats 关 0.801x（may29_ratio；样本 0.77、0.917、0.811），3a1906ab1 上是 1.021x；装进去的大小（304 503 B）和 14 个原生程序两次相同。两个镜像之间 OTel 相关的变化是 stage 里 perf-context 编译器换成当前源码（2294b0463、63547fcfe、0f5c55894、f45bb2485）。把每次调用拆成程序体、helper、map，逐个变化对比，找出慢在哪一处，按整类修。修完再接着 cb 偏移等原顺序。
+   2026-11-16 审计 6a86ae8f1：实际 measurement-window 的 13 条程序记录，旧 installed 330814 B、新 303930 B，11 个各减 2444 B，两个不变，与 f45bb2485 删除 copied hash 完全吻合；14 次 shim replacement 另含临时 feature test。当前 stage 的 main/native/v8 三个函数与保留的 12:13 physical P 指令及 relocation identity 全同；这不等于抓到了旧镜像的 stage 可执行文件。hash 调用成本是待量候选，未判定原因。当前镜像诊断 profile 已在 CPUs 20-23、image SH 下启动，controller 1842845，结果留 otel-regression-20261116；按 shim measure_start/finish 排除 warmup 后拆 body/helper/map，A 继续开。
 2. e4264fa35 在四份模块（含可信模块 kinsn/module/x86）的 map_ptr_query_write 里给 delete 新加了 -EOPNOTSUPP。运营者 11-16：“禁止加任何额外的 check”。协调者决定：delete 并进原有 update 分支的同一个判断（按 helper_id 选出 ops 指针，再用原来那一个空指针判断），检查条数回到修改前，用一个向前的提交，四份一起改。delete 绑定本身保留，它是设计第 5 步 LTO 的链接时绑定。
    2026-11-16T18:33:44Z 已落 35da4bdd4：四份都先选 update/delete ops 指针，再共用原来的一个空指针判断；两个 active x86 模块语法检查通过，绑定保留。
 
