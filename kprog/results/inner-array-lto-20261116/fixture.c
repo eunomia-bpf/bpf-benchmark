@@ -36,3 +36,28 @@ uintptr_t entry_arithmetic(struct context *ctx)
     char *inner = bpf_map_lookup_elem(choices[ctx->selector % 3], &ctx->key);
     return inner ? (uintptr_t)bpf_map_lookup_elem(inner + 1, &ctx->key) : 0;
 }
+
+uintptr_t entry_barrier(struct context *ctx)
+{
+    void *inner = bpf_map_lookup_elem(choices[ctx->selector % 3], &ctx->key);
+    if (!inner) return 0;
+    uintptr_t id=1;
+    __asm__ volatile("" : "+r"(id) : "r"(inner), "r"(&ctx->key) : "memory");
+    return (uintptr_t)((lookup_fn)id)(inner,&ctx->key);
+}
+
+uintptr_t entry_nonempty_barrier(struct context *ctx)
+{
+    void *inner = bpf_map_lookup_elem(choices[ctx->selector % 3], &ctx->key);
+    if (!inner) return 0;
+    uintptr_t id=1;
+    __asm__ volatile("xor %0,%0" : "+r"(id) : "r"(inner), "r"(&ctx->key) : "memory");
+    return (uintptr_t)((lookup_fn)id)(inner,&ctx->key);
+}
+
+uintptr_t entry_narrow_handle(struct context *ctx)
+{
+    void *inner = bpf_map_lookup_elem(choices[ctx->selector % 3], &ctx->key);
+    void *narrow = (void *)(uintptr_t)(uint32_t)(uintptr_t)inner;
+    return inner ? (uintptr_t)bpf_map_lookup_elem(narrow,&ctx->key) : 0;
+}

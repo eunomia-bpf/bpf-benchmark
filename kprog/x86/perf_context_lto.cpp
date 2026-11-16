@@ -3,6 +3,7 @@
 #include "llvm/ADT/SmallPtrSet.h"
 #include "llvm/BinaryFormat/Magic.h"
 #include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/InlineAsm.h"
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/Verifier.h"
 #include "llvm/IRReader/IRReader.h"
@@ -43,9 +44,33 @@ struct NativeMapType {
 static bool isMapLookup(const CallBase &Call) {
   auto *Callee = Call.getCalledOperand()->stripPointerCasts();
   if (auto *F = dyn_cast<Function>(Callee)) return F->getName() == "bpf_map_lookup_elem";
-  auto *Cast = dyn_cast<ConstantExpr>(Callee);
+  auto *Cast = dyn_cast<Operator>(Callee);
   if (!Cast || Cast->getOpcode() != Instruction::IntToPtr) return false;
-  auto *ID = dyn_cast<ConstantInt>(Cast->getOperand(0));
+  Value *Number = Cast->getOperand(0);
+  // The compat header keeps helper-ID observations and argument ordering with
+  // empty register asm. Its sole output equals the explicitly tied input;
+  // retain the side-effecting barrier itself when selecting the callee.
+  if (auto *Barrier = dyn_cast<CallBase>(Number)) {
+    auto *Asm = dyn_cast<InlineAsm>(Barrier->getCalledOperand());
+    if (!Asm || !Asm->getAsmString().empty()) return false;
+    auto Constraints = Asm->ParseConstraints();
+    int Matching = -1;
+    unsigned Outputs = 0;
+    for (auto &Constraint : Constraints) if (Constraint.Type == InlineAsm::isOutput) {
+      ++Outputs;
+      if (!Constraint.isIndirect) Matching = Constraint.MatchingInput;
+    }
+    if (Outputs != 1 || Matching < 0) return false;
+    unsigned Argument = 0;
+    for (unsigned I = 0; I < Constraints.size(); ++I) {
+      if (int(I) == Matching && Constraints[I].hasArg()) {
+        Number = Barrier->getArgOperand(Argument);
+        break;
+      }
+      Argument += Constraints[I].hasArg();
+    }
+  }
+  auto *ID = dyn_cast<ConstantInt>(Number);
   return ID && ID->equalsInt(BPF_FUNC_map_lookup_elem);
 }
 
@@ -98,6 +123,15 @@ static Expected<unsigned> lowerArrayLookups(Module &M, Function &Entry, StringRe
         if (Outer.type == BPF_MAP_TYPE_ARRAY_OF_MAPS || Outer.type == BPF_MAP_TYPE_HASH_OF_MAPS)
           Type.type = Outer.inner;
       }
+    } else if (auto *Cast = dyn_cast<Operator>(V);
+               Cast && (Cast->getOpcode() == Instruction::PtrToInt ||
+                        Cast->getOpcode() == Instruction::IntToPtr)) {
+      auto *PointerType = Cast->getOpcode() == Instruction::PtrToInt
+                            ? Cast->getOperand(0)->getType() : Cast->getType();
+      auto *IntegerType = Cast->getOpcode() == Instruction::PtrToInt
+                            ? Cast->getType() : Cast->getOperand(0)->getType();
+      if (IntegerType->getIntegerBitWidth() == M.getDataLayout().getPointerTypeSizeInBits(PointerType))
+        Type = Infer(Cast->getOperand(0));
     } else if (auto *Load = dyn_cast<LoadInst>(V)) {
       auto *GEP = dyn_cast<GEPOperator>(Load->getPointerOperand());
       // An inbounds element load from an immutable pointer table can return

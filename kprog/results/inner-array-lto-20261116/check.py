@@ -30,6 +30,9 @@ for name, symbol, values, count in [
     ('numeric','entry_numeric',facts,1), ('mixed','entry',mixed,0),
     ('unknown','entry',unknown,0), ('mutable','entry_mutable',facts,0),
     ('arithmetic','entry_arithmetic',facts,0),
+    ('barrier','entry_barrier',facts,1),
+    ('nonempty-barrier','entry_nonempty_barrier',facts,0),
+    ('narrow','entry_narrow_handle',facts,0),
 ]:
     path=raw/(name+'.json'); path.write_text(json.dumps(values,indent=2)+'\n')
     output=tmp/(name+'.native.o')
@@ -40,7 +43,7 @@ for name, symbol, values, count in [
     # Numeric helper calls intentionally retain ID1 for the outer lookup;
     # source arithmetic is a static negative case, not an executable map ABI.
     vectors=0
-    if name not in ['numeric','arithmetic']:
+    if name not in ['numeric','arithmetic','nonempty-barrier','narrow']:
         driver=tmp/(name+'-check')
         run(['clang-18','-O2','-Wall','-Wextra','-Werror','-DENTRY='+symbol,
              '-DEXPECT_CALLS='+str(1 if count else 2),'-DSELECT_ENTRY='+str(int(name=='select')),
