@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-11-16T03:24:37Z",
+  "image": "sha256:d9e2963059e759ca1b6f7cd25a13dc598f3ea0d4d6168b2679de36918d21b62c",
+  "old_image": "sha256:fc408f640ba1b0caaed406fe9f736893c25b5249bd27f7c4b0e84fb8d5c16cff",
+  "publication_finished": "2026-11-16T03:23:51Z",
+  "raw": "/workspaces/kprog-raw/perf/20261116-native-load-fixes-publication",
+  "rotation_pid": 1323519,
+  "rotation_log": "/workspaces/kprog-raw/one-image-runs/rotate-20261116T0324Z-perf.log",
+  "published_fixes": {
+    "DATASEC": "ed1d7a8f2",
+    "finite_helper_joins": "f18e94306",
+    "dynamic_chunks": "5a214d73d",
+    "B": [
+      "5d896c4c8",
+      "651c096d6",
+      "cbcb1f8ab",
+      "d0699b807"
+    ]
+  },
+  "open": [
+    "OTel original ELF source-map manifest binding",
+    "Tetragon producer manifest entries",
+    "checked six-app functional acceptance and B failure direct-native execution",
+    "application load acceptance and performance targets"
+  ]
+}

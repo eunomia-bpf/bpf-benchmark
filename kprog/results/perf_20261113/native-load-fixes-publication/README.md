@@ -1,0 +1,7 @@
+2026-11-16T03:24:37Z
+
+Published sole image `sha256:d9e2963059e759ca1b6f7cd25a13dc598f3ea0d4d6168b2679de36918d21b62c` with canonical DATASEC global binding, finite numeric helper joins, dynamic direct upload chunks and the current B normalizer. Kernel source/version/boot, benchmark entry/defaults and all-LTO configuration stay the same. Superseded imagefc408f64 is absent; no second image/base was kept. Image inventory records1,252 native files matching canonical stage, zero differences. Raw publication/build logs stay at `/workspaces/kprog-raw/perf/20261116-native-load-fixes-publication`.
+
+Coordinator03:19 says publish ready classes while longer fixes continue. OTel original-ELF manifest binding and Tetragon's four missing manifest entries remain with producer C. B fixes have subset coverage; real OTel main remains frame824B and whole stock acceptance is open. No new application performance gain is claimed.
+
+Removed the round STOP as directed, retaining its content in the raw publication directory. Started unchanged `make -f kprog/perf/one-image/Makefile rotate` under timing EX and image SH, PID1323519, hard96GiB address space. Entry defaults remain six apps in ORDER, stats0 then1, three180-second samples per app. Log `/workspaces/kprog-raw/one-image-runs/rotate-20261116T0324Z-perf.log`. Record each failure and continue. Katran linker comparison follows this round; no reference comparison job is queued.
