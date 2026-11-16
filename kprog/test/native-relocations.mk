@@ -53,6 +53,10 @@ guest-kernel-layout:
 	$(KERNEL_LAYOUT_BUILD)/facts /sys/kernel/btf/vmlinux /proc/kallsyms > $(OUTPUT)/kernel-layout.json
 
 CHECK_CPUS ?= 8-11
+.PHONY: lto-ranges-audit
+lto-ranges-audit:
+	taskset -c $(CHECK_CPUS) prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=1 CARGO_TARGET_DIR=$(LINKER_TARGET) NATIVE_LINK_LTO_AUDIT_REPORT=/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/report.json cargo test --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml retained_lto_diagnostics_preserve_payload_bytes -- --ignored --nocapture
+
 .PHONY: helper-register-abi
 helper-register-abi:
 	taskset -c 16-17 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/check_tetragon_helper_registers.py --build /var/tmp/kprog-tmp/perf/helper-register-abi --output $(OUTPUT)

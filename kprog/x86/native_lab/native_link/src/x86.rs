@@ -10,6 +10,15 @@ use crate::*;
 
 const MONO_FAST_HELPER_KEY: &str = "__native_x86_ktime_get_mono_fast_ns";
 
+fn show_lto_range(show: bool, piece: &str, range: (usize, usize)) {
+    if show {
+        eprintln!("native-link-lto-range {}", serde_json::json!({
+            "piece": piece, "start": range.0, "end": range.1,
+            "bytes": range.1 - range.0,
+        }));
+    }
+}
+
 fn runtime_call_target(name: &str, helpers: &HashMap<String, u64>, context: &str) -> Result<u64> {
     if name == "bpf_ktime_get_ns" {
         // The one kernel's helper body returns this same NMI-safe monotonic
@@ -1796,22 +1805,27 @@ pub(super) fn rewrite_x86(
 
     if let Some(layout) = runtime_array_layout.filter(|_| !proof_mode) {
         if let Some(range) = runtime_array::share(&mut blob, &mut relocs, layout, map_lookup_helper_addr)? {
+            show_lto_range(show, "runtime_array", range);
             code_ranges.push(range);
         }
     }
 
     let read_sites = if let Some(layout) = runtime_probe_read_layout.filter(|_| !proof_mode) {
         let (ranges,sites) = probe_read::share(&mut blob, &mut relocs, layout, helper_addrs)?;
+        for &range in &ranges { show_lto_range(show, "probe_read", range); }
         code_ranges.extend(ranges);
         sites
     } else { Vec::new() };
 
     if let Some(layout)=runtime_hash_layout.filter(|_| !proof_mode) {
-        code_ranges.extend(hash_lookup::share(&mut blob,&mut relocs,layout,lookup_maps)?);
+        let ranges = hash_lookup::share(&mut blob,&mut relocs,layout,lookup_maps)?;
+        for &range in &ranges { show_lto_range(show, "hash_lookup", range); }
+        code_ranges.extend(ranges);
     }
 
     if let Some(layout)=runtime_lpm_layout.filter(|_| !proof_mode) {
         if let Some(range)=lpm_lookup::share(&mut blob,&mut relocs,layout,map_lookup_helper_addr)? {
+            show_lto_range(show, "lpm_lookup", range);
             code_ranges.push(range);
         }
     }
@@ -4215,6 +4229,47 @@ fn build_x86_array_update(spec: &UpdateSiteSpec) -> Result<Vec<Instruction>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    #[ignore = "uses retained application load plans"]
+    fn retained_lto_diagnostics_preserve_payload_bytes() -> Result<()> {
+        let report = std::env::var("NATIVE_LINK_LTO_AUDIT_REPORT")?;
+        let report: serde_json::Value = serde_json::from_slice(&fs::read(report)?)?;
+        for (app, symbol) in [("bcc", "sys_enter"), ("bcc", "sys_exit"),
+            ("otelcol-ebpf-profiler", "native_tracer_entry"),
+            ("otelcol-ebpf-profiler", "perf_unwind_native")] {
+            let row = report["entries"].as_array().unwrap().iter().find(|r|
+                r["app"] == app && r["symbol"] == symbol).unwrap();
+            let command = row["kernel_replays"][0]["command"].as_array().unwrap();
+            let argument = |name: &str| -> &str {
+                let index = command.iter().position(|v| v == name).unwrap();
+                command[index+1].as_str().unwrap()
+            };
+            let bytes = fs::read(argument("--input"))?;
+            let elf = object::File::parse(bytes.as_slice())?;
+            let entry = find_symbol_by_name(&elf, symbol)?;
+            let included = discover_reachable(&elf, &entry)?;
+            let facts = load_link_plan(std::path::Path::new(argument("--link-plan")))?;
+            let layout = facts.kernel_layout.as_ref().unwrap();
+            let rewrite = |show| rewrite_x86(&elf, &entry, &included,
+                &facts.helper_addrs, &facts.map_addrs, &facts.lookup_maps, &facts.update_sites,
+                false, false, Some(&layout.array), Some(&layout.probe_read),
+                Some(&layout.hash), Some(&layout.lpm), show);
+            let normal = rewrite(false)?;
+            let previous = fs::read(argument("--output"))?;
+            assert_eq!(normal.blob, previous, "normal payload changed for {app}/{symbol}");
+            eprintln!("native-link-lto-audit {}", serde_json::json!({
+                "app": app, "symbol": symbol, "payload_bytes": normal.blob.len(),
+                "reference": argument("--output"),
+            }));
+            let shown = rewrite(true)?;
+            assert_eq!(normal.blob, shown.blob, "--show changed {app}/{symbol}");
+            let relocations = |result: &RewriteResult| result.relocs.iter()
+                .map(|r| (r.offset, r.kind, r.target)).collect::<Vec<_>>();
+            assert_eq!(relocations(&normal), relocations(&shown));
+        }
+        Ok(())
+    }
 
     #[test]
     fn clock_calls_bind_fast_target_without_changing_observed_helper_identity() -> Result<()> {
