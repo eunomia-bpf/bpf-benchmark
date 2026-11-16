@@ -44,8 +44,6 @@ mod known_maps;
 mod runtime_array;
 #[path = "x86_probe_read.rs"]
 mod probe_read;
-#[path = "x86_hash_lookup.rs"]
-mod hash_lookup;
 #[path = "x86_lpm_lookup.rs"]
 mod lpm_lookup;
 
@@ -1043,7 +1041,6 @@ pub(super) fn rewrite_x86(
     preserve_entry_abi: bool,
     runtime_array_layout: Option<&RuntimeArrayLayout>,
     runtime_probe_read_layout: Option<&RuntimeProbeReadLayout>,
-    runtime_hash_layout: Option<&RuntimeHashLayout>,
     runtime_lpm_layout: Option<&RuntimeLpmLayout>,
     show: bool,
 ) -> Result<RewriteResult> {
@@ -1806,6 +1803,9 @@ pub(super) fn rewrite_x86(
         Vec::new()
     };
 
+    // Typed hash relocations keep their raw kernel lookup target. Its one
+    // out-of-line implementation serves every program, while caller-side
+    // value/inner-map/per-CPU/LRU postprocessing stays in the image.
     if let Some(layout) = runtime_array_layout.filter(|_| !proof_mode) {
         if let Some(range) = runtime_array::share(&mut blob, &mut relocs, layout, map_lookup_helper_addr)? {
             show_lto_range(show, "runtime_array", range);
@@ -1819,12 +1819,6 @@ pub(super) fn rewrite_x86(
         code_ranges.extend(ranges);
         sites
     } else { Vec::new() };
-
-    if let Some(layout)=runtime_hash_layout.filter(|_| !proof_mode) {
-        let ranges = hash_lookup::share(&mut blob,&mut relocs,layout,lookup_maps)?;
-        for &range in &ranges { show_lto_range(show, "hash_lookup", range); }
-        code_ranges.extend(ranges);
-    }
 
     if let Some(layout)=runtime_lpm_layout.filter(|_| !proof_mode) {
         if let Some(range)=lpm_lookup::share(&mut blob,&mut relocs,layout,map_lookup_helper_addr)? {
@@ -4238,6 +4232,8 @@ mod tests {
     fn retained_lto_diagnostics_preserve_payload_bytes() -> Result<()> {
         let report = std::env::var("NATIVE_LINK_LTO_AUDIT_REPORT")?;
         let report: serde_json::Value = serde_json::from_slice(&fs::read(report)?)?;
+        let baseline = std::env::var("NATIVE_LINK_LTO_AUDIT_BASELINE")?;
+        let baseline: serde_json::Value = serde_json::from_slice(&fs::read(baseline)?)?;
         for (app, symbol) in [("bcc", "sys_enter"), ("bcc", "sys_exit"),
             ("otelcol-ebpf-profiler", "native_tracer_entry"),
             ("otelcol-ebpf-profiler", "perf_unwind_v8")] {
@@ -4256,14 +4252,29 @@ mod tests {
             let layout = facts.kernel_layout.as_ref().unwrap();
             let rewrite = |show| rewrite_x86(&elf, &entry, &included,
                 &facts.helper_addrs, &facts.map_addrs, &facts.lookup_maps, &facts.update_sites,
-                false, false, Some(&layout.array), Some(&layout.probe_read),
-                Some(&layout.hash), Some(&layout.lpm), show);
+                false, false, Some(&layout.array), Some(&layout.probe_read), Some(&layout.lpm), show);
             let normal = rewrite(false)?;
             let previous = fs::read(argument("--output"))?;
-            assert_eq!(normal.blob, previous, "normal payload changed for {app}/{symbol}");
+            let old = baseline["programs"].as_array().unwrap().iter().find(|p|
+                p["app"] == app && p["symbol"] == symbol).unwrap();
+            let removed_hash_bytes = match old["appended_bytes_by_piece"].get("hash_lookup") {
+                Some(bytes) => bytes.as_u64().unwrap() as usize,
+                None => 0,
+            };
+            assert_eq!(normal.blob.len()+removed_hash_bytes, previous.len(),
+                       "shared hash payload size for {app}/{symbol}");
+            if removed_hash_bytes == 0 { assert_eq!(normal.blob,previous); }
+            let targets: HashSet<_> = facts.lookup_maps.values().filter(|spec|
+                matches!(spec.kind,LookupKind::Hash|LookupKind::LruHash|
+                    LookupKind::PerCpuHash|LookupKind::HashOfMaps)).map(|spec|spec.target_addr).collect();
+            let shared_calls: Vec<_> = normal.relocs.iter().filter(|r|
+                r.kind==NATIVE_LAB_RELOC_HELPER_CALL_REL32 && targets.contains(&r.target))
+                .map(|r|serde_json::json!({"offset":r.offset,"target":r.target})).collect();
+            if removed_hash_bytes > 0 { assert!(!shared_calls.is_empty()); }
             eprintln!("native-link-lto-audit {}", serde_json::json!({
                 "app": app, "symbol": symbol, "payload_bytes": normal.blob.len(),
-                "reference": argument("--output"),
+                "reference": argument("--output"), "previous_payload_bytes":previous.len(),
+                "removed_hash_bytes":removed_hash_bytes,"shared_hash_calls":shared_calls,
             }));
             let shown = rewrite(true)?;
             assert_eq!(normal.blob, shown.blob, "--show changed {app}/{symbol}");
@@ -4305,7 +4316,7 @@ mod tests {
             let helpers = HashMap::from([("bpf_ktime_get_ns".into(),0x1234),
                 (MONO_FAST_HELPER_KEY.into(),0x5678)]);
             let rewrite = |facts: &HashMap<String,u64>| rewrite_x86(&elf,&entry,&[entry.clone()],facts,&HashMap::new(),
-                &HashMap::new(),&[],false,true,None,None,None,None,false);
+                &HashMap::new(),&[],false,true,None,None,None,false);
             let missing = HashMap::from([("bpf_ktime_get_ns".into(),0x1234)]);
             assert!(rewrite(&missing).is_err(),
                 "missing clock fact cannot silently use the old wrapper");
@@ -4375,7 +4386,7 @@ mod tests {
                 let entry = find_symbol_by_name(&elf, "entry")?;
                 let empty = HashMap::new();
                 let proof = rewrite_x86(&elf, &entry, &[entry.clone()], &empty, &empty,
-                    &HashMap::new(), &[], true, true, None, None, None, None, false,)?;
+                    &HashMap::new(), &[], true, true, None, None, None, false,)?;
                 assert!(proof.proof_relocs.is_empty(), "{name}, form={form}");
                 assert_eq!(proof.proof_symbols.len(), 2, "same length shares one routine");
                 assert!(proof.proof_symbols[1].name.starts_with("__native_link_local_"));
@@ -4389,7 +4400,7 @@ mod tests {
                 let included = discover_reachable(&elf, &entry)?;
                 assert_eq!(included.len(), 2);
                 let result = rewrite_x86(&elf, &entry, &included, &empty, &empty,
-                    &HashMap::new(), &[], false, true, None, None, None, None, false,)?;
+                    &HashMap::new(), &[], false, true, None, None, None, false,)?;
                 assert!(result.relocs.is_empty());
                 #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
                 {
@@ -4447,7 +4458,7 @@ mod tests {
             for layout in [None, Some(&array)] {
                 let result = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers,
                     &HashMap::new(), &HashMap::new(), &[],
-                    false, false, layout, None, None, None, false,)?;
+                    false, false, layout, None, None, false,)?;
                 assert!(result.relocs.iter().any(|r| r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32
                     && r.target == 0x1234), "form={form}: actual helper target");
                 assert!(!result.relocs.iter().any(|r| r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32
@@ -4587,7 +4598,7 @@ mod tests {
             elem_size: 8, index_mask: 3, value_offset: 32, percpu_base_addr: 0,
         })]);
         {
-            let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps, &facts, &[], false, false, None, None, None, None, false,)?;
+            let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps, &facts, &[], false, false, None, None, None, false,)?;
             assert!(output.relocs.is_empty(), "known array must avoid generic helper");
             assert_eq!(output.map_patches.len(), 1);
             let mut code = output.blob;
@@ -4690,7 +4701,7 @@ mod tests {
                 (X86_TAIL_CALL_OFFSET_KEY.to_owned(), 12),
             ]);
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers,
-                &HashMap::new(), &HashMap::new(), &[], false, false, None, None, None, None, false,)?;
+                &HashMap::new(), &HashMap::new(), &[], false, false, None, None, None, false,)?;
             assert_eq!(output.relocs.len(), 1, "immediate={immediate}");
             let relocation = output.relocs[0];
             assert_eq!(relocation.kind, NATIVE_LAB_RELOC_X86_TAIL_COUNT);
@@ -4755,7 +4766,7 @@ mod tests {
         let entry = find_symbol_by_name(&elf, "entry")?;
         for preserve in [false, true] {
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(),
-                &HashMap::new(), &HashMap::new(), &[], true, preserve, None, None, None, None, false,)?;
+                &HashMap::new(), &HashMap::new(), &[], true, preserve, None, None, None, false,)?;
             let mut expected = if preserve { vec![0x53, 0x31, 0xc0, 0x5b] } else { vec![0x31, 0xc0] };
             expected.extend_from_slice(&[0xe9, 0, 0, 0, 0]); // Canonical entry exit in proof mode.
             assert_eq!(output.blob, expected);

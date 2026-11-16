@@ -119,28 +119,6 @@ inline void write_layout(std::ostream &out, const btf *types, Resolver resolve)
         << ",\"value\":" << relative(types, "bpf_array", "value", array)
         << ",\"array_type\":" << map_type(types, "BPF_MAP_TYPE_ARRAY") << "}";
 
-    int pointer = btf__resolve_type(types, field(types, "bpf_htab", "buckets").type_id);
-    if (pointer < 0 || !btf_is_ptr(type(types, pointer)))
-        throw std::runtime_error("LTO BTF: bpf_htab.buckets is not a pointer");
-    int bucket_id = btf__resolve_type(types, type(types, pointer)->type);
-    if (bucket_id < 0) throw std::runtime_error("LTO BTF: invalid bucket target");
-    const auto *bucket = type(types, bucket_id);
-    Member head{};
-    long bucket_size = btf__resolve_size(types, bucket_id);
-    if (!btf_is_struct(bucket) || !member(types, bucket, "head", head) || bucket_size <= 0)
-        throw std::runtime_error("LTO BTF: unsupported hash bucket layout");
-    uint32_t hash = offset(types, "bpf_htab", "map");
-    out << ",\"hash\":{\"key_size\":" << offset(types, "bpf_map", "key_size", true)
-        << ",\"buckets\":" << relative(types, "bpf_htab", "buckets", hash)
-        << ",\"n_buckets\":" << relative(types, "bpf_htab", "n_buckets", hash, true)
-        << ",\"hashrnd\":" << relative(types, "bpf_htab", "hashrnd", hash, true)
-        << ",\"bucket_size\":" << bucket_size << ",\"head\":" << head.offset
-        << ",\"first\":" << offset(types, "hlist_nulls_head", "first")
-        << ",\"node\":" << offset(types, "htab_elem", "hash_node")
-        << ",\"next\":" << offset(types, "hlist_nulls_node", "next")
-        << ",\"hash\":" << offset(types, "htab_elem", "hash", true)
-        << ",\"key\":" << offset(types, "htab_elem", "key") << "}";
-
     uint32_t lpm = offset(types, "lpm_trie", "map");
     out << ",\"lpm\":{\"map_type\":" << offset(types, "bpf_map", "map_type", true)
         << ",\"lpm_type\":" << map_type(types, "BPF_MAP_TYPE_LPM_TRIE")

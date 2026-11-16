@@ -196,12 +196,6 @@ struct RuntimeLpmLayout {
 }
 
 #[derive(Debug, Deserialize)]
-struct RuntimeHashLayout {
-    key_size:u32, buckets:u32, n_buckets:u32, hashrnd:u32,
-    bucket_size:u32, head:u32, first:u32, node:u32, next:u32, hash:u32, key:u32,
-}
-
-#[derive(Debug, Deserialize)]
 struct RuntimeProbeReadLayout {
     user_helper: u64,
     kernel_helper: u64,
@@ -217,7 +211,6 @@ struct RuntimeProbeReadLayout {
 #[derive(Debug, Deserialize)]
 struct KernelLayout {
     array: RuntimeArrayLayout,
-    hash: RuntimeHashLayout,
     lpm: RuntimeLpmLayout,
     probe_read: RuntimeProbeReadLayout,
 }
@@ -534,7 +527,6 @@ fn main() -> Result<()> {
                 args.preserve_entry_abi,
                 kernel_layout.map(|k| &k.array),
                 kernel_layout.map(|k| &k.probe_read),
-                kernel_layout.map(|k| &k.hash),
                 kernel_layout.map(|k| &k.lpm),
                 args.show,)?
         }

@@ -460,7 +460,7 @@ mod tests {
         let entry = find_symbol_by_name(&original, "absolute_table")?;
         assert_eq!(control_targets(&original, &entry)?.values().next().map(Vec::len), Some(8));
         let proof = rewrite_x86(&original, &entry, &[entry.clone()], &HashMap::new(), &HashMap::new(),
-            &HashMap::new(), &[], true, true, None, None, None, None, false)?;
+            &HashMap::new(), &[], true, true, None, None, None, false)?;
         assert_eq!(proof.proof_data_relocs.len(), 8);
         assert!(proof.proof_data_relocs.iter().all(|reloc| reloc.r_type == 1));
         let path = build.join("absolute.proof.o");
@@ -472,8 +472,7 @@ mod tests {
         let layout: KernelLayout = serde_json::from_slice(&fs::read(
             "/var/tmp/kprog-tmp/perf/kernel-layout/kernel-layout.json")?)?;
         let linked = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(), &HashMap::new(),
-            &HashMap::new(), &[], false, true, Some(&layout.array), Some(&layout.probe_read),
-            Some(&layout.hash), Some(&layout.lpm), false)?;
+            &HashMap::new(), &[], false, true, Some(&layout.array), Some(&layout.probe_read), Some(&layout.lpm), false)?;
         assert_eq!(linked.relocs.len(), 8);
         assert!(linked.map_patches.is_empty());
         for record in &linked.relocs {
@@ -495,8 +494,7 @@ mod tests {
         let elf = object::File::parse(malformed.as_slice())?;
         let entry = find_symbol_by_name(&elf, "absolute_table")?;
         let error = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(), &HashMap::new(),
-            &HashMap::new(), &[], false, true, Some(&layout.array), Some(&layout.probe_read),
-            Some(&layout.hash), Some(&layout.lpm), false).err().ok_or_else(|| anyhow!("interior target accepted"))?;
+            &HashMap::new(), &[], false, true, Some(&layout.array), Some(&layout.probe_read), Some(&layout.lpm), false).err().ok_or_else(|| anyhow!("interior target accepted"))?;
         assert!(format!("{error:#}").contains("interior"));
         Ok(())
     }
@@ -529,7 +527,7 @@ mod tests {
             let included = discover_reachable(&original, &entry)?;
             assert_eq!(included.len(), 1);
             let proof = rewrite_x86(&original, &entry, &included, &HashMap::new(), &HashMap::new(),
-                &HashMap::new(), &[], true, true, None, None, None, None, false)?;
+                &HashMap::new(), &[], true, true, None, None, None, false)?;
             assert!(proof.proof_data_relocs.is_empty(), "scalar root copied another root's code entries");
             let values: Vec<_> = proof.proof_relocs.iter().filter_map(|r| r.data.as_ref()).collect();
             assert_eq!(values.len(), 1);
@@ -541,8 +539,7 @@ mod tests {
             let elf = object::File::parse(bytes.as_slice())?;
             let entry = find_symbol_by_name(&elf, name)?;
             let linked = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(), &HashMap::new(),
-                &HashMap::new(), &[], false, true, Some(&layout.array), Some(&layout.probe_read),
-                Some(&layout.hash), Some(&layout.lpm), false)?;
+                &HashMap::new(), &[], false, true, Some(&layout.array), Some(&layout.probe_read), Some(&layout.lpm), false)?;
             assert!(linked.relocs.is_empty() && linked.map_patches.is_empty());
             let mut code = linked.blob; code.push(0xc3);
             for index in (0..32u64).chain((0..32).map(|i| i + (1u64 << 63))) {
@@ -584,7 +581,7 @@ mod tests {
             assert_eq!(targets.len(), 1);
             assert_eq!(targets.values().next().unwrap().len(), 4);
             let proof = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(), &HashMap::new(),
-                &HashMap::new(), &[], true, true, None, None, None, None, false)?;
+                &HashMap::new(), &[], true, true, None, None, None, false)?;
             assert_eq!(proof.proof_data_relocs.len(), 4);
             let path = build.join(format!("{name}.proof.o"));
             write_proof_object(&path, object::Architecture::X86_64, "scheduled_table", &proof.blob,
@@ -593,8 +590,7 @@ mod tests {
             let elf = object::File::parse(bytes.as_slice())?;
             let entry = find_symbol_by_name(&elf, "scheduled_table")?;
             let linked = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(), &HashMap::new(),
-                &HashMap::new(), &[], false, true, Some(&layout.array), Some(&layout.probe_read),
-                Some(&layout.hash), Some(&layout.lpm), false)?;
+                &HashMap::new(), &[], false, true, Some(&layout.array), Some(&layout.probe_read), Some(&layout.lpm), false)?;
             let mut code = linked.blob; code.push(0xc3);
             if name == "scheduled" || name == "base" {
                 for index in 0..64u64 {
@@ -625,7 +621,7 @@ mod tests {
         let calls = helper_provenance::calls(&elf, &entry, &got, &HashMap::new())?;
         assert_eq!(calls.single.get(&0x211).map(String::as_str), Some("bpf_probe_read_user"));
         let proof = rewrite_x86(&elf, &entry, &included, &HashMap::new(), &HashMap::new(),
-            &HashMap::new(), &[], true, true, None, None, None, None, false)?;
+            &HashMap::new(), &[], true, true, None, None, None, false)?;
         let build = std::path::Path::new("/var/tmp/kprog-tmp/perf/scheduled-table");
         fs::create_dir_all(build)?;
         write_proof_object(&build.join("otel.proof.o"), object::Architecture::X86_64,
@@ -655,7 +651,7 @@ mod tests {
         assert_eq!(calls.numeric_joins.get(&0x16bd), Some(&vec![
             (23, "bpf_redirect".to_owned()), (155, "bpf_redirect_peer".to_owned())]));
         let proof = rewrite_x86(&elf, &entry, &included, &HashMap::new(), &HashMap::new(),
-            &HashMap::new(), &[], true, true, None, None, None, None, false)?;
+            &HashMap::new(), &[], true, true, None, None, None, false)?;
         let build = std::path::Path::new("/var/tmp/kprog-tmp/perf/finite-helper-joins");
         fs::create_dir_all(build)?;
         write_proof_object(&build.join("cilium.proof.o"), object::Architecture::X86_64,
@@ -692,7 +688,7 @@ mod tests {
             let included = discover_reachable(&original, &entry)?;
             assert_eq!(included.len(), 1);
             let proof = rewrite_x86(&original, &entry, &included, &HashMap::new(), &HashMap::new(),
-                &HashMap::new(), &[], true, true, None, None, None, None, false)?;
+                &HashMap::new(), &[], true, true, None, None, None, false)?;
             assert_eq!(proof.proof_data_relocs.len(), 8);
             let path = build.join("shared.proof.o");
             write_proof_object(&path, object::Architecture::X86_64, name, &proof.blob,
@@ -701,8 +697,7 @@ mod tests {
             let elf = object::File::parse(bytes.as_slice())?;
             let entry = find_symbol_by_name(&elf, name)?;
             let linked = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(), &HashMap::new(),
-                &HashMap::new(), &[], false, true, Some(&layout.array), Some(&layout.probe_read),
-                Some(&layout.hash), Some(&layout.lpm), false)?;
+                &HashMap::new(), &[], false, true, Some(&layout.array), Some(&layout.probe_read), Some(&layout.lpm), false)?;
             assert!(linked.relocs.is_empty() && linked.map_patches.is_empty());
             let mut code = linked.blob; code.push(0xc3);
             #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
@@ -743,7 +738,7 @@ mod tests {
         let entry = find_symbol_by_name(&elf, "map_lookup_table")?;
         let maps: HashMap<_, _> = (0..8).map(|index| (format!("map{index}"), 0x100000000u64 + index * 32)).collect();
         let proof = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(), &maps,
-            &HashMap::new(), &[], true, true, None, None, None, None, false)?;
+            &HashMap::new(), &[], true, true, None, None, None, false)?;
         assert_eq!(proof.proof_data_relocs.len(), 8);
         assert!(proof.proof_data_relocs.iter().all(|item|
             item.r_type == 1 && item.addend == 0 && maps.contains_key(&item.symbol)));
@@ -761,8 +756,7 @@ mod tests {
             "/var/tmp/kprog-tmp/perf/kernel-layout/kernel-layout.json")?)?;
         let helpers = HashMap::from([("bpf_map_lookup_elem".to_owned(), 0x1234)]);
         let linked = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps,
-            &HashMap::new(), &[], false, true, Some(&layout.array), Some(&layout.probe_read),
-            Some(&layout.hash), Some(&layout.lpm), false)?;
+            &HashMap::new(), &[], false, true, Some(&layout.array), Some(&layout.probe_read), Some(&layout.lpm), false)?;
         assert_eq!(linked.map_patches.len(), 8);
         assert!(linked.relocs.iter().all(|item|
             item.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32 && item.target == 0x1234));
@@ -802,7 +796,7 @@ mod tests {
         let maps: HashMap<_, _> = values.iter().enumerate()
             .map(|(index, value)| (format!("map{index}"), value.as_ptr() as u64)).collect();
         let proof = rewrite_x86(&elf, &entry, &[entry.clone()], &empty, &maps, &HashMap::new(),
-            &[], true, true, None, None, None, None, false)?;
+            &[], true, true, None, None, None, false)?;
         assert_eq!(proof.proof_data_relocs.len(), 8);
         for relocation in &proof.proof_data_relocs {
             assert_eq!((relocation.r_type, relocation.addend), (1, 0));
@@ -817,8 +811,7 @@ mod tests {
         let layout: KernelLayout = serde_json::from_slice(&fs::read(
             "/var/tmp/kprog-tmp/perf/kernel-layout/kernel-layout.json")?)?;
         let linked = rewrite_x86(&elf, &entry, &[entry.clone()], &empty, &maps, &HashMap::new(),
-            &[], false, true, Some(&layout.array), Some(&layout.probe_read),
-            Some(&layout.hash), Some(&layout.lpm), false)?;
+            &[], false, true, Some(&layout.array), Some(&layout.probe_read), Some(&layout.lpm), false)?;
         assert_eq!(linked.map_patches.len(), 8);
         assert!(linked.relocs.is_empty());
         fs::write(build.join("fixture.kernel.bin"), &linked.blob)?;
@@ -827,8 +820,7 @@ mod tests {
         let mut missing = maps.clone();
         missing.remove("map3");
         let error = rewrite_x86(&elf, &entry, &[entry.clone()], &empty, &missing, &HashMap::new(),
-            &[], false, true, Some(&layout.array), Some(&layout.probe_read),
-            Some(&layout.hash), Some(&layout.lpm), false).err()
+            &[], false, true, Some(&layout.array), Some(&layout.probe_read), Some(&layout.lpm), false).err()
             .ok_or_else(|| anyhow!("missing live map was silently embedded"))?;
         assert!(error.to_string().contains("unknown live map/data capability"));
         // Existing map-pointer ABI binds the exact handle. Do not silently
@@ -842,8 +834,7 @@ mod tests {
         let invalid = object::File::parse(altered.as_slice())?;
         let invalid_entry = find_symbol_by_name(&invalid, "map_pointer_table")?;
         let error = rewrite_x86(&invalid, &invalid_entry, &[invalid_entry.clone()], &empty, &maps,
-            &HashMap::new(), &[], false, true, Some(&layout.array), Some(&layout.probe_read),
-            Some(&layout.hash), Some(&layout.lpm), false).err()
+            &HashMap::new(), &[], false, true, Some(&layout.array), Some(&layout.probe_read), Some(&layout.lpm), false).err()
             .ok_or_else(|| anyhow!("nested map-pointer addend was silently dropped"))?;
         assert!(error.to_string().contains("explicit zero address addend"));
         let mut code = linked.blob;

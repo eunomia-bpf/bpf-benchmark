@@ -158,7 +158,7 @@ mod tests {
         let facts=calls(&elf,&entry,&HashMap::new(),&HashMap::new())?;
         assert!(!facts.tails.is_empty(),"compiler fixture no longer exercises numeric tail exits");
         let proof=rewrite_x86(&elf,&entry,&included,&HashMap::new(),&HashMap::new(),&HashMap::new(),&[],
-            true,true,None,None,None,None,false)?;
+            true,true,None,None,None,false)?;
         write_proof_object(&build.join("numeric-tail.proof.o"),object::Architecture::X86_64,"numeric_tail",
             &proof.blob,&proof.proof_symbols,&proof.proof_relocs,&proof.proof_data_relocs,proof.callee_saved_mask)?;
         assert!(proof.proof_relocs.iter().any(|r|r.symbol=="bpf_get_prandom_u32"));
@@ -197,7 +197,7 @@ mod tests {
                 let entry=find_symbol_by_name(&elf,"entry")?;
                 let included=discover_reachable(&elf,&entry)?;
                 let proof=rewrite_x86(&elf,&entry,&included,&helpers,&HashMap::new(),&HashMap::new(),&[],
-                    true,true,None,None,None,None,false)?;
+                    true,true,None,None,None,false)?;
                 assert_eq!(proof.proof_relocs.iter().filter(|r| r.symbol.starts_with("bpf_")).count(),
                     if name=="joined" {2}else {1});
                 let path=build.join(format!("{name}-{caller}.tail.proof.o"));
@@ -220,7 +220,7 @@ mod tests {
                 for (elf,entry,included) in [(&elf,&entry,&included),(&linked_elf,&linked_entry,&linked_symbols),
                     (&legacy_elf,&legacy_entry,&legacy_symbols)] {
                     let linked=rewrite_x86(elf,entry,included,&helpers,&HashMap::new(),&HashMap::new(),&[],
-                        false,true,None,None,None,None,false)?;
+                        false,true,None,None,None,false)?;
                     // An observable epilogue distinguishes returning through
                     // the JIT exit from incorrectly returning straight to C.
                     let mut image=linked.blob;image.extend_from_slice(&[0x48,0x05,0,1,0,0,0xc3]);
@@ -298,7 +298,7 @@ mod tests {
         let helpers = HashMap::from([("bpf_probe_read_compat".to_owned(), 0x1234),
                                     ("bpf_map_lookup_elem".to_owned(), 0x5678)]);
         let linked = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &HashMap::new(),
-            &HashMap::new(), &[], false, false, None, None, None, None, false)?;
+            &HashMap::new(), &[], false, false, None, None, None, false)?;
         assert_eq!(linked.relocs.len(), 1);
         assert_eq!(linked.relocs[0].target, 0x1234);
         let mut code = linked.blob;
@@ -335,10 +335,10 @@ mod tests {
         assert_eq!(facts.numeric_joins[&23],vec![(23,"bpf_redirect".into()),(155,"bpf_redirect_peer".into())]);
         let helpers=HashMap::from([("bpf_redirect".into(),0x1234),("bpf_redirect_peer".into(),0x5678)]);
         let proof=rewrite_x86(&elf,&entry,&[entry.clone()],&helpers,&HashMap::new(),
-            &HashMap::new(),&[],true,true,None,None,None,None,false)?;
+            &HashMap::new(),&[],true,true,None,None,None,false)?;
         assert!(!proof.blob.is_empty());
         let linked=rewrite_x86(&elf,&entry,&[entry.clone()],&helpers,&HashMap::new(),
-            &HashMap::new(),&[],false,true,None,None,None,None,false)?;
+            &HashMap::new(),&[],false,true,None,None,None,false)?;
         assert_eq!(linked.relocs.len(),2);
         let mut image=linked.blob;
         image.push(0xc3); // The installed JIT epilogue follows the entry blob.
@@ -388,7 +388,7 @@ mod tests {
         let helpers = HashMap::from([("bpf_probe_read_compat".into(),0x1234),
             ("bpf_probe_read_kernel".into(),0x5678)]);
         let linked = rewrite_x86(&elf,&entry,&[entry.clone()],&helpers,&HashMap::new(),
-            &HashMap::new(),&[],false,true,None,None,None,None,false)?;
+            &HashMap::new(),&[],false,true,None,None,None,false)?;
         assert_eq!(linked.relocs.iter().map(|r|r.target).collect::<Vec<_>>(),vec![0x1234,0x5678]);
         Ok(())
     }

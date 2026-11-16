@@ -20,7 +20,7 @@ def main():
     args.output.mkdir(parents=True, exist_ok=True)
     actual = json.loads(args.layout.read_text())
     groups, historical, commands = [], [], []
-    for name in ['array', 'hash', 'lpm', 'probe_read']:
+    for name in ['array', 'lpm', 'probe_read']:
         command = [str(args.reference_compiler), str(args.boot_capture/'kernel.btf')]
         if name == 'probe_read':
             command += ['--probe-read', str(args.boot_capture/'kernel.kallsyms')]
