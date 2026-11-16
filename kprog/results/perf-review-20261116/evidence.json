@@ -694,5 +694,32 @@
     "candidate_dead_tail_slots": 11,
     "candidate_dead_tail_bytes": 88,
     "scope": "Static retained B listing; no new compilation, verifier timing or actual reduced object size. Does not execute on installed native P path."
+  },
+  "array_update_semantic_gaps": {
+    "recorded_at": "2026-11-16T16:09:14Z",
+    "selector": "native_loader.cpp:3126-3150 type and small value size only",
+    "emitter": "x86.rs:4194-4200 key bounds before CMP ECX flags",
+    "kernel": "kernel/bpf/arraymap.c:363-399 u64 flags validation before bounds",
+    "counterexamples": [
+      {
+        "key": "in range",
+        "flags": "0x100000000",
+        "kernel": "-EINVAL, no write",
+        "native": "copies value, returns 0"
+      },
+      {
+        "key": "out of range",
+        "flags": 3,
+        "kernel": "-EINVAL",
+        "native": "-E2BIG"
+      },
+      {
+        "key": "in range",
+        "flags": 5,
+        "kernel": "-EEXIST",
+        "native": "-EINVAL"
+      }
+    ],
+    "scope": "Source and emitted opcode reasoning, no fresh execution or proof these inputs occur in the frozen benchmark. No source implementation change."
   }
 }

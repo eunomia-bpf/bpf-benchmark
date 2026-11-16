@@ -534,3 +534,36 @@ double-execution cause and no confirmed Cilium packet fix. Those remain open. Th
     work after cleanup, not another runtime check or a new proof gate.
     It affects B generation/verification cost and byte size; the native P
     installed for timing does not execute these B instructions.
+
+17. **Typed ARRAY update emitter truncates flags and changes error precedence.**
+
+    `native_loader.cpp:3126–3150` selects the ARRAY/PERCPU_ARRAY update emitter
+    based on map type and value size1/2/4/8, without restricting the actual
+    flags argument. `x86.rs:4194–4200` loads the key, checks bounds, then uses
+    CMP ECX,1 and CMP ECX,2. The helper's flags argument is u64 in RCX; those
+    comparisons ignore its upper32 bits. The success body copies the value.
+
+    The sole kernel operation in `kernel/bpf/arraymap.c:363–399` instead
+    validates `(map_flags & ~BPF_F_LOCK) > BPF_EXIST` at :370 before key bounds
+    at :374, then BPF_NOEXIST at :378 and lock-field semantics at :382.
+    Two source-derived counterexamples require no new test or check:
+
+    | Inputs | Kernel operation | Current native inline emitter |
+    |---|---|---|
+    | Valid key, flags=0x100000000 | -EINVAL, no write | ECX is zero; copies value and returns0 |
+    | Out-of-range key, flags=3 | -EINVAL | Bounds exit first: -E2BIG |
+
+    Even in-range flags=BPF_NOEXIST|BPF_F_LOCK (5) returns -EEXIST in the
+    kernel before lock-field validation; the emitter returns -EINVAL.
+    This is not just an extra branch or code-size concern: it changes return
+    values, and the high-flags case changes map contents. The frozen benchmark
+    may use constant zero flags; this review has not observed one of these
+    inputs in its actual calls and does not attribute a measured ratio to it.
+
+    The pending map-operation binding work can remove this custom update
+    implementation and use the already-selected map's actual update operation.
+    That preserves the existing kernel checks and removes duplicate userspace
+    semantic logic without adding a new native runtime check. If retaining a
+    specialized copy, restrict it by actual proven call facts and retain all
+    relevant semantics; value size alone does not prove flags or map-record
+    behavior. Per-call and installed-byte effects remain unmeasured.
