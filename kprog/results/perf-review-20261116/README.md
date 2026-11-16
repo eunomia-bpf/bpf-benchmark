@@ -507,6 +507,36 @@ double-execution cause and no confirmed Cilium packet fix. Those remain open. Th
     and isolated gain of the existing rewrite remain unmeasured. Do not build
     another CPU/task inliner based on the withdrawn claim.
 
+    A precise extension of that existing implementation is the BTF variant.
+    The sole kernel's `kernel/trace/bpf_trace.c:755–758` returns current for
+    bpf_get_current_task; :766–769 returns the same value for
+    bpf_get_current_task_btf. Their verifier return types differ at :763
+    and :774–775. Yet `x86_probe_read.rs:180` recognizes only the first name,
+    so helper158 falls through to the ordinary call at `x86.rs:1598–1609`.
+    The retained Tracee proof in replay409 contains a call relocation to
+    bpf_get_current_task_btf at section offset +0x195, in
+    trace_security_inode_symlink. This is proof-stage application evidence;
+    that entry's inventory has a proof object, with kernel replay evidence
+    still pending. Reuse the existing GS-load emission for the same native
+    value while retaining helper158's identity and BTF pointer contract in
+    proof/simulator handling. A global helper-ID substitution would lose
+    that distinction.
+
+    BCC's hot pid/tgid helper is a separate opportunity. Retained replay24
+    sys_enter calls it first, at proof/blob +0x5; replay25 sys_exit calls it
+    at proof +0x33 and blob +0x39 after the cgroup filter. Both blobs retain
+    actual helper relocations. `kernel/bpf/helpers.c:225–232` loads current,
+    handles the null case, then combines task->tgid and task->pid. This is
+    more than a GS pointer load. Reusing sole-kernel BTF offsets in trusted
+    IR lowering could expose those field loads to ordinary optimization.
+    In particular, syscount.bpf.c:77–103 uses the upper half for filter_pid
+    and count_by_process, so actual immutable configuration folding can make
+    that half unused. Folding the caller alone still leaves an opaque helper
+    computing both halves. Preserve the kernel helper's result/error behavior
+    and actual configuration; isolated per-call and installed-byte effects
+    remain to measure. This complements map-ops binding in the dominant
+    pair, with its priority unchanged.
+
     The simulator's TC metadata constant is also already the translated +48:
     `x86_sim.h:150–153` uses X86_SKB_CB_OFF=0x30, unlike the producer's native
     struct cb at +40. Its data/data_end constants (+208/+80) agree with the
