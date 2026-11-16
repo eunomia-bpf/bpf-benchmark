@@ -500,7 +500,7 @@ resident-census-checkpoint:
 		$(foreach queue,$(CENSUS_CHECKPOINT_QUEUES),--queue "$(queue)")
 
 shared-base-refresh:
-	bash ../test/refresh_verified_base.sh "$(REFRESH_OUTPUT)" "$(REFRESH_OPERATION)" "$(DIRECT_RECOVERY_BUILD)/module/bpf_x86_native_lab.ko" "$(REFRESH_LINKER_INPUT)"
+	bash ../test/refresh_verified_base.sh "$(REFRESH_OUTPUT)" "$(REFRESH_OPERATION)" "$(REPO_ROOT)/kinsn/module/x86/build/bpf_x86_native_lab.ko" "$(REFRESH_LINKER_INPUT)"
 
 shared-base-finalize:
 	bash ../test/refresh_verified_base.sh "$(REFRESH_OUTPUT)" --finalize
@@ -701,14 +701,14 @@ direct-recovery-check:
 	install -d "$(DIRECT_RECOVERY_BUILD)" "$(DIRECT_RECOVERY_OUTPUT)"
 	$(CXX) -std=gnu++20 -O1 -g -ffunction-sections -fdata-sections -Iinclude -I"$(KERNEL_OFFSETS_INCLUDE)" -I"$(LIBBPF_PREFIX)/include" -I"$(REPO_ROOT)/vendor/libbpf/include" -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" ../test/native_loader_recovery.cpp -Wl,--gc-sections "$(LIBBPF_LIBRARY)" -lelf -lz -ldl -pthread -o "$(DIRECT_RECOVERY_BUILD)/recovery"
 	"$(DIRECT_RECOVERY_BUILD)/recovery" host "$(DIRECT_RECOVERY_OUTPUT)" > "$(DIRECT_RECOVERY_OUTPUT)/host.log"
-	$(MAKE) -C ../perf/direct-native module KDIR=/workspaces/.agent-state/kprog-ck/build-x86 OUT="$(DIRECT_RECOVERY_BUILD)"
-	sha256sum src/native_loader.cpp ../perf/direct-native/bpf_x86_native_lab.c ../test/native_loader_recovery.cpp "$(DIRECT_RECOVERY_BUILD)/recovery" "$(DIRECT_RECOVERY_BUILD)/module/bpf_x86_native_lab.ko" > "$(DIRECT_RECOVERY_OUTPUT)/sha256"
+	$(MAKE) -C /workspaces/.agent-state/kprog-ck/build-x86 M="$(REPO_ROOT)/kprog/perf/direct-native" MO="$(REPO_ROOT)/kinsn/module/x86/build" ARCH=x86 modules
+	sha256sum src/native_loader.cpp ../perf/direct-native/bpf_x86_native_lab.c ../test/native_loader_recovery.cpp "$(DIRECT_RECOVERY_BUILD)/recovery" "$(REPO_ROOT)/kinsn/module/x86/build/bpf_x86_native_lab.ko" > "$(DIRECT_RECOVERY_OUTPUT)/sha256"
 
 direct-recovery-kvm:
 	install -d "$(DIRECT_RECOVERY_KERNEL_OUTPUT)"
 	install -m 0755 "$(DIRECT_RECOVERY_BUILD)/recovery" "$(DIRECT_RECOVERY_KERNEL_OUTPUT)/recovery"
-	install -m 0644 "$(DIRECT_RECOVERY_BUILD)/module/bpf_x86_native_lab.ko" "$(DIRECT_RECOVERY_KERNEL_OUTPUT)/bpf_x86_native_lab.ko"
-	taskset -c 14-15 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage --cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(DIRECT_RECOVERY_KERNEL_OUTPUT)" --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -C kprog/libnativeloader guest-direct-recovery DIRECT_RECOVERY_KERNEL_OUTPUT=$(DIRECT_RECOVERY_KERNEL_OUTPUT)'
+	install -m 0644 "$(REPO_ROOT)/kinsn/module/x86/build/bpf_x86_native_lab.ko" "$(DIRECT_RECOVERY_KERNEL_OUTPUT)/bpf_x86_native_lab.ko"
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 16-19 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage --cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(DIRECT_RECOVERY_KERNEL_OUTPUT)" --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -C kprog/libnativeloader guest-direct-recovery DIRECT_RECOVERY_KERNEL_OUTPUT=$(DIRECT_RECOVERY_KERNEL_OUTPUT)'
 
 guest-direct-recovery:
 	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug

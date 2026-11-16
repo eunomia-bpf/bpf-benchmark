@@ -14,6 +14,9 @@ static void host(const std::filesystem::path &output)
         "load_site\t127,3,11\nload_site\t250,4,65535\n"; }
     std::vector<native_lab_load_site> sites;
     require(read_link_abi_file(abi, &sites) == 3 && sites.size() == 2, "direct ABI dropped sites");
+    const auto large = plan_blob_chunks(627 * 128, {});
+    require(large.size() == 627 && large.back().offset == 626 * 128,
+        "large native object retained the old 512-chunk limit");
     const auto ordinary = plan_blob_chunks(384, {});
     const auto chunks = plan_blob_chunks(384, {}, sites);
     require(ordinary[0].len == 128 && chunks[0].len == 127, "fault instruction split across chunks");
@@ -83,7 +86,30 @@ static void kernel(const std::filesystem::path &output)
         require(bool(result), "write direct recovery result");
         require(run.retval == expected, "fault did not clear selected R11 status");
     }
-    std::cout << "direct recovery kernel PASS: default, cross-chunk R11 fault, reupload\n";
+    // Code beyond the old 512 boundary must survive, and a shorter next
+    // program must discard every stale chunk.
+    for (unsigned count : {627u, 1u, 1025u}) {
+        LinkedBlob linked{};
+        linked.blob.assign(count * 128, 0x90);
+        linked.blob[0] = 0xb8; // MOV EAX,0, then one ADD per chunk.
+        std::fill(linked.blob.begin()+1, linked.blob.begin()+5, 0);
+        for (unsigned i = 0; i < count; ++i) {
+            const size_t at = i * 128 + 8;
+            linked.blob[at] = 0x83; linked.blob[at+1] = 0xc0; linked.blob[at+2] = 1;
+        }
+        auto loaded = upload_and_load_stub(linked, BPF_PROG_TYPE_SOCKET_FILTER,
+            StubLoadAttrs{}, false, "large_chunks", {});
+        ScopedFd fd(loaded.prog_fd);
+        unsigned char packet[64] = {};
+        LIBBPF_OPTS(bpf_test_run_opts, run, .data_in=packet, .data_size_in=sizeof(packet), .repeat=1);
+        if (bpf_prog_test_run_opts(fd.get(), &run)) fail("large chunks TEST_RUN: " + std::string(strerror(errno)));
+        result << "{\"chunks\":" << count << ",\"retval\":" << run.retval
+            << ",\"expected\":" << count << "}\n";
+        result.flush();
+        require(bool(result), "write large chunks result");
+        require(run.retval == count, "dynamic chunks lost code or retained a previous program tail");
+    }
+    std::cout << "direct recovery kernel PASS: default, cross-chunk R11 fault, reupload, 627/1/1025 chunks\n";
 }
 
 int main(int argc, char **argv)

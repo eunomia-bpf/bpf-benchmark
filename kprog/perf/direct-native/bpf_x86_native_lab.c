@@ -45,7 +45,6 @@
 #include "native_lab_trusted_wire.h"
 #include <linux/ptrace.h>
 
-#define NATIVE_LAB_MAX_BLOBS		512
 #define NATIVE_LAB_MAX_BLOB_BYTES	128
 #define NATIVE_LAB_MAX_RELOCS		32
 
@@ -83,7 +82,8 @@ struct native_blob {
 	size_t load_site_count;
 };
 
-static struct native_blob blobs[NATIVE_LAB_MAX_BLOBS];
+static struct native_blob *blobs;
+static size_t blob_count;
 static DEFINE_MUTEX(blobs_lock);
 static struct dentry *debugfs_root;
 
@@ -118,7 +118,7 @@ static int decode_native_lab_payload(u64 payload, u32 *blob_id, u32 *abi_mask)
 		return -EOPNOTSUPP;
 
 	*blob_id = (u32)((payload >> 8) & 0x1ff);
-	if (*blob_id >= NATIVE_LAB_MAX_BLOBS)
+	if (*blob_id >= blob_count)
 		return -EINVAL;
 	if (abi_mask)
 		*abi_mask = (u32)((payload >> 4) & 0xf);
@@ -355,7 +355,7 @@ static int native_lab_arm_chunks(void)
 	u8 *bytes;
 	u32 i, j;
 
-	for (i = 0; i < NATIVE_LAB_MAX_BLOBS && blobs[i].bytes; i++) {
+	for (i = 0; i < blob_count && blobs[i].bytes; i++) {
 		len += blobs[i].len;
 		nr += blobs[i].reloc_count;
 		ns += blobs[i].load_site_count;
@@ -376,7 +376,7 @@ static int native_lab_arm_chunks(void)
 		sites = kvcalloc(ns, sizeof(*sites), GFP_KERNEL);
 		if (!sites) { kvfree(bytes); kvfree(relocs); return -ENOMEM; }
 	}
-	for (i = 0; i < NATIVE_LAB_MAX_BLOBS && blobs[i].bytes; i++) {
+	for (i = 0; i < blob_count && blobs[i].bytes; i++) {
 		memcpy(bytes + off, blobs[i].bytes, blobs[i].len);
 		for (j = 0; j < blobs[i].reloc_count; j++, k++) {
 			relocs[k].offset = off + blobs[i].relocs[j].offset;
@@ -434,6 +434,58 @@ struct map_ptr_file_priv {
 	size_t len;
 };
 
+static const struct file_operations blob_fops, relocs_fops;
+#if __has_include(<linux/bpf_native.h>)
+static const struct file_operations sites_fops;
+#endif
+
+/* Sequential upload creates its next endpoint before the loader opens it.
+ * File private data holds an index, so growing this array keeps open files
+ * valid. There is no per-program chunk limit beyond allocation and wire IDs.
+ * The caller holds blobs_lock after module initialization.
+ */
+static int native_lab_add_blob(void)
+{
+	struct native_blob *grown;
+	struct dentry *data, *relocs;
+#if __has_include(<linux/bpf_native.h>)
+	struct dentry *sites;
+#endif
+	char name[32];
+	size_t id = blob_count;
+	int err;
+
+	grown = kvrealloc(blobs, (id + 1) * sizeof(*blobs), GFP_KERNEL);
+	if (!grown)
+		return -ENOMEM;
+	blobs = grown;
+	memset(&blobs[id], 0, sizeof(blobs[id]));
+	scnprintf(name, sizeof(name), "blob%zu", id);
+	data = debugfs_create_file(name, 0600, debugfs_root, (void *)id, &blob_fops);
+	if (IS_ERR(data))
+		return PTR_ERR(data);
+	scnprintf(name, sizeof(name), "blob%zu.relocs", id);
+	relocs = debugfs_create_file(name, 0600, debugfs_root, (void *)id, &relocs_fops);
+	if (IS_ERR(relocs)) {
+		err = PTR_ERR(relocs);
+		goto remove_data;
+	}
+#if __has_include(<linux/bpf_native.h>)
+	scnprintf(name, sizeof(name), "blob%zu.sites", id);
+	sites = debugfs_create_file(name, 0600, debugfs_root, (void *)id, &sites_fops);
+	if (IS_ERR(sites)) {
+		err = PTR_ERR(sites);
+		debugfs_remove(relocs);
+		goto remove_data;
+	}
+#endif
+	blob_count++;
+	return 0;
+remove_data:
+	debugfs_remove(data);
+	return err;
+}
+
 static ssize_t blob_write(struct file *file, const char __user *ubuf,
 			  size_t len, loff_t *ppos)
 {
@@ -457,12 +509,21 @@ static ssize_t blob_write(struct file *file, const char __user *ubuf,
 	}
 
 	mutex_lock(&blobs_lock);
+	if ((size_t)priv->id + 1 == blob_count) {
+		int err = native_lab_add_blob();
+
+		if (err) {
+			mutex_unlock(&blobs_lock);
+			kfree(kbuf);
+			return err;
+		}
+	}
 #if __has_include(<linux/bpf_native.h>)
 	/* Chunk 0 starts a new program: drop the chunks a longer one left. */
 	if (priv->id == 0) {
 		int k;
 
-		for (k = 1; k < NATIVE_LAB_MAX_BLOBS; k++) {
+		for (k = 1; k < blob_count; k++) {
 			kfree(blobs[k].bytes);
 			kfree(blobs[k].relocs);
 			kfree(blobs[k].load_sites);
@@ -784,12 +845,15 @@ static void native_lab_free_blobs(void)
 	int i;
 
 	mutex_lock(&blobs_lock);
-	for (i = 0; i < NATIVE_LAB_MAX_BLOBS; i++) {
+	for (i = 0; i < blob_count; i++) {
 		kfree(blobs[i].bytes);
 		kfree(blobs[i].relocs);
 		kfree(blobs[i].load_sites);
 		memset(&blobs[i], 0, sizeof(blobs[i]));
 	}
+	kvfree(blobs);
+	blobs = NULL;
+	blob_count = 0;
 	mutex_unlock(&blobs_lock);
 }
 
@@ -803,7 +867,6 @@ static const struct btf_kfunc_id_set bpf_x86_native_lab_kfunc_set = {
 
 static int __init bpf_x86_native_lab_init(void)
 {
-	long i;
 	int err;
 
 	debugfs_root = debugfs_create_dir("bpf_x86_native_lab", NULL);
@@ -817,19 +880,11 @@ static int __init bpf_x86_native_lab_init(void)
 	debugfs_create_file("map_update_elem", 0600, debugfs_root, NULL,
 			    &map_update_elem_fops);
 
-	for (i = 0; i < NATIVE_LAB_MAX_BLOBS; i++) {
-		char name[24];
-
-		scnprintf(name, sizeof(name), "blob%ld", i);
-		debugfs_create_file(name, 0600, debugfs_root, (void *)i,
-				    &blob_fops);
-		scnprintf(name, sizeof(name), "blob%ld.relocs", i);
-		debugfs_create_file(name, 0600, debugfs_root, (void *)i,
-				    &relocs_fops);
-#if __has_include(<linux/bpf_native.h>)
-		scnprintf(name, sizeof(name), "blob%ld.sites", i);
-		debugfs_create_file(name, 0600, debugfs_root, (void *)i, &sites_fops);
-#endif
+	err = native_lab_add_blob();
+	if (err) {
+		debugfs_remove_recursive(debugfs_root);
+		native_lab_free_blobs();
+		return err;
 	}
 
 	err = register_btf_kfunc_id_set(BPF_PROG_TYPE_UNSPEC,

@@ -228,7 +228,6 @@ constexpr NativeLabTarget kNativeLabTarget = {
 
 constexpr const char *kVmlinuxBtfPath = "/sys/kernel/btf/vmlinux";
 constexpr const char *kDebugfsDir = "/sys/kernel/debug";
-constexpr uint32_t kMaxBlobs = 512;
 
 class NativeLabUploadLock {
 public:
@@ -606,10 +605,6 @@ std::vector<NativeBlobChunk> plan_blob_chunks(size_t blob_size,
         }
         chunks.push_back(NativeBlobChunk{offset, end - offset});
         offset = end;
-    }
-    if (chunks.size() > kMaxBlobs) {
-        fail("native blob requires " + std::to_string(chunks.size()) +
-             " chunks but module only supports " + std::to_string(kMaxBlobs));
     }
     return chunks;
 }
