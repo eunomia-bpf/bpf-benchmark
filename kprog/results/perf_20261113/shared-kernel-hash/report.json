@@ -1,0 +1,23 @@
+{
+  "recorded_at": "2026-11-16T13:52:07Z",
+  "source_commit": "f45bb2485",
+  "rust_tests": {
+    "passed": 48,
+    "failed": 0,
+    "ignored": 3
+  },
+  "retained_range_test": {
+    "passed": 1,
+    "failed": 0
+  },
+  "layout_groups": 3,
+  "layout_fields": 27,
+  "live_canonical_and_loader_facts_equal": true,
+  "loader_syntax": "passed",
+  "initial_layout_check": "Bytewise BTF identity failed; all 27 used facts already equal. Semantic replay compares independently resolved live and canonical facts, without type-ID/order identity.",
+  "raw_directories": [
+    "/workspaces/kprog-raw/perf/20261116-shared-kernel-hash",
+    "/workspaces/kprog-raw/perf/20261116-shared-kernel-hash-semantic"
+  ],
+  "scope": "Host subset only. Shared existing kernel hash call retained. Installed size and per-call tradeoff unmeasured; image unchanged."
+}

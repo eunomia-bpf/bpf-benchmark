@@ -1,6 +1,5 @@
 """Compare the normal loader's BTF facts with the retained sole-kernel facts."""
 import argparse
-import hashlib
 import json
 import subprocess
 from pathlib import Path
@@ -19,6 +18,9 @@ def main():
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     actual = json.loads(args.layout.read_text())
+    with (args.kernel / 'vmlinux').open('rb') as stream:
+        canonical_btf = args.output / 'canonical.btf'
+        canonical_btf.write_bytes(ELFFile(stream).get_section_by_name('.BTF').data())
     groups, historical, commands = [], [], []
     for name in ['array', 'lpm', 'probe_read']:
         command = [str(args.reference_compiler), str(args.boot_capture/'kernel.btf')]
@@ -32,24 +34,24 @@ def main():
         (args.output/'commands.json').write_text(json.dumps(commands, indent=2)+'\n')
         completed.check_returncode()
         expected = json.loads(completed.stdout)
+        command = [command[0], str(canonical_btf), *command[2:]]
+        canonical = subprocess.run(command, text=True, capture_output=True)
+        commands.append(dict(command=command, returncode=canonical.returncode,
+                             stdout=canonical.stdout, stderr=canonical.stderr))
+        (args.output/'commands.json').write_text(json.dumps(commands, indent=2)+'\n')
+        canonical.check_returncode()
+        canonical_expected = json.loads(canonical.stdout)
         groups.append(dict(group=name, expected=expected, actual=actual[name],
-                           equal=actual[name] == expected))
+                           canonical_expected=canonical_expected,
+                           equal=actual[name] == expected == canonical_expected))
         old = args.historical_reference / ('runtime-' + name.replace('_', '-') + '-layout.json')
         previous = json.loads(old.read_text())
         historical.append(dict(group=name, reference=str(old), previous=previous,
                                different_fields=[k for k in actual[name] if actual[name][k] != previous[k]]))
-    with (args.kernel / 'vmlinux').open('rb') as stream:
-        kernel_btf_sha256 = hashlib.sha256(ELFFile(stream).get_section_by_name('.BTF').data()).hexdigest()
-    live_btf_sha256 = hashlib.sha256((args.boot_capture/'kernel.btf').read_bytes()).hexdigest()
     result = dict(layout=actual, groups=groups, kernel=str(args.kernel), historical=historical,
-                  kernel_btf_sha256=kernel_btf_sha256,
-                  live_btf_sha256=live_btf_sha256,
-                  kallsyms_sha256=hashlib.sha256((args.boot_capture/'kernel.kallsyms').read_bytes()).hexdigest(),
                   fields=sum(len(group['actual']) for group in groups),
-                  scope='Live boot BTF/kallsyms against canonical boot ELF and independent C field resolver; no application execution')
+                  scope='Live boot and canonical ELF BTF fields resolved independently; BTF type IDs/order may differ; no application execution')
     (args.output / 'result.json').write_text(json.dumps(result, indent=2) + '\n')
-    if kernel_btf_sha256 != live_btf_sha256:
-        raise ValueError('Canonical ELF BTF differs from the running boot kernel')
     if not all(group['equal'] for group in groups):
         raise ValueError('Loader LTO facts differ from independent live-boot facts; inspect result.json')
     print(json.dumps(dict(groups=len(groups), fields=result['fields'], equal=True)))

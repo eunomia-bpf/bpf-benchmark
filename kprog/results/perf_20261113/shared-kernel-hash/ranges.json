@@ -1,0 +1,173 @@
+{
+  "programs": [
+    {
+      "app": "bcc",
+      "payload_bytes": 123,
+      "previous_payload_bytes": 123,
+      "reference": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/24/0.blob",
+      "removed_hash_bytes": 0,
+      "shared_hash_calls": [],
+      "symbol": "sys_enter",
+      "ranges": [],
+      "appended_bytes_by_piece": {},
+      "remaining_payload_bytes": 123
+    },
+    {
+      "app": "bcc",
+      "payload_bytes": 1021,
+      "previous_payload_bytes": 3465,
+      "reference": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/25/0.blob",
+      "removed_hash_bytes": 2444,
+      "shared_hash_calls": [
+        {
+          "offset": 198,
+          "target": 18446744071835511248
+        },
+        {
+          "offset": 298,
+          "target": 18446744071835511248
+        },
+        {
+          "offset": 453,
+          "target": 18446744071835511248
+        }
+      ],
+      "symbol": "sys_exit",
+      "ranges": [
+        {
+          "bytes": 255,
+          "end": 786,
+          "piece": "probe_read",
+          "start": 531
+        },
+        {
+          "bytes": 235,
+          "end": 1021,
+          "piece": "probe_read",
+          "start": 786
+        }
+      ],
+      "appended_bytes_by_piece": {
+        "probe_read": 490
+      },
+      "remaining_payload_bytes": 531
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "payload_bytes": 8015,
+      "previous_payload_bytes": 10459,
+      "reference": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/130/0.blob",
+      "removed_hash_bytes": 2444,
+      "shared_hash_calls": [
+        {
+          "offset": 1383,
+          "target": 18446744072422713808
+        },
+        {
+          "offset": 4482,
+          "target": 18446744072422713808
+        }
+      ],
+      "symbol": "native_tracer_entry",
+      "ranges": [
+        {
+          "bytes": 67,
+          "end": 7430,
+          "piece": "runtime_array",
+          "start": 7363
+        },
+        {
+          "bytes": 255,
+          "end": 7685,
+          "piece": "probe_read",
+          "start": 7430
+        },
+        {
+          "bytes": 330,
+          "end": 8015,
+          "piece": "lpm_lookup",
+          "start": 7685
+        }
+      ],
+      "appended_bytes_by_piece": {
+        "runtime_array": 67,
+        "probe_read": 255,
+        "lpm_lookup": 330
+      },
+      "remaining_payload_bytes": 7363
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "payload_bytes": 37519,
+      "previous_payload_bytes": 39963,
+      "reference": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/140/0.blob",
+      "removed_hash_bytes": 2444,
+      "shared_hash_calls": [
+        {
+          "offset": 141,
+          "target": 18446744072422713808
+        },
+        {
+          "offset": 3068,
+          "target": 18446744072422713808
+        },
+        {
+          "offset": 9917,
+          "target": 18446744072422713808
+        },
+        {
+          "offset": 13737,
+          "target": 18446744072422713808
+        },
+        {
+          "offset": 17808,
+          "target": 18446744072422713808
+        },
+        {
+          "offset": 24166,
+          "target": 18446744072422713808
+        },
+        {
+          "offset": 28103,
+          "target": 18446744072422713808
+        },
+        {
+          "offset": 32040,
+          "target": 18446744072422713808
+        },
+        {
+          "offset": 36008,
+          "target": 18446744072422713808
+        }
+      ],
+      "symbol": "perf_unwind_v8",
+      "ranges": [
+        {
+          "bytes": 67,
+          "end": 36863,
+          "piece": "runtime_array",
+          "start": 36796
+        },
+        {
+          "bytes": 326,
+          "end": 37189,
+          "piece": "probe_read",
+          "start": 36863
+        },
+        {
+          "bytes": 330,
+          "end": 37519,
+          "piece": "lpm_lookup",
+          "start": 37189
+        }
+      ],
+      "appended_bytes_by_piece": {
+        "runtime_array": 67,
+        "probe_read": 326,
+        "lpm_lookup": 330
+      },
+      "remaining_payload_bytes": 36796
+    }
+  ],
+  "scope": "Exact appended routine bytes in retained-plan host replay; remaining payload includes original code and per-site transformations. Not an isolated per-call gain or a new kernel installation."
+}
