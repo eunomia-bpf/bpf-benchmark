@@ -151,11 +151,10 @@ upstream-cel-b: compiler
 	date -u +%FT%TZ > $(OUTPUT)/cel-b-finished
 
 upstream-cel-stock:
-	$(CC) -O2 -Wall -Wextra -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include $(ROOT)/kprog/test/context_table_stock.c $(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -o $(BUILD)/cel-stock-loader
-	install -d $(OUTPUT)/inputs $(OUTPUT)/stock
-	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c $(CPUS) prlimit --as=8589934592 -- vng --run $(KERNEL)/arch/x86/boot/bzImage --cwd $(ROOT) --rodir $(OUTPUT)/inputs=$(BUILD) --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/perf-context-lto.mk guest-upstream-cel-stock OUTPUT=$(OUTPUT)'
+	$(MAKE) -r -f $(ROOT)/kprog/test/native-relocations.mk /var/tmp/kprog-tmp/perf/scheduled-table/stock-client CXX=$(CXX)
+	install -d $(OUTPUT)/inputs $(OUTPUT)/stock $(OUTPUT)/client
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c $(CPUS) prlimit --as=8589934592 -- vng --run $(KERNEL)/arch/x86/boot/bzImage --cwd $(ROOT) --rodir $(OUTPUT)/inputs=$(BUILD) --rodir $(OUTPUT)/client=/var/tmp/kprog-tmp/perf/scheduled-table --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/perf-context-lto.mk guest-upstream-cel-stock OUTPUT=$(OUTPUT)'
 	date -u +%FT%TZ > $(OUTPUT)/cel-stock-finished
 
 guest-upstream-cel-stock:
-	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
-	for object in $(OUTPUT)/inputs/cel-*.bpf.o; do name=$$(basename "$$object" .bpf.o); $(OUTPUT)/inputs/cel-stock-loader "$$object" trusted_x86_x86_sim_xdp $(OUTPUT)/stock/$$name.verifier.log > $(OUTPUT)/stock/$$name.json; done
+	for object in $(OUTPUT)/inputs/cel-*.bpf.o; do name=$$(basename "$$object" .bpf.o); $(OUTPUT)/client/stock-client "$$object" trusted_x86_x86_sim_xdp $(OUTPUT)/stock/$$name.verifier.log > $(OUTPUT)/stock/$$name.json; done

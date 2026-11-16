@@ -11,7 +11,9 @@
   "stock_accepted": false,
   "stock_failure_stage": "libbpf external ksym resolution before verifier",
   "error": "kprog_unspecified_input not found in kernel BTF",
-  "cause": "Diagnostic guest omitted the existing verified-module input kfunc provider.",
-  "followup": "Load the same existing verified module before stock B load; retry the exact existing B without recompilation.",
-  "scope": "Retained upstream CEL fixture, not whole Tetragon installation or execution."
+  "cause": "Stock compilation expresses unspecified inputs as an extern array-map value. Plain libbpf loading misses the production trusted-map relocation; this is not a kernel/module kfunc.",
+  "followup": "Use existing scheduled_table_stock.cpp client, which creates the private array map and invokes production relocate_trusted_proof before stock loading; same B, no recompilation.",
+  "scope": "Retained upstream CEL fixture, not whole Tetragon installation or execution.",
+  "initial_cause": "Diagnostic guest omitted the existing verified-module input kfunc provider.",
+  "correction_recorded_at": "2026-11-16T14:07:17Z"
 }
