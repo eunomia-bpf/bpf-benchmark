@@ -531,4 +531,99 @@ theorem gpr_read_prefix (i : Fin 31) (b cb vb tb kb : CC.Block)
     CC.Mptr, CC.Archi.ptr64, CC.tptr, CC.sizeof, CC.tuchar, CC.tint, CC.tuint, CC.tlong, CC.tulong,
     CC.emptyEnv, CC.E0, CC.Eapp, cells, cellSlot, tags, tagSlot, cell, kind, valueCast]
 
+private theorem read_return_type : readHandler.fn_return = CC.tulong := rfl
+
+private theorem read_inert_tail (m : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
+    (value : CC.Val) (tag : BitVec 8)
+    (valueRead : le.get Arm64Program.___a64_read_value = some value)
+    (tagRead : le.get Arm64Program.___a64_read_tag = some (.Vint (tag.setWidth 32)))
+    (hs : tag ≠ 4) (hr : tag ≠ 10)
+    (valueCast : CC.Cop.semCast value CC.tulong CC.tulong m = some value) :
+    steps ge 18 (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m) =
+      some (CC.E0, .Returnstate value (CC.callCont k) m) ∧
+    InternalPath ge 18 (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m) := by
+  have notStack : tag.setWidth 32 ≠ (4#32) := by
+    intro h; apply hs
+    simpa using congrArg (fun x : BitVec 32 => x.setWidth 8) h
+  have notReturn : tag.setWidth 32 ≠ (10#32) := by
+    intro h; apply hr
+    simpa using congrArg (fun x : BitVec 32 => x.setWidth 8) h
+  have empty : (CC.PTree.empty : CC.Env).elements = [] := rfl
+  simp only [CC.Cop.semCast, CC.Cop.classifyCast, CC.tulong, CC.Archi.ptr64,
+    ↓reduceIte] at valueCast
+  simp +decide [steps, InternalPath, InternalState, readParts, readCont,
+    step_seq, step_loop, step_skip_seq, step_skip_loop, step_break_loop, step_set, step_if,
+    step_return, read_return_type, CC.PTree.gso, CC.doEvalExpr, CC.typeof,
+    CC.typeconv, CC.removeAttributes, CC.tattr,
+    CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp, CC.Cop.semBinarith,
+    CC.Cop.classifyBinarith, CC.Cop.binarithType, CC.Cop.semCast, CC.Cop.classifyCast,
+    CC.Cop.castIntInt, CC.Cop.boolVal, CC.Cop.classifyBool,
+    CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse, CC.Integers.Int.cmpu, CC.Integers.MI.cmpu,
+    CC.Integers.Int.eq, CC.Integers.MI.eq, CC.Integers.Int.zero, CC.Integers.Int.one,
+    CC.Integers.MI.zero, CC.Integers.MI.one, CC.Integers.Int.repr, CC.Integers.MI.repr,
+    CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext, read_tag_mask,
+    CC.tuchar, CC.tint, CC.tuint, CC.tulong, CC.Archi.ptr64,
+    CC.blocksOfEnv, CC.Mem.freeList, CC.emptyEnv, CC.E0, CC.Eapp,
+    valueRead, tagRead, valueCast, notStack, notReturn, empty]
+
+/-- The complete exported combined reader returns the same scalar or bound
+pointer for every non-relative tag. It executes 73 internal transitions and
+preserves all memory, without any cache/provider premise. -/
+theorem gpr_read_nonrelative (addresses : Arm64Registers.PointerOrigins)
+    (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs) (i : Fin 31)
+    (m : CC.Mem) (k : CC.Cont) (value : CC.Val) (raw : BitVec 64) (tag : BitVec 8)
+    (observed : Arm64EntryMemory.gpr frontier m (.Vptr b ofs) i.val =
+      some (value, .Vint (tag.setWidth 32)))
+    (represented : Arm64Registers.ValueRep addresses value raw)
+    (notStack : tag ≠ 4) (notReturn : tag ≠ 10) :
+    InternalRun ge 73 (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
+      [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m)
+      (.Returnstate value (CC.callCont k) m) := by
+  have valueCast : CC.Cop.semCast value CC.tulong CC.tulong m = some value := by
+    cases value <;> try contradiction
+    all_goals rfl
+  obtain ⟨cb, co, vb, vo, tb, to, kb, ko, cells, slot, tags, tagSlot, cell, kind⟩ :=
+    Arm64EntryMemory.gpr_loads observed
+  have cellsLoad := field_load frontier b ofs m _ 0 _ layouts.2.2.1 cells
+  simp only [offset_zero] at cellsLoad
+  have beforeCall := gpr_read_prefix i b cb vb tb kb ofs co vo to ko m k value tag
+    cellsLoad slot
+    (field_load frontier b ofs m _ 8 _ layouts.2.2.2.1 tags) tagSlot cell kind valueCast
+  have valueRead : (gprReadTemps (.Vptr b ofs) (.Vptr cb co) (.Vptr vb vo)
+      (.Vptr tb to) (.Vptr kb ko) value (BitVec.ofNat 64 i.val) tag).get
+      Arm64Program.___a64_read_value = some value := by
+    simp +decide [gprReadTemps, CC.PTree.gso]
+  have tagRead : (gprReadTemps (.Vptr b ofs) (.Vptr cb co) (.Vptr vb vo)
+      (.Vptr tb to) (.Vptr kb ko) value (BitVec.ofNat 64 i.val) tag).get
+      Arm64Program.___a64_read_tag = some (.Vint (tag.setWidth 32)) := by
+    simp +decide [gprReadTemps, CC.PTree.gso]
+  have afterRead := read_inert_tail m k _ value tag valueRead tagRead notStack notReturn valueCast
+  exact (internalRun_of_steps beforeCall.2 beforeCall.1).trans
+    (internalRun_of_steps afterRead.2 afterRead.1)
+
+/-- Every Kstop return of the actual combined reader has the represented M3
+materialized bits for the 254 non-relative tags. Undefined and unbound values
+remain outside ValueRep; this law supplies no native origin or cache binding. -/
+theorem gpr_read_return_corresponds (addresses : Arm64Registers.PointerOrigins)
+    (origins : Reference.Provenance.AArch64.Origins)
+    (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs) (i : Fin 31)
+    (m : CC.Mem) (value : CC.Val) (raw : BitVec 64) (tag : BitVec 8)
+    (observed : Arm64EntryMemory.gpr frontier m (.Vptr b ofs) i.val =
+      some (value, .Vint (tag.setWidth 32)))
+    (represented : Arm64Registers.ValueRep addresses value raw)
+    (notStack : tag ≠ 4) (notReturn : tag ≠ 10)
+    (trace : CC.Trace) (result : CC.Val) (after : CC.Mem)
+    (returned : CC.Star (CC.Step2 ge)
+      (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
+        [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] .Kstop m)
+      trace (.Returnstate result .Kstop after)) :
+    trace = CC.E0 ∧ after = m ∧ Arm64Registers.ValueRep addresses result
+      (Reference.Provenance.AArch64.materialize origins raw tag) := by
+  have run := gpr_read_nonrelative addresses frontier b ofs i m .Kstop value raw tag
+    observed represented notStack notReturn
+  obtain ⟨rfl, rfl, rfl⟩ := stopped_return run returned
+  refine ⟨rfl, rfl, ?_⟩
+  simpa only [Reference.Provenance.AArch64.materialize,
+    ite_eq_right notStack, ite_eq_right notReturn] using represented
+
 end KProgFormal.ClightRefinement.Arm64RegisterReads

@@ -1980,3 +1980,10 @@ both SP value views return the borrowed relative offset in 21. The SP tag
 branch returns STACK in 15 transitions with no memory-read premise. Their
 Kstop return laws preserve complete memory and retain the explicit native
 origin in the SP correspondence.
+
+The [combined-reader proof](results/m5-program-read/README.md) now completes the
+actual exported GPR `program_read` call for the 254 non-relative tags. Its
+55-transition read prefix and 18-transition materialization tail preserve the
+represented scalar or pointer and all memory. Every Kstop return has the M3
+materialized bits. STACK/RETURN caches, SP and producer/native-memory bindings
+remain open; these helper laws add no complete ISA-handler count.

@@ -1,3 +1,7 @@
 import KProgFormal.ClightRefinement.Arm64RegisterReads
 #print axioms KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_read_prefix
 #check KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_read_prefix
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_read_nonrelative
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_read_return_corresponds
+#check KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_read_nonrelative
+#check KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_read_return_corresponds
