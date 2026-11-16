@@ -3256,6 +3256,7 @@ void publish_cache_file(const std::filesystem::path &tmp,
 }
 
 #include "native_loader_entry_data.hpp"
+#include "native_loader_context_lto.hpp"
 
 LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
                                 const std::string &symbol_name,
@@ -4168,6 +4169,9 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     if (symbol_name.empty()) {
         symbol_name = load_prog_btf_symbol_name(options.original_prog_fd, prog_info);
     }
+#if defined(__x86_64__)
+    native_object_path = native_perf_context_object(native_object_path, symbol_name, prog_info.type);
+#endif
     const auto manifest_end = diagnostic_now();
     CompanionLoad companion =
         load_from_loaded_program_fd(

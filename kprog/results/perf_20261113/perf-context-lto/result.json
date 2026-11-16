@@ -1,0 +1,36 @@
+{
+  "time": "2026-11-16T06:53:42Z",
+  "before_mismatches": 256,
+  "after_mismatches": 0,
+  "loader_mismatches": 0,
+  "cases": 256,
+  "kernel": "099357174783",
+  "raw": "/workspaces/kprog-raw/perf/20261116-perf-context-lto",
+  "input": "native ELF .llvmbc from clang-18 cc1 with unchanged target flags",
+  "layout": "boot kernel BTF fields for bpf_perf_event_data, bpf_perf_event_data_kern and perf_sample_data",
+  "fields": [
+    "regs",
+    "sample_period",
+    "addr"
+  ],
+  "widths_bits": [
+    8,
+    16,
+    32,
+    64
+  ],
+  "partial_offsets": true,
+  "helper_receives_physical_context": true,
+  "non_perf_path_unchanged": true,
+  "cache_reuse": true,
+  "retained_otel": {
+    "input": "/workspaces/kprog-raw/perf/20261114-otel-original-bpf/build-evidence/native_stack_trace.bc",
+    "converted_loads": 10,
+    "native_entry_bytes": 4497,
+    "proof_bytes": 4745,
+    "relocations": 121,
+    "scope": "retained IR diagnostic, not current canonical P or an application run"
+  },
+  "whole_app_unwind_counters": "pending producer IR payload, publication and paired app counters",
+  "timing_claim": false
+}
