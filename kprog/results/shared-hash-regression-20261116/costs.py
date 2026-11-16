@@ -157,6 +157,19 @@ for phase in ['baseline', 'post_rejit']:
         result['phases'][phase]['workload_pps'] = [sum(
             int(re.findall(r'(\d+)pps\b', component['stdout'])[-1])
             for component in workload['components']) for workload in app[phase]['workloads']]
+    if case.startswith('otel-'):
+        series = []
+        for workload in app[phase]['workloads']:
+            languages = {}
+            for component in workload['components']:
+                match = re.search(r'ops=(\d+) elapsed_s=([0-9.]+)', component['stderr'])
+                if match:
+                    language = component['config']['language']
+                    row = languages.setdefault(language, dict(operations=0, ops_per_second=0))
+                    row['operations'] += int(match[1])
+                    row['ops_per_second'] += int(match[1]) / float(match[2])
+            series.append(languages)
+        result['phases'][phase]['integer_loop_workload_by_language'] = series
 (capture / 'costs.json').write_text(json.dumps(result, indent=2) + '\n')
 print(json.dumps(dict(case=case, run=str(run), status=result['status'], phases={
     name: {key: p[key] for key in ('calls', 'counter_ns_per_call', 'installed_bytes')}
