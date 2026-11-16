@@ -93,10 +93,10 @@ fn analyze(bytes: &[u8], base: u64, seeds: &HashSet<u64>) -> HashSet<u64> {
 mod tests {
     use super::*;
 
-    fn roundtrip(elf: &object::File, entry: &SymInfo, path: &std::path::Path) -> Result<RewriteResult> {
+    fn roundtrip(elf: &object::File, entry: &SymInfo, path: &PathBuf) -> Result<RewriteResult> {
         let included=discover_reachable(elf,entry)?;
         let empty=HashMap::new();
-        let proof=rewrite_x86(elf,entry,&included,&empty,&empty,&empty,&[],true,true,
+        let proof=rewrite_x86(elf,entry,&included,&empty,&empty,&HashMap::new(),&[],true,true,
                               None,None,None,None,false)?;
         write_proof_object(path,object::Architecture::X86_64,&entry.name,&proof.blob,&proof.proof_symbols,
             &proof.proof_relocs,&proof.proof_data_relocs,proof.callee_saved_mask)?;
@@ -104,7 +104,7 @@ mod tests {
         let elf=object::File::parse(bytes.as_slice())?;
         let entry=find_symbol_by_name(&elf,&entry.name)?;
         let included=discover_reachable(&elf,&entry)?;
-        rewrite_x86(&elf,&entry,&included,&empty,&empty,&empty,&[],false,true,
+        rewrite_x86(&elf,&entry,&included,&empty,&empty,&HashMap::new(),&[],false,true,
                     None,None,None,None,false)
     }
 
