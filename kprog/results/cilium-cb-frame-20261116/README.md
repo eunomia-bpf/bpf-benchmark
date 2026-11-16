@@ -56,3 +56,10 @@ verbose marker construction. A focused stream-contract fixture covers plain
 and tail stubs, including map FD zero; host compilation/result is recorded
 under the raw stub directory. New-kernel guest validation remains queued with
 the rest of item 1.
+
+Fallback source: 3821bf1dc; focused job wrapper: 00538bd84. Controller 1825962
+completed at 2026-11-16T17:57:58Z with exit 0 on CPUs 16–19. The three
+stream-contract cases and loader rebuild pass; stub/stub.json records the
+case count. The production linker CLI refresh also completed successfully.
+This establishes host construction/build coverage; the guest frame and
+packet checks remain separate pending work.

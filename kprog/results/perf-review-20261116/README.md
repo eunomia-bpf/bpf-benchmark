@@ -626,6 +626,14 @@ double-execution cause and no confirmed Cilium packet fix. Those remain open. Th
     or another optional compatibility path. This belongs with the pending
     frame/phase-1 correction after coordinator cleanup.
 
+    Source fix after cleanup: 3821bf1dc makes the registered fallback and
+    ordinary native entry share native_stub_program. Linked counter
+    relocations supply tail reachability as well as the original source fact.
+    The marker map remains live through program loading. Three host stream
+    cases, including FD zero, and the loader rebuild pass; receipt is
+    cilium-cb-frame-20261116. Kernel/image publication and guest tail-frame
+    checks remain pending alongside item 1.
+
 16. **Private-input pruning runs before later dead-store elimination exposes waste.**
 
     There is already a narrowly scoped removal pass; adding a second general
