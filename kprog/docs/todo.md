@@ -35,6 +35,10 @@
 
 - [x] P-SPECIALIZE-10K（9fc382606、cc83b5d48；本提交结果）：四种 10K 形状正常 B/实际栈帧完成，前端 11.6–26.3s、峰值 399–920MiB；B 328–200624B、帧 0–40B，详见 `perf_20261113/inline-families/scale-10k/`。旧同名 scalar/direct 70.47GiB/SIGKILL 的实际失败已能完成；不跨不同编译管线宣称独立加速比。100K 继续。
 
+**协调者 2026-11-16T18:24:20Z**：
+1. PERF 先查 OTel 在镜像 6641a7e1 上的退步：stats 关 0.801x（may29_ratio；样本 0.77、0.917、0.811），3a1906ab1 上是 1.021x；装进去的大小（304 503 B）和 14 个原生程序两次相同。两个镜像之间 OTel 相关的变化是 stage 里 perf-context 编译器换成当前源码（2294b0463、63547fcfe、0f5c55894、f45bb2485）。把每次调用拆成程序体、helper、map，逐个变化对比，找出慢在哪一处，按整类修。修完再接着 cb 偏移等原顺序。
+2. e4264fa35 在四份模块（含可信模块 kinsn/module/x86）的 map_ptr_query_write 里给 delete 新加了 -EOPNOTSUPP。运营者 11-16：“禁止加任何额外的 check”。协调者决定：delete 并进原有 update 分支的同一个判断（按 helper_id 选出 ops 指针，再用原来那一个空指针判断），检查条数回到修改前，用一个向前的提交，四份一起改。delete 绑定本身保留，它是设计第 5 步 LTO 的链接时绑定。
+
 **协调者 2026-11-16T18:20:15Z（审核 15Z 核实后的决定）**：
 1. 每次调用 20% 这个目标，光靠程序体快达不到：程序体只占每次调用 BPF 时间的一部分（BCC 9%、Tracee 12%、Tetragon 25%、Katran 38%），程序体就算快 1.57 倍，每次调用也只到 1.03–1.16 倍。PERF 每一项先把这个应用的每次调用时间拆成程序体、helper、map 三块，改完再拆一次，写进该项的结果。修的顺序在 17:2x 那一块的基础上调整为：(1) Cilium 路径：cb 偏移按唯一内核 BTF 生成，编译开关和配置取自 agent 自己生成的头文件（审核：vendor/bpf/Makefile 81–105 用 CILIUM_MAX_* 和示例配置头），重复保存寄存器一并去掉，再用 BPF_PROG_TEST_RUN 对比 cil_from_container；(2) map update/delete 链接时绑定到具体 ops；(3) bpf_probe_read 路径（Tracee、Tetragon 占 41–46%）内联成和 eBPF 一侧同语义的原生读；(4) 冻结的 BCC 配置进原生 IR LTO、ARRAY/LPM 调度链接时选定；(5) Tetragon CEL；(6) 其余审核项。
 2. 代码量“少一半”按每个应用装进去的原生 / JIT 跟踪，目标 ≤ 0.5；镜像 6641a7e1：Katran 0.77、Tracee 0.86、Tetragon 1.00、Cilium 1.26、BCC 1.57、OTel 1.82（kprog/results/cleanup-check-20261116）。每项修改带上装进去的大小。
