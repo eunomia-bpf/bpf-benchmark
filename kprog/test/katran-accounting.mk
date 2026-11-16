@@ -18,4 +18,4 @@ reference-lru-profile:
 REFERENCE_COMPARISON_ARGS ?=
 .PHONY: reference-comparison
 reference-comparison:
-	bash $(ROOT)/kprog/test/run_katran_reference_comparison.sh $(REFERENCE_COMPARISON_ARGS)
+	prlimit --as=103079215104 -- bash $(ROOT)/kprog/test/run_katran_reference_comparison.sh $(REFERENCE_COMPARISON_ARGS)
