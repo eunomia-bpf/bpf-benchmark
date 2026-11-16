@@ -754,3 +754,35 @@ double-execution cause and no confirmed Cilium packet fix. Those remain open. Th
     routines only with actual per-call/installed-byte evidence. This review
     supplies no isolated gain and does not assume byte-at-a-time copying:
     the dynamic implementation already uses32-byte then8-byte chunks.
+
+23. **Shared hash lookup follows the JIT's kernel target and postprocessing.**
+
+    Source crosswalk, 2026-11-16: the loader currently lives at
+    `kprog/libnativeloader/src/native_loader.cpp` during coordinator cleanup.
+    Its :1600–1607 resolves the existing kernel __htab_map_lookup_elem.
+    The shape cases and caller-side operations correspond as follows:
+
+    | Map shape | Native source | Sole kernel's JIT lookup generation |
+    |---|---|---|
+    | HASH | Loader :2757–2762; x86.rs:4047–4049 adds the value offset after a successful raw lookup | hashtab.c:774–786 calls __htab_map_lookup_elem and adds the same key-storage/rounded-key offset |
+    | LRU_HASH | Loader :2764–2770; x86.rs:4055–4062 checks and sets the reference byte before adding the value offset | hashtab.c:812–836 emits the raw call, reference-byte read/conditional write and value adjustment |
+    | PERCPU_HASH | Loader :2772–2783; x86.rs:4064–4071 loads the stored per-CPU pointer and adds this_cpu_off | hashtab.c:2409–2425 emits the raw call, pointer load and per-CPU conversion |
+    | HASH_OF_MAPS | Loader :2790–2795; x86.rs:4051–4053 loads the inner-map pointer from the adjusted value address | hashtab.c:2698–2715 emits the raw call, value adjustment and inner-pointer load |
+    | LRU_PERCPU_HASH | Loader :2785–2788 binds the complete htab_lru_percpu_map_lookup_elem | hashtab.c:2441–2450 marks the LRU reference and returns the current CPU's value |
+
+    `x86.rs:4079–4083` guards raw-result postprocessing with the returned
+    pointer's null test. Thus the source retains the LRU reference update
+    that the earlier May-linker output skipped at Katran's dynamic sites.
+    The raw kernel target itself performs hashing, bucket selection and
+    collision comparison (`hashtab.c:732–749`) for both paths.
+
+    This supports publishing the existing shared-kernel change f45bb2485:
+    it removes the repeated 2444-B custom hash routine while retaining the
+    kernel lookup algorithm and map-specific result operations. This is
+    source correspondence; the actual timed site's selected map identity,
+    installed-byte delta and per-call effect still require the existing
+    load facts and post-cleanup measurement. The same-kernel hashing work
+    remains in both arms, so the byte reduction alone establishes a size
+    improvement candidate, with the speed target still open. Known-map
+    update/delete binding and immutable configuration folding remain the
+    separate opportunities identified above.
