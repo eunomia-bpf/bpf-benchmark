@@ -773,7 +773,7 @@ native-first-check: $(DIRECT_RECOVERY_BUILD)/recovery
 
 native-first-kvm:
 	install -d "$(OUTPUT)" "$(OUTPUT)/inputs"
-	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 16-19 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 16-18 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
 		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(OUTPUT)" --rodir "$(OUTPUT)/inputs=$(DIRECT_RECOVERY_BUILD)" --overlay-rwdir /tmp \
 		--disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' \
 		--exec 'make -C kprog/libnativeloader guest-native-first OUTPUT=$(OUTPUT) DIRECT_RECOVERY_BUILD=$(OUTPUT)/inputs'

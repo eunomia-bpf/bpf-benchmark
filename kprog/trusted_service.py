@@ -182,12 +182,11 @@ def load_service_artifacts(args, worker, fd, request, actual, envelope, artifact
             try:
                 verified = load('verify', artifacts)
             except subprocess.CalledProcessError as error:
-                # Exit 2 identifies an actual BPF_PROG_LOAD verification
-                # failure. Map binding, transport and native errors propagate.
-                if error.returncode != 2:
-                    raise
-                failure = dict(stage='verification', error=str(error),
-                    returncode=error.returncode, stderr=error.stderr)
+                # BTF/ELF preparation may fail before BPF_PROG_LOAD. Record
+                # that failure too and try original P; its own binding,
+                # transport and native-load errors still propagate.
+                failure = dict(stage='verification' if error.returncode == 2 else 'verification-preparation',
+                    error=str(error), returncode=error.returncode, stderr=error.stderr)
             else:
                 (job/'checked-simulator-verification.json').write_text(json.dumps(verified, indent=2)+'\n')
         if failure is not None:

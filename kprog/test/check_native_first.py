@@ -34,12 +34,20 @@ def worker(case):
                 obj.write_bytes(data)
                 if case == 'native':
                     artifacts['symbol'] = 'missing_native_entry'
-            elif case == 'transport':
+            elif case == 'artifact':
                 artifacts['simulator_object'] += '.missing'
             return artifacts
         implementation.specialize = specialize
         return implementation
     service.adapter = adapter
+    if case == 'transport':
+        actual_run = service.subprocess.run
+        def invalid_capability(command, **kwargs):
+            if len(command) > 2 and str(command[1]) in {'verify', 'load-direct'}:
+                command = list(command)
+                command[2] = str((1 << 31) - 1)  # Real ioctl gets EBADF.
+            return actual_run(command, **kwargs)
+        service.subprocess.run = invalid_capability
     service.main()
 
 
@@ -48,7 +56,7 @@ def check(output, loader):
     base = Path('/workspaces/.agent-state/kprog-ck/verified-loader')
     real_popen = subprocess.Popen
     rows = []
-    for case in ('verification', 'generation', 'transport', 'native', 'accepted'):
+    for case in ('verification', 'generation', 'artifact', 'transport', 'native', 'accepted'):
         directory = output / case
         directory.mkdir(parents=True)
         args = SimpleNamespace(arch=1, endpoint=Path('/sys/kernel/debug/bpf_x86_native_lab/specializer'),
@@ -73,14 +81,14 @@ def check(output, loader):
                 assert record['status'] != 0 and 'execution_path' not in record, record
                 member = 'service/requests/' + Path(record['failure_archive']).name
                 with tarfile.open(fileobj=io.BytesIO(archive.extractfile(member).read())) as failed:
-                    assert ('request/load-direct.stderr' in failed.getnames()) == (case == 'native')
+                    assert 'request/load-direct.stderr' in failed.getnames()
             else:
                 assert record['status'] == 0 and record['prog_id'] > 0, record
                 assert record['execution_path'] == ('checked-sim-c' if case == 'accepted' else 'direct-native'), record
                 assert record['b_stock_passed'] == (case == 'accepted'), record
                 assert record['b_generated'] == (case != 'generation'), record
                 if case != 'accepted':
-                    assert record['simulator_failure']['stage'] == case, record
+                    assert record['simulator_failure']['stage'] == ('verification-preparation' if case == 'artifact' else case), record
         rows.append(dict(case=case, application_returncode=status, record=record))
         (output/'results.json').write_text(json.dumps(rows, indent=2)+'\n')
 
