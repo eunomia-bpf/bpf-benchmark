@@ -36,7 +36,9 @@
 - [x] P-SPECIALIZE-10K（9fc382606、cc83b5d48；本提交结果）：四种 10K 形状正常 B/实际栈帧完成，前端 11.6–26.3s、峰值 399–920MiB；B 328–200624B、帧 0–40B，详见 `perf_20261113/inline-families/scale-10k/`。旧同名 scalar/direct 70.47GiB/SIGKILL 的实际失败已能完成；不跨不同编译管线宣称独立加速比。100K 继续。
 
 **协调者 2026-11-16T20:20:01Z**：
-   PERF 2026-11-16T21:34:39Z：OTel pair完成，两例0/appOK；shared/copy native5286.145/5158.974ns，JIT4156.394/4095.347ns，installed303930/330869B。复制hash相对各自JIT的每调用收益仅1.00960x，额外26939B；11份runtime code除fallback匹配，30calls重定向，hot native unwinder/hotspot没有typed rawhash所以不变。生产shared路径保留；历史throughput退步非该小变化能解释。控制器1908860已结束、20-23及imageSH释放。按21:19下一项Katran逐样本变慢；冻结reji.py462-484只有跨三样本一对counter快照，逐样本ns/call未存，先分析pps/errors/duration与stats1 aggregate，不能从pps编造时间。
+   PERF 2026-11-16T21:38:49Z：按 21:19 已转 Katran decay，results/katran-decay-20261116 复现 stats-off 192946_405839。native worker2/3 占第一到第三样本 PPS 减少的 85.7%，worker1 只降 3.6%；JIT worker1 也降 45.4%，其余三 worker 上升。kernel duration 均 179.895–180.005s。先关注 per-worker 执行/queue/cache 状态，未认定原因；stats1 aggregate/同样逐 worker 曲线待 C 当前 Tracee 后的 Katran。未新开来宾、未改冻结入口或添加 recorder；逐样本 ns/call 从未保留，不能编造。
+
+   PERF 2026-11-16T21:34:39Z：OTel pair完成，两例0/appOK；shared/copy native5286.145/5158.974ns，JIT4156.394/4095.347ns，installed303930/330869B。复制hash相对各自JIT的每调用收益仅1.00960x，额外26939B；11份runtime code除fallback匹配，30calls重定向，hot native unwinder/hotspot没有typed rawhash所以不变。生产shared路径保留；历史throughput退步非该小变化能解释。控制器1908860已结束、20-23及imageSH释放。按21:19下一项Katran逐样本变慢；冻结 runner/libs/rejit.py:462-484只有跨三样本一对counter快照，逐样本ns/call未存，先分析pps/errors/duration与stats1 aggregate，不能从pps编造时间。
 
    PERF 2026-11-16T21:13:55Z：Katran copy210724_159080完成0/appOK；shared/copy native204.532/205.781ns/call、10546/12995B、2440796/2428858pps，JIT controls207.044/205.679ns。恢复复制hash并未恢复速度；真实安装六call改向、2444B routine除fallback rel32匹配。LRU caller/generic ops保留；此单样本比较不支持shared hash单独解释原始回归，原三样本逐步变慢仍开。OTel shared/copy控制器1908860继续跑，先读完该比较再继续lookup。
 
