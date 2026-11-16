@@ -1,0 +1,59 @@
+Recorded 2026-11-16T15:51:43Z
+Sole kernel 099357174783, static linked vmlinux; runtime alternatives/ftrace patching not captured.
+
+$ objdump -d --start-address=0xffffffff814b8a30 --stop-address=0xffffffff814b8a72 /workspaces/.agent-state/kprog-ck/build-x86/vmlinux
+
+/workspaces/.agent-state/kprog-ck/build-x86/vmlinux:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+ffffffff814b8a30 <.text+0x4b8a30>:
+ffffffff814b8a30:	e8 5b 71 dc ff       	call   0xffffffff8127fb90
+ffffffff814b8a35:	48 8b 47 20          	mov    0x20(%rdi),%rax
+ffffffff814b8a39:	48 8b 40 68          	mov    0x68(%rax),%rax
+ffffffff814b8a3d:	e9 3e a2 b5 00       	jmp    0xffffffff82012c80
+ffffffff814b8a42:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+ffffffff814b8a49:	00 00 00 00 
+ffffffff814b8a4d:	0f 1f 00             	nopl   (%rax)
+ffffffff814b8a50:	90                   	nop
+ffffffff814b8a51:	90                   	nop
+ffffffff814b8a52:	90                   	nop
+ffffffff814b8a53:	90                   	nop
+ffffffff814b8a54:	90                   	nop
+ffffffff814b8a55:	90                   	nop
+ffffffff814b8a56:	90                   	nop
+ffffffff814b8a57:	90                   	nop
+ffffffff814b8a58:	90                   	nop
+ffffffff814b8a59:	90                   	nop
+ffffffff814b8a5a:	90                   	nop
+ffffffff814b8a5b:	90                   	nop
+ffffffff814b8a5c:	90                   	nop
+ffffffff814b8a5d:	90                   	nop
+ffffffff814b8a5e:	90                   	nop
+ffffffff814b8a5f:	90                   	nop
+ffffffff814b8a60:	e8 2b 71 dc ff       	call   0xffffffff8127fb90
+ffffffff814b8a65:	48 8b 47 20          	mov    0x20(%rdi),%rax
+ffffffff814b8a69:	48 8b 40 70          	mov    0x70(%rax),%rax
+ffffffff814b8a6d:	e9 0e a2 b5 00       	jmp    0xffffffff82012c80
+
+$ objdump -d --start-address=0xffffffff82012c80 --stop-address=0xffffffff82012c8f /workspaces/.agent-state/kprog-ck/build-x86/vmlinux
+
+/workspaces/.agent-state/kprog-ck/build-x86/vmlinux:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+ffffffff82012c80 <.text+0x1012c80>:
+ffffffff82012c80:	e8 01 00 00 00       	call   0xffffffff82012c86
+ffffffff82012c85:	cc                   	int3
+ffffffff82012c86:	48 89 04 24          	mov    %rax,(%rsp)
+ffffffff82012c8a:	e9 21 0c 00 00       	jmp    0xffffffff820138b0
+
+System.map identities:
+ffffffff8127fb90 T __fentry__
+ffffffff814b8a30 T bpf_map_update_elem
+ffffffff814b8a60 T bpf_map_delete_elem
+ffffffff82012c80 T __pi___x86_indirect_thunk_rax
+ffffffff82012c80 T __x86_indirect_thunk_array
+ffffffff82012c80 T __x86_indirect_thunk_rax

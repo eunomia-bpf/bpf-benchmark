@@ -41,8 +41,9 @@ to the source read during this review; subsequent cleanup may move them.
    with the generic `bpf_map_update_elem` target. Lines 3126–3150 specialize
    only small ARRAY/PERCPU_ARRAY values; known HASH updates keep that generic
    target. `x86.rs:1579` emits a call to it. Kernel
-   `kernel/bpf/helpers.c:59` implements that wrapper with an RCU warning check
-   and an indirect `map->ops->map_update_elem` call (lines 62–63).
+   `kernel/bpf/helpers.c:59` contains an RCU warning check in source
+   and an indirect `map->ops->map_update_elem` call (lines 62–63). The warning
+   is compiled away in the sole kernel: see the machine-code refinement below.
 
    The eBPF side already removes this dispatch for a known map:
    `kernel/bpf/verifier.c:23944` patches directly to `ops->map_update_elem`.
@@ -166,7 +167,7 @@ to the source read during this review; subsequent cleanup may move them.
    | ARRAY/LPM type/shape dispatch | Per lookup | Avoid for an already-proven fixed map identity/shape. |
    | ARRAY bounds, LPM query prefix/empty tree, lookup NULL, LRU reference bit, tail count/empty program slot | Per lookup/tail call | These implement observable operation semantics. Verification of pointer/argument types alone does not make dynamic values valid/nonempty. Fold only facts already established for that call. |
    | ARRAY update flags at `x86.rs:4197–4200` | Per update | BPF_NOEXIST/BPF_EXIST/error semantics; constant flags can specialize, unknown flags cannot simply disappear. |
-   | Generic map wrapper RCU warning and operation dispatch | Per helper | Bypass via the same proven-map direct operation binding used by the stock verifier. |
+   | Generic map wrapper operation dispatch | Per helper | The source RCU warning is absent in the sole compiled kernel. Bind the proven map operation directly as the stock verifier does. |
    | Probe policy/fault handling | Per read | Dynamic semantics, with avoidable general-routine overhead as item 5. |
    | `include/linux/filter.h:707–720` stats accounting; `kernel/trace/bpf_trace.c:2079` recursion/RCU protection | Per event | Existing common kernel execution envelope, not a new native-only validation loop. |
 
@@ -308,3 +309,60 @@ The highest-value next source changes are leaner consistent frame saving, direct
 map-specific update/delete calls, and actual frozen-value LTO. Current data
 provide no isolated per-piece speedup, no half-size result, no proven tracing
 double-execution cause and no confirmed Cilium packet fix. Those remain open. The cb access displacement above is confirmed independently of that packet attribution.
+
+11. **Machine-code refinement of map dispatch, and the existing path to binding.**
+
+    The sole kernel's System.map identifies bpf_map_update_elem at
+    ffffffff814b8a30 and bpf_map_delete_elem at ffffffff814b8a60. The retained
+    static disassembly in `kernel-map-wrapper-disassembly.txt` shows each as
+    an __fentry__ site, two loads (map->ops at +0x20, then operation +0x68
+    or +0x70), and a jump to __x86_indirect_thunk_rax at ffffffff82012c80.
+    The source RCU warning is absent from both compiled wrappers; deleting its
+    source cannot improve their per-call cost in this kernel. DEBUG_LOCK_ALLOC
+    and PROVE_LOCKING are disabled. The thunk contains a call, return-address
+    store and return-thunk jump in this linked image. Runtime alternatives and
+    ftrace patching are not captured here, so these static bytes do not prove
+    an exact live mitigation cost or an active __fentry__ call.
+
+    The map-operation dispatch is present regardless of the source warning.
+    Stock verifier.c:23944–23949 already binds update/delete directly to the
+    actual map's operations. Select those same operations; HASH, LRU_HASH,
+    PERCPU_HASH and LRU_PERCPU_HASH do not share one update function
+    (`kernel/bpf/hashtab.c:2351`, :2373, :2554 and :2576). Their deletion
+    operations also differ for LRU versus ordinary hash maps. Hard-coding one
+    generic hash function would lose the actual map semantics.
+
+    Native-side identity machinery already exists: x86.rs:1154 calls
+    `x86_known_maps.rs:7–72`, whose result maps each native CALL's local offset
+    to the proven RDI map symbol (:38–42). It recognizes the actual map
+    relocation and register moves, clearing lost facts at control-flow
+    boundaries, clobbers and unknown memory loads. Lookup selection already
+    consumes that identity in x86.rs:106–129. Update at :1562 instead selects
+    by emission ordinal, and delete falls through to generic resolution.
+    Reuse the existing per-native-call fact for both; a genuinely dynamic
+    map can still require dynamic operation dispatch. No second ordinal
+    metadata scheme or runtime map-identity check is needed.
+
+12. **The register-mask field describes removed saves, not all registers used.**
+
+    `x86.rs:2849` starts the strip set from compiler pushes. At :2987–3003
+    the mask is built from that stripped/renamed set. A frame-pointer prologue
+    exits early at :2801–2806 to preserve its frame and therefore yields no
+    transferred saves. A request to preserve ABI similarly exits at :2836.
+    Kernel-mode proof input also preserves the already-extracted ABI at :1140.
+    This explains why mask zero can coexist with five compiler callee saves:
+    it does not mean P uses or clobbers no callee-saved registers.
+
+    The fixed kernel four-register push/pop pair itself is eight stack
+    operations and 14 bytes (`bpf_jit_comp.c:357–392`), before the native-C
+    frame. Reducing these duplicate outer saves is a static saving candidate,
+    with no per-call measurement yet. Preserve the compiler's native frame
+    and its R12/RBP needs unless the existing stripping transformation has
+    actually transferred them; changing only the mask interpretation is not
+    sufficient. The tail path's native cleanup, outer-frame pops and counter
+    slots must follow the resulting frame together. Partial outer masks also
+    change stack movement by eight-byte increments: preserve the compiler's
+    existing stack alignment and offsets. The old comment at x86.rs:2982–2986
+    assumes one save set replaces the other, whereas today's fixed-four
+    wrapper ignores that metadata. This is a simplification opportunity, not
+    evidence of the withdrawn current tail-pop bug.

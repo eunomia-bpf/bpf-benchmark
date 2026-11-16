@@ -593,5 +593,24 @@
     "data_end": {
       "finding": "Native recomputes data+(len-data_len); eBPF reads the already maintained bpf_skb_data_end pointer. No isolated speed measurement."
     }
+  },
+  "map_wrapper_machine_review": {
+    "recorded_at": "2026-11-16T15:51:43Z",
+    "kernel": "0993571747839a7e83c958dfea7ad777c9820ee5",
+    "disassembly": "kernel-map-wrapper-disassembly.txt",
+    "update_address": "0xffffffff814b8a30",
+    "delete_address": "0xffffffff814b8a60",
+    "ops_pointer_offset": 32,
+    "update_ops_offset": 104,
+    "delete_ops_offset": 112,
+    "compiled_rcu_warning_present": false,
+    "static_indirect_target": "__x86_indirect_thunk_rax",
+    "scope": "Static sole-kernel linked machine code. Runtime alternatives, ftrace state and isolated dispatch timing not captured."
+  },
+  "register_mask_review": {
+    "mask_meaning": "Saves stripped/renamed from entry, not all native register use",
+    "fixed_kernel_save_restore_operations": 8,
+    "fixed_kernel_save_restore_bytes": 14,
+    "speed_gain_measured": false
   }
 }
