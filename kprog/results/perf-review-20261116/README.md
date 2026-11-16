@@ -139,6 +139,40 @@ to the source read during this review; subsequent cleanup may move them.
    than a success-status branch after every load. The latter must fit the
    existing exception representation; it is not a license to drop recovery.
 
+   Retained fixed-size calls make one part of that overhead concrete.
+   The native copy loop at `x86_probe_read.rs:89–108` handles u64 chunks,
+   then individual bytes. The sole kernel's `mm/maccess.c:39–46` handles
+   u64, u32, u16 and u8 chunks; its configuration enables efficient unaligned
+   access (`build-x86/.config:842`). Successful kernel reads therefore have
+   the following source-load counts, with a native fault-status branch after
+   each load:
+
+   | Requested bytes | Native loads | Kernel loads |
+   |---|---|---|
+   | 2 | 2 byte loads | 1 u16 load |
+   | 4 | 4 byte loads | 1 u32 load |
+   | 6 | 6 byte loads | 1 u32 + 1 u16 load |
+   | 12 | 1 u64 + 4 byte loads | 1 u64 + 1 u32 load |
+
+   This occurs in retained application code, beyond a synthetic shape.
+   Replay 27 tcp_v4_connect_ret has size=2 calls at blob +0x99/+0xac and
+   size=4 calls at +0x131/+0x225, all targeting the general routine +0x2d6;
+   its byte-load/status loop is at +0x34d. Replay 21 sched_switch has size=4
+   calls including +0x7c/+0xf8/+0x153/+0x374 into +0x3b6, with its byte loop
+   at +0x42d. These are static retained sites, with dynamic branch frequency
+   still to measure. `small-probe-reads.json` records exact call bytes, target
+   offsets and artifact hashes.
+
+   Existing known-size facts can lower a two/four-byte read to one recoverable
+   operation, matching the kernel's width while retaining policy, fault
+   nesting and full-destination clearing on failure. General residual copying
+   can likewise use the kernel's u32/u16 widths. String reads have their own
+   NUL semantics and remain a separate case. The installed-byte/per-call trade
+   needs measurement: sched_switch contributes only 0.94% of baseline BCC
+   time in item 2, while sys_exit's retained reads are an eight-byte pointer
+   and a sixteen-byte string. This candidate addresses a concrete cost, with
+   the dominant sys_enter/sys_exit map/configuration work still pending.
+
 6. **LTO pieces: what the code buys, and what is actually measured.**
 
    | Piece | Source effect | Retained byte attribution / measured limit |

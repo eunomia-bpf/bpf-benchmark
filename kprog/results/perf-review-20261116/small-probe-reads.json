@@ -1,0 +1,86 @@
+{
+  "reviewed_at": "2026-11-16T16:48:38Z",
+  "scope": "Source and retained host machine code; dynamic frequency, current installed bytes and per-call effects remain to measure.",
+  "kernel_copy_source": "vendor/linux-framework/mm/maccess.c:39-46",
+  "native_copy_source": "kprog/x86/native_lab/native_link/src/x86_probe_read.rs:89-108",
+  "records": [
+    {
+      "app": "bcc",
+      "symbol": "sched_switch",
+      "retained_replay": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/21",
+      "blob_sha256": "b31756ed24fba4c63f4470140ef6af1f37814699ac826a6588b8080473345b8a",
+      "proof_sha256": "10e995011d1329fa25983d9a4b7ba7edadd8c994f9611c117fe5b8f95ac72269",
+      "sample_sites": [
+        {
+          "size": 4,
+          "immediate_and_call_offset": "0x77",
+          "immediate_and_call_bytes": "be04000000e835030000",
+          "call_offset": "0x7c",
+          "routine_target": "0x3b6"
+        },
+        {
+          "size": 4,
+          "immediate_and_call_offset": "0xf3",
+          "immediate_and_call_bytes": "be04000000e8b9020000",
+          "call_offset": "0xf8",
+          "routine_target": "0x3b6"
+        },
+        {
+          "size": 4,
+          "immediate_and_call_offset": "0x14e",
+          "immediate_and_call_bytes": "be04000000e85e020000",
+          "call_offset": "0x153",
+          "routine_target": "0x3b6"
+        },
+        {
+          "size": 4,
+          "immediate_and_call_offset": "0x36f",
+          "immediate_and_call_bytes": "be04000000e83d000000",
+          "call_offset": "0x374",
+          "routine_target": "0x3b6"
+        }
+      ],
+      "byte_loop_offset": "0x42d",
+      "byte_load_and_status_bytes": "0fb6064585db0f84"
+    },
+    {
+      "app": "bcc",
+      "symbol": "tcp_v4_connect_ret",
+      "retained_replay": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/27",
+      "blob_sha256": "84d2aa3293a37f88b44a2a076554fc83f0134cf9657f1085a39f70beda84825a",
+      "proof_sha256": "5e027e3c480fca93a4c18fcd743536882ddf312c28f838be17f384fa14063124",
+      "sample_sites": [
+        {
+          "size": 2,
+          "immediate_and_call_offset": "0x94",
+          "immediate_and_call_bytes": "be02000000e838020000",
+          "call_offset": "0x99",
+          "routine_target": "0x2d6"
+        },
+        {
+          "size": 2,
+          "immediate_and_call_offset": "0xa7",
+          "immediate_and_call_bytes": "be02000000e825020000",
+          "call_offset": "0xac",
+          "routine_target": "0x2d6"
+        },
+        {
+          "size": 4,
+          "immediate_and_call_offset": "0x12c",
+          "immediate_and_call_bytes": "be04000000e8a0010000",
+          "call_offset": "0x131",
+          "routine_target": "0x2d6"
+        },
+        {
+          "size": 4,
+          "immediate_and_call_offset": "0x220",
+          "immediate_and_call_bytes": "be04000000e8ac000000",
+          "call_offset": "0x225",
+          "routine_target": "0x2d6"
+        }
+      ],
+      "byte_loop_offset": "0x34d",
+      "byte_load_and_status_bytes": "0fb6064585db0f84"
+    }
+  ]
+}
