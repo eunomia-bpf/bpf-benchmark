@@ -88,3 +88,22 @@ aggregate and its build-tree units are untouched.
 Own-counter parity and the six-app host replay are still pending, so no timing
 claim follows from this. The image is still `d9e29630`, which predates this
 payload; a rebuild is what puts the IR and the tool into a guest.
+## Reproved on the rebuilt linker
+
+The payload's own proof markers ran at 08:10 against the release linker built at
+03:12, before PERF's numeric-helper-tail source (`152ca8054`) was compiled. To
+confirm the payload is not resting on a stale binary, every manifest entry that
+names a symbol was proved again with a linker built at 08:39 from current source:
+
+| app | entries with a symbol | prove |
+|---|---|---|
+| katran | 3 | 3/3 |
+| bcc | 26 | 26/26 |
+| cilium | 75 | 75/75 |
+| otelcol-ebpf-profiler | 24 | 24/24 |
+| tracee | 96 | 96/96 |
+| tetragon | 77 | 77/77 |
+
+301 of 301. The 54 entries across five apps that carry no `symbol` field are a
+pre-existing manifest shape — the old `tet-manifest-ab-20261116` manifest has
+the same 17 missing in tetragon alone — not a producer change.
