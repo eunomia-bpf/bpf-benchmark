@@ -103,6 +103,16 @@ if [[ $refresh_operation == --direct-recovery ]]; then
 fi
 
 if [[ $refresh_operation == --loader-only ]]; then
+    # Publish the B normalizer fixes with this loader refresh. The other
+    # installed compiler/context emitters retain their existing ABI.
+    refresh_b_build=/var/tmp/kprog-tmp/perf/context-loads-v2
+    refresh_b_base=/workspaces/.agent-state/kprog-ck/verified-compiler
+    make -r -f "$refresh_root/kprog/test/scalar-spill-precision.mk" context-build \
+        CONTEXT_BUILD="$refresh_b_build" OUTPUT="$refresh_output/b-compiler-build"
+    stat --printf='%s bytes %n\n' "$refresh_b_base/packet-bounds" > "$refresh_output/replaced-b-compiler.txt"
+    install -m 0755 "$refresh_b_build/packet-bounds" "$refresh_b_base/packet-bounds"
+    printf -- '- %s PERF loader publication: replaced the sole installed B normalizer with the current source build; compiler/context emitter ABI and raw data retained; build log %s.\n' \
+        "$(date -u +%FT%TZ)" "$refresh_output/b-compiler-build" >> "$refresh_root/kprog/docs/cleanup-log.md"
     sha256sum "$refresh_kernel/arch/x86/boot/bzImage" "$refresh_kernel/vmlinux" \
         "$refresh_kernel/.config" "$refresh_direct/bpf_x86_native_lab.ko" \
         /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko \
