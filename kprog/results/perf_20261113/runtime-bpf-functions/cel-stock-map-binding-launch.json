@@ -1,0 +1,35 @@
+{
+  "recorded_at": "2026-11-16T14:09:50Z",
+  "source_commit": "ba066e75f",
+  "same_b_retry": {
+    "controller_pid": 1538919,
+    "raw_directory": "/workspaces/kprog-raw/perf/20261116-generator-indirect-spills/stock-map-binding",
+    "status": "launched_pending",
+    "make_options": [
+      "-o",
+      "code-pointer-b"
+    ],
+    "client": "scheduled_table_stock.cpp using production relocate_trusted_proof",
+    "b_executable_bytes": 440
+  },
+  "four_body_batch": {
+    "controller_pid": 1538921,
+    "raw_directory": "/workspaces/kprog-raw/perf/20261116-upstream-cel-stock-current-retry1",
+    "status": "queued_pending",
+    "make_options": [
+      "-o",
+      "compiler"
+    ],
+    "scope": "Reuse current materializer; build sole canonical release linker under existing imageEX, then actual upstream CEL bodies through P/shared I/B and stock."
+  },
+  "earlier_queue": {
+    "controller_pid": 1537440,
+    "children": [
+      1537443,
+      1537444
+    ],
+    "stopped_before_linker_build": true,
+    "reason": "Make had parsed the older guest loader recipe. Exact own PIDs stopped; logs preserved."
+  },
+  "scope": "Functional diagnostics only; original input semantics and current timing image unchanged. No stock acceptance or app/performance claim."
+}
