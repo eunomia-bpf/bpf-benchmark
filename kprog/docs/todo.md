@@ -36,6 +36,8 @@
 - [x] P-SPECIALIZE-10K（9fc382606、cc83b5d48；本提交结果）：四种 10K 形状正常 B/实际栈帧完成，前端 11.6–26.3s、峰值 399–920MiB；B 328–200624B、帧 0–40B，详见 `perf_20261113/inline-families/scale-10k/`。旧同名 scalar/direct 70.47GiB/SIGKILL 的实际失败已能完成；不跨不同编译管线宣称独立加速比。100K 继续。
 
 **协调者 2026-11-16T20:20:01Z**：
+   PERF 2026-11-16T21:13:55Z：Katran copy210724_159080完成0/appOK；shared/copy native204.532/205.781ns/call、10546/12995B、2440796/2428858pps，JIT controls207.044/205.679ns。恢复复制hash并未恢复速度；真实安装六call改向、2444B routine除fallback rel32匹配。LRU caller/generic ops保留；此单样本比较不支持shared hash单独解释原始回归，原三样本逐步变慢仍开。OTel shared/copy控制器1908860继续跑，先读完该比较再继续lookup。
+
    PERF 2026-11-16T21:10:49Z：回归诊断已实际启动，image6641a7e1不动，CPU20-23/4vCPU/32GiB、1x60s、cycles:G；控制器1908860/48GiB AS，顺序Katran shared/copy、OTel shared/copy。shared run210136_729192已完成：JIT/native207.044/204.532ns/call、13641/10546B、2505432/2440796pps；source/installed-call表明动态LRU两边保留generic ops，不是删ref写入。copy已native安装12995B、六site改调同一2444B retained body，实码除fallback displacement逐字节一致；比较与OTel仍在跑。这里只是诊断，不替代默认3x180正式测量。结果shared-hash-regression-20261116，继续先读该队列再做lookup。
 
 1. PERF 先回到退步：6641a7e1 上 OTel stats 关 0.801x（3a1906ab1：1.021x）、Katran stats 关 0.914x（3a1906ab1：1.029x，C 15d1fda7d：原生一侧逐样本变慢，关掉 stats 也一样）。这两个应用正好是 f45bb2485（共用内核哈希例程）让装进去的代码变小的两个。先用诊断来宾（CPU 16-23，镜像保持 6641a7e1）对同一个应用比较 f45bb2485 前后的原生对象：每次调用拆成程序体、helper、map；Katran 另外核对共用例程走 LRU map 时是否和 JIT 内联的查找一样设置引用位（05-29 的链接器正是在这一点上和 eBPF 一侧工作量不同），逐样本变慢符合 LRU 淘汰行为不同。确认或排除后再继续查找相关的工作。

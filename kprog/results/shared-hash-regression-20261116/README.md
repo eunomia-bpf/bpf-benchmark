@@ -97,3 +97,35 @@ through generic operations in this case. It does not measure eviction patterns
 or dynamic branch frequency. The copied case and both OTel cases remain queued.
 All exact per-program calls/counters and ownership caveats are in
 katran-shared.costs.json; actual loader facts are in katran-shared.link-plan.json.
+
+Katran pair completed
+
+The copied case x86_kvm_corpus_20261116_210724_159080 also completes with app
+status ok and controller exit zero. Six calls are redirected; the installed
+routine matches all retained bytes except its fallback-call displacement.
+
+| Measure | Shared case | Copied case |
+|---|---:|---:|
+| JIT counter ns/call | 207.044 | 205.679 |
+| Native counter ns/call | 204.532 | 205.781 |
+| JIT/native per-call ratio | 1.01228x | 0.99951x |
+| JIT packets/s | 2505432 | 2510395 |
+| Native packets/s | 2440796 | 2428858 |
+| Installed native bytes | 10546 | 12995 |
+| Native remaining-text cycles/call | 211.142 | 207.567 |
+| Native copied-hash text cycles/call | 0 | 68.560 |
+| Native ARRAY-dispatch text cycles/call | 3.360 | 4.037 |
+| Native LPM-dispatch text cycles/call | 2.500 | 2.702 |
+| Native external hash root cycles/app call | 155.885 | 97.009 |
+
+Restoring the copied routine recovers no per-call speed in this diagnostic;
+native counter time is about 0.6% higher, at 2449 additional bytes. The profile
+shows hash work moving from external kernel roots into copied program text.
+The roots lack exclusive ownership, so their sums are not an exact map-cost
+partition. The source/installed-call evidence and this result do not support
+removed LRU marking or the shared routine alone as sufficient explanations of
+the reported Katran regression. Each case has one sample, separate guest/map
+seeds, and the copy adds an entry jump/placement change. The original three-
+sample slowdown remains an observation to explain; this pair is not its exact
+historical image comparison. OTel shared/copy remains running under controller
+1908860; analyze those cases before returning to lookup optimization.
