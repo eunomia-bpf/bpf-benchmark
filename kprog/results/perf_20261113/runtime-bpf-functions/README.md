@@ -122,3 +122,17 @@ package staging now includes kprog-bpf-callee-ir; publication remains deferred
 while the current round holds imageSH. Generated body facts participate in both
 P and B through the same entry proof/request; cache identity also includes the
 companion compiler when present.
+
+
+2026-11-16T11:54:25Z: 3bce4215f tests the actual unmodified Tetragon celbpf.CompileFn
+implementation through the native runtime compiler. Nineteen vectors over
+four expressions pass native execution and entry proof extraction: uint64
+and uint32 comparison, signed int32 argument equality and signed arithmetic,
+including 32/64-bit boundary values. Argument offsets/data follow upstream's
+own DummyMsg layout, and no application source was edited. Code is generated
+by the upstream Go compiler, rather than constructed BPF instruction fixtures.
+This strengthens source/ABI coverage but does not claim actual app startup,
+stock verification of the generated simulator B, or runtime performance.
+Raw Go/compiler/native/proof logs and build archive are retained in
+/workspaces/kprog-raw/perf/20261116-upstream-cel; compact report and exact input
+bodies/values are committed here. Job 1494179 is terminal.

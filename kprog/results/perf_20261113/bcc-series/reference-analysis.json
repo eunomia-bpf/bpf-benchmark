@@ -1,0 +1,2248 @@
+{
+  "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_105138_635552",
+  "status": "ok",
+  "error": "",
+  "phases": {
+    "baseline": [
+      {
+        "metrics": {
+          "syscall": {
+            "ops": 514.0,
+            "seconds": 180.02,
+            "user_seconds": 0.02,
+            "system_seconds": 0.0,
+            "wall_ops_per_second": 2.86,
+            "cpu_ops_per_second": 22817.06,
+            "cpu_seconds": 0.02
+          },
+          "cap": {
+            "ops": 63493233.0,
+            "seconds": 180.0,
+            "user_seconds": 16.5,
+            "system_seconds": 149.87,
+            "wall_ops_per_second": 352740.18,
+            "cpu_ops_per_second": 381649.39,
+            "cpu_seconds": 166.37
+          },
+          "set": {
+            "ops": 4955654.0,
+            "seconds": 180.0,
+            "user_seconds": 12.6,
+            "system_seconds": 156.31,
+            "wall_ops_per_second": 27531.41,
+            "cpu_ops_per_second": 29339.47,
+            "cpu_seconds": 168.91
+          },
+          "sockfd": {
+            "ops": 31688920.0,
+            "seconds": 180.0,
+            "user_seconds": 7.56,
+            "system_seconds": 171.46,
+            "wall_ops_per_second": 176049.01,
+            "cpu_ops_per_second": 177009.98,
+            "cpu_seconds": 179.02
+          }
+        },
+        "total_wall_ops_per_second": 556323.46
+      },
+      {
+        "metrics": {
+          "syscall": {
+            "ops": 514.0,
+            "seconds": 183.27,
+            "user_seconds": 0.02,
+            "system_seconds": 0.01,
+            "wall_ops_per_second": 2.8,
+            "cpu_ops_per_second": 18609.7,
+            "cpu_seconds": 0.03
+          },
+          "cap": {
+            "ops": 66050747.0,
+            "seconds": 180.0,
+            "user_seconds": 15.93,
+            "system_seconds": 156.43,
+            "wall_ops_per_second": 366948.58,
+            "cpu_ops_per_second": 383219.54,
+            "cpu_seconds": 172.36
+          },
+          "set": {
+            "ops": 5057079.0,
+            "seconds": 180.0,
+            "user_seconds": 12.7,
+            "system_seconds": 160.23,
+            "wall_ops_per_second": 28094.78,
+            "cpu_ops_per_second": 29243.63,
+            "cpu_seconds": 172.92999999999998
+          },
+          "sockfd": {
+            "ops": 33052915.0,
+            "seconds": 180.0,
+            "user_seconds": 7.54,
+            "system_seconds": 179.41,
+            "wall_ops_per_second": 183626.14,
+            "cpu_ops_per_second": 176798.19,
+            "cpu_seconds": 186.95
+          }
+        },
+        "total_wall_ops_per_second": 578672.3
+      },
+      {
+        "metrics": {
+          "syscall": {
+            "ops": 514.0,
+            "seconds": 181.04,
+            "user_seconds": 0.02,
+            "system_seconds": 0.01,
+            "wall_ops_per_second": 2.84,
+            "cpu_ops_per_second": 15912.82,
+            "cpu_seconds": 0.03
+          },
+          "cap": {
+            "ops": 64900480.0,
+            "seconds": 180.0,
+            "user_seconds": 16.34,
+            "system_seconds": 154.18,
+            "wall_ops_per_second": 360556.41,
+            "cpu_ops_per_second": 380604.77,
+            "cpu_seconds": 170.52
+          },
+          "set": {
+            "ops": 5007496.0,
+            "seconds": 180.0,
+            "user_seconds": 12.12,
+            "system_seconds": 159.05,
+            "wall_ops_per_second": 27819.4,
+            "cpu_ops_per_second": 29255.19,
+            "cpu_seconds": 171.17000000000002
+          },
+          "sockfd": {
+            "ops": 31928075.0,
+            "seconds": 180.0,
+            "user_seconds": 7.02,
+            "system_seconds": 170.43,
+            "wall_ops_per_second": 177377.42,
+            "cpu_ops_per_second": 179922.56,
+            "cpu_seconds": 177.45000000000002
+          }
+        },
+        "total_wall_ops_per_second": 565756.07
+      }
+    ],
+    "post_rejit": [
+      {
+        "metrics": {
+          "syscall": {
+            "ops": 514.0,
+            "seconds": 181.7,
+            "user_seconds": 0.03,
+            "system_seconds": 0.02,
+            "wall_ops_per_second": 2.83,
+            "cpu_ops_per_second": 10388.04,
+            "cpu_seconds": 0.05
+          },
+          "cap": {
+            "ops": 64482338.0,
+            "seconds": 180.0,
+            "user_seconds": 16.77,
+            "system_seconds": 151.09,
+            "wall_ops_per_second": 358235.21,
+            "cpu_ops_per_second": 384136.68,
+            "cpu_seconds": 167.86
+          },
+          "set": {
+            "ops": 5041313.0,
+            "seconds": 180.0,
+            "user_seconds": 12.03,
+            "system_seconds": 158.07,
+            "wall_ops_per_second": 28007.16,
+            "cpu_ops_per_second": 29638.07,
+            "cpu_seconds": 170.1
+          },
+          "sockfd": {
+            "ops": 31314898.0,
+            "seconds": 180.0,
+            "user_seconds": 6.7,
+            "system_seconds": 166.29,
+            "wall_ops_per_second": 173970.84,
+            "cpu_ops_per_second": 181021.32,
+            "cpu_seconds": 172.98999999999998
+          }
+        },
+        "total_wall_ops_per_second": 560216.04
+      },
+      {
+        "metrics": {
+          "syscall": {
+            "ops": 514.0,
+            "seconds": 180.03,
+            "user_seconds": 0.01,
+            "system_seconds": 0.01,
+            "wall_ops_per_second": 2.86,
+            "cpu_ops_per_second": 22857.65,
+            "cpu_seconds": 0.02
+          },
+          "cap": {
+            "ops": 63189740.0,
+            "seconds": 180.0,
+            "user_seconds": 16.06,
+            "system_seconds": 148.45,
+            "wall_ops_per_second": 351054.11,
+            "cpu_ops_per_second": 384119.94,
+            "cpu_seconds": 164.51
+          },
+          "set": {
+            "ops": 4935458.0,
+            "seconds": 180.0,
+            "user_seconds": 11.45,
+            "system_seconds": 157.03,
+            "wall_ops_per_second": 27419.2,
+            "cpu_ops_per_second": 29294.61,
+            "cpu_seconds": 168.48
+          },
+          "sockfd": {
+            "ops": 25275971.0,
+            "seconds": 180.0,
+            "user_seconds": 4.97,
+            "system_seconds": 131.14,
+            "wall_ops_per_second": 140420.01,
+            "cpu_ops_per_second": 185703.12,
+            "cpu_seconds": 136.10999999999999
+          }
+        },
+        "total_wall_ops_per_second": 518896.18
+      },
+      {
+        "metrics": {
+          "syscall": {
+            "ops": 514.0,
+            "seconds": 183.12,
+            "user_seconds": 0.01,
+            "system_seconds": 0.02,
+            "wall_ops_per_second": 2.81,
+            "cpu_ops_per_second": 15269.9,
+            "cpu_seconds": 0.03
+          },
+          "cap": {
+            "ops": 57198065.0,
+            "seconds": 180.0,
+            "user_seconds": 14.96,
+            "system_seconds": 135.89,
+            "wall_ops_per_second": 317767.02,
+            "cpu_ops_per_second": 379153.42,
+            "cpu_seconds": 150.85
+          },
+          "set": {
+            "ops": 4572483.0,
+            "seconds": 180.0,
+            "user_seconds": 10.79,
+            "system_seconds": 144.84,
+            "wall_ops_per_second": 25402.35,
+            "cpu_ops_per_second": 29381.12,
+            "cpu_seconds": 155.63
+          },
+          "sockfd": {
+            "ops": 25152039.0,
+            "seconds": 180.0,
+            "user_seconds": 4.95,
+            "system_seconds": 131.79,
+            "wall_ops_per_second": 139730.17,
+            "cpu_ops_per_second": 183943.1,
+            "cpu_seconds": 136.73999999999998
+          }
+        },
+        "total_wall_ops_per_second": 482902.35000000003
+      }
+    ]
+  },
+  "native_last_over_first": {
+    "syscall": {
+      "wall_ops_per_second": 0.9929328621908127,
+      "cpu_ops_per_second": 1.4699500579512592,
+      "cpu_seconds": 0.6
+    },
+    "cap": {
+      "wall_ops_per_second": 0.8870345826698609,
+      "cpu_ops_per_second": 0.9870273778593598,
+      "cpu_seconds": 0.8986655546288572
+    },
+    "set": {
+      "wall_ops_per_second": 0.9069948541730043,
+      "cpu_ops_per_second": 0.9913304071418955,
+      "cpu_seconds": 0.9149323927101705
+    },
+    "sockfd": {
+      "wall_ops_per_second": 0.803181556173437,
+      "cpu_ops_per_second": 1.016140529745336,
+      "cpu_seconds": 0.7904503150471125
+    }
+  },
+  "ratio_of_phase_median_total_wall_rate": 0.9171729788069265,
+  "replacement_count": 25,
+  "replacement_first_boot_seconds": 831.373238,
+  "replacement_last_boot_seconds": 831.470017,
+  "programs": {
+    "baseline": 25,
+    "post_rejit": 25
+  },
+  "scope": "Stats off; no per-program time or scheduler/steal attribution. Stress-ng CPU times include its own accounting and rounding.",
+  "stats_on_references": [
+    {
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_060435_731340",
+      "status": "ok",
+      "error": "",
+      "bpf_stats": true,
+      "samples": 3,
+      "workload_seconds": 180.0,
+      "programs": {
+        "baseline": [
+          {
+            "bytes_jited": 40,
+            "bytes_xlated": 48,
+            "id": 23,
+            "name": "fentry_vfs_read",
+            "run_cnt_delta": 1547996,
+            "run_time_ns_delta": 124630247,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 40,
+            "bytes_xlated": 48,
+            "id": 25,
+            "name": "fentry_vfs_writ",
+            "run_cnt_delta": 1733907,
+            "run_time_ns_delta": 139020396,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 40,
+            "bytes_xlated": 48,
+            "id": 27,
+            "name": "fentry_vfs_fsyn",
+            "run_cnt_delta": 141,
+            "run_time_ns_delta": 13121,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 40,
+            "bytes_xlated": 48,
+            "id": 29,
+            "name": "fentry_vfs_open",
+            "run_cnt_delta": 78509972,
+            "run_time_ns_delta": 3786241389,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 40,
+            "bytes_xlated": 48,
+            "id": 31,
+            "name": "fentry_vfs_crea",
+            "run_cnt_delta": 42,
+            "run_time_ns_delta": 3244,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 1501,
+            "bytes_xlated": 2240,
+            "id": 38,
+            "name": "inet_sock_set_s",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 121,
+            "bytes_xlated": 200,
+            "id": 44,
+            "name": "blk_account_io_",
+            "run_cnt_delta": 209,
+            "run_time_ns_delta": 83872,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 143,
+            "bytes_xlated": 232,
+            "id": 49,
+            "name": "kprobe__cap_cap",
+            "run_cnt_delta": 124320100,
+            "run_time_ns_delta": 8517596775,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 108,
+            "bytes_xlated": 168,
+            "id": 51,
+            "name": "sys_enter",
+            "run_cnt_delta": 2809617249,
+            "run_time_ns_delta": 240146630489,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 141,
+            "bytes_xlated": 240,
+            "id": 52,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 354,
+            "bytes_xlated": 648,
+            "id": 53,
+            "name": "block_rq_insert",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 110,
+            "bytes_xlated": 184,
+            "id": 54,
+            "name": "tcp_v4_connect",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 406,
+            "bytes_xlated": 656,
+            "id": 58,
+            "name": "sys_exit",
+            "run_cnt_delta": 2809617254,
+            "run_time_ns_delta": 317709277557,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 383,
+            "bytes_xlated": 616,
+            "id": 60,
+            "name": "kprobe__cap_cap",
+            "run_cnt_delta": 124320098,
+            "run_time_ns_delta": 43284757722,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 493,
+            "bytes_xlated": 752,
+            "id": 61,
+            "name": "tcp_v4_connect_",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 440,
+            "bytes_xlated": 824,
+            "id": 62,
+            "name": "block_rq_issue",
+            "run_cnt_delta": 1732,
+            "run_time_ns_delta": 3283308,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 437,
+            "bytes_xlated": 712,
+            "id": 66,
+            "name": "block_rq_comple",
+            "run_cnt_delta": 1806,
+            "run_time_ns_delta": 31075560,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 141,
+            "bytes_xlated": 240,
+            "id": 68,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 78509522,
+            "run_time_ns_delta": 6199414134,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 121,
+            "bytes_xlated": 184,
+            "id": 69,
+            "name": "sched_wakeup",
+            "run_cnt_delta": 35181774,
+            "run_time_ns_delta": 3925392405,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 602,
+            "bytes_xlated": 792,
+            "id": 70,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 602,
+            "bytes_xlated": 792,
+            "id": 72,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 78509522,
+            "run_time_ns_delta": 128488785335,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 110,
+            "bytes_xlated": 184,
+            "id": 73,
+            "name": "tcp_v6_connect",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 121,
+            "bytes_xlated": 184,
+            "id": 74,
+            "name": "sched_wakeup_ne",
+            "run_cnt_delta": 129,
+            "run_time_ns_delta": 47190,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 496,
+            "bytes_xlated": 752,
+            "id": 75,
+            "name": "tcp_v6_connect_",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 935,
+            "bytes_xlated": 1632,
+            "id": 76,
+            "name": "sched_switch",
+            "run_cnt_delta": 70242816,
+            "run_time_ns_delta": 8716062141,
+            "type": "tracing"
+          }
+        ],
+        "post_rejit": [
+          {
+            "bytes_jited": 175,
+            "bytes_xlated": 16,
+            "id": 128,
+            "name": "kprobe__cap_cap",
+            "run_cnt_delta": 128915205,
+            "run_time_ns_delta": 8613824524,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 48,
+            "bytes_xlated": 16,
+            "id": 129,
+            "name": "fentry_vfs_read",
+            "run_cnt_delta": 2000879,
+            "run_time_ns_delta": 182397358,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 140,
+            "bytes_xlated": 16,
+            "id": 130,
+            "name": "tcp_v4_connect",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 153,
+            "bytes_xlated": 16,
+            "id": 131,
+            "name": "sys_enter",
+            "run_cnt_delta": 3174498794,
+            "run_time_ns_delta": 262454545249,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 4295,
+            "bytes_xlated": 16,
+            "id": 132,
+            "name": "inet_sock_set_s",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 159,
+            "bytes_xlated": 16,
+            "id": 142,
+            "name": "blk_account_io_",
+            "run_cnt_delta": 165,
+            "run_time_ns_delta": 44224,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 49,
+            "bytes_xlated": 16,
+            "id": 143,
+            "name": "fentry_vfs_writ",
+            "run_cnt_delta": 2090048,
+            "run_time_ns_delta": 185520436,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 3054,
+            "bytes_xlated": 16,
+            "id": 146,
+            "name": "kprobe__cap_cap",
+            "run_cnt_delta": 128915208,
+            "run_time_ns_delta": 42034892595,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 3443,
+            "bytes_xlated": 16,
+            "id": 148,
+            "name": "tcp_v4_connect_",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 3483,
+            "bytes_xlated": 16,
+            "id": 149,
+            "name": "sys_exit",
+            "run_cnt_delta": 3174498797,
+            "run_time_ns_delta": 280084586953,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 49,
+            "bytes_xlated": 16,
+            "id": 151,
+            "name": "fentry_vfs_fsyn",
+            "run_cnt_delta": 42,
+            "run_time_ns_delta": 5248,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 49,
+            "bytes_xlated": 16,
+            "id": 154,
+            "name": "fentry_vfs_open",
+            "run_cnt_delta": 107901719,
+            "run_time_ns_delta": 4317808265,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 140,
+            "bytes_xlated": 16,
+            "id": 155,
+            "name": "tcp_v6_connect",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 3102,
+            "bytes_xlated": 16,
+            "id": 157,
+            "name": "block_rq_insert",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 49,
+            "bytes_xlated": 16,
+            "id": 160,
+            "name": "fentry_vfs_crea",
+            "run_cnt_delta": 199,
+            "run_time_ns_delta": 17434,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 3490,
+            "bytes_xlated": 16,
+            "id": 161,
+            "name": "tcp_v6_connect_",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 3150,
+            "bytes_xlated": 16,
+            "id": 162,
+            "name": "block_rq_issue",
+            "run_cnt_delta": 423,
+            "run_time_ns_delta": 749611,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 3225,
+            "bytes_xlated": 16,
+            "id": 165,
+            "name": "block_rq_comple",
+            "run_cnt_delta": 447,
+            "run_time_ns_delta": 2527658,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 185,
+            "bytes_xlated": 16,
+            "id": 166,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 185,
+            "bytes_xlated": 16,
+            "id": 169,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 107900925,
+            "run_time_ns_delta": 6924280118,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 2991,
+            "bytes_xlated": 16,
+            "id": 171,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 160,
+            "bytes_xlated": 16,
+            "id": 173,
+            "name": "sched_wakeup",
+            "run_cnt_delta": 88247785,
+            "run_time_ns_delta": 7571847576,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 2991,
+            "bytes_xlated": 16,
+            "id": 174,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 107900925,
+            "run_time_ns_delta": 136962286430,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 160,
+            "bytes_xlated": 16,
+            "id": 178,
+            "name": "sched_wakeup_ne",
+            "run_cnt_delta": 122,
+            "run_time_ns_delta": 45274,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 3916,
+            "bytes_xlated": 16,
+            "id": 180,
+            "name": "sched_switch",
+            "run_cnt_delta": 176296084,
+            "run_time_ns_delta": 28004327041,
+            "type": "tracing"
+          }
+        ]
+      },
+      "name_groups": [
+        {
+          "type": "tracing",
+          "name": "fentry_vfs_read",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                23
+              ],
+              "calls": 1547996,
+              "time_ns": 124630247,
+              "ns_per_call": 80.51070351602976
+            },
+            "post_rejit": {
+              "program_ids": [
+                129
+              ],
+              "calls": 2000879,
+              "time_ns": 182397358,
+              "ns_per_call": 91.15861478880032
+            }
+          },
+          "native_over_baseline_calls": 1.2925608334905259,
+          "baseline_over_native_ns_per_call": 0.8831935818963459
+        },
+        {
+          "type": "tracing",
+          "name": "fentry_vfs_writ",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                25
+              ],
+              "calls": 1733907,
+              "time_ns": 139020396,
+              "ns_per_call": 80.17753893374905
+            },
+            "post_rejit": {
+              "program_ids": [
+                143
+              ],
+              "calls": 2090048,
+              "time_ns": 185520436,
+              "ns_per_call": 88.76372025905626
+            }
+          },
+          "native_over_baseline_calls": 1.2053979827061083,
+          "baseline_over_native_ns_per_call": 0.9032692489651346
+        },
+        {
+          "type": "tracing",
+          "name": "fentry_vfs_fsyn",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                27
+              ],
+              "calls": 141,
+              "time_ns": 13121,
+              "ns_per_call": 93.05673758865248
+            },
+            "post_rejit": {
+              "program_ids": [
+                151
+              ],
+              "calls": 42,
+              "time_ns": 5248,
+              "ns_per_call": 124.95238095238095
+            }
+          },
+          "native_over_baseline_calls": 0.2978723404255319,
+          "baseline_over_native_ns_per_call": 0.7447376102750389
+        },
+        {
+          "type": "tracing",
+          "name": "fentry_vfs_open",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                29
+              ],
+              "calls": 78509972,
+              "time_ns": 3786241389,
+              "ns_per_call": 48.22624811278751
+            },
+            "post_rejit": {
+              "program_ids": [
+                154
+              ],
+              "calls": 107901719,
+              "time_ns": 4317808265,
+              "ns_per_call": 40.01612119821743
+            }
+          },
+          "native_over_baseline_calls": 1.3743696023735685,
+          "baseline_over_native_ns_per_call": 1.2051704830136263
+        },
+        {
+          "type": "tracing",
+          "name": "fentry_vfs_crea",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                31
+              ],
+              "calls": 42,
+              "time_ns": 3244,
+              "ns_per_call": 77.23809523809524
+            },
+            "post_rejit": {
+              "program_ids": [
+                160
+              ],
+              "calls": 199,
+              "time_ns": 17434,
+              "ns_per_call": 87.60804020100502
+            }
+          },
+          "native_over_baseline_calls": 4.738095238095238,
+          "baseline_over_native_ns_per_call": 0.8816324969818145
+        },
+        {
+          "type": "tracepoint",
+          "name": "inet_sock_set_s",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                38
+              ],
+              "calls": 0,
+              "time_ns": 0,
+              "ns_per_call": null
+            },
+            "post_rejit": {
+              "program_ids": [
+                132
+              ],
+              "calls": 0,
+              "time_ns": 0,
+              "ns_per_call": null
+            }
+          },
+          "native_over_baseline_calls": null,
+          "baseline_over_native_ns_per_call": null
+        },
+        {
+          "type": "kprobe",
+          "name": "blk_account_io_",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                44
+              ],
+              "calls": 209,
+              "time_ns": 83872,
+              "ns_per_call": 401.30143540669854
+            },
+            "post_rejit": {
+              "program_ids": [
+                142
+              ],
+              "calls": 165,
+              "time_ns": 44224,
+              "ns_per_call": 268.0242424242424
+            }
+          },
+          "native_over_baseline_calls": 0.7894736842105263,
+          "baseline_over_native_ns_per_call": 1.4972579785208318
+        },
+        {
+          "type": "kprobe",
+          "name": "kprobe__cap_cap",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                49,
+                60
+              ],
+              "calls": 248640198,
+              "time_ns": 51802354497,
+              "ns_per_call": 208.3426369255063
+            },
+            "post_rejit": {
+              "program_ids": [
+                128,
+                146
+              ],
+              "calls": 257830413,
+              "time_ns": 50648717119,
+              "ns_per_call": 196.44198110561922
+            }
+          },
+          "native_over_baseline_calls": 1.0369619034811097,
+          "baseline_over_native_ns_per_call": 1.0605810211896027
+        },
+        {
+          "type": "tracepoint",
+          "name": "sys_enter",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                51
+              ],
+              "calls": 2809617249,
+              "time_ns": 240146630489,
+              "ns_per_call": 85.47307665286903
+            },
+            "post_rejit": {
+              "program_ids": [
+                131
+              ],
+              "calls": 3174498794,
+              "time_ns": 262454545249,
+              "ns_per_call": 82.67590012793686
+            }
+          },
+          "native_over_baseline_calls": 1.1298687730970718,
+          "baseline_over_native_ns_per_call": 1.0338330338176382
+        },
+        {
+          "type": "tracepoint",
+          "name": "tracepoint__sys",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                52,
+                68,
+                70,
+                72
+              ],
+              "calls": 157019044,
+              "time_ns": 134688199469,
+              "ns_per_call": 857.7825723419893
+            },
+            "post_rejit": {
+              "program_ids": [
+                166,
+                169,
+                171,
+                174
+              ],
+              "calls": 215801850,
+              "time_ns": 143886566548,
+              "ns_per_call": 666.75316522078
+            }
+          },
+          "native_over_baseline_calls": 1.374367366546952,
+          "baseline_over_native_ns_per_call": 1.2865069370281192
+        },
+        {
+          "type": "tracing",
+          "name": "block_rq_insert",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                53
+              ],
+              "calls": 0,
+              "time_ns": 0,
+              "ns_per_call": null
+            },
+            "post_rejit": {
+              "program_ids": [
+                157
+              ],
+              "calls": 0,
+              "time_ns": 0,
+              "ns_per_call": null
+            }
+          },
+          "native_over_baseline_calls": null,
+          "baseline_over_native_ns_per_call": null
+        },
+        {
+          "type": "kprobe",
+          "name": "tcp_v4_connect",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                54
+              ],
+              "calls": 0,
+              "time_ns": 0,
+              "ns_per_call": null
+            },
+            "post_rejit": {
+              "program_ids": [
+                130
+              ],
+              "calls": 0,
+              "time_ns": 0,
+              "ns_per_call": null
+            }
+          },
+          "native_over_baseline_calls": null,
+          "baseline_over_native_ns_per_call": null
+        },
+        {
+          "type": "tracepoint",
+          "name": "sys_exit",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                58
+              ],
+              "calls": 2809617254,
+              "time_ns": 317709277557,
+              "ns_per_call": 113.07920219548879
+            },
+            "post_rejit": {
+              "program_ids": [
+                149
+              ],
+              "calls": 3174498797,
+              "time_ns": 280084586953,
+              "ns_per_call": 88.22954578457822
+            }
+          },
+          "native_over_baseline_calls": 1.1298687721541163,
+          "baseline_over_native_ns_per_call": 1.2816477880503163
+        },
+        {
+          "type": "kprobe",
+          "name": "tcp_v4_connect_",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                61
+              ],
+              "calls": 0,
+              "time_ns": 0,
+              "ns_per_call": null
+            },
+            "post_rejit": {
+              "program_ids": [
+                148
+              ],
+              "calls": 0,
+              "time_ns": 0,
+              "ns_per_call": null
+            }
+          },
+          "native_over_baseline_calls": null,
+          "baseline_over_native_ns_per_call": null
+        },
+        {
+          "type": "tracing",
+          "name": "block_rq_issue",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                62
+              ],
+              "calls": 1732,
+              "time_ns": 3283308,
+              "ns_per_call": 1895.674364896074
+            },
+            "post_rejit": {
+              "program_ids": [
+                162
+              ],
+              "calls": 423,
+              "time_ns": 749611,
+              "ns_per_call": 1772.1300236406619
+            }
+          },
+          "native_over_baseline_calls": 0.24422632794457275,
+          "baseline_over_native_ns_per_call": 1.0697151674015446
+        },
+        {
+          "type": "tracing",
+          "name": "block_rq_comple",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                66
+              ],
+              "calls": 1806,
+              "time_ns": 31075560,
+              "ns_per_call": 17206.8438538206
+            },
+            "post_rejit": {
+              "program_ids": [
+                165
+              ],
+              "calls": 447,
+              "time_ns": 2527658,
+              "ns_per_call": 5654.715883668904
+            }
+          },
+          "native_over_baseline_calls": 0.24750830564784054,
+          "baseline_over_native_ns_per_call": 3.0429192567419356
+        },
+        {
+          "type": "tracing",
+          "name": "sched_wakeup",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                69
+              ],
+              "calls": 35181774,
+              "time_ns": 3925392405,
+              "ns_per_call": 111.5746012409721
+            },
+            "post_rejit": {
+              "program_ids": [
+                173
+              ],
+              "calls": 88247785,
+              "time_ns": 7571847576,
+              "ns_per_call": 85.80212609302319
+            }
+          },
+          "native_over_baseline_calls": 2.5083381241662233,
+          "baseline_over_native_ns_per_call": 1.3003710551415408
+        },
+        {
+          "type": "kprobe",
+          "name": "tcp_v6_connect",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                73
+              ],
+              "calls": 0,
+              "time_ns": 0,
+              "ns_per_call": null
+            },
+            "post_rejit": {
+              "program_ids": [
+                155
+              ],
+              "calls": 0,
+              "time_ns": 0,
+              "ns_per_call": null
+            }
+          },
+          "native_over_baseline_calls": null,
+          "baseline_over_native_ns_per_call": null
+        },
+        {
+          "type": "tracing",
+          "name": "sched_wakeup_ne",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                74
+              ],
+              "calls": 129,
+              "time_ns": 47190,
+              "ns_per_call": 365.8139534883721
+            },
+            "post_rejit": {
+              "program_ids": [
+                178
+              ],
+              "calls": 122,
+              "time_ns": 45274,
+              "ns_per_call": 371.0983606557377
+            }
+          },
+          "native_over_baseline_calls": 0.9457364341085271,
+          "baseline_over_native_ns_per_call": 0.9857600902412289
+        },
+        {
+          "type": "kprobe",
+          "name": "tcp_v6_connect_",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                75
+              ],
+              "calls": 0,
+              "time_ns": 0,
+              "ns_per_call": null
+            },
+            "post_rejit": {
+              "program_ids": [
+                161
+              ],
+              "calls": 0,
+              "time_ns": 0,
+              "ns_per_call": null
+            }
+          },
+          "native_over_baseline_calls": null,
+          "baseline_over_native_ns_per_call": null
+        },
+        {
+          "type": "tracing",
+          "name": "sched_switch",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                76
+              ],
+              "calls": 70242816,
+              "time_ns": 8716062141,
+              "ns_per_call": 124.08474826806489
+            },
+            "post_rejit": {
+              "program_ids": [
+                180
+              ],
+              "calls": 176296084,
+              "time_ns": 28004327041,
+              "ns_per_call": 158.84826483723825
+            }
+          },
+          "native_over_baseline_calls": 2.509809458664072,
+          "baseline_over_native_ns_per_call": 0.7811526830035359
+        }
+      ],
+      "name_scope": "Kernel names are truncated; equal type/name rows are groups, not unique bodies. All original program records are retained."
+    },
+    {
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261114_141724_941055",
+      "status": "ok",
+      "error": "",
+      "bpf_stats": true,
+      "samples": 3,
+      "workload_seconds": 180.0,
+      "programs": {
+        "baseline": [
+          {
+            "bytes_jited": 141,
+            "bytes_xlated": 240,
+            "id": 25,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 110,
+            "bytes_xlated": 184,
+            "id": 28,
+            "name": "tcp_v4_connect",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 141,
+            "bytes_xlated": 240,
+            "id": 29,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 164225287,
+            "run_time_ns_delta": 8253636641,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 602,
+            "bytes_xlated": 792,
+            "id": 31,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 493,
+            "bytes_xlated": 752,
+            "id": 33,
+            "name": "tcp_v4_connect_",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 602,
+            "bytes_xlated": 792,
+            "id": 34,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 164225287,
+            "run_time_ns_delta": 145499752721,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 110,
+            "bytes_xlated": 184,
+            "id": 35,
+            "name": "tcp_v6_connect",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 496,
+            "bytes_xlated": 752,
+            "id": 37,
+            "name": "tcp_v6_connect_",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 1501,
+            "bytes_xlated": 2240,
+            "id": 50,
+            "name": "inet_sock_set_s",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 40,
+            "bytes_xlated": 48,
+            "id": 51,
+            "name": "fentry_vfs_read",
+            "run_cnt_delta": 3121080,
+            "run_time_ns_delta": 175533151,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 40,
+            "bytes_xlated": 48,
+            "id": 53,
+            "name": "fentry_vfs_writ",
+            "run_cnt_delta": 3159044,
+            "run_time_ns_delta": 171652425,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 143,
+            "bytes_xlated": 232,
+            "id": 54,
+            "name": "kprobe__cap_cap",
+            "run_cnt_delta": 189266632,
+            "run_time_ns_delta": 10123816029,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 383,
+            "bytes_xlated": 616,
+            "id": 59,
+            "name": "kprobe__cap_cap",
+            "run_cnt_delta": 189266629,
+            "run_time_ns_delta": 43107562246,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 40,
+            "bytes_xlated": 48,
+            "id": 61,
+            "name": "fentry_vfs_fsyn",
+            "run_cnt_delta": 42,
+            "run_time_ns_delta": 2614,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 121,
+            "bytes_xlated": 200,
+            "id": 62,
+            "name": "blk_account_io_",
+            "run_cnt_delta": 149,
+            "run_time_ns_delta": 28001,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 121,
+            "bytes_xlated": 184,
+            "id": 63,
+            "name": "sched_wakeup",
+            "run_cnt_delta": 153007918,
+            "run_time_ns_delta": 9360887726,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 40,
+            "bytes_xlated": 48,
+            "id": 64,
+            "name": "fentry_vfs_open",
+            "run_cnt_delta": 164226234,
+            "run_time_ns_delta": 4216697766,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 121,
+            "bytes_xlated": 184,
+            "id": 68,
+            "name": "sched_wakeup_ne",
+            "run_cnt_delta": 125,
+            "run_time_ns_delta": 30046,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 40,
+            "bytes_xlated": 48,
+            "id": 69,
+            "name": "fentry_vfs_crea",
+            "run_cnt_delta": 271,
+            "run_time_ns_delta": 13120,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 354,
+            "bytes_xlated": 648,
+            "id": 70,
+            "name": "block_rq_insert",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 935,
+            "bytes_xlated": 1632,
+            "id": 71,
+            "name": "sched_switch",
+            "run_cnt_delta": 305781161,
+            "run_time_ns_delta": 23320653750,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 440,
+            "bytes_xlated": 824,
+            "id": 72,
+            "name": "block_rq_issue",
+            "run_cnt_delta": 413,
+            "run_time_ns_delta": 509533,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 437,
+            "bytes_xlated": 712,
+            "id": 73,
+            "name": "block_rq_comple",
+            "run_cnt_delta": 437,
+            "run_time_ns_delta": 1637892,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 108,
+            "bytes_xlated": 168,
+            "id": 75,
+            "name": "sys_enter",
+            "run_cnt_delta": 4783993255,
+            "run_time_ns_delta": 260577814916,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 406,
+            "bytes_xlated": 656,
+            "id": 77,
+            "name": "sys_exit",
+            "run_cnt_delta": 4783993263,
+            "run_time_ns_delta": 279679005690,
+            "type": "tracepoint"
+          }
+        ],
+        "post_rejit": [
+          {
+            "bytes_jited": 185,
+            "bytes_xlated": 16,
+            "id": 128,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 185,
+            "bytes_xlated": 16,
+            "id": 131,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 165142932,
+            "run_time_ns_delta": 7437152565,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 159,
+            "bytes_xlated": 16,
+            "id": 133,
+            "name": "blk_account_io_",
+            "run_cnt_delta": 155,
+            "run_time_ns_delta": 29559,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 48,
+            "bytes_xlated": 16,
+            "id": 136,
+            "name": "fentry_vfs_read",
+            "run_cnt_delta": 3141693,
+            "run_time_ns_delta": 208308553,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 311,
+            "bytes_xlated": 16,
+            "id": 137,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 140,
+            "bytes_xlated": 16,
+            "id": 140,
+            "name": "tcp_v4_connect",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 49,
+            "bytes_xlated": 16,
+            "id": 143,
+            "name": "fentry_vfs_writ",
+            "run_cnt_delta": 3176017,
+            "run_time_ns_delta": 194072133,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 175,
+            "bytes_xlated": 16,
+            "id": 144,
+            "name": "kprobe__cap_cap",
+            "run_cnt_delta": 190090514,
+            "run_time_ns_delta": 8298385542,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 311,
+            "bytes_xlated": 16,
+            "id": 145,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 165142932,
+            "run_time_ns_delta": 143405463615,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 1591,
+            "bytes_xlated": 16,
+            "id": 150,
+            "name": "inet_sock_set_s",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 153,
+            "bytes_xlated": 16,
+            "id": 153,
+            "name": "sys_enter",
+            "run_cnt_delta": 4792450632,
+            "run_time_ns_delta": 263623340549,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 49,
+            "bytes_xlated": 16,
+            "id": 156,
+            "name": "fentry_vfs_fsyn",
+            "run_cnt_delta": 42,
+            "run_time_ns_delta": 10995,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 49,
+            "bytes_xlated": 16,
+            "id": 158,
+            "name": "fentry_vfs_open",
+            "run_cnt_delta": 165143389,
+            "run_time_ns_delta": 4265490495,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 49,
+            "bytes_xlated": 16,
+            "id": 160,
+            "name": "fentry_vfs_crea",
+            "run_cnt_delta": 44,
+            "run_time_ns_delta": 2449,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 391,
+            "bytes_xlated": 16,
+            "id": 161,
+            "name": "block_rq_insert",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 749,
+            "bytes_xlated": 16,
+            "id": 163,
+            "name": "tcp_v4_connect_",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 605,
+            "bytes_xlated": 16,
+            "id": 165,
+            "name": "kprobe__cap_cap",
+            "run_cnt_delta": 190090517,
+            "run_time_ns_delta": 42607339491,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 561,
+            "bytes_xlated": 16,
+            "id": 166,
+            "name": "sys_exit",
+            "run_cnt_delta": 4792450638,
+            "run_time_ns_delta": 276603224132,
+            "type": "tracepoint"
+          },
+          {
+            "bytes_jited": 442,
+            "bytes_xlated": 16,
+            "id": 168,
+            "name": "block_rq_issue",
+            "run_cnt_delta": 414,
+            "run_time_ns_delta": 512279,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 160,
+            "bytes_xlated": 16,
+            "id": 170,
+            "name": "sched_wakeup",
+            "run_cnt_delta": 155453989,
+            "run_time_ns_delta": 8573789455,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 140,
+            "bytes_xlated": 16,
+            "id": 173,
+            "name": "tcp_v6_connect",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 521,
+            "bytes_xlated": 16,
+            "id": 175,
+            "name": "block_rq_comple",
+            "run_cnt_delta": 438,
+            "run_time_ns_delta": 1447164,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 160,
+            "bytes_xlated": 16,
+            "id": 176,
+            "name": "sched_wakeup_ne",
+            "run_cnt_delta": 124,
+            "run_time_ns_delta": 33624,
+            "type": "tracing"
+          },
+          {
+            "bytes_jited": 1063,
+            "bytes_xlated": 16,
+            "id": 178,
+            "name": "tcp_v6_connect_",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe"
+          },
+          {
+            "bytes_jited": 1099,
+            "bytes_xlated": 16,
+            "id": 181,
+            "name": "sched_switch",
+            "run_cnt_delta": 310631551,
+            "run_time_ns_delta": 30453937433,
+            "type": "tracing"
+          }
+        ]
+      },
+      "name_groups": [
+        {
+          "type": "tracepoint",
+          "name": "tracepoint__sys",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                25,
+                29,
+                31,
+                34
+              ],
+              "calls": 328450574,
+              "time_ns": 153753389362,
+              "ns_per_call": 468.11728014212576
+            },
+            "post_rejit": {
+              "program_ids": [
+                128,
+                131,
+                137,
+                145
+              ],
+              "calls": 330285864,
+              "time_ns": 150842616180,
+              "ns_per_call": 456.70321567259083
+            }
+          },
+          "native_over_baseline_calls": 1.0055877204830217,
+          "baseline_over_native_ns_per_call": 1.02499230151626
+        },
+        {
+          "type": "kprobe",
+          "name": "tcp_v4_connect",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                28
+              ],
+              "calls": 0,
+              "time_ns": 0,
+              "ns_per_call": null
+            },
+            "post_rejit": {
+              "program_ids": [
+                140
+              ],
+              "calls": 0,
+              "time_ns": 0,
+              "ns_per_call": null
+            }
+          },
+          "native_over_baseline_calls": null,
+          "baseline_over_native_ns_per_call": null
+        },
+        {
+          "type": "kprobe",
+          "name": "tcp_v4_connect_",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                33
+              ],
+              "calls": 0,
+              "time_ns": 0,
+              "ns_per_call": null
+            },
+            "post_rejit": {
+              "program_ids": [
+                163
+              ],
+              "calls": 0,
+              "time_ns": 0,
+              "ns_per_call": null
+            }
+          },
+          "native_over_baseline_calls": null,
+          "baseline_over_native_ns_per_call": null
+        },
+        {
+          "type": "kprobe",
+          "name": "tcp_v6_connect",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                35
+              ],
+              "calls": 0,
+              "time_ns": 0,
+              "ns_per_call": null
+            },
+            "post_rejit": {
+              "program_ids": [
+                173
+              ],
+              "calls": 0,
+              "time_ns": 0,
+              "ns_per_call": null
+            }
+          },
+          "native_over_baseline_calls": null,
+          "baseline_over_native_ns_per_call": null
+        },
+        {
+          "type": "kprobe",
+          "name": "tcp_v6_connect_",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                37
+              ],
+              "calls": 0,
+              "time_ns": 0,
+              "ns_per_call": null
+            },
+            "post_rejit": {
+              "program_ids": [
+                178
+              ],
+              "calls": 0,
+              "time_ns": 0,
+              "ns_per_call": null
+            }
+          },
+          "native_over_baseline_calls": null,
+          "baseline_over_native_ns_per_call": null
+        },
+        {
+          "type": "tracepoint",
+          "name": "inet_sock_set_s",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                50
+              ],
+              "calls": 0,
+              "time_ns": 0,
+              "ns_per_call": null
+            },
+            "post_rejit": {
+              "program_ids": [
+                150
+              ],
+              "calls": 0,
+              "time_ns": 0,
+              "ns_per_call": null
+            }
+          },
+          "native_over_baseline_calls": null,
+          "baseline_over_native_ns_per_call": null
+        },
+        {
+          "type": "tracing",
+          "name": "fentry_vfs_read",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                51
+              ],
+              "calls": 3121080,
+              "time_ns": 175533151,
+              "ns_per_call": 56.24115722762633
+            },
+            "post_rejit": {
+              "program_ids": [
+                136
+              ],
+              "calls": 3141693,
+              "time_ns": 208308553,
+              "ns_per_call": 66.30455394591388
+            }
+          },
+          "native_over_baseline_calls": 1.0066044446153255,
+          "baseline_over_native_ns_per_call": 0.8482246524651008
+        },
+        {
+          "type": "tracing",
+          "name": "fentry_vfs_writ",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                53
+              ],
+              "calls": 3159044,
+              "time_ns": 171652425,
+              "ns_per_call": 54.336826267693645
+            },
+            "post_rejit": {
+              "program_ids": [
+                143
+              ],
+              "calls": 3176017,
+              "time_ns": 194072133,
+              "ns_per_call": 61.10550825137271
+            }
+          },
+          "native_over_baseline_calls": 1.0053728279821363,
+          "baseline_over_native_ns_per_call": 0.8892295935771549
+        },
+        {
+          "type": "kprobe",
+          "name": "kprobe__cap_cap",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                54,
+                59
+              ],
+              "calls": 378533261,
+              "time_ns": 53231378275,
+              "ns_per_call": 140.62536574560087
+            },
+            "post_rejit": {
+              "program_ids": [
+                144,
+                165
+              ],
+              "calls": 380181031,
+              "time_ns": 50905725033,
+              "ns_per_call": 133.89864533509564
+            }
+          },
+          "native_over_baseline_calls": 1.0043530388733792,
+          "baseline_over_native_ns_per_call": 1.0502374045209413
+        },
+        {
+          "type": "tracing",
+          "name": "fentry_vfs_fsyn",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                61
+              ],
+              "calls": 42,
+              "time_ns": 2614,
+              "ns_per_call": 62.23809523809524
+            },
+            "post_rejit": {
+              "program_ids": [
+                156
+              ],
+              "calls": 42,
+              "time_ns": 10995,
+              "ns_per_call": 261.7857142857143
+            }
+          },
+          "native_over_baseline_calls": 1.0,
+          "baseline_over_native_ns_per_call": 0.23774442928603912
+        },
+        {
+          "type": "kprobe",
+          "name": "blk_account_io_",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                62
+              ],
+              "calls": 149,
+              "time_ns": 28001,
+              "ns_per_call": 187.9261744966443
+            },
+            "post_rejit": {
+              "program_ids": [
+                133
+              ],
+              "calls": 155,
+              "time_ns": 29559,
+              "ns_per_call": 190.70322580645163
+            }
+          },
+          "native_over_baseline_calls": 1.0402684563758389,
+          "baseline_over_native_ns_per_call": 0.9854378377813818
+        },
+        {
+          "type": "tracing",
+          "name": "sched_wakeup",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                63
+              ],
+              "calls": 153007918,
+              "time_ns": 9360887726,
+              "ns_per_call": 61.17910660022183
+            },
+            "post_rejit": {
+              "program_ids": [
+                170
+              ],
+              "calls": 155453989,
+              "time_ns": 8573789455,
+              "ns_per_call": 55.1532290046285
+            }
+          },
+          "native_over_baseline_calls": 1.0159865648260111,
+          "baseline_over_native_ns_per_call": 1.1092570227409102
+        },
+        {
+          "type": "tracing",
+          "name": "fentry_vfs_open",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                64
+              ],
+              "calls": 164226234,
+              "time_ns": 4216697766,
+              "ns_per_call": 25.676152118302852
+            },
+            "post_rejit": {
+              "program_ids": [
+                158
+              ],
+              "calls": 165143389,
+              "time_ns": 4265490495,
+              "ns_per_call": 25.82901150829598
+            }
+          },
+          "native_over_baseline_calls": 1.0055847045728394,
+          "baseline_over_native_ns_per_call": 0.9940818722410638
+        },
+        {
+          "type": "tracing",
+          "name": "sched_wakeup_ne",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                68
+              ],
+              "calls": 125,
+              "time_ns": 30046,
+              "ns_per_call": 240.368
+            },
+            "post_rejit": {
+              "program_ids": [
+                176
+              ],
+              "calls": 124,
+              "time_ns": 33624,
+              "ns_per_call": 271.16129032258067
+            }
+          },
+          "native_over_baseline_calls": 0.992,
+          "baseline_over_native_ns_per_call": 0.8864392100880323
+        },
+        {
+          "type": "tracing",
+          "name": "fentry_vfs_crea",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                69
+              ],
+              "calls": 271,
+              "time_ns": 13120,
+              "ns_per_call": 48.413284132841326
+            },
+            "post_rejit": {
+              "program_ids": [
+                160
+              ],
+              "calls": 44,
+              "time_ns": 2449,
+              "ns_per_call": 55.65909090909091
+            }
+          },
+          "native_over_baseline_calls": 0.16236162361623616,
+          "baseline_over_native_ns_per_call": 0.8698180897693011
+        },
+        {
+          "type": "tracing",
+          "name": "block_rq_insert",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                70
+              ],
+              "calls": 0,
+              "time_ns": 0,
+              "ns_per_call": null
+            },
+            "post_rejit": {
+              "program_ids": [
+                161
+              ],
+              "calls": 0,
+              "time_ns": 0,
+              "ns_per_call": null
+            }
+          },
+          "native_over_baseline_calls": null,
+          "baseline_over_native_ns_per_call": null
+        },
+        {
+          "type": "tracing",
+          "name": "sched_switch",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                71
+              ],
+              "calls": 305781161,
+              "time_ns": 23320653750,
+              "ns_per_call": 76.26582904497508
+            },
+            "post_rejit": {
+              "program_ids": [
+                181
+              ],
+              "calls": 310631551,
+              "time_ns": 30453937433,
+              "ns_per_call": 98.03877724256027
+            }
+          },
+          "native_over_baseline_calls": 1.0158622917910891,
+          "baseline_over_native_ns_per_call": 0.777914935192264
+        },
+        {
+          "type": "tracing",
+          "name": "block_rq_issue",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                72
+              ],
+              "calls": 413,
+              "time_ns": 509533,
+              "ns_per_call": 1233.73607748184
+            },
+            "post_rejit": {
+              "program_ids": [
+                168
+              ],
+              "calls": 414,
+              "time_ns": 512279,
+              "ns_per_call": 1237.388888888889
+            }
+          },
+          "native_over_baseline_calls": 1.0024213075060533,
+          "baseline_over_native_ns_per_call": 0.9970479681530607
+        },
+        {
+          "type": "tracing",
+          "name": "block_rq_comple",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                73
+              ],
+              "calls": 437,
+              "time_ns": 1637892,
+              "ns_per_call": 3748.036613272311
+            },
+            "post_rejit": {
+              "program_ids": [
+                175
+              ],
+              "calls": 438,
+              "time_ns": 1447164,
+              "ns_per_call": 3304.027397260274
+            }
+          },
+          "native_over_baseline_calls": 1.002288329519451,
+          "baseline_over_native_ns_per_call": 1.134384241601693
+        },
+        {
+          "type": "tracepoint",
+          "name": "sys_enter",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                75
+              ],
+              "calls": 4783993255,
+              "time_ns": 260577814916,
+              "ns_per_call": 54.468683592656944
+            },
+            "post_rejit": {
+              "program_ids": [
+                153
+              ],
+              "calls": 4792450632,
+              "time_ns": 263623340549,
+              "ns_per_call": 55.00804510926885
+            }
+          },
+          "native_over_baseline_calls": 1.0017678488553805,
+          "baseline_over_native_ns_per_call": 0.990194861214564
+        },
+        {
+          "type": "tracepoint",
+          "name": "sys_exit",
+          "arms": {
+            "baseline": {
+              "program_ids": [
+                77
+              ],
+              "calls": 4783993263,
+              "time_ns": 279679005690,
+              "ns_per_call": 58.46141294827321
+            },
+            "post_rejit": {
+              "program_ids": [
+                166
+              ],
+              "calls": 4792450638,
+              "time_ns": 276603224132,
+              "ns_per_call": 57.716447184406036
+            }
+          },
+          "native_over_baseline_calls": 1.0017678484343635,
+          "baseline_over_native_ns_per_call": 1.0129073392457262
+        }
+      ],
+      "name_scope": "Kernel names are truncated; equal type/name rows are groups, not unique bodies. All original program records are retained."
+    }
+  ]
+}

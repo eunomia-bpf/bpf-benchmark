@@ -1,0 +1,138 @@
+{
+  "cases": [
+    {
+      "index": 0,
+      "expression": "arg0 == 42u",
+      "instructions": 19,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "index": 1,
+      "expression": "arg0 == 42u",
+      "instructions": 19,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "index": 2,
+      "expression": "arg0 == 42u",
+      "instructions": 19,
+      "expected": 1,
+      "passed": true
+    },
+    {
+      "index": 3,
+      "expression": "arg0 == 42u",
+      "instructions": 19,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "index": 4,
+      "expression": "arg0 == 42u",
+      "instructions": 19,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "index": 5,
+      "expression": "arg0 == uint32(42u)",
+      "instructions": 23,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "index": 6,
+      "expression": "arg0 == uint32(42u)",
+      "instructions": 23,
+      "expected": 1,
+      "passed": true
+    },
+    {
+      "index": 7,
+      "expression": "arg0 == uint32(42u)",
+      "instructions": 23,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "index": 8,
+      "expression": "arg0 == uint32(42u)",
+      "instructions": 23,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "index": 9,
+      "expression": "arg2 == arg0",
+      "instructions": 21,
+      "expected": 1,
+      "passed": true
+    },
+    {
+      "index": 10,
+      "expression": "arg2 == arg0",
+      "instructions": 21,
+      "expected": 1,
+      "passed": true
+    },
+    {
+      "index": 11,
+      "expression": "arg2 == arg0",
+      "instructions": 21,
+      "expected": 1,
+      "passed": true
+    },
+    {
+      "index": 12,
+      "expression": "arg2 == arg0",
+      "instructions": 21,
+      "expected": 1,
+      "passed": true
+    },
+    {
+      "index": 13,
+      "expression": "arg2 == arg0",
+      "instructions": 21,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "index": 14,
+      "expression": "arg2 - int32(10) == int32(2) + arg0",
+      "instructions": 43,
+      "expected": 1,
+      "passed": true
+    },
+    {
+      "index": 15,
+      "expression": "arg2 - int32(10) == int32(2) + arg0",
+      "instructions": 43,
+      "expected": 0,
+      "passed": true
+    },
+    {
+      "index": 16,
+      "expression": "arg2 - int32(10) == int32(2) + arg0",
+      "instructions": 43,
+      "expected": 1,
+      "passed": true
+    },
+    {
+      "index": 17,
+      "expression": "arg2 - int32(10) == int32(2) + arg0",
+      "instructions": 43,
+      "expected": 1,
+      "passed": true
+    },
+    {
+      "index": 18,
+      "expression": "arg2 - int32(10) == int32(2) + arg0",
+      "instructions": 43,
+      "expected": 1,
+      "passed": true
+    }
+  ],
+  "scope": "Actual unmodified upstream CEL compiler, constructed argument vectors; not app startup or stock acceptance."
+}

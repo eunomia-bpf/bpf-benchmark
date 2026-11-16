@@ -624,3 +624,10 @@ Actual shim/live-BTF R1+R2 execution returns 13 in BPF and native. One producer
 flag set remains; no new library build, vendor edit, benchmark change or image
 publication. Actual app installation and checked-B acceptance remain open.
 Receipts: runtime-bpf-functions/nonconstant-report.json.
+
+2026-11-16T11:54:25Z — Phase 1 actual CEL compiler coverage: 3bce4215f exports bodies
+from unmodified upstream Tetragon celbpf.CompileFn and executes nineteen
+numeric/boundary vectors through runtime native LTO and native proof extraction.
+All pass. This is source/ABI coverage, not app installation, simulator-B stock
+acceptance or performance. One flag set and the published image remain intact.
+Receipts: runtime-bpf-functions/upstream-cel-report.json.
