@@ -1,0 +1,545 @@
+{
+  "recorded_at": "2026-11-16T15:28:17Z",
+  "reviewed_root_commit": "65369c037ef3ff713279dcd1365b1c5158d1d75a",
+  "kernel_commit": "0993571747839a7e83c958dfea7ad777c9820ee5",
+  "scope": "Read-only source review and retained-data extraction. No new guest, source change or added check. Program grouping preserves all original IDs.",
+  "bcc": {
+    "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_131847_109569",
+    "baseline": {
+      "calls": 6111113951,
+      "ns": 751319629316,
+      "ns_per_call": 122.94315493708915,
+      "groups": {
+        "inet_sock_set_s": {
+          "ids": [
+            33
+          ],
+          "calls": 0,
+          "ns": 0,
+          "installed_bytes": 1501,
+          "ns_per_call": null,
+          "time_share": 0.0
+        },
+        "fentry_vfs_read": {
+          "ids": [
+            35
+          ],
+          "calls": 1464162,
+          "ns": 120056331,
+          "installed_bytes": 40,
+          "ns_per_call": 81.99661717760739,
+          "time_share": 0.000159793949626072
+        },
+        "fentry_vfs_writ": {
+          "ids": [
+            37
+          ],
+          "calls": 1666263,
+          "ns": 133533767,
+          "installed_bytes": 40,
+          "ns_per_call": 80.1396700280808,
+          "time_share": 0.0001777323016591073
+        },
+        "kprobe__cap_cap": {
+          "ids": [
+            38,
+            49
+          ],
+          "calls": 252204951,
+          "ns": 51403620188,
+          "installed_bytes": 526,
+          "ns_per_call": 203.81685602991988,
+          "time_share": 0.0684177787751902
+        },
+        "fentry_vfs_fsyn": {
+          "ids": [
+            42
+          ],
+          "calls": 76,
+          "ns": 6493,
+          "installed_bytes": 40,
+          "ns_per_call": 85.4342105263158,
+          "time_share": 8.642127460334312e-09
+        },
+        "tracepoint__sys": {
+          "ids": [
+            46,
+            56,
+            58,
+            59
+          ],
+          "calls": 143683888,
+          "ns": 133780247666,
+          "installed_bytes": 1486,
+          "ns_per_call": 931.0734107222934,
+          "time_share": 0.17806036531721298
+        },
+        "fentry_vfs_open": {
+          "ids": [
+            47
+          ],
+          "calls": 71842395,
+          "ns": 3733101995,
+          "installed_bytes": 40,
+          "ns_per_call": 51.96238230922006,
+          "time_share": 0.004968726823227831
+        },
+        "sched_wakeup": {
+          "ids": [
+            48
+          ],
+          "calls": 27285677,
+          "ns": 3312059888,
+          "installed_bytes": 121,
+          "ns_per_call": 121.38455967209462,
+          "time_share": 0.004408323380310579
+        },
+        "fentry_vfs_crea": {
+          "ids": [
+            51
+          ],
+          "calls": 42,
+          "ns": 2437,
+          "installed_bytes": 40,
+          "ns_per_call": 58.023809523809526,
+          "time_share": 3.2436261544485938e-09
+        },
+        "tcp_v4_connect": {
+          "ids": [
+            54
+          ],
+          "calls": 0,
+          "ns": 0,
+          "installed_bytes": 110,
+          "ns_per_call": null,
+          "time_share": 0.0
+        },
+        "sched_wakeup_ne": {
+          "ids": [
+            57
+          ],
+          "calls": 125,
+          "ns": 49162,
+          "installed_bytes": 121,
+          "ns_per_call": 393.296,
+          "time_share": 6.543420147927852e-08
+        },
+        "sched_switch": {
+          "ids": [
+            60
+          ],
+          "calls": 54485576,
+          "ns": 7063957332,
+          "installed_bytes": 935,
+          "ns_per_call": 129.64820876629807,
+          "time_share": 0.009402066785385355
+        },
+        "tcp_v4_connect_": {
+          "ids": [
+            64
+          ],
+          "calls": 0,
+          "ns": 0,
+          "installed_bytes": 493,
+          "ns_per_call": null,
+          "time_share": 0.0
+        },
+        "blk_account_io_": {
+          "ids": [
+            65
+          ],
+          "calls": 162,
+          "ns": 49647,
+          "installed_bytes": 121,
+          "ns_per_call": 306.462962962963,
+          "time_share": 6.607973233069731e-08
+        },
+        "tcp_v6_connect": {
+          "ids": [
+            68
+          ],
+          "calls": 0,
+          "ns": 0,
+          "installed_bytes": 110,
+          "ns_per_call": null,
+          "time_share": 0.0
+        },
+        "sys_enter": {
+          "ids": [
+            70
+          ],
+          "calls": 2779239268,
+          "ns": 238448423950,
+          "installed_bytes": 108,
+          "ns_per_call": 85.79629206289698,
+          "time_share": 0.317372812643113
+        },
+        "tcp_v6_connect_": {
+          "ids": [
+            72
+          ],
+          "calls": 0,
+          "ns": 0,
+          "installed_bytes": 496,
+          "ns_per_call": null,
+          "time_share": 0.0
+        },
+        "block_rq_insert": {
+          "ids": [
+            73
+          ],
+          "calls": 0,
+          "ns": 0,
+          "installed_bytes": 354,
+          "ns_per_call": null,
+          "time_share": 0.0
+        },
+        "sys_exit": {
+          "ids": [
+            74
+          ],
+          "calls": 2779239269,
+          "ns": 313306731094,
+          "installed_bytes": 406,
+          "ns_per_call": 112.73111120322184,
+          "time_share": 0.4170085791306077
+        },
+        "block_rq_issue": {
+          "ids": [
+            75
+          ],
+          "calls": 1028,
+          "ns": 1499864,
+          "installed_bytes": 440,
+          "ns_per_call": 1459.011673151751,
+          "time_share": 1.9963061544997477e-06
+        },
+        "block_rq_comple": {
+          "ids": [
+            76
+          ],
+          "calls": 1069,
+          "ns": 16289502,
+          "installed_bytes": 437,
+          "ns_per_call": 15238.074836295604,
+          "time_share": 2.1681187825253456e-05
+        }
+      }
+    },
+    "post_rejit": {
+      "calls": 6045931112,
+      "ns": 757090063880,
+      "ns_per_call": 125.22307149304483,
+      "groups": {
+        "fentry_vfs_read": {
+          "ids": [
+            128
+          ],
+          "calls": 1440600,
+          "ns": 124298805,
+          "installed_bytes": 48,
+          "ns_per_call": 86.28266347355269,
+          "time_share": 0.0001641796807674147
+        },
+        "fentry_vfs_writ": {
+          "ids": [
+            130
+          ],
+          "calls": 1652517,
+          "ns": 146503423,
+          "installed_bytes": 49,
+          "ns_per_call": 88.65471459597693,
+          "time_share": 0.00019350857974437903
+        },
+        "fentry_vfs_fsyn": {
+          "ids": [
+            132
+          ],
+          "calls": 47,
+          "ns": 4684,
+          "installed_bytes": 49,
+          "ns_per_call": 99.65957446808511,
+          "time_share": 6.1868464842809265e-09
+        },
+        "fentry_vfs_open": {
+          "ids": [
+            134
+          ],
+          "calls": 70342944,
+          "ns": 3775183473,
+          "installed_bytes": 49,
+          "ns_per_call": 53.6682609274926,
+          "time_share": 0.004986439068626282
+        },
+        "fentry_vfs_crea": {
+          "ids": [
+            136
+          ],
+          "calls": 43,
+          "ns": 2418,
+          "installed_bytes": 49,
+          "ns_per_call": 56.23255813953488,
+          "time_share": 3.193807600126234e-09
+        },
+        "blk_account_io_": {
+          "ids": [
+            137
+          ],
+          "calls": 154,
+          "ns": 33388,
+          "installed_bytes": 159,
+          "ns_per_call": 216.80519480519482,
+          "time_share": 4.410043347932783e-08
+        },
+        "sys_enter": {
+          "ids": [
+            140
+          ],
+          "calls": 2754463469,
+          "ns": 240146656844,
+          "installed_bytes": 153,
+          "ns_per_call": 87.1845495671738,
+          "time_share": 0.317196946969923
+        },
+        "block_rq_insert": {
+          "ids": [
+            141
+          ],
+          "calls": 0,
+          "ns": 0,
+          "installed_bytes": 3102,
+          "ns_per_call": null,
+          "time_share": 0.0
+        },
+        "sys_exit": {
+          "ids": [
+            145
+          ],
+          "calls": 2754463473,
+          "ns": 319425266271,
+          "installed_bytes": 3483,
+          "ns_per_call": 115.96641937789094,
+          "time_share": 0.4219118457769503
+        },
+        "inet_sock_set_s": {
+          "ids": [
+            146
+          ],
+          "calls": 0,
+          "ns": 0,
+          "installed_bytes": 4295,
+          "ns_per_call": null,
+          "time_share": 0.0
+        },
+        "block_rq_issue": {
+          "ids": [
+            147
+          ],
+          "calls": 444,
+          "ns": 788869,
+          "installed_bytes": 3150,
+          "ns_per_call": 1776.731981981982,
+          "time_share": 1.0419751065773292e-06
+        },
+        "block_rq_comple": {
+          "ids": [
+            151
+          ],
+          "calls": 470,
+          "ns": 17789903,
+          "installed_bytes": 3225,
+          "ns_per_call": 37850.85744680851,
+          "time_share": 2.3497736727422868e-05
+        },
+        "tcp_v4_connect": {
+          "ids": [
+            152
+          ],
+          "calls": 0,
+          "ns": 0,
+          "installed_bytes": 140,
+          "ns_per_call": null,
+          "time_share": 0.0
+        },
+        "tracepoint__sys": {
+          "ids": [
+            154,
+            166,
+            170,
+            178
+          ],
+          "calls": 140684982,
+          "ns": 131176907823,
+          "installed_bytes": 6352,
+          "ns_per_call": 932.4158553256239,
+          "time_share": 0.17326460097855909
+        },
+        "kprobe__cap_cap": {
+          "ids": [
+            158,
+            172
+          ],
+          "calls": 252312008,
+          "ns": 50662380778,
+          "installed_bytes": 3229,
+          "ns_per_call": 200.79258684350845,
+          "time_share": 0.0669172443214498
+        },
+        "tcp_v4_connect_": {
+          "ids": [
+            160
+          ],
+          "calls": 0,
+          "ns": 0,
+          "installed_bytes": 3443,
+          "ns_per_call": null,
+          "time_share": 0.0
+        },
+        "sched_wakeup": {
+          "ids": [
+            162
+          ],
+          "calls": 23546695,
+          "ns": 3140586785,
+          "installed_bytes": 160,
+          "ns_per_call": 133.37696797788394,
+          "time_share": 0.00414823405408975
+        },
+        "tcp_v6_connect": {
+          "ids": [
+            171
+          ],
+          "calls": 0,
+          "ns": 0,
+          "installed_bytes": 140,
+          "ns_per_call": null,
+          "time_share": 0.0
+        },
+        "sched_wakeup_ne": {
+          "ids": [
+            174
+          ],
+          "calls": 124,
+          "ns": 48812,
+          "installed_bytes": 160,
+          "ns_per_call": 393.64516129032256,
+          "time_share": 6.447317476317689e-08
+        },
+        "tcp_v6_connect_": {
+          "ids": [
+            176
+          ],
+          "calls": 0,
+          "ns": 0,
+          "installed_bytes": 3490,
+          "ns_per_call": null,
+          "time_share": 0.0
+        },
+        "sched_switch": {
+          "ids": [
+            181
+          ],
+          "calls": 47023142,
+          "ns": 8473611604,
+          "installed_bytes": 3916,
+          "ns_per_call": 180.20088074931274,
+          "time_share": 0.01119234290379365
+        }
+      }
+    }
+  },
+  "relocation_calls": {
+    "24": {
+      "plan": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/24/0.link-plan.json",
+      "abi_header": [
+        "version\tnative-link-abi-v2",
+        "callee_saved_mask\t0"
+      ],
+      "calls": {
+        "bpf_get_current_pid_tgid": 1,
+        "bpf_current_task_under_cgroup": 1,
+        "__native_x86_ktime_get_mono_fast_ns": 1,
+        "bpf_map_update_elem": 1
+      }
+    },
+    "25": {
+      "plan": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/25/0.link-plan.json",
+      "abi_header": [
+        "version\tnative-link-abi-v2",
+        "callee_saved_mask\t0"
+      ],
+      "calls": {
+        "bpf_current_task_under_cgroup": 1,
+        "bpf_get_current_pid_tgid": 1,
+        "__native_x86_ktime_get_mono_fast_ns": 1,
+        "bpf_map_update_elem": 1,
+        "0xffffffff90299280": 2,
+        "0xffffffff904c69d0": 1
+      }
+    },
+    "34": {
+      "plan": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/34/0.link-plan.json",
+      "abi_header": [
+        "version\tnative-link-abi-v2",
+        "callee_saved_mask\t0"
+      ],
+      "calls": {
+        "bpf_skb_pull_data": 2,
+        "bpf_map_update_elem": 1,
+        "bpf_skb_load_bytes": 9,
+        "0xffffffffb84c69d0": 1
+      }
+    },
+    "130": {
+      "plan": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/130/0.link-plan.json",
+      "abi_header": [
+        "version\tnative-link-abi-v2",
+        "callee_saved_mask\t0"
+      ],
+      "calls": {
+        "bpf_get_current_pid_tgid": 1,
+        "__native_x86_ktime_get_mono_fast_ns": 3,
+        "bpf_get_current_comm": 2,
+        "bpf_get_stackid": 2,
+        "bpf_map_update_elem": 3,
+        "bpf_perf_event_output": 1,
+        "0xffffffffb3299280": 1,
+        "0xffffffffb34c69d0": 1,
+        "bpf_map_lookup_elem": 1
+      }
+    }
+  },
+  "cilium_native_initial_values": {
+    "__config_rt_info": {
+      "section": ".rodata.config",
+      "bytes": 4,
+      "value": 0
+    },
+    "__config_cilium_net_ifindex": {
+      "section": ".rodata.config",
+      "bytes": 4,
+      "value": 0
+    },
+    "__config_cilium_host_ifindex": {
+      "section": ".rodata.config",
+      "bytes": 4,
+      "value": 0
+    },
+    "__config_interface_ifindex": {
+      "section": ".rodata.config",
+      "bytes": 4,
+      "value": 0
+    },
+    "__config_endpoint_id": {
+      "section": ".rodata.config",
+      "bytes": 2,
+      "value": 0
+    },
+    "__config_host_ep_id": {
+      "section": ".rodata.config",
+      "bytes": 2,
+      "value": 0
+    }
+  },
+  "cilium_native_initial_values_scope": "Initial ELF values only; loaded map binding can replace them. This is not proof of an observed packet config mismatch."
+}
