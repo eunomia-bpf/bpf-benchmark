@@ -475,3 +475,20 @@
 - LANE PERF 2026-11-16T22:33:10Z: Katran stats1 215758_610196 has aggregate JIT/native 185.812/187.283 ns per call and 13641/10546 installed bytes. Native pps 2469673/2215775/2330732 does not repeat the earlier monotone decline; all workers still use queue 0 and worker 1 changes share sharply. The recorder has no per-sample counter snapshots, so no sample ns/call is inferred. Results are in katran-decay-20261116/stats-on.json. Tetragon diagnostic 221727_857801 names a separate native-link failure: generic_kprobe_filter_arg IP 0x3a4 branches to 0x1133 outside included symbols. Its later console NULL fetch is in netfs/loop0 shutdown, without a native BPF frame. Both errors stay recorded. Publication controller 1996263 is waiting for C OTel QEMU 1965090; recipe c07455b73 is pushed.
 
 - LANE PERF 2026-11-16T22:35:33Z: Publication controller 1996263 acquired image EX at 22:34:19 after C QEMU 1965090 ended. The sole kernel/base rebuild is in progress via the frozen image recipe, JOBS=8, on 8-16,18-23; no guest is running. The unchanged check is queued in the same controller under image SH and timing EX. Tetragon cause is now source-grounded: x86.rs:492 recognizes only unconditional tail transfers, and discover_reachable at :554 follows calls, so conditional tails from filter_32ty omit selector/range callees and retain stale displacements. The candidate 206 proof contains two targets beyond its text. This class remains queued after this publication/check; detailed original and proof addresses are recorded in host-link-replay-20261116/tetragon-diagnostic.md.
+
+- LANE C $(date -u +%Y-%m-%dT%H:%M:%SZ): **Breadth round on `6641a7e1a55d` finished — all 12 app-passes, every one committed.** Stats 0 / stats 1, against the published value on the earlier image and the 05-29 floor:
+
+  | app | stats 0 | stats 1 | published | floor |
+  |---|---|---|---|---|
+  | otel | 0.820x | 1.013x (per-call **0.960x**) | 1.866x / 2.020x | 1.849x |
+  | bcc | 0.929x | 0.912x | 1.002x / 1.268x | 0.985x |
+  | cilium | 1.245x | 1.218x (per-call 2.453x) | 1.262x / 1.212x | 1.319x |
+  | tetragon | error | error (baseline only, 287 progs) | error | 1.009x |
+  | tracee | 1.179x | 0.941x | error / error | 0.948x |
+  | katran | 0.914x | 0.974x (per-call 0.992x) | 1.002x / 1.029x | 1.113x |
+
+  **What reproduces on this image: Cilium only** (1.245x / 1.218x against 1.262x / 1.212x, per-call 2.453x against 2.29x). **OTel and BCC fall and the fall is inside the native body**; **Tracee newly completes both modes** (stats 0 clears its floor at 1.179x, stats 1 lands 0.941x just under it, with every high-count program neutral and every regression low-count); Tetragon still fails at the native arm. **Katran's stats-0 decay did not reproduce**: the stats-0 run had the eBPF arm rising while the native arm fell (1.377 / 0.895 / 0.783), but the stats-1 run on the same image has both arms flat and per-call 0.992x — so stats collection is not the cause and the decay is not a property of the image either, just a single-sweep shape that needs one re-run before anyone calls it a regression.
+
+  **The one number to act on is OTel's per-call on `native_tracer_execve`**: 14.40x cheaper on `053859_493069`, 0.96x here, with the *same* original and a native body that is *smaller* (8033 B vs 10450 B). Payload size does not predict it — two ~10.4 k bodies differ 16x — so it is run-time behaviour of the emitted body, not emitted bytes. The unwind counters (`otel-counters-20261116c`, both arms 120 s on this image) close off the alternative explanation: the native arm does **fewer** unwinds (0.888x attempts) and takes the interpreter path **less** often (0.747x), so the workload's path mix improves while per-call cost worsens. That is A/PERF's OTel-regression question, now with a per-call statement and a counter-mix statement that agree.
+
+  Everything is in `kprog/results/breadth-20261116/README.md` (new section "Second sweep on the post-cleanup image") with per-app run directories; `kprog/perf/one-image/Makefile` is unmodified (`git diff` empty).
