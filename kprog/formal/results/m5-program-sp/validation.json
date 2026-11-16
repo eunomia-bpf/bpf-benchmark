@@ -1,0 +1,43 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-program-sp",
+  "focused_build": {
+    "exit": 0,
+    "jobs": 141,
+    "log": "sp1.log"
+  },
+  "whole_lake_build": {
+    "exit": 0,
+    "jobs": 270,
+    "log": "lake-build.log"
+  },
+  "public_queries": {
+    "exit": 0,
+    "declarations": 3,
+    "log": "query.log",
+    "prefix_axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "relational_axioms": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "internal_transitions": {
+    "prefix": 35,
+    "complete_warm_SP": 71
+  },
+  "canonical_C_exports_external_semantics_and_frozen_paths": "unchanged from 75ffe2130; export parity retained in m5-program-warm",
+  "last_full_make_check": {
+    "exit": 0,
+    "commit": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "new_native_run": "not needed for Lean-only proofs"
+  },
+  "complete_ISA_handler_refinements": 0,
+  "M5": "open",
+  "M6": "open"
+}

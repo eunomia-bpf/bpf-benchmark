@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64RegisterReads
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterReads.sp_read_prefix
+#check KProgFormal.ClightRefinement.Arm64RegisterReads.sp_read_prefix
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterReads.sp_read_warm
+#check KProgFormal.ClightRefinement.Arm64RegisterReads.sp_read_warm
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterReads.sp_read_return_corresponds
+#check KProgFormal.ClightRefinement.Arm64RegisterReads.sp_read_return_corresponds

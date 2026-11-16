@@ -896,4 +896,85 @@ theorem gpr_read_all_tags_return_corresponds (addresses : Arm64Registers.Pointer
   obtain ⟨rfl, rfl, rfl⟩ := stopped_return run returned
   exact ⟨rfl, rfl, rep⟩
 
+private def spReadTemps (entry pointer : CC.Val) (offset : BitVec 64) : CC.TempEnv :=
+  ((((((((readTemps entry (32#64)).set Arm64Program.___a64_l_reg (.Vlong (32#64))).set
+    Arm64Program._t'21 pointer).set Arm64Program._t'22 (.Vlong offset)).set
+    Arm64Program._t'1 (.Vlong offset)).set Arm64Program.___a64_read_value (.Vlong offset)).set
+    Arm64Program.___a64_l_reg__1 (.Vlong (32#64))).set Arm64Program._t'2 (.Vint (4#32))).set
+    Arm64Program.___a64_read_tag (.Vint (4#32))
+
+/-- The actual combined SP reader reaches the same materializer with its
+borrowed signed-long offset and constant STACK tag. No GPR tables are read. -/
+theorem sp_read_prefix (b sb : CC.Block) (ofs so : CC.Integers.Ptrofs)
+    (m : CC.Mem) (k : CC.Cont) (offset : BitVec 64)
+    (header : CC.Mem.loadv CC.Mptr m (.Vptr b (CC.Integers.Ptrofs.add ofs
+      (CC.Integers.Ptrofs.repr 40))) = some (.Vptr sb so))
+    (cell : CC.Mem.loadv .Mint64 m (.Vptr sb so) = some (.Vlong offset)) :
+    steps ge 35 (.Callstate (.Internal readHandler) [.Vptr b ofs, .Vlong (32#64)] k m) =
+      some (CC.E0, .State readHandler readParts.materialize (readCont k) CC.emptyEnv
+        (spReadTemps (.Vptr b ofs) (.Vptr sb so) offset) m) ∧
+    InternalPath ge 35 (.Callstate (.Internal readHandler)
+      [.Vptr b ofs, .Vlong (32#64)] k m) := by
+  simp only [CC.Mptr, CC.Archi.ptr64, ↓reduceIte] at header
+  simp +decide [steps, InternalPath, InternalState, step_read, readParts, readCont,
+    step_seq, step_loop, step_skip_seq, step_skip_loop, step_break_loop, step_set, step_if,
+    readTemps, spReadTemps, CC.PTree.gso, CC.doEvalExpr, CC.lvalOfField, CC.doDerefLoc,
+    CC.typeof, CC.typeconv, CC.removeAttributes, CC.tattr, CC.accessMode, layouts.1, sp_offset,
+    CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp, CC.Cop.semBinarith,
+    CC.Cop.classifyBinarith, CC.Cop.binarithType,
+    CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt, CC.Cop.castIntLong,
+    CC.Cop.boolVal, CC.Cop.classifyBool, CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse,
+    CC.Integers.Int64.cmpu, CC.Integers.Int64.eq, CC.Integers.MI.cmpu,
+    CC.Integers.Int.eq, CC.Integers.Int.zero, CC.Integers.Int.one,
+    CC.Integers.MI.zero, CC.Integers.MI.one, CC.Integers.MI.eq,
+    CC.Integers.Int.repr, CC.Integers.Int64.repr, CC.Integers.MI.repr,
+    CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
+    CC.Integers.Int64.unsigned, CC.Integers.Int.unsigned, CC.Integers.MI.unsigned,
+    CC.Mptr, CC.Archi.ptr64, CC.tptr, CC.tuchar, CC.tint, CC.tuint, CC.tlong, CC.tulong,
+    CC.emptyEnv, CC.E0, CC.Eapp, header, cell]
+
+/-- SP materialization reads the actual offset and selected warm STACK cache,
+returning their wrapped sum while preserving the complete memory. -/
+theorem sp_read_warm (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs)
+    (m : CC.Mem) (k : CC.Cont) (offset base : BitVec 64)
+    (observed : Arm64EntryMemory.borrowed frontier .Mint64 m (.Vptr b ofs) Arm64Program._sp =
+      some (.Vlong offset))
+    (cache : WarmEntryCache false frontier m (.Vptr b ofs) base) :
+    InternalRun ge 71 (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
+      [.Vptr b ofs, .Vlong (32#64)] k m)
+      (.Returnstate (.Vlong (offset + base)) (CC.callCont k) m) := by
+  obtain ⟨sb, so, header, cell⟩ := borrowed_loads observed
+  have beforeCall := sp_read_prefix b sb ofs so m k offset
+    (field_load frontier b ofs m _ 40 _ sp_offset header) cell
+  have entryRead : (spReadTemps (.Vptr b ofs) (.Vptr sb so) offset).get
+      Arm64Program._entry = some (.Vptr b ofs) := by
+    simp +decide [spReadTemps, readTemps, CC.PTree.gso]
+  have valueRead : (spReadTemps (.Vptr b ofs) (.Vptr sb so) offset).get
+      Arm64Program.___a64_read_value = some (.Vlong offset) := by
+    simp +decide [spReadTemps, CC.PTree.gso]
+  have tagRead : (spReadTemps (.Vptr b ofs) (.Vptr sb so) offset).get
+      Arm64Program.___a64_read_tag = some (.Vint (4#32)) := by
+    simp +decide [spReadTemps, CC.PTree.gso]
+  exact (internalRun_of_steps beforeCall.2 beforeCall.1).trans
+    (warm_entry_finishes false frontier b ofs m k _ offset base entryRead valueRead tagRead cache)
+
+/-- Every actual Kstop SP read returns the native SP from the concrete register
+relation, under an explicit warm invocation stack-origin binding. -/
+theorem sp_read_return_corresponds (addresses : Arm64Registers.PointerOrigins)
+    (origins : Reference.Provenance.AArch64.Origins) (cells : Reference.AArch64.Gpr → Nat)
+    (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs) (m : CC.Mem)
+    (native : Reference.AArch64.State)
+    (rep : Arm64Registers.Represents addresses origins cells frontier m (.Vptr b ofs) native)
+    (cache : WarmEntryCache false frontier m (.Vptr b ofs) origins.stack)
+    (trace : CC.Trace) (result : CC.Val) (after : CC.Mem)
+    (returned : CC.Star (CC.Step2 ge)
+      (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
+        [.Vptr b ofs, .Vlong (32#64)] .Kstop m)
+      trace (.Returnstate result .Kstop after)) :
+    trace = CC.E0 ∧ after = m ∧ result = .Vlong (Reference.AArch64.sp native) := by
+  obtain ⟨offset, observed, bits⟩ := rep.sp
+  have run := sp_read_warm frontier b ofs m .Kstop offset origins.stack observed cache
+  obtain ⟨rfl, rfl, rfl⟩ := stopped_return run returned
+  exact ⟨rfl, rfl, congrArg CC.Val.Vlong bits.symm⟩
+
 end KProgFormal.ClightRefinement.Arm64RegisterReads

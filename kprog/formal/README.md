@@ -1994,3 +1994,9 @@ internal transitions. Its all-tag return law represents M3 materialization
 and preserves complete memory, with explicit scalar-relative-payload and
 selected-origin-cache producer conditions. Cold Program paths, SP and the
 producer/native-memory/control bindings remain open.
+
+The [combined SP-reader proof](results/m5-program-sp/README.md) completes the
+actual SP selector in 71 internal transitions and preserves all memory.
+Every Kstop return matches native SP through the register relation and an
+explicit warm stack-origin binding. Cold Program caches and producer,
+native-memory and compiled-control obligations remain M5.
