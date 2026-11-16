@@ -1,0 +1,130 @@
+{
+  "default_build_exit": 1,
+  "files": [
+    {
+      "path": "KProgFormal/Arm64CcmpDecode.lean",
+      "first_error": "error: KProgFormal/Arm64CcmpDecode.lean:22:2: The prover found a potentially spurious counterexample:",
+      "unchanged_from_9c617740f": true
+    },
+    {
+      "path": "KProgFormal/Arm64Extrev.lean",
+      "first_error": "error: KProgFormal/Arm64Extrev.lean:17:2: Unknown identifier `Reference.AArch64.extractRawWindow`",
+      "unchanged_from_9c617740f": true
+    },
+    {
+      "path": "KProgFormal/Arm64Movk.lean",
+      "first_error": "error: KProgFormal/Arm64Movk.lean:15:2: Unknown identifier `Reference.AArch64.moveKeepRaw`",
+      "unchanged_from_9c617740f": true
+    },
+    {
+      "path": "KProgFormal/Arm64Mul.lean",
+      "first_error": "error: KProgFormal/Arm64Mul.lean:238:32: Unknown identifier `Reference.AArch64.MulOp`",
+      "unchanged_from_9c617740f": true
+    },
+    {
+      "path": "KProgFormal/Arm64StackArena.lean",
+      "first_error": "error: KProgFormal/Arm64StackArena.lean:179:2: omega could not prove the goal:",
+      "unchanged_from_9c617740f": true
+    },
+    {
+      "path": "KProgFormal/CrossIsaRev.lean",
+      "first_error": "error: KProgFormal/CrossIsaRev.lean:49:2: Tactic `simp` failed with a nested error:",
+      "unchanged_from_9c617740f": true
+    },
+    {
+      "path": "KProgFormal/CrossIsaStackArena.lean",
+      "first_error": "error: KProgFormal/CrossIsaStackArena.lean:67:112: unsolved goals",
+      "unchanged_from_9c617740f": true
+    },
+    {
+      "path": "KProgFormal/CrossIsaWidth.lean",
+      "first_error": "error: KProgFormal/CrossIsaWidth.lean:79:77: unsolved goals",
+      "unchanged_from_9c617740f": true
+    },
+    {
+      "path": "KProgFormal/NativeLinkProducer.lean",
+      "first_error": "error: KProgFormal/NativeLinkProducer.lean:222:4: No goals to be solved",
+      "unchanged_from_9c617740f": true
+    },
+    {
+      "path": "KProgFormal/Refinement/Arm64Condition.lean",
+      "first_error": "error: KProgFormal/Refinement/Arm64Condition.lean:16:6: Unknown identifier `Reference.AArch64.condition`",
+      "unchanged_from_9c617740f": true
+    },
+    {
+      "path": "KProgFormal/Refinement/Arm64Register.lean",
+      "first_error": "error: KProgFormal/Refinement/Arm64Register.lean:9:24: Unknown constant `KProgFormal.Reference.AArch64.Width`",
+      "unchanged_from_9c617740f": true
+    },
+    {
+      "path": "KProgFormal/Refinement/EntryEnvironment.lean",
+      "first_error": "error: KProgFormal/Refinement/EntryEnvironment.lean:106:4: Unknown identifier `Reference.X86.resultZero`",
+      "unchanged_from_9c617740f": true
+    },
+    {
+      "path": "KProgFormal/Refinement/X86AuxFlags.lean",
+      "first_error": "error: KProgFormal/Refinement/X86AuxFlags.lean:10:40: Unknown identifier `Reference.X86.evenParity`",
+      "unchanged_from_9c617740f": true
+    },
+    {
+      "path": "KProgFormal/Refinement/X86Scalar.lean",
+      "first_error": "error: KProgFormal/Refinement/X86Scalar.lean:27:6: Unknown identifier `Reference.X86.scalarWriteValue`",
+      "unchanged_from_9c617740f": true
+    },
+    {
+      "path": "KProgFormal/SpillControl.lean",
+      "first_error": "error: KProgFormal/SpillControl.lean:55:20: Type mismatch: After simplification, term",
+      "unchanged_from_9c617740f": true
+    },
+    {
+      "path": "KProgFormal/X86AndnHandler.lean",
+      "first_error": "error: KProgFormal/X86AndnHandler.lean:150:2: Unknown identifier `Reference.X86.andNot`",
+      "unchanged_from_9c617740f": true
+    },
+    {
+      "path": "KProgFormal/X86Bitops.lean",
+      "first_error": "error: KProgFormal/X86Bitops.lean:15:2: Unknown identifier `Reference.X86.bitTest`",
+      "unchanged_from_9c617740f": true
+    },
+    {
+      "path": "KProgFormal/X86Bswap.lean",
+      "first_error": "error: KProgFormal/X86Bswap.lean:15:11: Unknown identifier `Reference.X86.reverseBytes`",
+      "unchanged_from_9c617740f": true
+    },
+    {
+      "path": "KProgFormal/X86BzhiFlags.lean",
+      "first_error": "error: KProgFormal/X86BzhiFlags.lean:27:2: Unknown identifier `Reference.X86.bzhiCarry`",
+      "unchanged_from_9c617740f": true
+    },
+    {
+      "path": "KProgFormal/X86CmovHandler.lean",
+      "first_error": "error: KProgFormal/X86CmovHandler.lean:361:76: unsolved goals",
+      "unchanged_from_9c617740f": true
+    },
+    {
+      "path": "KProgFormal/X86DivHandler.lean",
+      "first_error": "error: KProgFormal/X86DivHandler.lean:364:31: omega could not prove the goal:",
+      "unchanged_from_9c617740f": true
+    },
+    {
+      "path": "KProgFormal/X86DoubleShift.lean",
+      "first_error": "error: KProgFormal/X86DoubleShift.lean:9:2: Unknown identifier `Reference.X86.doubleShiftValue`",
+      "unchanged_from_9c617740f": true
+    },
+    {
+      "path": "KProgFormal/X86MovRegShape.lean",
+      "first_error": "error: KProgFormal/X86MovRegShape.lean:208:17: Type mismatch: After simplification, term",
+      "unchanged_from_9c617740f": true
+    },
+    {
+      "path": "KProgFormal/X86PushPopHandler.lean",
+      "first_error": "error: KProgFormal/X86PushPopHandler.lean:442:6: Unknown identifier `Reference.X86.popRsp`",
+      "unchanged_from_9c617740f": true
+    },
+    {
+      "path": "KProgFormal/X86StackArena.lean",
+      "first_error": "error: KProgFormal/X86StackArena.lean:175:2: omega could not prove the goal:",
+      "unchanged_from_9c617740f": true
+    }
+  ]
+}

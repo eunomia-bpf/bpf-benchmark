@@ -710,7 +710,7 @@ mature:
 
 # CompCert's frontend exports the production C helpers. System build dependencies
 # are Coq, OCaml/findlib, Menhir and the Menhir/Zarith development libraries.
-.PHONY: clightgen clight
+.PHONY: clightgen clight-sources clight
 clightgen:
 	test -f external/clean/Makefile.config || (cd external/clean && ./configure -clightgen x86_64-linux)
 	$(MAKE) -C external/clean depend
@@ -718,23 +718,53 @@ clightgen:
 	$(MAKE) -C external/clean extraction
 	$(MAKE) -C external/clean clightgen
 
-clight: clightgen
+# Clight is a build product. Profile inputs are sole checked-in C snapshots;
+# build symlinks preserve the frontend source_file metadata and include paths.
+.DELETE_ON_ERROR:
+CLIGHT_MODULES := Arm64Access Arm64Address Arm64Addressing Arm64Entry Arm64Numeric Arm64PayloadProfile Arm64Program Arm64ProgramContext Arm64ProgramFixture Arm64Stack X86Context X86ContextSkb X86ContextXdp X86Helpers X86Inline X86Memory X86Numeric X86Pointer X86ProgramProfile X86ReadonlyProfile X86StackProfile200 X86StackProfile376 X86TetragonWake
+CLIGHT_OUTPUTS := $(addprefix KProgFormal/Clight/,$(addsuffix .lean,$(CLIGHT_MODULES)))
+CLIGHT_INCLUDES := -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src
+CLIGHT_PLAIN := Arm64Access Arm64Address Arm64Addressing Arm64Entry Arm64Numeric Arm64Program Arm64ProgramContext Arm64ProgramFixture Arm64Stack X86Context X86Helpers X86Inline X86Memory X86Numeric X86Pointer
+
+$(addprefix KProgFormal/Clight/,$(addsuffix .lean,$(CLIGHT_PLAIN))): KProgFormal/Clight/%.lean: c/%.c
+KProgFormal/Clight/X86TetragonWake.lean: c/TetragonWake.c
+KProgFormal/Clight/X86ProgramProfile.lean: build/x86_program_profile.bpf.c
+KProgFormal/Clight/X86ReadonlyProfile.lean: build/x86_readonly_profile.bpf.c
+KProgFormal/Clight/X86ContextXdp.lean: build/x86_context_xdp.bpf.c
+KProgFormal/Clight/X86ContextSkb.lean: build/x86_context_skb.bpf.c
+KProgFormal/Clight/X86StackProfile200.lean: build/x86_stack_profile_200.bpf.c
+KProgFormal/Clight/X86StackProfile376.lean: build/x86_stack_profile_376.bpf.c
+KProgFormal/Clight/Arm64PayloadProfile.lean: build/arm64_payload_profile.bpf.c
+
+KProgFormal/Clight/X86Inline.lean KProgFormal/Clight/X86TetragonWake.lean KProgFormal/Clight/X86ReadonlyProfile.lean KProgFormal/Clight/X86ContextXdp.lean KProgFormal/Clight/X86ContextSkb.lean KProgFormal/Clight/X86ProgramProfile.lean KProgFormal/Clight/X86StackProfile200.lean KProgFormal/Clight/X86StackProfile376.lean KProgFormal/Clight/Arm64Addressing.lean KProgFormal/Clight/Arm64Program.lean KProgFormal/Clight/Arm64ProgramFixture.lean KProgFormal/Clight/Arm64ProgramContext.lean KProgFormal/Clight/Arm64PayloadProfile.lean: CLIGHT_OPTIONS += -fstruct-passing
+KProgFormal/Clight/X86TetragonWake.lean KProgFormal/Clight/X86ReadonlyProfile.lean KProgFormal/Clight/X86ContextXdp.lean KProgFormal/Clight/X86ContextSkb.lean KProgFormal/Clight/X86ProgramProfile.lean: CLIGHT_OPTIONS += -DKPROG_X86_PROGRAM_EXPORT=1 -include c/ProgramSections.h
+KProgFormal/Clight/X86StackProfile200.lean KProgFormal/Clight/X86StackProfile376.lean: CLIGHT_OPTIONS += -include c/ProgramSections.h
+KProgFormal/Clight/Arm64PayloadProfile.lean: CLIGHT_OPTIONS += -DKPROG_ARM64_PROGRAM_EXPORT=1
+KProgFormal/Clight/X86Numeric.lean: CLIGHT_INCLUDES :=
+
+build KProgFormal/Clight:
+	install -d $@
+
+build/%.bpf.c: c/%.bpf.c | build
+	ln -s ../$< $@
+
+external/clean/clightgen:
+	$(MAKE) clightgen
+
+$(CLIGHT_OUTPUTS): Makefile external/clean/clightgen | build KProgFormal/Clight
+	external/clean/clightgen -lean -normalize $(CLIGHT_OPTIONS) $(CLIGHT_INCLUDES) -MD -MP -MF build/clight-$(@F:.lean=.d) -MT $@ -o $@ $(firstword $(filter %.c,$^))
+
+-include $(wildcard build/clight-*.d)
+
+clight-sources: clightgen
+	$(MAKE) $(CLIGHT_OUTPUTS)
+
+clight: clight-sources
 	install -d build
 	$(CC) -std=c11 -Wall -Wextra -O2 -I../../vendor/libbpf/include/uapi oracles/test_bpf_abi_layout.c -o build/test_bpf_abi_layout
 	./build/test_bpf_abi_layout
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o build/BpfABILayout.lean oracles/test_bpf_abi_layout.c
-	external/clean/clightgen -lean -normalize -o KProgFormal/Clight/X86Numeric.lean c/X86Numeric.c
-	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64Numeric.lean c/Arm64Numeric.c
-	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Pointer.lean c/X86Pointer.c
-	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Context.lean c/X86Context.c
-	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Memory.lean c/X86Memory.c
-	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Helpers.lean c/X86Helpers.c
-	external/clean/clightgen -fstruct-passing -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Inline.lean c/X86Inline.c
-	external/clean/clightgen -fstruct-passing -lean -normalize -DKPROG_X86_PROGRAM_EXPORT=1 -include c/ProgramSections.h -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86TetragonWake.lean c/TetragonWake.c
 	../stock-path/bin/clang -c oracles/x86_readonly_profile.S -o build/x86_readonly_profile.native.o
-	../x86/native_lab/native_link/target/release/native-link --input build/x86_readonly_profile.native.o --symbol x86_readonly_profile --mode proof --preserve-entry-abi --output build/x86_readonly_profile.proof.o
-	python3 tools/export_x86_stack_fixture.py --name x86_readonly_profile --object-dir build --output build/x86_readonly_profile.bpf.c
-	external/clean/clightgen -fstruct-passing -lean -normalize -DKPROG_X86_PROGRAM_EXPORT=1 -include c/ProgramSections.h -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86ReadonlyProfile.lean build/x86_readonly_profile.bpf.c
 	for adapter in 0 1; do \
 	  flags=; if test $$adapter = 1; then flags=-D__COMPCERT__; fi; \
 	  $(CC) -std=c11 -Wall -Wextra -O1 -fsanitize=undefined -fno-sanitize-recover=undefined \
@@ -742,16 +772,6 @@ clight: clightgen
 	    oracles/test_x86_readonly_host.c build/x86_readonly_profile.native.o -o build/test_x86_readonly_host && \
 	  ./build/test_x86_readonly_host || exit $$?; \
 	done
-	for abi in xdp tc; do \
-	  name=x86_context_xdp; module=X86ContextXdp; skb=0; \
-	  if test $$abi = tc; then name=x86_context_skb; module=X86ContextSkb; skb=1; fi; \
-	  ../stock-path/bin/clang -DSKB=$$skb -c oracles/x86_context_profile.S -o build/$$name.proof.o && \
-	  python3 tools/export_x86_stack_fixture.py --name $$name --kind $$abi --object-dir build --output build/$$name.bpf.c && \
-	  external/clean/clightgen -fstruct-passing -lean -normalize -DKPROG_X86_PROGRAM_EXPORT=1 -include c/ProgramSections.h -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/$$module.lean build/$$name.bpf.c || exit $$?; \
-	done
-	../stock-path/bin/clang -c oracles/x86_program_profile.S -o build/x86_program_profile.proof.o
-	python3 tools/export_x86_stack_fixture.py --name x86_program_profile --object-dir build --output build/x86_program_profile.bpf.c
-	external/clean/clightgen -fstruct-passing -lean -normalize -DKPROG_X86_PROGRAM_EXPORT=1 -include c/ProgramSections.h -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86ProgramProfile.lean build/x86_program_profile.bpf.c
 	for skb in 0 1; do for adapter in 0 1; do \
 	  name=x86_context_xdp; if test $$skb = 1; then name=x86_context_skb; fi; \
 	  flags=; if test $$adapter = 1; then flags=-D__COMPCERT__; fi; \
@@ -776,11 +796,6 @@ clight: clightgen
 	    oracles/test_x86_program_profile_host.c build/x86_program_profile_host.o -o build/test_x86_program_profile_host && \
 	  ./build/test_x86_program_profile_host || exit $$?; \
 	done
-	for frame in 200 376; do \
-	  ../stock-path/bin/clang -DFRAME=$$frame -c oracles/x86_stack_profile.S -o build/x86_stack_profile_$$frame.proof.o && \
-	  python3 tools/export_x86_stack_fixture.py --name x86_stack_profile_$$frame --object-dir build --output build/x86_stack_profile_$$frame.bpf.c && \
-	  external/clean/clightgen -fstruct-passing -lean -normalize -include c/ProgramSections.h -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86StackProfile$$frame.lean build/x86_stack_profile_$$frame.bpf.c || exit $$?; \
-	done
 	for frame in 200 376; do for adapter in 0 1; do \
 	  flags=; if test $$adapter = 1; then flags=-D__COMPCERT__; fi; \
 	  $(CC) -std=c11 -Wall -Wextra -O1 -fsanitize=undefined -fno-sanitize-recover=undefined \
@@ -791,17 +806,6 @@ clight: clightgen
 	    oracles/test_x86_producer_profile_host.c -o build/test_x86_producer_profile_host && \
 	  ./build/test_x86_producer_profile_host || exit $$?; \
 	done; done
-	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64Address.lean c/Arm64Address.c
-	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64Stack.lean c/Arm64Stack.c
-	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64Access.lean c/Arm64Access.c
-	external/clean/clightgen -fstruct-passing -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64Addressing.lean c/Arm64Addressing.c
-	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64Entry.lean c/Arm64Entry.c
-	external/clean/clightgen -fstruct-passing -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64Program.lean c/Arm64Program.c
-	external/clean/clightgen -fstruct-passing -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64ProgramFixture.lean c/Arm64ProgramFixture.c
-	external/clean/clightgen -fstruct-passing -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64ProgramContext.lean c/Arm64ProgramContext.c
-	../stock-path/bin/clang -target aarch64-linux-gnu -c oracles/arm64_payload_profile.S -o build/arm64_payload_profile.proof.o
-	python3 tools/export_arm64_payload_fixture.py --object-dir build --output build/arm64_payload_profile.bpf.c
-	external/clean/clightgen -fstruct-passing -lean -normalize -DKPROG_ARM64_PROGRAM_EXPORT=1 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/Arm64PayloadProfile.lean build/arm64_payload_profile.bpf.c
 	$(CC) -std=c11 -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src c/Arm64Entry.c oracles/test_arm64_entry_binding_host.c -o build/test_arm64_entry_binding_host
 	./build/test_arm64_entry_binding_host
 	$(CC) -std=c11 -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -D__COMPCERT__ -DADAPTER=1 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src c/Arm64Entry.c oracles/test_arm64_entry_binding_host.c -o build/test_arm64_entry_binding_host

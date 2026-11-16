@@ -1,0 +1,24 @@
+-- The C exports are generated before Lake reads these imports.
+import KProgFormal.Clight.Arm64Access
+import KProgFormal.Clight.Arm64Address
+import KProgFormal.Clight.Arm64Addressing
+import KProgFormal.Clight.Arm64Entry
+import KProgFormal.Clight.Arm64Numeric
+import KProgFormal.Clight.Arm64PayloadProfile
+import KProgFormal.Clight.Arm64Program
+import KProgFormal.Clight.Arm64ProgramContext
+import KProgFormal.Clight.Arm64ProgramFixture
+import KProgFormal.Clight.Arm64Stack
+import KProgFormal.Clight.X86Context
+import KProgFormal.Clight.X86ContextSkb
+import KProgFormal.Clight.X86ContextXdp
+import KProgFormal.Clight.X86Helpers
+import KProgFormal.Clight.X86Inline
+import KProgFormal.Clight.X86Memory
+import KProgFormal.Clight.X86Numeric
+import KProgFormal.Clight.X86Pointer
+import KProgFormal.Clight.X86ProgramProfile
+import KProgFormal.Clight.X86ReadonlyProfile
+import KProgFormal.Clight.X86StackProfile200
+import KProgFormal.Clight.X86StackProfile376
+import KProgFormal.Clight.X86TetragonWake

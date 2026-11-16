@@ -1,0 +1,191 @@
+[
+  {
+    "command": [
+      "make",
+      "-n",
+      "clight-sources"
+    ],
+    "exit": 0
+  },
+  {
+    "command": [
+      "make",
+      "-j2",
+      "clight-sources"
+    ],
+    "exit": 0,
+    "cpus": [
+      17,
+      18
+    ]
+  },
+  {
+    "command": [
+      "python3",
+      "results/clight-build/compare.py",
+      "9c617740f"
+    ],
+    "phase": "parity1",
+    "exit": 0
+  },
+  {
+    "command": [
+      "python3",
+      "results/clight-build/compare.py",
+      "9c617740f"
+    ],
+    "phase": "parity2",
+    "exit": 0
+  },
+  {
+    "command": [
+      "python3",
+      "results/clight-build/compare.py",
+      "9c617740f"
+    ],
+    "phase": "parity3",
+    "exit": 0
+  },
+  {
+    "command": [
+      "lake",
+      "build"
+    ],
+    "phase": "first cold full build",
+    "exit": 1,
+    "limitations": "initial source-ordering issue fixed by input facet; unchanged legacy proof failures remain recorded"
+  },
+  {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.Clight",
+      "KProgFormal.ClightRefinement.Arm64EntryMemory",
+      "KProgFormal.ClightRefinement.Arm64Nop",
+      "KProgFormal.ClightRefinement.Arm64NopCall",
+      "KProgFormal.ClightRefinement.Arm64NopDeclarations",
+      "KProgFormal.ClightRefinement.Arm64NopEntry",
+      "KProgFormal.ClightRefinement.Arm64OriginCache",
+      "KProgFormal.ClightRefinement.Arm64RegisterReads",
+      "KProgFormal.ClightRefinement.Arm64Registers",
+      "KProgFormal.ClightRefinement.Arm64Width",
+      "KProgFormal.ClightRefinement.Deallocation",
+      "KProgFormal.ClightRefinement.Execution",
+      "KProgFormal.ClightRefinement.Frame",
+      "KProgFormal.ClightRefinement.Globalenv",
+      "KProgFormal.ClightRefinement.InternalExecution"
+    ],
+    "exit": 0,
+    "seconds": 67.13843561400427,
+    "cpus": [
+      17,
+      18
+    ],
+    "as_bytes": 34359738368,
+    "env": {
+      "LEAN_NUM_THREADS": "1",
+      "MAKEFLAGS": "-j2"
+    }
+  },
+  {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.Clight",
+      "KProgFormal.ClightRefinement.Arm64EntryMemory",
+      "KProgFormal.ClightRefinement.Arm64Nop",
+      "KProgFormal.ClightRefinement.Arm64NopCall",
+      "KProgFormal.ClightRefinement.Arm64NopDeclarations",
+      "KProgFormal.ClightRefinement.Arm64NopEntry",
+      "KProgFormal.ClightRefinement.Arm64OriginCache",
+      "KProgFormal.ClightRefinement.Arm64RegisterReads",
+      "KProgFormal.ClightRefinement.Arm64Registers",
+      "KProgFormal.ClightRefinement.Arm64Width",
+      "KProgFormal.ClightRefinement.Deallocation",
+      "KProgFormal.ClightRefinement.Execution",
+      "KProgFormal.ClightRefinement.Frame",
+      "KProgFormal.ClightRefinement.Globalenv",
+      "KProgFormal.ClightRefinement.InternalExecution"
+    ],
+    "exit": 0,
+    "seconds": 2.0030545779736713,
+    "regenerated": []
+  },
+  {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.Clight",
+      "KProgFormal.ClightRefinement.Arm64EntryMemory",
+      "KProgFormal.ClightRefinement.Arm64Nop",
+      "KProgFormal.ClightRefinement.Arm64NopCall",
+      "KProgFormal.ClightRefinement.Arm64NopDeclarations",
+      "KProgFormal.ClightRefinement.Arm64NopEntry",
+      "KProgFormal.ClightRefinement.Arm64OriginCache",
+      "KProgFormal.ClightRefinement.Arm64RegisterReads",
+      "KProgFormal.ClightRefinement.Arm64Registers",
+      "KProgFormal.ClightRefinement.Arm64Width",
+      "KProgFormal.ClightRefinement.Deallocation",
+      "KProgFormal.ClightRefinement.Execution",
+      "KProgFormal.ClightRefinement.Frame",
+      "KProgFormal.ClightRefinement.Globalenv",
+      "KProgFormal.ClightRefinement.InternalExecution"
+    ],
+    "exit": 0,
+    "seconds": 18.03178875800222,
+    "touched_header": "c/Arm64Entry.h",
+    "regenerated": [
+      "Arm64Entry.lean",
+      "Arm64PayloadProfile.lean",
+      "Arm64Program.lean",
+      "Arm64ProgramContext.lean",
+      "Arm64ProgramFixture.lean"
+    ]
+  },
+  {
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-sp-pointer-reads/Axioms.lean"
+    ],
+    "queries": 6,
+    "public_types": 4,
+    "exit": 0
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--exit-code",
+      "9c617740f",
+      "--",
+      "kprog/arm64",
+      "kprog/x86/x86_sim*.h",
+      "runner/libs/workload.py",
+      "runner/libs/app_runners",
+      "corpus/driver.py",
+      "corpus/config",
+      "micro/driver.py",
+      "micro/config",
+      "micro/programs",
+      "Makefile",
+      "micro/Makefile",
+      "runner/mk",
+      "kprog/perf/one-image/Makefile"
+    ],
+    "exit": 0
+  },
+  {
+    "command": [
+      "lake",
+      "build",
+      "KProgFormal.Clight",
+      "KProgFormal.ClightRefinement.Arm64RegisterReads",
+      "KProgFormal.ClightRefinement.Arm64OriginCache"
+    ],
+    "purpose": "remove one trailing blank from an empty ARM C macro",
+    "exit": 0
+  }
+]

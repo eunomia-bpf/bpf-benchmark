@@ -8,6 +8,13 @@ kprog belong in those forks. M3 replaced the local ISA bodies; M4 adapted the
 shared simulator C for Clight export. M5 now proves the exported handlers
 against those bases; its counts must be recomputed.
 
+Clight imports are [generated build products](results/clight-build/README.md).
+`lake build` generates them from C before module-input processing;
+`make clight-sources` runs that build step directly. The seven profile C
+snapshots live in `c/`, with build symlinks preserving their original export
+metadata. Edit C directly. The current M5 export/refinement subset is checked
+separately; unchanged legacy proof failures keep the whole-package result open.
+
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|
 | AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `da428593b21d` | Lean 4.35.0 |
