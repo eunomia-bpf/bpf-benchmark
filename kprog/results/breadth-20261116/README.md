@@ -109,10 +109,16 @@ stats 1, 3 samples of 180 s, kernel `7.0.0-rc2+`.
 
 Four of six pass with zero loader failures. The two that do not are new
 failures, not the round-one ones: Tetragon's `CONFIG_ITER_NUM` GOT-reloc is
-closed and its native arm now dies at the third replacement (the count, not the
-program — `corpus/results/tet-tetragon-cap-20261116/README.md`), and Tracee's
-512-chunk ceiling is closed and replaced by `BPF data map .rodata.str1.1 lacks
-BTF` on `sys_enter_submit`.
+closed and its native arm dies in the guest, and Tracee's 512-chunk ceiling is
+closed and replaced by `BPF data map .rodata.str1.1 lacks BTF` on
+`sys_enter_submit`.
+
+Tetragon's trigger is the single entry `event_wake_up_n`, not a replacement
+count: twelve runs split exactly on whether the manifest contains it, and
+`manifest-wake.json` (that one entry) kills the VM on its own
+(`corpus/results/tet-tetragon-cap-20261116/README.md`). The earlier "third
+replacement" reading was an artifact of set construction — every set with three
+or more entries happened to contain it.
 
 ### Stats on
 
@@ -196,6 +202,26 @@ neither is a per-call regression: Cilium's is the eBPF arm having improved
   errors per sample in both arms). Katran's 1.113x floor is therefore a
   throughput target the current code does not meet; it is not a per-call
   regression.
+
+## After the helper ABI repair: the wake entry stops killing the guest
+
+Every row above ran on the payload built before `e688689e6`, which is the
+`core-compat.h` that gives Tetragon's helpers compiler-visible SysV calls. On a
+payload rebuilt from it, the isolated `event_wake_up_n` entry that ended twelve
+earlier runs now replaces and runs
+(`corpus/results/x86_kvm_corpus_20261116_082133_210399`): fd 71 → 87, native
+JIT 5012 B against the original's 7339, zero loader failures, both arms ok,
+stress-ng 6/6 with zero failures in each. The death was the helper call shape.
+
+The full 94-entry canonical manifest then survives the load and gets ten
+replacements in, including `event_wake_up_n` and `tg_kp_bprm_comm`, before
+Tetragon exits on `generic_kprobe_filter_arg`. That is a linker gap, not a
+producer one: `native-link` reports `x86 helper tail branch cel_expr_0 has no
+helper address`, and `cel_expr_0..7` are policy-load symbols
+(`vendor/bpf/tetragon/bpf/process/cel_expr.h:8`), so no plan can carry an
+address for them. Both retests used stats off, so Tetragon still has no
+timing row; the diagnosis is in
+`kprog/results/tet-canonical-retest-20261116/README.md`.
 
 ## The original OTel ELF and `source_bpf_object`
 
