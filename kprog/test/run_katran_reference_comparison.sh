@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Publish the data-layout fix after the breadth round, retry BCC, and compare
-# Katran linkers on that same loader through the frozen entry.
+# Compare Katran linkers after the restarted breadth round, retaining the
+# published loader and frozen entry defaults for both linker outputs.
 set -euo pipefail
 comparison_root=/workspaces/repository
-comparison_output=/workspaces/kprog-raw/perf/20261116-post-round-data-fix
+comparison_output=/workspaces/kprog-raw/perf/20261116-katran-linker-after-rerun
 comparison_reference=/workspaces/kprog-raw/paper-tree-untracked/native-sim/x86/native_lab/native_link/target/release/native-link
 comparison_locks=/workspaces/.agent-state/kprog-lanes/locks
 
@@ -23,8 +23,6 @@ measure_app() {
 if [[ ${1:-} == --dry-run ]]; then
     declare -f publish_linker measure_app
     printf '%s\n' 'Wait for locks/timing, then release it before image publication.' \
-        'publish_linker --loader-only fixed-loader-image' \
-        'measure_app bcc/set 0' 'measure_app bcc/set 1' \
         'measure_app katran 0' 'measure_app katran 1' \
         'publish_linker --linker-input reference-image' \
         'measure_app katran 0' 'measure_app katran 1' \
@@ -37,7 +35,7 @@ date -u +%FT%TZ > "$comparison_output/waiting"
 # The rotate job holds timing for its whole round. Releasing this wait before
 # publication keeps image builds outside the timing resource's critical section.
 flock -x "$comparison_locks/timing" true
-printf -- '- LANE PERF %s: The post-round job acquired timing after the breadth round. Publishing the DATASEC loader fix under image EX, then running BCC stats 0/1 and current Katran stats 0/1 through unchanged corpus defaults. Reference Katran follows on this same loader; current source rebuilds into the sole image afterward. Raw: %s.\n' \
+printf -- '- LANE PERF %s: The Katran comparison follows the restarted breadth round. Running current and May linker output on the same published loader through unchanged corpus defaults; current source rebuilds into the sole image afterward. Raw: %s.\n' \
     "$(date -u +%FT%TZ)" "$comparison_output" >> /workspaces/.agent-state/kprog-lanes/COORDINATION.md
 
 # Successful and failed timed Make invocations both rebuild current source.
@@ -54,9 +52,8 @@ rebuild_current() {
     exit "$comparison_status"
 }
 trap rebuild_current EXIT
-publish_linker --loader-only fixed-loader-image > "$comparison_output/fixed-loader-image.log" 2>&1
 comparison_failed=0
-for comparison_app in bcc/set katran; do
+for comparison_app in katran; do
     for comparison_stats in 0 1; do
         comparison_label=${comparison_app//\//_}
         if measure_app "$comparison_app" "$comparison_stats" > "$comparison_output/current-$comparison_label-stats-$comparison_stats.log" 2>&1; then
