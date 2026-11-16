@@ -1,0 +1,47 @@
+{
+  "raw": "/workspaces/kprog-raw/perf/20261116-otel-helper-memory",
+  "frontend": [
+    {
+      "target": "inttoptr (i64 1 to ptr)",
+      "count": 110,
+      "example": "%50 = call ptr inttoptr (i64 1 to ptr)(ptr noundef nonnull @per_cpu_records, ptr noundef %49) #4, !dbg !15653"
+    },
+    {
+      "target": "inttoptr (i64 6 to ptr)",
+      "count": 108,
+      "example": "%512 = call i64 (ptr, i32, ...) inttoptr (i64 6 to ptr)(ptr noundef %458, i32 noundef %504, i64 noundef %509, i64 noundef %510, i64 noundef %511) #4, !dbg !15780"
+    },
+    {
+      "target": "inttoptr (i64 112 to ptr)",
+      "count": 24,
+      "example": "%6434 = call i64 inttoptr (i64 112 to ptr)(ptr noundef %6388, i32 noundef %6430, ptr noundef %6429) #4, !dbg !17309"
+    },
+    {
+      "target": "inttoptr (i64 12 to ptr)",
+      "count": 1,
+      "example": "%66872 = call i64 inttoptr (i64 12 to ptr)(ptr noundef %66690, ptr noundef nonnull @perf_progs, i32 noundef %66868) #4, !dbg !26908"
+    }
+  ],
+  "optimized": [
+    {
+      "target": "inttoptr (i64 1 to ptr)",
+      "count": 110,
+      "example": "%24 = call ptr inttoptr (i64 1 to ptr)(ptr noundef nonnull @per_cpu_records, ptr noundef %23) #5, !dbg !15652"
+    },
+    {
+      "target": "inttoptr (i64 6 to ptr)",
+      "count": 108,
+      "example": "%159 = call i64 (ptr, i32, ...) inttoptr (i64 6 to ptr)(ptr noundef %155, i32 noundef %151, i64 noundef %156, i64 noundef %157, i64 noundef %158) #5, !dbg !15777"
+    },
+    {
+      "target": "inttoptr (i64 112 to ptr)",
+      "count": 24,
+      "example": "%2200 = call i64 inttoptr (i64 112 to ptr)(ptr noundef %2199, i32 noundef %2196, ptr noundef %2194) #5, !dbg !17178"
+    },
+    {
+      "target": "inttoptr (i64 12 to ptr)",
+      "count": 1,
+      "example": "%21074 = call i64 inttoptr (i64 12 to ptr)(ptr noundef %20946, ptr noundef nonnull @perf_progs, i32 noundef %21070) #5, !dbg !26083"
+    }
+  ]
+}

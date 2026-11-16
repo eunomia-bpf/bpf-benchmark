@@ -43,6 +43,8 @@ def storage_text_observation(text, command=None):
     lines = text.splitlines()
     assemblies = Counter()
     private_choices = Counter()
+    call_shapes = Counter()
+    call_examples = {}
     operand_counts = Counter(re.findall(r'%[-\w.]+', text))
     for line in lines:
         assembly = re.search(r'\basm(?: sideeffect)?(?: alignstack)?(?: inteldialect)? "((?:[^"\\]|\\.)*)", "([^"]*)"', line)
@@ -53,6 +55,12 @@ def storage_text_observation(text, command=None):
             # SSA use observation only; deciding deadness belongs to LLVM.
             uses = operand_counts[choice[1]]-1
             private_choices['with_uses' if uses else 'without_uses'] += 1
+        if 'call ' in line and ' asm' not in line and '@llvm.' not in line:
+            target = re.search(r'\bcall\b.*?(@[-\w.]+|inttoptr \([^)]*\)|%[-\w.]+)\(', line)
+            if target:
+                shape = target[1]
+                call_shapes[shape] += 1
+                call_examples.setdefault(shape, line.strip())
     definitions = {}
     for line in lines:
         match = re.match(r'\s*(%[-\w.]+) = (.*)', line)
@@ -85,6 +93,8 @@ def storage_text_observation(text, command=None):
                 inline_assembly=[dict(template=template, constraints=constraints, count=count)
                                  for (template, constraints), count in assemblies.most_common()],
                 private_choice_uses=dict(private_choices),
+                call_shapes=[dict(target=target, count=count, example=call_examples[target])
+                             for target, count in call_shapes.most_common()],
                 scope='Direct textual operand observations, not alias/escape proofs or a transformation.')
 
 
