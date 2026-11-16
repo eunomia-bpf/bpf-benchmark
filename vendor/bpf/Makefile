@@ -13,7 +13,6 @@ GOARCH := amd64
 
 CLANG ?= clang-18
 LLC ?= llc-18
-BPF_LINK ?= llvm-link-18
 LLVM_NM ?= llvm-nm-18
 LLVM_STRIP ?= llvm-strip-18
 LLVM_OBJCOPY ?= llvm-objcopy-18
@@ -23,6 +22,7 @@ BPFTOOL ?= $(VENDOR)/build/x86/bpftool/bin/bpftool
 # header generated from the host silently compiles BCC against a different kernel.
 VMLINUX_BTF ?= /workspaces/.agent-state/kprog-ck/build-x86/vmlinux
 NATIVE_LINK ?= $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link
+NATIVE_IR_LINK ?= /var/tmp/kprog-tmp/perf/perf-context-lto/link-embedded-ir
 
 OUT := $(BUILD)/$(ARCH)/$(KERNEL_RELEASE)
 VMLINUX_H := targets/$(ARCH)/$(KERNEL_RELEASE)/vmlinux.h
@@ -288,8 +288,11 @@ $(NATIVE_OUT)/otel/%.native.o: $(OTEL_EBPF_DIR)/%.ebpf.c $(OTEL_EBPF_DIR)/errors
 # clang -r concatenates each unit's .llvmbc into one section, which is two
 # modules in a row, not one module: llvm-link can read the section but not the
 # program. The runtime context compiler needs a single module, so extract the
-# unit bitcode, link it, and replace the combined object's .llvmbc with it.
-$(OTEL_NATIVE_OBJECT): $(OTEL_NATIVE_UNIT_OBJS)
+# unit bitcode, retain its section entry roots, and embed the linked module.
+$(NATIVE_IR_LINK): $(ROOT)/kprog/x86/link_embedded_ir.cpp
+	$(MAKE) -r -f $(ROOT)/kprog/test/perf-context-lto.mk ir-linker CPUS=16
+
+$(OTEL_NATIVE_OBJECT): $(OTEL_NATIVE_UNIT_OBJS) $(NATIVE_IR_LINK)
 	install -d "$(dir $@)"
 	"$(CLANG)" -r -o "$@" $(OTEL_NATIVE_UNIT_OBJS)
 	install -d "$(OTEL_NATIVE_IR_DIR)"
@@ -297,7 +300,7 @@ $(OTEL_NATIVE_OBJECT): $(OTEL_NATIVE_UNIT_OBJS)
 	for o in $(OTEL_NATIVE_UNIT_OBJS); do \
 		"$(LLVM_OBJCOPY)" --dump-section .llvmbc="$(OTEL_NATIVE_IR_DIR)/$$(basename $$o .native.o).bc" "$$o"; \
 	done
-	"$(BPF_LINK)" $(OTEL_NATIVE_IR_DIR)/*.bc -o "$(OTEL_NATIVE_IR)"
+	"$(NATIVE_IR_LINK)" $(OTEL_NATIVE_IR_DIR)/*.bc -o "$(OTEL_NATIVE_IR)"
 	"$(LLVM_OBJCOPY)" --remove-section .llvmbc --remove-section .llvmcmd "$@"
 	"$(LLVM_OBJCOPY)" --add-section .llvmbc="$(OTEL_NATIVE_IR)" "$@"
 

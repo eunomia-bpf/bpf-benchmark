@@ -6,6 +6,9 @@
 #define ENTRY perf_entry
 #endif
 extern unsigned long context_helper(void *);
+#ifdef PERF_CONTEXT_STATIC
+static __attribute__((used))
+#endif
 __attribute__((section("perf_event")))
 unsigned long ENTRY(struct bpf_perf_event_data *ctx)
 {

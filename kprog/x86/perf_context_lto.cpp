@@ -48,6 +48,14 @@ int main(int argc, char **argv) {
   }
   auto M = parseIR(Buffer, Error, C);
   if (!M) { Error.print(argv[0], errs()); return 1; }
+  auto *F = M->getFunction(Symbol);
+  if (!F || F->isDeclaration() || F->arg_empty()) {
+    errs() << "PERF_EVENT LTO entry is missing: " << Symbol << '\n'; return 1;
+  }
+  // A static ELF entry is still the selected public program boundary. Keep
+  // its ABI and body alive through both module optimization pipelines.
+  F->setLinkage(GlobalValue::ExternalLinkage);
+  F->setDSOLocal(true);
   InitializeNativeTarget(); InitializeNativeTargetAsmPrinter(); InitializeNativeTargetAsmParser();
   std::string TargetError;
   auto *Target = TargetRegistry::lookupTarget(M->getTargetTriple(), TargetError);
@@ -65,10 +73,6 @@ int main(int argc, char **argv) {
   PB.crossRegisterProxies(LAM, FAM, CGAM, MAM);
   // Embedded cc1 IR precedes promotion/inlining; expose its context uses first.
   PB.buildPerModuleDefaultPipeline(OptimizationLevel::O3).run(*M, MAM);
-  auto *F = M->getFunction(Symbol);
-  if (!F || F->isDeclaration() || F->arg_empty()) {
-    errs() << "PERF_EVENT LTO entry is missing: " << Symbol << '\n'; return 1;
-  }
   std::unique_ptr<btf, decltype(&btf__free)> Types(
       btf__parse(Kernel.c_str(), nullptr), btf__free);
   if (!Types) { errs() << "cannot read boot kernel BTF\n"; return 1; }

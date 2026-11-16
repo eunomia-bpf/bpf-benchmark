@@ -11,6 +11,24 @@ CC := clang-18
 FLAGS := -O3 -g -fPIC -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables
 
 .PHONY: compiler check replay
+IR_LINKER := $(BUILD)/link-embedded-ir
+.PHONY: ir-linker
+ir-linker: $(IR_LINKER)
+$(IR_LINKER): $(ROOT)/kprog/x86/link_embedded_ir.cpp
+	install -d $(BUILD)
+	taskset -c $(CPUS) prlimit --as=8589934592 -- $(CXX) $$(llvm-config-18 --cxxflags) -std=c++17 -Wall -Wextra -Wno-unused-parameter $< -o $@ $$(llvm-config-18 --link-static --ldflags --libs core irreader linker bitwriter support --system-libs)
+
+.PHONY: ir-link-check
+ir-link-check: ir-linker
+	install -d $(OUTPUT)
+	$(IR_LINKER) $(ROOT)/vendor/build/native-bpf/x86/$(shell cat $(KERNEL)/include/config/kernel.release)/native/otel/ir/*.bc -o $(BUILD)/linked-entries.bc
+	llvm-nm-18 --defined-only $(BUILD)/linked-entries.bc > $(OUTPUT)/linked-symbols.txt
+	$(MAKE) -r -f $(ROOT)/kprog/test/perf-context-lto.mk replay CPUS=$(CPUS) REPLAY_INPUT=$(BUILD)/linked-entries.bc REPLAY_SYMBOL=perf_go_labels OUTPUT=$(OUTPUT)/static-entry
+
+.PHONY: stage
+stage:
+	install -m 0755 $(BUILD)/perf-context-lto $(ROOT)/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto
+
 compiler:
 	install -d $(BUILD) $(OUTPUT)
 	taskset -c $(CPUS) prlimit --as=8589934592 -- $(CXX) $$(llvm-config-18 --cxxflags) -std=c++17 -fexceptions -Wall -Wextra -Wno-unused-parameter -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include $(ROOT)/kprog/x86/perf_context_lto.cpp -o $(BUILD)/perf-context-lto $$(llvm-config-18 --link-static --ldflags --libs core irreader analysis support passes native object --system-libs) $(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz
@@ -28,6 +46,10 @@ check: compiler
 	$(BUILD)/loader-context $(BUILD)/input.o $(BUILD)/perf-context-lto $(KERNEL)/vmlinux $(BUILD)/cache > $(OUTPUT)/loader-path.txt
 	read -r native < $(OUTPUT)/loader-path.txt; $(CC) $(FLAGS) "$$native" $(BUILD)/reference.o $(BUILD)/driver.o -o $(BUILD)/loader-after
 	$(BUILD)/loader-after | tee $(OUTPUT)/loader-after.txt
+	$(CC) $(FLAGS) -Wno-unknown-attributes -I$(VMLINUX) -DPERF_CONTEXT_STATIC -Xclang -fembed-bitcode=all -c $(ROOT)/kprog/test/perf_context_lto.c -o $(BUILD)/static-input.o
+	$(BUILD)/perf-context-lto $(BUILD)/static-input.o --symbol perf_entry --kernel-btf $(KERNEL)/vmlinux -o $(BUILD)/static-physical.o 2> $(OUTPUT)/static-compiler.txt
+	$(CC) $(FLAGS) $(BUILD)/static-physical.o $(BUILD)/reference.o $(BUILD)/driver.o -o $(BUILD)/static-after
+	$(BUILD)/static-after | tee $(OUTPUT)/static-after.txt
 	llvm-objdump-18 -dr $(BUILD)/physical.o > $(OUTPUT)/physical.dis
 	tar -C $(BUILD) -czf $(OUTPUT)/build.tar.gz .
 	date -u +%FT%TZ > $(OUTPUT)/finished
