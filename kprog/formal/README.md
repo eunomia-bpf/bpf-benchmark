@@ -1559,7 +1559,18 @@ Typed callees still require an actual helper binding/effect relation in M5;
 this is C extraction and ABI coverage, not kernel-helper correctness.
 [Helper receipts](results/m4-arm64-helpers/README.md) retain the scope.
 
-M4 remains open for entry/continuation bindings, remaining producer/storage
+The actual RAW/XDP/SKB entries now export through typed continuations borrowing
+their live locals in [Arm64Entry](c/Arm64Entry.c). The default 160-byte/bias 96
+AST has 3 functions/840,530B; all eleven Clight modules/48 Lean jobs pass. Native
+and adapter tests check 448 continuations per profile across six storage profiles,
+including distinct SKB context-cast results, ordered context/cast refusal and
+six negative mutations. Two native fixtures retain exact allocated bytes and
+relocations. The entry export leaves an explicit program-body continuation hole;
+it does not bind arbitrary producer return tables or establish a refinement.
+[Entry receipts](results/m4-arm64-entry/README.md) distinguish host profile checks
+from the checked-in default profile and whole-default byte coverage.
+
+M4 remains open for program/return-continuation bindings, remaining producer/storage
 profiles, platform correspondence and full default compiled-byte coverage. The
 stated x86 inline profile and ARM instruction dispatcher clear their earlier
 syntax/code-generation obstructions. Preserve

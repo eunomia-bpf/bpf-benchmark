@@ -1,0 +1,88 @@
+{
+  "step": "M4 ARM entry continuation extraction",
+  "status": "validated; M4 remains open",
+  "raw": "/workspaces/kprog-raw/formal/m4-arm64-entry",
+  "baseline": "5cc971b3bc542e138aeabcc798fefb642676837d",
+  "exports": {
+    "module": "Arm64Entry",
+    "roots": 3,
+    "bytes": 840530,
+    "profile": {
+      "capacity": 160,
+      "bias": 96
+    },
+    "deterministic": true
+  },
+  "checks": {
+    "make_clight": 0,
+    "all_11_clight_modules": {
+      "exit": 0,
+      "jobs": 48
+    },
+    "axiom_queries": 4,
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "host_continuations_per_profile_per_mode": 448,
+    "host_profiles": [
+      [
+        1,
+        0
+      ],
+      [
+        7,
+        -3
+      ],
+      [
+        9,
+        4
+      ],
+      [
+        160,
+        96
+      ],
+      [
+        200,
+        160
+      ],
+      [
+        376,
+        280
+      ]
+    ],
+    "historical_native_continuations": 448,
+    "negative_mutations": 6,
+    "cast_refusal_prefixes_per_mode": 1,
+    "adapter_context_refusal_prefixes": 2
+  },
+  "native_fidelity": {
+    "fidelity-arm64_context_compile": {
+      "allocated_sections_equal": true,
+      "allocated_relocations_equal": true,
+      "current_stream_equals_normal_build": true,
+      "allocated_section_bytes": {
+        ".text": 0,
+        "xdp": 1152,
+        "tc": 1896,
+        "license": 4
+      },
+      "allocated_relocations": 4
+    },
+    "fidelity-arm64_execute_compile": {
+      "allocated_sections_equal": true,
+      "allocated_relocations_equal": true,
+      "current_stream_equals_normal_build": true,
+      "allocated_section_bytes": {
+        ".text": 0,
+        "socket": 11104,
+        "xdp": 15320,
+        "license": 4
+      },
+      "allocated_relocations": 8
+    }
+  },
+  "preprocessed_bytes": 316867,
+  "scope": "Entry segment with live borrowed locals and typed continuation; no arbitrary program/PC/helper-target closure or migrated refinement theorem."
+}
