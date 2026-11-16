@@ -5,7 +5,7 @@ publish_batch() {
     local root=/workspaces/repository
     local raw=$2
     local locks=/workspaces/.agent-state/kprog-lanes/locks
-    local wait_pid=$1 old_image new_image
+    local wait_pid=$1 old_image new_image candidate
     trap 'rc=$?; printf "%s\n" "$rc" > "$kprog_publication_raw/exit-code"; date -u +%FT%TZ > "$kprog_publication_raw/controller.finished"' EXIT
     cd "$root"
     date -u +%FT%TZ > "$raw/started"
@@ -22,6 +22,12 @@ publish_batch() {
     make -f kprog/perf/one-image/Makefile image JOBS=8 > "$raw/image.log" 2>&1
     new_image=$(docker image inspect --format '{{.Id}}' bpf-benchmark/kprog:current)
     printf '%s\n' "$new_image" > "$raw/image.id"
+    docker image ls --all --no-trunc --format '{{.ID}}' > "$raw/image-inventory.txt"
+    while IFS= read -r candidate; do
+        if [ "$candidate" = "$old_image" ] && [ "$old_image" != "$new_image" ]; then
+            docker image rm --no-prune "$old_image" > "$raw/image-cleanup.log" 2>&1
+        fi
+    done < "$raw/image-inventory.txt"
     cat /workspaces/.agent-state/kprog-ck/build-x86/include/config/kernel.release > "$raw/kernel.release"
     date -u +%FT%TZ > "$raw/image.finished"
     flock -u 9

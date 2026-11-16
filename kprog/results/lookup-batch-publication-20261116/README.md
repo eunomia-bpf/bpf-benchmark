@@ -67,3 +67,9 @@ fixed in source by 3940c4bee. Tracee and Katran still follow in the check.
 directory, so a follow-up publication preserves this first build/check rather
 than overwriting its logs. Script parsing and the result-local dry-run pass.
 This changes only experiment bookkeeping, not the frozen recipe or entry.
+
+For follow-up publications, the controller records Docker's actual image
+inventory and removes the exact superseded object if it is still present.
+An already absent object requires no deletion. Errors in inventory collection
+or a required removal remain visible. This enforces the existing one-image
+resource rule and does not add a benchmark admission condition.
