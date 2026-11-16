@@ -78,7 +78,7 @@ def readonly_relocations(elf, section_index, symbol):
     return tuple(sorted(result)), tuple(sorted(maps)), tuple(sorted(absolute))
 
 
-def private_results_dead(insns, starts, scratch, flags, decode, exit_addr, call_targets, table_targets):
+def private_results_dead(insns, starts, scratch, flags, decode, exit_addr, call_targets, table_targets, *, initial=None):
     """Check the bit masks of private definitions across the actual native CFG."""
     by_addr = {i.addr: i for i in insns}
     following = {a.addr: b.addr for a, b in zip(insns, insns[1:])}
@@ -86,7 +86,8 @@ def private_results_dead(insns, starts, scratch, flags, decode, exit_addr, call_
     caller_saved = ('X86_RAX', 'X86_RCX', 'X86_RDX', 'X86_RSI', 'X86_RDI',
                     'X86_R8', 'X86_R9', 'X86_R10', 'X86_R11')
     arguments = ('X86_RDI', 'X86_RSI', 'X86_RDX', 'X86_RCX', 'X86_R8', 'X86_R9')
-    initial = (full,) * len(scratch) + (flags,)
+    if initial is None:
+        initial = (full,) * len(scratch) + (flags,)
     pending = deque((target, initial) for target in starts)
     visited = {}
     while pending:
@@ -287,12 +288,12 @@ def lower_relative_tables(insns, rodata, decode, exit_addr, function_starts):
     provisional_insns = [provisional.get(i.addr, i) for i in insns if i.addr not in interiors]
     call_targets = decode.indirect_targets(provisional_insns, exit_addr, function_starts)
 
-    def dead(candidate):
+    def dead(candidate, private):
         add = candidate['window'][-2]
         if add.effects is None:
             raise ValueError('relative table lowering requires native instruction effects')
         return private_results_dead(insns, [target for _, target in candidate['choices']],
-            candidate['scratch'], add.effects.flags_written, decode, exit_addr, call_targets, table_targets)
+            candidate['scratch'], add.effects.flags_written, decode, exit_addr, call_targets, table_targets, initial=private)
 
     replacements, removed = {}, set()
     for candidate in candidates:
@@ -302,14 +303,22 @@ def lower_relative_tables(insns, rodata, decode, exit_addr, function_starts):
             raise ValueError('relative table computation has an external CFG entry')
         if add.effects is None:
             raise ValueError('relative table lowering requires native instruction effects')
+        private = (full,) * len(candidate['scratch']) + (add.effects.flags_written,)
+        destination = candidate['scratch'][-1]
         for instruction in candidate['scheduled']:
             if instruction.effects is None:
                 raise ValueError('relative table schedule lacks native instruction effects')
             effects = instruction.effects
-            touched = dict(effects.reads + effects.writes)
-            if any(touched.get(reg, 0) for reg in candidate['scratch']) or effects.flags_read & add.effects.flags_written:
+            reads, writes = dict(effects.reads), dict(effects.writes)
+            if (any(reads.get(reg, 0) & mask for reg, mask in zip(candidate['scratch'], private[:-1])) or
+                    writes.get(destination, 0) or effects.flags_read & private[-1]):
                 raise ValueError('relative table schedule observes or overwrites private results')
-        if not dead(candidate):
+            # A scheduled definition kills the old private bits. Its own value
+            # remains in the instruction stream and may be observed by cases.
+            private = tuple(mask & ~writes.get(reg, 0)
+                for reg, mask in zip(candidate['scratch'], private[:-1])) + (
+                    private[-1] & ~effects.flags_written,)
+        if not dead(candidate, private):
             raise ValueError('relative table computation has live register or flag results')
         replacements[lea.addr] = captured(candidate)
         replacements[jump.addr] = dispatch(candidate)

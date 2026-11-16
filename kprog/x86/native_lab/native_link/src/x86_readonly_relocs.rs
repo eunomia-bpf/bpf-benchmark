@@ -564,7 +564,8 @@ mod tests {
             "/var/tmp/kprog-tmp/perf/kernel-layout/kernel-layout.json")?)?;
         let mut rows = Vec::new();
         for (name, selection) in [("clobber", "-DSCHEDULE_WRITE_TARGET"),
-            ("flags", "-DSCHEDULE_READ_FLAGS"), ("scheduled", "-DSCHEDULE_NORMAL")] {
+            ("flags", "-DSCHEDULE_READ_FLAGS"), ("partial", "-DSCHEDULE_PARTIAL_BASE"),
+            ("base", "-DSCHEDULE_WRITE_BASE"), ("scheduled", "-DSCHEDULE_NORMAL")] {
             let native = build.join("scheduled.native.o");
             let command = ["clang-18", "-target", "x86_64-linux-gnu", "-c", selection,
                 "/workspaces/repository/kprog/test/native_scheduled_code_table.S",
@@ -595,16 +596,16 @@ mod tests {
                 &HashMap::new(), &[], false, true, Some(&layout.array), Some(&layout.probe_read),
                 Some(&layout.hash), Some(&layout.lpm), false)?;
             let mut code = linked.blob; code.push(0xc3);
-            if name == "scheduled" {
+            if name == "scheduled" || name == "base" {
                 for index in 0..64u64 {
                     let mut context = [index];
                     let actual = memory::call_blob(&code, context.as_mut_ptr().cast(), 0, 0) as usize as u32;
                     let selected = index & 7;
-                    assert_eq!(actual, if selected < 4 { (selected as u32 + 1)*10 + 10 } else { 0 });
+                    assert_eq!(actual, if selected < 4 { (selected as u32 + 1)*10 + 10 + if name == "base" {11} else {0} } else { 0 });
                 }
             }
             rows.push(serde_json::json!({"variant":name,"table_identity":true,
-                "proof_slots":4,"native_host_cases":if name=="scheduled" {64} else {0}}));
+                "proof_slots":4,"native_host_cases":if name=="scheduled" || name=="base" {64} else {0}}));
         }
         fs::write(build.join("rust-result.json"), serde_json::to_vec_pretty(&rows)?)?;
         Ok(())

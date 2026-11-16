@@ -52,9 +52,10 @@ guest-kernel-layout:
 	cat /sys/kernel/btf/vmlinux > $(OUTPUT)/kernel.btf
 	$(KERNEL_LAYOUT_BUILD)/facts /sys/kernel/btf/vmlinux /proc/kallsyms > $(OUTPUT)/kernel-layout.json
 
+CHECK_CPUS ?= 8-11
 .PHONY: check build
 check: $(KERNEL_LAYOUT)
-	taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) NATIVE_LINK_HASH_TEST_OUTPUT=$(OUTPUT)/hash-execution cargo test --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
+	taskset -c $(CHECK_CPUS) prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) NATIVE_LINK_HASH_TEST_OUTPUT=$(OUTPUT)/hash-execution cargo test --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
 
 .PHONY: map-table-b
 map-table-b: check
@@ -78,7 +79,7 @@ guest-shared-table-stock:
 	$(OUTPUT)/client/stock-client $(OUTPUT)/inputs/shared.original.bpf.o $(OUTPUT)/inputs/shared.bpf.o $(OUTPUT)/original.verifier.log $(OUTPUT)/generated.verifier.log second_table shared_model_x86_sim_xdp > $(OUTPUT)/stock.jsonl
 
 build:
-	flock -x /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) bash -eu -c 'if test -L "$(LINKER_TARGET)/release/native-link"; then unlink "$(LINKER_TARGET)/release/native-link"; fi; exec cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml'
+	flock -x /workspaces/.agent-state/kprog-lanes/locks/image taskset -c $(CHECK_CPUS) prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) bash -eu -c 'if test -L "$(LINKER_TARGET)/release/native-link"; then unlink "$(LINKER_TARGET)/release/native-link"; fi; exec cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml'
 
 .PHONY: preserve-running-linker
 preserve-running-linker:
@@ -123,7 +124,7 @@ publish-normal-pair: $(CONTEXT_TOOL) $(CHECKED_TOOL)
 	git -C $(ROOT) rev-parse HEAD > $(OUTPUT)/source-head.txt
 	CMAKE_BUILD_PARALLEL_LEVEL=2 $(MAKE) -r -C $(ROOT)/kprog/libnativeloader trusted-service BUILD_DIR=/workspaces/.agent-state/kprog-ck/verified-loader
 	if test -L $(LINKER_TARGET)/release/native-link; then unlink $(LINKER_TARGET)/release/native-link; fi
-	taskset -c 8-11 prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
+	taskset -c $(CHECK_CPUS) prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=$(LINKER_TARGET) cargo build --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml
 	install -m755 $(CONTEXT_TOOL) /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds
 	install -m755 $(CHECKED_TOOL) /workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir
 	sha256sum $(LINKER_TARGET)/release/native-link /workspaces/.agent-state/kprog-ck/verified-loader/trusted-native-loader /workspaces/.agent-state/kprog-ck/verified-loader/libnative_loader.a /workspaces/.agent-state/kprog-ck/verified-loader/libnative_loader.so /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds /workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir > $(OUTPUT)/tool-sha256.txt
@@ -282,7 +283,7 @@ guest-map-table-lookup-checked:
 
 .PHONY: scheduled-table-b
 scheduled-table-b: $(CONTEXT_TOOL)
-	taskset -c 8-11 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_scheduled_table.py --build /var/tmp/kprog-tmp/perf/scheduled-table --output $(OUTPUT)/simulator --bounds $(CONTEXT_TOOL)
+	taskset -c $(CHECK_CPUS) prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_scheduled_table.py --build /var/tmp/kprog-tmp/perf/scheduled-table --output $(OUTPUT)/simulator --bounds $(CONTEXT_TOOL)
 
 .PHONY: scheduled-otel-source
 scheduled-otel-source:
@@ -294,11 +295,12 @@ scheduled-table-reference:
 
 scheduled-table-stock: /var/tmp/kprog-tmp/perf/scheduled-table/stock-client
 	install -d $(OUTPUT) $(OUTPUT)/inputs $(OUTPUT)/client
-	taskset -c 16-17 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --rodir $(OUTPUT)/inputs=/var/tmp/kprog-tmp/perf/scheduled-table --rodir $(OUTPUT)/client=/var/tmp/kprog-tmp/perf/scheduled-table --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-scheduled-table-stock OUTPUT=$(OUTPUT)'
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 16-17 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --rodir $(OUTPUT)/inputs=/var/tmp/kprog-tmp/perf/scheduled-table --rodir $(OUTPUT)/client=/var/tmp/kprog-tmp/perf/scheduled-table --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-scheduled-table-stock OUTPUT=$(OUTPUT)'
 
 guest-scheduled-table-stock:
 	uname -r > $(OUTPUT)/kernel.release
 	$(OUTPUT)/client/stock-client $(OUTPUT)/inputs/scheduled.original.bpf.o $(OUTPUT)/inputs/scheduled.bpf.o $(OUTPUT)/original.verifier.log $(OUTPUT)/generated.verifier.log > $(OUTPUT)/stock.jsonl
+	$(OUTPUT)/client/stock-client $(OUTPUT)/inputs/base.bpf.o trusted_x86_x86_sim_xdp $(OUTPUT)/base.verifier.log >> $(OUTPUT)/stock.jsonl
 
 /var/tmp/kprog-tmp/perf/scheduled-table/stock-client: $(ROOT)/kprog/test/scheduled_table_stock.cpp $(ROOT)/kprog/libnativeloader/src/native_loader.cpp
 	taskset -c 8-11 prlimit --as=8589934592 -- $(CXX) -std=gnu++20 -O1 -g -ffunction-sections -fdata-sections -I$(ROOT)/kprog/libnativeloader/include -I$(ROOT)/micro/programs/build-x86 -I$(LIBBPF_PREFIX)/include -I$(ROOT)/vendor/libbpf/include -I$(ROOT)/vendor/libbpf/include/uapi $< -Wl,--gc-sections $(LIBBPF_LIBRARY) -lelf -lz -ldl -pthread -o $@
@@ -527,3 +529,11 @@ katran-source-costs:
 .PHONY: katran-hot-instructions
 katran-hot-instructions:
 	taskset -c 8-11 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/perf/profile/hot-jit-instructions.py --capture /workspaces/kprog-raw/perf/20261115-katran-body-profile-retry2/profile --analysis /workspaces/kprog-raw/perf/20261115-katran-body-profile-retry2/analysis-callers/result.json --source-map /workspaces/kprog-raw/perf/20261115-katran-body-profile-retry2/source-audit-profile-facts/jit-source-map.json --output $(OUTPUT)
+
+.PHONY: relative-schedule-replay
+relative-schedule-replay:
+	taskset -c 16-18 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/replay_relative_schedule.py --archive $(SCHEDULE_ARCHIVE) --build /var/tmp/kprog-tmp/perf/relative-schedule --output $(OUTPUT)
+
+.PHONY: relative-schedule-b
+relative-schedule-b: $(CONTEXT_TOOL)
+	taskset -c 16-18 prlimit --as=17179869184 -- python3 $(ROOT)/kprog/test/replay_relative_schedule.py --archive $(SCHEDULE_ARCHIVE) --build /var/tmp/kprog-tmp/perf/relative-schedule --output $(OUTPUT) --compile --bounds $(CONTEXT_TOOL)

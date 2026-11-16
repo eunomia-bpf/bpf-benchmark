@@ -1,0 +1,268 @@
+{
+  "entry": "perf_unwind_native",
+  "proof_sha256": "1a44ae1ffdcc6ee67fb857d9457512ca089acc32aa1d4f8b53a3f66a9b6f285a",
+  "instructions": 5234,
+  "source_archive": "/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/3.success.tar.gz",
+  "generated": false,
+  "error": "relative table schedule observes or overwrites private results",
+  "candidate": {
+    "symbol": "section:SectionIndex(63):.rodata:table_144",
+    "scratch": [
+      "X86_R8",
+      "X86_R9"
+    ],
+    "window": [
+      {
+        "addr": 3485,
+        "raw": "lea    r8,[rip+0x0]",
+        "mnemonic": "lea",
+        "operands": [
+          "r8",
+          "[rip+0x0]"
+        ],
+        "reloc_symbol": "section:SectionIndex(63):.rodata:table_144",
+        "reloc_target": null,
+        "sim_imm": null,
+        "end_addr": 3492,
+        "stack_width": null,
+        "reloc_type": "R_X86_64_PC32",
+        "symbol_offset": 0,
+        "source_pointer": null,
+        "kernel_function": null,
+        "effects": {
+          "reads": [],
+          "writes": [
+            [
+              "X86_R8",
+              18446744073709551615
+            ]
+          ],
+          "flags_read": 0,
+          "flags_written": 0
+        },
+        "code_table": null,
+        "map_table": null
+      },
+      {
+        "addr": 3492,
+        "raw": "movsxd r9,DWORD PTR [r8+rdi*4]",
+        "mnemonic": "movsxd",
+        "operands": [
+          "r9",
+          "DWORD PTR [r8+rdi*4]"
+        ],
+        "reloc_symbol": null,
+        "reloc_target": null,
+        "sim_imm": null,
+        "end_addr": 3496,
+        "stack_width": null,
+        "reloc_type": null,
+        "symbol_offset": 0,
+        "source_pointer": null,
+        "kernel_function": null,
+        "effects": {
+          "reads": [
+            [
+              "X86_R8",
+              18446744073709551615
+            ],
+            [
+              "X86_RDI",
+              18446744073709551615
+            ]
+          ],
+          "writes": [
+            [
+              "X86_R9",
+              18446744073709551615
+            ]
+          ],
+          "flags_read": 0,
+          "flags_written": 0
+        },
+        "code_table": null,
+        "map_table": null
+      },
+      {
+        "addr": 3496,
+        "raw": "add    r9,r8",
+        "mnemonic": "add",
+        "operands": [
+          "r9",
+          "r8"
+        ],
+        "reloc_symbol": null,
+        "reloc_target": null,
+        "sim_imm": null,
+        "end_addr": 3499,
+        "stack_width": null,
+        "reloc_type": null,
+        "symbol_offset": 0,
+        "source_pointer": null,
+        "kernel_function": null,
+        "effects": {
+          "reads": [
+            [
+              "X86_R8",
+              18446744073709551615
+            ],
+            [
+              "X86_R9",
+              18446744073709551615
+            ]
+          ],
+          "writes": [
+            [
+              "X86_R9",
+              18446744073709551615
+            ]
+          ],
+          "flags_read": 0,
+          "flags_written": 63
+        },
+        "code_table": null,
+        "map_table": null
+      },
+      {
+        "addr": 3505,
+        "raw": "jmp    r9",
+        "mnemonic": "jmp",
+        "operands": [
+          "r9"
+        ],
+        "reloc_symbol": null,
+        "reloc_target": null,
+        "sim_imm": null,
+        "end_addr": 3508,
+        "stack_width": null,
+        "reloc_type": null,
+        "symbol_offset": 0,
+        "source_pointer": null,
+        "kernel_function": null,
+        "effects": {
+          "reads": [
+            [
+              "X86_R9",
+              18446744073709551615
+            ]
+          ],
+          "writes": [],
+          "flags_read": 0,
+          "flags_written": 0
+        },
+        "code_table": null,
+        "map_table": null
+      }
+    ],
+    "scheduled": [
+      {
+        "addr": 3499,
+        "raw": "mov    r8,r10",
+        "mnemonic": "mov",
+        "operands": [
+          "r8",
+          "r10"
+        ],
+        "reloc_symbol": null,
+        "reloc_target": null,
+        "sim_imm": null,
+        "end_addr": 3502,
+        "stack_width": null,
+        "reloc_type": null,
+        "symbol_offset": 0,
+        "source_pointer": null,
+        "kernel_function": null,
+        "effects": {
+          "reads": [
+            [
+              "X86_R10",
+              18446744073709551615
+            ]
+          ],
+          "writes": [
+            [
+              "X86_R8",
+              18446744073709551615
+            ]
+          ],
+          "flags_read": 0,
+          "flags_written": 0
+        },
+        "code_table": null,
+        "map_table": null
+      },
+      {
+        "addr": 3502,
+        "raw": "mov    rdi,r12",
+        "mnemonic": "mov",
+        "operands": [
+          "rdi",
+          "r12"
+        ],
+        "reloc_symbol": null,
+        "reloc_target": null,
+        "sim_imm": null,
+        "end_addr": 3505,
+        "stack_width": null,
+        "reloc_type": null,
+        "symbol_offset": 0,
+        "source_pointer": null,
+        "kernel_function": null,
+        "effects": {
+          "reads": [
+            [
+              "X86_R12",
+              18446744073709551615
+            ]
+          ],
+          "writes": [
+            [
+              "X86_RDI",
+              18446744073709551615
+            ]
+          ],
+          "flags_read": 0,
+          "flags_written": 0
+        },
+        "code_table": null,
+        "map_table": null
+      }
+    ]
+  },
+  "offending_instruction": {
+    "addr": 3499,
+    "raw": "mov    r8,r10",
+    "mnemonic": "mov",
+    "operands": [
+      "r8",
+      "r10"
+    ],
+    "reloc_symbol": null,
+    "reloc_target": null,
+    "sim_imm": null,
+    "end_addr": 3502,
+    "stack_width": null,
+    "reloc_type": null,
+    "symbol_offset": 0,
+    "source_pointer": null,
+    "kernel_function": null,
+    "effects": {
+      "reads": [
+        [
+          "X86_R10",
+          18446744073709551615
+        ]
+      ],
+      "writes": [
+        [
+          "X86_R8",
+          18446744073709551615
+        ]
+      ],
+      "flags_read": 0,
+      "flags_written": 0
+    },
+    "code_table": null,
+    "map_table": null
+  }
+}

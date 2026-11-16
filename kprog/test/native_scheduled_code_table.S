@@ -11,7 +11,11 @@ scheduled_table:
     lea rcx,[rip+.Ltable]
     movsxd rdx,DWORD PTR [rcx+rax*4]
     add rdx,rcx
-#if defined(SCHEDULE_WRITE_TARGET)
+#if defined(SCHEDULE_WRITE_BASE)
+    mov ecx,11
+#elif defined(SCHEDULE_PARTIAL_BASE)
+    mov cl,11
+#elif defined(SCHEDULE_WRITE_TARGET)
     mov edx,1
 #elif defined(SCHEDULE_READ_FLAGS)
     adc esi,0
@@ -32,6 +36,9 @@ scheduled_table:
     add eax,40
 .Ldone:
     add eax,esi
+#if defined(SCHEDULE_WRITE_BASE) || defined(SCHEDULE_PARTIAL_BASE)
+    add eax,ecx
+#endif
     xor ecx,ecx
     xor edx,edx
     ret
