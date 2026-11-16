@@ -33,3 +33,18 @@ No component is newly removed on the basis of a missing measurement. The known c
 BCC current throughput is the measured 0.917172979x, with an observed environment/CPU-budget difference: native first-to-last CPU-normalized cap/set/sockfd rates are 0.987/0.991/1.016 while accounted CPU time falls. This is not evidence of a rising CPU cost per reported operation; the underlying cause remains unresolved. It does not justify discarding the result. Retained stats-on sys_enter is 85.473 → 82.676 ns and 108 → 153 B; sys_exit is 113.079 → 88.230 ns and 406 → 3,483 B. Its event counts differ and it is not the queued current stats-on case. See ../bcc-series/README.md.
 
 Reproduce: `make -r -f kprog/test/katran-accounting.mk lto-piece-audit OUTPUT=/workspaces/kprog-raw/perf/20261116-lto-piece-audit`. analysis.json names every raw input and preserves all original per-program counters and colliding IDs. Source review identifies the candidates; separate per-piece installed deltas and current per-call attribution remain open before further LTO optimization. No benchmark knob, program selection or paper text changed.
+
+2026-11-16T12:51:12Z: actual retained-plan byte attribution completed. The four no-show payloads equal the previously saved link outputs; show on/off payloads and relocations also equal. The first attempt's Path/PathBuf compile error and retry1's missing native-unwinder plan remain in raw. Retry2 uses the actual captured V8 plan and passes; no substitute load facts were manufactured for perf_unwind_native.
+
+| Replayed entry | Payload B | Shared hash B | Read routines B | Runtime ARRAY B | LPM B | Remaining payload B |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| bcc/sys_enter | 123 | 0 | 0 | 0 | 0 | 123 |
+| bcc/sys_exit | 3465 | 2444 | 490 | 0 | 0 | 531 |
+| otelcol-ebpf-profiler/native_tracer_entry | 10459 | 2444 | 255 | 67 | 330 | 7363 |
+| otelcol-ebpf-profiler/perf_unwind_v8 | 39963 | 2444 | 326 | 67 | 330 | 36796 |
+
+These are exact spans inside the retained-plan payload, not new installed program measurements or hypothetical size savings after removal. Remaining bytes include original code and per-site transformations; they are not pure source-body bytes. BCC sys_exit's shared hash accounts for 70.53% of the payload. Its kernel-reported installed size is separately 3,483 B; no normalization removes prologue/ABI bytes from the size target. OTel perf_unwind_native has no retained emission plan in this archive; the V8 result does not replace that missing observation. Four sampled entries do not provide an app-wide component total or individual per-call effect.
+
+Source policy appends the 2,444 B hash routine for each used raw hash target; it includes five constant key lengths plus general/byte-key paths. This is the leading measured code-growth source in sys_exit. Per-call effect remains unknown for the hash alone; the retained combined sys_exit is faster per invocation. No emitter is deleted from that evidence alone. Runtime ARRAY/LPM also exist in entries with remaining generic-map calls; whether those paths are hot needs matching profile/counters. The payloads retain all LTO pieces together.
+
+Reproduce via `make -r -f kprog/test/native-relocations.mk lto-ranges-audit CHECK_CPUS=16 OUTPUT=/workspaces/kprog-raw/perf/20261116-lto-ranges-retry2`. Raw diagnostics/controller logs and the two earlier failures remain at /workspaces/kprog-raw/perf/20261116-lto-ranges*. Host-only CPU16/8GiB test; release CLI and current image were unchanged.

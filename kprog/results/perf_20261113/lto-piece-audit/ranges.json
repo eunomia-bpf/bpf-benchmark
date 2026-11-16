@@ -1,0 +1,123 @@
+{
+  "programs": [
+    {
+      "app": "bcc",
+      "payload_bytes": 123,
+      "reference": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/24/0.blob",
+      "symbol": "sys_enter",
+      "ranges": [],
+      "appended_bytes_by_piece": {},
+      "remaining_payload_bytes": 123
+    },
+    {
+      "app": "bcc",
+      "payload_bytes": 3465,
+      "reference": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/25/0.blob",
+      "symbol": "sys_exit",
+      "ranges": [
+        {
+          "bytes": 255,
+          "end": 786,
+          "piece": "probe_read",
+          "start": 531
+        },
+        {
+          "bytes": 235,
+          "end": 1021,
+          "piece": "probe_read",
+          "start": 786
+        },
+        {
+          "bytes": 2444,
+          "end": 3465,
+          "piece": "hash_lookup",
+          "start": 1021
+        }
+      ],
+      "appended_bytes_by_piece": {
+        "probe_read": 490,
+        "hash_lookup": 2444
+      },
+      "remaining_payload_bytes": 531
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "payload_bytes": 10459,
+      "reference": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/130/0.blob",
+      "symbol": "native_tracer_entry",
+      "ranges": [
+        {
+          "bytes": 67,
+          "end": 7430,
+          "piece": "runtime_array",
+          "start": 7363
+        },
+        {
+          "bytes": 255,
+          "end": 7685,
+          "piece": "probe_read",
+          "start": 7430
+        },
+        {
+          "bytes": 2444,
+          "end": 10129,
+          "piece": "hash_lookup",
+          "start": 7685
+        },
+        {
+          "bytes": 330,
+          "end": 10459,
+          "piece": "lpm_lookup",
+          "start": 10129
+        }
+      ],
+      "appended_bytes_by_piece": {
+        "runtime_array": 67,
+        "probe_read": 255,
+        "hash_lookup": 2444,
+        "lpm_lookup": 330
+      },
+      "remaining_payload_bytes": 7363
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "payload_bytes": 39963,
+      "reference": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/140/0.blob",
+      "symbol": "perf_unwind_v8",
+      "ranges": [
+        {
+          "bytes": 67,
+          "end": 36863,
+          "piece": "runtime_array",
+          "start": 36796
+        },
+        {
+          "bytes": 326,
+          "end": 37189,
+          "piece": "probe_read",
+          "start": 36863
+        },
+        {
+          "bytes": 2444,
+          "end": 39633,
+          "piece": "hash_lookup",
+          "start": 37189
+        },
+        {
+          "bytes": 330,
+          "end": 39963,
+          "piece": "lpm_lookup",
+          "start": 39633
+        }
+      ],
+      "appended_bytes_by_piece": {
+        "runtime_array": 67,
+        "probe_read": 326,
+        "hash_lookup": 2444,
+        "lpm_lookup": 330
+      },
+      "remaining_payload_bytes": 36796
+    }
+  ],
+  "scope": "Exact appended routine bytes in retained-plan host replay; remaining payload includes original code and per-site transformations. Not an isolated per-call gain or a new kernel installation."
+}
