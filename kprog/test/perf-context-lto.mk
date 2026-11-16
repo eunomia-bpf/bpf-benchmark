@@ -71,3 +71,15 @@ function-check: compiler
 	cp /var/tmp/kprog-tmp/perf/bpf-functions/report.json $(OUTPUT)/function-report.json
 	tar -C /var/tmp/kprog-tmp/perf/bpf-functions -czf $(OUTPUT)/function-build.tar.gz .
 	date -u +%FT%TZ > $(OUTPUT)/function-finished
+
+.PHONY: function-loader-check
+function-loader-check: compiler
+	$(CC) $(FLAGS) -Xclang -fembed-bitcode=all -c $(ROOT)/kprog/build/test-bpf-function.c -o $(BUILD)/functions-input.o
+	taskset -c $(CPUS) prlimit --as=8589934592 -- $(CXX) -std=gnu++20 -O1 -g -ffunction-sections -fdata-sections -I$(ROOT)/kprog/libnativeloader/include -I$(ROOT)/micro/programs/build-x86 -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include -I$(ROOT)/vendor/libbpf/include -I$(ROOT)/vendor/libbpf/include/uapi $(ROOT)/kprog/test/native_loader_function_bodies.cpp -Wl,--gc-sections $(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -ldl -pthread -o $(BUILD)/loader-functions
+	$(BUILD)/loader-functions $(BUILD)/functions-input.o $(BUILD)/perf-context-lto $(KERNEL)/vmlinux $(BUILD)/function-cache > $(OUTPUT)/loader-functions.txt
+	while read -r value object; do \
+	  $(CC) "$$object" -o $(BUILD)/loader-function-result; \
+	  if [ "$$value" = -1 ]; then $(BUILD)/loader-function-result 0xffffffffffffffff 0xffffffff; else $(BUILD)/loader-function-result 0 0; fi; \
+	done < $(OUTPUT)/loader-functions.txt
+	tar -C $(BUILD) -czf $(OUTPUT)/loader-function-build.tar.gz .
+	date -u +%FT%TZ > $(OUTPUT)/loader-function-finished

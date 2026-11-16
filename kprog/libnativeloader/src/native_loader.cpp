@@ -3257,6 +3257,7 @@ void publish_cache_file(const std::filesystem::path &tmp,
 
 #include "native_loader_entry_data.hpp"
 #include "native_loader_context_lto.hpp"
+#include "native_loader_function_bodies.hpp"
 
 LinkerOutput invoke_native_link(const std::filesystem::path &elf_path,
                                 const std::string &symbol_name,
@@ -4170,7 +4171,11 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         symbol_name = load_prog_btf_symbol_name(options.original_prog_fd, prog_info);
     }
 #if defined(__x86_64__)
-    native_object_path = native_perf_context_object(native_object_path, symbol_name, prog_info.type);
+    const auto function_bodies = native_source_function_bodies(
+        native_object_path, options.source_bpf_path, prog_info, source_insns);
+    native_object_path = native_context_lto_object(native_object_path, symbol_name, prog_info.type,
+        "/opt/bpf-benchmark/native-bpf/x86_64/kprog-perf-context-lto", "/sys/kernel/btf/vmlinux",
+        kNativeLinkCacheDir, function_bodies);
 #endif
     const auto manifest_end = diagnostic_now();
     CompanionLoad companion =
