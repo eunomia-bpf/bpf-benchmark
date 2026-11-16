@@ -158,15 +158,18 @@ neither is a per-call regression: Cilium's is the eBPF arm having improved
   regression. Evidence and the per-program `bytes_jited` diff:
   `kprog/results/native-payload-ir-20261116/README.md`.
 
-  **Confirmed on the stats-on path.** The next round's `x86_kvm_corpus_20261116_125155_179400`
-  (same image, `status: ok`) measured **0.946x** on interpreter-loop
-  `ops=` (7 445 647 378 → 7 040 298 780, median of three) and **0.893x**
-  per-call on `native_tracer_execve` (3189.2 → 3571.9 ns), where this row
-  records 14.4x. The two runs' replacement sets differ by exactly one
-  program — `custom__generic`, absent from the 13 replacements here and
-  present among the 14 there — so the fallback above is what carries the
-  14.4x. The same extractor reproduces 2.020x exactly on this row's run, so
-  the difference is the runs, not the arithmetic.
+  **Confirmed on the stats-on path, with one caveat.** The next round's
+  `x86_kvm_corpus_20261116_125155_179400` (`status: ok`) measured **0.946x**
+  on interpreter-loop `ops=` (7 445 647 378 → 7 040 298 780, median of
+  three) and **0.893x** per-call on `native_tracer_execve` (3189.2 → 3571.9
+  ns), where this row records 14.4x. The two runs' replacement sets differ by
+  exactly one program — `custom__generic`, absent from the 13 replacements
+  here and present among the 14 there — and the extractor reproduces 2.020x
+  exactly on this row's run, so the ratio is not an arithmetic artifact.
+  Caveat: this row's run predates the 09:04:03Z build of the current image,
+  and the new run is on it, so image is not held fixed. That does not touch
+  the set difference, which is image-independent: this row's run never linked
+  `custom__generic` at all.
 - **BCC** — 657 707 / 661 454 / 663 888 against 661 569 / 662 768 / 670 159;
   25 native programs replaced and **zero** `native-loader failed` lines, so the
   `target_family` GOT-reloc link-plan gap is closed on this path.
