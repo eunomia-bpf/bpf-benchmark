@@ -137,6 +137,7 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-16 ~23:34 UTC: "代码量有多少? 一直在改什么 所有的代码? 对比 5/29 之后的所有进展?"
 - 2026-11-16 ~23:40 UTC: "需要有东西冻结并且明确禁止修改, 除了删除死代码. 是不是? 性能优化为啥没有做?"
 - 2026-11-16 ~23:41 UTC（前面贴了协调者“11-09 以来改动最频繁的文件”那一段）: "一直指出 bug 的是什么? ... 这些是不是应该你去看看回退到一个稳定版本并且禁止修改? 5/29?"
+- 2026-11-16 ~23:43 UTC: "也需要在 agent md 等等地方说明. 功能和性能和 LTO 方面我们做了啥机制了? 新的?"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
