@@ -290,7 +290,9 @@ $(NATIVE_OUT)/otel/%.native.o: $(OTEL_EBPF_DIR)/%.ebpf.c $(OTEL_EBPF_DIR)/errors
 # program. The runtime context compiler needs a single module, so extract the
 # unit bitcode, retain its section entry roots, and embed the linked module.
 $(NATIVE_IR_LINK): $(ROOT)/kprog/x86/link_embedded_ir.cpp
-	$(MAKE) -r -f $(ROOT)/kprog/test/perf-context-lto.mk ir-linker CPUS=16
+	install -d "$(dir $@)"
+	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -Wall -Wextra -Wno-unused-parameter "$<" -o "$@" \
+		$$(llvm-config-18 --link-static --ldflags --libs core irreader linker bitwriter support --system-libs)
 
 $(OTEL_NATIVE_OBJECT): $(OTEL_NATIVE_UNIT_OBJS) $(NATIVE_IR_LINK)
 	install -d "$(dir $@)"
