@@ -8,6 +8,14 @@
 #include <setjmp.h>
 #include <stdarg.h>
 #include "../c/Arm64Addressing.h"
+#if PROGRAM
+#include "arm64_program_bridge_host.h"
+#define KPROG_ARM64_HELPER(ID, NAME, RESULT, ARGS) \
+typedef void (*program_abi_##NAME)(struct kprog_arm64_entry *, __typeof__(NAME)); \
+_Static_assert(__builtin_types_compatible_p(__typeof__(&kprog_arm64_program_helper_##NAME), program_abi_##NAME), "program helper ABI mismatch: " #NAME);
+#include "../c/Arm64HelperCalls.h"
+#undef KPROG_ARM64_HELPER
+#endif
 
 /* Compile-time ABI regression: every callee parameter must match libbpf. */
 #define KPROG_ARM64_HELPER(ID, NAME, RESULT, ARGS) \

@@ -16,6 +16,7 @@ parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--output',type=Path,required=True)
 parser.add_argument('--before',default='4a2b31f48')
 parser.add_argument('--mutations-only',action='store_true')
+parser.add_argument('--program',action='store_true',help='also compare borrowed-entry handlers')
 parser.add_argument('--mutation',action='append',default=[],help='run an exact named negative case; repeat for a focused subset')
 a=parser.parse_args()
 a.output.mkdir(parents=True,exist_ok=False)
@@ -63,21 +64,34 @@ if not a.mutations_only:
     # the adapter phase, where its actual CompCert branch is compiled in place.
     run('address-native',flags+['-c','c/Arm64Address.c','-o',objects[1]])
     results={}
-    for phase in ['historical','native','adapter']:
-        extra=['-D__COMPCERT__','-include','oracles/compcert_memory_host.h'] if phase=='adapter' else []
+    phases=['historical','native','program-native','adapter','program-adapter'] if a.program else ['historical','native','adapter']
+    for phase in phases:
+        extra=['-D__COMPCERT__','-include','oracles/compcert_memory_host.h'] if phase in ['adapter','program-adapter'] else []
         if phase=='adapter':run('address-adapter',flags+extra+['-c','c/Arm64Address.c','-o',objects[1]])
-        for filename,index in [('Arm64Numeric',2),('Arm64Addressing',0)]:
+        for filename,index in ([] if phase.startswith('program-') else [('Arm64Numeric',2),('Arm64Addressing',0)]):
             run(phase+'-'+filename,flags+extra+['-x','c','-c','-','-o',objects[index]],source(FORMAL/f'c/{filename}.c',phase=='historical'))
-        run(phase+'-oracle',flags+(['-DADAPTER=1'] if phase=='adapter' else [])+['oracles/test_arm64_execute_host.c']+objects+['-o','build/test_arm64_execute_host'])
+        program_object=['build/arm64_program_binding.o'] if phase.startswith('program-') else []
+        if program_object:
+            run(phase+'-binding',flags+extra+['-c','c/Arm64Program.c','-o',program_object[0]])
+        run(phase+'-oracle',flags+(['-DADAPTER=1'] if phase in ['adapter','program-adapter'] else [])+(['-DPROGRAM=1'] if program_object else [])+['oracles/test_arm64_execute_host.c']+objects+program_object+['-o','build/test_arm64_execute_host'])
         capture=a.output/(phase+'.bin')
         run(phase+'-frames',['./build/test_arm64_execute_host','--capture'],capture=capture)
         results[phase]={'capture_bytes':capture.stat().st_size,'summary':(a.output/(phase+'-frames.log')).read_text().strip()}
+        if a.program:
+            fixture='c/Arm64ProgramFixture.c' if program_object else 'oracles/arm64_execute_compile.bpf.c'
+            run(phase+'-closed-compile',flags+extra+['-ffunction-sections','-Wl,--gc-sections','-x','c','-','-x','none','oracles/test_arm64_program_host.c']+objects+program_object+['-o','build/test_arm64_program_host'],source(FORMAL/fixture,phase=='historical'))
+            closed=a.output/(phase+'-closed.bin')
+            run(phase+'-closed',['./build/test_arm64_program_host'],capture=closed)
+            results[phase]['closed_program_bytes']=closed.stat().st_size
+            results[phase]['closed_program_summary']=(a.output/(phase+'-closed.log')).read_text().strip()
     reference=(a.output/'historical.bin').read_bytes()
-    for phase in ['native','adapter']:
+    for phase in phases[1:]:
         got=(a.output/(phase+'.bin')).read_bytes()
         if got!=reference:
             first=next((i for i,(x,y) in enumerate(zip(reference,got)) if x!=y),min(len(got),len(reference)))
             raise SystemExit(f'{phase} frame mismatch at byte {first}')
+        if a.program and (a.output/(phase+'-closed.bin')).read_bytes()!=(a.output/'historical-closed.bin').read_bytes():
+            raise SystemExit(f'{phase} closed program mismatch')
     results['comparison']='all capture bytes identical; no masks'
     results['before']=revision
     (a.output/'results.json').write_text(json.dumps(results,indent=2)+'\n')
@@ -90,7 +104,7 @@ mutants=[
  ('branch-kind-truncation',FORMAL/'generated/arm64_branch.h','__u64 __kprog_a64_br_kind = (KIND);','__u64 __kprog_a64_br_kind = (__u8)(KIND);'),
  ('branch-bit31-mask',FORMAL/'generated/arm64_branch.h','(BIT) & 63ULL','(BIT) & 31ULL'),
  ('branch-capture-order',FORMAL/'generated/arm64_branch.h','__u64 __kprog_a64_br_kind = (KIND); '+chr(92)+'\n\t\t__u64 __kprog_a64_br_value = (VALUE);','__u64 __kprog_a64_br_value = (VALUE); '+chr(92)+'\n\t\t__u64 __kprog_a64_br_kind = (KIND);'),
- ('clobber-vector31-high',local,'__a64_vectors[31].hi = ARM64_SIM_L_UNSPECIFIED();','__a64_vectors[31].lo = ARM64_SIM_L_UNSPECIFIED();'),
+ ('clobber-vector31-high',local,'ARM64_SIM_L_VECTOR_HI(31) = ARM64_SIM_L_UNSPECIFIED();','ARM64_SIM_L_VECTOR_LO(31) = ARM64_SIM_L_UNSPECIFIED();'),
  ('return-early-result-read',local,'if (__a64_sp != 0) ARM64_SIM_L_REJECT_PC();','__u32 early_result = (__u32)ARM64_SIM_L_READ_REG(ARM64_X0); if (__a64_sp != 0) ARM64_SIM_L_REJECT_PC();'),
  ('memcpy-wrong-source',FORMAL/'c/Arm64Addressing.c','kprog_arm64_memory_read(addressing, (BASE), (INDEX), (AUX), (IMM), (EXTRA), (WIDTH))','kprog_arm64_memory_read(addressing, ARM64_X0, (INDEX), (AUX), (IMM), (EXTRA), (WIDTH))'),
  ('mov-width-truncation',FORMAL/'generated/arm64_mov.h','__u64 __kprog_a64_mov_width = (WIDTH);','__u64 __kprog_a64_mov_width = (__u8)(WIDTH);'),

@@ -81,11 +81,11 @@ static __u32 continuation(struct kprog_arm64_entry *e)
 	      e->tag_bytes == ARM64_SIM_TAG_STORAGE_BYTES(ARM64_SIM_STACK_BYTES), "storage profile");
 	for (unsigned i = 0; i < e->tag_bytes; ++i) check(e->stack_tags[i] == 0, "initialized stack tags");
 	/* Write before read, including the partial final q word's allocated padding. */
-	e->words[0] = 0x8877665544332211ULL;
-	check(e->bytes[0] == 0x11 && (e->capacity < 8 || e->bytes[7] == 0x88), "shared byte/word arena");
+	e->q[0] = 0x8877665544332211ULL;
+	check(e->b[0] == 0x11 && (e->capacity < 8 || e->b[7] == 0x88), "shared byte/word arena");
 	for (unsigned i = 0; i < e->payload_words; ++i) e->payload[i] = i + 100;
 	for (unsigned i = 0; i < e->payload_words; ++i) check(e->payload[i] == i+100, "live payload");
-	check(e->words[0] == 0x8877665544332211ULL, "payload does not alias byte arena");
+	check(e->q[0] == 0x8877665544332211ULL, "payload does not alias byte arena");
 	if (kind == KPROG_ABI_KIND_XDP) {
 		struct arm64_sim_xdp_abi *abi = e->abi;
 		for (unsigned i = 0; i < 5; ++i) check(abi->cb[i] == 0, "initialized XDP cb");

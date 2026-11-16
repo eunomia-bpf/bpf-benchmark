@@ -179,7 +179,6 @@ def _bias : Ident := identOfString "bias"
 def _bpf_cast_to_kern_ctx : Ident := identOfString "bpf_cast_to_kern_ctx"
 def _bpf_flow_keys : Ident := identOfString "bpf_flow_keys"
 def _bpf_sock : Ident := identOfString "bpf_sock"
-def _bytes : Ident := identOfString "bytes"
 def _c : Ident := identOfString "c"
 def _capacity : Ident := identOfString "capacity"
 def _cb : Ident := identOfString "cb"
@@ -257,7 +256,6 @@ def _vlan_proto : Ident := identOfString "vlan_proto"
 def _vlan_tci : Ident := identOfString "vlan_tci"
 def _w : Ident := identOfString "w"
 def _wire_len : Ident := identOfString "wire_len"
-def _words : Ident := identOfString "words"
 def _x : Ident := identOfString "x"
 def _xdp_md : Ident := identOfString "xdp_md"
 def _z : Ident := identOfString "z"
@@ -757,8 +755,9 @@ def _t'99 : Ident := (Positive.ofNat 226)
 
 @[noinline] def s_kprog_arm64_entry_raw_41 : Stmt :=
 (Stmt.Sassign
-  (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr)) _lr
-    (tptr tulong)) (Expr.Eaddrof (Expr.Evar ___a64_lr tulong) (tptr tulong)))
+  (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
+    _return_base (tptr tulong))
+  (Expr.Eaddrof (Expr.Evar ___a64_numeric_return tulong) (tptr tulong)))
 
 @[noinline] def s_kprog_arm64_entry_raw_42 : Stmt :=
 (Stmt.Sassign
@@ -766,7 +765,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
     (Expr.Ebinop Binop.Oadd
       (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
         _vector_lo (tarray (tptr tulong) 32))
-      (Expr.Econst_int (Integers.Int.repr 9) tint) (tptr (tptr tulong)))
+      (Expr.Econst_int (Integers.Int.repr 8) tint) (tptr (tptr tulong)))
     (tptr tulong))
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
 
@@ -776,7 +775,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
     (Expr.Ebinop Binop.Oadd
       (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
         _vector_lo (tarray (tptr tulong) 32))
-      (Expr.Econst_int (Integers.Int.repr 26) tint) (tptr (tptr tulong)))
+      (Expr.Econst_int (Integers.Int.repr 25) tint) (tptr (tptr tulong)))
     (tptr tulong))
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
 
@@ -786,7 +785,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
     (Expr.Ebinop Binop.Oadd
       (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
         _vector_hi (tarray (tptr tulong) 32))
-      (Expr.Econst_int (Integers.Int.repr 11) tint) (tptr (tptr tulong)))
+      (Expr.Econst_int (Integers.Int.repr 10) tint) (tptr (tptr tulong)))
     (tptr tulong))
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
 
@@ -796,72 +795,81 @@ def _t'99 : Ident := (Positive.ofNat 226)
     (Expr.Ebinop Binop.Oadd
       (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
         _vector_hi (tarray (tptr tulong) 32))
-      (Expr.Econst_int (Integers.Int.repr 28) tint) (tptr (tptr tulong)))
+      (Expr.Econst_int (Integers.Int.repr 27) tint) (tptr (tptr tulong)))
     (tptr tulong))
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
 
 @[noinline] def s_kprog_arm64_entry_raw_46 : Stmt :=
 (Stmt.Sassign
-  (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr)) _abi
-    (tptr tvoid))
+  (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
+    _skb_context (tptr (tptr (Ty.Tstruct ___sk_buff noattr))))
   (Expr.Eaddrof
-    (Expr.Evar ___a64_sim_abi (Ty.Tstruct _arm64_sim_skb_abi noattr))
-    (tptr (Ty.Tstruct _arm64_sim_skb_abi noattr))))
+    (Expr.Evar ___a64_sim_skb_ctx (tptr (Ty.Tstruct ___sk_buff noattr)))
+    (tptr (tptr (Ty.Tstruct ___sk_buff noattr)))))
 
 @[noinline] def s_kprog_arm64_entry_raw_47 : Stmt :=
 (Stmt.Ssequence
+  (Stmt.Sassign
+    (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
+      _abi (tptr tvoid))
+    (Expr.Eaddrof
+      (Expr.Evar ___a64_sim_abi (Ty.Tstruct _arm64_sim_skb_abi noattr))
+      (tptr (Ty.Tstruct _arm64_sim_skb_abi noattr))))
   (Stmt.Ssequence
-    (Stmt.Sset _i (Expr.Econst_int (Integers.Int.repr 0) tint))
-    (Stmt.Sloop
-      (Stmt.Ssequence
-        (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt (Expr.Etempvar _i tuint)
-                            (Expr.Econst_int (Integers.Int.repr 32) tint)
-                            tint)
-          Stmt.Sskip
-          Stmt.Sbreak)
+    (Stmt.Ssequence
+      (Stmt.Sset _i (Expr.Econst_int (Integers.Int.repr 0) tint))
+      (Stmt.Sloop
         (Stmt.Ssequence
-          (Stmt.Sassign
-            (Expr.Ederef
-              (Expr.Ebinop Binop.Oadd
+          (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt (Expr.Etempvar _i tuint)
+                              (Expr.Econst_int (Integers.Int.repr 32) tint)
+                              tint)
+            Stmt.Sskip
+            Stmt.Sbreak)
+          (Stmt.Ssequence
+            (Stmt.Sassign
+              (Expr.Ederef
+                (Expr.Ebinop Binop.Oadd
+                  (Expr.Efield
+                    (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
+                    _vector_lo (tarray (tptr tulong) 32))
+                  (Expr.Etempvar _i tuint) (tptr (tptr tulong)))
+                (tptr tulong))
+              (Expr.Eaddrof
                 (Expr.Efield
-                  (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                  _vector_lo (tarray (tptr tulong) 32))
-                (Expr.Etempvar _i tuint) (tptr (tptr tulong))) (tptr tulong))
-            (Expr.Eaddrof
-              (Expr.Efield
-                (Expr.Ederef
-                  (Expr.Ebinop Binop.Oadd
-                    (Expr.Evar ___a64_vectors (tarray (Ty.Tstruct __2840 noattr) 32))
-                    (Expr.Etempvar _i tuint)
-                    (tptr (Ty.Tstruct __2840 noattr)))
-                  (Ty.Tstruct __2840 noattr)) _lo tulong) (tptr tulong)))
-          (Stmt.Sassign
-            (Expr.Ederef
-              (Expr.Ebinop Binop.Oadd
+                  (Expr.Ederef
+                    (Expr.Ebinop Binop.Oadd
+                      (Expr.Evar ___a64_vectors (tarray (Ty.Tstruct __2840 noattr) 32))
+                      (Expr.Etempvar _i tuint)
+                      (tptr (Ty.Tstruct __2840 noattr)))
+                    (Ty.Tstruct __2840 noattr)) _lo tulong) (tptr tulong)))
+            (Stmt.Sassign
+              (Expr.Ederef
+                (Expr.Ebinop Binop.Oadd
+                  (Expr.Efield
+                    (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
+                    _vector_hi (tarray (tptr tulong) 32))
+                  (Expr.Etempvar _i tuint) (tptr (tptr tulong)))
+                (tptr tulong))
+              (Expr.Eaddrof
                 (Expr.Efield
-                  (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                  _vector_hi (tarray (tptr tulong) 32))
-                (Expr.Etempvar _i tuint) (tptr (tptr tulong))) (tptr tulong))
-            (Expr.Eaddrof
-              (Expr.Efield
-                (Expr.Ederef
-                  (Expr.Ebinop Binop.Oadd
-                    (Expr.Evar ___a64_vectors (tarray (Ty.Tstruct __2840 noattr) 32))
-                    (Expr.Etempvar _i tuint)
-                    (tptr (Ty.Tstruct __2840 noattr)))
-                  (Ty.Tstruct __2840 noattr)) _hi tulong) (tptr tulong)))))
-      (Stmt.Sset _i
-        (Expr.Ebinop Binop.Oadd (Expr.Etempvar _i tuint)
-          (Expr.Econst_int (Integers.Int.repr 1) tint) tuint))))
-  (Stmt.Ssequence
-    (Stmt.Scall (some _t'131)
-      (Expr.Etempvar _continuation (tptr (Ty.Tfunction
-                                           [(tptr (Ty.Tstruct _kprog_arm64_entry noattr))]
-                                           tuint cc_default)))
-      [(Expr.Eaddrof
-         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-         (tptr (Ty.Tstruct _kprog_arm64_entry noattr)))])
-    (Stmt.Sreturn (some (Expr.Etempvar _t'131 tuint)))))
+                  (Expr.Ederef
+                    (Expr.Ebinop Binop.Oadd
+                      (Expr.Evar ___a64_vectors (tarray (Ty.Tstruct __2840 noattr) 32))
+                      (Expr.Etempvar _i tuint)
+                      (tptr (Ty.Tstruct __2840 noattr)))
+                    (Ty.Tstruct __2840 noattr)) _hi tulong) (tptr tulong)))))
+        (Stmt.Sset _i
+          (Expr.Ebinop Binop.Oadd (Expr.Etempvar _i tuint)
+            (Expr.Econst_int (Integers.Int.repr 1) tint) tuint))))
+    (Stmt.Ssequence
+      (Stmt.Scall (some _t'131)
+        (Expr.Etempvar _continuation (tptr (Ty.Tfunction
+                                             [(tptr (Ty.Tstruct _kprog_arm64_entry noattr))]
+                                             tuint cc_default)))
+        [(Expr.Eaddrof
+           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
+           (tptr (Ty.Tstruct _kprog_arm64_entry noattr)))])
+      (Stmt.Sreturn (some (Expr.Etempvar _t'131 tuint))))))
 
 @[noinline] def s_kprog_arm64_entry_raw_48 : Stmt :=
 (Stmt.Ssequence
@@ -871,7 +879,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
         (Expr.Efield
           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
           _vector_hi (tarray (tptr tulong) 32))
-        (Expr.Econst_int (Integers.Int.repr 29) tint) (tptr (tptr tulong)))
+        (Expr.Econst_int (Integers.Int.repr 28) tint) (tptr (tptr tulong)))
       (tptr tulong))
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
   (Stmt.Ssequence
@@ -881,7 +889,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
           (Expr.Efield
             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
             _vector_hi (tarray (tptr tulong) 32))
-          (Expr.Econst_int (Integers.Int.repr 30) tint) (tptr (tptr tulong)))
+          (Expr.Econst_int (Integers.Int.repr 29) tint) (tptr (tptr tulong)))
         (tptr tulong))
       (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
     (Stmt.Ssequence
@@ -891,124 +899,107 @@ def _t'99 : Ident := (Positive.ofNat 226)
             (Expr.Efield
               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
               _vector_hi (tarray (tptr tulong) 32))
-            (Expr.Econst_int (Integers.Int.repr 31) tint)
+            (Expr.Econst_int (Integers.Int.repr 30) tint)
             (tptr (tptr tulong))) (tptr tulong))
         (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
           (tptr tvoid)))
       (Stmt.Ssequence
         (Stmt.Sassign
-          (Expr.Efield
-            (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr)) _bytes
-            (tptr (tvolatile tuchar)))
-          (Expr.Efield
-            (Expr.Evar ___a64_stack (tvolatile (Ty.Tunion __2842 noattr))) _b
-            (tvolatile (tarray tuchar 160))))
+          (Expr.Ederef
+            (Expr.Ebinop Binop.Oadd
+              (Expr.Efield
+                (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
+                _vector_hi (tarray (tptr tulong) 32))
+              (Expr.Econst_int (Integers.Int.repr 31) tint)
+              (tptr (tptr tulong))) (tptr tulong))
+          (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
+            (tptr tvoid)))
         (Stmt.Ssequence
           (Stmt.Sassign
             (Expr.Efield
-              (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-              _words (tptr (tvolatile tulong)))
+              (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr)) _b
+              (tptr (tvolatile tuchar)))
             (Expr.Efield
               (Expr.Evar ___a64_stack (tvolatile (Ty.Tunion __2842 noattr)))
-              _q (tvolatile (tarray tulong 20))))
+              _b (tvolatile (tarray tuchar 160))))
           (Stmt.Ssequence
             (Stmt.Sassign
               (Expr.Efield
-                (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                _payload (tptr (tvolatile tulong)))
-              (Expr.Evar ___a64_stack_payload (tarray (tvolatile tulong) 20)))
+                (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr)) _q
+                (tptr (tvolatile tulong)))
+              (Expr.Efield
+                (Expr.Evar ___a64_stack (tvolatile (Ty.Tunion __2842 noattr)))
+                _q (tvolatile (tarray tulong 20))))
             (Stmt.Ssequence
               (Stmt.Sassign
                 (Expr.Efield
                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                  _stack_tags (tptr tuchar))
-                (Expr.Evar ___a64_stack_tag (tarray tuchar 24)))
+                  _payload (tptr (tvolatile tulong)))
+                (Expr.Evar ___a64_stack_payload (tarray (tvolatile tulong) 20)))
               (Stmt.Ssequence
                 (Stmt.Sassign
                   (Expr.Efield
                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                    _capacity tuint)
-                  (Expr.Econst_int (Integers.Int.repr 160) tuint))
+                    _stack_tags (tptr tuchar))
+                  (Expr.Evar ___a64_stack_tag (tarray tuchar 24)))
                 (Stmt.Ssequence
                   (Stmt.Sassign
                     (Expr.Efield
                       (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                      _payload_words tuint)
-                    (Expr.Ebinop Binop.Odiv
-                      (Expr.Ebinop Binop.Oadd
-                        (Expr.Ecast
-                          (Expr.Econst_int (Integers.Int.repr 160) tuint)
-                          tuint)
-                        (Expr.Econst_int (Integers.Int.repr 7) tuint) tuint)
-                      (Expr.Econst_int (Integers.Int.repr 8) tuint) tuint))
+                      _capacity tuint)
+                    (Expr.Esizeof (tarray (tvolatile tuchar) 160) tulong))
                   (Stmt.Ssequence
                     (Stmt.Sassign
                       (Expr.Efield
                         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                        _tag_bytes tuint)
-                      (Expr.Ebinop Binop.Oand
-                        (Expr.Ebinop Binop.Oadd
-                          (Expr.Ebinop Binop.Odiv
-                            (Expr.Ebinop Binop.Oadd
-                              (Expr.Ecast
-                                (Expr.Econst_int (Integers.Int.repr 160) tuint)
-                                tuint)
-                              (Expr.Econst_int (Integers.Int.repr 7) tuint)
-                              tuint)
-                            (Expr.Econst_int (Integers.Int.repr 8) tuint)
-                            tuint)
-                          (Expr.Econst_int (Integers.Int.repr 7) tuint)
-                          tuint)
-                        (Expr.Eunop Unop.Onotint
-                          (Expr.Econst_int (Integers.Int.repr 7) tuint)
-                          tuint) tuint))
+                        _payload_words tuint)
+                      (Expr.Ebinop Binop.Odiv
+                        (Expr.Esizeof (tarray (tvolatile tulong) 20) tulong)
+                        (Expr.Esizeof (tvolatile tulong) tulong) tulong))
                     (Stmt.Ssequence
                       (Stmt.Sassign
                         (Expr.Efield
                           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                          _bias tlong)
-                        (Expr.Econst_long (Integers.Int64.repr 96) tlong))
+                          _tag_bytes tuint)
+                        (Expr.Esizeof (tarray tuchar 24) tulong))
                       (Stmt.Ssequence
                         (Stmt.Sassign
                           (Expr.Efield
                             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                            _helper_context (tptr (tptr tvoid)))
-                          (Expr.Eaddrof
-                            (Expr.Evar ___a64_sim_helper_ctx (tptr tvoid))
-                            (tptr (tptr tvoid))))
+                            _bias tlong)
+                          (Expr.Econst_long (Integers.Int64.repr 96) tlong))
                         (Stmt.Ssequence
                           (Stmt.Sassign
                             (Expr.Efield
                               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                              _helper_abi_base (tptr (tptr tvoid)))
+                              _helper_context (tptr (tptr tvoid)))
                             (Expr.Eaddrof
-                              (Expr.Evar ___a64_sim_helper_abi_base (tptr tvoid))
+                              (Expr.Evar ___a64_sim_helper_ctx (tptr tvoid))
                               (tptr (tptr tvoid))))
                           (Stmt.Ssequence
                             (Stmt.Sassign
                               (Expr.Efield
                                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                                _is_xdp (tptr tuchar))
+                                _helper_abi_base (tptr (tptr tvoid)))
                               (Expr.Eaddrof
-                                (Expr.Evar ___a64_sim_is_xdp tuchar)
-                                (tptr tuchar)))
+                                (Expr.Evar ___a64_sim_helper_abi_base (tptr tvoid))
+                                (tptr (tptr tvoid))))
                             (Stmt.Ssequence
                               (Stmt.Sassign
                                 (Expr.Efield
                                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                                  _abi_kind (tptr tuchar))
+                                  _is_xdp (tptr tuchar))
                                 (Expr.Eaddrof
-                                  (Expr.Evar ___a64_sim_abi_kind tuchar)
+                                  (Expr.Evar ___a64_sim_is_xdp tuchar)
                                   (tptr tuchar)))
                               (Stmt.Ssequence
                                 (Stmt.Sassign
                                   (Expr.Efield
                                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                                    _skb_context
-                                    (tptr (tptr (Ty.Tstruct ___sk_buff noattr))))
+                                    _abi_kind (tptr tuchar))
                                   (Expr.Eaddrof
-                                    (Expr.Evar ___a64_sim_skb_ctx (tptr (Ty.Tstruct ___sk_buff noattr)))
-                                    (tptr (tptr (Ty.Tstruct ___sk_buff noattr)))))
+                                    (Expr.Evar ___a64_sim_abi_kind tuchar)
+                                    (tptr tuchar)))
                                 (Stmt.Ssequence
                                   s_kprog_arm64_entry_raw_46
                                   s_kprog_arm64_entry_raw_47)))))))))))))))))
@@ -1021,7 +1012,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
         (Expr.Efield
           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
           _vector_hi (tarray (tptr tulong) 32))
-        (Expr.Econst_int (Integers.Int.repr 12) tint) (tptr (tptr tulong)))
+        (Expr.Econst_int (Integers.Int.repr 11) tint) (tptr (tptr tulong)))
       (tptr tulong))
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
   (Stmt.Ssequence
@@ -1031,7 +1022,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
           (Expr.Efield
             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
             _vector_hi (tarray (tptr tulong) 32))
-          (Expr.Econst_int (Integers.Int.repr 13) tint) (tptr (tptr tulong)))
+          (Expr.Econst_int (Integers.Int.repr 12) tint) (tptr (tptr tulong)))
         (tptr tulong))
       (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
     (Stmt.Ssequence
@@ -1041,7 +1032,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
             (Expr.Efield
               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
               _vector_hi (tarray (tptr tulong) 32))
-            (Expr.Econst_int (Integers.Int.repr 14) tint)
+            (Expr.Econst_int (Integers.Int.repr 13) tint)
             (tptr (tptr tulong))) (tptr tulong))
         (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
           (tptr tvoid)))
@@ -1052,7 +1043,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
               (Expr.Efield
                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                 _vector_hi (tarray (tptr tulong) 32))
-              (Expr.Econst_int (Integers.Int.repr 15) tint)
+              (Expr.Econst_int (Integers.Int.repr 14) tint)
               (tptr (tptr tulong))) (tptr tulong))
           (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
             (tptr tvoid)))
@@ -1063,7 +1054,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                 (Expr.Efield
                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                   _vector_hi (tarray (tptr tulong) 32))
-                (Expr.Econst_int (Integers.Int.repr 16) tint)
+                (Expr.Econst_int (Integers.Int.repr 15) tint)
                 (tptr (tptr tulong))) (tptr tulong))
             (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
               (tptr tvoid)))
@@ -1074,7 +1065,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                   (Expr.Efield
                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                     _vector_hi (tarray (tptr tulong) 32))
-                  (Expr.Econst_int (Integers.Int.repr 17) tint)
+                  (Expr.Econst_int (Integers.Int.repr 16) tint)
                   (tptr (tptr tulong))) (tptr tulong))
               (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                 (tptr tvoid)))
@@ -1085,7 +1076,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                     (Expr.Efield
                       (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                       _vector_hi (tarray (tptr tulong) 32))
-                    (Expr.Econst_int (Integers.Int.repr 18) tint)
+                    (Expr.Econst_int (Integers.Int.repr 17) tint)
                     (tptr (tptr tulong))) (tptr tulong))
                 (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                   (tptr tvoid)))
@@ -1096,7 +1087,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                       (Expr.Efield
                         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                         _vector_hi (tarray (tptr tulong) 32))
-                      (Expr.Econst_int (Integers.Int.repr 19) tint)
+                      (Expr.Econst_int (Integers.Int.repr 18) tint)
                       (tptr (tptr tulong))) (tptr tulong))
                   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                     (tptr tvoid)))
@@ -1107,7 +1098,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                         (Expr.Efield
                           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                           _vector_hi (tarray (tptr tulong) 32))
-                        (Expr.Econst_int (Integers.Int.repr 20) tint)
+                        (Expr.Econst_int (Integers.Int.repr 19) tint)
                         (tptr (tptr tulong))) (tptr tulong))
                     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                       (tptr tvoid)))
@@ -1118,7 +1109,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                           (Expr.Efield
                             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                             _vector_hi (tarray (tptr tulong) 32))
-                          (Expr.Econst_int (Integers.Int.repr 21) tint)
+                          (Expr.Econst_int (Integers.Int.repr 20) tint)
                           (tptr (tptr tulong))) (tptr tulong))
                       (Expr.Ecast
                         (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1130,7 +1121,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                             (Expr.Efield
                               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                               _vector_hi (tarray (tptr tulong) 32))
-                            (Expr.Econst_int (Integers.Int.repr 22) tint)
+                            (Expr.Econst_int (Integers.Int.repr 21) tint)
                             (tptr (tptr tulong))) (tptr tulong))
                         (Expr.Ecast
                           (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1142,7 +1133,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                               (Expr.Efield
                                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                 _vector_hi (tarray (tptr tulong) 32))
-                              (Expr.Econst_int (Integers.Int.repr 23) tint)
+                              (Expr.Econst_int (Integers.Int.repr 22) tint)
                               (tptr (tptr tulong))) (tptr tulong))
                           (Expr.Ecast
                             (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1154,7 +1145,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                                 (Expr.Efield
                                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                   _vector_hi (tarray (tptr tulong) 32))
-                                (Expr.Econst_int (Integers.Int.repr 24) tint)
+                                (Expr.Econst_int (Integers.Int.repr 23) tint)
                                 (tptr (tptr tulong))) (tptr tulong))
                             (Expr.Ecast
                               (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1166,7 +1157,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                                   (Expr.Efield
                                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                     _vector_hi (tarray (tptr tulong) 32))
-                                  (Expr.Econst_int (Integers.Int.repr 25) tint)
+                                  (Expr.Econst_int (Integers.Int.repr 24) tint)
                                   (tptr (tptr tulong))) (tptr tulong))
                               (Expr.Ecast
                                 (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1178,7 +1169,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                                     (Expr.Efield
                                       (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                       _vector_hi (tarray (tptr tulong) 32))
-                                    (Expr.Econst_int (Integers.Int.repr 26) tint)
+                                    (Expr.Econst_int (Integers.Int.repr 25) tint)
                                     (tptr (tptr tulong))) (tptr tulong))
                                 (Expr.Ecast
                                   (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1190,7 +1181,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                                       (Expr.Efield
                                         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                         _vector_hi (tarray (tptr tulong) 32))
-                                      (Expr.Econst_int (Integers.Int.repr 27) tint)
+                                      (Expr.Econst_int (Integers.Int.repr 26) tint)
                                       (tptr (tptr tulong))) (tptr tulong))
                                   (Expr.Ecast
                                     (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1207,7 +1198,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
         (Expr.Efield
           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
           _vector_lo (tarray (tptr tulong) 32))
-        (Expr.Econst_int (Integers.Int.repr 27) tint) (tptr (tptr tulong)))
+        (Expr.Econst_int (Integers.Int.repr 26) tint) (tptr (tptr tulong)))
       (tptr tulong))
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
   (Stmt.Ssequence
@@ -1217,7 +1208,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
           (Expr.Efield
             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
             _vector_lo (tarray (tptr tulong) 32))
-          (Expr.Econst_int (Integers.Int.repr 28) tint) (tptr (tptr tulong)))
+          (Expr.Econst_int (Integers.Int.repr 27) tint) (tptr (tptr tulong)))
         (tptr tulong))
       (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
     (Stmt.Ssequence
@@ -1227,7 +1218,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
             (Expr.Efield
               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
               _vector_lo (tarray (tptr tulong) 32))
-            (Expr.Econst_int (Integers.Int.repr 29) tint)
+            (Expr.Econst_int (Integers.Int.repr 28) tint)
             (tptr (tptr tulong))) (tptr tulong))
         (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
           (tptr tvoid)))
@@ -1238,7 +1229,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
               (Expr.Efield
                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                 _vector_lo (tarray (tptr tulong) 32))
-              (Expr.Econst_int (Integers.Int.repr 30) tint)
+              (Expr.Econst_int (Integers.Int.repr 29) tint)
               (tptr (tptr tulong))) (tptr tulong))
           (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
             (tptr tvoid)))
@@ -1249,7 +1240,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                 (Expr.Efield
                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                   _vector_lo (tarray (tptr tulong) 32))
-                (Expr.Econst_int (Integers.Int.repr 31) tint)
+                (Expr.Econst_int (Integers.Int.repr 30) tint)
                 (tptr (tptr tulong))) (tptr tulong))
             (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
               (tptr tvoid)))
@@ -1259,8 +1250,8 @@ def _t'99 : Ident := (Positive.ofNat 226)
                 (Expr.Ebinop Binop.Oadd
                   (Expr.Efield
                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                    _vector_hi (tarray (tptr tulong) 32))
-                  (Expr.Econst_int (Integers.Int.repr 0) tint)
+                    _vector_lo (tarray (tptr tulong) 32))
+                  (Expr.Econst_int (Integers.Int.repr 31) tint)
                   (tptr (tptr tulong))) (tptr tulong))
               (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                 (tptr tvoid)))
@@ -1271,7 +1262,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                     (Expr.Efield
                       (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                       _vector_hi (tarray (tptr tulong) 32))
-                    (Expr.Econst_int (Integers.Int.repr 1) tint)
+                    (Expr.Econst_int (Integers.Int.repr 0) tint)
                     (tptr (tptr tulong))) (tptr tulong))
                 (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                   (tptr tvoid)))
@@ -1282,7 +1273,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                       (Expr.Efield
                         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                         _vector_hi (tarray (tptr tulong) 32))
-                      (Expr.Econst_int (Integers.Int.repr 2) tint)
+                      (Expr.Econst_int (Integers.Int.repr 1) tint)
                       (tptr (tptr tulong))) (tptr tulong))
                   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                     (tptr tvoid)))
@@ -1293,7 +1284,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                         (Expr.Efield
                           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                           _vector_hi (tarray (tptr tulong) 32))
-                        (Expr.Econst_int (Integers.Int.repr 3) tint)
+                        (Expr.Econst_int (Integers.Int.repr 2) tint)
                         (tptr (tptr tulong))) (tptr tulong))
                     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                       (tptr tvoid)))
@@ -1304,7 +1295,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                           (Expr.Efield
                             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                             _vector_hi (tarray (tptr tulong) 32))
-                          (Expr.Econst_int (Integers.Int.repr 4) tint)
+                          (Expr.Econst_int (Integers.Int.repr 3) tint)
                           (tptr (tptr tulong))) (tptr tulong))
                       (Expr.Ecast
                         (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1316,7 +1307,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                             (Expr.Efield
                               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                               _vector_hi (tarray (tptr tulong) 32))
-                            (Expr.Econst_int (Integers.Int.repr 5) tint)
+                            (Expr.Econst_int (Integers.Int.repr 4) tint)
                             (tptr (tptr tulong))) (tptr tulong))
                         (Expr.Ecast
                           (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1328,7 +1319,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                               (Expr.Efield
                                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                 _vector_hi (tarray (tptr tulong) 32))
-                              (Expr.Econst_int (Integers.Int.repr 6) tint)
+                              (Expr.Econst_int (Integers.Int.repr 5) tint)
                               (tptr (tptr tulong))) (tptr tulong))
                           (Expr.Ecast
                             (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1340,7 +1331,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                                 (Expr.Efield
                                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                   _vector_hi (tarray (tptr tulong) 32))
-                                (Expr.Econst_int (Integers.Int.repr 7) tint)
+                                (Expr.Econst_int (Integers.Int.repr 6) tint)
                                 (tptr (tptr tulong))) (tptr tulong))
                             (Expr.Ecast
                               (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1352,7 +1343,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                                   (Expr.Efield
                                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                     _vector_hi (tarray (tptr tulong) 32))
-                                  (Expr.Econst_int (Integers.Int.repr 8) tint)
+                                  (Expr.Econst_int (Integers.Int.repr 7) tint)
                                   (tptr (tptr tulong))) (tptr tulong))
                               (Expr.Ecast
                                 (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1364,7 +1355,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                                     (Expr.Efield
                                       (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                       _vector_hi (tarray (tptr tulong) 32))
-                                    (Expr.Econst_int (Integers.Int.repr 9) tint)
+                                    (Expr.Econst_int (Integers.Int.repr 8) tint)
                                     (tptr (tptr tulong))) (tptr tulong))
                                 (Expr.Ecast
                                   (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1376,7 +1367,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                                       (Expr.Efield
                                         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                         _vector_hi (tarray (tptr tulong) 32))
-                                      (Expr.Econst_int (Integers.Int.repr 10) tint)
+                                      (Expr.Econst_int (Integers.Int.repr 9) tint)
                                       (tptr (tptr tulong))) (tptr tulong))
                                   (Expr.Ecast
                                     (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1393,7 +1384,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
         (Expr.Efield
           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
           _vector_lo (tarray (tptr tulong) 32))
-        (Expr.Econst_int (Integers.Int.repr 10) tint) (tptr (tptr tulong)))
+        (Expr.Econst_int (Integers.Int.repr 9) tint) (tptr (tptr tulong)))
       (tptr tulong))
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
   (Stmt.Ssequence
@@ -1403,7 +1394,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
           (Expr.Efield
             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
             _vector_lo (tarray (tptr tulong) 32))
-          (Expr.Econst_int (Integers.Int.repr 11) tint) (tptr (tptr tulong)))
+          (Expr.Econst_int (Integers.Int.repr 10) tint) (tptr (tptr tulong)))
         (tptr tulong))
       (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
     (Stmt.Ssequence
@@ -1413,7 +1404,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
             (Expr.Efield
               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
               _vector_lo (tarray (tptr tulong) 32))
-            (Expr.Econst_int (Integers.Int.repr 12) tint)
+            (Expr.Econst_int (Integers.Int.repr 11) tint)
             (tptr (tptr tulong))) (tptr tulong))
         (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
           (tptr tvoid)))
@@ -1424,7 +1415,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
               (Expr.Efield
                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                 _vector_lo (tarray (tptr tulong) 32))
-              (Expr.Econst_int (Integers.Int.repr 13) tint)
+              (Expr.Econst_int (Integers.Int.repr 12) tint)
               (tptr (tptr tulong))) (tptr tulong))
           (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
             (tptr tvoid)))
@@ -1435,7 +1426,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                 (Expr.Efield
                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                   _vector_lo (tarray (tptr tulong) 32))
-                (Expr.Econst_int (Integers.Int.repr 14) tint)
+                (Expr.Econst_int (Integers.Int.repr 13) tint)
                 (tptr (tptr tulong))) (tptr tulong))
             (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
               (tptr tvoid)))
@@ -1446,7 +1437,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                   (Expr.Efield
                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                     _vector_lo (tarray (tptr tulong) 32))
-                  (Expr.Econst_int (Integers.Int.repr 15) tint)
+                  (Expr.Econst_int (Integers.Int.repr 14) tint)
                   (tptr (tptr tulong))) (tptr tulong))
               (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                 (tptr tvoid)))
@@ -1457,7 +1448,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                     (Expr.Efield
                       (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                       _vector_lo (tarray (tptr tulong) 32))
-                    (Expr.Econst_int (Integers.Int.repr 16) tint)
+                    (Expr.Econst_int (Integers.Int.repr 15) tint)
                     (tptr (tptr tulong))) (tptr tulong))
                 (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                   (tptr tvoid)))
@@ -1468,7 +1459,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                       (Expr.Efield
                         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                         _vector_lo (tarray (tptr tulong) 32))
-                      (Expr.Econst_int (Integers.Int.repr 17) tint)
+                      (Expr.Econst_int (Integers.Int.repr 16) tint)
                       (tptr (tptr tulong))) (tptr tulong))
                   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                     (tptr tvoid)))
@@ -1479,7 +1470,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                         (Expr.Efield
                           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                           _vector_lo (tarray (tptr tulong) 32))
-                        (Expr.Econst_int (Integers.Int.repr 18) tint)
+                        (Expr.Econst_int (Integers.Int.repr 17) tint)
                         (tptr (tptr tulong))) (tptr tulong))
                     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                       (tptr tvoid)))
@@ -1490,7 +1481,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                           (Expr.Efield
                             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                             _vector_lo (tarray (tptr tulong) 32))
-                          (Expr.Econst_int (Integers.Int.repr 19) tint)
+                          (Expr.Econst_int (Integers.Int.repr 18) tint)
                           (tptr (tptr tulong))) (tptr tulong))
                       (Expr.Ecast
                         (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1502,7 +1493,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                             (Expr.Efield
                               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                               _vector_lo (tarray (tptr tulong) 32))
-                            (Expr.Econst_int (Integers.Int.repr 20) tint)
+                            (Expr.Econst_int (Integers.Int.repr 19) tint)
                             (tptr (tptr tulong))) (tptr tulong))
                         (Expr.Ecast
                           (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1514,7 +1505,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                               (Expr.Efield
                                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                 _vector_lo (tarray (tptr tulong) 32))
-                              (Expr.Econst_int (Integers.Int.repr 21) tint)
+                              (Expr.Econst_int (Integers.Int.repr 20) tint)
                               (tptr (tptr tulong))) (tptr tulong))
                           (Expr.Ecast
                             (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1526,7 +1517,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                                 (Expr.Efield
                                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                   _vector_lo (tarray (tptr tulong) 32))
-                                (Expr.Econst_int (Integers.Int.repr 22) tint)
+                                (Expr.Econst_int (Integers.Int.repr 21) tint)
                                 (tptr (tptr tulong))) (tptr tulong))
                             (Expr.Ecast
                               (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1538,7 +1529,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                                   (Expr.Efield
                                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                     _vector_lo (tarray (tptr tulong) 32))
-                                  (Expr.Econst_int (Integers.Int.repr 23) tint)
+                                  (Expr.Econst_int (Integers.Int.repr 22) tint)
                                   (tptr (tptr tulong))) (tptr tulong))
                               (Expr.Ecast
                                 (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1550,7 +1541,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                                     (Expr.Efield
                                       (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                       _vector_lo (tarray (tptr tulong) 32))
-                                    (Expr.Econst_int (Integers.Int.repr 24) tint)
+                                    (Expr.Econst_int (Integers.Int.repr 23) tint)
                                     (tptr (tptr tulong))) (tptr tulong))
                                 (Expr.Ecast
                                   (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1562,7 +1553,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                                       (Expr.Efield
                                         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                         _vector_lo (tarray (tptr tulong) 32))
-                                      (Expr.Econst_int (Integers.Int.repr 25) tint)
+                                      (Expr.Econst_int (Integers.Int.repr 24) tint)
                                       (tptr (tptr tulong))) (tptr tulong))
                                   (Expr.Ecast
                                     (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1575,55 +1566,51 @@ def _t'99 : Ident := (Positive.ofNat 226)
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-      _sp (tptr tlong))
-    (Expr.Eaddrof (Expr.Evar ___a64_sp tlong) (tptr tlong)))
+      _lr (tptr tulong))
+    (Expr.Eaddrof (Expr.Evar ___a64_lr tulong) (tptr tulong)))
   (Stmt.Ssequence
     (Stmt.Sassign
       (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-        _sp_valid (tptr tuchar))
-      (Expr.Eaddrof (Expr.Evar ___a64_numeric_sp_valid tuchar) (tptr tuchar)))
+        _sp (tptr tlong))
+      (Expr.Eaddrof (Expr.Evar ___a64_sp tlong) (tptr tlong)))
     (Stmt.Ssequence
       (Stmt.Sassign
         (Expr.Efield
-          (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-          _return_valid (tptr tuchar))
-        (Expr.Eaddrof (Expr.Evar ___a64_numeric_return_valid tuchar)
+          (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr)) _sp_valid
+          (tptr tuchar))
+        (Expr.Eaddrof (Expr.Evar ___a64_numeric_sp_valid tuchar)
           (tptr tuchar)))
       (Stmt.Ssequence
         (Stmt.Sassign
           (Expr.Efield
-            (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr)) _n
-            (tptr tuchar))
-          (Expr.Eaddrof (Expr.Evar ___a64_n tuchar) (tptr tuchar)))
+            (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
+            _return_valid (tptr tuchar))
+          (Expr.Eaddrof (Expr.Evar ___a64_numeric_return_valid tuchar)
+            (tptr tuchar)))
         (Stmt.Ssequence
           (Stmt.Sassign
             (Expr.Efield
-              (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr)) _z
+              (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr)) _n
               (tptr tuchar))
-            (Expr.Eaddrof (Expr.Evar ___a64_z tuchar) (tptr tuchar)))
+            (Expr.Eaddrof (Expr.Evar ___a64_n tuchar) (tptr tuchar)))
           (Stmt.Ssequence
             (Stmt.Sassign
               (Expr.Efield
-                (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr)) _c
+                (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr)) _z
                 (tptr tuchar))
-              (Expr.Eaddrof (Expr.Evar ___a64_c tuchar) (tptr tuchar)))
+              (Expr.Eaddrof (Expr.Evar ___a64_z tuchar) (tptr tuchar)))
             (Stmt.Ssequence
               (Stmt.Sassign
                 (Expr.Efield
                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                  _v (tptr tuchar))
-                (Expr.Eaddrof (Expr.Evar ___a64_v tuchar) (tptr tuchar)))
+                  _c (tptr tuchar))
+                (Expr.Eaddrof (Expr.Evar ___a64_c tuchar) (tptr tuchar)))
               (Stmt.Ssequence
                 (Stmt.Sassign
-                  (Expr.Ederef
-                    (Expr.Ebinop Binop.Oadd
-                      (Expr.Efield
-                        (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                        _vector_lo (tarray (tptr tulong) 32))
-                      (Expr.Econst_int (Integers.Int.repr 0) tint)
-                      (tptr (tptr tulong))) (tptr tulong))
-                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
-                    (tptr tvoid)))
+                  (Expr.Efield
+                    (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
+                    _v (tptr tuchar))
+                  (Expr.Eaddrof (Expr.Evar ___a64_v tuchar) (tptr tuchar)))
                 (Stmt.Ssequence
                   (Stmt.Sassign
                     (Expr.Ederef
@@ -1631,7 +1618,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                         (Expr.Efield
                           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                           _vector_lo (tarray (tptr tulong) 32))
-                        (Expr.Econst_int (Integers.Int.repr 1) tint)
+                        (Expr.Econst_int (Integers.Int.repr 0) tint)
                         (tptr (tptr tulong))) (tptr tulong))
                     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                       (tptr tvoid)))
@@ -1642,7 +1629,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                           (Expr.Efield
                             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                             _vector_lo (tarray (tptr tulong) 32))
-                          (Expr.Econst_int (Integers.Int.repr 2) tint)
+                          (Expr.Econst_int (Integers.Int.repr 1) tint)
                           (tptr (tptr tulong))) (tptr tulong))
                       (Expr.Ecast
                         (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1654,7 +1641,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                             (Expr.Efield
                               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                               _vector_lo (tarray (tptr tulong) 32))
-                            (Expr.Econst_int (Integers.Int.repr 3) tint)
+                            (Expr.Econst_int (Integers.Int.repr 2) tint)
                             (tptr (tptr tulong))) (tptr tulong))
                         (Expr.Ecast
                           (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1666,7 +1653,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                               (Expr.Efield
                                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                 _vector_lo (tarray (tptr tulong) 32))
-                              (Expr.Econst_int (Integers.Int.repr 4) tint)
+                              (Expr.Econst_int (Integers.Int.repr 3) tint)
                               (tptr (tptr tulong))) (tptr tulong))
                           (Expr.Ecast
                             (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1678,7 +1665,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                                 (Expr.Efield
                                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                   _vector_lo (tarray (tptr tulong) 32))
-                                (Expr.Econst_int (Integers.Int.repr 5) tint)
+                                (Expr.Econst_int (Integers.Int.repr 4) tint)
                                 (tptr (tptr tulong))) (tptr tulong))
                             (Expr.Ecast
                               (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1690,7 +1677,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                                   (Expr.Efield
                                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                     _vector_lo (tarray (tptr tulong) 32))
-                                  (Expr.Econst_int (Integers.Int.repr 6) tint)
+                                  (Expr.Econst_int (Integers.Int.repr 5) tint)
                                   (tptr (tptr tulong))) (tptr tulong))
                               (Expr.Ecast
                                 (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1702,7 +1689,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                                     (Expr.Efield
                                       (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                       _vector_lo (tarray (tptr tulong) 32))
-                                    (Expr.Econst_int (Integers.Int.repr 7) tint)
+                                    (Expr.Econst_int (Integers.Int.repr 6) tint)
                                     (tptr (tptr tulong))) (tptr tulong))
                                 (Expr.Ecast
                                   (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1714,7 +1701,7 @@ def _t'99 : Ident := (Positive.ofNat 226)
                                       (Expr.Efield
                                         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                         _vector_lo (tarray (tptr tulong) 32))
-                                      (Expr.Econst_int (Integers.Int.repr 8) tint)
+                                      (Expr.Econst_int (Integers.Int.repr 7) tint)
                                       (tptr (tptr tulong))) (tptr tulong))
                                   (Expr.Ecast
                                     (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -1812,16 +1799,8 @@ def _t'99 : Ident := (Positive.ofNat 226)
                                   (Expr.Evar ___a64_numeric_sp tulong)
                                   (tptr tulong)))
                               (Stmt.Ssequence
-                                (Stmt.Sassign
-                                  (Expr.Efield
-                                    (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                                    _return_base (tptr tulong))
-                                  (Expr.Eaddrof
-                                    (Expr.Evar ___a64_numeric_return tulong)
-                                    (tptr tulong)))
-                                (Stmt.Ssequence
-                                  s_kprog_arm64_entry_raw_41
-                                  s_kprog_arm64_entry_raw_52)))))))))))))))))
+                                s_kprog_arm64_entry_raw_41
+                                s_kprog_arm64_entry_raw_52))))))))))))))))
 
 @[noinline] def s_kprog_arm64_entry_raw_54 : Stmt :=
 (Stmt.Ssequence
@@ -6335,7 +6314,7 @@ def f_kprog_arm64_entry_raw : Function := {
     (Expr.Ebinop Binop.Oadd
       (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
         _vector_lo (tarray (tptr tulong) 32))
-      (Expr.Econst_int (Integers.Int.repr 1) tint) (tptr (tptr tulong)))
+      (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr (tptr tulong)))
     (tptr tulong))
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
 
@@ -6345,7 +6324,7 @@ def f_kprog_arm64_entry_raw : Function := {
     (Expr.Ebinop Binop.Oadd
       (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
         _vector_lo (tarray (tptr tulong) 32))
-      (Expr.Econst_int (Integers.Int.repr 18) tint) (tptr (tptr tulong)))
+      (Expr.Econst_int (Integers.Int.repr 17) tint) (tptr (tptr tulong)))
     (tptr tulong))
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
 
@@ -6355,7 +6334,7 @@ def f_kprog_arm64_entry_raw : Function := {
     (Expr.Ebinop Binop.Oadd
       (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
         _vector_hi (tarray (tptr tulong) 32))
-      (Expr.Econst_int (Integers.Int.repr 3) tint) (tptr (tptr tulong)))
+      (Expr.Econst_int (Integers.Int.repr 2) tint) (tptr (tptr tulong)))
     (tptr tulong))
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
 
@@ -6365,141 +6344,138 @@ def f_kprog_arm64_entry_raw : Function := {
     (Expr.Ebinop Binop.Oadd
       (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
         _vector_hi (tarray (tptr tulong) 32))
-      (Expr.Econst_int (Integers.Int.repr 20) tint) (tptr (tptr tulong)))
+      (Expr.Econst_int (Integers.Int.repr 19) tint) (tptr (tptr tulong)))
     (tptr tulong))
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
 
 @[noinline] def s_kprog_arm64_entry_xdp_31 : Stmt :=
 (Stmt.Sassign
   (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-    _payload_words tuint)
-  (Expr.Ebinop Binop.Odiv
-    (Expr.Ebinop Binop.Oadd
-      (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 160) tuint) tuint)
-      (Expr.Econst_int (Integers.Int.repr 7) tuint) tuint)
-    (Expr.Econst_int (Integers.Int.repr 8) tuint) tuint))
+    _capacity tuint) (Expr.Esizeof (tarray (tvolatile tuchar) 160) tulong))
 
 @[noinline] def s_kprog_arm64_entry_xdp_32 : Stmt :=
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-      _tag_bytes tuint)
-    (Expr.Ebinop Binop.Oand
-      (Expr.Ebinop Binop.Oadd
-        (Expr.Ebinop Binop.Odiv
-          (Expr.Ebinop Binop.Oadd
-            (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 160) tuint)
-              tuint) (Expr.Econst_int (Integers.Int.repr 7) tuint) tuint)
-          (Expr.Econst_int (Integers.Int.repr 8) tuint) tuint)
-        (Expr.Econst_int (Integers.Int.repr 7) tuint) tuint)
-      (Expr.Eunop Unop.Onotint (Expr.Econst_int (Integers.Int.repr 7) tuint)
-        tuint) tuint))
+      _payload_words tuint)
+    (Expr.Ebinop Binop.Odiv
+      (Expr.Esizeof (tarray (tvolatile tulong) 20) tulong)
+      (Expr.Esizeof (tvolatile tulong) tulong) tulong))
   (Stmt.Ssequence
     (Stmt.Sassign
       (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-        _bias tlong) (Expr.Econst_long (Integers.Int64.repr 96) tlong))
+        _tag_bytes tuint) (Expr.Esizeof (tarray tuchar 24) tulong))
     (Stmt.Ssequence
       (Stmt.Sassign
         (Expr.Efield
-          (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-          _helper_context (tptr (tptr tvoid)))
-        (Expr.Eaddrof (Expr.Evar ___a64_sim_helper_ctx (tptr tvoid))
-          (tptr (tptr tvoid))))
+          (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr)) _bias
+          tlong) (Expr.Econst_long (Integers.Int64.repr 96) tlong))
       (Stmt.Ssequence
         (Stmt.Sassign
           (Expr.Efield
             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-            _helper_abi_base (tptr (tptr tvoid)))
-          (Expr.Eaddrof (Expr.Evar ___a64_sim_helper_abi_base (tptr tvoid))
+            _helper_context (tptr (tptr tvoid)))
+          (Expr.Eaddrof (Expr.Evar ___a64_sim_helper_ctx (tptr tvoid))
             (tptr (tptr tvoid))))
         (Stmt.Ssequence
           (Stmt.Sassign
             (Expr.Efield
               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-              _is_xdp (tptr tuchar))
-            (Expr.Eaddrof (Expr.Evar ___a64_sim_is_xdp tuchar) (tptr tuchar)))
+              _helper_abi_base (tptr (tptr tvoid)))
+            (Expr.Eaddrof (Expr.Evar ___a64_sim_helper_abi_base (tptr tvoid))
+              (tptr (tptr tvoid))))
           (Stmt.Ssequence
             (Stmt.Sassign
               (Expr.Efield
                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                _abi_kind (tptr tuchar))
-              (Expr.Eaddrof (Expr.Evar ___a64_sim_abi_kind tuchar)
+                _is_xdp (tptr tuchar))
+              (Expr.Eaddrof (Expr.Evar ___a64_sim_is_xdp tuchar)
                 (tptr tuchar)))
             (Stmt.Ssequence
               (Stmt.Sassign
                 (Expr.Efield
                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                  _skb_context (tptr (tptr (Ty.Tstruct ___sk_buff noattr))))
-                (Expr.Eaddrof
-                  (Expr.Evar ___a64_sim_skb_ctx (tptr (Ty.Tstruct ___sk_buff noattr)))
-                  (tptr (tptr (Ty.Tstruct ___sk_buff noattr)))))
+                  _abi_kind (tptr tuchar))
+                (Expr.Eaddrof (Expr.Evar ___a64_sim_abi_kind tuchar)
+                  (tptr tuchar)))
               (Stmt.Ssequence
                 (Stmt.Sassign
                   (Expr.Efield
                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                    _abi (tptr tvoid))
+                    _skb_context
+                    (tptr (tptr (Ty.Tstruct ___sk_buff noattr))))
                   (Expr.Eaddrof
-                    (Expr.Evar ___a64_sim_abi (Ty.Tstruct _arm64_sim_xdp_abi noattr))
-                    (tptr (Ty.Tstruct _arm64_sim_xdp_abi noattr))))
+                    (Expr.Evar ___a64_sim_skb_ctx (tptr (Ty.Tstruct ___sk_buff noattr)))
+                    (tptr (tptr (Ty.Tstruct ___sk_buff noattr)))))
                 (Stmt.Ssequence
+                  (Stmt.Sassign
+                    (Expr.Efield
+                      (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
+                      _abi (tptr tvoid))
+                    (Expr.Eaddrof
+                      (Expr.Evar ___a64_sim_abi (Ty.Tstruct _arm64_sim_xdp_abi noattr))
+                      (tptr (Ty.Tstruct _arm64_sim_xdp_abi noattr))))
                   (Stmt.Ssequence
-                    (Stmt.Sset _i
-                      (Expr.Econst_int (Integers.Int.repr 0) tint))
-                    (Stmt.Sloop
-                      (Stmt.Ssequence
-                        (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
-                                            (Expr.Etempvar _i tuint)
-                                            (Expr.Econst_int (Integers.Int.repr 32) tint)
-                                            tint)
-                          Stmt.Sskip
-                          Stmt.Sbreak)
-                        (Stmt.Ssequence
-                          (Stmt.Sassign
-                            (Expr.Ederef
-                              (Expr.Ebinop Binop.Oadd
-                                (Expr.Efield
-                                  (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                                  _vector_lo (tarray (tptr tulong) 32))
-                                (Expr.Etempvar _i tuint)
-                                (tptr (tptr tulong))) (tptr tulong))
-                            (Expr.Eaddrof
-                              (Expr.Efield
-                                (Expr.Ederef
-                                  (Expr.Ebinop Binop.Oadd
-                                    (Expr.Evar ___a64_vectors (tarray (Ty.Tstruct __2932 noattr) 32))
-                                    (Expr.Etempvar _i tuint)
-                                    (tptr (Ty.Tstruct __2932 noattr)))
-                                  (Ty.Tstruct __2932 noattr)) _lo tulong)
-                              (tptr tulong)))
-                          (Stmt.Sassign
-                            (Expr.Ederef
-                              (Expr.Ebinop Binop.Oadd
-                                (Expr.Efield
-                                  (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                                  _vector_hi (tarray (tptr tulong) 32))
-                                (Expr.Etempvar _i tuint)
-                                (tptr (tptr tulong))) (tptr tulong))
-                            (Expr.Eaddrof
-                              (Expr.Efield
-                                (Expr.Ederef
-                                  (Expr.Ebinop Binop.Oadd
-                                    (Expr.Evar ___a64_vectors (tarray (Ty.Tstruct __2932 noattr) 32))
-                                    (Expr.Etempvar _i tuint)
-                                    (tptr (Ty.Tstruct __2932 noattr)))
-                                  (Ty.Tstruct __2932 noattr)) _hi tulong)
-                              (tptr tulong)))))
+                    (Stmt.Ssequence
                       (Stmt.Sset _i
-                        (Expr.Ebinop Binop.Oadd (Expr.Etempvar _i tuint)
-                          (Expr.Econst_int (Integers.Int.repr 1) tint) tuint))))
-                  (Stmt.Ssequence
-                    (Stmt.Scall (some _t'133)
-                      (Expr.Etempvar _continuation (tptr (Ty.Tfunction
-                                                           [(tptr (Ty.Tstruct _kprog_arm64_entry noattr))]
-                                                           tuint cc_default)))
-                      [(Expr.Eaddrof
-                         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                         (tptr (Ty.Tstruct _kprog_arm64_entry noattr)))])
-                    (Stmt.Sreturn (some (Expr.Etempvar _t'133 tuint)))))))))))))
+                        (Expr.Econst_int (Integers.Int.repr 0) tint))
+                      (Stmt.Sloop
+                        (Stmt.Ssequence
+                          (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt
+                                              (Expr.Etempvar _i tuint)
+                                              (Expr.Econst_int (Integers.Int.repr 32) tint)
+                                              tint)
+                            Stmt.Sskip
+                            Stmt.Sbreak)
+                          (Stmt.Ssequence
+                            (Stmt.Sassign
+                              (Expr.Ederef
+                                (Expr.Ebinop Binop.Oadd
+                                  (Expr.Efield
+                                    (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
+                                    _vector_lo (tarray (tptr tulong) 32))
+                                  (Expr.Etempvar _i tuint)
+                                  (tptr (tptr tulong))) (tptr tulong))
+                              (Expr.Eaddrof
+                                (Expr.Efield
+                                  (Expr.Ederef
+                                    (Expr.Ebinop Binop.Oadd
+                                      (Expr.Evar ___a64_vectors (tarray (Ty.Tstruct __2932 noattr) 32))
+                                      (Expr.Etempvar _i tuint)
+                                      (tptr (Ty.Tstruct __2932 noattr)))
+                                    (Ty.Tstruct __2932 noattr)) _lo tulong)
+                                (tptr tulong)))
+                            (Stmt.Sassign
+                              (Expr.Ederef
+                                (Expr.Ebinop Binop.Oadd
+                                  (Expr.Efield
+                                    (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
+                                    _vector_hi (tarray (tptr tulong) 32))
+                                  (Expr.Etempvar _i tuint)
+                                  (tptr (tptr tulong))) (tptr tulong))
+                              (Expr.Eaddrof
+                                (Expr.Efield
+                                  (Expr.Ederef
+                                    (Expr.Ebinop Binop.Oadd
+                                      (Expr.Evar ___a64_vectors (tarray (Ty.Tstruct __2932 noattr) 32))
+                                      (Expr.Etempvar _i tuint)
+                                      (tptr (Ty.Tstruct __2932 noattr)))
+                                    (Ty.Tstruct __2932 noattr)) _hi tulong)
+                                (tptr tulong)))))
+                        (Stmt.Sset _i
+                          (Expr.Ebinop Binop.Oadd (Expr.Etempvar _i tuint)
+                            (Expr.Econst_int (Integers.Int.repr 1) tint)
+                            tuint))))
+                    (Stmt.Ssequence
+                      (Stmt.Scall (some _t'133)
+                        (Expr.Etempvar _continuation (tptr (Ty.Tfunction
+                                                             [(tptr (Ty.Tstruct _kprog_arm64_entry noattr))]
+                                                             tuint
+                                                             cc_default)))
+                        [(Expr.Eaddrof
+                           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
+                           (tptr (Ty.Tstruct _kprog_arm64_entry noattr)))])
+                      (Stmt.Sreturn (some (Expr.Etempvar _t'133 tuint))))))))))))))
 
 @[noinline] def s_kprog_arm64_entry_xdp_33 : Stmt :=
 (Stmt.Ssequence
@@ -6509,7 +6485,7 @@ def f_kprog_arm64_entry_raw : Function := {
         (Expr.Efield
           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
           _vector_hi (tarray (tptr tulong) 32))
-        (Expr.Econst_int (Integers.Int.repr 21) tint) (tptr (tptr tulong)))
+        (Expr.Econst_int (Integers.Int.repr 20) tint) (tptr (tptr tulong)))
       (tptr tulong))
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
   (Stmt.Ssequence
@@ -6519,7 +6495,7 @@ def f_kprog_arm64_entry_raw : Function := {
           (Expr.Efield
             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
             _vector_hi (tarray (tptr tulong) 32))
-          (Expr.Econst_int (Integers.Int.repr 22) tint) (tptr (tptr tulong)))
+          (Expr.Econst_int (Integers.Int.repr 21) tint) (tptr (tptr tulong)))
         (tptr tulong))
       (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
     (Stmt.Ssequence
@@ -6529,7 +6505,7 @@ def f_kprog_arm64_entry_raw : Function := {
             (Expr.Efield
               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
               _vector_hi (tarray (tptr tulong) 32))
-            (Expr.Econst_int (Integers.Int.repr 23) tint)
+            (Expr.Econst_int (Integers.Int.repr 22) tint)
             (tptr (tptr tulong))) (tptr tulong))
         (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
           (tptr tvoid)))
@@ -6540,7 +6516,7 @@ def f_kprog_arm64_entry_raw : Function := {
               (Expr.Efield
                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                 _vector_hi (tarray (tptr tulong) 32))
-              (Expr.Econst_int (Integers.Int.repr 24) tint)
+              (Expr.Econst_int (Integers.Int.repr 23) tint)
               (tptr (tptr tulong))) (tptr tulong))
           (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
             (tptr tvoid)))
@@ -6551,7 +6527,7 @@ def f_kprog_arm64_entry_raw : Function := {
                 (Expr.Efield
                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                   _vector_hi (tarray (tptr tulong) 32))
-                (Expr.Econst_int (Integers.Int.repr 25) tint)
+                (Expr.Econst_int (Integers.Int.repr 24) tint)
                 (tptr (tptr tulong))) (tptr tulong))
             (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
               (tptr tvoid)))
@@ -6562,7 +6538,7 @@ def f_kprog_arm64_entry_raw : Function := {
                   (Expr.Efield
                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                     _vector_hi (tarray (tptr tulong) 32))
-                  (Expr.Econst_int (Integers.Int.repr 26) tint)
+                  (Expr.Econst_int (Integers.Int.repr 25) tint)
                   (tptr (tptr tulong))) (tptr tulong))
               (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                 (tptr tvoid)))
@@ -6573,7 +6549,7 @@ def f_kprog_arm64_entry_raw : Function := {
                     (Expr.Efield
                       (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                       _vector_hi (tarray (tptr tulong) 32))
-                    (Expr.Econst_int (Integers.Int.repr 27) tint)
+                    (Expr.Econst_int (Integers.Int.repr 26) tint)
                     (tptr (tptr tulong))) (tptr tulong))
                 (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                   (tptr tvoid)))
@@ -6584,7 +6560,7 @@ def f_kprog_arm64_entry_raw : Function := {
                       (Expr.Efield
                         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                         _vector_hi (tarray (tptr tulong) 32))
-                      (Expr.Econst_int (Integers.Int.repr 28) tint)
+                      (Expr.Econst_int (Integers.Int.repr 27) tint)
                       (tptr (tptr tulong))) (tptr tulong))
                   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                     (tptr tvoid)))
@@ -6595,7 +6571,7 @@ def f_kprog_arm64_entry_raw : Function := {
                         (Expr.Efield
                           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                           _vector_hi (tarray (tptr tulong) 32))
-                        (Expr.Econst_int (Integers.Int.repr 29) tint)
+                        (Expr.Econst_int (Integers.Int.repr 28) tint)
                         (tptr (tptr tulong))) (tptr tulong))
                     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                       (tptr tvoid)))
@@ -6606,7 +6582,7 @@ def f_kprog_arm64_entry_raw : Function := {
                           (Expr.Efield
                             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                             _vector_hi (tarray (tptr tulong) 32))
-                          (Expr.Econst_int (Integers.Int.repr 30) tint)
+                          (Expr.Econst_int (Integers.Int.repr 29) tint)
                           (tptr (tptr tulong))) (tptr tulong))
                       (Expr.Ecast
                         (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -6618,45 +6594,51 @@ def f_kprog_arm64_entry_raw : Function := {
                             (Expr.Efield
                               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                               _vector_hi (tarray (tptr tulong) 32))
-                            (Expr.Econst_int (Integers.Int.repr 31) tint)
+                            (Expr.Econst_int (Integers.Int.repr 30) tint)
                             (tptr (tptr tulong))) (tptr tulong))
                         (Expr.Ecast
                           (Expr.Econst_int (Integers.Int.repr 0) tint)
                           (tptr tvoid)))
                       (Stmt.Ssequence
                         (Stmt.Sassign
-                          (Expr.Efield
-                            (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                            _bytes (tptr (tvolatile tuchar)))
-                          (Expr.Efield
-                            (Expr.Evar ___a64_stack (tvolatile (Ty.Tunion __2934 noattr)))
-                            _b (tvolatile (tarray tuchar 160))))
+                          (Expr.Ederef
+                            (Expr.Ebinop Binop.Oadd
+                              (Expr.Efield
+                                (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
+                                _vector_hi (tarray (tptr tulong) 32))
+                              (Expr.Econst_int (Integers.Int.repr 31) tint)
+                              (tptr (tptr tulong))) (tptr tulong))
+                          (Expr.Ecast
+                            (Expr.Econst_int (Integers.Int.repr 0) tint)
+                            (tptr tvoid)))
                         (Stmt.Ssequence
                           (Stmt.Sassign
                             (Expr.Efield
                               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                              _words (tptr (tvolatile tulong)))
+                              _b (tptr (tvolatile tuchar)))
                             (Expr.Efield
                               (Expr.Evar ___a64_stack (tvolatile (Ty.Tunion __2934 noattr)))
-                              _q (tvolatile (tarray tulong 20))))
+                              _b (tvolatile (tarray tuchar 160))))
                           (Stmt.Ssequence
                             (Stmt.Sassign
                               (Expr.Efield
                                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                                _payload (tptr (tvolatile tulong)))
-                              (Expr.Evar ___a64_stack_payload (tarray (tvolatile tulong) 20)))
+                                _q (tptr (tvolatile tulong)))
+                              (Expr.Efield
+                                (Expr.Evar ___a64_stack (tvolatile (Ty.Tunion __2934 noattr)))
+                                _q (tvolatile (tarray tulong 20))))
                             (Stmt.Ssequence
                               (Stmt.Sassign
                                 (Expr.Efield
                                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                                  _stack_tags (tptr tuchar))
-                                (Expr.Evar ___a64_stack_tag (tarray tuchar 24)))
+                                  _payload (tptr (tvolatile tulong)))
+                                (Expr.Evar ___a64_stack_payload (tarray (tvolatile tulong) 20)))
                               (Stmt.Ssequence
                                 (Stmt.Sassign
                                   (Expr.Efield
                                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                                    _capacity tuint)
-                                  (Expr.Econst_int (Integers.Int.repr 160) tuint))
+                                    _stack_tags (tptr tuchar))
+                                  (Expr.Evar ___a64_stack_tag (tarray tuchar 24)))
                                 (Stmt.Ssequence
                                   s_kprog_arm64_entry_xdp_31
                                   s_kprog_arm64_entry_xdp_32)))))))))))))))))
@@ -6669,7 +6651,7 @@ def f_kprog_arm64_entry_raw : Function := {
         (Expr.Efield
           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
           _vector_hi (tarray (tptr tulong) 32))
-        (Expr.Econst_int (Integers.Int.repr 4) tint) (tptr (tptr tulong)))
+        (Expr.Econst_int (Integers.Int.repr 3) tint) (tptr (tptr tulong)))
       (tptr tulong))
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
   (Stmt.Ssequence
@@ -6679,7 +6661,7 @@ def f_kprog_arm64_entry_raw : Function := {
           (Expr.Efield
             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
             _vector_hi (tarray (tptr tulong) 32))
-          (Expr.Econst_int (Integers.Int.repr 5) tint) (tptr (tptr tulong)))
+          (Expr.Econst_int (Integers.Int.repr 4) tint) (tptr (tptr tulong)))
         (tptr tulong))
       (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
     (Stmt.Ssequence
@@ -6689,7 +6671,7 @@ def f_kprog_arm64_entry_raw : Function := {
             (Expr.Efield
               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
               _vector_hi (tarray (tptr tulong) 32))
-            (Expr.Econst_int (Integers.Int.repr 6) tint)
+            (Expr.Econst_int (Integers.Int.repr 5) tint)
             (tptr (tptr tulong))) (tptr tulong))
         (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
           (tptr tvoid)))
@@ -6700,7 +6682,7 @@ def f_kprog_arm64_entry_raw : Function := {
               (Expr.Efield
                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                 _vector_hi (tarray (tptr tulong) 32))
-              (Expr.Econst_int (Integers.Int.repr 7) tint)
+              (Expr.Econst_int (Integers.Int.repr 6) tint)
               (tptr (tptr tulong))) (tptr tulong))
           (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
             (tptr tvoid)))
@@ -6711,7 +6693,7 @@ def f_kprog_arm64_entry_raw : Function := {
                 (Expr.Efield
                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                   _vector_hi (tarray (tptr tulong) 32))
-                (Expr.Econst_int (Integers.Int.repr 8) tint)
+                (Expr.Econst_int (Integers.Int.repr 7) tint)
                 (tptr (tptr tulong))) (tptr tulong))
             (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
               (tptr tvoid)))
@@ -6722,7 +6704,7 @@ def f_kprog_arm64_entry_raw : Function := {
                   (Expr.Efield
                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                     _vector_hi (tarray (tptr tulong) 32))
-                  (Expr.Econst_int (Integers.Int.repr 9) tint)
+                  (Expr.Econst_int (Integers.Int.repr 8) tint)
                   (tptr (tptr tulong))) (tptr tulong))
               (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                 (tptr tvoid)))
@@ -6733,7 +6715,7 @@ def f_kprog_arm64_entry_raw : Function := {
                     (Expr.Efield
                       (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                       _vector_hi (tarray (tptr tulong) 32))
-                    (Expr.Econst_int (Integers.Int.repr 10) tint)
+                    (Expr.Econst_int (Integers.Int.repr 9) tint)
                     (tptr (tptr tulong))) (tptr tulong))
                 (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                   (tptr tvoid)))
@@ -6744,7 +6726,7 @@ def f_kprog_arm64_entry_raw : Function := {
                       (Expr.Efield
                         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                         _vector_hi (tarray (tptr tulong) 32))
-                      (Expr.Econst_int (Integers.Int.repr 11) tint)
+                      (Expr.Econst_int (Integers.Int.repr 10) tint)
                       (tptr (tptr tulong))) (tptr tulong))
                   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                     (tptr tvoid)))
@@ -6755,7 +6737,7 @@ def f_kprog_arm64_entry_raw : Function := {
                         (Expr.Efield
                           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                           _vector_hi (tarray (tptr tulong) 32))
-                        (Expr.Econst_int (Integers.Int.repr 12) tint)
+                        (Expr.Econst_int (Integers.Int.repr 11) tint)
                         (tptr (tptr tulong))) (tptr tulong))
                     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                       (tptr tvoid)))
@@ -6766,7 +6748,7 @@ def f_kprog_arm64_entry_raw : Function := {
                           (Expr.Efield
                             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                             _vector_hi (tarray (tptr tulong) 32))
-                          (Expr.Econst_int (Integers.Int.repr 13) tint)
+                          (Expr.Econst_int (Integers.Int.repr 12) tint)
                           (tptr (tptr tulong))) (tptr tulong))
                       (Expr.Ecast
                         (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -6778,7 +6760,7 @@ def f_kprog_arm64_entry_raw : Function := {
                             (Expr.Efield
                               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                               _vector_hi (tarray (tptr tulong) 32))
-                            (Expr.Econst_int (Integers.Int.repr 14) tint)
+                            (Expr.Econst_int (Integers.Int.repr 13) tint)
                             (tptr (tptr tulong))) (tptr tulong))
                         (Expr.Ecast
                           (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -6790,7 +6772,7 @@ def f_kprog_arm64_entry_raw : Function := {
                               (Expr.Efield
                                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                 _vector_hi (tarray (tptr tulong) 32))
-                              (Expr.Econst_int (Integers.Int.repr 15) tint)
+                              (Expr.Econst_int (Integers.Int.repr 14) tint)
                               (tptr (tptr tulong))) (tptr tulong))
                           (Expr.Ecast
                             (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -6802,7 +6784,7 @@ def f_kprog_arm64_entry_raw : Function := {
                                 (Expr.Efield
                                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                   _vector_hi (tarray (tptr tulong) 32))
-                                (Expr.Econst_int (Integers.Int.repr 16) tint)
+                                (Expr.Econst_int (Integers.Int.repr 15) tint)
                                 (tptr (tptr tulong))) (tptr tulong))
                             (Expr.Ecast
                               (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -6814,7 +6796,7 @@ def f_kprog_arm64_entry_raw : Function := {
                                   (Expr.Efield
                                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                     _vector_hi (tarray (tptr tulong) 32))
-                                  (Expr.Econst_int (Integers.Int.repr 17) tint)
+                                  (Expr.Econst_int (Integers.Int.repr 16) tint)
                                   (tptr (tptr tulong))) (tptr tulong))
                               (Expr.Ecast
                                 (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -6826,7 +6808,7 @@ def f_kprog_arm64_entry_raw : Function := {
                                     (Expr.Efield
                                       (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                       _vector_hi (tarray (tptr tulong) 32))
-                                    (Expr.Econst_int (Integers.Int.repr 18) tint)
+                                    (Expr.Econst_int (Integers.Int.repr 17) tint)
                                     (tptr (tptr tulong))) (tptr tulong))
                                 (Expr.Ecast
                                   (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -6838,7 +6820,7 @@ def f_kprog_arm64_entry_raw : Function := {
                                       (Expr.Efield
                                         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                         _vector_hi (tarray (tptr tulong) 32))
-                                      (Expr.Econst_int (Integers.Int.repr 19) tint)
+                                      (Expr.Econst_int (Integers.Int.repr 18) tint)
                                       (tptr (tptr tulong))) (tptr tulong))
                                   (Expr.Ecast
                                     (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -6855,7 +6837,7 @@ def f_kprog_arm64_entry_raw : Function := {
         (Expr.Efield
           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
           _vector_lo (tarray (tptr tulong) 32))
-        (Expr.Econst_int (Integers.Int.repr 19) tint) (tptr (tptr tulong)))
+        (Expr.Econst_int (Integers.Int.repr 18) tint) (tptr (tptr tulong)))
       (tptr tulong))
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
   (Stmt.Ssequence
@@ -6865,7 +6847,7 @@ def f_kprog_arm64_entry_raw : Function := {
           (Expr.Efield
             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
             _vector_lo (tarray (tptr tulong) 32))
-          (Expr.Econst_int (Integers.Int.repr 20) tint) (tptr (tptr tulong)))
+          (Expr.Econst_int (Integers.Int.repr 19) tint) (tptr (tptr tulong)))
         (tptr tulong))
       (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
     (Stmt.Ssequence
@@ -6875,7 +6857,7 @@ def f_kprog_arm64_entry_raw : Function := {
             (Expr.Efield
               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
               _vector_lo (tarray (tptr tulong) 32))
-            (Expr.Econst_int (Integers.Int.repr 21) tint)
+            (Expr.Econst_int (Integers.Int.repr 20) tint)
             (tptr (tptr tulong))) (tptr tulong))
         (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
           (tptr tvoid)))
@@ -6886,7 +6868,7 @@ def f_kprog_arm64_entry_raw : Function := {
               (Expr.Efield
                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                 _vector_lo (tarray (tptr tulong) 32))
-              (Expr.Econst_int (Integers.Int.repr 22) tint)
+              (Expr.Econst_int (Integers.Int.repr 21) tint)
               (tptr (tptr tulong))) (tptr tulong))
           (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
             (tptr tvoid)))
@@ -6897,7 +6879,7 @@ def f_kprog_arm64_entry_raw : Function := {
                 (Expr.Efield
                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                   _vector_lo (tarray (tptr tulong) 32))
-                (Expr.Econst_int (Integers.Int.repr 23) tint)
+                (Expr.Econst_int (Integers.Int.repr 22) tint)
                 (tptr (tptr tulong))) (tptr tulong))
             (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
               (tptr tvoid)))
@@ -6908,7 +6890,7 @@ def f_kprog_arm64_entry_raw : Function := {
                   (Expr.Efield
                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                     _vector_lo (tarray (tptr tulong) 32))
-                  (Expr.Econst_int (Integers.Int.repr 24) tint)
+                  (Expr.Econst_int (Integers.Int.repr 23) tint)
                   (tptr (tptr tulong))) (tptr tulong))
               (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                 (tptr tvoid)))
@@ -6919,7 +6901,7 @@ def f_kprog_arm64_entry_raw : Function := {
                     (Expr.Efield
                       (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                       _vector_lo (tarray (tptr tulong) 32))
-                    (Expr.Econst_int (Integers.Int.repr 25) tint)
+                    (Expr.Econst_int (Integers.Int.repr 24) tint)
                     (tptr (tptr tulong))) (tptr tulong))
                 (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                   (tptr tvoid)))
@@ -6930,7 +6912,7 @@ def f_kprog_arm64_entry_raw : Function := {
                       (Expr.Efield
                         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                         _vector_lo (tarray (tptr tulong) 32))
-                      (Expr.Econst_int (Integers.Int.repr 26) tint)
+                      (Expr.Econst_int (Integers.Int.repr 25) tint)
                       (tptr (tptr tulong))) (tptr tulong))
                   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                     (tptr tvoid)))
@@ -6941,7 +6923,7 @@ def f_kprog_arm64_entry_raw : Function := {
                         (Expr.Efield
                           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                           _vector_lo (tarray (tptr tulong) 32))
-                        (Expr.Econst_int (Integers.Int.repr 27) tint)
+                        (Expr.Econst_int (Integers.Int.repr 26) tint)
                         (tptr (tptr tulong))) (tptr tulong))
                     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                       (tptr tvoid)))
@@ -6952,7 +6934,7 @@ def f_kprog_arm64_entry_raw : Function := {
                           (Expr.Efield
                             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                             _vector_lo (tarray (tptr tulong) 32))
-                          (Expr.Econst_int (Integers.Int.repr 28) tint)
+                          (Expr.Econst_int (Integers.Int.repr 27) tint)
                           (tptr (tptr tulong))) (tptr tulong))
                       (Expr.Ecast
                         (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -6964,7 +6946,7 @@ def f_kprog_arm64_entry_raw : Function := {
                             (Expr.Efield
                               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                               _vector_lo (tarray (tptr tulong) 32))
-                            (Expr.Econst_int (Integers.Int.repr 29) tint)
+                            (Expr.Econst_int (Integers.Int.repr 28) tint)
                             (tptr (tptr tulong))) (tptr tulong))
                         (Expr.Ecast
                           (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -6976,7 +6958,7 @@ def f_kprog_arm64_entry_raw : Function := {
                               (Expr.Efield
                                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                 _vector_lo (tarray (tptr tulong) 32))
-                              (Expr.Econst_int (Integers.Int.repr 30) tint)
+                              (Expr.Econst_int (Integers.Int.repr 29) tint)
                               (tptr (tptr tulong))) (tptr tulong))
                           (Expr.Ecast
                             (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -6988,7 +6970,7 @@ def f_kprog_arm64_entry_raw : Function := {
                                 (Expr.Efield
                                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                   _vector_lo (tarray (tptr tulong) 32))
-                                (Expr.Econst_int (Integers.Int.repr 31) tint)
+                                (Expr.Econst_int (Integers.Int.repr 30) tint)
                                 (tptr (tptr tulong))) (tptr tulong))
                             (Expr.Ecast
                               (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -6999,8 +6981,8 @@ def f_kprog_arm64_entry_raw : Function := {
                                 (Expr.Ebinop Binop.Oadd
                                   (Expr.Efield
                                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                                    _vector_hi (tarray (tptr tulong) 32))
-                                  (Expr.Econst_int (Integers.Int.repr 0) tint)
+                                    _vector_lo (tarray (tptr tulong) 32))
+                                  (Expr.Econst_int (Integers.Int.repr 31) tint)
                                   (tptr (tptr tulong))) (tptr tulong))
                               (Expr.Ecast
                                 (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -7012,7 +6994,7 @@ def f_kprog_arm64_entry_raw : Function := {
                                     (Expr.Efield
                                       (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                       _vector_hi (tarray (tptr tulong) 32))
-                                    (Expr.Econst_int (Integers.Int.repr 1) tint)
+                                    (Expr.Econst_int (Integers.Int.repr 0) tint)
                                     (tptr (tptr tulong))) (tptr tulong))
                                 (Expr.Ecast
                                   (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -7024,7 +7006,7 @@ def f_kprog_arm64_entry_raw : Function := {
                                       (Expr.Efield
                                         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                         _vector_hi (tarray (tptr tulong) 32))
-                                      (Expr.Econst_int (Integers.Int.repr 2) tint)
+                                      (Expr.Econst_int (Integers.Int.repr 1) tint)
                                       (tptr (tptr tulong))) (tptr tulong))
                                   (Expr.Ecast
                                     (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -7041,7 +7023,7 @@ def f_kprog_arm64_entry_raw : Function := {
         (Expr.Efield
           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
           _vector_lo (tarray (tptr tulong) 32))
-        (Expr.Econst_int (Integers.Int.repr 2) tint) (tptr (tptr tulong)))
+        (Expr.Econst_int (Integers.Int.repr 1) tint) (tptr (tptr tulong)))
       (tptr tulong))
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
   (Stmt.Ssequence
@@ -7051,7 +7033,7 @@ def f_kprog_arm64_entry_raw : Function := {
           (Expr.Efield
             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
             _vector_lo (tarray (tptr tulong) 32))
-          (Expr.Econst_int (Integers.Int.repr 3) tint) (tptr (tptr tulong)))
+          (Expr.Econst_int (Integers.Int.repr 2) tint) (tptr (tptr tulong)))
         (tptr tulong))
       (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
     (Stmt.Ssequence
@@ -7061,7 +7043,7 @@ def f_kprog_arm64_entry_raw : Function := {
             (Expr.Efield
               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
               _vector_lo (tarray (tptr tulong) 32))
-            (Expr.Econst_int (Integers.Int.repr 4) tint)
+            (Expr.Econst_int (Integers.Int.repr 3) tint)
             (tptr (tptr tulong))) (tptr tulong))
         (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
           (tptr tvoid)))
@@ -7072,7 +7054,7 @@ def f_kprog_arm64_entry_raw : Function := {
               (Expr.Efield
                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                 _vector_lo (tarray (tptr tulong) 32))
-              (Expr.Econst_int (Integers.Int.repr 5) tint)
+              (Expr.Econst_int (Integers.Int.repr 4) tint)
               (tptr (tptr tulong))) (tptr tulong))
           (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
             (tptr tvoid)))
@@ -7083,7 +7065,7 @@ def f_kprog_arm64_entry_raw : Function := {
                 (Expr.Efield
                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                   _vector_lo (tarray (tptr tulong) 32))
-                (Expr.Econst_int (Integers.Int.repr 6) tint)
+                (Expr.Econst_int (Integers.Int.repr 5) tint)
                 (tptr (tptr tulong))) (tptr tulong))
             (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
               (tptr tvoid)))
@@ -7094,7 +7076,7 @@ def f_kprog_arm64_entry_raw : Function := {
                   (Expr.Efield
                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                     _vector_lo (tarray (tptr tulong) 32))
-                  (Expr.Econst_int (Integers.Int.repr 7) tint)
+                  (Expr.Econst_int (Integers.Int.repr 6) tint)
                   (tptr (tptr tulong))) (tptr tulong))
               (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                 (tptr tvoid)))
@@ -7105,7 +7087,7 @@ def f_kprog_arm64_entry_raw : Function := {
                     (Expr.Efield
                       (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                       _vector_lo (tarray (tptr tulong) 32))
-                    (Expr.Econst_int (Integers.Int.repr 8) tint)
+                    (Expr.Econst_int (Integers.Int.repr 7) tint)
                     (tptr (tptr tulong))) (tptr tulong))
                 (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                   (tptr tvoid)))
@@ -7116,7 +7098,7 @@ def f_kprog_arm64_entry_raw : Function := {
                       (Expr.Efield
                         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                         _vector_lo (tarray (tptr tulong) 32))
-                      (Expr.Econst_int (Integers.Int.repr 9) tint)
+                      (Expr.Econst_int (Integers.Int.repr 8) tint)
                       (tptr (tptr tulong))) (tptr tulong))
                   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                     (tptr tvoid)))
@@ -7127,7 +7109,7 @@ def f_kprog_arm64_entry_raw : Function := {
                         (Expr.Efield
                           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                           _vector_lo (tarray (tptr tulong) 32))
-                        (Expr.Econst_int (Integers.Int.repr 10) tint)
+                        (Expr.Econst_int (Integers.Int.repr 9) tint)
                         (tptr (tptr tulong))) (tptr tulong))
                     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                       (tptr tvoid)))
@@ -7138,7 +7120,7 @@ def f_kprog_arm64_entry_raw : Function := {
                           (Expr.Efield
                             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                             _vector_lo (tarray (tptr tulong) 32))
-                          (Expr.Econst_int (Integers.Int.repr 11) tint)
+                          (Expr.Econst_int (Integers.Int.repr 10) tint)
                           (tptr (tptr tulong))) (tptr tulong))
                       (Expr.Ecast
                         (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -7150,7 +7132,7 @@ def f_kprog_arm64_entry_raw : Function := {
                             (Expr.Efield
                               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                               _vector_lo (tarray (tptr tulong) 32))
-                            (Expr.Econst_int (Integers.Int.repr 12) tint)
+                            (Expr.Econst_int (Integers.Int.repr 11) tint)
                             (tptr (tptr tulong))) (tptr tulong))
                         (Expr.Ecast
                           (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -7162,7 +7144,7 @@ def f_kprog_arm64_entry_raw : Function := {
                               (Expr.Efield
                                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                 _vector_lo (tarray (tptr tulong) 32))
-                              (Expr.Econst_int (Integers.Int.repr 13) tint)
+                              (Expr.Econst_int (Integers.Int.repr 12) tint)
                               (tptr (tptr tulong))) (tptr tulong))
                           (Expr.Ecast
                             (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -7174,7 +7156,7 @@ def f_kprog_arm64_entry_raw : Function := {
                                 (Expr.Efield
                                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                   _vector_lo (tarray (tptr tulong) 32))
-                                (Expr.Econst_int (Integers.Int.repr 14) tint)
+                                (Expr.Econst_int (Integers.Int.repr 13) tint)
                                 (tptr (tptr tulong))) (tptr tulong))
                             (Expr.Ecast
                               (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -7186,7 +7168,7 @@ def f_kprog_arm64_entry_raw : Function := {
                                   (Expr.Efield
                                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                     _vector_lo (tarray (tptr tulong) 32))
-                                  (Expr.Econst_int (Integers.Int.repr 15) tint)
+                                  (Expr.Econst_int (Integers.Int.repr 14) tint)
                                   (tptr (tptr tulong))) (tptr tulong))
                               (Expr.Ecast
                                 (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -7198,7 +7180,7 @@ def f_kprog_arm64_entry_raw : Function := {
                                     (Expr.Efield
                                       (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                       _vector_lo (tarray (tptr tulong) 32))
-                                    (Expr.Econst_int (Integers.Int.repr 16) tint)
+                                    (Expr.Econst_int (Integers.Int.repr 15) tint)
                                     (tptr (tptr tulong))) (tptr tulong))
                                 (Expr.Ecast
                                   (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -7210,7 +7192,7 @@ def f_kprog_arm64_entry_raw : Function := {
                                       (Expr.Efield
                                         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                         _vector_lo (tarray (tptr tulong) 32))
-                                      (Expr.Econst_int (Integers.Int.repr 17) tint)
+                                      (Expr.Econst_int (Integers.Int.repr 16) tint)
                                       (tptr (tptr tulong))) (tptr tulong))
                                   (Expr.Ecast
                                     (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -7315,20 +7297,8 @@ def f_kprog_arm64_entry_raw : Function := {
                                 (Expr.Eaddrof (Expr.Evar ___a64_v tuchar)
                                   (tptr tuchar)))
                               (Stmt.Ssequence
-                                (Stmt.Sassign
-                                  (Expr.Ederef
-                                    (Expr.Ebinop Binop.Oadd
-                                      (Expr.Efield
-                                        (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                                        _vector_lo (tarray (tptr tulong) 32))
-                                      (Expr.Econst_int (Integers.Int.repr 0) tint)
-                                      (tptr (tptr tulong))) (tptr tulong))
-                                  (Expr.Ecast
-                                    (Expr.Econst_int (Integers.Int.repr 0) tint)
-                                    (tptr tvoid)))
-                                (Stmt.Ssequence
-                                  s_kprog_arm64_entry_xdp_27
-                                  s_kprog_arm64_entry_xdp_36)))))))))))))))))
+                                s_kprog_arm64_entry_xdp_27
+                                s_kprog_arm64_entry_xdp_36))))))))))))))))
 
 @[noinline] def s_kprog_arm64_entry_xdp_38 : Stmt :=
 (Stmt.Ssequence
@@ -10365,8 +10335,9 @@ def f_kprog_arm64_entry_xdp : Function := {
 
 @[noinline] def s_kprog_arm64_entry_skb_41 : Stmt :=
 (Stmt.Sassign
-  (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr)) _lr
-    (tptr tulong)) (Expr.Eaddrof (Expr.Evar ___a64_lr tulong) (tptr tulong)))
+  (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
+    _return_base (tptr tulong))
+  (Expr.Eaddrof (Expr.Evar ___a64_numeric_return tulong) (tptr tulong)))
 
 @[noinline] def s_kprog_arm64_entry_skb_42 : Stmt :=
 (Stmt.Sassign
@@ -10374,7 +10345,7 @@ def f_kprog_arm64_entry_xdp : Function := {
     (Expr.Ebinop Binop.Oadd
       (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
         _vector_lo (tarray (tptr tulong) 32))
-      (Expr.Econst_int (Integers.Int.repr 9) tint) (tptr (tptr tulong)))
+      (Expr.Econst_int (Integers.Int.repr 8) tint) (tptr (tptr tulong)))
     (tptr tulong))
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
 
@@ -10384,7 +10355,7 @@ def f_kprog_arm64_entry_xdp : Function := {
     (Expr.Ebinop Binop.Oadd
       (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
         _vector_lo (tarray (tptr tulong) 32))
-      (Expr.Econst_int (Integers.Int.repr 26) tint) (tptr (tptr tulong)))
+      (Expr.Econst_int (Integers.Int.repr 25) tint) (tptr (tptr tulong)))
     (tptr tulong))
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
 
@@ -10394,7 +10365,7 @@ def f_kprog_arm64_entry_xdp : Function := {
     (Expr.Ebinop Binop.Oadd
       (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
         _vector_hi (tarray (tptr tulong) 32))
-      (Expr.Econst_int (Integers.Int.repr 11) tint) (tptr (tptr tulong)))
+      (Expr.Econst_int (Integers.Int.repr 10) tint) (tptr (tptr tulong)))
     (tptr tulong))
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
 
@@ -10404,72 +10375,81 @@ def f_kprog_arm64_entry_xdp : Function := {
     (Expr.Ebinop Binop.Oadd
       (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
         _vector_hi (tarray (tptr tulong) 32))
-      (Expr.Econst_int (Integers.Int.repr 28) tint) (tptr (tptr tulong)))
+      (Expr.Econst_int (Integers.Int.repr 27) tint) (tptr (tptr tulong)))
     (tptr tulong))
   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
 
 @[noinline] def s_kprog_arm64_entry_skb_46 : Stmt :=
 (Stmt.Sassign
-  (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr)) _abi
-    (tptr tvoid))
+  (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
+    _skb_context (tptr (tptr (Ty.Tstruct ___sk_buff noattr))))
   (Expr.Eaddrof
-    (Expr.Evar ___a64_sim_abi (Ty.Tstruct _arm64_sim_skb_abi noattr))
-    (tptr (Ty.Tstruct _arm64_sim_skb_abi noattr))))
+    (Expr.Evar ___a64_sim_skb_ctx (tptr (Ty.Tstruct ___sk_buff noattr)))
+    (tptr (tptr (Ty.Tstruct ___sk_buff noattr)))))
 
 @[noinline] def s_kprog_arm64_entry_skb_47 : Stmt :=
 (Stmt.Ssequence
+  (Stmt.Sassign
+    (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
+      _abi (tptr tvoid))
+    (Expr.Eaddrof
+      (Expr.Evar ___a64_sim_abi (Ty.Tstruct _arm64_sim_skb_abi noattr))
+      (tptr (Ty.Tstruct _arm64_sim_skb_abi noattr))))
   (Stmt.Ssequence
-    (Stmt.Sset _i (Expr.Econst_int (Integers.Int.repr 0) tint))
-    (Stmt.Sloop
-      (Stmt.Ssequence
-        (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt (Expr.Etempvar _i tuint)
-                            (Expr.Econst_int (Integers.Int.repr 32) tint)
-                            tint)
-          Stmt.Sskip
-          Stmt.Sbreak)
+    (Stmt.Ssequence
+      (Stmt.Sset _i (Expr.Econst_int (Integers.Int.repr 0) tint))
+      (Stmt.Sloop
         (Stmt.Ssequence
-          (Stmt.Sassign
-            (Expr.Ederef
-              (Expr.Ebinop Binop.Oadd
+          (Stmt.Sifthenelse (Expr.Ebinop Binop.Olt (Expr.Etempvar _i tuint)
+                              (Expr.Econst_int (Integers.Int.repr 32) tint)
+                              tint)
+            Stmt.Sskip
+            Stmt.Sbreak)
+          (Stmt.Ssequence
+            (Stmt.Sassign
+              (Expr.Ederef
+                (Expr.Ebinop Binop.Oadd
+                  (Expr.Efield
+                    (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
+                    _vector_lo (tarray (tptr tulong) 32))
+                  (Expr.Etempvar _i tuint) (tptr (tptr tulong)))
+                (tptr tulong))
+              (Expr.Eaddrof
                 (Expr.Efield
-                  (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                  _vector_lo (tarray (tptr tulong) 32))
-                (Expr.Etempvar _i tuint) (tptr (tptr tulong))) (tptr tulong))
-            (Expr.Eaddrof
-              (Expr.Efield
-                (Expr.Ederef
-                  (Expr.Ebinop Binop.Oadd
-                    (Expr.Evar ___a64_vectors (tarray (Ty.Tstruct __3026 noattr) 32))
-                    (Expr.Etempvar _i tuint)
-                    (tptr (Ty.Tstruct __3026 noattr)))
-                  (Ty.Tstruct __3026 noattr)) _lo tulong) (tptr tulong)))
-          (Stmt.Sassign
-            (Expr.Ederef
-              (Expr.Ebinop Binop.Oadd
+                  (Expr.Ederef
+                    (Expr.Ebinop Binop.Oadd
+                      (Expr.Evar ___a64_vectors (tarray (Ty.Tstruct __3026 noattr) 32))
+                      (Expr.Etempvar _i tuint)
+                      (tptr (Ty.Tstruct __3026 noattr)))
+                    (Ty.Tstruct __3026 noattr)) _lo tulong) (tptr tulong)))
+            (Stmt.Sassign
+              (Expr.Ederef
+                (Expr.Ebinop Binop.Oadd
+                  (Expr.Efield
+                    (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
+                    _vector_hi (tarray (tptr tulong) 32))
+                  (Expr.Etempvar _i tuint) (tptr (tptr tulong)))
+                (tptr tulong))
+              (Expr.Eaddrof
                 (Expr.Efield
-                  (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                  _vector_hi (tarray (tptr tulong) 32))
-                (Expr.Etempvar _i tuint) (tptr (tptr tulong))) (tptr tulong))
-            (Expr.Eaddrof
-              (Expr.Efield
-                (Expr.Ederef
-                  (Expr.Ebinop Binop.Oadd
-                    (Expr.Evar ___a64_vectors (tarray (Ty.Tstruct __3026 noattr) 32))
-                    (Expr.Etempvar _i tuint)
-                    (tptr (Ty.Tstruct __3026 noattr)))
-                  (Ty.Tstruct __3026 noattr)) _hi tulong) (tptr tulong)))))
-      (Stmt.Sset _i
-        (Expr.Ebinop Binop.Oadd (Expr.Etempvar _i tuint)
-          (Expr.Econst_int (Integers.Int.repr 1) tint) tuint))))
-  (Stmt.Ssequence
-    (Stmt.Scall (some _t'132)
-      (Expr.Etempvar _continuation (tptr (Ty.Tfunction
-                                           [(tptr (Ty.Tstruct _kprog_arm64_entry noattr))]
-                                           tuint cc_default)))
-      [(Expr.Eaddrof
-         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-         (tptr (Ty.Tstruct _kprog_arm64_entry noattr)))])
-    (Stmt.Sreturn (some (Expr.Etempvar _t'132 tuint)))))
+                  (Expr.Ederef
+                    (Expr.Ebinop Binop.Oadd
+                      (Expr.Evar ___a64_vectors (tarray (Ty.Tstruct __3026 noattr) 32))
+                      (Expr.Etempvar _i tuint)
+                      (tptr (Ty.Tstruct __3026 noattr)))
+                    (Ty.Tstruct __3026 noattr)) _hi tulong) (tptr tulong)))))
+        (Stmt.Sset _i
+          (Expr.Ebinop Binop.Oadd (Expr.Etempvar _i tuint)
+            (Expr.Econst_int (Integers.Int.repr 1) tint) tuint))))
+    (Stmt.Ssequence
+      (Stmt.Scall (some _t'132)
+        (Expr.Etempvar _continuation (tptr (Ty.Tfunction
+                                             [(tptr (Ty.Tstruct _kprog_arm64_entry noattr))]
+                                             tuint cc_default)))
+        [(Expr.Eaddrof
+           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
+           (tptr (Ty.Tstruct _kprog_arm64_entry noattr)))])
+      (Stmt.Sreturn (some (Expr.Etempvar _t'132 tuint))))))
 
 @[noinline] def s_kprog_arm64_entry_skb_48 : Stmt :=
 (Stmt.Ssequence
@@ -10479,7 +10459,7 @@ def f_kprog_arm64_entry_xdp : Function := {
         (Expr.Efield
           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
           _vector_hi (tarray (tptr tulong) 32))
-        (Expr.Econst_int (Integers.Int.repr 29) tint) (tptr (tptr tulong)))
+        (Expr.Econst_int (Integers.Int.repr 28) tint) (tptr (tptr tulong)))
       (tptr tulong))
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
   (Stmt.Ssequence
@@ -10489,7 +10469,7 @@ def f_kprog_arm64_entry_xdp : Function := {
           (Expr.Efield
             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
             _vector_hi (tarray (tptr tulong) 32))
-          (Expr.Econst_int (Integers.Int.repr 30) tint) (tptr (tptr tulong)))
+          (Expr.Econst_int (Integers.Int.repr 29) tint) (tptr (tptr tulong)))
         (tptr tulong))
       (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
     (Stmt.Ssequence
@@ -10499,124 +10479,107 @@ def f_kprog_arm64_entry_xdp : Function := {
             (Expr.Efield
               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
               _vector_hi (tarray (tptr tulong) 32))
-            (Expr.Econst_int (Integers.Int.repr 31) tint)
+            (Expr.Econst_int (Integers.Int.repr 30) tint)
             (tptr (tptr tulong))) (tptr tulong))
         (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
           (tptr tvoid)))
       (Stmt.Ssequence
         (Stmt.Sassign
-          (Expr.Efield
-            (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr)) _bytes
-            (tptr (tvolatile tuchar)))
-          (Expr.Efield
-            (Expr.Evar ___a64_stack (tvolatile (Ty.Tunion __3028 noattr))) _b
-            (tvolatile (tarray tuchar 160))))
+          (Expr.Ederef
+            (Expr.Ebinop Binop.Oadd
+              (Expr.Efield
+                (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
+                _vector_hi (tarray (tptr tulong) 32))
+              (Expr.Econst_int (Integers.Int.repr 31) tint)
+              (tptr (tptr tulong))) (tptr tulong))
+          (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
+            (tptr tvoid)))
         (Stmt.Ssequence
           (Stmt.Sassign
             (Expr.Efield
-              (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-              _words (tptr (tvolatile tulong)))
+              (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr)) _b
+              (tptr (tvolatile tuchar)))
             (Expr.Efield
               (Expr.Evar ___a64_stack (tvolatile (Ty.Tunion __3028 noattr)))
-              _q (tvolatile (tarray tulong 20))))
+              _b (tvolatile (tarray tuchar 160))))
           (Stmt.Ssequence
             (Stmt.Sassign
               (Expr.Efield
-                (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                _payload (tptr (tvolatile tulong)))
-              (Expr.Evar ___a64_stack_payload (tarray (tvolatile tulong) 20)))
+                (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr)) _q
+                (tptr (tvolatile tulong)))
+              (Expr.Efield
+                (Expr.Evar ___a64_stack (tvolatile (Ty.Tunion __3028 noattr)))
+                _q (tvolatile (tarray tulong 20))))
             (Stmt.Ssequence
               (Stmt.Sassign
                 (Expr.Efield
                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                  _stack_tags (tptr tuchar))
-                (Expr.Evar ___a64_stack_tag (tarray tuchar 24)))
+                  _payload (tptr (tvolatile tulong)))
+                (Expr.Evar ___a64_stack_payload (tarray (tvolatile tulong) 20)))
               (Stmt.Ssequence
                 (Stmt.Sassign
                   (Expr.Efield
                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                    _capacity tuint)
-                  (Expr.Econst_int (Integers.Int.repr 160) tuint))
+                    _stack_tags (tptr tuchar))
+                  (Expr.Evar ___a64_stack_tag (tarray tuchar 24)))
                 (Stmt.Ssequence
                   (Stmt.Sassign
                     (Expr.Efield
                       (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                      _payload_words tuint)
-                    (Expr.Ebinop Binop.Odiv
-                      (Expr.Ebinop Binop.Oadd
-                        (Expr.Ecast
-                          (Expr.Econst_int (Integers.Int.repr 160) tuint)
-                          tuint)
-                        (Expr.Econst_int (Integers.Int.repr 7) tuint) tuint)
-                      (Expr.Econst_int (Integers.Int.repr 8) tuint) tuint))
+                      _capacity tuint)
+                    (Expr.Esizeof (tarray (tvolatile tuchar) 160) tulong))
                   (Stmt.Ssequence
                     (Stmt.Sassign
                       (Expr.Efield
                         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                        _tag_bytes tuint)
-                      (Expr.Ebinop Binop.Oand
-                        (Expr.Ebinop Binop.Oadd
-                          (Expr.Ebinop Binop.Odiv
-                            (Expr.Ebinop Binop.Oadd
-                              (Expr.Ecast
-                                (Expr.Econst_int (Integers.Int.repr 160) tuint)
-                                tuint)
-                              (Expr.Econst_int (Integers.Int.repr 7) tuint)
-                              tuint)
-                            (Expr.Econst_int (Integers.Int.repr 8) tuint)
-                            tuint)
-                          (Expr.Econst_int (Integers.Int.repr 7) tuint)
-                          tuint)
-                        (Expr.Eunop Unop.Onotint
-                          (Expr.Econst_int (Integers.Int.repr 7) tuint)
-                          tuint) tuint))
+                        _payload_words tuint)
+                      (Expr.Ebinop Binop.Odiv
+                        (Expr.Esizeof (tarray (tvolatile tulong) 20) tulong)
+                        (Expr.Esizeof (tvolatile tulong) tulong) tulong))
                     (Stmt.Ssequence
                       (Stmt.Sassign
                         (Expr.Efield
                           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                          _bias tlong)
-                        (Expr.Econst_long (Integers.Int64.repr 96) tlong))
+                          _tag_bytes tuint)
+                        (Expr.Esizeof (tarray tuchar 24) tulong))
                       (Stmt.Ssequence
                         (Stmt.Sassign
                           (Expr.Efield
                             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                            _helper_context (tptr (tptr tvoid)))
-                          (Expr.Eaddrof
-                            (Expr.Evar ___a64_sim_helper_ctx (tptr tvoid))
-                            (tptr (tptr tvoid))))
+                            _bias tlong)
+                          (Expr.Econst_long (Integers.Int64.repr 96) tlong))
                         (Stmt.Ssequence
                           (Stmt.Sassign
                             (Expr.Efield
                               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                              _helper_abi_base (tptr (tptr tvoid)))
+                              _helper_context (tptr (tptr tvoid)))
                             (Expr.Eaddrof
-                              (Expr.Evar ___a64_sim_helper_abi_base (tptr tvoid))
+                              (Expr.Evar ___a64_sim_helper_ctx (tptr tvoid))
                               (tptr (tptr tvoid))))
                           (Stmt.Ssequence
                             (Stmt.Sassign
                               (Expr.Efield
                                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                                _is_xdp (tptr tuchar))
+                                _helper_abi_base (tptr (tptr tvoid)))
                               (Expr.Eaddrof
-                                (Expr.Evar ___a64_sim_is_xdp tuchar)
-                                (tptr tuchar)))
+                                (Expr.Evar ___a64_sim_helper_abi_base (tptr tvoid))
+                                (tptr (tptr tvoid))))
                             (Stmt.Ssequence
                               (Stmt.Sassign
                                 (Expr.Efield
                                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                                  _abi_kind (tptr tuchar))
+                                  _is_xdp (tptr tuchar))
                                 (Expr.Eaddrof
-                                  (Expr.Evar ___a64_sim_abi_kind tuchar)
+                                  (Expr.Evar ___a64_sim_is_xdp tuchar)
                                   (tptr tuchar)))
                               (Stmt.Ssequence
                                 (Stmt.Sassign
                                   (Expr.Efield
                                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                                    _skb_context
-                                    (tptr (tptr (Ty.Tstruct ___sk_buff noattr))))
+                                    _abi_kind (tptr tuchar))
                                   (Expr.Eaddrof
-                                    (Expr.Evar ___a64_sim_skb_ctx (tptr (Ty.Tstruct ___sk_buff noattr)))
-                                    (tptr (tptr (Ty.Tstruct ___sk_buff noattr)))))
+                                    (Expr.Evar ___a64_sim_abi_kind tuchar)
+                                    (tptr tuchar)))
                                 (Stmt.Ssequence
                                   s_kprog_arm64_entry_skb_46
                                   s_kprog_arm64_entry_skb_47)))))))))))))))))
@@ -10629,7 +10592,7 @@ def f_kprog_arm64_entry_xdp : Function := {
         (Expr.Efield
           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
           _vector_hi (tarray (tptr tulong) 32))
-        (Expr.Econst_int (Integers.Int.repr 12) tint) (tptr (tptr tulong)))
+        (Expr.Econst_int (Integers.Int.repr 11) tint) (tptr (tptr tulong)))
       (tptr tulong))
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
   (Stmt.Ssequence
@@ -10639,7 +10602,7 @@ def f_kprog_arm64_entry_xdp : Function := {
           (Expr.Efield
             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
             _vector_hi (tarray (tptr tulong) 32))
-          (Expr.Econst_int (Integers.Int.repr 13) tint) (tptr (tptr tulong)))
+          (Expr.Econst_int (Integers.Int.repr 12) tint) (tptr (tptr tulong)))
         (tptr tulong))
       (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
     (Stmt.Ssequence
@@ -10649,7 +10612,7 @@ def f_kprog_arm64_entry_xdp : Function := {
             (Expr.Efield
               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
               _vector_hi (tarray (tptr tulong) 32))
-            (Expr.Econst_int (Integers.Int.repr 14) tint)
+            (Expr.Econst_int (Integers.Int.repr 13) tint)
             (tptr (tptr tulong))) (tptr tulong))
         (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
           (tptr tvoid)))
@@ -10660,7 +10623,7 @@ def f_kprog_arm64_entry_xdp : Function := {
               (Expr.Efield
                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                 _vector_hi (tarray (tptr tulong) 32))
-              (Expr.Econst_int (Integers.Int.repr 15) tint)
+              (Expr.Econst_int (Integers.Int.repr 14) tint)
               (tptr (tptr tulong))) (tptr tulong))
           (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
             (tptr tvoid)))
@@ -10671,7 +10634,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                 (Expr.Efield
                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                   _vector_hi (tarray (tptr tulong) 32))
-                (Expr.Econst_int (Integers.Int.repr 16) tint)
+                (Expr.Econst_int (Integers.Int.repr 15) tint)
                 (tptr (tptr tulong))) (tptr tulong))
             (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
               (tptr tvoid)))
@@ -10682,7 +10645,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                   (Expr.Efield
                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                     _vector_hi (tarray (tptr tulong) 32))
-                  (Expr.Econst_int (Integers.Int.repr 17) tint)
+                  (Expr.Econst_int (Integers.Int.repr 16) tint)
                   (tptr (tptr tulong))) (tptr tulong))
               (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                 (tptr tvoid)))
@@ -10693,7 +10656,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                     (Expr.Efield
                       (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                       _vector_hi (tarray (tptr tulong) 32))
-                    (Expr.Econst_int (Integers.Int.repr 18) tint)
+                    (Expr.Econst_int (Integers.Int.repr 17) tint)
                     (tptr (tptr tulong))) (tptr tulong))
                 (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                   (tptr tvoid)))
@@ -10704,7 +10667,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                       (Expr.Efield
                         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                         _vector_hi (tarray (tptr tulong) 32))
-                      (Expr.Econst_int (Integers.Int.repr 19) tint)
+                      (Expr.Econst_int (Integers.Int.repr 18) tint)
                       (tptr (tptr tulong))) (tptr tulong))
                   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                     (tptr tvoid)))
@@ -10715,7 +10678,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                         (Expr.Efield
                           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                           _vector_hi (tarray (tptr tulong) 32))
-                        (Expr.Econst_int (Integers.Int.repr 20) tint)
+                        (Expr.Econst_int (Integers.Int.repr 19) tint)
                         (tptr (tptr tulong))) (tptr tulong))
                     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                       (tptr tvoid)))
@@ -10726,7 +10689,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                           (Expr.Efield
                             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                             _vector_hi (tarray (tptr tulong) 32))
-                          (Expr.Econst_int (Integers.Int.repr 21) tint)
+                          (Expr.Econst_int (Integers.Int.repr 20) tint)
                           (tptr (tptr tulong))) (tptr tulong))
                       (Expr.Ecast
                         (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -10738,7 +10701,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                             (Expr.Efield
                               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                               _vector_hi (tarray (tptr tulong) 32))
-                            (Expr.Econst_int (Integers.Int.repr 22) tint)
+                            (Expr.Econst_int (Integers.Int.repr 21) tint)
                             (tptr (tptr tulong))) (tptr tulong))
                         (Expr.Ecast
                           (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -10750,7 +10713,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                               (Expr.Efield
                                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                 _vector_hi (tarray (tptr tulong) 32))
-                              (Expr.Econst_int (Integers.Int.repr 23) tint)
+                              (Expr.Econst_int (Integers.Int.repr 22) tint)
                               (tptr (tptr tulong))) (tptr tulong))
                           (Expr.Ecast
                             (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -10762,7 +10725,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                                 (Expr.Efield
                                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                   _vector_hi (tarray (tptr tulong) 32))
-                                (Expr.Econst_int (Integers.Int.repr 24) tint)
+                                (Expr.Econst_int (Integers.Int.repr 23) tint)
                                 (tptr (tptr tulong))) (tptr tulong))
                             (Expr.Ecast
                               (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -10774,7 +10737,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                                   (Expr.Efield
                                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                     _vector_hi (tarray (tptr tulong) 32))
-                                  (Expr.Econst_int (Integers.Int.repr 25) tint)
+                                  (Expr.Econst_int (Integers.Int.repr 24) tint)
                                   (tptr (tptr tulong))) (tptr tulong))
                               (Expr.Ecast
                                 (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -10786,7 +10749,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                                     (Expr.Efield
                                       (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                       _vector_hi (tarray (tptr tulong) 32))
-                                    (Expr.Econst_int (Integers.Int.repr 26) tint)
+                                    (Expr.Econst_int (Integers.Int.repr 25) tint)
                                     (tptr (tptr tulong))) (tptr tulong))
                                 (Expr.Ecast
                                   (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -10798,7 +10761,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                                       (Expr.Efield
                                         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                         _vector_hi (tarray (tptr tulong) 32))
-                                      (Expr.Econst_int (Integers.Int.repr 27) tint)
+                                      (Expr.Econst_int (Integers.Int.repr 26) tint)
                                       (tptr (tptr tulong))) (tptr tulong))
                                   (Expr.Ecast
                                     (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -10815,7 +10778,7 @@ def f_kprog_arm64_entry_xdp : Function := {
         (Expr.Efield
           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
           _vector_lo (tarray (tptr tulong) 32))
-        (Expr.Econst_int (Integers.Int.repr 27) tint) (tptr (tptr tulong)))
+        (Expr.Econst_int (Integers.Int.repr 26) tint) (tptr (tptr tulong)))
       (tptr tulong))
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
   (Stmt.Ssequence
@@ -10825,7 +10788,7 @@ def f_kprog_arm64_entry_xdp : Function := {
           (Expr.Efield
             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
             _vector_lo (tarray (tptr tulong) 32))
-          (Expr.Econst_int (Integers.Int.repr 28) tint) (tptr (tptr tulong)))
+          (Expr.Econst_int (Integers.Int.repr 27) tint) (tptr (tptr tulong)))
         (tptr tulong))
       (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
     (Stmt.Ssequence
@@ -10835,7 +10798,7 @@ def f_kprog_arm64_entry_xdp : Function := {
             (Expr.Efield
               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
               _vector_lo (tarray (tptr tulong) 32))
-            (Expr.Econst_int (Integers.Int.repr 29) tint)
+            (Expr.Econst_int (Integers.Int.repr 28) tint)
             (tptr (tptr tulong))) (tptr tulong))
         (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
           (tptr tvoid)))
@@ -10846,7 +10809,7 @@ def f_kprog_arm64_entry_xdp : Function := {
               (Expr.Efield
                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                 _vector_lo (tarray (tptr tulong) 32))
-              (Expr.Econst_int (Integers.Int.repr 30) tint)
+              (Expr.Econst_int (Integers.Int.repr 29) tint)
               (tptr (tptr tulong))) (tptr tulong))
           (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
             (tptr tvoid)))
@@ -10857,7 +10820,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                 (Expr.Efield
                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                   _vector_lo (tarray (tptr tulong) 32))
-                (Expr.Econst_int (Integers.Int.repr 31) tint)
+                (Expr.Econst_int (Integers.Int.repr 30) tint)
                 (tptr (tptr tulong))) (tptr tulong))
             (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
               (tptr tvoid)))
@@ -10867,8 +10830,8 @@ def f_kprog_arm64_entry_xdp : Function := {
                 (Expr.Ebinop Binop.Oadd
                   (Expr.Efield
                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                    _vector_hi (tarray (tptr tulong) 32))
-                  (Expr.Econst_int (Integers.Int.repr 0) tint)
+                    _vector_lo (tarray (tptr tulong) 32))
+                  (Expr.Econst_int (Integers.Int.repr 31) tint)
                   (tptr (tptr tulong))) (tptr tulong))
               (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                 (tptr tvoid)))
@@ -10879,7 +10842,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                     (Expr.Efield
                       (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                       _vector_hi (tarray (tptr tulong) 32))
-                    (Expr.Econst_int (Integers.Int.repr 1) tint)
+                    (Expr.Econst_int (Integers.Int.repr 0) tint)
                     (tptr (tptr tulong))) (tptr tulong))
                 (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                   (tptr tvoid)))
@@ -10890,7 +10853,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                       (Expr.Efield
                         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                         _vector_hi (tarray (tptr tulong) 32))
-                      (Expr.Econst_int (Integers.Int.repr 2) tint)
+                      (Expr.Econst_int (Integers.Int.repr 1) tint)
                       (tptr (tptr tulong))) (tptr tulong))
                   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                     (tptr tvoid)))
@@ -10901,7 +10864,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                         (Expr.Efield
                           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                           _vector_hi (tarray (tptr tulong) 32))
-                        (Expr.Econst_int (Integers.Int.repr 3) tint)
+                        (Expr.Econst_int (Integers.Int.repr 2) tint)
                         (tptr (tptr tulong))) (tptr tulong))
                     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                       (tptr tvoid)))
@@ -10912,7 +10875,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                           (Expr.Efield
                             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                             _vector_hi (tarray (tptr tulong) 32))
-                          (Expr.Econst_int (Integers.Int.repr 4) tint)
+                          (Expr.Econst_int (Integers.Int.repr 3) tint)
                           (tptr (tptr tulong))) (tptr tulong))
                       (Expr.Ecast
                         (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -10924,7 +10887,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                             (Expr.Efield
                               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                               _vector_hi (tarray (tptr tulong) 32))
-                            (Expr.Econst_int (Integers.Int.repr 5) tint)
+                            (Expr.Econst_int (Integers.Int.repr 4) tint)
                             (tptr (tptr tulong))) (tptr tulong))
                         (Expr.Ecast
                           (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -10936,7 +10899,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                               (Expr.Efield
                                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                 _vector_hi (tarray (tptr tulong) 32))
-                              (Expr.Econst_int (Integers.Int.repr 6) tint)
+                              (Expr.Econst_int (Integers.Int.repr 5) tint)
                               (tptr (tptr tulong))) (tptr tulong))
                           (Expr.Ecast
                             (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -10948,7 +10911,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                                 (Expr.Efield
                                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                   _vector_hi (tarray (tptr tulong) 32))
-                                (Expr.Econst_int (Integers.Int.repr 7) tint)
+                                (Expr.Econst_int (Integers.Int.repr 6) tint)
                                 (tptr (tptr tulong))) (tptr tulong))
                             (Expr.Ecast
                               (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -10960,7 +10923,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                                   (Expr.Efield
                                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                     _vector_hi (tarray (tptr tulong) 32))
-                                  (Expr.Econst_int (Integers.Int.repr 8) tint)
+                                  (Expr.Econst_int (Integers.Int.repr 7) tint)
                                   (tptr (tptr tulong))) (tptr tulong))
                               (Expr.Ecast
                                 (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -10972,7 +10935,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                                     (Expr.Efield
                                       (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                       _vector_hi (tarray (tptr tulong) 32))
-                                    (Expr.Econst_int (Integers.Int.repr 9) tint)
+                                    (Expr.Econst_int (Integers.Int.repr 8) tint)
                                     (tptr (tptr tulong))) (tptr tulong))
                                 (Expr.Ecast
                                   (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -10984,7 +10947,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                                       (Expr.Efield
                                         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                         _vector_hi (tarray (tptr tulong) 32))
-                                      (Expr.Econst_int (Integers.Int.repr 10) tint)
+                                      (Expr.Econst_int (Integers.Int.repr 9) tint)
                                       (tptr (tptr tulong))) (tptr tulong))
                                   (Expr.Ecast
                                     (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -11001,7 +10964,7 @@ def f_kprog_arm64_entry_xdp : Function := {
         (Expr.Efield
           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
           _vector_lo (tarray (tptr tulong) 32))
-        (Expr.Econst_int (Integers.Int.repr 10) tint) (tptr (tptr tulong)))
+        (Expr.Econst_int (Integers.Int.repr 9) tint) (tptr (tptr tulong)))
       (tptr tulong))
     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
   (Stmt.Ssequence
@@ -11011,7 +10974,7 @@ def f_kprog_arm64_entry_xdp : Function := {
           (Expr.Efield
             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
             _vector_lo (tarray (tptr tulong) 32))
-          (Expr.Econst_int (Integers.Int.repr 11) tint) (tptr (tptr tulong)))
+          (Expr.Econst_int (Integers.Int.repr 10) tint) (tptr (tptr tulong)))
         (tptr tulong))
       (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint) (tptr tvoid)))
     (Stmt.Ssequence
@@ -11021,7 +10984,7 @@ def f_kprog_arm64_entry_xdp : Function := {
             (Expr.Efield
               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
               _vector_lo (tarray (tptr tulong) 32))
-            (Expr.Econst_int (Integers.Int.repr 12) tint)
+            (Expr.Econst_int (Integers.Int.repr 11) tint)
             (tptr (tptr tulong))) (tptr tulong))
         (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
           (tptr tvoid)))
@@ -11032,7 +10995,7 @@ def f_kprog_arm64_entry_xdp : Function := {
               (Expr.Efield
                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                 _vector_lo (tarray (tptr tulong) 32))
-              (Expr.Econst_int (Integers.Int.repr 13) tint)
+              (Expr.Econst_int (Integers.Int.repr 12) tint)
               (tptr (tptr tulong))) (tptr tulong))
           (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
             (tptr tvoid)))
@@ -11043,7 +11006,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                 (Expr.Efield
                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                   _vector_lo (tarray (tptr tulong) 32))
-                (Expr.Econst_int (Integers.Int.repr 14) tint)
+                (Expr.Econst_int (Integers.Int.repr 13) tint)
                 (tptr (tptr tulong))) (tptr tulong))
             (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
               (tptr tvoid)))
@@ -11054,7 +11017,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                   (Expr.Efield
                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                     _vector_lo (tarray (tptr tulong) 32))
-                  (Expr.Econst_int (Integers.Int.repr 15) tint)
+                  (Expr.Econst_int (Integers.Int.repr 14) tint)
                   (tptr (tptr tulong))) (tptr tulong))
               (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                 (tptr tvoid)))
@@ -11065,7 +11028,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                     (Expr.Efield
                       (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                       _vector_lo (tarray (tptr tulong) 32))
-                    (Expr.Econst_int (Integers.Int.repr 16) tint)
+                    (Expr.Econst_int (Integers.Int.repr 15) tint)
                     (tptr (tptr tulong))) (tptr tulong))
                 (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                   (tptr tvoid)))
@@ -11076,7 +11039,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                       (Expr.Efield
                         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                         _vector_lo (tarray (tptr tulong) 32))
-                      (Expr.Econst_int (Integers.Int.repr 17) tint)
+                      (Expr.Econst_int (Integers.Int.repr 16) tint)
                       (tptr (tptr tulong))) (tptr tulong))
                   (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                     (tptr tvoid)))
@@ -11087,7 +11050,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                         (Expr.Efield
                           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                           _vector_lo (tarray (tptr tulong) 32))
-                        (Expr.Econst_int (Integers.Int.repr 18) tint)
+                        (Expr.Econst_int (Integers.Int.repr 17) tint)
                         (tptr (tptr tulong))) (tptr tulong))
                     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                       (tptr tvoid)))
@@ -11098,7 +11061,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                           (Expr.Efield
                             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                             _vector_lo (tarray (tptr tulong) 32))
-                          (Expr.Econst_int (Integers.Int.repr 19) tint)
+                          (Expr.Econst_int (Integers.Int.repr 18) tint)
                           (tptr (tptr tulong))) (tptr tulong))
                       (Expr.Ecast
                         (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -11110,7 +11073,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                             (Expr.Efield
                               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                               _vector_lo (tarray (tptr tulong) 32))
-                            (Expr.Econst_int (Integers.Int.repr 20) tint)
+                            (Expr.Econst_int (Integers.Int.repr 19) tint)
                             (tptr (tptr tulong))) (tptr tulong))
                         (Expr.Ecast
                           (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -11122,7 +11085,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                               (Expr.Efield
                                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                 _vector_lo (tarray (tptr tulong) 32))
-                              (Expr.Econst_int (Integers.Int.repr 21) tint)
+                              (Expr.Econst_int (Integers.Int.repr 20) tint)
                               (tptr (tptr tulong))) (tptr tulong))
                           (Expr.Ecast
                             (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -11134,7 +11097,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                                 (Expr.Efield
                                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                   _vector_lo (tarray (tptr tulong) 32))
-                                (Expr.Econst_int (Integers.Int.repr 22) tint)
+                                (Expr.Econst_int (Integers.Int.repr 21) tint)
                                 (tptr (tptr tulong))) (tptr tulong))
                             (Expr.Ecast
                               (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -11146,7 +11109,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                                   (Expr.Efield
                                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                     _vector_lo (tarray (tptr tulong) 32))
-                                  (Expr.Econst_int (Integers.Int.repr 23) tint)
+                                  (Expr.Econst_int (Integers.Int.repr 22) tint)
                                   (tptr (tptr tulong))) (tptr tulong))
                               (Expr.Ecast
                                 (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -11158,7 +11121,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                                     (Expr.Efield
                                       (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                       _vector_lo (tarray (tptr tulong) 32))
-                                    (Expr.Econst_int (Integers.Int.repr 24) tint)
+                                    (Expr.Econst_int (Integers.Int.repr 23) tint)
                                     (tptr (tptr tulong))) (tptr tulong))
                                 (Expr.Ecast
                                   (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -11170,7 +11133,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                                       (Expr.Efield
                                         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                         _vector_lo (tarray (tptr tulong) 32))
-                                      (Expr.Econst_int (Integers.Int.repr 25) tint)
+                                      (Expr.Econst_int (Integers.Int.repr 24) tint)
                                       (tptr (tptr tulong))) (tptr tulong))
                                   (Expr.Ecast
                                     (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -11183,55 +11146,51 @@ def f_kprog_arm64_entry_xdp : Function := {
 (Stmt.Ssequence
   (Stmt.Sassign
     (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-      _sp (tptr tlong))
-    (Expr.Eaddrof (Expr.Evar ___a64_sp tlong) (tptr tlong)))
+      _lr (tptr tulong))
+    (Expr.Eaddrof (Expr.Evar ___a64_lr tulong) (tptr tulong)))
   (Stmt.Ssequence
     (Stmt.Sassign
       (Expr.Efield (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-        _sp_valid (tptr tuchar))
-      (Expr.Eaddrof (Expr.Evar ___a64_numeric_sp_valid tuchar) (tptr tuchar)))
+        _sp (tptr tlong))
+      (Expr.Eaddrof (Expr.Evar ___a64_sp tlong) (tptr tlong)))
     (Stmt.Ssequence
       (Stmt.Sassign
         (Expr.Efield
-          (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-          _return_valid (tptr tuchar))
-        (Expr.Eaddrof (Expr.Evar ___a64_numeric_return_valid tuchar)
+          (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr)) _sp_valid
+          (tptr tuchar))
+        (Expr.Eaddrof (Expr.Evar ___a64_numeric_sp_valid tuchar)
           (tptr tuchar)))
       (Stmt.Ssequence
         (Stmt.Sassign
           (Expr.Efield
-            (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr)) _n
-            (tptr tuchar))
-          (Expr.Eaddrof (Expr.Evar ___a64_n tuchar) (tptr tuchar)))
+            (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
+            _return_valid (tptr tuchar))
+          (Expr.Eaddrof (Expr.Evar ___a64_numeric_return_valid tuchar)
+            (tptr tuchar)))
         (Stmt.Ssequence
           (Stmt.Sassign
             (Expr.Efield
-              (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr)) _z
+              (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr)) _n
               (tptr tuchar))
-            (Expr.Eaddrof (Expr.Evar ___a64_z tuchar) (tptr tuchar)))
+            (Expr.Eaddrof (Expr.Evar ___a64_n tuchar) (tptr tuchar)))
           (Stmt.Ssequence
             (Stmt.Sassign
               (Expr.Efield
-                (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr)) _c
+                (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr)) _z
                 (tptr tuchar))
-              (Expr.Eaddrof (Expr.Evar ___a64_c tuchar) (tptr tuchar)))
+              (Expr.Eaddrof (Expr.Evar ___a64_z tuchar) (tptr tuchar)))
             (Stmt.Ssequence
               (Stmt.Sassign
                 (Expr.Efield
                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                  _v (tptr tuchar))
-                (Expr.Eaddrof (Expr.Evar ___a64_v tuchar) (tptr tuchar)))
+                  _c (tptr tuchar))
+                (Expr.Eaddrof (Expr.Evar ___a64_c tuchar) (tptr tuchar)))
               (Stmt.Ssequence
                 (Stmt.Sassign
-                  (Expr.Ederef
-                    (Expr.Ebinop Binop.Oadd
-                      (Expr.Efield
-                        (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                        _vector_lo (tarray (tptr tulong) 32))
-                      (Expr.Econst_int (Integers.Int.repr 0) tint)
-                      (tptr (tptr tulong))) (tptr tulong))
-                  (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
-                    (tptr tvoid)))
+                  (Expr.Efield
+                    (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
+                    _v (tptr tuchar))
+                  (Expr.Eaddrof (Expr.Evar ___a64_v tuchar) (tptr tuchar)))
                 (Stmt.Ssequence
                   (Stmt.Sassign
                     (Expr.Ederef
@@ -11239,7 +11198,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                         (Expr.Efield
                           (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                           _vector_lo (tarray (tptr tulong) 32))
-                        (Expr.Econst_int (Integers.Int.repr 1) tint)
+                        (Expr.Econst_int (Integers.Int.repr 0) tint)
                         (tptr (tptr tulong))) (tptr tulong))
                     (Expr.Ecast (Expr.Econst_int (Integers.Int.repr 0) tint)
                       (tptr tvoid)))
@@ -11250,7 +11209,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                           (Expr.Efield
                             (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                             _vector_lo (tarray (tptr tulong) 32))
-                          (Expr.Econst_int (Integers.Int.repr 2) tint)
+                          (Expr.Econst_int (Integers.Int.repr 1) tint)
                           (tptr (tptr tulong))) (tptr tulong))
                       (Expr.Ecast
                         (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -11262,7 +11221,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                             (Expr.Efield
                               (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                               _vector_lo (tarray (tptr tulong) 32))
-                            (Expr.Econst_int (Integers.Int.repr 3) tint)
+                            (Expr.Econst_int (Integers.Int.repr 2) tint)
                             (tptr (tptr tulong))) (tptr tulong))
                         (Expr.Ecast
                           (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -11274,7 +11233,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                               (Expr.Efield
                                 (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                 _vector_lo (tarray (tptr tulong) 32))
-                              (Expr.Econst_int (Integers.Int.repr 4) tint)
+                              (Expr.Econst_int (Integers.Int.repr 3) tint)
                               (tptr (tptr tulong))) (tptr tulong))
                           (Expr.Ecast
                             (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -11286,7 +11245,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                                 (Expr.Efield
                                   (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                   _vector_lo (tarray (tptr tulong) 32))
-                                (Expr.Econst_int (Integers.Int.repr 5) tint)
+                                (Expr.Econst_int (Integers.Int.repr 4) tint)
                                 (tptr (tptr tulong))) (tptr tulong))
                             (Expr.Ecast
                               (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -11298,7 +11257,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                                   (Expr.Efield
                                     (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                     _vector_lo (tarray (tptr tulong) 32))
-                                  (Expr.Econst_int (Integers.Int.repr 6) tint)
+                                  (Expr.Econst_int (Integers.Int.repr 5) tint)
                                   (tptr (tptr tulong))) (tptr tulong))
                               (Expr.Ecast
                                 (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -11310,7 +11269,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                                     (Expr.Efield
                                       (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                       _vector_lo (tarray (tptr tulong) 32))
-                                    (Expr.Econst_int (Integers.Int.repr 7) tint)
+                                    (Expr.Econst_int (Integers.Int.repr 6) tint)
                                     (tptr (tptr tulong))) (tptr tulong))
                                 (Expr.Ecast
                                   (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -11322,7 +11281,7 @@ def f_kprog_arm64_entry_xdp : Function := {
                                       (Expr.Efield
                                         (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
                                         _vector_lo (tarray (tptr tulong) 32))
-                                      (Expr.Econst_int (Integers.Int.repr 8) tint)
+                                      (Expr.Econst_int (Integers.Int.repr 7) tint)
                                       (tptr (tptr tulong))) (tptr tulong))
                                   (Expr.Ecast
                                     (Expr.Econst_int (Integers.Int.repr 0) tint)
@@ -11432,16 +11391,8 @@ def f_kprog_arm64_entry_xdp : Function := {
                                   (Expr.Evar ___a64_numeric_sp tulong)
                                   (tptr tulong)))
                               (Stmt.Ssequence
-                                (Stmt.Sassign
-                                  (Expr.Efield
-                                    (Expr.Evar _entry (Ty.Tstruct _kprog_arm64_entry noattr))
-                                    _return_base (tptr tulong))
-                                  (Expr.Eaddrof
-                                    (Expr.Evar ___a64_numeric_return tulong)
-                                    (tptr tulong)))
-                                (Stmt.Ssequence
-                                  s_kprog_arm64_entry_skb_41
-                                  s_kprog_arm64_entry_skb_52)))))))))))))))))
+                                s_kprog_arm64_entry_skb_41
+                                s_kprog_arm64_entry_skb_52))))))))))))))))
 
 @[noinline] def s_kprog_arm64_entry_skb_54 : Stmt :=
 (Stmt.Ssequence
@@ -15801,8 +15752,8 @@ def composites : List CompositeDef :=
     (Member.Member_plain _v (tptr tuchar)),
     (Member.Member_plain _vector_lo (tarray (tptr tulong) 32)),
     (Member.Member_plain _vector_hi (tarray (tptr tulong) 32)),
-    (Member.Member_plain _bytes (tptr (tvolatile tuchar))),
-    (Member.Member_plain _words (tptr (tvolatile tulong))),
+    (Member.Member_plain _b (tptr (tvolatile tuchar))),
+    (Member.Member_plain _q (tptr (tvolatile tulong))),
     (Member.Member_plain _payload (tptr (tvolatile tulong))),
     (Member.Member_plain _stack_tags (tptr tuchar)),
     (Member.Member_plain _capacity tuint),

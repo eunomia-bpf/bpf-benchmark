@@ -1,0 +1,107 @@
+{
+  "step": "M4 borrowed ARM program bindings",
+  "status": "validated; M4 remains open",
+  "baseline": "776e46a27df84c7a343dfad149aa90a516ee288b",
+  "raw": "/workspaces/kprog-raw/formal/m4-arm64-program",
+  "exports": {
+    "Arm64Entry": {
+      "bytes": 837600,
+      "functions": 3,
+      "deterministic": true,
+      "preprocessed_tu_bytes": 316959
+    },
+    "Arm64Program": {
+      "bytes": 11497120,
+      "functions": 111,
+      "deterministic": true,
+      "preprocessed_tu_bytes": 1408251
+    },
+    "Arm64ProgramFixture": {
+      "bytes": 668616,
+      "functions": 2,
+      "deterministic": true,
+      "preprocessed_tu_bytes": 367022
+    },
+    "Arm64ProgramContext": {
+      "bytes": 1858226,
+      "functions": 2,
+      "deterministic": true,
+      "preprocessed_tu_bytes": 500394
+    }
+  },
+  "validation": {
+    "make_clight": 0,
+    "all_14_clight_modules": {
+      "exit": 0,
+      "jobs": 51
+    },
+    "link_computations": {
+      "exit": 0,
+      "library": "CC.Link.linkProgramsRenaming",
+      "programs": [
+        "CALL/RET fixture",
+        "XDP/SKB fixture"
+      ],
+      "reported_definitions_each": 134
+    },
+    "axiom_queries": 8,
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "whole_frame_cases_per_mode": 12823,
+    "borrowed_handler_frames_within_each_capture": 7788,
+    "retained_control_root_frames_within_each_capture": 5035,
+    "capture_bytes_per_mode": 28557200,
+    "closed_raw_cases_per_mode": 840,
+    "closed_raw_capture_bytes_per_mode": 4042080,
+    "modes": [
+      "historical",
+      "native",
+      "program-native",
+      "adapter",
+      "program-adapter"
+    ],
+    "comparison": "all bytes identical, no masks",
+    "new_negatives": {
+      "lane_reference_alias": "assertion exit1",
+      "GPR_reference_alias": "assertion exit1",
+      "helper_context_reference_alias": "assertion exit1",
+      "coordinate_cache_alias": {
+        "exit": 0,
+        "comparison": "different as expected",
+        "first_difference": 20751620
+      },
+      "closed_return_target": "SIGABRT as expected"
+    },
+    "retained_clobber_mutant": "assertion exit1"
+  },
+  "native_fidelity": {
+    "fidelity-arm64_context_compile": {
+      "allocated_sections_equal": true,
+      "allocated_relocations_equal": true,
+      "current_stream_equals_normal_build": true,
+      "allocated_section_bytes": {
+        ".text": 0,
+        "xdp": 1152,
+        "tc": 1896,
+        "license": 4
+      },
+      "allocated_relocations": 4
+    },
+    "fidelity-arm64_execute_compile": {
+      "allocated_sections_equal": true,
+      "allocated_relocations_equal": true,
+      "current_stream_equals_normal_build": true,
+      "allocated_section_bytes": {
+        ".text": 0,
+        "socket": 11104,
+        "xdp": 15320,
+        "license": 4
+      },
+      "allocated_relocations": 8
+    }
+  },
+  "scope": "Actual shared C bodies with borrowed local cells; unchanged complete fixture sources are included once through extraction wrappers. Only full payload layouts are bound; application/sparse-layout universality and M5 refinement remain open. The stack-disabled fixture covers context-only leaf operations, not generic private/helper behavior for that declaration profile."
+}

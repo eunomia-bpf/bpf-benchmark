@@ -13,8 +13,8 @@ struct kprog_arm64_entry {
 	__u8 *sp_valid, *return_valid;
 	__u8 *n, *z, *c, *v;
 	__u64 *vector_lo[32], *vector_hi[32];
-	volatile __u8 *bytes;
-	volatile __u64 *words, *payload;
+	volatile __u8 *b;
+	volatile __u64 *q, *payload;
 	__u8 *stack_tags;
 	__u32 capacity, payload_words, tag_bytes;
 	__s64 bias;
@@ -27,4 +27,26 @@ typedef __u32 (*kprog_arm64_entry_continuation)(struct kprog_arm64_entry *);
 __u32 kprog_arm64_entry_raw(void *, kprog_arm64_entry_continuation);
 __u32 kprog_arm64_entry_xdp(struct xdp_md *, kprog_arm64_entry_continuation);
 __u32 kprog_arm64_entry_skb(struct __sk_buff *, void *(*)(void *), kprog_arm64_entry_continuation);
+#define KPROG_ARM64_ENTRY_VIEW(NAME) \
+	struct kprog_arm64_entry NAME = { \
+		.cells = __a64_cells, .tag_cells = __a64_tag_cells, \
+		.sp_base = &__a64_numeric_sp, .return_base = &__a64_numeric_return, \
+		.sp = &__a64_sp, .sp_valid = &__a64_numeric_sp_valid, \
+		.return_valid = &__a64_numeric_return_valid, .lr = &__a64_lr, \
+		.n = &__a64_n, .z = &__a64_z, .c = &__a64_c, .v = &__a64_v, \
+		.b = __a64_stack.b, .q = __a64_stack.q, \
+		.payload = __a64_stack_payload, .stack_tags = __a64_stack_tag, \
+		.capacity = sizeof(__a64_stack.b), .bias = ARM64_SIM_STACK_BIAS, \
+		.payload_words = sizeof(__a64_stack_payload) / sizeof(__a64_stack_payload[0]), \
+		.tag_bytes = sizeof(__a64_stack_tag), \
+		.helper_context = &__a64_sim_helper_ctx, \
+		.helper_abi_base = &__a64_sim_helper_abi_base, \
+		.is_xdp = &__a64_sim_is_xdp, .abi_kind = &__a64_sim_abi_kind, \
+		.skb_context = &__a64_sim_skb_ctx, .abi = &__a64_sim_abi \
+	}; \
+	for (__u32 i = 0; i < 32; ++i) { \
+		NAME.vector_lo[i] = &__a64_vectors[i].lo; \
+		NAME.vector_hi[i] = &__a64_vectors[i].hi; \
+	}
+
 #endif

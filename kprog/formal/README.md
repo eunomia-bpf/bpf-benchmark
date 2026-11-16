@@ -1570,7 +1570,20 @@ it does not bind arbitrary producer return tables or establish a refinement.
 [Entry receipts](results/m4-arm64-entry/README.md) distinguish host profile checks
 from the checked-in default profile and whole-default byte coverage.
 
-M4 remains open for program/return-continuation bindings, remaining producer/storage
+The borrowed program binding now exports the actual instruction/libc/helper
+bodies in [Arm64Program](c/Arm64Program.c): 111 functions/11,497,120B. Extraction
+wrappers include the unchanged CALL/RET and XDP/SKB fixtures, preserving their
+real labels and nonempty return table. All 14 Clight modules/51 Lean jobs and
+the mature library's link computations pass. Five C modes agree on 12,823 full
+frames and 840 closed RAW program return/input-stream observations per mode;
+the independent memory dispatcher and five new negative cases pass. Native
+fixture allocated bytes and relocations remain exact. Entry's shared constructor
+now records actual declaration sizes; its current export is 3 functions/837,600B.
+[Program receipts](results/m4-arm64-program/README.md) separate borrowed-handler
+cases from retained control-root cases and describe the full-payload profile.
+This supplies concrete C program composition, not a migrated refinement theorem.
+
+M4 remains open for arbitrary producer program/return tables, remaining producer/storage
 profiles, platform correspondence and full default compiled-byte coverage. The
 stated x86 inline profile and ARM instruction dispatcher clear their earlier
 syntax/code-generation obstructions. Preserve

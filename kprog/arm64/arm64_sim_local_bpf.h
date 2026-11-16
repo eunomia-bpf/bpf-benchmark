@@ -285,8 +285,10 @@ typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 	__s64 __a64_sp = 0
 #endif
 
-#define __a64_v0 (__a64_vectors[0].lo)
-#define __a64_v0_hi (__a64_vectors[0].hi)
+#define ARM64_SIM_L_VECTOR_LO(INDEX) (__a64_vectors[(INDEX)].lo)
+#define ARM64_SIM_L_VECTOR_HI(INDEX) (__a64_vectors[(INDEX)].hi)
+#define __a64_v0 ARM64_SIM_L_VECTOR_LO(0)
+#define __a64_v0_hi ARM64_SIM_L_VECTOR_HI(0)
 #define ARM64_SIM_L_DECLARE_STATE()                                         \
 	__u64 __a64_numeric_sp __attribute__((unused)) = 0;               \
 	__u64 __a64_numeric_return __attribute__((unused)) = 0;            \
@@ -313,6 +315,8 @@ typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 #else
 #define ARM64_SIM_L_ENTRY_XDP_FIELD(CTX, FIELD) ((void *)(long)(CTX)->FIELD)
 #endif
+/* A formal program adapter borrows the completed entry locals here. */
+#define ARM64_SIM_L_ENTRY_BOUND() ((void)0)
 #define ARM64_SIM_ENTRY_XDP(CTX)                                            \
 	struct arm64_sim_xdp_abi __a64_sim_abi = {                         \
 		.data = ARM64_SIM_L_ENTRY_XDP_FIELD(CTX, data),             \
@@ -327,7 +331,7 @@ typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 	__a64_sim_helper_abi_base = &__a64_sim_abi;                       \
 	__a64_x0.ptr = (void *)(CTX);                                    \
 	__a64_x30_tag = ARM64_SIM_TAG_RETURN;                           \
-	__a64_x0_tag = ARM64_SIM_TAG_ABI
+	__a64_x0_tag = ARM64_SIM_TAG_ABI; ARM64_SIM_L_ENTRY_BOUND()
 
 #define ARM64_SIM_ENTRY_SKB(CTX)                                            \
 	struct arm64_sim_skb_abi __a64_sim_abi = {0};                       \
@@ -339,7 +343,7 @@ typedef __u64 arm64_sim_tag_word __attribute__((may_alias));
 	__a64_sim_helper_abi_base = bpf_cast_to_kern_ctx((void *)(CTX));                       \
 	__a64_x0.ptr = __a64_sim_helper_abi_base;                                    \
 	__a64_x30_tag = ARM64_SIM_TAG_RETURN;                           \
-	__a64_x0_tag = ARM64_SIM_TAG_ABI
+	__a64_x0_tag = ARM64_SIM_TAG_ABI; ARM64_SIM_L_ENTRY_BOUND()
 
 /* Raw tracing contexts keep the actual verifier context pointer. */
 #define ARM64_SIM_ABI_KIND_RAW 2U
@@ -355,7 +359,7 @@ _Static_assert(ARM64_SIM_ABI_KIND_RAW != KPROG_ABI_KIND_XDP && ARM64_SIM_ABI_KIN
 	__a64_sim_helper_abi_base = (void *)(CTX);                        \
 	__a64_x0.ptr = (void *)(CTX);                                      \
 	__a64_x30_tag = ARM64_SIM_TAG_RETURN; \
-	__a64_x0_tag = ARM64_SIM_TAG_ABI
+	__a64_x0_tag = ARM64_SIM_TAG_ABI; ARM64_SIM_L_ENTRY_BOUND()
 
 /* Invocation-stable coordinate inputs are fetched only on the first use.
  * Payloads remain relative for stack indexing; numeric views carry native bits.
@@ -2160,14 +2164,14 @@ do { \
 			if (__a64_fmov_index >= 32U) {                     \
 				ARM64_SIM_L_UNSUPPORTED_OPCODE();           \
 			} else {                                           \
-			ARM64_SIM_L_VALUE(__u64, __a64_fmov_result, KPROG_ARM64_FMOV_VALUE, (AUX), __a64_vectors[__a64_fmov_index].lo, \
+			ARM64_SIM_L_VALUE(__u64, __a64_fmov_result, KPROG_ARM64_FMOV_VALUE, (AUX), ARM64_SIM_L_VECTOR_LO(__a64_fmov_index), \
 					ARM64_SIM_L_READ_REG(SRC),         \
 					ARM64_SIM_L_UNSUPPORTED_OPCODE()); \
 			if (KPROG_ARM64_FMOV_DEST_VECTOR((AUX),           \
 					ARM64_SIM_L_UNSUPPORTED_OPCODE())) { \
-				__a64_vectors[__a64_fmov_index].lo = (AUX) == ARM64_FMOV_S_FROM_W ? \
+				ARM64_SIM_L_VECTOR_LO(__a64_fmov_index) = (AUX) == ARM64_FMOV_S_FROM_W ? \
 					(__u32)__a64_fmov_result : __a64_fmov_result; \
-				__a64_vectors[__a64_fmov_index].hi = 0;     \
+				ARM64_SIM_L_VECTOR_HI(__a64_fmov_index) = 0;     \
 			}                                                  \
 			else                                               \
 				ARM64_SIM_L_WRITE_REG_WIDTH((DST),         \
@@ -2284,70 +2288,70 @@ do { \
         __a64_z = ARM64_SIM_L_UNSPECIFIED() & 1; \
         __a64_c = ARM64_SIM_L_UNSPECIFIED() & 1; \
         __a64_v = ARM64_SIM_L_UNSPECIFIED() & 1; \
-        __a64_vectors[0].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[0].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[1].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[1].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[2].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[2].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[3].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[3].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[4].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[4].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[5].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[5].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[6].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[6].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[7].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[7].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[8].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[8].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[9].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[9].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[10].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[10].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[11].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[11].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[12].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[12].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[13].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[13].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[14].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[14].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[15].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[15].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[16].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[16].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[17].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[17].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[18].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[18].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[19].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[19].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[20].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[20].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[21].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[21].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[22].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[22].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[23].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[23].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[24].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[24].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[25].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[25].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[26].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[26].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[27].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[27].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[28].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[28].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[29].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[29].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[30].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[30].hi = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[31].lo = ARM64_SIM_L_UNSPECIFIED(); \
-        __a64_vectors[31].hi = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(0) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(0) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(1) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(1) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(2) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(2) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(3) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(3) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(4) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(4) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(5) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(5) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(6) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(6) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(7) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(7) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(8) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(8) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(9) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(9) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(10) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(10) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(11) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(11) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(12) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(12) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(13) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(13) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(14) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(14) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(15) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(15) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(16) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(16) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(17) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(17) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(18) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(18) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(19) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(19) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(20) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(20) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(21) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(21) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(22) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(22) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(23) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(23) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(24) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(24) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(25) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(25) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(26) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(26) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(27) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(27) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(28) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(28) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(29) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(29) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(30) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(30) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_LO(31) = ARM64_SIM_L_UNSPECIFIED(); \
+        ARM64_SIM_L_VECTOR_HI(31) = ARM64_SIM_L_UNSPECIFIED(); \
     } while (0)
 
 #define ARM64_SIM_L_HELPER_SCALAR_RESULT(EXPR) \

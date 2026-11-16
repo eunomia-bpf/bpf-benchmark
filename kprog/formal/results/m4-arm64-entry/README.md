@@ -42,3 +42,8 @@ fixture still exits2 at the GNU `KPROG_ARM64_MOV_PTR_TAG_PATH` expression inside
 bound in this program context. Its preprocessed fixture is26,822,809B; this is
 not an application scale result. `program-probe.log` and
 `program-preprocess.log` retain the failure and expansion for the next M4 step.
+
+The subsequent [program binding](../m4-arm64-program/README.md) clears that
+fixture obstruction. Its shared constructor records actual declaration sizes
+and uses native arena field names; the current entry export is 837,600 B. The
+840,530B result above remains the earlier publication's receipt.

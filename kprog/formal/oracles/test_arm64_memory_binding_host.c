@@ -8,6 +8,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include "../c/Arm64Addressing.h"
+#if PROGRAM
+#include "arm64_program_bridge_host.h"
+#endif
 #if defined(DISPATCH)
 /* Run the independent memory oracle through the real complete dispatcher. */
 static struct kprog_arm64_vector dispatch_vectors[32];
