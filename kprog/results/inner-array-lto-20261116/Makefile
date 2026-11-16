@@ -10,11 +10,17 @@ host:
 	clang-18 -O3 -Xclang -fembed-bitcode=all -fPIC -mno-red-zone -mgeneral-regs-only \
 		-c $(ROOT)/kprog/results/inner-array-lto-20261116/fixture.c -o $(TMP)/fixture.native.o
 	python3 $(ROOT)/kprog/results/inner-array-lto-20261116/check.py $(RAW) $(TMP) > $(RAW)/check.log 2>&1
+	$(MAKE) -f $(ROOT)/kprog/results/inner-array-lto-20261116/Makefile definitions RAW=$(RAW)
+
+.PHONY: definitions
+definitions:
+	install -d $(RAW) $(TMP)
 	clang-18 -O2 -g -target bpf -I/usr/include/x86_64-linux-gnu \
 		-I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include \
 		-c $(ROOT)/kprog/results/inner-array-lto-20261116/nested.bpf.c -o $(TMP)/nested.bpf.o
 	$(CXX) -std=gnu++20 -O1 -ffunction-sections -fdata-sections \
-		-I$(ROOT)/micro/programs/build-x86 -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include \
+		-I$(ROOT)/kprog/libnativeloader/include -I$(ROOT)/micro/programs/build-x86 \
+		-I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include \
 		-I$(ROOT)/vendor/libbpf/include -I$(ROOT)/vendor/libbpf/include/uapi \
 		$(ROOT)/kprog/results/inner-array-lto-20261116/definitions.cpp -Wl,--gc-sections \
 		$(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -ldl -pthread -o $(TMP)/definitions
