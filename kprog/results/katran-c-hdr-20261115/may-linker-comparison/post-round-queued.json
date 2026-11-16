@@ -1,0 +1,25 @@
+{
+  "timestamp": "2026-11-16T02:41:17Z",
+  "source_commit": "82a95e032",
+  "launcher_pid": 1305713,
+  "shell_pid": 1305715,
+  "flock_pid": 1305718,
+  "state": "Waiting behind breadth round",
+  "raw": "/workspaces/kprog-raw/perf/20261116-post-round-data-fix",
+  "retired_queue": {
+    "launcher_pid": 1290695,
+    "ended_own_pid": 1290703,
+    "before_publication": true,
+    "raw_preserved": "/workspaces/kprog-raw/perf/20261116-reference-linker-timing"
+  },
+  "steps": [
+    "Publish current B normalizer and canonical DATASEC loader under image EX",
+    "BCC stats0/1 through unchanged corpus defaults",
+    "Current Katran stats0/1 on fixed loader",
+    "Replace sole linker/image with preserved May reference",
+    "Reference Katran stats0/1 on same fixed loader",
+    "Rebuild current linker into sole image"
+  ],
+  "address_space_bytes": 103079215104,
+  "scope": "Queued, no publication or new timing result yet. Entry/defaults unchanged."
+}

@@ -1,0 +1,33 @@
+{
+  "timestamp": "2026-11-16T02:41:17Z",
+  "run": "corpus/results/x86_kvm_corpus_20261116_020859_257027",
+  "program": "execve_send",
+  "symbol": "CONFIG_ITER_NUM",
+  "native_definitions": [
+    {
+      "object": "corpus/results/tetragon-c-hdr-20261115/objects/bpf_execve_event_v511.native.o",
+      "section": ".rodata",
+      "offset": 1080,
+      "bytes": 1
+    },
+    {
+      "object": "corpus/results/tetragon-c-hdr-20261115/objects/bpf_execve_map_update_v61.native.o",
+      "section": ".rodata",
+      "offset": 0,
+      "bytes": 1
+    },
+    {
+      "object": "corpus/results/tetragon-c-hdr-20261115/objects/bpf_execve_event_v61.native.o",
+      "section": ".rodata",
+      "offset": 756,
+      "bytes": 1
+    },
+    {
+      "object": "corpus/results/tetragon-c-hdr-20261115/objects/bpf_execve_map_update_v511.native.o",
+      "section": ".rodata",
+      "offset": 0,
+      "bytes": 1
+    }
+  ],
+  "scope": "The missing symbol is a defined native data global. Actual loaded DATASEC name/offset and full app acceptance remain to be checked; do not assume the BCC fix alone closes Tetragon."
+}

@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-11-16T02:41:17Z",
+  "run": "corpus/results/x86_kvm_corpus_20261116_014919_236561",
+  "program": "tail_ipv4_policy",
+  "native": "vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_lxc.native.o",
+  "entry_address": 48896,
+  "failing_offset": 5821,
+  "call_address": 54717,
+  "helper_ids": [
+    23,
+    155
+  ],
+  "paths": [
+    "0xd5b6: mov eax,23 ->0xd5bb xor esi,esi ->0xd5bd call rax",
+    "0xd5e3: mov eax,155 ->0xd5e8 jmp0xd5bb ->same call"
+  ],
+  "cause": "CFG join has two known helper identities; current singleton helper provenance drops the joined identity and refuses the call.",
+  "scope": "Static code evidence. No source modification or app acceptance; finite dispatch must preserve path-selected helper and observed scalar IDs."
+}

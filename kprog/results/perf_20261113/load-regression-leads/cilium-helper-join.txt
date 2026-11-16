@@ -1,0 +1,24 @@
+    d597:	mov    0x0(%rip),%rax        # d59e <tail_ipv4_policy+0x169e>	d59a: R_X86_64_REX_GOTPCRELX	__config_interface_ifindex-0x4
+    d59e:	mov    (%rax),%edi
+    d5a0:	cmpl   $0x0,0xc4(%rsp)
+    d5a8:	jne    d5b6 <tail_ipv4_policy+0x16b6>
+    d5aa:	mov    0x0(%rip),%rax        # d5b1 <tail_ipv4_policy+0x16b1>	d5ad: R_X86_64_REX_GOTPCRELX	__config_enable_netkit-0x4
+    d5b1:	cmpb   $0x0,(%rax)
+    d5b4:	je     d5c9 <tail_ipv4_policy+0x16c9>
+    d5b6:	mov    $0x17,%eax
+    d5bb:	xor    %esi,%esi
+    d5bd:	call   *%rax
+    d5bf:	mov    %eax,%r15d
+    d5c2:	test   %r15d,%r15d
+    d5c5:	jns    d604 <tail_ipv4_policy+0x1704>
+    d5c7:	jmp    d61e <tail_ipv4_policy+0x171e>
+    d5c9:	cmpl   $0x0,0xb4(%rsp)
+    d5d1:	je     d5e3 <tail_ipv4_policy+0x16e3>
+    d5d3:	mov    $0x20,%eax
+    d5d8:	mov    %edi,%ebp
+    d5da:	mov    %rbx,%rdi
+    d5dd:	xor    %esi,%esi
+    d5df:	call   *%rax
+    d5e1:	mov    %ebp,%edi
+    d5e3:	mov    $0x9b,%eax
+    d5e8:	jmp    d5bb <tail_ipv4_policy+0x16bb>
