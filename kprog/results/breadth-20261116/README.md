@@ -157,10 +157,11 @@ neither is a per-call regression: Cilium's is the eBPF arm having improved
   units (+6.1 %) while today's native arm is 1 629 943 against 1 605 561
   (+1.5 %). The native arm is ahead of the 11-10 native arm in absolute terms,
   and the ratio fell because the denominator grew faster. The native objects
-  are 5 of 7 byte-identical to 05-29 (`compare_code.py`: 275 813 code bytes
-  then, 276 063 now; only `bpf_xdp` grew, by 250 B), so the remaining
-  difference is not the compiled code. The stats-on run is what turns this
-  into a per-call statement rather than a ratio statement.
+  are 4 of 7 code-identical to 05-29 (`compare_code.py`: 275 813 code bytes
+  then, 275 868 now; `bpf_xdp` grew 250 B, `bpf_host` shrank 80 B and
+  `bpf_lxc` 115 B), so the remaining difference is not the compiled code.
+  The stats-on run is what turns this into a per-call statement rather than a
+  ratio statement.
 - **Katran** — 2 836 395 / 2 834 431 / 2 751 056 against 2 815 437 / 2 840 654
   / 2 916 733, one replacement (`balancer_ingres`), zero loader failures.
   pktgen reports 80-117 M errors per sample in both arms, so the number is pps

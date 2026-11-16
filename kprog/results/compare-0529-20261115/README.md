@@ -63,3 +63,28 @@ The header route therefore matches the 05-29 codegen wherever the flag set is
 restored; the operator's expectation that the two routes perform alike is not
 contradicted by the objects, and the current size delta is a flag choice that
 can be reversed in one line if it is wanted.
+
+## 2026-11-16T08:46: re-run after the IR embedding
+
+`vendor/bpf/Makefile` `b27e7c253` added `-Xclang -fembed-bitcode=all` to the one
+flag set and rebuilt all six payloads. The comparison is unchanged, which is the
+point of measuring it: an IR section must not move a single executable byte.
+
+```
+bcc: 7 of 8 code-identical, 8 001 -> 8 015 B
+cilium: 4 of 7, 275 813 -> 275 868 B (bpf_xdp +250, bpf_host -80, bpf_lxc -115)
+katran: 3 of 4, 9 887 -> 9 830 B (healthchecking 1 154 -> 1 097)
+otelcol-ebpf-profiler: 0 of 1, 575 240 -> 547 799 B
+tracee: 0 of 3, 1 615 175 -> 1 457 903 B
+tetragon: only now, 88 objects
+katran balancer vs 05-29: identical, .text 319 B, xdp 7 965 B
+```
+
+Identical to the 08:05 pre-flag numbers for every app, so embedding IR costs no
+codegen. It also shows the comparison is stable across the rebuild rather than a
+snapshot of one build's timestamps.
+
+One correction to the breadth README, which quoted this table from memory as
+"5 of 7 byte-identical, 276 063 now, only `bpf_xdp` grew": Cilium is **4 of 7**,
+the total is **275 868**, and three objects differ — `bpf_xdp` +250 B,
+`bpf_host` -80 B, `bpf_lxc` -115 B. Fixed in `db5ec653d`'s follow-up.
