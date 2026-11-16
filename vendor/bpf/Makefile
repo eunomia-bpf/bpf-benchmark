@@ -16,6 +16,7 @@ LLC ?= llc-18
 BPF_LINK ?= llvm-link-18
 LLVM_NM ?= llvm-nm-18
 LLVM_STRIP ?= llvm-strip-18
+LLVM_OBJCOPY ?= llvm-objcopy-18
 LLVM_DIS ?= llvm-dis-18
 BPFTOOL ?= $(VENDOR)/build/x86/bpftool/bin/bpftool
 # The one kernel the guests boot, not the host's running kernel: the two BTFs differ, and a
@@ -51,6 +52,7 @@ NATIVE_ARCH_CFLAGS := $(if $(filter x86,$(ARCH)),-march=native -mno-red-zone -mg
 NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c \
 	-fomit-frame-pointer $(NATIVE_ARCH_CFLAGS) -fno-stack-protector \
 	-fno-asynchronous-unwind-tables -fno-unwind-tables \
+	-Xclang -fembed-bitcode=all \
 	-Wno-unknown-attributes -Wno-compare-distinct-pointer-types
 KATRAN_NATIVE_OBJS := $(patsubst %,$(NATIVE_OUT)/katran/%.native.o,$(KATRAN_OBJS))
 KATRAN_NATIVE_PROOF_MARKERS := $(patsubst %,$(NATIVE_OUT)/katran/%.proof.ok,$(KATRAN_OBJS))
@@ -67,6 +69,8 @@ OTEL_NATIVE_UNIT_SRCS := $(wildcard $(OTEL_EBPF_DIR)/*.ebpf.c)
 OTEL_NATIVE_UNIT_OBJS := $(patsubst $(OTEL_EBPF_DIR)/%.ebpf.c,$(NATIVE_OUT)/otel/%.native.o,$(OTEL_NATIVE_UNIT_SRCS))
 OTEL_NATIVE_OBJECT := $(NATIVE_OUT)/otel/otelcol-ebpf-profiler.native.o
 OTEL_NATIVE_PROOF_MARKER := $(NATIVE_OUT)/otel/otelcol-ebpf-profiler.proof.ok
+OTEL_NATIVE_IR_DIR := $(NATIVE_OUT)/otel/ir
+OTEL_NATIVE_IR := $(OTEL_NATIVE_IR_DIR)/otelcol-ebpf-profiler.llvmbc
 TRACEE_NATIVE_OBJECT := $(NATIVE_OUT)/tracee/tracee.native.o
 TRACEE_LSM_SUPPORT_NATIVE_OBJS := $(patsubst %,$(NATIVE_OUT)/tracee/lsm_support/%.native.o,$(TRACEE_LSM_SUPPORT_SRCS))
 TRACEE_NATIVE_OBJS := $(TRACEE_NATIVE_OBJECT) $(TRACEE_LSM_SUPPORT_NATIVE_OBJS)
@@ -281,9 +285,21 @@ $(NATIVE_OUT)/otel/%.native.o: $(OTEL_EBPF_DIR)/%.ebpf.c $(OTEL_EBPF_DIR)/errors
 		-I"$(CURDIR)/$(OTEL_EBPF_DIR)" \
 		-o "$@" "$<"
 
+# clang -r concatenates each unit's .llvmbc into one section, which is two
+# modules in a row, not one module: llvm-link can read the section but not the
+# program. The runtime context compiler needs a single module, so extract the
+# unit bitcode, link it, and replace the combined object's .llvmbc with it.
 $(OTEL_NATIVE_OBJECT): $(OTEL_NATIVE_UNIT_OBJS)
 	install -d "$(dir $@)"
 	"$(CLANG)" -r -o "$@" $(OTEL_NATIVE_UNIT_OBJS)
+	install -d "$(OTEL_NATIVE_IR_DIR)"
+	rm -f "$(OTEL_NATIVE_IR_DIR)"/*.bc
+	for o in $(OTEL_NATIVE_UNIT_OBJS); do \
+		"$(LLVM_OBJCOPY)" --dump-section .llvmbc="$(OTEL_NATIVE_IR_DIR)/$$(basename $$o .native.o).bc" "$$o"; \
+	done
+	"$(BPF_LINK)" $(OTEL_NATIVE_IR_DIR)/*.bc -o "$(OTEL_NATIVE_IR)"
+	"$(LLVM_OBJCOPY)" --remove-section .llvmbc --remove-section .llvmcmd "$@"
+	"$(LLVM_OBJCOPY)" --add-section .llvmbc="$(OTEL_NATIVE_IR)" "$@"
 
 $(TRACEE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinux.h \
 		core-compat.h $(CORE_ANSWERS)/tracee.h
