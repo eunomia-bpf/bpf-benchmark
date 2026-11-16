@@ -29,3 +29,7 @@ profile:
 		python3 $(HERE)/profile.py $(MODE) run --app $(APP) \
 		--cpus 20-23 --vcpus 4 --memory 32G --seconds 60 --freq 199 --host-event cycles:G \
 		--state-root /var/tmp/kprog-tmp/perf/shared-hash-regression --persist-output --out $(RAW)/$(CASE)
+
+.PHONY: costs
+costs:
+	DEBUGINFOD_URLS= python3 $(HERE)/costs.py $(RAW) $(CASE) > $(RAW)/$(CASE).costs.log 2>&1
