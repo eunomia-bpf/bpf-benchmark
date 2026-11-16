@@ -462,3 +462,40 @@ double-execution cause and no confirmed Cilium packet fix. Those remain open. Th
     sole kernel. This does not fix the native producer. The context bug in
     item 8 belongs to that producer boundary; simply changing the simulator
     constant to the raw sk_buff.cb offset would repeat it.
+
+15. **Registered direct-native fallback does not preserve native tail reachability.**
+
+    This is separate from the withdrawn callee-mask/pop claim in item 1.
+    The timing path's `native_loader.cpp:1057–1150` takes tail_call_reachable
+    and puts a verifier-visible tail-call site into the stub when needed.
+    Source helper scan at :3085 records that fact in companion.has_tail_call;
+    the ordinary direct loader passes it to load_stub_prog at :3486.
+
+    In contrast, `load_trusted_worker` at :3995–3999 uses just MOV r0,0 and
+    EXIT when trusted_direct_native is selected after a B failure. It submits
+    those two instructions at :4086–4088 with the native image attached, but
+    does not use companion.has_tail_call to describe P's tail frame. Reading
+    the original program at :3973 can populate the companion fact, yet that
+    does not transfer it into the newly loaded program's aux structure.
+
+    Kernel `kernel/bpf/core.c:69–76` binds only the native image pointer.
+    `kernel/bpf/verifier.c:3692–3696` marks tail sites found in the submitted
+    B instructions, and :6864–6865 transfers that reachability to prog->aux.
+    The two-instruction fallback has no such site. Native JIT
+    `bpf_jit_comp.c:3806–3808` passes prog->aux->tail_call_reachable to
+    emit_prologue; :557–558 allocates the two counter slots only when true.
+    It neither derives that fact from native relocations nor overrides it for
+    registered fallback. `x86.rs:3855–3877` still emits the native counter
+    access at BPF RBP-16 and pops its two slots on a successful tail call.
+    With that fallback stub, the frame does not contain the expected slots.
+
+    Thus a native P with tail calls routed through registered fallback has a
+    source-level frame-contract gap even though the ordinary timing stub
+    correctly retains reachability. No new guest was run to trigger it, and
+    it is not evidence that the recorded timing Cilium run used this route.
+    The existing native tail-count relocation kind 10 already identifies
+    these counter accesses; use actual P facts for the installed frame rather
+    than inferring them solely from the different B/stub. Keep frame creation,
+    tail cleanup and target entry consistent without an added per-call check
+    or another optional compatibility path. This belongs with the pending
+    frame/phase-1 correction after coordinator cleanup.

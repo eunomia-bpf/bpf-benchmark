@@ -659,5 +659,14 @@
     "simulator_data_offset": 208,
     "simulator_data_end_offset": 80,
     "scope": "Simulator already uses kernel public-field translation; producer still needs correction."
+  },
+  "registered_fallback_tail_reachability": {
+    "recorded_at": "2026-11-16T16:02:17Z",
+    "loader_stub": "native_loader.cpp:3995-3999 MOV r0,0; EXIT",
+    "ordinary_timing_path": "load_stub_prog retains verifier-visible tail site for companion.has_tail_call",
+    "kernel_frame_selector": "bpf_jit_comp.c:3806-3808 prog->aux->tail_call_reachable",
+    "native_counter_access": "x86.rs:3855-3877 RBP-16 and two counter-slot pops",
+    "existing_native_fact": "Tail count relocation kind 10",
+    "status": "Source-contract defect for native tail-calling P on registered fallback; no new execution, not asserted to explain timing Cilium path."
   }
 }
