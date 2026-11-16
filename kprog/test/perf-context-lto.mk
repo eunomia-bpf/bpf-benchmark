@@ -126,3 +126,5 @@ callee-check: compiler
 	python3 $(ROOT)/kprog/test/check_bpf_callee_abi.py --build $(BUILD) --compiler $(BUILD)/perf-context-lto --kernel $(KERNEL)/vmlinux --linker $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link --output $(OUTPUT)
 	tar -C $(BUILD) -czf $(OUTPUT)/callee-abi-build.tar.gz .
 	date -u +%FT%TZ > $(OUTPUT)/callee-abi-finished
+
+-include $(BUILD)/bpf-callee-ir.compile.d $(BUILD)/bpf-callee-ir.link.d

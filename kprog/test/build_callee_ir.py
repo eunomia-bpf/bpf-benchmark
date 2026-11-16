@@ -22,6 +22,7 @@ objects = [value for value in link[first_object:output_index] if '/vendor/llvmbp
 obj = args.build / 'bpf-callee-ir.o'
 commands = [
     [link[0], *flags['CXX_DEFINES'], *flags['CXX_INCLUDES'], *flags['CXX_FLAGS'],
+     '-MMD', '-MF', str(args.build / 'bpf-callee-ir.compile.d'), '-MT', str(args.build / 'kprog-bpf-callee-ir'),
      '-c', str(args.root / 'kprog/x86/bpf_callee_ir.cpp'), '-o', str(obj)],
     [*link[:first_object], str(obj), *objects, '-o', str(args.build / 'kprog-bpf-callee-ir'),
      *link[output_index + 2:]],
@@ -29,3 +30,11 @@ commands = [
 for command in commands:
     print(shlex.join(command), flush=True)
     subprocess.run(command, cwd=canonical, check=True)
+
+# Normal Make dependencies keep the bridge tied to the canonical compiler,
+# without building or retaining another library.
+dependencies = [canonical / value for value in objects]
+dependencies += [canonical / 'CMakeFiles/micro_exec.dir/flags.make',
+                 canonical / 'CMakeFiles/micro_exec.dir/link.txt']
+(args.build / 'bpf-callee-ir.link.d').write_text(
+    str(args.build / 'kprog-bpf-callee-ir') + ': ' + ' '.join(map(str, dependencies)) + '\n')
