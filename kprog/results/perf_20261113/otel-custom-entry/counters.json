@@ -1,0 +1,34 @@
+{
+  "time": "2026-11-16T11:57:51Z",
+  "run": "corpus/results/x86_kvm_corpus_20261114_174202_766748",
+  "bpf_stats": true,
+  "samples": 3,
+  "workload_seconds": 180.0,
+  "status": "ok",
+  "programs": {
+    "baseline": [
+      {
+        "bytes_jited": 3679,
+        "bytes_xlated": 5712,
+        "id": 18,
+        "name": "custom__generic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    ],
+    "post_rejit": [
+      {
+        "bytes_jited": 9400,
+        "bytes_xlated": 24,
+        "id": 50,
+        "name": "custom__generic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      }
+    ]
+  },
+  "source": "vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/custom_trace.ebpf.c:19",
+  "scope": "Earlier stats-on run, not the current stats-off run. No program excluded and no image change."
+}
