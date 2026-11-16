@@ -94,18 +94,39 @@ The fourth is the loader's 512-chunk module budget against Tracee's 13 815-insn
 PERF published image `d9e29630` at 2026-11-16T03:23:26Z (DATASEC `ed1d7a8f2`,
 finite helper joins `f18e94306`, dynamic chunks `5a214d73d`) and restarted the
 unchanged rotate entry at 03:24:37Z, six apps in the same ORDER at stats 0 then
-stats 1, 3 samples of 180 s, kernel `7.0.0-rc2+`. This section carries the
-stats-off rows that finished before this writing; the stats-on half is still
-running, so per-call stays n/a here.
+stats 1, 3 samples of 180 s, kernel `7.0.0-rc2+`.
+
+### Stats off
 
 | app | run | status | throughput vs eBPF arm | per-call | 05-29 floor (stats off) |
 |---|---|---|---|---|---|
 | otelcol-ebpf-profiler/profiling | `x86_kvm_corpus_20261116_032555_782265` | ok | **1.866x** | n/a | 1.849x |
 | bcc/set | `x86_kvm_corpus_20261116_035145_077678` | ok | **1.002x** | n/a | 0.985x |
 | cilium/agent | `x86_kvm_corpus_20261116_041809_047167` | ok | **1.262x** | n/a | 1.319x |
-| tetragon/observer | — | running | — | n/a | 1.009x |
-| tracee/monitor | — | running | — | n/a | 0.948x |
-| katran | — | running | — | n/a | 1.113x |
+| tetragon/observer | `x86_kvm_corpus_20261116_044420_592995` | error (VM dies) | — | n/a | 1.009x |
+| tracee/monitor | `x86_kvm_corpus_20261116_045848_214505` | error (BTF) | — | n/a | 0.948x |
+| katran | `x86_kvm_corpus_20261116_051257_960411` | ok | **1.002x** | n/a | 1.113x |
+
+Four of six pass with zero loader failures. The two that do not are new
+failures, not the round-one ones: Tetragon's `CONFIG_ITER_NUM` GOT-reloc is
+closed and its native arm now dies at the third replacement (the count, not the
+program — `corpus/results/tet-tetragon-cap-20261116/README.md`), and Tracee's
+512-chunk ceiling is closed and replaced by `BPF data map .rodata.str1.1 lacks
+BTF` on `sys_enter_submit`.
+
+### Stats on
+
+Stats on is the only mode with per-call BPF time, and the rotate had reached
+BCC when this was written.
+
+| app | run | status | throughput | per-call | 05-29 floor |
+|---|---|---|---|---|---|
+| bcc/set | `x86_kvm_corpus_20261116_060435_731340` | ok | **1.268x** | **1.134x** (122.51 → 107.98 ns) | 0.985x |
+| otelcol-ebpf-profiler/profiling | — | running | — | — | 1.849x |
+| cilium/agent | — | running | — | — | 1.319x |
+| tetragon/observer | — | blocked by the replacement ceiling | — | — | 1.009x |
+| tracee/monitor | — | blocked by the BTF gap | — | — | 0.948x |
+| katran | — | queued | — | — | 1.113x |
 
 - **OTel** — workload units eBPF 40 774 750 / 39 759 786 / 40 450 832, native
   75 471 022 / 75 117 432 / 78 452 133; 0 workload errors, 13 replacements.
@@ -119,6 +140,15 @@ running, so per-call stays n/a here.
   register-indirect helper call is closed too. This is the one app still below
   its 05-29 floor (1.262x against 1.319x); at stats 0 no per-call number
   exists to say whether the gap is BPF time or workload noise.
+- **Katran** — 2 836 395 / 2 834 431 / 2 751 056 against 2 815 437 / 2 840 654
+  / 2 916 733, one replacement (`balancer_ingres`), zero loader failures.
+  pktgen reports 80-117 M errors per sample in both arms, so the number is pps
+  alone. 1.002x against the 05-29 floor 1.113x.
+- **BCC, stats on** — 410 168 / 401 184 / 467 953 against 525 896 / 520 143 /
+  444 167, 25 programs in both arms, zero failures. Per-call BPF time 122.51 to
+  107.98 ns, so the native arm does the same work 1.134x cheaper; the
+  throughput spread is wider than the per-call gain, so pps is the noisy side
+  of that row.
 
 ## The original OTel ELF and `source_bpf_object`
 
