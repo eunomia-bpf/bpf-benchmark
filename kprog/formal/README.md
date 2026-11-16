@@ -1924,3 +1924,10 @@ execution is a silent prefix of that return, every stuck endpoint is the same
 full return state, and no infinite execution exists. The concrete NZCV law
 now covers every such relational return. These results need no external-call
 determinism assumptions; general caller control and full representation remain.
+
+The [register-representation proof](results/m5-register-representation/README.md)
+now relates actual entry reads to all 31 GPRs, SP, 32 vector registers and NZCV.
+It uses existing provenance materialization and explicit pointer-block origins
+and cell-map bindings. The relation determines every covered register bit and
+survives the actual NOP call and every return at `Kstop`. Producer admissibility,
+native memory and general compiled caller control remain open.

@@ -1,0 +1,71 @@
+'KProgFormal.ClightRefinement.Arm64Registers.sp_layout' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Registers.valueRep_unique' depends on axioms: [propext]
+'KProgFormal.ClightRefinement.Arm64Registers.unique' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Registers.frame' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Registers.cursor' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Registers.call_corresponds' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Registers.return_corresponds' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.Arm64Registers.Represents : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins →
+  KProgFormal.Reference.Provenance.AArch64.Origins →
+    (KProgFormal.Reference.AArch64.Gpr → Nat) → CC.Block → CC.Mem → CC.Val → KProgFormal.Reference.AArch64.State → Prop
+@KProgFormal.ClightRefinement.Arm64Registers.unique : ∀
+  {addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins}
+  {origins : KProgFormal.Reference.Provenance.AArch64.Origins} {cells : KProgFormal.Reference.AArch64.Gpr → Nat}
+  {frontier : CC.Block} {m : CC.Mem} {entry : CC.Val} {a b : KProgFormal.Reference.AArch64.State},
+  KProgFormal.ClightRefinement.Arm64Registers.Represents addresses origins cells frontier m entry a →
+    KProgFormal.ClightRefinement.Arm64Registers.Represents addresses origins cells frontier m entry b →
+      (∀ (i : KProgFormal.Reference.AArch64.Gpr),
+          KProgFormal.Reference.AArch64.gpr a i = KProgFormal.Reference.AArch64.gpr b i) ∧
+        KProgFormal.Reference.AArch64.sp a = KProgFormal.Reference.AArch64.sp b ∧
+          (∀ (i : KProgFormal.Reference.AArch64.Register),
+              KProgFormal.Reference.AArch64.readVector a i = KProgFormal.Reference.AArch64.readVector b i) ∧
+            ∀ (flag : PFlag), read_flag flag a.machine = read_flag flag b.machine
+KProgFormal.ClightRefinement.Arm64Registers.call_corresponds : ∀
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.AArch64.Origins) (cells : KProgFormal.Reference.AArch64.Gpr → Nat)
+  (m : CC.Mem) (ignored : KProgFormal.ClightRefinement.Arm64Nop.IgnoredArguments) (width : BitVec 8) (k : CC.Cont),
+  CC.isCallCont k = true →
+    ∀ (s : KProgFormal.Reference.AArch64.State),
+      KProgFormal.ClightRefinement.Arm64Registers.Represents addresses origins cells m.nextblock m ignored.entry s →
+        read_err s.machine = StateError.None →
+          fetch_inst (read_pc s.machine) s.machine = some 3573751839#32 →
+            ∃ after,
+              KProgFormal.ClightRefinement.InternalRun Arm64Program.prog.globalenv 19
+                  (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.Arm64Nop.handler)
+                    (KProgFormal.ClightRefinement.Arm64Nop.arguments ignored width) k m)
+                  (CC.State.Returnstate CC.Val.Vundef k after) ∧
+                KProgFormal.ClightRefinement.FrameBelow m.nextblock m after ∧
+                  KProgFormal.Reference.AArch64.step s =
+                      { state := KProgFormal.ClightRefinement.Arm64Nop.atCursor (read_pc s.machine + 4#64) s,
+                        events := [] } ∧
+                    KProgFormal.ClightRefinement.Arm64Registers.Represents addresses origins cells m.nextblock after
+                      ignored.entry (KProgFormal.ClightRefinement.Arm64Nop.atCursor (read_pc s.machine + 4#64) s)
+KProgFormal.ClightRefinement.Arm64Registers.return_corresponds : ∀
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.AArch64.Origins) (cells : KProgFormal.Reference.AArch64.Gpr → Nat)
+  (m : CC.Mem) (ignored : KProgFormal.ClightRefinement.Arm64Nop.IgnoredArguments) (width : BitVec 8)
+  (s : KProgFormal.Reference.AArch64.State),
+  KProgFormal.ClightRefinement.Arm64Registers.Represents addresses origins cells m.nextblock m ignored.entry s →
+    read_err s.machine = StateError.None →
+      fetch_inst (read_pc s.machine) s.machine = some 3573751839#32 →
+        ∀ (t : CC.Trace) (result : CC.Val) (after : CC.Mem),
+          CC.Star (CC.Step2 Arm64Program.prog.globalenv)
+              (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.Arm64Nop.handler)
+                (KProgFormal.ClightRefinement.Arm64Nop.arguments ignored width) CC.Cont.Kstop m)
+              t (CC.State.Returnstate result CC.Cont.Kstop after) →
+            t = CC.E0 ∧
+              result = CC.Val.Vundef ∧
+                KProgFormal.ClightRefinement.FrameBelow m.nextblock m after ∧
+                  KProgFormal.Reference.AArch64.step s =
+                      { state := KProgFormal.ClightRefinement.Arm64Nop.atCursor (read_pc s.machine + 4#64) s,
+                        events := [] } ∧
+                    KProgFormal.ClightRefinement.Arm64Registers.Represents addresses origins cells m.nextblock after
+                      ignored.entry (KProgFormal.ClightRefinement.Arm64Nop.atCursor (read_pc s.machine + 4#64) s)
