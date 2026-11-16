@@ -83,3 +83,21 @@ function-loader-check: compiler
 	done < $(OUTPUT)/loader-functions.txt
 	tar -C $(BUILD) -czf $(OUTPUT)/loader-function-build.tar.gz .
 	date -u +%FT%TZ > $(OUTPUT)/loader-function-finished
+
+.PHONY: function-live-inputs function-live-kvm guest-function-live
+function-live-inputs: compiler
+	$(CC) $(FLAGS) -Xclang -fembed-bitcode=all -c $(ROOT)/kprog/test/native_function_live.c -o $(BUILD)/live-input.o
+	$(CC) $(FLAGS) -DFUNCTION_DRIVER -c $(ROOT)/kprog/test/native_function_live.c -o $(BUILD)/live-driver.o
+	taskset -c $(CPUS) prlimit --as=8589934592 -- $(CXX) -std=gnu++20 -O1 -g -ffunction-sections -fdata-sections -I$(ROOT)/kprog/libnativeloader/include -I$(ROOT)/micro/programs/build-x86 -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include -I$(ROOT)/vendor/libbpf/include -I$(ROOT)/vendor/libbpf/include/uapi $(ROOT)/kprog/test/native_function_live.cpp -Wl,--gc-sections $(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -ldl -pthread -o $(BUILD)/function-live
+
+function-live-kvm: function-live-inputs
+	install -d $(OUTPUT)/live
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c $(CPUS) prlimit --as=8589934592 -- vng --run $(KERNEL)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(BUILD) --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/perf-context-lto.mk guest-function-live OUTPUT=$(OUTPUT)'
+	tar -C $(BUILD) -czf $(OUTPUT)/live-build.tar.gz .
+	date -u +%FT%TZ > $(OUTPUT)/live-finished
+
+guest-function-live:
+	$(BUILD)/function-live $(BUILD)/live-input.o $(BUILD)/perf-context-lto $(OUTPUT)/live $(OUTPUT)/live/native-path.txt > $(OUTPUT)/live/kernel.json
+	read -r object < $(OUTPUT)/live/native-path.txt; $(CC) "$$object" $(BUILD)/live-driver.o -o $(OUTPUT)/live/native-result
+	$(OUTPUT)/live/native-result
+	printf 'BPF and native result both 9\n' > $(OUTPUT)/live/execution.txt
