@@ -1,0 +1,68 @@
+'KProgFormal.ClightRefinement.FrameBelow.alloc' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ClightRefinement.FrameBelow.allocVariables' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ClightRefinement.FrameBelow.freeList' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ClightRefinement.FrameBelow.load' depends on axioms: [propext, Classical.choice, Quot.sound]
+'CC.allocVariables_env_other' depends on axioms: [propext, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64NopDeclarations.vars_norepet' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64NopDeclarations.params_norepet' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64NopDeclarations.params_temps_disjoint' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64NopDeclarations.width_not_local' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Nop.entry_valid' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Nop.entry_unshadowed' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Nop.entry_frame' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Nop.call_returns' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Nop.return_frame' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Nop.call_corresponds' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+'CC.PTree.forall_elements_of_get' depends on axioms: [propext]
+'CC.PTree.pairwise_elements_of_get' depends on axioms: [propext]
+'KProgFormal.ClightRefinement.deallocate_locals' depends on axioms: [propext, Classical.choice, Quot.sound]
+KProgFormal.ClightRefinement.Arm64Nop.return_frame : ∀ (ge : CC.CGenv) (m : CC.Mem),
+  ∃ m',
+    (KProgFormal.ClightRefinement.Arm64Nop.allocation ge m).snd.freeList
+          (CC.blocksOfEnv ge.genv_cenv (KProgFormal.ClightRefinement.Arm64Nop.allocation ge m).fst) =
+        some m' ∧
+      KProgFormal.ClightRefinement.FrameBelow m.nextblock m m'
+KProgFormal.ClightRefinement.Arm64Nop.call_returns : ∀ (m : CC.Mem)
+  (ignored : KProgFormal.ClightRefinement.Arm64Nop.IgnoredArguments) (flags : BitVec 8) (k : CC.Cont),
+  CC.isCallCont k = true →
+    ∃ m',
+      CC.Star (CC.Step2 Arm64Program.prog.globalenv)
+          (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.Arm64Nop.handler)
+            (KProgFormal.ClightRefinement.Arm64Nop.arguments ignored flags) k m)
+          CC.E0 (CC.State.Returnstate CC.Val.Vundef k m') ∧
+        KProgFormal.ClightRefinement.FrameBelow m.nextblock m m'
+KProgFormal.ClightRefinement.Arm64Nop.call_corresponds : ∀ (m : CC.Mem)
+  (ignored : KProgFormal.ClightRefinement.Arm64Nop.IgnoredArguments) (flags : BitVec 8) (k : CC.Cont),
+  CC.isCallCont k = true →
+    ∀ (decodeHeap : CC.Mem → KProgFormal.Reference.AArch64.State),
+      (∀ (after : CC.Mem),
+          KProgFormal.ClightRefinement.FrameBelow m.nextblock m after → decodeHeap after = decodeHeap m) →
+        ∀ (cursor : BitVec 64) (s : KProgFormal.Reference.AArch64.State),
+          KProgFormal.ClightRefinement.Arm64Nop.Represents decodeHeap cursor m s →
+            read_err s.machine = StateError.None →
+              fetch_inst (read_pc s.machine) s.machine = some 3573751839#32 →
+                ∃ m',
+                  CC.Star (CC.Step2 Arm64Program.prog.globalenv)
+                      (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.Arm64Nop.handler)
+                        (KProgFormal.ClightRefinement.Arm64Nop.arguments ignored flags) k m)
+                      CC.E0 (CC.State.Returnstate CC.Val.Vundef k m') ∧
+                    KProgFormal.ClightRefinement.FrameBelow m.nextblock m m' ∧
+                      KProgFormal.Reference.AArch64.step s =
+                        { state := KProgFormal.ClightRefinement.Arm64Nop.atCursor (cursor + 4#64) (decodeHeap m'),
+                          events := [] }

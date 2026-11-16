@@ -78,3 +78,10 @@ existing opaque `CC.externalFunctionsSem` and `CC.inlineAssemblySem`. No new
 axiom, admission, native checker or external determinism assumption. Source
 comparison against `dec7e3a19` confirms canonical C and frozen paths unchanged.
 Checks ran on CPUs 17–19, Lean -j1/32 GiB AS/default proof limits.
+
+The subsequent [local deallocation step](../m5-local-deallocation/README.md)
+proves the enumerated-local freshness and free-success obligations discussed
+above. Current `call_returns` and `call_corresponds` construct a return memory
+without these caller premises. This receipt records the earlier `ac0f772d1`
+procedure step; its historical validation and remaining concrete-representation
+and all-behaviors obligations are retained.

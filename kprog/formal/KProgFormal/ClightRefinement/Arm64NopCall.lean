@@ -1,5 +1,5 @@
 import KProgFormal.ClightRefinement.Arm64Nop
-import KProgFormal.ClightRefinement.Frame
+import KProgFormal.ClightRefinement.Deallocation
 import KProgFormal.ClightRefinement.Arm64NopDeclarations
 
 namespace KProgFormal.ClightRefinement.Arm64Nop
@@ -83,10 +83,9 @@ theorem entry_frame (ge : CC.CGenv) (m : CC.Mem) :
     FrameBelow m.nextblock m (allocation ge m).2 :=
   (FrameBelow.allocVariables (allocation_valid ge m) m.nextblock (Nat.le_refl _)).2
 
-/-- From real Callstate to real Returnstate, including local allocation and
-freeing. A successful free remains explicit until its allocation-list law is
-proved; no refused operation is replaced with success. -/
-theorem call_returns (m m' : CC.Mem) (ignored : IgnoredArguments) (flags : BitVec 8)
+/-- Execute the real body and return using the deallocation equation supplied
+by the generic allocation theorem below. -/
+private theorem execute_return (m m' : CC.Mem) (ignored : IgnoredArguments) (flags : BitVec 8)
     (k : CC.Cont) (hk : CC.isCallCont k = true)
     (hfree : CC.Mem.freeList (allocation Arm64Program.prog.globalenv m).2
       (CC.blocksOfEnv Arm64Program.prog.globalenv.genv_cenv
@@ -111,37 +110,40 @@ theorem call_returns (m m' : CC.Mem) (ignored : IgnoredArguments) (flags : BitVe
     .step _ _ _ _ _ _ (.skip_call _ _ _ _ _ _ hk hfree) (.refl _) rfl
   simpa only [CC.Eapp, CC.E0, List.nil_append] using star_trans (star_trans enter run) leave
 
-/-- Exact old-block frame at return. Freshness of the actual enumerated local
-blocks is explicit alongside free success; both will be discharged together. -/
-theorem return_frame (ge : CC.CGenv) (m m' : CC.Mem)
-    (fresh : ∀ p ∈ CC.blocksOfEnv ge.genv_cenv (allocation ge m).1,
-      m.nextblock.toNat ≤ p.1.toNat)
-    (hfree : CC.Mem.freeList (allocation ge m).2
-      (CC.blocksOfEnv ge.genv_cenv (allocation ge m).1) = some m') :
-    FrameBelow m.nextblock m m' :=
-  FrameBelow.trans (entry_frame ge m) (FrameBelow.freeList fresh hfree)
+/-- The actual allocated local environment always frees successfully and
+preserves every caller block. Its enumeration needs no caller premise. -/
+theorem return_frame (ge : CC.CGenv) (m : CC.Mem) :
+    ∃ m', CC.Mem.freeList (allocation ge m).2
+      (CC.blocksOfEnv ge.genv_cenv (allocation ge m).1) = some m' ∧
+      FrameBelow m.nextblock m m' :=
+  deallocate_locals (allocation_valid ge m)
 
-/-- Procedure-level correspondence transports the full native view through
-real C allocation/freeing. Concrete decoder stability, successful free and
-freshness of enumerated locals remain explicit representation obligations. -/
-theorem call_corresponds (m m' : CC.Mem) (ignored : IgnoredArguments) (flags : BitVec 8)
+/-- Complete actual C procedure execution, including successful allocation and
+freeing, for arbitrary caller memory, ignored arguments and flags byte. -/
+theorem call_returns (m : CC.Mem) (ignored : IgnoredArguments) (flags : BitVec 8)
+    (k : CC.Cont) (hk : CC.isCallCont k = true) :
+    ∃ m', CC.Star (CC.Step2 Arm64Program.prog.globalenv)
+      (.Callstate (.Internal handler) (arguments ignored flags) k m) CC.E0
+      (.Returnstate .Vundef k m') ∧ FrameBelow m.nextblock m m' := by
+  obtain ⟨m', hfree, frame⟩ := return_frame Arm64Program.prog.globalenv m
+  exact ⟨m', execute_return m m' ignored flags k hk hfree, frame⟩
+
+/-- The full native view transports through real C allocation and deallocation.
+Only concrete decoder stability and the native/control representation remain
+explicit; frame freshness and successful freeing are proved internally. -/
+theorem call_corresponds (m : CC.Mem) (ignored : IgnoredArguments) (flags : BitVec 8)
     (k : CC.Cont) (hk : CC.isCallCont k = true)
-    (fresh : ∀ p ∈ CC.blocksOfEnv Arm64Program.prog.globalenv.genv_cenv
-      (allocation Arm64Program.prog.globalenv m).1, m.nextblock.toNat ≤ p.1.toNat)
-    (hfree : CC.Mem.freeList (allocation Arm64Program.prog.globalenv m).2
-      (CC.blocksOfEnv Arm64Program.prog.globalenv.genv_cenv
-        (allocation Arm64Program.prog.globalenv m).1) = some m')
     (decodeHeap : CC.Mem → Reference.AArch64.State)
     (decode_frame : ∀ after, FrameBelow m.nextblock m after → decodeHeap after = decodeHeap m)
     (cursor : BitVec 64) (s : Reference.AArch64.State)
     (hrep : Represents decodeHeap cursor m s) (herror : read_err s.machine = .None)
     (hfetch : fetch_inst (read_pc s.machine) s.machine = some (0xd503201f#32)) :
-    CC.Star (CC.Step2 Arm64Program.prog.globalenv)
+    ∃ m', CC.Star (CC.Step2 Arm64Program.prog.globalenv)
       (.Callstate (.Internal handler) (arguments ignored flags) k m) CC.E0
       (.Returnstate .Vundef k m') ∧ FrameBelow m.nextblock m m' ∧
     Reference.AArch64.step s = ⟨atCursor (cursor + (4#64)) (decodeHeap m'), [], none⟩ := by
-  have frame := return_frame Arm64Program.prog.globalenv m m' fresh hfree
-  refine ⟨call_returns m m' ignored flags k hk hfree, frame, ?_⟩
+  obtain ⟨m', call, frame⟩ := call_returns m ignored flags k hk
+  refine ⟨m', call, frame, ?_⟩
   rw [decode_frame m' frame, reference_step s herror hfetch]
   unfold Represents at hrep
   rw [hrep]

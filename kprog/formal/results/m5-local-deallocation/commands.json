@@ -1,0 +1,58 @@
+[
+  {
+    "name": "generic-deallocation",
+    "argv": [
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Deallocation"
+    ],
+    "exit": 0,
+    "log": "/workspaces/kprog-raw/formal/m5-local-deallocation/deallocation4.log"
+  },
+  {
+    "name": "core-interfaces",
+    "argv": [
+      "lake",
+      "build",
+      "Clightdefs",
+      "KProgFormal.ClightRefinement.Deallocation"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "generic-axioms",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "build/DeallocationAxioms.lean"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "axioms-and-public-types",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-local-deallocation/Axioms.lean"
+    ],
+    "exit": 0
+  },
+  {
+    "argv": [
+      "taskset",
+      "-c",
+      "17",
+      "lake",
+      "build",
+      "KProgFormal.ClightRefinement.Arm64NopCall"
+    ],
+    "exit": 0,
+    "seconds": 489.6094738309912,
+    "finished_utc": "2026-11-16T12:19:33.969358+00:00",
+    "as_bytes": 34359738368
+  }
+]
