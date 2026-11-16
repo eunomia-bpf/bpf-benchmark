@@ -81,6 +81,7 @@ code-pointer-stock: code-pointer-b $(TABLE_CONTEXT_BUILD)/stock-client
 	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c $(CHECK_CPUS) prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rodir $(OUTPUT)/inputs=$(CODE_POINTER_B) --rodir $(OUTPUT)/loader=$(TABLE_CONTEXT_BUILD) --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-code-pointer-stock OUTPUT=$(OUTPUT)'
 
 guest-code-pointer-stock:
+	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
 	$(OUTPUT)/loader/stock-client $(OUTPUT)/inputs/trusted_x86.bpf.o trusted_x86_x86_sim_xdp $(OUTPUT)/verifier.log > $(OUTPUT)/stock.json
 
 .PHONY: helper-register-abi

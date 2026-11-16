@@ -1,0 +1,17 @@
+{
+  "recorded_at": "2026-11-16T14:00:04Z",
+  "source_commit": "69a7b75eb",
+  "controller_pid": 1534732,
+  "raw_directory": "/workspaces/kprog-raw/perf/20261116-generator-indirect-spills/stock",
+  "instructions": 18,
+  "subprograms": 1,
+  "b_generated": true,
+  "b_object_bytes": 18384,
+  "b_executable_bytes": 440,
+  "stock_accepted": false,
+  "stock_failure_stage": "libbpf external ksym resolution before verifier",
+  "error": "kprog_unspecified_input not found in kernel BTF",
+  "cause": "Diagnostic guest omitted the existing verified-module input kfunc provider.",
+  "followup": "Load the same existing verified module before stock B load; retry the exact existing B without recompilation.",
+  "scope": "Retained upstream CEL fixture, not whole Tetragon installation or execution."
+}
