@@ -139,6 +139,8 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-16 ~23:41 UTC（前面贴了协调者“11-09 以来改动最频繁的文件”那一段）: "一直指出 bug 的是什么? ... 这些是不是应该你去看看回退到一个稳定版本并且禁止修改? 5/29?"
 - 2026-11-16 ~23:43 UTC: "也需要在 agent md 等等地方说明. 功能和性能和 LTO 方面我们做了啥机制了? 新的?"
 - 2026-11-16 ~23:46 UTC: "你自己, 不是别的 lane. 停掉别的 lane. 去把不应该有的清理掉"
+- 2026-11-16 ~23:48 UTC（贴了协调者“修正两处工作量不对等”和 LTO 清单两段）: "这个是通用的还是专用的? ... 这些做了吗" "去掉 CMOV 为啥"
+- 2026-11-16 ~23:48 UTC（/goal）: "接下来你来做, 不要叫其他人, 你来负责清理好并且自己去调性能参数"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
