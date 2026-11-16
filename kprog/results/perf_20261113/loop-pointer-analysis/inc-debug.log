@@ -1,0 +1,43 @@
+taskset -c 16-18 prlimit --as=8589934592 -- gdb --batch -ex run -ex 'thread apply all bt' --args python3 /workspaces/repository/kprog/test/check_loop_pointer_analysis.py --build /var/tmp/kprog-tmp/perf/loop-pointer-analysis --output /workspaces/kprog-raw/perf/20261116-tetragon-generator-profile/loop-debug --linker /workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link
+
+This GDB supports auto-downloading debuginfo from the following URLs:
+  <https://debuginfod.ubuntu.com>
+Enable debuginfod for this session? (y or [n]) [answered N; input not from terminal]
+Debuginfod has been disabled.
+To make this setting permanent, add 'set debuginfod enabled off' to .gdbinit.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[Detaching after vfork from child process 1357817]
+[Detaching after vfork from child process 1357820]
+[Detaching after vfork from child process 1357821]
+[Detaching after vfork from child process 1357822]
+[Detaching after vfork from child process 1357823]
+[Detaching after vfork from child process 1357824]
+[Detaching after vfork from child process 1357825]
+[Detaching after vfork from child process 1357829]
+Executing native
+Executing shared simulator
+
+Program received signal SIGSEGV, Segmentation fault.
+copy_x86_sim_xdp (ctx=<optimized out>) at /var/tmp/kprog-tmp/perf/loop-pointer-analysis/copy.bpf.c:67
+67		X86_SIM_RUN_OP(X86_OP_MOV_STORE_REG, X86_RDI, X86_RAX, X86_WIDTH_8, X86_MEM_AUX(X86_REG_NONE, 0), 0ULL);
+
+Thread 1 (Thread 0x7ffff7c71080 (LWP 1357814) "python3"):
+#0  copy_x86_sim_xdp (ctx=<optimized out>) at /var/tmp/kprog-tmp/perf/loop-pointer-analysis/copy.bpf.c:67
+#1  0x00007ffff7596b16 in ?? () from /lib/x86_64-linux-gnu/libffi.so.8
+#2  0x00007ffff75933ef in ?? () from /lib/x86_64-linux-gnu/libffi.so.8
+#3  0x00007ffff75960be in ffi_call () from /lib/x86_64-linux-gnu/libffi.so.8
+#4  0x00007ffff75ae11c in ?? () from /usr/lib/python3.12/lib-dynload/_ctypes.cpython-312-x86_64-linux-gnu.so
+#5  0x00007ffff75a92af in ?? () from /usr/lib/python3.12/lib-dynload/_ctypes.cpython-312-x86_64-linux-gnu.so
+#6  0x0000000000548fb5 in _PyObject_MakeTpCall ()
+#7  0x00000000005d710f in _PyEval_EvalFrameDefault ()
+#8  0x00000000005d55eb in PyEval_EvalCode ()
+#9  0x0000000000608852 in ?? ()
+#10 0x00000000006b50d3 in ?? ()
+#11 0x00000000006b4e3a in _PyRun_SimpleFileObject ()
+#12 0x00000000006b4c6f in _PyRun_AnyFileObject ()
+#13 0x00000000006bccd5 in Py_RunMain ()
+#14 0x00000000006bc7bd in Py_BytesMain ()
+#15 0x00007ffff7c9c1ca in ?? () from /lib/x86_64-linux-gnu/libc.so.6
+#16 0x00007ffff7c9c28b in __libc_start_main () from /lib/x86_64-linux-gnu/libc.so.6
+#17 0x0000000000657a05 in _start ()

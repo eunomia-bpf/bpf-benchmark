@@ -1,0 +1,5 @@
+mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
+/workspaces/kprog-raw/perf/20261116-native-string-pool/confirmed/test-inputs/entry-data kernel /workspaces/kprog-raw/perf/20261116-native-string-pool/confirmed/test-inputs/fixture.o /workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link /workspaces/kprog-raw/perf/20261116-native-string-pool/confirmed/kernel /workspaces/kprog-raw/perf/20261116-native-string-pool/confirmed/host/existing.proof.o
+RX native text, live DATASEC and string aliases, persistent state, runtime updates and immediate-store bias: PASS
+kernel selected-entry binding, actual BTF offset/map identity, needed-missing error, live bytes: PASS

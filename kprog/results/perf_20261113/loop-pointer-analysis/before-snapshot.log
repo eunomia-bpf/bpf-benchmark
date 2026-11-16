@@ -1,0 +1,139 @@
+taskset -c 16-18 prlimit --as=8589934592 -- python3 /workspaces/repository/kprog/test/profile_sim_generation.py --archive /workspaces/kprog-raw/perf/20261116-tetragon-generator-profile/request3.tar.gz --build /var/tmp/kprog-tmp/perf/relative-schedule --output /workspaces/kprog-raw/perf/20261116-tetragon-generator-profile/snapshot
+Current thread 0x00007b5e0b2ec080 (most recent call first):
+  File "/workspaces/repository/kprog/test/profile_sim_generation.py", line 10 in snapshot
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 172 in <genexpr>
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 172 in read_alias
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 175 in read_alias
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 190 in read_memory
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 236 in check_definedness
+  File "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py", line 1814 in render_program
+  File "/workspaces/repository/kprog/test/replay_relative_schedule.py", line 31 in main
+  File "/workspaces/repository/kprog/test/replay_relative_schedule.py", line 82 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 98 in _run_module_code
+  File "<frozen runpy>", line 286 in run_path
+  File "/workspaces/repository/kprog/test/profile_sim_generation.py", line 26 in <module>
+{'states': 880, 'pending': 23, 'addr': 3348, 'lowest_stack': -336, 'opaque': 48, 'pointers': 19, 'alias_alternatives': [751]}
+Current thread 0x00007b5e0b2ec080 (most recent call first):
+  File "/workspaces/repository/kprog/test/profile_sim_generation.py", line 10 in snapshot
+  File "<string>", line 2 in __init__
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 77 in joined_pointer
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 91 in <genexpr>
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 91 in joined
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 103 in push
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 612 in check_definedness
+  File "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py", line 1814 in render_program
+  File "/workspaces/repository/kprog/test/replay_relative_schedule.py", line 31 in main
+  File "/workspaces/repository/kprog/test/replay_relative_schedule.py", line 82 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 98 in _run_module_code
+  File "<frozen runpy>", line 286 in run_path
+  File "/workspaces/repository/kprog/test/profile_sim_generation.py", line 26 in <module>
+{'states': 880, 'pending': 20, 'addr': 3518, 'lowest_stack': -336, 'opaque': 48, 'pointers': 17, 'alias_alternatives': [3604]}
+Current thread 0x00007b5e0b2ec080 (most recent call first):
+  File "/workspaces/repository/kprog/test/profile_sim_generation.py", line 10 in snapshot
+  File "<string>", line 2 in __init__
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 77 in joined_pointer
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 91 in <genexpr>
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 91 in joined
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 103 in push
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 612 in check_definedness
+  File "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py", line 1814 in render_program
+  File "/workspaces/repository/kprog/test/replay_relative_schedule.py", line 31 in main
+  File "/workspaces/repository/kprog/test/replay_relative_schedule.py", line 82 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 98 in _run_module_code
+  File "<frozen runpy>", line 286 in run_path
+  File "/workspaces/repository/kprog/test/profile_sim_generation.py", line 26 in <module>
+{'states': 880, 'pending': 21, 'addr': 3371, 'lowest_stack': -336, 'opaque': 48, 'pointers': 19, 'alias_alternatives': [2665]}
+Current thread 0x00007b5e0b2ec080 (most recent call first):
+  File "/workspaces/repository/kprog/test/profile_sim_generation.py", line 10 in snapshot
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 202 in store
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 254 in check_definedness
+  File "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py", line 1814 in render_program
+  File "/workspaces/repository/kprog/test/replay_relative_schedule.py", line 31 in main
+  File "/workspaces/repository/kprog/test/replay_relative_schedule.py", line 82 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 98 in _run_module_code
+  File "<frozen runpy>", line 286 in run_path
+  File "/workspaces/repository/kprog/test/profile_sim_generation.py", line 26 in <module>
+{'states': 880, 'pending': 23, 'addr': 3478, 'lowest_stack': -336, 'opaque': 48, 'pointers': 17, 'alias_alternatives': [2550]}
+Current thread 0x00007b5e0b2ec080 (most recent call first):
+  File "/workspaces/repository/kprog/test/profile_sim_generation.py", line 10 in snapshot
+  File "/usr/lib/python3.12/re/__init__.py", line 167 in match
+  File "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py", line 466 in branch_target
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 498 in check_definedness
+  File "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py", line 1814 in render_program
+  File "/workspaces/repository/kprog/test/replay_relative_schedule.py", line 31 in main
+  File "/workspaces/repository/kprog/test/replay_relative_schedule.py", line 82 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 98 in _run_module_code
+  File "<frozen runpy>", line 286 in run_path
+  File "/workspaces/repository/kprog/test/profile_sim_generation.py", line 26 in <module>
+{'states': 880, 'pending': 25, 'addr': 3518, 'lowest_stack': -336, 'opaque': 48, 'pointers': 17, 'alias_alternatives': [5671]}
+Current thread 0x00007b5e0b2ec080 (most recent call first):
+  File "/workspaces/repository/kprog/test/profile_sim_generation.py", line 10 in snapshot
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 198 in store
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 254 in check_definedness
+  File "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py", line 1814 in render_program
+  File "/workspaces/repository/kprog/test/replay_relative_schedule.py", line 31 in main
+  File "/workspaces/repository/kprog/test/replay_relative_schedule.py", line 82 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 98 in _run_module_code
+  File "<frozen runpy>", line 286 in run_path
+  File "/workspaces/repository/kprog/test/profile_sim_generation.py", line 26 in <module>
+{'states': 880, 'pending': 23, 'addr': 3508, 'lowest_stack': -336, 'opaque': 48, 'pointers': 17, 'alias_alternatives': [3097]}
+Current thread 0x00007b5e0b2ec080 (most recent call first):
+  File "/workspaces/repository/kprog/test/profile_sim_generation.py", line 10 in snapshot
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 172 in <genexpr>
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 172 in read_alias
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 175 in read_alias
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 190 in read_memory
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 236 in check_definedness
+  File "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py", line 1814 in render_program
+  File "/workspaces/repository/kprog/test/replay_relative_schedule.py", line 31 in main
+  File "/workspaces/repository/kprog/test/replay_relative_schedule.py", line 82 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 98 in _run_module_code
+  File "<frozen runpy>", line 286 in run_path
+  File "/workspaces/repository/kprog/test/profile_sim_generation.py", line 26 in <module>
+{'states': 880, 'pending': 24, 'addr': 3255, 'lowest_stack': -336, 'opaque': 48, 'pointers': 19, 'alias_alternatives': [508]}
+Current thread 0x00007b5e0b2ec080 (most recent call first):
+  File "/workspaces/repository/kprog/test/profile_sim_generation.py", line 10 in snapshot
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 198 in store
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 254 in check_definedness
+  File "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py", line 1814 in render_program
+  File "/workspaces/repository/kprog/test/replay_relative_schedule.py", line 31 in main
+  File "/workspaces/repository/kprog/test/replay_relative_schedule.py", line 82 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 98 in _run_module_code
+  File "<frozen runpy>", line 286 in run_path
+  File "/workspaces/repository/kprog/test/profile_sim_generation.py", line 26 in <module>
+{'states': 880, 'pending': 24, 'addr': 3478, 'lowest_stack': -336, 'opaque': 48, 'pointers': 17, 'alias_alternatives': [3574]}
+Current thread 0x00007b5e0b2ec080 (most recent call first):
+  File "/workspaces/repository/kprog/test/profile_sim_generation.py", line 10 in snapshot
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 198 in store
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 254 in check_definedness
+  File "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py", line 1814 in render_program
+  File "/workspaces/repository/kprog/test/replay_relative_schedule.py", line 31 in main
+  File "/workspaces/repository/kprog/test/replay_relative_schedule.py", line 82 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 98 in _run_module_code
+  File "<frozen runpy>", line 286 in run_path
+  File "/workspaces/repository/kprog/test/profile_sim_generation.py", line 26 in <module>
+{'states': 880, 'pending': 23, 'addr': 3541, 'lowest_stack': -336, 'opaque': 48, 'pointers': 17, 'alias_alternatives': [15152]}
+Current thread 0x00007b5e0b2ec080 (most recent call first):
+  File "/workspaces/repository/kprog/test/profile_sim_generation.py", line 10 in snapshot
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 172 in read_alias
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 175 in read_alias
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 190 in read_memory
+  File "/workspaces/repository/kprog/x86/micro-prog/x86_abi.py", line 236 in check_definedness
+  File "/workspaces/repository/kprog/x86/micro-prog/generate_micro_sim_proofs.py", line 1814 in render_program
+  File "/workspaces/repository/kprog/test/replay_relative_schedule.py", line 31 in main
+  File "/workspaces/repository/kprog/test/replay_relative_schedule.py", line 82 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 98 in _run_module_code
+  File "<frozen runpy>", line 286 in run_path
+  File "/workspaces/repository/kprog/test/profile_sim_generation.py", line 26 in <module>
+{'states': 880, 'pending': 22, 'addr': 3371, 'lowest_stack': -336, 'opaque': 48, 'pointers': 19, 'alias_alternatives': [4851]}
+make: *** [kprog/test/native-relocations.mk:539: generator-profile] Terminated
