@@ -1603,6 +1603,16 @@ clearing, along with a closed program return depending on high stack-base bits.
 [Profile receipts](results/m4-x86-producer-profile/README.md) distinguish these
 actual producer declarations from arbitrary-profile refinements.
 
+The 81 canonical x86 helper macros now export with exact libbpf-typed callee
+parameters through [X86Helpers](KProgFormal/Clight/X86Helpers.lean). They reuse
+the existing capacity/arena/fact bindings and register-reader C bodies. Three
+void forms use a CompCert statement adapter while retaining their original
+native expansion. Each host mode passes 5,832 paired full-state/ABI/input cases
+and 20 output-alias/refusal executions. Seven negatives, all 18 Clight modules,
+the mature helper/read link and native fixture byte comparisons pass.
+[Helper receipts](results/m4-x86-helpers/README.md) state the remaining callee
+interpretation and whole-program obligations.
+
 M4 remains open for arbitrary producer program/return tables, remaining producer/storage
 profiles, platform correspondence and full default compiled-byte coverage. The
 stated x86 inline profile and ARM instruction dispatcher clear their earlier

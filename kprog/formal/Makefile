@@ -730,6 +730,7 @@ clight: clightgen
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Pointer.lean c/X86Pointer.c
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Context.lean c/X86Context.c
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Memory.lean c/X86Memory.c
+	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Helpers.lean c/X86Helpers.c
 	external/clean/clightgen -fstruct-passing -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Inline.lean c/X86Inline.c
 	for frame in 200 376; do \
 	  ../stock-path/bin/clang -DFRAME=$$frame -c oracles/x86_stack_profile.S -o build/x86_stack_profile_$$frame.proof.o && \
@@ -836,6 +837,19 @@ clight: clightgen
 	./build/test_x86_store_selectors_host
 	$(CC) -D__COMPCERT__ -include oracles/compcert_memory_host.h -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_x86_inline_binding_host.c -o build/test_x86_inline_binding_host
 	./build/test_x86_inline_binding_host
+	$(CC) -std=c11 -Wall -Wextra -O1 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -c oracles/test_x86_helper_abi.c -o build/test_x86_helper_abi.o
+	for adapter in 0 1; do \
+	  flags=; if test $$adapter = 1; then flags=-D__COMPCERT__; fi; \
+	  for source in x86_pointer:X86Pointer x86_helpers:X86Helpers; do \
+	    $(CC) -std=c11 -Wall -Wextra -O1 -fsanitize=undefined -fno-sanitize-recover=undefined \
+	      $$flags -include oracles/compcert_memory_host.h -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src \
+	      -c c/$${source#*:}.c -o build/$${source%:*}_binding.o || exit $$?; \
+	  done; \
+	  $(CC) -std=c11 -Wall -Wextra -O1 -fsanitize=undefined -fno-sanitize-recover=undefined \
+	    -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_x86_helpers_binding_host.c \
+	    build/x86_helpers_binding.o build/x86_pointer_binding.o -o build/test_x86_helpers_binding_host && \
+	  ./build/test_x86_helpers_binding_host || exit $$?; \
+	done
 	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -c c/X86Pointer.c -o build/x86_pointer_binding.o
 	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -c c/X86Memory.c -o build/x86_memory_binding.o
 	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_x86_memory_read_host.c build/x86_memory_binding.o build/x86_pointer_binding.o -o build/test_x86_memory_read_host
@@ -851,6 +865,7 @@ clight: clightgen
 	$(CC) -D__COMPCERT__ -include oracles/compcert_memory_host.h -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_x86_context_host.c build/x86_context_binding.o build/x86_memory_binding.o build/x86_pointer_binding.o -o build/test_x86_context_host
 	./build/test_x86_context_host
 	../stock-path/bin/clang -g -O2 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c oracles/x86_inline_compile.bpf.c -o build/x86_inline_compile.bpf.o
+	../stock-path/bin/clang -g -O2 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c oracles/x86_helpers_compile.bpf.c -o build/x86_helpers_compile.bpf.o
 	../stock-path/bin/clang -g -O2 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c oracles/x86_context_compile.bpf.c -o build/x86_context_compile.bpf.o
 	../stock-path/bin/clang -g -O2 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c oracles/x86_stack_read_compile.bpf.c -o build/x86_stack_read_compile.bpf.o
 	../stock-path/bin/clang -g -O2 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -D__TARGET_ARCH_x86 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -I/usr/include/x86_64-linux-gnu -c oracles/x86_memory_read_compile.bpf.c -o build/x86_memory_read_compile.bpf.o

@@ -1,0 +1,108 @@
+{
+  "step": "M4 x86 typed helper C exports",
+  "status": "validated; M4 remains open",
+  "raw": "/workspaces/kprog-raw/formal/m4-x86-helpers",
+  "helper_macros": 81,
+  "export": {
+    "equal": true,
+    "bytes": 8069666,
+    "functions": 83,
+    "preprocessed_bytes": 1257141,
+    "prior_exports_unchanged": [
+      "Arm64Access.lean",
+      "Arm64Address.lean",
+      "Arm64Addressing.lean",
+      "Arm64Entry.lean",
+      "Arm64Numeric.lean",
+      "Arm64PayloadProfile.lean",
+      "Arm64Program.lean",
+      "Arm64ProgramContext.lean",
+      "Arm64ProgramFixture.lean",
+      "Arm64Stack.lean",
+      "X86Context.lean",
+      "X86Inline.lean",
+      "X86Memory.lean",
+      "X86Numeric.lean",
+      "X86Pointer.lean",
+      "X86StackProfile200.lean",
+      "X86StackProfile376.lean"
+    ]
+  },
+  "validation": {
+    "make_clight": 0,
+    "clight_modules": 18,
+    "lean_jobs": 55,
+    "link_internal_bodies": 117,
+    "axiom_queries": 6,
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "callee_abi_types": 81
+  },
+  "host": {
+    "capacities": [
+      1,
+      7,
+      9,
+      64,
+      200,
+      376
+    ],
+    "sp_positions": 3,
+    "seeds": 4,
+    "paired_registry_cases_per_mode": 5832,
+    "alias_refusal_executions_per_mode": 20,
+    "alias_refusal_pairs_per_mode": 10,
+    "registry_capture_bytes_per_mode": 18156960,
+    "comparison": "complete paired observations within each process; cross-process raw pointer bits are retained",
+    "negatives": [
+      "capacity-frozen64",
+      "fact-pointer-slot0",
+      "output-length-low8",
+      "void-result-one",
+      "clobber-xmm-high",
+      "map-update-arguments",
+      "callee-abi-negative"
+    ],
+    "normal_products_restored": true
+  },
+  "native_header_baseline": "768241403",
+  "native_fidelity": {
+    "helpers": {
+      "allocated_sections_equal": true,
+      "allocated_relocations_equal": true,
+      "current_stream_equals_normal_build": true,
+      "allocated_section_bytes": {
+        ".text": 0,
+        "socket": 1632,
+        "license": 4
+      },
+      "allocated_relocations": 1
+    },
+    "inline": {
+      "allocated_sections_equal": true,
+      "allocated_relocations_equal": true,
+      "current_stream_equals_normal_build": true,
+      "allocated_section_bytes": {
+        ".text": 0,
+        "socket": 1448,
+        "license": 4
+      },
+      "allocated_relocations": 11
+    },
+    "profile376": {
+      "allocated_sections_equal": true,
+      "allocated_relocations_equal": true,
+      "current_stream_equals_normal_build": true,
+      "allocated_section_bytes": {
+        ".text": 0,
+        "socket": 5184,
+        "license": 4
+      },
+      "allocated_relocations": 24
+    }
+  },
+  "scope": "Actual generic C helper bodies and typed callee ABI. Kernel-target/effects interpretation and full producer program correspondence remain open. Zero M5 refinements migrated."
+}

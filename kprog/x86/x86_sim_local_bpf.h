@@ -4080,14 +4080,21 @@ extern void __x86_sim_unsupported_helper(void)
 #define X86_SIM_BPF_CALL_bpf_strncmp() \
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_strncmp((const char *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u32)X86_SIM_L_READ_REG(X86_RSI), (const char *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX)))
 
+#if defined(__COMPCERT__)
+#define X86_SIM_L_HELPER_VOID_RESULT(EXPR) \
+    do { (EXPR); X86_SIM_L_HELPER_SCALAR_RESULT(0ULL); } while (0)
+#else
+#define X86_SIM_L_HELPER_VOID_RESULT(EXPR) \
+    X86_SIM_L_HELPER_SCALAR_RESULT(({ EXPR; 0ULL; }))
+#endif
 #define X86_SIM_BPF_CALL_bpf_ringbuf_submit() \
-	X86_SIM_L_HELPER_SCALAR_RESULT(({ bpf_ringbuf_submit((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u64)X86_SIM_L_READ_REG(X86_RSI)); 0ULL; }))
+	X86_SIM_L_HELPER_VOID_RESULT(bpf_ringbuf_submit((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u64)X86_SIM_L_READ_REG(X86_RSI)))
 
 #define X86_SIM_BPF_CALL_bpf_ringbuf_submit_dynptr() \
-	X86_SIM_L_HELPER_SCALAR_RESULT(({ bpf_ringbuf_submit_dynptr((struct bpf_dynptr *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u64)X86_SIM_L_READ_REG(X86_RSI)); 0ULL; }))
+	X86_SIM_L_HELPER_VOID_RESULT(bpf_ringbuf_submit_dynptr((struct bpf_dynptr *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u64)X86_SIM_L_READ_REG(X86_RSI)))
 
 #define X86_SIM_BPF_CALL_bpf_ringbuf_discard_dynptr() \
-	X86_SIM_L_HELPER_SCALAR_RESULT(({ bpf_ringbuf_discard_dynptr((struct bpf_dynptr *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u64)X86_SIM_L_READ_REG(X86_RSI)); 0ULL; }))
+	X86_SIM_L_HELPER_VOID_RESULT(bpf_ringbuf_discard_dynptr((struct bpf_dynptr *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u64)X86_SIM_L_READ_REG(X86_RSI)))
 
 #define X86_SIM_BPF_CALL_bpf_dynptr_read() \
 	X86_SIM_L_HELPER_SCALAR_RESULT(bpf_dynptr_read((void *)X86_SIM_L_HELPER_ARG_PTR(X86_RDI), (__u64)X86_SIM_L_READ_REG(X86_RSI), (const struct bpf_dynptr *)X86_SIM_L_HELPER_ARG_PTR(X86_RDX), (__u64)X86_SIM_L_READ_REG(X86_RCX), (__u64)X86_SIM_L_READ_REG(X86_R8)))
