@@ -1,0 +1,468 @@
+{
+  "app": "bcc/set",
+  "app_status": "ok",
+  "app_error": "",
+  "service_archive": "/workspaces/kprog-raw/perf/20261116-bcc-preparation-retry/service.tar.gz",
+  "framework_run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_043640_944453",
+  "request_attempts": 25,
+  "programs": 25,
+  "native_installed": 25,
+  "b_generated": 25,
+  "b_stock_passed": 23,
+  "tracked_program_ids": {
+    "baseline": 25,
+    "post_rejit": 25
+  },
+  "definition": "Programs are distinct native ELF SHA256/entry/type bodies submitted to the service; missing manifest entries do not submit a request. Tracked active IDs and request attempts are separate observations.",
+  "bodies": [
+    {
+      "native_sha256": "e39301b242033e2ffdf69b4e50a0b8517c12285b6f4949e9708c85a68efa32fb",
+      "entry": "blk_account_io_merge_bio",
+      "prog_type": 2,
+      "attempts": [
+        {
+          "request_id": 3,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "3.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "e39301b242033e2ffdf69b4e50a0b8517c12285b6f4949e9708c85a68efa32fb",
+      "entry": "block_rq_complete",
+      "prog_type": 26,
+      "attempts": [
+        {
+          "request_id": 22,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "22.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "e39301b242033e2ffdf69b4e50a0b8517c12285b6f4949e9708c85a68efa32fb",
+      "entry": "block_rq_insert",
+      "prog_type": 26,
+      "attempts": [
+        {
+          "request_id": 11,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "11.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "e39301b242033e2ffdf69b4e50a0b8517c12285b6f4949e9708c85a68efa32fb",
+      "entry": "block_rq_issue",
+      "prog_type": 26,
+      "attempts": [
+        {
+          "request_id": 17,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "17.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "abfd1b88c4aee53d8738a6ff26bb9ece5936fc3380f8f8fc033948dadc9fa606",
+      "entry": "fentry_vfs_create",
+      "prog_type": 26,
+      "attempts": [
+        {
+          "request_id": 25,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "25.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "abfd1b88c4aee53d8738a6ff26bb9ece5936fc3380f8f8fc033948dadc9fa606",
+      "entry": "fentry_vfs_fsync",
+      "prog_type": 26,
+      "attempts": [
+        {
+          "request_id": 19,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "19.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "abfd1b88c4aee53d8738a6ff26bb9ece5936fc3380f8f8fc033948dadc9fa606",
+      "entry": "fentry_vfs_open",
+      "prog_type": 26,
+      "attempts": [
+        {
+          "request_id": 24,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "24.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "abfd1b88c4aee53d8738a6ff26bb9ece5936fc3380f8f8fc033948dadc9fa606",
+      "entry": "fentry_vfs_read",
+      "prog_type": 26,
+      "attempts": [
+        {
+          "request_id": 6,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "6.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "abfd1b88c4aee53d8738a6ff26bb9ece5936fc3380f8f8fc033948dadc9fa606",
+      "entry": "fentry_vfs_write",
+      "prog_type": 26,
+      "attempts": [
+        {
+          "request_id": 13,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "13.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "568b2aede957207e96ca62a829199fe23222bcce98108c6353a1c4cd29753da9",
+      "entry": "inet_sock_set_state",
+      "prog_type": 5,
+      "attempts": [
+        {
+          "request_id": 4,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "4.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "dbd4aead46523c4a4c9e3605f82a023ae2d1ced5f781b34b15e1add3c17af2f3",
+      "entry": "kprobe__cap_capable_entry",
+      "prog_type": 2,
+      "attempts": [
+        {
+          "request_id": 2,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "2.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "dbd4aead46523c4a4c9e3605f82a023ae2d1ced5f781b34b15e1add3c17af2f3",
+      "entry": "kprobe__cap_capable_exit",
+      "prog_type": 2,
+      "attempts": [
+        {
+          "request_id": 10,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "10.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "34bf4789d699bd068ec65376cff023ad2aa30cccf9086922945e3698af8fff08",
+      "entry": "sched_switch",
+      "prog_type": 26,
+      "attempts": [
+        {
+          "request_id": 20,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "20.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-bcc-preparation-retry/loader-inputs/recovery', 'verify', '4', '20', '238', '/workspaces/kprog-raw/perf/20261116-bcc-preparation-retry/state/session-7iribg7y/requests/request-zlws5f3f/generated/request.native.o', 'sched_switch', '/workspaces/kprog-raw/perf/20261116-bcc-preparation-retry/state/session-7iribg7y/requests/request-zlws5f3f/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-bcc-preparation-retry/state/session-7iribg7y/requests/request-zlws5f3f/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '23', '0', '74175', '1', '0', '0', 'targ_ms', '113', '4', 'targ_per_pidns', '113', '3', 'zero', '114', '0', 'targ_per_thread', '113', '2', 'filter_cg', '113', '0', 'cgroup_map', '109', 'null', 'hists', '111', 'null', 'targ_tgid', '113', '8', 'start', '110', 'null', 'targ_per_process', '113', '1']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "0: (b7) r0 = 0                        ; R0=0",
+            "1: (7b) *(u64 *)(r10 -456) = r0       ; R0=0 R10=fp0 fp-456=0",
+            "2: (7b) *(u64 *)(r10 -480) = r0       ; R0=0 R10=fp0 fp-480=0",
+            "3: (7b) *(u64 *)(r10 -504) = r0       ; R0=0 R10=fp0 fp-504=0",
+            "4: (7b) *(u64 *)(r10 -528) = r0",
+            "invalid write to stack R10 off=-528 size=8",
+            "processed 5 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "34bf4789d699bd068ec65376cff023ad2aa30cccf9086922945e3698af8fff08",
+      "entry": "sched_wakeup",
+      "prog_type": 26,
+      "attempts": [
+        {
+          "request_id": 8,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "8.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "34bf4789d699bd068ec65376cff023ad2aa30cccf9086922945e3698af8fff08",
+      "entry": "sched_wakeup_new",
+      "prog_type": 26,
+      "attempts": [
+        {
+          "request_id": 15,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "15.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "b6f7448697675719e623c47da375886f45edf171be84070042fad0c817b16805",
+      "entry": "sys_enter",
+      "prog_type": 5,
+      "attempts": [
+        {
+          "request_id": 7,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "7.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "b6f7448697675719e623c47da375886f45edf171be84070042fad0c817b16805",
+      "entry": "sys_exit",
+      "prog_type": 5,
+      "attempts": [
+        {
+          "request_id": 14,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "14.success.tar.gz",
+          "verifier_tail": [
+            "libbpf: elf: skipping unrecognized data section(6) .native_lab.rodata"
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "f8c7660c1c863e2e23f14911725d28678f50018177da85eb50907967bf389a09",
+      "entry": "tcp_v4_connect",
+      "prog_type": 2,
+      "attempts": [
+        {
+          "request_id": 1,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "1.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "f8c7660c1c863e2e23f14911725d28678f50018177da85eb50907967bf389a09",
+      "entry": "tcp_v4_connect_ret",
+      "prog_type": 2,
+      "attempts": [
+        {
+          "request_id": 9,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "9.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification-preparation",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-bcc-preparation-retry/loader-inputs/recovery', 'verify', '4', '9', '135', '/workspaces/kprog-raw/perf/20261116-bcc-preparation-retry/state/session-7iribg7y/requests/request-z6ijynyv/generated/request.native.o', 'tcp_v4_connect_ret', '/workspaces/kprog-raw/perf/20261116-bcc-preparation-retry/state/session-7iribg7y/requests/request-z6ijynyv/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-bcc-preparation-retry/state/session-7iribg7y/requests/request-z6ijynyv/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'events', '81', 'null', 'count_v4.zero', '93', '0', 'filter_ports', '92', '16', 'source_port', '92', '13', 'sockets', '66', 'null', 'filter_ports_len', '92', '0', 'do_count', '92', '12', 'ipv4_count', '72', 'null']' returned non-zero exit status 1."
+          },
+          "verifier_tail": [
+            "libbpf: failed to find BTF for extern 'count_v4.zero': -2",
+            "trusted-native-loader: open service simulator: No such file or directory"
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "f8c7660c1c863e2e23f14911725d28678f50018177da85eb50907967bf389a09",
+      "entry": "tcp_v6_connect",
+      "prog_type": 2,
+      "attempts": [
+        {
+          "request_id": 16,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "16.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "f8c7660c1c863e2e23f14911725d28678f50018177da85eb50907967bf389a09",
+      "entry": "tcp_v6_connect_ret",
+      "prog_type": 2,
+      "attempts": [
+        {
+          "request_id": 21,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "21.success.tar.gz",
+          "verifier_tail": [
+            "libbpf: elf: skipping unrecognized data section(6) .native_lab.rodata"
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "63ba2e49083d1b540a9700a1d65aba18135196dcfe98594073d6234116768ae3",
+      "entry": "tracepoint__syscalls__sys_enter_open",
+      "prog_type": 5,
+      "attempts": [
+        {
+          "request_id": 5,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "5.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "63ba2e49083d1b540a9700a1d65aba18135196dcfe98594073d6234116768ae3",
+      "entry": "tracepoint__syscalls__sys_enter_openat",
+      "prog_type": 5,
+      "attempts": [
+        {
+          "request_id": 12,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "12.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "63ba2e49083d1b540a9700a1d65aba18135196dcfe98594073d6234116768ae3",
+      "entry": "tracepoint__syscalls__sys_exit_open",
+      "prog_type": 5,
+      "attempts": [
+        {
+          "request_id": 18,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "18.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "63ba2e49083d1b540a9700a1d65aba18135196dcfe98594073d6234116768ae3",
+      "entry": "tracepoint__syscalls__sys_exit_openat",
+      "prog_type": 5,
+      "attempts": [
+        {
+          "request_id": 23,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "23.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    }
+  ]
+}
