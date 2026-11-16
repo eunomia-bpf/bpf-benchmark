@@ -14,6 +14,26 @@ IDENTITY_ARGS ?=
 HELPER_SHAPE_BUILD ?= /var/tmp/kprog-tmp/perf/helper-shapes
 SPILL_GROUP_BUILD ?= /var/tmp/kprog-tmp/perf/spill-groups
 HELPER_MEMORY_BUILD ?= /var/tmp/kprog-tmp/perf/helper-memory
+MAP_EXTERN_BUILD ?= $(CONTEXT_BUILD)/map-externs
+MAP_EXTERN_ARGS ?=
+
+.PHONY: map-extern-check
+map-extern-check:
+	install -d $(OUTPUT) $(CONTEXT_BUILD)
+	taskset -c 16-18 prlimit --as=8589934592 -- clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -I$(ROOT)/vendor/libbpf/include/uapi $(ROOT)/kprog/x86/packet_bounds_ir.cpp -o $(CONTEXT_BUILD)/packet-bounds $$(llvm-config-18 --ldflags --libs core irreader bitwriter analysis support --system-libs)
+	taskset -c 16-18 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_b_map_externs.py --tool $(CONTEXT_BUILD)/packet-bounds --bpftool $(ROOT)/vendor/build/.bpftool/x86/bpftool --build $(MAP_EXTERN_BUILD) --output $(OUTPUT) $(MAP_EXTERN_ARGS)
+
+.PHONY: map-extern-stock map-extern-stock-guest
+map-extern-stock:
+	install -d $(OUTPUT) $(OUTPUT)/inputs
+	python3 -c 'import io,pathlib,tarfile; outer=tarfile.open("/workspaces/kprog-raw/perf/20261116-bcc-preparation-retry/service.tar.gz"); archive=tarfile.open(fileobj=io.BytesIO(outer.extractfile("service/requests/9.success.tar.gz").read())); build=pathlib.Path("$(MAP_EXTERN_BUILD)"); fields={"kernel.native.o":"actual.native.o","generation.metadata.json":"actual.metadata.json","kernel.facts.json":"actual.context.json"}; [(build/name).write_bytes(archive.extractfile("request/"+source).read()) for source,name in fields.items()]'
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 16-18 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --rodir $(OUTPUT)/inputs=$(MAP_EXTERN_BUILD) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 4G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/scalar-spill-precision.mk map-extern-stock-guest OUTPUT=$(OUTPUT)'
+
+map-extern-stock-guest:
+	mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf
+	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
+	python3 $(ROOT)/kprog/test/verify_retained_proof.py --native $(OUTPUT)/inputs/actual.native.o --metadata $(OUTPUT)/inputs/actual.metadata.json --context $(OUTPUT)/inputs/actual.context.json --source $(ROOT)/vendor/build/.bcc-libbpf/x86/output/tcpconnect.bpf.o --proof $(OUTPUT)/inputs/actual.bpf.o --symbol tcp_v4_connect_ret --linker $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link --output $(OUTPUT)/replay
 
 .PHONY: spill-liveness-check
 spill-liveness-check:

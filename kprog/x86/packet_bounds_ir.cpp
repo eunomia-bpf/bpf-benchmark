@@ -5,6 +5,7 @@
 #include "llvm/Analysis/ConstantFolding.h"
 #include "llvm/ADT/SetVector.h"
 #include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/DIBuilder.h"
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/InlineAsm.h"
 #include "llvm/IR/IntrinsicInst.h"
@@ -22,6 +23,31 @@
 using namespace llvm;
 static cl::opt<std::string> Input(cl::Positional,cl::Required);
 static cl::opt<std::string> Output("o",cl::Required);
+// Clang can leave an asm-named extern's debug declaration detached from its
+// actual LLVM global. BTF then omits the VAR and libbpf cannot open B. Rendered
+// map bindings are zero-length byte arrays; describe that exact IR declaration
+// under its linker name, without guessing which orphan C alias belongs to it.
+static unsigned restore_map_extern_debug_info(Module &module) {
+  auto *units=module.getNamedMetadata("llvm.dbg.cu");
+  if (!units || !units->getNumOperands()) return 0;
+  auto *unit=cast<DICompileUnit>(units->getOperand(0));
+  DIBuilder builder(module,true,unit);
+  unsigned count=0;
+  for (auto &global:module.globals()) {
+    auto *array=dyn_cast<ArrayType>(global.getValueType());
+    if (!global.isDeclaration() || global.getSection()!=".ksyms" ||
+        global.getMetadata(LLVMContext::MD_dbg) || !array ||
+        array->getNumElements()!=0 || !array->getElementType()->isIntegerTy(8)) continue;
+    auto *byte=builder.createBasicType("unsigned char",8,dwarf::DW_ATE_unsigned_char);
+    auto *type=builder.createArrayType(0,8,byte,
+        builder.getOrCreateArray({builder.getOrCreateSubrange(0,int64_t{0})}));
+    global.addDebugInfo(builder.createGlobalVariableExpression(unit,global.getName(),
+        global.getName(),unit->getFile(),0,type,false,false));
+    ++count;
+  }
+  builder.finalize();
+  return count;
+}
 static bool tied_identity(CallInst *call,InlineAsm *assembly) {
   return assembly->getAsmString().empty() && assembly->getConstraintString()=="=r,0" &&
       call->arg_size()==1 && call->getType()==call->getArgOperand(0)->getType();
@@ -288,6 +314,7 @@ int main(int argc,char **argv) {
   cl::ParseCommandLineOptions(argc,argv);
   LLVMContext context;SMDiagnostic error;auto module=parseIRFile(Input,error,context);
   if (!module) { error.print(argv[0],errs());return 1; }
+  unsigned externs=restore_map_extern_debug_info(*module);
   unsigned constants=fold_constant_identities(*module);
   unsigned live_identities=normalize_live_integer_identities(*module);
   unsigned memory_barriers=remove_empty_memory_barriers(*module);
@@ -340,6 +367,7 @@ int main(int argc,char **argv) {
   WriteBitcodeToFile(*module,output.os());output.keep();output.os().flush();
   if (output.os().has_error()) { errs()<<"write packet bounds IR failed\n";return 1; }
   errs()<<"packet length predicates lowered="<<count<<'\n';
+  errs()<<"map extern debug declarations restored="<<externs<<'\n';
   errs()<<"unused private inputs removed="<<unused<<'\n';
   errs()<<"constant context loads canonicalized="<<contexts<<'\n';
   errs()<<"debug variable intrinsics removed="<<debug_variables<<'\n';

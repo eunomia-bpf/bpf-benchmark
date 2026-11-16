@@ -8,6 +8,8 @@
 
 ## 0. Lane 目标与待办
 
+- [x] P-BTF-map-extern（本提交，2026-11-16T05:02:51Z）：asm-named B map extern 缺少 debug attachment，按实际 LLVM global 的名字与零长 byte-array 类型补齐；BCC tcp_v4_connect_ret 的 count_v4.zero BTF VAR 恢复，原 context/map shapes 的 stock replay 通过，B executable bytes 不变。两别名 fixture 与已有 metadata 保留通过。整应用 B 全通过与 sched_switch 栈仍开；`perf_20261113/map-extern-btf/`。
+
 - [x] P-SPECIALIZE（9fc382606、cab373d96、71d4fd637；本提交16形状/OTel四项测量及stock结果；协调者 2026-11-15T14:20:12Z；运营者：“是不是产量传播和展开的不对? 预处理不是尽可能要类似元编程一样编译器展开?”）：现在生成器把每条指令写成一个宏调用，预处理器把整个通用处理函数（所有宽度、寻址方式、分支）原样贴到每条指令上，常量折叠要等到 clang 之后才做：一条 MOV_LOAD 展开成 114 508 字节，OTel hotspot 6945 条指令 1.03 MB 变成 431.7 MB（418 倍），1 万条指令编译到 74 GB 被杀；大函数里的临时值多，栈帧超过 512 字节被 stock 拒绝（hotspot fp-576）。做法（设计里写的是“clang 常量传播把解释循环展开成直线”）：模拟器的处理函数从宏改成 static __always_inline 函数，生成器按每条指令已知的操作码、操作数、宽度把常量参数传进去，由编译器在 IR 层展开和折叠，文本只留一份处理函数；所有指令种类一次改完，停掉按操作码一个个做的“direct specialization”。改完量四样：预处理后大小、编译时间和内存、B 的大小、栈帧（规模用例和 OTel hotspot）。处理函数本身（I）保持同一份 C，formal 的证明对象跟着它走，和 FORMAL 在 COORDINATION 对齐。归 PERF，排第一。
 
 - [x] P-clock-link（51fcc939f、fbee52b39；本提交收据）：normal x86 clock calls/tail transfers绑定同boot fast函数，地址/ID观察及helper可用性不变；44测试/实际十类helper查询和XDP plan通过，17:42配对base发布。image d4b19c9f于17:47发布，本提交image收据；实际shipped工具和1193stage文件一致。实际Katran map绑定/整应用计时仍开。`perf_20261113/clock-lto/report.md`。

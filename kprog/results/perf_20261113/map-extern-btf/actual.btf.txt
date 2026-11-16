@@ -1,0 +1,36 @@
+[1] PTR '(anon)' type_id=0
+[2] FUNC_PROTO '(anon)' ret_type_id=3 vlen=1
+	'ctx' type_id=1
+[3] INT 'int' size=4 bits_offset=0 nr_bits=32 encoding=SIGNED
+[4] FUNC 'trusted_x86_x86_sim_xdp' type_id=2 linkage=global
+[5] INT 'unsigned long long' size=8 bits_offset=0 nr_bits=64 encoding=(none)
+[6] ARRAY '(anon)' type_id=5 index_type_id=7 nr_elems=0
+[7] INT '__ARRAY_SIZE_TYPE__' size=4 bits_offset=0 nr_bits=32 encoding=(none)
+[8] VAR 'kprog_unspecified_input' type_id=6, linkage=extern
+[9] TYPEDEF '__u8' type_id=10
+[10] INT 'unsigned char' size=1 bits_offset=0 nr_bits=8 encoding=(none)
+[11] ARRAY '(anon)' type_id=9 index_type_id=7 nr_elems=0
+[12] VAR 'sockets' type_id=11, linkage=extern
+[13] VAR 'source_port' type_id=11, linkage=extern
+[14] VAR 'filter_ports_len' type_id=11, linkage=extern
+[15] VAR 'filter_ports' type_id=11, linkage=extern
+[16] VAR 'do_count' type_id=11, linkage=extern
+[17] VAR 'ipv4_count' type_id=11, linkage=extern
+[18] VAR 'events' type_id=11, linkage=extern
+[19] ARRAY '(anon)' type_id=10 index_type_id=7 nr_elems=0
+[20] VAR 'count_v4.zero' type_id=19, linkage=extern
+[21] INT 'char' size=1 bits_offset=0 nr_bits=8 encoding=SIGNED
+[22] ARRAY '(anon)' type_id=21 index_type_id=7 nr_elems=4
+[23] VAR 'LICENSE' type_id=22, linkage=global
+[24] DATASEC '.ksyms' size=0 vlen=9
+	type_id=8 offset=0 size=0 (VAR 'kprog_unspecified_input')
+	type_id=12 offset=0 size=0 (VAR 'sockets')
+	type_id=13 offset=0 size=0 (VAR 'source_port')
+	type_id=14 offset=0 size=0 (VAR 'filter_ports_len')
+	type_id=15 offset=0 size=0 (VAR 'filter_ports')
+	type_id=16 offset=0 size=0 (VAR 'do_count')
+	type_id=17 offset=0 size=0 (VAR 'ipv4_count')
+	type_id=18 offset=0 size=0 (VAR 'events')
+	type_id=20 offset=0 size=0 (VAR 'count_v4.zero')
+[25] DATASEC 'license' size=0 vlen=1
+	type_id=23 offset=0 size=4 (VAR 'LICENSE')
