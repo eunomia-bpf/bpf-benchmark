@@ -145,9 +145,9 @@ upstream-cel-check: compiler
 CEL_CASES ?= /workspaces/kprog-raw/perf/20261116-upstream-cel/upstream-cel.json
 .PHONY: upstream-cel-b upstream-cel-stock guest-upstream-cel-stock
 upstream-cel-b: compiler
+	$(MAKE) -r -f $(ROOT)/kprog/test/native-relocations.mk build CHECK_CPUS=$(CPUS)
 	$(CC) $(FLAGS) -DCEL_STOCK_ENTRY -Xclang -fembed-bitcode=all -c $(ROOT)/kprog/test/tetragon_cel_native.c -o $(BUILD)/cel-stock-input.o
-	python3 $(ROOT)/kprog/test/build_tetragon_cel_b.py --build $(BUILD) --output $(OUTPUT) --cases $(CEL_CASES) --compiler $(BUILD)/perf-context-lto --kernel $(KERNEL)/vmlinux --linker $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link --bounds /var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds
-	tar -C $(BUILD) -czf $(OUTPUT)/cel-b-build.tar.gz .
+	status=0; python3 $(ROOT)/kprog/test/build_tetragon_cel_b.py --build $(BUILD) --output $(OUTPUT) --cases $(CEL_CASES) --compiler $(BUILD)/perf-context-lto --kernel $(KERNEL)/vmlinux --linker $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link --bounds /var/tmp/kprog-tmp/perf/context-loads-v2/packet-bounds || status=$$?; tar -C $(BUILD) -czf $(OUTPUT)/cel-b-build.tar.gz .; exit $$status
 	date -u +%FT%TZ > $(OUTPUT)/cel-b-finished
 
 upstream-cel-stock:
@@ -157,4 +157,5 @@ upstream-cel-stock:
 	date -u +%FT%TZ > $(OUTPUT)/cel-stock-finished
 
 guest-upstream-cel-stock:
+	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
 	for object in $(OUTPUT)/inputs/cel-*.bpf.o; do name=$$(basename "$$object" .bpf.o); $(OUTPUT)/inputs/cel-stock-loader "$$object" trusted_x86_x86_sim_xdp $(OUTPUT)/stock/$$name.verifier.log > $(OUTPUT)/stock/$$name.json; done
