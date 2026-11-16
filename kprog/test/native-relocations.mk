@@ -59,6 +59,10 @@ lto-ranges-audit:
 	taskset -c $(CHECK_CPUS) prlimit --as=8589934592 -- env CARGO_BUILD_JOBS=1 CARGO_TARGET_DIR=$(LINKER_TARGET) NATIVE_LINK_LTO_AUDIT_REPORT=/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/report.json NATIVE_LINK_LTO_AUDIT_BASELINE=$(ROOT)/kprog/results/perf_20261113/lto-piece-audit/ranges.json cargo test --release --manifest-path $(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml retained_lto_diagnostics_preserve_payload_bytes -- --ignored --nocapture 2>&1 | tee $(OUTPUT)/ranges.log
 	python3 $(ROOT)/kprog/results/perf_20261113/lto_range_analysis.py --log $(OUTPUT)/ranges.log --output $(OUTPUT)/ranges.json
 
+.PHONY: code-pointer-analysis
+code-pointer-analysis:
+	taskset -c $(CHECK_CPUS) prlimit --as=2147483648 -- python3 -m unittest kprog/test/test_x86_indirect_spills.py
+
 .PHONY: code-pointer-check
 code-pointer-check: check
 	install -d $(OUTPUT)

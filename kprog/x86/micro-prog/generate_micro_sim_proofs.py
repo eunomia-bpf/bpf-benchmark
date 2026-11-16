@@ -1195,9 +1195,9 @@ def indirect_targets(insns: list[NativeInsn], exit_addr: int | None = None,
                      ) -> dict[int, frozenset[tuple[str, int]]]:
     """Join finite reaching definitions on the native CFG, without execution fuel.
 
-    Only literal definitions, code addresses and exact register copies create
-    values. Other writes become unknown, so cycles terminate on a finite lattice
-    of source definitions rather than a guessed iteration bound. This analysis
+    Only literal definitions, code addresses and exact register/stack copies
+    create values. Other writes become unknown, so cycles terminate on a finite
+    lattice of source definitions rather than a guessed iteration bound. This analysis
     selects dispatch cases; C still dispatches on the actual architectural value.
     """
     registers = tuple(dict.fromkeys(info[0] for info in REGS.values()))
@@ -1209,10 +1209,23 @@ def indirect_targets(insns: list[NativeInsn], exit_addr: int | None = None,
     starts = sorted(function_starts or {insns[0].addr})
     owners = {addr: max(start for start in starts if start <= addr) for addr in by_addr}
     returns: dict[int, set[int]] = {}
-    states = {insns[0].addr: (None,) * len(registers)}
+    # The last state component holds full-width RSP-relative spill definitions.
+    # A stack adjustment or call discards them, so offsets never cross frames.
+    states = {insns[0].addr: (None,) * len(registers) + ({},)}
     queue = deque(states)
 
+    def stack_slot(operand):
+        if re.fullmatch(
+                r"(?:byteptr|wordptr|dwordptr|qwordptr)?"
+                r"\[rsp(?:[+-](?:0x[0-9a-f]+|[0-9]+))?\]",
+                operand.replace(" ", "").lower()):
+            return mem_disp(operand)
+        return None
+
     def read(state, operand):
+        if is_mem(operand):
+            slot = stack_slot(operand)
+            return state[-1].get(slot) if operand_width(operand) == 64 else None
         reg = reg_info(operand)
         if reg is None:
             return None
@@ -1233,13 +1246,16 @@ def indirect_targets(insns: list[NativeInsn], exit_addr: int | None = None,
         if target not in by_addr:
             raise ValueError(f"native CFG target 0x{target:x} is not an instruction")
         old = states.get(target)
-        merged = state if old is None else tuple(joined(a, b) for a, b in zip(old, state))
+        merged = state if old is None else (
+            tuple(joined(a, b) for a, b in zip(old[:-1], state[:-1])) +
+            ({slot: joined(old[-1][slot], state[-1][slot])
+              for slot in old[-1].keys() & state[-1].keys()},))
         if merged != old:
             states[target] = merged
             queue.append(target)
 
     def call_edge(target, addr, state):
-        push(target, state)
+        push(target, state[:-1] + ({},))
         continuation = following[addr]
         destinations = returns.setdefault(owners[target], set())
         if continuation not in destinations:
@@ -1253,6 +1269,7 @@ def indirect_targets(insns: list[NativeInsn], exit_addr: int | None = None,
         op, args = insn.mnemonic, insn.operands
         incoming = states[addr]
         outgoing = list(incoming)
+        outgoing[-1] = dict(incoming[-1])
         dst = reg_info(args[0]) if args else None
         if dst and op not in {"cmp", "test", "bt", "push", "jmp", "call"}:
             outgoing[indices[dst[0]]] = None
@@ -1274,6 +1291,26 @@ def indirect_targets(insns: list[NativeInsn], exit_addr: int | None = None,
         for reg in implicit:
             if reg is not None:
                 outgoing[indices[reg]] = None
+        if ("X86_RSP" in implicit or (dst and dst[0] == "X86_RSP" and
+             op not in {"cmp", "test", "bt", "jmp", "call", "push"}) or
+                op in {"push", "pop", "enter", "leave", "rep", "stos", "movs"}):
+            outgoing[-1].clear()
+        if args and is_mem(args[0]) and op in {"mov", "movabs"}:
+            slot = stack_slot(args[0])
+            if slot is None:
+                outgoing[-1].clear()
+            else:
+                width = operand_width(args[0]) // 8
+                outgoing[-1] = {offset: value for offset, value in outgoing[-1].items()
+                                if offset + 8 <= slot or slot + width <= offset}
+                value = read(incoming, args[1])
+                if width == 8 and value is not None:
+                    outgoing[-1][slot] = value
+        elif any(is_mem(arg) for arg in args) and op not in {
+                "mov", "movabs", "lea", "cmp", "test", "bt", "jmp", "call"}:
+            # Includes RMW and implicit/second-operand writes; unknown aliases
+            # cannot leave an old spill definition live.
+            outgoing[-1].clear()
         if dst and op in {"mov", "movabs"} and dst[1] in {32, 64}:
             value = None
             if insn.code_table is not None:
@@ -1282,10 +1319,10 @@ def indirect_targets(insns: list[NativeInsn], exit_addr: int | None = None,
                 pass  # A selected capability is not a scalar/code address.
             elif is_int(args[1]):
                 value = frozenset({("scalar", parse_int(args[1]) & ((1 << dst[1]) - 1))})
-            elif reg_info(args[1]):
-                value = read(incoming, args[1])
             elif insn.reloc_symbol in helper_numbers:
                 value = frozenset({("scalar", helper_numbers[insn.reloc_symbol])})
+            elif reg_info(args[1]) or is_mem(args[1]):
+                value = read(incoming, args[1])
             if dst[1] == 32 and value is not None:
                 value = None if any(k == "code" for k, v in value) else frozenset(
                     (k, v & 0xffffffff) for k, v in value)
@@ -1318,9 +1355,10 @@ def indirect_targets(insns: list[NativeInsn], exit_addr: int | None = None,
         if op == "ret":
             # Join return contexts of this callee; don't assume ABI preservation.
             for target in returns.get(owners[addr], set()):
-                push(target, outgoing)
+                push(target, outgoing[:-1] + ({},))
         elif helper_call:
             clobbered = list(outgoing)
+            clobbered[-1] = {}
             for reg in ("RAX", "RCX", "RDX", "RSI", "RDI", "R8", "R9", "R10", "R11"):
                 clobbered[indices["X86_" + reg]] = None
             if addr in following:
