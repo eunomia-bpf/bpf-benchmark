@@ -72,3 +72,12 @@ ARRAY/PERCPU_ARRAY expansions while dynamic inner-map sites retain dispatch.
 The plan deliberately contains zero map-object pointers, so it is never a
 loadable image. The next size fix shares identical selected ARRAY routines
 within the linked program; per-call and installed-byte effects remain pending.
+
+
+Selected ARRAY routines are now shared once per identical emitted body in a
+linked program. The key remains a live argument; bounds, element size, value
+offset and per-CPU base remain the selected constants. Three call sites in the
+regression exercise two equal shapes and a different value offset, checking
+actual returns for in-range and out-of-range keys. Distinct per-CPU offsets
+must also produce distinct bodies. Existing ELF execution tests continue to
+cover ordinary named lookup lowering. Dynamic map dispatch remains separate.

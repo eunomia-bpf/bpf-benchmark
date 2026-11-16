@@ -596,6 +596,7 @@ enum PatchKind {
     /// memory.
     HelperBranchRel32 { target_addr: u64, opcode: u8 },
     LocalMemory { routine: memory::Routine },
+    LocalArray { bytes: Vec<u8> },
     /// Rewritten `mov reg, [rip+GOT]` against a map symbol. The runner
     /// patches the immediate field with the live kernel map pointer.
     MapImmediate { name: String, imm_offset: usize },
@@ -1523,15 +1524,11 @@ pub(super) fn rewrite_x86(
                         )?;
                         match spec.kind {
                             LookupKind::Array | LookupKind::PerCpuArray => {
-                                for ib in build_x86_array_lookup(&spec)? {
-                                    push_x86_synthetic(
-                                        &mut local,
-                                        &mut kinds,
-                                        &mut insn_local_ip,
-                                        &mut next_synthetic_ip,
-                                        ib,
-                                    )?;
-                                }
+                                push_x86_replacement(&mut local, &mut kinds, &mut insn_local_ip,
+                                    local_ip, build_x86_helper_call_rel32_slot()?,
+                                    Some(PatchKind::LocalArray {
+                                        bytes: build_x86_array_lookup_routine(&spec)?,
+                                    }));
                                 resolved_helper_call_sites.insert(site_key);
                                 continue;
                             }
@@ -1674,6 +1671,7 @@ pub(super) fn rewrite_x86(
             blob.extend_from_slice(&bytes);
         }
     }
+    share_x86_array_routines(&mut blob, &patches, &mut code_ranges, show)?;
 
     // Apply intra-blob direct call and tail-jump patches first;
     // those need only `sym_global_offset` which is already known.
@@ -1755,7 +1753,8 @@ pub(super) fn rewrite_x86(
                 tail_proof_relocs.push(ProofReloc { offset: (p.global_offset + 3) as u64,
                     r_type: 9, symbol: name.clone(), addend: -4, data: None });
             }
-            PatchKind::JmpEnd | PatchKind::DirectBranch { .. } | PatchKind::LocalMemory { .. } => {}
+            PatchKind::JmpEnd | PatchKind::DirectBranch { .. } | PatchKind::LocalMemory { .. }
+            | PatchKind::LocalArray { .. } => {}
         }
     }
 
@@ -3946,7 +3945,7 @@ fn append_x86_array_value_ptr(
     Ok(())
 }
 
-fn build_x86_array_lookup(spec: &LookupSiteSpec) -> Result<Vec<Instruction>> {
+fn build_x86_array_lookup_routine(spec: &LookupSiteSpec) -> Result<Vec<u8>> {
     if spec.max_entries == 0 {
         bail!("array lookup max_entries must be non-zero");
     }
@@ -3980,8 +3979,29 @@ fn build_x86_array_lookup(spec: &LookupSiteSpec) -> Result<Vec<Instruction>> {
     bytes.extend_from_slice(&[0x73, body_len]); // jae null
     bytes.extend_from_slice(&body);
     bytes.extend_from_slice(&[0x31, 0xC0]); // xor eax, eax
+    bytes.push(0xc3);
+    Ok(bytes)
+}
 
-    declared_byte_chunks(&bytes)
+fn share_x86_array_routines(blob: &mut Vec<u8>, patches: &[PatchInfo],
+                            code_ranges: &mut Vec<(usize, usize)>, show: bool) -> Result<()> {
+    // Machine bytes include every bound constant and the per-CPU offset.
+    // Different shapes cannot merge; identical bodies serve every such call
+    // in this image without repeating the map-type dispatch.
+    let mut offsets = HashMap::new();
+    for patch in patches {
+        let PatchKind::LocalArray { bytes } = &patch.kind else { continue; };
+        let target = *offsets.entry(bytes).or_insert_with(|| {
+            let start = blob.len();
+            blob.extend_from_slice(bytes);
+            let range = (start, blob.len());
+            code_ranges.push(range);
+            show_lto_range(show, "known_array", range);
+            start
+        });
+        patch_x86_rel32(blob, patch.global_offset + 1, target)?;
+    }
+    Ok(())
 }
 
 fn append_x86_cmp_byte_rax_disp32_imm(bytes: &mut Vec<u8>, disp: u32, imm: u8) {
@@ -4483,6 +4503,49 @@ mod tests {
                 assert_eq!(munmap(memory, 4096), 0);
             }
         }
+        Ok(())
+    }
+
+    #[test]
+    #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
+    fn shared_known_arrays_preserve_shapes_keys_bounds_and_call_returns() -> Result<()> {
+        let spec = LookupSiteSpec { kind: LookupKind::Array, target_addr: 0,
+            key_offset: 0, max_entries: 3, elem_size: 8, index_mask: 3,
+            value_offset: 32, percpu_base_addr: 0 };
+        let first = build_x86_array_lookup_routine(&spec)?;
+        let mut other = spec.clone();
+        other.value_offset = 64;
+        let last = build_x86_array_lookup_routine(&other)?;
+        let mut blob = X86_HELPER_CALL_REL32_SLOT.repeat(3);
+        blob.push(0xc3);
+        let patches = vec![
+            PatchInfo { global_offset: 0, kind: PatchKind::LocalArray { bytes: first.clone() } },
+            PatchInfo { global_offset: 5, kind: PatchKind::LocalArray { bytes: first } },
+            PatchInfo { global_offset: 10, kind: PatchKind::LocalArray { bytes: last } },
+        ];
+        let mut ranges = Vec::new();
+        share_x86_array_routines(&mut blob, &patches, &mut ranges, false)?;
+        let targets: Vec<_> = [0,5,10].into_iter().map(|at| at + 5 +
+            i32::from_le_bytes(blob[at as usize+1..at as usize+5].try_into().unwrap())).collect();
+        assert_eq!(ranges.len(), 2, "equal bodies share once; value offsets cannot merge");
+        assert_eq!(targets[0], targets[1]);
+        assert_ne!(targets[0], targets[2]);
+        assert_eq!(targets[0] as usize, ranges[0].0);
+        assert_eq!(targets[2] as usize, ranges[1].0);
+        let mut map = [0u8;128];
+        for key in [0u32,1,2,3,u32::MAX] {
+            let actual = memory::call_blob(&blob, map.as_mut_ptr(), &key as *const _ as usize, 0);
+            let expected = if key < 3 { map.as_mut_ptr().wrapping_add(64 + key as usize*8) }
+                           else { std::ptr::null_mut() };
+            assert_eq!(actual, expected, "shared call/return and last shape for key {key}");
+        }
+        let mut per_cpu = spec;
+        per_cpu.kind = LookupKind::PerCpuArray;
+        per_cpu.percpu_base_addr = 0x1000;
+        let a = build_x86_array_lookup_routine(&per_cpu)?;
+        per_cpu.percpu_base_addr = 0x2000;
+        assert_ne!(a, build_x86_array_lookup_routine(&per_cpu)?,
+                   "different CPU offsets cannot share a body");
         Ok(())
     }
 
