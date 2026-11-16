@@ -101,3 +101,10 @@ Both PMU guest arms completed at 19:15:05Z; the controller returned zero at
 19:15:07Z. The 37 MiB host recording is retained for offline guest-kernel
 decoding with the recorded clock pairs and symbols. The regression cause and
 production optimization remain open.
+
+Live frame detail: native sampling-entry JIT program 48 shows four outer kernel
+saves and only the remaining RBP/R12 saves in its body. The preserved-ABI replay
+used for the earlier duplicate-save review retains all C saves and has a
+different entry contract. It does not demonstrate four duplicated saves in this
+timing path. The new mask contract's conditional 14-byte accounting for mask
+zero is not an installed-byte or speed gain for this captured entry.

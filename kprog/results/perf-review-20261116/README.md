@@ -35,6 +35,13 @@ to the source read during this review; subsequent cleanup may move them.
    should be consolidated carefully, not mistaken for a live mismatch.
    Any simplification must change the frame and tail cleanup together.
 
+   2026-11-16 live-frame refinement: current-image OTel JIT program 48 in
+   otel-regression/profile/post_rejit.jit-lines.d/prog-48.bin has the kernel's
+   RBX/R13/R14/R15 saves followed by only RBP/R12 saves in the native body.
+   The earlier preserved-ABI host blob keeps all C saves; that replay does not
+   prove duplicate saves in this actual timing path. The mask contract change
+   remains applicable to mask-zero and other frames, with gains still unmeasured.
+
 2. **Confirmed native map-update dispatch gap on the dominant BCC path.**
 
    `kprog/libnativeloader/src/native_loader.cpp:3117` initializes update sites
