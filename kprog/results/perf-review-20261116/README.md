@@ -636,3 +636,36 @@ double-execution cause and no confirmed Cilium packet fix. Those remain open. Th
     for unresolved symbols traverses process descriptors and re-queries matching
     maps; it can increase load cost and code complexity. No elapsed cost,
     current timed misbinding or packet-path cause has been measured here.
+
+20. **Finite helper-ID dispatch bypasses helper-specific leaf lowering.**
+
+    The compiler can prove a finite set of helper IDs at an indirect call.
+    `x86.rs:1422–1434` handles that set before the singleton path, emits the
+    dispatcher, and continues. Its leaves at :3738–3741 all resolve a normal
+    runtime function target and emit E8/E9. That does not use the singleton
+    bpf_tail_call lowering at :1460–1497 or CPU/task GS lowering at :1500.
+    The dispatcher's tail parameter means a native sibling JMP, not a BPF
+    program-array tail transition.
+
+    This matters functionally for a finite set containing helper12:
+    frame planning at :1125–1126 already recognizes bpf_tail_call in numeric
+    alternatives, but emission still asks runtime_call_target for a C function.
+    The sole kernel's bpf_tail_call_proto has func=BPF_PTR_POISON, explicitly
+    unused (`kernel/bpf/core.c:3083–3092`); real tail calls are verifier/JIT
+    control flow. A normal helper function target cannot implement its map
+    lookup, counter and frame transition. With no such address in the plan,
+    this path fails linking; a supplied ordinary address would still not be
+    the existing BPF tail lowering. This is a source-level coverage gap, not
+    a newly observed application failure or a fresh runtime test.
+
+    CPU-ID/current-task alternatives also miss their existing GS leaf rewrite,
+    whereas singleton calls can inline it. Some other optimizations still
+    apply: runtime_call_target handles clocks, and the later shared helper
+    passes can rewrite emitted lookup/probe relocations. Therefore this is
+    not a claim that finite dispatch disables all LTO.
+
+    Reuse the same proven helper-specific lowering for a dispatch leaf rather
+    than a second generic-only implementation. Preserve the actual finite
+    selector and each leaf's success/failure/return behavior; no speculative
+    helper target or extra validation is needed. The number of such sites in
+    the current apps and any per-call or installed-byte effect remain unknown.

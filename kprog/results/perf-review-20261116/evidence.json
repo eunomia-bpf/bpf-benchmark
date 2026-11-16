@@ -762,5 +762,21 @@
     "source_counterexample": "A(fd10),B(fd11) chooseB; dupA tofd20 changes choice toA without changing object/program ownership",
     "stage": "load time",
     "scope": "Source identity ambiguity and complexity; no actual timed misbinding or measured load-cost attribution."
+  },
+  "finite_helper_leaf_lowering_review": {
+    "recorded_at": "2026-11-16T16:20:53Z",
+    "dispatch_branch": "x86.rs:1422-1434",
+    "leaf_emission": "x86.rs:3738-3741 normal runtime target E8/E9",
+    "tail_frame_planning": "x86.rs:1125-1126 already recognizes helper12 in alternatives",
+    "kernel_tail_proto": "kernel/bpf/core.c:3083-3092 func=BPF_PTR_POISON",
+    "missing_leaf_cases": [
+      "BPF program-array tail transition",
+      "existing CPU-ID/current-task GS lowering"
+    ],
+    "optimizations_still_applicable": [
+      "clock target binding",
+      "later shared lookup/probe relocation rewrites"
+    ],
+    "scope": "Source coverage gap and optimization opportunity; no actual app failure, new execution, site frequency or measured speed/size claim."
   }
 }
