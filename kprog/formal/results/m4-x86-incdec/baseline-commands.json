@@ -1,0 +1,54 @@
+[
+  {
+    "name": "before-compile",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-x",
+      "c",
+      "-",
+      "-o",
+      "build/test_x86_incdec_host"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "before",
+    "argv": [
+      "./build/test_x86_incdec_host"
+    ],
+    "exit": 1
+  },
+  {
+    "name": "restore-compile",
+    "argv": [
+      "cc",
+      "-std=c11",
+      "-Wall",
+      "-Wextra",
+      "-O1",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "oracles/test_x86_incdec_host.c",
+      "-o",
+      "build/test_x86_incdec_host"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "restore",
+    "argv": [
+      "./build/test_x86_incdec_host"
+    ],
+    "exit": 0
+  }
+]

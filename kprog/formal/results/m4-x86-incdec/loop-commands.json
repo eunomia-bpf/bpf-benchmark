@@ -1,0 +1,128 @@
+{
+  "inc": [
+    {
+      "command": [
+        "clang-18",
+        "-c",
+        "/var/tmp/kprog-tmp/perf/loop-pointer-analysis/copy.S",
+        "-o",
+        "/var/tmp/kprog-tmp/perf/loop-pointer-analysis/copy.native.o"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--input",
+        "/var/tmp/kprog-tmp/perf/loop-pointer-analysis/copy.native.o",
+        "--symbol",
+        "loop_copy",
+        "--mode",
+        "proof",
+        "--preserve-entry-abi",
+        "--output",
+        "/var/tmp/kprog-tmp/perf/loop-pointer-analysis/copy.proof.o"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "native-link: entry=loop_copy (28 bytes), 2 reachable symbol(s) total\n  - loop_copy (vaddr 0x0, 28 bytes) [entry]\n  - copy_bytes (vaddr 0x1c, 15 bytes)\nnative-link: wrote proof object 47 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/loop-pointer-analysis/copy.proof.o\n"
+    },
+    {
+      "command": [
+        "clang-18",
+        "-shared",
+        "-fPIC",
+        "-O3",
+        "/var/tmp/kprog-tmp/perf/loop-pointer-analysis/copy.S",
+        "-o",
+        "/var/tmp/kprog-tmp/perf/loop-pointer-analysis/native.so"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "clang-18",
+        "-shared",
+        "-fPIC",
+        "-O2",
+        "-g",
+        "-w",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/var/tmp/kprog-tmp/perf/loop-pointer-analysis/copy.bpf.c",
+        "/var/tmp/kprog-tmp/perf/loop-pointer-analysis/input.c",
+        "-o",
+        "/var/tmp/kprog-tmp/perf/loop-pointer-analysis/model.so"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "add": [
+    {
+      "command": [
+        "clang-18",
+        "-c",
+        "/var/tmp/kprog-tmp/perf/loop-pointer-analysis/copy.S",
+        "-o",
+        "/var/tmp/kprog-tmp/perf/loop-pointer-analysis/copy.native.o"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+        "--input",
+        "/var/tmp/kprog-tmp/perf/loop-pointer-analysis/copy.native.o",
+        "--symbol",
+        "loop_copy",
+        "--mode",
+        "proof",
+        "--preserve-entry-abi",
+        "--output",
+        "/var/tmp/kprog-tmp/perf/loop-pointer-analysis/copy.proof.o"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "native-link: entry=loop_copy (28 bytes), 2 reachable symbol(s) total\n  - loop_copy (vaddr 0x0, 28 bytes) [entry]\n  - copy_bytes (vaddr 0x1c, 17 bytes)\nnative-link: wrote proof object 49 bytes, 0 reloc(s) -> /var/tmp/kprog-tmp/perf/loop-pointer-analysis/copy.proof.o\n"
+    },
+    {
+      "command": [
+        "clang-18",
+        "-shared",
+        "-fPIC",
+        "-O3",
+        "/var/tmp/kprog-tmp/perf/loop-pointer-analysis/copy.S",
+        "-o",
+        "/var/tmp/kprog-tmp/perf/loop-pointer-analysis/native.so"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "clang-18",
+        "-shared",
+        "-fPIC",
+        "-O2",
+        "-g",
+        "-w",
+        "-I/workspaces/repository/vendor/libbpf/src",
+        "/var/tmp/kprog-tmp/perf/loop-pointer-analysis/copy.bpf.c",
+        "/var/tmp/kprog-tmp/perf/loop-pointer-analysis/input.c",
+        "-o",
+        "/var/tmp/kprog-tmp/perf/loop-pointer-analysis/model.so"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ]
+}

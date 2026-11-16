@@ -851,6 +851,14 @@ clight: clightgen
 	./build/test_x86_store_selectors_host
 	$(CC) -D__COMPCERT__ -include oracles/compcert_memory_host.h -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_x86_inline_binding_host.c -o build/test_x86_inline_binding_host
 	./build/test_x86_inline_binding_host
+	for mode in 0:0 1:0 1:1; do \
+	  flags=; if test $${mode#*:} = 1; then flags=-D__COMPCERT__; fi; \
+	  $(CC) -std=c11 -Wall -Wextra -O1 -fsanitize=undefined -fno-sanitize-recover=undefined \
+	    -DINLINE=$${mode%:*} $$flags -include oracles/compcert_memory_host.h \
+	    -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src \
+	    oracles/test_x86_incdec_host.c -o build/test_x86_incdec_host && \
+	  ./build/test_x86_incdec_host || exit $$?; \
+	done
 	$(CC) -std=c11 -Wall -Wextra -O1 -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -c oracles/test_x86_helper_abi.c -o build/test_x86_helper_abi.o
 	for adapter in 0 1; do \
 	  flags=; if test $$adapter = 1; then flags=-D__COMPCERT__; fi; \

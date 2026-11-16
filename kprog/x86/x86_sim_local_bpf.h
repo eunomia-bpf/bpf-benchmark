@@ -1937,6 +1937,12 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
                 X86_SIM_L_WRITE_REG_PTR_TAG((DST), KPROG_PTR_ADD64_BITS(X86_SIM_L_READ_REG_PTR(DST), \
                     __x86_l_alu==X86_ALU_ADD ? __x86_l_rhs : -__x86_l_rhs), \
                     KPROG_PTR_ADD64_TAG(X86_SIM_L_REG_TAG(DST))); \
+            else if ((DST)!=X86_RSP && __x86_l_width==X86_WIDTH_64 && __x86_l_dst_shift==0 && \
+                X86_SIM_L_MEMORY_TAG(X86_SIM_L_REG_TAG(DST)) && \
+                (__x86_l_alu==X86_ALU_INC || __x86_l_alu==X86_ALU_DEC)) \
+                X86_SIM_L_WRITE_REG_PTR_TAG((DST), KPROG_PTR_ADD64_BITS(X86_SIM_L_READ_REG_PTR(DST), \
+                    __x86_l_result-__x86_l_lhs), \
+                    KPROG_PTR_ADD64_TAG(X86_SIM_L_REG_TAG(DST))); \
             else \
 			X86_SIM_L_WRITE_REG_WIDTH_SHIFT((DST), __x86_l_result,\
 				__x86_l_width, __x86_l_dst_shift);           \

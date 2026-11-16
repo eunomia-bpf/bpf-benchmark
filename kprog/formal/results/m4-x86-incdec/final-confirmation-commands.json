@@ -1,0 +1,105 @@
+[
+  {
+    "name": "reexport-X86ProgramProfile",
+    "argv": [
+      "external/clean/clightgen",
+      "-fstruct-passing",
+      "-lean",
+      "-normalize",
+      "-DKPROG_X86_PROGRAM_EXPORT=1",
+      "-include",
+      "c/ProgramSections.h",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-o",
+      "KProgFormal/Clight/X86ProgramProfile.lean",
+      "build/x86_program_profile.bpf.c"
+    ],
+    "exit": 0,
+    "equal": true,
+    "seconds": 4.3431035070098005
+  },
+  {
+    "name": "reexport-X86StackProfile376",
+    "argv": [
+      "external/clean/clightgen",
+      "-fstruct-passing",
+      "-lean",
+      "-normalize",
+      "-include",
+      "c/ProgramSections.h",
+      "-I../../vendor/libbpf/include/uapi",
+      "-I../../vendor/libbpf/src",
+      "-o",
+      "KProgFormal/Clight/X86StackProfile376.lean",
+      "build/x86_stack_profile_376.bpf.c"
+    ],
+    "exit": 0,
+    "equal": true,
+    "seconds": 9.07855569999083
+  },
+  {
+    "name": "all-clight-lean",
+    "argv": [
+      "lake",
+      "build",
+      "KProgFormal.Clight.Arm64Access",
+      "KProgFormal.Clight.Arm64Address",
+      "KProgFormal.Clight.Arm64Addressing",
+      "KProgFormal.Clight.Arm64Entry",
+      "KProgFormal.Clight.Arm64Numeric",
+      "KProgFormal.Clight.Arm64PayloadProfile",
+      "KProgFormal.Clight.Arm64Program",
+      "KProgFormal.Clight.Arm64ProgramContext",
+      "KProgFormal.Clight.Arm64ProgramFixture",
+      "KProgFormal.Clight.Arm64Stack",
+      "KProgFormal.Clight.X86Context",
+      "KProgFormal.Clight.X86Helpers",
+      "KProgFormal.Clight.X86Inline",
+      "KProgFormal.Clight.X86Memory",
+      "KProgFormal.Clight.X86Numeric",
+      "KProgFormal.Clight.X86Pointer",
+      "KProgFormal.Clight.X86ProgramProfile",
+      "KProgFormal.Clight.X86StackProfile200",
+      "KProgFormal.Clight.X86StackProfile376"
+    ],
+    "exit": 0,
+    "seconds": 1.298106388974702
+  },
+  {
+    "name": "program-check",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "oracles/test_x86_program_profile.lean"
+    ],
+    "exit": 0,
+    "seconds": 2.1759929329855368
+  },
+  {
+    "name": "producer-profile-check",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "oracles/test_x86_producer_profile.lean"
+    ],
+    "exit": 0,
+    "seconds": 4.891717891005101
+  },
+  {
+    "name": "axioms",
+    "argv": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "build/X86ProgramAxioms.lean"
+    ],
+    "exit": 0,
+    "seconds": 1.016971172997728
+  }
+]
