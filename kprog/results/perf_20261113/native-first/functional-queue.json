@@ -1,0 +1,37 @@
+{
+  "timestamp": "2026-11-16T03:47:05Z",
+  "pid": 1328820,
+  "raw": "/workspaces/kprog-raw/perf/20261116-checked-six-apps",
+  "log": "/workspaces/kprog-raw/perf/20261116-checked-six-apps/launcher.log",
+  "command": [
+    "make",
+    "-r",
+    "-f",
+    "kprog/test/scalar-spill-precision.mk",
+    "checked-corpus-all",
+    "OUTPUT=/workspaces/kprog-raw/perf/20261116-checked-six-apps",
+    "CHECKED_LOADER=/var/tmp/kprog-tmp/verified/direct-recovery/recovery"
+  ],
+  "source_commits": [
+    "b2793af35",
+    "8b6e5db21"
+  ],
+  "image": "d9e2963059e759ca1b6f7cd25a13dc598f3ea0d4d6168b2679de36918d21b62c",
+  "host_cpus": "8-15",
+  "guest_memory": "48G",
+  "guest_address_space_bytes": 85899345920,
+  "parent_address_space_bytes": 103079215104,
+  "samples": 1,
+  "workload_seconds": 10,
+  "stats": 1,
+  "lock": "image SH; no timing lock",
+  "scope": "Functional diagnostic using production loader/bridge embedded in the existing recovery regression binary; source not yet published into base/image",
+  "apps": [
+    "otelcol-ebpf-profiler/profiling",
+    "bcc/set",
+    "cilium/agent",
+    "tetragon/observer",
+    "tracee/monitor",
+    "katran"
+  ]
+}
