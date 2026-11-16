@@ -1,0 +1,55 @@
+{
+  "recorded_at": "2026-11-16T00:43:26Z",
+  "source": "00a402b4c",
+  "image": "sha256:fc408f640ba1b0caaed406fe9f736893c25b5249bd27f7c4b0e84fb8d5c16cff",
+  "previous_image": "sha256:741f82276311e4fe6f219a7bc26120f80c2596c7cf396e2cbfca81164f6872d3",
+  "started": "2026-11-16T00:06:12Z",
+  "finished": "2026-11-16T00:07:50Z",
+  "kernel_modules_stable": true,
+  "base_B_stable": true,
+  "native_files": 1252,
+  "native_files_unchanged": true,
+  "stage_differences": [],
+  "tools": [
+    {
+      "path": "/usr/local/bin/native-link",
+      "shipped": {
+        "bytes": 2875176,
+        "sha256": "f7de4bfc240bfe9eac1adf2ef8c848d1b9adf321798a9a3b50a41702ae9aff81"
+      },
+      "built": "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+      "current": {
+        "bytes": 2875176,
+        "sha256": "f7de4bfc240bfe9eac1adf2ef8c848d1b9adf321798a9a3b50a41702ae9aff81"
+      },
+      "equal": true
+    },
+    {
+      "path": "/usr/local/lib/bpfrejit/libnative_loader.so",
+      "shipped": {
+        "bytes": 801360,
+        "sha256": "c296f028a431c28bb80d503d34ce0bb9fb00628c82557b31fa95171ee3946795"
+      },
+      "built": "/workspaces/repository/runner/build-llvmbpf/native_loader/libnative_loader.so",
+      "current": {
+        "bytes": 801360,
+        "sha256": "c296f028a431c28bb80d503d34ce0bb9fb00628c82557b31fa95171ee3946795"
+      },
+      "equal": true
+    },
+    {
+      "path": "/usr/local/lib/bpfrejit/libbpfrejit_shim.so",
+      "shipped": {
+        "bytes": 463696,
+        "sha256": "19f2f67ad127424b1356e8913eb9114299f4ea250ca2750511129af0b2a51ab0"
+      },
+      "built": "/workspaces/repository/bpfopt/shim/build-x86/libbpfrejit_shim.so",
+      "current": {
+        "bytes": 463696,
+        "sha256": "19f2f67ad127424b1356e8913eb9114299f4ea250ca2750511129af0b2a51ab0"
+      },
+      "equal": true
+    }
+  ],
+  "scope": "Published sole image/base with helper aliases. Actual kernel prototype checks pass; C breadth-round application results follow."
+}

@@ -1,0 +1,21 @@
+{
+  "raw": "/workspaces/kprog-raw/perf/20261115-narrow-spill/no-slot-sharing",
+  "flags": [
+    "-no-stack-slot-sharing"
+  ],
+  "completed": true,
+  "code_bytes": 463200,
+  "object_bytes": 1287264,
+  "frame": {
+    "trusted_x86_x86_sim_xdp": 2920
+  },
+  "spill_slots": 417,
+  "widths": {
+    "4": 211,
+    "8": 206
+  },
+  "live_slots": 42,
+  "noninterfering_pairs": 73559,
+  "packed_pairs": 105,
+  "interpretation": "Disabling slot sharing exposes211 narrow and206 wide spills; frame increases784->2920/code295336->463200. Production flags remain unchanged."
+}

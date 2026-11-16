@@ -1,0 +1,927 @@
+{
+  "scope": "Compare reference lookup code between unchanged non-lookup helper anchors.\n\nThis observes static code from existing linker replays and retains all source\nlookups. Dynamic branch frequency, program safety and runtime work are separate\nquestions.\n",
+  "source": "/workspaces/kprog-raw/perf/20261115-word-hash-lto/timed-plan-replay/result.json",
+  "reference": "/workspaces/kprog-raw/perf/20261115-may-linker-comparison/reference/result.json",
+  "plan": "/workspaces/kprog-raw/perf/20261115-word-hash-lto/timing/ab/post_rejit-27aee6c02466/35d7f2355be09ef4.tmp.3020.link-plan.json",
+  "helper_anchor_sequences_equal": true,
+  "source_anchors": [
+    {
+      "helper": "bpf_ktime_get_ns",
+      "offset": 3765
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "offset": 3900
+    },
+    {
+      "helper": "bpf_xdp_adjust_head",
+      "offset": 4211
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "offset": 4511
+    },
+    {
+      "helper": "bpf_map_update_elem",
+      "offset": 4829
+    },
+    {
+      "helper": "bpf_xdp_adjust_head",
+      "offset": 4942
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "offset": 5535
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "offset": 5853
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "offset": 5997
+    },
+    {
+      "helper": "bpf_xdp_adjust_head",
+      "offset": 6320
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "offset": 6485
+    },
+    {
+      "helper": "bpf_map_update_elem",
+      "offset": 6808
+    },
+    {
+      "helper": "bpf_xdp_adjust_head",
+      "offset": 7142
+    },
+    {
+      "helper": "bpf_map_update_elem",
+      "offset": 7725
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "offset": 7793
+    },
+    {
+      "helper": "bpf_map_update_elem",
+      "offset": 7931
+    }
+  ],
+  "reference_anchors": [
+    {
+      "helper": "bpf_ktime_get_ns",
+      "offset": 4344
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "offset": 4541
+    },
+    {
+      "helper": "bpf_xdp_adjust_head",
+      "offset": 4986
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "offset": 5350
+    },
+    {
+      "helper": "bpf_map_update_elem",
+      "offset": 5736
+    },
+    {
+      "helper": "bpf_xdp_adjust_head",
+      "offset": 5870
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "offset": 6622
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "offset": 7093
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "offset": 7302
+    },
+    {
+      "helper": "bpf_xdp_adjust_head",
+      "offset": 7762
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "offset": 8020
+    },
+    {
+      "helper": "bpf_map_update_elem",
+      "offset": 8414
+    },
+    {
+      "helper": "bpf_xdp_adjust_head",
+      "offset": 8934
+    },
+    {
+      "helper": "bpf_map_update_elem",
+      "offset": 9548
+    },
+    {
+      "helper": "bpf_ktime_get_ns",
+      "offset": 9643
+    },
+    {
+      "helper": "bpf_map_update_elem",
+      "offset": 9826
+    }
+  ],
+  "intervals": [
+    {
+      "previous_anchor": null,
+      "next_anchor": {
+        "helper": "bpf_ktime_get_ns",
+        "offset": 3765
+      },
+      "source_lookups": [
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 70,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1597,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1797,
+          "map": "vip_map",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1869,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1959,
+          "map": "lru_mapping",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 1993,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 2071,
+          "map": "quic_stats_map",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 2243,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 2382,
+          "map": "vip_map",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 2517,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 2691,
+          "map": "vip_map",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 2765,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 2855,
+          "map": "lru_mapping",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 2889,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 2967,
+          "map": "quic_stats_map",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 3129,
+          "map": "vip_map",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 3191,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 3337,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 3400,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 3486,
+          "map": "server_id_stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 3552,
+          "map": "server_id_stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 3743,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        }
+      ],
+      "reference_external_lookups": [
+        {
+          "offset": 1869,
+          "kind": 1,
+          "target": 18446744071617407440,
+          "helper_names": []
+        },
+        {
+          "offset": 2086,
+          "kind": 1,
+          "target": 18446744071617426816,
+          "helper_names": []
+        },
+        {
+          "offset": 2610,
+          "kind": 1,
+          "target": 18446744071617407440,
+          "helper_names": []
+        },
+        {
+          "offset": 2966,
+          "kind": 1,
+          "target": 18446744071617407440,
+          "helper_names": []
+        },
+        {
+          "offset": 3185,
+          "kind": 1,
+          "target": 18446744071617426816,
+          "helper_names": []
+        },
+        {
+          "offset": 3523,
+          "kind": 1,
+          "target": 18446744071617407440,
+          "helper_names": []
+        },
+        {
+          "offset": 4316,
+          "kind": 1,
+          "target": 18446744071617350144,
+          "helper_names": [
+            "bpf_map_lookup_elem"
+          ]
+        }
+      ],
+      "lru_sites": [
+        3743
+      ]
+    },
+    {
+      "previous_anchor": {
+        "helper": "bpf_ktime_get_ns",
+        "offset": 3765
+      },
+      "next_anchor": {
+        "helper": "bpf_ktime_get_ns",
+        "offset": 3900
+      },
+      "source_lookups": [
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 3827,
+          "map": "reals",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 3881,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        }
+      ],
+      "reference_external_lookups": [],
+      "lru_sites": []
+    },
+    {
+      "previous_anchor": {
+        "helper": "bpf_ktime_get_ns",
+        "offset": 3900
+      },
+      "next_anchor": {
+        "helper": "bpf_xdp_adjust_head",
+        "offset": 4211
+      },
+      "source_lookups": [
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 3972,
+          "map": "vip_to_down_reals_map",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 3988,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 4018,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 4067,
+          "map": "ctl_array",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 4108,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 4150,
+          "map": "reals_stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        }
+      ],
+      "reference_external_lookups": [
+        {
+          "offset": 4624,
+          "kind": 1,
+          "target": 18446744071617407440,
+          "helper_names": []
+        },
+        {
+          "offset": 4658,
+          "kind": 1,
+          "target": 18446744071617350144,
+          "helper_names": [
+            "bpf_map_lookup_elem"
+          ]
+        }
+      ],
+      "lru_sites": []
+    },
+    {
+      "previous_anchor": {
+        "helper": "bpf_xdp_adjust_head",
+        "offset": 4211
+      },
+      "next_anchor": {
+        "helper": "bpf_ktime_get_ns",
+        "offset": 4511
+      },
+      "source_lookups": [
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 4426,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 4493,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        }
+      ],
+      "reference_external_lookups": [],
+      "lru_sites": []
+    },
+    {
+      "previous_anchor": {
+        "helper": "bpf_ktime_get_ns",
+        "offset": 4511
+      },
+      "next_anchor": {
+        "helper": "bpf_map_update_elem",
+        "offset": 4829
+      },
+      "source_lookups": [
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 4699,
+          "map": "ch_rings",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 4749,
+          "map": "reals",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        }
+      ],
+      "reference_external_lookups": [],
+      "lru_sites": []
+    },
+    {
+      "previous_anchor": {
+        "helper": "bpf_map_update_elem",
+        "offset": 4829
+      },
+      "next_anchor": {
+        "helper": "bpf_xdp_adjust_head",
+        "offset": 4942
+      },
+      "source_lookups": [
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 4853,
+          "map": "vip_miss_stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        }
+      ],
+      "reference_external_lookups": [],
+      "lru_sites": []
+    },
+    {
+      "previous_anchor": {
+        "helper": "bpf_xdp_adjust_head",
+        "offset": 4942
+      },
+      "next_anchor": {
+        "helper": "bpf_ktime_get_ns",
+        "offset": 5535
+      },
+      "source_lookups": [
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 5168,
+          "map": "lru_miss_stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 5244,
+          "map": "server_id_map",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 5283,
+          "map": "reals",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 5304,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 5516,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        }
+      ],
+      "reference_external_lookups": [],
+      "lru_sites": [
+        5304
+      ]
+    },
+    {
+      "previous_anchor": {
+        "helper": "bpf_ktime_get_ns",
+        "offset": 5535
+      },
+      "next_anchor": {
+        "helper": "bpf_ktime_get_ns",
+        "offset": 5853
+      },
+      "source_lookups": [
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 5604,
+          "map": "server_id_stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 5674,
+          "map": "server_id_map",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 5713,
+          "map": "reals",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 5743,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 5831,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        }
+      ],
+      "reference_external_lookups": [],
+      "lru_sites": [
+        5743,
+        5831
+      ]
+    },
+    {
+      "previous_anchor": {
+        "helper": "bpf_ktime_get_ns",
+        "offset": 5853
+      },
+      "next_anchor": {
+        "helper": "bpf_ktime_get_ns",
+        "offset": 5997
+      },
+      "source_lookups": [
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 5924,
+          "map": "reals",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 5978,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        }
+      ],
+      "reference_external_lookups": [],
+      "lru_sites": []
+    },
+    {
+      "previous_anchor": {
+        "helper": "bpf_ktime_get_ns",
+        "offset": 5997
+      },
+      "next_anchor": {
+        "helper": "bpf_xdp_adjust_head",
+        "offset": 6320
+      },
+      "source_lookups": [
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 6069,
+          "map": "vip_to_down_reals_map",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 6085,
+          "map": null,
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 6115,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 6171,
+          "map": "ctl_array",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 6206,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 6257,
+          "map": "reals_stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        }
+      ],
+      "reference_external_lookups": [
+        {
+          "offset": 7385,
+          "kind": 1,
+          "target": 18446744071617407440,
+          "helper_names": []
+        },
+        {
+          "offset": 7419,
+          "kind": 1,
+          "target": 18446744071617350144,
+          "helper_names": [
+            "bpf_map_lookup_elem"
+          ]
+        }
+      ],
+      "lru_sites": []
+    },
+    {
+      "previous_anchor": {
+        "helper": "bpf_xdp_adjust_head",
+        "offset": 6320
+      },
+      "next_anchor": {
+        "helper": "bpf_ktime_get_ns",
+        "offset": 6485
+      },
+      "source_lookups": [
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 6352,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 6400,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 6467,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        }
+      ],
+      "reference_external_lookups": [],
+      "lru_sites": []
+    },
+    {
+      "previous_anchor": {
+        "helper": "bpf_ktime_get_ns",
+        "offset": 6485
+      },
+      "next_anchor": {
+        "helper": "bpf_map_update_elem",
+        "offset": 6808
+      },
+      "source_lookups": [
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 6673,
+          "map": "ch_rings",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 6720,
+          "map": "reals",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        }
+      ],
+      "reference_external_lookups": [],
+      "lru_sites": []
+    },
+    {
+      "previous_anchor": {
+        "helper": "bpf_map_update_elem",
+        "offset": 6808
+      },
+      "next_anchor": {
+        "helper": "bpf_xdp_adjust_head",
+        "offset": 7142
+      },
+      "source_lookups": [
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 6832,
+          "map": "vip_miss_stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 6911,
+          "map": "lru_miss_stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 6962,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 6995,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        },
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 7096,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        }
+      ],
+      "reference_external_lookups": [],
+      "lru_sites": []
+    },
+    {
+      "previous_anchor": {
+        "helper": "bpf_xdp_adjust_head",
+        "offset": 7142
+      },
+      "next_anchor": {
+        "helper": "bpf_map_update_elem",
+        "offset": 7725
+      },
+      "source_lookups": [
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 7174,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        }
+      ],
+      "reference_external_lookups": [],
+      "lru_sites": []
+    },
+    {
+      "previous_anchor": {
+        "helper": "bpf_map_update_elem",
+        "offset": 7725
+      },
+      "next_anchor": {
+        "helper": "bpf_ktime_get_ns",
+        "offset": 7793
+      },
+      "source_lookups": [
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 7774,
+          "map": "stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        }
+      ],
+      "reference_external_lookups": [],
+      "lru_sites": []
+    },
+    {
+      "previous_anchor": {
+        "helper": "bpf_ktime_get_ns",
+        "offset": 7793
+      },
+      "next_anchor": {
+        "helper": "bpf_map_update_elem",
+        "offset": 7931
+      },
+      "source_lookups": [
+        {
+          "helper": "bpf_map_lookup_elem",
+          "input_offset": 7855,
+          "map": "server_id_stats",
+          "proof_mode": false,
+          "symbol": "balancer_ingress"
+        }
+      ],
+      "reference_external_lookups": [],
+      "lru_sites": []
+    },
+    {
+      "previous_anchor": {
+        "helper": "bpf_map_update_elem",
+        "offset": 7931
+      },
+      "next_anchor": null,
+      "source_lookups": [],
+      "reference_external_lookups": [],
+      "lru_sites": []
+    }
+  ],
+  "expected_lru_sites": [
+    3743,
+    5304,
+    5743,
+    5831
+  ],
+  "lru_ref_offsets": [
+    35
+  ],
+  "direct_reference_lru_ref_stores": [],
+  "interpretation": "External-call and ref-store presence describe the static output in each aligned interval. Multiple source sites in an interval share the same reported reference calls. Actual branch frequency awaits runtime observation."
+}

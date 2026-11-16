@@ -466,6 +466,10 @@ KATRAN_AUDIT_JIT ?=
 katran-helper-audit:
 	taskset -c 16-19 prlimit --as=2147483648 -- python3 $(ROOT)/kprog/test/audit_native_helper_sites.py --native $(ROOT)/corpus/results/katran-c-hdr-20261115/objects/balancer.native.o --symbol balancer_ingress --linker $(LINKER_BINARY) $(if $(KATRAN_LINK_PLAN),--link-plan $(KATRAN_LINK_PLAN),) $(if $(KATRAN_AUDIT_JIT),--jit-capture $(KATRAN_AUDIT_JIT) --jit-program 16,) --output $(OUTPUT)
 
+.PHONY: reference-helper-intervals
+reference-helper-intervals:
+	python3 $(ROOT)/kprog/test/compare_helper_intervals.py $(HELPER_INTERVAL_ARGS) --output $(OUTPUT)
+
 .PHONY: clock-kernel-facts
 clock-kernel-facts:
 	$(MAKE) -r -C $(ROOT)/kprog/libnativeloader helper-context-kernel-input HELPER_BUILD=/var/tmp/kprog-tmp/perf/helper-context

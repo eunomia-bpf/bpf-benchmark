@@ -25,3 +25,8 @@ The existing wrong-type query failure is also preserved. All Tracee object
 undefined BPF helper spellings are already represented by the supported table;
 this fixes the two differing public/kernel spellings without editing its source.
 Sole-image loader publication follows, then C's unchanged-default breadth round.
+
+Published00:07:50Z in sole imagefc408f64. Shipped loaderc296f028, linkerf7de4bfc
+and shim19f2f67a match their inputs. Kernel/modules, base B compiler and1252
+native files remain stable. C's full-default breadth round supplies the
+application outcome; the alias kernel test establishes the binding identities.
