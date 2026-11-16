@@ -1,0 +1,435 @@
+{
+  "scope": "Katran's per-thread packetgen series and separately scoped arm counters.\n\nThe frozen runner snapshots BPF counters once around the whole sample loop.\nIt does not retain per-sample ns/call. Packetgen errors are reported attempts,\nnot established BPF drops; keep their raw counts separate from throughput.\n",
+  "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_215758_610196",
+  "app_status": "ok",
+  "stamp": "2026-11-16T22:31:55Z",
+  "bpf_stats": true,
+  "samples": 3,
+  "workload_seconds": 180.0,
+  "phases": {
+    "baseline": {
+      "samples": [
+        {
+          "index": 0,
+          "threads": [
+            {
+              "thread": 0,
+              "reported_pps": 635502,
+              "reported_errors": 144867590,
+              "reported_packets": 114338077,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
+              "reported_kernel_duration_us": 179917681,
+              "wrapper_duration_s": 180.044534376,
+              "component_returncode": 0
+            },
+            {
+              "thread": 1,
+              "reported_pps": 458702,
+              "reported_errors": 109433991,
+              "reported_packets": 82528771,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
+              "reported_kernel_duration_us": 179917758,
+              "wrapper_duration_s": 180.044534376,
+              "component_returncode": 0
+            },
+            {
+              "thread": 2,
+              "reported_pps": 550577,
+              "reported_errors": 125354306,
+              "reported_packets": 99057015,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
+              "reported_kernel_duration_us": 179914868,
+              "wrapper_duration_s": 180.044534376,
+              "component_returncode": 0
+            },
+            {
+              "thread": 3,
+              "reported_pps": 629212,
+              "reported_errors": 143629900,
+              "reported_packets": 113202905,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
+              "reported_kernel_duration_us": 179912060,
+              "wrapper_duration_s": 180.044534376,
+              "component_returncode": 0
+            }
+          ],
+          "reported_pps": 2273993,
+          "reported_errors": 523285787,
+          "reported_packets": 409126768
+        },
+        {
+          "index": 1,
+          "threads": [
+            {
+              "thread": 0,
+              "reported_pps": 781081,
+              "reported_errors": 164816748,
+              "reported_packets": 140561886,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
+              "reported_kernel_duration_us": 179957943,
+              "wrapper_duration_s": 180.09460673400002,
+              "component_returncode": 0
+            },
+            {
+              "thread": 1,
+              "reported_pps": 469025,
+              "reported_errors": 91977874,
+              "reported_packets": 84404953,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
+              "reported_kernel_duration_us": 179958204,
+              "wrapper_duration_s": 180.09460673400002,
+              "component_returncode": 0
+            },
+            {
+              "thread": 2,
+              "reported_pps": 393300,
+              "reported_errors": 84121990,
+              "reported_packets": 70777681,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
+              "reported_kernel_duration_us": 179958100,
+              "wrapper_duration_s": 180.09460673400002,
+              "component_returncode": 0
+            },
+            {
+              "thread": 3,
+              "reported_pps": 749079,
+              "reported_errors": 155103028,
+              "reported_packets": 134803104,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
+              "reported_kernel_duration_us": 179958242,
+              "wrapper_duration_s": 180.09460673400002,
+              "component_returncode": 0
+            }
+          ],
+          "reported_pps": 2392485,
+          "reported_errors": 496019640,
+          "reported_packets": 430547624
+        },
+        {
+          "index": 2,
+          "threads": [
+            {
+              "thread": 0,
+              "reported_pps": 766521,
+              "reported_errors": 169489954,
+              "reported_packets": 137894058,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
+              "reported_kernel_duration_us": 179895940,
+              "wrapper_duration_s": 180.04656710899997,
+              "component_returncode": 0
+            },
+            {
+              "thread": 1,
+              "reported_pps": 159354,
+              "reported_errors": 36211047,
+              "reported_packets": 28667310,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
+              "reported_kernel_duration_us": 179896141,
+              "wrapper_duration_s": 180.04656710899997,
+              "component_returncode": 0
+            },
+            {
+              "thread": 2,
+              "reported_pps": 781221,
+              "reported_errors": 172099545,
+              "reported_packets": 140538637,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
+              "reported_kernel_duration_us": 179896011,
+              "wrapper_duration_s": 180.04656710899997,
+              "component_returncode": 0
+            },
+            {
+              "thread": 3,
+              "reported_pps": 706952,
+              "reported_errors": 161606728,
+              "reported_packets": 127178011,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
+              "reported_kernel_duration_us": 179896016,
+              "wrapper_duration_s": 180.04656710899997,
+              "component_returncode": 0
+            }
+          ],
+          "reported_pps": 2414048,
+          "reported_errors": 539407274,
+          "reported_packets": 434278016
+        }
+      ],
+      "counter_scope": "one full-arm window across all samples",
+      "calls": 1273952408,
+      "run_time_ns": 236715364289,
+      "aggregate_ns_per_call": 185.81177978274994,
+      "per_sample_ns_per_call": "not retained by the frozen entry",
+      "programs": {
+        "9": {
+          "bytes_jited": 13641,
+          "bytes_xlated": 23840,
+          "id": 9,
+          "name": "balancer_ingres",
+          "run_cnt_delta": 1273952408,
+          "run_time_ns_delta": 236715364289,
+          "type": "xdp"
+        }
+      }
+    },
+    "post_rejit": {
+      "samples": [
+        {
+          "index": 0,
+          "threads": [
+            {
+              "thread": 0,
+              "reported_pps": 744282,
+              "reported_errors": 162994701,
+              "reported_packets": 133928636,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
+              "reported_kernel_duration_us": 179943242,
+              "wrapper_duration_s": 180.08992053399993,
+              "component_returncode": 0
+            },
+            {
+              "thread": 1,
+              "reported_pps": 147141,
+              "reported_errors": 31439190,
+              "reported_packets": 26477140,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
+              "reported_kernel_duration_us": 179942977,
+              "wrapper_duration_s": 180.08992053399993,
+              "component_returncode": 0
+            },
+            {
+              "thread": 2,
+              "reported_pps": 825751,
+              "reported_errors": 181010659,
+              "reported_packets": 148588257,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
+              "reported_kernel_duration_us": 179943128,
+              "wrapper_duration_s": 180.08992053399993,
+              "component_returncode": 0
+            },
+            {
+              "thread": 3,
+              "reported_pps": 752499,
+              "reported_errors": 169806025,
+              "reported_packets": 135407135,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
+              "reported_kernel_duration_us": 179943128,
+              "wrapper_duration_s": 180.08992053399993,
+              "component_returncode": 0
+            }
+          ],
+          "reported_pps": 2469673,
+          "reported_errors": 545250575,
+          "reported_packets": 444401168
+        },
+        {
+          "index": 1,
+          "threads": [
+            {
+              "thread": 0,
+              "reported_pps": 726301,
+              "reported_errors": 149187327,
+              "reported_packets": 130667062,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
+              "reported_kernel_duration_us": 179907528,
+              "wrapper_duration_s": 180.04559573999995,
+              "component_returncode": 0
+            },
+            {
+              "thread": 1,
+              "reported_pps": 38149,
+              "reported_errors": 11119950,
+              "reported_packets": 6863397,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
+              "reported_kernel_duration_us": 179907537,
+              "wrapper_duration_s": 180.04559573999995,
+              "component_returncode": 0
+            },
+            {
+              "thread": 2,
+              "reported_pps": 749178,
+              "reported_errors": 148593667,
+              "reported_packets": 134780762,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
+              "reported_kernel_duration_us": 179904738,
+              "wrapper_duration_s": 180.04559573999995,
+              "component_returncode": 0
+            },
+            {
+              "thread": 3,
+              "reported_pps": 702147,
+              "reported_errors": 141150054,
+              "reported_packets": 126322044,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
+              "reported_kernel_duration_us": 179908151,
+              "wrapper_duration_s": 180.04559573999995,
+              "component_returncode": 0
+            }
+          ],
+          "reported_pps": 2215775,
+          "reported_errors": 450050998,
+          "reported_packets": 398633265
+        },
+        {
+          "index": 2,
+          "threads": [
+            {
+              "thread": 0,
+              "reported_pps": 559463,
+              "reported_errors": 126015413,
+              "reported_packets": 102688637,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
+              "reported_kernel_duration_us": 183548533,
+              "wrapper_duration_s": 199.11967135999998,
+              "component_returncode": 0
+            },
+            {
+              "thread": 1,
+              "reported_pps": 420201,
+              "reported_errors": 92550968,
+              "reported_packets": 77361421,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
+              "reported_kernel_duration_us": 184105539,
+              "wrapper_duration_s": 199.11967135999998,
+              "component_returncode": 0
+            },
+            {
+              "thread": 2,
+              "reported_pps": 691346,
+              "reported_errors": 152523711,
+              "reported_packets": 127111915,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
+              "reported_kernel_duration_us": 183861409,
+              "wrapper_duration_s": 199.11967135999998,
+              "component_returncode": 0
+            },
+            {
+              "thread": 3,
+              "reported_pps": 659722,
+              "reported_errors": 150381491,
+              "reported_packets": 122191621,
+              "queue_map_range": [
+                0,
+                0
+              ],
+              "current_queue": 0,
+              "reported_kernel_duration_us": 185216669,
+              "wrapper_duration_s": 199.11967135999998,
+              "component_returncode": 0
+            }
+          ],
+          "reported_pps": 2330732,
+          "reported_errors": 521471583,
+          "reported_packets": 429353594
+        }
+      ],
+      "counter_scope": "one full-arm window across all samples",
+      "calls": 1272388027,
+      "run_time_ns": 238296129383,
+      "aggregate_ns_per_call": 187.2825933020195,
+      "per_sample_ns_per_call": "not retained by the frozen entry",
+      "programs": {
+        "16": {
+          "bytes_jited": 10546,
+          "bytes_xlated": 16,
+          "id": 16,
+          "name": "balancer_ingres",
+          "run_cnt_delta": 1272388027,
+          "run_time_ns_delta": 238296129383,
+          "type": "xdp"
+        }
+      }
+    }
+  }
+}

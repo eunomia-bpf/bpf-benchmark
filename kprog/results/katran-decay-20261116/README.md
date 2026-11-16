@@ -100,3 +100,30 @@ case. No cache capacity or benchmark configuration is changed.
 The three transport kernel files above are unchanged between boot build
 099357174783 and the pending kernel source HEAD; this source explanation
 applies to the current boot. Exact per-sample per-call times remain absent.
+
+Stats-on follow-up, 2026-11-16T22:33:10Z
+
+Run 215758_610196 on the same 6641a7e1 image completed both arms. JIT
+aggregate time is 185.812 ns/call over 1,273,952,408 calls; native is
+187.283 ns/call over 1,272,388,027 calls (JIT/native 0.99215x). Installed
+JIT/native bytes are 13,641/10,546 (0.7731 native/JIT). These counters span
+the whole three-sample arm; the frozen recorder retains no sample ns/call.
+
+| Arm | Sample 1 pps | Sample 2 pps | Sample 3 pps |
+| --- | ---: | ---: | ---: |
+| JIT | 2,273,993 | 2,392,485 | 2,414,048 |
+| Native | 2,469,673 | 2,215,775 | 2,330,732 |
+
+Native worker series are 744282/726301/559463, 147141/38149/420201,
+825751/749178/691346 and 752499/702147/659722. Worker 1's later rise offsets
+losses at the other workers; its JIT series is 458702/469025/159354. All
+workers again select queue 0. The monotone native decline of the stats-off
+run did not repeat here; this observation does not establish why it happened
+or rule out an image interaction. Aggregate per-call times are near parity,
+and the differing worker shares keep shared transport scheduling/cache state
+as a lead. BPF-stats, queue, capacity and workloads were unchanged.
+
+The packetgen errors/packets ratios are 1.279/1.152/1.242 for JIT and
+1.227/1.129/1.215 for native. These are retained producer reports, not BPF
+drop counts. Reproduce with the committed analyze target, RUN pointing at
+215758_610196 and CASE=stats-on. Raw component values are in stats-on.json.
