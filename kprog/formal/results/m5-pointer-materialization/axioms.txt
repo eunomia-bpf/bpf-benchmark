@@ -1,0 +1,51 @@
+'KProgFormal.ClightRefinement.Arm64OriginCache.materialize_represents' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64OriginCache.materialize_return_represents' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64OriginCache.materialize_executes' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64OriginCache.materialize_return_unique' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.Arm64OriginCache.materialize_represents : ∀
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins) (b : CC.Block) (ofs : CC.Integers.Ptrofs)
+  (m : CC.Mem) (k : CC.Cont) (origins : KProgFormal.Reference.Provenance.AArch64.Origins) (value : CC.Val)
+  (raw : BitVec 64) (tag : BitVec 8),
+  KProgFormal.ClightRefinement.Arm64Registers.ValueRep addresses value raw →
+    (tag = 4 ∨ tag = 10 → ∃ bits, value = CC.Val.Vlong bits) →
+      (tag = 4 → KProgFormal.ClightRefinement.Arm64OriginCache.WarmCache false b ofs m origins.stack) →
+        (tag = 10 → KProgFormal.ClightRefinement.Arm64OriginCache.WarmCache true b ofs m origins.returnAddress) →
+          ∃ result,
+            KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.Arm64OriginCache.ge
+                (KProgFormal.ClightRefinement.Arm64OriginCache.materializeSteps tag)
+                (CC.State.Callstate (CC.FunDef.Internal Arm64Address.f_kprog_arm64_materialize)
+                  [CC.Val.Vptr b ofs, value, CC.Val.Vint (BitVec.setWidth 32 tag)] k m)
+                (CC.State.Returnstate result (CC.callCont k) m) ∧
+              KProgFormal.ClightRefinement.Arm64Registers.ValueRep addresses result
+                (KProgFormal.Reference.Provenance.AArch64.materialize origins raw tag)
+KProgFormal.ClightRefinement.Arm64OriginCache.materialize_return_represents : ∀
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins) (b : CC.Block) (ofs : CC.Integers.Ptrofs)
+  (m : CC.Mem) (origins : KProgFormal.Reference.Provenance.AArch64.Origins) (value : CC.Val) (raw : BitVec 64)
+  (tag : BitVec 8),
+  KProgFormal.ClightRefinement.Arm64Registers.ValueRep addresses value raw →
+    (tag = 4 ∨ tag = 10 → ∃ bits, value = CC.Val.Vlong bits) →
+      (tag = 4 → KProgFormal.ClightRefinement.Arm64OriginCache.WarmCache false b ofs m origins.stack) →
+        (tag = 10 → KProgFormal.ClightRefinement.Arm64OriginCache.WarmCache true b ofs m origins.returnAddress) →
+          ∀ (trace : CC.Trace) (result : CC.Val) (after : CC.Mem),
+            CC.Star (CC.Step2 KProgFormal.ClightRefinement.Arm64OriginCache.ge)
+                (CC.State.Callstate (CC.FunDef.Internal Arm64Address.f_kprog_arm64_materialize)
+                  [CC.Val.Vptr b ofs, value, CC.Val.Vint (BitVec.setWidth 32 tag)] CC.Cont.Kstop m)
+                trace (CC.State.Returnstate result CC.Cont.Kstop after) →
+              trace = CC.E0 ∧
+                after = m ∧
+                  KProgFormal.ClightRefinement.Arm64Registers.ValueRep addresses result
+                    (KProgFormal.Reference.Provenance.AArch64.materialize origins raw tag)

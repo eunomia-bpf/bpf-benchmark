@@ -1945,3 +1945,10 @@ external-call relation. Writable-field premises construct the two cache stores
 and establish `WarmCache`, preserving the provider outcome's trace and memory
 before those writes. Relating that provider to native origins, pointer-valued
 materialization and producer admissibility remain open M5 obligations.
+
+The [represented-value materializer proof](results/m5-pointer-materialization/README.md)
+also covers pointer-valued union inputs. Non-relative tags return the same
+Clight pointer and retain its existing native block-origin binding. Scalar
+relative cases reuse the warm-cache laws; relative payloads being scalar
+remains an explicit producer condition. Every return at `Kstop` preserves
+the complete memory and represents the M3 materialized native bits.

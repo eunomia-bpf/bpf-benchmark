@@ -4,6 +4,7 @@ import KProgFormal.ClightRefinement.Arm64Width
 import KProgFormal.Reference.Provenance
 import KProgFormal.ClightRefinement.Globalenv
 import CCLib.MemoryLemmas
+import KProgFormal.ClightRefinement.Arm64Registers
 
 namespace KProgFormal.ClightRefinement.Arm64OriginCache
 
@@ -476,6 +477,47 @@ private theorem stack_base_ne_mat_value : Arm64Address.___a64_mat_base ≠ Arm64
 private theorem return_base_ne_mat_value : Arm64Address.___a64_mat_base__1 ≠ Arm64Address.___a64_mat_value := by decide +kernel
 private theorem mat_tag_ne_mat_value : Arm64Address.___a64_mat_tag ≠ Arm64Address.___a64_mat_value := by decide +kernel
 
+/-- Non-relative tags preserve every value accepted by the actual ulong cast,
+including a Clight pointer. The result remains that pointer, never guessed bits. -/
+private theorem materialize_inert_executes (b : CC.Block) (ofs : CC.Integers.Ptrofs)
+    (m : CC.Mem) (k : CC.Cont) (value : CC.Val) (tag : BitVec 8)
+    (hs : tag ≠ 4) (hr : tag ≠ 10)
+    (valueCast : CC.Cop.semCast value CC.tulong CC.tulong m = some value) :
+    steps ge 18 (.Callstate (.Internal Arm64Address.f_kprog_arm64_materialize)
+      [.Vptr b ofs, value, .Vint (tag.setWidth 32)] k m) =
+      some (CC.E0, .Returnstate value (CC.callCont k) m) ∧
+    InternalPath ge 18 (.Callstate (.Internal Arm64Address.f_kprog_arm64_materialize)
+      [.Vptr b ofs, value, .Vint (tag.setWidth 32)] k m) := by
+  simp only [CC.Cop.semCast, CC.Cop.classifyCast, CC.tulong, CC.Archi.ptr64,
+    ↓reduceIte] at valueCast
+  have empty : (CC.PTree.empty : CC.Env).elements = [] := rfl
+  have tagCast := Arm64Width.cast_argument tag m
+  simp only [Arm64Width.argument] at tagCast
+  have notStack : tag.setWidth 32 ≠ (4#32) := by
+    intro h; apply hs
+    simpa using congrArg (fun x : BitVec 32 => x.setWidth 8) h
+  have notReturn : tag.setWidth 32 ≠ (10#32) := by
+    intro h; apply hr
+    simpa using congrArg (fun x : BitVec 32 => x.setWidth 8) h
+  have cmpStack := tag_compare_false m tag (4#32) notStack
+  have cmpReturn := tag_compare_false m tag (10#32) notReturn
+  simp only [CC.tuchar, CC.tuint] at cmpStack cmpReturn
+  simp [↓reduceIte, ↓reduceDIte, steps, InternalPath, InternalState,
+    step_materialize, step_seq, step_loop, step_skip_seq, step_skip_loop,
+  step_break_loop, step_set, step_if, step_return, materializeTemps, bodyParts, return_type,
+
+    tag_ne_value, mat_value_ne_tag, mat_value_ne_coordinates, mat_tag_ne_coordinates, tag_ne_coordinates, value_ne_coordinates, stack_valid_ne_coordinates, return_valid_ne_coordinates, stack_valid_ne_mat_value, return_valid_ne_mat_value, stack_base_ne_mat_value, return_base_ne_mat_value, mat_tag_ne_mat_value, narrow_mask, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext, CC.PTree.gso, CC.doEvalExpr, tagCast,
+    CC.typeof, CC.typeconv, CC.removeAttributes, CC.tattr,
+    CC.Cop.boolVal, CC.Cop.classifyBool,
+    cmpStack, cmpReturn,
+    CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
+    CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse,
+    CC.Integers.Int.eq, CC.Integers.MI.eq, CC.Integers.Int.cmpu, CC.Integers.MI.cmpu,
+    CC.Integers.Int.zero, CC.Integers.Int.one, CC.Integers.MI.zero, CC.Integers.MI.one,
+    CC.Integers.Int.repr, CC.Integers.MI.repr,
+    CC.tuchar, CC.tint, CC.tuint, CC.tulong, CC.blocksOfEnv, CC.Mem.freeList, CC.emptyEnv,
+    CC.E0, CC.Eapp, notStack, notReturn, empty, valueCast]
+
 /-- Actual exported materialization for every 64-bit scalar and byte tag.
 Only the selected STACK/RETURN cache is required to be warm. Other tags need
 no memory premise. No result is supplied for a cold native-input call. -/
@@ -539,38 +581,9 @@ theorem materialize_executes (b : CC.Block) (ofs : CC.Integers.Ptrofs) (m : CC.M
         CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Integers.Int64.add, CC.Integers.MI.add,
         CC.tuchar, CC.tint, CC.tuint, CC.tulong, CC.blocksOfEnv, CC.Mem.freeList, CC.emptyEnv,
         CC.E0, CC.Eapp, nonzero, empty, Reference.Provenance.AArch64.materialize]
-    · have notStack : tag.setWidth 32 ≠ (4#32) := by
-        intro h; apply hs
-        simpa using congrArg (fun x : BitVec 32 => x.setWidth 8) h
-      have notReturn : tag.setWidth 32 ≠ (10#32) := by
-        intro h; apply hr
-        simpa using congrArg (fun x : BitVec 32 => x.setWidth 8) h
-      have cmpStack := tag_compare_false m tag (4#32) notStack
-      have cmpReturn := tag_compare_false m tag (10#32) notReturn
-      simp only [CC.tuchar, CC.tuint] at cmpStack cmpReturn
-      have result : Reference.Provenance.AArch64.materialize origins value tag = value := by
-        unfold Reference.Provenance.AArch64.materialize
-        rw [ite_eq_right hs, ite_eq_right hr]
-      have count : materializeSteps tag = 18 := by
-        unfold materializeSteps
-        rw [ite_eq_right hs, ite_eq_right hr]
-      simp only [count]
-      simp [↓reduceIte, ↓reduceDIte, materializeSteps, hs, hr, steps, InternalPath, InternalState,
-        step_materialize, step_seq, step_loop, step_skip_seq, step_skip_loop,
-      step_break_loop, step_set, step_if, step_return, materializeTemps, bodyParts, return_type,
-
-        tag_ne_value, mat_value_ne_tag, mat_value_ne_coordinates, mat_tag_ne_coordinates, tag_ne_coordinates, value_ne_coordinates, stack_valid_ne_coordinates, return_valid_ne_coordinates, stack_valid_ne_mat_value, return_valid_ne_mat_value, stack_base_ne_mat_value, return_base_ne_mat_value, mat_tag_ne_mat_value, narrow_mask, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext, CC.PTree.gso, CC.doEvalExpr, tagCast,
-        CC.typeof, CC.typeconv, CC.removeAttributes, CC.tattr,
-        CC.Cop.boolVal, CC.Cop.classifyBool,
-        cmpStack, cmpReturn,
-        CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
-        CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse,
-        CC.Integers.Int.eq, CC.Integers.MI.eq, CC.Integers.Int.cmpu, CC.Integers.MI.cmpu,
-        CC.Integers.Int.zero, CC.Integers.Int.one, CC.Integers.MI.zero, CC.Integers.MI.one,
-        CC.Integers.Int.repr, CC.Integers.MI.repr,
-        CC.tuchar, CC.tint, CC.tuint, CC.tulong, CC.blocksOfEnv, CC.Mem.freeList, CC.emptyEnv,
-        CC.E0, CC.Eapp, notStack, notReturn, empty, Reference.Provenance.AArch64.materialize]
-      exact result.symm
+    · have run := materialize_inert_executes b ofs m k (.Vlong value) tag hs hr rfl
+      simpa only [materializeSteps, Reference.Provenance.AArch64.materialize,
+        ite_eq_right hs, ite_eq_right hr] using run
 
 /-- Both actual base readers finish in fourteen internal transitions and
 retain the complete memory. -/
@@ -619,5 +632,72 @@ theorem materialize_return_unique (b : CC.Block) (ofs : CC.Integers.Ptrofs) (m :
   obtain ⟨silent, same⟩ := run.endpoint_unique (stop _ _) observed (stop _ _)
   cases same
   exact ⟨silent, rfl, rfl⟩
+
+/-- Materialization preserves the concrete register value representation for
+both scalars and bound pointers. Relative STACK/RETURN payloads must be scalar
+offsets: the actual C integer addition does not accept Clight pointers. This
+is an entry/producer admissibility condition, not a runtime check. -/
+theorem materialize_represents (addresses : Arm64Registers.PointerOrigins)
+    (b : CC.Block) (ofs : CC.Integers.Ptrofs) (m : CC.Mem) (k : CC.Cont)
+    (origins : Reference.Provenance.AArch64.Origins) (value : CC.Val)
+    (raw : BitVec 64) (tag : BitVec 8)
+    (represented : Arm64Registers.ValueRep addresses value raw)
+    (relativeScalar : tag = 4 ∨ tag = 10 → ∃ bits, value = .Vlong bits)
+    (stack : tag = 4 → WarmCache false b ofs m origins.stack)
+    (ret : tag = 10 → WarmCache true b ofs m origins.returnAddress) :
+    ∃ result, InternalRun ge (materializeSteps tag)
+      (.Callstate (.Internal Arm64Address.f_kprog_arm64_materialize)
+        [.Vptr b ofs, value, .Vint (tag.setWidth 32)] k m)
+      (.Returnstate result (CC.callCont k) m) ∧
+      Arm64Registers.ValueRep addresses result
+        (Reference.Provenance.AArch64.materialize origins raw tag) := by
+  cases value <;> try contradiction
+  case Vlong bits =>
+    change raw = bits at represented
+    subst raw
+    exact ⟨_, materialize_returns b ofs m k origins bits tag stack ret, rfl⟩
+  case Vptr block offset =>
+    have hs : tag ≠ 4 := by
+      intro h
+      obtain ⟨_, impossible⟩ := relativeScalar (.inl h)
+      cases impossible
+    have hr : tag ≠ 10 := by
+      intro h
+      obtain ⟨_, impossible⟩ := relativeScalar (.inr h)
+      cases impossible
+    have exec := materialize_inert_executes b ofs m k (.Vptr block offset) tag hs hr rfl
+    refine ⟨.Vptr block offset, ?_, ?_⟩
+    · simpa only [materializeSteps, ite_eq_right hs, ite_eq_right hr] using
+        internalRun_of_steps exec.2 exec.1
+    · simpa only [Reference.Provenance.AArch64.materialize, ite_eq_right hs, ite_eq_right hr] using
+        represented
+
+/-- Every relational return at Kstop retains the complete caller memory and
+represents the materialized native bits. The observed value may be a pointer;
+its physical bits are determined by the existing block-origin binding. -/
+theorem materialize_return_represents (addresses : Arm64Registers.PointerOrigins)
+    (b : CC.Block) (ofs : CC.Integers.Ptrofs) (m : CC.Mem)
+    (origins : Reference.Provenance.AArch64.Origins) (value : CC.Val)
+    (raw : BitVec 64) (tag : BitVec 8)
+    (represented : Arm64Registers.ValueRep addresses value raw)
+    (relativeScalar : tag = 4 ∨ tag = 10 → ∃ bits, value = .Vlong bits)
+    (stack : tag = 4 → WarmCache false b ofs m origins.stack)
+    (ret : tag = 10 → WarmCache true b ofs m origins.returnAddress)
+    (trace : CC.Trace) (result : CC.Val) (after : CC.Mem)
+    (observed : CC.Star (CC.Step2 ge)
+      (.Callstate (.Internal Arm64Address.f_kprog_arm64_materialize)
+        [.Vptr b ofs, value, .Vint (tag.setWidth 32)] .Kstop m) trace
+      (.Returnstate result .Kstop after)) :
+    trace = CC.E0 ∧ after = m ∧ Arm64Registers.ValueRep addresses result
+      (Reference.Provenance.AArch64.materialize origins raw tag) := by
+  obtain ⟨expected, run, rep⟩ := materialize_represents addresses b ofs m .Kstop origins
+    value raw tag represented relativeScalar stack ret
+  have stop : ∀ (v : CC.Val) (memory : CC.Mem) u next,
+      ¬ CC.Step2 ge (.Returnstate v .Kstop memory) u next := by
+    intro v memory u next step
+    cases step
+  obtain ⟨silent, same⟩ := run.endpoint_unique (stop _ _) observed (stop _ _)
+  cases same
+  exact ⟨silent, rfl, rep⟩
 
 end KProgFormal.ClightRefinement.Arm64OriginCache

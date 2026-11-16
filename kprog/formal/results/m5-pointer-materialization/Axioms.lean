@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64OriginCache
+#print axioms KProgFormal.ClightRefinement.Arm64OriginCache.materialize_represents
+#print axioms KProgFormal.ClightRefinement.Arm64OriginCache.materialize_return_represents
+#print axioms KProgFormal.ClightRefinement.Arm64OriginCache.materialize_executes
+#print axioms KProgFormal.ClightRefinement.Arm64OriginCache.materialize_return_unique
+#check @KProgFormal.ClightRefinement.Arm64OriginCache.materialize_represents
+#check @KProgFormal.ClightRefinement.Arm64OriginCache.materialize_return_represents
