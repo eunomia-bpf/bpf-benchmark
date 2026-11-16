@@ -18,6 +18,7 @@
 #include "llvm/Target/TargetMachine.h"
 #include "../libnativeloader/src/native_loader_lto.hpp"
 #include "bpf_function_bodies.hpp"
+#include "runtime_bpf_callee.hpp"
 #include <memory>
 using namespace llvm;
 
@@ -56,7 +57,15 @@ int main(int argc, char **argv) {
     if (!Facts) { errs() << Facts.getError().message() << '\n'; return 1; }
     auto Document = json::parse((*Facts)->getBuffer());
     if (!Document) { errs() << toString(Document.takeError()) << '\n'; return 1; }
-    if (auto E = native_bpf::materializeFunctions(*M, *Document)) {
+    unsigned index = 0;
+    const auto callee_compiler = std::filesystem::path(argv[0]).parent_path() / "kprog-bpf-callee-ir";
+    auto lower = [&](Function &function, ArrayRef<bpf_insn> code) -> llvm::Error {
+      auto *entry = M->getFunction(Symbol);
+      if (!entry) return native_bpf::failure("native LTO entry is missing: " + Symbol);
+      return lowerRuntimeBpfCallee(function, code, *entry, callee_compiler,
+                                   Output + ".callee." + std::to_string(index++));
+    };
+    if (auto E = native_bpf::materializeFunctions(*M, *Document, lower)) {
       errs() << toString(std::move(E)) << '\n'; return 1;
     }
   }

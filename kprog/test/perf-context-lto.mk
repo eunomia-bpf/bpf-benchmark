@@ -26,12 +26,13 @@ ir-link-check: ir-linker
 	$(MAKE) -r -f $(ROOT)/kprog/test/perf-context-lto.mk replay CPUS=$(CPUS) REPLAY_INPUT=$(BUILD)/linked-entries.bc REPLAY_SYMBOL=perf_go_labels OUTPUT=$(OUTPUT)/static-entry
 
 .PHONY: stage
-stage:
+stage: $(BUILD)/kprog-bpf-callee-ir
 	install -m 0755 $(BUILD)/perf-context-lto $(ROOT)/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto
+	install -m 0755 $(BUILD)/kprog-bpf-callee-ir $(ROOT)/vendor/build/native-bpf/x86/stage/kprog-bpf-callee-ir
 
-compiler:
+compiler: $(BUILD)/kprog-bpf-callee-ir
 	install -d $(BUILD) $(OUTPUT)
-	taskset -c $(CPUS) prlimit --as=8589934592 -- $(CXX) $$(llvm-config-18 --cxxflags) -std=c++17 -fexceptions -Wall -Wextra -Wno-unused-parameter -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include $(ROOT)/kprog/x86/perf_context_lto.cpp -o $(BUILD)/perf-context-lto $$(llvm-config-18 --link-static --ldflags --libs core irreader analysis support passes native object --system-libs) $(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz
+	taskset -c $(CPUS) prlimit --as=8589934592 -- $(CXX) $$(llvm-config-18 --cxxflags) -std=c++17 -fexceptions -Wall -Wextra -Wno-unused-parameter -I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include $(ROOT)/kprog/x86/perf_context_lto.cpp -o $(BUILD)/perf-context-lto $$(llvm-config-18 --link-static --ldflags --libs core irreader analysis support passes native object linker --system-libs) $(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz
 
 check: compiler
 	$(CC) $(FLAGS) -Wno-unknown-attributes -I$(VMLINUX) -Xclang -fembed-bitcode=all -c $(ROOT)/kprog/test/perf_context_lto.c -o $(BUILD)/input.o
@@ -100,7 +101,7 @@ guest-function-live:
 	$(FUNCTION_LIVE_ENV) $(BUILD)/function-live $(BUILD)/live-input.o $(BUILD)/perf-context-lto $(OUTPUT)/live $(OUTPUT)/live/native-path.txt > $(OUTPUT)/live/kernel.json
 	read -r object < $(OUTPUT)/live/native-path.txt; $(CC) "$$object" $(BUILD)/live-driver.o -o $(OUTPUT)/live/native-result
 	$(OUTPUT)/live/native-result
-	printf 'BPF and native result both 9\n' > $(OUTPUT)/live/execution.txt
+	printf 'BPF and native result both 13\n' > $(OUTPUT)/live/execution.txt
 
 .PHONY: function-shim-live-kvm guest-function-shim-live
 function-shim-live-kvm: function-live-inputs
@@ -118,3 +119,10 @@ callee-ir: $(BUILD)/kprog-bpf-callee-ir
 $(BUILD)/kprog-bpf-callee-ir: $(ROOT)/kprog/x86/bpf_callee_ir.cpp $(ROOT)/kprog/test/build_callee_ir.py $(ROOT)/runner/build-llvmbpf/CMakeFiles/micro_exec.dir/link.txt
 	install -d $(BUILD)
 	taskset -c $(CPUS) prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/build_callee_ir.py --root $(ROOT) --build $(BUILD)
+
+.PHONY: callee-check
+callee-check: compiler
+	$(CC) $(FLAGS) -Xclang -fembed-bitcode=all -c $(ROOT)/kprog/test/bpf_callee_abi.c -o $(BUILD)/callee-abi-input.o
+	python3 $(ROOT)/kprog/test/check_bpf_callee_abi.py --build $(BUILD) --compiler $(BUILD)/perf-context-lto --kernel $(KERNEL)/vmlinux --linker $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link --output $(OUTPUT)
+	tar -C $(BUILD) -czf $(OUTPUT)/callee-abi-build.tar.gz .
+	date -u +%FT%TZ > $(OUTPUT)/callee-abi-finished

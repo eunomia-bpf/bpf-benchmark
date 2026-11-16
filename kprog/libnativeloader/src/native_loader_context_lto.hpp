@@ -20,6 +20,12 @@ std::filesystem::path native_context_lto_object(
         hash.add_string("original-bpf-function-bodies-v1");
         hash.add_string(function_bodies);
         hash.add_u64(prog_type);
+        const auto callee_compiler = compiler.parent_path() / "kprog-bpf-callee-ir";
+        std::error_code callee_error;
+        const bool present = std::filesystem::exists(callee_compiler, callee_error);
+        if (callee_error) fail("read BPF callee compiler identity: " + callee_error.message());
+        hash.add_u64(present);
+        if (present) hash_file_identity(hash, callee_compiler, "bpf_callee_ir_compiler");
     }
     std::error_code ec;
     std::filesystem::create_directories(directory, ec);

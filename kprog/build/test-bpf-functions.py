@@ -75,7 +75,7 @@ def main():
         if output.exists():
             raise AssertionError('unsupported facts produced a partial output: ' + label)
         report['failures'].append(dict(case=label, command=command))
-        if args.runtime_compiler and label != 'disabled':
+        if args.runtime_compiler and label in ('defined-function', 'bad-hex'):
             runtime_output = args.build / (label + '.o')
             command = run([args.runtime_compiler, args.build / 'embedded.o', '--symbol', 'main',
                            '--prog-type', '6', '--kernel-btf', args.kernel_btf,
@@ -83,6 +83,19 @@ def main():
                           'runtime-' + label, success=False)
             if runtime_output.exists():
                 raise AssertionError('runtime facts produced a partial output: ' + label)
+            report['failures'].append(dict(case='runtime-' + label, command=command))
+    if args.runtime_compiler:
+        for label, data in {'truncated': '00' * 15,
+                            'unknown-opcode': 'ff000000000000009500000000000000'}.items():
+            path = args.build / ('runtime-' + label + '.json')
+            path.write_text(json.dumps(dict(functions={'supplied64': data})) + '\n')
+            output = args.build / ('runtime-' + label + '.o')
+            command = run([args.runtime_compiler, args.build / 'embedded.o', '--symbol', 'main',
+                           '--prog-type', '6', '--kernel-btf', args.kernel_btf,
+                           '--bpf-function-bodies', path, '-o', output],
+                          'runtime-' + label, success=False)
+            if output.exists():
+                raise AssertionError('bad runtime body emitted a partial object: ' + label)
             report['failures'].append(dict(case='runtime-' + label, command=command))
     report['runtime_compiler_exercised'] = bool(args.runtime_compiler)
     report['absent_facts_default_and_native_byte_identical'] = True
