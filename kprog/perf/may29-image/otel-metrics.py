@@ -65,11 +65,31 @@ def totals(path: str) -> dict[str, int]:
     return out
 
 
+def image_ids(paths: list[str]) -> set[str]:
+    """Image IDs recorded beside each dump.
+
+    otel-unwind-counters.sh writes image-id.txt next to the dumps. The sole
+    image is swapped between the May reference and current source during a
+    round, so two dumps of the same name taken across a swap belong to
+    different systems and must not be subtracted.
+    """
+    ids = set()
+    for p in paths:
+        side = pathlib.Path(p).parent / "image-id.txt"
+        if side.exists():
+            ids.add(side.read_text().strip())
+    return ids
+
+
 def main() -> int:
     paths = sys.argv[1:]
     if not paths:
         print(__doc__, file=sys.stderr)
         return 2
+    ids = image_ids(paths)
+    if len(ids) > 1:
+        print(f"dumps come from different images: {sorted(ids)}", file=sys.stderr)
+        return 1
     series = [(p, totals(p)) for p in paths]
     if len(series) == 1:
         p, t = series[0]
@@ -78,7 +98,7 @@ def main() -> int:
             print(f"  {name:36s} {t.get(name, 0):>15,}")
         return 0
     (p0, a), (p1, b) = series[0], series[-1]
-    print(f"{p0}\n-> {p1}")
+    print(f"{p0}\n-> {p1}" + (f"\nimage {ids.pop()}" if ids else ""))
     for name in WATCHED:
         print(f"  {name:36s} {b.get(name, 0) - a.get(name, 0):>15,}")
     return 0
