@@ -122,6 +122,7 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-16 ~14:23 UTC: "你自己让一个 subagent 也去审核完整系统和代码, 看看代码实现问题. 现在代码量?"
 - 2026-11-16 ~14:26 UTC: "为啥这么大? 是不是哪里不对? 你去仔细看看? 我觉得代码量比我想得大了 10x, 是不是非常混乱?"
 - 2026-11-16 ~14:27 UTC: "5/29 没那么多吧? 之后这个框架是不是主要是修 bug? 干嘛膨胀了? 解释一下?"
+- 2026-11-16 ~14:28 UTC: "发现问题你自己主动推进清理整改, 别的 lane 停下来, 清理整理好再继续?"（协调者 14:28 起停下 C、perf、formal，自己做清理）
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
