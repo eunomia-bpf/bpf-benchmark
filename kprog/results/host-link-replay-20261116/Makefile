@@ -13,3 +13,10 @@ dry-run:
 
 proofs:
 	python3 $(HERE)/proofs.py $(RAW)/proofs-initial
+
+.PHONY: emission-dry-run emission
+emission-dry-run:
+	python3 $(HERE)/emission.py $(RAW) --dry-run
+
+emission:
+	python3 $(HERE)/emission.py $(RAW)
