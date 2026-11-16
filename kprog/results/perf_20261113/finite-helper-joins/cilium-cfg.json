@@ -1,0 +1,19 @@
+{
+  "included_functions": 1,
+  "numeric_helper_joins": {
+    "5821": [
+      [
+        23,
+        "bpf_redirect"
+      ],
+      [
+        155,
+        "bpf_redirect_peer"
+      ]
+    ]
+  },
+  "object": "/workspaces/repository/vendor/build/native-bpf/x86/7.0.0-rc2+/native/cilium/bpf_lxc.native.o",
+  "proof_blob_bytes": 7365,
+  "scope": "Actual Cilium object CFG and production proof; B stock verification and application retry pending",
+  "symbol": "tail_ipv4_policy"
+}

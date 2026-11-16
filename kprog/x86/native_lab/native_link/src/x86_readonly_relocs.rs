@@ -622,7 +622,7 @@ mod tests {
         let included = discover_reachable(&elf, &entry)?;
         let got = scan_x86_got_relocations(&elf, &included)?;
         let calls = helper_provenance::calls(&elf, &entry, &got, &HashMap::new())?;
-        assert_eq!(calls.get(&0x211).map(String::as_str), Some("bpf_probe_read_user"));
+        assert_eq!(calls.single.get(&0x211).map(String::as_str), Some("bpf_probe_read_user"));
         let proof = rewrite_x86(&elf, &entry, &included, &HashMap::new(), &HashMap::new(),
             &HashMap::new(), &[], true, true, None, None, None, None, false)?;
         let build = std::path::Path::new("/var/tmp/kprog-tmp/perf/scheduled-table");
@@ -631,9 +631,39 @@ mod tests {
             "kprobe_unwind_hotspot", &proof.blob, &proof.proof_symbols, &proof.proof_relocs,
             &proof.proof_data_relocs, proof.callee_saved_mask)?;
         fs::write(build.join("otel-cfg.json"), serde_json::to_vec_pretty(&serde_json::json!({
-            "object":path,"symbol":entry.name,"table_targets":targets,"helper_calls":calls,
+            "object":path,"symbol":entry.name,"table_targets":targets,"helper_calls":calls.single,
+            "numeric_helper_joins":calls.numeric_joins,
             "proof_blob_bytes":proof.blob.len(),"proof_data_relocations":proof.proof_data_relocs.len(),
             "scope":"Current object helper CFG and production proof; no B verification or application execution"
+        }))?)?;
+        Ok(())
+    }
+
+    #[test]
+    fn current_cilium_policy_preserves_both_tail_merged_redirect_helpers() -> Result<()> {
+        // Bug: Clang merges redirect and redirect_peer into one register call;
+        // singleton provenance loses both paths and rejects the whole app.
+        let release = fs::read_to_string("/workspaces/.agent-state/kprog-ck/build-x86/include/config/kernel.release")?;
+        let path = format!("/workspaces/repository/vendor/build/native-bpf/x86/{}/native/cilium/bpf_lxc.native.o", release.trim());
+        let bytes = fs::read(&path)?;
+        let elf = object::File::parse(bytes.as_slice())?;
+        let entry = find_symbol_by_name(&elf, "tail_ipv4_policy")?;
+        let included = discover_reachable(&elf, &entry)?;
+        let got = scan_x86_got_relocations(&elf, &included)?;
+        let calls = helper_provenance::calls(&elf, &entry, &got, &HashMap::new())?;
+        assert_eq!(calls.numeric_joins.get(&0x16bd), Some(&vec![
+            (23, "bpf_redirect".to_owned()), (155, "bpf_redirect_peer".to_owned())]));
+        let proof = rewrite_x86(&elf, &entry, &included, &HashMap::new(), &HashMap::new(),
+            &HashMap::new(), &[], true, true, None, None, None, None, false)?;
+        let build = std::path::Path::new("/var/tmp/kprog-tmp/perf/finite-helper-joins");
+        fs::create_dir_all(build)?;
+        write_proof_object(&build.join("cilium.proof.o"), object::Architecture::X86_64,
+            "tail_ipv4_policy", &proof.blob, &proof.proof_symbols, &proof.proof_relocs,
+            &proof.proof_data_relocs, proof.callee_saved_mask)?;
+        fs::write(build.join("cilium-cfg.json"), serde_json::to_vec_pretty(&serde_json::json!({
+            "object":path, "symbol":entry.name, "numeric_helper_joins":calls.numeric_joins,
+            "proof_blob_bytes":proof.blob.len(), "included_functions":included.len(),
+            "scope":"Actual Cilium object CFG and production proof; B stock verification and application retry pending"
         }))?)?;
         Ok(())
     }

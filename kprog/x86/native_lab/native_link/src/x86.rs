@@ -1101,9 +1101,11 @@ pub(super) fn rewrite_x86(
         let mut tail_transfers = x86_direct_tail_transfers(elf, sym)?;
         let mut tail_calls = Vec::new();
         let memory_constants = memory::constants(&bytes, sym.address)?;
-        let proven_helpers = helper_provenance::calls(elf, sym, &got_relocations, helper_addrs)?;
+        let helper_calls = helper_provenance::calls(elf, sym, &got_relocations, helper_addrs)?;
+        let proven_helpers = &helper_calls.single;
         let entry_abi_strip = if is_entry {
             let entry_has_tail_call = proven_helpers.values().any(|name| name == "bpf_tail_call")
+                || helper_calls.numeric_joins.values().flatten().any(|(_,name)| name=="bpf_tail_call")
                 || helper_call_sites.iter().any(|(key, name)| {
                     key.0 == sym.section_index && key.1 == sym.address && name == "bpf_tail_call"
                 });
@@ -1389,6 +1391,19 @@ pub(super) fn rewrite_x86(
                 let call_reg = x86_indirect_call_register(&insn);
                 let helper_call_name = helper_call_sites.get(&site_key).cloned()
                     .or_else(|| proven_helpers.get(&local_ip).cloned());
+                if let Some(alternatives)=helper_calls.numeric_joins.get(&local_ip) {
+                    if proof_mode {
+                        // The proof keeps the original finite dispatch. B's
+                        // existing helper-ID interpreter observes each path.
+                        local.push(insn);kinds.push(None);insn_local_ip.push(local_ip);
+                    } else {
+                        append_x86_numeric_helper_dispatch(&mut local,&mut kinds,
+                            &mut insn_local_ip,&mut next_synthetic_ip,local_ip,
+                            insn.next_ip()-sym.address,call_reg.unwrap(),alternatives,helper_addrs)?;
+                    }
+                    resolved_helper_call_sites.insert(site_key);
+                    continue;
+                }
                 if let Some(name) = helper_call_name {
                     if show {
                         eprintln!("native-link-helper-site {}", serde_json::json!({
@@ -3662,6 +3677,57 @@ fn push_x86_helper_call_reloc(
             opcode: 0xe8,
         }),
     );
+    Ok(())
+}
+
+fn append_x86_numeric_helper_dispatch(
+    local: &mut Vec<Instruction>, kinds: &mut Vec<Option<PatchKind>>,
+    source_ips: &mut Vec<u64>, next_ip: &mut u64, source_ip: u64,
+    continuation: u64, register: Register, alternatives: &[(u64,String)],
+    helpers: &HashMap<String,u64>,
+) -> Result<()> {
+    let registers=[Register::RAX,Register::RCX,Register::RDX,Register::RBX,
+        Register::RSP,Register::RBP,Register::RSI,Register::RDI,
+        Register::R8,Register::R9,Register::R10,Register::R11,
+        Register::R12,Register::R13,Register::R14,Register::R15];
+    let reg=registers.iter().position(|r| *r==register).unwrap() as u8;
+    let mut bytes=Vec::new();
+    let mut calls=HashMap::new();
+    let mut returns=HashSet::new();
+    for (index,(id,name)) in alternatives.iter().enumerate() {
+        let last=index+1==alternatives.len();
+        // Helper CALL already clobbers condition flags in the shared ABI.
+        // Comparisons leave argument registers and observed helper IDs intact.
+        let next=if last {None} else {
+            bytes.extend_from_slice(&[0x48 | (reg>>3),0x81,0xf8 | (reg&7)]);
+            bytes.extend_from_slice(&(*id as u32).to_le_bytes());
+            Some(append_x86_jcc_rel32(&mut bytes,0x85))
+        };
+        calls.insert(bytes.len(),runtime_call_target(name,helpers,"finite helper call")?);
+        bytes.extend_from_slice(&[0xe8,0,0,0,0]);
+        if let Some(next)=next {
+            returns.insert(bytes.len());bytes.extend_from_slice(&[0xe9,0,0,0,0]);
+            let destination=bytes.len();patch_x86_rel32(&mut bytes,next,destination)?;
+        }
+    }
+    let base=*next_ip;
+    for (index,mut instruction) in Decoder::with_ip(64,&bytes,base,DecoderOptions::NONE).into_iter().enumerate() {
+        let offset=(instruction.ip()-base) as usize;
+        if returns.contains(&offset) { instruction.set_near_branch64(continuation); }
+        let kind=calls.get(&offset).map(|target| PatchKind::HelperBranchRel32 {
+            target_addr:*target,opcode:0xe8 });
+        if kind.is_some() { instruction=build_x86_helper_call_rel32_slot()?; }
+        if index==0 {
+            push_x86_replacement(local,kinds,source_ips,source_ip,instruction,kind);
+        } else {
+            // DeclareByte call slots have no decoded length; keep the virtual
+            // labels from the fully decoded dispatch rather than advancing by
+            // Instruction::len(), so its internal branches keep exact targets.
+            instruction.set_ip(base+offset as u64);
+            local.push(instruction);kinds.push(kind);source_ips.push(u64::MAX);
+        }
+    }
+    *next_ip=base+bytes.len() as u64;
     Ok(())
 }
 
