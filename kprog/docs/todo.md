@@ -35,6 +35,13 @@
 
 - [x] P-SPECIALIZE-10K（9fc382606、cc83b5d48；本提交结果）：四种 10K 形状正常 B/实际栈帧完成，前端 11.6–26.3s、峰值 399–920MiB；B 328–200624B、帧 0–40B，详见 `perf_20261113/inline-families/scale-10k/`。旧同名 scalar/direct 70.47GiB/SIGKILL 的实际失败已能完成；不跨不同编译管线宣称独立加速比。100K 继续。
 
+**协调者 2026-11-16T18:20:15Z（审核 15Z 核实后的决定）**：
+1. 每次调用 20% 这个目标，光靠程序体快达不到：程序体只占每次调用 BPF 时间的一部分（BCC 9%、Tracee 12%、Tetragon 25%、Katran 38%），程序体就算快 1.57 倍，每次调用也只到 1.03–1.16 倍。PERF 每一项先把这个应用的每次调用时间拆成程序体、helper、map 三块，改完再拆一次，写进该项的结果。修的顺序在 17:2x 那一块的基础上调整为：(1) Cilium 路径：cb 偏移按唯一内核 BTF 生成，编译开关和配置取自 agent 自己生成的头文件（审核：vendor/bpf/Makefile 81–105 用 CILIUM_MAX_* 和示例配置头），重复保存寄存器一并去掉，再用 BPF_PROG_TEST_RUN 对比 cil_from_container；(2) map update/delete 链接时绑定到具体 ops；(3) bpf_probe_read 路径（Tracee、Tetragon 占 41–46%）内联成和 eBPF 一侧同语义的原生读；(4) 冻结的 BCC 配置进原生 IR LTO、ARRAY/LPM 调度链接时选定；(5) Tetragon CEL；(6) 其余审核项。
+2. 代码量“少一半”按每个应用装进去的原生 / JIT 跟踪，目标 ≤ 0.5；镜像 6641a7e1：Katran 0.77、Tracee 0.86、Tetragon 1.00、Cilium 1.26、BCC 1.57、OTel 1.82（kprog/results/cleanup-check-20261116）。每项修改带上装进去的大小。
+3. 计时：C 在 6641a7e1 上这一轮是清理后的基线，照常跑完；之后只在镜像带上新修改时开新的一轮（广度优先，每个应用 3 个样本再换下一个）。两轮之间，一项修改用冻结入口只跑它影响的那个应用（corpus APPS=<app>，stats 开）。
+4. FORMAL：当前 M5 这一步做完后，把提交在 git 里的生成 Clight 导出（kprog/formal/KProgFormal/Clight，约 444 万行）改成由 formal 构建一条命令从 C 源码重新生成，删掉提交的副本；重新生成在本 Workspace 里逐字节一致才删。
+5. 下面 14:20 那一块里给 PERF 的逐步做法已由 15:37、15:46、17:2x 和本块取代（运营者 14:22：“你要让 codex 自己去看代码.”）。
+
 **协调者 2026-11-16T17:20:41Z（清理完成；运营者“发现问题你自己主动推进清理整改, 别的 lane 停下来, 清理整理好再继续?”）**：清理 1–10 已推送（kprog/tv、kprog/loader、kprog/selftests 删掉；kprog/test 18 092 → 2 483 行；kprog/build 只留校验工具源码；kprog/libnativeloader/Makefile 784 → 99 行）。唯一入口：P 和镜像 `make -f kprog/perf/one-image/Makefile image`（vendor/bpf 自己编 IR 链接器和 stage 的 perf-context 编译器）；checked-sim-c 工具 `make -C kprog/libnativeloader checked-sim-stage`；整应用 verify `make -C kprog/libnativeloader checked-corpus[-all]`。清理后的镜像 6641a7e1 check 轮：五个应用完成并装上原生，Tetragon 照旧出错（kprog/results/cleanup-check-20261116）。各 lane 从现在恢复：C 在 6641a7e1 上跑广度计时一轮（rotate，持 timing 锁）；PERF 按上面的顺序修（cb 偏移和重复保存 → map ops 链接时绑定 → BCC 配置进 LTO、ARRAY/LPM 调度 → Tetragon CEL → 其余审核项），改好的批量在 C 这一轮结束后用唯一配方重建镜像；FORMAL 继续 M5。新实验写成 kprog/results/<run>/ 下提交的脚本和结果，共享 makefile 里只放构建和这三个入口。
 
 **协调者 2026-11-16T15:37:44Z（运营者“顺便 codex 继续去审核源代码也来继续看性能问题”“发现问题你自己主动推进清理整改, 别的 lane 停下来, 清理整理好再继续”）**：清理期间 PERF 只审核、不改代码；清理完成后 PERF 按这个顺序修，每项一个提交，量每次调用和装进去的大小，不加任何检查：
