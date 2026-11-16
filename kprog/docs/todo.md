@@ -8,7 +8,7 @@
 
 ## 0. Lane 目标与待办
 
-- [ ] P-comparison-script-lifetime（2026-11-16T09:38:54Z）：comparison1444229 在执行中修改输出路径后，恢复读取后续 shell 文本时报 unexpected EOF；原生 arm 同时有独立 Terminated/Make2，全部 raw 保留。当前 repeat1451238 使用通过 bash -n 的固定脚本，结束前不改这个文件；空闲后把完整比较流程封装为先解析的 main 函数，避免执行中重写造成读取偏移变化。不能为此改冻结 entry/工作负载，也不丢弃第一轮数据。
+- [x] P-comparison-script-lifetime（2026-11-16T09:38:54Z）：comparison1444229 在执行中修改输出路径后，恢复读取后续 shell 文本时报 unexpected EOF；原生 arm 同时有独立 Terminated/Make2，全部 raw 保留。当前 repeat1451238 使用通过 bash -n 的固定脚本，结束前不改这个文件；空闲后把完整比较流程封装为先解析的 main 函数，避免执行中重写造成读取偏移变化。不能为此改冻结 entry/工作负载，也不丢弃第一轮数据。 2026-11-16T10:35:00Z 本次已在 repeat1451238 完成后修好：完整流程放入执行前解析的 run_comparison 函数，bash -n 通过，原有 Make --dry-run 输出逐字节相同；冻结 entry 未改。
 
 - [x] P-helper-numeric-tail（2026-11-16T07:39:50Z）：普通 C helper 调用在统一 sibling-call 优化下可生成常量 helper ID 的间接尾跳；当前链接器 kernel emission 拒绝 `indirect branch ... no resolved code-table relocation`。实际两 helper 条件 fixture 的41B proof与真实 Tetragon plan失败保留在 `/workspaces/kprog-raw/perf/20261116-tetragon-helper-abi/joins/`。G 已用正确 read-write asm CALL operands 修好并通过224向量/实际plan，本次整类修复：singleton/finite-join 数值尾跳、entry epilogue、subprogram RET 与 legacy proof；49 Rust checks / 48 native execution cases 通过，真实 clang fixture 的 B 经 shared I 后通过唯一内核 stock。未发布进镜像，无性能结论；`perf_20261113/numeric-helper-tail/README.md`。
 

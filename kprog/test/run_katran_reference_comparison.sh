@@ -20,6 +20,9 @@ measure_app() {
         APPS="$1" BPFREJIT_CORPUS_BPF_STATS="$2"
 }
 
+# Parse the complete workflow before any guest waits. Bash otherwise resumes
+# reading later commands from this file after a long foreground invocation.
+run_comparison() {
 if [[ ${1:-} == --dry-run ]]; then
     declare -f publish_linker measure_app
     printf '%s\n' 'Wait for locks/timing, then release it before image publication.' \
@@ -76,3 +79,6 @@ for comparison_stats in 0; do
     printf 'reference\tkatran\t%s\t%s\n' "$comparison_stats" "$comparison_rc" >> "$comparison_output/run-codes.tsv"
 done
 exit "$comparison_failed"
+}
+
+run_comparison "$@"

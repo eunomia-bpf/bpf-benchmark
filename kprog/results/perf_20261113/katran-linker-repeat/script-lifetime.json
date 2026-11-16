@@ -1,0 +1,9 @@
+{
+  "time_utc": "2026-11-16T10:35:00Z",
+  "repeat_ended_before_edit": true,
+  "syntax_check": "bash -n passed",
+  "dry_run_output_equal": true,
+  "scope": "Wrap complete comparison workflow in a function parsed before the long guest commands; no workload or timing-entry edit.",
+  "before": "/workspaces/kprog-raw/perf/20261116-perf-entry-roots/comparison-before-main.dry-run.txt",
+  "after": "/workspaces/kprog-raw/perf/20261116-perf-entry-roots/comparison-main.dry-run.txt"
+}
