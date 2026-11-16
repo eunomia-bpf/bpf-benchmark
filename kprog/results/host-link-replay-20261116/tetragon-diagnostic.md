@@ -79,3 +79,21 @@ Raw console and capture controller remain under
 /workspaces/kprog-raw/perf/20261116-host-link-replay/tetragon-capture.
 The frozen new-image check is next under the coordinator's 22:20 instruction.
 Any continuing failure will be diagnosed from that image before timing claims.
+
+Source diagnosis, 2026-11-16T22:35:33Z
+
+The current P independently shows the missing class. Its filter_32ty has
+conditional tail branches at +0x12/+0x21/+0x35 into filter_32ty_selector_val,
+filter_32ty_map and filter_32ty_range. The original ELF addresses are
+0x7c2 -> 0xcf0, 0x7d1 -> 0xee0 and 0x7e5 -> 0xf70.
+x86.rs:554 follows decoded CALLs; x86.rs:492 accepts only unconditional
+branches as direct tail transfers. Thus discovery omits selector/range
+functions, and the re-encoding retains stale external displacements for
+conditional tail branches. The host proof for candidate 206 visibly has
+filter_32ty at 0x4b7 with conditional targets 0x11a7/0x1397/0x1427, while
+its last function ends at 0x11ff. At least two targets are outside proof
+text. This is a linker control-flow closure/emission defect, independent
+of CEL specialization. The existing kernel check catches it; no additional
+refusal is proposed. The forward fix must retain conditions, discover their
+real callees and relocate both proof and installed branches. It is queued
+after the current frozen batch/check rather than changing a live build.
