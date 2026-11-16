@@ -3,7 +3,7 @@ obj-m += native_load_fault_module.o
 else
 ROOT := $(abspath ../../..)
 OUT ?= $(ROOT)/kprog/test/native_load_fault/build
-KDIR ?= $(ROOT)/kprog/tv/build-kernel-x86
+KDIR ?= /workspaces/.agent-state/kprog-ck/build-x86
 .PHONY: all host
 all:
 	install -d $(OUT)

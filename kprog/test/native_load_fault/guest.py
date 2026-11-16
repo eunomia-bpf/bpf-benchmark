@@ -16,7 +16,7 @@ for rel in identities:
 (O/'inputs.json').write_text(json.dumps(identities,indent=2)+'\n')
 service=None;log=[];exit_code=1
 try:
- subprocess.run(['insmod',str(R/'kprog/tv/build-x86/corpus-modules/bpf_x86_native_lab.ko')],check=True)
+ subprocess.run(['insmod',str(R/'kinsn/module/x86/build/bpf_x86_native_lab.ko')],check=True)
  state=O/'requests';state.mkdir(mode=0o700,exist_ok=True)
  command=[sys.executable,str(R/'kprog/trusted_service.py'),'--arch','1','--endpoint','/sys/kernel/debug/bpf_x86_native_lab/specializer','--state',str(state),'--native-link',str(R/'kprog/x86/native_lab/native_link/target/release/native-link'),'--loader',str(R/'kprog/libnativeloader/build/trusted-native-loader')]
  service=subprocess.Popen(command,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True)
