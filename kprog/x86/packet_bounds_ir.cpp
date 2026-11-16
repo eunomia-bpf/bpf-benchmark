@@ -86,9 +86,32 @@ static unsigned fold_constant_identities(Module &module) {
   }
   return identities;
 }
+// A tied empty register template returns its input bits. Freeze also models
+// a concrete register value when LLVM represents the incoming value as undef
+// or poison, while retaining defined input bits. Pointer and memory-clobber
+// templates retain their existing treatment.
+static unsigned normalize_live_integer_identities(Module &module) {
+  SmallVector<CallInst *,16> calls;
+  for (auto &function:module) for (auto &instruction:instructions(function)) {
+    auto *call=dyn_cast<CallInst>(&instruction);
+    if (!call || !call->getType()->isIntegerTy()) continue;
+    auto *assembly=dyn_cast<InlineAsm>(call->getCalledOperand());
+    if (assembly && tied_identity(call,assembly) && !assembly->isAlignStack() &&
+        !assembly->canThrow()) calls.push_back(call);
+  }
+  for (auto *call:calls) {
+    IRBuilder<> builder(call);builder.SetCurrentDebugLocation(call->getDebugLoc());
+    auto *value=builder.CreateFreeze(call->getArgOperand(0),"register_bits");
+    call->replaceAllUsesWith(value);call->eraseFromParent();
+  }
+  return calls.size();
+}
 static Value *origin(Value *value) {
   while (true) {
     if (auto *extension=dyn_cast<ZExtInst>(value)) { value=extension->getOperand(0); continue; }
+    // Kernel context fields supply defined bits; a freeze preserves the
+    // identity that the former tied register template already exposed here.
+    if (auto *freeze=dyn_cast<FreezeInst>(value)) { value=freeze->getOperand(0); continue; }
     if (auto *call=dyn_cast<CallInst>(value))
       if (auto *assembly=dyn_cast<InlineAsm>(call->getCalledOperand()))
         if (tied_identity(call,assembly)) {
@@ -215,6 +238,7 @@ int main(int argc,char **argv) {
   LLVMContext context;SMDiagnostic error;auto module=parseIRFile(Input,error,context);
   if (!module) { error.print(argv[0],errs());return 1; }
   unsigned constants=fold_constant_identities(*module);
+  unsigned live_identities=normalize_live_integer_identities(*module);
   unsigned private_stack=normalize_private_stack_accesses(*module);
   unsigned unused=remove_unused_private_inputs(*module);
   unsigned contexts=canonical_context_loads(*module);
@@ -268,5 +292,6 @@ int main(int argc,char **argv) {
   errs()<<"debug variable intrinsics removed="<<debug_variables<<'\n';
   errs()<<"equality-edge PHI expressions folded="<<equality_edges<<'\n';
   errs()<<"tied integer constant identities folded="<<constants<<'\n';
+  errs()<<"live integer identities normalized="<<live_identities<<'\n';
   errs()<<"private stack accesses normalized="<<private_stack<<'\n';
 }

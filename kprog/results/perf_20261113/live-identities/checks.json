@@ -1,0 +1,166 @@
+{
+  "counterexample": {
+    "function": "untied",
+    "start": 100,
+    "end": 200,
+    "seed": 0,
+    "expected": 0,
+    "before": 0,
+    "strict": 0
+  },
+  "execution_cases": 60,
+  "retained": [],
+  "normal_service_path": true,
+  "bpf_untied_output_preserved": true,
+  "constant_identity_execution_cases": 30,
+  "equality_edge_execution_cases": 30,
+  "private_stack": {
+    "private_helper_executions": 20,
+    "mixed_alias_executions": 20,
+    "other_access_executions": 30,
+    "normalized_accesses": 2,
+    "helper_observations": [
+      {
+        "variant": "original",
+        "seed": 0,
+        "choose": false,
+        "helper_input": 0,
+        "result": 1311768467463790325
+      },
+      {
+        "variant": "original",
+        "seed": 0,
+        "choose": true,
+        "helper_input": 0,
+        "result": 1311768467463790325
+      },
+      {
+        "variant": "original",
+        "seed": 1,
+        "choose": false,
+        "helper_input": 1,
+        "result": 1311768467463790328
+      },
+      {
+        "variant": "original",
+        "seed": 1,
+        "choose": true,
+        "helper_input": 1,
+        "result": 1311768467463790328
+      },
+      {
+        "variant": "original",
+        "seed": 4294967303,
+        "choose": false,
+        "helper_input": 4294967303,
+        "result": 1311768480348692234
+      },
+      {
+        "variant": "original",
+        "seed": 4294967303,
+        "choose": true,
+        "helper_input": 4294967303,
+        "result": 1311768480348692234
+      },
+      {
+        "variant": "original",
+        "seed": 9223372036854775808,
+        "choose": false,
+        "helper_input": 9223372036854775808,
+        "result": 10535140504318566133
+      },
+      {
+        "variant": "original",
+        "seed": 9223372036854775808,
+        "choose": true,
+        "helper_input": 9223372036854775808,
+        "result": 10535140504318566133
+      },
+      {
+        "variant": "original",
+        "seed": 18446744073709551615,
+        "choose": false,
+        "helper_input": 18446744073709551615,
+        "result": 1311768467463790322
+      },
+      {
+        "variant": "original",
+        "seed": 18446744073709551615,
+        "choose": true,
+        "helper_input": 18446744073709551615,
+        "result": 1311768467463790322
+      },
+      {
+        "variant": "normal",
+        "seed": 0,
+        "choose": false,
+        "helper_input": 0,
+        "result": 1311768467463790325
+      },
+      {
+        "variant": "normal",
+        "seed": 0,
+        "choose": true,
+        "helper_input": 0,
+        "result": 1311768467463790325
+      },
+      {
+        "variant": "normal",
+        "seed": 1,
+        "choose": false,
+        "helper_input": 1,
+        "result": 1311768467463790328
+      },
+      {
+        "variant": "normal",
+        "seed": 1,
+        "choose": true,
+        "helper_input": 1,
+        "result": 1311768467463790328
+      },
+      {
+        "variant": "normal",
+        "seed": 4294967303,
+        "choose": false,
+        "helper_input": 4294967303,
+        "result": 1311768480348692234
+      },
+      {
+        "variant": "normal",
+        "seed": 4294967303,
+        "choose": true,
+        "helper_input": 4294967303,
+        "result": 1311768480348692234
+      },
+      {
+        "variant": "normal",
+        "seed": 9223372036854775808,
+        "choose": false,
+        "helper_input": 9223372036854775808,
+        "result": 10535140504318566133
+      },
+      {
+        "variant": "normal",
+        "seed": 9223372036854775808,
+        "choose": true,
+        "helper_input": 9223372036854775808,
+        "result": 10535140504318566133
+      },
+      {
+        "variant": "normal",
+        "seed": 18446744073709551615,
+        "choose": false,
+        "helper_input": 18446744073709551615,
+        "result": 1311768467463790322
+      },
+      {
+        "variant": "normal",
+        "seed": 18446744073709551615,
+        "choose": true,
+        "helper_input": 18446744073709551615,
+        "result": 1311768467463790322
+      }
+    ],
+    "scope": "Real host loads/stores and external helper mutation; IR boundaries for nonlocal/mixed/atomic/other-local accesses. Actual app/frame acceptance is separate."
+  }
+}

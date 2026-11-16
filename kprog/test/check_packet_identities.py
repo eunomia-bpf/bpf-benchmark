@@ -64,6 +64,10 @@ define i64 @constant_chain() {
 %second = call i64 asm sideeffect "", "=r,0"(i64 %offset)
 ret i64 %second
 }
+define i64 @live_integer(i64 %input) {
+%value = call i64 asm sideeffect "", "=r,0"(i64 %input)
+ret i64 %value
+}
 '''
     before.write_text(source)
     active = run([tool, before, '-o', build/'strict.bc'])
@@ -72,6 +76,9 @@ ret i64 %second
     if 'tied integer constant identities folded=5' not in active.stderr:
         raise ValueError('Expected three constants plus both chained identities to fold')
     lowered = run(['llvm-dis-18', build/'strict.bc', '-o', '-']).stdout
+    live_body = lowered.split('@live_integer(', 1)[1].split('\n}', 1)[0]
+    if 'asm sideeffect' in live_body or 'freeze i64 %input' not in live_body:
+        raise ValueError('A live identity lost its defined-bit/undef register semantics')
     for name, removable in [('constant64', True), ('constant32', True), ('constant_zero', True),
                              ('constant_memory', False), ('constant_pointer', False), ('constant_untied', False),
                              ('constant_chain', True)]:
@@ -105,6 +112,13 @@ ret i64 %second
                           row['start']==100 and row['end']==200 and row['seed']==0)
     constant_cases = []
     for label, library in libraries.items():
+        library.live_integer.argtypes = [c.c_uint64]
+        library.live_integer.restype = c.c_uint64
+        for value in (0, 1, (1<<32)+7, 1<<63, (1<<64)-1):
+            actual = library.live_integer(value)
+            if actual != value:
+                raise ValueError('Live64-bit register identity changed bits')
+            constant_cases.append(dict(pipeline=label, function='live_integer', value=actual))
         for name, restype, expected in [('constant64', c.c_uint64, (1<<64)-1),
                                         ('constant32', c.c_uint32, (1<<32)-1),
                                         ('constant_zero', c.c_uint64, 0),
