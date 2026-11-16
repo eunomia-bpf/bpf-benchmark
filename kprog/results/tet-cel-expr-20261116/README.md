@@ -16,8 +16,9 @@ static `cel_expr(int id, long *argsoff, char *args)` at lines 23-45.
 
 Confirmed in the app's own object,
 `…/snapshots/3167/fs/artifacts/tetragon/bpf_generic_kprobe_v61.o`: all eight
-are undefined `U`, with eight `R_BPF_64_32` relocations into `.text`, one per
-switch case. **No object in the image defines any of them.**
+are undefined `U`, with exactly one `R_BPF_64_32` relocation into `.text` per
+case (41 `R_BPF_64_32` in the object overall). **No object in the image defines
+any of them.**
 
 ## How upstream makes them
 
