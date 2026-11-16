@@ -7,5 +7,5 @@ Coordinator 2026-11-17. Operator: "也得通过调优编译参数做到native �
 the source tree unchanged), records executable bytes per app (`textsize.py`), then times OTel, BCC, Cilium, Tracee and
 Katran through the frozen corpus entry with stats on (SAMPLES=3, WORKLOAD_DURATION=60: a tuning measurement; official
 numbers stay 3 x 180 s). Ratios come from `may29_ratio.py` (the 05-29 parser) and installed bytes from `inst.py`.
-Order: O3 (current), Os, O2, O3 again for drift. The CMOV-to-branch and no-unrolling candidates were dropped on the operator's word (2026-11-17 ~23:58 UTC: "没必要吧").
+Order: O3 (current), Os, O2. The CMOV-to-branch and no-unrolling candidates were dropped on the operator's word (2026-11-17 ~23:58 UTC: "没必要吧").
 Lanes are stopped, so the host is quiet. Each candidate's summary is committed as `<n>-<name>.txt` when it lands.
