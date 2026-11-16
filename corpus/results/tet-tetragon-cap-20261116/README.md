@@ -192,3 +192,33 @@ step is not where this dies.
 That leaves the replaced program's *runtime* behaviour, which matches the
 timing evidence: replacement at 126.586 s, death at 132.678 s, six seconds of
 the program actually executing under the workload.
+
+## Eliminated, with the evidence
+
+Each of these was a plausible silent-fault mechanism. None of them is it.
+
+| candidate | how it was checked | result |
+|---|---|---|
+| replacement count | nine manifests, 0 to 94 entries | not the variable; `event_wake_up_n` is |
+| `tg_kp_bprm_comm` / helper 174 at the `source_lacks_helper` site | dropped that entry from the 94 | still dies |
+| unresolved register-indirect helper call | `native-link --mode proof --show` on the object | 75 sites, all resolved; 30 relocs; clean proof object |
+| unusual helper-id register (`%rcx` instead of `%rax`) | same run, plus `balancer.native.o`/`biosnoop.native.o` | all sites bind; shape is cosmetic |
+| stale link cache | key hashes the native ELF's contents and the linker's identity; cache files dated after the objects | not stale |
+| divide-by-zero in kernel context | every `divq/divl %r12` site is preceded by `testq %r12,%r12; je` | guarded |
+| wrong object variant (v310/plain vs v511) | image's `bpf_fork_v511.o` is 10 896 B = 1362 insns, the count the running program loads; v310 is 7624 B, plain 10 296 B | v511 is the right one |
+| helper queries failing | 94-entry and 1-entry manifests fail identically, so the count of queries is irrelevant | not it |
+| the loader's load path | replacement, attach and `OBJ_GET_INFO_BY_FD` redirection all return 0 | load path is fine |
+
+What remains: the replaced program executes for about six seconds under the
+workload and the guest then stops, with no console output, no oops in any of the
+three channels tried (host dmesg, guest `dmesg -c` into the repo, monitor on
+with `oops=panic` removed), no `result.json` and no app json. In every failing
+run the last complete log line is a successful `PROG_LOAD` for a *different*
+program and the next `BPF_PROG_LOAD` never returns.
+
+The shortest remaining path is out of the guest: run the v511 native object in
+the x86 simulator against the intercepted 1362-insn BPF original
+(`/tmp/bpf_fork_v511.o` copied from the image, or
+`vendor/bpf/tetragon/bpf/process/bpf_fork.c` under `-D__LARGE_BPF_PROG
+-D__V511_BPF_PROG`), and compare the two instruction streams. Anything that
+turns this into a comparable trace beats reading more logs.
