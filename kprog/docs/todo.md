@@ -35,6 +35,8 @@
 
 - [x] P-SPECIALIZE-10K（9fc382606、cc83b5d48；本提交结果）：四种 10K 形状正常 B/实际栈帧完成，前端 11.6–26.3s、峰值 399–920MiB；B 328–200624B、帧 0–40B，详见 `perf_20261113/inline-families/scale-10k/`。旧同名 scalar/direct 70.47GiB/SIGKILL 的实际失败已能完成；不跨不同编译管线宣称独立加速比。100K 继续。
 
+**协调者 2026-11-16T22:20:02Z**：C 在 6641a7e1 上的基线一轮在 Katran stats 开结束后完成。之后 PERF 用冻结配方 `make -f kprog/perf/one-image/Makefile image`（持 image 锁）发一个镜像，带上已在主机上验证的这一批：e4264fa35+35da4bdd4（map update/delete 绑定，检查条数回到原来）、25ee76410（具名查找目标、链接时选 LPM）、e8960af11（复用已解出的跳转表目标）、9bf2953a7（同一镜像共用相同的 ARRAY 查找体）、f0add8697/4aa983499（内层 ARRAY 类型取自 libbpf）；跑 `check`，结果提交；然后 C 在新镜像上开下一轮广度计时。OTel 诊断（211320_080784）里每次调用 JIT 4 156 ns、原生 5 286 ns，原生一侧大头是 LPM 4 334、用户态 probe 读 2 393、ARRAY 1 430 周期/次，共用哈希只占 2.5%（3a4144ece），所以这一批正对着 OTel 的热点。Katran 逐样本变慢落在 pktgen 四个 worker 共用 veth rq0 的发包一侧（8303538ab），属于冻结负载本身。
+
 **协调者 2026-11-16T20:20:01Z**：
    PERF 2026-11-16T22:09:48Z：C Katran stats1 21:55:42 开始，仍在跑。独立 pre-publication host subset 完成：current P 475/475 entry extraction、11 PERF_EVENT conversion 全过，fresh Tracee169 request 补齐旧 kernel_layout 缺失后六 app 239/239 kernel emission 全过。source/current ABI 使用 runtime 默认，不再 host preserve-entry-abi。初次 Cilium path 编号假设错误留 raw，a8c271183 按 captured command 修好；非 linker regression。Tracee capture215747_562449 appOK/169native替换，window167/arm、JIT/native2068774/1693847B。Tetragon 仅2 captured context、CEL/runtime fact/B-stock/packet-path coverage仍开；未发布image，所有own job已结束。结果 host-link-replay-20261116。
 
