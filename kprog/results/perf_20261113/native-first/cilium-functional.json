@@ -1,0 +1,814 @@
+{
+  "app": "cilium/agent",
+  "app_status": "error",
+  "app_error": "Cilium API PUT /v1/endpoint/0 returned HTTP 500: \"timeout while waiting for initial endpoint generation to complete: context deadline exceeded\"; cilium-agent output tail:\ntime=2026-11-16T04:14:55.458290269Z level=info msg=\"Starting restartable watch store\" module=agent.infra.kvstore-utils clusterName=default prefix=cilium/state/ip/v1/default/\ntime=2026-11-16T04:14:55.458322473Z level=info msg=\"Starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:41369] config=\"\" prefix=cilium/state/ip/v1/default/\ntime=2026-11-16T04:14:55.458839524Z level=info msg=\"Successfully listed keys before starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:41369] config=\"\" prefix=cilium/state/ip/v1/default/ count=0 revision=3\ntime=2026-11-16T04:14:55.458859961Z level=info msg=\"Starting to watch prefix\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:41369] config=\"\" prefix=cilium/state/ip/v1/default/ revision=4\ntime=2026-11-16T04:14:55.507288575Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"mtu-updater (mtu.(*MTUManager).Updater)\" duration=910ns\ntime=2026-11-16T04:14:55.50934802Z level=info msg=\"BPF host routing requires kube-proxy-replacement. Falling back to legacy host routing (enable-host-legacy-routing=true).\" module=agent.controlplane.kube-proxy-replacement-init\ntime=2026-11-16T04:14:55.509385527Z level=info msg=\"kube-proxy replacement starting with the following config\" module=agent.controlplane.kube-proxy-replacement-init kprConfiguration=\"{KubeProxyReplacement:false EnableSocketLB:false}\"\ntime=2026-11-16T04:14:55.509435902Z level=info msg=\"Starting connection tracking garbage collector\" module=agent.datapath.maps.ct-nat-map-gc\ntime=2026-11-16T04:14:55.50935391Z level=info msg=\"Datapath signal listener running\" module=agent.controlplane.signal\ntime=2026-11-16T04:14:55.595867882Z level=info msg=\"Restored node IDs from the BPF map\" module=agent.datapath count=0\ntime=2026-11-16T04:14:55.595910032Z level=info msg=\"Removing stale endpoint interfaces\" module=agent.controlplane.endpoint-restore\ntime=2026-11-16T04:14:55.596069478Z level=info msg=\"Reading old endpoints...\" module=agent.controlplane.endpoint-restore\ntime=2026-11-16T04:14:55.596133274Z level=info msg=\"No old endpoints found.\" module=agent.controlplane.endpoint-restore\ntime=2026-11-16T04:14:55.596177562Z level=info msg=\"Initializing daemon\" module=agent.controlplane.daemon\ntime=2026-11-16T04:14:55.596190577Z level=info msg=\"Direct routing device detected\" module=agent.controlplane.daemon direct-routing-device=bpfbench0\ntime=2026-11-16T04:14:55.596322282Z level=info msg=\"Initializing node addressing\" module=agent.controlplane.ipam\ntime=2026-11-16T04:14:55.596342743Z level=info msg=\"Initializing IPAM\" module=agent.controlplane.ipam mode=cluster-pool v4Prefix=10.244.0.0/24 v6Prefix=<nil>\ntime=2026-11-16T04:14:55.596369928Z level=info msg=\"Restoring endpoints...\" module=agent.controlplane.endpoint-restore\ntime=2026-11-16T04:14:55.596446029Z level=info msg=\"Endpoints restored\" module=agent.controlplane.endpoint-restore restored=0 failed=0\ntime=2026-11-16T04:14:55.622724673Z level=info msg=\"More than one stale router IP was found on the cilium_host device after restoration, cleaning up old router IPs.\" module=agent.controlplane.agent-infra-endpoints\ntime=2026-11-16T04:14:55.622835983Z level=info msg=\"Node updated\" module=agent.controlplane.node-manager clusterName=default nodeName=virtme-ng spi=0\ntime=2026-11-16T04:14:55.622869096Z level=info msg=\"Adding local node to cluster\" module=agent.controlplane.nodediscovery node=virtme-ng\ntime=2026-11-16T04:14:55.622942233Z level=info msg=\"Initializing identity allocator\" module=agent.controlplane.identity.identity\ntime=2026-11-16T04:14:55.622948697Z level=info msg=\"Allocating identities between range\" module=agent.controlplane.identity.identity min=256 max=65535 clusterID=0\ntime=2026-11-16T04:14:55.623134834Z level=info msg=\"Validating configured node address ranges\" module=agent.controlplane.daemon\ntime=2026-11-16T04:14:55.623144885Z level=info msg=\"Daemon initialization completed\" module=agent.controlplane.daemon\ntime=2026-11-16T04:14:55.623336706Z level=info msg=\"Serving cilium API at unix:///var/tmp/ciliumrunner_r8qcailz/state/cilium.sock\" module=agent.infra.cilium-api-server\ntime=2026-11-16T04:14:55.623356286Z level=info msg=\"Starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:41369] config=\"\" prefix=cilium/state/nodes/v1\ntime=2026-11-16T04:14:55.623666294Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"nat-stats (stats.(*Stats).countNat)\" duration=625ns\ntime=2026-11-16T04:14:55.624429921Z level=info msg=\"Successfully listed keys before starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:41369] config=\"\" prefix=cilium/state/nodes/v1 count=0 revision=3\ntime=2026-11-16T04:14:55.624487506Z level=info msg=\"Starting to watch prefix\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:41369] config=\"\" prefix=cilium/state/nodes/v1 revision=4\ntime=2026-11-16T04:14:55.628152784Z level=info msg=\"Hubble server is disabled\" module=agent.controlplane.hubble\ntime=2026-11-16T04:14:55.62912214Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"reconcile (reconciler.Register[...].func2 (.../statedb/reconciler/builder.go:84))\" duration=6.552\u00b5s\ntime=2026-11-16T04:14:55.629175162Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"refresh (reconciler.Register[...].func3 (.../statedb/reconciler/builder.go:86))\" duration=798ns\ntime=2026-11-16T04:14:55.62940964Z level=info msg=\"Shell listening\" module=agent.infra.shell socket=/var/run/cilium/shell.sock\ntime=2026-11-16T04:14:55.629535888Z level=info msg=\"Starting healthz status API server\" module=agent.infra.agent-healthz address=127.0.0.1:9879\ntime=2026-11-16T04:14:55.629657855Z level=info msg=\"Regenerating restored endpoints\" module=agent.controlplane.endpoint-restore restored=0\ntime=2026-11-16T04:14:55.629747263Z level=info msg=\"Processing queued deletion requests\" module=agent.controlplane.endpoint-api lenEndpoints=0\ntime=2026-11-16T04:14:55.629858857Z level=info msg=\"Starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:41369] config=\"\" prefix=cilium/state/identities/v1/id\ntime=2026-11-16T04:14:55.630955682Z level=info msg=\"Fence waiting\" module=agent.controlplane.endpoint-api name=cni-deletion-queue remaining=1\ntime=2026-11-16T04:14:55.631017383Z level=info msg=\"Fence done\" module=agent.controlplane.endpoint-api name=cni-deletion-queue remaining=1 duration=66.904\u00b5s\ntime=2026-11-16T04:14:55.631034183Z level=info msg=\"Finished regenerating restored endpoints\" module=agent.controlplane.endpoint-restore regenerated=0 failed=0 total=0\ntime=2026-11-16T04:14:55.631183248Z level=info msg=\"Creating host endpoint\" module=agent.controlplane.agent-infra-endpoints\ntime=2026-11-16T04:14:55.632055897Z level=info msg=\"Removed stale bpf map\" module=agent.datapath.map-sweeper file-path=/var/tmp/ciliumrunner_r8qcailz/bpffs/tc/globals/cilium_cidr_v6_dyn\ntime=2026-11-16T04:14:55.632068705Z level=info msg=\"Removed stale bpf map\" module=agent.datapath.map-sweeper file-path=/var/tmp/ciliumrunner_r8qcailz/bpffs/tc/globals/cilium_cidr_v6_fix\ntime=2026-11-16T04:14:55.632076892Z level=info msg=\"Removed stale bpf map\" module=agent.datapath.map-sweeper file-path=/var/tmp/ciliumrunner_r8qcailz/bpffs/tc/globals/cilium_lb4_maglev\ntime=2026-11-16T04:14:55.632160654Z level=info msg=\"New endpoint\" ipv6=\"\" endpointID=541 ipv4=\"\" ciliumEndpointName=/ containerInterface=\"\" containerID=\"\" k8sPodName=/ subsys=endpoint\ntime=2026-11-16T04:14:55.63220488Z level=info msg=\"Resolving identity labels (blocking)\" ipv6=\"\" endpointID=541 ipv4=\"\" ciliumEndpointName=/ containerInterface=\"\" containerID=\"\" k8sPodName=/ subsys=endpoint identityLabels=reserved:host\ntime=2026-11-16T04:14:55.632247181Z level=info msg=\"Identity of endpoint changed\" ipv6=\"\" endpointID=541 ipv4=\"\" ciliumEndpointName=/ containerInterface=\"\" containerID=\"\" k8sPodName=/ subsys=endpoint new-identity=1 old-identity=\"no identity\" identityLabels=\"map[host:{Key:host Value: Source:reserved cidr:<nil>}]\"\ntime=2026-11-16T04:14:55.632516423Z level=info msg=\"Start hook executed\" module=jobs function=*job.queuedJob.Start detail=\"dns-garbage-collector-job (namemanager.(*manager).doGC)\" duration=14.496\u00b5s\ntime=2026-11-16T04:14:55.632728648Z level=info msg=\"Starting GC of connection tracking\" module=agent.datapath.maps.ct-nat-map-gc first=true\ntime=2026-11-16T04:14:55.635352602Z level=info msg=\"initial gc of ct and nat maps completed\" module=agent.datapath.maps.ct-nat-map-gc duration=2.62474ms\ntime=2026-11-16T04:14:55.63538174Z level=info msg=\"Initial scan of connection tracking completed, starting ctmap pressure metrics controller\" module=agent.datapath.maps.ct-nat-map-gc\ntime=2026-11-16T04:14:55.637104515Z level=info msg=\"Successfully listed keys before starting watcher\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:41369] config=\"\" prefix=cilium/state/identities/v1/id count=0 revision=3\ntime=2026-11-16T04:14:55.63718635Z level=info msg=\"Starting to watch prefix\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:41369] config=\"\" prefix=cilium/state/identities/v1/id revision=4\ntime=2026-11-16T04:14:55.637288953Z level=info msg=\"New lease successfully acquired\" module=agent.infra.kvstore-client backendName=etcd endpoints=[127.0.0.1:41369] config=\"\" leaseID=3090773238744808206 ttl=15m0s\ntime=2026-11-16T04:14:55.658591205Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::d83d:34ff:fe76:cad (primary)\" device=*\ntime=2026-11-16T04:14:55.658631641Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=fe80::f032:6eff:fefe:d8bb device=cilium_host\ntime=2026-11-16T04:14:55.698751744Z level=info msg=\"Started hive\" duration=543.821169ms\ntime=2026-11-16T04:14:55.959664151Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::d83d:34ff:fe76:cad (primary)\" device=*\ntime=2026-11-16T04:14:55.959737976Z level=info msg=\"Node addresses updated\" module=agent.datapath.node-address addresses=\"10.244.0.7 (primary), fe80::f032:6eff:fefe:d8bb\" device=cilium_host\ntime=2026-11-16T04:15:02.644952041Z level=info msg=\"No existing link found for program\" module=agent.datapath.loader link=/var/tmp/ciliumrunner_r8qcailz/bpffs/cilium/devices/bpfbench0/links/cil_xdp_entry progName=cil_xdp_entry\ntime=2026-11-16T04:15:02.662683041Z level=info msg=\"Program attached using bpf_link\" module=agent.datapath.loader progName=cil_xdp_entry\ntime=2026-11-16T04:15:04.794944114Z level=info msg=\"Compiled new BPF template\" module=agent.datapath.loader file-path=/var/tmp/ciliumrunner_r8qcailz/state/state/templates/926fcb3efe1fca1487e0a24658282336c990ae1a2f1f5872945fed70701bd007/bpf_host.o BPFCompilationTime=1.773536504s\ntime=2026-11-16T04:15:04.803679646Z level=info msg=\"Create endpoint request\" module=agent.controlplane.endpoint-api addressing=\"&{IPv4:10.244.0.233 IPv4ExpirationUUID: IPv4PoolName:default IPv6: IPv6ExpirationUUID: IPv6PoolName:}\" containerID=bpfbench-cepa containerInterface=eth0 datapathConfiguration=\"&{DisableSipVerification:false ExternalIpam:false InstallEndpointRoute:false RequireArpPassthrough:false RequireEgressProg:false RequireRouting:<nil>}\" interface=lxcbench0 k8sPodName=/ k8sUID=\"\" labels=\"[container:app=bpfbench-cilium container:instance=a]\" sync-build=true\ntime=2026-11-16T04:15:04.803800225Z level=info msg=\"New endpoint\" ipv6=\"\" k8sPodName=/ endpointID=602 ciliumEndpointName=/ ipv4=10.244.0.233 containerInterface=\"\" containerID=bpfbench-c subsys=endpoint\ntime=2026-11-16T04:15:04.803849842Z level=info msg=\"Resolving identity labels (blocking)\" ipv6=\"\" k8sPodName=/ endpointID=602 ciliumEndpointName=/ ipv4=10.244.0.233 containerInterface=\"\" containerID=bpfbench-c subsys=endpoint identityLabels=\"container:app=bpfbench-cilium,container:instance=a\"\ntime=2026-11-16T04:15:04.847909944Z level=info msg=\"Identity of endpoint changed\" ipv6=\"\" k8sPodName=/ endpointID=602 ciliumEndpointName=/ ipv4=10.244.0.233 containerInterface=\"\" containerID=bpfbench-c subsys=endpoint new-identity=1478 old-identity=\"no identity\" identityLabels=\"map[app:{Key:app Value:bpfbench-cilium Source:container cidr:<nil>} instance:{Key:instance Value:a Source:container cidr:<nil>}]\"\ntime=2026-11-16T04:15:04.847967629Z level=info msg=\"Waiting for endpoint to be generated\" ipv6=\"\" k8sPodName=/ endpointID=602 ciliumEndpointName=/ ipv4=10.244.0.233 containerInterface=\"\" containerID=bpfbench-c identity=1478 subsys=endpoint\ntime=2026-11-16T04:15:04.85942688Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::d83d:34ff:fe76:cad (primary)\" device=*\ntime=2026-11-16T04:15:06.558994972Z level=info msg=\"Fallback node addresses updated\" module=agent.datapath.node-address addresses=\"198.18.0.1 (primary), fe80::d83d:34ff:fe76:cad (primary)\" device=*\ntime=2026-11-16T04:15:06.782536207Z level=info msg=\"Compiled new BPF template\" module=agent.datapath.loader file-path=/var/tmp/ciliumrunner_r8qcailz/state/state/templates/ef1c1daf2496c12bb023a8baebcb723f7150eb24bf04753248c042886bf68371/bpf_lxc.o BPFCompilationTime=1.915882587s\ntime=2026-11-16T04:19:55.635538122Z level=info msg=\"Starting GC of connection tracking\" module=agent.datapath.maps.ct-nat-map-gc first=false\ntime=2026-11-16T04:20:54.882626208Z level=info msg=\"Program attached to device using tcx\" module=agent.datapath.loader progName=cil_to_host device=cilium_host\ntime=2026-11-16T04:20:54.912770133Z level=info msg=\"Program attached to device using tcx\" module=agent.datapath.loader progName=cil_from_host device=cilium_host\ntime=2026-11-16T04:22:21.312601231Z level=info msg=\"Program attached to device using tcx\" module=agent.datapath.loader progName=cil_from_container device=lxcbench0\ntime=2026-11-16T04:22:21.312882216Z level=info msg=\"Reloaded endpoint BPF program\" ipv6=\"\" k8sPodName=/ endpointID=602 ciliumEndpointName=/ ipv4=10.244.0.233 containerInterface=\"\" containerID=bpfbench-c identity=1478 subsys=endpoint\ntime=2026-11-16T04:22:21.313493244Z level=info msg=\"Released last local use of key, invoking global release\" module=agent.controlplane.identity.identity subsys=kvstorebackend key=\"[container:app=bpfbench-cilium container:instance=a]\"\ntime=2026-11-16T04:22:21.321056277Z level=info msg=\"Removed endpoint\" ipv6=\"\" k8sPodName=/ endpointID=602 ciliumEndpointName=/ ipv4=10.244.0.233 containerInterface=\"\" containerID=bpfbench-c identity=1478 subsys=endpoint\ntime=2026-11-16T04:22:21.32108465Z level=warn msg=\"Creation of endpoint failed\" ipv6=\"\" k8sPodName=/ endpointID=602 ciliumEndpointName=/ ipv4=10.244.0.233 containerInterface=\"\" containerID=bpfbench-c identity=1478 subsys=endpoint-api error=\"timeout while waiting for initial endpoint generation to complete: context deadline exceeded\"",
+  "service_archive": "/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/service.tar.gz",
+  "framework_run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_041417_544240",
+  "request_attempts": 28,
+  "programs": 23,
+  "native_installed": 23,
+  "b_generated": 23,
+  "b_stock_passed": 1,
+  "tracked_program_ids": {
+    "baseline": 53,
+    "post_rejit": 0
+  },
+  "definition": "Programs are distinct native ELF SHA256/entry/type bodies submitted to the service; missing manifest entries do not submit a request. Tracked active IDs and request attempts are separate observations.",
+  "bodies": [
+    {
+      "native_sha256": "269b862447b45c4df64763b77acea8216aaa162cc453fbcdb79c26982c6d8ef7",
+      "entry": "cil_from_container",
+      "prog_type": 3,
+      "attempts": [
+        {
+          "request_id": 25,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "25.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '25', '353', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-31jds8rc/generated/request.native.o', 'cil_from_container', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-31jds8rc/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-31jds8rc/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '__config_enable_arp_responder', '154', '158', '__config_security_label', '154', '152', 'cilium_calls', '159', 'null', 'cilium_metrics', '99', 'null', '__config_endpoint_id', '154', '160', '__config_trace_payload_len', '154', '84', 'cilium_percpu_trace_id', '110', 'null', '__config_tracing_ip_option_type', '154', '99']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "48: (bf) r1 = r0                      ; R0=trusted_ptr_sk_buff() R1=trusted_ptr_sk_buff()",
+            "49: (07) r1 += 40                     ; R1=trusted_ptr_sk_buff(off=40)",
+            "50: (b7) r5 = 0                       ; R5=0",
+            "51: (7b) *(u64 *)(r10 -104) = r1      ; R1=trusted_ptr_sk_buff(off=40) R10=fp0 fp-104=trusted_ptr_sk_buff(off=40)",
+            "52: (63) *(u32 *)(r1 +0) = r5",
+            "only read is supported",
+            "processed 41 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "bcd0778c3be7b9964252fcafef27fe18283e4a92fa738db61f835534ad3bf7f2",
+      "entry": "cil_from_host",
+      "prog_type": 3,
+      "attempts": [
+        {
+          "request_id": 18,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "18.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '18', '308', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-0bfbvz2_/generated/request.native.o', 'cil_from_host', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-0bfbvz2_/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-0bfbvz2_/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'cilium_runtime_config', '123', 'null', 'cilium_calls', '146', 'null', 'cilium_metrics', '99', 'null', '__config_interface_mac', '148', '144', '__config_trace_payload_len', '148', '84', '__config_l2_announcements_max_liveness', '148', '208', 'cilium_ipcache_v2', '98', 'null', 'cilium_percpu_trace_id', '110', 'null', '__config_tracing_ip_option_type', '148', '99', '__config_enable_l2_announcements', '148', '206', '__config_eth_header_length', '148', '4', 'cilium_l2_responder_v4', '133', 'null', '__config_cluster_id_bits', '148', '0']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "23: (b7) r1 = 0                       ; R1=0",
+            "24: (bf) r2 = r0                      ; R0=trusted_ptr_sk_buff() R2=trusted_ptr_sk_buff()",
+            "25: (07) r2 += 40                     ; R2=trusted_ptr_sk_buff(off=40)",
+            "26: (7b) *(u64 *)(r10 -144) = r2      ; R2=trusted_ptr_sk_buff(off=40) R10=fp0 fp-144=trusted_ptr_sk_buff(off=40)",
+            "27: (63) *(u32 *)(r2 +0) = r1",
+            "only read is supported",
+            "processed 27 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            ""
+          ]
+        },
+        {
+          "request_id": 22,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "22.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '22', '334', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-dvyhbyu9/generated/request.native.o', 'cil_from_host', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-dvyhbyu9/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-dvyhbyu9/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'cilium_runtime_config', '123', 'null', 'cilium_calls', '195', 'null', 'cilium_metrics', '99', 'null', '__config_interface_mac', '194', '144', '__config_trace_payload_len', '194', '84', '__config_l2_announcements_max_liveness', '194', '208', 'cilium_ipcache_v2', '98', 'null', 'cilium_percpu_trace_id', '110', 'null', '__config_tracing_ip_option_type', '194', '99', '__config_enable_l2_announcements', '194', '206', '__config_eth_header_length', '194', '4', 'cilium_l2_responder_v4', '133', 'null', '__config_cluster_id_bits', '194', '0']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "23: (b7) r1 = 0                       ; R1=0",
+            "24: (bf) r2 = r0                      ; R0=trusted_ptr_sk_buff() R2=trusted_ptr_sk_buff()",
+            "25: (07) r2 += 40                     ; R2=trusted_ptr_sk_buff(off=40)",
+            "26: (7b) *(u64 *)(r10 -144) = r2      ; R2=trusted_ptr_sk_buff(off=40) R10=fp0 fp-144=trusted_ptr_sk_buff(off=40)",
+            "27: (63) *(u32 *)(r2 +0) = r1",
+            "only read is supported",
+            "processed 27 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "bcd0778c3be7b9964252fcafef27fe18283e4a92fa738db61f835534ad3bf7f2",
+      "entry": "cil_from_netdev",
+      "prog_type": 3,
+      "attempts": [
+        {
+          "request_id": 2,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "2.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '2', '215', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-ky7he061/generated/request.native.o', 'cil_from_netdev', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-ky7he061/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-ky7he061/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'cilium_l2_responder_v4', '133', 'null', 'cilium_runtime_config', '123', 'null', 'cilium_calls', '146', 'null', 'cilium_metrics', '99', 'null', '__config_interface_mac', '148', '144', '__config_trace_payload_len', '148', '84', '__config_l2_announcements_max_liveness', '148', '208', 'cilium_ipcache_v2', '98', 'null', 'cilium_percpu_trace_id', '110', 'null', '__config_tracing_ip_option_type', '148', '99', '__config_enable_l2_announcements', '148', '206', '__config_eth_header_length', '148', '4']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "22: (7b) *(u64 *)(r10 -56) = r1       ; R1=scalar(id=1) R10=fp0 fp-56=scalar(id=1)",
+            "23: (b7) r6 = 0                       ; R6=0",
+            "24: (bf) r9 = r0                      ; R0=trusted_ptr_sk_buff() R9=trusted_ptr_sk_buff()",
+            "25: (07) r9 += 40                     ; R9=trusted_ptr_sk_buff(off=40)",
+            "26: (63) *(u32 *)(r9 +0) = r6",
+            "only read is supported",
+            "processed 26 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            ""
+          ]
+        },
+        {
+          "request_id": 20,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "20.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '20', '321', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-poly85u8/generated/request.native.o', 'cil_from_netdev', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-poly85u8/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-poly85u8/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'cilium_l2_responder_v4', '133', 'null', 'cilium_runtime_config', '123', 'null', 'cilium_calls', '195', 'null', 'cilium_metrics', '99', 'null', '__config_interface_mac', '194', '144', '__config_trace_payload_len', '194', '84', '__config_l2_announcements_max_liveness', '194', '208', 'cilium_ipcache_v2', '98', 'null', 'cilium_percpu_trace_id', '110', 'null', '__config_tracing_ip_option_type', '194', '99', '__config_enable_l2_announcements', '194', '206', '__config_eth_header_length', '194', '4']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "22: (7b) *(u64 *)(r10 -56) = r1       ; R1=scalar(id=1) R10=fp0 fp-56=scalar(id=1)",
+            "23: (b7) r6 = 0                       ; R6=0",
+            "24: (bf) r9 = r0                      ; R0=trusted_ptr_sk_buff() R9=trusted_ptr_sk_buff()",
+            "25: (07) r9 += 40                     ; R9=trusted_ptr_sk_buff(off=40)",
+            "26: (63) *(u32 *)(r9 +0) = r6",
+            "only read is supported",
+            "processed 26 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "269b862447b45c4df64763b77acea8216aaa162cc453fbcdb79c26982c6d8ef7",
+      "entry": "cil_lxc_policy",
+      "prog_type": 3,
+      "attempts": [
+        {
+          "request_id": 11,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "11.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '11', '266', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-ra3vsmhp/generated/request.native.o', 'cil_lxc_policy', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-ra3vsmhp/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-ra3vsmhp/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '__config_enable_extended_ip_protocols', '154', '203', '__config_trace_payload_len', '154', '84', '__config_enable_conntrack_accounting', '154', '108', 'cilium_tail_call_buffer4', '156', 'null', 'cilium_calls', '159', 'null', '__config_kernel_hz', '154', '8', '__config_security_label', '154', '152', '__config_enable_ipv4_fragments', '154', '201', '__config_endpoint_id', '154', '160', 'cilium_ipv4_frag_datagrams', '128', 'null', 'cilium_metrics', '99', 'null', 'cilium_ct4_global', '126', 'null', 'cilium_ct_any4_global', '127', 'null', '__config_enable_jiffies', '154', '6']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "1: (7b) *(u64 *)(r10 -304) = r0       ; R0=0 R10=fp0 fp-304=0",
+            "2: (7b) *(u64 *)(r10 -320) = r0       ; R0=0 R10=fp0 fp-320=0",
+            "3: (7b) *(u64 *)(r10 -472) = r0       ; R0=0 R10=fp0 fp-472=0",
+            "4: (7b) *(u64 *)(r10 -488) = r0       ; R0=0 R10=fp0 fp-488=0",
+            "5: (7b) *(u64 *)(r10 -552) = r0",
+            "invalid write to stack R10 off=-552 size=8",
+            "processed 6 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "269b862447b45c4df64763b77acea8216aaa162cc453fbcdb79c26982c6d8ef7",
+      "entry": "cil_to_container",
+      "prog_type": 3,
+      "attempts": [
+        {
+          "request_id": 23,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "23.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '23', '340', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-llpohu37/generated/request.native.o', 'cil_to_container', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-llpohu37/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-llpohu37/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '__config_security_label', '154', '152', 'cilium_calls', '159', 'null', 'cilium_metrics', '99', 'null', '__config_endpoint_id', '154', '160', '__config_trace_payload_len', '154', '84', 'cilium_percpu_trace_id', '110', 'null', '__config_tracing_ip_option_type', '154', '99', '__config_cluster_id_bits', '154', '0']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "38: (bc) w0 = w0                      ; R0=0",
+            "39: (a6) if w2 < 0xe goto pc+79       ; R2=scalar(id=8,smin=umin=umin32=14,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))",
+            "40: (61) r2 = *(u32 *)(r6 +76)        ; R2=pkt(r=0) R6=ctx()",
+            "41: (69) r2 = *(u16 *)(r2 +12)",
+            "invalid access to packet, off=12 size=2, R2(id=0,off=12,r=0)",
+            "R2 offset is outside of the packet",
+            "processed 40 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "bcd0778c3be7b9964252fcafef27fe18283e4a92fa738db61f835534ad3bf7f2",
+      "entry": "cil_to_host",
+      "prog_type": 3,
+      "attempts": [
+        {
+          "request_id": 8,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "8.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '8', '247', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-3cs9ni_6/generated/request.native.o', 'cil_to_host', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-3cs9ni_6/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-3cs9ni_6/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'cilium_calls', '146', 'null', '__config_enable_identity_mark', '148', '141', 'cilium_metrics', '99', 'null', '__config_enable_tproxy', '148', '128', '__config_enable_ipv4_fragments', '148', '163', 'cilium_percpu_trace_id', '110', 'null', '__config_tracing_ip_option_type', '148', '99', '__config_eth_header_length', '148', '4', '__config_cilium_host_ifindex', '148', '32', 'cilium_ipv4_frag_datagrams', '128', 'null', '__config_cluster_id_bits', '148', '0']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "171: (16) if w1 == 0x200 goto pc+32 204: R0=16 R1=512 R2=scalar(id=14,smin=smin32=0,smax=umax=smax32=umax32=0xffff,var_off=(0x0; 0xffff)) R3=map_value(map=.rodata.config,ks=4,vs=221) R4=16 R5=8 R6=scalar(id=5) R7=scalar(id=16,smin=smin32=0,smax=umax=smax32=umax32=0xffffff,var_off=(0x0; 0xffffff)) R8=scalar(id=17,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R9=ctx() R10=fp0 fp-8=scalar() fp-16=scalar() fp-24=scalar(id=5) fp-32=scalar() fp-40=scalar() fp-48=scalar() fp-128=ctx() fp-136=trusted_ptr_sk_buff() fp-144=trusted_ptr_sk_buff()",
+            "204: (79) r3 = *(u64 *)(r10 -144)     ; R3=trusted_ptr_sk_buff() R10=fp0 fp-144=trusted_ptr_sk_buff()",
+            "205: (07) r3 += 40                    ; R3=trusted_ptr_sk_buff(off=40)",
+            "206: (b7) r1 = 0                      ; R1=0",
+            "207: (63) *(u32 *)(r3 +0) = r1",
+            "only read is supported",
+            "processed 172 insns (limit 1000000) max_states_per_insn 0 total_states 8 peak_states 8 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "bcd0778c3be7b9964252fcafef27fe18283e4a92fa738db61f835534ad3bf7f2",
+      "entry": "cil_to_netdev",
+      "prog_type": 3,
+      "attempts": [
+        {
+          "request_id": 16,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "16.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '16', '296', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-u9sqc0zx/generated/request.native.o', 'cil_to_netdev', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-u9sqc0zx/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-u9sqc0zx/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '__config_enable_identity_mark', '148', '141', '__config_interface_ifindex', '148', '16', '__config_debug_lb', '148', '109', 'cilium_lb4_reverse_nat', '116', 'null', '__config_enable_jiffies', '148', '8', 'cilium_ipv4_frag_datagrams', '128', 'null', '__config_enable_ipv4_fragments', '148', '163', '__config_supports_fib_lookup_skip_neigh', '148', '96', 'cilium_ct_any4_global', '127', 'null', 'cilium_ct4_global', '126', 'null', 'cilium_metrics', '99', 'null', '__config_cluster_id_bits', '148', '0', '__config_eth_header_length', '148', '4', 'cilium_devices', '145', 'null', 'cilium_percpu_trace_id', '110', 'null', 'cilium_snat_v4_external', '125', 'null', '__config_enable_conntrack_accounting', '148', '108', '__config_events_map_rate_limit', '148', '132', '__config_kernel_hz', '148', '12', '__config_events_map_burst_limit', '148', '136', 'cilium_calls', '146', 'null', 'cilium_ratelimit_metrics', '100', 'null', '__config_tracing_ip_option_type', '148', '99', '__config_trace_payload_len_overlay', '148', '88', 'cilium_ratelimit', '100', 'null', '__config_tunnel_protocol', '148', '159', '__config_trace_payload_len', '148', '84', '__config_host_ep_id', '148', '156', 'cilium_events', '97', 'null']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "61: (63) *(u32 *)(r10 -68) = r1       ; R1=0 R10=fp0 fp-72=0000????",
+            "62: (bf) r5 = r0                      ; R0=trusted_ptr_sk_buff() R5=trusted_ptr_sk_buff()",
+            "63: (07) r5 += 40                     ; R5=trusted_ptr_sk_buff(off=40)",
+            "64: (b7) r1 = 0                       ; R1=0",
+            "65: (63) *(u32 *)(r5 +0) = r1",
+            "only read is supported",
+            "processed 56 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0",
+            ""
+          ]
+        },
+        {
+          "request_id": 27,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "27.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '27', '371', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-osmk1aa7/generated/request.native.o', 'cil_to_netdev', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-osmk1aa7/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-osmk1aa7/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '__config_enable_identity_mark', '194', '141', '__config_interface_ifindex', '194', '16', '__config_debug_lb', '194', '109', 'cilium_lb4_reverse_nat', '116', 'null', '__config_enable_jiffies', '194', '8', 'cilium_ipv4_frag_datagrams', '128', 'null', '__config_enable_ipv4_fragments', '194', '163', '__config_supports_fib_lookup_skip_neigh', '194', '96', 'cilium_ct_any4_global', '127', 'null', 'cilium_ct4_global', '126', 'null', 'cilium_metrics', '99', 'null', '__config_cluster_id_bits', '194', '0', '__config_eth_header_length', '194', '4', 'cilium_devices', '145', 'null', 'cilium_percpu_trace_id', '110', 'null', 'cilium_snat_v4_external', '125', 'null', '__config_enable_conntrack_accounting', '194', '108', '__config_events_map_rate_limit', '194', '132', '__config_kernel_hz', '194', '12', '__config_events_map_burst_limit', '194', '136', 'cilium_calls', '195', 'null', 'cilium_ratelimit_metrics', '100', 'null', '__config_tracing_ip_option_type', '194', '99', '__config_trace_payload_len_overlay', '194', '88', 'cilium_ratelimit', '100', 'null', '__config_tunnel_protocol', '194', '159', '__config_trace_payload_len', '194', '84', '__config_host_ep_id', '194', '156', 'cilium_events', '97', 'null']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "61: (63) *(u32 *)(r10 -68) = r1       ; R1=0 R10=fp0 fp-72=0000????",
+            "62: (bf) r5 = r0                      ; R0=trusted_ptr_sk_buff() R5=trusted_ptr_sk_buff()",
+            "63: (07) r5 += 40                     ; R5=trusted_ptr_sk_buff(off=40)",
+            "64: (b7) r1 = 0                       ; R1=0",
+            "65: (63) *(u32 *)(r5 +0) = r1",
+            "only read is supported",
+            "processed 56 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "8f9d7139f67d88e00c70a9a35a80897afe3d410f5436a8620403d1337de6cffd",
+      "entry": "cil_xdp_entry",
+      "prog_type": 6,
+      "attempts": [
+        {
+          "request_id": 1,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "1.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "269b862447b45c4df64763b77acea8216aaa162cc453fbcdb79c26982c6d8ef7",
+      "entry": "tail_handle_arp",
+      "prog_type": 3,
+      "attempts": [
+        {
+          "request_id": 17,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "17.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '17', '302', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-xxrmitml/generated/request.native.o', 'tail_handle_arp', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-xxrmitml/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-xxrmitml/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '__config_endpoint_ipv4', '154', '164', 'cilium_calls', '159', 'null', 'cilium_metrics', '99', 'null', '__config_interface_mac', '154', '144']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "21: (a6) if w1 < 0x2a goto pc+333     ; R1=scalar(id=5,smin=umin=umin32=42,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))",
+            "22: (79) r1 = *(u64 *)(r10 -80)       ; R1=ctx() R10=fp0 fp-80=ctx()",
+            "23: (61) r1 = *(u32 *)(r1 +76)        ; R1=pkt(r=0)",
+            "24: (69) r2 = *(u16 *)(r1 +20)",
+            "invalid access to packet, off=20 size=2, R1(id=0,off=20,r=0)",
+            "R1 offset is outside of the packet",
+            "processed 23 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "269b862447b45c4df64763b77acea8216aaa162cc453fbcdb79c26982c6d8ef7",
+      "entry": "tail_handle_ipv4",
+      "prog_type": 3,
+      "attempts": [
+        {
+          "request_id": 21,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "21.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '21', '327', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-8wftsbh9/generated/request.native.o', 'tail_handle_ipv4', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-8wftsbh9/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-8wftsbh9/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'cilium_skip_lb4', '121', 'null', '__config_enable_no_service_endpoints_routable', '154', '236', 'cilium_lb_affinity_match', '112', 'null', 'cilium_lb4_backends_v3', '115', 'null', '__config_nodeport_port_min', '154', '110', 'cilium_nodeport_nat_buffer', '155', 'null', 'cilium_lb4_services_v2', '114', 'null', '__config_trace_payload_len', '154', '84', 'cilium_calls', '159', 'null', 'cilium_lb4_affinity', '120', 'null', 'cilium_ipcache_v2', '98', 'null', '__config_kernel_hz', '154', '8', '__config_security_label', '154', '152', '__config_enable_ipv4_fragments', '154', '201', 'cilium_ipv4_frag_datagrams', '128', 'null', '__config_service_loopback_ipv4', '154', '48', 'cilium_metrics', '99', 'null', 'cilium_ct4_global', '126', 'null', 'cilium_ct_any4_global', '127', 'null', '__config_enable_jiffies', '154', '6', '__config_enable_conntrack_accounting', '154', '108', '__config_debug_lb', '154', '109', '__config_endpoint_netns_cookie', '154', '184', '__config_enable_lrp', '154', '205', '__config_nodeport_port_max', '154', '112']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "4123: (4c) w9 |= w7                   ; R7=134 R9=134",
+            "4124: (bc) w9 = w9                    ; R9=134",
+            "4125: (bf) r2 = r0                    ; R0=trusted_ptr_sk_buff() R2=trusted_ptr_sk_buff()",
+            "4126: (07) r2 += 40                   ; R2=trusted_ptr_sk_buff(off=40)",
+            "4127: (63) *(u32 *)(r2 +0) = r1",
+            "only read is supported",
+            "processed 51 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "269b862447b45c4df64763b77acea8216aaa162cc453fbcdb79c26982c6d8ef7",
+      "entry": "tail_handle_ipv4_cont",
+      "prog_type": 3,
+      "attempts": [
+        {
+          "request_id": 7,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "7.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '7', '240', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-4zj4ai16/generated/request.native.o', 'tail_handle_ipv4_cont', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-4zj4ai16/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-4zj4ai16/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'cilium_call_policy', '107', 'null', '__config_policy_deny_response_enabled', '154', '100', 'cilium_runtime_config', '123', 'null', 'cilium_auth_map', '122', 'null', 'cilium_node_map_v2', '106', 'null', 'cilium_policystats', '109', 'null', '__config_rt_info', '154', '192', '__config_cilium_net_ifindex', '154', '16', '__config_enable_tproxy', '154', '128', 'cilium_calls', '159', 'null', 'cilium_ratelimit_metrics', '100', 'null', 'cilium_events', '97', 'null', '__config_tunnel_port', '154', '198', '__config_endpoint_id', '154', '160', '__config_trace_payload_len', '154', '84', '__config_enable_identity_mark', '154', '141', 'cilium_lxc', '101', 'null', 'cilium_ct4_global', '126', 'null', '__config_enable_netkit', '154', '202', 'cilium_ct_any4_global', '127', 'null', '__config_interface_mac', '154', '144', '__config_policy_verdict_log_filter', '154', '240', 'cilium_ratelimit', '100', 'null', '__config_tracing_ip_option_type', '154', '99', '__config_enable_policy_accounting', '154', '208', '__config_events_map_burst_limit', '154', '136', '__config_kernel_hz', '154', '8', 'cilium_ipcache_v2', '98', 'null', '__config_events_map_rate_limit', '154', '132', '__config_enable_conntrack_accounting', '154', '108', '__config_cluster_id_bits', '154', '0', 'cilium_signals', '129', 'null', '__config_allow_icmp_frag_needed', '154', '206', '__config_enable_icmp_rule', '154', '207', '__config_supports_fib_lookup_skip_neigh', '154', '96', 'cilium_metrics', '99', 'null', 'cilium_tail_call_buffer4', '156', 'null', 'cilium_percpu_trace_id', '110', 'null', '__config_security_label', '154', '152', '__config_enable_jiffies', '154', '6', 'cilium_policy_v2', '149', 'null', 'cilium_nodeport_nat_buffer', '155', 'null']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "242: (4c) w8 |= w9                    ; R8=134 R9=134",
+            "243: (bc) w8 = w8                     ; R8=134",
+            "244: (bf) r2 = r0                     ; R0=trusted_ptr_sk_buff() R2=trusted_ptr_sk_buff()",
+            "245: (07) r2 += 40                    ; R2=trusted_ptr_sk_buff(off=40)",
+            "246: (63) *(u32 *)(r2 +0) = r1",
+            "only read is supported",
+            "processed 66 insns (limit 1000000) max_states_per_insn 0 total_states 1 peak_states 1 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "bcd0778c3be7b9964252fcafef27fe18283e4a92fa738db61f835534ad3bf7f2",
+      "entry": "tail_handle_ipv4_from_host",
+      "prog_type": 3,
+      "attempts": [
+        {
+          "request_id": 10,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "10.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '10', '260', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-khofn07p/generated/request.native.o', 'tail_handle_ipv4_from_host', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-khofn07p/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-khofn07p/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'cilium_call_policy', '107', 'null', '__config_cilium_net_mac', '148', '24', 'cilium_ipcache_v2', '98', 'null', '__config_enable_ipv4_fragments', '148', '163', 'cilium_lxc', '101', 'null', 'cilium_calls', '146', 'null', 'cilium_metrics', '99', 'null', '__config_trace_payload_len', '148', '84', '__config_eth_header_length', '148', '4']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "26: (b7) r1 = 0                       ; R1=0",
+            "27: (bf) r2 = r0                      ; R0=trusted_ptr_sk_buff() R2=trusted_ptr_sk_buff()",
+            "28: (07) r2 += 40                     ; R2=trusted_ptr_sk_buff(off=40)",
+            "29: (7b) *(u64 *)(r10 -120) = r2      ; R2=trusted_ptr_sk_buff(off=40) R10=fp0 fp-120=trusted_ptr_sk_buff(off=40)",
+            "30: (63) *(u32 *)(r2 +0) = r1",
+            "only read is supported",
+            "processed 30 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "bcd0778c3be7b9964252fcafef27fe18283e4a92fa738db61f835534ad3bf7f2",
+      "entry": "tail_handle_ipv4_from_netdev",
+      "prog_type": 3,
+      "attempts": [
+        {
+          "request_id": 6,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "6.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '6', '234', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-kln0gmwp/generated/request.native.o', 'tail_handle_ipv4_from_netdev', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-kln0gmwp/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-kln0gmwp/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'cilium_nodeport_neigh4', '147', 'null', '__config_enable_no_service_endpoints_routable', '148', '197', 'cilium_lb_affinity_match', '112', 'null', 'cilium_lb4_backends_v3', '115', 'null', 'cilium_lb4_source_range', '113', 'null', '__config_enable_netkit', '148', '168', '__config_debug_lb', '148', '109', '__config_eth_header_length', '148', '4', 'cilium_lb4_services_v2', '114', 'null', 'cilium_call_policy', '107', 'null', '__config_trace_payload_len', '148', '84', 'cilium_calls', '146', 'null', 'cilium_lb4_affinity', '120', 'null', '__config_kernel_hz', '148', '12', 'cilium_ipv4_frag_datagrams', '128', 'null', 'cilium_devices', '158', 'null', '__config_enable_ipv4_fragments', '148', '163', 'cilium_metrics', '99', 'null', 'cilium_lxc', '101', 'null', 'cilium_ct4_global', '126', 'null', 'cilium_ct_any4_global', '127', 'null', '__config_enable_jiffies', '148', '8', '__config_enable_conntrack_accounting', '148', '108']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "30: (7b) *(u64 *)(r10 -288) = r1      ; R1=scalar(id=8,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-288=scalar(id=8,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))",
+            "31: (b7) r7 = 0                       ; R7=0",
+            "32: (7b) *(u64 *)(r10 -280) = r5      ; R5=trusted_ptr_sk_buff() R10=fp0 fp-280=trusted_ptr_sk_buff()",
+            "33: (07) r5 += 40                     ; R5=trusted_ptr_sk_buff(off=40)",
+            "34: (63) *(u32 *)(r5 +0) = r7",
+            "only read is supported",
+            "processed 34 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            ""
+          ]
+        },
+        {
+          "request_id": 24,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "24.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '24', '346', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-dxjqblsw/generated/request.native.o', 'tail_handle_ipv4_from_netdev', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-dxjqblsw/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-dxjqblsw/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'cilium_nodeport_neigh4', '147', 'null', '__config_enable_no_service_endpoints_routable', '194', '197', 'cilium_lb_affinity_match', '112', 'null', 'cilium_lb4_backends_v3', '115', 'null', 'cilium_lb4_source_range', '113', 'null', '__config_enable_netkit', '194', '168', '__config_debug_lb', '194', '109', '__config_eth_header_length', '194', '4', 'cilium_lb4_services_v2', '114', 'null', 'cilium_call_policy', '107', 'null', '__config_trace_payload_len', '194', '84', 'cilium_calls', '195', 'null', 'cilium_lb4_affinity', '120', 'null', '__config_kernel_hz', '194', '12', 'cilium_ipv4_frag_datagrams', '128', 'null', 'cilium_devices', '145', 'null', '__config_enable_ipv4_fragments', '194', '163', 'cilium_metrics', '99', 'null', 'cilium_lxc', '101', 'null', 'cilium_ct4_global', '126', 'null', 'cilium_ct_any4_global', '127', 'null', '__config_enable_jiffies', '194', '8', '__config_enable_conntrack_accounting', '194', '108']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "30: (7b) *(u64 *)(r10 -288) = r1      ; R1=scalar(id=8,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-288=scalar(id=8,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))",
+            "31: (b7) r7 = 0                       ; R7=0",
+            "32: (7b) *(u64 *)(r10 -280) = r5      ; R5=trusted_ptr_sk_buff() R10=fp0 fp-280=trusted_ptr_sk_buff()",
+            "33: (07) r5 += 40                     ; R5=trusted_ptr_sk_buff(off=40)",
+            "34: (63) *(u32 *)(r5 +0) = r7",
+            "only read is supported",
+            "processed 34 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "bcd0778c3be7b9964252fcafef27fe18283e4a92fa738db61f835534ad3bf7f2",
+      "entry": "tail_handle_snat_fwd_ipv4",
+      "prog_type": 3,
+      "attempts": [
+        {
+          "request_id": 4,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "4.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '4', '222', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-o8__9lou/generated/request.native.o', 'tail_handle_snat_fwd_ipv4', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-o8__9lou/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-o8__9lou/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'cilium_ipcache_v2', '98', 'null', 'cilium_events', '97', 'null', '__config_host_ep_id', '148', '156', '__config_trace_payload_len', '148', '84', '__config_tunnel_protocol', '148', '159', 'cilium_ratelimit', '100', 'null', '__config_trace_payload_len_overlay', '148', '88', '__config_tracing_ip_option_type', '148', '99', 'cilium_metrics', '99', 'null', 'cilium_lxc', '101', 'null', 'cilium_ratelimit_metrics', '100', 'null', 'cilium_calls', '146', 'null', '__config_events_map_burst_limit', '148', '136', '__config_kernel_hz', '148', '12', '__config_events_map_rate_limit', '148', '132', '__config_enable_conntrack_accounting', '148', '108', 'cilium_snat_v4_external', '125', 'null', 'cilium_percpu_trace_id', '110', 'null', '__config_enable_remote_node_masquerade', '148', '192', '__config_eth_header_length', '148', '4', '__config_enable_ipv4_fragments', '148', '163', 'cilium_ct_any4_global', '127', 'null', 'cilium_ipv4_frag_datagrams', '128', 'null', '__config_nodeport_port_max', '148', '112', '__config_enable_jiffies', '148', '8', 'cilium_snat_v4_alloc_retries', '130', 'null', 'cilium_signals', '129', 'null', '__config_interface_ifindex', '148', '16', 'cilium_ct4_global', '126', 'null', '__config_enable_extended_ip_protocols', '148', '164', '__config_nat_ipv4_masquerade', '148', '172']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "28: (b7) r1 = 0                       ; R1=0",
+            "29: (7b) *(u64 *)(r10 -320) = r0      ; R0=trusted_ptr_sk_buff() R10=fp0 fp-320=trusted_ptr_sk_buff()",
+            "30: (07) r0 += 40                     ; R0=trusted_ptr_sk_buff(off=40)",
+            "31: (7b) *(u64 *)(r10 -336) = r0      ; R0=trusted_ptr_sk_buff(off=40) R10=fp0 fp-336=trusted_ptr_sk_buff(off=40)",
+            "32: (7b) *(u64 *)(r0 +0) = r1",
+            "only read is supported",
+            "processed 32 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            ""
+          ]
+        },
+        {
+          "request_id": 28,
+          "status": -5,
+          "native_installed": false,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": null,
+          "request_archive": "28.failure.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '28', '377', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-bih5ytsl/generated/request.native.o', 'tail_handle_snat_fwd_ipv4', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-bih5ytsl/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-bih5ytsl/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'cilium_ipcache_v2', '98', 'null', 'cilium_events', '97', 'null', '__config_host_ep_id', '194', '156', '__config_trace_payload_len', '194', '84', '__config_tunnel_protocol', '194', '159', 'cilium_ratelimit', '100', 'null', '__config_trace_payload_len_overlay', '194', '88', '__config_tracing_ip_option_type', '194', '99', 'cilium_metrics', '99', 'null', 'cilium_lxc', '101', 'null', 'cilium_ratelimit_metrics', '100', 'null', 'cilium_calls', '195', 'null', '__config_events_map_burst_limit', '194', '136', '__config_kernel_hz', '194', '12', '__config_events_map_rate_limit', '194', '132', '__config_enable_conntrack_accounting', '194', '108', 'cilium_snat_v4_external', '125', 'null', 'cilium_percpu_trace_id', '110', 'null', '__config_enable_remote_node_masquerade', '194', '192', '__config_eth_header_length', '194', '4', '__config_enable_ipv4_fragments', '194', '163', 'cilium_ct_any4_global', '127', 'null', 'cilium_ipv4_frag_datagrams', '128', 'null', '__config_nodeport_port_max', '194', '112', '__config_enable_jiffies', '194', '8', 'cilium_snat_v4_alloc_retries', '130', 'null', 'cilium_signals', '129', 'null', '__config_interface_ifindex', '194', '16', 'cilium_ct4_global', '126', 'null', '__config_enable_extended_ip_protocols', '194', '164', '__config_nat_ipv4_masquerade', '194', '172']' returned non-zero exit status 2."
+          },
+          "error.json": {
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'load-direct', '4', '28', '377', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-bih5ytsl/generated/request.native.o', 'tail_handle_snat_fwd_ipv4', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-bih5ytsl/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-bih5ytsl/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'cilium_ipcache_v2', '98', 'null', 'cilium_events', '97', 'null', '__config_host_ep_id', '194', '156', '__config_trace_payload_len', '194', '84', '__config_tunnel_protocol', '194', '159', 'cilium_ratelimit', '100', 'null', '__config_trace_payload_len_overlay', '194', '88', '__config_tracing_ip_option_type', '194', '99', 'cilium_metrics', '99', 'null', 'cilium_lxc', '101', 'null', 'cilium_ratelimit_metrics', '100', 'null', 'cilium_calls', '195', 'null', '__config_events_map_burst_limit', '194', '136', '__config_kernel_hz', '194', '12', '__config_events_map_rate_limit', '194', '132', '__config_enable_conntrack_accounting', '194', '108', 'cilium_snat_v4_external', '125', 'null', 'cilium_percpu_trace_id', '110', 'null', '__config_enable_remote_node_masquerade', '194', '192', '__config_eth_header_length', '194', '4', '__config_enable_ipv4_fragments', '194', '163', 'cilium_ct_any4_global', '127', 'null', 'cilium_ipv4_frag_datagrams', '128', 'null', '__config_nodeport_port_max', '194', '112', '__config_enable_jiffies', '194', '8', 'cilium_snat_v4_alloc_retries', '130', 'null', 'cilium_signals', '129', 'null', '__config_interface_ifindex', '194', '16', 'cilium_ct4_global', '126', 'null', '__config_enable_extended_ip_protocols', '194', '164', '__config_nat_ipv4_masquerade', '194', '172']' returned non-zero exit status 1."
+          },
+          "verifier_tail": [
+            "28: (b7) r1 = 0                       ; R1=0",
+            "29: (7b) *(u64 *)(r10 -320) = r0      ; R0=trusted_ptr_sk_buff() R10=fp0 fp-320=trusted_ptr_sk_buff()",
+            "30: (07) r0 += 40                     ; R0=trusted_ptr_sk_buff(off=40)",
+            "31: (7b) *(u64 *)(r10 -336) = r0      ; R0=trusted_ptr_sk_buff(off=40) R10=fp0 fp-336=trusted_ptr_sk_buff(off=40)",
+            "32: (7b) *(u64 *)(r0 +0) = r1",
+            "only read is supported",
+            "processed 32 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "269b862447b45c4df64763b77acea8216aaa162cc453fbcdb79c26982c6d8ef7",
+      "entry": "tail_ipv4_ct_egress",
+      "prog_type": 3,
+      "attempts": [
+        {
+          "request_id": 15,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "15.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '15', '290', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-nb8ni6mk/generated/request.native.o', 'tail_ipv4_ct_egress', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-nb8ni6mk/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-nb8ni6mk/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '__config_enable_extended_ip_protocols', '154', '203', '__config_enable_conntrack_accounting', '154', '108', '__config_enable_jiffies', '154', '6', 'cilium_ct_any4_global', '127', 'null', 'cilium_ct4_global', '126', 'null', 'cilium_ipv4_frag_datagrams', '128', 'null', '__config_enable_ipv4_fragments', '154', '201', '__config_security_label', '154', '152', '__config_kernel_hz', '154', '8', 'cilium_calls', '159', 'null', 'cilium_tail_call_buffer4', '156', 'null', 'cilium_metrics', '99', 'null', '__config_trace_payload_len', '154', '84']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "107: (61) r1 = *(u32 *)(r1 +0)        ; R1=1478",
+            "108: (bc) w1 = w1                     ; R1=1478",
+            "109: (bf) r2 = r7                     ; R2=trusted_ptr_sk_buff() R7=trusted_ptr_sk_buff()",
+            "110: (07) r2 += 40                    ; R2=trusted_ptr_sk_buff(off=40)",
+            "111: (63) *(u32 *)(r2 +0) = r1",
+            "only read is supported",
+            "processed 51 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "269b862447b45c4df64763b77acea8216aaa162cc453fbcdb79c26982c6d8ef7",
+      "entry": "tail_ipv4_ct_ingress",
+      "prog_type": 3,
+      "attempts": [
+        {
+          "request_id": 5,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "5.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '5', '228', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-kwpz6ecj/generated/request.native.o', 'tail_ipv4_ct_ingress', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-kwpz6ecj/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-kwpz6ecj/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '__config_enable_extended_ip_protocols', '154', '203', '__config_trace_payload_len', '154', '84', '__config_enable_conntrack_accounting', '154', '108', 'cilium_tail_call_buffer4', '156', 'null', 'cilium_calls', '159', 'null', '__config_kernel_hz', '154', '8', '__config_security_label', '154', '152', '__config_enable_ipv4_fragments', '154', '201', '__config_endpoint_id', '154', '160', 'cilium_ipv4_frag_datagrams', '128', 'null', 'cilium_metrics', '99', 'null', 'cilium_ct4_global', '126', 'null', 'cilium_ct_any4_global', '127', 'null', '__config_enable_jiffies', '154', '6']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "116: (69) r2 = *(u16 *)(r2 +0)        ; R2=602",
+            "117: (54) w2 &= 65535                 ; R2=602",
+            "118: (bc) w2 = w2                     ; R2=602",
+            "119: (07) r7 += 44                    ; R7=trusted_ptr_sk_buff(off=44)",
+            "120: (63) *(u32 *)(r7 +0) = r1",
+            "only read is supported",
+            "processed 52 insns (limit 1000000) max_states_per_insn 0 total_states 2 peak_states 2 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "269b862447b45c4df64763b77acea8216aaa162cc453fbcdb79c26982c6d8ef7",
+      "entry": "tail_ipv4_policy",
+      "prog_type": 3,
+      "attempts": [
+        {
+          "request_id": 3,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "3.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '3', '216', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-f1d3ixlf/generated/request.native.o', 'tail_ipv4_policy', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-f1d3ixlf/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-f1d3ixlf/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '__config_interface_ifindex', '154', '12', 'cilium_runtime_config', '123', 'null', '__config_service_loopback_ipv4', '154', '48', 'cilium_auth_map', '122', 'null', 'cilium_node_map_v2', '106', 'null', 'cilium_calls', '159', 'null', 'cilium_ratelimit_metrics', '100', 'null', 'cilium_events', '97', 'null', '__config_endpoint_id', '154', '160', '__config_trace_payload_len', '154', '84', 'cilium_ct4_global', '126', 'null', '__config_enable_netkit', '154', '202', 'cilium_ct_any4_global', '127', 'null', '__config_policy_verdict_log_filter', '154', '240', 'cilium_ratelimit', '100', 'null', '__config_tracing_ip_option_type', '154', '99', '__config_enable_policy_accounting', '154', '208', '__config_events_map_burst_limit', '154', '136', 'cilium_ipcache_v2', '98', 'null', 'cilium_policy_v2', '149', 'null', '__config_events_map_rate_limit', '154', '132', '__config_enable_conntrack_accounting', '154', '108', '__config_enable_ipv4_fragments', '154', '201', '__config_security_label', '154', '152', 'cilium_percpu_trace_id', '110', 'null', '__config_enable_jiffies', '154', '6', 'cilium_lb4_reverse_nat', '116', 'null', '__config_kernel_hz', '154', '8', '__config_debug_lb', '154', '109', 'cilium_signals', '129', 'null', '__config_allow_icmp_frag_needed', '154', '206', '__config_enable_icmp_rule', '154', '207', 'cilium_metrics', '99', 'null', 'cilium_tail_call_buffer4', '156', 'null', '__config_enable_tproxy', '154', '128', 'cilium_policystats', '109', 'null']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "32: (bc) w1 = w1                      ; R1=scalar(id=9,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))",
+            "33: (b7) r4 = 0                       ; R4=0",
+            "34: (7b) *(u64 *)(r10 -328) = r0      ; R0=trusted_ptr_sk_buff() R10=fp0 fp-328=trusted_ptr_sk_buff()",
+            "35: (07) r0 += 40                     ; R0=trusted_ptr_sk_buff(off=40)",
+            "36: (63) *(u32 *)(r0 +0) = r4",
+            "only read is supported",
+            "processed 36 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "269b862447b45c4df64763b77acea8216aaa162cc453fbcdb79c26982c6d8ef7",
+      "entry": "tail_ipv4_to_endpoint",
+      "prog_type": 3,
+      "attempts": [
+        {
+          "request_id": 9,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "9.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '9', '253', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-pony0ldw/generated/request.native.o', 'tail_ipv4_to_endpoint', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-pony0ldw/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-pony0ldw/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '__config_cilium_host_mac', '154', '40', '__config_interface_ifindex', '154', '12', 'cilium_runtime_config', '123', 'null', '__config_service_loopback_ipv4', '154', '48', 'cilium_auth_map', '122', 'null', 'cilium_node_map_v2', '106', 'null', 'cilium_policystats', '109', 'null', 'cilium_calls', '159', 'null', 'cilium_ratelimit_metrics', '100', 'null', 'cilium_events', '97', 'null', '__config_endpoint_id', '154', '160', '__config_trace_payload_len', '154', '84', 'cilium_ct4_global', '126', 'null', 'cilium_ct_any4_global', '127', 'null', '__config_interface_mac', '154', '144', '__config_policy_verdict_log_filter', '154', '240', 'cilium_ratelimit', '100', 'null', '__config_tracing_ip_option_type', '154', '99', '__config_enable_policy_accounting', '154', '208', '__config_events_map_burst_limit', '154', '136', 'cilium_ipcache_v2', '98', 'null', 'cilium_policy_v2', '149', 'null', '__config_events_map_rate_limit', '154', '132', '__config_enable_conntrack_accounting', '154', '108', '__config_security_label', '154', '152', 'cilium_percpu_trace_id', '110', 'null', '__config_enable_ipv4_fragments', '154', '201', '__config_enable_jiffies', '154', '6', 'cilium_lb4_reverse_nat', '116', 'null', '__config_kernel_hz', '154', '8', '__config_debug_lb', '154', '109', 'cilium_signals', '129', 'null', '__config_allow_icmp_frag_needed', '154', '206', '__config_enable_icmp_rule', '154', '207', 'cilium_metrics', '99', 'null', 'cilium_tail_call_buffer4', '156', 'null', '__config_cilium_net_ifindex', '154', '16']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "31: (bc) w7 = w7                      ; R7=scalar(id=11,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))",
+            "32: (b7) r1 = 0                       ; R1=0",
+            "33: (bf) r6 = r0                      ; R0=trusted_ptr_sk_buff() R6=trusted_ptr_sk_buff()",
+            "34: (07) r6 += 40                     ; R6=trusted_ptr_sk_buff(off=40)",
+            "35: (63) *(u32 *)(r6 +0) = r1",
+            "only read is supported",
+            "processed 35 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "269b862447b45c4df64763b77acea8216aaa162cc453fbcdb79c26982c6d8ef7",
+      "entry": "tail_no_service_ipv4",
+      "prog_type": 3,
+      "attempts": [
+        {
+          "request_id": 19,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "19.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '19', '315', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-85dtrj3t/generated/request.native.o', 'tail_no_service_ipv4', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-85dtrj3t/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-85dtrj3t/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'cilium_calls', '159', 'null', 'cilium_metrics', '99', 'null']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "72: (5f) r8 &= r1                     ; R1=0x80000000 R8=scalar(smin=0,smax=umax=umax32=0x80000000,smax32=0,var_off=(0x0; 0x80000000))",
+            "73: (79) r3 = *(u64 *)(r10 -104)      ; R3=scalar(id=12,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-104=scalar(id=12,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))",
+            "74: (55) if r8 != 0x0 goto pc+106     ; R8=0",
+            "75: (61) r1 = *(u32 *)(r9 +26)",
+            "invalid access to packet, off=26 size=4, R9(id=0,off=26,r=0)",
+            "R9 offset is outside of the packet",
+            "processed 71 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "bcd0778c3be7b9964252fcafef27fe18283e4a92fa738db61f835534ad3bf7f2",
+      "entry": "tail_no_service_ipv4",
+      "prog_type": 3,
+      "attempts": [
+        {
+          "request_id": 26,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "26.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '26', '359', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-9pgto7ur/generated/request.native.o', 'tail_no_service_ipv4', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-9pgto7ur/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-9pgto7ur/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'cilium_calls', '195', 'null', 'cilium_metrics', '99', 'null', '__config_eth_header_length', '194', '4']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "87: (79) r0 = *(u64 *)(r10 -96)       ; R0=trusted_ptr_sk_buff() R10=fp0 fp-96=trusted_ptr_sk_buff()",
+            "88: (79) r5 = *(u64 *)(r10 -104)      ; R5=scalar(id=13,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff)) R10=fp0 fp-104=scalar(id=13,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))",
+            "89: (55) if r8 != 0x0 goto pc+117     ; R8=0",
+            "90: (61) r1 = *(u32 *)(r9 +12)",
+            "invalid access to packet, off=26 size=4, R9(id=0,off=26,r=0)",
+            "R9 offset is outside of the packet",
+            "processed 85 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "bcd0778c3be7b9964252fcafef27fe18283e4a92fa738db61f835534ad3bf7f2",
+      "entry": "tail_nodeport_nat_egress_ipv4",
+      "prog_type": 3,
+      "attempts": [
+        {
+          "request_id": 12,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "12.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '12', '272', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-tbgs17a9/generated/request.native.o', 'tail_nodeport_nat_egress_ipv4', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-tbgs17a9/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-tbgs17a9/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'cilium_signals', '129', 'null', 'cilium_snat_v4_alloc_retries', '130', 'null', '__config_eth_header_length', '148', '4', '__config_trace_payload_len', '148', '84', '__config_supports_fib_lookup_skip_neigh', '148', '96', 'cilium_metrics', '99', 'null', 'cilium_calls', '146', 'null', 'cilium_devices', '145', 'null', '__config_enable_ipv4_fragments', '148', '163', 'cilium_ipv4_frag_datagrams', '128', 'null', '__config_enable_jiffies', '148', '8', '__config_nodeport_port_max', '148', '112', 'cilium_snat_v4_external', '125', 'null', '__config_enable_nodeport_source_lookup', '148', '98', '__config_supports_fib_lookup_src', '148', '97']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "2555: (4c) w7 |= w9                   ; R7=134 R9=134",
+            "2556: (bc) w7 = w7                    ; R7=134",
+            "2557: (07) r0 += 40                   ; R0=trusted_ptr_sk_buff(off=40)",
+            "2558: (b7) r1 = 0                     ; R1=0",
+            "2559: (7b) *(u64 *)(r0 +0) = r1",
+            "only read is supported",
+            "processed 98 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "bcd0778c3be7b9964252fcafef27fe18283e4a92fa738db61f835534ad3bf7f2",
+      "entry": "tail_nodeport_nat_ingress_ipv4",
+      "prog_type": 3,
+      "attempts": [
+        {
+          "request_id": 14,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "14.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '14', '284', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-pip60ujh/generated/request.native.o', 'tail_nodeport_nat_ingress_ipv4', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-pip60ujh/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-pip60ujh/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '__config_nodeport_port_max', '148', '112', '__config_debug_lb', '148', '109', 'cilium_snat_v4_external', '125', 'null', '__config_enable_conntrack_accounting', '148', '108', '__config_eth_header_length', '148', '4', '__config_trace_payload_len', '148', '84', '__config_supports_fib_lookup_skip_neigh', '148', '96', 'cilium_calls', '146', 'null', '__config_kernel_hz', '148', '12', 'cilium_devices', '145', 'null', '__config_security_label', '148', '152', '__config_enable_ipv4_fragments', '148', '163', 'cilium_ipv4_frag_datagrams', '128', 'null', 'cilium_metrics', '99', 'null', 'cilium_ct4_global', '126', 'null', 'cilium_ct_any4_global', '127', 'null', 'cilium_lb4_reverse_nat', '116', 'null', '__config_enable_jiffies', '148', '8']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "59: (7b) *(u64 *)(r10 -288) = r6      ; R6=ctx() R10=fp0 fp-288=ctx()",
+            "60: (2d) if r2 > r3 goto pc+2438      ; R2=pkt(off=34,r=0) R3=pkt(id=11,r=0,smin=0,smax=umax=0xffffffff,var_off=(0x0; 0xffffffff))",
+            "61: (7b) *(u64 *)(r10 -304) = r7      ; R7=trusted_ptr_sk_buff() R10=fp0 fp-304=trusted_ptr_sk_buff()",
+            "62: (69) r3 = *(u16 *)(r5 +4)",
+            "invalid access to packet, off=18 size=2, R5(id=0,off=18,r=0)",
+            "R5 offset is outside of the packet",
+            "processed 59 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "269b862447b45c4df64763b77acea8216aaa162cc453fbcdb79c26982c6d8ef7",
+      "entry": "tail_nodeport_rev_dnat_ipv4",
+      "prog_type": 3,
+      "attempts": [
+        {
+          "request_id": 13,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "13.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/loader-inputs/recovery', 'verify', '4', '13', '278', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-yjhd9wf6/generated/request.native.o', 'tail_nodeport_rev_dnat_ipv4', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-yjhd9wf6/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/state/session-fjejzzdh/requests/request-yjhd9wf6/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', '__config_debug_lb', '154', '109', '__config_trace_payload_len', '154', '84', '__config_supports_fib_lookup_skip_neigh', '154', '96', 'cilium_calls', '159', 'null', '__config_kernel_hz', '154', '8', 'cilium_devices', '158', 'null', '__config_security_label', '154', '152', '__config_enable_ipv4_fragments', '154', '201', 'cilium_ipv4_frag_datagrams', '128', 'null', 'cilium_metrics', '99', 'null', 'cilium_ct4_global', '126', 'null', 'cilium_ct_any4_global', '127', 'null', 'cilium_lb4_reverse_nat', '116', 'null', '__config_enable_jiffies', '154', '6', '__config_enable_conntrack_accounting', '154', '108']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "467: (4c) w9 |= w8                    ; R8=0 R9=134",
+            "468: (bc) w9 = w9                     ; R9=134",
+            "469: (07) r0 += 40                    ; R0=trusted_ptr_sk_buff(off=40)",
+            "470: (b7) r1 = 0                      ; R1=0",
+            "471: (7b) *(u64 *)(r0 +0) = r1",
+            "only read is supported",
+            "processed 81 insns (limit 1000000) max_states_per_insn 0 total_states 3 peak_states 3 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    }
+  ]
+}
