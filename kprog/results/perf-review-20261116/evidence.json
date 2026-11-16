@@ -630,5 +630,15 @@
     "native_stack_relative_pointer": -56,
     "cause": "Read memory dispatch and recovery inspect base only; numeric read of STACK-tagged index loses its private-arena pointer. LEA already preserves such unscaled index pointers.",
     "status": "Review only; no source change or fresh execution. B generated, stock acceptance remains open."
+  },
+  "cilium_compile_time_feature_boundary": {
+    "recorded_at": "2026-11-16T15:56:24Z",
+    "native_features": {
+      "ENABLE_HOST_ROUTING": 1,
+      "ENABLE_ROUTING": 1
+    },
+    "selector": "lib/config.h:6-14 preprocessor is_defined, not a .rodata.config global",
+    "agent_source": "pkg/datapath/linux/config/config.go:374,674 conditionally emits macros",
+    "scope": "Actual native compile choices confirmed; actual eBPF runtime build macro choices not yet compared. DATASEC rebinding alone cannot change a preprocessor-folded branch."
   }
 }

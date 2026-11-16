@@ -243,6 +243,20 @@ to the source read during this review; subsequent cleanup may move them.
    them at `pkg/bpf/reachability.go:31`. The two paths must consume the same
    applied configuration, not merely the same declaration spelling.
 
+   Compile-time feature flags form a separate binding boundary. In this
+   native build, `-DENABLE_HOST_ROUTING=1` and `-DENABLE_ROUTING=1` are fixed
+   in `vendor/bpf/Makefile:81–104`. `lib/config.h:6–14` implements is_defined
+   through preprocessor expansion, so bpf_lxc.c:1361's host-routing condition
+   is constant true. It is not a CONFIG() variable in .rodata.config, and
+   binding live DATASEC values cannot change it. Upstream agent config emits
+   ENABLE_HOST_ROUTING conditionally (`pkg/datapath/linux/config/config.go:374`)
+   and ENABLE_ROUTING per endpoint (:674). This identifies a real source of
+   potentially different compiled paths and excess code separate from the
+   global-value binder. It does not establish which macros were present in
+   the actual eBPF arm; inspect that arm's retained generated headers/objects
+   before calling a particular feature different. Correcting cb or binding
+   all global values alone does not settle this compile-time parity question.
+
    The IPv4 host-route decision is visible at `bpf_lxc.c:1363`: rt_info feeds
    fib_redirect_v4; REDIRECT returns at :1378, while NOT_FWDED can fall through
    to the stack at :1381. `lxc_redirect_to_host` uses cilium_net_ifindex at
