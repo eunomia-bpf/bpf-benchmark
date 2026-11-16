@@ -12,3 +12,7 @@ host:
 	python3 $(ROOT)/kprog/results/inner-array-lto-20261116/check.py $(RAW) $(TMP) > $(RAW)/check.log 2>&1
 	$(MAKE) -C $(ROOT)/kprog/libnativeloader > $(RAW)/loader-build.log 2>&1
 	$(MAKE) -f $(ROOT)/kprog/results/map-ops-binding-20261116/Makefile syntax RAW=$(RAW)
+
+.PHONY: inspect
+inspect:
+	python3 $(ROOT)/kprog/results/inner-array-lto-20261116/inspect.py $(RAW)
