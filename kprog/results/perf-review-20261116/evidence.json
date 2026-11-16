@@ -640,5 +640,24 @@
     "selector": "lib/config.h:6-14 preprocessor is_defined, not a .rodata.config global",
     "agent_source": "pkg/datapath/linux/config/config.go:374,674 conditionally emits macros",
     "scope": "Actual native compile choices confirmed; actual eBPF runtime build macro choices not yet compared. DATASEC rebinding alone cannot change a preprocessor-folded branch."
+  },
+  "cpu_task_inlining_correction": {
+    "recorded_at": "2026-11-16T15:59:54Z",
+    "supersedes": "Original item6 table claim of no native CPU/task helper-specific rewrite",
+    "call_site": "kprog/x86/native_lab/native_link/src/x86.rs:1500",
+    "implementation": "kprog/x86/native_lab/native_link/src/x86_probe_read.rs:178-193",
+    "present_since": "3880cda8f2",
+    "helpers": [
+      "bpf_get_smp_processor_id",
+      "bpf_get_current_task"
+    ],
+    "scope": "Source path confirmed. Actual emitted occurrence counts and isolated per-call gain not measured."
+  },
+  "simulator_skb_metadata_boundary": {
+    "simulator_public_cb_physical_offset": 48,
+    "native_producer_cb_physical_offset": 40,
+    "simulator_data_offset": 208,
+    "simulator_data_end_offset": 80,
+    "scope": "Simulator already uses kernel public-field translation; producer still needs correction."
   }
 }

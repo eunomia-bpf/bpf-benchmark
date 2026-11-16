@@ -149,7 +149,7 @@ to the source read during this review; subsequent cleanup may move them.
    | Probe reads | Direct recoverable loads, but preserves policy/nesting/zeroing and local call boundary | 490 B in sys_exit, 255 B in OTel sampling entry; no isolated current gain. |
    | Clock | `x86.rs:23` calls the same fast monotonic implementation directly | Kernel helper itself returns it (`kernel/bpf/helpers.c:178–181`). Removes wrapper linkage, not clock-source/seqlock work. |
    | Tail calls | Machine-code dispatch avoiding the nonfunctional C helper stub | Required semantics; uses the fixed-four convention in item 1; no tail-pop mismatch demonstrated. |
-   | CPU/current-task helpers | Native generally retains helper calls via `x86.rs:1598` | Kernel verifier inlines CPU and task loads at `verifier.c:24000` and :24027. Current source has no matching native helper-specific rewrite; do not claim these calls are already inlined. |
+   | CPU/current-task helpers | `x86.rs:1500` already calls `probe_read::percpu` before generic resolution | GS-relative CPU-ID/current-task loads exist since 3880cda8f2; applicability depends on actual per-CPU/address facts. The previous claim that no native rewrite existed was wrong; see item 14. |
    | Frozen data | Current loader supplies live data addresses | Missing whole-IR folding for BCC described above. |
 
    Historical combined speedups are not individual component measurements.
@@ -434,3 +434,31 @@ double-execution cause and no confirmed Cilium packet fix. Those remain open. Th
     application claim. Coordinator cleanup still owns all source edits.
     FORMAL owns shared-I proof coordination; the existing LEA and memory
     handlers must keep the same native address semantics when this is fixed.
+
+14. **Correction: native CPU-ID/current-task inlining already exists.**
+
+    The original item-6 table incorrectly stopped at generic helper resolution
+    in x86.rs:1598. The earlier call at :1500 invokes
+    `x86_probe_read.rs:178–193` before that path. For bpf_get_smp_processor_id
+    it uses the plan's __native_x86_cpu_number; for bpf_get_current_task it
+    resolves current_task relative to an available probe-read helper anchor
+    and the actual same-kernel helper address. A representable GS disp32 emits
+    a direct GS-relative load, with 64-bit width for the task pointer. These
+    cases have existed since 3880cda8f2 (2026-11-14), not a cleanup addition.
+    The loader supplies cpu_number and this_cpu_off from kallsyms at
+    `native_loader_link_schema.hpp:95–103`.
+
+    Missing layout/helper anchors or an unrepresentable offset keep the helper
+    call; this review has not measured the frequency of those cases. Neither
+    bpf_get_current_pid_tgid nor bpf_current_task_under_cgroup is one of those
+    two rewrites. Their retained calls in BCC sys_enter/sys_exit therefore do
+    not show that CPU-ID/current-task inlining is absent. The installed bytes
+    and isolated gain of the existing rewrite remain unmeasured. Do not build
+    another CPU/task inliner based on the withdrawn claim.
+
+    The simulator's TC metadata constant is also already the translated +48:
+    `x86_sim.h:150–153` uses X86_SKB_CB_OFF=0x30, unlike the producer's native
+    struct cb at +40. Its data/data_end constants (+208/+80) agree with the
+    sole kernel. This does not fix the native producer. The context bug in
+    item 8 belongs to that producer boundary; simply changing the simulator
+    constant to the raw sk_buff.cb offset would repeat it.
