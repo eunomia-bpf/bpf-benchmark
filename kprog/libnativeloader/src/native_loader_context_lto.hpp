@@ -1,25 +1,26 @@
 #pragma once
 
 // The selected P carries its own frontend IR. Context conversion happens here,
-// before entry extraction, data binding, ABI proof and normal helper/map LTO.
+// after current data binding and before final ABI proof and helper/map LTO.
 std::filesystem::path native_context_lto_object(
     const std::filesystem::path &input, const std::string &symbol, uint32_t prog_type,
     const std::filesystem::path &compiler = "/opt/bpf-benchmark/native-bpf/x86_64/kprog-perf-context-lto",
     const std::filesystem::path &kernel_btf = "/sys/kernel/btf/vmlinux",
     const std::filesystem::path &directory = kNativeLinkCacheDir,
-    const std::string &function_bodies = {})
+    const std::string &function_bodies = {}, const std::string &immutable_globals = {})
 {
-    if (prog_type != BPF_PROG_TYPE_PERF_EVENT && function_bodies.empty()) return input;
+    if (prog_type != BPF_PROG_TYPE_PERF_EVENT && function_bodies.empty() && immutable_globals.empty()) return input;
     Hash64 hash;
-    hash.add_string("perf-context-lto-v1");
+    hash.add_string("perf-context-lto-v2");
     hash_file_contents(hash, input, "native_elf");
     hash_file_contents(hash, kernel_btf, "boot_kernel_btf");
     hash_file_identity(hash, compiler, "context_lto_compiler");
     hash.add_string(symbol);
+    hash.add_u64(prog_type);
+    hash.add_string(immutable_globals);
     if (!function_bodies.empty()) {
         hash.add_string("original-bpf-function-bodies-v1");
         hash.add_string(function_bodies);
-        hash.add_u64(prog_type);
         const auto callee_compiler = compiler.parent_path() / "kprog-bpf-callee-ir";
         std::error_code callee_error;
         const bool present = std::filesystem::exists(callee_compiler, callee_error);
@@ -37,11 +38,17 @@ std::filesystem::path native_context_lto_object(
     const auto temporary = output.string() + ".tmp." + std::to_string(getpid());
     const auto log = temporary + ".stderr.txt";
     std::vector<std::string> argv = {compiler.string(), input.string(),
-        "--symbol", symbol, "--kernel-btf", kernel_btf.string(), "-o", temporary};
+        "--symbol", symbol, "--kernel-btf", kernel_btf.string(),
+        "--prog-type", std::to_string(prog_type), "-o", temporary};
+    if (!immutable_globals.empty()) {
+        const auto facts = temporary + ".immutable.json";
+        write_binary_file(facts, reinterpret_cast<const uint8_t *>(immutable_globals.data()), immutable_globals.size());
+        argv.insert(argv.end(), {"--immutable-globals", facts});
+    }
     if (!function_bodies.empty()) {
         const auto facts = temporary + ".functions.json";
         write_binary_file(facts, reinterpret_cast<const uint8_t *>(function_bodies.data()), function_bodies.size());
-        argv.insert(argv.end(), {"--prog-type", std::to_string(prog_type), "--bpf-function-bodies", facts});
+        argv.insert(argv.end(), {"--bpf-function-bodies", facts});
     }
     const int rc = native_loader_detail::run_subprocess(argv, log);
     const int saved_errno = errno;

@@ -1,4 +1,4 @@
-// Trusted load-time native LTO: current-load function bodies and context ABI.
+// Trusted load-time native LTO: current-load functions, data and context ABI.
 #include "llvm/Analysis/ValueTracking.h"
 #include "llvm/BinaryFormat/Magic.h"
 #include "llvm/IR/IRBuilder.h"
@@ -28,6 +28,44 @@ static cl::opt<std::string> Kernel("kernel-btf", cl::Required);
 static cl::opt<std::string> Symbol("symbol", cl::Required);
 static cl::opt<unsigned> ProgType("prog-type", cl::init(BPF_PROG_TYPE_PERF_EVENT));
 static cl::opt<std::string> FunctionBodies("bpf-function-bodies");
+static cl::opt<std::string> ImmutableGlobals("immutable-globals");
+
+static Expected<unsigned> foldImmutableGlobals(Module &M, StringRef Path) {
+  if (Path.empty()) return 0;
+  auto Facts = MemoryBuffer::getFile(Path);
+  if (!Facts) return errorCodeToError(Facts.getError());
+  auto Document = json::parse((*Facts)->getBuffer());
+  if (!Document) return Document.takeError();
+  auto *Values = Document->getAsObject();
+  if (!Values) return native_bpf::failure("immutable globals require an object");
+  const auto &DL = M.getDataLayout();
+  SmallVector<LoadInst *, 32> Loads;
+  for (auto &F : M) for (auto &I : instructions(F))
+    if (auto *L = dyn_cast<LoadInst>(&I)) Loads.push_back(L);
+  unsigned Folded = 0;
+  for (auto *L : Loads) {
+    int64_t Offset = 0;
+    auto *G = dyn_cast<GlobalVariable>(GetPointerBaseWithConstantOffset(
+        L->getPointerOperand(), Offset, DL));
+    // Aggregate layouts can differ between BPF and native. Only consume a
+    // complete scalar whose native storage matches its bound DATASEC bytes.
+    if (!G || Offset || L->isAtomic() || !G->getValueType()->isIntegerTy() ||
+        G->getValueType() != L->getType() || L->getType()->getIntegerBitWidth() > 64) continue;
+    auto Text = Values->getString(G->getName());
+    const auto Width = DL.getTypeStoreSize(L->getType()).getFixedValue();
+    if (!Text || Text->size() != Width * 2) continue;
+    uint64_t Bits = 0;
+    for (size_t I = 0; I < Width; ++I) {
+      unsigned Byte;
+      if (Text->substr(I * 2, 2).getAsInteger(16, Byte))
+        return native_bpf::failure("malformed immutable scalar bytes");
+      Bits |= uint64_t(Byte) << (8 * (DL.isLittleEndian() ? I : Width - I - 1));
+    }
+    L->replaceAllUsesWith(ConstantInt::get(L->getType(), Bits));
+    L->eraseFromParent(); ++Folded;
+  }
+  return Folded;
+}
 
 int main(int argc, char **argv) {
   cl::ParseCommandLineOptions(argc, argv);
@@ -48,7 +86,7 @@ int main(int argc, char **argv) {
       if (!Bytes) { errs() << toString(Bytes.takeError()) << '\n'; return 1; }
       Buffer = MemoryBufferRef(*Bytes, Input); Found = true; break;
     }
-    if (!Found) { errs() << "PERF_EVENT LTO needs embedded LLVM IR in P\n"; return 1; }
+    if (!Found) { errs() << "native LTO needs embedded LLVM IR in P\n"; return 1; }
   }
   auto M = parseIR(Buffer, Error, C);
   if (!M) { Error.print(argv[0], errs()); return 1; }
@@ -71,7 +109,7 @@ int main(int argc, char **argv) {
   }
   auto *F = M->getFunction(Symbol);
   if (!F || F->isDeclaration() || F->arg_empty()) {
-    errs() << "PERF_EVENT LTO entry is missing: " << Symbol << '\n'; return 1;
+    errs() << "native LTO entry is missing: " << Symbol << '\n'; return 1;
   }
   // A static ELF entry is still the selected public program boundary. Keep
   // its ABI and body alive through both module optimization pipelines.
@@ -86,6 +124,9 @@ int main(int argc, char **argv) {
       M->getTargetTriple(), sys::getHostCPUName(), "", Options,
       Reloc::PIC_, std::nullopt, CodeGenOptLevel::Aggressive));
   M->setDataLayout(Machine->createDataLayout());
+  auto Folded = foldImmutableGlobals(*M, ImmutableGlobals);
+  if (!Folded) { errs() << toString(Folded.takeError()) << '\n'; return 1; }
+  if (!ImmutableGlobals.empty()) errs() << "immutable scalar loads folded: " << *Folded << '\n';
   LoopAnalysisManager LAM; FunctionAnalysisManager FAM;
   CGSCCAnalysisManager CGAM; ModuleAnalysisManager MAM;
   PassBuilder PB(Machine.get());

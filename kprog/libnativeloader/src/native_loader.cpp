@@ -434,7 +434,8 @@ void ensure_debugfs_mounted()
 
 uint64_t lookup_native_lab_ptr_by_fd(int map_fd,
                                      const char *path,
-                                     const char *label)
+                                     const char *label,
+                                     bool *immutable = nullptr)
 {
     ensure_debugfs_mounted();
     int fd = open(path, O_RDWR | O_CLOEXEC);
@@ -477,6 +478,13 @@ uint64_t lookup_native_lab_ptr_by_fd(int map_fd,
     if (errno != 0 || end == response || value == 0) {
         fail(std::string("native_kernel: invalid ") + label + " response: " + response);
     }
+    if (immutable) {
+        char *last = nullptr;
+        const auto flag = std::strtoul(end, &last, 10);
+        if (last == end || flag > 1)
+            fail(std::string("native_kernel: invalid immutable-map metadata: ") + response);
+        *immutable = flag != 0;
+    }
     return static_cast<uint64_t>(value);
 }
 
@@ -486,10 +494,10 @@ uint64_t lookup_kernel_map_ptr_by_fd(int map_fd)
         map_fd, kNativeLabTarget.map_ptr_path, "map_ptr");
 }
 
-uint64_t lookup_kernel_map_value_ptr_by_fd(int map_fd)
+uint64_t lookup_kernel_map_value_ptr_by_fd(int map_fd, bool *immutable = nullptr)
 {
     return lookup_native_lab_ptr_by_fd(
-        map_fd, kNativeLabTarget.map_value_ptr_path, "map_value_ptr");
+        map_fd, kNativeLabTarget.map_value_ptr_path, "map_value_ptr", immutable);
 }
 
 constexpr size_t kRelocRecordBytes = 16;
@@ -1597,6 +1605,7 @@ struct MapMeta {
     uint64_t value_addr;
     uint32_t btf_id = 0;
     uint32_t btf_value_type_id = 0;
+    std::vector<uint8_t> immutable_value;
 };
 
 struct HelperAlias {
@@ -1914,12 +1923,13 @@ bpf_map_info load_map_info(int map_fd)
     return info;
 }
 
-uint64_t lookup_array_value_addr_if_direct(const bpf_map_info &info, int map_fd)
+uint64_t lookup_array_value_addr_if_direct(const bpf_map_info &info, int map_fd,
+                                         bool *immutable = nullptr)
 {
     if (info.type != BPF_MAP_TYPE_ARRAY || info.max_entries != 1) {
         return 0;
     }
-    return lookup_kernel_map_value_ptr_by_fd(map_fd);
+    return lookup_kernel_map_value_ptr_by_fd(map_fd, immutable);
 }
 
 MapMeta load_map_meta_from_fd(int map_fd)
@@ -1930,7 +1940,9 @@ MapMeta load_map_meta_from_fd(int map_fd)
     if (name[0] == '\0') {
         fail("loaded BPF program references unnamed map fd " + std::to_string(map_fd));
     }
-    return MapMeta{
+    bool immutable = false;
+    const auto value_addr = lookup_array_value_addr_if_direct(info, map_fd, &immutable);
+    MapMeta meta{
         std::string(name),
         map_fd,
         info.id,
@@ -1939,10 +1951,17 @@ MapMeta load_map_meta_from_fd(int map_fd)
         info.value_size,
         info.max_entries,
         lookup_kernel_map_ptr_by_fd(map_fd),
-        lookup_array_value_addr_if_direct(info, map_fd),
+        value_addr,
         info.btf_id,
         info.btf_value_type_id,
     };
+    if (immutable) {
+        uint32_t key = 0;
+        meta.immutable_value.resize(info.value_size);
+        if (bpf_map_lookup_elem(map_fd, &key, meta.immutable_value.data()))
+            fail("read immutable data map " + meta.name + ": " + std::strerror(errno));
+    }
+    return meta;
 }
 
 template <typename Predicate>
@@ -2180,6 +2199,7 @@ struct CompanionLoad {
     std::unordered_map<std::string, uint64_t> map_addrs;
     std::unordered_map<std::string, uint32_t> map_addr_ids;
     std::unordered_set<std::string> native_data_symbols;
+    std::map<std::string, std::string> immutable_globals;
     std::unordered_map<std::string, std::string> native_map_symbols;
     std::unordered_map<std::string, MapMeta> exact_map_addrs;
     std::unordered_set<std::string> ambiguous_exact_maps;
@@ -2936,6 +2956,16 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
                 map->value_addr + off;
             load.map_addr_ids[std::string(name)] = map->kernel_id;
             load.native_data_symbols.insert(name);
+            if (!map->immutable_value.empty() &&
+                (sym.st_size == 1 || sym.st_size == 2 || sym.st_size == 4 || sym.st_size == 8)) {
+                constexpr char hex[] = "0123456789abcdef";
+                std::string value;
+                for (size_t i = off; i < off + sym.st_size; ++i) {
+                    const auto byte = map->immutable_value[i];
+                    value += hex[byte >> 4]; value += hex[byte & 15];
+                }
+                load.immutable_globals[name] = std::move(value);
+            }
         }
     }
     add_known_kconfig_symbol_addrs(load);
@@ -4090,13 +4120,6 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     if (symbol_name.empty()) {
         symbol_name = load_prog_btf_symbol_name(options.original_prog_fd, prog_info);
     }
-#if defined(__x86_64__)
-    const auto function_bodies = native_source_function_bodies(
-        native_object_path, options.source_bpf_path, prog_info, source_insns);
-    native_object_path = native_context_lto_object(native_object_path, symbol_name, prog_info.type,
-        "/opt/bpf-benchmark/native-bpf/x86_64/kprog-perf-context-lto", "/sys/kernel/btf/vmlinux",
-        kNativeLinkCacheDir, function_bodies);
-#endif
     const auto manifest_end = diagnostic_now();
     CompanionLoad companion =
         load_from_loaded_program_fd(
@@ -4118,13 +4141,41 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         companion.kernel_functions = native_kernel_function_targets(native_object_path, local.get(), kernel.get());
     }
     const auto data_symbols_start = diagnostic_now();
-    const auto entry_proof = cached_native_entry_proof(options.native_link_path, native_object_path, symbol_name);
+    auto entry_proof = cached_native_entry_proof(options.native_link_path, native_object_path, symbol_name);
     const auto entry_symbols = native_entry_symbol_names(entry_proof);
     if (!source_bpf_object.empty()) {
         if (source_insns.empty()) fail("source_bpf_object requires intercepted source instructions");
         bind_original_source_maps(source_bpf_object, symbol_name, source_insns, companion, &entry_symbols);
     }
     add_native_data_symbol_addrs(native_object_path, companion, &entry_symbols);
+#if defined(__x86_64__)
+    std::ostringstream immutable;
+    immutable << '{';
+    bool separator = false;
+    for (const auto &[name, value] : companion.immutable_globals) {
+        if (separator) immutable << ',';
+        write_json_string(immutable, name); immutable << ':';
+        write_json_string(immutable, value); separator = true;
+    }
+    immutable << '}';
+    const auto function_bodies = native_source_function_bodies(
+        native_object_path, options.source_bpf_path, prog_info, source_insns);
+    const auto optimized = native_context_lto_object(native_object_path, symbol_name, prog_info.type,
+        "/opt/bpf-benchmark/native-bpf/x86_64/kprog-perf-context-lto", "/sys/kernel/btf/vmlinux",
+        kNativeLinkCacheDir, function_bodies,
+        companion.immutable_globals.empty() ? std::string{} : immutable.str());
+    if (optimized != native_object_path) {
+        native_object_path = optimized;
+        entry_proof = cached_native_entry_proof(options.native_link_path, native_object_path, symbol_name);
+        const auto optimized_symbols = native_entry_symbol_names(entry_proof);
+        // The new closure can eliminate globals and define former function
+        // declarations; only its data references belong to the final proof.
+        companion.native_data_symbols.clear();
+        if (!source_bpf_object.empty())
+            bind_original_source_maps(source_bpf_object, symbol_name, source_insns, companion, &optimized_symbols);
+        add_native_data_symbol_addrs(native_object_path, companion, &optimized_symbols);
+    }
+#endif
     const auto data_symbols_end = diagnostic_now();
     const auto with_common_timings = [&](LoadedProgram result) {
         if (collecting_timings()) {

@@ -1,0 +1,26 @@
+{
+  "fixture_snapshots": [
+    {
+      "snapshot_enabled": 0,
+      "cold_call": false
+    },
+    {
+      "snapshot_enabled": 1,
+      "cold_call": true
+    }
+  ],
+  "aggregate_and_atomic_loads": "preserved",
+  "mutable_load": "preserved",
+  "syscount_sys_exit_proof_text_bytes": {
+    "before": 418,
+    "after": 305
+  },
+  "bcc_fact_provenance": "source-derived workload setting; not a guest snapshot",
+  "guest_eligibility_and_installed_per_call": "pending publication",
+  "raw_entry_extraction": [
+    "native_tracer_entry",
+    "custom__generic",
+    "event_execve",
+    "cil_from_container"
+  ]
+}
