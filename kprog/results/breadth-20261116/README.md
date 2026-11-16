@@ -145,6 +145,18 @@ neither is a per-call regression: Cilium's is the eBPF arm having improved
   75 471 022 / 75 117 432 / 78 452 133; 0 workload errors, 13 replacements.
   `custom__generic` still failed twice, which the `source_bpf_object`
   publication below closes.
+
+  **Warning for the next round: once `custom__generic` links, this row falls to
+  1.021x.** In `x86_kvm_corpus_20261116_102445_806916` (stats off) the same app
+  with the same manifest measured 324,431,106 against 369,715,211 median ops —
+  post_rejit *below* baseline — because `custom__generic`, the per-event kprobe,
+  was replaced with a 9257 B body instead of falling back to JIT. Its original
+  is 3679 B. Across runs, that program's native size predicts the outcome:
+  6452 B → 1.832x/1.885x, 9400 B → 1.060x/1.161x, 9257 B → 1.021x, not
+  replaced → 1.85x-2.02x. So the 2.020x above depends on that fallback, and the
+  `source_bpf_object` publication closing the failure is what exposes the
+  regression. Evidence and the per-program `bytes_jited` diff:
+  `kprog/results/native-payload-ir-20261116/README.md`.
 - **BCC** — 657 707 / 661 454 / 663 888 against 661 569 / 662 768 / 670 159;
   25 native programs replaced and **zero** `native-loader failed` lines, so the
   `target_family` GOT-reloc link-plan gap is closed on this path.
