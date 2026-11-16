@@ -374,18 +374,9 @@ __attribute__((constructor)) static void shim_init(void) {
         }
     }
 
-    /* Periodic dump worker, if enabled by env. */
-    pthread_t tid;
-    pthread_create(&tid, NULL, worker_thread, NULL);
-    pthread_detach(tid);
-
-    /* Socket server thread — per-pid app-level shim socket.
-     * Disable by setting BPFREJIT_SHIM_SOCK_DISABLE=1. */
-    if (!getenv("BPFREJIT_SHIM_SOCK_DISABLE")) {
         pthread_t stid;
         pthread_create(&stid, NULL, socket_thread, NULL);
         pthread_detach(stid);
-    }
 }
 
 /* Intercept syscall(2). */
@@ -1058,7 +1049,6 @@ int close_range(unsigned int first, unsigned int last, int flags) {
 }
 
 /* Write a JSON snapshot of all tracked objects.
- * Invoked by the periodic worker thread (BPFREJIT_SHIM_PERIODIC_DUMP_MS) and
  * by the `dump_state` socket RPC. */
 static void dump_state_json(void) {
     const char *dir = getenv("BPFREJIT_SHIM_DIR");
@@ -1500,24 +1490,3 @@ static void *socket_thread(void *arg) {
     return NULL;
 }
 
-/* Worker thread: optional periodic state JSON dump
- * (env: BPFREJIT_SHIM_PERIODIC_DUMP_MS, ms). Optimization itself is driven
- * by the runner over the socket via execute_plan, not by this thread. */
-static void *worker_thread(void *arg) {
-    (void)arg;
-    const char *dump_env = getenv("BPFREJIT_SHIM_PERIODIC_DUMP_MS");
-    int dump_ms = dump_env ? atoi(dump_env) : 0;
-    if (dump_ms <= 0)
-        return NULL;
-    sigset_t mask;
-    sigfillset(&mask);
-    pthread_sigmask(SIG_BLOCK, &mask, NULL);
-    while (1) {
-        struct timespec ts = {dump_ms / 1000,
-                              (long)(dump_ms % 1000) * 1000000L}, rem;
-        while (nanosleep(&ts, &rem) == -1 && errno == EINTR)
-            ts = rem;
-        dump_state_json();
-    }
-    return NULL;
-}
