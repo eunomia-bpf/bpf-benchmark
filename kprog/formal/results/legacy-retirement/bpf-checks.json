@@ -1,0 +1,93 @@
+[
+  {
+    "command": [
+      "taskset",
+      "-c",
+      "17",
+      "python3",
+      "kprog/formal/tools/check_x86_divide_handler.py"
+    ],
+    "initial_exit": 0,
+    "initial_log": "/workspaces/kprog-raw/formal/legacy-retirement/bpf-v3-check_x86_divide_handler.log",
+    "final_exit": 0,
+    "final_log": "/workspaces/kprog-raw/formal/legacy-retirement/bpf-v3-check_x86_divide_handler.log"
+  },
+  {
+    "command": [
+      "taskset",
+      "-c",
+      "18",
+      "python3",
+      "kprog/formal/tools/check_x86_rotate_handler.py"
+    ],
+    "initial_exit": 0,
+    "initial_log": "/workspaces/kprog-raw/formal/legacy-retirement/bpf-v3-check_x86_rotate_handler.log",
+    "final_exit": 0,
+    "final_log": "/workspaces/kprog-raw/formal/legacy-retirement/bpf-v3-check_x86_rotate_handler.log"
+  },
+  {
+    "command": [
+      "taskset",
+      "-c",
+      "17",
+      "python3",
+      "kprog/formal/tools/check_x86_high_load.py"
+    ],
+    "initial_exit": 0,
+    "initial_log": "/workspaces/kprog-raw/formal/legacy-retirement/bpf-v3-check_x86_high_load.log",
+    "final_exit": 0,
+    "final_log": "/workspaces/kprog-raw/formal/legacy-retirement/bpf-v3-check_x86_high_load.log"
+  },
+  {
+    "command": [
+      "taskset",
+      "-c",
+      "18",
+      "python3",
+      "kprog/formal/tools/check_x86_popcount_memory.py"
+    ],
+    "initial_exit": 1,
+    "initial_log": "/workspaces/kprog-raw/formal/legacy-retirement/bpf-v3-check_x86_popcount_memory.log",
+    "final_exit": 0,
+    "final_log": "/workspaces/kprog-raw/formal/legacy-retirement/popcount2.log"
+  },
+  {
+    "command": [
+      "taskset",
+      "-c",
+      "17",
+      "python3",
+      "kprog/formal/tools/check_x86_encoded_handlers.py"
+    ],
+    "initial_exit": 0,
+    "initial_log": "/workspaces/kprog-raw/formal/legacy-retirement/bpf-v3-check_x86_encoded_handlers.log",
+    "final_exit": 0,
+    "final_log": "/workspaces/kprog-raw/formal/legacy-retirement/bpf-v3-check_x86_encoded_handlers.log"
+  },
+  {
+    "command": [
+      "taskset",
+      "-c",
+      "18",
+      "python3",
+      "kprog/formal/tools/check_x86_memory_widths.py"
+    ],
+    "initial_exit": 1,
+    "initial_log": "/workspaces/kprog-raw/formal/legacy-retirement/bpf-v3-check_x86_memory_widths.log",
+    "final_exit": 0,
+    "final_log": "/workspaces/kprog-raw/formal/legacy-retirement/memory-widths2.log"
+  },
+  {
+    "command": [
+      "taskset",
+      "-c",
+      "18",
+      "python3",
+      "kprog/formal/tools/check_arm64_pointer_access.py"
+    ],
+    "initial_exit": 0,
+    "initial_log": "/workspaces/kprog-raw/formal/legacy-retirement/bpf-v3-check_arm64_pointer_access.log",
+    "final_exit": 0,
+    "final_log": "/workspaces/kprog-raw/formal/legacy-retirement/bpf-v3-check_arm64_pointer_access.log"
+  }
+]

@@ -18,12 +18,13 @@ def command(argv):
         raise SystemExit(f"memory widths: {argv[0]} failed: {error.stderr}") from error
 
 
-def accesses(instructions, fixed_displacement=None):
+def accesses(instructions, fixed_displacement=None, second_argument=None):
     # Register1 starts at the guest pointer; track pointer copies and constant
     # additions. Every other value is scalar. Unexpected control flow fails.
     registers = [None] * 11
     registers[1] = 0
     constants = [None] * 11
+    constants[2] = second_argument
     events = []
     for raw in instructions:
         code, packed, offset, immediate = struct.unpack("<BBhi", raw)
@@ -106,7 +107,7 @@ def main():
     args = parser.parse_args()
     args.build_dir.mkdir(parents=True, exist_ok=True)
     obj = args.build_dir / "x86.bpf.o"
-    command([args.clang, "-target", "bpfel", "-O2", "-g", "-I", str(args.include_dir),
+    command([args.clang, "-target", "bpfel", "-mcpu=v3", "-O2", "-g", "-I", str(args.include_dir),
              "-I", str(ROOT), "-c", str(ROOT / "oracles/test_x86_memory_widths.c"), "-o", str(obj)])
     disassembly = command([args.objdump, "-d", str(obj)])
     (args.build_dir / "x86.asm").write_text(disassembly)
@@ -124,15 +125,24 @@ def main():
         actual = accesses(functions[name], wanted[0][1] if name in fixed else None)
         if actual != wanted:
             raise SystemExit(f"memory widths: {name}: got {actual}, expected {wanted}")
+    # The current C preserves literal signed16 offsets and computes other
+    # addresses. Check those existing supported cases instead of demanding a
+    # removed compile-time refusal. R2 is the fixture's long-long argument.
     for mode in (1, 2, 3):
-        result = subprocess.run([args.clang, "-target", "bpfel", "-O2", "-I", str(args.include_dir),
-            "-I", str(ROOT), f"-DKPROG_TEST_BAD_FIXED={mode}", "-c", str(ROOT / "oracles/test_x86_memory_widths.c"),
-            "-o", str(args.build_dir / f"bad-fixed-{mode}.o")], text=True, capture_output=True)
-        (args.build_dir / f"bad-fixed-{mode}.log").write_text(result.stdout + result.stderr)
-        if result.returncode == 0 or "fixed load requires a constant signed16 displacement" not in result.stderr:
-            raise SystemExit(f"memory widths: bad fixed displacement mode{mode} did not fail precisely: {result.stderr}")
+        computed = args.build_dir / f"computed-fixed-{mode}.o"
+        command([args.clang, "-target", "bpfel", "-mcpu=v3", "-O2", "-I", str(args.include_dir),
+            "-I", str(ROOT), f"-DKPROG_TEST_COMPUTED_FIXED={mode}", "-c",
+            str(ROOT / "oracles/test_x86_memory_widths.c"), "-o", str(computed)])
+        assembly = command([args.objdump, "-d", str(computed)])
+        (args.build_dir / f"computed-fixed-{mode}.asm").write_text(assembly)
+        instructions = instructions_by_function(assembly)["computed_fixed"]
+        offsets = (-32769, -3, 0, 32768) if mode == 1 else ((32768,) if mode == 2 else (-32769,))
+        for offset in offsets:
+            actual = accesses(instructions, second_argument=offset if mode == 1 else None)
+            if actual != [("read", offset, 4)]:
+                raise SystemExit(f"memory widths: computed mode{mode} offset{offset}: got {actual}")
     movx = args.build_dir / "x86-movx.bpf.o"
-    command([args.clang, "-target", "bpfel", "-O2", "-I", str(args.include_dir), "-I", str(ROOT),
+    command([args.clang, "-target", "bpfel", "-mcpu=v3", "-O2", "-I", str(args.include_dir), "-I", str(ROOT),
              "-I", str(ROOT.parent / "x86"), "-I", str(ROOT.parents[1] / "vendor/libbpf/src"),
              "-I/usr/include/x86_64-linux-gnu", "-c", str(ROOT / "oracles/test_x86_movx_widths.c"), "-o", str(movx)])
     assembly = command([args.objdump, "-d", str(movx)])
@@ -146,7 +156,7 @@ def main():
         actual = accesses(functions[name])
         if actual != wanted:
             raise SystemExit(f"MOVX memory widths: {name}: got {actual}, expected {wanted}")
-    print("x86 BPF memory widths: ten generic + twenty fixed loads keep exact kind/address/width/count; fixed bases/displacements, three bad-offset rejections and twelve actual MOVX handler access widths OK")
+    print("x86 BPF memory widths: ten generic + twenty fixed loads keep exact kind/address/width/count; fixed bases/displacements, dynamic and out-of-signed16 computed offsets and twelve actual MOVX handler access widths OK")
 
 
 if __name__ == "__main__":

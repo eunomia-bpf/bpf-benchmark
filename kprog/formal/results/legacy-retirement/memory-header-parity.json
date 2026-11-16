@@ -1,0 +1,44 @@
+{
+  "baseline": "01b18b84b",
+  "header": "kprog/formal/generated/x86_mem_access.h",
+  "profiles": [
+    {
+      "profile": "bpf",
+      "before_bytes": 3411,
+      "after_bytes": 3411,
+      "identical": true,
+      "command": [
+        "clang-18",
+        "-E",
+        "-P",
+        "-x",
+        "c",
+        "-D__bpf__",
+        "-Ikprog/formal/generated",
+        "-Ivendor/libbpf/include/uapi",
+        "-Ivendor/libbpf/src",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-"
+      ]
+    },
+    {
+      "profile": "clight",
+      "before_bytes": 5751,
+      "after_bytes": 5751,
+      "identical": true,
+      "command": [
+        "clang-18",
+        "-E",
+        "-P",
+        "-x",
+        "c",
+        "-D__COMPCERT__",
+        "-Ikprog/formal/generated",
+        "-Ivendor/libbpf/include/uapi",
+        "-Ivendor/libbpf/src",
+        "-I/usr/include/x86_64-linux-gnu",
+        "-"
+      ]
+    }
+  ]
+}

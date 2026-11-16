@@ -85,7 +85,7 @@ int main(void) {
                 ("mov", ("rbx", "r8")), ("ret", ())]
         insns = [g.NativeInsn(i, mnemonic + " " + ",".join(args), mnemonic, args)
                  for i, (mnemonic, args) in enumerate(body)]
-        compile_flags = ["clang-18", "-g", "-O2", "-target", "bpf", "-D__TARGET_ARCH_x86",
+        compile_flags = ["clang-18", "-g", "-O2", "-target", "bpf", "-mcpu=v3", "-D__TARGET_ARCH_x86",
             "-I" + str(ROOT.parent / "x86/micro-prog"),
             "-I" + str(ROOT.parents[1] / "vendor/libbpf/src"), "-I/usr/include/x86_64-linux-gnu"]
         # Retain the original partial native context-field fixture alongside
@@ -140,7 +140,7 @@ def check_compiled_movx():
                         str(path),"-o",str(path.with_suffix(""))],check=True)
         subprocess.run([str(path.with_suffix(""))],check=True)
         path.write_text(program)
-        subprocess.run(["clang-18","-target","bpfel","-O2","-D__TARGET_ARCH_x86",*includes,
+        subprocess.run(["clang-18","-target","bpfel","-mcpu=v3","-O2","-D__TARGET_ARCH_x86",*includes,
                         "-c",str(path),"-o",str(path.with_suffix(".o"))],check=True)
     for op,args in (("movsx",("rax","ah")),("movzx",("r8d","bh")),("movzx",("ax","ebx")),
                     ("movsx",("al","bl")),("movsxd",("eax","bx"))):

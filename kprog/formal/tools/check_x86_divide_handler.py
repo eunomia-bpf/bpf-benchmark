@@ -55,7 +55,7 @@ int main(void) {{
             subprocess.run(["cc","-O2","-fsanitize=undefined","-fno-sanitize-recover=undefined",*includes,str(path),"-o",str(path.with_suffix(""))],check=True)
             subprocess.run([str(path.with_suffix(""))],check=True)
             path.write_text(program)
-            subprocess.run(["clang-18","-target","bpfel","-O2","-D__TARGET_ARCH_x86",*includes,"-c",str(path),"-o",str(path.with_suffix(".o"))],check=True)
+            subprocess.run(["clang-18","-target","bpfel","-mcpu=v3","-O2","-D__TARGET_ARCH_x86",*includes,"-c",str(path),"-o",str(path.with_suffix(".o"))],check=True)
         for overflow in ((False,True,"high") if width==8 else (False,True)):
             rows=[("mov",("rax","0x100" if width==8 and overflow else "0")),
                   ("mov",("rdx","1" if overflow else "0")),("mov",("rcx","1" if overflow else "0")),
@@ -64,7 +64,7 @@ int main(void) {{
             name=f"fault_{width}_{overflow}"
             path=folder/(name+".c")
             path.write_text(g.render_program(name,insns,kind="raw",program_section="xdp"))
-            subprocess.run(["clang-18","-target","bpfel","-O2","-D__TARGET_ARCH_x86",*includes,"-c",str(path),"-o",str(path.with_suffix(".o"))],check=True)
+            subprocess.run(["clang-18","-target","bpfel","-mcpu=v3","-O2","-D__TARGET_ARCH_x86",*includes,"-c",str(path),"-o",str(path.with_suffix(".o"))],check=True)
             assembly=subprocess.check_output(["llvm-objdump-18","-d",str(path.with_suffix(".o"))],text=True)
             path.with_suffix(".asm").write_text(assembly)
             functions=instructions_by_function(assembly)
@@ -83,7 +83,7 @@ int main(void) {{
         subprocess.run(["cc","-O2",*includes,str(path),"-o",str(path.with_suffix(""))],check=True)
         subprocess.run([str(path.with_suffix(""))],check=True)
         path.write_text(program)
-        subprocess.run(["clang-18","-target","bpfel","-O2","-D__TARGET_ARCH_x86",*includes,"-c",str(path),"-o",str(path.with_suffix(".o"))],check=True)
+        subprocess.run(["clang-18","-target","bpfel","-mcpu=v3","-O2","-D__TARGET_ARCH_x86",*includes,"-c",str(path),"-o",str(path.with_suffix(".o"))],check=True)
     print("x86 DIV handler:18432 actual CPU/encoded register-memory/high-byte results,9 valid BPF compiles and9 retained zero/overflow/AX-alias fault markers;2 narrow-result controls OK")
 
 

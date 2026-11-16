@@ -1,0 +1,5 @@
+import KProgFormal.NativeLinkSourceProducer
+#print axioms KProgFormal.NativeLinkProducer.selected_field_image
+#print axioms KProgFormal.NativeLinkProducerImage.record_window
+#check KProgFormal.NativeLinkProducer.selected_field_image
+#check KProgFormal.NativeLinkProducerImage.record_window

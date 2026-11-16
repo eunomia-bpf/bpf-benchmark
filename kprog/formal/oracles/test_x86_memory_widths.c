@@ -37,12 +37,12 @@ FIXED_WIDTH(b32, X86_WIDTH_32)
 FIXED_WIDTH(b64, X86_WIDTH_64)
 FIXED_WIDTH(default, 0)
 
-#ifdef KPROG_TEST_BAD_FIXED
-__u64 bad_fixed(const __u8 *p, long long offset)
+#ifdef KPROG_TEST_COMPUTED_FIXED
+__u64 computed_fixed(const __u8 *p, long long offset)
 {
-#if KPROG_TEST_BAD_FIXED == 1
+#if KPROG_TEST_COMPUTED_FIXED == 1
     return KPROG_X86_MEM_LOAD_FIXED(p, offset, X86_WIDTH_32);
-#elif KPROG_TEST_BAD_FIXED == 2
+#elif KPROG_TEST_COMPUTED_FIXED == 2
     return KPROG_X86_MEM_LOAD_FIXED(p, 32768, X86_WIDTH_32);
 #else
     return KPROG_X86_MEM_LOAD_FIXED(p, -32769, X86_WIDTH_32);

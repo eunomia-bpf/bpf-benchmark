@@ -106,8 +106,14 @@ kprog_x86_mem_load_fixed(const void *base, long long displacement, __u8 width)
         return value;
     default: KPROG_C_TRAP();
     }
-#else
+#elif defined(__COMPCERT__)
     return kprog_x86_mem_load((const __u8 *)base + displacement, width);
+#else
+    /* RIP-relative host fixtures carry the symbol address in displacement
+     * with a scalar zero base. Form the address bits without null-pointer
+     * arithmetic; the resulting load still has exactly its original width. */
+    return kprog_x86_mem_load((const void *)((unsigned long)base +
+                                          (unsigned long)displacement), width);
 #endif
 }
 static __attribute__((always_inline)) inline void

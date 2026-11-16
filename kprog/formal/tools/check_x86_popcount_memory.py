@@ -97,7 +97,7 @@ def main():
         # reads as well as a complete native-width pointer-field read.
         context = folder / f"context-{width}.c"
         context.write_text(g.render_program(f"popcount_context_{width}", body))
-        context_command = ["clang-18", "-target", "bpfel", "-O2", "-D__TARGET_ARCH_x86", *includes,
+        context_command = ["clang-18", "-target", "bpfel", "-mcpu=v3", "-O2", "-D__TARGET_ARCH_x86", *includes,
             "-I/usr/include/x86_64-linux-gnu", "-c", str(context), "-o", str(context.with_suffix(".o"))]
         result = subprocess.run(context_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
         context.with_suffix(".log").write_text(result.stdout)
@@ -108,7 +108,7 @@ def main():
         packet_body += [g.NativeInsn(i.addr + 1, i.raw, i.mnemonic, i.operands) for i in body]
         c = folder / f"bpf-{width}.c"
         c.write_text(g.render_program(f"popcount_memory_{width}", packet_body))
-        subprocess.run(["clang-18", "-target", "bpfel", "-O2", "-D__TARGET_ARCH_x86", *includes,
+        subprocess.run(["clang-18", "-target", "bpfel", "-mcpu=v3", "-O2", "-D__TARGET_ARCH_x86", *includes,
             "-I/usr/include/x86_64-linux-gnu", "-c", str(c), "-o", str(c.with_suffix(".o"))], check=True)
         encoded = g.encode(body[0], {})
         probe = folder / f"probe-{width}.c"
@@ -116,7 +116,7 @@ def main():
             'X86_SIM_ENTRY_RAW(pointer);\n' +
             f'X86_SIM_L_EXEC({encoded.op},{encoded.dst},{encoded.src},{encoded.flags},{encoded.aux},{encoded.imm});\n' +
             'return X86_SIM_L_READ_REG(X86_RAX); }\n')
-        subprocess.run(["clang-18", "-target", "bpfel", "-O2", "-D__TARGET_ARCH_x86", *includes,
+        subprocess.run(["clang-18", "-target", "bpfel", "-mcpu=v3", "-O2", "-D__TARGET_ARCH_x86", *includes,
             "-I/usr/include/x86_64-linux-gnu", "-c", str(probe), "-o", str(probe.with_suffix(".o"))], check=True)
         assembly = subprocess.check_output(["llvm-objdump-18", "-d", str(probe.with_suffix(".o"))], text=True)
         probe.with_suffix(".asm").write_text(assembly)
@@ -129,7 +129,7 @@ def main():
     c = folder / "readonly.c"
     c.write_text(g.render_program("popcount_readonly", [readonly, g.NativeInsn(1, "ret", "ret", ())],
         rodata16={"datum": bytes(range(64))}))
-    subprocess.run(["clang-18", "-target", "bpfel", "-O2", "-D__TARGET_ARCH_x86", *includes,
+    subprocess.run(["clang-18", "-target", "bpfel", "-mcpu=v3", "-O2", "-D__TARGET_ARCH_x86", *includes,
         "-I/usr/include/x86_64-linux-gnu", "-c", str(c), "-o", str(c.with_suffix(".o"))], check=True)
     relocations = subprocess.check_output(["llvm-readelf-18", "-r", str(c.with_suffix(".o"))], text=True)
     c.with_suffix(".relocs").write_text(relocations)

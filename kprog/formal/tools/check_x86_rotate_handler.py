@@ -93,7 +93,7 @@ def main():
                 g.NativeInsn(3,'xor eax,eax','xor',('eax','eax')),g.NativeInsn(4,'ret','ret',())]
             name = 'rotate_bpf'+str(artifacts); p = folder/(name+'.c')
             p.write_text(g.render_program(name,body,kind='raw',program_section='xdp'))
-            subprocess.run(['clang-18','-target','bpfel','-O2','-D__TARGET_ARCH_x86',*includes,'-c',p,'-o',p.with_suffix('.o')],check=True)
+            subprocess.run(['clang-18','-target','bpfel','-mcpu=v3','-O2','-D__TARGET_ARCH_x86',*includes,'-c',p,'-o',p.with_suffix('.o')],check=True)
             if 'PTR' in operand:
                 assembly = subprocess.check_output(['llvm-objdump-18','-d',p.with_suffix('.o')],text=True)
                 functions = instructions_by_function(assembly)

@@ -53,7 +53,7 @@ def main():
                             str(path),"-o",str(path.with_suffix(""))],check=True)
             subprocess.run([str(path.with_suffix(""))],check=True)
             path.write_text(program)
-            subprocess.run(["clang-18","-target","bpfel","-O2","-D__TARGET_ARCH_x86",*includes,
+            subprocess.run(["clang-18","-target","bpfel","-mcpu=v3","-O2","-D__TARGET_ARCH_x86",*includes,
                             "-c",str(path),"-o",str(path.with_suffix(".o"))],check=True)
             cases.append(name)
         # Inspect the actual encoded expression in a raw pointer probe. The
@@ -65,7 +65,7 @@ def main():
             f'X86_SIM_L_WRITE_REG_PTR_TAG({g.reg_info(high)[0]},(void *)0x12345678UL,X86_SIM_TAG_SCALAR);\n'+
             f'X86_SIM_L_EXEC_MOV_IMM_AUX({encoded.dst},{encoded.flags},{encoded.aux},{encoded.imm});\n'+
             f'return X86_SIM_L_READ_REG({g.reg_info(high)[0]});}}\n')
-        subprocess.run(["clang-18","-target","bpfel","-O2","-D__TARGET_ARCH_x86",*includes,
+        subprocess.run(["clang-18","-target","bpfel","-mcpu=v3","-O2","-D__TARGET_ARCH_x86",*includes,
                         "-c",str(path),"-o",str(path.with_suffix(".o"))],check=True)
         assembly=subprocess.check_output(["llvm-objdump-18","-d",str(path.with_suffix(".o"))],text=True)
         path.with_suffix(".asm").write_text(assembly)

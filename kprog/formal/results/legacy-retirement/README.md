@@ -54,3 +54,23 @@ Raw attempts are under `/workspaces/kprog-raw/formal/legacy-retirement`.
 M5 still needs complete exported-handler correspondence and O1/O2/O4 recount;
 the obsolete theorem total is not migrated coverage. M6 remains open for any
 remaining retirement and final frozen-path verification.
+
+The seven BPF compile checks now select v3, matching the ALU32 operand constraint
+already required by the simulator. Their focused results, including initial
+failures and repairs, are in `bpf-checks.json`. Existing computed-displacement
+cases now check their supported emitted loads instead of expecting the removed
+signed16-only refusal: four dynamic arguments plus both signed16 boundaries
+retain one 32-bit read at the complete effective address.
+
+The ordinary host fixed-address load now forms unsigned address bits before
+casting back to a pointer. This avoids Clang UBSan's null-base arithmetic failure
+for RIP-symbol fixtures, while preserving the accessed address and width. Both
+GCC and Clang pass all 88,704 POPCNT full-state cases. The BPF and Clight header
+preprocessing streams are byte-identical to `01b18b84b` (3,411 and 5,751 bytes);
+`memory-header-parity.json` records the exact commands. The earlier sole-writer
+agreement is recorded in COORDINATION before this change. This host repair adds
+no new production check or external interpretation.
+
+Both retained producer axiom queries pass with only standard axioms; reproduce
+with `LEAN_NUM_THREADS=1 lake env lean -j1 results/legacy-retirement/Query.lean`.
+The complete check is being repeated after these focused fixes.
