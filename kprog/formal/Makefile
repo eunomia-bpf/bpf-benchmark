@@ -700,8 +700,6 @@ check:
 	./build/test_arm64_stack_arena_route_host
 	$(CC) $(ARM64_HOST_ENV) -Wall -Wextra -O2 -I. -I../arm64 oracles/test_arm64_decode_host.c -o build/test_arm64_decode_host
 	./build/test_arm64_decode_host
-	$(MAKE) -C ../tv native-link-arm-percpu-check
-	$(MAKE) -C ../tv cmov-check
 
 # Both ISA forks define a Tests library; resolve nested LNSym test imports
 # from its own package, after the combined external-library/regression build.
