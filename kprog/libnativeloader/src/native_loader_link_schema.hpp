@@ -127,6 +127,13 @@ NativeLinkArgs build_native_link_args(
             uint64_t addr = kallsyms_lookup(helper.symbol);
             if (addr != 0) {
                 add_name_addr(out.helpers, helper.symbol, addr);
+                // An upstream object names the UAPI helper, while kallsyms
+                // can name its implementation differently. Keep both spellings
+                // bound to this helper ID's same implementation and semantics.
+                for (const auto &identity : kCanonicalHelperIdentities) {
+                    if (identity.id == static_cast<uint32_t>(helper.id))
+                        add_name_addr(out.helpers, identity.name, addr);
+                }
             }
         }
         static constexpr int kContextualHelperIds[] = {

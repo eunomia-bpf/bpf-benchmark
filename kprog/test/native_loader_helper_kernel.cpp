@@ -143,6 +143,37 @@ try {
             passed &= match;
         }
         output << ']';
+        if (test.type == BPF_PROG_TYPE_KPROBE) {
+            CompanionLoad unbound{};
+            unbound.prog_type = info.type;
+            const auto plan = build_native_link_args(
+                "/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link",
+                {}, unbound);
+            output << ",\"unbound_aliases\":[";
+            bool first_alias = true;
+            for (const auto &helper : kSupportedHelpers) {
+                for (const auto &identity : kCanonicalHelperIdentities) {
+                    if (identity.id != static_cast<uint32_t>(helper.id) ||
+                        std::strcmp(identity.name, helper.symbol) == 0) continue;
+                    const auto api = std::find_if(plan.helpers.begin(), plan.helpers.end(),
+                        [&](const auto &entry) { return entry.name == identity.name; });
+                    const auto kernel = std::find_if(plan.helpers.begin(), plan.helpers.end(),
+                        [&](const auto &entry) { return entry.name == helper.symbol; });
+                    const auto queried = std::find_if(targets.begin(), targets.end(),
+                        [&](const auto &entry) { return entry.first == identity.name; });
+                    const bool match = api != plan.helpers.end() && kernel != plan.helpers.end() &&
+                        queried != targets.end() && api->addr == kernel->addr &&
+                        api->addr == queried->second && matches(symbols, helper.symbol, api->addr);
+                    passed &= match;
+                    if (!first_alias) output << ',';
+                    first_alias = false;
+                    output << "{\"id\":" << helper.id << ",\"source\":\"" << identity.name
+                           << "\",\"kernel\":\"" << helper.symbol << "\",\"matches\":"
+                           << (match ? "true" : "false") << '}';
+                }
+            }
+            output << ']';
+        }
 #if defined(__x86_64__)
         if (test.type == BPF_PROG_TYPE_XDP) {
             CompanionLoad companion{};
