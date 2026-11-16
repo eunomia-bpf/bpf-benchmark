@@ -13,6 +13,66 @@ def registers(line):
     return {int(n) for n in re.findall(r'\$[rw](\d+)', line)}
 
 
+def machine_blocks(body):
+    blocks, current = {}, None
+    for line in body.splitlines():
+        match = re.match(r'  bb\.(\d+)[^:]*:', line)
+        if match:
+            current = int(match[1])
+            blocks[current] = dict(label=line, lines=[], successors=[], liveins=set())
+        elif current is not None:
+            block = blocks[current]
+            block['lines'].append(line)
+            if line.strip().startswith('successors:'):
+                block['successors'] = list(map(int, re.findall(r'%bb\.(\d+)', line)))
+            if line.strip().startswith('liveins:'):
+                block['liveins'] = registers(line)
+    return blocks
+
+
+def register_effects(line):
+    read_text, definitions = line, set()
+    match = re.match(r'\s*(?:dead )?\$[rw](\d+) =', read_text)
+    if match:
+        definitions.add(int(match[1]))
+        read_text = read_text[match.end():]
+    definition_pattern = r'(?:implicit-def|\bdef|early-clobber) (?:dead )?\$[rw](\d+)'
+    definitions.update(map(int, re.findall(definition_pattern, read_text)))
+    read_text = re.sub(definition_pattern, '', read_text)
+    used = registers(read_text)
+    return used, definitions
+
+
+def remove_dead_frame_addresses(document):
+    """Drop unused pure frame addresses before BPF PEI expands them.
+
+    LLVM 18 can mark the expanded MOV dead although the following ADD uses it.
+    Retain every address whose register is read locally or live in a successor.
+    """
+    head, body = document.split('body:             |', 1)
+    blocks = machine_blocks(body)
+    removed = []
+    for number, block in blocks.items():
+        live = set().union(*(blocks[n]['liveins'] for n in block['successors']))
+        kept = []
+        for line in reversed(block['lines']):
+            if line.lstrip().startswith(('DBG_', 'successors:', 'liveins:')):
+                kept.append(line)
+                continue
+            address = re.fullmatch(r'\s*(?:dead )?\$r(\d+) = (?:FI_ri %stack\.\d+, -?\d+|MOV_rr %stack\.\d+)(?:, debug-location !\d+)?', line)
+            if address and int(address[1]) not in live:
+                removed.append(dict(block=number, instruction=line.strip()))
+                continue
+            used, definitions = register_effects(line)
+            live = (live-definitions) | used
+            kept.append(line)
+        block['lines'] = list(reversed(kept))
+    if not removed:
+        return document, removed
+    return head+'body:             |\n'+'\n'.join(
+        b['label']+'\n'+'\n'.join(b['lines']) for b in blocks.values())+'\n', removed
+
+
 def lower(path, low, high):
     return lower_text(path.read_text(), low, high)
 
@@ -38,19 +98,7 @@ def lower_text(text, low, high, *, require_final=True, reuse_dead_source=False, 
             head += f'# kprog_spill_scratch_{number}: {slot}\n'
             scratch_slots[number] = slot
         return scratch_slots[number]
-    blocks, current = {}, None
-    for line in body.splitlines():
-        match = re.match(r'  bb\.(\d+)[^:]*:', line)
-        if match:
-            current = int(match[1])
-            blocks[current] = dict(label=line, lines=[], successors=[], liveins=set())
-        elif current is not None:
-            data = blocks[current]
-            data['lines'].append(line)
-            if line.strip().startswith('successors:'):
-                data['successors'] = list(map(int, re.findall(r'%bb\.(\d+)', line)))
-            if line.strip().startswith('liveins:'):
-                data['liveins'] = registers(line)
+    blocks = machine_blocks(body)
     changes = []
     for block, data in blocks.items():
         live = set().union(*(blocks[n]['liveins'] for n in data['successors']))
@@ -61,15 +109,7 @@ def lower_text(text, low, high, *, require_final=True, reuse_dead_source=False, 
                     rewritten.append(line)
                 continue
             after = set(live)
-            read_text, definitions = line, set()
-            match = re.match(r'\s*(?:dead )?\$[rw](\d+) =', read_text)
-            if match:
-                definitions.add(int(match[1]))
-                read_text = read_text[match.end():]
-            definition_pattern = r'(?:implicit-def|\bdef|early-clobber) (?:dead )?\$[rw](\d+)'
-            definitions.update(map(int, re.findall(definition_pattern, read_text)))
-            read_text = re.sub(definition_pattern, '', read_text)
-            used = registers(read_text)
+            used, definitions = register_effects(line)
             live = (live - definitions) | used
             selected = set(map(int, re.findall(r'%stack\.(\d+)', line))) & {low, high}
             if not selected:
@@ -247,6 +287,9 @@ def automatic(path, normalizations=None):
     for index, document in enumerate(documents):
         if 'body:             |' not in document:
             continue
+        document, dead_addresses = remove_dead_frame_addresses(document)
+        if normalizations is not None and dead_addresses:
+            normalizations.append(dict(document=index, dead_frame_addresses=dead_addresses))
         document, narrowed = narrow_scalar_storage(document)
         if normalizations is not None and narrowed:
             normalizations.append(dict(document=index, slots=narrowed))

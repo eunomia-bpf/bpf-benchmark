@@ -1,0 +1,18 @@
+*** Bad machine code: Using an undefined physical register ***
+- function:    trusted_x86_x86_sim_xdp
+- basic block: %bb.1864  (0x5c87ff933860)
+- instruction: $r1 = ADD_ri $r1(tied-def 0), -400
+- operand 1:   $r1(tied-def 0)
+
+*** Bad machine code: Using an undefined physical register ***
+- function:    trusted_x86_x86_sim_xdp
+- basic block: %bb.1908  (0x5c87ff936490)
+- instruction: $r1 = ADD_ri $r1(tied-def 0), -400, debug-location !16661; /var/tmp/kprog-tmp/perf/relative-schedule/replay.bpf.c:6839:1
+- operand 1:   $r1(tied-def 0)
+
+*** Bad machine code: Using an undefined physical register ***
+- function:    trusted_x86_x86_sim_xdp
+- basic block: %bb.1953  (0x5c87ff9391c0)
+- instruction: $r3 = ADD_ri $r3(tied-def 0), -400, debug-location !16674; /var/tmp/kprog-tmp/perf/relative-schedule/replay.bpf.c:6857:1
+- operand 1:   $r3(tied-def 0)
+

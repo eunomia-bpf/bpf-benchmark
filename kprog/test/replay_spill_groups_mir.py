@@ -32,9 +32,9 @@ def stack_depth(source):
 def replay(args):
     args.build.mkdir(parents=True, exist_ok=True)
     args.output.mkdir(parents=True, exist_ok=True)
-    wanted = {'request/generated/trusted_x86.bpf.before.mir': 'before',
-              'request/generated/trusted_x86.bpf.packed.mir': 'accepted',
-              'request/generated/trusted_x86.bpf.o': 'object'}
+    wanted = {args.member_stem+'.before.mir': 'before',
+              args.member_stem+'.packed.mir': 'accepted',
+              args.member_stem+'.o': 'object'}
     data = {}
     with tarfile.open(args.archive, 'r|gz') as archive:
         for member in archive:
@@ -47,6 +47,7 @@ def replay(args):
     spec.loader.exec_module(spills)
     before = args.build/'main.before.mir'
     before.write_bytes(data['before'])
+    (args.build/'main.retained.mir').write_bytes(data['accepted'])
     normalizations = []
     grouped, groups = spills.automatic(before, normalizations)
     same_mir = grouped.encode() == data['accepted']
@@ -78,4 +79,5 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ('archive','build','output'):
         parser.add_argument('--'+name, type=Path, required=True)
+    parser.add_argument('--member-stem', default='request/generated/trusted_x86.bpf')
     replay(parser.parse_args())

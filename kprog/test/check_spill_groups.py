@@ -213,6 +213,35 @@ def check(args):
             raise ValueError('Dead-marked reload changed the packed-word result')
         row.update(execution)
     cases.append(row)
+    # BPF PEI marks the MOV of an unused frame address dead but emits an ADD
+    # that reads it. Live local and successor-carried addresses must remain.
+    dead_address = base.replace('    RET implicit $r0',
+        '    dead $r1 = MOV_rr %stack.9\n    $r2 = FI_ri %stack.9, 0\n    RET implicit $r0')
+    lowered, removed = spills.remove_dead_frame_addresses(dead_address.split('\n---\n')[1])
+    if len(removed) != 2:
+        raise ValueError('Unused frame address was not eliminated before BPF PEI')
+    live_address = base.replace('    RET implicit $r0',
+        '    $r1 = MOV_rr %stack.9\n    RET implicit $r0').replace('    RET implicit $r0',
+        '    $r0 = XOR_rr $r0, $r1\n    RET implicit $r0')
+    if spills.remove_dead_frame_addresses(live_address.split('\n---\n')[1])[1]:
+        raise ValueError('Locally observed frame address was removed')
+    carried = base.replace('    JMP %bb.1',
+        '    $r5 = FI_ri %stack.9, 0\n    JMP %bb.1')
+    carried = carried.replace('    liveins: $r6', '    liveins: $r5, $r6')
+    if spills.remove_dead_frame_addresses(carried.split('\n---\n')[1])[1]:
+        raise ValueError('Successor-carried frame address was removed')
+    mir.write_text(dead_address)
+    lowered, _ = spills.automatic(mir)
+    mir.write_text(lowered)
+    run(['llc-18', '-O3', '-march=bpf', '-mcpu=v4', '-verify-machineinstrs',
+         '-start-before=prologepilog', '-filetype=obj', mir, '-o', obj])
+    row = dict(phase='dead-frame-address', frame_access_depth=depth(obj))
+    if not args.compile_only:
+        execution = json.loads(run([args.build/'values-client', '--groups', 'dead-frame-address', obj]).stdout)
+        if execution['failed'] or execution['executions'] != 1060:
+            raise ValueError('Removing an unused frame address changed execution')
+        row.update(execution)
+    cases.append(row)
     (args.output/'result.json').write_text(json.dumps(dict(compile_only=args.compile_only,
         cases=cases), indent=2)+'\n')
     print(json.dumps(cases))

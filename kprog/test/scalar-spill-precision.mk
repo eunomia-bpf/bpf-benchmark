@@ -15,6 +15,11 @@ HELPER_SHAPE_BUILD ?= /var/tmp/kprog-tmp/perf/helper-shapes
 SPILL_GROUP_BUILD ?= /var/tmp/kprog-tmp/perf/spill-groups
 SPILL_GROUP_CPUS ?= 19
 SCALAR_WIDTH_BUILD ?= /var/tmp/kprog-tmp/perf/scalar-width
+SCALAR_WIDTH_ARCHIVE ?= /workspaces/kprog-raw/perf/20261116-bcc-stack-observation/request20.tar.gz
+SCALAR_WIDTH_MEMBER_STEM ?= request/generated/trusted_x86.bpf
+SCALAR_WIDTH_CONTEXT_ARCHIVE ?= $(SCALAR_WIDTH_ARCHIVE)
+SCALAR_WIDTH_SOURCE ?= $(ROOT)/vendor/build/.bcc-libbpf/x86/output/runqlat.bpf.o
+SCALAR_WIDTH_SYMBOL ?= sched_switch
 HELPER_MEMORY_BUILD ?= /var/tmp/kprog-tmp/perf/helper-memory
 MAP_EXTERN_BUILD ?= $(CONTEXT_BUILD)/map-externs
 MAP_EXTERN_ARGS ?=
@@ -86,18 +91,26 @@ scalar-width-run:
 	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 16 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(OUTPUT) --rwdir $(OUTPUT)/inputs=$(SCALAR_WIDTH_BUILD) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/scalar-spill-precision.mk spill-groups-guest SPILL_GROUP_BUILD=$(OUTPUT)/inputs OUTPUT=$(OUTPUT)'
 
 scalar-width-replay:
-	taskset -c 16 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/replay_spill_groups_mir.py --archive /workspaces/kprog-raw/perf/20261116-bcc-stack-observation/request20.tar.gz --build $(SCALAR_WIDTH_BUILD) --output $(OUTPUT)
+	taskset -c 16 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/replay_spill_groups_mir.py --archive $(SCALAR_WIDTH_ARCHIVE) --member-stem $(SCALAR_WIDTH_MEMBER_STEM) --build $(SCALAR_WIDTH_BUILD) --output $(OUTPUT)
+
+.PHONY: scalar-width-baseline scalar-width-dead
+scalar-width-baseline:
+	taskset -c 16 prlimit --as=8589934592 -- llc-18 -O3 -march=bpf -mcpu=v4 -bpf-stack-size=4096 -verify-machineinstrs -start-before=prologepilog -filetype=obj $(SCALAR_WIDTH_BUILD)/main.retained.mir -o $(SCALAR_WIDTH_BUILD)/retained.bpf.o
+
+scalar-width-dead:
+	taskset -c 16 prlimit --as=8589934592 -- llc-18 -O3 -march=bpf -mcpu=v4 -run-pass=dead-mi-elimination $(SCALAR_WIDTH_BUILD)/main.groups.mir -o $(SCALAR_WIDTH_BUILD)/main.dead.mir
+	taskset -c 16 prlimit --as=8589934592 -- llc-18 -O3 -march=bpf -mcpu=v4 -bpf-stack-size=4096 -verify-machineinstrs -start-before=prologepilog -filetype=obj $(SCALAR_WIDTH_BUILD)/main.dead.mir -o $(SCALAR_WIDTH_BUILD)/main.bpf.o
 
 scalar-width-stock:
 	install -d $(OUTPUT) $(OUTPUT)/inputs
-	python3 -c 'import pathlib,tarfile; archive=tarfile.open("/workspaces/kprog-raw/perf/20261116-bcc-stack-observation/request20.tar.gz"); build=pathlib.Path("$(SCALAR_WIDTH_BUILD)"); fields={"kernel.native.o":"main.native.o","generation.metadata.json":"main.metadata.json","kernel.facts.json":"main.context.json"}; [(build/name).write_bytes(archive.extractfile("request/"+source).read()) for source,name in fields.items()]'
-	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 16 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(OUTPUT) --rodir $(OUTPUT)/inputs=$(SCALAR_WIDTH_BUILD) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/scalar-spill-precision.mk scalar-width-stock-guest OUTPUT=$(OUTPUT)'
+	python3 -c 'import pathlib,tarfile; archive=tarfile.open("$(SCALAR_WIDTH_CONTEXT_ARCHIVE)"); build=pathlib.Path("$(SCALAR_WIDTH_BUILD)"); fields={"kernel.native.o":"main.native.o","generation.metadata.json":"main.metadata.json","kernel.facts.json":"main.context.json"}; [(build/name).write_bytes(archive.extractfile("request/"+source).read()) for source,name in fields.items()]'
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 16 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(OUTPUT) --rodir $(OUTPUT)/inputs=$(SCALAR_WIDTH_BUILD) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/scalar-spill-precision.mk scalar-width-stock-guest OUTPUT=$(OUTPUT) SCALAR_WIDTH_SOURCE=$(SCALAR_WIDTH_SOURCE) SCALAR_WIDTH_SYMBOL=$(SCALAR_WIDTH_SYMBOL)'
 
 scalar-width-stock-guest:
 	mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
 	mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf
 	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
-	python3 $(ROOT)/kprog/test/verify_retained_proof.py --native $(OUTPUT)/inputs/main.native.o --metadata $(OUTPUT)/inputs/main.metadata.json --context $(OUTPUT)/inputs/main.context.json --source $(ROOT)/vendor/build/.bcc-libbpf/x86/output/runqlat.bpf.o --proof $(OUTPUT)/inputs/main.bpf.o --symbol sched_switch --linker $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link --output $(OUTPUT)/replay
+	python3 $(ROOT)/kprog/test/verify_retained_proof.py --native $(OUTPUT)/inputs/main.native.o --metadata $(OUTPUT)/inputs/main.metadata.json --context $(OUTPUT)/inputs/main.context.json --source $(SCALAR_WIDTH_SOURCE) --proof $(OUTPUT)/inputs/main.bpf.o --symbol $(SCALAR_WIDTH_SYMBOL) --linker $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link --output $(OUTPUT)/replay
 
 spill-groups-build:
 	install -d $(SPILL_GROUP_BUILD)

@@ -1,0 +1,58 @@
+{
+  "archive": "/workspaces/kprog-raw/perf/20261116-relative-schedule/otel-b/build.tar.gz",
+  "narrowed_scalar_slots": [
+    {
+      "document": 1,
+      "dead_frame_addresses": [
+        {
+          "block": 1864,
+          "instruction": "dead $r1 = MOV_rr %stack.0"
+        },
+        {
+          "block": 1908,
+          "instruction": "dead $r1 = MOV_rr %stack.0"
+        },
+        {
+          "block": 1953,
+          "instruction": "dead $r3 = MOV_rr %stack.0"
+        }
+      ]
+    }
+  ],
+  "grouped_pairs": [
+    {
+      "low": 44,
+      "high": 45
+    },
+    {
+      "low": 42,
+      "high": 43
+    },
+    {
+      "low": 40,
+      "high": 41
+    },
+    {
+      "low": 38,
+      "high": 39
+    },
+    {
+      "low": 35,
+      "high": 36
+    },
+    {
+      "low": 33,
+      "high": 34
+    },
+    {
+      "low": 22,
+      "high": 32
+    }
+  ],
+  "grouped_mir_equals_accepted": false,
+  "allocated_bytes_equal_accepted": false,
+  "frame_access_depth": 704,
+  "retained_frame_access_depth": 704,
+  "object": "/var/tmp/kprog-tmp/perf/scalar-width/main.bpf.o",
+  "scope": "Captured whole-body MIR/codegen replay; stock verification not repeated"
+}
