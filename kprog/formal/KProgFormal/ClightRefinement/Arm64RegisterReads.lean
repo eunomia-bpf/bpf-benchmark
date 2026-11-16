@@ -7,6 +7,10 @@ def ge : CC.CGenv := Arm64Program.prog.globalenv
 def reader (tags : Bool) : CC.Function :=
   if tags then Arm64Program.f_kprog_arm64_program_tag else Arm64Program.f_kprog_arm64_program_raw
 
+private def selected (tags pointers : Bool) : CC.Function :=
+  if tags then reader true else if pointers then Arm64Program.f_kprog_arm64_program_pointer
+  else reader false
+
 private def entryComposite : CC.Composite :=
   (ge.genv_cenv.get Arm64Program._kprog_arm64_entry).get (by decide +kernel)
 private def cellComposite : CC.Composite :=
@@ -18,6 +22,14 @@ private theorem layouts :
     CC.fieldOffset ge.genv_cenv Arm64Program._cells entryComposite.co_members = .OK (0, .Full) ∧
     CC.fieldOffset ge.genv_cenv Arm64Program._tag_cells entryComposite.co_members = .OK (8, .Full) ∧
     CC.unionFieldOffset ge.genv_cenv Arm64Program._x cellComposite.co_members = .OK (0, .Full) := by
+  decide +kernel
+
+private theorem pointer_offset :
+    CC.unionFieldOffset ge.genv_cenv Arm64Program._ptr cellComposite.co_members = .OK (0, .Full) := by
+  decide +kernel
+
+private theorem sp_offset :
+    CC.fieldOffset ge.genv_cenv Arm64Program._sp entryComposite.co_members = .OK (40, .Full) := by
   decide +kernel
 
 private theorem index_nat (i : Fin 31) : (BitVec.ofNat 64 i.val).toNat = i.val := by
@@ -78,7 +90,7 @@ private theorem field_load (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs)
       offset, CC.Val.offsetPtr]
   exact checked_load (by simpa only [Arm64EntryMemory.field, address, bind, Option.bind_some] using read)
 
-private theorem gpr_executes (tags : Bool) (i : Fin 31)
+private theorem gpr_executes (tags pointers : Bool) (i : Fin 31)
     (b cb vb : CC.Block) (ofs co vo : CC.Integers.Ptrofs)
     (m : CC.Mem) (k : CC.Cont) (value : CC.Val) (tag : BitVec 8)
     (header : CC.Mem.loadv CC.Mptr m (.Vptr b (CC.Integers.Ptrofs.add ofs
@@ -88,11 +100,11 @@ private theorem gpr_executes (tags : Bool) (i : Fin 31)
     (cell : CC.Mem.loadv (if tags then .Mint8unsigned else .Mint64) m (.Vptr vb vo) =
       some (if tags then .Vint (tag.setWidth 32) else value))
     (valueCast : CC.Cop.semCast value CC.tulong CC.tulong m = some value) :
-    steps ge 28 (.Callstate (.Internal (reader tags))
+    steps ge 28 (.Callstate (.Internal (selected tags pointers))
       [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m) =
       some (CC.E0, .Returnstate (if tags then .Vint (tag.setWidth 32) else value)
         (CC.callCont k) m) ∧
-    InternalPath ge 28 (.Callstate (.Internal (reader tags))
+    InternalPath ge 28 (.Callstate (.Internal (selected tags pointers))
       [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m) := by
   have bound := i.isLt
   have ne : BitVec.ofNat 64 i.val ≠ (32#64) := by
@@ -114,10 +126,12 @@ private theorem gpr_executes (tags : Bool) (i : Fin 31)
   simp only [CC.Cop.semCast, CC.Cop.classifyCast, CC.tulong, CC.Archi.ptr64,
     ↓reduceIte] at valueCast
   have empty : (CC.PTree.empty : CC.Env).elements = [] := rfl
-  cases tags <;> simp only [Bool.false_eq_true, ite_false, ite_true, offset_zero] at header cell
+  simp only [CC.Mptr, CC.Archi.ptr64, ↓reduceIte] at header slot cell
+  cases pointers <;> cases tags <;> simp only [Bool.false_eq_true, ite_false, ite_true, offset_zero] at header cell
   all_goals
-    simp +decide [reader, steps, InternalPath, InternalState, CC.doStep, CC.doFunctionEntry2,
+    simp +decide [selected, reader, steps, InternalPath, InternalState, CC.doStep, CC.doFunctionEntry2,
       Arm64Program.f_kprog_arm64_program_raw, Arm64Program.f_kprog_arm64_program_tag,
+      Arm64Program.f_kprog_arm64_program_pointer, pointer_offset,
       CC.doAllocVariables, CC.bindParameterTemps,
       CC.createUndefTemps, CC.PTree.gso, CC.doEvalExpr, CC.lvalOfField,
       CC.doDerefLoc, CC.typeof, CC.typeconv, CC.removeAttributes, CC.tattr, CC.accessMode,
@@ -135,9 +149,38 @@ private theorem gpr_executes (tags : Bool) (i : Fin 31)
       CC.Integers.Int.unsigned,
       CC.Integers.MI.unsigned,
       offset_zero,
-      CC.tptr, CC.sizeof, CC.tuchar, CC.tint, CC.tuint, CC.tlong, CC.tulong,
+      CC.Mptr, CC.Archi.ptr64, CC.tptr, CC.tvoid, CC.sizeof, CC.tuchar, CC.tint, CC.tuint, CC.tlong, CC.tulong,
       CC.blocksOfEnv, CC.Mem.freeList,
       CC.emptyEnv, CC.E0, CC.Eapp, header, slot, cell, valueCast, empty]
+
+private theorem gpr_calls (addresses : Arm64Registers.PointerOrigins)
+    (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs) (i : Fin 31)
+    (m : CC.Mem) (k : CC.Cont) (value : CC.Val) (raw : BitVec 64) (tag : BitVec 8)
+    (observed : Arm64EntryMemory.gpr frontier m (.Vptr b ofs) i.val =
+      some (value, .Vint (tag.setWidth 32)))
+    (represented : Arm64Registers.ValueRep addresses value raw) :
+    InternalRun ge 28 (.Callstate (.Internal (reader false))
+      [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m)
+      (.Returnstate value (CC.callCont k) m) ∧
+    InternalRun ge 28 (.Callstate (.Internal (reader true))
+      [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m)
+      (.Returnstate (.Vint (tag.setWidth 32)) (CC.callCont k) m) ∧
+    InternalRun ge 28 (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_pointer)
+      [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m)
+      (.Returnstate value (CC.callCont k) m) := by
+  have valueCast : CC.Cop.semCast value CC.tulong CC.tulong m = some value := by
+    cases value <;> try contradiction
+    all_goals rfl
+  obtain ⟨cb, co, vb, vo, tb, to, kb, ko, cells, slot, tags, tagSlot, cell, kind⟩ :=
+    Arm64EntryMemory.gpr_loads observed
+  have rawExec := gpr_executes false false i b cb vb ofs co vo m k value tag
+    (field_load frontier b ofs m _ 0 _ layouts.2.2.1 cells) slot cell valueCast
+  have tagExec := gpr_executes true false i b tb kb ofs to ko m k value tag
+    (field_load frontier b ofs m _ 8 _ layouts.2.2.2.1 tags) tagSlot kind valueCast
+  have pointerExec := gpr_executes false true i b cb vb ofs co vo m k value tag
+    (field_load frontier b ofs m _ 0 _ layouts.2.2.1 cells) slot cell valueCast
+  exact ⟨internalRun_of_steps rawExec.2 rawExec.1, internalRun_of_steps tagExec.2 tagExec.1,
+    internalRun_of_steps pointerExec.2 pointerExec.1⟩
 
 /-- Both real exported readers follow the same cells observed by gpr.
 Pointers keep their identity; ValueRep excludes undefined/invented values. -/
@@ -153,16 +196,21 @@ theorem gpr_returns (addresses : Arm64Registers.PointerOrigins)
     InternalRun ge 28 (.Callstate (.Internal (reader true))
       [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m)
       (.Returnstate (.Vint (tag.setWidth 32)) (CC.callCont k) m) := by
-  have valueCast : CC.Cop.semCast value CC.tulong CC.tulong m = some value := by
-    cases value <;> try contradiction
-    all_goals rfl
-  obtain ⟨cb, co, vb, vo, tb, to, kb, ko, cells, slot, tags, tagSlot, cell, kind⟩ :=
-    Arm64EntryMemory.gpr_loads observed
-  have rawExec := gpr_executes false i b cb vb ofs co vo m k value tag
-    (field_load frontier b ofs m _ 0 _ layouts.2.2.1 cells) slot cell valueCast
-  have tagExec := gpr_executes true i b tb kb ofs to ko m k value tag
-    (field_load frontier b ofs m _ 8 _ layouts.2.2.2.1 tags) tagSlot kind valueCast
-  exact ⟨internalRun_of_steps rawExec.2 rawExec.1, internalRun_of_steps tagExec.2 tagExec.1⟩
+  have calls := gpr_calls addresses frontier b ofs i m k value raw tag observed represented
+  exact ⟨calls.1, calls.2.1⟩
+
+/-- The pointer view reads the same union cell with the actual pointer-field
+layout. Vptr and Vlong representatives remain exact, including null/offset bits. -/
+theorem gpr_pointer_returns (addresses : Arm64Registers.PointerOrigins)
+    (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs) (i : Fin 31)
+    (m : CC.Mem) (k : CC.Cont) (value : CC.Val) (raw : BitVec 64) (tag : BitVec 8)
+    (observed : Arm64EntryMemory.gpr frontier m (.Vptr b ofs) i.val =
+      some (value, .Vint (tag.setWidth 32)))
+    (represented : Arm64Registers.ValueRep addresses value raw) :
+    InternalRun ge 28 (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_pointer)
+      [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m)
+      (.Returnstate value (CC.callCont k) m) :=
+  (gpr_calls addresses frontier b ofs i m k value raw tag observed represented).2.2
 
 /-- Every pair of Kstop returns from the actual raw/tag functions agrees
 with the full-register relation and its M3 native materialization. The cell
@@ -198,5 +246,161 @@ theorem register_return_corresponds (addresses : Arm64Registers.PointerOrigins)
   cases rawSame
   cases tagSame
   exact ⟨rawSilent, tagSilent, rfl, rfl, bits, tag, binding, rfl, nativeBits⟩
+
+private theorem sp_executes (pointers : Bool) (b sb : CC.Block)
+    (ofs so : CC.Integers.Ptrofs) (m : CC.Mem) (k : CC.Cont) (offset : BitVec 64)
+    (header : CC.Mem.loadv CC.Mptr m (.Vptr b (CC.Integers.Ptrofs.add ofs
+      (CC.Integers.Ptrofs.repr 40))) = some (.Vptr sb so))
+    (cell : CC.Mem.loadv .Mint64 m (.Vptr sb so) = some (.Vlong offset)) :
+    steps ge 21 (.Callstate (.Internal (selected false pointers))
+      [.Vptr b ofs, .Vlong (32#64)] k m) =
+      some (CC.E0, .Returnstate (.Vlong offset) (CC.callCont k) m) ∧
+    InternalPath ge 21 (.Callstate (.Internal (selected false pointers))
+      [.Vptr b ofs, .Vlong (32#64)] k m) := by
+  have empty : (CC.PTree.empty : CC.Env).elements = [] := rfl
+  simp only [CC.Mptr, CC.Archi.ptr64, ↓reduceIte] at header
+  cases pointers <;>
+    simp +decide [selected, reader, steps, InternalPath, InternalState, CC.doStep,
+      CC.doFunctionEntry2, Arm64Program.f_kprog_arm64_program_raw,
+      Arm64Program.f_kprog_arm64_program_pointer,
+      CC.doAllocVariables, CC.bindParameterTemps, CC.createUndefTemps, CC.PTree.gso,
+      CC.doEvalExpr, CC.lvalOfField, CC.doDerefLoc, CC.typeof, CC.typeconv,
+      CC.removeAttributes, CC.tattr, CC.accessMode, layouts.1, sp_offset,
+      CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp, CC.Cop.semBinarith,
+      CC.Cop.classifyBinarith, CC.Cop.binarithType, CC.Cop.semCast, CC.Cop.classifyCast,
+      CC.Cop.castIntInt, CC.Cop.castIntLong, CC.Cop.boolVal, CC.Cop.classifyBool,
+      CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse,
+      CC.Integers.Int64.cmpu, CC.Integers.Int64.eq, CC.Integers.MI.cmpu,
+      CC.Integers.Int.eq, CC.Integers.Int.zero, CC.Integers.Int.one,
+      CC.Integers.MI.zero, CC.Integers.MI.one, CC.Integers.MI.eq,
+      CC.Integers.Int.repr, CC.Integers.Int64.repr, CC.Integers.MI.repr,
+      CC.Integers.Int.unsigned, CC.Integers.MI.unsigned,
+      CC.Mptr, CC.Archi.ptr64, CC.tptr, CC.tvoid, CC.tint, CC.tuint, CC.tlong, CC.tulong,
+      CC.blocksOfEnv, CC.Mem.freeList, CC.emptyEnv, CC.E0, CC.Eapp, header, cell, empty]
+
+/-- The real SP tag branch needs no memory read or validity assumption on
+its entry argument. Its constant is the C STACK tag, not a native SP value. -/
+theorem sp_tag_executes (entry : CC.Val) (m : CC.Mem) (k : CC.Cont) :
+    steps ge 15 (.Callstate (.Internal (reader true)) [entry, .Vlong (32#64)] k m) =
+      some (CC.E0, .Returnstate (.Vint (4#32)) (CC.callCont k) m) ∧
+    InternalPath ge 15 (.Callstate (.Internal (reader true)) [entry, .Vlong (32#64)] k m) := by
+  have empty : (CC.PTree.empty : CC.Env).elements = [] := rfl
+  simp +decide [reader, steps, InternalPath, InternalState, CC.doStep, CC.doFunctionEntry2,
+    Arm64Program.f_kprog_arm64_program_tag, CC.doAllocVariables, CC.bindParameterTemps,
+    CC.createUndefTemps, CC.PTree.gso, CC.doEvalExpr, CC.typeof, CC.typeconv,
+    CC.removeAttributes, CC.tattr,
+    CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp, CC.Cop.semBinarith,
+    CC.Cop.classifyBinarith, CC.Cop.binarithType, CC.Cop.semCast, CC.Cop.classifyCast,
+    CC.Cop.castIntInt, CC.Cop.castIntLong, CC.Cop.boolVal, CC.Cop.classifyBool,
+    CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse,
+    CC.Integers.Int64.cmpu, CC.Integers.Int64.eq, CC.Integers.MI.cmpu,
+    CC.Integers.Int.eq, CC.Integers.Int.zero, CC.Integers.Int.one,
+    CC.Integers.MI.zero, CC.Integers.MI.one, CC.Integers.MI.eq,
+    CC.Integers.Int.repr, CC.Integers.Int64.repr, CC.Integers.MI.repr,
+    CC.Integers.Int.unsigned, CC.Integers.MI.unsigned,
+    CC.tptr, CC.tint, CC.tuint, CC.tlong, CC.tulong,
+    CC.blocksOfEnv, CC.Mem.freeList, CC.emptyEnv, CC.E0, CC.Eapp, empty]
+
+/-- Complete SP tag call for any entry value, memory and continuation. -/
+theorem sp_tag_returns (entry : CC.Val) (m : CC.Mem) (k : CC.Cont) :
+    InternalRun ge 15 (.Callstate (.Internal (reader true)) [entry, .Vlong (32#64)] k m)
+      (.Returnstate (.Vint (4#32)) (CC.callCont k) m) := by
+  have run := sp_tag_executes entry m k
+  exact internalRun_of_steps run.2 run.1
+
+/-- Both SP value views read the actual borrowed signed-long slot. A pointer
+cast of its Vlong offset remains that offset, not a fabricated native address. -/
+theorem sp_returns (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs)
+    (m : CC.Mem) (k : CC.Cont) (offset : BitVec 64)
+    (read : Arm64EntryMemory.borrowed frontier .Mint64 m (.Vptr b ofs) Arm64Program._sp =
+      some (.Vlong offset)) :
+    InternalRun ge 21 (.Callstate (.Internal (reader false)) [.Vptr b ofs, .Vlong (32#64)] k m)
+      (.Returnstate (.Vlong offset) (CC.callCont k) m) ∧
+    InternalRun ge 21 (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_pointer)
+      [.Vptr b ofs, .Vlong (32#64)] k m)
+      (.Returnstate (.Vlong offset) (CC.callCont k) m) ∧
+    InternalRun ge 15 (.Callstate (.Internal (reader true)) [.Vptr b ofs, .Vlong (32#64)] k m)
+      (.Returnstate (.Vint (4#32)) (CC.callCont k) m) := by
+  simp only [Arm64EntryMemory.borrowed, bind, Option.bind_eq_some_iff] at read
+  obtain ⟨sp, header, cell⟩ := read
+  obtain ⟨sb, so, rfl, _, cell⟩ := Arm64EntryMemory.load_pointer cell
+  have actualHeader := field_load frontier b ofs m _ 40 _ sp_offset header
+  have raw := sp_executes false b sb ofs so m k offset actualHeader cell
+  have pointer := sp_executes true b sb ofs so m k offset actualHeader cell
+  exact ⟨internalRun_of_steps raw.2 raw.1, internalRun_of_steps pointer.2 pointer.1,
+    sp_tag_returns (.Vptr b ofs) m k⟩
+
+private theorem stopped_return {n : Nat} {initial : CC.State} {value result : CC.Val}
+    {m after : CC.Mem} {trace : CC.Trace}
+    (run : InternalRun ge n initial (.Returnstate value .Kstop m))
+    (observed : CC.Star (CC.Step2 ge) initial trace (.Returnstate result .Kstop after)) :
+    trace = CC.E0 ∧ result = value ∧ after = m := by
+  have stop : ∀ (v : CC.Val) (memory : CC.Mem) t next,
+      ¬ CC.Step2 ge (.Returnstate v .Kstop memory) t next := by
+    intro v memory t next step
+    cases step
+  obtain ⟨silent, same⟩ := run.endpoint_unique (stop _ _) observed (stop _ _)
+  cases same
+  exact ⟨silent, rfl, rfl⟩
+
+/-- Every pointer-view return agrees with the represented native GPR through
+its original tag and M3 materialization. Relative words remain relative here. -/
+theorem pointer_return_corresponds (addresses : Arm64Registers.PointerOrigins)
+    (origins : Reference.Provenance.AArch64.Origins)
+    (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs) (i : Reference.AArch64.Gpr)
+    (m : CC.Mem) (native : Reference.AArch64.State)
+    (rep : Arm64Registers.Represents addresses origins (fun reg => reg.val)
+      frontier m (.Vptr b ofs) native)
+    (trace : CC.Trace) (result : CC.Val) (after : CC.Mem)
+    (observed : CC.Star (CC.Step2 ge)
+      (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_pointer)
+        [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] .Kstop m) trace
+      (.Returnstate result .Kstop after)) :
+    trace = CC.E0 ∧ after = m ∧ ∃ bits tag,
+      Arm64Registers.ValueRep addresses result bits ∧
+      Reference.AArch64.gpr native i =
+        Reference.Provenance.AArch64.materialize origins bits tag := by
+  obtain ⟨value, bits, tag, read, binding, nativeBits⟩ := rep.gpr i
+  have run := gpr_pointer_returns addresses frontier b ofs i m .Kstop value bits tag read binding
+  obtain ⟨silent, sameValue, sameMemory⟩ := stopped_return run observed
+  refine ⟨silent, sameMemory, bits, tag, ?_, nativeBits⟩
+  rw [sameValue]
+  exact binding
+
+/-- Native SP uses source offset plus the actual invocation stack origin.
+The C pointer view returns that same offset, not the native physical address. -/
+theorem sp_return_corresponds (pointers : Bool) (addresses : Arm64Registers.PointerOrigins)
+    (origins : Reference.Provenance.AArch64.Origins) (cells : Reference.AArch64.Gpr → Nat)
+    (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs) (m : CC.Mem)
+    (native : Reference.AArch64.State)
+    (rep : Arm64Registers.Represents addresses origins cells frontier m (.Vptr b ofs) native)
+    (trace : CC.Trace) (result : CC.Val) (after : CC.Mem)
+    (observed : CC.Star (CC.Step2 ge)
+      (.Callstate (.Internal (if pointers then Arm64Program.f_kprog_arm64_program_pointer
+        else reader false)) [.Vptr b ofs, .Vlong (32#64)] .Kstop m) trace
+      (.Returnstate result .Kstop after)) :
+    trace = CC.E0 ∧ after = m ∧ ∃ offset,
+      result = .Vlong offset ∧ Reference.AArch64.sp native = offset + origins.stack := by
+  obtain ⟨offset, read, nativeBits⟩ := rep.sp
+  have calls := sp_returns frontier b ofs m .Kstop offset read
+  have run : InternalRun ge 21
+      (.Callstate (.Internal (if pointers then Arm64Program.f_kprog_arm64_program_pointer
+        else reader false)) [.Vptr b ofs, .Vlong (32#64)] .Kstop m)
+      (.Returnstate (.Vlong offset) .Kstop m) := by
+    cases pointers
+    · exact calls.1
+    · exact calls.2.1
+  obtain ⟨silent, sameValue, sameMemory⟩ := stopped_return run observed
+  exact ⟨silent, sameMemory, offset, sameValue, nativeBits⟩
+
+/-- Every top-level SP tag return is STACK, with exact complete-memory
+preservation, for every entry value and proposed result/trace/memory. -/
+theorem sp_tag_return_unique (entry : CC.Val) (m : CC.Mem)
+    (trace : CC.Trace) (result : CC.Val) (after : CC.Mem)
+    (observed : CC.Star (CC.Step2 ge)
+      (.Callstate (.Internal (reader true)) [entry, .Vlong (32#64)] .Kstop m) trace
+      (.Returnstate result .Kstop after)) :
+    trace = CC.E0 ∧ result = .Vint (4#32) ∧ after = m :=
+  stopped_return (sp_tag_returns entry m .Kstop) observed
 
 end KProgFormal.ClightRefinement.Arm64RegisterReads

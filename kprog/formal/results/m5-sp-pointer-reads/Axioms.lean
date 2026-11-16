@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.Arm64RegisterReads
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterReads.sp_tag_executes
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_pointer_returns
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterReads.pointer_return_corresponds
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterReads.sp_returns
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterReads.sp_return_corresponds
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_returns
+#check @KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_pointer_returns
+#check @KProgFormal.ClightRefinement.Arm64RegisterReads.sp_tag_executes
+#check @KProgFormal.ClightRefinement.Arm64RegisterReads.sp_returns
+#check @KProgFormal.ClightRefinement.Arm64RegisterReads.sp_return_corresponds

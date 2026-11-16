@@ -1959,3 +1959,11 @@ For every GPR index 0–30, each call completes 28 internal transitions and
 preserves all memory. Every pair of returns at `Kstop` agrees with the
 represented native GPR through the default export's actual cell selection.
 Producer initialization and compact source-profile bindings remain open.
+
+The [SP/pointer-view proof](results/m5-sp-pointer-reads/README.md) extends
+those reads to the actual pointer export and C's distinct SP selector 32.
+Pointer GPR reads preserve their union representative in 28 transitions;
+both SP value views return the borrowed relative offset in 21. The SP tag
+branch returns STACK in 15 transitions with no memory-read premise. Their
+Kstop return laws preserve complete memory and retain the explicit native
+origin in the SP correspondence.

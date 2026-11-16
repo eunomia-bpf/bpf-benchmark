@@ -1,0 +1,80 @@
+'KProgFormal.ClightRefinement.Arm64RegisterReads.sp_tag_executes' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_pointer_returns' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64RegisterReads.pointer_return_corresponds' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64RegisterReads.sp_returns' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64RegisterReads.sp_return_corresponds' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_returns' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_pointer_returns : ∀
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins) (frontier b : CC.Block)
+  (ofs : CC.Integers.Ptrofs) (i : Fin 31) (m : CC.Mem) (k : CC.Cont) (value : CC.Val) (raw : BitVec 64)
+  (tag : BitVec 8),
+  KProgFormal.ClightRefinement.Arm64EntryMemory.gpr frontier m (CC.Val.Vptr b ofs) ↑i =
+      some (value, CC.Val.Vint (BitVec.setWidth 32 tag)) →
+    KProgFormal.ClightRefinement.Arm64Registers.ValueRep addresses value raw →
+      KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.Arm64RegisterReads.ge 28
+        (CC.State.Callstate (CC.FunDef.Internal Arm64Program.f_kprog_arm64_program_pointer)
+          [CC.Val.Vptr b ofs, CC.Val.Vlong (BitVec.ofNat 64 ↑i)] k m)
+        (CC.State.Returnstate value (CC.callCont k) m)
+KProgFormal.ClightRefinement.Arm64RegisterReads.sp_tag_executes : ∀ (entry : CC.Val) (m : CC.Mem) (k : CC.Cont),
+  KProgFormal.ClightRefinement.steps KProgFormal.ClightRefinement.Arm64RegisterReads.ge 15
+        (CC.State.Callstate (CC.FunDef.Internal (KProgFormal.ClightRefinement.Arm64RegisterReads.reader true))
+          [entry, CC.Val.Vlong 32#64] k m) =
+      some (CC.E0, CC.State.Returnstate (CC.Val.Vint 4#32) (CC.callCont k) m) ∧
+    KProgFormal.ClightRefinement.InternalPath KProgFormal.ClightRefinement.Arm64RegisterReads.ge 15
+      (CC.State.Callstate (CC.FunDef.Internal (KProgFormal.ClightRefinement.Arm64RegisterReads.reader true))
+        [entry, CC.Val.Vlong 32#64] k m)
+KProgFormal.ClightRefinement.Arm64RegisterReads.sp_returns : ∀ (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs)
+  (m : CC.Mem) (k : CC.Cont) (offset : BitVec 64),
+  KProgFormal.ClightRefinement.Arm64EntryMemory.borrowed frontier CC.Chunk.Mint64 m (CC.Val.Vptr b ofs)
+        Arm64Program._sp =
+      some (CC.Val.Vlong offset) →
+    KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.Arm64RegisterReads.ge 21
+        (CC.State.Callstate (CC.FunDef.Internal (KProgFormal.ClightRefinement.Arm64RegisterReads.reader false))
+          [CC.Val.Vptr b ofs, CC.Val.Vlong 32#64] k m)
+        (CC.State.Returnstate (CC.Val.Vlong offset) (CC.callCont k) m) ∧
+      KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.Arm64RegisterReads.ge 21
+          (CC.State.Callstate (CC.FunDef.Internal Arm64Program.f_kprog_arm64_program_pointer)
+            [CC.Val.Vptr b ofs, CC.Val.Vlong 32#64] k m)
+          (CC.State.Returnstate (CC.Val.Vlong offset) (CC.callCont k) m) ∧
+        KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.Arm64RegisterReads.ge 15
+          (CC.State.Callstate (CC.FunDef.Internal (KProgFormal.ClightRefinement.Arm64RegisterReads.reader true))
+            [CC.Val.Vptr b ofs, CC.Val.Vlong 32#64] k m)
+          (CC.State.Returnstate (CC.Val.Vint 4#32) (CC.callCont k) m)
+KProgFormal.ClightRefinement.Arm64RegisterReads.sp_return_corresponds : ∀ (pointers : Bool)
+  (addresses : KProgFormal.ClightRefinement.Arm64Registers.PointerOrigins)
+  (origins : KProgFormal.Reference.Provenance.AArch64.Origins) (cells : KProgFormal.Reference.AArch64.Gpr → Nat)
+  (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs) (m : CC.Mem) (native : KProgFormal.Reference.AArch64.State),
+  KProgFormal.ClightRefinement.Arm64Registers.Represents addresses origins cells frontier m (CC.Val.Vptr b ofs) native →
+    ∀ (trace : CC.Trace) (result : CC.Val) (after : CC.Mem),
+      CC.Star (CC.Step2 KProgFormal.ClightRefinement.Arm64RegisterReads.ge)
+          (CC.State.Callstate
+            (CC.FunDef.Internal
+              (if pointers = true then Arm64Program.f_kprog_arm64_program_pointer
+              else KProgFormal.ClightRefinement.Arm64RegisterReads.reader false))
+            [CC.Val.Vptr b ofs, CC.Val.Vlong 32#64] CC.Cont.Kstop m)
+          trace (CC.State.Returnstate result CC.Cont.Kstop after) →
+        trace = CC.E0 ∧
+          after = m ∧
+            ∃ offset, result = CC.Val.Vlong offset ∧ KProgFormal.Reference.AArch64.sp native = offset + origins.stack
