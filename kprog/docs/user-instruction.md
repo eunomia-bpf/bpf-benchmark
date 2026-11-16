@@ -131,6 +131,9 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-16 ~23:26 UTC: "你要看看你都在调啥"
 - 2026-11-16 ~23:28 UTC: "我们的工作方式是什么"
 - 2026-11-16 ~23:29 UTC: "为啥越来越慢, 源代码有没有也审计?"
+- 2026-11-16 ~23:32 UTC: "内核公共路径 为啥改? 我觉得内核是不是应该几乎不要修改, 整体 patch 也要少于 500 loc?"
+- 2026-11-16 ~23:32 UTC: "你来查, 不要交给别人"
+- 2026-11-16 ~23:32 UTC: "代码量有多少? 一直在改什么"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
