@@ -112,6 +112,7 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-16 ~02:05 UTC: "功能正常吗? 我们的功能修复也都在?"
 - 2026-11-16 ~02:05 UTC: "还有新的 verify 修复也在? verify 也要继续做"
 - 2026-11-16 ~02:58 UTC（前半句引用协调者说 OTel “13 个程序跑在原生一侧”）: "13 个程序跑在原生一侧? 也要确保弄好, 想办法改进我们的 sim generate 的过程, 确保能 verify, verify 不了的也需要跑 native 先."
+- 2026-11-16 ~14:06 UTC（读了协调者 13:19 的汇报后）: "解释一下, 为啥慢?"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
