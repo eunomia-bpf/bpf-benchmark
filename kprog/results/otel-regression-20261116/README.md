@@ -26,3 +26,49 @@ Run the committed Makefile's audit/profile targets. Raw evidence remains under
 `/workspaces/kprog-raw/perf/20261116-otel-regression`. Per-call counters alone
 do not separate body, helpers and maps. The corresponding profile split and
 an affected-app stats-on run after publication remain work in progress.
+
+Host audit result: the current stage compiler produces byte-identical selected
+functions and identical relocation identities against retained physical objects:
+
+| Selected function | Native function bytes | Relocations |
+|---|---:|---:|
+| native_tracer_entry | 6,434 | 44 |
+| perf_unwind_native | 27,689 | 171 |
+| perf_unwind_v8 | 34,346 | 225 |
+
+This compares current producer P with the retained 12:13 replay objects. Those
+objects are not a capture of the stage executable inside the 08:xx image, so
+this does not alone exclude every historical compiler discrepancy. The source
+changes have the following scopes:
+
+| Change | Relevant behavior |
+|---|---|
+| 2294b0463 | Preserve a selected static entry across O3 and set its linkage. |
+| 0f5c55894 | Conditional PERF_EVENT lowering plus optional supplied function bodies. With type 7 and no supplied bodies, context conversion is retained. |
+| 63547fcfe | Generalize the supplied BPF callee lowering callback. The host comparisons supply no such bodies. |
+| f45bb2485 | Change typed hash calls from a copied native routine to the raw kernel hash implementation; delete 2,444 appended bytes per using program. |
+
+The last change's signature matches all thirteen measurement-window size deltas:
+eleven shrink by exactly 2,444 B; perf_unwind_native and perf_unwind_hotspot
+retain their sizes. It is a distinct linker change, not a context-compiler edit.
+The current sampling entry has two raw hash call sites (retained shared-hash
+audit offsets 1383 and 4482). Hash-call cost is therefore a concrete candidate
+to measure, not yet an established cause or reason to restore duplicated code.
+
+Available stats-on counters give the following total BPF times per invocation:
+
+| Run and scope | eBPF ns/call | Native ns/call |
+|---|---:|---:|
+| 125155_179400, three 180-second samples | 3,189.196 | 3,571.941 |
+| 163206_529710, one 10-second cleanup check | 3,574.743 | 3,746.349 |
+
+The latter is a short diagnostic, not the current full round. Its native time
+rose 4.9%, while eBPF time rose 12.1%; those two runs alone do not establish a
+native-relative regression. custom__generic records zero invocations in both
+arms of the available stats-on runs; its replacement-set presence cannot explain
+a measured per-call cost there. Stats-off zero counters are uninformative.
+
+Integer-loop sum ratios differ from other throughput summaries; audit.json
+labels its exact calculation and retains each language's series. The existing
+official May-comparison metric is unchanged. No body/helper/map split is
+fabricated from aggregate program counters or instruction counts.

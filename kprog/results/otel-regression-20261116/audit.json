@@ -1,0 +1,886 @@
+{
+  "runs": {
+    "102445_806916": {
+      "bpf_stats": false,
+      "samples": 3,
+      "workload_seconds": 180.0,
+      "phases": {
+        "baseline": {
+          "measured_programs": 13,
+          "installed_bytes": 167504,
+          "programs": {
+            "perf_unwind_php": {
+              "bytes": 14983,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_pyt": {
+              "bytes": 19605,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_rub": {
+              "bytes": 17840,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_v8": {
+              "bytes": 20215,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_dot": {
+              "bytes": 22797,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_go_labels": {
+              "bytes": 1572,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "tracepoint__sch": {
+              "bytes": 792,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "native_tracer_e": {
+              "bytes": 3815,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "custom__generic": {
+              "bytes": 3679,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_sto": {
+              "bytes": 3650,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_nat": {
+              "bytes": 21868,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_hot": {
+              "bytes": 18424,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_per": {
+              "bytes": 18264,
+              "calls": 0,
+              "time_ns": 0
+            }
+          },
+          "total_calls": 0,
+          "total_ns": 0,
+          "ns_per_call": null,
+          "integer_loop_operations_by_language": [
+            {
+              "python3": 774097328,
+              "ruby": 1787307585,
+              "nodejs": 407640035,
+              "perl": 1037464635,
+              "php": 3186176068
+            },
+            {
+              "python3": 688831912,
+              "ruby": 1857499256,
+              "nodejs": 434919943,
+              "perl": 959000524,
+              "php": 3107408488
+            },
+            {
+              "python3": 740596328,
+              "ruby": 1792417013,
+              "nodejs": 417338414,
+              "perl": 973760083,
+              "php": 3013086156
+            }
+          ]
+        },
+        "post_rejit": {
+          "measured_programs": 13,
+          "installed_bytes": 330814,
+          "programs": {
+            "perf_unwind_sto": {
+              "bytes": 10955,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_nat": {
+              "bytes": 30252,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_hot": {
+              "bytes": 41278,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_per": {
+              "bytes": 43063,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_php": {
+              "bytes": 39420,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_pyt": {
+              "bytes": 23143,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_rub": {
+              "bytes": 32966,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_v8": {
+              "bytes": 39988,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_dot": {
+              "bytes": 39584,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_go_labels": {
+              "bytes": 6141,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "tracepoint__sch": {
+              "bytes": 4290,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "native_tracer_e": {
+              "bytes": 10477,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "custom__generic": {
+              "bytes": 9257,
+              "calls": 0,
+              "time_ns": 0
+            }
+          },
+          "total_calls": 0,
+          "total_ns": 0,
+          "ns_per_call": null,
+          "integer_loop_operations_by_language": [
+            {
+              "python3": 635341454,
+              "ruby": 1684870428,
+              "nodejs": 907257753,
+              "perl": 952247581,
+              "php": 2955124899
+            },
+            {
+              "python3": 646652934,
+              "ruby": 1650398415,
+              "nodejs": 1096441666,
+              "perl": 900334341,
+              "php": 2899869675
+            },
+            {
+              "python3": 653390962,
+              "ruby": 1690877545,
+              "nodejs": 1111815724,
+              "perl": 933541567,
+              "php": 3024278176
+            }
+          ]
+        }
+      },
+      "integer_loop_sum_ratios": [
+        0.991958005840008,
+        1.0207213323927766,
+        1.068717366927152
+      ]
+    },
+    "125155_179400": {
+      "bpf_stats": true,
+      "samples": 3,
+      "workload_seconds": 180.0,
+      "phases": {
+        "baseline": {
+          "measured_programs": 13,
+          "installed_bytes": 167504,
+          "programs": {
+            "perf_unwind_php": {
+              "bytes": 14983,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_pyt": {
+              "bytes": 19605,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_rub": {
+              "bytes": 17840,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_v8": {
+              "bytes": 20215,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_dot": {
+              "bytes": 22797,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_go_labels": {
+              "bytes": 1572,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "tracepoint__sch": {
+              "bytes": 792,
+              "calls": 92,
+              "time_ns": 205905
+            },
+            "native_tracer_e": {
+              "bytes": 3815,
+              "calls": 418587618,
+              "time_ns": 1334958245942
+            },
+            "custom__generic": {
+              "bytes": 3679,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_sto": {
+              "bytes": 3650,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_nat": {
+              "bytes": 21868,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_hot": {
+              "bytes": 18424,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_per": {
+              "bytes": 18264,
+              "calls": 0,
+              "time_ns": 0
+            }
+          },
+          "total_calls": 418587710,
+          "total_ns": 1334958451847,
+          "ns_per_call": 3189.196481298985,
+          "integer_loop_operations_by_language": [
+            {
+              "python3": 794071836,
+              "ruby": 1974877380,
+              "nodejs": 371114210,
+              "perl": 981863602,
+              "php": 3366817540
+            },
+            {
+              "python3": 735275385,
+              "ruby": 1926785631,
+              "nodejs": 366992421,
+              "perl": 996385365,
+              "php": 3420208576
+            },
+            {
+              "python3": 756680340,
+              "ruby": 2027486504,
+              "nodejs": 436751433,
+              "perl": 1045513625,
+              "php": 3174601460
+            }
+          ]
+        },
+        "post_rejit": {
+          "measured_programs": 13,
+          "installed_bytes": 330814,
+          "programs": {
+            "perf_unwind_sto": {
+              "bytes": 10955,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_nat": {
+              "bytes": 30252,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_hot": {
+              "bytes": 41278,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_per": {
+              "bytes": 43063,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_php": {
+              "bytes": 39420,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_pyt": {
+              "bytes": 23143,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_rub": {
+              "bytes": 32966,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_v8": {
+              "bytes": 39988,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_dot": {
+              "bytes": 39584,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_go_labels": {
+              "bytes": 6141,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "tracepoint__sch": {
+              "bytes": 4290,
+              "calls": 103,
+              "time_ns": 309663
+            },
+            "native_tracer_e": {
+              "bytes": 10477,
+              "calls": 394567298,
+              "time_ns": 1409371237723
+            },
+            "custom__generic": {
+              "bytes": 9257,
+              "calls": 0,
+              "time_ns": 0
+            }
+          },
+          "total_calls": 394567401,
+          "total_ns": 1409371547386,
+          "ns_per_call": 3571.941178653023,
+          "integer_loop_operations_by_language": [
+            {
+              "python3": 668570972,
+              "ruby": 1648395235,
+              "nodejs": 614236458,
+              "perl": 914783577,
+              "php": 2882609482
+            },
+            {
+              "python3": 665720893,
+              "ruby": 1631137220,
+              "nodejs": 1075506385,
+              "perl": 920906111,
+              "php": 2906203322
+            },
+            {
+              "python3": 642791533,
+              "ruby": 1575343279,
+              "nodejs": 1015919833,
+              "perl": 920609250,
+              "php": 2885634885
+            }
+          ]
+        }
+      },
+      "integer_loop_sum_ratios": [
+        0.8984944890164666,
+        0.9669372675736189,
+        0.946145305026251
+      ]
+    },
+    "163206_529710": {
+      "bpf_stats": true,
+      "samples": 1,
+      "workload_seconds": 10.0,
+      "phases": {
+        "baseline": {
+          "measured_programs": 13,
+          "installed_bytes": 167504,
+          "programs": {
+            "perf_unwind_php": {
+              "bytes": 14983,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_pyt": {
+              "bytes": 19605,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_rub": {
+              "bytes": 17840,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_v8": {
+              "bytes": 20215,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_dot": {
+              "bytes": 22797,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_go_labels": {
+              "bytes": 1572,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "tracepoint__sch": {
+              "bytes": 792,
+              "calls": 37,
+              "time_ns": 76404
+            },
+            "native_tracer_e": {
+              "bytes": 3815,
+              "calls": 7139135,
+              "time_ns": 25520629072
+            },
+            "custom__generic": {
+              "bytes": 3679,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_sto": {
+              "bytes": 3650,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_nat": {
+              "bytes": 21868,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_hot": {
+              "bytes": 18424,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_per": {
+              "bytes": 18264,
+              "calls": 0,
+              "time_ns": 0
+            }
+          },
+          "total_calls": 7139172,
+          "total_ns": 25520705476,
+          "ns_per_call": 3574.743048073362,
+          "integer_loop_operations_by_language": [
+            {
+              "python3": 35608101,
+              "ruby": 103915467,
+              "nodejs": 22251386,
+              "perl": 46548911,
+              "php": 148152241
+            }
+          ]
+        },
+        "post_rejit": {
+          "measured_programs": 13,
+          "installed_bytes": 303930,
+          "programs": {
+            "perf_unwind_sto": {
+              "bytes": 8511,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_nat": {
+              "bytes": 30252,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_hot": {
+              "bytes": 41278,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_per": {
+              "bytes": 40619,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_php": {
+              "bytes": 36976,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_pyt": {
+              "bytes": 20699,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_rub": {
+              "bytes": 30522,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_v8": {
+              "bytes": 37544,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_dot": {
+              "bytes": 37140,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_go_labels": {
+              "bytes": 3697,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "tracepoint__sch": {
+              "bytes": 1846,
+              "calls": 30,
+              "time_ns": 101615
+            },
+            "native_tracer_e": {
+              "bytes": 8033,
+              "calls": 7447502,
+              "time_ns": 27900955639
+            },
+            "custom__generic": {
+              "bytes": 6813,
+              "calls": 0,
+              "time_ns": 0
+            }
+          },
+          "total_calls": 7447532,
+          "total_ns": 27901057254,
+          "ns_per_call": 3746.349428777211,
+          "integer_loop_operations_by_language": [
+            {
+              "python3": 37086623,
+              "ruby": 89038698,
+              "nodejs": 69218154,
+              "perl": 43129729,
+              "php": 139841782
+            }
+          ]
+        }
+      },
+      "integer_loop_sum_ratios": [
+        1.0612632365323245
+      ]
+    },
+    "172620_968192": {
+      "bpf_stats": false,
+      "samples": 3,
+      "workload_seconds": 180.0,
+      "phases": {
+        "baseline": {
+          "measured_programs": 13,
+          "installed_bytes": 167504,
+          "programs": {
+            "perf_unwind_php": {
+              "bytes": 14983,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_pyt": {
+              "bytes": 19605,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_rub": {
+              "bytes": 17840,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_v8": {
+              "bytes": 20215,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_dot": {
+              "bytes": 22797,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_go_labels": {
+              "bytes": 1572,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "tracepoint__sch": {
+              "bytes": 792,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "native_tracer_e": {
+              "bytes": 3815,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "custom__generic": {
+              "bytes": 3679,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_sto": {
+              "bytes": 3650,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_nat": {
+              "bytes": 21868,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_hot": {
+              "bytes": 18424,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_per": {
+              "bytes": 18264,
+              "calls": 0,
+              "time_ns": 0
+            }
+          },
+          "total_calls": 0,
+          "total_ns": 0,
+          "ns_per_call": null,
+          "integer_loop_operations_by_language": [
+            {
+              "python3": 745235944,
+              "ruby": 1927211515,
+              "nodejs": 409039440,
+              "perl": 994043655,
+              "php": 3221547235
+            },
+            {
+              "python3": 774403231,
+              "ruby": 1890892935,
+              "nodejs": 294536911,
+              "perl": 976288517,
+              "php": 3144980180
+            },
+            {
+              "python3": 711261461,
+              "ruby": 1857932557,
+              "nodejs": 391000790,
+              "perl": 951286758,
+              "php": 3085519149
+            }
+          ]
+        },
+        "post_rejit": {
+          "measured_programs": 13,
+          "installed_bytes": 303930,
+          "programs": {
+            "perf_unwind_sto": {
+              "bytes": 8511,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_nat": {
+              "bytes": 30252,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_hot": {
+              "bytes": 41278,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_per": {
+              "bytes": 40619,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_php": {
+              "bytes": 36976,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_pyt": {
+              "bytes": 20699,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_rub": {
+              "bytes": 30522,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_v8": {
+              "bytes": 37544,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_unwind_dot": {
+              "bytes": 37140,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "perf_go_labels": {
+              "bytes": 3697,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "tracepoint__sch": {
+              "bytes": 1846,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "native_tracer_e": {
+              "bytes": 8033,
+              "calls": 0,
+              "time_ns": 0
+            },
+            "custom__generic": {
+              "bytes": 6813,
+              "calls": 0,
+              "time_ns": 0
+            }
+          },
+          "total_calls": 0,
+          "total_ns": 0,
+          "ns_per_call": null,
+          "integer_loop_operations_by_language": [
+            {
+              "python3": 524070891,
+              "ruby": 1313090026,
+              "nodejs": 622708032,
+              "perl": 751529044,
+              "php": 2406229547
+            },
+            {
+              "python3": 586897803,
+              "ruby": 1468529727,
+              "nodejs": 949412096,
+              "perl": 863534227,
+              "php": 2624011000
+            },
+            {
+              "python3": 521744156,
+              "ruby": 1340292646,
+              "nodejs": 721068924,
+              "perl": 757765631,
+              "php": 2468490939
+            }
+          ]
+        }
+      },
+      "integer_loop_sum_ratios": [
+        0.7698461908228946,
+        0.9168608304485019,
+        0.8302646423268231
+      ]
+    }
+  },
+  "stage_comparisons": [
+    {
+      "symbol": "native_tracer_entry",
+      "retained": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/130/physical.native.o",
+      "command": [
+        "/workspaces/repository/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto",
+        "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+        "--symbol",
+        "native_tracer_entry",
+        "--prog-type",
+        "7",
+        "--kernel-btf",
+        "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+        "-o",
+        "/var/tmp/kprog-tmp/perf/otel-regression/native_tracer_entry.native.o"
+      ],
+      "retained_bytes": 6434,
+      "current_bytes": 6434,
+      "instruction_bytes_equal": true,
+      "relocation_identities_equal": true,
+      "relocation_count": 44
+    },
+    {
+      "symbol": "perf_unwind_native",
+      "retained": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/134/physical.native.o",
+      "command": [
+        "/workspaces/repository/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto",
+        "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+        "--symbol",
+        "perf_unwind_native",
+        "--prog-type",
+        "7",
+        "--kernel-btf",
+        "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+        "-o",
+        "/var/tmp/kprog-tmp/perf/otel-regression/perf_unwind_native.native.o"
+      ],
+      "retained_bytes": 27689,
+      "current_bytes": 27689,
+      "instruction_bytes_equal": true,
+      "relocation_identities_equal": true,
+      "relocation_count": 171
+    },
+    {
+      "symbol": "perf_unwind_v8",
+      "retained": "/workspaces/kprog-raw/perf/20261116-native-corpus-before-publication/140/physical.native.o",
+      "command": [
+        "/workspaces/repository/vendor/build/native-bpf/x86/stage/kprog-perf-context-lto",
+        "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+        "--symbol",
+        "perf_unwind_v8",
+        "--prog-type",
+        "7",
+        "--kernel-btf",
+        "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+        "-o",
+        "/var/tmp/kprog-tmp/perf/otel-regression/perf_unwind_v8.native.o"
+      ],
+      "retained_bytes": 34346,
+      "current_bytes": 34346,
+      "instruction_bytes_equal": true,
+      "relocation_identities_equal": true,
+      "relocation_count": 225
+    }
+  ],
+  "installed_size_deltas": {
+    "perf_unwind_sto": -2444,
+    "perf_unwind_nat": 0,
+    "perf_unwind_hot": 0,
+    "perf_unwind_per": -2444,
+    "perf_unwind_php": -2444,
+    "perf_unwind_pyt": -2444,
+    "perf_unwind_rub": -2444,
+    "perf_unwind_v8": -2444,
+    "perf_unwind_dot": -2444,
+    "perf_go_labels": -2444,
+    "tracepoint__sch": -2444,
+    "native_tracer_e": -2444,
+    "custom__generic": -2444
+  },
+  "cost_split": {
+    "current_full_round_profile": "pending diagnostic profile on CPUs 20-23",
+    "retained_old_stats1_ns_per_call": {
+      "baseline": 3189.196481298985,
+      "post_rejit": 3571.941178653023
+    },
+    "body_helpers_maps": "program counters do not separate these; no split inferred from byte size"
+  }
+}

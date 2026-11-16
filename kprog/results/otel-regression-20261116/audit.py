@@ -99,14 +99,11 @@ for name in ['native_tracer_entry', 'perf_unwind_native', 'perf_unwind_v8']:
 
 report['cost_split'] = {
     'current_full_round_profile': 'pending diagnostic profile on CPUs 20-23',
-    'retained_old_stats1_ns_per_call': report['runs']['125155_179400']['phases'],
+    'retained_old_stats1_ns_per_call': {
+        phase: report['runs']['125155_179400']['phases'][phase]['ns_per_call']
+        for phase in ['baseline', 'post_rejit']},
     'body_helpers_maps': 'program counters do not separate these; no split inferred from byte size',
 }
-# The compact report keeps counters once; the phase dictionaries above are the
-# raw-derived source for totals, not a second copy in the cost-split descriptor.
-report['cost_split']['retained_old_stats1_ns_per_call'] = {
-    phase: report['runs']['125155_179400']['phases'][phase]['ns_per_call']
-    for phase in ['baseline', 'post_rejit']}
 (RAW / 'audit.json').write_text(json.dumps(report, indent=2) + '\n')
 print(json.dumps({'stage': report['stage_comparisons'],
                   'size_deltas': report['installed_size_deltas']}, indent=2))
