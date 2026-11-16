@@ -31,3 +31,8 @@ rotate-after-pair:
 .PHONY: rerun-after-pair
 rerun-after-pair:
 	prlimit --as=103079215104 -- bash -eu -o pipefail -c 'tail --pid="$(PAIR_PID)" -f /dev/null; cat "$(PAIR_OUTPUT)/current-rebuilt"; exec env KPROG_KATRAN_REFERENCE_OUTPUT="$(RERUN_OUTPUT)" make -r -f $(ROOT)/kprog/test/katran-accounting.mk reference-comparison'
+
+BCC_RUN ?= /workspaces/repository/corpus/results/x86_kvm_corpus_20261116_105138_635552
+.PHONY: bcc-series
+bcc-series:
+	python3 $(ROOT)/kprog/results/perf_20261113/bcc_series_analysis.py --run $(BCC_RUN) --output $(OUTPUT)

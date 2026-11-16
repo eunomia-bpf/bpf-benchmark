@@ -23,6 +23,9 @@ int main(int argc, char **argv)
         if (call5(a,b,i,0x123456789abcdefULL,i*17) != a+b+i+0x123456789abcdefULL+i*17) return 1;
         uint64_t value=a;
         if (load(&value,b) != a+b || stack(a,b) != a+b) return 2;
+        uint64_t unaligned;
+        __builtin_memcpy(&unaligned,data+1,sizeof(unaligned));
+        if (load((const uint64_t *)(data+1),b) != unaligned+b) return 7;
         uint64_t sum=0, length=i%33;
         for (unsigned j=0;j<length;++j) sum+=data[j];
         if (bytes(data,length) != sum) return 3;

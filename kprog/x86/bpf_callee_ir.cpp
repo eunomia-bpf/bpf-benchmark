@@ -2,6 +2,7 @@
 #include "llvmbpf.hpp"
 #include "llvm_jit_context.hpp"
 #include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/InstIterator.h"
 #include "llvm/IR/Verifier.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/MemoryBuffer.h"
@@ -49,6 +50,13 @@ int main(int argc, char **argv)
                     store->setOperand(0, callee->getArg(reg - 1));
         }
         entry->eraseFromParent();
+        // Ordinary BPF loads/stores can be unaligned on this target. Their
+        // instruction width does not promise an equally aligned address.
+        for (auto &function : m)
+            for (auto &instruction : instructions(function)) {
+                if (auto *load = dyn_cast<LoadInst>(&instruction)) load->setAlignment(Align(1));
+                if (auto *store = dyn_cast<StoreInst>(&instruction)) store->setAlignment(Align(1));
+            }
         invalid = verifyModule(m, &errs());
         if (invalid) return;
         std::error_code error;
