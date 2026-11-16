@@ -138,8 +138,16 @@ BCC when this was written.
 - **Cilium** — 1 291 758 / 1 294 084 / 1 255 396 against 1 636 270 / 1 613 004
   / 1 629 943; zero `native-loader failed` lines, so `tail_ipv4_policy`'s
   register-indirect helper call is closed too. This is the one app still below
-  its 05-29 floor (1.262x against 1.319x); at stats 0 no per-call number
-  exists to say whether the gap is BPF time or workload noise.
+  its 05-29 floor (1.262x against 1.319x), and the gap is the **eBPF arm
+  getting faster**, not native code getting slower: against the 11-10 run of
+  the same image family, today's baseline arm is 1 291 758 against 1 217 640
+  units (+6.1 %) while today's native arm is 1 629 943 against 1 605 561
+  (+1.5 %). The native arm is ahead of the 11-10 native arm in absolute terms,
+  and the ratio fell because the denominator grew faster. The native objects
+  are 5 of 7 byte-identical to 05-29 (`compare_code.py`: 275 813 code bytes
+  then, 276 063 now; only `bpf_xdp` grew, by 250 B), so the remaining
+  difference is not the compiled code. The stats-on run is what turns this
+  into a per-call statement rather than a ratio statement.
 - **Katran** — 2 836 395 / 2 834 431 / 2 751 056 against 2 815 437 / 2 840 654
   / 2 916 733, one replacement (`balancer_ingres`), zero loader failures.
   pktgen reports 80-117 M errors per sample in both arms, so the number is pps
