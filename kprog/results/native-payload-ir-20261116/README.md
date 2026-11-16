@@ -74,8 +74,8 @@ OTel's `source_bpf_object` survived: all 26 manifest objects name
 
 `vendor/build/native-bpf/x86/stage` is a gitignored build output; `payload-md5.txt`
 records what the guests would read (111 native objects + the tool). The tool is
-2 757 056 bytes, `install -m 0755`, so it lands executable at the root of the
-payload directory the frozen Dockerfile copies whole.
+52 757 056 bytes (LLVM linked statically), mode 0755, so it lands executable at
+the root of the payload directory the frozen Dockerfile copies whole.
 
 Fifteen stale OTel unit objects from 02:34 sat in the stage next to the
 aggregate. No manifest referenced them (`native_object` is
