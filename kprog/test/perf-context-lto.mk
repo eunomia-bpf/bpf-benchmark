@@ -11,12 +11,16 @@ CC := clang-18
 FLAGS := -O3 -g -fPIC -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables
 
 .PHONY: compiler check replay
-IR_LINKER := $(BUILD)/link-embedded-ir
+IR_LINKER := /workspaces/.agent-state/kprog-ck/verified-compiler/link-embedded-ir
 .PHONY: ir-linker
 ir-linker: $(IR_LINKER)
 $(IR_LINKER): $(ROOT)/kprog/x86/link_embedded_ir.cpp
-	install -d $(BUILD)
+	install -d $(dir $(IR_LINKER))
 	taskset -c $(CPUS) prlimit --as=8589934592 -- $(CXX) $$(llvm-config-18 --cxxflags) -std=c++17 -Wall -Wextra -Wno-unused-parameter $< -o $@ $$(llvm-config-18 --link-static --ldflags --libs core irreader linker bitwriter support --system-libs)
+
+.PHONY: relocate-ir-linker
+relocate-ir-linker:
+	flock -x /workspaces/.agent-state/kprog-lanes/locks/image mv $(BUILD)/link-embedded-ir $(IR_LINKER)
 
 .PHONY: ir-link-check
 ir-link-check: ir-linker

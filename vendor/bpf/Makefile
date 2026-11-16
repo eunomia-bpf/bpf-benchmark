@@ -22,7 +22,7 @@ BPFTOOL ?= $(VENDOR)/build/x86/bpftool/bin/bpftool
 # header generated from the host silently compiles BCC against a different kernel.
 VMLINUX_BTF ?= /workspaces/.agent-state/kprog-ck/build-x86/vmlinux
 NATIVE_LINK ?= $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link
-NATIVE_IR_LINK ?= /var/tmp/kprog-tmp/perf/perf-context-lto/link-embedded-ir
+NATIVE_IR_LINK ?= /workspaces/.agent-state/kprog-ck/verified-compiler/link-embedded-ir
 
 OUT := $(BUILD)/$(ARCH)/$(KERNEL_RELEASE)
 VMLINUX_H := targets/$(ARCH)/$(KERNEL_RELEASE)/vmlinux.h

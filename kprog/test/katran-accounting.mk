@@ -37,3 +37,7 @@ BCC_RUN ?= /workspaces/repository/corpus/results/x86_kvm_corpus_20261116_105138_
 .PHONY: bcc-series
 bcc-series:
 	python3 $(ROOT)/kprog/results/perf_20261113/bcc_series_analysis.py --run $(BCC_RUN) --output $(OUTPUT) $(foreach run,$(BCC_REFERENCES),--reference $(run))
+
+.PHONY: lto-piece-audit
+lto-piece-audit:
+	python3 $(ROOT)/kprog/results/perf_20261113/lto_piece_audit.py --output $(OUTPUT)
