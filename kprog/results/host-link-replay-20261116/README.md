@@ -29,3 +29,12 @@ P-stage compiler, not a verified-compiler binary or the retired /var/tmp tool.
 Entry proof extraction follows native_loader_entry_data.hpp:33-43, without
 the old host-only --preserve-entry-abi argument. Missing runtime function,
 immutable-data or map-template facts remain explicit coverage limits.
+
+`dry-run` lists the 475 retained candidate entries and tools. `proofs` extracts
+all current-P entries with two workers, including the eleven recorded OTel
+PERF_EVENT conversions with the current P-stage compiler. It uses the runtime
+entry ABI contract. Every command, output and failure is retained separately.
+No guest/image/base rebuild is part of that target. Its controller inherits a
+16 GiB address-space cap and runs on 16,19. Runtime immutable/map-template and
+generated-function facts are not supplied when absent from the retained input;
+those limits remain distinct from entry extraction and later kernel emission.
