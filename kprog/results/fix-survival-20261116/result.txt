@@ -1,0 +1,160 @@
+fix-like commits since 05-29 in these paths: 343; with under 60% of their code still in HEAD: 159
+11-15 3f9021e37 kept 5/13  | perf: make unified-flag map binding the normal linker path
+11-14 b6ba77538 kept 0/8  | Verify spill-group service selection and preserve one compiler test output
+11-14 d2dddd9a9 kept 0/15 files gone: vendor/bpf/native_specialize_objects.py | fix(bpf): specialize BCC tools and keep objects a capture has no .rodata for
+11-14 8394230ed kept 0/18 files gone: vendor/bpf/native_specialize_maps.py | Map sinking: resolve real entry counts, percpu base, member keys
+11-13 f9f4f6140 kept 0/3  | Katran: restage switch-on objects from the repaired tree, pin my own tools
+11-13 7d0147e99 kept 0/18  | Wire core-ir-resolve into the BCC switch; CO-RE now resolves to the shipped offsets
+11-12 4253a0ab3 kept 0/126 files gone: vendor/bpf/native_specialize.py, vendor/bpf/native_specialize_objects.py, vendor/bpf/native_specialize_prepares.py | Specialize Cilium's configuration, whose volatile const globals clang keeps
+11-12 0f33d2a6a kept 0/15 files gone: vendor/bpf/native_specialize_maps.py | Keep percpu arrays out of the C lookup bodies: their base is a run-time address
+11-12 3313da89d kept 0/46 files gone: vendor/bpf/native_specialize.py, vendor/bpf/native_specialize_objects.py | Keep each original declaration so the .rodata layout decides the constants
+11-12 dc9372771 kept 0/37 files gone: vendor/bpf/native_specialize.py, vendor/bpf/native_specialize_objects.py, vendor/bpf/native_specialize_prepares.py | Join captured .rodata images to objects by map name and keep array types
+11-12 b95957d5a kept 0/19 files gone: vendor/bpf/native_specialize.py | Replace each .rodata declaration in place, keeping the loaded layout
+11-10 3676dab5f kept 0/3  | Bind each raw proof map operand to its own original map identity first
+11-10 65c73b03c kept 0/3 files gone: vendor/bpf/native_compat.h | Restore helper-call native inputs for the verified application track
+11-09 f05af452e kept 0/20  | Resolve bounded code targets while planning x86 tail-call entry frames
+11-09 fdc68ecea kept 7/19  | Preserve ARM callee registers in the stock native JIT frame
+11-09 3df4af0f5 kept 0/11 files gone: vendor/bpf/native_division.cpp | Resolve native map helper IDs through tied asm operands
+11-09 a3a4470c3 kept 3/18  | Preserve stack metadata coordinates through memory ALU writes
+11-09 9738f6a5a kept 0/21 files gone: vendor/bpf/native_compat.h | Compile complete Tracee P with protected fixed-width probe reads
+11-09 5d8c38d3a kept 13/47  | Preserve x86 full-word stack values across read-only helpers
+11-09 165ac4100 kept 0/5  | Preserve the compiler thunk register domain in relocation decoding
+11-09 731a91ee6 kept 6/120 files gone: runner/libs/cilium_native_build.py | Resolve native external thunks under kernel branch policy
+11-09 64ca0ff0a kept 9/57  | Resolve native x86 tail frames from the actual JIT stack
+11-09 da42f496c kept 16/29  | Preserve native stack memory effects and entry frame coordinates
+11-09 53dc94561 kept 2/4  | Preserve caller stack across checksum and map helpers
+11-09 d717641ae kept 0/6  | Model x86 scalar copy faults and precise read recovery routes
+11-09 48eb036f5 kept 0/12  | Preserve the native invocation frame at both ISA exits
+11-09 0ee16fa8f kept 17/46  | Model stock x86 read-fault recovery across memory operations
+11-08 dc120a8eb kept 18/36  | Resolve submitted native helper calls through the existing ABI
+11-08 d920fbca5 kept 0/4  | Preserve Tracee size registers through the existing clamps
+11-08 a9abb84e5 kept 0/7  | Keep the original Tetragon path length bound in the helper argument
+11-08 252434ea0 kept 3/11  | Carry Tracee string-buffer offsets through existing checks in paired source
+11-08 a5a580340 kept 0/14 files gone: vendor/bpf/native_division.cpp | Lower fixed vector integer division through the shared scalar semantics
+11-08 55c50b34f kept 9/68  | kprog: preserve x86 PLT32 tail-jump function chains
+11-08 be91b11ef kept 0/8  | Resolve strtol and context-specific MTU native helper targets
+11-08 21e8040ed kept 0/16  | binding: resolve pruned map helper identities through owned resources
+11-08 6e6905907 kept 6/16  | x86: preserve signed stack loads and normalize loaded RSP values
+11-08 572c90db4 kept 0/4  | Preserve resolved vmlinux kfunc calls in bound proof transport
+11-08 8cf05d44d kept 18/33  | Resolve trusted proof kfunc calls against vmlinux BTF
+11-07 c36ec6a23 kept 0/7  | Keep verified Tracee startup active through common generation
+11-07 5ed0c5831 kept 7/42  | Bind native map capabilities through the kernel-owned request
+11-07 ea0afc455 kept 5/87  | Preserve readonly label identity across x86 native link modes
+11-07 697bea0ea kept 0/3  | Bind trusted x86 inline memcpy targets to verified memory operations
+11-07 815df5cb2 kept 8/15  | Carry finite native helper stack origins through affine addresses
+11-07 070559db8 kept 1/40  | Bind full update map aliases before neutralizing native templates
+11-07 bfbb60d1a kept 4/54  | Resolve x86 update calls by full source map identity
+11-07 86e0927e9 kept 0/7  | Bind trusted x86 memset calls to their verified store expansion
+11-07 18aef1f0c kept 26/46  | Preserve actual XDP context identity in x86 native proofs
+11-07 0c99e5047 kept 0/4  | Fix unbound native ABI marker reads before R0 initialization
+11-07 e18af21bb kept 1/5  | Preserve ARM return targets in entry-ABI proof linking
+11-07 3bba71795 kept 0/4  | fix(kprog): report native validation failure stages and retain BCC replay
+11-07 3926d37a8 kept 0/3  | fix(kprog): diagnose unmatched native proof relocation bindings
+11-07 d75153947 kept 9/18  | fix(kprog): preserve byte accesses for unaligned x86 private stack operations
+11-07 c52568758 kept 1/15  | fix(corpus): await trusted native loads and retain full BCC request coverage
+11-07 5d545ea7b kept 10/74 files gone: kprog/libnativeloader/src/native_source_map_binding.hpp | Bind trusted proof externs to native map aliases and relative offsets
+11-07 a4d37a890 kept 0/33  | Preserve dynamic map identity when lowering x86 native helper calls
+11-07 a1d42d745 kept 7/14  | Preserve absolute and 32-bit LEA address semantics through binding
+11-07 9f24ca076 kept 3/105 files gone: kinsn/module/include/native_lab_checked.h, kinsn/module/include/native_lab_checked_wire.h, kprog/libnativeloader/src/nat | Bind actual ARM JIT native entries to per-load simple translation-validation certificates
+11-07 cfa82fc7f kept 0/31 files gone: kprog/libnativeloader/src/native_data_layout.hpp | Fix Tracee readonly identity and tail-call stack allocation
+11-07 2a65cd9b9 kept 16/57  | Preserve finite stack aliases and opaque bytes at control-flow joins
+11-07 f197f00a9 kept 2/209 files gone: kinsn/module/include/native_lab_checked.h, kinsn/module/include/native_lab_checked_wire.h, kprog/libnativeloader/src/nat | Recover verifier proof dependencies removed by repeated stale index recording
+11-07 a7c4192c2 kept 2/209 files gone: kinsn/module/include/native_lab_checked.h, kinsn/module/include/native_lab_checked_wire.h, kprog/libnativeloader/src/nat | Recover verifier artifact capture and platform proofs removed by stale recording index
+11-07 2ebc80b25 kept 2/134 files gone: kinsn/module/include/native_lab_checked.h, kinsn/module/include/native_lab_checked_wire.h | Recover published verifier capture and block certificates lost to stale index
+11-07 dc0e3dbe2 kept 3/6 files gone: runner/libs/bpf_evidence.py | Build cilium's native artifacts and fix the 16-byte name check
+11-06 9487f632f kept 2/134 files gone: kinsn/module/include/native_lab_checked.h, kinsn/module/include/native_lab_checked_wire.h | Capture exact expanded verifier proofs and resolved binding environment
+11-06 75efda4b9 kept 25/44  | Restore published lane artifacts removed by stale measurement index
+11-06 e18350d26 kept 27/50  | Preserve original packet context across native helper calls
+11-06 aabec1349 kept 5/11  | Bind merged map updates to the public helper identity
+11-06 2cac3ca29 kept 12/23  | Preserve source helper frames and literal context loads
+11-06 5a5575d9f kept 50/162 files gone: kprog/libnativeloader/src/native_environment_binding.hpp | Preserve published validation results across concurrent measurement commit
+11-06 781ce6e93 kept 38/134 files gone: kprog/libnativeloader/src/native_environment_binding.hpp | Bind fresh exclusive-store proof choices to exact native sites
+11-06 23f3c6931 kept 20/42  | Refine every x86 condition and preserve defined parity uses
+11-06 d25b4d7f4 kept 88/315 files gone: kinsn/module/include/native_lab_map_offset.h, kprog/libnativeloader/src/native_rodata_binding.hpp, kprog/libnativeloader | Bind imported map symbols to original source sites and compiled proof relocations
+11-06 01e636c94 kept 11/106  | Bind every ARM libbpf startup probe and preserve helper tail branches
+11-06 edfbc0348 kept 1/43  | Preserve exact Unicode identities in bound artifact metadata
+11-06 aa93f0db4 kept 3/51  | Preserve ARM entry frames and indexed stack adjustments
+11-06 189ec6979 kept 5/29  | Preserve external x86 helper tail jumps through proof and kernel linking
+11-06 14df099f5 kept 9/140  | fix(arm64): lower complete finite helper target sets on the native path
+11-06 ed94164e8 kept 4/28  | Bind anonymous startup proofs and model coarse-clock and function-IP helpers
+11-06 e43eca549 kept 0/3  | Bind runtime-configured proof map value sizes to original FDs
+11-06 b1edd51e3 kept 8/168 files gone: kprog/libnativeloader/src/native_rodata_binding.hpp | Bind private readonly proof maps to exact native object metadata
+11-06 3b19ec714 kept 15/64  | Preserve canonical readonly object identities across native and proof linking
+11-06 991aab4fb kept 0/17 files gone: runner/libs/cilium_native_build.py | fix(cilium): use the AArch64 native backend flags at runtime
+11-06 15b253cb4 kept 0/34  | Bind internal proof maps by canonical BTF data sections
+11-06 7dc38531c kept 0/24  | Preserve AArch64 readonly symbol offsets through native and proof linking
+11-06 6836f7d44 kept 30/207  | Bind native proofs to exact load context and source BTF prototype
+11-06 26325bd48 kept 2/44  | Preserve complete AArch64 proof readonly objects and relocation offsets
+11-06 78f037780 kept 5/123  | Preserve native code targets and capture actual app loads
+11-06 f490af8df kept 8/198  | Preserve finite helper targets through native control flow
+11-06 02a2fa8c3 kept 5/26  | Preserve defined low bits through native arithmetic
+11-06 ac10dbfab kept 7/40  | Preserve native entry and call return-slot provenance
+11-06 f272b2b02 kept 16/137  | Bind frozen proof constants to exact native readonly extents
+11-06 4fe6b3186 kept 0/55 files gone: kprog/libnativeloader/src/native_data_layout.hpp | Bind simulator internal maps to original BTF data layouts
+11-06 4ff0c34ef kept 7/15  | Bind helper pointer literals for finite indirect dispatch
+11-06 a607bc0ae kept 1/6  | Correct double-shift overflow and zero-count register writes
+11-06 6053f43f5 kept 6/29  | Preserve direct native calls to section address zero
+11-06 b8fa3fcfd kept 14/148  | Bind app simulator objects and admit checked helper/map proofs
+11-06 3193e443f kept 6/11  | Fix CMOV effects and add executable x86 reference semantics
+11-06 8b36bf31f kept 2/32  | Fix the kernel-symbol scan dominating native load time
+11-06 543e80b1e kept 5/110  | Bind the complete native chunk group and reject reordered entry paths
+10-09 ed5b78241 kept 0/12 files gone: runner/libs/app_outcomes.py, runner/libs/bpf_evidence.py | Fix Katran veth XDP transmit path
+10-09 1a818671a kept 0/7  | Restore Katran paper packet shape
+10-09 7f70d5ca9 kept 14/324 files gone: kprog/libnativeloader/src/native_data_layout.hpp, runner/libs/app_outcomes.py, runner/libs/bpf_evidence.py | Fix native Cilium data symbol layout
+10-09 2462aa01c kept 0/6  | x86 DIV: generated resolved-width quotient/remainder case-ladder contract
+10-06 a237ee4fc kept 30/79  | Guard x86 division and preserve aliased live operands
+10-06 2af878011 kept 5/35  | Preserve live x86 population count operands and spill effects
+10-06 881f12014 kept 12/54  | Preserve live x86 byte moves and high-lane store effects
+10-06 65ce99f3b kept 3/39  | Preserve live x86 double-shift operands and spill effects
+10-06 52d5d467c kept 34/80  | Preserve x86 byte arithmetic and aliased CL shift operands
+10-06 2c64967d5 kept 23/79  | Preserve live x86 wide ALU operands and memory effects
+10-06 b601727d9 kept 3/65 files gone: kprog/formal/generate_arm64_width_spec.py, kprog/formal/test_arm64_width_effective_host.c | wip: preserve arm64 effective-width contract and simulator changes
+10-06 3a1d2648d kept 4/9  | Correct x86 byte-order width and ARCH expansions
+10-06 b42a07ec5 kept 1/8  | Preserve x86 CMOV32 destinations on false predicates
+10-02 5412c221b kept 1/553 files gone: kprog/formal/generate_x86_bzhi_spec.py, kprog/formal/test_x86_bzhi_host.c | native-sim: machine-check x86 BZHI/BZHI_MEM handler composition (step 0048)
+10-02 163650145 kept 1/390 files gone: kprog/formal/generate_x86_rep_movs_spec.py, kprog/formal/test_x86_rep_movs_host.c | native-sim: x86 REP MOVS block-copy handler contract (step 0046)
+10-01 1be30e8d9 kept 1/555 files gone: kprog/formal/generate_x86_pushpop_spec.py, kprog/formal/test_x86_pushpop_host.c | native-sim: add x86 PUSH/POP stack-step handler contract
+10-01 f74d4ecec kept 1/665 files gone: kprog/formal/generate_x86_movbe_spec.py, kprog/formal/test_x86_movbe_host.c | formal: compose the x86 MOVBE_LOAD / MOVBE_STORE handler
+09-29 3d49d9f06 kept 1/844 files gone: kprog/formal/generate_x86_cmov_spec.py, kprog/formal/test_x86_cmov_host.c | formal: compose the x86 CMOV / CMOV_MEM handler
+09-29 33acdf189 kept 1/537 files gone: kprog/formal/generate_x86_setcc_mem_spec.py, kprog/formal/test_x86_setcc_mem_host.c | formal: compose the x86 SETCC_MEM handler
+09-28 106e9b69b kept 1/504 files gone: kprog/formal/generate_x86_setcc_spec.py, kprog/formal/test_x86_setcc_host.c | formal: compose the x86 SETCC handler
+09-28 ff267c8b5 kept 1/494 files gone: kprog/formal/generate_x86_store_spec.py, kprog/formal/test_x86_store_host.c | formal: compose the shared x86 MOV_STORE handler
+09-28 5d7b435c2 kept 1/593 files gone: kprog/formal/generate_x86_mov_load_spec.py, kprog/formal/test_x86_mov_load_host.c | formal: compose the shared x86 MOV_LOAD handler
+09-28 7a43a5b27 kept 1/290 files gone: kprog/formal/generate_x86_mem_dispatch_spec.py, kprog/formal/test_x86_mem_read_dispatch_host.c | formal: compose the shared x86 memory read-dispatch handler
+09-27 e861cf838 kept 1/143 files gone: kprog/formal/test_x86_movx_reg_host.c | formal: compose width-converting register MOV (MOVZX/MOVSX/cdqe) handler
+09-27 21f6aae0f kept 1/174 files gone: kprog/formal/test_x86_mov_handler_host.c | native-sim/formal: prove x86 register-writing MOV handlers
+09-27 601c76544 kept 1/284 files gone: kprog/formal/generate_x86_mem_offset_spec.py, kprog/formal/test_x86_lea_handler_host.c | formal: prove x86 effective-address offset and LEA handler
+09-27 011e3a80e kept 1/135 files gone: kprog/formal/test_x86_imul_reg_imm_handler_host.c | Add x86 register-source IMUL-immediate handler composition proof
+09-27 bd518d708 kept 1/136 files gone: kprog/formal/test_x86_mulx_handler_host.c | native-sim/formal: compose the x86 two-destination MULX handler
+09-27 947efed1a kept 1/146 files gone: kprog/formal/test_x86_mem_compare_handler_host.c | Prove x86 memory-source compare handlers
+09-27 5c5f9515a kept 1/151 files gone: kprog/formal/test_x86_mem_imul_handler_host.c | Prove x86 memory-source multiply handlers
+09-27 40ca51e79 kept 1/138 files gone: kprog/formal/test_x86_mem_bit_handler_host.c | Prove x86 memory-source bit-test/zero-high-bits handlers
+09-26 5b20bc853 kept 1/105 files gone: kprog/formal/test_x86_mem_shift_handler_host.c | Prove x86 memory-source shift/rotate handlers
+09-25 3fdf1f94b kept 1/70 files gone: kprog/formal/test_x86_mem_logic_handler_host.c | Prove x86 memory-destination logic handlers
+09-25 bf238ad04 kept 1/112 files gone: kprog/formal/test_x86_mem_unary_handler_host.c | Prove x86 memory-unary handlers
+09-25 25d0bab04 kept 1/104 files gone: kprog/formal/test_x86_mem_store_alu_handler_host.c | Prove x86 memory-destination arithmetic handlers
+09-25 65faf8d2c kept 3/170 files gone: kprog/formal/generate_x86_sbb_flags_spec.py, kprog/formal/generate_x86_sbb_result_spec.py, kprog/formal/test_x86_mem_alu | Prove x86 memory-source arithmetic handlers
+09-24 6ad88ddbd kept 35/167 files gone: kprog/formal/generate_arm64_logic_flag_handler_spec.py, kprog/formal/test_arm64_logic_flag_handler_host.c | native-sim: prove AArch64 logical flag handlers
+09-24 ccdaa3510 kept 35/209 files gone: kprog/formal/generate_arm64_flag_handler_spec.py, kprog/formal/test_arm64_flag_handler_host.c | native-sim: prove AArch64 flag handler composition
+09-24 17b1ddce4 kept 4/79 files gone: kprog/formal/generate_arm64_alu_handler_spec.py, kprog/formal/test_arm64_alu_handler_host.c | native-sim: prove AArch64 ALU handler refinement
+09-18 8d27358ba kept 7/167 files gone: kprog/formal/generate_x86_bitops_spec.py, kprog/formal/test_x86_bitops_host.c | x86-sim: add proven BT/BZHI contract and fix marginal POPCNT proof budget
+09-13 3c304482a kept 3/164 files gone: kprog/formal/generate_x86_imul_flags_spec.py, kprog/formal/test_imul_flags_host.c | Compose x86 IMUL immediate and register-register handler proofs
+09-11 074c22acf kept 10/38 files gone: kprog/formal/generate_x86_alu_decode_spec.py | Classify carry-sensitive ALU handlers as SBB/ADC
+09-10 bc23832e3 kept 2/4  | Bind x86 high-byte TEST handler
+09-10 b3b673cf9 kept 12/32  | Bind x86 high-byte CMP handler
+09-10 fad5d3921 kept 41/127 files gone: kprog/formal/generate_x86_reg_lane_aux_spec.py | Bind x86 high-byte MOV operands
+09-10 99d5443bf kept 5/113 files gone: kprog/formal/generate_x86_shift_flags_spec.py | Fix and prove x86 shift flags
+09-10 880ef1111 kept 0/96 files gone: kprog/formal/generate_x86_shift_result_spec.py | Fix and prove x86 shift results
+09-10 feb4e0735 kept 1/83 files gone: kprog/formal/generate_x86_alu_decode_spec.py | Bind x86 ALU decode codes across artifacts
+09-10 bd6b34428 kept 6/15 files gone: kprog/formal/generate_x86_width_spec.py | Bind x86 sign masks to width semantics
+09-10 86d81485c kept 47/114 files gone: kprog/formal/generate_x86_adc_spec.py | Prove and fix x86 ADC semantics
+09-09 ab3d9bfa6 kept 57/351  | Bind kprog proofs to native payload generations
+06-22 7e75883e6 kept 8/22  | Preserve native proof entry ABI
+06-22 608c43ae3 kept 8/19  | Fix native link-plan map name identity
+06-22 2da63217a kept 1/122 files gone: vendor/bpf/native_compat.h | Fix native Tracee map-in-map semantics
+06-21 e2451d368 kept 62/170  | Checkpoint native whole-program fixes
+06-17 326531fed kept 0/7  | Keep Tetragon arm64 filename reads shared
+06-17 56d6b95da kept 0/5  | Handle saved helper ids in arm64 app proofs
+06-17 27e8be71e kept 1/11  | Keep Cilium native logic aligned
+06-17 b940093d4 kept 19/74  | Record Tracee native-specific hot-path fix
+06-02 6c02e6c00 kept 3/32  | feat: update LEA and related configurations for enhanced instruction support
