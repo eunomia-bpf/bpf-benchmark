@@ -435,7 +435,7 @@ void ensure_debugfs_mounted()
 uint64_t lookup_native_lab_ptr_by_fd(int map_fd,
                                      const char *path,
                                      const char *label,
-                                     bool *immutable = nullptr)
+                                     uint64_t *metadata = nullptr)
 {
     ensure_debugfs_mounted();
     int fd = open(path, O_RDWR | O_CLOEXEC);
@@ -478,26 +478,29 @@ uint64_t lookup_native_lab_ptr_by_fd(int map_fd,
     if (errno != 0 || end == response || value == 0) {
         fail(std::string("native_kernel: invalid ") + label + " response: " + response);
     }
-    if (immutable) {
+    if (metadata) {
         char *last = nullptr;
-        const auto flag = std::strtoul(end, &last, 10);
-        if (last == end || flag > 1)
-            fail(std::string("native_kernel: invalid immutable-map metadata: ") + response);
-        *immutable = flag != 0;
+        const auto flag = std::strtoull(end, &last, 10);
+        if (last == end || errno)
+            fail(std::string("native_kernel: invalid map metadata: ") + response);
+        *metadata = flag;
     }
     return static_cast<uint64_t>(value);
 }
 
-uint64_t lookup_kernel_map_ptr_by_fd(int map_fd)
+uint64_t lookup_kernel_map_ptr_by_fd(int map_fd, uint64_t *inner_type = nullptr)
 {
     return lookup_native_lab_ptr_by_fd(
-        map_fd, kNativeLabTarget.map_ptr_path, "map_ptr");
+        map_fd, kNativeLabTarget.map_ptr_path, "map_ptr", inner_type);
 }
 
 uint64_t lookup_kernel_map_value_ptr_by_fd(int map_fd, bool *immutable = nullptr)
 {
-    return lookup_native_lab_ptr_by_fd(
-        map_fd, kNativeLabTarget.map_value_ptr_path, "map_value_ptr", immutable);
+    uint64_t flag = 0;
+    const auto value = lookup_native_lab_ptr_by_fd(
+        map_fd, kNativeLabTarget.map_value_ptr_path, "map_value_ptr", immutable ? &flag : nullptr);
+    if (immutable) *immutable = flag != 0;
+    return value;
 }
 
 constexpr size_t kRelocRecordBytes = 16;
@@ -1606,6 +1609,7 @@ struct MapMeta {
     uint32_t btf_id = 0;
     uint32_t btf_value_type_id = 0;
     std::vector<uint8_t> immutable_value;
+    uint64_t inner_type = 0;
 };
 
 struct HelperAlias {
@@ -1942,6 +1946,8 @@ MapMeta load_map_meta_from_fd(int map_fd)
     }
     bool immutable = false;
     const auto value_addr = lookup_array_value_addr_if_direct(info, map_fd, &immutable);
+    uint64_t inner_type = 0;
+    const auto kernel_addr = lookup_kernel_map_ptr_by_fd(map_fd, &inner_type);
     MapMeta meta{
         std::string(name),
         map_fd,
@@ -1950,11 +1956,12 @@ MapMeta load_map_meta_from_fd(int map_fd)
         info.key_size,
         info.value_size,
         info.max_entries,
-        lookup_kernel_map_ptr_by_fd(map_fd),
+        kernel_addr,
         value_addr,
         info.btf_id,
         info.btf_value_type_id,
     };
+    meta.inner_type = inner_type;
     if (immutable) {
         uint32_t key = 0;
         meta.immutable_value.resize(info.value_size);
@@ -1993,6 +2000,8 @@ std::vector<MapMeta> collect_open_process_maps(Predicate predicate)
         if (map_name.empty() || !predicate(info, map_name)) {
             continue;
         }
+        uint64_t inner_type = 0;
+        const auto kernel_addr = lookup_kernel_map_ptr_by_fd(fd, &inner_type);
         matches.push_back(MapMeta{
             std::move(map_name),
             fd,
@@ -2001,11 +2010,12 @@ std::vector<MapMeta> collect_open_process_maps(Predicate predicate)
             info.key_size,
             info.value_size,
             info.max_entries,
-            lookup_kernel_map_ptr_by_fd(fd),
+            kernel_addr,
             lookup_array_value_addr_if_direct(info, fd),
             info.btf_id,
             info.btf_value_type_id,
         });
+        matches.back().inner_type = inner_type;
     }
     closedir(fd_dir);
     return matches;
@@ -4165,12 +4175,28 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         write_json_string(immutable, value); separator = true;
     }
     immutable << '}';
+    std::ostringstream map_types;
+    map_types << '{';
+    bool map_separator = false;
+    bool array_inner = false;
+    for (const auto &[name, loaded] : companion.native_map_symbols) {
+        if (companion.native_data_symbols.contains(name)) continue;
+        const auto *meta = find_map_meta_by_native_symbol(companion, name);
+        if (!meta) continue;
+        if (map_separator) map_types << ',';
+        write_json_string(map_types, name);
+        map_types << ":{\"type\":" << meta->type << ",\"inner_type\":" << meta->inner_type << '}';
+        map_separator = true;
+        array_inner |= meta->inner_type == BPF_MAP_TYPE_ARRAY;
+    }
+    map_types << '}';
     const auto function_bodies = native_source_function_bodies(
         native_object_path, options.source_bpf_path, prog_info, source_insns);
     const auto optimized = native_context_lto_object(native_object_path, symbol_name, prog_info.type,
         "/opt/bpf-benchmark/native-bpf/x86_64/kprog-perf-context-lto", "/sys/kernel/btf/vmlinux",
         kNativeLinkCacheDir, function_bodies,
-        companion.immutable_globals.empty() ? std::string{} : immutable.str());
+        companion.immutable_globals.empty() ? std::string{} : immutable.str(),
+        array_inner ? map_types.str() : std::string{});
     if (optimized != native_object_path) {
         native_object_path = optimized;
         entry_proof = cached_native_entry_proof(options.native_link_path, native_object_path, symbol_name);

@@ -1,5 +1,6 @@
 // Trusted load-time native LTO: current-load functions, data and context ABI.
 #include "llvm/Analysis/ValueTracking.h"
+#include "llvm/ADT/SmallPtrSet.h"
 #include "llvm/BinaryFormat/Magic.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/InstIterator.h"
@@ -20,6 +21,7 @@
 #include "bpf_function_bodies.hpp"
 #include "runtime_bpf_callee.hpp"
 #include <memory>
+#include <functional>
 using namespace llvm;
 
 static cl::opt<std::string> Input(cl::Positional, cl::Required);
@@ -29,6 +31,147 @@ static cl::opt<std::string> Symbol("symbol", cl::Required);
 static cl::opt<unsigned> ProgType("prog-type", cl::init(BPF_PROG_TYPE_PERF_EVENT));
 static cl::opt<std::string> FunctionBodies("bpf-function-bodies");
 static cl::opt<std::string> ImmutableGlobals("immutable-globals");
+static cl::opt<std::string> MapTypes("map-types");
+
+struct NativeMapType {
+  int64_t type = 0, inner = 0;
+  bool operator==(const NativeMapType &Other) const {
+    return type == Other.type && inner == Other.inner;
+  }
+};
+
+static bool isMapLookup(const CallBase &Call) {
+  auto *Callee = Call.getCalledOperand()->stripPointerCasts();
+  if (auto *F = dyn_cast<Function>(Callee)) return F->getName() == "bpf_map_lookup_elem";
+  auto *Cast = dyn_cast<ConstantExpr>(Callee);
+  if (!Cast || Cast->getOpcode() != Instruction::IntToPtr) return false;
+  auto *ID = dyn_cast<ConstantInt>(Cast->getOperand(0));
+  return ID && ID->equalsInt(BPF_FUNC_map_lookup_elem);
+}
+
+static Expected<unsigned> lowerArrayLookups(Module &M, Function &Entry, StringRef Path) {
+  if (Path.empty()) return 0;
+  auto File = MemoryBuffer::getFile(Path);
+  if (!File) return errorCodeToError(File.getError());
+  auto Document = json::parse((*File)->getBuffer());
+  if (!Document) return Document.takeError();
+  auto *Object = Document->getAsObject();
+  if (!Object) return native_bpf::failure("map types require an object");
+  DenseMap<const Value *, NativeMapType> Known;
+  SmallPtrSet<const Value *, 32> Active;
+  for (auto &Item : *Object) {
+    auto *Fields = Item.second.getAsObject();
+    auto *Global = M.getNamedGlobal(Item.first);
+    if (!Fields || !Global) continue;
+    auto Type = Fields->getInteger("type"), Inner = Fields->getInteger("inner_type");
+    if (!Type || !Inner) continue;
+    Known[Global] = {*Type, *Inner};
+    // These are handles rebound to kernel objects, not native map-definition
+    // storage. Do not let later optimization read their C initializers.
+    Global->setInitializer(nullptr);
+    Global->setLinkage(GlobalValue::ExternalLinkage);
+    Global->setDSOLocal(false);
+  }
+  std::function<NativeMapType(Value *)> Infer = [&](Value *V) -> NativeMapType {
+    V = V->stripPointerCasts();
+    if (auto Found = Known.find(V); Found != Known.end()) return Found->second;
+    if (!Active.insert(V).second) return {};
+    NativeMapType Type;
+    auto Meet = [&](ArrayRef<Value *> Values) {
+      NativeMapType Common;
+      bool First = true;
+      for (auto *Input : Values) {
+        auto Current = Infer(Input);
+        if (First) { Common = Current; First = false; }
+        else if (!(Common == Current)) return NativeMapType{};
+      }
+      return Common;
+    };
+    if (auto *Phi = dyn_cast<PHINode>(V)) {
+      SmallVector<Value *, 16> Inputs(Phi->incoming_values());
+      Type = Meet(Inputs);
+    } else if (auto *Select = dyn_cast<SelectInst>(V)) {
+      Type = Meet({Select->getTrueValue(), Select->getFalseValue()});
+    } else if (auto *Call = dyn_cast<CallBase>(V)) {
+      if (Call->arg_size() == 2 && isMapLookup(*Call)) {
+        auto Outer = Infer(Call->getArgOperand(0));
+        if (Outer.type == BPF_MAP_TYPE_ARRAY_OF_MAPS || Outer.type == BPF_MAP_TYPE_HASH_OF_MAPS)
+          Type.type = Outer.inner;
+      }
+    } else if (auto *Load = dyn_cast<LoadInst>(V)) {
+      auto *GEP = dyn_cast<GEPOperator>(Load->getPointerOperand());
+      // An inbounds element load from an immutable pointer table can return
+      // only an element of that table. Every alternative must have one type.
+      if (!Load->isVolatile() && !Load->isAtomic() && GEP && GEP->isInBounds() &&
+          GEP->getNumIndices() == 2 && isa<ConstantInt>(GEP->getOperand(1)) &&
+          cast<ConstantInt>(GEP->getOperand(1))->isZero()) {
+        auto *Table = dyn_cast<GlobalVariable>(GEP->getPointerOperand());
+        auto *Array = Table && Table->isConstant() && Table->hasInitializer()
+                        ? dyn_cast<ConstantArray>(Table->getInitializer()) : nullptr;
+        if (Array && Array->getType()->getElementType()->isPointerTy()) {
+          SmallVector<Value *, 16> Inputs;
+          for (auto &Element : Array->operands()) Inputs.push_back(Element.get());
+          Type = Meet(Inputs);
+        }
+      }
+    }
+    Active.erase(V);
+    Known[V] = Type;
+    return Type;
+  };
+  SmallVector<Function *, 16> Functions{&Entry};
+  SmallPtrSet<Function *, 16> Seen;
+  SmallVector<CallBase *, 64> Calls;
+  while (!Functions.empty()) {
+    auto *F = Functions.pop_back_val();
+    if (!Seen.insert(F).second || F->isDeclaration()) continue;
+    for (auto &I : instructions(F)) if (auto *Call = dyn_cast<CallBase>(&I)) {
+      if (isMapLookup(*Call) && Call->arg_size() == 2 && Call->getType()->isPointerTy() &&
+          Call->getArgOperand(0)->getType()->isPointerTy() &&
+          Call->getArgOperand(1)->getType()->isPointerTy() &&
+          !isa<GlobalVariable>(Call->getArgOperand(0)->stripPointerCasts()) &&
+          Infer(Call->getArgOperand(0)).type == BPF_MAP_TYPE_ARRAY)
+        Calls.push_back(Call);
+      else if (auto *Callee = Call->getCalledFunction()) Functions.push_back(Callee);
+    }
+  }
+  if (Calls.empty()) return 0;
+  std::unique_ptr<btf, decltype(&btf__free)> Types(btf__parse(Kernel.c_str(), nullptr), btf__free);
+  if (!Types) return native_bpf::failure("cannot read array lookup kernel BTF");
+  auto &C = M.getContext();
+  auto *Ptr = PointerType::getUnqual(C);
+  auto *Signature = FunctionType::get(Ptr, {Ptr, Ptr}, false);
+  auto *Lookup = Function::Create(Signature, GlobalValue::InternalLinkage,
+                                 "__native_link_typed_array_lookup", M);
+  Lookup->addFnAttr(Attribute::NoInline);
+  Lookup->addFnAttr(Attribute::NoUnwind);
+  auto *Begin = BasicBlock::Create(C, "entry", Lookup);
+  auto *Found = BasicBlock::Create(C, "found", Lookup);
+  auto *Missing = BasicBlock::Create(C, "missing", Lookup);
+  IRBuilder<> B(Begin);
+  auto *Map = Lookup->getArg(0), *Key = Lookup->getArg(1);
+  auto Load32 = [&](Value *Base, unsigned Offset) {
+    auto *Load = B.CreateLoad(B.getInt32Ty(), B.CreateConstGEP1_64(B.getInt8Ty(), Base, Offset));
+    Load->setAlignment(Align(1));
+    return Load;
+  };
+  auto *Index = Load32(Key, 0);
+  auto *Limit = Load32(Map, native_lto::offset(Types.get(), "bpf_map", "max_entries", true));
+  B.CreateCondBr(B.CreateICmpULT(Index, Limit), Found, Missing);
+  B.SetInsertPoint(Missing);
+  B.CreateRet(ConstantPointerNull::get(Ptr));
+  B.SetInsertPoint(Found);
+  auto Base = native_lto::offset(Types.get(), "bpf_array", "map");
+  auto *Mask = Load32(Map, native_lto::relative(Types.get(), "bpf_array", "index_mask", Base, true));
+  auto *Stride = Load32(Map, native_lto::relative(Types.get(), "bpf_array", "elem_size", Base, true));
+  auto *Offset = B.CreateMul(B.CreateZExt(B.CreateAnd(Index, Mask), B.getInt64Ty()),
+                             B.CreateZExt(Stride, B.getInt64Ty()));
+  auto *Values = B.CreateConstGEP1_64(B.getInt8Ty(), Map,
+                 native_lto::relative(Types.get(), "bpf_array", "value", Base));
+  B.CreateRet(B.CreateGEP(B.getInt8Ty(), Values, Offset));
+  for (auto *Call : Calls) Call->setCalledFunction(Signature, Lookup);
+  return Calls.size();
+}
 
 static Expected<unsigned> foldImmutableGlobals(Module &M, StringRef Path) {
   if (Path.empty()) return 0;
@@ -181,6 +324,9 @@ int main(int argc, char **argv) {
       F->removeParamAttr(0, Attribute::DereferenceableOrNull);
       Converted = Loads.size();
     }
+    auto Arrays = lowerArrayLookups(*M, *F, MapTypes);
+    if (!Arrays) { errs() << toString(Arrays.takeError()) << '\n'; return 1; }
+    if (!MapTypes.empty()) errs() << "typed ARRAY lookups lowered: " << *Arrays << '\n';
     if (verifyModule(*M, &errs())) return 1;
     std::error_code EC;
     ToolOutputFile Out(Output, EC, sys::fs::OF_None);
