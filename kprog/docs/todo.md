@@ -28,6 +28,8 @@
 
 - [x] P-SPECIALIZE-10K（9fc382606、cc83b5d48；本提交结果）：四种 10K 形状正常 B/实际栈帧完成，前端 11.6–26.3s、峰值 399–920MiB；B 328–200624B、帧 0–40B，详见 `perf_20261113/inline-families/scale-10k/`。旧同名 scalar/direct 70.47GiB/SIGKILL 的实际失败已能完成；不跨不同编译管线宣称独立加速比。100K 继续。
 
+**协调者 2026-11-16T02:03:09Z（广度一轮中途）**：OTel stats 关 1.854x（run 20261116_010841_344218，三个样本 1.808/1.854/1.967，0 个错误），和 05-29 底线 1.849x 持平。BCC stats 关出错（run 20261116_013455_495442）：tcplife 的 inet_sock_set_state 链接失败，shim 日志第 255 行 “GOT-relative reloc against unknown symbol target_family; add it to link-plan helpers or maps”。这个对象和 05-29 的逐字节相同，11-14 还能装上，所以是 11-14 之后链接器或 loader 的退步；PERF 按整类修（GOT 相对重定位指向 .rodata/.data 全局变量时绑到对应 map 的值），镜像在这一轮结束后发布，BCC 的 stats 关、开接在这一轮最后补跑。
+
 **协调者 2026-11-16T01:07:08Z（运营者“现在在做啥? 完整解释”）**：C 的 omp 从 23:15 起两次没照做广度计时（23:11、00:15 的指令），按运营者 11-12 的做法结束这一轮，换新会话；广度一轮由协调者直接用入口自带的 rotate 起（pid 1284733，/workspaces/kprog-raw/one-image-runs/rotate-20261116T0107Z.log），六个应用按 ORDER 先 stats 关、再 stats 开，入口默认设置，镜像 fc408f64，跑完之前镜像保持不变。PERF 00:39 查到：05-29 链接器给 Katran 链接出来的代码在 3 处（5304、5743/5831）跳过了 LRU 查找和引用位写入，所以 11-12、11-14 的收益，可能连 05-29 的 Katran 数字，原生一侧做的工作更少；PERF 量这几处的分支频率，广度一轮之后再给两种链接各计时一次。
 
 **协调者 2026-11-16T00:19:56Z（审核 21Z 已核实）**：
