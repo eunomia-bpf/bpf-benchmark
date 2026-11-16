@@ -33,3 +33,7 @@ Build output: `/var/tmp/kprog-tmp/perf/helper-cfg`.
 Normal release/native-link and the sole image remain unchanged pending the
 coherent publication. Full-app coverage, helper-tail-call-specific semantics,
 equal work and performance targets remain separate open work.
+
+The ordinary CALL/RET copy-loop regression also passes 64 inputs in both native
+and shared-simulator host executions, retaining its 72-byte stack extent and
+one return continuation. See loop-regression.json.
