@@ -1,4 +1,4 @@
-# Breadth round, one image, stats off: 2026-11-16
+# Breadth round, one image: 2026-11-16
 
 Six applications, one run each, same image and same frozen workload as the
 2026-05-29 reference. The coordinator started the round at 2026-11-16T01:07:08Z
@@ -6,9 +6,11 @@ Six applications, one run each, same image and same frozen workload as the
 `/workspaces/kprog-raw/one-image-runs/rotate-20261116T0107Z.log`), six apps in
 the entry ORDER at stats 0 then stats 1; it stopped the round after Katran
 stats 0 (STOP file, 2026-11-16T02:59:45Z: "stop after Katran stats 0; rerun the
-round on the image with the native-load fixes"). So this table is the stats-off
+round on the image with the native-load fixes"). So round one is the stats-off
 half only; the stats-on half, and the per-call BPF time that comes only from
 it, are not in it.
+
+## Round one, image `fc408f64`, stats off
 
 Image `fc408f64`, entry defaults, 3 samples per arm of 180 s, kernel
 `7.0.0-rc2+`. Each run dir is committed under `corpus/results/`.
@@ -87,4 +89,60 @@ linker, not this image's objects or the flags.
 The fourth is the loader's 512-chunk module budget against Tracee's 13 815-insn
 `lkm_seeker_modt`.
 
-Reported in `COORDINATION.md` for PERF at `220913e8b`, `5c4f908b1`.
+## Round two, image `d9e29630`: the native-load fixes land
+
+PERF published image `d9e29630` at 2026-11-16T03:23:26Z (DATASEC `ed1d7a8f2`,
+finite helper joins `f18e94306`, dynamic chunks `5a214d73d`) and restarted the
+unchanged rotate entry at 03:24:37Z, six apps in the same ORDER at stats 0 then
+stats 1, 3 samples of 180 s, kernel `7.0.0-rc2+`. This section carries the
+stats-off rows that finished before this writing; the stats-on half is still
+running, so per-call stays n/a here.
+
+| app | run | status | throughput vs eBPF arm | per-call | 05-29 floor (stats off) |
+|---|---|---|---|---|---|
+| otelcol-ebpf-profiler/profiling | `x86_kvm_corpus_20261116_032555_782265` | ok | **1.866x** | n/a | 1.849x |
+| bcc/set | `x86_kvm_corpus_20261116_035145_077678` | ok | **1.002x** | n/a | 0.985x |
+| cilium/agent | `x86_kvm_corpus_20261116_041809_047167` | ok | **1.262x** | n/a | 1.319x |
+| tetragon/observer | — | running | — | n/a | 1.009x |
+| tracee/monitor | — | running | — | n/a | 0.948x |
+| katran | — | running | — | n/a | 1.113x |
+
+- **OTel** — workload units eBPF 40 774 750 / 39 759 786 / 40 450 832, native
+  75 471 022 / 75 117 432 / 78 452 133; 0 workload errors, 13 replacements.
+  `custom__generic` still failed twice, which the `source_bpf_object`
+  publication below closes.
+- **BCC** — 657 707 / 661 454 / 663 888 against 661 569 / 662 768 / 670 159;
+  25 native programs replaced and **zero** `native-loader failed` lines, so the
+  `target_family` GOT-reloc link-plan gap is closed on this path.
+- **Cilium** — 1 291 758 / 1 294 084 / 1 255 396 against 1 636 270 / 1 613 004
+  / 1 629 943; zero `native-loader failed` lines, so `tail_ipv4_policy`'s
+  register-indirect helper call is closed too. This is the one app still below
+  its 05-29 floor (1.262x against 1.319x); at stats 0 no per-call number
+  exists to say whether the gap is BPF time or workload noise.
+
+## The original OTel ELF and `source_bpf_object`
+
+The native loader binds an original program's map symbols to the intercepted
+program's map FDs through the ELF the application itself embeds, not through an
+object this repository compiles. `native-otel` now stages
+`vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/tracer.ebpf.amd64`
+(2 419 520 B, md5 `c45c97f31aa375408b14ecae2dae5b5d`, byte-identical to the
+blob at offset 29 995 136 of the image's `/usr/local/bin/otelcol-ebpf-profiler`)
+into the canonical payload and writes `source_bpf_object` into all 26 manifest
+entries.
+
+Measured effect, one 10 s stats-on sample with that payload
+(`corpus/results/x86_kvm_corpus_20261116_044522_968846`): 14 replacements and
+no failure. `custom__generic` is the 14th;
+`details/shim-logs/otelcol-ebpf-profiler__profiling.post_rejit.log:276`:
+```
+native-loader replaced prog=custom__generic original_fd=10 native_fd=96 manifest=/workspaces/repository/corpus/results/otel-source-bpf-20261116/manifest.json
+```
+Every earlier run replaced 13 and failed this program twice with
+`BPF_PROG_LOAD native_lab stub: Invalid argument`. Committed `8e8ece4fb`
+(payload), `2c1bda03d` (proof). The one image does not carry the new payload
+yet; `corpus/results/otel-source-bpf-20261116` holds the same three files for
+a run that points `NATIVE_MANIFEST` into the repository.
+
+The first round's failures were reported in `COORDINATION.md` for PERF at
+`220913e8b` and `5c4f908b1`.
