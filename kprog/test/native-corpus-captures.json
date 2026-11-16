@@ -1,0 +1,11 @@
+{
+  "bcc": ["/workspaces/kprog-raw/perf/20261116-bcc-all-stock/service.tar.gz"],
+  "otelcol-ebpf-profiler": ["/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/service.tar.gz"],
+  "cilium": ["/workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium/service.tar.gz"],
+  "katran": [{"symbol": "balancer_ingress", "plan": "/workspaces/kprog-raw/perf/20261115-word-hash-lto/timing/ab/post_rejit-27aee6c02466/35d7f2355be09ef4.tmp.3020.link-plan.json"}],
+  "tracee": ["/workspaces/kprog-raw/verified/20261114-tracee-core-checked-lto/control/service.tar.gz"],
+  "tetragon": [
+    "/workspaces/kprog-raw/perf/20261116-checked-six-apps/tetragon/state/session-sxeysh3e/requests/1.success.tar.gz",
+    "/workspaces/kprog-raw/perf/20261116-checked-six-apps/tetragon/state/session-sxeysh3e/requests/2.success.tar.gz"
+  ]
+}

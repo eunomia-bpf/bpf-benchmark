@@ -1,0 +1,44 @@
+{
+  "recorded": "2026-11-16T07:08:58Z",
+  "inventory": [
+    {
+      "app": "bcc",
+      "candidate_entries": 34,
+      "entries_with_captured_plans": 25
+    },
+    {
+      "app": "cilium",
+      "candidate_entries": 80,
+      "entries_with_captured_plans": 42
+    },
+    {
+      "app": "katran",
+      "candidate_entries": 3,
+      "entries_with_captured_plans": 1
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "candidate_entries": 30,
+      "entries_with_captured_plans": 13
+    },
+    {
+      "app": "tetragon",
+      "candidate_entries": 154,
+      "entries_with_captured_plans": 2
+    },
+    {
+      "app": "tracee",
+      "candidate_entries": 174,
+      "entries_with_captured_plans": 5
+    }
+  ],
+  "bcc_subset": {
+    "entries": 34,
+    "proof_passes": 34,
+    "kernel_replays": 25,
+    "failures": 0
+  },
+  "raw": "/workspaces/kprog-raw/perf/20261116-native-corpus-replay",
+  "whole_six_app_replay": "pending producer fixes, not run",
+  "scope": "Expanded native manifest candidates, not app installed-program counts. All full symbols matching an implicit 15-character program name are included. Same-symbol captured plans remain separate contexts; missing captures are not invented."
+}
