@@ -38,6 +38,7 @@
 **协调者 2026-11-16T18:24:20Z**：
 1. PERF 先查 OTel 在镜像 6641a7e1 上的退步：stats 关 0.801x（may29_ratio；样本 0.77、0.917、0.811），3a1906ab1 上是 1.021x；装进去的大小（304 503 B）和 14 个原生程序两次相同。两个镜像之间 OTel 相关的变化是 stage 里 perf-context 编译器换成当前源码（2294b0463、63547fcfe、0f5c55894、f45bb2485）。把每次调用拆成程序体、helper、map，逐个变化对比，找出慢在哪一处，按整类修。修完再接着 cb 偏移等原顺序。
 2. e4264fa35 在四份模块（含可信模块 kinsn/module/x86）的 map_ptr_query_write 里给 delete 新加了 -EOPNOTSUPP。运营者 11-16：“禁止加任何额外的 check”。协调者决定：delete 并进原有 update 分支的同一个判断（按 helper_id 选出 ops 指针，再用原来那一个空指针判断），检查条数回到修改前，用一个向前的提交，四份一起改。delete 绑定本身保留，它是设计第 5 步 LTO 的链接时绑定。
+   2026-11-16T18:33:44Z 已落 35da4bdd4：四份都先选 update/delete ops 指针，再共用原来的一个空指针判断；两个 active x86 模块语法检查通过，绑定保留。
 
 **协调者 2026-11-16T18:20:15Z（审核 15Z 核实后的决定）**：
 1. 每次调用 20% 这个目标，光靠程序体快达不到：程序体只占每次调用 BPF 时间的一部分（BCC 9%、Tracee 12%、Tetragon 25%、Katran 38%），程序体就算快 1.57 倍，每次调用也只到 1.03–1.16 倍。PERF 每一项先把这个应用的每次调用时间拆成程序体、helper、map 三块，改完再拆一次，写进该项的结果。修的顺序在 17:2x 那一块的基础上调整为：(1) Cilium 路径：cb 偏移按唯一内核 BTF 生成，编译开关和配置取自 agent 自己生成的头文件（审核：vendor/bpf/Makefile 81–105 用 CILIUM_MAX_* 和示例配置头），重复保存寄存器一并去掉，再用 BPF_PROG_TEST_RUN 对比 cil_from_container；(2) map update/delete 链接时绑定到具体 ops；(3) bpf_probe_read 路径（Tracee、Tetragon 占 41–46%）内联成和 eBPF 一侧同语义的原生读；(4) 冻结的 BCC 配置进原生 IR LTO、ARRAY/LPM 调度链接时选定；(5) Tetragon CEL；(6) 其余审核项。
@@ -45,6 +46,7 @@
 3. 计时：C 在 6641a7e1 上这一轮是清理后的基线，照常跑完；之后只在镜像带上新修改时开新的一轮（广度优先，每个应用 3 个样本再换下一个）。两轮之间，一项修改用冻结入口只跑它影响的那个应用（corpus APPS=<app>，stats 开）。
 4. FORMAL：当前 M5 这一步做完后，把提交在 git 里的生成 Clight 导出（kprog/formal/KProgFormal/Clight，约 444 万行）改成由 formal 构建一条命令从 C 源码重新生成，删掉提交的副本；重新生成在本 Workspace 里逐字节一致才删。
 5. 下面 14:20 那一块里给 PERF 的逐步做法已由 15:37、15:46、17:2x 和本块取代（运营者 14:22：“你要让 codex 自己去看代码.”）。
+   2026-11-16 源码进展 e4cd3a12b：优先级调整时已在做的冻结标量配置项已完成源码和 host subset。现有 direct-value 回答携带同内核 readonly/frozen/no-writer 语义，按实际 loaded map+BTF 偏移取值进入同一 trusted LTO。相反配置值及 mutable/aggregate/atomic 边界通过，四个实际 P 的初始 entry 提取通过，工具/loader 构建和两个 active x86 模块语法通过。BCC sys_exit 的 source-derived count_by_process=0 诊断 proof text 为 418→305 B；这不是来宾配置抓取或安装大小。来宾资格、实际配置、installed bytes 与 body/helper/map/per-call 等发布后测。ARRAY/LPM 选路仍开；下一项先按 18:24 查 OTel，随后按本块顺序推进。
 
 **协调者 2026-11-16T17:20:41Z（清理完成；运营者“发现问题你自己主动推进清理整改, 别的 lane 停下来, 清理整理好再继续?”）**：清理 1–10 已推送（kprog/tv、kprog/loader、kprog/selftests 删掉；kprog/test 18 092 → 2 483 行；kprog/build 只留校验工具源码；kprog/libnativeloader/Makefile 784 → 99 行）。唯一入口：P 和镜像 `make -f kprog/perf/one-image/Makefile image`（vendor/bpf 自己编 IR 链接器和 stage 的 perf-context 编译器）；checked-sim-c 工具 `make -C kprog/libnativeloader checked-sim-stage`；整应用 verify `make -C kprog/libnativeloader checked-corpus[-all]`。清理后的镜像 6641a7e1 check 轮：五个应用完成并装上原生，Tetragon 照旧出错（kprog/results/cleanup-check-20261116）。各 lane 从现在恢复：C 在 6641a7e1 上跑广度计时一轮（rotate，持 timing 锁）；PERF 按上面的顺序修（cb 偏移和重复保存 → map ops 链接时绑定 → BCC 配置进 LTO、ARRAY/LPM 调度 → Tetragon CEL → 其余审核项），改好的批量在 C 这一轮结束后用唯一配方重建镜像；FORMAL 继续 M5。新实验写成 kprog/results/<run>/ 下提交的脚本和结果，共享 makefile 里只放构建和这三个入口。
 
