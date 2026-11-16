@@ -35,8 +35,10 @@
 
 - [x] P-SPECIALIZE-10K（9fc382606、cc83b5d48；本提交结果）：四种 10K 形状正常 B/实际栈帧完成，前端 11.6–26.3s、峰值 399–920MiB；B 328–200624B、帧 0–40B，详见 `perf_20261113/inline-families/scale-10k/`。旧同名 scalar/direct 70.47GiB/SIGKILL 的实际失败已能完成；不跨不同编译管线宣称独立加速比。100K 继续。
 
+**协调者 2026-11-16T19:19:42Z**：FORMAL：2be755991 把 23 个 Clight 导出改成 Lake 从 C 生成、删掉提交的 4 435 905 行，完成审核 15Z 第 4 项。last.md 记的 25 个旧证明失败（oldroute288 tag、旧生成器 --check 与当前 C 不一致）按运营者“旧的会误导的不要关闭, 要拆掉丢掉”处理：已被 M 步新证明取代的旧证明和旧生成器删掉，剩下的修到通过；做完时 formal 构建零失败，接着 M5。
+
 **协调者 2026-11-16T18:24:20Z**：
-1. PERF 先查 OTel 在镜像 6641a7e1 上的退步：stats 关 0.801x（may29_ratio；样本 0.77、0.917、0.811），3a1906ab1 上是 1.021x；装进去的大小（304 503 B）和 14 个原生程序两次相同。两个镜像之间 OTel 相关的变化是 stage 里 perf-context 编译器换成当前源码（2294b0463、63547fcfe、0f5c55894、f45bb2485）。把每次调用拆成程序体、helper、map，逐个变化对比，找出慢在哪一处，按整类修。修完再接着 cb 偏移等原顺序。
+1. PERF 先查 OTel 在镜像 6641a7e1 上的退步：stats 关 0.801x（may29_ratio；样本 0.77、0.917、0.811），3a1906ab1 上是 1.021x；14 个原生程序两次相同；装进去的大小 330 814 → 303 930 B，11 个程序各少 2 444 B，正好是 f45bb2485 去掉的哈希拷贝（2026-11-16T19:19:42Z 协调者改正：原先写的“两次相同”比的是同一镜像的两次运行，PERF 6a86ae8f1 给出了正确的对比）。两个镜像之间 OTel 相关的变化是 stage 里 perf-context 编译器换成当前源码（2294b0463、63547fcfe、0f5c55894、f45bb2485）。把每次调用拆成程序体、helper、map，逐个变化对比，找出慢在哪一处，按整类修。修完再接着 cb 偏移等原顺序。
    2026-11-16 审计 6a86ae8f1：实际 measurement-window 的 13 条程序记录，旧 installed 330814 B、新 303930 B，11 个各减 2444 B，两个不变，与 f45bb2485 删除 copied hash 完全吻合；14 次 shim replacement 另含临时 feature test。当前 stage 的 main/native/v8 三个函数与保留的 12:13 physical P 指令及 relocation identity 全同；这不等于抓到了旧镜像的 stage 可执行文件。hash 调用成本是待量候选，未判定原因。当前镜像诊断 profile 已在 CPUs 20-23、image SH 下启动，controller 1842845，结果留 otel-regression-20261116；按 shim measure_start/finish 排除 warmup 后拆 body/helper/map，A 继续开。
 2. e4264fa35 在四份模块（含可信模块 kinsn/module/x86）的 map_ptr_query_write 里给 delete 新加了 -EOPNOTSUPP。运营者 11-16：“禁止加任何额外的 check”。协调者决定：delete 并进原有 update 分支的同一个判断（按 helper_id 选出 ops 指针，再用原来那一个空指针判断），检查条数回到修改前，用一个向前的提交，四份一起改。delete 绑定本身保留，它是设计第 5 步 LTO 的链接时绑定。
    2026-11-16T18:33:44Z 已落 35da4bdd4：四份都先选 update/delete ops 指针，再共用原来的一个空指针判断；两个 active x86 模块语法检查通过，绑定保留。
