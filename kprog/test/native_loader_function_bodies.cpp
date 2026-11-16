@@ -1,6 +1,7 @@
 // Catch wrong original offsets, invented bodies and stale generated-code caches.
 #include "../libnativeloader/src/native_loader.cpp"
 #include <iostream>
+#include "../../bpfopt/shim/shim_function_info.h"
 
 static void require(bool condition, const char *message)
 {
@@ -67,7 +68,7 @@ int main(int argc, char **argv)
 
     // A bytecode hash can be shared by loads with different metadata. The
     // program-specific filename prevents the second record overwriting the first.
-    const auto source_path = cache / "same-bytecode.bpf";
+    const auto source_path = cache / ("same-bytecode-" + std::to_string(getpid()) + ".bpf");
     bpf_prog_info program{}; program.id = 71;
     require(native_source_function_bodies(input, source_path, program, {}).empty(),
             "absent capture metadata invented a body");
@@ -87,4 +88,27 @@ int main(int argc, char **argv)
     require(mismatch, "foreign load metadata was accepted");
     program.id = 71;
     require(native_source_function_bodies(input, source_path, program, {}).empty(), "second metadata overwrote first");
+    struct WideRecord { bpf_func_info info; uint64_t extra; };
+    WideRecord original[] = {{{0, 17}, 0xabababababababab}, {{4, 23}, 0xcdcdcdcdcdcdcdcd}};
+    require(write_original_function_info(source_path.c_str(), 74, 91, original, 2, sizeof(WideRecord)) == 0,
+            "write original function table");
+    original[1].info.type_id = 29;
+    require(write_original_function_info(source_path.c_str(), 75, 92, original, 2, sizeof(WideRecord)) == 0,
+            "write same-code second function table");
+    for (uint32_t id : {74u, 75u}) {
+        const auto raw = read_binary_file(source_path.string() + ".functions." + std::to_string(id) + ".json");
+        const std::string document(raw.begin(), raw.end());
+        const auto records = json_array_objects(document, "functions");
+        require(json_required_u32(document, "prog_id") == id &&
+                json_required_u32(document, "btf_id") == id + 17 && records.size() == 2,
+                "same-bytecode loads overwrote their metadata identities");
+        require(json_required_u32(records[0], "insn_off") == 0 && json_required_u32(records[0], "type_id") == 17 &&
+                json_required_u32(records[1], "insn_off") == 4 &&
+                json_required_u32(records[1], "type_id") == (id == 74 ? 23u : 29u),
+                "original record stride was not normalized");
+    }
+    const auto missing = cache / ("absent-" + std::to_string(getpid())) / "code.bpf";
+    require(write_original_function_info(missing.c_str(), 76, 93, original, 2, sizeof(WideRecord)) < 0 && errno == ENOENT,
+            "metadata writer hid an output error");
+
 }

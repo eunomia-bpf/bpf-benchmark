@@ -97,7 +97,18 @@ function-live-kvm: function-live-inputs
 	date -u +%FT%TZ > $(OUTPUT)/live-finished
 
 guest-function-live:
-	$(BUILD)/function-live $(BUILD)/live-input.o $(BUILD)/perf-context-lto $(OUTPUT)/live $(OUTPUT)/live/native-path.txt > $(OUTPUT)/live/kernel.json
+	$(FUNCTION_LIVE_ENV) $(BUILD)/function-live $(BUILD)/live-input.o $(BUILD)/perf-context-lto $(OUTPUT)/live $(OUTPUT)/live/native-path.txt > $(OUTPUT)/live/kernel.json
 	read -r object < $(OUTPUT)/live/native-path.txt; $(CC) "$$object" $(BUILD)/live-driver.o -o $(OUTPUT)/live/native-result
 	$(OUTPUT)/live/native-result
 	printf 'BPF and native result both 9\n' > $(OUTPUT)/live/execution.txt
+
+.PHONY: function-shim-live-kvm guest-function-shim-live
+function-shim-live-kvm: function-live-inputs
+	$(MAKE) -C $(ROOT)/bpfopt/shim libbpfrejit_shim.so
+	install -d $(OUTPUT)/live $(OUTPUT)/inputs
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c $(CPUS) prlimit --as=8589934592 -- vng --run $(KERNEL)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rodir $(OUTPUT)/inputs=$(BUILD) --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/perf-context-lto.mk guest-function-shim-live OUTPUT=$(OUTPUT) BUILD=$(OUTPUT)/inputs'
+	tar -C $(BUILD) -czf $(OUTPUT)/shim-live-build.tar.gz .
+	date -u +%FT%TZ > $(OUTPUT)/shim-live-finished
+
+guest-function-shim-live: FUNCTION_LIVE_ENV = env FUNCTION_CAPTURE_SHIM=1 BPFREJIT_SHIM_DIR=$(OUTPUT)/live BPFREJIT_SHIM_LOG=$(OUTPUT)/live/shim.log LD_PRELOAD=$(ROOT)/bpfopt/shim/libbpfrejit_shim.so
+guest-function-shim-live: guest-function-live

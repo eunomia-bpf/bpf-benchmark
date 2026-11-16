@@ -583,6 +583,9 @@ long syscall(long number, ...) {
     uint32_t resolved_id = 0;
     if (pending_prog) {
         if (ret >= 0) {
+            /* Native replacement consumes this original identity and the
+             * pre-verifier function offsets during the following call. */
+            dump_original_function_info((int)ret, pending_prog);
             long native_ret =
                 shim_maybe_replace_with_native_fd(ret, pending_prog);
             if (native_ret < 0) {

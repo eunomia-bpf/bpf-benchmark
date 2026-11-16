@@ -32,22 +32,38 @@ int main(int argc, char **argv)
     source[3].code = BPF_JMP | BPF_EXIT;
     source[4].code = BPF_ALU64 | BPF_MOV | BPF_K; source[4].imm = 9;
     source[5].code = BPF_JMP | BPF_EXIT;
-    const bpf_func_info functions[] = {{0, static_cast<uint32_t>(entry_type)}, {4, static_cast<uint32_t>(callee_type)}};
+    struct OriginalRecord { bpf_func_info info; uint64_t extension; };
+    const OriginalRecord functions[] = {{{0, static_cast<uint32_t>(entry_type)}, 0},
+                                        {{4, static_cast<uint32_t>(callee_type)}, 0}};
     std::vector<char> log(1024 * 1024);
     bpf_prog_load_opts options{}; options.sz = sizeof(options);
     options.prog_btf_fd = btf__fd(types.get());
-    options.func_info = functions; options.func_info_cnt = 2; options.func_info_rec_size = sizeof(bpf_func_info);
+    options.func_info = functions; options.func_info_cnt = 2; options.func_info_rec_size = sizeof(OriginalRecord);
     options.log_buf = log.data(); options.log_size = log.size(); options.log_level = 1;
     ScopedFd program(bpf_prog_load(BPF_PROG_TYPE_SOCKET_FILTER, "function_entry", "GPL", source.data(), source.size(), &options));
     if (program.get() < 0) fail("load live function program: " + std::string(log.data()));
     const auto info = load_prog_info(program.get());
-    const auto source_path = directory / "original.bpf";
-    write_binary_file(source_path, reinterpret_cast<const uint8_t *>(source.data()), source.size() * sizeof(bpf_insn));
-    const std::string metadata = "{\"version\":1,\"prog_id\":" + std::to_string(info.id) +
-        ",\"btf_id\":" + std::to_string(info.btf_id) + ",\"functions\":[{\"insn_off\":0,\"type_id\":" +
-        std::to_string(entry_type) + "},{\"insn_off\":4,\"type_id\":" + std::to_string(callee_type) + "}]}\n";
-    write_binary_file(source_path.string() + ".functions." + std::to_string(info.id) + ".json",
-                      reinterpret_cast<const uint8_t *>(metadata.data()), metadata.size());
+    auto source_path = directory / "original.bpf";
+    if (std::getenv("FUNCTION_CAPTURE_SHIM")) {
+        const auto suffix = ".functions." + std::to_string(info.id) + ".json";
+        source_path.clear();
+        for (const auto &file : std::filesystem::directory_iterator(directory)) {
+            const auto name = file.path().string();
+            if (name.ends_with(suffix)) source_path = name.substr(0, name.size() - suffix.size());
+        }
+        if (source_path.empty()) fail("shim did not capture original function metadata before load returned");
+        const auto original = read_binary_file(source_path);
+        if (original.size() != source.size() * sizeof(bpf_insn) ||
+            std::memcmp(original.data(), source.data(), original.size()))
+            fail("shim function metadata did not bind original source bytes");
+    } else {
+        write_binary_file(source_path, reinterpret_cast<const uint8_t *>(source.data()), source.size() * sizeof(bpf_insn));
+        const std::string metadata = "{\"version\":1,\"prog_id\":" + std::to_string(info.id) +
+            ",\"btf_id\":" + std::to_string(info.btf_id) + ",\"functions\":[{\"insn_off\":0,\"type_id\":" +
+            std::to_string(entry_type) + "},{\"insn_off\":4,\"type_id\":" + std::to_string(callee_type) + "}]}\n";
+        write_binary_file(source_path.string() + ".functions." + std::to_string(info.id) + ".json",
+                          reinterpret_cast<const uint8_t *>(metadata.data()), metadata.size());
+    }
     const auto facts = native_source_function_bodies(input, source_path, info, source);
     if (facts != "{\"functions\":{\"captured_function\":\"b7000000090000009500000000000000\"}}\n")
         fail("live original BTF/offsets selected the wrong function body");
@@ -60,5 +76,6 @@ int main(int argc, char **argv)
     const auto path = output.string() + '\n';
     write_binary_file(result, reinterpret_cast<const uint8_t *>(path.data()), path.size());
     std::cout << "{\"prog_id\":" << info.id << ",\"btf_id\":" << info.btf_id
-              << ",\"bpf_result\":" << run.retval << ",\"source_function_offset\":4}\n";
+              << ",\"bpf_result\":" << run.retval << ",\"source_function_offset\":4,\"original_record_stride\":" << sizeof(OriginalRecord)
+              << ",\"shim_capture\":" << (std::getenv("FUNCTION_CAPTURE_SHIM") ? "true" : "false") << "}\n";
 }
