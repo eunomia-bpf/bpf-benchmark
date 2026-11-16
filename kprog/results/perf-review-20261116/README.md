@@ -282,8 +282,8 @@ to the source read during this review; subsequent cleanup may move them.
    public declaration at :6163 is u32. A native assignment therefore truncates
    its value before a later pass can recover it. The sole kernel's
    `filter.c:9835–9845` instead preserves the old mapping for values at least
-   65535. For an existing mapping of7, assigning65536 leaves7 on that kernel
-   path but writes0 through the native u16 field. This is a source-derived
+   65535. For an existing mapping of 7, assigning 65536 leaves 7 on that kernel
+   path but writes 0 through the native u16 field. This is a source-derived
    boundary example, with benchmark occurrence still open. Cilium's
    `lib/edt.h:44–49` contains the assignment under ENABLE_BANDWIDTH_MANAGER.
    Existing packet-physical-layout.c:29 already records store_max_exclusive
@@ -828,7 +828,7 @@ double-execution cause and no confirmed Cilium packet fix. Those remain open. Th
     establish the operator's installed half-size target or any per-call gain.
 
     The existing launcher already addresses process-boundary cost:
-    `src/native_loader_subprocess.hpp:27–53` uses posix_spawn and synchronously
+    `src/native_loader_subprocess.hpp:27–59` uses posix_spawn and synchronously
     reaps the child with waitpid, retrying interrupted waits. It removes the
     preload variable from the child environment at :14–23. This keeps the
     compiler/linker outside the intercepted application's shim and avoids
