@@ -813,5 +813,18 @@
       8
     ],
     "scope": "Source structure, not isolated size/speed attribution."
+  },
+  "frame_alignment_conventions": {
+    "recorded_at": "2026-11-16T16:34:02Z",
+    "kernel_definition": "arch/x86/Makefile:38-46 cc_stack_align8",
+    "kernel_application": "arch/x86/Makefile:162",
+    "kernel_clang_flag": "-mstack-alignment=8",
+    "kernel_gcc_flag": "-mpreferred-stack-boundary=3",
+    "producer": "vendor/bpf/Makefile:46-56 no explicit matching stack-alignment flag",
+    "wrapper_sources": [
+      "x86.rs:1088-1095",
+      "x86_runtime_array.rs:34-40"
+    ],
+    "scope": "Source convention difference only. No live RSP residue, fault, padding reduction or measured performance claim."
   }
 }

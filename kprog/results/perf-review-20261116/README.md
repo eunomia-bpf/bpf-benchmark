@@ -381,6 +381,23 @@ double-execution cause and no confirmed Cilium packet fix. Those remain open. Th
     wrapper ignores that metadata. This is a simplification opportunity, not
     evidence of the withdrawn current tail-pop bug.
 
+    One more source fact belongs to this frame work: the sole kernel's
+    `arch/x86/Makefile:38–46` defines an 8-byte stack convention for x86-64
+    (clang -mstack-alignment=8, GCC -mpreferred-stack-boundary=3), applied at
+    :162. The shared native producer flags in `vendor/bpf/Makefile:46–56`
+    specify general-register-only/no-red-zone but do not set that stack
+    convention. Linker wrappers such as x86.rs:1088–1095 and the nested-call
+    ARRAY routine in x86_runtime_array.rs:34–40 assume a SysV alignment when
+    adding eight-byte pads. Keeping the native compiler's saved registers
+    does not by itself prove alignment at its kernel entry boundary.
+
+    No live stack residue or alignment fault was captured in this review.
+    Treat this as a convention to reconcile when consolidating the frame,
+    using one producer setting across apps and the same convention in load-time
+    code generation. Do not blindly remove/add one pad from a push count or
+    introduce a runtime alignment check. Any reduction in compiler stack
+    padding or installed bytes remains to be measured.
+
 13. **Phase-1 CEL stock rejection loses the pointer carried in an index register.**
 
     This finding follows the actual terminal verifier log, not a new guest:
