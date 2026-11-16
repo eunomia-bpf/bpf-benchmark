@@ -64,3 +64,10 @@ replay:
 	cp $(BUILD)/replay.o $(OUTPUT)/replay.o
 	cp $(BUILD)/replay.proof.o $(OUTPUT)/replay.proof.o
 	date -u +%FT%TZ > $(OUTPUT)/replay-finished
+
+.PHONY: function-check
+function-check: compiler
+	taskset -c $(CPUS) prlimit --as=8589934592 -- $(MAKE) -r -f $(ROOT)/kprog/build/Makefile bpf-function-check BPF_FUNCTION_RUNTIME_ARGS='--runtime-compiler $(BUILD)/perf-context-lto --kernel-btf $(KERNEL)/vmlinux'
+	cp /var/tmp/kprog-tmp/perf/bpf-functions/report.json $(OUTPUT)/function-report.json
+	tar -C /var/tmp/kprog-tmp/perf/bpf-functions -czf $(OUTPUT)/function-build.tar.gz .
+	date -u +%FT%TZ > $(OUTPUT)/function-finished

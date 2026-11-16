@@ -11,6 +11,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ['build', 'compiler', 'reference', 'public-layout', 'physical-layout']:
         parser.add_argument('--' + name, type=Path, required=True)
+    parser.add_argument('--runtime-compiler', type=Path)
+    parser.add_argument('--kernel-btf', type=Path)
     args = parser.parse_args()
     report = dict(cases=[], failures=[], scope='Host compiler/body ABI tests only; constructed test facts are never application runtime facts.')
 
@@ -48,6 +50,16 @@ def main():
                          '-o', prefix.with_suffix('.bc')], 'case-%d-lower' % i),
                     run(['clang-18', '-O3', prefix.with_suffix('.bc'), '-o', prefix], 'case-%d-link' % i),
                     run([prefix, hex(value & ((1 << 64) - 1)), hex(value & ((1 << 32) - 1))], 'case-%d-run' % i)]
+        if args.runtime_compiler:
+            runtime_object = args.build / ('runtime-%d.o' % i)
+            runtime_exe = args.build / ('runtime-%d' % i)
+            commands += [run([args.runtime_compiler, args.build / 'embedded.o', '--symbol', 'main',
+                              '--prog-type', '6', '--kernel-btf', args.kernel_btf,
+                              '--bpf-function-bodies', prefix.with_suffix('.json'), '-o', runtime_object],
+                             'runtime-%d-lower' % i),
+                         run(['clang-18', runtime_object, '-o', runtime_exe], 'runtime-%d-link' % i),
+                         run([runtime_exe, hex(value & ((1 << 64) - 1)), hex(value & ((1 << 32) - 1))],
+                             'runtime-%d-run' % i)]
         report['cases'].append(dict(immediate=value, vectors=48, commands=commands))
 
     negative = {'nonconstant': dict(functions={'supplied64': body(0) + body(1)}),
@@ -63,9 +75,19 @@ def main():
         if output.exists():
             raise AssertionError('unsupported facts produced a partial output: ' + label)
         report['failures'].append(dict(case=label, command=command))
+        if args.runtime_compiler and label != 'disabled':
+            runtime_output = args.build / (label + '.o')
+            command = run([args.runtime_compiler, args.build / 'embedded.o', '--symbol', 'main',
+                           '--prog-type', '6', '--kernel-btf', args.kernel_btf,
+                           '--bpf-function-bodies', path, '-o', runtime_output],
+                          'runtime-' + label, success=False)
+            if runtime_output.exists():
+                raise AssertionError('runtime facts produced a partial output: ' + label)
+            report['failures'].append(dict(case='runtime-' + label, command=command))
+    report['runtime_compiler_exercised'] = bool(args.runtime_compiler)
     report['absent_facts_default_and_native_byte_identical'] = True
     (args.build / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
-    print('Six body values x48 real host ABI vectors, five explicit failures, both absent-facts paths PASS')
+    print('Six body values x48 real host ABI vectors, explicit failures, both absent-facts paths PASS; runtime:', bool(args.runtime_compiler))
 
 
 if __name__ == '__main__':

@@ -216,7 +216,7 @@ $(SOCKET_BUILD)/public-layout.json: $(SOCKET_BUILD)/public-layout
 $(SOCKET_BUILD)/physical-layout.json: $(SOCKET_BUILD)/physical-layout
 	$< > $@
 
-$(SOCKET_BUILD)/socket-context-lower: $(HERE)/socket-context-lower.cpp
+$(SOCKET_BUILD)/socket-context-lower: $(HERE)/socket-context-lower.cpp $(ROOT)/kprog/x86/bpf_function_bodies.hpp
 	install -d $(SOCKET_BUILD)
 	$(CXX) $$($(LLVM_CONFIG) --cxxflags) -std=c++17 -Wall -Wextra -Wno-unused-parameter $< -o $@ $$($(LLVM_CONFIG) --ldflags --libs core irreader bitwriter analysis support --system-libs)
 
@@ -559,13 +559,15 @@ native-frame-check: $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-
 
 BPF_FUNCTION_BUILD ?= /var/tmp/kprog-tmp/perf/bpf-functions
 BPF_FUNCTION_REFERENCE ?= /workspaces/kprog-raw/perf/20261114-native-frame/input-evidence/socket-context-lower
+BPF_FUNCTION_RUNTIME_ARGS ?=
 .PHONY: bpf-function-check
 bpf-function-check: $(SOCKET_BUILD)/socket-context-lower $(SOCKET_BUILD)/public-layout.json $(SOCKET_BUILD)/physical-layout.json
 	install -d $(BPF_FUNCTION_BUILD)
 	install -m755 $(BPF_FUNCTION_REFERENCE) $(BPF_FUNCTION_BUILD)/reference-lower
 	$(CC) -O2 -g -emit-llvm -c $(HERE)/test-bpf-function.c -o $(BPF_FUNCTION_BUILD)/input.bc
+	$(CC) -O2 -g -mno-red-zone -mgeneral-regs-only -Xclang -fembed-bitcode=all -c $(HERE)/test-bpf-function.c -o $(BPF_FUNCTION_BUILD)/embedded.o
 	python3 $(HERE)/socket-helper-names.py > $(BPF_FUNCTION_BUILD)/helpers.json
-	python3 $(HERE)/test-bpf-functions.py --build $(BPF_FUNCTION_BUILD) --compiler $(SOCKET_BUILD)/socket-context-lower --reference $(BPF_FUNCTION_BUILD)/reference-lower --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json
+	python3 $(HERE)/test-bpf-functions.py --build $(BPF_FUNCTION_BUILD) --compiler $(SOCKET_BUILD)/socket-context-lower --reference $(BPF_FUNCTION_BUILD)/reference-lower --public-layout $(SOCKET_BUILD)/public-layout.json --physical-layout $(SOCKET_BUILD)/physical-layout.json $(BPF_FUNCTION_RUNTIME_ARGS)
 
 PROBE_KERNEL_BUILD ?= /var/tmp/kprog-tmp/perf/probe-read-kernel
 PROBE_KERNEL_OUTPUT ?= /workspaces/kprog-raw/perf/20261114-probe-read/kernel
