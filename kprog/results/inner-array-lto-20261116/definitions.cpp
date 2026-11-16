@@ -23,6 +23,17 @@ int main(int argc, char **argv) try {
         load.maps[0].inner_value_size!=4) return 1;
     SourceBpfMaps original(argv[2]);
     const auto bytes=original.map_definitions(argv[2]);
+    auto unmodified=read_binary_file(argv[2]);
+    std::unique_ptr<Elf,decltype(&elf_end)> image(
+        elf_memory(reinterpret_cast<char *>(unmodified.data()),unmodified.size()),elf_end);
+    Elf_Scn *section=nullptr;
+    while ((section=elf_nextscn(image.get()))) {
+        GElf_Shdr h{};
+        if (!gelf_getshdr(section,&h)) return 1;
+        if (h.sh_type==SHT_NOBITS) continue;
+        if (!std::equal(unmodified.begin()+h.sh_offset,unmodified.begin()+h.sh_offset+h.sh_size,
+                        bytes.begin()+h.sh_offset)) return 1;
+    }
     Object otel(bpf_object__open_mem(bytes.data(),bytes.size(),nullptr),bpf_object__close);
     if (!otel) return 1;
     unsigned count=0;
