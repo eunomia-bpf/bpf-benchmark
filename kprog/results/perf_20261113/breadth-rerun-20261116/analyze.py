@@ -1,17 +1,28 @@
 """Post-process one completed run with the frozen May workload parser."""
-import importlib.util
+import ast
+import hashlib
 import json
 import math
 from pathlib import Path
 import re
 import statistics
+from types import SimpleNamespace
+from typing import Any
 import sys
 
 ROOT = Path(__file__).resolve().parents[4]
-spec = importlib.util.spec_from_file_location('may_evaluation', ROOT/'kprog/docs/archive/native_eval_20260529.py')
-parser = importlib.util.module_from_spec(spec)
-sys.modules[spec.name] = parser
-spec.loader.exec_module(parser)
+source = (ROOT/'kprog/docs/archive/native_eval_20260529.py').read_bytes()
+# Execute the unchanged metric functions without importing the plot-only
+# dependencies or running the archive's paper-output routines.
+names = {'text_metrics', 'workload_metric', 'phase_samples', 'bpf_aggregate'}
+constants = {'STRESS_RE', 'OPS_RE', 'PPS_RE'}
+module = ast.parse(source)
+selected = [node for node in module.body if
+    (isinstance(node, ast.FunctionDef) and node.name in names) or
+    (isinstance(node, ast.Assign) and any(isinstance(n, ast.Name) and n.id in constants for n in node.targets))]
+namespace = dict(re=re, math=math, Any=Any)
+exec(compile(ast.Module(body=selected, type_ignores=[]), 'native_eval_20260529.metrics', 'exec'), namespace)
+parser = SimpleNamespace(**namespace)
 run, output = map(Path, sys.argv[1:3])
 metadata = json.loads((run/'metadata.json').read_text())
 app_files = list((run/'details/apps').glob('*.json'))
@@ -19,7 +30,7 @@ rows = []
 for path in app_files:
     app = json.loads(path.read_text())
     row = dict(app=app['app'], status=app['status'], error=app.get('error'), run=str(run),
-               stats=metadata['bpf_stats'], samples={}, tracked_programs={}, per_call_ns={})
+               stats=metadata['bpf_stats'], parser_sha256=hashlib.sha256(source).hexdigest(), samples={}, tracked_programs={}, per_call_ns={})
     errors = 0
     for phase in ('baseline', 'post_rejit'):
         samples = parser.phase_samples(app, phase)

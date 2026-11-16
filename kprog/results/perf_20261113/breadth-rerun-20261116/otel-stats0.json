@@ -1,0 +1,220 @@
+[
+  {
+    "app": "otelcol-ebpf-profiler/profiling",
+    "status": "ok",
+    "error": "",
+    "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_032555_782265",
+    "stats": false,
+    "parser_sha256": "8b3cd99572449d333000e6f05d1a73ad328a2e740721d369a48d87cad9599157",
+    "samples": {
+      "baseline": [
+        40774750.38737157,
+        39759785.76370517,
+        40450831.62746014
+      ],
+      "post_rejit": [
+        75471022.45883447,
+        75117431.6765518,
+        78452132.73585965
+      ]
+    },
+    "tracked_programs": {
+      "baseline": 13,
+      "post_rejit": 12
+    },
+    "per_call_ns": {
+      "baseline": null,
+      "post_rejit": null
+    },
+    "throughput_native_over_ebpf": 1.8657471162496644,
+    "workload_errors": 0,
+    "native_load_records": [
+      {
+        "pid": "1991",
+        "tid": "2002]",
+        "fd": "18",
+        "id": "22",
+        "type": "17",
+        "name": "read_task_struc",
+        "tag": "59f4a931744dcdc6",
+        "jited_len": "573",
+        "xlated_len": "16",
+        "nr_jited_ksyms": "1",
+        "ksym0": "0xffffffffc0401858",
+        "ksym1": "0x0"
+      },
+      {
+        "pid": "1991",
+        "tid": "2002]",
+        "fd": "71",
+        "id": "26",
+        "type": "7",
+        "name": "perf_unwind_sto",
+        "tag": "26449268576adffc",
+        "jited_len": "10955",
+        "xlated_len": "24",
+        "nr_jited_ksyms": "1",
+        "ksym0": "0xffffffffc0402b0c",
+        "ksym1": "0x0"
+      },
+      {
+        "pid": "1991",
+        "tid": "2002]",
+        "fd": "86",
+        "id": "28",
+        "type": "7",
+        "name": "perf_unwind_nat",
+        "tag": "26449268576adffc",
+        "jited_len": "30108",
+        "xlated_len": "24",
+        "nr_jited_ksyms": "1",
+        "ksym0": "0xffffffffc040bd10",
+        "ksym1": "0x0"
+      },
+      {
+        "pid": "1991",
+        "tid": "2002]",
+        "fd": "69",
+        "id": "30",
+        "type": "7",
+        "name": "perf_unwind_hot",
+        "tag": "26449268576adffc",
+        "jited_len": "41242",
+        "xlated_len": "24",
+        "nr_jited_ksyms": "1",
+        "ksym0": "0xffffffffc041ad4c",
+        "ksym1": "0x0"
+      },
+      {
+        "pid": "1991",
+        "tid": "2002]",
+        "fd": "68",
+        "id": "32",
+        "type": "7",
+        "name": "perf_unwind_per",
+        "tag": "26449268576adffc",
+        "jited_len": "41031",
+        "xlated_len": "24",
+        "nr_jited_ksyms": "1",
+        "ksym0": "0xffffffffc042cadc",
+        "ksym1": "0x0"
+      },
+      {
+        "pid": "1991",
+        "tid": "2002]",
+        "fd": "73",
+        "id": "34",
+        "type": "7",
+        "name": "perf_unwind_php",
+        "tag": "26449268576adffc",
+        "jited_len": "39420",
+        "xlated_len": "24",
+        "nr_jited_ksyms": "1",
+        "ksym0": "0xffffffffc043e558",
+        "ksym1": "0x0"
+      },
+      {
+        "pid": "1991",
+        "tid": "2002]",
+        "fd": "74",
+        "id": "36",
+        "type": "7",
+        "name": "perf_unwind_pyt",
+        "tag": "26449268576adffc",
+        "jited_len": "23143",
+        "xlated_len": "24",
+        "nr_jited_ksyms": "1",
+        "ksym0": "0xffffffffc04505f0",
+        "ksym1": "0x0"
+      },
+      {
+        "pid": "1991",
+        "tid": "2002]",
+        "fd": "76",
+        "id": "38",
+        "type": "7",
+        "name": "perf_unwind_rub",
+        "tag": "26449268576adffc",
+        "jited_len": "32966",
+        "xlated_len": "24",
+        "nr_jited_ksyms": "1",
+        "ksym0": "0xffffffffc045de90",
+        "ksym1": "0x0"
+      },
+      {
+        "pid": "1991",
+        "tid": "2002]",
+        "fd": "80",
+        "id": "40",
+        "type": "7",
+        "name": "perf_unwind_v8",
+        "tag": "26449268576adffc",
+        "jited_len": "39891",
+        "xlated_len": "24",
+        "nr_jited_ksyms": "1",
+        "ksym0": "0xffffffffc046f40c",
+        "ksym1": "0x0"
+      },
+      {
+        "pid": "1991",
+        "tid": "2002]",
+        "fd": "82",
+        "id": "42",
+        "type": "7",
+        "name": "perf_unwind_dot",
+        "tag": "26449268576adffc",
+        "jited_len": "39584",
+        "xlated_len": "24",
+        "nr_jited_ksyms": "1",
+        "ksym0": "0xffffffffc0482c8c",
+        "ksym1": "0x0"
+      },
+      {
+        "pid": "1991",
+        "tid": "2002]",
+        "fd": "79",
+        "id": "44",
+        "type": "7",
+        "name": "perf_go_labels",
+        "tag": "59f4a931744dcdc6",
+        "jited_len": "6141",
+        "xlated_len": "16",
+        "nr_jited_ksyms": "1",
+        "ksym0": "0xffffffffc04906d4",
+        "ksym1": "0x0"
+      },
+      {
+        "pid": "1991",
+        "tid": "2002]",
+        "fd": "85",
+        "id": "46",
+        "type": "5",
+        "name": "tracepoint__sch",
+        "tag": "59f4a931744dcdc6",
+        "jited_len": "4290",
+        "xlated_len": "16",
+        "nr_jited_ksyms": "1",
+        "ksym0": "0xffffffffc0492a68",
+        "ksym1": "0x0"
+      },
+      {
+        "pid": "1991",
+        "tid": "2002]",
+        "fd": "93",
+        "id": "48",
+        "type": "7",
+        "name": "native_tracer_e",
+        "tag": "26449268576adffc",
+        "jited_len": "10450",
+        "xlated_len": "24",
+        "nr_jited_ksyms": "1",
+        "ksym0": "0xffffffffc0495354",
+        "ksym1": "0x0"
+      }
+    ],
+    "native_load_errors": [
+      "[809.317115 pid=1991 tid=2002] native-loader failed prog=custom__generic manifest=/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/manifest.json source=/tmp/bpfrejit_1991_eb219a11a761bd46.bpf error=BPF_PROG_LOAD native_lab stub: Invalid argument",
+      "[809.328006 pid=1991 tid=2002] native-loader failed prog=custom__generic manifest=/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/manifest.json source=/tmp/bpfrejit_1991_eb219a11a761bd46.bpf error=BPF_PROG_LOAD native_lab stub: Invalid argument"
+    ]
+  }
+]
