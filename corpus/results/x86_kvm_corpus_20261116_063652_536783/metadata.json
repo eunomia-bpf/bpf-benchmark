@@ -1,0 +1,39 @@
+{
+  "bpf_stats": false,
+  "config": {
+    "enabled_passes": [
+      "noop",
+      "map_inline",
+      "const_prop",
+      "dce",
+      "rotate",
+      "cond_select",
+      "extract",
+      "endian_fusion",
+      "lea",
+      "ccmp",
+      "bulk_memory",
+      "prefetch",
+      "wide_mem",
+      "bounds_check_merge",
+      "skb_load_bytes_spec",
+      "noop",
+      "const_prop",
+      "dce"
+    ]
+  },
+  "details_dir": "details",
+  "generated_at": "2026-11-16T06:36:52.538341+00:00",
+  "last_updated_at": "2026-11-16T06:36:52.538334+00:00",
+  "launcher_boot_id": "f108bcc1-1854-4dbb-a170-bfd35af6da01",
+  "launcher_pid": 1798,
+  "launcher_start_ticks": 8923,
+  "manifest": "/workspaces/repository/corpus/config/macro_apps.yaml",
+  "run_type": "x86_kvm_corpus",
+  "samples": 1,
+  "started_at": "2026-11-16T06:36:52.536783+00:00",
+  "status": "running",
+  "suite": "corpus",
+  "workload_only": false,
+  "workload_seconds": 10.0
+}

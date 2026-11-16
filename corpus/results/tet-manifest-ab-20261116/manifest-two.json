@@ -1,0 +1,555 @@
+{
+  "app": "tetragon",
+  "map_rules": [
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 2,
+      "object_scoped": true,
+      "pattern": "execve_calls",
+      "type": 3,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 8,
+      "object_scoped": true,
+      "pattern": "tcpmon_map",
+      "type": 4,
+      "value_size": 4
+    },
+    {
+      "match": "exact",
+      "max_entries": 524288,
+      "object_scoped": true,
+      "pattern": "tg_rb_events",
+      "type": 27
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "buffer_heap_map",
+      "type": 6,
+      "value_size": 4352
+    },
+    {
+      "exclude": "string_maps_heap",
+      "key_size": 4,
+      "match": "prefix",
+      "max_entries": 8,
+      "object_scoped": true,
+      "pattern": "string_maps_",
+      "type": 12,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "string_maps_heap",
+      "type": 6,
+      "value_size": 16384
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "substring_map",
+      "type": 2,
+      "value_size": 100
+    },
+    {
+      "key_size": 12,
+      "match": "exact",
+      "max_entries": 1024,
+      "object_scoped": true,
+      "pattern": "tg_errmetrics_map",
+      "type": 10,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_conf_map",
+      "type": 2,
+      "value_size": 48
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "policy_conf",
+      "type": 2,
+      "value_size": 1
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "execve_msg_heap_map",
+      "type": 6,
+      "value_size": 6224
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_binary_heap",
+      "type": 6,
+      "value_size": 792
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_parents_bin",
+      "type": 9,
+      "value_size": 792
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 32768,
+      "object_scoped": true,
+      "pattern": "execve_map",
+      "type": 1,
+      "value_size": 896
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 3,
+      "object_scoped": true,
+      "pattern": "execve_map_stats",
+      "type": 6,
+      "value_size": 8
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "execve_val",
+      "type": 6,
+      "value_size": 896
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "execve_heap",
+      "type": 6,
+      "value_size": 4112
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 8192,
+      "object_scoped": true,
+      "pattern": "tg_execve_joined_info_map",
+      "type": 9,
+      "value_size": 16
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 3,
+      "object_scoped": true,
+      "pattern": "tg_execve_joined_info_map_stats",
+      "type": 6,
+      "value_size": 8
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_stats_map",
+      "type": 6,
+      "value_size": 14336
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 32768,
+      "object_scoped": true,
+      "pattern": "tg_cgrps_tracking_map",
+      "type": 1,
+      "value_size": 144
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_cgrps_tracking_heap",
+      "type": 6,
+      "value_size": 144
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_cgrps_msg_heap",
+      "type": 6,
+      "value_size": 4312
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_cgtracker_map",
+      "type": 1,
+      "value_size": 8
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 8,
+      "object_scoped": true,
+      "pattern": "string_prefix_maps",
+      "type": 12,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "string_prefix_maps_heap",
+      "type": 6,
+      "value_size": 260
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 8,
+      "object_scoped": true,
+      "pattern": "string_postfix_maps",
+      "type": 12,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "string_postfix_maps_heap",
+      "type": 6,
+      "value_size": 132
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "cgroup_rate_options_map",
+      "type": 2,
+      "value_size": 16
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "cgroup_rate_map",
+      "type": 5,
+      "value_size": 40
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "throttle_heap_map",
+      "type": 6,
+      "value_size": 160
+    },
+    {
+      "key_size": 256,
+      "match": "exact",
+      "max_entries": 1024,
+      "object_scoped": true,
+      "pattern": "tg_mbset_map",
+      "type": 1,
+      "value_size": 8
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_mbset_gen",
+      "type": 2,
+      "value_size": 8
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "data_heap",
+      "type": 6,
+      "value_size": 32768
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "heap_ro_zero",
+      "type": 2,
+      "value_size": 16384
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "heap",
+      "type": 6,
+      "value_size": 4104
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "process_call_heap",
+      "type": 6,
+      "value_size": 25632
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "override_tasks",
+      "type": 1,
+      "value_size": 4
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "enforcer_data",
+      "type": 1,
+      "value_size": 12
+    },
+    {
+      "key_size": 12,
+      "match": "exact",
+      "max_entries": 128,
+      "object_scoped": true,
+      "pattern": "enforcer_missed_notifications",
+      "type": 1,
+      "value_size": 4
+    },
+    {
+      "key_size": 224,
+      "match": "exact",
+      "object_scoped": true,
+      "pattern": "ratelimit_map",
+      "type": 9,
+      "value_size": 8
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "ratelimit_heap",
+      "type": 6,
+      "value_size": 352
+    },
+    {
+      "key_size": 16,
+      "match": "exact",
+      "max_entries": 1024,
+      "object_scoped": true,
+      "pattern": "retprobe_map",
+      "type": 1,
+      "value_size": 24
+    },
+    {
+      "key_size": 16,
+      "match": "exact",
+      "object_scoped": true,
+      "pattern": "fdinstall_map",
+      "type": 9,
+      "value_size": 4104
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "object_scoped": true,
+      "pattern": "stack_trace_map",
+      "type": 7,
+      "value_size": 1016
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "object_scoped": true,
+      "pattern": "sleepable_preload",
+      "type": 1,
+      "value_size": 4100
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "tg_ipv6_ext_heap",
+      "type": 6,
+      "value_size": 8
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 10,
+      "object_scoped": true,
+      "pattern": "tg_mb_sel_opts",
+      "type": 2,
+      "value_size": 12
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 10,
+      "object_scoped": true,
+      "pattern": "tg_mb_paths",
+      "type": 12,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 8,
+      "object_scoped": true,
+      "pattern": "addr4lpm_maps",
+      "type": 12,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 8,
+      "object_scoped": true,
+      "pattern": "addr6lpm_maps",
+      "type": 12,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "policy_stats",
+      "type": 2,
+      "value_size": 80
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "filter_map",
+      "type": 2,
+      "value_size": 4096
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "config_map",
+      "type": 2,
+      "value_size": 736
+    },
+    {
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "write_offload",
+      "type": 1,
+      "value_size": 16
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 8,
+      "object_scoped": true,
+      "pattern": "argfilter_maps",
+      "type": 12,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 8,
+      "inner_max_entries": 1,
+      "inner_type": 1,
+      "inner_value_size": 1,
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 128,
+      "object_scoped": true,
+      "pattern": "policy_filter_maps",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "inner_key_size": 4,
+      "inner_max_entries": 128,
+      "inner_type": 1,
+      "inner_value_size": 1,
+      "key_size": 8,
+      "match": "exact",
+      "max_entries": 1024,
+      "object_scoped": true,
+      "pattern": "policy_filter_cgroup_maps",
+      "type": 13,
+      "value_size": 4
+    },
+    {
+      "key_size": 4,
+      "match": "exact",
+      "max_entries": 1,
+      "object_scoped": true,
+      "pattern": "exit_heap_map",
+      "type": 6,
+      "value_size": 40
+    }
+  ],
+  "objects": [
+    {
+      "native_object": "bpf_exit_v511.native.o",
+      "program": "event_exit_acct",
+      "source_lacks_helper": 174,
+      "symbol": "event_exit_acct_process"
+    },
+    {
+      "native_object": "bpf_exit_v511.native.o",
+      "program": "event_exit_disa",
+      "source_lacks_helper": 174,
+      "symbol": "event_exit_disassociate_ctty"
+    }
+  ],
+  "status": "native-objects-proof-linked",
+  "version": 1
+}
