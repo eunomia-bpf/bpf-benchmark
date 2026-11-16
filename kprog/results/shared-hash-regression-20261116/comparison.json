@@ -1,0 +1,174 @@
+{
+  "scope": "Compare the two hash implementations, retaining each case's JIT control.",
+  "diagnostic": "one 60-second sample/case, four vCPUs on 20-23",
+  "apps": {
+    "katran": {
+      "cases": {
+        "shared": {
+          "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_210136_729192",
+          "status": "ok",
+          "jit_ns_per_call": 207.04446528124754,
+          "native_ns_per_call": 204.53195508971544,
+          "jit_bytes": 13641,
+          "native_bytes": 10546,
+          "jit_over_native_per_call": 1.0122841938827114,
+          "workload": {
+            "jit_pps": [
+              2505432
+            ],
+            "native_pps": [
+              2440796
+            ]
+          }
+        },
+        "copy": {
+          "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_210724_159080",
+          "status": "ok",
+          "jit_ns_per_call": 205.67870985758756,
+          "native_ns_per_call": 205.78053041395452,
+          "jit_bytes": 13641,
+          "native_bytes": 12995,
+          "jit_over_native_per_call": 0.9995051982995566,
+          "workload": {
+            "jit_pps": [
+              2510395
+            ],
+            "native_pps": [
+              2428858
+            ]
+          }
+        }
+      },
+      "native_shared_over_copy_ns": 0.9939324904949588,
+      "copy_over_shared_control_normalized_per_call": 0.9873760791086348,
+      "copy_added_installed_bytes": 2449
+    },
+    "otel": {
+      "cases": {
+        "shared": {
+          "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_211320_080784",
+          "status": "ok",
+          "jit_ns_per_call": 4156.393777862978,
+          "native_ns_per_call": 5286.144553856474,
+          "jit_bytes": 167504,
+          "native_bytes": 303930,
+          "jit_over_native_per_call": 0.7862807638944922,
+          "workload": {
+            "scope": "integer-loop operations exclude stress-ng; not official throughput summary",
+            "jit_languages": [
+              {
+                "python3": {
+                  "operations": 34626679,
+                  "ops_per_second": 577110.4972378258
+                },
+                "ruby": {
+                  "operations": 182792870,
+                  "ops_per_second": 3046545.670492514
+                },
+                "nodejs": {
+                  "operations": 121704968,
+                  "ops_per_second": 2028396.0957378123
+                },
+                "perl": {
+                  "operations": 59808883,
+                  "ops_per_second": 996765.7234878859
+                },
+                "php": {
+                  "operations": 348709733,
+                  "ops_per_second": 5811158.89113163
+                }
+              }
+            ],
+            "native_languages": [
+              {
+                "python3": {
+                  "operations": 7496299,
+                  "ops_per_second": 124938.0273284302
+                },
+                "ruby": {
+                  "operations": 134369831,
+                  "ops_per_second": 2239494.6977002
+                },
+                "nodejs": {
+                  "operations": 91505223,
+                  "ops_per_second": 1525066.4632924697
+                },
+                "perl": {
+                  "operations": 36299830,
+                  "ops_per_second": 604965.5802973253
+                },
+                "php": {
+                  "operations": 273802080,
+                  "ops_per_second": 4562526.802375399
+                }
+              }
+            ]
+          }
+        },
+        "copy": {
+          "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_212124_709294",
+          "status": "ok",
+          "jit_ns_per_call": 4095.347104859328,
+          "native_ns_per_call": 5158.973902753814,
+          "jit_bytes": 167504,
+          "native_bytes": 330869,
+          "jit_over_native_per_call": 0.7938297774046246,
+          "workload": {
+            "scope": "integer-loop operations exclude stress-ng; not official throughput summary",
+            "jit_languages": [
+              {
+                "python3": {
+                  "operations": 33234571,
+                  "ops_per_second": 553908.8842717395
+                },
+                "ruby": {
+                  "operations": 174387866,
+                  "ops_per_second": 2906462.8400777234
+                },
+                "nodejs": {
+                  "operations": 118703966,
+                  "ops_per_second": 1978384.6793180718
+                },
+                "perl": {
+                  "operations": 62343862,
+                  "ops_per_second": 1038908.2871465776
+                },
+                "php": {
+                  "operations": 355076035,
+                  "ops_per_second": 5916787.918976195
+                }
+              }
+            ],
+            "native_languages": [
+              {
+                "python3": {
+                  "operations": 5180010,
+                  "ops_per_second": 86327.54584210474
+                },
+                "ruby": {
+                  "operations": 144035657,
+                  "ops_per_second": 2400592.3980885744
+                },
+                "nodejs": {
+                  "operations": 115342060,
+                  "ops_per_second": 1922354.8723352295
+                },
+                "perl": {
+                  "operations": 32920778,
+                  "ops_per_second": 548679.5557050774
+                },
+                "php": {
+                  "operations": 282625001,
+                  "ops_per_second": 4709304.8672534935
+                }
+              }
+            ]
+          }
+        }
+      },
+      "native_shared_over_copy_ns": 1.0246503768966106,
+      "copy_over_shared_control_normalized_per_call": 1.0096009133846053,
+      "copy_added_installed_bytes": 26939
+    }
+  }
+}

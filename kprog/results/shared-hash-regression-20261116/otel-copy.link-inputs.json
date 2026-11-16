@@ -1,0 +1,591 @@
+[
+  {
+    "symbol": "perf_unwind_perl",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-cey5o1zv",
+    "adapter": {
+      "mode": "copy-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/92636e9d65bfadf2.tmp.2223.proof.o",
+        "--symbol",
+        "perf_unwind_perl",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/92636e9d65bfadf2.tmp.2223.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/92636e9d65bfadf2.tmp.2223.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/92636e9d65bfadf2.tmp.2223.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/92636e9d65bfadf2.tmp.2223.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/92636e9d65bfadf2.tmp.2223.link-plan.json"
+      ],
+      "redirected_calls": 1,
+      "original_calls": [
+        [
+          142,
+          18446744072523377104
+        ]
+      ],
+      "shift": 2449,
+      "copied_range": [
+        5,
+        2449
+      ],
+      "fallback_offset": 2439
+    },
+    "payload_bytes": 43022
+  },
+  {
+    "symbol": "perf_unwind_hotspot",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-unxqokkp",
+    "adapter": {
+      "mode": "copy-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/e0291b538c9c4578.tmp.2223.proof.o",
+        "--symbol",
+        "perf_unwind_hotspot",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/e0291b538c9c4578.tmp.2223.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/e0291b538c9c4578.tmp.2223.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/e0291b538c9c4578.tmp.2223.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/e0291b538c9c4578.tmp.2223.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/e0291b538c9c4578.tmp.2223.link-plan.json"
+      ],
+      "redirected_calls": 0,
+      "shift": 0
+    },
+    "payload_bytes": 41232
+  },
+  {
+    "symbol": "perf_unwind_python",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-xsi4gkp_",
+    "adapter": {
+      "mode": "copy-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/3138f84c865d8fd5.tmp.2223.proof.o",
+        "--symbol",
+        "perf_unwind_python",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/3138f84c865d8fd5.tmp.2223.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/3138f84c865d8fd5.tmp.2223.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/3138f84c865d8fd5.tmp.2223.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/3138f84c865d8fd5.tmp.2223.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/3138f84c865d8fd5.tmp.2223.link-plan.json"
+      ],
+      "redirected_calls": 1,
+      "original_calls": [
+        [
+          140,
+          18446744072523377104
+        ]
+      ],
+      "shift": 2449,
+      "copied_range": [
+        5,
+        2449
+      ],
+      "fallback_offset": 2439
+    },
+    "payload_bytes": 23102
+  },
+  {
+    "symbol": "perf_unwind_dotnet",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-lom6ua3f",
+    "adapter": {
+      "mode": "copy-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/02e77ea34acc7514.tmp.2223.proof.o",
+        "--symbol",
+        "perf_unwind_dotnet",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/02e77ea34acc7514.tmp.2223.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/02e77ea34acc7514.tmp.2223.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/02e77ea34acc7514.tmp.2223.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/02e77ea34acc7514.tmp.2223.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/02e77ea34acc7514.tmp.2223.link-plan.json"
+      ],
+      "redirected_calls": 7,
+      "original_calls": [
+        [
+          135,
+          18446744072523377104
+        ],
+        [
+          4066,
+          18446744072523377104
+        ],
+        [
+          10305,
+          18446744072523377104
+        ],
+        [
+          15445,
+          18446744072523377104
+        ],
+        [
+          20813,
+          18446744072523377104
+        ],
+        [
+          25136,
+          18446744072523377104
+        ],
+        [
+          34702,
+          18446744072523377104
+        ]
+      ],
+      "shift": 2449,
+      "copied_range": [
+        5,
+        2449
+      ],
+      "fallback_offset": 2439
+    },
+    "payload_bytes": 39543
+  },
+  {
+    "symbol": "read_task_struct",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-bu5tsqj9",
+    "adapter": {
+      "mode": "copy-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/5697173b68239db7.tmp.2223.proof.o",
+        "--symbol",
+        "read_task_struct",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/5697173b68239db7.tmp.2223.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/5697173b68239db7.tmp.2223.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/5697173b68239db7.tmp.2223.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/5697173b68239db7.tmp.2223.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/5697173b68239db7.tmp.2223.link-plan.json"
+      ],
+      "redirected_calls": 0,
+      "shift": 0
+    },
+    "payload_bytes": 541
+  },
+  {
+    "symbol": "perf_unwind_native",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-d6qdvioj",
+    "adapter": {
+      "mode": "copy-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/0a023162a7ccde5a.tmp.2223.proof.o",
+        "--symbol",
+        "perf_unwind_native",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/0a023162a7ccde5a.tmp.2223.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/0a023162a7ccde5a.tmp.2223.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/0a023162a7ccde5a.tmp.2223.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/0a023162a7ccde5a.tmp.2223.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/0a023162a7ccde5a.tmp.2223.link-plan.json"
+      ],
+      "redirected_calls": 0,
+      "shift": 0
+    },
+    "payload_bytes": 30206
+  },
+  {
+    "symbol": "perf_unwind_stop",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-j_3bzz7q",
+    "adapter": {
+      "mode": "copy-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/8ea1221362577cd0.tmp.2223.proof.o",
+        "--symbol",
+        "perf_unwind_stop",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/8ea1221362577cd0.tmp.2223.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/8ea1221362577cd0.tmp.2223.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/8ea1221362577cd0.tmp.2223.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/8ea1221362577cd0.tmp.2223.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/8ea1221362577cd0.tmp.2223.link-plan.json"
+      ],
+      "redirected_calls": 3,
+      "original_calls": [
+        [
+          111,
+          18446744072523377104
+        ],
+        [
+          2496,
+          18446744072523377104
+        ],
+        [
+          3931,
+          18446744072523377104
+        ]
+      ],
+      "shift": 2449,
+      "copied_range": [
+        5,
+        2449
+      ],
+      "fallback_offset": 2439
+    },
+    "payload_bytes": 10914
+  },
+  {
+    "symbol": "custom__generic",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-wrhe5p8b",
+    "adapter": {
+      "mode": "copy-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/9a6a2cda13db6f40.tmp.2223.proof.o",
+        "--symbol",
+        "custom__generic",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/9a6a2cda13db6f40.tmp.2223.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/9a6a2cda13db6f40.tmp.2223.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/9a6a2cda13db6f40.tmp.2223.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/9a6a2cda13db6f40.tmp.2223.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/9a6a2cda13db6f40.tmp.2223.link-plan.json"
+      ],
+      "redirected_calls": 2,
+      "original_calls": [
+        [
+          1007,
+          18446744072523377104
+        ],
+        [
+          4016,
+          18446744072523377104
+        ]
+      ],
+      "shift": 2449,
+      "copied_range": [
+        5,
+        2449
+      ],
+      "fallback_offset": 2439
+    },
+    "payload_bytes": 9216
+  },
+  {
+    "symbol": "perf_unwind_v8",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-rcyw83db",
+    "adapter": {
+      "mode": "copy-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/507a6d782b7a2b45.tmp.2223.proof.o",
+        "--symbol",
+        "perf_unwind_v8",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/507a6d782b7a2b45.tmp.2223.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/507a6d782b7a2b45.tmp.2223.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/507a6d782b7a2b45.tmp.2223.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/507a6d782b7a2b45.tmp.2223.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/507a6d782b7a2b45.tmp.2223.link-plan.json"
+      ],
+      "redirected_calls": 9,
+      "original_calls": [
+        [
+          134,
+          18446744072523377104
+        ],
+        [
+          3061,
+          18446744072523377104
+        ],
+        [
+          9896,
+          18446744072523377104
+        ],
+        [
+          13716,
+          18446744072523377104
+        ],
+        [
+          17787,
+          18446744072523377104
+        ],
+        [
+          24145,
+          18446744072523377104
+        ],
+        [
+          28082,
+          18446744072523377104
+        ],
+        [
+          32019,
+          18446744072523377104
+        ],
+        [
+          35987,
+          18446744072523377104
+        ]
+      ],
+      "shift": 2449,
+      "copied_range": [
+        5,
+        2449
+      ],
+      "fallback_offset": 2439
+    },
+    "payload_bytes": 39947
+  },
+  {
+    "symbol": "perf_unwind_ruby",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-m65yo76j",
+    "adapter": {
+      "mode": "copy-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/7b304976b0a1ba5f.tmp.2223.proof.o",
+        "--symbol",
+        "perf_unwind_ruby",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/7b304976b0a1ba5f.tmp.2223.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/7b304976b0a1ba5f.tmp.2223.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/7b304976b0a1ba5f.tmp.2223.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/7b304976b0a1ba5f.tmp.2223.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/7b304976b0a1ba5f.tmp.2223.link-plan.json"
+      ],
+      "redirected_calls": 1,
+      "original_calls": [
+        [
+          116,
+          18446744072523377104
+        ]
+      ],
+      "shift": 2449,
+      "copied_range": [
+        5,
+        2449
+      ],
+      "fallback_offset": 2439
+    },
+    "payload_bytes": 32925
+  },
+  {
+    "symbol": "tracepoint__sched_process_free",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-tle2qnmn",
+    "adapter": {
+      "mode": "copy-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/fb1f5a9fd1899bb9.tmp.2223.proof.o",
+        "--symbol",
+        "tracepoint__sched_process_free",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/fb1f5a9fd1899bb9.tmp.2223.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/fb1f5a9fd1899bb9.tmp.2223.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/fb1f5a9fd1899bb9.tmp.2223.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/fb1f5a9fd1899bb9.tmp.2223.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/fb1f5a9fd1899bb9.tmp.2223.link-plan.json"
+      ],
+      "redirected_calls": 2,
+      "original_calls": [
+        [
+          34,
+          18446744072523377104
+        ],
+        [
+          180,
+          18446744072523377104
+        ]
+      ],
+      "shift": 2449,
+      "copied_range": [
+        5,
+        2449
+      ],
+      "fallback_offset": 2439
+    },
+    "payload_bytes": 4263
+  },
+  {
+    "symbol": "perf_go_labels",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-2hqznbn8",
+    "adapter": {
+      "mode": "copy-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/0a739c46eaf643e2.tmp.2223.proof.o",
+        "--symbol",
+        "perf_go_labels",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/0a739c46eaf643e2.tmp.2223.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/0a739c46eaf643e2.tmp.2223.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/0a739c46eaf643e2.tmp.2223.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/0a739c46eaf643e2.tmp.2223.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/0a739c46eaf643e2.tmp.2223.link-plan.json"
+      ],
+      "redirected_calls": 1,
+      "original_calls": [
+        [
+          110,
+          18446744072523377104
+        ]
+      ],
+      "shift": 2449,
+      "copied_range": [
+        5,
+        2449
+      ],
+      "fallback_offset": 2439
+    },
+    "payload_bytes": 6114
+  },
+  {
+    "symbol": "native_tracer_entry",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-kepi5rug",
+    "adapter": {
+      "mode": "copy-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/52b051eee9f90162.tmp.2223.proof.o",
+        "--symbol",
+        "native_tracer_entry",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/52b051eee9f90162.tmp.2223.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/52b051eee9f90162.tmp.2223.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/52b051eee9f90162.tmp.2223.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/52b051eee9f90162.tmp.2223.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/52b051eee9f90162.tmp.2223.link-plan.json"
+      ],
+      "redirected_calls": 2,
+      "original_calls": [
+        [
+          1376,
+          18446744072523377104
+        ],
+        [
+          4468,
+          18446744072523377104
+        ]
+      ],
+      "shift": 2449,
+      "copied_range": [
+        5,
+        2449
+      ],
+      "fallback_offset": 2439
+    },
+    "payload_bytes": 10436
+  },
+  {
+    "symbol": "perf_unwind_php",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-f97g_9hm",
+    "adapter": {
+      "mode": "copy-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/678f5e5164efdb31.tmp.2223.proof.o",
+        "--symbol",
+        "perf_unwind_php",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/678f5e5164efdb31.tmp.2223.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/678f5e5164efdb31.tmp.2223.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/678f5e5164efdb31.tmp.2223.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/678f5e5164efdb31.tmp.2223.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/678f5e5164efdb31.tmp.2223.link-plan.json"
+      ],
+      "redirected_calls": 1,
+      "original_calls": [
+        [
+          120,
+          18446744072523377104
+        ]
+      ],
+      "shift": 2449,
+      "copied_range": [
+        5,
+        2449
+      ],
+      "fallback_offset": 2439
+    },
+    "payload_bytes": 39379
+  }
+]

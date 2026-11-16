@@ -33,3 +33,7 @@ profile:
 .PHONY: costs
 costs:
 	DEBUGINFOD_URLS= python3 $(HERE)/costs.py $(RAW) $(CASE) > $(RAW)/$(CASE).costs.log 2>&1
+
+.PHONY: compare
+compare:
+	python3 $(HERE)/compare.py $(RAW) > $(RAW)/comparison.log

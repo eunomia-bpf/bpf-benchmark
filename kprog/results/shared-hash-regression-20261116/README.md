@@ -1,8 +1,9 @@
 Shared-hash regression investigation, 2026-11-16
 
 Coordinator20:20 requests before/after-f45bb2485 diagnostics on image6641a7e1,
-CPUs16-23, for OTel and Katran. Actual body/helper/map per-call comparison is
-still open. The result-local diagnostic below is ready to run.
+CPUs16-23, for OTel and Katran. Both diagnostic pairs are now complete; the
+counter, installed-byte and sampled cost comparisons appear below. Historical
+regression attribution and the official performance targets remain open.
 
 Static audit (audit.json): build_x86_lookup_call_postprocess is text-identical
 before and after f45bb2485. The kernel raw __htab_map_lookup_elem returns an
@@ -158,3 +159,42 @@ unwinder activity; retained logs contain no UnwindNativeAttempts/Frames metric
 scrape, so they do not establish matching unwind totals or mix. This missing
 supplement does not discard the completed run. The copied case is running.
 The hash comparison remains open until that case completes.
+
+OTel pair completed
+
+Copied run x86_kvm_corpus_20261116_212124_709294 completes with app status ok
+and exit zero. Eleven installed routines match the retained code outside the
+external fallback-call displacement, with 30 typed raw calls redirected.
+The unchanged native unwinder and hotspot programs have no typed raw-hash
+calls; their generic map operations remain with the kernel.
+
+| Measure | Shared case | Copied case |
+|---|---:|---:|
+| JIT counter ns/app call | 4156.394 | 4095.347 |
+| Native counter ns/app call | 5286.145 | 5158.974 |
+| JIT/native per-call ratio | 0.78628x | 0.79383x |
+| Installed native bytes | 303930 | 330869 |
+| Native remaining-text cycles/app call | 3570.823 | 3549.844 |
+| Native copied-hash cycles/app call | 0 | 251.796 |
+| Native LPM dispatch/lookup cycles/app call | 4333.540 | 4385.125 |
+| Native ARRAY dispatch cycles/app call | 1429.922 | 1365.152 |
+| Native user probe-read cycles/app call | 2393.348 | 2392.433 |
+| Native kernel probe-read cycles/app call | 9.365 | 6.612 |
+| External hash root cycles/app call, unowned | 1934.717 | 1632.635 |
+| JIT integer-loop operations, excluding stress-ng | 747643133 | 743746300 |
+| Native integer-loop operations, excluding stress-ng | 543473263 | 580103506 |
+
+Copy improves native counter time by 2.4% in these two cases; its own JIT
+control is also 1.5% faster. The control-normalized per-call gain is 1.00960x,
+for 26939 additional installed bytes (eleven additions of 2449 B). That small
+change does not explain the reported 1.021x to 0.801x historical throughput
+change. LPM/ARRAY dispatch and probe-read costs remain large with either hash
+routine. Root-cycle ownership and one-sample/placement limitations above still
+apply, and exact unwind-counter equality remains unmeasured.
+
+`make -f kprog/results/shared-hash-regression-20261116/Makefile compare`
+reproduces comparison.json from all four completed cost reports. The copied
+routine is retained as diagnostic input; the production shared-hash path stays.
+Controller 1908860 is terminal and diagnostic CPUs 20-23 are released. The next
+coordinator item is Katran's three-sample decay, using C's stats-on result when
+it lands, before the cb-offset item.
