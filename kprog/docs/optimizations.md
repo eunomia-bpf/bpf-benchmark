@@ -578,3 +578,14 @@ scope and raw recordings: `../results/perf_20261113/host-input-route/report.md`.
 2026-11-16T07:39:50Z Tetragon G final ABI form: read-write RAX and argument operands plus remaining SysV clobbers, preserving explicit helper CALL sites. Supersedes the ordinary-C-call form after real plan replay exposed its numeric helper tail exits. Final224/224 register vectors and actual-plan conditional-helper proof/kernel emission pass (46B input,633B image,2relocations). Canonical P/runtime retry remains pending; flags/allLTO unchanged. `perf_20261113/tetragon-helper-abi/read-write.json`.
 
 2026-11-16T09:01:39Z phase1 section entry retention: embedded LLVM aggregation now preserves explicitly sectioned program roots, and trusted PERF_EVENT LTO retains the selected entry before O3. Ordinary internal helper linkage, native machine-object generation and uniform flags stay unchanged. Public/loader/static context subsets each pass256 cases; actual OTel perf_go_labels survives aggregation and trusted conversion/proof. No app counter parity or timing gain yet. `perf_20261113/perf-entry-roots/`.
+
+
+2026-11-16T10:43:11Z — Phase 1 generated-function correctness: 0f5c55894 moves the
+existing exact constant-leaf lowering into one shared implementation used by
+producer lowering and trusted runtime LTO. Supplied current-load instruction
+semantics determine native bodies before O3. Both compilers pass six constants
+by 48 real ABI vectors; absent-facts producer output stays byte-identical.
+Public/loader/static PERF_EVENT regressions each pass 256 contexts. This is
+runtime compiler wiring, with no performance claim or image publication;
+metadata extraction, P/B binding and nonconstant bodies remain open.
+Receipts: perf_20261113/runtime-bpf-functions.
