@@ -395,7 +395,7 @@ constexpr const char *kX86TailCallOffsetKey = "__native_x86_tail_call_offset";
 constexpr const char *kArm64ThreadInfoCpuOffsetHelperKey =
     "__native_arm64_thread_info_cpu_offset";
 constexpr const char *kNativeLinkCacheDir = "/tmp/native_kernel_link_cache";
-constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v43";
+constexpr const char *kNativeLinkCacheVersion = "native-link-template-cache-v44";
 constexpr const char *kNativeStubBtfCachePath = "/tmp/native_kernel_stub_btf.tsv";
 constexpr const char *kNativeStubBtfCacheVersion = "native-stub-btf-cache-v1";
 constexpr const char *kHtabLookupElemSymbol = "__htab_map_lookup_elem";
@@ -2148,20 +2148,16 @@ struct NativeLinkArgs {
         std::string name;
         LookupSite site;
     };
-    struct UpdateSite {
-        std::string kind;
-        uint64_t target_addr = 0;
-        uint32_t max_entries = 0;
-        uint32_t elem_size = 0;
-        uint32_t value_size = 0;
-        uint32_t value_offset = 0;
-        uint64_t percpu_base_addr = 0;
+    struct MapOps {
+        std::string name;
+        uint64_t update = 0;
+        uint64_t remove = 0;
     };
     std::vector<NameAddr> helpers;
     std::vector<NameAddr> maps;
     std::vector<LookupSite> lookup_sites;
     std::vector<LookupMap> lookup_maps;
-    std::vector<UpdateSite> update_sites;
+    std::vector<MapOps> map_ops;
 };
 
 struct LinkedBlob {
@@ -2229,16 +2225,7 @@ struct CompanionLoad {
         std::string map_name;
     };
     std::vector<LookupSite> lookup_sites;
-    struct UpdateSite {
-        enum class Kind { Call, Array, PerCpuArray } kind;
-        uint64_t target_addr;
-        uint32_t max_entries;
-        uint32_t elem_size;
-        uint32_t value_size;
-        uint32_t value_offset;
-        uint64_t percpu_base_addr;
-    };
-    std::vector<UpdateSite> update_sites;
+    std::unordered_map<uint32_t, NativeLinkArgs::MapOps> map_ops;
 };
 
 void add_exact_map_meta(CompanionLoad &load, const MapMeta &meta)
@@ -3061,43 +3048,19 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
                                                 this_cpu_off_addr);
             }
             out.lookup_sites.push_back(site);
-        } else if (call.helper_id == BPF_FUNC_map_update_elem) {
-            CompanionLoad::UpdateSite site{
-                CompanionLoad::UpdateSite::Kind::Call,
-                helper_kernel_addr(BPF_FUNC_map_update_elem),
-                0,
-                0,
-                0,
-                0,
-                0,
-            };
+        } else if (call.helper_id == BPF_FUNC_map_update_elem ||
+                   call.helper_id == BPF_FUNC_map_delete_elem) {
             if (map_it != meta_by_source_fd.end()) {
-                const uint32_t value_size = map_it->second.value_size;
-                const bool simple_value =
-                    value_size == 1 || value_size == 2 ||
-                    value_size == 4 || value_size == 8;
-                int t = map_it->second.type;
-                if (simple_value && t == BPF_MAP_TYPE_ARRAY) {
-                    site.kind = CompanionLoad::UpdateSite::Kind::Array;
-                    site.max_entries = map_it->second.max_entries;
-                    site.elem_size = (value_size + 7u) & ~7u;
-                    site.value_size = value_size;
-                    site.value_offset = array_offsets.value;
-                } else if (simple_value && t == BPF_MAP_TYPE_PERCPU_ARRAY) {
-#if defined(__x86_64__)
-                    if (this_cpu_off_addr == 0) {
-                        fail("this_cpu_off not in /proc/kallsyms");
-                    }
-#endif
-                    site.kind = CompanionLoad::UpdateSite::Kind::PerCpuArray;
-                    site.max_entries = map_it->second.max_entries;
-                    site.elem_size = sizeof(void *);
-                    site.value_size = value_size;
-                    site.value_offset = array_offsets.pptrs;
-                    site.percpu_base_addr = this_cpu_off_addr;
+                auto &ops = out.map_ops[map_it->second.kernel_id];
+                const bool update = call.helper_id == BPF_FUNC_map_update_elem;
+                auto &target = update ? ops.update : ops.remove;
+                if (!target) {
+                    const std::string path = std::string(kNativeLabTarget.debugfs_dir) +
+                        (update ? "/map_update_elem" : "/map_delete_elem");
+                    target = lookup_native_lab_ptr_by_fd(call.map_fd, path.c_str(),
+                        update ? "map_update_elem" : "map_delete_elem");
                 }
             }
-            out.update_sites.push_back(site);
         }
     }
     const auto lookup_spec_end = std::chrono::steady_clock::now();
@@ -3163,15 +3126,11 @@ std::string native_link_cache_key(const std::filesystem::path &native_elf,
         hash.add_u64(arg.site.value_offset);
         hash.add_u64(arg.site.percpu_base_addr);
     }
-    for (const NativeLinkArgs::UpdateSite &arg : link_args.update_sites) {
-        hash.add_string("update");
-        hash.add_string(arg.kind);
-        hash.add_u64(arg.target_addr);
-        hash.add_u64(arg.max_entries);
-        hash.add_u64(arg.elem_size);
-        hash.add_u64(arg.value_size);
-        hash.add_u64(arg.value_offset);
-        hash.add_u64(arg.percpu_base_addr);
+    for (const auto &arg : link_args.map_ops) {
+        hash.add_string("map_ops");
+        hash.add_string(arg.name);
+        hash.add_u64(arg.update);
+        hash.add_u64(arg.remove);
     }
     return hash.hex();
 }

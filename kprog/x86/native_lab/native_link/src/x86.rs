@@ -31,6 +31,16 @@ fn runtime_call_target(name: &str, helpers: &HashMap<String, u64>, context: &str
     resolve_helper_target(name, helpers, context)
 }
 
+fn map_op_target(ops: &[MapOps], map: Option<&String>, helper: &str) -> Option<u64> {
+    let ops = ops.iter().find(|ops| Some(&ops.name) == map)?;
+    let target = match helper {
+        "bpf_map_update_elem" => ops.update,
+        "bpf_map_delete_elem" => ops.remove,
+        _ => 0,
+    };
+    (target != 0).then_some(target)
+}
+
 #[path = "x86_writable_data.rs"]
 mod writable_data;
 
@@ -1036,7 +1046,7 @@ pub(super) fn rewrite_x86(
     helper_addrs: &HashMap<String, u64>,
     map_addrs: &HashMap<String, u64>,
     lookup_maps: &HashMap<String, LookupSiteSpec>,
-    update_sites: &[UpdateSiteSpec],
+    map_ops: &[MapOps],
     proof_mode: bool,
     preserve_entry_abi: bool,
     runtime_array_layout: Option<&RuntimeArrayLayout>,
@@ -1099,7 +1109,6 @@ pub(super) fn rewrite_x86(
         .get("bpf_map_lookup_elem")
         .copied()
         .unwrap_or(0);
-    let mut update_call_counter: usize = 0;
     let mut resolved_helper_call_sites: HashSet<LocalSiteKey> = HashSet::new();
     let mut resolved_got_relocations: HashSet<LocalSiteKey> = HashSet::new();
     let mut canonicalized_relocations: HashSet<LocalSiteKey> = HashSet::new();
@@ -1204,8 +1213,11 @@ pub(super) fn rewrite_x86(
                 let kind = if let Some(callee) = &tail.defined {
                     Some(PatchKind::DirectBranch { target_symbol_key: symbol_key(callee), opcode: 0xe9 })
                 } else if !proof_mode {
-                    let target_addr = runtime_call_target(&tail.symbol, helper_addrs,
-                        &format!("x86 helper tail branch {}", tail.symbol))?;
+                    let target_addr = match map_op_target(map_ops, proven_maps.get(&local_ip), &tail.symbol) {
+                        Some(target) => target,
+                        None => runtime_call_target(&tail.symbol, helper_addrs,
+                            &format!("x86 helper tail branch {}", tail.symbol))?,
+                    };
                     Some(PatchKind::HelperBranchRel32 { target_addr, opcode: 0xe9 })
                 } else { None };
                 let index = local.len();
@@ -1557,41 +1569,12 @@ pub(super) fn rewrite_x86(
                         }
                     }
 
-                    if name == "bpf_map_update_elem" {
-                        let ordinal = update_call_counter;
-                        update_call_counter += 1;
-                        if let Some(spec) = update_sites.get(ordinal) {
-                            match spec.kind {
-                                UpdateKind::Array | UpdateKind::PerCpuArray => {
-                                    for ib in build_x86_array_update(spec)? {
-                                        push_x86_synthetic(
-                                            &mut local,
-                                            &mut kinds,
-                                            &mut insn_local_ip,
-                                            &mut next_synthetic_ip,
-                                            ib,
-                                        )?;
-                                    }
-                                    resolved_helper_call_sites.insert(site_key);
-                                    continue;
-                                }
-                                UpdateKind::Call => {
-                                    let helper_addr = require_call_target(
-                                        spec.target_addr,
-                                        &format!("x86 update-site {ordinal}"),
-                                    )?;
-                                    push_x86_helper_call_reloc(
-                                        &mut local,
-                                        &mut kinds,
-                                        &mut insn_local_ip,
-                                        local_ip,
-                                        helper_addr,
-                                    )?;
-                                    resolved_helper_call_sites.insert(site_key);
-                                    continue;
-                                }
-                            }
-                        }
+                    // Use the actual native RDI provenance, never source call order.
+                    if let Some(target) = map_op_target(map_ops, proven_maps.get(&local_ip), &name) {
+                        push_x86_helper_call_reloc(&mut local, &mut kinds,
+                            &mut insn_local_ip, local_ip, target)?;
+                        resolved_helper_call_sites.insert(site_key);
+                        continue;
                     }
 
                     let helper_addr = runtime_call_target(
@@ -3919,29 +3902,6 @@ fn build_x86_movabs_reg(reg: Register, imm: u64) -> Result<Instruction> {
     declared_bytes(&bytes)
 }
 
-fn x86_sign_extended_imm32(imm: u64) -> Option<i32> {
-    let v = imm as i32;
-    if (v as i64) as u64 == imm {
-        Some(v)
-    } else {
-        None
-    }
-}
-
-fn append_x86_mov_reg_imm64(bytes: &mut Vec<u8>, reg: Register, imm: u64) -> Result<()> {
-    let (low, high) = x86_gpr64_encoding(reg)?;
-    let rex = 0x48 | if high { 0x01 } else { 0x00 };
-    if let Some(imm32) = x86_sign_extended_imm32(imm) {
-        bytes.extend_from_slice(&[rex, 0xC7, 0xC0 | low]);
-        bytes.extend_from_slice(&imm32.to_le_bytes());
-    } else {
-        bytes.push(rex);
-        bytes.push(0xB8 + low);
-        bytes.extend_from_slice(&imm.to_le_bytes());
-    }
-    Ok(())
-}
-
 fn append_x86_scale_rax(bytes: &mut Vec<u8>, elem_size: u32) -> Result<()> {
     if elem_size == 0 {
         bail!("array lookup elem_size must be non-zero");
@@ -4090,18 +4050,6 @@ fn append_x86_add_rax_imm(bytes: &mut Vec<u8>, key_offset: u32) {
     }
 }
 
-fn append_x86_add_rdi_imm(bytes: &mut Vec<u8>, offset: u32) {
-    if offset == 0 {
-        return;
-    }
-    if offset <= 0x7f {
-        bytes.extend_from_slice(&[0x48, 0x83, 0xC7, offset as u8]);
-    } else {
-        bytes.extend_from_slice(&[0x48, 0x81, 0xC7]);
-        bytes.extend_from_slice(&offset.to_le_bytes());
-    }
-}
-
 fn append_x86_cmp_eax_imm(bytes: &mut Vec<u8>, imm: u32) {
     if imm <= 0x7f {
         bytes.extend_from_slice(&[0x83, 0xF8, imm as u8]);
@@ -4109,34 +4057,6 @@ fn append_x86_cmp_eax_imm(bytes: &mut Vec<u8>, imm: u32) {
         bytes.push(0x3D);
         bytes.extend_from_slice(&imm.to_le_bytes());
     }
-}
-
-fn append_x86_array_value_ptr_rdi(
-    bytes: &mut Vec<u8>,
-    elem_size: u32,
-    value_offset: u32,
-) -> Result<()> {
-    if let Some(scale) = x86_sib_scale(elem_size) {
-        bytes.extend_from_slice(&[0x48, 0x8D, 0xBC, (scale << 6) | 0x07]);
-        bytes.extend_from_slice(&value_offset.to_le_bytes());
-        return Ok(());
-    }
-
-    append_x86_scale_rax(bytes, elem_size)?;
-    bytes.extend_from_slice(&[0x48, 0x01, 0xC7]); // add rdi, rax
-    append_x86_add_rdi_imm(bytes, value_offset);
-    Ok(())
-}
-
-fn append_x86_copy_value_to_rdi(bytes: &mut Vec<u8>, value_size: u32) -> Result<()> {
-    match value_size {
-        1 => bytes.extend_from_slice(&[0x8A, 0x02, 0x88, 0x07]), // mov al,[rdx]; mov [rdi],al
-        2 => bytes.extend_from_slice(&[0x66, 0x8B, 0x02, 0x66, 0x89, 0x07]),
-        4 => bytes.extend_from_slice(&[0x8B, 0x02, 0x89, 0x07]),
-        8 => bytes.extend_from_slice(&[0x48, 0x8B, 0x02, 0x48, 0x89, 0x07]),
-        _ => bail!("unsupported x86 array update value size: {value_size}"),
-    }
-    Ok(())
 }
 
 fn append_x86_jcc_rel8(bytes: &mut Vec<u8>, opcode: u8) -> usize {
@@ -4155,70 +4075,6 @@ fn patch_x86_rel8(bytes: &mut [u8], disp_offset: usize, target: usize) -> Result
     })?;
     bytes[disp_offset] = disp_i8 as u8;
     Ok(())
-}
-
-fn append_x86_mov_rax_i32(bytes: &mut Vec<u8>, value: i32) -> Result<()> {
-    append_x86_mov_reg_imm64(bytes, Register::RAX, value as i64 as u64)
-}
-
-fn build_x86_array_update(spec: &UpdateSiteSpec) -> Result<Vec<Instruction>> {
-    if !matches!(spec.kind, UpdateKind::Array | UpdateKind::PerCpuArray) {
-        bail!("update kind {:?} is not an array-style inline", spec.kind);
-    }
-    if spec.max_entries == 0 {
-        bail!("array update max_entries must be non-zero");
-    }
-    if spec.elem_size == 0 {
-        bail!("array update elem_size must be non-zero");
-    }
-    if !matches!(spec.value_size, 1 | 2 | 4 | 8) {
-        bail!("array update value_size must be 1, 2, 4, or 8");
-    }
-    if matches!(spec.kind, UpdateKind::PerCpuArray) && spec.percpu_base_addr == 0 {
-        bail!("percpu array update missing this_cpu_off address");
-    }
-
-    let mut body = Vec::new();
-    append_x86_array_value_ptr_rdi(&mut body, spec.elem_size, spec.value_offset)?;
-    if matches!(spec.kind, UpdateKind::PerCpuArray) {
-        body.extend_from_slice(&[0x48, 0x8B, 0x3F]); // mov rdi, [rdi]
-        body.extend_from_slice(&[0x65, 0x48, 0x03, 0x3C, 0x25]); // add rdi, gs:[disp32]
-        body.extend_from_slice(&(spec.percpu_base_addr as u32).to_le_bytes());
-    }
-    append_x86_copy_value_to_rdi(&mut body, spec.value_size)?;
-    body.extend_from_slice(&[0x31, 0xC0]); // xor eax, eax
-
-    let mut bytes = Vec::new();
-    bytes.extend_from_slice(&[0x8B, 0x06]); // mov eax, [rsi]
-    append_x86_cmp_eax_imm(&mut bytes, spec.max_entries);
-    let bounds_jmp = append_x86_jcc_rel8(&mut bytes, 0x73); // jae bounds
-    bytes.extend_from_slice(&[0x83, 0xF9, 0x01]); // cmp ecx, BPF_NOEXIST
-    let eexist_jmp = append_x86_jcc_rel8(&mut bytes, 0x74); // je eexist
-    bytes.extend_from_slice(&[0x83, 0xF9, 0x02]); // cmp ecx, BPF_EXIST
-    let invalid_jmp = append_x86_jcc_rel8(&mut bytes, 0x77); // ja invalid
-    bytes.extend_from_slice(&body);
-    let success_end_jmp = append_x86_jcc_rel8(&mut bytes, 0xEB);
-
-    let bounds_off = bytes.len();
-    append_x86_mov_rax_i32(&mut bytes, -7)?; // -E2BIG
-    let bounds_end_jmp = append_x86_jcc_rel8(&mut bytes, 0xEB);
-
-    let eexist_off = bytes.len();
-    append_x86_mov_rax_i32(&mut bytes, -17)?; // -EEXIST
-    let eexist_end_jmp = append_x86_jcc_rel8(&mut bytes, 0xEB);
-
-    let invalid_off = bytes.len();
-    append_x86_mov_rax_i32(&mut bytes, -22)?; // -EINVAL
-
-    let end_off = bytes.len();
-    patch_x86_rel8(&mut bytes, bounds_jmp, bounds_off)?;
-    patch_x86_rel8(&mut bytes, eexist_jmp, eexist_off)?;
-    patch_x86_rel8(&mut bytes, invalid_jmp, invalid_off)?;
-    patch_x86_rel8(&mut bytes, success_end_jmp, end_off)?;
-    patch_x86_rel8(&mut bytes, bounds_end_jmp, end_off)?;
-    patch_x86_rel8(&mut bytes, eexist_end_jmp, end_off)?;
-
-    declared_byte_chunks(&bytes)
 }
 
 #[cfg(test)]
@@ -4249,7 +4105,7 @@ mod tests {
             let facts = load_link_plan(&PathBuf::from(argument("--link-plan")))?;
             let layout = facts.kernel_layout.as_ref().unwrap();
             let rewrite = |show| rewrite_x86(&elf, &entry, &included,
-                &facts.helper_addrs, &facts.map_addrs, &facts.lookup_maps, &facts.update_sites,
+                &facts.helper_addrs, &facts.map_addrs, &facts.lookup_maps, &facts.map_ops,
                 false, false, Some(&layout.array), Some(&layout.probe_read), Some(&layout.lpm), show);
             let normal = rewrite(false)?;
             let previous = fs::read(argument("--output"))?;
@@ -4413,6 +4269,74 @@ mod tests {
                     assert_eq!(&dest[9..], &[0xa5;4]);
                     assert_eq!(&dest[4..9], if name == "memcpy" { &source[..5] } else { &[0x34;5] });
                 }
+            }
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn map_operations_follow_native_arguments_across_reordered_calls() -> Result<()> {
+        // Facts are deliberately in A,B order while machine code uses B,A.
+        let ops = [MapOps { name: "map_a".into(), update: 0x1000, remove: 0x2000 },
+                   MapOps { name: "map_b".into(), update: 0x3000, remove: 0x4000 }];
+        for form in 0..3 {
+            for tail in [false, true].into_iter().filter(|tail| !tail || form == 1) {
+                let mut object = WriteObject::new(BinaryFormat::Elf,
+                    object::Architecture::X86_64, Endianness::Little);
+                let text = object.add_section(Vec::new(), b".text".to_vec(), SectionKind::Text);
+                let mut bytes = Vec::new();
+                for (map, helper, id) in [("map_b", "bpf_map_update_elem", 2),
+                                          ("map_a", "bpf_map_delete_elem", 3)] {
+                    let symbol = object.add_symbol(WriteSymbol {
+                        name: map.as_bytes().to_vec(), value: 0, size: 0,
+                        kind: SymbolKind::Data, scope: SymbolScope::Linkage, weak: false,
+                        section: WriteSymbolSection::Undefined, flags: SymbolFlags::None,
+                    });
+                    let offset = bytes.len() as u64;
+                    bytes.extend_from_slice(&[0x48,0x8b,0x3d,0,0,0,0]);
+                    object.add_relocation(text, WriteRelocation { offset: offset + 3,
+                        symbol, addend: -4, flags: RelocationFlags::Elf { r_type: 9 } })?;
+                    let jump = tail && id == 3;
+                    if form == 0 {
+                        bytes.extend_from_slice(&[0xb8,id,0,0,0,0xff,if jump {0xe0} else {0xd0}]);
+                    } else {
+                        let symbol = object.add_symbol(WriteSymbol {
+                            name: helper.as_bytes().to_vec(), value: 0, size: 0,
+                            kind: SymbolKind::Text, scope: SymbolScope::Linkage, weak: false,
+                            section: WriteSymbolSection::Undefined, flags: SymbolFlags::None,
+                        });
+                        let offset = bytes.len() as u64;
+                        if form == 1 { bytes.extend_from_slice(&[if jump {0xe9} else {0xe8},0,0,0,0]); }
+                        else { bytes.extend_from_slice(&[0xff,if jump {0x25} else {0x15},0,0,0,0]); }
+                        object.add_relocation(text, WriteRelocation {
+                            offset: offset + if form == 1 {1} else {2}, symbol, addend: -4,
+                            flags: RelocationFlags::Elf { r_type: if form == 1 {4} else {9} },
+                        })?;
+                    }
+                }
+                bytes.push(0xc3);
+                object.append_section_data(text, &bytes, 1);
+                object.add_symbol(WriteSymbol { name: b"entry".to_vec(), value: 0,
+                    size: bytes.len() as u64, kind: SymbolKind::Text, scope: SymbolScope::Linkage,
+                    weak: false, section: WriteSymbolSection::Section(text), flags: SymbolFlags::None });
+                let encoded = object.write()?;
+                let elf = object::File::parse(encoded.as_slice())?;
+                let entry = find_symbol_by_name(&elf, "entry")?;
+                let maps = HashMap::from([("map_a".into(),0), ("map_b".into(),0)]);
+                let helpers = HashMap::from([("bpf_map_update_elem".into(),0x5000),
+                    ("bpf_map_delete_elem".into(),0x6000)]);
+                let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps,
+                    &HashMap::new(), &ops, false, true, None, None, None, false)?;
+                let targets: Vec<_> = output.relocs.iter().filter(|r|
+                    r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32).map(|r| r.target).collect();
+                assert_eq!(targets, vec![0x3000,0x2000], "form={form}, tail={tail}");
+                let unknown = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps,
+                    &HashMap::new(), &[], false, true, None, None, None, false)?;
+                let generic: Vec<_> = unknown.relocs.iter().filter(|r|
+                    r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32).map(|r| r.target).collect();
+                assert_eq!(generic, vec![0x5000,0x6000], "missing facts retain generic calls");
+                assert_eq!(map_op_target(&ops, Some(&"map_a_suffix".into()),
+                    "bpf_map_delete_elem"), None, "a name prefix is not identity");
             }
         }
         Ok(())

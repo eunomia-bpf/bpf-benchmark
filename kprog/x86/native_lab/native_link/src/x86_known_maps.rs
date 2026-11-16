@@ -36,7 +36,8 @@ pub(super) fn arguments(
         if boundaries.contains(&insn.ip()) { registers.clear(); }
         let local_ip = insn.ip() - sym.address;
         let call = matches!(insn.flow_control(), FlowControl::Call | FlowControl::IndirectCall);
-        if call {
+        let transfer = call || insn.flow_control() == FlowControl::UnconditionalBranch;
+        if transfer {
             if let Some(name) = registers.get(&Register::RDI) {
                 result.insert(local_ip, name.clone());
             }

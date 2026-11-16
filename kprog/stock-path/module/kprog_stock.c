@@ -173,7 +173,7 @@ static int map_ptr_release(struct inode *inode, struct file *file)
 
 static ssize_t map_ptr_query_write(struct file *file, const char __user *ubuf,
 				   size_t len, loff_t *ppos, bool direct_value,
-				   bool update_elem)
+				   unsigned int helper_id)
 {
 	struct map_ptr_file_priv *priv = file->private_data;
 	struct bpf_map *map;
@@ -210,12 +210,18 @@ static ssize_t map_ptr_query_write(struct file *file, const char __user *ubuf,
 		if (err)
 			goto out_put;
 		ptr = (unsigned long)value;
-	} else if (update_elem) {
+	} else if (helper_id == BPF_FUNC_map_update_elem) {
 		if (!map->ops || !map->ops->map_update_elem) {
 			err = -EOPNOTSUPP;
 			goto out_put;
 		}
 		ptr = (unsigned long)map->ops->map_update_elem;
+	} else if (helper_id == BPF_FUNC_map_delete_elem) {
+		if (!map->ops || !map->ops->map_delete_elem) {
+			err = -EOPNOTSUPP;
+			goto out_put;
+		}
+		ptr = (unsigned long)map->ops->map_delete_elem;
 	}
 
 	priv->len = scnprintf(priv->response, sizeof(priv->response),
@@ -232,19 +238,25 @@ out_put:
 static ssize_t map_ptr_write(struct file *file, const char __user *ubuf,
 			     size_t len, loff_t *ppos)
 {
-	return map_ptr_query_write(file, ubuf, len, ppos, false, false);
+	return map_ptr_query_write(file, ubuf, len, ppos, false, 0);
 }
 
 static ssize_t map_value_ptr_write(struct file *file, const char __user *ubuf,
 				   size_t len, loff_t *ppos)
 {
-	return map_ptr_query_write(file, ubuf, len, ppos, true, false);
+	return map_ptr_query_write(file, ubuf, len, ppos, true, 0);
 }
 
 static ssize_t map_update_elem_write(struct file *file, const char __user *ubuf,
 				     size_t len, loff_t *ppos)
 {
-	return map_ptr_query_write(file, ubuf, len, ppos, false, true);
+	return map_ptr_query_write(file, ubuf, len, ppos, false, BPF_FUNC_map_update_elem);
+}
+
+static ssize_t map_delete_elem_write(struct file *file, const char __user *ubuf,
+				     size_t len, loff_t *ppos)
+{
+	return map_ptr_query_write(file, ubuf, len, ppos, false, BPF_FUNC_map_delete_elem);
 }
 
 static ssize_t map_ptr_read(struct file *file, char __user *ubuf, size_t len,
@@ -283,6 +295,15 @@ static const struct file_operations map_update_elem_fops = {
 	.llseek = default_llseek,
 };
 
+static const struct file_operations map_delete_elem_fops = {
+	.owner = THIS_MODULE,
+	.open = map_ptr_open,
+	.release = map_ptr_release,
+	.read = map_ptr_read,
+	.write = map_delete_elem_write,
+	.llseek = default_llseek,
+};
+
 
 static int __init kprog_stock_init(void)
 {
@@ -294,6 +315,7 @@ static int __init kprog_stock_init(void)
 	debugfs_create_file("map_ptr", 0600, debugfs_root, NULL, &map_ptr_fops);
 	debugfs_create_file("map_value_ptr", 0600, debugfs_root, NULL, &map_value_ptr_fops);
 	debugfs_create_file("map_update_elem", 0600, debugfs_root, NULL, &map_update_elem_fops);
+	debugfs_create_file("map_delete_elem", 0600, debugfs_root, NULL, &map_delete_elem_fops);
 	debugfs_create_file("helper_targets", 0600, debugfs_root, NULL, &helper_targets_fops);
 	return 0;
 }

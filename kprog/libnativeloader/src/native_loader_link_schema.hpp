@@ -50,33 +50,6 @@ NativeLinkArgs::LookupSite make_link_lookup_site(
     };
 }
 
-const char *update_kind_name(CompanionLoad::UpdateSite::Kind kind)
-{
-    switch (kind) {
-    case CompanionLoad::UpdateSite::Kind::Call:
-        return "call";
-    case CompanionLoad::UpdateSite::Kind::Array:
-        return "array";
-    case CompanionLoad::UpdateSite::Kind::PerCpuArray:
-        return "percpu_array";
-    }
-    fail("native_link: unknown update kind");
-}
-
-NativeLinkArgs::UpdateSite make_link_update_site(
-    const CompanionLoad::UpdateSite &site)
-{
-    return NativeLinkArgs::UpdateSite{
-        update_kind_name(site.kind),
-        site.target_addr,
-        site.max_entries,
-        site.elem_size,
-        site.value_size,
-        site.value_offset,
-        site.percpu_base_addr,
-    };
-}
-
 NativeLinkArgs build_native_link_args(
     const std::filesystem::path &native_link_path,
     const std::unordered_map<std::string, uint64_t> &map_addrs,
@@ -189,9 +162,10 @@ NativeLinkArgs build_native_link_args(
             kv.first,
             make_link_lookup_site(site),
         });
-    }
-    for (size_t i = 0; i < companion.update_sites.size(); i++) {
-        out.update_sites.push_back(make_link_update_site(companion.update_sites[i]));
+        if (const auto ops = companion.map_ops.find(meta->kernel_id);
+            ops != companion.map_ops.end()) {
+            out.map_ops.push_back({kv.first, ops->second.update, ops->second.remove});
+        }
     }
     return out;
 }

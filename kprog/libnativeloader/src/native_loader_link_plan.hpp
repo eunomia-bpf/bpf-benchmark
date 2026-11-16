@@ -95,17 +95,13 @@ inline void write_json_lookup_map(std::ostream &out,
     out << "}";
 }
 
-inline void write_json_update_site(std::ostream &out,
-                                   const NativeLinkArgs::UpdateSite &site)
+inline void write_json_map_ops(std::ostream &out,
+                               const NativeLinkArgs::MapOps &ops)
 {
-    out << "{\"kind\":";
-    write_json_string(out, site.kind);
-    out << ",\"target_addr\":" << site.target_addr
-        << ",\"max_entries\":" << site.max_entries
-        << ",\"elem_size\":" << site.elem_size
-        << ",\"value_size\":" << site.value_size
-        << ",\"value_offset\":" << site.value_offset
-        << ",\"percpu_base_addr\":" << site.percpu_base_addr
+    out << "{\"name\":";
+    write_json_string(out, ops.name);
+    out << ",\"update\":" << ops.update
+        << ",\"remove\":" << ops.remove
         << "}";
 }
 
@@ -161,8 +157,8 @@ inline std::filesystem::path write_native_link_plan(
     write_json_array(out, link_args.lookup_sites, write_json_lookup_site);
     out << ",\"lookup_maps\":";
     write_json_array(out, link_args.lookup_maps, write_json_lookup_map);
-    out << ",\"update_sites\":";
-    write_json_array(out, link_args.update_sites, write_json_update_site);
+    out << ",\"map_ops\":";
+    write_json_array(out, link_args.map_ops, write_json_map_ops);
 #if defined(__x86_64__)
     out << ",\"kernel_layout\":" << native_kernel_lto_layout();
 #endif
