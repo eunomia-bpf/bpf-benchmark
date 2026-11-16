@@ -87,3 +87,13 @@ address-space limit. It does not change C's official timing entry or round.
 Offline decoding disables remote debuginfo lookup; the guest's recorded symbols
 and JIT bytes are the relevant identities. The ordinary profile reporter spent
 several minutes in debuginfod lookup and then completed; no process was stopped.
+
+The software run's raw app counters are committed at
+`corpus/results/x86_kvm_corpus_20261116_184518_934200`.
+`software-sampling.json` records the actual shim windows: baseline has
+102.549 seconds of BPF time and native has 132.432 seconds, while program-text
+root samples are zero in both. The native profile has only one attributed
+external map sample. These facts explain the need for a different sampler.
+Host guest-only PMU preflight passed; controller 1850880 started at
+19:06:56Z with raw output in `otel-regression/pmu`. Its native recording began
+at 19:13:00Z. It uses the same diagnostic CPU/memory scope as the software run.
