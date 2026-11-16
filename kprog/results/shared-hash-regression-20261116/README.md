@@ -2,7 +2,7 @@ Shared-hash regression investigation, 2026-11-16
 
 Coordinator20:20 requests before/after-f45bb2485 diagnostics on image6641a7e1,
 CPUs16-23, for OTel and Katran. Actual body/helper/map per-call comparison is
-still open; no diagnostic guest has been started by this result yet.
+still open. The result-local diagnostic below is ready to run.
 
 Static audit (audit.json): build_x86_lookup_call_postprocess is text-identical
 before and after f45bb2485. The kernel raw __htab_map_lookup_elem returns an
@@ -29,3 +29,38 @@ comparison must preserve map patches, helper/image-pointer relocations,
 entry/end control flow and ABI sites. Keep the image, workload and frozen
 entry intact. Hardware guest-only sampling is needed for OTel; software
 CPU-clock missed its perf-event BPF execution in the earlier profile.
+
+Runtime comparison recipe
+
+`make -f kprog/results/shared-hash-regression-20261116/Makefile preflight`
+checks local branch targets, shifted map/image-pointer relocations, unchanged
+tail-counter values, ABI metadata, and the no-hash passthrough. This passed
+before guest launch; raw preflight.json and copied-hash.disassembly.txt remain
+under /workspaces/kprog-raw/perf/20261116-shared-hash-regression.
+
+`stage` hardlinks the single committed link.py into the existing corpus result
+mount as copy-link and shared-link; retained machine code and ABI sites are
+data inputs there. Both names delegate proof and kernel linking to the current
+image's /usr/local/bin/native-link. The shared name only archives the actual
+output and plan. The copy name redirects typed raw-hash calls into the retained
+2444 B body, with its fallback bound to the current boot's original raw target.
+It leaves generic map operations and all LRU postprocessing intact. No second
+tool build, source tree, image, base or module is created.
+
+The copied body precedes the original image after a five-byte entry jump.
+All original instructions move uniformly by 2449 B, preserving local branches;
+sideband image-pointer targets and source-map ABI sites move with them. The
+extra entry jump, changed alignment and placement are comparison limitations.
+This isolates the hash class on the current image, rather than reproducing the
+complete historical installed program. Actual installed bytes and selected
+call counts come from each guest and archived adapter.json.
+
+`run.sh` queues Katran shared/copy then OTel shared/copy via the existing
+phase-profile workflow. Each case is a diagnostic 4-vCPU, 32 GiB guest on
+20-23, one 60-second sample, host guest-only cycles:G at 199 Hz, image shared
+lock. It exports the already-supported BPFREJIT_NATIVE_LINK_BINARY override
+inside that guest; frozen files and settings remain untouched. The controller
+runs with a 48 GiB address-space cap and keeps each case's log and exit code.
+These profiles supplement the official default 3x180-second corpus runs.
+Root cycles are not nanoseconds, and external kernel samples without caller
+ownership must be reported separately from program body/inline costs.
