@@ -2,10 +2,50 @@ import KProgFormal.Clight.Arm64Address
 import KProgFormal.ClightRefinement.InternalExecution
 import KProgFormal.ClightRefinement.Arm64Width
 import KProgFormal.Reference.Provenance
+import KProgFormal.ClightRefinement.Globalenv
+import CCLib.MemoryLemmas
 
 namespace KProgFormal.ClightRefinement.Arm64OriginCache
 
 def ge : CC.CGenv := Arm64Address.prog.globalenv
+
+/-- The actual host/native extraction boundary, distinct from the stock
+verifier configuration's mutable array-map input. -/
+def inputEF : CC.ExtFun := .EF_external "native_lab_entry_input"
+  (CC.mksignature [.Xint] .Xlong CC.cc_default)
+
+def inputFunction : CC.FunDef := .External inputEF [CC.tuint] CC.tulong CC.cc_default
+
+private def inputBefore := Arm64Address.global_definitions.take 56
+private def inputAfter := Arm64Address.global_definitions.drop 57
+private def inputGlobal : CC.Ident × CC.GlobDef CC.FunDef CC.Ty :=
+  (Arm64Address._native_lab_entry_input, .Gfun inputFunction)
+
+private theorem input_globals : Arm64Address.global_definitions =
+    inputBefore ++ inputGlobal :: inputAfter := rfl
+
+private def inputBeforeEnv : CC.Genv CC.FunDef CC.Ty :=
+  CC.Genv.addGlobals (CC.Genv.emptyGenv Arm64Address.prog.prog_public) inputBefore
+
+private theorem input_next : inputBeforeEnv.genv_next = CC.Positive.ofNat 57 := rfl
+
+private theorem input_env : ge.genv_genv =
+    CC.Genv.addGlobals (CC.Genv.addGlobal inputBeforeEnv inputGlobal) inputAfter := by
+  change CC.Genv.addGlobals (CC.Genv.emptyGenv Arm64Address.prog.prog_public)
+    Arm64Address.global_definitions = _
+  rw [input_globals, addGlobals_append]
+  exact addGlobals_cons _ _ _
+
+/-- Both lookup facts bind the real exported external and its complete type.
+Block 57 is a Clight block, not a physical native address. -/
+theorem input_binding :
+    CC.Genv.findSymbol ge.genv_genv Arm64Address._native_lab_entry_input =
+      some (CC.Positive.ofNat 57) ∧
+    CC.Genv.findFunctPtr ge.genv_genv (CC.Positive.ofNat 57) = some inputFunction := by
+  constructor
+  · decide +kernel
+  · rw [input_env, ← input_next]
+    exact findFunctPtr_next inputBeforeEnv _ inputFunction inputAfter
 
 private def coordinates : CC.Composite :=
   (ge.genv_cenv.get Arm64Address._kprog_arm64_coordinates).get (by decide +kernel)
