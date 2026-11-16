@@ -67,3 +67,24 @@ This exercises actual live BTF I/O and original function offsets. The source
 is a constructed regression fixture, not a Tetragon capture. Native code ran
 in userspace; native kernel installation, actual app capture, nonconstant CEL
 and checked B acceptance remain separate. live-report.json records scope.
+
+
+2026-11-16T11:08:42Z: dae9cdac4 completes the original-record writer in the production
+shim. The hook runs after the original BPF_PROG_LOAD succeeds and before the
+native replacement call consumes the metadata. It queries the original FD
+for program/BTF identity and normalizes the pre-syscall deep copy using its
+original record stride. A program-specific sidecar avoids collisions when
+multiple loads share the same bytecode. Capture I/O errors are reported through
+the existing diagnostic channel; this adds no benchmark admission condition.
+
+The actual LD_PRELOAD shim, live kernel BTF consumer and native LTO execute
+successfully on the sole kernel: original record stride 16, offsets 0/4,
+program 3, BTF 27, and BPF/native return 9.
+This mode consumes the shim-written file; the test does not create the sidecar
+itself. Host subsets also check two distinct tables for the same bytecode,
+normalization of extended records and an actual ENOENT output failure, together
+with the existing body/cache ABI regressions. Raw metadata/source, logs and
+build archives remain at /workspaces/kprog-raw/perf/20261116-shim-function-facts.
+Source and inputs are a constructed regression fixture. Nonconstant CEL,
+actual Tetragon installation and checked B acceptance remain open. No image,
+base, application flag or benchmark entry was changed for this check.

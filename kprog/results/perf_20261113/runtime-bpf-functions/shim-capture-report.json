@@ -1,0 +1,51 @@
+{
+  "time": "2026-11-16T11:08:42Z",
+  "source": "dae9cdac4",
+  "kernel": {
+    "prog_id": 3,
+    "btf_id": 27,
+    "bpf_result": 9,
+    "source_function_offset": 4,
+    "original_record_stride": 16,
+    "shim_capture": true
+  },
+  "sidecars": [
+    {
+      "path": "/workspaces/kprog-raw/perf/20261116-shim-function-facts/live/bpfrejit_1182_4646e4257027f7ef.bpf.functions.3.json",
+      "metadata": {
+        "version": 1,
+        "prog_id": 3,
+        "btf_id": 27,
+        "functions": [
+          {
+            "insn_off": 0,
+            "type_id": 5
+          },
+          {
+            "insn_off": 4,
+            "type_id": 7
+          }
+        ]
+      }
+    }
+  ],
+  "execution": "BPF and native result both 9",
+  "finished": "2026-11-16T11:06:40Z",
+  "host_finished": "2026-11-16T11:06:14Z",
+  "host_cases": [
+    "original 16-byte stride normalized",
+    "same bytecode/different programs and BTF tables remain distinct",
+    "metadata output failure returns ENOENT",
+    "loader cache/body ABI regressions"
+  ],
+  "hook_order": "after original PROG_LOAD success, before shim_maybe_replace_with_native_fd",
+  "resources": {
+    "cpu": 16,
+    "vcpus": 1,
+    "guest_gib": 2,
+    "address_space_gib": 8,
+    "lease": "image shared, no timing lock"
+  },
+  "raw": "/workspaces/kprog-raw/perf/20261116-shim-function-facts",
+  "scope": "Real shim capture and live BTF consumer on a constructed original program; not Tetragon installation or nonconstant CEL support."
+}

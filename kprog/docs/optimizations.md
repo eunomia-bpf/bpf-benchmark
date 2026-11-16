@@ -604,3 +604,12 @@ execution and the native artifact from its captured constant callee both return
 9. Empty BTF Params does not replace the actual native prototype. Fixture-only
 I/O/semantic evidence, with no app performance or native-kernel installation
 claim; image and timing entry unchanged. runtime-bpf-functions/live-report.json.
+
+2026-11-16T11:08:42Z — Phase 1 original function capture: dae9cdac4 writes load-specific
+original func_info before native replacement starts, using the original FD's
+program/BTF identity and each pre-call record stride. The real shim plus live
+BTF consumer and runtime LTO pass the sole-kernel execution subset (BPF/native
+both 9, original stride 16). Host tests cover same-code/different-table records
+and output errors. This closes the capture component; nonconstant CEL and real
+app installation remain open. No runtime gain or image publication is claimed.
+Receipts: runtime-bpf-functions/shim-capture-report.json.
