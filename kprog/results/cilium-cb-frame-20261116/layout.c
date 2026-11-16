@@ -1,23 +1,21 @@
-#include <stddef.h>
-#include <stdio.h>
-#include <string.h>
-
 #ifdef KERNEL_VIEW
+#define BPF_NO_PRESERVE_ACCESS_INDEX
 #include "vmlinux.h"
+extern int printf(const char *, ...);
 void native_clear(void *);
 int main(void)
 {
     struct sk_buff skb;
-    memset(&skb, 0xa5, sizeof(skb));
+    __builtin_memset(&skb, 0xa5, sizeof(skb));
     native_clear(&skb);
     struct qdisc_skb_cb *q = (void *)skb.cb;
-    unsigned int offset = offsetof(struct sk_buff, cb) + offsetof(struct qdisc_skb_cb, data);
-    unsigned int classid = offsetof(struct sk_buff, cb) + offsetof(struct qdisc_skb_cb, tc_classid);
-    for (size_t i = 0; i < sizeof(skb); i++) {
+    unsigned int offset = __builtin_offsetof(struct sk_buff, cb) + __builtin_offsetof(struct qdisc_skb_cb, data);
+    unsigned int classid = __builtin_offsetof(struct sk_buff, cb) + __builtin_offsetof(struct qdisc_skb_cb, tc_classid);
+    for (unsigned long i = 0; i < sizeof(skb); i++) {
         unsigned char expected = (i >= offset && i < offset + 20) ||
             (i >= classid && i < classid + 2) ? 0 : 0xa5;
         if (((unsigned char *)&skb)[i] != expected)
-            return fprintf(stderr, "context write differs at byte %zu\n", i), 1;
+            return printf("context write differs at byte %lu\n", i), 1;
     }
     printf("{\"cb_offset\":%u,\"tc_classid_offset\":%u,\"public_words\":5}\n", offset, classid);
 }
