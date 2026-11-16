@@ -1931,3 +1931,10 @@ It uses existing provenance materialization and explicit pointer-block origins
 and cell-map bindings. The relation determines every covered register bit and
 survives the actual NOP call and every return at `Kstop`. Producer admissibility,
 native memory and general compiled caller control remain open.
+
+The [origin-cache proof](results/m5-origin-cache/README.md) now executes both
+exported C base readers and the scalar materializer against the existing M3
+coordinate function. Every nonzero validity byte is covered; only a selected
+STACK or RETURN cache needs a warm-cache premise. Calls preserve all memory,
+and every materializer return at `Kstop` has the specified result. Cold input
+calls, pointer-valued materialization and producer admissibility remain open.

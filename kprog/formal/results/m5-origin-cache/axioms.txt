@@ -1,0 +1,57 @@
+'KProgFormal.ClightRefinement.Arm64OriginCache.reader_executes' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64OriginCache.materialize_executes' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64OriginCache.reader_returns' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64OriginCache.materialize_returns' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64OriginCache.materialize_return_unique' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.Arm64OriginCache.reader_returns : ∀ (returns : Bool) (b : CC.Block)
+  (ofs : CC.Integers.Ptrofs) (m : CC.Mem) (k : CC.Cont) (base : BitVec 64),
+  KProgFormal.ClightRefinement.Arm64OriginCache.WarmCache returns b ofs m base →
+    KProgFormal.ClightRefinement.InternalRun KProgFormal.ClightRefinement.Arm64OriginCache.ge 14
+      (CC.State.Callstate (CC.FunDef.Internal (KProgFormal.ClightRefinement.Arm64OriginCache.reader returns))
+        [CC.Val.Vptr b ofs] k m)
+      (CC.State.Returnstate (CC.Val.Vlong base) (CC.callCont k) m)
+KProgFormal.ClightRefinement.Arm64OriginCache.materialize_executes : ∀ (b : CC.Block) (ofs : CC.Integers.Ptrofs)
+  (m : CC.Mem) (k : CC.Cont) (origins : KProgFormal.Reference.Provenance.AArch64.Origins) (value : BitVec 64)
+  (tag : BitVec 8),
+  (tag = 4 → KProgFormal.ClightRefinement.Arm64OriginCache.WarmCache false b ofs m origins.stack) →
+    (tag = 10 → KProgFormal.ClightRefinement.Arm64OriginCache.WarmCache true b ofs m origins.returnAddress) →
+      KProgFormal.ClightRefinement.steps KProgFormal.ClightRefinement.Arm64OriginCache.ge
+            (KProgFormal.ClightRefinement.Arm64OriginCache.materializeSteps tag)
+            (CC.State.Callstate (CC.FunDef.Internal Arm64Address.f_kprog_arm64_materialize)
+              [CC.Val.Vptr b ofs, CC.Val.Vlong value, CC.Val.Vint (BitVec.setWidth 32 tag)] k m) =
+          some
+            (CC.E0,
+              CC.State.Returnstate
+                (CC.Val.Vlong (KProgFormal.Reference.Provenance.AArch64.materialize origins value tag)) (CC.callCont k)
+                m) ∧
+        KProgFormal.ClightRefinement.InternalPath KProgFormal.ClightRefinement.Arm64OriginCache.ge
+          (KProgFormal.ClightRefinement.Arm64OriginCache.materializeSteps tag)
+          (CC.State.Callstate (CC.FunDef.Internal Arm64Address.f_kprog_arm64_materialize)
+            [CC.Val.Vptr b ofs, CC.Val.Vlong value, CC.Val.Vint (BitVec.setWidth 32 tag)] k m)
+KProgFormal.ClightRefinement.Arm64OriginCache.materialize_return_unique : ∀ (b : CC.Block) (ofs : CC.Integers.Ptrofs)
+  (m : CC.Mem) (origins : KProgFormal.Reference.Provenance.AArch64.Origins) (value : BitVec 64) (tag : BitVec 8),
+  (tag = 4 → KProgFormal.ClightRefinement.Arm64OriginCache.WarmCache false b ofs m origins.stack) →
+    (tag = 10 → KProgFormal.ClightRefinement.Arm64OriginCache.WarmCache true b ofs m origins.returnAddress) →
+      ∀ (t : CC.Trace) (result : CC.Val) (after : CC.Mem),
+        CC.Star (CC.Step2 KProgFormal.ClightRefinement.Arm64OriginCache.ge)
+            (CC.State.Callstate (CC.FunDef.Internal Arm64Address.f_kprog_arm64_materialize)
+              [CC.Val.Vptr b ofs, CC.Val.Vlong value, CC.Val.Vint (BitVec.setWidth 32 tag)] CC.Cont.Kstop m)
+            t (CC.State.Returnstate result CC.Cont.Kstop after) →
+          t = CC.E0 ∧
+            result = CC.Val.Vlong (KProgFormal.Reference.Provenance.AArch64.materialize origins value tag) ∧ after = m
