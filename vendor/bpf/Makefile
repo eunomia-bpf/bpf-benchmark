@@ -59,6 +59,10 @@ BCC_NATIVE_PROOF_MARKERS := $(patsubst %,$(NATIVE_OUT)/bcc/%.proof.ok,$(BCC_TOOL
 CILIUM_NATIVE_OBJS := $(patsubst %.o,$(NATIVE_OUT)/cilium/%.native.o,$(CILIUM_OBJS))
 CILIUM_NATIVE_PROOF_MARKERS := $(patsubst %.o,$(NATIVE_OUT)/cilium/%.proof.ok,$(CILIUM_OBJS))
 OTEL_EBPF_DIR := otel/support/ebpf
+# The ELF the application embeds in itself and loads (go:embed in support_$(GOARCH).go). The
+# original-ELF binder needs its symbol/slot layout, so the canonical payload ships this exact
+# tracked file, nothing rebuilt or relinked.
+OTEL_SOURCE_BPF_OBJECT := $(VENDOR)/repos/opentelemetry-ebpf-profiler/support/ebpf/tracer.ebpf.$(GOARCH)
 OTEL_NATIVE_UNIT_SRCS := $(wildcard $(OTEL_EBPF_DIR)/*.ebpf.c)
 OTEL_NATIVE_UNIT_OBJS := $(patsubst $(OTEL_EBPF_DIR)/%.ebpf.c,$(NATIVE_OUT)/otel/%.native.o,$(OTEL_NATIVE_UNIT_SRCS))
 OTEL_NATIVE_OBJECT := $(NATIVE_OUT)/otel/otelcol-ebpf-profiler.native.o
@@ -401,15 +405,17 @@ $(OTEL_NATIVE_PROOF_MARKER): $(OTEL_NATIVE_OBJECT) $(NATIVE_LINK)
 	done; \
 	printf 'ok\n' > "$@"
 
-native-otel: $(OTEL_NATIVE_OBJECT) $(OTEL_NATIVE_PROOF_MARKER)
+native-otel: $(OTEL_NATIVE_OBJECT) $(OTEL_NATIVE_PROOF_MARKER) $(OTEL_SOURCE_BPF_OBJECT)
 	install -d "$(OTEL_NATIVE_STAGE_OUT)"
 	install -m 0644 "$(OTEL_NATIVE_OBJECT)" "$(OTEL_NATIVE_STAGE_OUT)/otelcol-ebpf-profiler.native.o"
+	install -m 0644 "$(OTEL_SOURCE_BPF_OBJECT)" "$(OTEL_NATIVE_STAGE_OUT)/$(notdir $(OTEL_SOURCE_BPF_OBJECT))"
 	python3 "$(CURDIR)/write_native_manifest.py" --app otelcol-ebpf-profiler --llvm-nm "$(LLVM_NM)" \
 		--output "$(NATIVE_OUT)/otel/manifest.json" \
 		--object "$(OTEL_NATIVE_OBJECT)"
 	python3 "$(CURDIR)/write_native_manifest.py" --app otelcol-ebpf-profiler --llvm-nm "$(LLVM_NM)" \
 		--output "$(OTEL_NATIVE_STAGE_OUT)/manifest.json" \
-		--object "$(OTEL_NATIVE_STAGE_OUT)/otelcol-ebpf-profiler.native.o"
+		--object "$(OTEL_NATIVE_STAGE_OUT)/otelcol-ebpf-profiler.native.o" \
+		--source-bpf-object "$(OTEL_NATIVE_STAGE_OUT)/$(notdir $(OTEL_SOURCE_BPF_OBJECT))"
 
 $(TRACEE_NATIVE_PROOF_MARKER): $(TRACEE_NATIVE_OBJECT) $(NATIVE_LINK)
 	install -d "$(dir $@)"

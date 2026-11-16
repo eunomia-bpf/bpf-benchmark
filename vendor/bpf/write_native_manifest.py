@@ -277,7 +277,9 @@ def main() -> None:
     parser.add_argument("--skip-prefix", action="append", default=["LBB", "__check_"])
     parser.add_argument("--dedupe-program", choices=("none", "last"), default="none")
     parser.add_argument("--source-object-root", type=Path)
+    parser.add_argument("--source-bpf-object", type=Path)
     parser.add_argument("--helper-disambiguate", action="append", type=lambda v: int(v, 0), default=[])
+
     args = parser.parse_args()
 
     output: Path = args.output
@@ -353,6 +355,8 @@ def main() -> None:
             if len(forbidden) != 1:
                 raise SystemExit("manifest supports one forbidden helper discriminator")
             entry["source_lacks_helper"] = forbidden[0]
+        if args.source_bpf_object is not None:
+            entry["source_bpf_object"] = rel_object(output, args.source_bpf_object)
         objects.append(entry)
 
     manifest: dict[str, object] = {
