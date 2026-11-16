@@ -895,3 +895,33 @@ double-execution cause and no confirmed Cilium packet fix. Those remain open. Th
     installed bytes and the per-call benefit remain measurement work after
     cleanup; the older replay's offsets identify evidence, not current code
     addresses or workload branch counts.
+
+25. **Helper lowering retains immediately dead helper-ID moves.**
+
+    Two exact instruction pairs in retained Katran replay114 illustrate a
+    small emitted-code cost:
+
+    | Blob offset | Retained definition | Immediate replacement instruction |
+    |---|---|---|
+    | +0x4b | b8 01 00 00 00: mov eax,1 | +0x50: mov eax,[rsi], beginning typed per-CPU ARRAY lookup |
+    | +0x801 | b8 08 00 00 00: mov eax,8 | +0x806: mov eax,gs:[cpu_number], the existing CPU-ID lowering |
+
+    Both replacement instructions write the whole RAX value through a
+    32-bit destination. The earlier ID is overwritten before any intervening
+    value use; MOV also preserves flags. The retained two definitions occupy
+    ten bytes and one extra instruction whenever each site executes. They
+    are static examples, with workload frequencies and measured timing still
+    to establish.
+
+    `x86.rs:1622–1628` keeps ordinary decoded instructions, while :1500–1505
+    and :1517–1528 replace the helper call in isolation. Helper provenance
+    knows its identity, but emitting the replacement leaves the earlier
+    definition intact. Consume such dead definitions as part of the existing
+    lowering using the decoder's register-use/write facts and branch targets.
+    This is a local opportunity, sized against its implementation cost; the
+    operator's half-size requirement still needs the larger changes above.
+    Preserve observable address values from item22 and selector values that
+    finite helper dispatch actually reads. The proof/simulator helper-ID
+    representation has its own uses, so apply native emission cleanup at
+    the appropriate stage. Installed-byte and per-call deltas remain to
+    measure after cleanup.
