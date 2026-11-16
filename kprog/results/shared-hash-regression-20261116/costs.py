@@ -53,6 +53,19 @@ templates = [
     ('map_lpm_lookup', ref_bytes[48][7690:8020], range(321, 325)),
     ('helper_user_probe', ref_bytes[28][29583:29909], range(50, 54)),
     ('map_copied_hash', (raw / 'katran.copied-hash.bin').read_bytes(), range(2435, 2439))]
+# Probe routines also embed boot-dependent GS/current_task and movabs symbol
+# addresses. Exclude precisely those instruction operands, retaining all
+# opcodes, branches, kernel-layout offsets and other immediates in the match.
+for i, (label, template, masked) in enumerate(templates):
+    masked = set(masked)
+    if label.startswith('helper_'):
+        for instruction, width in [(bytes.fromhex('65488b1c25'), 4), (bytes.fromhex('49bb'), 8)]:
+            start = 0
+            while (start := template.find(instruction, start)) >= 0:
+                operand = start + len(instruction)
+                masked.update(range(operand, operand + width))
+                start = operand + width
+    templates[i] = label, template, masked
 result = dict(scope=__doc__, case=case, run=str(run), status=app.get('status'), phases={})
 for phase in ['baseline', 'post_rejit']:
     measured = app[phase]['bpf']
@@ -84,6 +97,27 @@ for phase in ['baseline', 'post_rejit']:
     ranges.sort()
     starts = [r[0] for r in ranges]
     addresses, names, _ = symbolize.load_kallsyms(capture / (phase + '.start.kallsyms'))
+    # Resolve actual installed CALL destinations, rather than infer them from
+    # P or from the linker plan alone. Disassemble each function at its own IP.
+    for p in live['programs']:
+        calls, offset = [], 0
+        for function in p['functions']:
+            address, length = function['address'], function['length']
+            assembly = subprocess.check_output([
+                'objdump', '-D', '-b', 'binary', '-m', 'i386:x86-64',
+                '--adjust-vma=' + str(address - offset), '--start-address=' + str(address),
+                '--stop-address=' + str(address + length), str(capture / p['binary'])], text=True)
+            for line in assembly.splitlines():
+                match = re.search(r'\bcall\s+(?:0x)?([0-9a-f]+)(?:\s|$)', line)
+                if match:
+                    target = int(match[1], 16)
+                    index = bisect.bisect_right(addresses, target) - 1
+                    symbol = names[index] if index >= 0 else '[unknown]'
+                    calls.append(dict(offset=int(line.split(':')[0], 16) - address + offset,
+                                      target=target, symbol=symbol,
+                                      symbol_offset=target - addresses[index] if index >= 0 else None))
+            offset += length
+        programs[p['id']]['installed_direct_calls'] = calls
     roots, external = Counter(), Counter()
     for sample in samples:
         if not any(a <= sample['time_ns'] <= b for a, b in bounds):
@@ -119,6 +153,10 @@ for phase in ['baseline', 'post_rejit']:
         clock_offset_drift_ns=host.clock_offset(guest_end) - host.clock_offset(guest_clock),
         external_root_cycles_per_app_call_without_caller_ownership={key: value / calls for key, value in external.items()},
         external_root_cycles=dict(roots.most_common()), programs=programs)
+    if case.startswith('katran-'):
+        result['phases'][phase]['workload_pps'] = [sum(
+            int(re.findall(r'(\d+)pps\b', component['stdout'])[-1])
+            for component in workload['components']) for workload in app[phase]['workloads']]
 (capture / 'costs.json').write_text(json.dumps(result, indent=2) + '\n')
 print(json.dumps(dict(case=case, run=str(run), status=result['status'], phases={
     name: {key: p[key] for key in ('calls', 'counter_ns_per_call', 'installed_bytes')}

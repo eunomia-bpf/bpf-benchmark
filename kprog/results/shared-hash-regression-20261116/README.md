@@ -64,3 +64,36 @@ runs with a 48 GiB address-space cap and keeps each case's log and exit code.
 These profiles supplement the official default 3x180-second corpus runs.
 Root cycles are not nanoseconds, and external kernel samples without caller
 ownership must be reported separately from program body/inline costs.
+The copied kernel image is a direct-native diagnostic; its unchanged proof
+output does not establish B verification of the substituted machine code.
+
+First completed case: Katran shared
+
+Run x86_kvm_corpus_20261116_210136_729192 completed with status ok and controller
+exit zero. This is the one-sample diagnostic, not the official default timing.
+
+| Measure | JIT | Shared native |
+|---|---:|---:|
+| Counter ns/call | 207.044 | 204.532 |
+| Workload packets/s | 2505432 | 2440796 |
+| Installed bytes | 13641 | 10546 |
+| Remaining program-text cycles/call | 225.991 | 211.142 |
+| Exact ARRAY-dispatch text cycles/call | — | 3.360 |
+| Exact LPM-dispatch text cycles/call | — | 2.500 |
+| External hash root cycles/app call | 148.467 | 155.885 |
+
+Remaining text includes inline context/clock/percpu/tail operations, so it is
+not pure body. JIT inline maps/helpers remain inside its text bucket. External
+roots have no exclusive caller attribution; they include other guest work.
+The LPM dispatch range can execute its type-test/fallback on non-LPM maps.
+Boot-dependent helper operands are excluded precisely from template matches;
+the opcodes, branches and layout offsets must still match.
+
+Actual installed CALL decoding resolves the JIT's dynamic LRU lookups to
+bpf_map_lookup_elem; native retains that generic fallback and has six typed
+raw-hash calls. Neither installed program has a typed ref35 compare/store.
+Together with the kernel map-ops source, this supports preserved LRU marking
+through generic operations in this case. It does not measure eviction patterns
+or dynamic branch frequency. The copied case and both OTel cases remain queued.
+All exact per-program calls/counters and ownership caveats are in
+katran-shared.costs.json; actual loader facts are in katran-shared.link-plan.json.

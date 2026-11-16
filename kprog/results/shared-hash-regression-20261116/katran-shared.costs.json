@@ -1,0 +1,1180 @@
+{
+  "scope": "Disjoint guest PMU roots in shim windows, with explicit ownership limits.\n\nCounter ns/call is measured. PMU periods are cycles; external roots include\nother guest work and are never converted into a fabricated body/helper/map\nnanosecond split. Exact inline-template ranges separate maps/helpers in native\ntext. Remaining text also contains context, clock, percpu and tail operations.\n",
+  "case": "katran-shared",
+  "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_210136_729192",
+  "status": "ok",
+  "phases": {
+    "baseline": {
+      "calls": 150459208,
+      "counter_ns_per_call": 207.04446528124754,
+      "installed_bytes": 13641,
+      "clock_offset_drift_ns": 187,
+      "external_root_cycles_per_app_call_without_caller_ownership": {
+        "other_guest_kernel": 4027.984498948047,
+        "hash_lookup": 148.46669224126182,
+        "generic_lookup_dispatch": 0.836944389604922
+      },
+      "external_root_cycles": {
+        "pvclock_clocksource_read_nowd": 71843672526,
+        "mod_cur_headers": 56870041055,
+        "__pv_queued_spin_lock_slowpath": 51249885860,
+        "get_random_u32": 46428168720,
+        "__alloc_skb": 42751498351,
+        "veth_xmit": 42434559006,
+        "_raw_spin_lock": 33947508013,
+        "pktgen_thread_worker": 31469781081,
+        "__raw_callee_save___pv_queued_spin_unlock": 18490290484,
+        "kmem_cache_alloc_node_noprof": 17205815412,
+        "napi_build_skb": 16860042303,
+        "ip_send_check": 14321551237,
+        "kmem_cache_free": 13543117724,
+        "chacha_permute": 13230426610,
+        "memset": 12286752209,
+        "lookup_nulls_elem_raw": 10973459107,
+        "htab_map_hash": 10054992080,
+        "memcpy": 8236414043,
+        "fill_packet_ipv4": 7411864967,
+        "pktgen_finalize_skb": 6125338240,
+        "__memcg_slab_free_hook": 5533545855,
+        "skb_pp_cow_data": 5457994451,
+        "ktime_get_real_ts64": 4981484287,
+        "skb_put": 4000964520,
+        "kmalloc_reserve": 3206388931,
+        "ktime_get_mono_fast_ns": 3200582455,
+        "veth_xdp_get": 3088635095,
+        "veth_xdp_rcv_skb": 3042820313,
+        "napi_pp_put_page": 3031710263,
+        "pktgen_xmit": 3005766237,
+        "kthread_should_stop": 2786534237,
+        "page_frag_free": 2771245705,
+        "__build_skb_around": 2517181157,
+        "__list_del_entry_valid_or_report": 2509484736,
+        "__get_random_u32_below": 2507768961,
+        "veth_xdp_rcv.constprop.0": 2233909561,
+        "its_return_thunk": 1988495906,
+        "kvm_clock_get_cycles": 1811283401,
+        "_raw_spin_lock_irqsave": 1674690542,
+        "skb_release_data": 1581349532,
+        "__pcs_replace_full_main": 1564914701,
+        "skb_copy_header": 1427754138,
+        "_raw_spin_unlock_irqrestore": 1425167718,
+        "__copy_skb_header": 1396444741,
+        "__rcu_read_unlock": 1325668695,
+        "dev_kfree_skb_any_reason": 1296621959,
+        "__dev_forward_skb2": 1229043639,
+        "crng_make_state": 1166856104,
+        "_raw_spin_unlock": 1162089330,
+        "page_pool_return_netmem": 1062739434,
+        "skb_release_head_state": 1042833655,
+        "__local_bh_enable_ip": 1038280923,
+        "pktgen_alloc_skb": 961866068,
+        "eth_type_trans": 957927441,
+        "skb_scrub_packet": 909966723,
+        "chacha_block_generic": 895267950,
+        "memcmp": 888560143,
+        "skb_push": 849926746,
+        "_get_random_bytes": 836214912,
+        "_raw_spin_trylock": 821613047,
+        "__netdev_alloc_skb": 772701860,
+        "skb_free_head": 761071956,
+        "barn_replace_empty_sheaf": 759602746,
+        "consume_skb": 759351182,
+        "__htab_map_lookup_elem": 759152685,
+        "sk_skb_reason_drop": 743930845,
+        "__rcu_read_lock": 741274465,
+        "veth_xdp_tx": 683128348,
+        "sched_clock": 666154286,
+        "htab_lru_map_delete_node": 661451701,
+        "htab_lru_map_update_elem": 642830343,
+        "veth_xdp_xmit": 603526542,
+        "crng_fast_key_erasure": 594665262,
+        "page_pool_alloc_frag_netmem": 569170453,
+        "htab_lru_map_lookup_elem": 550577057,
+        "skb_copy_bits": 523688084,
+        "net_rx_action": 445481836,
+        "kmem_cache_alloc_bulk_noprof": 395745824,
+        "handle_softirqs": 347832513,
+        "bpf_xdp_adjust_head": 332299196,
+        "kfree_skbmem": 317508370,
+        "sched_clock_noinstr": 301590843,
+        "process_ipsec": 284341203,
+        "__dev_forward_skb": 282974446,
+        "__get_pfnblock_flags_mask.isra.0": 270436786,
+        "__list_add_valid_or_report": 269116721,
+        "veth_xdp_flush_bq": 267282443,
+        "xdp_return_frame": 252039126,
+        "veth_poll": 237545051,
+        "__pcs_replace_empty_main": 237232358,
+        "kvm_sched_clock_read": 222700779,
+        "__free_frozen_pages": 221667904,
+        "skb_headers_offset_update": 221360541,
+        "skb_defer_free_flush": 206378592,
+        "page_pool_set_pp_info": 204993489,
+        "barn_replace_full_sheaf.part.0": 204589164,
+        "ipip_fini": 158553196,
+        "prealloc_lru_pop": 152189018,
+        "alloc_pages_bulk_noprof": 142980455,
+        "skb_clone_tx_timestamp": 127711196,
+        "bpf_map_lookup_elem": 125925990,
+        "free_frozen_page_commit.isra.0": 110232174,
+        "bpf_ktime_get_ns": 79791716,
+        "__bpf_lru_list_rotate_inactive": 78765632,
+        "bpf_common_lru_pop_free": 78593031,
+        "__xdp_return": 63013468,
+        "__rmqueue_pcplist": 62055654,
+        "enqueue_entity": 61827188,
+        "__bpf_lru_node_move_to_free": 60791064,
+        "orc_header": 49697424,
+        "_find_next_bit": 47819691,
+        "lookup_elem_raw": 47217077,
+        "page_pool_alloc_netmems": 47134846,
+        "bpf_lru_list_pop_free_to_local": 46976857,
+        "__page_pool_alloc_netmems_slow": 46257255,
+        "p9pdu_vreadf": 46235096,
+        "__iov_iter_get_pages_alloc": 44834628,
+        "asm_exc_page_fault": 33390851,
+        "os_xsave": 31953181,
+        "account_process_tick": 31805442,
+        "__raise_softirq_irqoff": 31790261,
+        "hrtimer_interrupt": 31314913,
+        "irq_entries_start": 31236680,
+        "update_se": 30974415,
+        "__schedule": 30541660,
+        "kfree": 30358558,
+        "vring_unmap_one_split": 29243242,
+        "copy_mc_enhanced_fast_string": 23417327,
+        "tlb_finish_mmu": 19028866,
+        "kmem_cache_alloc_noprof": 16987497,
+        "netfs_create_write_req": 15987336,
+        "pick_link": 15984212,
+        "do_softirq": 15983500,
+        "__update_load_avg_cfs_rq": 15982465,
+        "ovl_getattr": 15977526,
+        "reweight_entity": 15966016,
+        "__napi_poll": 15965702,
+        "req_done": 15954939,
+        "timerqueue_add": 15944281,
+        "do_syscall_64": 15937309,
+        "detach_buf_split_in_order": 15935327,
+        "notifier_call_chain": 15927935,
+        "__run_timers": 15925212,
+        "check_and_free_fields": 15918601,
+        "bpf_obj_memcpy": 15918336,
+        "kvm_steal_clock": 15917840,
+        "mas_wr_node_store": 15912418,
+        "free_frozen_pages": 15906379,
+        "prepare_to_swait_event": 15895275,
+        "strnlen_user": 15890267,
+        "__hrtimer_next_event_base": 15884209,
+        "__bpf_lru_list_shrink.isra.0": 15882588,
+        "pick_task_fair": 15882428,
+        "_raw_spin_unlock_irq": 15869220,
+        "account_user_time": 15860490,
+        "propagate_entity_load_avg": 15859071,
+        "get_timespec64": 15857261,
+        "asm_sysvec_apic_timer_interrupt": 15855463,
+        "rcu_report_qs_rdp": 15849590,
+        "ktime_get": 15830398,
+        "update_sg_lb_stats.isra.0": 15821813,
+        "net_current_may_mount": 15817278,
+        "ktime_get_update_offsets_now": 15741719,
+        "prepare_task_switch": 15659494,
+        "apic_ack_edge": 15648997,
+        "delay_halt_tpause": 15641546,
+        "sched_clock_cpu": 15632606,
+        "sched_balance_rq": 15620814,
+        "smpboot_thread_fn": 15599237,
+        "ioread8": 15524984,
+        "try_to_wake_up": 15509287,
+        "process_one_work": 15508764,
+        "__fput": 15498622,
+        "clockevents_program_event": 15474097,
+        "tmigr_requires_handle_remote": 15454076,
+        "__tlb_remove_folio_pages_size.isra.0": 15429751,
+        "p9_virtio_request": 15425407,
+        "virtqueue_kick": 15317178,
+        "vring_interrupt": 15285856,
+        "__update_load_avg_se": 15234395,
+        "pick_next_task": 15178147,
+        "__kmalloc_noprof": 15136752,
+        "rcu_report_qs_rnp": 15130097,
+        "idr_get_free": 15054783,
+        "update_rq_clock_task": 14951665,
+        "hrtimer_try_to_cancel": 14940720,
+        "netfs_prepare_write": 14915422,
+        "handle_edge_irq": 14907666,
+        "psi_flags_change": 14862596,
+        "io_schedule": 14854575,
+        "update_load_avg": 14817963,
+        "radix_tree_node_rcu_free": 14732741,
+        "ext4_init_inode_table": 14666317,
+        "perf_event_task_tick": 14560240,
+        "__handle_irq_event_percpu": 14493267,
+        "_raw_spin_lock_irq": 14441066,
+        "fsnotify_open_perm_and_set_mode": 13923192,
+        "taskstats_exit": 13767615,
+        "p9pdu_readf": 13638036,
+        "walk_to_pmd": 11947538,
+        "native_flush_tlb_one_user": 11924912,
+        "exc_page_fault": 11530648,
+        "__put_user_8": 11357866,
+        "rb_erase": 11049103,
+        "__mmap_region": 10812602,
+        "uncharge_folio": 8628430,
+        "__get_user_8": 7834524,
+        "__queue_work": 6281137,
+        "ovl_lowerdata_redirect": 5492724,
+        "__calc_delta.constprop.0": 4838478,
+        "update_rt_rq_load_avg": 4681178,
+        "do_idle": 4158664,
+        "destroy_inode": 3669607,
+        "mas_wr_store_type": 3091812,
+        "lookup_mountpoint": 2869767,
+        "do_user_addr_fault": 2824884,
+        "folio_add_file_rmap_ptes": 2746658,
+        "tick_nohz_idle_exit": 2688137,
+        "lock_vma_under_rcu": 2633622,
+        "sync_regs": 2443200,
+        "__x64_sys_ioctl": 2437320,
+        "irq_work_sync": 2414610,
+        "selinux_file_permission": 2352283,
+        "next_uptodate_folio": 2225300,
+        "xas_load": 1424446,
+        "iowrite16": 1402327,
+        "update_cfs_rq_load_avg": 1113640,
+        "cpu_startup_entry": 1006150,
+        "make_visible": 985334,
+        "first_online_pgdat": 921586,
+        "mas_store_prealloc": 790908,
+        "__memcg_slab_post_alloc_hook": 790908
+      },
+      "programs": {
+        "3": {
+          "name": "",
+          "bytes": 45,
+          "regions": [],
+          "cycles": {},
+          "measured": null,
+          "installed_direct_calls": []
+        },
+        "9": {
+          "name": "balancer_ingres",
+          "bytes": 13641,
+          "regions": [],
+          "cycles": {
+            "remaining_program_text": 34002381931
+          },
+          "measured": {
+            "bytes_jited": 13641,
+            "bytes_xlated": 23840,
+            "id": 9,
+            "name": "balancer_ingres",
+            "run_cnt_delta": 150459208,
+            "run_time_ns_delta": 31151746267,
+            "type": "xdp"
+          },
+          "installed_direct_calls": [
+            {
+              "offset": 2520,
+              "target": 18446744072288496080,
+              "symbol": "__htab_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 2562,
+              "target": 18446744072288496080,
+              "symbol": "__htab_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 3980,
+              "target": 18446744072288496080,
+              "symbol": "__htab_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 4022,
+              "target": 18446744072288496080,
+              "symbol": "__htab_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 5547,
+              "target": 18446744072288438784,
+              "symbol": "bpf_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 5571,
+              "target": 18446744072288439856,
+              "symbol": "bpf_ktime_get_ns",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 5801,
+              "target": 18446744072288439856,
+              "symbol": "bpf_ktime_get_ns",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 5860,
+              "target": 18446744072288496080,
+              "symbol": "__htab_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 5904,
+              "target": 18446744072288496080,
+              "symbol": "__htab_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 6393,
+              "target": 18446744072297527984,
+              "symbol": "bpf_xdp_adjust_head",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 6926,
+              "target": 18446744072288439856,
+              "symbol": "bpf_ktime_get_ns",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 7042,
+              "target": 18446744072642120168,
+              "symbol": "bpf_prog_6ca33340d780157b_jhash",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 7053,
+              "target": 18446744072642120716,
+              "symbol": "bpf_prog_35b30cd6a39d3bb8_jhash_2words",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 7489,
+              "target": 18446744072288438832,
+              "symbol": "bpf_map_update_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 7780,
+              "target": 18446744072297527984,
+              "symbol": "bpf_xdp_adjust_head",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 8696,
+              "target": 18446744072288438784,
+              "symbol": "bpf_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 9063,
+              "target": 18446744072288439856,
+              "symbol": "bpf_ktime_get_ns",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 9144,
+              "target": 18446744072288438832,
+              "symbol": "bpf_map_update_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 9533,
+              "target": 18446744072288438784,
+              "symbol": "bpf_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 9557,
+              "target": 18446744072288439856,
+              "symbol": "bpf_ktime_get_ns",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 9773,
+              "target": 18446744072288439856,
+              "symbol": "bpf_ktime_get_ns",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 9832,
+              "target": 18446744072288496080,
+              "symbol": "__htab_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 9869,
+              "target": 18446744072288496080,
+              "symbol": "__htab_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 10334,
+              "target": 18446744072297527984,
+              "symbol": "bpf_xdp_adjust_head",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 10871,
+              "target": 18446744072288439856,
+              "symbol": "bpf_ktime_get_ns",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 10990,
+              "target": 18446744072642120716,
+              "symbol": "bpf_prog_35b30cd6a39d3bb8_jhash_2words",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 11462,
+              "target": 18446744072288438832,
+              "symbol": "bpf_map_update_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 11692,
+              "target": 18446744072297527984,
+              "symbol": "bpf_xdp_adjust_head",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 12410,
+              "target": 18446744072288438784,
+              "symbol": "bpf_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 12603,
+              "target": 18446744072288439856,
+              "symbol": "bpf_ktime_get_ns",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 12684,
+              "target": 18446744072288438832,
+              "symbol": "bpf_map_update_elem",
+              "symbol_offset": 0
+            }
+          ],
+          "counter_ns_per_call": 207.04446528124754,
+          "text_cycles_per_call": {
+            "remaining_program_text": 225.99070128695612
+          }
+        }
+      },
+      "workload_pps": [
+        2505432
+      ]
+    },
+    "post_rejit": {
+      "calls": 146377073,
+      "counter_ns_per_call": 204.53195508971544,
+      "installed_bytes": 10546,
+      "clock_offset_drift_ns": -52,
+      "external_root_cycles_per_app_call_without_caller_ownership": {
+        "other_guest_kernel": 4144.339390240438,
+        "hash_lookup": 155.88450930426788,
+        "generic_lookup_dispatch": 0.3264386493095131
+      },
+      "external_root_cycles": {
+        "pvclock_clocksource_read_nowd": 69809885228,
+        "mod_cur_headers": 60216286934,
+        "__pv_queued_spin_lock_slowpath": 49251328981,
+        "get_random_u32": 46945998838,
+        "veth_xmit": 42657903385,
+        "__alloc_skb": 42506102715,
+        "_raw_spin_lock": 34407460673,
+        "pktgen_thread_worker": 31462224731,
+        "__raw_callee_save___pv_queued_spin_unlock": 17159824872,
+        "kmem_cache_alloc_node_noprof": 16862350756,
+        "napi_build_skb": 16463700390,
+        "kmem_cache_free": 15431770021,
+        "ip_send_check": 14524398792,
+        "chacha_permute": 13932497563,
+        "memset": 11618323838,
+        "lookup_nulls_elem_raw": 10881694897,
+        "htab_map_hash": 10731823512,
+        "memcpy": 7695881756,
+        "fill_packet_ipv4": 6785580152,
+        "__memcg_slab_free_hook": 6000537274,
+        "pktgen_finalize_skb": 5978076610,
+        "skb_pp_cow_data": 5519498396,
+        "ktime_get_real_ts64": 5076103012,
+        "skb_put": 4067856955,
+        "veth_xdp_rcv.constprop.0": 3721433351,
+        "veth_xdp_rcv_skb": 3552285491,
+        "__build_skb_around": 3471191941,
+        "napi_pp_put_page": 3136030379,
+        "veth_xdp_get": 2994844500,
+        "pktgen_xmit": 2955939875,
+        "ktime_get_mono_fast_ns": 2915577872,
+        "kmalloc_reserve": 2828093473,
+        "__get_random_u32_below": 2813889892,
+        "kthread_should_stop": 2794749397,
+        "page_frag_free": 2696685909,
+        "__list_del_entry_valid_or_report": 2275735741,
+        "_raw_spin_lock_irqsave": 1975405968,
+        "its_return_thunk": 1955777113,
+        "kvm_clock_get_cycles": 1865088988,
+        "skb_release_data": 1551253028,
+        "chacha_block_generic": 1324174362,
+        "crng_make_state": 1279784961,
+        "_raw_spin_unlock_irqrestore": 1261418662,
+        "__rcu_read_unlock": 1260980210,
+        "__dev_forward_skb2": 1231990256,
+        "skb_copy_header": 1222246539,
+        "__copy_skb_header": 1185114574,
+        "eth_type_trans": 1179676990,
+        "__pcs_replace_full_main": 1168560021,
+        "page_pool_return_netmem": 1095237801,
+        "memcmp": 1094346030,
+        "__local_bh_enable_ip": 1089093426,
+        "_raw_spin_unlock": 1087767410,
+        "htab_lru_map_update_elem": 883183155,
+        "_raw_spin_trylock": 871814542,
+        "dev_kfree_skb_any_reason": 861171820,
+        "skb_release_head_state": 854044164,
+        "pktgen_alloc_skb": 852547124,
+        "__rcu_read_lock": 833570907,
+        "crng_fast_key_erasure": 803384327,
+        "sched_clock": 791545723,
+        "_get_random_bytes": 785573401,
+        "veth_xdp_xmit": 778325048,
+        "skb_free_head": 773296820,
+        "skb_scrub_packet": 768500835,
+        "sk_skb_reason_drop": 728212983,
+        "veth_xdp_tx": 683857225,
+        "__htab_map_lookup_elem": 632781826,
+        "htab_lru_map_delete_node": 607919036,
+        "__netdev_alloc_skb": 599763212,
+        "consume_skb": 586304747,
+        "htab_lru_map_lookup_elem": 571617963,
+        "barn_replace_empty_sheaf": 566646765,
+        "page_pool_alloc_frag_netmem": 546817622,
+        "skb_copy_bits": 539488025,
+        "skb_push": 396809672,
+        "veth_xdp_flush_bq": 333829468,
+        "kmem_cache_alloc_bulk_noprof": 331979749,
+        "kvm_sched_clock_read": 317833377,
+        "sched_clock_noinstr": 302025323,
+        "handle_softirqs": 295443993,
+        "xdp_return_frame": 270380612,
+        "veth_poll": 255240612,
+        "free_frozen_page_commit.isra.0": 254662071,
+        "__get_pfnblock_flags_mask.isra.0": 253637072,
+        "skb_defer_free_flush": 238502873,
+        "net_rx_action": 237609441,
+        "__free_frozen_pages": 223068298,
+        "process_ipsec": 219796015,
+        "array_of_map_lookup_elem": 207384962,
+        "bpf_xdp_adjust_head": 206879629,
+        "__dev_forward_skb": 205142219,
+        "kfree_skbmem": 189936689,
+        "__list_add_valid_or_report": 189537144,
+        "ipip_fini": 173963204,
+        "__xdp_return": 173894464,
+        "__pcs_replace_empty_main": 172603909,
+        "skb_clone_tx_timestamp": 157676356,
+        "alloc_pages_bulk_noprof": 143316018,
+        "skb_headers_offset_update": 126934645,
+        "prealloc_lru_pop": 110509052,
+        "__bpf_lru_list_rotate_inactive": 109730989,
+        "__page_pool_alloc_netmems_slow": 95686921,
+        "barn_replace_full_sheaf.part.0": 95411730,
+        "_find_next_bit": 94993048,
+        "__rmqueue_pcplist": 79927728,
+        "__bpf_lru_node_move_to_free": 63468578,
+        "page_pool_set_pp_info": 62278006,
+        "bpf_common_lru_pop_free": 61708349,
+        "asm_exc_page_fault": 56113461,
+        "update_se": 48009997,
+        "bpf_map_lookup_elem": 47783134,
+        "__sched_balance_update_blocked_averages": 47742824,
+        "irq_entries_start": 47357689,
+        "asm_sysvec_apic_timer_interrupt": 46690073,
+        "bpf_lru_list_pop_free_to_local": 46565318,
+        "__bpf_lru_list_shrink.isra.0": 46436856,
+        "kmem_cache_alloc_noprof": 46418515,
+        "p9_tag_alloc": 44238360,
+        "lapic_next_deadline": 33567318,
+        "update_cfs_rq_load_avg": 31899890,
+        "__sysvec_apic_timer_interrupt": 31818367,
+        "hrtimer_interrupt": 31794101,
+        "propagate_entity_load_avg": 31077177,
+        "kfree": 30935928,
+        "note_interrupt": 30918317,
+        "_raw_spin_lock_irq": 30856345,
+        "lookup_elem_raw": 30808439,
+        "update_sd_lb_stats.constprop.0": 30736825,
+        "vp_notify": 29325028,
+        "next_uptodate_folio": 18388775,
+        "rb_next": 16425148,
+        "enqueue_entity": 16347452,
+        "avg_vruntime": 15986036,
+        "update_rq_clock_task": 15982547,
+        "task_tick_fair": 15982452,
+        "update_curr": 15981897,
+        "smpboot_thread_fn": 15980975,
+        "kvm_steal_clock": 15980211,
+        "__run_timers": 15980177,
+        "psi_task_change": 15979621,
+        "rcu_softirq_qs": 15979376,
+        "rcu_do_batch": 15972943,
+        "finish_task_switch.isra.0": 15968796,
+        "run_posix_cpu_timers": 15966139,
+        "update_vsyscall": 15951255,
+        "rcu_note_context_switch": 15947605,
+        "mas_prev_slot": 15947304,
+        "do_open_execat": 15945543,
+        "calc_wheel_index": 15939116,
+        "update_load_avg": 15934064,
+        "page_pool_refill_alloc_cache": 15931880,
+        "tick_do_update_jiffies64": 15930344,
+        "__split_vma": 15928553,
+        "p9pdu_vreadf": 15927670,
+        "timerqueue_del": 15926539,
+        "error_return": 15906710,
+        "run_ksoftirqd": 15897062,
+        "dl_server_update": 15875530,
+        "vring_unmap_one_split": 15871288,
+        "wait_task_zombie": 15859255,
+        "__call_rcu_common.constprop.0": 15857184,
+        "dequeue_entities": 15851412,
+        "pick_task_fair": 15837170,
+        "bio_blkcg_css": 15788839,
+        "page_pool_alloc_netmems": 15754251,
+        "entry_SYSCALL_64_after_hwframe": 15702653,
+        "exc_page_fault": 15676613,
+        "bpf_obj_memcpy": 15638386,
+        "enqueue_task_fair": 15624235,
+        "prepare_task_switch": 15541785,
+        "put_cred_rcu": 15511298,
+        "invoke_rcu_core": 15481096,
+        "orc_header": 15431564,
+        "nohz_balance_exit_idle": 15317440,
+        "kvfree": 15289507,
+        "__schedule": 15280903,
+        "check_and_free_fields": 15205168,
+        "rcu_core_si": 15172390,
+        "netfs_start_io_direct": 15029009,
+        "req_done": 15006947,
+        "__iov_iter_get_pages_alloc": 14988688,
+        "add_interrupt_randomness": 14937415,
+        "virtqueue_add_split": 14864026,
+        "__wake_up_common": 14785449,
+        "pick_next_task": 14722694,
+        "iowrite16": 14714958,
+        "p9_client_zc_rpc.constprop.0": 14596942,
+        "p9_req_put": 14523490,
+        "mntput": 14391776,
+        "rcu_cblist_dequeue": 12311808,
+        "lruvec_stat_mod_folio": 11823906,
+        "__switch_to": 11538147,
+        "exit_to_user_mode_loop": 11285860,
+        "free_percpu.part.0": 11186730,
+        "entry_SYSCALL_64": 10731080,
+        "folio_remove_rmap_ptes": 9310614,
+        "do_wp_page": 9261971,
+        "sync_regs": 7926596,
+        "selinux_inode_permission": 7282525,
+        "__kmalloc_noprof": 7084663,
+        "flush_tlb_mm_range": 6730406,
+        "irqentry_exit": 6554226,
+        "mt_find": 6530865,
+        "do_arch_prctl_64": 5198622,
+        "x64_sys_call": 3875965,
+        "__memcg_slab_post_alloc_hook": 3408575,
+        "strncmp": 3376544,
+        "_raw_spin_unlock_irq": 3341385,
+        "d_flags_for_inode": 3317763,
+        "__d_lookup_rcu": 3274444,
+        "__next_zones_zonelist": 2841698,
+        "do_user_addr_fault": 2821610,
+        "unmap_page_range": 2506068,
+        "init_entity_runnable_average": 2416466,
+        "avc_lookup": 2364110,
+        "uprobe_mmap": 2327834,
+        "psi_task_switch": 2275849,
+        "truncate_inode_pages_final": 2261932,
+        "force_qs_rnp": 2215518,
+        "deferred_put_nlk_sk": 2131890,
+        "__pte_offset_map": 2121591,
+        "vring_map_one_sg": 1779557,
+        "sysvec_call_function_single": 1561273,
+        "cpuacct_charge": 1531050,
+        "put_prev_task_fair": 1481081,
+        "asm_sysvec_call_function_single": 1389904,
+        "__wrgsbase_inactive": 1186542,
+        "arch_cpu_idle": 1178329,
+        "number": 1166733,
+        "x2apic_send_IPI": 1105459,
+        "wake_up_var": 1053980,
+        "mas_walk": 972434,
+        "vfs_get_link": 382176,
+        "default_idle": 327849,
+        "pv_native_safe_halt": 323726
+      },
+      "programs": {
+        "3": {
+          "name": "",
+          "bytes": 45,
+          "regions": [],
+          "cycles": {},
+          "measured": null,
+          "installed_direct_calls": []
+        },
+        "15": {
+          "name": "balancer_ingres",
+          "bytes": 13641,
+          "regions": [],
+          "cycles": {},
+          "measured": null,
+          "installed_direct_calls": [
+            {
+              "offset": 2520,
+              "target": 18446744072288496080,
+              "symbol": "__htab_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 2562,
+              "target": 18446744072288496080,
+              "symbol": "__htab_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 3980,
+              "target": 18446744072288496080,
+              "symbol": "__htab_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 4022,
+              "target": 18446744072288496080,
+              "symbol": "__htab_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 5547,
+              "target": 18446744072288438784,
+              "symbol": "bpf_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 5571,
+              "target": 18446744072288439856,
+              "symbol": "bpf_ktime_get_ns",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 5801,
+              "target": 18446744072288439856,
+              "symbol": "bpf_ktime_get_ns",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 5860,
+              "target": 18446744072288496080,
+              "symbol": "__htab_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 5904,
+              "target": 18446744072288496080,
+              "symbol": "__htab_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 6393,
+              "target": 18446744072297527984,
+              "symbol": "bpf_xdp_adjust_head",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 6926,
+              "target": 18446744072288439856,
+              "symbol": "bpf_ktime_get_ns",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 7042,
+              "target": 18446744072642120144,
+              "symbol": "bpf_prog_6ca33340d780157b_jhash",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 7053,
+              "target": 18446744072642120736,
+              "symbol": "bpf_prog_35b30cd6a39d3bb8_jhash_2words",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 7489,
+              "target": 18446744072288438832,
+              "symbol": "bpf_map_update_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 7780,
+              "target": 18446744072297527984,
+              "symbol": "bpf_xdp_adjust_head",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 8696,
+              "target": 18446744072288438784,
+              "symbol": "bpf_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 9063,
+              "target": 18446744072288439856,
+              "symbol": "bpf_ktime_get_ns",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 9144,
+              "target": 18446744072288438832,
+              "symbol": "bpf_map_update_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 9533,
+              "target": 18446744072288438784,
+              "symbol": "bpf_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 9557,
+              "target": 18446744072288439856,
+              "symbol": "bpf_ktime_get_ns",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 9773,
+              "target": 18446744072288439856,
+              "symbol": "bpf_ktime_get_ns",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 9832,
+              "target": 18446744072288496080,
+              "symbol": "__htab_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 9869,
+              "target": 18446744072288496080,
+              "symbol": "__htab_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 10334,
+              "target": 18446744072297527984,
+              "symbol": "bpf_xdp_adjust_head",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 10871,
+              "target": 18446744072288439856,
+              "symbol": "bpf_ktime_get_ns",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 10990,
+              "target": 18446744072642120736,
+              "symbol": "bpf_prog_35b30cd6a39d3bb8_jhash_2words",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 11462,
+              "target": 18446744072288438832,
+              "symbol": "bpf_map_update_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 11692,
+              "target": 18446744072297527984,
+              "symbol": "bpf_xdp_adjust_head",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 12410,
+              "target": 18446744072288438784,
+              "symbol": "bpf_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 12603,
+              "target": 18446744072288439856,
+              "symbol": "bpf_ktime_get_ns",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 12684,
+              "target": 18446744072288438832,
+              "symbol": "bpf_map_update_elem",
+              "symbol_offset": 0
+            }
+          ]
+        },
+        "16": {
+          "name": "balancer_ingres",
+          "bytes": 10546,
+          "regions": [
+            {
+              "kind": "map_array_dispatch",
+              "start": 10136,
+              "end": 10203
+            },
+            {
+              "kind": "map_lpm_lookup",
+              "start": 10203,
+              "end": 10533
+            }
+          ],
+          "cycles": {
+            "remaining_program_text": 30906300394,
+            "map_array_dispatch": 491770453,
+            "map_lpm_lookup": 365957272
+          },
+          "measured": {
+            "bytes_jited": 10546,
+            "bytes_xlated": 16,
+            "id": 16,
+            "name": "balancer_ingres",
+            "run_cnt_delta": 146377073,
+            "run_time_ns_delta": 29938788921,
+            "type": "xdp"
+          },
+          "installed_direct_calls": [
+            {
+              "offset": 1887,
+              "target": 18446744072288496080,
+              "symbol": "__htab_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 2104,
+              "target": 18446744072642135268,
+              "symbol": "bpf_prog_59f4a931744dcdc6_balancer_ingres",
+              "symbol_offset": 10136
+            },
+            {
+              "offset": 2636,
+              "target": 18446744072288496080,
+              "symbol": "__htab_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 2994,
+              "target": 18446744072288496080,
+              "symbol": "__htab_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 3213,
+              "target": 18446744072642135268,
+              "symbol": "bpf_prog_59f4a931744dcdc6_balancer_ingres",
+              "symbol_offset": 10136
+            },
+            {
+              "offset": 3562,
+              "target": 18446744072288496080,
+              "symbol": "__htab_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 4362,
+              "target": 18446744072642135268,
+              "symbol": "bpf_prog_59f4a931744dcdc6_balancer_ingres",
+              "symbol_offset": 10136
+            },
+            {
+              "offset": 4387,
+              "target": 18446744072287392656,
+              "symbol": "ktime_get_mono_fast_ns",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 4589,
+              "target": 18446744072287392656,
+              "symbol": "ktime_get_mono_fast_ns",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 4671,
+              "target": 18446744072288496080,
+              "symbol": "__htab_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 4701,
+              "target": 18446744072642135268,
+              "symbol": "bpf_prog_59f4a931744dcdc6_balancer_ingres",
+              "symbol_offset": 10136
+            },
+            {
+              "offset": 5046,
+              "target": 18446744072297527984,
+              "symbol": "bpf_xdp_adjust_head",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 5417,
+              "target": 18446744072287392656,
+              "symbol": "ktime_get_mono_fast_ns",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 5530,
+              "target": 18446744072642134957,
+              "symbol": "bpf_prog_59f4a931744dcdc6_balancer_ingres",
+              "symbol_offset": 9825
+            },
+            {
+              "offset": 5541,
+              "target": 18446744072642135180,
+              "symbol": "bpf_prog_59f4a931744dcdc6_balancer_ingres",
+              "symbol_offset": 10048
+            },
+            {
+              "offset": 5789,
+              "target": 18446744072288438832,
+              "symbol": "bpf_map_update_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 5933,
+              "target": 18446744072297527984,
+              "symbol": "bpf_xdp_adjust_head",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 6383,
+              "target": 18446744072642135268,
+              "symbol": "bpf_prog_59f4a931744dcdc6_balancer_ingres",
+              "symbol_offset": 10136
+            },
+            {
+              "offset": 6650,
+              "target": 18446744072287392656,
+              "symbol": "ktime_get_mono_fast_ns",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 6950,
+              "target": 18446744072642135268,
+              "symbol": "bpf_prog_59f4a931744dcdc6_balancer_ingres",
+              "symbol_offset": 10136
+            },
+            {
+              "offset": 7040,
+              "target": 18446744072642135268,
+              "symbol": "bpf_prog_59f4a931744dcdc6_balancer_ingres",
+              "symbol_offset": 10136
+            },
+            {
+              "offset": 7065,
+              "target": 18446744072287392656,
+              "symbol": "ktime_get_mono_fast_ns",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 7276,
+              "target": 18446744072287392656,
+              "symbol": "ktime_get_mono_fast_ns",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 7358,
+              "target": 18446744072288496080,
+              "symbol": "__htab_map_lookup_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 7388,
+              "target": 18446744072642135268,
+              "symbol": "bpf_prog_59f4a931744dcdc6_balancer_ingres",
+              "symbol_offset": 10136
+            },
+            {
+              "offset": 7747,
+              "target": 18446744072297527984,
+              "symbol": "bpf_xdp_adjust_head",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 8017,
+              "target": 18446744072287392656,
+              "symbol": "ktime_get_mono_fast_ns",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 8141,
+              "target": 18446744072642135180,
+              "symbol": "bpf_prog_59f4a931744dcdc6_balancer_ingres",
+              "symbol_offset": 10048
+            },
+            {
+              "offset": 8394,
+              "target": 18446744072288438832,
+              "symbol": "bpf_map_update_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 8898,
+              "target": 18446744072297527984,
+              "symbol": "bpf_xdp_adjust_head",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 9518,
+              "target": 18446744072288438832,
+              "symbol": "bpf_map_update_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 9623,
+              "target": 18446744072287392656,
+              "symbol": "ktime_get_mono_fast_ns",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 9798,
+              "target": 18446744072288438832,
+              "symbol": "bpf_map_update_elem",
+              "symbol_offset": 0
+            },
+            {
+              "offset": 10193,
+              "target": 18446744072642135335,
+              "symbol": "bpf_prog_59f4a931744dcdc6_balancer_ingres",
+              "symbol_offset": 10203
+            },
+            {
+              "offset": 10523,
+              "target": 18446744072288438784,
+              "symbol": "bpf_map_lookup_elem",
+              "symbol_offset": 0
+            }
+          ],
+          "counter_ns_per_call": 204.53195508971544,
+          "text_cycles_per_call": {
+            "remaining_program_text": 211.14167513105008,
+            "map_array_dispatch": 3.3596139266973863,
+            "map_lpm_lookup": 2.5000996706635883
+          }
+        }
+      },
+      "workload_pps": [
+        2440796
+      ]
+    }
+  }
+}
