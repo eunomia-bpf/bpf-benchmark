@@ -1,0 +1,22 @@
+{
+  "stamp": "2026-11-16T23:31:05Z",
+  "app": "tracee/monitor",
+  "command_returncode": 0,
+  "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_232903_310816",
+  "status": "ok",
+  "error": "",
+  "baseline": {
+    "programs": 167,
+    "installed_bytes": 2068774,
+    "run_count": 129109475,
+    "run_time_ns": 46957842007
+  },
+  "post_rejit": {
+    "programs": 167,
+    "installed_bytes": 1690844,
+    "run_count": 139075491,
+    "run_time_ns": 44681643897
+  },
+  "replacement_events": 169,
+  "native_failure_events": 0
+}

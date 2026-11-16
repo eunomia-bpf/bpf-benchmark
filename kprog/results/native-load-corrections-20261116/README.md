@@ -38,3 +38,27 @@ This confirms the conditional-Jcc closure fix in the real policy/CEL load
 context, which was absent from the earlier239 retained kernel plans. Raw
 phase counters and installed bytes are retained in tetragon.json. B generation
 and stock verification are separate and remain unmeasured in this check.
+
+2026-11-16T23:46:29Z: The complete frozen check finishes with all six app statuses ok
+on image603cacfb442a. Source4edcdadc2, kernel83e0fabe355d and full raw
+phase/window counters are in summary.json. Native replacement events are
+OTel14, BCC25, Cilium113, Tetragon288, Tracee169 and Katran1, with zero
+native-load failures in these completed logs. This establishes successful
+loads, not B-stock or whole-app equal-work proof.
+
+Tetragon's corrected inventory audit finds288 unique native load IDs and225
+IDs in its counter window; all225 are present in the load log. The63 absent
+load IDs are event_exit_disa1, generic_retkpro6 and generic_kprobe_56. The
+latter form seven repeated size families with eight copies each. This is
+a structured inventory difference, not evidence that those calls were zero
+or that attachments failed. Baseline/native positive-record counts are35/25.
+The original-source info and ID pairs are retained in tetragon-inventory.json;
+reproduce with make inventory. FD/program-array lifetimes and tracker/source
+identity are next read-only leads, with no source change outside the freeze.
+
+C's next breadth round now holds timing EX on0-7. Future heavy work takes
+timing SH before image locks. Packet retry2103056 is queued on that shared
+lock and has not started a VM; it uses fresh raw retry1 after the first
+callback's capture timeout. The earlier diagnostic guest2099055 is terminal.
+The kernel and frozen paths remain as the operator's23:42 freeze specifies;
+production work is now confined to open LTO paths.

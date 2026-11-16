@@ -1,0 +1,22 @@
+{
+  "stamp": "2026-11-16T23:34:00Z",
+  "app": "katran",
+  "command_returncode": 0,
+  "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_233255_633008",
+  "status": "ok",
+  "error": "",
+  "baseline": {
+    "programs": 1,
+    "installed_bytes": 13641,
+    "run_count": 24426193,
+    "run_time_ns": 4288354751
+  },
+  "post_rejit": {
+    "programs": 1,
+    "installed_bytes": 9442,
+    "run_count": 24247408,
+    "run_time_ns": 4227187198
+  },
+  "replacement_events": 1,
+  "native_failure_events": 0
+}

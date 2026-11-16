@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/cilium-packet-20261116/packet.py", line 100, in <module>
+    main(Path(sys.argv[1]))
+  File "/workspaces/repository/kprog/results/cilium-packet-20261116/packet.py", line 53, in main
+    data, address = capture.recvfrom(65535)
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: timed out
