@@ -1,0 +1,1688 @@
+{
+  "app": "otelcol-ebpf-profiler/profiling",
+  "baseline": {
+    "bpf": {
+      "10": {
+        "bytes_jited": 14983,
+        "bytes_xlated": 24736,
+        "id": 10,
+        "name": "perf_unwind_php",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "11": {
+        "bytes_jited": 19605,
+        "bytes_xlated": 33208,
+        "id": 11,
+        "name": "perf_unwind_pyt",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "12": {
+        "bytes_jited": 17840,
+        "bytes_xlated": 30280,
+        "id": 12,
+        "name": "perf_unwind_rub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "13": {
+        "bytes_jited": 20215,
+        "bytes_xlated": 33448,
+        "id": 13,
+        "name": "perf_unwind_v8",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "14": {
+        "bytes_jited": 22797,
+        "bytes_xlated": 37440,
+        "id": 14,
+        "name": "perf_unwind_dot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "15": {
+        "bytes_jited": 1572,
+        "bytes_xlated": 2504,
+        "id": 15,
+        "name": "perf_go_labels",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "16": {
+        "bytes_jited": 792,
+        "bytes_xlated": 1320,
+        "id": 16,
+        "name": "tracepoint__sch",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "17": {
+        "bytes_jited": 3815,
+        "bytes_xlated": 5904,
+        "id": 17,
+        "name": "native_tracer_e",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "18": {
+        "bytes_jited": 3679,
+        "bytes_xlated": 5712,
+        "id": 18,
+        "name": "custom__generic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "kprobe"
+      },
+      "6": {
+        "bytes_jited": 3650,
+        "bytes_xlated": 6144,
+        "id": 6,
+        "name": "perf_unwind_sto",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "7": {
+        "bytes_jited": 21868,
+        "bytes_xlated": 37024,
+        "id": 7,
+        "name": "perf_unwind_nat",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "8": {
+        "bytes_jited": 18424,
+        "bytes_xlated": 28080,
+        "id": 8,
+        "name": "perf_unwind_hot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "9": {
+        "bytes_jited": 18264,
+        "bytes_xlated": 29640,
+        "id": 9,
+        "name": "perf_unwind_per",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      }
+    },
+    "workloads": [
+      {
+        "components": [
+          {
+            "command": [
+              "/usr/bin/python3",
+              "-u",
+              "-c",
+              "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "python3",
+              "loop": "integer_lcg",
+              "tool": "python3",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.02621472799996,
+            "returncode": 0,
+            "stderr": "python3 int_loop ops=714151863 elapsed_s=180.000010 worker=0 sink=1429537808",
+            "stdout": "",
+            "workload_name": "otel_python3_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/python3",
+              "-u",
+              "-c",
+              "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "python3",
+              "loop": "integer_lcg",
+              "tool": "python3",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.02631891099998,
+            "returncode": 0,
+            "stderr": "python3 int_loop ops=737329955 elapsed_s=180.000010 worker=1 sink=336600361",
+            "stdout": "",
+            "workload_name": "otel_python3_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/ruby",
+              "-e",
+              "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "ruby",
+              "loop": "integer_lcg",
+              "tool": "ruby",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.03636752,
+            "returncode": 0,
+            "stderr": "ruby int_loop ops=1700030386 elapsed_s=180.000006 worker=0 sink=2752100407",
+            "stdout": "",
+            "workload_name": "otel_ruby_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/ruby",
+              "-e",
+              "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "ruby",
+              "loop": "integer_lcg",
+              "tool": "ruby",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.039045446,
+            "returncode": 0,
+            "stderr": "ruby int_loop ops=1842286564 elapsed_s=180.000005 worker=1 sink=3585686766",
+            "stdout": "",
+            "workload_name": "otel_ruby_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/nodejs",
+              "-e",
+              "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "nodejs",
+              "loop": "integer_lcg",
+              "tool": "nodejs",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.488774035,
+            "returncode": 0,
+            "stderr": "nodejs int_loop ops=806462606 elapsed_s=180.000230 worker=0 sink=905350144",
+            "stdout": "",
+            "workload_name": "otel_nodejs_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/nodejs",
+              "-e",
+              "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "nodejs",
+              "loop": "integer_lcg",
+              "tool": "nodejs",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.48891437999998,
+            "returncode": 0,
+            "stderr": "nodejs int_loop ops=723710134 elapsed_s=180.000323 worker=1 sink=4149465088",
+            "stdout": "",
+            "workload_name": "otel_nodejs_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/perl",
+              "-e",
+              "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "perl",
+              "loop": "integer_lcg",
+              "tool": "perl",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.48897705899998,
+            "returncode": 0,
+            "stderr": "perl int_loop ops=922296161 elapsed_s=180.000001 worker=0 sink=2887958470",
+            "stdout": "",
+            "workload_name": "otel_perl_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/perl",
+              "-e",
+              "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "perl",
+              "loop": "integer_lcg",
+              "tool": "perl",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.489026942,
+            "returncode": 0,
+            "stderr": "perl int_loop ops=938503357 elapsed_s=180.000001 worker=1 sink=1804871607",
+            "stdout": "",
+            "workload_name": "otel_perl_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/php",
+              "-r",
+              "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "php",
+              "loop": "integer_lcg",
+              "tool": "php",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.489106563,
+            "returncode": 0,
+            "stderr": "php int_loop ops=3184029651 elapsed_s=180.000004 worker=0 sink=593336836",
+            "stdout": "",
+            "workload_name": "otel_php_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/php",
+              "-r",
+              "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "php",
+              "loop": "integer_lcg",
+              "tool": "php",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.48918866599996,
+            "returncode": 0,
+            "stderr": "php int_loop ops=3268932693 elapsed_s=180.000002 worker=1 sink=3811752479",
+            "stdout": "",
+            "workload_name": "otel_php_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/stress-ng",
+              "--cpu",
+              "1",
+              "--timeout",
+              "180s",
+              "--metrics-brief",
+              "--temp-path",
+              "/var/tmp/bpfrejit-runtime/1f4e7877"
+            ],
+            "config": {
+              "stressors": [
+                "cpu"
+              ],
+              "tool": "stress-ng"
+            },
+            "duration_s": 180.48926533599996,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [5255] setting to a 3 mins, 0 secs run per stressor\nstress-ng: info:  [5255] dispatching hogs: 1 cpu\nstress-ng: info:  [5255] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [5255] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [5255]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [5255] cpu              251136    180.00    127.98      0.00      1395.20        1962.27\nstress-ng: info:  [5255] skipped: 0\nstress-ng: info:  [5255] passed: 1: cpu (1)\nstress-ng: info:  [5255] failed: 0\nstress-ng: info:  [5255] metrics untrustworthy: 0\nstress-ng: info:  [5255] successful run completed in 3 mins, 0.01 secs",
+            "workload_name": "otel_stress_ng_cpu"
+          }
+        ],
+        "workload_name": "otel_mixed_workload"
+      },
+      {
+        "components": [
+          {
+            "command": [
+              "/usr/bin/python3",
+              "-u",
+              "-c",
+              "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "python3",
+              "loop": "integer_lcg",
+              "tool": "python3",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.024698999,
+            "returncode": 0,
+            "stderr": "python3 int_loop ops=684293723 elapsed_s=180.000008 worker=0 sink=978264348",
+            "stdout": "",
+            "workload_name": "otel_python3_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/python3",
+              "-u",
+              "-c",
+              "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "python3",
+              "loop": "integer_lcg",
+              "tool": "python3",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.03004905699999,
+            "returncode": 0,
+            "stderr": "python3 int_loop ops=739456045 elapsed_s=180.000004 worker=1 sink=3881656135",
+            "stdout": "",
+            "workload_name": "otel_python3_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/ruby",
+              "-e",
+              "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "ruby",
+              "loop": "integer_lcg",
+              "tool": "ruby",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.29567062099994,
+            "returncode": 0,
+            "stderr": "ruby int_loop ops=1731877030 elapsed_s=180.000009 worker=0 sink=3323226083",
+            "stdout": "",
+            "workload_name": "otel_ruby_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/ruby",
+              "-e",
+              "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "ruby",
+              "loop": "integer_lcg",
+              "tool": "ruby",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.29579249399995,
+            "returncode": 0,
+            "stderr": "ruby int_loop ops=1694832879 elapsed_s=180.000010 worker=1 sink=3168571869",
+            "stdout": "",
+            "workload_name": "otel_ruby_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/nodejs",
+              "-e",
+              "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "nodejs",
+              "loop": "integer_lcg",
+              "tool": "nodejs",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.426468242,
+            "returncode": 0,
+            "stderr": "nodejs int_loop ops=663278000 elapsed_s=180.000259 worker=0 sink=3352390656",
+            "stdout": "",
+            "workload_name": "otel_nodejs_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/nodejs",
+              "-e",
+              "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "nodejs",
+              "loop": "integer_lcg",
+              "tool": "nodejs",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.42660098699997,
+            "returncode": 0,
+            "stderr": "nodejs int_loop ops=643839398 elapsed_s=180.000286 worker=1 sink=1736081408",
+            "stdout": "",
+            "workload_name": "otel_nodejs_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/perl",
+              "-e",
+              "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "perl",
+              "loop": "integer_lcg",
+              "tool": "perl",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.42666989899993,
+            "returncode": 0,
+            "stderr": "perl int_loop ops=860073077 elapsed_s=180.000001 worker=0 sink=820015874",
+            "stdout": "",
+            "workload_name": "otel_perl_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/perl",
+              "-e",
+              "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "perl",
+              "loop": "integer_lcg",
+              "tool": "perl",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.42673138899994,
+            "returncode": 0,
+            "stderr": "perl int_loop ops=883962254 elapsed_s=180.000004 worker=1 sink=1602634644",
+            "stdout": "",
+            "workload_name": "otel_perl_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/php",
+              "-r",
+              "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "php",
+              "loop": "integer_lcg",
+              "tool": "php",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.42680016399999,
+            "returncode": 0,
+            "stderr": "php int_loop ops=2964947690 elapsed_s=180.000001 worker=0 sink=453286143",
+            "stdout": "",
+            "workload_name": "otel_php_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/php",
+              "-r",
+              "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "php",
+              "loop": "integer_lcg",
+              "tool": "php",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.426868909,
+            "returncode": 0,
+            "stderr": "php int_loop ops=3228367893 elapsed_s=180.000002 worker=1 sink=2596507231",
+            "stdout": "",
+            "workload_name": "otel_php_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/stress-ng",
+              "--cpu",
+              "1",
+              "--timeout",
+              "180s",
+              "--metrics-brief",
+              "--temp-path",
+              "/var/tmp/bpfrejit-runtime/1f4e7877"
+            ],
+            "config": {
+              "stressors": [
+                "cpu"
+              ],
+              "tool": "stress-ng"
+            },
+            "duration_s": 180.42692970399997,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [8180] setting to a 3 mins, 0 secs run per stressor\nstress-ng: info:  [8180] dispatching hogs: 1 cpu\nstress-ng: info:  [8180] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [8180] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [8180]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [8180] cpu              227112    180.00    119.89      0.03      1261.73        1893.88\nstress-ng: info:  [8180] skipped: 0\nstress-ng: info:  [8180] passed: 1: cpu (1)\nstress-ng: info:  [8180] failed: 0\nstress-ng: info:  [8180] metrics untrustworthy: 0\nstress-ng: info:  [8180] successful run completed in 3 mins, 0.01 secs",
+            "workload_name": "otel_stress_ng_cpu"
+          }
+        ],
+        "workload_name": "otel_mixed_workload"
+      },
+      {
+        "components": [
+          {
+            "command": [
+              "/usr/bin/python3",
+              "-u",
+              "-c",
+              "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "python3",
+              "loop": "integer_lcg",
+              "tool": "python3",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.03442239499998,
+            "returncode": 0,
+            "stderr": "python3 int_loop ops=529288582 elapsed_s=180.000010 worker=0 sink=1362319107",
+            "stdout": "",
+            "workload_name": "otel_python3_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/python3",
+              "-u",
+              "-c",
+              "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "python3",
+              "loop": "integer_lcg",
+              "tool": "python3",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.03454155600002,
+            "returncode": 0,
+            "stderr": "python3 int_loop ops=536311648 elapsed_s=180.000010 worker=1 sink=851456802",
+            "stdout": "",
+            "workload_name": "otel_python3_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/ruby",
+              "-e",
+              "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "ruby",
+              "loop": "integer_lcg",
+              "tool": "ruby",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.12373194400004,
+            "returncode": 0,
+            "stderr": "ruby int_loop ops=1358370736 elapsed_s=180.000010 worker=0 sink=1343787729",
+            "stdout": "",
+            "workload_name": "otel_ruby_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/ruby",
+              "-e",
+              "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "ruby",
+              "loop": "integer_lcg",
+              "tool": "ruby",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.12386714900003,
+            "returncode": 0,
+            "stderr": "ruby int_loop ops=1269105058 elapsed_s=180.000009 worker=1 sink=209591856",
+            "stdout": "",
+            "workload_name": "otel_ruby_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/nodejs",
+              "-e",
+              "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "nodejs",
+              "loop": "integer_lcg",
+              "tool": "nodejs",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.41661359900002,
+            "returncode": 0,
+            "stderr": "nodejs int_loop ops=387250393 elapsed_s=180.000418 worker=0 sink=1849849856",
+            "stdout": "",
+            "workload_name": "otel_nodejs_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/nodejs",
+              "-e",
+              "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "nodejs",
+              "loop": "integer_lcg",
+              "tool": "nodejs",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.41677560200003,
+            "returncode": 0,
+            "stderr": "nodejs int_loop ops=437193490 elapsed_s=180.000279 worker=1 sink=2955272704",
+            "stdout": "",
+            "workload_name": "otel_nodejs_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/perl",
+              "-e",
+              "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "perl",
+              "loop": "integer_lcg",
+              "tool": "perl",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.416852566,
+            "returncode": 0,
+            "stderr": "perl int_loop ops=691493380 elapsed_s=180.005502 worker=0 sink=4191392061",
+            "stdout": "",
+            "workload_name": "otel_perl_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/perl",
+              "-e",
+              "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "perl",
+              "loop": "integer_lcg",
+              "tool": "perl",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.41691365400004,
+            "returncode": 0,
+            "stderr": "perl int_loop ops=668750942 elapsed_s=180.000003 worker=1 sink=3926987268",
+            "stdout": "",
+            "workload_name": "otel_perl_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/php",
+              "-r",
+              "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "php",
+              "loop": "integer_lcg",
+              "tool": "php",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.41700466999998,
+            "returncode": 0,
+            "stderr": "php int_loop ops=2293217212 elapsed_s=180.000006 worker=0 sink=3558043333",
+            "stdout": "",
+            "workload_name": "otel_php_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/php",
+              "-r",
+              "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "php",
+              "loop": "integer_lcg",
+              "tool": "php",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.41709284,
+            "returncode": 0,
+            "stderr": "php int_loop ops=2417077232 elapsed_s=180.000002 worker=1 sink=2817786450",
+            "stdout": "",
+            "workload_name": "otel_php_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/stress-ng",
+              "--cpu",
+              "1",
+              "--timeout",
+              "180s",
+              "--metrics-brief",
+              "--temp-path",
+              "/var/tmp/bpfrejit-runtime/1f4e7877"
+            ],
+            "config": {
+              "stressors": [
+                "cpu"
+              ],
+              "tool": "stress-ng"
+            },
+            "duration_s": 180.41715497300004,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [11114] setting to a 3 mins, 0 secs run per stressor\nstress-ng: info:  [11114] dispatching hogs: 1 cpu\nstress-ng: info:  [11114] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [11114] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [11114]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [11114] cpu              190970    180.00    108.41      0.09      1060.93        1760.03\nstress-ng: info:  [11114] skipped: 0\nstress-ng: info:  [11114] passed: 1: cpu (1)\nstress-ng: info:  [11114] failed: 0\nstress-ng: info:  [11114] metrics untrustworthy: 0\nstress-ng: info:  [11114] successful run completed in 3 mins, 0.02 secs",
+            "workload_name": "otel_stress_ng_cpu"
+          }
+        ],
+        "workload_name": "otel_mixed_workload"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "26": {
+        "bytes_jited": 9973,
+        "bytes_xlated": 24,
+        "id": 26,
+        "name": "perf_unwind_sto",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "28": {
+        "bytes_jited": 33141,
+        "bytes_xlated": 24,
+        "id": 28,
+        "name": "perf_unwind_nat",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "30": {
+        "bytes_jited": 42553,
+        "bytes_xlated": 24,
+        "id": 30,
+        "name": "perf_unwind_hot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "32": {
+        "bytes_jited": 38930,
+        "bytes_xlated": 24,
+        "id": 32,
+        "name": "perf_unwind_per",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "34": {
+        "bytes_jited": 35932,
+        "bytes_xlated": 24,
+        "id": 34,
+        "name": "perf_unwind_php",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "36": {
+        "bytes_jited": 22671,
+        "bytes_xlated": 24,
+        "id": 36,
+        "name": "perf_unwind_pyt",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "38": {
+        "bytes_jited": 29452,
+        "bytes_xlated": 24,
+        "id": 38,
+        "name": "perf_unwind_rub",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "40": {
+        "bytes_jited": 36678,
+        "bytes_xlated": 24,
+        "id": 40,
+        "name": "perf_unwind_v8",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "42": {
+        "bytes_jited": 38427,
+        "bytes_xlated": 24,
+        "id": 42,
+        "name": "perf_unwind_dot",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "44": {
+        "bytes_jited": 5168,
+        "bytes_xlated": 16,
+        "id": 44,
+        "name": "perf_go_labels",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      },
+      "46": {
+        "bytes_jited": 3619,
+        "bytes_xlated": 16,
+        "id": 46,
+        "name": "tracepoint__sch",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "tracepoint"
+      },
+      "48": {
+        "bytes_jited": 9315,
+        "bytes_xlated": 24,
+        "id": 48,
+        "name": "native_tracer_e",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "perf_event"
+      }
+    },
+    "workloads": [
+      {
+        "components": [
+          {
+            "command": [
+              "/usr/bin/python3",
+              "-u",
+              "-c",
+              "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "python3",
+              "loop": "integer_lcg",
+              "tool": "python3",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.04223366100007,
+            "returncode": 0,
+            "stderr": "python3 int_loop ops=620973870 elapsed_s=180.000009 worker=0 sink=2312026587",
+            "stdout": "",
+            "workload_name": "otel_python3_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/python3",
+              "-u",
+              "-c",
+              "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "python3",
+              "loop": "integer_lcg",
+              "tool": "python3",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.04234679400008,
+            "returncode": 0,
+            "stderr": "python3 int_loop ops=625069934 elapsed_s=180.000008 worker=1 sink=524088628",
+            "stdout": "",
+            "workload_name": "otel_python3_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/ruby",
+              "-e",
+              "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "ruby",
+              "loop": "integer_lcg",
+              "tool": "ruby",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.15830244100005,
+            "returncode": 0,
+            "stderr": "ruby int_loop ops=1514301186 elapsed_s=180.000008 worker=0 sink=2002754023",
+            "stdout": "",
+            "workload_name": "otel_ruby_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/ruby",
+              "-e",
+              "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "ruby",
+              "loop": "integer_lcg",
+              "tool": "ruby",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.15842260099987,
+            "returncode": 0,
+            "stderr": "ruby int_loop ops=1553617414 elapsed_s=180.000009 worker=1 sink=2046427772",
+            "stdout": "",
+            "workload_name": "otel_ruby_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/nodejs",
+              "-e",
+              "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "nodejs",
+              "loop": "integer_lcg",
+              "tool": "nodejs",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.43169647000002,
+            "returncode": 0,
+            "stderr": "nodejs int_loop ops=473270510 elapsed_s=180.000388 worker=0 sink=3955062784",
+            "stdout": "",
+            "workload_name": "otel_nodejs_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/nodejs",
+              "-e",
+              "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "nodejs",
+              "loop": "integer_lcg",
+              "tool": "nodejs",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.43176891199994,
+            "returncode": 0,
+            "stderr": "nodejs int_loop ops=485111962 elapsed_s=180.000188 worker=1 sink=1593725952",
+            "stdout": "",
+            "workload_name": "otel_nodejs_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/perl",
+              "-e",
+              "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "perl",
+              "loop": "integer_lcg",
+              "tool": "perl",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.43180222700005,
+            "returncode": 0,
+            "stderr": "perl int_loop ops=837795868 elapsed_s=180.000004 worker=0 sink=1051673957",
+            "stdout": "",
+            "workload_name": "otel_perl_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/perl",
+              "-e",
+              "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "perl",
+              "loop": "integer_lcg",
+              "tool": "perl",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.43253285999992,
+            "returncode": 0,
+            "stderr": "perl int_loop ops=848167990 elapsed_s=180.000001 worker=1 sink=1542069516",
+            "stdout": "",
+            "workload_name": "otel_perl_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/php",
+              "-r",
+              "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "php",
+              "loop": "integer_lcg",
+              "tool": "php",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.4326505800001,
+            "returncode": 0,
+            "stderr": "php int_loop ops=2692064332 elapsed_s=180.000001 worker=0 sink=3241810613",
+            "stdout": "",
+            "workload_name": "otel_php_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/php",
+              "-r",
+              "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "php",
+              "loop": "integer_lcg",
+              "tool": "php",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.43271988999993,
+            "returncode": 0,
+            "stderr": "php int_loop ops=2881415685 elapsed_s=180.000004 worker=1 sink=1468095855",
+            "stdout": "",
+            "workload_name": "otel_php_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/stress-ng",
+              "--cpu",
+              "1",
+              "--timeout",
+              "180s",
+              "--metrics-brief",
+              "--temp-path",
+              "/var/tmp/bpfrejit-runtime/1f4e7877"
+            ],
+            "config": {
+              "stressors": [
+                "cpu"
+              ],
+              "tool": "stress-ng"
+            },
+            "duration_s": 180.43277841399993,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [17751] setting to a 3 mins, 0 secs run per stressor\nstress-ng: info:  [17751] dispatching hogs: 1 cpu\nstress-ng: info:  [17751] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [17751] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [17751]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [17751] cpu              226138    180.00    124.49      0.05      1256.31        1815.79\nstress-ng: info:  [17751] skipped: 0\nstress-ng: info:  [17751] passed: 1: cpu (1)\nstress-ng: info:  [17751] failed: 0\nstress-ng: info:  [17751] metrics untrustworthy: 0\nstress-ng: info:  [17751] successful run completed in 3 mins, 0.01 secs",
+            "workload_name": "otel_stress_ng_cpu"
+          }
+        ],
+        "workload_name": "otel_mixed_workload"
+      },
+      {
+        "components": [
+          {
+            "command": [
+              "/usr/bin/python3",
+              "-u",
+              "-c",
+              "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "python3",
+              "loop": "integer_lcg",
+              "tool": "python3",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.02691431199992,
+            "returncode": 0,
+            "stderr": "python3 int_loop ops=585870370 elapsed_s=180.000845 worker=0 sink=3862774471",
+            "stdout": "",
+            "workload_name": "otel_python3_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/python3",
+              "-u",
+              "-c",
+              "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "python3",
+              "loop": "integer_lcg",
+              "tool": "python3",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.06472478799992,
+            "returncode": 0,
+            "stderr": "python3 int_loop ops=617114497 elapsed_s=180.000007 worker=1 sink=2063675795",
+            "stdout": "",
+            "workload_name": "otel_python3_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/ruby",
+              "-e",
+              "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "ruby",
+              "loop": "integer_lcg",
+              "tool": "ruby",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.27592639099998,
+            "returncode": 0,
+            "stderr": "ruby int_loop ops=1434018474 elapsed_s=180.000011 worker=0 sink=3263575359",
+            "stdout": "",
+            "workload_name": "otel_ruby_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/ruby",
+              "-e",
+              "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "ruby",
+              "loop": "integer_lcg",
+              "tool": "ruby",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.27600655600008,
+            "returncode": 0,
+            "stderr": "ruby int_loop ops=1411800393 elapsed_s=180.000018 worker=1 sink=1601789515",
+            "stdout": "",
+            "workload_name": "otel_ruby_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/nodejs",
+              "-e",
+              "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "nodejs",
+              "loop": "integer_lcg",
+              "tool": "nodejs",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.65349791199992,
+            "returncode": 0,
+            "stderr": "nodejs int_loop ops=343490972 elapsed_s=180.000367 worker=0 sink=3377476608",
+            "stdout": "",
+            "workload_name": "otel_nodejs_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/nodejs",
+              "-e",
+              "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "nodejs",
+              "loop": "integer_lcg",
+              "tool": "nodejs",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.6537761919999,
+            "returncode": 0,
+            "stderr": "nodejs int_loop ops=377064537 elapsed_s=180.002941 worker=1 sink=2570357760",
+            "stdout": "",
+            "workload_name": "otel_nodejs_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/perl",
+              "-e",
+              "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "perl",
+              "loop": "integer_lcg",
+              "tool": "perl",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.65387801099996,
+            "returncode": 0,
+            "stderr": "perl int_loop ops=735808938 elapsed_s=180.010651 worker=0 sink=1220819519",
+            "stdout": "",
+            "workload_name": "otel_perl_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/perl",
+              "-e",
+              "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "perl",
+              "loop": "integer_lcg",
+              "tool": "perl",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.65396912000006,
+            "returncode": 0,
+            "stderr": "perl int_loop ops=767736092 elapsed_s=180.014674 worker=1 sink=2067224278",
+            "stdout": "",
+            "workload_name": "otel_perl_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/php",
+              "-r",
+              "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "php",
+              "loop": "integer_lcg",
+              "tool": "php",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.654077143,
+            "returncode": 0,
+            "stderr": "php int_loop ops=2425354436 elapsed_s=180.001538 worker=0 sink=3965040765",
+            "stdout": "",
+            "workload_name": "otel_php_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/php",
+              "-r",
+              "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "php",
+              "loop": "integer_lcg",
+              "tool": "php",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.654189203,
+            "returncode": 0,
+            "stderr": "php int_loop ops=2622328151 elapsed_s=180.000004 worker=1 sink=2018599477",
+            "stdout": "",
+            "workload_name": "otel_php_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/stress-ng",
+              "--cpu",
+              "1",
+              "--timeout",
+              "180s",
+              "--metrics-brief",
+              "--temp-path",
+              "/var/tmp/bpfrejit-runtime/1f4e7877"
+            ],
+            "config": {
+              "stressors": [
+                "cpu"
+              ],
+              "tool": "stress-ng"
+            },
+            "duration_s": 180.65431735900006,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [20696] setting to a 3 mins, 0 secs run per stressor\nstress-ng: info:  [20696] dispatching hogs: 1 cpu\nstress-ng: info:  [20696] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [20696] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [20696]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [20696] cpu              205147    180.00    115.93      0.07      1139.69        1768.62\nstress-ng: info:  [20696] skipped: 0\nstress-ng: info:  [20696] passed: 1: cpu (1)\nstress-ng: info:  [20696] failed: 0\nstress-ng: info:  [20696] metrics untrustworthy: 0\nstress-ng: info:  [20696] successful run completed in 3 mins, 0.02 secs",
+            "workload_name": "otel_stress_ng_cpu"
+          }
+        ],
+        "workload_name": "otel_mixed_workload"
+      },
+      {
+        "components": [
+          {
+            "command": [
+              "/usr/bin/python3",
+              "-u",
+              "-c",
+              "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "python3",
+              "loop": "integer_lcg",
+              "tool": "python3",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.0246111800002,
+            "returncode": 0,
+            "stderr": "python3 int_loop ops=618064637 elapsed_s=180.000010 worker=0 sink=2608945114",
+            "stdout": "",
+            "workload_name": "otel_python3_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/python3",
+              "-u",
+              "-c",
+              "import sys, time\nworker = int(sys.argv[2])\nx = worker + 1\nn = 0\nt0 = time.monotonic()\ndeadline = t0 + float(sys.argv[1])\nwhile time.monotonic() < deadline:\n    x = ((x * 1103515245) + 12345) & 0xffffffff\n    n += 1\nsys.stderr.write(f\"python3 int_loop ops={n} elapsed_s={time.monotonic()-t0:.6f} worker={worker} sink={x}\\n\")\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "python3",
+              "loop": "integer_lcg",
+              "tool": "python3",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.1684006800001,
+            "returncode": 0,
+            "stderr": "python3 int_loop ops=648419269 elapsed_s=180.000005 worker=1 sink=2903907247",
+            "stdout": "",
+            "workload_name": "otel_python3_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/ruby",
+              "-e",
+              "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "ruby",
+              "loop": "integer_lcg",
+              "tool": "ruby",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.16852511900015,
+            "returncode": 0,
+            "stderr": "ruby int_loop ops=1492044492 elapsed_s=180.000006 worker=0 sink=1505654837",
+            "stdout": "",
+            "workload_name": "otel_ruby_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/ruby",
+              "-e",
+              "worker = ARGV.fetch(1).to_i\nx = worker + 1\nn = 0\nt0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)\ndeadline = t0 + ARGV.fetch(0).to_f\nwhile Process.clock_gettime(Process::CLOCK_MONOTONIC) < deadline\n  x = ((x * 1103515245) + 12345) & 0xffffffff\n  n += 1\nend\nelapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0\nSTDERR.puts \"ruby int_loop ops=#{n} elapsed_s=#{format(\"%.6f\", elapsed)} worker=#{worker} sink=#{x}\"\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "ruby",
+              "loop": "integer_lcg",
+              "tool": "ruby",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 180.16859222800008,
+            "returncode": 0,
+            "stderr": "ruby int_loop ops=1489254769 elapsed_s=180.000012 worker=1 sink=1410304931",
+            "stdout": "",
+            "workload_name": "otel_ruby_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/nodejs",
+              "-e",
+              "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "nodejs",
+              "loop": "integer_lcg",
+              "tool": "nodejs",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 181.23635077500012,
+            "returncode": 0,
+            "stderr": "nodejs int_loop ops=377804122 elapsed_s=180.000328 worker=0 sink=4097247232",
+            "stdout": "",
+            "workload_name": "otel_nodejs_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/nodejs",
+              "-e",
+              "const worker = Number(process.argv[2]);\nlet x = worker + 1;\nlet n = 0;\nconst t0 = process.hrtime.bigint();\nconst deadline = t0 + BigInt(Math.round(Number(process.argv[1]) * 1e9));\nwhile (process.hrtime.bigint() < deadline) {\n  x = (((x * 1103515245) + 12345) >>> 0);\n  n++;\n}\nconst dt = Number(process.hrtime.bigint() - t0) / 1e9;\nprocess.stderr.write(`nodejs int_loop ops=${n} elapsed_s=${dt.toFixed(6)} worker=${worker} sink=${x}\\n`);\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "nodejs",
+              "loop": "integer_lcg",
+              "tool": "nodejs",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 182.200504744,
+            "returncode": 0,
+            "stderr": "nodejs int_loop ops=413206412 elapsed_s=180.000301 worker=1 sink=4158529536",
+            "stdout": "",
+            "workload_name": "otel_nodejs_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/perl",
+              "-e",
+              "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "perl",
+              "loop": "integer_lcg",
+              "tool": "perl",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 182.20063488600022,
+            "returncode": 0,
+            "stderr": "perl int_loop ops=797909468 elapsed_s=180.000001 worker=0 sink=1906203045",
+            "stdout": "",
+            "workload_name": "otel_perl_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/perl",
+              "-e",
+              "use Time::HiRes qw(clock_gettime CLOCK_MONOTONIC);\nmy $worker = int($ARGV[1]);\nmy $x = $worker + 1;\nmy $n = 0;\nmy $t0 = clock_gettime(CLOCK_MONOTONIC);\nmy $deadline = $t0 + $ARGV[0];\nwhile (clock_gettime(CLOCK_MONOTONIC) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\nmy $dt = clock_gettime(CLOCK_MONOTONIC) - $t0;\nprintf STDERR (\"perl int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x);\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "perl",
+              "loop": "integer_lcg",
+              "tool": "perl",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 182.200695192,
+            "returncode": 0,
+            "stderr": "perl int_loop ops=810544692 elapsed_s=180.000001 worker=1 sink=3619095134",
+            "stdout": "",
+            "workload_name": "otel_perl_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/php",
+              "-r",
+              "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+              "180",
+              "0"
+            ],
+            "config": {
+              "language": "php",
+              "loop": "integer_lcg",
+              "tool": "php",
+              "worker_index": 0,
+              "workers_per_language": 2
+            },
+            "duration_s": 182.20077630700007,
+            "returncode": 0,
+            "stderr": "php int_loop ops=2752421247 elapsed_s=180.000002 worker=0 sink=3219939944",
+            "stdout": "",
+            "workload_name": "otel_php_int_loop_0"
+          },
+          {
+            "command": [
+              "/usr/bin/php",
+              "-r",
+              "$worker = (int)$argv[2];\n$x = $worker + 1;\n$n = 0;\n$t0 = hrtime(true);\n$deadline = $t0 + (int)((float)$argv[1] * 1e9);\nwhile (hrtime(true) < $deadline) {\n  $x = (($x * 1103515245) + 12345) & 0xffffffff;\n  $n++;\n}\n$dt = (hrtime(true) - $t0) / 1e9;\nfwrite(STDERR, sprintf(\"php int_loop ops=%d elapsed_s=%.6f worker=%d sink=%d\\n\", $n, $dt, $worker, $x));\n",
+              "180",
+              "1"
+            ],
+            "config": {
+              "language": "php",
+              "loop": "integer_lcg",
+              "tool": "php",
+              "worker_index": 1,
+              "workers_per_language": 2
+            },
+            "duration_s": 182.20084695000014,
+            "returncode": 0,
+            "stderr": "php int_loop ops=2495342361 elapsed_s=180.000006 worker=1 sink=1958659707",
+            "stdout": "",
+            "workload_name": "otel_php_int_loop_1"
+          },
+          {
+            "command": [
+              "/usr/bin/stress-ng",
+              "--cpu",
+              "1",
+              "--timeout",
+              "180s",
+              "--metrics-brief",
+              "--temp-path",
+              "/var/tmp/bpfrejit-runtime/1f4e7877"
+            ],
+            "config": {
+              "stressors": [
+                "cpu"
+              ],
+              "tool": "stress-ng"
+            },
+            "duration_s": 182.20091880400014,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "stress-ng: info:  [23480] setting to a 3 mins, 0 secs run per stressor\nstress-ng: info:  [23480] dispatching hogs: 1 cpu\nstress-ng: info:  [23480] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics\nstress-ng: metrc: [23480] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s\nstress-ng: metrc: [23480]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)\nstress-ng: metrc: [23480] cpu              205050    180.00    112.85      0.08      1139.14        1815.73\nstress-ng: info:  [23480] skipped: 0\nstress-ng: info:  [23480] passed: 1: cpu (1)\nstress-ng: info:  [23480] failed: 0\nstress-ng: info:  [23480] metrics untrustworthy: 0\nstress-ng: info:  [23480] successful run completed in 3 mins, 0.01 secs",
+            "workload_name": "otel_stress_ng_cpu"
+          }
+        ],
+        "workload_name": "otel_mixed_workload"
+      }
+    ]
+  },
+  "rejit_result": {
+    "mode": "loadtime",
+    "status": "skipped"
+  },
+  "runner": "otelcol-ebpf-profiler",
+  "selected_workload": "otel_mixed_workload",
+  "status": "ok"
+}

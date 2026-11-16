@@ -1,0 +1,876 @@
+{
+  "app": "cilium/agent",
+  "baseline": {
+    "bpf": {
+      "125": {
+        "bytes_jited": 513,
+        "bytes_xlated": 880,
+        "id": 125,
+        "name": "cil_xdp_entry",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 1965,
+        "type": "xdp"
+      },
+      "126": {
+        "bytes_jited": 409,
+        "bytes_xlated": 752,
+        "id": 126,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "127": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 127,
+        "name": "cil_lxc_policy_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "128": {
+        "bytes_jited": 6570,
+        "bytes_xlated": 11024,
+        "id": 128,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "129": {
+        "bytes_jited": 6220,
+        "bytes_xlated": 10984,
+        "id": 129,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "130": {
+        "bytes_jited": 1093,
+        "bytes_xlated": 1720,
+        "id": 130,
+        "name": "cil_from_contai",
+        "run_cnt_delta": 234691574,
+        "run_time_ns_delta": 195823131803,
+        "type": "sched_cls"
+      },
+      "132": {
+        "bytes_jited": 3626,
+        "bytes_xlated": 6368,
+        "id": 132,
+        "name": "tail_nodeport_r",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "133": {
+        "bytes_jited": 931,
+        "bytes_xlated": 1616,
+        "id": 133,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "134": {
+        "bytes_jited": 5584,
+        "bytes_xlated": 9904,
+        "id": 134,
+        "name": "tail_ipv4_polic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "136": {
+        "bytes_jited": 8885,
+        "bytes_xlated": 15112,
+        "id": 136,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "138": {
+        "bytes_jited": 5806,
+        "bytes_xlated": 10368,
+        "id": 138,
+        "name": "tail_ipv4_to_en",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "139": {
+        "bytes_jited": 931,
+        "bytes_xlated": 1616,
+        "id": 139,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "140": {
+        "bytes_jited": 386,
+        "bytes_xlated": 696,
+        "id": 140,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "141": {
+        "bytes_jited": 5226,
+        "bytes_xlated": 8912,
+        "id": 141,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "142": {
+        "bytes_jited": 5584,
+        "bytes_xlated": 9904,
+        "id": 142,
+        "name": "tail_ipv4_polic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "143": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 143,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "144": {
+        "bytes_jited": 3626,
+        "bytes_xlated": 6368,
+        "id": 144,
+        "name": "tail_nodeport_r",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "145": {
+        "bytes_jited": 3390,
+        "bytes_xlated": 5936,
+        "id": 145,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "146": {
+        "bytes_jited": 5379,
+        "bytes_xlated": 9592,
+        "id": 146,
+        "name": "tail_ipv4_ct_eg",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "147": {
+        "bytes_jited": 5214,
+        "bytes_xlated": 9224,
+        "id": 147,
+        "name": "tail_ipv4_ct_in",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "148": {
+        "bytes_jited": 6404,
+        "bytes_xlated": 11104,
+        "id": 148,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "149": {
+        "bytes_jited": 386,
+        "bytes_xlated": 696,
+        "id": 149,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "150": {
+        "bytes_jited": 5806,
+        "bytes_xlated": 10368,
+        "id": 150,
+        "name": "tail_ipv4_to_en",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "152": {
+        "bytes_jited": 5764,
+        "bytes_xlated": 10104,
+        "id": 152,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "153": {
+        "bytes_jited": 2778,
+        "bytes_xlated": 4920,
+        "id": 153,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "154": {
+        "bytes_jited": 8258,
+        "bytes_xlated": 14392,
+        "id": 154,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "155": {
+        "bytes_jited": 5214,
+        "bytes_xlated": 9224,
+        "id": 155,
+        "name": "tail_ipv4_ct_in",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "156": {
+        "bytes_jited": 6220,
+        "bytes_xlated": 10984,
+        "id": 156,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "158": {
+        "bytes_jited": 5379,
+        "bytes_xlated": 9592,
+        "id": 158,
+        "name": "tail_ipv4_ct_eg",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "159": {
+        "bytes_jited": 2778,
+        "bytes_xlated": 4920,
+        "id": 159,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "160": {
+        "bytes_jited": 12958,
+        "bytes_xlated": 21584,
+        "id": 160,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "161": {
+        "bytes_jited": 3949,
+        "bytes_xlated": 7040,
+        "id": 161,
+        "name": "cil_from_host",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 4374,
+        "type": "sched_cls"
+      },
+      "162": {
+        "bytes_jited": 1268,
+        "bytes_xlated": 2112,
+        "id": 162,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "163": {
+        "bytes_jited": 6404,
+        "bytes_xlated": 11104,
+        "id": 163,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "164": {
+        "bytes_jited": 863,
+        "bytes_xlated": 1512,
+        "id": 164,
+        "name": "cil_to_host",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 2755,
+        "type": "sched_cls"
+      },
+      "165": {
+        "bytes_jited": 1268,
+        "bytes_xlated": 2112,
+        "id": 165,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "166": {
+        "bytes_jited": 8885,
+        "bytes_xlated": 15112,
+        "id": 166,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "167": {
+        "bytes_jited": 1093,
+        "bytes_xlated": 1720,
+        "id": 167,
+        "name": "cil_from_contai",
+        "run_cnt_delta": 234753091,
+        "run_time_ns_delta": 198655198451,
+        "type": "sched_cls"
+      },
+      "168": {
+        "bytes_jited": 386,
+        "bytes_xlated": 696,
+        "id": 168,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "169": {
+        "bytes_jited": 5379,
+        "bytes_xlated": 9592,
+        "id": 169,
+        "name": "tail_ipv4_ct_eg",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "170": {
+        "bytes_jited": 8246,
+        "bytes_xlated": 14312,
+        "id": 170,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "171": {
+        "bytes_jited": 5764,
+        "bytes_xlated": 10104,
+        "id": 171,
+        "name": "cil_lxc_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "172": {
+        "bytes_jited": 6404,
+        "bytes_xlated": 11104,
+        "id": 172,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "173": {
+        "bytes_jited": 12985,
+        "bytes_xlated": 21632,
+        "id": 173,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "174": {
+        "bytes_jited": 5226,
+        "bytes_xlated": 8912,
+        "id": 174,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "175": {
+        "bytes_jited": 6220,
+        "bytes_xlated": 10984,
+        "id": 175,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "176": {
+        "bytes_jited": 6570,
+        "bytes_xlated": 11024,
+        "id": 176,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "177": {
+        "bytes_jited": 863,
+        "bytes_xlated": 1512,
+        "id": 177,
+        "name": "cil_to_host",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 1972,
+        "type": "sched_cls"
+      },
+      "178": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 178,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "179": {
+        "bytes_jited": 2796,
+        "bytes_xlated": 4952,
+        "id": 179,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "180": {
+        "bytes_jited": 5806,
+        "bytes_xlated": 10368,
+        "id": 180,
+        "name": "tail_ipv4_to_en",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "181": {
+        "bytes_jited": 3949,
+        "bytes_xlated": 7040,
+        "id": 181,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "182": {
+        "bytes_jited": 409,
+        "bytes_xlated": 752,
+        "id": 182,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "183": {
+        "bytes_jited": 3626,
+        "bytes_xlated": 6368,
+        "id": 183,
+        "name": "tail_nodeport_r",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "184": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 184,
+        "name": "cil_lxc_policy_",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "185": {
+        "bytes_jited": 3390,
+        "bytes_xlated": 5936,
+        "id": 185,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "186": {
+        "bytes_jited": 5584,
+        "bytes_xlated": 9904,
+        "id": 186,
+        "name": "tail_ipv4_polic",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "188": {
+        "bytes_jited": 2778,
+        "bytes_xlated": 4920,
+        "id": 188,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "189": {
+        "bytes_jited": 2796,
+        "bytes_xlated": 4952,
+        "id": 189,
+        "name": "tail_no_service",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "190": {
+        "bytes_jited": 5214,
+        "bytes_xlated": 9224,
+        "id": 190,
+        "name": "tail_ipv4_ct_in",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "191": {
+        "bytes_jited": 931,
+        "bytes_xlated": 1616,
+        "id": 191,
+        "name": "tail_handle_arp",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "192": {
+        "bytes_jited": 6570,
+        "bytes_xlated": 11024,
+        "id": 192,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "193": {
+        "bytes_jited": 12985,
+        "bytes_xlated": 21632,
+        "id": 193,
+        "name": "tail_handle_sna",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "194": {
+        "bytes_jited": 3949,
+        "bytes_xlated": 7040,
+        "id": 194,
+        "name": "cil_from_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "195": {
+        "bytes_jited": 409,
+        "bytes_xlated": 752,
+        "id": 195,
+        "name": "tail_drop_notif",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "196": {
+        "bytes_jited": 3390,
+        "bytes_xlated": 5936,
+        "id": 196,
+        "name": "cil_from_netdev",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 3194,
+        "type": "sched_cls"
+      },
+      "197": {
+        "bytes_jited": 8246,
+        "bytes_xlated": 14312,
+        "id": 197,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "198": {
+        "bytes_jited": 5226,
+        "bytes_xlated": 8912,
+        "id": 198,
+        "name": "cil_to_netdev",
+        "run_cnt_delta": 2,
+        "run_time_ns_delta": 3292,
+        "type": "sched_cls"
+      },
+      "199": {
+        "bytes_jited": 1268,
+        "bytes_xlated": 2112,
+        "id": 199,
+        "name": "tail_handle_ipv",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "200": {
+        "bytes_jited": 863,
+        "bytes_xlated": 1512,
+        "id": 200,
+        "name": "cil_to_host",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "201": {
+        "bytes_jited": 8885,
+        "bytes_xlated": 15112,
+        "id": 201,
+        "name": "tail_nodeport_n",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      },
+      "202": {
+        "bytes_jited": 20,
+        "bytes_xlated": 16,
+        "id": 202,
+        "name": "cil_host_policy",
+        "run_cnt_delta": 0,
+        "run_time_ns_delta": 0,
+        "type": "sched_cls"
+      }
+    },
+    "workloads": [
+      {
+        "components": [
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepa",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.16",
+              "dst_port": 18081,
+              "dst_port_range": [
+                1,
+                65535
+              ],
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepa",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.163",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 180.00538908,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.16  dst_max: 10.244.0.16\n     src_min: 10.244.0.163  src_max: 10.244.0.163\n     src_mac: 46:a2:48:f1:3d:fb dst_mac: 0a:9a:49:25:5a:ae\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 1  udp_dst_max: 65535\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 77714559  errors: 0\n     started: 323270192us  stopped: 503187476us idle: 0us\n     seq_num: 77714560  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.163  cur_daddr: 10.244.0.16\n     cur_udp_dst: 56770  cur_udp_src: 56770\n     cur_queue_map: 0\n     flows: 38873529\nResult: OK: 179917283(c179917283+d0) usec, 77714559 (64byte,-1frags)\n  431946pps 221Mb/sec (221156352bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_forward"
+          },
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepb",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.163",
+              "dst_port": 18081,
+              "dst_port_range": [
+                1,
+                65535
+              ],
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepb",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.16",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 180.095415329,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.163  dst_max: 10.244.0.163\n     src_min: 10.244.0.16  src_max: 10.244.0.16\n     src_mac: 2a:fd:15:64:67:fd dst_mac: 02:5a:d1:5e:db:08\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 1  udp_dst_max: 65535\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 77776149  errors: 0\n     started: 323180018us  stopped: 503177717us idle: 0us\n     seq_num: 77776150  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.16  cur_daddr: 10.244.0.163\n     cur_udp_dst: 52826  cur_udp_src: 52826\n     cur_queue_map: 0\n     flows: 38904513\nResult: OK: 179997699(c179997699+d0) usec, 77776149 (64byte,-1frags)\n  432095pps 221Mb/sec (221232640bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_reverse"
+          }
+        ],
+        "config": {
+          "path": "bidirectional-endpoint-to-endpoint"
+        },
+        "workload_name": "cilium_endpoint_pktgen"
+      },
+      {
+        "components": [
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepa",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.16",
+              "dst_port": 18081,
+              "dst_port_range": [
+                1,
+                65535
+              ],
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepa",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.163",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 180.10607537399994,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.16  dst_max: 10.244.0.16\n     src_min: 10.244.0.163  src_max: 10.244.0.163\n     src_mac: 46:a2:48:f1:3d:fb dst_mac: 0a:9a:49:25:5a:ae\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 1  udp_dst_max: 65535\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 78014441  errors: 0\n     started: 503620071us  stopped: 683597322us idle: 0us\n     seq_num: 78014442  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.163  cur_daddr: 10.244.0.16\n     cur_udp_dst: 28982  cur_udp_src: 28982\n     cur_queue_map: 0\n     flows: 39023631\nResult: OK: 179977250(c179977250+d0) usec, 78014441 (64byte,-1frags)\n  433468pps 221Mb/sec (221935616bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_forward"
+          },
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepb",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.163",
+              "dst_port": 18081,
+              "dst_port_range": [
+                1,
+                65535
+              ],
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepb",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.16",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 180.01545405999997,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.163  dst_max: 10.244.0.163\n     src_min: 10.244.0.16  src_max: 10.244.0.16\n     src_mac: 2a:fd:15:64:67:fd dst_mac: 02:5a:d1:5e:db:08\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 1  udp_dst_max: 65535\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 78014440  errors: 0\n     started: 503620066us  stopped: 683597320us idle: 0us\n     seq_num: 78014441  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.16  cur_daddr: 10.244.0.163\n     cur_udp_dst: 28981  cur_udp_src: 28981\n     cur_queue_map: 0\n     flows: 39023585\nResult: OK: 179977253(c179977253+d0) usec, 78014440 (64byte,-1frags)\n  433468pps 221Mb/sec (221935616bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_reverse"
+          }
+        ],
+        "config": {
+          "path": "bidirectional-endpoint-to-endpoint"
+        },
+        "workload_name": "cilium_endpoint_pktgen"
+      },
+      {
+        "components": [
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepa",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.16",
+              "dst_port": 18081,
+              "dst_port_range": [
+                1,
+                65535
+              ],
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepa",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.163",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 180.076578949,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.16  dst_max: 10.244.0.16\n     src_min: 10.244.0.163  src_max: 10.244.0.163\n     src_mac: 46:a2:48:f1:3d:fb dst_mac: 0a:9a:49:25:5a:ae\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 1  udp_dst_max: 65535\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 78962004  errors: 0\n     started: 684150124us  stopped: 864047276us idle: 0us\n     seq_num: 78962005  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.163  cur_daddr: 10.244.0.16\n     cur_udp_dst: 59069  cur_udp_src: 59069\n     cur_queue_map: 0\n     flows: 39497466\nResult: OK: 179897151(c179897151+d0) usec, 78962004 (64byte,-1frags)\n  438928pps 224Mb/sec (224731136bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_forward"
+          },
+          {
+            "command": [
+              "ip",
+              "netns",
+              "exec",
+              "bpfbench-cepb",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.244.0.163",
+              "dst_port": 18081,
+              "dst_port_range": [
+                1,
+                65535
+              ],
+              "flows": 65535,
+              "iface": "eth0",
+              "namespace": "bpfbench-cepb",
+              "pkt_size": 64,
+              "src_ip": "10.244.0.16",
+              "tool": "kernel_pktgen"
+            },
+            "duration_s": 180.07676394500004,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: eth0\n     flows: 65535 flowlen: 1\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.244.0.163  dst_max: 10.244.0.163\n     src_min: 10.244.0.16  src_max: 10.244.0.16\n     src_mac: 2a:fd:15:64:67:fd dst_mac: 02:5a:d1:5e:db:08\n     udp_src_min: 1  udp_src_max: 65535  udp_dst_min: 1  udp_dst_max: 65535\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: FLOW_RND\nCurrent:\n     pkts-sofar: 78961944  errors: 0\n     started: 684150037us  stopped: 864047133us idle: 0us\n     seq_num: 78961945  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.244.0.16  cur_daddr: 10.244.0.163\n     cur_udp_dst: 59009  cur_udp_src: 59009\n     cur_queue_map: 0\n     flows: 39497215\nResult: OK: 179897095(c179897095+d0) usec, 78961944 (64byte,-1frags)\n  438928pps 224Mb/sec (224731136bps) errors: 0",
+            "workload_name": "cilium_endpoint_pktgen_reverse"
+          }
+        ],
+        "config": {
+          "path": "bidirectional-endpoint-to-endpoint"
+        },
+        "workload_name": "cilium_endpoint_pktgen"
+      }
+    ]
+  },
+  "error": "Cilium API PUT /v1/endpoint/0 returned HTTP 500: \"timeout while waiting for initial endpoint generation to complete: context deadline exceeded\"; cilium-agent output tail:\nm tail_drop_notify: load program: invalid argument\"\ntime=2026-11-10T12:55:29.659827175Z level=info msg=\"Wrote verifier log to endpoint directory\" ipv4=10.244.0.92 identity=41997 ciliumEndpointName=/ containerID=bpfbench-c endpointID=706 containerInterface=\"\" ipv6=\"\" k8sPodName=/ subsys=endpoint file-path=706_next/verifier.log\ntime=2026-11-10T12:55:29.65983689Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" ipv4=10.244.0.92 identity=41997 ciliumEndpointName=/ containerID=bpfbench-c endpointID=706 containerInterface=\"\" ipv6=\"\" k8sPodName=/ subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\" file-path=706_next_fail\ntime=2026-11-10T12:55:29.660009179Z level=warn msg=\"Regeneration of endpoint failed\" ipv4=10.244.0.92 identity=41997 ciliumEndpointName=/ containerID=bpfbench-c endpointID=706 containerInterface=\"\" ipv6=\"\" k8sPodName=/ subsys=endpoint reason=RegenerationFailure buildPermitAcquisition=4.147\u00b5s bpfLoadProg=7.814731ms waitingForPolicyRepository=173ns endpointPolicyCalculation=3.674\u00b5s bpfCompilation=0s proxyConfiguration=4.454\u00b5s selectorPolicyCalculation=0s prepareBuild=135.197\u00b5s bpfWaitForELF=717.181\u00b5s waitingForLock=2.587\u00b5s waitingForCTClean=865ns policyCalculation=17.601\u00b5s proxyWaitForAck=0s total=35.087185ms proxyPolicyCalculation=49.795\u00b5s mapSync=941ns bpfCompilation=0s bpfWaitForELF=717.181\u00b5s bpfLoadProg=7.814731ms error=\"loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\"\ntime=2026-11-10T12:55:29.660050426Z level=error msg=\"Endpoint regeneration failed\" ipv4=10.244.0.92 identity=41997 ciliumEndpointName=/ containerID=bpfbench-c endpointID=706 containerInterface=\"\" ipv6=\"\" k8sPodName=/ subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\"\ntime=2026-11-10T12:55:56.978684025Z level=error msg=\"Error while reloading endpoint BPF program\" endpointID=2176 containerInterface=\"\" ciliumEndpointName=/ k8sPodName=/ identity=1 containerID=\"\" ipv6=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\"\ntime=2026-11-10T12:55:56.978832105Z level=info msg=\"Wrote verifier log to endpoint directory\" endpointID=2176 containerInterface=\"\" ciliumEndpointName=/ k8sPodName=/ identity=1 containerID=\"\" ipv6=\"\" ipv4=\"\" subsys=endpoint file-path=2176_next/verifier.log\ntime=2026-11-10T12:55:56.978843353Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" endpointID=2176 containerInterface=\"\" ciliumEndpointName=/ k8sPodName=/ identity=1 containerID=\"\" ipv6=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\" file-path=2176_next_fail\ntime=2026-11-10T12:55:56.979014293Z level=warn msg=\"Regeneration of endpoint failed\" endpointID=2176 containerInterface=\"\" ciliumEndpointName=/ k8sPodName=/ identity=1 containerID=\"\" ipv6=\"\" ipv4=\"\" subsys=endpoint reason=RegenerationFailure proxyConfiguration=4.286\u00b5s endpointPolicyCalculation=16.589\u00b5s bpfCompilation=0s waitingForPolicyRepository=107ns policyCalculation=26.61\u00b5s selectorPolicyCalculation=0s mapSync=19.991\u00b5s bpfWaitForELF=727.913\u00b5s waitingForLock=2.493\u00b5s waitingForCTClean=1.537356ms proxyPolicyCalculation=3.206\u00b5s buildPermitAcquisition=4.267\u00b5s proxyWaitForAck=0s prepareBuild=139.486\u00b5s total=576.34402ms bpfLoadProg=549.418293ms bpfCompilation=0s bpfWaitForELF=727.913\u00b5s bpfLoadProg=549.418293ms error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\"\ntime=2026-11-10T12:55:56.979056543Z level=error msg=\"Endpoint regeneration failed\" endpointID=2176 containerInterface=\"\" ciliumEndpointName=/ k8sPodName=/ identity=1 containerID=\"\" ipv6=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\"\ntime=2026-11-10T12:55:59.995923984Z level=error msg=\"Error while reloading endpoint BPF program\" ipv4=10.244.0.92 identity=41997 ciliumEndpointName=/ containerID=bpfbench-c endpointID=706 containerInterface=\"\" ipv6=\"\" k8sPodName=/ subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\"\ntime=2026-11-10T12:55:59.996047906Z level=info msg=\"Wrote verifier log to endpoint directory\" ipv4=10.244.0.92 identity=41997 ciliumEndpointName=/ containerID=bpfbench-c endpointID=706 containerInterface=\"\" ipv6=\"\" k8sPodName=/ subsys=endpoint file-path=706_next/verifier.log\ntime=2026-11-10T12:55:59.996059098Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" ipv4=10.244.0.92 identity=41997 ciliumEndpointName=/ containerID=bpfbench-c endpointID=706 containerInterface=\"\" ipv6=\"\" k8sPodName=/ subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\" file-path=706_next_fail\ntime=2026-11-10T12:55:59.996244446Z level=warn msg=\"Regeneration of endpoint failed\" ipv4=10.244.0.92 identity=41997 ciliumEndpointName=/ containerID=bpfbench-c endpointID=706 containerInterface=\"\" ipv6=\"\" k8sPodName=/ subsys=endpoint reason=RegenerationFailure total=336.022141ms proxyConfiguration=4.571\u00b5s bpfLoadProg=307.103061ms bpfWaitForELF=775.429\u00b5s buildPermitAcquisition=3.608\u00b5s bpfCompilation=0s waitingForCTClean=790ns policyCalculation=14.205\u00b5s selectorPolicyCalculation=0s proxyPolicyCalculation=43.616\u00b5s proxyWaitForAck=0s mapSync=975ns waitingForLock=2.192\u00b5s waitingForPolicyRepository=118ns endpointPolicyCalculation=4.041\u00b5s prepareBuild=131.413\u00b5s bpfCompilation=0s bpfWaitForELF=775.429\u00b5s bpfLoadProg=307.103061ms error=\"loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\"\ntime=2026-11-10T12:55:59.996286369Z level=error msg=\"Endpoint regeneration failed\" ipv4=10.244.0.92 identity=41997 ciliumEndpointName=/ containerID=bpfbench-c endpointID=706 containerInterface=\"\" ipv6=\"\" k8sPodName=/ subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\"\ntime=2026-11-10T12:56:29.627379965Z level=error msg=\"Error while reloading endpoint BPF program\" endpointID=2176 containerInterface=\"\" ciliumEndpointName=/ k8sPodName=/ identity=1 containerID=\"\" ipv6=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\"\ntime=2026-11-10T12:56:29.627540542Z level=info msg=\"Wrote verifier log to endpoint directory\" endpointID=2176 containerInterface=\"\" ciliumEndpointName=/ k8sPodName=/ identity=1 containerID=\"\" ipv6=\"\" ipv4=\"\" subsys=endpoint file-path=2176_next/verifier.log\ntime=2026-11-10T12:56:29.62755214Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" endpointID=2176 containerInterface=\"\" ciliumEndpointName=/ k8sPodName=/ identity=1 containerID=\"\" ipv6=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\" file-path=2176_next_fail\ntime=2026-11-10T12:56:29.627721049Z level=warn msg=\"Regeneration of endpoint failed\" endpointID=2176 containerInterface=\"\" ciliumEndpointName=/ k8sPodName=/ identity=1 containerID=\"\" ipv6=\"\" ipv4=\"\" subsys=endpoint reason=RegenerationFailure endpointPolicyCalculation=24.25\u00b5s prepareBuild=148.255\u00b5s proxyConfiguration=4.548\u00b5s proxyWaitForAck=0s mapSync=21.443\u00b5s bpfLoadProg=621.238463ms bpfWaitForELF=747.832\u00b5s waitingForLock=2.535\u00b5s waitingForCTClean=1.711379ms selectorPolicyCalculation=0s proxyPolicyCalculation=3.558\u00b5s total=648.167405ms waitingForPolicyRepository=122ns policyCalculation=34.422\u00b5s buildPermitAcquisition=3.202\u00b5s bpfCompilation=0s bpfLoadProg=621.238463ms bpfCompilation=0s bpfWaitForELF=747.832\u00b5s error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\"\ntime=2026-11-10T12:56:29.627764132Z level=error msg=\"Endpoint regeneration failed\" endpointID=2176 containerInterface=\"\" ciliumEndpointName=/ k8sPodName=/ identity=1 containerID=\"\" ipv6=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\"\ntime=2026-11-10T12:56:32.576896892Z level=error msg=\"Error while reloading endpoint BPF program\" ipv4=10.244.0.92 identity=41997 ciliumEndpointName=/ containerID=bpfbench-c endpointID=706 containerInterface=\"\" ipv6=\"\" k8sPodName=/ subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\"\ntime=2026-11-10T12:56:32.57701858Z level=info msg=\"Wrote verifier log to endpoint directory\" ipv4=10.244.0.92 identity=41997 ciliumEndpointName=/ containerID=bpfbench-c endpointID=706 containerInterface=\"\" ipv6=\"\" k8sPodName=/ subsys=endpoint file-path=706_next/verifier.log\ntime=2026-11-10T12:56:32.577029592Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" ipv4=10.244.0.92 identity=41997 ciliumEndpointName=/ containerID=bpfbench-c endpointID=706 containerInterface=\"\" ipv6=\"\" k8sPodName=/ subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\" file-path=706_next_fail\ntime=2026-11-10T12:56:32.577226243Z level=warn msg=\"Regeneration of endpoint failed\" ipv4=10.244.0.92 identity=41997 ciliumEndpointName=/ containerID=bpfbench-c endpointID=706 containerInterface=\"\" ipv6=\"\" k8sPodName=/ subsys=endpoint reason=RegenerationFailure waitingForLock=2.269\u00b5s policyCalculation=13.665\u00b5s proxyWaitForAck=0s mapSync=855ns selectorPolicyCalculation=0s total=579.83287ms buildPermitAcquisition=4.108\u00b5s bpfWaitForELF=801.349\u00b5s bpfLoadProg=552.362788ms waitingForPolicyRepository=120ns waitingForCTClean=1.511498ms proxyConfiguration=3.786\u00b5s bpfCompilation=0s endpointPolicyCalculation=3.915\u00b5s proxyPolicyCalculation=44.839\u00b5s prepareBuild=129.601\u00b5s bpfCompilation=0s bpfWaitForELF=801.349\u00b5s bpfLoadProg=552.362788ms error=\"loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\"\ntime=2026-11-10T12:56:32.577271018Z level=error msg=\"Endpoint regeneration failed\" ipv4=10.244.0.92 identity=41997 ciliumEndpointName=/ containerID=bpfbench-c endpointID=706 containerInterface=\"\" ipv6=\"\" k8sPodName=/ subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\"\ntime=2026-11-10T12:56:47.3086703Z level=info msg=\"Starting GC of connection tracking\" module=agent.datapath.maps.ct-nat-map-gc first=false\ntime=2026-11-10T12:57:04.253222202Z level=error msg=\"Error while reloading endpoint BPF program\" endpointID=2176 containerInterface=\"\" ciliumEndpointName=/ k8sPodName=/ identity=1 containerID=\"\" ipv6=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\"\ntime=2026-11-10T12:57:04.253398196Z level=info msg=\"Wrote verifier log to endpoint directory\" endpointID=2176 containerInterface=\"\" ciliumEndpointName=/ k8sPodName=/ identity=1 containerID=\"\" ipv6=\"\" ipv4=\"\" subsys=endpoint file-path=2176_next/verifier.log\ntime=2026-11-10T12:57:04.253411171Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" endpointID=2176 containerInterface=\"\" ciliumEndpointName=/ k8sPodName=/ identity=1 containerID=\"\" ipv6=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\" file-path=2176_next_fail\ntime=2026-11-10T12:57:04.253589353Z level=warn msg=\"Regeneration of endpoint failed\" endpointID=2176 containerInterface=\"\" ciliumEndpointName=/ k8sPodName=/ identity=1 containerID=\"\" ipv6=\"\" ipv4=\"\" subsys=endpoint reason=RegenerationFailure waitingForCTClean=1.231\u00b5s policyCalculation=27.091\u00b5s proxyConfiguration=4.336\u00b5s proxyWaitForAck=0s waitingForPolicyRepository=134ns endpointPolicyCalculation=17.764\u00b5s prepareBuild=127.026\u00b5s total=624.812377ms buildPermitAcquisition=3.089\u00b5s bpfWaitForELF=777.116\u00b5s selectorPolicyCalculation=0s mapSync=21.171\u00b5s bpfCompilation=0s bpfLoadProg=594.456755ms waitingForLock=2.515\u00b5s proxyPolicyCalculation=2.939\u00b5s bpfCompilation=0s bpfWaitForELF=777.116\u00b5s bpfLoadProg=594.456755ms error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\"\ntime=2026-11-10T12:57:04.253632159Z level=error msg=\"Endpoint regeneration failed\" endpointID=2176 containerInterface=\"\" ciliumEndpointName=/ k8sPodName=/ identity=1 containerID=\"\" ipv6=\"\" ipv4=\"\" subsys=endpoint error=\"attaching cilium_host: loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\"\ntime=2026-11-10T12:57:06.67749589Z level=error msg=\"Error while reloading endpoint BPF program\" ipv4=10.244.0.92 identity=41997 ciliumEndpointName=/ containerID=bpfbench-c endpointID=706 containerInterface=\"\" ipv6=\"\" k8sPodName=/ subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\"\ntime=2026-11-10T12:57:06.677680401Z level=info msg=\"Wrote verifier log to endpoint directory\" ipv4=10.244.0.92 identity=41997 ciliumEndpointName=/ containerID=bpfbench-c endpointID=706 containerInterface=\"\" ipv6=\"\" k8sPodName=/ subsys=endpoint file-path=706_next/verifier.log\ntime=2026-11-10T12:57:06.677692758Z level=info msg=\"generating BPF for endpoint failed, keeping stale directory\" ipv4=10.244.0.92 identity=41997 ciliumEndpointName=/ containerID=bpfbench-c endpointID=706 containerInterface=\"\" ipv6=\"\" k8sPodName=/ subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\" file-path=706_next_fail\ntime=2026-11-10T12:57:06.677884032Z level=warn msg=\"Regeneration of endpoint failed\" ipv4=10.244.0.92 identity=41997 ciliumEndpointName=/ containerID=bpfbench-c endpointID=706 containerInterface=\"\" ipv6=\"\" k8sPodName=/ subsys=endpoint reason=RegenerationFailure waitingForLock=2.517\u00b5s waitingForPolicyRepository=132ns waitingForCTClean=1.089\u00b5s policyCalculation=16.402\u00b5s proxyConfiguration=6.73\u00b5s selectorPolicyCalculation=0s proxyPolicyCalculation=45.828\u00b5s bpfCompilation=0s mapSync=817ns total=99.823183ms buildPermitAcquisition=2.991\u00b5s bpfWaitForELF=805.201\u00b5s bpfLoadProg=67.99101ms endpointPolicyCalculation=4.14\u00b5s proxyWaitForAck=0s prepareBuild=137.63\u00b5s bpfCompilation=0s bpfWaitForELF=805.201\u00b5s bpfLoadProg=67.99101ms error=\"loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\"\ntime=2026-11-10T12:57:06.67792521Z level=error msg=\"Endpoint regeneration failed\" ipv4=10.244.0.92 identity=41997 ciliumEndpointName=/ containerID=bpfbench-c endpointID=706 containerInterface=\"\" ipv6=\"\" k8sPodName=/ subsys=endpoint error=\"loading eBPF collection into the kernel: program tail_drop_notify: load program: invalid argument\"\ntime=2026-11-10T12:57:20.750394936Z level=info msg=\"Released last local use of key, invoking global release\" module=agent.controlplane.identity.identity subsys=kvstorebackend key=\"[container:app=bpfbench-cilium container:instance=a]\"\ntime=2026-11-10T12:57:20.765945839Z level=info msg=\"Removed endpoint\" ipv4=10.244.0.92 identity=41997 ciliumEndpointName=/ containerID=bpfbench-c endpointID=706 containerInterface=\"\" ipv6=\"\" k8sPodName=/ subsys=endpoint\ntime=2026-11-10T12:57:20.76597907Z level=warn msg=\"Creation of endpoint failed\" ipv4=10.244.0.92 identity=41997 ciliumEndpointName=/ containerID=bpfbench-c endpointID=706 containerInterface=\"\" ipv6=\"\" k8sPodName=/ subsys=endpoint-api error=\"timeout while waiting for initial endpoint generation to complete: context deadline exceeded\"",
+  "post_rejit": null,
+  "rejit_result": {
+    "mode": "loadtime",
+    "status": "skipped"
+  },
+  "runner": "cilium",
+  "selected_workload": "cilium_endpoint_pktgen",
+  "status": "error"
+}

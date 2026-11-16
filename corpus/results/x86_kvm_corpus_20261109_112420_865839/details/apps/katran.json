@@ -1,0 +1,3180 @@
+{
+  "app": "katran",
+  "baseline": {
+    "bpf": {
+      "20": {
+        "bytes_jited": 13641,
+        "bytes_xlated": 23840,
+        "id": 20,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 745780083,
+        "run_time_ns_delta": 129975029855,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "components": [
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@7",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": true,
+              "src_ip": "10.0.0.2",
+              "thread_id": 7,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 180.02165891600004,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@7\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 10000  udp_src_max: 10000  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: SHARED\nCurrent:\n     pkts-sofar: 249725680  errors: 1929534\n     started: 363630466us  stopped: 543551269us idle: 0us\n     seq_num: 249725681  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 10000\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 179920803(c179920803+d0) usec, 249725680 (64byte,0frags)\n  1387975pps 710Mb/sec (710643200bps) errors: 1929534",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          }
+        ],
+        "config": {
+          "clone_skb": 0,
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "outcomes": {
+            "after": {
+              "counters": {
+                "consistent_hash_drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "decap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "encap_fail": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "fallback_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 497352336
+                },
+                "global_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v4": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v6": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_too_big": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lpm_src": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lru": {
+                  "bytes_or_v2": 1,
+                  "packets_or_v1": 497352336
+                },
+                "lru_miss": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "new_conn_rate": {
+                  "bytes_or_v2": 942787818557,
+                  "packets_or_v1": 358269
+                },
+                "pass": {
+                  "bytes_or_v2": 350,
+                  "packets_or_v1": 5
+                },
+                "quic_icmp": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "remote_encap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "total": {
+                  "bytes_or_v2": 31830549854,
+                  "packets_or_v1": 497352341
+                },
+                "tx": {
+                  "bytes_or_v2": 31830549504,
+                  "packets_or_v1": 497352336
+                },
+                "udp_flow_migration": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "vip_0": {
+                  "bytes_or_v2": 24867616800,
+                  "packets_or_v1": 497352336
+                },
+                "xpop_decap_success": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                }
+              },
+              "interfaces": {
+                "load_balancer/katran0": {
+                  "rx_bytes": 24867617756,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 497352349,
+                  "tx_bytes": 41777419834,
+                  "tx_dropped": 2111,
+                  "tx_errors": 0,
+                  "tx_packets": 497350239
+                },
+                "real/real0": {
+                  "rx_bytes": 41777020720,
+                  "rx_dropped": 4763,
+                  "rx_errors": 0,
+                  "rx_packets": 497345488,
+                  "tx_bytes": 1192,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 15
+                },
+                "router/rtlb0": {
+                  "rx_bytes": 41777419834,
+                  "rx_dropped": 2111,
+                  "rx_errors": 0,
+                  "rx_packets": 497350239,
+                  "tx_bytes": 24867617756,
+                  "tx_dropped": 1929534,
+                  "tx_errors": 0,
+                  "tx_packets": 497352349
+                },
+                "router/rtreal0": {
+                  "rx_bytes": 1192,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 15,
+                  "tx_bytes": 41777020720,
+                  "tx_dropped": 4763,
+                  "tx_errors": 0,
+                  "tx_packets": 497345488
+                }
+              },
+              "real_counters": {
+                "real_1": {
+                  "bytes_or_v2": 24867616800,
+                  "packets_or_v1": 497352336
+                }
+              },
+              "reals_stats_map_ids": [
+                14
+              ],
+              "receiver": {
+                "rx_bytes": 41777020720,
+                "rx_dropped": 4763,
+                "rx_errors": 0,
+                "rx_packets": 497345488,
+                "tx_bytes": 1192,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 15
+              },
+              "stats_map_ids": [
+                7
+              ]
+            },
+            "before": {
+              "counters": {
+                "consistent_hash_drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "decap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "encap_fail": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "fallback_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 247626656
+                },
+                "global_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v4": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v6": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_too_big": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lpm_src": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lru": {
+                  "bytes_or_v2": 1,
+                  "packets_or_v1": 247626656
+                },
+                "lru_miss": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "new_conn_rate": {
+                  "bytes_or_v2": 361040124538,
+                  "packets_or_v1": 1238382
+                },
+                "pass": {
+                  "bytes_or_v2": 280,
+                  "packets_or_v1": 4
+                },
+                "quic_icmp": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "remote_encap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "total": {
+                  "bytes_or_v2": 15848106264,
+                  "packets_or_v1": 247626660
+                },
+                "tx": {
+                  "bytes_or_v2": 15848105984,
+                  "packets_or_v1": 247626656
+                },
+                "udp_flow_migration": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "vip_0": {
+                  "bytes_or_v2": 12381332800,
+                  "packets_or_v1": 247626656
+                },
+                "xpop_decap_success": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                }
+              },
+              "interfaces": {
+                "load_balancer/katran0": {
+                  "rx_bytes": 12381333700,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 247626668,
+                  "tx_bytes": 20800628306,
+                  "tx_dropped": 139,
+                  "tx_errors": 0,
+                  "tx_packets": 247626530
+                },
+                "real/real0": {
+                  "rx_bytes": 20800283134,
+                  "rx_dropped": 4120,
+                  "rx_errors": 0,
+                  "rx_packets": 247622421,
+                  "tx_bytes": 1122,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 14
+                },
+                "router/rtlb0": {
+                  "rx_bytes": 20800628306,
+                  "rx_dropped": 139,
+                  "rx_errors": 0,
+                  "rx_packets": 247626530,
+                  "tx_bytes": 12381333700,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 247626668
+                },
+                "router/rtreal0": {
+                  "rx_bytes": 1122,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 14,
+                  "tx_bytes": 20800283134,
+                  "tx_dropped": 4120,
+                  "tx_errors": 0,
+                  "tx_packets": 247622421
+                }
+              },
+              "real_counters": {
+                "real_1": {
+                  "bytes_or_v2": 12381332800,
+                  "packets_or_v1": 247626656
+                }
+              },
+              "reals_stats_map_ids": [
+                14
+              ],
+              "receiver": {
+                "rx_bytes": 20800283134,
+                "rx_dropped": 4120,
+                "rx_errors": 0,
+                "rx_packets": 247622421,
+                "tx_bytes": 1122,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 14
+              },
+              "stats_map_ids": [
+                7
+              ]
+            },
+            "delta": {
+              "counters": {
+                "consistent_hash_drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "decap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "encap_fail": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "fallback_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 249725680
+                },
+                "global_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v4": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v6": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_too_big": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lpm_src": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 249725680
+                },
+                "lru_miss": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "new_conn_rate": {
+                  "bytes_or_v2": 581747694019,
+                  "packets_or_v1": -880113
+                },
+                "pass": {
+                  "bytes_or_v2": 70,
+                  "packets_or_v1": 1
+                },
+                "quic_icmp": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "remote_encap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "total": {
+                  "bytes_or_v2": 15982443590,
+                  "packets_or_v1": 249725681
+                },
+                "tx": {
+                  "bytes_or_v2": 15982443520,
+                  "packets_or_v1": 249725680
+                },
+                "udp_flow_migration": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "vip_0": {
+                  "bytes_or_v2": 12486284000,
+                  "packets_or_v1": 249725680
+                },
+                "xpop_decap_success": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                }
+              },
+              "interfaces": {
+                "load_balancer/katran0": {
+                  "rx_bytes": 12486284056,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 249725681,
+                  "tx_bytes": 20976791528,
+                  "tx_dropped": 1972,
+                  "tx_errors": 0,
+                  "tx_packets": 249723709
+                },
+                "real/real0": {
+                  "rx_bytes": 20976737586,
+                  "rx_dropped": 643,
+                  "rx_errors": 0,
+                  "rx_packets": 249723067,
+                  "tx_bytes": 70,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 1
+                },
+                "router/rtlb0": {
+                  "rx_bytes": 20976791528,
+                  "rx_dropped": 1972,
+                  "rx_errors": 0,
+                  "rx_packets": 249723709,
+                  "tx_bytes": 12486284056,
+                  "tx_dropped": 1929534,
+                  "tx_errors": 0,
+                  "tx_packets": 249725681
+                },
+                "router/rtreal0": {
+                  "rx_bytes": 70,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 1,
+                  "tx_bytes": 20976737586,
+                  "tx_dropped": 643,
+                  "tx_errors": 0,
+                  "tx_packets": 249723067
+                }
+              },
+              "real_counters": {
+                "real_1": {
+                  "bytes_or_v2": 12486284000,
+                  "packets_or_v1": 249725680
+                }
+              },
+              "reals_stats_map_ids": [
+                14
+              ],
+              "receiver": {
+                "rx_bytes": 20976737586,
+                "rx_dropped": 643,
+                "rx_errors": 0,
+                "rx_packets": 249723067,
+                "tx_bytes": 70,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 1
+              },
+              "stats_map_ids": [
+                7
+              ]
+            },
+            "settle_seconds": 1.0
+          },
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": true,
+          "src_ip": "10.0.0.2",
+          "threads": [
+            7
+          ],
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 180.02165891600004,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      },
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "components": [
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@7",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": true,
+              "src_ip": "10.0.0.2",
+              "thread_id": 7,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 180.09635292299993,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@7\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 10000  udp_src_max: 10000  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: SHARED\nCurrent:\n     pkts-sofar: 249109366  errors: 0\n     started: 544980040us  stopped: 724975971us idle: 0us\n     seq_num: 249109367  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 10000\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 179995930(c179995930+d0) usec, 249109366 (64byte,0frags)\n  1383972pps 708Mb/sec (708593664bps) errors: 0",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          }
+        ],
+        "config": {
+          "clone_skb": 0,
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "outcomes": {
+            "after": {
+              "counters": {
+                "consistent_hash_drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "decap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "encap_fail": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "fallback_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 746461702
+                },
+                "global_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v4": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v6": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_too_big": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lpm_src": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lru": {
+                  "bytes_or_v2": 1,
+                  "packets_or_v1": 746461702
+                },
+                "lru_miss": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "new_conn_rate": {
+                  "bytes_or_v2": 1123340149631,
+                  "packets_or_v1": 1570166
+                },
+                "pass": {
+                  "bytes_or_v2": 420,
+                  "packets_or_v1": 6
+                },
+                "quic_icmp": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "remote_encap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "total": {
+                  "bytes_or_v2": 47773549348,
+                  "packets_or_v1": 746461708
+                },
+                "tx": {
+                  "bytes_or_v2": 47773548928,
+                  "packets_or_v1": 746461702
+                },
+                "udp_flow_migration": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "vip_0": {
+                  "bytes_or_v2": 37323085100,
+                  "packets_or_v1": 746461702
+                },
+                "xpop_decap_success": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                }
+              },
+              "interfaces": {
+                "load_balancer/katran0": {
+                  "rx_bytes": 37323086112,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 746461716,
+                  "tx_bytes": 62702287182,
+                  "tx_dropped": 5914,
+                  "tx_errors": 0,
+                  "tx_packets": 746455803
+                },
+                "real/real0": {
+                  "rx_bytes": 62701665202,
+                  "rx_dropped": 7417,
+                  "rx_errors": 0,
+                  "rx_packets": 746448399,
+                  "tx_bytes": 1262,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 16
+                },
+                "router/rtlb0": {
+                  "rx_bytes": 62702287182,
+                  "rx_dropped": 5914,
+                  "rx_errors": 0,
+                  "rx_packets": 746455803,
+                  "tx_bytes": 37323086112,
+                  "tx_dropped": 1929534,
+                  "tx_errors": 0,
+                  "tx_packets": 746461716
+                },
+                "router/rtreal0": {
+                  "rx_bytes": 1262,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 16,
+                  "tx_bytes": 62701665202,
+                  "tx_dropped": 7417,
+                  "tx_errors": 0,
+                  "tx_packets": 746448399
+                }
+              },
+              "real_counters": {
+                "real_1": {
+                  "bytes_or_v2": 37323085100,
+                  "packets_or_v1": 746461702
+                }
+              },
+              "reals_stats_map_ids": [
+                14
+              ],
+              "receiver": {
+                "rx_bytes": 62701665202,
+                "rx_dropped": 7417,
+                "rx_errors": 0,
+                "rx_packets": 746448399,
+                "tx_bytes": 1262,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 16
+              },
+              "stats_map_ids": [
+                7
+              ]
+            },
+            "before": {
+              "counters": {
+                "consistent_hash_drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "decap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "encap_fail": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "fallback_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 497352336
+                },
+                "global_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v4": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v6": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_too_big": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lpm_src": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lru": {
+                  "bytes_or_v2": 1,
+                  "packets_or_v1": 497352336
+                },
+                "lru_miss": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "new_conn_rate": {
+                  "bytes_or_v2": 942787818557,
+                  "packets_or_v1": 358269
+                },
+                "pass": {
+                  "bytes_or_v2": 350,
+                  "packets_or_v1": 5
+                },
+                "quic_icmp": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "remote_encap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "total": {
+                  "bytes_or_v2": 31830549854,
+                  "packets_or_v1": 497352341
+                },
+                "tx": {
+                  "bytes_or_v2": 31830549504,
+                  "packets_or_v1": 497352336
+                },
+                "udp_flow_migration": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "vip_0": {
+                  "bytes_or_v2": 24867616800,
+                  "packets_or_v1": 497352336
+                },
+                "xpop_decap_success": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                }
+              },
+              "interfaces": {
+                "load_balancer/katran0": {
+                  "rx_bytes": 24867617756,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 497352349,
+                  "tx_bytes": 41777419834,
+                  "tx_dropped": 2111,
+                  "tx_errors": 0,
+                  "tx_packets": 497350239
+                },
+                "real/real0": {
+                  "rx_bytes": 41777020720,
+                  "rx_dropped": 4763,
+                  "rx_errors": 0,
+                  "rx_packets": 497345488,
+                  "tx_bytes": 1192,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 15
+                },
+                "router/rtlb0": {
+                  "rx_bytes": 41777419834,
+                  "rx_dropped": 2111,
+                  "rx_errors": 0,
+                  "rx_packets": 497350239,
+                  "tx_bytes": 24867617756,
+                  "tx_dropped": 1929534,
+                  "tx_errors": 0,
+                  "tx_packets": 497352349
+                },
+                "router/rtreal0": {
+                  "rx_bytes": 1192,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 15,
+                  "tx_bytes": 41777020720,
+                  "tx_dropped": 4763,
+                  "tx_errors": 0,
+                  "tx_packets": 497345488
+                }
+              },
+              "real_counters": {
+                "real_1": {
+                  "bytes_or_v2": 24867616800,
+                  "packets_or_v1": 497352336
+                }
+              },
+              "reals_stats_map_ids": [
+                14
+              ],
+              "receiver": {
+                "rx_bytes": 41777020720,
+                "rx_dropped": 4763,
+                "rx_errors": 0,
+                "rx_packets": 497345488,
+                "tx_bytes": 1192,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 15
+              },
+              "stats_map_ids": [
+                7
+              ]
+            },
+            "delta": {
+              "counters": {
+                "consistent_hash_drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "decap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "encap_fail": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "fallback_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 249109366
+                },
+                "global_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v4": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v6": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_too_big": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lpm_src": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 249109366
+                },
+                "lru_miss": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "new_conn_rate": {
+                  "bytes_or_v2": 180552331074,
+                  "packets_or_v1": 1211897
+                },
+                "pass": {
+                  "bytes_or_v2": 70,
+                  "packets_or_v1": 1
+                },
+                "quic_icmp": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "remote_encap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "total": {
+                  "bytes_or_v2": 15942999494,
+                  "packets_or_v1": 249109367
+                },
+                "tx": {
+                  "bytes_or_v2": 15942999424,
+                  "packets_or_v1": 249109366
+                },
+                "udp_flow_migration": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "vip_0": {
+                  "bytes_or_v2": 12455468300,
+                  "packets_or_v1": 249109366
+                },
+                "xpop_decap_success": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                }
+              },
+              "interfaces": {
+                "load_balancer/katran0": {
+                  "rx_bytes": 12455468356,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 249109367,
+                  "tx_bytes": 20924867348,
+                  "tx_dropped": 3803,
+                  "tx_errors": 0,
+                  "tx_packets": 249105564
+                },
+                "real/real0": {
+                  "rx_bytes": 20924644482,
+                  "rx_dropped": 2654,
+                  "rx_errors": 0,
+                  "rx_packets": 249102911,
+                  "tx_bytes": 70,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 1
+                },
+                "router/rtlb0": {
+                  "rx_bytes": 20924867348,
+                  "rx_dropped": 3803,
+                  "rx_errors": 0,
+                  "rx_packets": 249105564,
+                  "tx_bytes": 12455468356,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 249109367
+                },
+                "router/rtreal0": {
+                  "rx_bytes": 70,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 1,
+                  "tx_bytes": 20924644482,
+                  "tx_dropped": 2654,
+                  "tx_errors": 0,
+                  "tx_packets": 249102911
+                }
+              },
+              "real_counters": {
+                "real_1": {
+                  "bytes_or_v2": 12455468300,
+                  "packets_or_v1": 249109366
+                }
+              },
+              "reals_stats_map_ids": [
+                14
+              ],
+              "receiver": {
+                "rx_bytes": 20924644482,
+                "rx_dropped": 2654,
+                "rx_errors": 0,
+                "rx_packets": 249102911,
+                "tx_bytes": 70,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 1
+              },
+              "stats_map_ids": [
+                7
+              ]
+            },
+            "settle_seconds": 1.0
+          },
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": true,
+          "src_ip": "10.0.0.2",
+          "threads": [
+            7
+          ],
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 180.09635292299993,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      },
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "components": [
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@7",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": true,
+              "src_ip": "10.0.0.2",
+              "thread_id": 7,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 180.025646746,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@7\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 10000  udp_src_max: 10000  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: SHARED\nCurrent:\n     pkts-sofar: 246945035  errors: 0\n     started: 726510072us  stopped: 906467080us idle: 0us\n     seq_num: 246945036  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 10000\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 179957008(c179957008+d0) usec, 246945035 (64byte,0frags)\n  1372244pps 702Mb/sec (702588928bps) errors: 0",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          }
+        ],
+        "config": {
+          "clone_skb": 0,
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "outcomes": {
+            "after": {
+              "counters": {
+                "consistent_hash_drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "decap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "encap_fail": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "fallback_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 993406737
+                },
+                "global_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v4": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v6": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_too_big": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lpm_src": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lru": {
+                  "bytes_or_v2": 1,
+                  "packets_or_v1": 993406737
+                },
+                "lru_miss": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "new_conn_rate": {
+                  "bytes_or_v2": 1304870246280,
+                  "packets_or_v1": 1513643
+                },
+                "pass": {
+                  "bytes_or_v2": 420,
+                  "packets_or_v1": 6
+                },
+                "quic_icmp": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "remote_encap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "total": {
+                  "bytes_or_v2": 63578031588,
+                  "packets_or_v1": 993406743
+                },
+                "tx": {
+                  "bytes_or_v2": 63578031168,
+                  "packets_or_v1": 993406737
+                },
+                "udp_flow_migration": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "vip_0": {
+                  "bytes_or_v2": 49670336850,
+                  "packets_or_v1": 993406737
+                },
+                "xpop_decap_success": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                }
+              },
+              "interfaces": {
+                "load_balancer/katran0": {
+                  "rx_bytes": 49670337862,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 993406751,
+                  "tx_bytes": 83445554706,
+                  "tx_dropped": 7288,
+                  "tx_errors": 0,
+                  "tx_packets": 993399464
+                },
+                "real/real0": {
+                  "rx_bytes": 83444932726,
+                  "rx_dropped": 7417,
+                  "rx_errors": 0,
+                  "rx_packets": 993392060,
+                  "tx_bytes": 1262,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 16
+                },
+                "router/rtlb0": {
+                  "rx_bytes": 83445554706,
+                  "rx_dropped": 7288,
+                  "rx_errors": 0,
+                  "rx_packets": 993399464,
+                  "tx_bytes": 49670337862,
+                  "tx_dropped": 1929534,
+                  "tx_errors": 0,
+                  "tx_packets": 993406751
+                },
+                "router/rtreal0": {
+                  "rx_bytes": 1262,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 16,
+                  "tx_bytes": 83444932726,
+                  "tx_dropped": 7417,
+                  "tx_errors": 0,
+                  "tx_packets": 993392060
+                }
+              },
+              "real_counters": {
+                "real_1": {
+                  "bytes_or_v2": 49670336850,
+                  "packets_or_v1": 993406737
+                }
+              },
+              "reals_stats_map_ids": [
+                14
+              ],
+              "receiver": {
+                "rx_bytes": 83444932726,
+                "rx_dropped": 7417,
+                "rx_errors": 0,
+                "rx_packets": 993392060,
+                "tx_bytes": 1262,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 16
+              },
+              "stats_map_ids": [
+                7
+              ]
+            },
+            "before": {
+              "counters": {
+                "consistent_hash_drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "decap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "encap_fail": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "fallback_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 746461702
+                },
+                "global_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v4": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v6": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_too_big": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lpm_src": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lru": {
+                  "bytes_or_v2": 1,
+                  "packets_or_v1": 746461702
+                },
+                "lru_miss": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "new_conn_rate": {
+                  "bytes_or_v2": 1123340149631,
+                  "packets_or_v1": 1570166
+                },
+                "pass": {
+                  "bytes_or_v2": 420,
+                  "packets_or_v1": 6
+                },
+                "quic_icmp": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "remote_encap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "total": {
+                  "bytes_or_v2": 47773549348,
+                  "packets_or_v1": 746461708
+                },
+                "tx": {
+                  "bytes_or_v2": 47773548928,
+                  "packets_or_v1": 746461702
+                },
+                "udp_flow_migration": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "vip_0": {
+                  "bytes_or_v2": 37323085100,
+                  "packets_or_v1": 746461702
+                },
+                "xpop_decap_success": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                }
+              },
+              "interfaces": {
+                "load_balancer/katran0": {
+                  "rx_bytes": 37323086112,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 746461716,
+                  "tx_bytes": 62702287182,
+                  "tx_dropped": 5914,
+                  "tx_errors": 0,
+                  "tx_packets": 746455803
+                },
+                "real/real0": {
+                  "rx_bytes": 62701665202,
+                  "rx_dropped": 7417,
+                  "rx_errors": 0,
+                  "rx_packets": 746448399,
+                  "tx_bytes": 1262,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 16
+                },
+                "router/rtlb0": {
+                  "rx_bytes": 62702287182,
+                  "rx_dropped": 5914,
+                  "rx_errors": 0,
+                  "rx_packets": 746455803,
+                  "tx_bytes": 37323086112,
+                  "tx_dropped": 1929534,
+                  "tx_errors": 0,
+                  "tx_packets": 746461716
+                },
+                "router/rtreal0": {
+                  "rx_bytes": 1262,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 16,
+                  "tx_bytes": 62701665202,
+                  "tx_dropped": 7417,
+                  "tx_errors": 0,
+                  "tx_packets": 746448399
+                }
+              },
+              "real_counters": {
+                "real_1": {
+                  "bytes_or_v2": 37323085100,
+                  "packets_or_v1": 746461702
+                }
+              },
+              "reals_stats_map_ids": [
+                14
+              ],
+              "receiver": {
+                "rx_bytes": 62701665202,
+                "rx_dropped": 7417,
+                "rx_errors": 0,
+                "rx_packets": 746448399,
+                "tx_bytes": 1262,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 16
+              },
+              "stats_map_ids": [
+                7
+              ]
+            },
+            "delta": {
+              "counters": {
+                "consistent_hash_drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "decap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "encap_fail": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "fallback_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 246945035
+                },
+                "global_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v4": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v6": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_too_big": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lpm_src": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 246945035
+                },
+                "lru_miss": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "new_conn_rate": {
+                  "bytes_or_v2": 181530096649,
+                  "packets_or_v1": -56523
+                },
+                "pass": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "quic_icmp": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "remote_encap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "total": {
+                  "bytes_or_v2": 15804482240,
+                  "packets_or_v1": 246945035
+                },
+                "tx": {
+                  "bytes_or_v2": 15804482240,
+                  "packets_or_v1": 246945035
+                },
+                "udp_flow_migration": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "vip_0": {
+                  "bytes_or_v2": 12347251750,
+                  "packets_or_v1": 246945035
+                },
+                "xpop_decap_success": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                }
+              },
+              "interfaces": {
+                "load_balancer/katran0": {
+                  "rx_bytes": 12347251750,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 246945035,
+                  "tx_bytes": 20743267524,
+                  "tx_dropped": 1374,
+                  "tx_errors": 0,
+                  "tx_packets": 246943661
+                },
+                "real/real0": {
+                  "rx_bytes": 20743267524,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 246943661,
+                  "tx_bytes": 0,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 0
+                },
+                "router/rtlb0": {
+                  "rx_bytes": 20743267524,
+                  "rx_dropped": 1374,
+                  "rx_errors": 0,
+                  "rx_packets": 246943661,
+                  "tx_bytes": 12347251750,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 246945035
+                },
+                "router/rtreal0": {
+                  "rx_bytes": 0,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 0,
+                  "tx_bytes": 20743267524,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 246943661
+                }
+              },
+              "real_counters": {
+                "real_1": {
+                  "bytes_or_v2": 12347251750,
+                  "packets_or_v1": 246945035
+                }
+              },
+              "reals_stats_map_ids": [
+                14
+              ],
+              "receiver": {
+                "rx_bytes": 20743267524,
+                "rx_dropped": 0,
+                "rx_errors": 0,
+                "rx_packets": 246943661,
+                "tx_bytes": 0,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 0
+              },
+              "stats_map_ids": [
+                7
+              ]
+            },
+            "settle_seconds": 1.0
+          },
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": true,
+          "src_ip": "10.0.0.2",
+          "threads": [
+            7
+          ],
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 180.025646746,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      }
+    ]
+  },
+  "error": "",
+  "post_rejit": {
+    "bpf": {
+      "35": {
+        "bytes_jited": 10196,
+        "bytes_xlated": 1288,
+        "id": 35,
+        "name": "balancer_ingres",
+        "run_cnt_delta": 750784639,
+        "run_time_ns_delta": 124568807089,
+        "type": "xdp"
+      }
+    },
+    "workloads": [
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "components": [
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@7",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": true,
+              "src_ip": "10.0.0.2",
+              "thread_id": 7,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 180.091901774,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@7\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 10000  udp_src_max: 10000  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: SHARED\nCurrent:\n     pkts-sofar: 249692274  errors: 0\n     started: 1110730074us  stopped: 1290711458us idle: 0us\n     seq_num: 249692275  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 10000\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 179981384(c179981384+d0) usec, 249692274 (64byte,0frags)\n  1387322pps 710Mb/sec (710308864bps) errors: 0",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          }
+        ],
+        "config": {
+          "clone_skb": 0,
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "outcomes": {
+            "after": {
+              "counters": {
+                "consistent_hash_drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "decap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "encap_fail": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "fallback_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 528667194
+                },
+                "global_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v4": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v6": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_too_big": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lpm_src": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lru": {
+                  "bytes_or_v2": 528667194,
+                  "packets_or_v1": 528667194
+                },
+                "lru_miss": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "new_conn_rate": {
+                  "bytes_or_v2": 2365560206670,
+                  "packets_or_v1": 3286874
+                },
+                "pass": {
+                  "bytes_or_v2": 350,
+                  "packets_or_v1": 5
+                },
+                "quic_icmp": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "remote_encap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "total": {
+                  "bytes_or_v2": 33834700766,
+                  "packets_or_v1": 528667199
+                },
+                "tx": {
+                  "bytes_or_v2": 33834700416,
+                  "packets_or_v1": 528667194
+                },
+                "udp_flow_migration": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "vip_0": {
+                  "bytes_or_v2": 26433359700,
+                  "packets_or_v1": 528667194
+                },
+                "xpop_decap_success": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                }
+              },
+              "interfaces": {
+                "load_balancer/katran0": {
+                  "rx_bytes": 26433360656,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 528667207,
+                  "tx_bytes": 44408043466,
+                  "tx_dropped": 21,
+                  "tx_errors": 0,
+                  "tx_packets": 528667187
+                },
+                "real/real0": {
+                  "rx_bytes": 44407559420,
+                  "rx_dropped": 5775,
+                  "rx_errors": 0,
+                  "rx_packets": 528661425,
+                  "tx_bytes": 1192,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 15
+                },
+                "router/rtlb0": {
+                  "rx_bytes": 44408043466,
+                  "rx_dropped": 21,
+                  "rx_errors": 0,
+                  "rx_packets": 528667187,
+                  "tx_bytes": 26433360656,
+                  "tx_dropped": 11647745,
+                  "tx_errors": 0,
+                  "tx_packets": 528667207
+                },
+                "router/rtreal0": {
+                  "rx_bytes": 1192,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 15,
+                  "tx_bytes": 44407559420,
+                  "tx_dropped": 5775,
+                  "tx_errors": 0,
+                  "tx_packets": 528661425
+                }
+              },
+              "real_counters": {
+                "real_1": {
+                  "bytes_or_v2": 26433359700,
+                  "packets_or_v1": 528667194
+                }
+              },
+              "reals_stats_map_ids": [
+                35
+              ],
+              "receiver": {
+                "rx_bytes": 44407559420,
+                "rx_dropped": 5775,
+                "rx_errors": 0,
+                "rx_packets": 528661425,
+                "tx_bytes": 1192,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 15
+              },
+              "stats_map_ids": [
+                28
+              ]
+            },
+            "before": {
+              "counters": {
+                "consistent_hash_drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "decap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "encap_fail": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "fallback_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 278974920
+                },
+                "global_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v4": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v6": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_too_big": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lpm_src": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lru": {
+                  "bytes_or_v2": 278974920,
+                  "packets_or_v1": 278974920
+                },
+                "lru_miss": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "new_conn_rate": {
+                  "bytes_or_v2": 2184760146144,
+                  "packets_or_v1": 1262870
+                },
+                "pass": {
+                  "bytes_or_v2": 280,
+                  "packets_or_v1": 4
+                },
+                "quic_icmp": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "remote_encap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "total": {
+                  "bytes_or_v2": 17854395160,
+                  "packets_or_v1": 278974924
+                },
+                "tx": {
+                  "bytes_or_v2": 17854394880,
+                  "packets_or_v1": 278974920
+                },
+                "udp_flow_migration": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "vip_0": {
+                  "bytes_or_v2": 13948746000,
+                  "packets_or_v1": 278974920
+                },
+                "xpop_decap_success": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                }
+              },
+              "interfaces": {
+                "load_balancer/katran0": {
+                  "rx_bytes": 13948746900,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 278974932,
+                  "tx_bytes": 23433892394,
+                  "tx_dropped": 21,
+                  "tx_errors": 0,
+                  "tx_packets": 278974912
+                },
+                "real/real0": {
+                  "rx_bytes": 23433753266,
+                  "rx_dropped": 1668,
+                  "rx_errors": 0,
+                  "rx_packets": 278973256,
+                  "tx_bytes": 1122,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 14
+                },
+                "router/rtlb0": {
+                  "rx_bytes": 23433892394,
+                  "rx_dropped": 21,
+                  "rx_errors": 0,
+                  "rx_packets": 278974912,
+                  "tx_bytes": 13948746900,
+                  "tx_dropped": 11647745,
+                  "tx_errors": 0,
+                  "tx_packets": 278974932
+                },
+                "router/rtreal0": {
+                  "rx_bytes": 1122,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 14,
+                  "tx_bytes": 23433753266,
+                  "tx_dropped": 1668,
+                  "tx_errors": 0,
+                  "tx_packets": 278973256
+                }
+              },
+              "real_counters": {
+                "real_1": {
+                  "bytes_or_v2": 13948746000,
+                  "packets_or_v1": 278974920
+                }
+              },
+              "reals_stats_map_ids": [
+                35
+              ],
+              "receiver": {
+                "rx_bytes": 23433753266,
+                "rx_dropped": 1668,
+                "rx_errors": 0,
+                "rx_packets": 278973256,
+                "tx_bytes": 1122,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 14
+              },
+              "stats_map_ids": [
+                28
+              ]
+            },
+            "delta": {
+              "counters": {
+                "consistent_hash_drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "decap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "encap_fail": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "fallback_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 249692274
+                },
+                "global_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v4": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v6": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_too_big": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lpm_src": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lru": {
+                  "bytes_or_v2": 249692274,
+                  "packets_or_v1": 249692274
+                },
+                "lru_miss": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "new_conn_rate": {
+                  "bytes_or_v2": 180800060526,
+                  "packets_or_v1": 2024004
+                },
+                "pass": {
+                  "bytes_or_v2": 70,
+                  "packets_or_v1": 1
+                },
+                "quic_icmp": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "remote_encap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "total": {
+                  "bytes_or_v2": 15980305606,
+                  "packets_or_v1": 249692275
+                },
+                "tx": {
+                  "bytes_or_v2": 15980305536,
+                  "packets_or_v1": 249692274
+                },
+                "udp_flow_migration": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "vip_0": {
+                  "bytes_or_v2": 12484613700,
+                  "packets_or_v1": 249692274
+                },
+                "xpop_decap_success": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                }
+              },
+              "interfaces": {
+                "load_balancer/katran0": {
+                  "rx_bytes": 12484613756,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 249692275,
+                  "tx_bytes": 20974151072,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 249692275
+                },
+                "real/real0": {
+                  "rx_bytes": 20973806154,
+                  "rx_dropped": 4107,
+                  "rx_errors": 0,
+                  "rx_packets": 249688169,
+                  "tx_bytes": 70,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 1
+                },
+                "router/rtlb0": {
+                  "rx_bytes": 20974151072,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 249692275,
+                  "tx_bytes": 12484613756,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 249692275
+                },
+                "router/rtreal0": {
+                  "rx_bytes": 70,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 1,
+                  "tx_bytes": 20973806154,
+                  "tx_dropped": 4107,
+                  "tx_errors": 0,
+                  "tx_packets": 249688169
+                }
+              },
+              "real_counters": {
+                "real_1": {
+                  "bytes_or_v2": 12484613700,
+                  "packets_or_v1": 249692274
+                }
+              },
+              "reals_stats_map_ids": [
+                35
+              ],
+              "receiver": {
+                "rx_bytes": 20973806154,
+                "rx_dropped": 4107,
+                "rx_errors": 0,
+                "rx_packets": 249688169,
+                "tx_bytes": 70,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 1
+              },
+              "stats_map_ids": [
+                28
+              ]
+            },
+            "settle_seconds": 1.0
+          },
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": true,
+          "src_ip": "10.0.0.2",
+          "threads": [
+            7
+          ],
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 180.091901774,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      },
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "components": [
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@7",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": true,
+              "src_ip": "10.0.0.2",
+              "thread_id": 7,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 180.09559184599993,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@7\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 10000  udp_src_max: 10000  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: SHARED\nCurrent:\n     pkts-sofar: 250430683  errors: 0\n     started: 1292250173us  stopped: 1472207327us idle: 0us\n     seq_num: 250430684  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 10000\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 179957154(c179957154+d0) usec, 250430683 (64byte,0frags)\n  1391612pps 712Mb/sec (712505344bps) errors: 0",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          }
+        ],
+        "config": {
+          "clone_skb": 0,
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "outcomes": {
+            "after": {
+              "counters": {
+                "consistent_hash_drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "decap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "encap_fail": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "fallback_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 779097877
+                },
+                "global_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v4": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v6": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_too_big": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lpm_src": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lru": {
+                  "bytes_or_v2": 779097877,
+                  "packets_or_v1": 779097877
+                },
+                "lru_miss": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "new_conn_rate": {
+                  "bytes_or_v2": 2547080274051,
+                  "packets_or_v1": 3196160
+                },
+                "pass": {
+                  "bytes_or_v2": 350,
+                  "packets_or_v1": 5
+                },
+                "quic_icmp": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "remote_encap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "total": {
+                  "bytes_or_v2": 49862264478,
+                  "packets_or_v1": 779097882
+                },
+                "tx": {
+                  "bytes_or_v2": 49862264128,
+                  "packets_or_v1": 779097877
+                },
+                "udp_flow_migration": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "vip_0": {
+                  "bytes_or_v2": 38954893850,
+                  "packets_or_v1": 779097877
+                },
+                "xpop_decap_success": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                }
+              },
+              "interfaces": {
+                "load_balancer/katran0": {
+                  "rx_bytes": 38954894806,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 779097890,
+                  "tx_bytes": 65444220894,
+                  "tx_dropped": 21,
+                  "tx_errors": 0,
+                  "tx_packets": 779097871
+                },
+                "real/real0": {
+                  "rx_bytes": 65443594538,
+                  "rx_dropped": 7470,
+                  "rx_errors": 0,
+                  "rx_packets": 779090415,
+                  "tx_bytes": 1262,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 16
+                },
+                "router/rtlb0": {
+                  "rx_bytes": 65444220894,
+                  "rx_dropped": 21,
+                  "rx_errors": 0,
+                  "rx_packets": 779097871,
+                  "tx_bytes": 38954894806,
+                  "tx_dropped": 11647745,
+                  "tx_errors": 0,
+                  "tx_packets": 779097890
+                },
+                "router/rtreal0": {
+                  "rx_bytes": 1262,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 16,
+                  "tx_bytes": 65443594538,
+                  "tx_dropped": 7470,
+                  "tx_errors": 0,
+                  "tx_packets": 779090415
+                }
+              },
+              "real_counters": {
+                "real_1": {
+                  "bytes_or_v2": 38954893850,
+                  "packets_or_v1": 779097877
+                }
+              },
+              "reals_stats_map_ids": [
+                35
+              ],
+              "receiver": {
+                "rx_bytes": 65443594538,
+                "rx_dropped": 7470,
+                "rx_errors": 0,
+                "rx_packets": 779090415,
+                "tx_bytes": 1262,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 16
+              },
+              "stats_map_ids": [
+                28
+              ]
+            },
+            "before": {
+              "counters": {
+                "consistent_hash_drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "decap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "encap_fail": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "fallback_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 528667194
+                },
+                "global_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v4": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v6": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_too_big": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lpm_src": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lru": {
+                  "bytes_or_v2": 528667194,
+                  "packets_or_v1": 528667194
+                },
+                "lru_miss": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "new_conn_rate": {
+                  "bytes_or_v2": 2365560206670,
+                  "packets_or_v1": 3286874
+                },
+                "pass": {
+                  "bytes_or_v2": 350,
+                  "packets_or_v1": 5
+                },
+                "quic_icmp": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "remote_encap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "total": {
+                  "bytes_or_v2": 33834700766,
+                  "packets_or_v1": 528667199
+                },
+                "tx": {
+                  "bytes_or_v2": 33834700416,
+                  "packets_or_v1": 528667194
+                },
+                "udp_flow_migration": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "vip_0": {
+                  "bytes_or_v2": 26433359700,
+                  "packets_or_v1": 528667194
+                },
+                "xpop_decap_success": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                }
+              },
+              "interfaces": {
+                "load_balancer/katran0": {
+                  "rx_bytes": 26433360656,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 528667207,
+                  "tx_bytes": 44408043466,
+                  "tx_dropped": 21,
+                  "tx_errors": 0,
+                  "tx_packets": 528667187
+                },
+                "real/real0": {
+                  "rx_bytes": 44407559420,
+                  "rx_dropped": 5775,
+                  "rx_errors": 0,
+                  "rx_packets": 528661425,
+                  "tx_bytes": 1192,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 15
+                },
+                "router/rtlb0": {
+                  "rx_bytes": 44408043466,
+                  "rx_dropped": 21,
+                  "rx_errors": 0,
+                  "rx_packets": 528667187,
+                  "tx_bytes": 26433360656,
+                  "tx_dropped": 11647745,
+                  "tx_errors": 0,
+                  "tx_packets": 528667207
+                },
+                "router/rtreal0": {
+                  "rx_bytes": 1192,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 15,
+                  "tx_bytes": 44407559420,
+                  "tx_dropped": 5775,
+                  "tx_errors": 0,
+                  "tx_packets": 528661425
+                }
+              },
+              "real_counters": {
+                "real_1": {
+                  "bytes_or_v2": 26433359700,
+                  "packets_or_v1": 528667194
+                }
+              },
+              "reals_stats_map_ids": [
+                35
+              ],
+              "receiver": {
+                "rx_bytes": 44407559420,
+                "rx_dropped": 5775,
+                "rx_errors": 0,
+                "rx_packets": 528661425,
+                "tx_bytes": 1192,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 15
+              },
+              "stats_map_ids": [
+                28
+              ]
+            },
+            "delta": {
+              "counters": {
+                "consistent_hash_drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "decap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "encap_fail": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "fallback_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 250430683
+                },
+                "global_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v4": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v6": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_too_big": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lpm_src": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lru": {
+                  "bytes_or_v2": 250430683,
+                  "packets_or_v1": 250430683
+                },
+                "lru_miss": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "new_conn_rate": {
+                  "bytes_or_v2": 181520067381,
+                  "packets_or_v1": -90714
+                },
+                "pass": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "quic_icmp": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "remote_encap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "total": {
+                  "bytes_or_v2": 16027563712,
+                  "packets_or_v1": 250430683
+                },
+                "tx": {
+                  "bytes_or_v2": 16027563712,
+                  "packets_or_v1": 250430683
+                },
+                "udp_flow_migration": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "vip_0": {
+                  "bytes_or_v2": 12521534150,
+                  "packets_or_v1": 250430683
+                },
+                "xpop_decap_success": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                }
+              },
+              "interfaces": {
+                "load_balancer/katran0": {
+                  "rx_bytes": 12521534150,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 250430683,
+                  "tx_bytes": 21036177428,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 250430684
+                },
+                "real/real0": {
+                  "rx_bytes": 21036035118,
+                  "rx_dropped": 1695,
+                  "rx_errors": 0,
+                  "rx_packets": 250428990,
+                  "tx_bytes": 70,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 1
+                },
+                "router/rtlb0": {
+                  "rx_bytes": 21036177428,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 250430684,
+                  "tx_bytes": 12521534150,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 250430683
+                },
+                "router/rtreal0": {
+                  "rx_bytes": 70,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 1,
+                  "tx_bytes": 21036035118,
+                  "tx_dropped": 1695,
+                  "tx_errors": 0,
+                  "tx_packets": 250428990
+                }
+              },
+              "real_counters": {
+                "real_1": {
+                  "bytes_or_v2": 12521534150,
+                  "packets_or_v1": 250430683
+                }
+              },
+              "reals_stats_map_ids": [
+                35
+              ],
+              "receiver": {
+                "rx_bytes": 21036035118,
+                "rx_dropped": 1695,
+                "rx_errors": 0,
+                "rx_packets": 250428990,
+                "tx_bytes": 70,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 1
+              },
+              "stats_map_ids": [
+                28
+              ]
+            },
+            "settle_seconds": 1.0
+          },
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": true,
+          "src_ip": "10.0.0.2",
+          "threads": [
+            7
+          ],
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 180.09559184599993,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      },
+      {
+        "command": [
+          "/usr/sbin/ip",
+          "netns",
+          "exec",
+          "katran-router",
+          "sh",
+          "-c",
+          "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+        ],
+        "components": [
+          {
+            "command": [
+              "/usr/sbin/ip",
+              "netns",
+              "exec",
+              "katran-router",
+              "sh",
+              "-c",
+              "printf '%s\\n' start > /proc/net/pktgen/pgctrl"
+            ],
+            "config": {
+              "clone_skb": 0,
+              "dst_ip": "10.100.1.1",
+              "dst_port": 8080,
+              "iface": "rtlb0@7",
+              "namespace": "katran-router",
+              "pkt_size": 64,
+              "proto": 17,
+              "shared_skb": true,
+              "src_ip": "10.0.0.2",
+              "thread_id": 7,
+              "tool": "kernel_pktgen",
+              "xmit_mode": "start_xmit"
+            },
+            "duration_s": 180.09511569400001,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "Params: count 0  min_pkt_size: 64  max_pkt_size: 64\n     frags: 0  delay: 0  clone_skb: 0  ifname: rtlb0@7\n     flows: 0 flowlen: 0\n     queue_map_min: 0  queue_map_max: 0\n     dst_min: 10.100.1.1  dst_max: 10.100.1.1\n     src_min: 10.0.0.2  src_max: 10.0.0.2\n     src_mac: 02:00:00:00:00:0b dst_mac: 02:00:00:00:00:0a\n     udp_src_min: 10000  udp_src_max: 10000  udp_dst_min: 8080  udp_dst_max: 8080\n     src_mac_count: 0  dst_mac_count: 0\n     Flags: SHARED\nCurrent:\n     pkts-sofar: 250661680  errors: 0\n     started: 1473740031us  stopped: 1653707179us idle: 0us\n     seq_num: 250661681  cur_dst_mac_offset: 0  cur_src_mac_offset: 0\n     cur_saddr: 10.0.0.2  cur_daddr: 10.100.1.1\n     cur_udp_dst: 8080  cur_udp_src: 10000\n     cur_queue_map: 0\n     flows: 0\nResult: OK: 179967148(c179967148+d0) usec, 250661680 (64byte,0frags)\n  1392819pps 713Mb/sec (713123328bps) errors: 0",
+            "workload_name": "katran_kernel_pktgen_l2_udp_thread"
+          }
+        ],
+        "config": {
+          "clone_skb": 0,
+          "dst_ip": "10.100.1.1",
+          "dst_port": 8080,
+          "iface": "rtlb0",
+          "namespace": "katran-router",
+          "outcomes": {
+            "after": {
+              "counters": {
+                "consistent_hash_drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "decap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "encap_fail": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "fallback_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 1029759557
+                },
+                "global_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v4": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v6": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_too_big": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lpm_src": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lru": {
+                  "bytes_or_v2": 1029759557,
+                  "packets_or_v1": 1029759557
+                },
+                "lru_miss": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "new_conn_rate": {
+                  "bytes_or_v2": 2728570168341,
+                  "packets_or_v1": 3235474
+                },
+                "pass": {
+                  "bytes_or_v2": 420,
+                  "packets_or_v1": 6
+                },
+                "quic_icmp": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "remote_encap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "total": {
+                  "bytes_or_v2": 65904612068,
+                  "packets_or_v1": 1029759563
+                },
+                "tx": {
+                  "bytes_or_v2": 65904611648,
+                  "packets_or_v1": 1029759557
+                },
+                "udp_flow_migration": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "vip_0": {
+                  "bytes_or_v2": 51487977850,
+                  "packets_or_v1": 1029759557
+                },
+                "xpop_decap_success": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                }
+              },
+              "interfaces": {
+                "load_balancer/katran0": {
+                  "rx_bytes": 51487978862,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 1029759571,
+                  "tx_bytes": 86499802014,
+                  "tx_dropped": 21,
+                  "tx_errors": 0,
+                  "tx_packets": 1029759551
+                },
+                "real/real0": {
+                  "rx_bytes": 86499022862,
+                  "rx_dropped": 9289,
+                  "rx_errors": 0,
+                  "rx_packets": 1029750276,
+                  "tx_bytes": 1262,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 16
+                },
+                "router/rtlb0": {
+                  "rx_bytes": 86499802014,
+                  "rx_dropped": 21,
+                  "rx_errors": 0,
+                  "rx_packets": 1029759551,
+                  "tx_bytes": 51487978862,
+                  "tx_dropped": 11647745,
+                  "tx_errors": 0,
+                  "tx_packets": 1029759571
+                },
+                "router/rtreal0": {
+                  "rx_bytes": 1262,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 16,
+                  "tx_bytes": 86499022862,
+                  "tx_dropped": 9289,
+                  "tx_errors": 0,
+                  "tx_packets": 1029750276
+                }
+              },
+              "real_counters": {
+                "real_1": {
+                  "bytes_or_v2": 51487977850,
+                  "packets_or_v1": 1029759557
+                }
+              },
+              "reals_stats_map_ids": [
+                35
+              ],
+              "receiver": {
+                "rx_bytes": 86499022862,
+                "rx_dropped": 9289,
+                "rx_errors": 0,
+                "rx_packets": 1029750276,
+                "tx_bytes": 1262,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 16
+              },
+              "stats_map_ids": [
+                28
+              ]
+            },
+            "before": {
+              "counters": {
+                "consistent_hash_drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "decap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "encap_fail": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "fallback_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 779097877
+                },
+                "global_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v4": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v6": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_too_big": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lpm_src": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lru": {
+                  "bytes_or_v2": 779097877,
+                  "packets_or_v1": 779097877
+                },
+                "lru_miss": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "new_conn_rate": {
+                  "bytes_or_v2": 2547080274051,
+                  "packets_or_v1": 3196160
+                },
+                "pass": {
+                  "bytes_or_v2": 350,
+                  "packets_or_v1": 5
+                },
+                "quic_icmp": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "remote_encap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "total": {
+                  "bytes_or_v2": 49862264478,
+                  "packets_or_v1": 779097882
+                },
+                "tx": {
+                  "bytes_or_v2": 49862264128,
+                  "packets_or_v1": 779097877
+                },
+                "udp_flow_migration": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "vip_0": {
+                  "bytes_or_v2": 38954893850,
+                  "packets_or_v1": 779097877
+                },
+                "xpop_decap_success": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                }
+              },
+              "interfaces": {
+                "load_balancer/katran0": {
+                  "rx_bytes": 38954894806,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 779097890,
+                  "tx_bytes": 65444220894,
+                  "tx_dropped": 21,
+                  "tx_errors": 0,
+                  "tx_packets": 779097871
+                },
+                "real/real0": {
+                  "rx_bytes": 65443594538,
+                  "rx_dropped": 7470,
+                  "rx_errors": 0,
+                  "rx_packets": 779090415,
+                  "tx_bytes": 1262,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 16
+                },
+                "router/rtlb0": {
+                  "rx_bytes": 65444220894,
+                  "rx_dropped": 21,
+                  "rx_errors": 0,
+                  "rx_packets": 779097871,
+                  "tx_bytes": 38954894806,
+                  "tx_dropped": 11647745,
+                  "tx_errors": 0,
+                  "tx_packets": 779097890
+                },
+                "router/rtreal0": {
+                  "rx_bytes": 1262,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 16,
+                  "tx_bytes": 65443594538,
+                  "tx_dropped": 7470,
+                  "tx_errors": 0,
+                  "tx_packets": 779090415
+                }
+              },
+              "real_counters": {
+                "real_1": {
+                  "bytes_or_v2": 38954893850,
+                  "packets_or_v1": 779097877
+                }
+              },
+              "reals_stats_map_ids": [
+                35
+              ],
+              "receiver": {
+                "rx_bytes": 65443594538,
+                "rx_dropped": 7470,
+                "rx_errors": 0,
+                "rx_packets": 779090415,
+                "tx_bytes": 1262,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 16
+              },
+              "stats_map_ids": [
+                28
+              ]
+            },
+            "delta": {
+              "counters": {
+                "consistent_hash_drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "decap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "drop": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "encap_fail": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "fallback_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 250661680
+                },
+                "global_lru": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v4": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_ptb_v6": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "icmp_too_big": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lpm_src": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "lru": {
+                  "bytes_or_v2": 250661680,
+                  "packets_or_v1": 250661680
+                },
+                "lru_miss": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "new_conn_rate": {
+                  "bytes_or_v2": 181489894290,
+                  "packets_or_v1": 39314
+                },
+                "pass": {
+                  "bytes_or_v2": 70,
+                  "packets_or_v1": 1
+                },
+                "quic_icmp": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "remote_encap": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "total": {
+                  "bytes_or_v2": 16042347590,
+                  "packets_or_v1": 250661681
+                },
+                "tx": {
+                  "bytes_or_v2": 16042347520,
+                  "packets_or_v1": 250661680
+                },
+                "udp_flow_migration": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                },
+                "vip_0": {
+                  "bytes_or_v2": 12533084000,
+                  "packets_or_v1": 250661680
+                },
+                "xpop_decap_success": {
+                  "bytes_or_v2": 0,
+                  "packets_or_v1": 0
+                }
+              },
+              "interfaces": {
+                "load_balancer/katran0": {
+                  "rx_bytes": 12533084056,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 250661681,
+                  "tx_bytes": 21055581120,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 250661680
+                },
+                "real/real0": {
+                  "rx_bytes": 21055428324,
+                  "rx_dropped": 1819,
+                  "rx_errors": 0,
+                  "rx_packets": 250659861,
+                  "tx_bytes": 0,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 0
+                },
+                "router/rtlb0": {
+                  "rx_bytes": 21055581120,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 250661680,
+                  "tx_bytes": 12533084056,
+                  "tx_dropped": 0,
+                  "tx_errors": 0,
+                  "tx_packets": 250661681
+                },
+                "router/rtreal0": {
+                  "rx_bytes": 0,
+                  "rx_dropped": 0,
+                  "rx_errors": 0,
+                  "rx_packets": 0,
+                  "tx_bytes": 21055428324,
+                  "tx_dropped": 1819,
+                  "tx_errors": 0,
+                  "tx_packets": 250659861
+                }
+              },
+              "real_counters": {
+                "real_1": {
+                  "bytes_or_v2": 12533084000,
+                  "packets_or_v1": 250661680
+                }
+              },
+              "reals_stats_map_ids": [
+                35
+              ],
+              "receiver": {
+                "rx_bytes": 21055428324,
+                "rx_dropped": 1819,
+                "rx_errors": 0,
+                "rx_packets": 250659861,
+                "tx_bytes": 0,
+                "tx_dropped": 0,
+                "tx_errors": 0,
+                "tx_packets": 0
+              },
+              "stats_map_ids": [
+                28
+              ]
+            },
+            "settle_seconds": 1.0
+          },
+          "pkt_size": 64,
+          "proto": 17,
+          "shared_skb": true,
+          "src_ip": "10.0.0.2",
+          "threads": [
+            7
+          ],
+          "tool": "kernel_pktgen",
+          "xmit_mode": "start_xmit"
+        },
+        "duration_s": 180.09511569400001,
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "",
+        "workload_name": "katran_kernel_pktgen_l2_udp"
+      }
+    ]
+  },
+  "rejit_result": {
+    "enabled_passes": [],
+    "mode": "native_loader",
+    "status": "ok"
+  },
+  "runner": "katran",
+  "selected_workload": "xdp_pktgen",
+  "status": "ok"
+}
