@@ -1439,6 +1439,7 @@ const std::unordered_map<std::string, uint64_t> &kallsyms_table()
     wanted.push_back(kHtabLookupElemSymbol);
     wanted.push_back(kArrayOfMapLookupElemSymbol);
     wanted.push_back(kHtabLruPercpuMapLookupElemSymbol);
+    wanted.push_back("trie_lookup_elem");
     wanted.push_back("bpf_verifier_ops");
 #if defined(__x86_64__)
     for (const char *symbol : native_lto::kernel_symbols) {

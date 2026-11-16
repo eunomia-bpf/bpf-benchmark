@@ -19,3 +19,7 @@ check:
 
 summarize:
 	python3 $(HERE)/summarize.py $(RAW)
+
+.PHONY: loader
+loader:
+	$(MAKE) -C $(ROOT)/kprog/libnativeloader > $(RAW)/lpm-loader-build.log 2>&1

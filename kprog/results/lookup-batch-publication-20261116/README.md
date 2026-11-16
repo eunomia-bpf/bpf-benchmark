@@ -39,3 +39,26 @@ old object is not established by the build log. The redundant removal is
 deleted forward, and the result-local check target resumes the unchanged
 frozen check on this finished image. The first controller's failure and log
 remain retained. No rebuild is needed to resume the check.
+
+LPM target failure and forward correction, 2026-11-16T22:57:44Z
+
+OTel 224734_587583 fails perf_unwind_native on named LPM map
+pid_page_to_mapping_info. Cilium 225345_805000 fails cil_xdp_entry on
+cilium_cidr_v4_dyn. Both name a Call target address of zero. The sole
+kernel has trie_lookup_elem (System.map ffffffff814ced00), but the loader's
+kallsyms_table only retains its explicit wanted names, and the new LPM
+selection had omitted that function. Host replay plans had retained nonzero
+addresses and did not exercise this live collection step.
+
+One wanted-name entry now retains trie_lookup_elem in the same load-time
+cache as the other map lookup functions. This applies to every LPM map,
+adds no runtime check or refusal, and keeps link-time target selection.
+The canonical loader build passes. The current image predates the correction;
+actual new-image loads and per-call/installed effects remain pending.
+
+BCC 225014_025710 finishes app ok, with all 25 measured programs replaced
+by native. Its ten-second diagnostic sums are JIT/native 95437971/93825612
+calls and 13761318318/13633217882 ns; installed 7965/7962 B. This is the
+frozen functional check, not the next official three-sample timing result.
+Tetragon 225559_070245 repeats the conditional-tail error at IP0x3a4, already
+fixed in source by 3940c4bee. Tracee and Katran still follow in the check.
