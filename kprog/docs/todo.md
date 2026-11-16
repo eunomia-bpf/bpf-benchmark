@@ -39,6 +39,8 @@
 1. PERF 先回到退步：6641a7e1 上 OTel stats 关 0.801x（3a1906ab1：1.021x）、Katran stats 关 0.914x（3a1906ab1：1.029x，C 15d1fda7d：原生一侧逐样本变慢，关掉 stats 也一样）。这两个应用正好是 f45bb2485（共用内核哈希例程）让装进去的代码变小的两个。先用诊断来宾（CPU 16-23，镜像保持 6641a7e1）对同一个应用比较 f45bb2485 前后的原生对象：每次调用拆成程序体、helper、map；Katran 另外核对共用例程走 LRU map 时是否和 JIT 内联的查找一样设置引用位（05-29 的链接器正是在这一点上和 eBPF 一侧工作量不同），逐样本变慢符合 LRU 淘汰行为不同。确认或排除后再继续查找相关的工作。
 2. 可信模块和其余三份模块的 map_ptr 回复保持原样：内层 map 的类型和值大小由装载器从 libbpf 的内层 map 定义（bpf_map__inner_map，正是内核 inner_map_meta 的模板）取，编译器和链接器用它；这样内层 ARRAY 的工作照做，模块零改动。
 
+   PERF 2026-11-16T20:51:38Z：第 2 条源码完成，当前四份模块相对本项前 3c5384aed 逐字节一致。f0add8697 / 4aa983499 从原始 ELF 的 libbpf inner template 取 type/value_size，绑定实际 map ID；maps-only 内存视图避开静态 program entry，源 section 内容逐字节保留。11 fixture / 2520 native vectors、16 个实际 OTel ARRAY/value-size4 定义、FD 改名绑定、编译器/loader 与 active x86 syntax 全过；68 inner sites 共用 27 B，host payload 30383→30410 B。尚未发布/测 installed/per-call/B stock。第 1 条 static audit b9a813006：f45 前后 LRU caller 函数完全相同，旧 Katran 的 LRU 走 generic ops（会置 ref），并非删掉该写入；真实来宾前后成本/路径仍开，下一项优先。结果 inner-array-lto-20261116、shared-hash-regression-20261116。
+
 **协调者 2026-11-16T19:19:42Z**：FORMAL：2be755991 把 23 个 Clight 导出改成 Lake 从 C 生成、删掉提交的 4 435 905 行，完成审核 15Z 第 4 项。last.md 记的 25 个旧证明失败（oldroute288 tag、旧生成器 --check 与当前 C 不一致）按运营者“旧的会误导的不要关闭, 要拆掉丢掉”处理：已被 M 步新证明取代的旧证明和旧生成器删掉，剩下的修到通过；做完时 formal 构建零失败，接着 M5。
 
 **协调者 2026-11-16T18:24:20Z**：
