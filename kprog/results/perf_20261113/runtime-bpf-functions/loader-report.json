@@ -1,0 +1,39 @@
+{
+  "time": "2026-11-16T10:49:00Z",
+  "source_commit": "338d5b7df",
+  "raw": "/workspaces/kprog-raw/perf/20261116-runtime-bpf-functions-loader",
+  "command": "make -r -f kprog/test/perf-context-lto.mk function-loader-check check CPUS=16 OUTPUT=/workspaces/kprog-raw/perf/20261116-runtime-bpf-functions-loader",
+  "original_offset_and_btf_names": true,
+  "empty_btf_prototype_accepted": true,
+  "defined_and_unmatched_functions_unchanged": true,
+  "changed_body_cache_keys_distinct": true,
+  "same_body_cache_reused": true,
+  "per_program_sidecar_identity": true,
+  "host_execution": {
+    "constants": [
+      0,
+      -1
+    ],
+    "vectors_per_constant": 48,
+    "signatures": 6
+  },
+  "perf_context_regressions": {
+    "after": "256 perf contexts, 0 mismatches",
+    "loader-after": "256 perf contexts, 0 mismatches",
+    "static-after": "256 perf contexts, 0 mismatches"
+  },
+  "scope": "Constructed host facts; live BTF loading, capture writer and real app installation await the next publication.",
+  "objects": [
+    {
+      "value": 0,
+      "path": "/var/tmp/kprog-tmp/perf/perf-context-lto/function-cache/2a5417007f05cbeb.perf.native.o",
+      "sha256": "c037afd2671fd65571a31a9c24b3770e7af88dd919093690a671c4a8cd889da0"
+    },
+    {
+      "value": -1,
+      "path": "/var/tmp/kprog-tmp/perf/perf-context-lto/function-cache/94e731844eb6360b.perf.native.o",
+      "sha256": "9c767895dbab4b7851865ec7a9897c2028c1248de200d3ffba9174e9db4b1240"
+    }
+  ],
+  "finished": "2026-11-16T10:47:31Z"
+}

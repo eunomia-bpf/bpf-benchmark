@@ -589,3 +589,11 @@ Public/loader/static PERF_EVENT regressions each pass 256 contexts. This is
 runtime compiler wiring, with no performance claim or image publication;
 metadata extraction, P/B binding and nonconstant bodies remain open.
 Receipts: perf_20261113/runtime-bpf-functions.
+
+2026-11-16T10:49:00Z — Phase 1 generated-function binding: 338d5b7df consumes original
+per-program func_info/BTF metadata and exact source bytes before runtime LTO,
+entry proof extraction and the trusted P/B request. Body facts and program type
+participate in the cache key. Host original-offset/name extraction, two body
+values across 48 ABI vectors, cache identity/reuse, and three 256-context
+regressions pass. Real capture/app installation and nonconstant CEL remain
+open; the active benchmark image is unchanged. Receipts: runtime-bpf-functions/loader-report.json.
