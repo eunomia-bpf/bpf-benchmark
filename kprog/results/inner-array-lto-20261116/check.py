@@ -24,6 +24,8 @@ def run(args, name):
 facts = {name:dict(type=13,inner_type=2) for name in ['outer_a','outer_b','outer_c']}
 mixed=copy.deepcopy(facts); mixed['outer_b']['inner_type']=1
 unknown=copy.deepcopy(facts); del unknown['outer_c']
+uniform=copy.deepcopy(facts)
+for value in uniform.values(): value['inner_value_size']=8
 rows=[]
 for name, symbol, values, count in [
     ('table','entry',facts,1), ('select','entry_select',facts,1),
@@ -33,6 +35,7 @@ for name, symbol, values, count in [
     ('barrier','entry_barrier',facts,1),
     ('nonempty-barrier','entry_nonempty_barrier',facts,0),
     ('narrow','entry_narrow_handle',facts,0),
+    ('value-size','entry',uniform,1),
 ]:
     path=raw/(name+'.json'); path.write_text(json.dumps(values,indent=2)+'\n')
     output=tmp/(name+'.native.o')
@@ -47,6 +50,7 @@ for name, symbol, values, count in [
         driver=tmp/(name+'-check')
         run(['clang-18','-O2','-Wall','-Wextra','-Werror','-DENTRY='+symbol,
              '-DEXPECT_CALLS='+str(1 if count else 2),'-DSELECT_ENTRY='+str(int(name=='select')),
+             '-DUNIFORM_STRIDE='+str(int(name=='value-size')),
              '-DLIMIT_OFFSET='+str(layout['max_entries']),'-DSTRIDE_OFFSET='+str(layout['elem_size']),
              '-DMASK_OFFSET='+str(layout['index_mask']),'-DVALUE_OFFSET='+str(layout['value']),
              ROOT/'kprog/results/inner-array-lto-20261116/driver.c',output,'-o',driver],name+'-driver')
@@ -56,6 +60,10 @@ for name, symbol, values, count in [
 metadata=json.loads((previous/'generation.metadata.json').read_text())
 types={m['name']:dict(type=m['map_type'],inner_type=m['inner_map']['map_type'] if 'inner_map' in m else 0)
        for m in metadata['maps'] if m['value_offset'] is None}
+for m in metadata['maps']:
+    if m['name'] in types:
+        types[m['name']]['value_size']=m['value_size']
+        types[m['name']]['inner_value_size']=m['inner_map']['value_size'] if 'inner_map' in m else 0
 path=raw/'otel-map-types.json'; path.write_text(json.dumps(types,indent=2)+'\n')
 otel=ROOT/'vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o'
 real={}

@@ -427,8 +427,7 @@ static ssize_t map_ptr_query_write(struct file *file, const char __user *ubuf,
 			   READ_ONCE(map->frozen) && !atomic64_read(&map->writecnt)));
 	else
 		priv->len = scnprintf(priv->response, sizeof(priv->response),
-				      "0x%llx %u\n", (unsigned long long)ptr,
-			map->inner_map_meta ? map->inner_map_meta->map_type : 0);
+				      "0x%llx\n", (unsigned long long)ptr);
 	err = len;
 out_put:
 	bpf_map_put(map);

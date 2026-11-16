@@ -36,6 +36,7 @@ static cl::opt<std::string> MapTypes("map-types");
 
 struct NativeMapType {
   int64_t type = 0, inner = 0;
+  uint64_t value_size = 0, inner_value_size = 0;
   bool operator==(const NativeMapType &Other) const {
     return type == Other.type && inner == Other.inner;
   }
@@ -91,6 +92,8 @@ static Expected<unsigned> lowerArrayLookups(Module &M, Function &Entry, StringRe
     auto Type = Fields->getInteger("type"), Inner = Fields->getInteger("inner_type");
     if (!Type || !Inner) continue;
     Known[Global] = {*Type, *Inner};
+    Known[Global].value_size = Fields->getInteger("value_size").value_or(0);
+    Known[Global].inner_value_size = Fields->getInteger("inner_value_size").value_or(0);
     // These are handles rebound to kernel objects, not native map-definition
     // storage. Do not let later optimization read their C initializers.
     Global->setInitializer(nullptr);
@@ -108,7 +111,11 @@ static Expected<unsigned> lowerArrayLookups(Module &M, Function &Entry, StringRe
       for (auto *Input : Values) {
         auto Current = Infer(Input);
         if (First) { Common = Current; First = false; }
-        else if (!(Common == Current)) return NativeMapType{};
+        else {
+          if (!(Common == Current)) return NativeMapType{};
+          if (Common.value_size != Current.value_size) Common.value_size = 0;
+          if (Common.inner_value_size != Current.inner_value_size) Common.inner_value_size = 0;
+        }
       }
       return Common;
     };
@@ -120,8 +127,10 @@ static Expected<unsigned> lowerArrayLookups(Module &M, Function &Entry, StringRe
     } else if (auto *Call = dyn_cast<CallBase>(V)) {
       if (Call->arg_size() == 2 && isMapLookup(*Call)) {
         auto Outer = Infer(Call->getArgOperand(0));
-        if (Outer.type == BPF_MAP_TYPE_ARRAY_OF_MAPS || Outer.type == BPF_MAP_TYPE_HASH_OF_MAPS)
+        if (Outer.type == BPF_MAP_TYPE_ARRAY_OF_MAPS || Outer.type == BPF_MAP_TYPE_HASH_OF_MAPS) {
           Type.type = Outer.inner;
+          Type.value_size = Outer.inner_value_size;
+        }
       }
     } else if (auto *Cast = dyn_cast<Operator>(V);
                Cast && (Cast->getOpcode() == Instruction::PtrToInt ||
@@ -170,6 +179,9 @@ static Expected<unsigned> lowerArrayLookups(Module &M, Function &Entry, StringRe
     }
   }
   if (Calls.empty()) return 0;
+  auto ValueSize = Infer(Calls.front()->getArgOperand(0)).value_size;
+  for (auto *Call : Calls)
+    if (Infer(Call->getArgOperand(0)).value_size != ValueSize) ValueSize = 0;
   std::unique_ptr<btf, decltype(&btf__free)> Types(btf__parse(Kernel.c_str(), nullptr), btf__free);
   if (!Types) return native_bpf::failure("cannot read array lookup kernel BTF");
   auto &C = M.getContext();
@@ -197,9 +209,10 @@ static Expected<unsigned> lowerArrayLookups(Module &M, Function &Entry, StringRe
   B.SetInsertPoint(Found);
   auto Base = native_lto::offset(Types.get(), "bpf_array", "map");
   auto *Mask = Load32(Map, native_lto::relative(Types.get(), "bpf_array", "index_mask", Base, true));
-  auto *Stride = Load32(Map, native_lto::relative(Types.get(), "bpf_array", "elem_size", Base, true));
+  Value *Stride = ValueSize ? B.getInt64((ValueSize + 7) & ~uint64_t(7)) :
+      B.CreateZExt(Load32(Map, native_lto::relative(Types.get(), "bpf_array", "elem_size", Base, true)), B.getInt64Ty());
   auto *Offset = B.CreateMul(B.CreateZExt(B.CreateAnd(Index, Mask), B.getInt64Ty()),
-                             B.CreateZExt(Stride, B.getInt64Ty()));
+                             Stride);
   auto *Values = B.CreateConstGEP1_64(B.getInt8Ty(), Map,
                  native_lto::relative(Types.get(), "bpf_array", "value", Base));
   B.CreateRet(B.CreateGEP(B.getInt8Ty(), Values, Offset));

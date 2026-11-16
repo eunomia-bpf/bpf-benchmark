@@ -156,7 +156,9 @@ void bind_original_source_maps(const std::filesystem::path &object, const std::s
                                const std::unordered_set<std::string> *needed = nullptr)
 {
     std::map<std::string, uint32_t> identities;
-    for (const auto &binding : SourceBpfMaps(object).bind(entry, insns, needed)) {
+    const auto bindings = SourceBpfMaps(object).bind(entry, insns, needed);
+    bool has_inner = false;
+    for (const auto &binding : bindings) {
         const auto found = load.source_maps_by_fd.find(binding.fd);
         if (found == load.source_maps_by_fd.end())
             fail("source map FD is unavailable at instruction " + std::to_string(binding.loaded_slot));
@@ -167,5 +169,21 @@ void bind_original_source_maps(const std::filesystem::path &object, const std::s
         load.map_addrs[binding.symbol] = meta.kernel_addr;
         load.map_addr_ids[binding.symbol] = meta.kernel_id;
         load.native_map_symbols[binding.symbol] = meta.name;
+        has_inner |= meta.type == BPF_MAP_TYPE_ARRAY_OF_MAPS || meta.type == BPF_MAP_TYPE_HASH_OF_MAPS;
+    }
+    if (!has_inner) return;
+    bpf_object *raw = bpf_object__open_file(object.c_str(), nullptr);
+    const auto error = libbpf_get_error(raw);
+    if (error || !raw) fail("open original map definitions: " + libbpf_error_string(error ? error : -errno));
+    std::unique_ptr<bpf_object, decltype(&bpf_object__close)> definitions(raw, bpf_object__close);
+    for (const auto &binding : bindings) {
+        auto *map = bpf_object__find_map_by_name(raw, binding.symbol.c_str());
+        auto *inner = map ? bpf_map__inner_map(map) : nullptr;
+        if (!inner) continue;
+        const auto id = load.map_addr_ids.at(binding.symbol);
+        for (auto &meta : load.maps) if (meta.kernel_id == id) {
+            meta.inner_type = bpf_map__type(inner);
+            meta.inner_value_size = bpf_map__value_size(inner);
+        }
     }
 }

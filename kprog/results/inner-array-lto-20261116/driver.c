@@ -4,7 +4,10 @@
 
 unsigned char outer_a[1], outer_b[1], outer_c[1];
 static unsigned char arrays[3][2048];
-static const uint32_t limits[] = {1,5,17}, strides[] = {8,24,16}, masks[] = {0,7,31};
+#ifndef UNIFORM_STRIDE
+#define UNIFORM_STRIDE 0
+#endif
+static const uint32_t limits[] = {1,5,17}, strides[] = {8,UNIFORM_STRIDE ? 8 : 24,UNIFORM_STRIDE ? 8 : 16}, masks[] = {0,7,31};
 static unsigned calls, fail_outer;
 struct context { uint32_t selector, key; };
 extern uintptr_t ENTRY(struct context *);
