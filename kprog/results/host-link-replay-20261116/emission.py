@@ -1,8 +1,7 @@
-"""Emit current-P proofs with captured plans, including all fresh Tracee loads.
+"""Emit current-P proofs with the recorded plans, including fresh Tracee loads.
 
-Fresh capture ownership is explicit: the only adapter job after the four hash
-cases is this result's Tracee capture. Names are unique in the Tracee inventory;
-other apps keep the inventory's previously resolved source-file pairing.
+The committed Tracee index fixes capture ownership independently of later jobs.
+Other apps keep the inventory's previously resolved source-file pairing.
 """
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
@@ -18,18 +17,8 @@ inventory = json.loads((old / 'report.json').read_text())['entries']
 proofs = json.loads((raw / 'proofs-initial/report.json').read_text())['entries']
 linker = ROOT / 'kprog/x86/native_lab/native_link/target/release/native-link'
 hash_results = ROOT / 'kprog/results/shared-hash-regression-20261116'
-prior = {'link-ie2fmz97', 'link-is5ndi7x'}
-for case in ['otel-shared', 'otel-copy']:
-    prior.update(Path(r['capture']).name for r in json.loads((hash_results / (case + '.link-inputs.json')).read_text()))
 captures = ROOT / 'corpus/results/shared-hash-regression-20261116/captures'
-tracee = []
-for folder in sorted(captures.iterdir()):
-    if folder.name in prior:
-        continue
-    adapter = json.loads((folder / 'adapter.json').read_text())
-    tracee.append(dict(app='tracee', symbol=adapter['argv'][adapter['argv'].index('--symbol') + 1],
-        folder=str(folder), plan=str(folder / 'link-plan.json'), adapter=adapter))
-(raw / 'tracee-inputs.json').write_text(json.dumps(tracee, indent=2) + '\n')
+tracee = json.loads((Path(__file__).parent / 'tracee-inputs.json').read_text())
 otel = json.loads((hash_results / 'otel-shared.link-inputs.json').read_text())
 requests = []
 for i, entry in enumerate(inventory):
