@@ -213,6 +213,24 @@ neither is a per-call regression: Cilium's is the eBPF arm having improved
   Invalid argument` because this run used the image's default manifest, which
   predates the `source_bpf_object` publication; with the corpus manifest the
   same program replaces successfully (section below).
+
+  **The unwind counters say the same thing from the other side.** On
+  `6641a7e1a55d` (the rebuild after cleanups 1-10), `otel-counters-20261116c`
+  ran both arms 120 s with stats on and dumped the `metrics` map in each:
+  `UnwindNativeAttempts` 400 358 535 → 355 386 936 (**0.888x**),
+  `UnwindNativeFrames` 368 904 471 → 325 638 924 (0.883x),
+  `UnwindCallInterpreter` 91 929 461 → 68 702 764 (**0.747x**),
+  `UnwindNativeErrReadKernelModeRegs` 218 328 → 246 289, `ErrEmptyStack`
+  14 706 → 469 008 (31.9x, on a 0.13 % share). So the native arm does **fewer**
+  unwinds and takes the interpreter path **less** often, i.e. the counter mix
+  moves the right way while per-call cost on `native_tracer_execve` moves the
+  wrong way (0.960x on this image's stats-on run). The regression is inside the
+  native body's execution, not a change in which unwind path the workload
+  takes. `kprog/perf/may29-image/otel-metrics.py` reproduces the known
+  baseline-only figures of `otel-counters-20261116` (277 503 868 / 254 369 615
+  / 57 668 994) exactly, so the decoder is not in question. Caveat: this capture
+  is a 1-sample 120 s pair, not the 3×180 s timing protocol, so the ratios are
+  counter-mix evidence, not a timing result.
 - **Tracee, stats on** — the baseline arm measured 317 680 / 325 022 / 316 350,
   then the app exited before the native arm ran: `Tracee exited before BPF
   programs were tracked by shim`. The shim log names the cause twice on
@@ -275,3 +293,60 @@ a run that points `NATIVE_MANIFEST` into the repository.
 
 The first round's failures were reported in `COORDINATION.md` for PERF at
 `220913e8b` and `5c4f908b1`.
+
+## Second sweep on the post-cleanup image `6641a7e1a55d`
+
+The image rebuilt after cleanups 1-10 (`6641a7e1a55d`, built 2026-11-16
+16:29:46Z) was swept once, whole, with the unchanged rotate
+(`kprog/perf/one-image/Makefile` unmodified throughout). Six apps, stats 0 then
+stats 1, 3 samples of 180 s. Every extractor reproduced a published value on
+this image before its own number was reported.
+
+| app | stats 0 | stats 1 | published on this round's earlier image | 05-29 floor |
+|---|---|---|---|---|
+| otelcol-ebpf-profiler/profiling | **0.820x** | **1.013x** (per-call 0.960x) | 1.866x / 2.020x | 1.849x |
+| bcc/set | **0.929x** | **0.912x** | 1.002x / 1.268x | 0.985x |
+| cilium/agent | **1.245x** | **1.218x** (per-call 2.453x) | 1.262x / 1.212x | 1.319x |
+| tetragon/observer | error | error (baseline only) | error | 1.009x |
+| tracee/monitor | **1.179x** | **0.941x** | error / error | 0.948x |
+| katran | **0.914x** | **0.974x** (per-call 0.992x) | 1.002x / 1.029x | 1.113x |
+
+Three things hold on the rebuilt image that did not hold before it:
+
+- **Cilium reproduces.** 1.245x / 1.218x against 1.262x / 1.212x, and the
+  per-call gain on `cil_from_container` is 2.453x against the published 2.29x.
+  This is the one app whose numbers did not move between images.
+- **Tracee now completes both modes.** Both arms load and the app exits clean,
+  which the earlier sweep never achieved (BTF failure, then baseline only).
+  Stats 0 measures 1.179x, above its 0.948x floor. Stats 1 is **0.941x**, just
+  under it, and the per-call split explains it: every high-count program is
+  neutral (`trace_sys_enter` 1.009x on 1.32 G runs, `trace_sys_exit` 1.014x,
+  `tracepoint__sch` 0.982x on 191 M) and every regression is low-count
+  (`sched_process_exit` 0.547x on 177 k runs, `trace_do_exit` 0.641x). One
+  real gain: `trace_fd_install` 3.578x on 18.2 M runs.
+- **OTel and BCC fall, and the fall is in the native body.** OTel stats 0 is
+  0.820x against 1.866x, stats 1 is 1.013x throughput but **0.960x per call** on
+  `native_tracer_execve` against 14.4x. BCC is 0.929x / 0.912x against
+  1.002x / 1.268x, and its per-call split is a mix, not a uniform loss
+  (`blk_account_io_completion` 1.813x cheaper, `block_rq_complete` 0.713x).
+  The unwind counters above rule out a change in which unwind path the workload
+  takes.
+
+**Katran's stats-0 decay did not reproduce.** The stats-0 run
+(`192946_405839`) showed the eBPF arm rising 2 091 198 → 2 967 073 → 2 904 586
+while the native arm fell 2 880 121 → 2 654 425 → 2 274 339, per-sample
+1.377 / 0.895 / 0.783, median 0.914x. BPF stats collection is therefore not
+the cause — but the stats-1 run on the same image has **both arms flat**,
+2 414 048 vs 2 330 732, per-sample 1.086 / 0.926 / 0.965, with
+`balancer_ingress` at 185.8 → 187.3 ns = 0.992x. So the decay is not a
+property of the image either; it is a single-sweep shape that needs a
+re-run to confirm before it is called a regression.
+
+Tetragon failed in both modes on this image for the same reason as before
+(`Tetragon exited before BPF programs were tracked by shim`); stats 1 still
+recorded a full 287-program baseline arm, so the failure is at the native arm.
+
+**One correction to the earlier OTel stats-0 reading.** `tracepoint__sch` has
+89-96 invocations per sample across these runs, below the `min_runs ≥ 100`
+filter `rejit/docs/evaluation.md` §5 uses, so its 0.297x is 6-10 timings of a
+single ~4 µs tail and is not quoted as a ratio anywhere above.
