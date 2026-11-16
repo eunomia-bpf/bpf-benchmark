@@ -116,6 +116,7 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-16 ~14:07 UTC（说 Cilium 两臂路径不同）: "为啥一直路径不同?什么原因?哪里出bug?"
 - 2026-11-16 ~14:09 UTC（前面引用协调者对 BCC 0.917x 的解释：原生一侧 CPU 时间逐样本减少、按 CPU 时间折算 0.987/0.991/1.016、“所以这次是环境问题”）: "=== 这个你改了 benchmark 吗"
 - 2026-11-16 ~14:10 UTC: "我们是不是所有程序都走一样的路径? 路径正确吗?"
+- 2026-11-16 ~14:17 UTC（引用协调者的话）: "原生一侧虚拟机里的上下文切换多了 2.5 倍???"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
