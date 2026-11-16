@@ -366,3 +366,57 @@ double-execution cause and no confirmed Cilium packet fix. Those remain open. Th
     assumes one save set replaces the other, whereas today's fixed-four
     wrapper ignores that metadata. This is a simplification opportunity, not
     evidence of the withdrawn current tail-pop bug.
+
+13. **Phase-1 CEL stock rejection loses the pointer carried in an index register.**
+
+    This finding follows the actual terminal verifier log, not a new guest:
+    `/workspaces/kprog-raw/perf/20261116-generator-indirect-spills/stock-map-binding/verifier.log`.
+    B generated successfully; production private-map relocation succeeded.
+    Instructions 3/5 load the arbitrary numeric entry-stack base from the private
+    input map, then :23 subtracts 56. Instruction :35 dereferences that scalar,
+    giving `R3 invalid mem access 'scalar'`. The log already proves the other
+    offset zero at :16–19, so lack of a bound on that particular offset is not
+    the first failure.
+
+    The exact retained native proof is
+    `/workspaces/kprog-raw/perf/20261116-code-pointer-check-retry1/cel.proof.o`.
+    At +0x4f it forms RSI = RSP+0x10 after allocating 0x48 bytes: this is the
+    stack array at entry-SP minus 56. Its actual upstream CEL body at +0x6a
+    compares `QWORD PTR [rcx+rsi*1]` with 42. RCX is the scalar offset read from
+    the separate offset array and masked with 2047 (+0x5f/+0x62).
+    The archived generated B source in
+    `20261116-generator-indirect-spills/stock/b-build.tar.gz` preserves this
+    operand as CMP_MEM_IMM with base X86_RCX and index X86_RSI, scale zero.
+    The defined-code spill target at +0x54 is now resolved; this rejection is
+    downstream of that earlier generator fix.
+
+    The source chain is explicit:
+
+    - `x86_sim_local_bpf.h:1800–1805` gives the RSI LEA result STACK tag and
+      an actual private-arena pointer.
+    - `:670–683` computes memory displacement via X86_SIM_L_READ_REG(index).
+      For STACK-tagged RSI, `:532–556` converts the pointer to numeric native
+      entry-base bits. This is appropriate for observing numeric register
+      bits, but discards the pointer needed for dereference.
+    - `:1361–1409` forms the memory address and classifies it using only the
+      encoded base register, RCX. `:1423–1435` also bases fault routing on
+      that same scalar base. The resulting successful arm is a scalar memory
+      load, exactly as the stock verifier log shows.
+    - The generator's `parse_mem_terms` at
+      `micro-prog/generate_micro_sim_proofs.py:416–449` retains the actual
+      base/index arrangement; it does not establish a pointer-first operand.
+
+    LEA already has the missing commutative, unscaled pointer handling at
+    `x86_sim_local_bpf.h:1811–1817`: scalar base plus memory-tagged index with
+    scale one preserves the index pointer and adds the scalar displacement.
+    Memory read/write and recovery routing need the same effective-address
+    provenance, using the existing operand/tag facts. Simply swapping all
+    decoded operands would break scaled indices, mixed pointer arithmetic,
+    address-width and segment cases. Do not make the native stack-base input
+    constant, guess the pointer's bits, add a new runtime check or bypass the
+    stock rejection.
+
+    This is a concrete next phase-1 class, with no stock-acceptance or full
+    application claim. Coordinator cleanup still owns all source edits.
+    FORMAL owns shared-I proof coordination; the existing LEA and memory
+    handlers must keep the same native address semantics when this is fixed.

@@ -612,5 +612,23 @@
     "fixed_kernel_save_restore_operations": 8,
     "fixed_kernel_save_restore_bytes": 14,
     "speed_gain_measured": false
+  },
+  "cel_stock_index_pointer": {
+    "recorded_at": "2026-11-16T15:55:22Z",
+    "verifier_log": "/workspaces/kprog-raw/perf/20261116-generator-indirect-spills/stock-map-binding/verifier.log",
+    "native_proof": "/workspaces/kprog-raw/perf/20261116-code-pointer-check-retry1/cel.proof.o",
+    "generated_source_archive": "/workspaces/kprog-raw/perf/20261116-generator-indirect-spills/stock/b-build.tar.gz",
+    "native_memory_instruction": {
+      "offset": "0x6a",
+      "op": "cmp QWORD PTR [rcx+rsi*1],0x2a",
+      "base": "RCX scalar offset",
+      "index": "RSI stack pointer",
+      "index_scale": 1
+    },
+    "stock_failure_instruction": 35,
+    "stock_failure": "R3 invalid mem access 'scalar'",
+    "native_stack_relative_pointer": -56,
+    "cause": "Read memory dispatch and recovery inspect base only; numeric read of STACK-tagged index loses its private-arena pointer. LEA already preserves such unscaled index pointers.",
+    "status": "Review only; no source change or fresh execution. B generated, stock acceptance remains open."
   }
 }
