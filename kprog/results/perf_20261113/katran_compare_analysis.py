@@ -20,6 +20,8 @@ def summarize(label, directory):
     result['arms'] = arms
     result['throughput_native_over_bpf'] = (
         arms['post_rejit']['median_pps']/arms['baseline']['median_pps'])
+    result['ordinal_sample_ratios'] = [b['reported_pps']/a['reported_pps']
+        for a, b in zip(arms['baseline']['samples'], arms['post_rejit']['samples'])]
     result['per_call_bpf_over_native'] = (
         arms['baseline']['ns_per_invocation']/arms['post_rejit']['ns_per_invocation']
         if meta['bpf_stats'] else None)
