@@ -1054,6 +1054,36 @@ int bpf_prog_load_native_stub_raw(uint32_t prog_type_value,
     return -errno;
 }
 
+int create_tail_call_marker_map()
+{
+    int fd = bpf_map_create(BPF_MAP_TYPE_PROG_ARRAY, "native_tail_call_probe",
+                            sizeof(uint32_t), sizeof(uint32_t), 1, nullptr);
+    if (fd < 0)
+        fail("bpf_map_create native tail-call probe map: " + std::string(std::strerror(errno)));
+    return fd;
+}
+
+std::vector<bpf_insn> native_stub_program(int tail_map_fd)
+{
+    // Both native entry paths use this verifier-visible frame description.
+    // The JIT emits P in place of these instructions.
+    if (tail_map_fd < 0)
+        return {{.code = BPF_ALU64 | BPF_MOV | BPF_K, .dst_reg = BPF_REG_0},
+                {.code = BPF_JMP | BPF_EXIT}};
+    return {
+        {.code = BPF_ALU64 | BPF_MOV | BPF_K, .dst_reg = BPF_REG_0},
+        {.code = BPF_JMP | BPF_JNE | BPF_K, .dst_reg = BPF_REG_0, .off = 2},
+        {.code = BPF_ALU64 | BPF_MOV | BPF_K, .dst_reg = BPF_REG_0},
+        {.code = BPF_JMP | BPF_EXIT},
+        {.code = BPF_LD | BPF_DW | BPF_IMM, .dst_reg = BPF_REG_2,
+         .src_reg = BPF_PSEUDO_MAP_FD, .imm = tail_map_fd},
+        {},
+        {.code = BPF_ALU64 | BPF_MOV | BPF_K, .dst_reg = BPF_REG_3},
+        {.code = BPF_JMP | BPF_CALL, .imm = BPF_FUNC_tail_call},
+        {.code = BPF_JMP | BPF_EXIT},
+    };
+}
+
 int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
                    uint32_t prog_type_value,
                    const StubLoadAttrs &attrs,
@@ -1064,86 +1094,8 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
     if (chunks == 0) {
         fail("chunks must be > 0");
     }
-    ScopedFd tail_call_map_fd;
-    if (tail_call_reachable) {
-        LIBBPF_OPTS(bpf_map_create_opts, map_opts);
-        int fd = bpf_map_create(BPF_MAP_TYPE_PROG_ARRAY,
-                                "native_tail_call_probe",
-                                sizeof(uint32_t),
-                                sizeof(uint32_t),
-                                1,
-                                &map_opts);
-        if (fd < 0) {
-            fail("bpf_map_create native tail-call probe map: "
-                 + std::string(std::strerror(errno)));
-        }
-        tail_call_map_fd.fd = fd;
-    }
-
-    std::vector<bpf_insn> insns;
-    insns.reserve(static_cast<size_t>(2) * chunks +
-                  (tail_call_reachable ? 8 : 1));
-    if (tail_call_reachable) {
-        const size_t probe_off = 2; /* skip the body's r0 = 0 and its exit */
-        if (probe_off > static_cast<size_t>(std::numeric_limits<int16_t>::max())) {
-            fail("native_kernel tail-call probe jump offset exceeds int16");
-        }
-        insns.push_back(bpf_insn{
-            .code = BPF_ALU64 | BPF_MOV | BPF_K,
-            .dst_reg = BPF_REG_0,
-            .src_reg = 0,
-            .off = 0,
-            .imm = 0,
-        });
-        insns.push_back(bpf_insn{
-            .code = BPF_JMP | BPF_JNE | BPF_K,
-            .dst_reg = BPF_REG_0,
-            .src_reg = 0,
-            .off = static_cast<int16_t>(probe_off),
-            .imm = 0,
-        });
-    }
-    /* The one kernel line emits the image armed for the whole program
-     * (bpf_native_jit), so the stub carries no kinsn sidecar/call pairs. */
-    insns.push_back(bpf_insn{
-        .code = BPF_ALU64 | BPF_MOV | BPF_K,
-        .dst_reg = BPF_REG_0,
-        .src_reg = 0,
-        .off = 0,
-        .imm = 0,
-    });
-    insns.push_back(bpf_insn{
-        .code = BPF_JMP | BPF_EXIT, .dst_reg = 0, .src_reg = 0, .off = 0, .imm = 0,
-    });
-    if (tail_call_reachable) {
-        insns.push_back(bpf_insn{
-            .code = BPF_LD | BPF_DW | BPF_IMM,
-            .dst_reg = BPF_REG_2,
-            .src_reg = BPF_PSEUDO_MAP_FD,
-            .off = 0,
-            .imm = tail_call_map_fd.get(),
-        });
-        insns.push_back(bpf_insn{
-            .code = 0, .dst_reg = 0, .src_reg = 0, .off = 0, .imm = 0,
-        });
-        insns.push_back(bpf_insn{
-            .code = BPF_ALU64 | BPF_MOV | BPF_K,
-            .dst_reg = BPF_REG_3,
-            .src_reg = 0,
-            .off = 0,
-            .imm = 0,
-        });
-        insns.push_back(bpf_insn{
-            .code = BPF_JMP | BPF_CALL,
-            .dst_reg = 0,
-            .src_reg = 0,
-            .off = 0,
-            .imm = BPF_FUNC_tail_call,
-        });
-        insns.push_back(bpf_insn{
-            .code = BPF_JMP | BPF_EXIT, .dst_reg = 0, .src_reg = 0, .off = 0, .imm = 0,
-        });
-    }
+    ScopedFd tail_call_map_fd(tail_call_reachable ? create_tail_call_marker_map() : -1);
+    const auto insns = native_stub_program(tail_call_map_fd.get());
 
     // fd_array[0] is the verifier pre-scan slot; fd_array[1] is what `off=1`
     // in the kinsn call resolves to. Retained map fds follow and are bound via
@@ -3467,6 +3419,9 @@ LoadedStub upload_and_load_stub(const LinkedBlob &linked,
                           reinterpret_cast<const uint8_t *>(mask.data()), mask.size());
 #endif
         relocs = parse_native_lab_relocs(linked.relocs, linked.blob.size());
+        tail_call_reachable |= std::any_of(relocs.begin(), relocs.end(), [](const auto &reloc) {
+            return reloc.kind == NATIVE_LAB_RELOC_X86_TAIL_COUNT;
+        });
         chunks = plan_blob_chunks(linked.blob.size(), relocs, linked.load_sites);
         upload_blob(linked.blob, chunks);
         upload_relocs(relocs, chunks);
@@ -3992,12 +3947,7 @@ native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOpti
         pins.push_back(std::move(fd));
     }
     std::vector<bpf_insn> proof;
-    if (options.trusted_direct_native) {
-        // This path executes P after a recorded B failure. The stub is not a
-        // verification of P; its native image uses the same kernel transport.
-        proof = {{.code = BPF_ALU64 | BPF_MOV | BPF_K, .dst_reg = BPF_REG_0},
-                 {.code = BPF_JMP | BPF_EXIT}};
-    } else {
+    if (!options.trusted_direct_native) {
         // These aliases come from kernel-pinned identities, not process-wide map names.
         using Object = std::unique_ptr<bpf_object, decltype(&bpf_object__close)>;
         bpf_object *raw = bpf_object__open_file(options.proof_object_path.c_str(), nullptr);
@@ -4068,6 +4018,17 @@ native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOpti
     }
     LinkedBlob linked = load_or_link_native_blob(options.native_link_path, options.native_object_path,
         options.symbol_name, companion, options.trusted_native_proof_path);
+    ScopedFd tail_call_marker;
+    if (options.trusted_direct_native) {
+        const auto relocs = parse_native_lab_relocs(linked.relocs, linked.blob.size());
+        const bool tail_call_reachable = companion.has_tail_call ||
+            std::any_of(relocs.begin(), relocs.end(), [](const auto &reloc) {
+                return reloc.kind == NATIVE_LAB_RELOC_X86_TAIL_COUNT;
+            });
+        if (tail_call_reachable)
+            tail_call_marker.fd = create_tail_call_marker_map();
+        proof = native_stub_program(tail_call_marker.get());
+    }
     // P retains its relocated maps; B's LDDW references retain B's maps.
     std::vector<int> fd_array = reopen_relocated_map_fds(linked.relocated_map_ids);
     for (int fd : fd_array)

@@ -46,3 +46,13 @@ publication, actual cil_from_container BPF_PROG_TEST_RUN comparison and
 per-call/installed-byte measurement follow that round under the image lock.
 The frozen benchmark entry and settings stay unchanged. All existing LTO
 pieces remain together; the operator's performance/size targets remain open.
+
+The registered direct-native fallback now shares the timing path's stub
+builder. Both preserve the verifier-visible tail marker; the linked image's
+counter relocation also supplies tail reachability when source metadata
+omits it. The marker map stays open through program loading. This removes
+the separate two-instruction fallback constructor and consolidates the old
+verbose marker construction. A focused stream-contract fixture covers plain
+and tail stubs, including map FD zero; host compilation/result is recorded
+under the raw stub directory. New-kernel guest validation remains queued with
+the rest of item 1.
