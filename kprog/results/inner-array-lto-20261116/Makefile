@@ -15,4 +15,4 @@ host:
 
 .PHONY: inspect
 inspect:
-	python3 $(ROOT)/kprog/results/inner-array-lto-20261116/inspect.py $(RAW)
+	python3 $(ROOT)/kprog/results/inner-array-lto-20261116/ir_form.py $(RAW)
