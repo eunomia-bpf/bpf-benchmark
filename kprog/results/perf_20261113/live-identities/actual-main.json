@@ -1,0 +1,37 @@
+{
+  "archive": "/workspaces/kprog-raw/perf/20261115-otel-current-app-retry2/service.tar.gz",
+  "member": "service/requests/3.failure.tar.gz",
+  "input_sha256": "b82b7613186277602d529ed9416872745ece8f9ccc2ca44647c380b57cb35d09",
+  "bounds_compiler_sha256": "0776d2b630cfcda203a8a9fb68520ab797b66afd37e11dbd19b79774c2b1f18c",
+  "compile_flags": [
+    "-w",
+    "-g",
+    "-O3",
+    "-mcpu=v4",
+    "-target",
+    "bpf",
+    "-mllvm",
+    "-bpf-stack-size=4096",
+    "-D__TARGET_ARCH_x86",
+    "-I",
+    "/workspaces/repository/vendor/libbpf/include/uapi",
+    "-I",
+    "/workspaces/repository/vendor/libbpf/src",
+    "-I",
+    "/usr/include/x86_64-linux-gnu"
+  ],
+  "name": "normal",
+  "completed": true,
+  "object_bytes": 1110880,
+  "code_bytes": 289560,
+  "post_pei_stack_bytes": {
+    "trusted_x86_x86_sim_xdp": 824
+  },
+  "previous_code_bytes": 295336,
+  "previous_stack_bytes": 784,
+  "live_identities_normalized": 280,
+  "private_accesses_normalized": 18581,
+  "spill_slots": 52,
+  "raw": "/workspaces/kprog-raw/perf/20261116-live-identities/main",
+  "scope": "Retained real frontend, normal backend. No stock verifier or whole-app acceptance; published compiler unchanged."
+}
