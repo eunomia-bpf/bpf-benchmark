@@ -1,7 +1,6 @@
 {
   "step": "M4 borrowed ARM program bindings",
   "status": "validated; M4 remains open",
-  "baseline": "776e46a27df84c7a343dfad149aa90a516ee288b",
   "raw": "/workspaces/kprog-raw/formal/m4-arm64-program",
   "exports": {
     "Arm64Entry": {
@@ -103,5 +102,7 @@
       "allocated_relocations": 8
     }
   },
-  "scope": "Actual shared C bodies with borrowed local cells; unchanged complete fixture sources are included once through extraction wrappers. Only full payload layouts are bound; application/sparse-layout universality and M5 refinement remain open. The stack-disabled fixture covers context-only leaf operations, not generic private/helper behavior for that declaration profile."
+  "scope": "Actual shared C bodies with borrowed local cells; unchanged complete fixture sources are included once through extraction wrappers. Only full payload layouts are bound; application/sparse-layout universality and M5 refinement remain open. The stack-disabled fixture covers context-only leaf operations, not generic private/helper behavior for that declaration profile.",
+  "native_header_baseline": "776e46a27df84c7a343dfad149aa90a516ee288b",
+  "frame_header_baseline": "4a2b31f48347c9e970aa5a11ebbf5196de80173d"
 }

@@ -58,3 +58,8 @@ Complete recipes/results remain under `/workspaces/kprog-raw/formal/m4-arm64-pro
 `link.log`, `final-frames.json` and `final-frames.log`. Initial orchestration,
 SEC-parser and ineffective-unused-macro negative attempts remain as evidence;
 the corrected terminal runs determine the results above.
+
+The frame and closed-program comparisons stream canonical headers from
+`4a2b31f48` into the current fixture/oracle. Native allocated-section comparisons
+use the immediately preceding `776e46a27` header. These two baselines are
+recorded separately in `result.json` and in the full raw commands.
