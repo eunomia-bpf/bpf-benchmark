@@ -35,6 +35,8 @@
 
 - [x] P-SPECIALIZE-10K（9fc382606、cc83b5d48；本提交结果）：四种 10K 形状正常 B/实际栈帧完成，前端 11.6–26.3s、峰值 399–920MiB；B 328–200624B、帧 0–40B，详见 `perf_20261113/inline-families/scale-10k/`。旧同名 scalar/direct 70.47GiB/SIGKILL 的实际失败已能完成；不跨不同编译管线宣称独立加速比。100K 继续。
 
+**协调者 2026-11-16T15:07:59Z（运营者“你自己去清理和删除不必要的 deadcode 和过度设计 ... 旧的都你(claude)主线程来直接清理”）**：清理进行中，协调者在主线程直接做；C、formal 停着，perf 只审核源代码、看性能问题（运营者“顺便 codex 继续去审核源代码也来继续看性能问题”）。已删：1ed4cbc6c（另一内核 6.15.11 的 vmlinux.h、kprog/perf/art），清理 2（kprog/tv 116 个文件 43 376 行及其构建树；direct-native 只留模块构建；fidelity 的 negative、stage2、bound-probe 流程），93dedd0e8（旧的独立 Rust 装载器 kprog/loader 及构建树）。计时模块用唯一内核重新编译通过。下一批：kprog/x86、kprog/arm64 Makefile 里依赖旧装载器的 build/run 目标和硬编码模拟器（冻结 benchmark 的镜像构建会调 kprog/x86 的 micro-proofs-build，这个目标保持原样）；普查工具和 kprog/selftests；kprog/test 里没人用的一次性脚本（*.bpf.c 由 kprog/test/Makefile 的通配编译，保留）；然后按审核报告处理核心代码里的过度设计；formal 的 oracles、tools 等 formal 恢复后一起做。
+
 **协调者 2026-11-16T14:20:22Z（运营者“去审核代码. 禁止加任何额外的 check. 内核不必要的 check 也需要拆掉一部分, 确保这些被内联进去了. 也检查为啥会有性能问题, 让 codex 看看 …… 这个明显不对 …… 为啥多走???”）**：PERF（Codex）按这个顺序做，C 配合：
 1. Cilium 两臂路径不同：原生一侧每个包多走 cil_to_host、cil_from_host（各 740 557 968 次）。PERF 接手 C 12:17 起的这一项：对 cil_from_container 的 eBPF 版和原生版各跑一次 BPF_PROG_TEST_RUN，比较返回码、重定向目标、ifindex 和两边读到的配置值（原生对象是对着 Cilium 自带的示例 ep_config.h、node_config.h 编的，原生 CONFIG() 直接读 __config_ 全局变量），找到出错的那一行，按整类修。C 提供构建事实，需要重编时由 C 编。
 2. BCC 的 tracing 程序多跑：runqlat 的 sched_switch、sched_wakeup 在原生一侧是 eBPF 一侧的 2.51 倍，其余程序 1.293 倍；用已知次数的事件在来宾里对比两版的 run_cnt 和直方图总数，找出原生一侧 tracing 程序为什么每个事件多跑（或多记）一次，按 tracing 这一类修。
