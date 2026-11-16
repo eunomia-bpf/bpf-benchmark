@@ -29,3 +29,14 @@ pmu-profile:
 		python3 $(ROOT)/kprog/perf/profile/phase-profile.py run --app otelcol-ebpf-profiler/profiling \
 		--cpus 20-23 --vcpus 4 --memory 32G --seconds 60 --freq 199 --host-event cycles:G \
 		--state-root /var/tmp/kprog-tmp/perf/otel-regression-profile --persist-output --out $(RAW)/profile
+
+.PHONY: pmu-decode
+pmu-decode:
+	DEBUGINFOD_URLS= /var/tmp/kprog-tmp/C/perf-build/perf script -i $(RAW)/pmu/profile/host.data \
+		--guestkallsyms $(RAW)/pmu/profile/baseline.start.kallsyms \
+		-F time,misc,ip,pid,tid,cpu,period --no-inline --hide-call-graph --ns \
+		> $(RAW)/pmu/samples.txt 2> $(RAW)/pmu/decode.stderr
+
+.PHONY: pmu-costs
+pmu-costs:
+	python3 $(ROOT)/kprog/results/otel-regression-20261116/pmu.py $(RAW) > $(RAW)/pmu/costs.log 2>&1

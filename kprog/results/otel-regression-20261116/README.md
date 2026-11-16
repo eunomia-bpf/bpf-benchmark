@@ -108,3 +108,48 @@ used for the earlier duplicate-save review retains all C saves and has a
 different entry contract. It does not demonstrate four duplicated saves in this
 timing path. The new mask contract's conditional 14-byte accounting for mask
 zero is not an installed-byte or speed gain for this captured entry.
+
+
+PMU result (19:08 diagnostic, image 6641a7e1)
+
+`pmu-sampling.json` and `pmu.py` use the actual shim windows and live JIT
+ranges. Unlike CPU-clock, hardware cycles provide thousands of samples inside
+OTel. The 60-second workload diagnostic gives 4,543.127 to 7,463.351 counter
+ns/call, and 167,504 to 303,930 installed bytes. This is a four-vCPU profile on
+CPUs 20-23, with sampling and concurrent host work; it is not the official
+three-by-180-second result or a comparison with the earlier image.
+
+| Component | eBPF sampled cycles/root invocation | Native sampled cycles/root invocation |
+|---|---:|---:|
+| Program text before separating inline routines | 2,446.33 | 11,811.64 |
+| Native remaining text after separating the routines below | — | 3,679.12 |
+| LPM lookup, kernel symbol / native inline routine | 3,439.94 | 4,286.97 |
+| ARRAY lookup / native ARRAY dispatcher | 259.39 | 1,279.95 |
+| User copy / native user probe routine | 2,636.44 | 2,560.64 |
+| Native kernel probe routine | — | 4.96 |
+| External hash symbols, including raw hash and bucket walk | 1,520.98 | 2,022.39 |
+
+The native rows identify complete inline routines by captured instruction
+bytes, masking only their external-call rel32 displacement. They include
+samples in tail programs: tail execution time is charged to the invoking
+program's counter. For perf_unwind_native, ARRAY is [29,516, 29,583), user probe
+[29,583, 29,909), and LPM [29,909, 30,239). The largest individual LPM roots
+are offsets 30,042 (child load) and 30,050 (node-data load). The ARRAY hot
+root at 29,526 is the key load immediately after the type test. Its period
+may include skid from the preceding map-type load; instruction addresses
+alone do not prove that a particular load missed cache.
+
+These are cycle periods, never nanoseconds. The recording has no callchains:
+external kernel roots include other guest activity, and cannot be assigned
+wholly to OTel. Remaining text still includes tail/context/percpu operations,
+so it is not pure application body. Neither external copies nor shared hash
+are hidden in a claimed body speedup. Hardware sampling/skid also prevents
+converting this table into an exact accounting of BPF counter time.
+
+The result puts map dispatch/LPM ahead of further body-only work. It does
+not by itself establish which historical change caused the throughput drop.
+Source confirms an avoidable class: select_lookup_site discards a proven
+named map's complete `call` target; the loader also leaves LPM maps at the
+generic helper. Those calls enter ARRAY then LPM dispatch rather than using
+the verifier's once-selected lookup operation. Resolve those facts at link
+time, retaining actual dynamic-map semantics, and measure after publication.
