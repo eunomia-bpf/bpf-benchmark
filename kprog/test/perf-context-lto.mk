@@ -91,8 +91,8 @@ function-live-inputs: compiler
 	taskset -c $(CPUS) prlimit --as=8589934592 -- $(CXX) -std=gnu++20 -O1 -g -ffunction-sections -fdata-sections -I$(ROOT)/kprog/libnativeloader/include -I$(ROOT)/micro/programs/build-x86 -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include -I$(ROOT)/vendor/libbpf/include -I$(ROOT)/vendor/libbpf/include/uapi $(ROOT)/kprog/test/native_function_live.cpp -Wl,--gc-sections $(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -ldl -pthread -o $(BUILD)/function-live
 
 function-live-kvm: function-live-inputs
-	install -d $(OUTPUT)/live
-	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c $(CPUS) prlimit --as=8589934592 -- vng --run $(KERNEL)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(BUILD) --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/perf-context-lto.mk guest-function-live OUTPUT=$(OUTPUT)'
+	install -d $(OUTPUT)/live $(OUTPUT)/inputs
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c $(CPUS) prlimit --as=8589934592 -- vng --run $(KERNEL)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rodir $(OUTPUT)/inputs=$(BUILD) --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/perf-context-lto.mk guest-function-live OUTPUT=$(OUTPUT) BUILD=$(OUTPUT)/inputs'
 	tar -C $(BUILD) -czf $(OUTPUT)/live-build.tar.gz .
 	date -u +%FT%TZ > $(OUTPUT)/live-finished
 
