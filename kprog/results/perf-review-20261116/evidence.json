@@ -778,5 +778,17 @@
       "later shared lookup/probe relocation rewrites"
     ],
     "scope": "Source coverage gap and optimization opportunity; no actual app failure, new execution, site frequency or measured speed/size claim."
+  },
+  "per_symbol_context_lto_scope": {
+    "recorded_at": "2026-11-16T16:25:26Z",
+    "combined_module_roots": "kprog/x86/link_embedded_ir.cpp:23-30 every program-section function external",
+    "symbol_cache_key": "native_loader_context_lto.hpp:18",
+    "whole_module_pipelines": [
+      "perf_context_lto.cpp:96",
+      "perf_context_lto.cpp:147"
+    ],
+    "whole_module_emission": "perf_context_lto.cpp:152",
+    "selected_entry_handling": "perf_context_lto.cpp:72-79 keeps selected entry external without internalizing unrelated entries",
+    "scope": "Source repeated compilation cost. No elapsed/memory/post-change-byte measurement, no installed-size or per-call improvement claim."
   }
 }

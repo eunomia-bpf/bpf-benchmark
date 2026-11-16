@@ -669,3 +669,34 @@ double-execution cause and no confirmed Cilium packet fix. Those remain open. Th
     selector and each leaf's success/failure/return behavior; no speculative
     helper target or extra validation is needed. The number of such sites in
     the current apps and any per-call or installed-byte effect remain unknown.
+
+21. **OTel context LTO reoptimizes and code-generates unrelated entry bodies per symbol.**
+
+    `link_embedded_ir.cpp:23–30` preserves every function with a program section
+    by making it externally linked before combining the OTel frontend modules.
+    That is needed to retain selectable program entries in P. At load time,
+    however, `native_loader_context_lto.hpp:18` includes the selected symbol
+    in the cache key, and :39–40 invokes the compiler with that symbol.
+
+    `perf_context_lto.cpp:72–79` keeps the selected entry external but does not
+    internalize/drop other program entries. It runs the whole-module O3
+    pipeline at :96, converts the selected PERF_EVENT entry, runs whole-module
+    O3 again at :147, and emits the whole module at :152. Other external
+    program bodies remain roots. Therefore distinct cold-cache symbol loads
+    redo optimization and native object emission for unrelated entries from
+    the same combined P. The later native-link selected-entry extraction
+    does not undo that compilation work already spent.
+
+    Use the selected entry's existing LLVM/global-reference closure before
+    these expensive stages, retaining its real callees, address-taken code and
+    reachable data. Standard LLVM internalization/global elimination can
+    express this without another source-language parser, private source tree,
+    per-application compiler or new runtime check. Merely deleting all other
+    named functions would break referenced helpers/tables, and emitting a
+    different context conversion for an unrelated program type is not valid.
+
+    This is source-level repeated load-time work, not an explanation of native
+    per-call0.946x/1.0x. Cold-cache compilation time/memory and eliminated output
+    bytes have not been measured for this change. The installed P linker already
+    selects a reachable entry, so a smaller temporary ELF does not itself
+    establish the operator's installed half-size target or any per-call gain.
