@@ -1,0 +1,180 @@
+{
+  "recorded_at": "2026-11-16T00:05:12Z",
+  "raw_main": "/workspaces/kprog-raw/perf/20261115-narrow-spill/main",
+  "raw_kernel": "/workspaces/kprog-raw/perf/20261115-narrow-spill/kernel",
+  "kernel_cases": {
+    "compile_only": false,
+    "cases": [
+      {
+        "phase": "small-original",
+        "frame_access_depth": 80,
+        "pairs": 0,
+        "object": "/var/tmp/fixture.o",
+        "executions": 1060,
+        "failed": 0
+      },
+      {
+        "phase": "small-packed",
+        "frame_access_depth": 48,
+        "pairs": 4,
+        "object": "/var/tmp/fixture.o",
+        "executions": 1060,
+        "failed": 0
+      },
+      {
+        "phase": "large-original",
+        "frame_access_depth": 544,
+        "pairs": 0,
+        "stock_rejected": true,
+        "executions": 0
+      },
+      {
+        "phase": "large-packed",
+        "frame_access_depth": 512,
+        "pairs": 4,
+        "object": "/var/tmp/fixture.o",
+        "executions": 1060,
+        "failed": 0
+      },
+      {
+        "phase": "pressure-original",
+        "frame_access_depth": 16,
+        "object": "/var/tmp/fixture.o",
+        "executions": 1060,
+        "failed": 0
+      },
+      {
+        "phase": "pressure-packed",
+        "frame_access_depth": 8,
+        "object": "/var/tmp/fixture.o",
+        "executions": 1060,
+        "failed": 0
+      },
+      {
+        "phase": "pressure-context-original",
+        "frame_access_depth": 16,
+        "object": "/var/tmp/fixture.o",
+        "executions": 1060,
+        "failed": 0
+      },
+      {
+        "phase": "pressure-context-packed",
+        "frame_access_depth": 16,
+        "object": "/var/tmp/fixture.o",
+        "executions": 1060,
+        "failed": 0
+      },
+      {
+        "phase": "pressure-all-live-original",
+        "frame_access_depth": 16,
+        "object": "/var/tmp/fixture.o",
+        "executions": 1060,
+        "failed": 0
+      },
+      {
+        "phase": "pressure-all-live-packed",
+        "frame_access_depth": 24,
+        "object": "/var/tmp/fixture.o",
+        "executions": 1060,
+        "failed": 0
+      },
+      {
+        "phase": "wide-descriptor-packed",
+        "frame_access_depth": 48,
+        "normalized_slots": [
+          {
+            "document": 1,
+            "slots": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ]
+          }
+        ],
+        "object": "/var/tmp/fixture.o",
+        "executions": 1060,
+        "failed": 0
+      },
+      {
+        "phase": "dead-reload",
+        "frame_access_depth": 48,
+        "object": "/var/tmp/fixture.o",
+        "executions": 1060,
+        "failed": 0
+      }
+    ]
+  },
+  "actual_main": {
+    "completed": true,
+    "code_bytes": 295336,
+    "object_bytes": 1116648,
+    "frame": {
+      "trusted_x86_x86_sim_xdp": 784
+    },
+    "spill_slots": 47,
+    "narrowed_scalar_slots": [],
+    "normalized_liveness": {
+      "input": "/proc/self/fd/8",
+      "blocks": 7690,
+      "slots": {
+        "1": 8,
+        "2": 8,
+        "3": 8,
+        "4": 8,
+        "5": 8,
+        "6": 8,
+        "7": 8,
+        "8": 8,
+        "9": 8,
+        "10": 8,
+        "11": 8,
+        "12": 8,
+        "13": 8,
+        "14": 8,
+        "15": 8,
+        "16": 8,
+        "17": 8,
+        "18": 8,
+        "19": 8,
+        "20": 8,
+        "21": 8,
+        "22": 8,
+        "23": 8,
+        "24": 8,
+        "25": 8,
+        "26": 8,
+        "27": 8,
+        "28": 8,
+        "29": 8,
+        "30": 8,
+        "31": 8,
+        "32": 8,
+        "33": 8,
+        "34": 8,
+        "35": 8,
+        "36": 8,
+        "37": 8,
+        "38": 8,
+        "39": 8,
+        "40": 8,
+        "41": 8,
+        "42": 8,
+        "43": 8,
+        "44": 4,
+        "45": 8,
+        "46": 8,
+        "47": 8
+      },
+      "rounds": 4,
+      "conservative_maximum_live_slots": 44,
+      "noninterfering_pairs": [],
+      "scope": "Direct spill CFG diagnostic; partial stores keep the whole old slot live. No rewrite, verifier acceptance or execution."
+    }
+  },
+  "interpretation": "Kernel subset11660 real executions passes. Actual main has full-width uses in every8B slot, so zero descriptors narrow and code295336/frame784 remain unchanged. Partial32-bit examples did not establish narrow-only storage. No source/base/image/main acceptance claim."
+}

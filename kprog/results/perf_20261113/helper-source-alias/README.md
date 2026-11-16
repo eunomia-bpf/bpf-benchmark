@@ -18,3 +18,10 @@ and compares every differing spelling against the actual loaded program's
 get_func_proto query and kallsyms. The updated production resolver compiles;
 the ten-program-type kernel subset follows. Application timing uses only the
 unchanged default corpus entry, as assigned to C's breadth-first round.
+
+The actual ten-program-type kernel subset passes. Kprobe unbound aliases4 and45
+match both their kernel symbols and the loaded program's get_func_proto query.
+The existing wrong-type query failure is also preserved. All Tracee object
+undefined BPF helper spellings are already represented by the supported table;
+this fixes the two differing public/kernel spellings without editing its source.
+Sole-image loader publication follows, then C's unchanged-default breadth round.

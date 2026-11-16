@@ -1,0 +1,277 @@
+{
+  "recorded_at": "2026-11-16T00:05:12Z",
+  "source": "00a402b4c",
+  "raw": "/workspaces/kprog-raw/perf/20261115-helper-source-alias/kernel",
+  "cases": [
+    {
+      "case": "kprobe",
+      "prog_id": 3,
+      "type": 2,
+      "checks": [
+        {
+          "helper": "bpf_perf_event_output",
+          "expected_symbol": "bpf_perf_event_output",
+          "address": 18446744072489425072,
+          "matches": true
+        },
+        {
+          "helper": "bpf_get_stackid",
+          "expected_symbol": "bpf_get_stackid",
+          "address": 18446744072490035776,
+          "matches": true
+        },
+        {
+          "helper": "bpf_get_socket_cookie",
+          "expected_symbol": "",
+          "address": 0,
+          "matches": true
+        },
+        {
+          "helper": "bpf_get_netns_cookie",
+          "expected_symbol": "",
+          "address": 0,
+          "matches": true
+        },
+        {
+          "helper": "bpf_probe_read",
+          "expected_symbol": "bpf_probe_read_compat",
+          "address": 18446744072489423856,
+          "matches": true
+        },
+        {
+          "helper": "bpf_probe_read_compat",
+          "expected_symbol": "bpf_probe_read_compat",
+          "address": 18446744072489423856,
+          "matches": true
+        }
+      ],
+      "unbound_aliases": [
+        {
+          "id": 4,
+          "source": "bpf_probe_read",
+          "kernel": "bpf_probe_read_compat",
+          "matches": true
+        },
+        {
+          "id": 45,
+          "source": "bpf_probe_read_str",
+          "kernel": "bpf_probe_read_compat_str",
+          "matches": true
+        }
+      ]
+    },
+    {
+      "case": "tracepoint",
+      "prog_id": 4,
+      "type": 5,
+      "checks": [
+        {
+          "helper": "bpf_perf_event_output",
+          "expected_symbol": "bpf_perf_event_output_tp",
+          "address": 18446744072489425568,
+          "matches": true
+        },
+        {
+          "helper": "bpf_get_stackid",
+          "expected_symbol": "bpf_get_stackid_tp",
+          "address": 18446744072489419600,
+          "matches": true
+        },
+        {
+          "helper": "bpf_get_socket_cookie",
+          "expected_symbol": "",
+          "address": 0,
+          "matches": true
+        },
+        {
+          "helper": "bpf_get_netns_cookie",
+          "expected_symbol": "",
+          "address": 0,
+          "matches": true
+        }
+      ],
+      "unbound_aliases": []
+    },
+    {
+      "case": "raw_tp",
+      "prog_id": 5,
+      "type": 17,
+      "checks": [
+        {
+          "helper": "bpf_perf_event_output",
+          "expected_symbol": "bpf_perf_event_output_raw_tp",
+          "address": 18446744072489422784,
+          "matches": true
+        },
+        {
+          "helper": "bpf_get_stackid",
+          "expected_symbol": "bpf_get_stackid_raw_tp",
+          "address": 18446744072489422608,
+          "matches": true
+        },
+        {
+          "helper": "bpf_get_socket_cookie",
+          "expected_symbol": "",
+          "address": 0,
+          "matches": true
+        },
+        {
+          "helper": "bpf_get_netns_cookie",
+          "expected_symbol": "",
+          "address": 0,
+          "matches": true
+        }
+      ],
+      "unbound_aliases": []
+    },
+    {
+      "case": "tc",
+      "prog_id": 6,
+      "type": 3,
+      "checks": [
+        {
+          "helper": "bpf_get_socket_cookie",
+          "expected_symbol": "bpf_get_socket_cookie",
+          "address": 18446744072498856048,
+          "matches": true
+        },
+        {
+          "helper": "bpf_get_netns_cookie",
+          "expected_symbol": "bpf_get_netns_cookie",
+          "address": 18446744072498827648,
+          "matches": true
+        },
+        {
+          "helper": "bpf_fib_lookup",
+          "expected_symbol": "bpf_skb_fib_lookup",
+          "address": 18446744072498895888,
+          "matches": true
+        },
+        {
+          "helper": "bpf_skc_lookup_tcp",
+          "expected_symbol": "bpf_tc_skc_lookup_tcp",
+          "address": 18446744072498880816,
+          "matches": true
+        }
+      ],
+      "unbound_aliases": []
+    },
+    {
+      "case": "xdp",
+      "prog_id": 7,
+      "type": 6,
+      "checks": [
+        {
+          "helper": "bpf_fib_lookup",
+          "expected_symbol": "bpf_xdp_fib_lookup",
+          "address": 18446744072498895744,
+          "matches": true
+        },
+        {
+          "helper": "bpf_skc_lookup_tcp",
+          "expected_symbol": "bpf_xdp_skc_lookup_tcp",
+          "address": 18446744072498880912,
+          "matches": true
+        }
+      ],
+      "unbound_aliases": []
+    },
+    {
+      "case": "sock_create",
+      "prog_id": 8,
+      "type": 9,
+      "checks": [
+        {
+          "helper": "bpf_get_socket_cookie",
+          "expected_symbol": "bpf_get_socket_cookie_sock",
+          "address": 18446744072498856128,
+          "matches": true
+        },
+        {
+          "helper": "bpf_get_netns_cookie",
+          "expected_symbol": "bpf_get_netns_cookie_sock",
+          "address": 18446744072498827712,
+          "matches": true
+        }
+      ],
+      "unbound_aliases": []
+    },
+    {
+      "case": "sock_connect",
+      "prog_id": 9,
+      "type": 18,
+      "checks": [
+        {
+          "helper": "bpf_get_socket_cookie",
+          "expected_symbol": "bpf_get_socket_cookie_sock_addr",
+          "address": 18446744072498856096,
+          "matches": true
+        },
+        {
+          "helper": "bpf_get_netns_cookie",
+          "expected_symbol": "bpf_get_netns_cookie_sock_addr",
+          "address": 18446744072498827776,
+          "matches": true
+        }
+      ],
+      "unbound_aliases": []
+    },
+    {
+      "case": "sock_bind",
+      "prog_id": 10,
+      "type": 18,
+      "checks": [
+        {
+          "helper": "bpf_get_socket_cookie",
+          "expected_symbol": "bpf_get_socket_cookie_sock_addr",
+          "address": 18446744072498856096,
+          "matches": true
+        },
+        {
+          "helper": "bpf_get_netns_cookie",
+          "expected_symbol": "bpf_get_netns_cookie_sock_addr",
+          "address": 18446744072498827776,
+          "matches": true
+        }
+      ],
+      "unbound_aliases": []
+    },
+    {
+      "case": "sock_ops",
+      "prog_id": 11,
+      "type": 13,
+      "checks": [
+        {
+          "helper": "bpf_get_socket_cookie",
+          "expected_symbol": "bpf_get_socket_cookie_sock_ops",
+          "address": 18446744072498856160,
+          "matches": true
+        },
+        {
+          "helper": "bpf_get_netns_cookie",
+          "expected_symbol": "bpf_get_netns_cookie_sock_ops",
+          "address": 18446744072498827840,
+          "matches": true
+        }
+      ],
+      "unbound_aliases": []
+    },
+    {
+      "case": "sk_msg",
+      "prog_id": 12,
+      "type": 16,
+      "checks": [
+        {
+          "helper": "bpf_get_netns_cookie",
+          "expected_symbol": "bpf_get_netns_cookie_sk_msg",
+          "address": 18446744072498827904,
+          "matches": true
+        }
+      ],
+      "unbound_aliases": []
+    }
+  ],
+  "all_checks_match": true,
+  "all_aliases_match": true,
+  "scope": "Actual loaded program IDs, production planner/kallsyms and get_func_proto targets on sole kernel. Tracee app installation remains separate."
+}
