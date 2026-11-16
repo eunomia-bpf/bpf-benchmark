@@ -99,8 +99,9 @@ private theorem enter_width (ge : CC.CGenv) (e : CC.Env) (binding : WidthBinding
     steps ge 4 (.State handler handler.fn_body k e le m) =
       some (CC.E0, .Callstate (.Internal Arm64Program.f_arm64_width_effective)
         [Arm64Width.argument flags]
-        (.Kcall (some Arm64Program._t'1) handler e le (afterCall k)) m) := by
-  simp [body_eq, body, branch, call_eq, afterCall, steps, CC.doStep,
+        (.Kcall (some Arm64Program._t'1) handler e le (afterCall k)) m) ∧
+    InternalPath ge 4 (.State handler handler.fn_body k e le m) := by
+  simp [body_eq, body, branch, call_eq, afterCall, steps, InternalPath, InternalState, CC.doStep,
     CC.doEvalExpr, CC.doEvalExprlist, CC.Cop.classifyFun, CC.typeof,
     CC.lvalOfVar, binding.unshadowed, binding.symbol, CC.doDerefLoc,
     CC.accessMode, CC.Genv.findFunct, binding.function, hflags,
@@ -119,13 +120,15 @@ private theorem leave_width (ge : CC.CGenv) (e : CC.Env)
     (hop : le.get Arm64Program._op = some (.Vint 0)) :
     steps ge 7 (.Returnstate (Arm64Width.result flags)
       (.Kcall (some Arm64Program._t'1) handler e le (afterCall k)) m) =
-      some (CC.E0, .State handler .Sskip k e (resultEnv le flags) m) := by
+      some (CC.E0, .State handler .Sskip k e (resultEnv le flags) m) ∧
+    InternalPath ge 7 (.Returnstate (Arm64Width.result flags)
+      (.Kcall (some Arm64Program._t'1) handler e le (afterCall k)) m) := by
   have op_temp : Arm64Program._t'1 ≠ Arm64Program._op := by decide
   have op_width : Arm64Program.___a64_l_width ≠ Arm64Program._op := by decide
   have cast : CC.Cop.semCast (Arm64Width.result flags) CC.tuchar CC.tuchar m =
       some (Arm64Width.result flags) :=
     Arm64Width.cast_argument (if flags == 0 then 8 else flags) m
-  simp only [steps, CC.doStep, CC.setOpttemp, afterCall, resultEnv, branch,
+  simp only [steps, InternalPath, InternalState, CC.doStep, CC.setOpttemp, afterCall, resultEnv, branch,
     store_eq, test_eq, CC.doEvalExpr, CC.typeof, CC.PTree.gss, cast]
   simp [CC.PTree.gso,
     op_temp, op_width, hop, CC.Cop.semBinaryOperation,
@@ -139,6 +142,22 @@ private theorem leave_width (ge : CC.CGenv) (e : CC.Env)
     CC.Integers.Int.zero, CC.Integers.Int.one,
     CC.Integers.MI.zero, CC.Integers.MI.one, CC.Eapp, CC.E0]
 
+/-- All seventeen transitions of the real body use internal rules. This
+certificate retains the exact exported body, helper binding and full states. -/
+theorem body_internal (ge : CC.CGenv) (e : CC.Env) (binding : WidthBinding ge e)
+    (le : CC.TempEnv) (m : CC.Mem) (k : CC.Cont) (flags : BitVec 8)
+    (hflags : le.get Arm64Program._flags = some (Arm64Width.argument flags))
+    (hop : le.get Arm64Program._op = some (.Vint 0)) :
+    InternalRun ge 17 (.State handler handler.fn_body k e le m)
+      (.State handler .Sskip k e (resultEnv le flags) m) := by
+  have enter := enter_width ge e binding le m k flags hflags
+  have leave := leave_width ge e le m k flags hop
+  have run := (internalRun_of_steps enter.2 enter.1).trans
+    ((Arm64Width.internal ge flags
+      (.Kcall (some Arm64Program._t'1) handler e le (afterCall k)) m).trans
+      (internalRun_of_steps leave.2 leave.1))
+  simpa only [CC.callCont] using run
+
 /-- Execution of the entire actual generic NOP body, from entry to completion
 of its statement. Function-frame allocation/freeing belongs to its caller. -/
 theorem body_returns (ge : CC.CGenv) (e : CC.Env) (binding : WidthBinding ge e)
@@ -146,12 +165,8 @@ theorem body_returns (ge : CC.CGenv) (e : CC.Env) (binding : WidthBinding ge e)
     (hflags : le.get Arm64Program._flags = some (Arm64Width.argument flags))
     (hop : le.get Arm64Program._op = some (.Vint 0)) :
     CC.Star (CC.Step2 ge) (.State handler handler.fn_body k e le m) CC.E0
-      (.State handler .Sskip k e (resultEnv le flags) m) := by
-  have enter := steps_sound ge 4 _ _ _ (enter_width ge e binding le m k flags hflags)
-  have call := Arm64Width.returns ge flags
-    (.Kcall (some Arm64Program._t'1) handler e le (afterCall k)) m
-  have leave := steps_sound ge 7 _ _ _ (leave_width ge e le m k flags hop)
-  simpa [CC.Eapp, CC.E0, CC.callCont] using star_trans (star_trans enter call) leave
+      (.State handler .Sskip k e (resultEnv le flags) m) :=
+  (body_internal ge e binding le m k flags hflags hop).sound
 
 /-- The retained native word is decoded by LNSym, not by a local classifier. -/
 theorem decode_native : decode_raw_inst (0xd503201f#32) =

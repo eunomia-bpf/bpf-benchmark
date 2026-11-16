@@ -1,4 +1,4 @@
-import KProgFormal.ClightRefinement.Execution
+import KProgFormal.ClightRefinement.InternalExecution
 import KProgFormal.Clight.Arm64Program
 
 namespace KProgFormal.ClightRefinement.Arm64Width
@@ -19,15 +19,17 @@ theorem cast_argument (code : BitVec 8) (m : CC.Mem) :
 
 /-- Complete call of the actual exported width function, with arbitrary memory
 and continuation. No memory, input stream or platform effect is supplied. -/
-theorem executes (ge : CC.CGenv) (code : BitVec 8) (k : CC.Cont) (m : CC.Mem) :
+private theorem execution (ge : CC.CGenv) (code : BitVec 8) (k : CC.Cont) (m : CC.Mem) :
     steps ge 6 (.Callstate (.Internal Arm64Program.f_arm64_width_effective)
-      [argument code] k m) = some (CC.E0, .Returnstate (result code) (CC.callCont k) m) := by
+      [argument code] k m) = some (CC.E0, .Returnstate (result code) (CC.callCont k) m) ∧
+    InternalPath ge 6 (.Callstate (.Internal Arm64Program.f_arm64_width_effective)
+      [argument code] k m) := by
   have empty : (CC.PTree.empty : CC.Env).elements = [] := rfl
   have ids : Arm64Program._code ≠ Arm64Program._t'1 := by decide
   by_cases hz : code = 0
   all_goals
     simp [empty, hz, ids, CC.typeof, CC.typeconv, CC.removeAttributes,
-    CC.tattr, CC.tuchar, CC.tuint, CC.tint, steps, argument, result,
+    CC.tattr, CC.tuchar, CC.tuint, CC.tint, steps, InternalPath, InternalState, argument, result,
     CC.doStep, CC.doFunctionEntry2,
     Arm64Program.f_arm64_width_effective, CC.listNorepet, CC.varNames,
     CC.listDisjoint, CC.doAllocVariables, CC.bindParameterTemps, CC.createUndefTemps,
@@ -55,6 +57,19 @@ theorem executes (ge : CC.CGenv) (code : BitVec 8) (k : CC.Cont) (m : CC.Mem) :
   all_goals
     change code.setWidth 32 &&& (BitVec.allOnes 8).setWidth 32 = code.setWidth 32
     rw [← BitVec.setWidth_and, BitVec.and_allOnes]
+
+/-- Complete executable result, with the original public contract. -/
+theorem executes (ge : CC.CGenv) (code : BitVec 8) (k : CC.Cont) (m : CC.Mem) :
+    steps ge 6 (.Callstate (.Internal Arm64Program.f_arm64_width_effective)
+      [argument code] k m) = some (CC.E0, .Returnstate (result code) (CC.callCont k) m) :=
+  (execution ge code k m).1
+
+/-- All six visited sources are internal, even when unused branches contain
+other operations. The certificate imposes no condition on the global env. -/
+theorem internal (ge : CC.CGenv) (code : BitVec 8) (k : CC.Cont) (m : CC.Mem) :
+    InternalRun ge 6 (.Callstate (.Internal Arm64Program.f_arm64_width_effective)
+      [argument code] k m) (.Returnstate (result code) (CC.callCont k) m) :=
+  internalRun_of_steps (execution ge code k m).2 (execution ge code k m).1
 
 /-- The complete call is a trace-empty Clight relational execution and preserves
 all memory, not merely an observed projection. This is a C helper law, not an

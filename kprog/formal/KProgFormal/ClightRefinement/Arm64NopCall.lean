@@ -83,32 +83,32 @@ theorem entry_frame (ge : CC.CGenv) (m : CC.Mem) :
     FrameBelow m.nextblock m (allocation ge m).2 :=
   (FrameBelow.allocVariables (allocation_valid ge m) m.nextblock (Nat.le_refl _)).2
 
-/-- Execute the real body and return using the deallocation equation supplied
-by the generic allocation theorem below. -/
-private theorem execute_return (m m' : CC.Mem) (ignored : IgnoredArguments) (flags : BitVec 8)
+/-- Certify all nineteen actual transitions, including function entry,
+the internal width call and local deallocation. -/
+private theorem execute_internal (m m' : CC.Mem) (ignored : IgnoredArguments) (flags : BitVec 8)
     (k : CC.Cont) (hk : CC.isCallCont k = true)
     (hfree : CC.Mem.freeList (allocation Arm64Program.prog.globalenv m).2
       (CC.blocksOfEnv Arm64Program.prog.globalenv.genv_cenv
         (allocation Arm64Program.prog.globalenv m).1) = some m') :
-    CC.Star (CC.Step2 Arm64Program.prog.globalenv)
-      (.Callstate (.Internal handler) (arguments ignored flags) k m) CC.E0
+    InternalRun Arm64Program.prog.globalenv 19
+      (.Callstate (.Internal handler) (arguments ignored flags) k m)
       (.Returnstate .Vundef k m') := by
   let ge := Arm64Program.prog.globalenv
   let e := (allocation ge m).1
   let m1 := (allocation ge m).2
   let le := initialTemps ignored flags
-  have enter : CC.Star (CC.Step2 ge)
-      (.Callstate (.Internal handler) (arguments ignored flags) k m) CC.E0
+  have enter : InternalRun ge 1
+      (.Callstate (.Internal handler) (arguments ignored flags) k m)
       (.State handler handler.fn_body k e le m1) :=
-    .step _ _ _ _ _ _ (.internal_function _ _ _ _ _ _ _
-      (entry_valid ge m ignored flags)) (.refl _) rfl
-  have run := body_returns ge e (programBinding e (entry_unshadowed ge m)) le m1 k flags
+    .step trivial (.internal_function _ _ _ _ _ _ _
+      (entry_valid ge m ignored flags)) (.refl _)
+  have run := body_internal ge e (programBinding e (entry_unshadowed ge m)) le m1 k flags
     (flags_temp ignored flags) (op_temp ignored flags)
-  have leave : CC.Star (CC.Step2 ge)
-      (.State handler .Sskip k e (resultEnv le flags) m1) CC.E0
+  have leave : InternalRun ge 1
+      (.State handler .Sskip k e (resultEnv le flags) m1)
       (.Returnstate .Vundef k m') :=
-    .step _ _ _ _ _ _ (.skip_call _ _ _ _ _ _ hk hfree) (.refl _) rfl
-  simpa only [CC.Eapp, CC.E0, List.nil_append] using star_trans (star_trans enter run) leave
+    .step trivial (.skip_call _ _ _ _ _ _ hk hfree) (.refl _)
+  exact (enter.trans run).trans leave
 
 /-- The actual allocated local environment always frees successfully and
 preserves every caller block. Its enumeration needs no caller premise. -/
@@ -118,6 +118,16 @@ theorem return_frame (ge : CC.CGenv) (m : CC.Mem) :
       FrameBelow m.nextblock m m' :=
   deallocate_locals (allocation_valid ge m)
 
+/-- Internal certificate and exact caller frame, for arbitrary call
+continuations. Successful deallocation is supplied internally. -/
+theorem call_internal (m : CC.Mem) (ignored : IgnoredArguments) (flags : BitVec 8)
+    (k : CC.Cont) (hk : CC.isCallCont k = true) :
+    ∃ m', InternalRun Arm64Program.prog.globalenv 19
+      (.Callstate (.Internal handler) (arguments ignored flags) k m)
+      (.Returnstate .Vundef k m') ∧ FrameBelow m.nextblock m m' := by
+  obtain ⟨m', free, frame⟩ := return_frame Arm64Program.prog.globalenv m
+  exact ⟨m', execute_internal m m' ignored flags k hk free, frame⟩
+
 /-- Complete actual C procedure execution, including successful allocation and
 freeing, for arbitrary caller memory, ignored arguments and flags byte. -/
 theorem call_returns (m : CC.Mem) (ignored : IgnoredArguments) (flags : BitVec 8)
@@ -125,8 +135,39 @@ theorem call_returns (m : CC.Mem) (ignored : IgnoredArguments) (flags : BitVec 8
     ∃ m', CC.Star (CC.Step2 Arm64Program.prog.globalenv)
       (.Callstate (.Internal handler) (arguments ignored flags) k m) CC.E0
       (.Returnstate .Vundef k m') ∧ FrameBelow m.nextblock m m' := by
-  obtain ⟨m', hfree, frame⟩ := return_frame Arm64Program.prog.globalenv m
-  exact ⟨m', execute_return m m' ignored flags k hk hfree, frame⟩
+  obtain ⟨m', run, frame⟩ := call_internal m ignored flags k hk
+  exact ⟨m', run.sound, frame⟩
+
+private theorem return_stop_stuck (ge : CC.CGenv) (v : CC.Val) (m : CC.Mem) :
+    ∀ t next, ¬ CC.Step2 ge (.Returnstate v .Kstop m) t next := by
+  intro t next step
+  cases step
+
+/-- At the top-level procedure boundary, every finite relational execution
+is a silent prefix of the nineteen-step return, every stuck endpoint is that
+same full return state, and an infinite execution is impossible. Traces of
+proposed executions are arbitrary, not assumed silent. General caller-control
+composition remains separate because a Kcall return may resume its caller. -/
+theorem call_all_behaviors (m : CC.Mem) (ignored : IgnoredArguments) (flags : BitVec 8) :
+    ∃ m', InternalRun Arm64Program.prog.globalenv 19
+      (.Callstate (.Internal handler) (arguments ignored flags) .Kstop m)
+      (.Returnstate .Vundef .Kstop m') ∧ FrameBelow m.nextblock m m' ∧
+      (∀ t other, CC.Star (CC.Step2 Arm64Program.prog.globalenv)
+        (.Callstate (.Internal handler) (arguments ignored flags) .Kstop m) t other →
+        t = CC.E0 ∧ ∃ remaining, InternalRun Arm64Program.prog.globalenv remaining other
+          (.Returnstate .Vundef .Kstop m')) ∧
+      (∀ t other, CC.Star (CC.Step2 Arm64Program.prog.globalenv)
+        (.Callstate (.Internal handler) (arguments ignored flags) .Kstop m) t other →
+        (∀ u next, ¬ CC.Step2 Arm64Program.prog.globalenv other u next) →
+        t = CC.E0 ∧ other = .Returnstate .Vundef .Kstop m') ∧
+      ¬ (∃ states : Nat → CC.State,
+        states 0 = .Callstate (.Internal handler) (arguments ignored flags) .Kstop m ∧
+        ∀ i, ∃ t, CC.Step2 Arm64Program.prog.globalenv (states i) t (states (i + 1))) := by
+  obtain ⟨m', run, frame⟩ := call_internal m ignored flags .Kstop rfl
+  have stuck := return_stop_stuck Arm64Program.prog.globalenv .Vundef m'
+  exact ⟨m', run, frame, fun _ _ observed => run.finish_prefix stuck observed,
+    fun _ _ observed otherStuck => run.endpoint_unique stuck observed otherStuck,
+    run.no_infinite stuck⟩
 
 /-- The full native view transports through real C allocation and deallocation.
 Only concrete decoder stability and the native/control representation remain

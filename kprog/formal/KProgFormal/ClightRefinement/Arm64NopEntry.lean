@@ -73,4 +73,32 @@ theorem call_flags_correspond (m : CC.Mem) (ignored : IgnoredArguments) (width :
   exact (flagsRepresent_cursor _ _ _ _ _).mpr
     ((flagsRepresent_frame frame ignored.entry s).mpr hrep)
 
+/-- Every relational return at the top-level boundary, with an arbitrary
+proposed trace/result/memory, has the same concrete NZCV/native correspondence.
+This is universal over returns; it does not assume that the observed run is
+the particular executable witness or that its trace is already empty. -/
+theorem return_flags_correspond (m : CC.Mem) (ignored : IgnoredArguments) (width : BitVec 8)
+    (s : Reference.AArch64.State) (hrep : FlagsRepresent m.nextblock m ignored.entry s)
+    (herror : read_err s.machine = .None)
+    (hfetch : fetch_inst (read_pc s.machine) s.machine = some (0xd503201f#32))
+    (t : CC.Trace) (result : CC.Val) (after : CC.Mem)
+    (observed : CC.Star (CC.Step2 Arm64Program.prog.globalenv)
+      (.Callstate (.Internal handler) (arguments ignored width) .Kstop m) t
+      (.Returnstate result .Kstop after)) :
+    t = CC.E0 ∧ result = .Vundef ∧ FrameBelow m.nextblock m after ∧
+      Reference.AArch64.step s =
+        ⟨atCursor (read_pc s.machine + (4#64)) s, [], none⟩ ∧
+      FlagsRepresent m.nextblock after ignored.entry
+        (atCursor (read_pc s.machine + (4#64)) s) := by
+  obtain ⟨m', _, frame, _, unique, _⟩ := call_all_behaviors m ignored width
+  have stuck : ∀ u next, ¬ CC.Step2 Arm64Program.prog.globalenv
+      (.Returnstate result .Kstop after) u next := by
+    intro u next step
+    cases step
+  obtain ⟨silent, same⟩ := unique _ _ observed stuck
+  cases same
+  exact ⟨silent, rfl, frame, reference_step s herror hfetch,
+    (flagsRepresent_cursor _ _ _ _ _).mpr
+      ((flagsRepresent_frame frame ignored.entry s).mpr hrep)⟩
+
 end KProgFormal.ClightRefinement.Arm64Nop

@@ -1917,3 +1917,10 @@ Their checked reads survive the complete NOP call, and the four materialized
 NZCV bytes remain related to LNSym without a heap-decoder stability premise.
 This is a partial representation proof: producer admissibility, compact cell
 mapping, pointer/native-memory representation and compiled control still remain.
+
+The [internal-run proof](results/m5-internal-runs/README.md) certifies all 19
+actual NOP call transitions. At its `Kstop` procedure boundary, every finite
+execution is a silent prefix of that return, every stuck endpoint is the same
+full return state, and no infinite execution exists. The concrete NZCV law
+now covers every such relational return. These results need no external-call
+determinism assumptions; general caller control and full representation remain.
