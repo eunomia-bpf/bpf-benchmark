@@ -129,3 +129,32 @@ seeds, and the copy adds an entry jump/placement change. The original three-
 sample slowdown remains an observation to explain; this pair is not its exact
 historical image comparison. OTel shared/copy remains running under controller
 1908860; analyze those cases before returning to lookup optimization.
+
+OTel shared case completed
+
+Run x86_kvm_corpus_20261116_211320_080784 completes with status ok and controller
+exit zero, on the same diagnostic image/CPU/memory contract. JIT/native counter
+times are 4156.394/5286.145 ns per app call; installed code is 167504/303930 B.
+Integer-loop work sums 747643133/543473263 operations, or
+12459976.88/9056991.57 ops/s using each worker's recorded elapsed time.
+Those sums exclude stress-ng and are not the official throughput summary.
+Per-language work remains in otel-shared.costs.json.
+
+Native program-text cycles per app/root call, including samples in tail-called
+programs with zero individual run_cnt, split as follows:
+
+| Native range | Cycles/app call |
+|---|---:|
+| Remaining program text, including other inline work | 3570.823 |
+| Exact LPM dispatch/lookup routine | 4333.540 |
+| Exact ARRAY dispatch routine | 1429.922 |
+| Exact user probe-read routine | 2393.348 |
+| Exact kernel probe-read routine | 9.365 |
+
+External hash roots contribute 1934.717 cycles/app call without exclusive
+caller ownership (JIT: 1582.114). These are disjoint root observations, not
+nanosecond cost measurements. The tail samples establish actual native
+unwinder activity; retained logs contain no UnwindNativeAttempts/Frames metric
+scrape, so they do not establish matching unwind totals or mix. This missing
+supplement does not discard the completed run. The copied case is running.
+The hash comparison remains open until that case completes.

@@ -1,0 +1,380 @@
+[
+  {
+    "symbol": "perf_unwind_hotspot",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-48gpc8v3",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/c6cef199be5bfc22.tmp.2217.proof.o",
+        "--symbol",
+        "perf_unwind_hotspot",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/c6cef199be5bfc22.tmp.2217.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/c6cef199be5bfc22.tmp.2217.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/c6cef199be5bfc22.tmp.2217.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/c6cef199be5bfc22.tmp.2217.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/c6cef199be5bfc22.tmp.2217.link-plan.json"
+      ],
+      "redirected_calls": 0
+    },
+    "payload_bytes": 41232
+  },
+  {
+    "symbol": "perf_go_labels",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-gmrm5l5d",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/26a13473f4199a5e.tmp.2217.proof.o",
+        "--symbol",
+        "perf_go_labels",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/26a13473f4199a5e.tmp.2217.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/26a13473f4199a5e.tmp.2217.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/26a13473f4199a5e.tmp.2217.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/26a13473f4199a5e.tmp.2217.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/26a13473f4199a5e.tmp.2217.link-plan.json"
+      ],
+      "redirected_calls": 0
+    },
+    "payload_bytes": 3665
+  },
+  {
+    "symbol": "custom__generic",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ig19yzid",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/9e6dc0a9f8d6a687.tmp.2217.proof.o",
+        "--symbol",
+        "custom__generic",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/9e6dc0a9f8d6a687.tmp.2217.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/9e6dc0a9f8d6a687.tmp.2217.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/9e6dc0a9f8d6a687.tmp.2217.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/9e6dc0a9f8d6a687.tmp.2217.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/9e6dc0a9f8d6a687.tmp.2217.link-plan.json"
+      ],
+      "redirected_calls": 0
+    },
+    "payload_bytes": 6767
+  },
+  {
+    "symbol": "perf_unwind_php",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-m2ruv7uw",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/b8d05ded54a0dc30.tmp.2217.proof.o",
+        "--symbol",
+        "perf_unwind_php",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/b8d05ded54a0dc30.tmp.2217.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/b8d05ded54a0dc30.tmp.2217.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/b8d05ded54a0dc30.tmp.2217.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/b8d05ded54a0dc30.tmp.2217.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/b8d05ded54a0dc30.tmp.2217.link-plan.json"
+      ],
+      "redirected_calls": 0
+    },
+    "payload_bytes": 36930
+  },
+  {
+    "symbol": "perf_unwind_dotnet",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-f5hihz3i",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/1d0d06df2487c52c.tmp.2217.proof.o",
+        "--symbol",
+        "perf_unwind_dotnet",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/1d0d06df2487c52c.tmp.2217.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/1d0d06df2487c52c.tmp.2217.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/1d0d06df2487c52c.tmp.2217.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/1d0d06df2487c52c.tmp.2217.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/1d0d06df2487c52c.tmp.2217.link-plan.json"
+      ],
+      "redirected_calls": 0
+    },
+    "payload_bytes": 37094
+  },
+  {
+    "symbol": "tracepoint__sched_process_free",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-jwiuow2v",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/11f31be2c8571317.tmp.2217.proof.o",
+        "--symbol",
+        "tracepoint__sched_process_free",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/11f31be2c8571317.tmp.2217.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/11f31be2c8571317.tmp.2217.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/11f31be2c8571317.tmp.2217.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/11f31be2c8571317.tmp.2217.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/11f31be2c8571317.tmp.2217.link-plan.json"
+      ],
+      "redirected_calls": 0
+    },
+    "payload_bytes": 1814
+  },
+  {
+    "symbol": "perf_unwind_stop",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-jzu2rggr",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/5c6ed4b4ac3fa21a.tmp.2217.proof.o",
+        "--symbol",
+        "perf_unwind_stop",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/5c6ed4b4ac3fa21a.tmp.2217.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/5c6ed4b4ac3fa21a.tmp.2217.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/5c6ed4b4ac3fa21a.tmp.2217.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/5c6ed4b4ac3fa21a.tmp.2217.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/5c6ed4b4ac3fa21a.tmp.2217.link-plan.json"
+      ],
+      "redirected_calls": 0
+    },
+    "payload_bytes": 8465
+  },
+  {
+    "symbol": "perf_unwind_ruby",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-mzklepjm",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/d0fd687c3eb365b5.tmp.2217.proof.o",
+        "--symbol",
+        "perf_unwind_ruby",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/d0fd687c3eb365b5.tmp.2217.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/d0fd687c3eb365b5.tmp.2217.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/d0fd687c3eb365b5.tmp.2217.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/d0fd687c3eb365b5.tmp.2217.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/d0fd687c3eb365b5.tmp.2217.link-plan.json"
+      ],
+      "redirected_calls": 0
+    },
+    "payload_bytes": 30476
+  },
+  {
+    "symbol": "read_task_struct",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-h1ivifin",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/d8f671806113be44.tmp.2217.proof.o",
+        "--symbol",
+        "read_task_struct",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/d8f671806113be44.tmp.2217.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/d8f671806113be44.tmp.2217.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/d8f671806113be44.tmp.2217.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/d8f671806113be44.tmp.2217.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/d8f671806113be44.tmp.2217.link-plan.json"
+      ],
+      "redirected_calls": 0
+    },
+    "payload_bytes": 541
+  },
+  {
+    "symbol": "native_tracer_entry",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-6tuf3oq8",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/8d1c54b58357dfd8.tmp.2217.proof.o",
+        "--symbol",
+        "native_tracer_entry",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/8d1c54b58357dfd8.tmp.2217.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/8d1c54b58357dfd8.tmp.2217.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/8d1c54b58357dfd8.tmp.2217.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/8d1c54b58357dfd8.tmp.2217.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/8d1c54b58357dfd8.tmp.2217.link-plan.json"
+      ],
+      "redirected_calls": 0
+    },
+    "payload_bytes": 7987
+  },
+  {
+    "symbol": "perf_unwind_v8",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-67y6em5d",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/7ef4323407b6c97f.tmp.2217.proof.o",
+        "--symbol",
+        "perf_unwind_v8",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/7ef4323407b6c97f.tmp.2217.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/7ef4323407b6c97f.tmp.2217.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/7ef4323407b6c97f.tmp.2217.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/7ef4323407b6c97f.tmp.2217.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/7ef4323407b6c97f.tmp.2217.link-plan.json"
+      ],
+      "redirected_calls": 0
+    },
+    "payload_bytes": 37498
+  },
+  {
+    "symbol": "perf_unwind_perl",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-3v83uuqt",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/ab4692f0ac56ceb4.tmp.2217.proof.o",
+        "--symbol",
+        "perf_unwind_perl",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/ab4692f0ac56ceb4.tmp.2217.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/ab4692f0ac56ceb4.tmp.2217.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/ab4692f0ac56ceb4.tmp.2217.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/ab4692f0ac56ceb4.tmp.2217.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/ab4692f0ac56ceb4.tmp.2217.link-plan.json"
+      ],
+      "redirected_calls": 0
+    },
+    "payload_bytes": 40573
+  },
+  {
+    "symbol": "perf_unwind_native",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-loaicnuw",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/deb903542948a8ae.tmp.2217.proof.o",
+        "--symbol",
+        "perf_unwind_native",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/deb903542948a8ae.tmp.2217.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/deb903542948a8ae.tmp.2217.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/deb903542948a8ae.tmp.2217.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/deb903542948a8ae.tmp.2217.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/deb903542948a8ae.tmp.2217.link-plan.json"
+      ],
+      "redirected_calls": 0
+    },
+    "payload_bytes": 30206
+  },
+  {
+    "symbol": "perf_unwind_python",
+    "capture": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ks0upl0l",
+    "adapter": {
+      "mode": "shared-link",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/6ecf23ae7ec8636b.tmp.2217.proof.o",
+        "--symbol",
+        "perf_unwind_python",
+        "--mode",
+        "kernel",
+        "--output",
+        "/tmp/native_kernel_link_cache/6ecf23ae7ec8636b.tmp.2217.blob.bin",
+        "--output-relocs",
+        "/tmp/native_kernel_link_cache/6ecf23ae7ec8636b.tmp.2217.relocs.bin",
+        "--output-map-patches",
+        "/tmp/native_kernel_link_cache/6ecf23ae7ec8636b.tmp.2217.map-patches.tsv",
+        "--output-abi",
+        "/tmp/native_kernel_link_cache/6ecf23ae7ec8636b.tmp.2217.abi.tsv",
+        "--link-plan",
+        "/tmp/native_kernel_link_cache/6ecf23ae7ec8636b.tmp.2217.link-plan.json"
+      ],
+      "redirected_calls": 0
+    },
+    "payload_bytes": 20653
+  }
+]

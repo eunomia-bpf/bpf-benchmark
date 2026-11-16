@@ -142,14 +142,20 @@ for phase in ['baseline', 'post_rejit']:
             external[host.root_category(symbol)] += period
     calls = sum(p['run_cnt_delta'] for p in measured.values())
     ns = sum(p['run_time_ns_delta'] for p in measured.values())
+    text_classes = Counter()
     for p in programs.values():
         p['cycles'] = dict(p['cycles'])
+        if p['measured'] is not None:
+            # Tail programs can have zero run_cnt while executing under the
+            # root invocation. Keep their samples in the app/root denominator.
+            text_classes.update(p['cycles'])
         if p['measured'] and p['measured']['run_cnt_delta']:
             count = p['measured']['run_cnt_delta']
             p['counter_ns_per_call'] = p['measured']['run_time_ns_delta'] / count
             p['text_cycles_per_call'] = {label: value / count for label, value in p['cycles'].items()}
     result['phases'][phase] = dict(calls=calls, counter_ns_per_call=ns / calls,
         installed_bytes=sum(p['bytes_jited'] for p in measured.values()),
+        program_text_cycles_per_app_call={key: value / calls for key, value in text_classes.items()},
         clock_offset_drift_ns=host.clock_offset(guest_end) - host.clock_offset(guest_clock),
         external_root_cycles_per_app_call_without_caller_ownership={key: value / calls for key, value in external.items()},
         external_root_cycles=dict(roots.most_common()), programs=programs)
