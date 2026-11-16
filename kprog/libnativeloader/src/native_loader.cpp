@@ -2972,18 +2972,23 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
             }
             // Source DATASEC names bind globals to their loaded map layout;
             // native compiler alignment does not describe that layout.
-            auto types = data_types.find(map->btf_id);
-            if (types == data_types.end()) {
-                if (!map->btf_id) fail("BPF data map " + map->name + " lacks BTF");
-                std::unique_ptr<btf, decltype(&btf__free)> loaded(
-                    btf__load_from_kernel_by_id(map->btf_id), btf__free);
-                const long error = libbpf_get_error(loaded.get());
-                if (error || !loaded)
-                    fail("load BPF data map BTF: " + libbpf_error_string(error ? error : -errno));
-                types = data_types.emplace(map->btf_id, std::move(loaded)).first;
+            uint64_t off = sym.st_value - target_shdr.sh_addr;
+            // Merged string pools have section offsets rather than BTF VARs.
+            // Bind them to the application's corresponding literal-pool map.
+            if (!(target_shdr.sh_flags & SHF_STRINGS)) {
+                auto types = data_types.find(map->btf_id);
+                if (types == data_types.end()) {
+                    if (!map->btf_id) fail("BPF data map " + map->name + " lacks BTF");
+                    std::unique_ptr<btf, decltype(&btf__free)> loaded(
+                        btf__load_from_kernel_by_id(map->btf_id), btf__free);
+                    const long error = libbpf_get_error(loaded.get());
+                    if (error || !loaded)
+                        fail("load BPF data map BTF: " + libbpf_error_string(error ? error : -errno));
+                    types = data_types.emplace(map->btf_id, std::move(loaded)).first;
+                }
+                off = native_data_symbol_offset(types->second.get(),
+                    map->btf_value_type_id, section, name);
             }
-            const uint64_t off = native_data_symbol_offset(
-                types->second.get(), map->btf_value_type_id, section, name);
             if (off + sym.st_size > map->value_size) {
                 fail("native data symbol " + std::string(name) +
                      " exceeds BPF data map value_size for " + map->name);

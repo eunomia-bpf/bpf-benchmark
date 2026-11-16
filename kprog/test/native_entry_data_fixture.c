@@ -4,6 +4,7 @@ const volatile unsigned other_value __attribute__((section(".rodata.config"))) =
 __attribute__((noinline)) unsigned shared_read(void) { return live_value; }
 unsigned entry(void *ctx) { return shared_read() + 1; }
 unsigned other_entry(void *ctx) { return other_value; }
+const char *literal_entry(void *ctx) { return "native string pool"; }
 
 #if defined(__bpf__) || defined(__BPF__)
 #define MUTABLE_SECTION(name) __attribute__((section(name), used))

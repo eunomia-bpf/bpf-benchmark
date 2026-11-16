@@ -15,17 +15,20 @@ static void mutable_data(const std::filesystem::path &object,
 {
     struct { uint32_t before=0x12345678; uint8_t flag=0; uint8_t pad[3]={1,2,3};
              uint32_t bias=7, after=0x87654321; } live;
+    char literal[64] = "live pooled string";
     NativeLinkArgs args; args.linker=linker;
     args.maps={{"mutable_flag",reinterpret_cast<uint64_t>(&live.flag)},
-               {"mutable_bias",reinterpret_cast<uint64_t>(&live.bias)}};
+               {"mutable_bias",reinterpret_cast<uint64_t>(&live.bias)},
+               {".L.str",reinterpret_cast<uint64_t>(literal)}};
     std::unordered_map<std::string,uint64_t> addresses;
     for (const auto &map : args.maps) addresses[map.name]=map.addr;
-    for (const std::string symbol : {"mutable_entry","mutable_immediate"}) {
+    for (const std::string symbol : {"mutable_entry","mutable_immediate","literal_entry"}) {
         const auto proof=cached_native_entry_proof(linker,object,symbol);
         const auto names=native_entry_symbol_names(proof);
         const auto repeated=cached_native_entry_proof(linker,proof,symbol);
         require(native_entry_symbol_names(repeated)==names,"re-extraction changed mutable resource identities");
-        require(names.contains("mutable_flag"),"mutable PC32 lost its original variable identity");
+        if (symbol!="literal_entry")
+            require(names.contains("mutable_flag"),"mutable PC32 lost its original variable identity");
         const auto linked=invoke_native_link(object,symbol,args,output/symbol,{},proof);
         auto bytes=read_binary_file(linked.blob);
         patch_map_literals(bytes,read_map_patch_file(linked.map_patches),addresses);
@@ -40,12 +43,20 @@ static void mutable_data(const std::filesystem::path &object,
             require(run(nullptr)==8 && run(nullptr)==9 && live.flag==2,"mutable state did not persist");
             live.bias=100;
             require(run(nullptr)==103 && live.flag==3,"native data copied instead of using live binding");
-        } else require(run(nullptr)==9 && live.flag==9,"trailing immediate PC32 bias changed its target");
+        } else if (symbol=="mutable_immediate")
+            require(run(nullptr)==9 && live.flag==9,"trailing immediate PC32 bias changed its target");
+        else {
+            auto string_run=reinterpret_cast<const char *(*)(void*)>(code);
+            require(string_run(nullptr)==literal,"native string pool lost its live binding");
+            literal[0]='L';
+            require(!std::strcmp(string_run(nullptr),"Live pooled string"),
+                    "native string pool ignored a live map update");
+        }
         require(live.before==0x12345678 && live.after==0x87654321 &&
                 live.pad[0]==1 && live.pad[1]==2 && live.pad[2]==3,"mutable write damaged adjacent bytes");
         require(!munmap(code,size),"release native text mapping");
     }
-    std::cout << "RX native text, live writable DATASEC aliases, persistent state, runtime updates and immediate-store bias: PASS" << std::endl;
+    std::cout << "RX native text, live DATASEC and string aliases, persistent state, runtime updates and immediate-store bias: PASS" << std::endl;
 }
 
 static int kernel_mutable(const char *native,const char *linker,const char *directory,const char *original)
@@ -109,6 +120,7 @@ try {
     const std::filesystem::path output = argv[4];
     const auto entry = cached_native_entry_proof(argv[3], argv[2], "entry");
     const auto other = cached_native_entry_proof(argv[3], argv[2], "other_entry");
+    const auto literal = cached_native_entry_proof(argv[3], argv[2], "literal_entry");
     const auto entry_names = native_entry_symbol_names(entry);
     const auto other_names = native_entry_symbol_names(other);
     require(entry_names.contains("live_value") && entry_names.contains("shared_read") &&
@@ -152,6 +164,16 @@ try {
     const int section = btf__add_datasec(types.get(), ".rodata.config", 8);
     require(section > 0 && !btf__add_datasec_var_info(types.get(), variable, 4, 4), "create live DATASEC");
     require(!btf__load_into_kernel(types.get()), "load fixture BTF");
+    ScopedFd strings(bpf_map_create(BPF_MAP_TYPE_ARRAY, ".rodata.str1.1", 4, 64, 1, nullptr));
+    require(strings.get() >= 0, "create literal map without BTF");
+    CompanionLoad literal_load;
+    add_map_meta(literal_load, load_map_meta_from_fd(strings.get()));
+    const auto literal_names = native_entry_symbol_names(literal);
+    require(literal_names.contains(".L.str"), "literal entry lost its referenced constant");
+    add_native_data_symbol_addrs(argv[2], literal_load, &literal_names);
+    require(literal_load.map_addrs.at(".L.str") == literal_load.maps.at(0).value_addr &&
+            literal_load.map_addr_ids.at(".L.str") == literal_load.maps.at(0).kernel_id,
+            "literal pool lost its section offset or actual map binding");
     bpf_map_create_opts options{};
     options.sz = sizeof(options);
     options.btf_fd = btf__fd(types.get());

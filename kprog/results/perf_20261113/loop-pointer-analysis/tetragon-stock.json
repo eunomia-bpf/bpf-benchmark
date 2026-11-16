@@ -1,0 +1,18 @@
+{
+  "scope": "Stock-only retained proof replay; submission cancelled after verification.",
+  "native": "/workspaces/kprog-raw/perf/20261116-tetragon-generator-profile/stock-v511/inputs/replay.native.o",
+  "proof": "/workspaces/kprog-raw/perf/20261116-tetragon-generator-profile/stock-v511/inputs/replay.bpf.o",
+  "context": "/workspaces/kprog-raw/perf/20261116-tetragon-generator-profile/stock-v511/inputs/replay.context.json",
+  "verify_exit": 1,
+  "stock_accepted": false,
+  "context_and_map_shapes_equal": true,
+  "submission_cancelled": true,
+  "replies": [
+    {
+      "request_id": 1,
+      "status": -125,
+      "prog_id": 0
+    }
+  ],
+  "wait_errors": []
+}
