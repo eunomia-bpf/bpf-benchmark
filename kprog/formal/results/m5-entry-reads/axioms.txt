@@ -1,0 +1,64 @@
+'KProgFormal.ClightRefinement.Arm64EntryMemory.entry_offsets' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64EntryMemory.entry_types' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64EntryMemory.cell_layout' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64EntryMemory.load_frame' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64EntryMemory.field_frame' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64EntryMemory.borrowed_frame' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64EntryMemory.gpr_frame' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64EntryMemory.vector_frame' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64EntryMemory.flags_frame' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Nop.flagsRepresent_frame' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Nop.flagsRepresent_cursor' depends on axioms: [propext, Classical.choice, Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Nop.call_preserves_entry' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+'KProgFormal.ClightRefinement.Arm64Nop.call_flags_correspond' depends on axioms: [propext,
+ CC.externalFunctionsSem,
+ CC.inlineAssemblySem,
+ Classical.choice,
+ Quot.sound]
+KProgFormal.ClightRefinement.Arm64Nop.call_preserves_entry : ∀ (m : CC.Mem)
+  (ignored : KProgFormal.ClightRefinement.Arm64Nop.IgnoredArguments) (width : BitVec 8) (k : CC.Cont),
+  CC.isCallCont k = true →
+    ∃ m',
+      CC.Star (CC.Step2 Arm64Program.prog.globalenv)
+          (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.Arm64Nop.handler)
+            (KProgFormal.ClightRefinement.Arm64Nop.arguments ignored width) k m)
+          CC.E0 (CC.State.Returnstate CC.Val.Vundef k m') ∧
+        KProgFormal.ClightRefinement.FrameBelow m.nextblock m m' ∧
+          (∀ (chunk : CC.Chunk) (name : CC.Ident),
+              KProgFormal.ClightRefinement.Arm64EntryMemory.field m.nextblock chunk m' ignored.entry name =
+                KProgFormal.ClightRefinement.Arm64EntryMemory.field m.nextblock chunk m ignored.entry name) ∧
+            (∀ (chunk : CC.Chunk) (name : CC.Ident),
+                KProgFormal.ClightRefinement.Arm64EntryMemory.borrowed m.nextblock chunk m' ignored.entry name =
+                  KProgFormal.ClightRefinement.Arm64EntryMemory.borrowed m.nextblock chunk m ignored.entry name) ∧
+              (∀ (i : Nat),
+                  KProgFormal.ClightRefinement.Arm64EntryMemory.gpr m.nextblock m' ignored.entry i =
+                    KProgFormal.ClightRefinement.Arm64EntryMemory.gpr m.nextblock m ignored.entry i) ∧
+                (∀ (i : Fin 32),
+                    KProgFormal.ClightRefinement.Arm64EntryMemory.vector m.nextblock m' ignored.entry i =
+                      KProgFormal.ClightRefinement.Arm64EntryMemory.vector m.nextblock m ignored.entry i) ∧
+                  KProgFormal.ClightRefinement.Arm64EntryMemory.flags m.nextblock m' ignored.entry =
+                    KProgFormal.ClightRefinement.Arm64EntryMemory.flags m.nextblock m ignored.entry
+KProgFormal.ClightRefinement.Arm64Nop.call_flags_correspond : ∀ (m : CC.Mem)
+  (ignored : KProgFormal.ClightRefinement.Arm64Nop.IgnoredArguments) (width : BitVec 8) (k : CC.Cont),
+  CC.isCallCont k = true →
+    ∀ (s : KProgFormal.Reference.AArch64.State),
+      KProgFormal.ClightRefinement.Arm64Nop.FlagsRepresent m.nextblock m ignored.entry s →
+        read_err s.machine = StateError.None →
+          fetch_inst (read_pc s.machine) s.machine = some 3573751839#32 →
+            ∃ m',
+              CC.Star (CC.Step2 Arm64Program.prog.globalenv)
+                  (CC.State.Callstate (CC.FunDef.Internal KProgFormal.ClightRefinement.Arm64Nop.handler)
+                    (KProgFormal.ClightRefinement.Arm64Nop.arguments ignored width) k m)
+                  CC.E0 (CC.State.Returnstate CC.Val.Vundef k m') ∧
+                KProgFormal.ClightRefinement.FrameBelow m.nextblock m m' ∧
+                  KProgFormal.Reference.AArch64.step s =
+                      { state := KProgFormal.ClightRefinement.Arm64Nop.atCursor (read_pc s.machine + 4#64) s,
+                        events := [] } ∧
+                    KProgFormal.ClightRefinement.Arm64Nop.FlagsRepresent m.nextblock m' ignored.entry
+                      (KProgFormal.ClightRefinement.Arm64Nop.atCursor (read_pc s.machine + 4#64) s)

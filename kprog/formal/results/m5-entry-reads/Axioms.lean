@@ -1,0 +1,16 @@
+import KProgFormal.ClightRefinement.Arm64NopEntry
+#print axioms KProgFormal.ClightRefinement.Arm64EntryMemory.entry_offsets
+#print axioms KProgFormal.ClightRefinement.Arm64EntryMemory.entry_types
+#print axioms KProgFormal.ClightRefinement.Arm64EntryMemory.cell_layout
+#print axioms KProgFormal.ClightRefinement.Arm64EntryMemory.load_frame
+#print axioms KProgFormal.ClightRefinement.Arm64EntryMemory.field_frame
+#print axioms KProgFormal.ClightRefinement.Arm64EntryMemory.borrowed_frame
+#print axioms KProgFormal.ClightRefinement.Arm64EntryMemory.gpr_frame
+#print axioms KProgFormal.ClightRefinement.Arm64EntryMemory.vector_frame
+#print axioms KProgFormal.ClightRefinement.Arm64EntryMemory.flags_frame
+#print axioms KProgFormal.ClightRefinement.Arm64Nop.flagsRepresent_frame
+#print axioms KProgFormal.ClightRefinement.Arm64Nop.flagsRepresent_cursor
+#print axioms KProgFormal.ClightRefinement.Arm64Nop.call_preserves_entry
+#print axioms KProgFormal.ClightRefinement.Arm64Nop.call_flags_correspond
+#check @KProgFormal.ClightRefinement.Arm64Nop.call_preserves_entry
+#check @KProgFormal.ClightRefinement.Arm64Nop.call_flags_correspond

@@ -1910,3 +1910,10 @@ The public call/return correspondence takes no freshness or free-success
 premises. Concrete representation and decoder stability, compiled control
 points and all-behaviors refinement still keep the complete-handler count at
 zero; M5 and M6 remain open.
+
+The [entry-read proof](results/m5-entry-reads/README.md) now follows the actual
+entry fields, individual GPR/tag pointers and embedded vector pointer arrays.
+Their checked reads survive the complete NOP call, and the four materialized
+NZCV bytes remain related to LNSym without a heap-decoder stability premise.
+This is a partial representation proof: producer admissibility, compact cell
+mapping, pointer/native-memory representation and compiled control still remain.
