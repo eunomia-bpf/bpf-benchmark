@@ -32,6 +32,17 @@ theorem alloc (frontier : CC.Block) (m : CC.Mem) (lo hi : CC.Z)
   simp only [CC.Mem.alloc_contents, CC.Mem.alloc_access,
     CC.PMap.gso _ _ _ _ hne, and_self]
 
+/-- Writing a new local block preserves every raw caller byte and both
+permission maps below the original caller frontier. -/
+theorem store {frontier : CC.Block} {m after : CC.Mem} {chunk : CC.Chunk}
+    {b : CC.Block} {ofs : CC.Z} {value : CC.Val}
+    (fresh : frontier.toNat ≤ b.toNat)
+    (stored : CC.Mem.store chunk m b ofs value = some after) : FrameBelow frontier m after := by
+  intro old below
+  have distinct : b ≠ old := by intro equal; rw [equal] at fresh; omega
+  rw [CC.Mem.store_contents stored, CC.Mem.store_access stored]
+  exact ⟨CC.PMap.gso _ _ _ _ distinct, rfl⟩
+
 /-- Freeing a new frame block preserves the complete old-block view. -/
 theorem free {frontier : CC.Block} {m after : CC.Mem} {b : CC.Block} {lo hi : CC.Z}
     (fresh : frontier.toNat ≤ b.toNat) (hfree : CC.Mem.free m b lo hi = some after) :

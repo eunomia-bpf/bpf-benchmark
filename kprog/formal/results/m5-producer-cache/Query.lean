@@ -1,0 +1,19 @@
+import KProgFormal.ClightRefinement.Arm64Producer
+#print axioms KProgFormal.ClightRefinement.allocated_local_binding
+#check KProgFormal.ClightRefinement.allocated_local_binding
+#print axioms KProgFormal.ClightRefinement.allocated_local_storage
+#check KProgFormal.ClightRefinement.allocated_local_storage
+#print axioms KProgFormal.ClightRefinement.FrameBelow.store
+#check KProgFormal.ClightRefinement.FrameBelow.store
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.entry_valid
+#check KProgFormal.ClightRefinement.Arm64Producer.entry_valid
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.entry_internal
+#check KProgFormal.ClightRefinement.Arm64Producer.entry_internal
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.entry_frame
+#check KProgFormal.ClightRefinement.Arm64Producer.entry_frame
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.cache_locals
+#check KProgFormal.ClightRefinement.Arm64Producer.cache_locals
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.cache_stage_exported
+#check KProgFormal.ClightRefinement.Arm64Producer.cache_stage_exported
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.initialize_caches
+#check KProgFormal.ClightRefinement.Arm64Producer.initialize_caches

@@ -2013,3 +2013,10 @@ completes the other relative GPR branch through the real kind-3 provider
 and borrowed cache stores. It shares the checked stage extraction and storage
 constructor with STACK while retaining RETURN's own continuation. Native
 provider/origin, producer storage and full-handler bindings remain M5.
+
+The [raw producer allocation/cache proof](results/m5-producer-cache/README.md)
+establishes actual function entry and distinct owned writable cache locals
+without caller allocation or permission premises. The actual four-initializer
+stage takes 12 internal transitions, zeros both invalid caches and frames all
+caller blocks. Connecting the preceding producer body, header construction
+and continuation remains open.

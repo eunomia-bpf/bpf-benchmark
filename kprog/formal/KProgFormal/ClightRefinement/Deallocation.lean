@@ -82,6 +82,45 @@ private theorem LocalFrame.allocVariables {ce : CC.CompositeEnv} {frontier : CC.
     cases ha
     exact ih (hf.alloc id ty)
 
+/-- Every declared local has its actual type in the resulting environment
+when the declaration names are distinct. This uses the imported allocation
+relation and its environment-preservation lemma. -/
+theorem allocated_local_binding {ce : CC.CompositeEnv} {e0 e : CC.Env} {m m1 : CC.Mem}
+    {vars : List (CC.Ident × CC.Ty)} {query : CC.Ident} {ty : CC.Ty}
+    (halloc : CC.AllocVariables ce e0 m vars e m1)
+    (names : CC.listNorepet (CC.varNames vars)) (present : (query, ty) ∈ vars) :
+    ∃ block, e.get query = some (block, ty) := by
+  induction halloc with
+  | nil => simp at present
+  | cons e0 m id ty0 rest m2 block m3 e3 ha tail ih =>
+    have nr := List.nodup_cons.mp names
+    rcases List.mem_cons.mp present with head | member
+    · cases head
+      rw [CC.allocVariables_env_other tail nr.1]
+      exact ⟨block, CC.PTree.gss _ _ _⟩
+    · exact ih nr.2 member
+
+/-- The actual local allocator gives every bound local a distinct fresh,
+caller-owned block with the full declared range Freeable. No byte contents
+are prescribed, and declaration sizes need not be positive for this law. -/
+theorem allocated_local_storage {ce : CC.CompositeEnv} {m m1 : CC.Mem} {e : CC.Env}
+    {vars : List (CC.Ident × CC.Ty)}
+    (halloc : CC.AllocVariables ce CC.emptyEnv m vars e m1) :
+    (∀ i v, e.get i = some v →
+      m.nextblock.toNat ≤ v.1.toNat ∧ v.1.toNat < m1.nextblock.toNat ∧
+      CC.Mem.rangePerm m1 v.1 0 (CC.sizeof ce v.2) .Cur .Freeable = true) ∧
+    (∀ i j v w, e.get i = some v → e.get j = some w → i ≠ j → v.1 ≠ w.1) := by
+  have initial : LocalFrame ce m.nextblock CC.emptyEnv m := by
+    refine ⟨Nat.le_refl _, ?_, ?_⟩
+    · intro i v hi
+      simp only [CC.emptyEnv, CC.PTree.gempty] at hi
+      cases hi
+    · intro i j v w hi hj hij
+      simp only [CC.emptyEnv, CC.PTree.gempty] at hi
+      cases hi
+  have frame := LocalFrame.allocVariables halloc initial
+  exact ⟨frame.live, frame.distinct⟩
+
 /-- The upstream allocator and free-list always complete for an initially
 empty local environment. No name, size, memory, or enumeration-order premise
 is imposed; any overwritten allocation stays outside the caller's old frame. -/
@@ -90,21 +129,13 @@ theorem deallocate_locals {ce : CC.CompositeEnv} {m m1 : CC.Mem} {e : CC.Env}
     (halloc : CC.AllocVariables ce CC.emptyEnv m vars e m1) :
     ∃ m2, CC.Mem.freeList m1 (CC.blocksOfEnv ce e) = some m2 ∧
       FrameBelow m.nextblock m m2 := by
-  have initial : LocalFrame ce m.nextblock CC.emptyEnv m := by
-    refine ⟨Nat.le_refl _, ?_, ?_⟩
-    · intro i v hi
-      simp only [CC.emptyEnv, CC.PTree.gempty] at hi
-      cases hi
-    · intro i j v w hi
-      simp only [CC.emptyEnv, CC.PTree.gempty] at hi
-      cases hi
-  have hf := LocalFrame.allocVariables halloc initial
+  obtain ⟨live, separate⟩ := allocated_local_storage halloc
   have rows := CC.PTree.forall_elements_of_get
     (fun v : CC.Block × CC.Ty => m.nextblock.toNat ≤ v.1.toNat ∧
       v.1.toNat < m1.nextblock.toNat ∧
-      CC.Mem.rangePerm m1 v.1 0 (CC.sizeof ce v.2) .Cur .Freeable = true) e hf.live
+      CC.Mem.rangePerm m1 v.1 0 (CC.sizeof ce v.2) .Cur .Freeable = true) e live
   have distinct := CC.PTree.pairwise_elements_of_get
-    (fun v w : CC.Block × CC.Ty => v.1 ≠ w.1) e hf.distinct
+    (fun v w : CC.Block × CC.Ty => v.1 ≠ w.1) e separate
   have ranges : ∀ p ∈ CC.blocksOfEnv ce e,
       CC.Mem.rangePerm m1 p.1 p.2.1 p.2.2 .Cur .Freeable = true := by
     intro p hp
