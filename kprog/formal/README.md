@@ -2000,3 +2000,10 @@ actual SP selector in 71 internal transitions and preserves all memory.
 Every Kstop return matches native SP through the register relation and an
 explicit warm stack-origin binding. Cold Program caches and producer,
 native-memory and compiled-control obligations remain M5.
+
+The [cold STACK Program-reader proof](results/m5-program-cold/README.md)
+follows the real kind-1 provider outcome through both cache stores and the
+complete GPR/SP reader return. It retains the provider trace and post-memory,
+constructing a warm cache from explicit writable storage and pointer/range
+bindings. The provider may change cache pointers; its native-origin binding
+and the cold RETURN Program path remain open.

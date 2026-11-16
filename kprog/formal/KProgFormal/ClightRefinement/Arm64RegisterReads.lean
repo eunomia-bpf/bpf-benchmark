@@ -1,5 +1,6 @@
 import KProgFormal.ClightRefinement.StepEquations
 import KProgFormal.ClightRefinement.Arm64Registers
+import KProgFormal.ClightRefinement.Arm64OriginCache
 
 namespace KProgFormal.ClightRefinement.Arm64RegisterReads
 
@@ -976,5 +977,421 @@ theorem sp_read_return_corresponds (addresses : Arm64Registers.PointerOrigins)
   have run := sp_read_warm frontier b ofs m .Kstop offset origins.stack observed cache
   obtain ⟨rfl, rfl, rfl⟩ := stopped_return run returned
   exact ⟨rfl, rfl, congrArg CC.Val.Vlong bits.symm⟩
+
+private def inputBefore := Arm64Program.global_definitions.take 63
+private def inputAfter := Arm64Program.global_definitions.drop 64
+private def inputGlobal : CC.Ident × CC.GlobDef CC.FunDef CC.Ty :=
+  (Arm64Program._native_lab_entry_input, .Gfun Arm64OriginCache.inputFunction)
+private def inputBeforeEnv : CC.Genv CC.FunDef CC.Ty :=
+  CC.Genv.addGlobals (CC.Genv.emptyGenv Arm64Program.prog.prog_public) inputBefore
+
+/-- Bind the actual Program export's native/host input symbol and full type.
+The stock BPF mutable-map provider remains a distinct ABI. -/
+theorem program_input_binding :
+    CC.Genv.findSymbol ge.genv_genv Arm64Program._native_lab_entry_input =
+      some (CC.Positive.ofNat 64) ∧
+    CC.Genv.findFunctPtr ge.genv_genv (CC.Positive.ofNat 64) =
+      some Arm64OriginCache.inputFunction := by
+  have globals : Arm64Program.global_definitions = inputBefore ++ inputGlobal :: inputAfter := rfl
+  have next : inputBeforeEnv.genv_next = CC.Positive.ofNat 64 := rfl
+  have environment : ge.genv_genv =
+      CC.Genv.addGlobals (CC.Genv.addGlobal inputBeforeEnv inputGlobal) inputAfter := by
+    change CC.Genv.addGlobals (CC.Genv.emptyGenv Arm64Program.prog.prog_public)
+      Arm64Program.global_definitions = _
+    rw [globals, addGlobals_append]
+    exact addGlobals_cons _ _ _
+  constructor
+  · decide +kernel
+  · rw [environment, ← next]
+    exact findFunctPtr_next inputBeforeEnv _ Arm64OriginCache.inputFunction inputAfter
+
+private def sequenceParts : CC.Stmt → Option (CC.Stmt × CC.Stmt)
+  | .Ssequence a b => some (a, b)
+  | _ => none
+private def loopParts : CC.Stmt → Option (CC.Stmt × CC.Stmt)
+  | .Sloop a b => some (a, b)
+  | _ => none
+private def branchParts : CC.Stmt → Option (CC.Stmt × CC.Stmt)
+  | .Sifthenelse _ a b => some (a, b)
+  | _ => none
+
+private structure StackColdParts where
+  materializeBody : CC.Stmt
+  stackBody : CC.Stmt
+  storeBase : CC.Stmt
+  storeValid : CC.Stmt
+  readBase : CC.Stmt
+  add : CC.Stmt
+  result : CC.Stmt
+
+private def unpackStackCold : Option StackColdParts := do
+  let (body, _) ← loopParts readParts.materialize
+  let (_, rest) ← sequenceParts body
+  let (_, rest) ← sequenceParts rest
+  let (branch, result) ← sequenceParts rest
+  let (yes, _) ← branchParts branch
+  let (loop, add) ← sequenceParts yes
+  let (stackBody, _) ← loopParts loop
+  let (guard, readBase) ← sequenceParts stackBody
+  let (_, guardRest) ← sequenceParts guard
+  let (_, check) ← sequenceParts guardRest
+  let (cold, _) ← branchParts check
+  let (callBase, storeValid) ← sequenceParts cold
+  let (_, storeBase) ← sequenceParts callBase
+  pure ⟨body, stackBody, storeBase, storeValid, readBase, add, result⟩
+
+private def stackColdParts : StackColdParts := by
+  run_tac do
+    let term ← Lean.Elab.Term.elabTerm (← `(unpackStackCold.get (by decide +kernel)))
+      (some (← Lean.Elab.Tactic.getMainTarget))
+    let value ← Lean.Meta.withTransparency .all (Lean.Meta.whnf term)
+    Lean.Elab.Tactic.closeMainGoal `stack_cold_parts value
+
+private def stackColdTemps (le : CC.TempEnv) (value : BitVec 64) (valid : CC.Val) : CC.TempEnv :=
+  (((le.set Arm64Program.___a64_mat_value (.Vlong value)).set
+    Arm64Program.___a64_mat_tag (.Vint (4#32))).set Arm64Program._t'11 valid).set
+    Arm64Program._t'12 (.Vint (0#32))
+
+private def stackInputContinuation (le : CC.TempEnv) (value : BitVec 64)
+    (valid : CC.Val) (k : CC.Cont) : CC.Cont :=
+  let p := stackColdParts
+  .Kcall (some Arm64Program._t'3) readHandler CC.emptyEnv (stackColdTemps le value valid)
+    (.Kseq p.storeBase (.Kseq p.storeValid (.Kseq p.readBase
+      (.Kloop1 p.stackBody .Sbreak (.Kseq p.add (.Kseq p.result
+        (.Kloop1 p.materializeBody .Sbreak (readCont k))))))))
+
+/-- The cold STACK branch reaches the actual native-input external boundary.
+It retains the exact pending stores and both enclosing loops. -/
+theorem stack_read_cold_prefix (b vb : CC.Block) (ofs vo : CC.Integers.Ptrofs)
+    (m : CC.Mem) (k : CC.Cont) (le : CC.TempEnv) (value : BitVec 64)
+    (entryRead : le.get Arm64Program._entry = some (.Vptr b ofs))
+    (valueRead : le.get Arm64Program.___a64_read_value = some (.Vlong value))
+    (tagRead : le.get Arm64Program.___a64_read_tag = some (.Vint (4#32)))
+    (header : CC.Mem.loadv CC.Mptr m (.Vptr b (CC.Integers.Ptrofs.add ofs
+      (CC.Integers.Ptrofs.repr 48))) = some (.Vptr vb vo))
+    (cold : CC.Mem.loadv .Mint8unsigned m (.Vptr vb vo) = some (.Vint (0#32))) :
+    steps ge 22 (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m) =
+      some (CC.E0, .Callstate Arm64OriginCache.inputFunction [.Vint (1#32)]
+        (stackInputContinuation le value (.Vptr vb vo) k) m) ∧
+    InternalPath ge 22 (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m) := by
+  have offsets := cache_offsets false
+  simp only [Bool.false_eq_true, ↓reduceIte] at offsets
+  simp only [CC.Mptr, CC.Archi.ptr64, ↓reduceIte] at header
+  simp +decide [steps, InternalPath, InternalState, readParts, readCont,
+    step_seq, step_loop, step_skip_seq, step_skip_loop, step_break_loop, step_set, step_if,
+    CC.doStep, Arm64Program.s_kprog_arm64_program_read_0,
+    CC.doEvalExpr, CC.doEvalLvalue, CC.doEvalExprlist, CC.lvalOfField, CC.lvalOfVar,
+    CC.doDerefLoc, CC.typeof, CC.typeconv, CC.removeAttributes, CC.tattr, CC.accessMode,
+    layouts.1, offsets.1, CC.Cop.semUnaryOperation, CC.Cop.semNotbool,
+    CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp,
+    CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType,
+    CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt, CC.Cop.boolVal, CC.Cop.classifyBool,
+    CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse, CC.Integers.Int.eq, CC.Integers.MI.eq,
+    CC.Integers.Int.zero, CC.Integers.Int.one, CC.Integers.MI.zero, CC.Integers.MI.one,
+    CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
+    CC.Integers.Ptrofs.eq, CC.Integers.Ptrofs.zero,
+    program_input_binding.1, program_input_binding.2, CC.Genv.findFunct, CC.typeOfFundef,
+    Arm64OriginCache.inputFunction, Arm64OriginCache.inputEF, CC.Cop.classifyFun,
+    CC.PTree.gso, CC.Mptr, CC.Archi.ptr64, CC.tptr, CC.tuchar, CC.tint, CC.tuint, CC.tulong,
+    CC.emptyEnv, CC.E0, CC.Eapp, entryRead, valueRead, tagRead, header, cold,
+    stackInputContinuation, stackColdTemps, stackColdParts]
+
+private theorem field_store_distinct (frontier b wb : CC.Block) (ofs : CC.Integers.Ptrofs)
+    (name : CC.Ident) (delta : CC.Z) (chunk : CC.Chunk) (wo : CC.Z)
+    (before after : CC.Mem) (value : CC.Val)
+    (offset : CC.fieldOffset ge.genv_cenv name entryComposite.co_members = .OK (delta, .Full))
+    (distinct : b ≠ wb) (stored : CC.Mem.store chunk before wb wo value = some after) :
+    Arm64EntryMemory.field frontier CC.Mptr after (.Vptr b ofs) name =
+      Arm64EntryMemory.field frontier CC.Mptr before (.Vptr b ofs) name := by
+  have binding : Arm64EntryMemory.composites.get Arm64Program._kprog_arm64_entry =
+      some entryComposite := layouts.1
+  change CC.fieldOffset Arm64EntryMemory.composites name entryComposite.co_members = _ at offset
+  simp only [Arm64EntryMemory.field, Arm64EntryMemory.fieldAddress, binding,
+    offset, CC.Val.offsetPtr, bind, pure, Option.bind_some, Arm64EntryMemory.load]
+  split
+  · exact CC.Mem.load_store_other stored CC.Mptr b _ (.inl distinct)
+  · rfl
+
+private theorem borrowed_of_load (frontier block : CC.Block) (offset : CC.Integers.Ptrofs)
+    (chunk : CC.Chunk) (m : CC.Mem) (entry value : CC.Val) (name : CC.Ident)
+    (header : Arm64EntryMemory.field frontier CC.Mptr m entry name = some (.Vptr block offset))
+    (owned : block.toNat < frontier.toNat)
+    (read : CC.Mem.loadv chunk m (.Vptr block offset) = some value) :
+    Arm64EntryMemory.borrowed frontier chunk m entry name = some value := by
+  simpa only [Arm64EntryMemory.borrowed, header, bind, Option.bind_some,
+    Arm64EntryMemory.load, if_pos owned, CC.Mem.loadv] using read
+
+/-- Construct the actual selected borrowed cache stores. The cells may share a
+block when their byte ranges are disjoint; the entry has a distinct block so
+its pointer fields survive. These are explicit storage/producer bindings. -/
+theorem entry_cache_stores (returns : Bool) (frontier b vb bb : CC.Block) (ofs vo bo : CC.Integers.Ptrofs)
+    (m : CC.Mem) (base : BitVec 64)
+    (validHeader : Arm64EntryMemory.field frontier CC.Mptr m (.Vptr b ofs)
+      (if returns then Arm64Program._return_valid else Arm64Program._sp_valid) = some (.Vptr vb vo))
+    (baseHeader : Arm64EntryMemory.field frontier CC.Mptr m (.Vptr b ofs)
+      (if returns then Arm64Program._return_base else Arm64Program._sp_base) = some (.Vptr bb bo))
+    (validOwned : vb.toNat < frontier.toNat) (baseOwned : bb.toNat < frontier.toNat)
+    (entryValid : b ≠ vb) (entryBase : b ≠ bb)
+    (separate : bb ≠ vb ∨ CC.Integers.Ptrofs.unsigned bo + 8 ≤ CC.Integers.Ptrofs.unsigned vo ∨
+      CC.Integers.Ptrofs.unsigned vo + 1 ≤ CC.Integers.Ptrofs.unsigned bo)
+    (baseWritable : CC.Mem.validAccess m .Mint64 bb (CC.Integers.Ptrofs.unsigned bo) .Writable = true)
+    (validWritable : CC.Mem.validAccess m .Mint8unsigned vb (CC.Integers.Ptrofs.unsigned vo)
+      .Writable = true) :
+    ∃ middle after,
+      CC.Mem.storev .Mint64 m (.Vptr bb bo) (.Vlong base) = some middle ∧
+      CC.Mem.storev .Mint8unsigned middle (.Vptr vb vo) (.Vint (1#32)) = some after ∧
+      WarmEntryCache returns frontier after (.Vptr b ofs) base ∧
+      Arm64EntryMemory.field frontier CC.Mptr middle (.Vptr b ofs) (if returns then Arm64Program._return_valid else Arm64Program._sp_valid) =
+        some (.Vptr vb vo) ∧
+      Arm64EntryMemory.field frontier CC.Mptr after (.Vptr b ofs) (if returns then Arm64Program._return_base else Arm64Program._sp_base) =
+        some (.Vptr bb bo) ∧
+      after.access = m.access ∧ after.nextblock = m.nextblock := by
+  have create : ∀ (chunk : CC.Chunk) (memory : CC.Mem) block offset value,
+      CC.Mem.validAccess memory chunk block offset .Writable = true →
+      ∃ after, CC.Mem.store chunk memory block offset value = some after := by
+    intro chunk memory block offset value writable
+    unfold CC.Mem.store
+    rw [writable]
+    exact ⟨_, rfl⟩
+  obtain ⟨middle, storeBase⟩ := create .Mint64 m bb _ (.Vlong base) baseWritable
+  have validMiddle := (CC.Mem.validAccess_store_eq storeBase .Mint8unsigned vb _ .Writable).trans
+    validWritable
+  obtain ⟨after, storeValid⟩ := create .Mint8unsigned middle vb _ (.Vint (1#32)) validMiddle
+  have offsets := cache_offsets returns
+  have fieldFrame := field_store_distinct frontier b bb ofs _ (if returns then 56 else 48) .Mint64 _ m middle
+    (.Vlong base) offsets.1 entryBase storeBase
+  have validMiddleHeader := fieldFrame.trans validHeader
+  have validAfterHeader := (field_store_distinct frontier b vb ofs _ (if returns then 56 else 48) .Mint8unsigned _
+    middle after (.Vint (1#32)) offsets.1 entryValid storeValid).trans validMiddleHeader
+  have baseMiddleHeader := (field_store_distinct frontier b bb ofs _ (if returns then 24 else 16) .Mint64 _ m middle
+    (.Vlong base) offsets.2 entryBase storeBase).trans baseHeader
+  have baseAfterHeader := (field_store_distinct frontier b vb ofs _ (if returns then 24 else 16) .Mint8unsigned _
+    middle after (.Vint (1#32)) offsets.2 entryValid storeValid).trans baseMiddleHeader
+  have validRead : CC.Mem.loadv .Mint8unsigned after (.Vptr vb vo) = some (.Vint (1#32)) := by
+    simpa [CC.Mem.loadv, CC.Val.loadResult, CC.Integers.Int.zero_ext,
+      CC.Integers.MI.zero_ext] using CC.Mem.load_store_same storeValid
+  have baseRead : CC.Mem.loadv .Mint64 after (.Vptr bb bo) = some (.Vlong base) := by
+    have same := CC.Mem.load_store_other storeValid .Mint64 bb (CC.Integers.Ptrofs.unsigned bo)
+      (by simpa only [CC.sizeChunk] using separate)
+    simpa only [CC.Mem.loadv, CC.Val.loadResult] using
+      same.trans (CC.Mem.load_store_same storeBase)
+  refine ⟨middle, after, storeBase, storeValid, ?_, validMiddleHeader, baseAfterHeader,
+    (CC.Mem.store_access storeValid).trans (CC.Mem.store_access storeBase),
+    (CC.Mem.store_nextblock storeValid).trans (CC.Mem.store_nextblock storeBase)⟩
+  refine ⟨1#8, by decide, ?_, ?_⟩
+  · exact borrowed_of_load frontier vb vo .Mint8unsigned after _ _ _ validAfterHeader validOwned validRead
+  · exact borrowed_of_load frontier bb bo .Mint64 after _ _ _ baseAfterHeader baseOwned baseRead
+
+private theorem stack_read_cold_suffix (b vb bb : CC.Block) (ofs vo bo : CC.Integers.Ptrofs)
+    (supplied middle after : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
+    (value base : BitVec 64) (oldValid : CC.Val)
+    (entryRead : le.get Arm64Program._entry = some (.Vptr b ofs))
+    (baseHeader : CC.Mem.loadv CC.Mptr supplied (.Vptr b (CC.Integers.Ptrofs.add ofs
+      (CC.Integers.Ptrofs.repr 16))) = some (.Vptr bb bo))
+    (validHeader : CC.Mem.loadv CC.Mptr middle (.Vptr b (CC.Integers.Ptrofs.add ofs
+      (CC.Integers.Ptrofs.repr 48))) = some (.Vptr vb vo))
+    (baseHeaderAfter : CC.Mem.loadv CC.Mptr after (.Vptr b (CC.Integers.Ptrofs.add ofs
+      (CC.Integers.Ptrofs.repr 16))) = some (.Vptr bb bo))
+    (storeBase : CC.Mem.storev .Mint64 supplied (.Vptr bb bo) (.Vlong base) = some middle)
+    (storeValid : CC.Mem.storev .Mint8unsigned middle (.Vptr vb vo) (.Vint (1#32)) = some after)
+    (readBase : CC.Mem.loadv .Mint64 after (.Vptr bb bo) = some (.Vlong base)) :
+    steps ge 28 (.Returnstate (.Vlong base) (stackInputContinuation le value oldValid k) supplied) =
+      some (CC.E0, .Returnstate (.Vlong (value + base)) (CC.callCont k) after) ∧
+    InternalPath ge 28
+      (.Returnstate (.Vlong base) (stackInputContinuation le value oldValid k) supplied) := by
+  have empty : (CC.PTree.empty : CC.Env).elements = [] := rfl
+  have offsets := cache_offsets false
+  simp only [Bool.false_eq_true, ↓reduceIte] at offsets
+  simp only [CC.Mptr, CC.Archi.ptr64, ↓reduceIte] at baseHeader validHeader baseHeaderAfter
+  simp +decide [steps, InternalPath, InternalState, CC.doStep, read_return_type,
+    stackInputContinuation, stackColdTemps, stackColdParts, readParts, readCont,
+    CC.setOpttemp, CC.PTree.gso, CC.doEvalExpr, CC.doEvalLvalue, CC.doDerefLoc,
+    CC.doAssignLoc, CC.lvalOfField, CC.typeof, CC.accessMode, layouts.1, offsets.1, offsets.2,
+    CC.Cop.semBinaryOperation, CC.Cop.semAdd, CC.Cop.classifyAdd,
+    CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType,
+    CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
+    CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
+    CC.Integers.Int64.add, CC.Mptr, CC.Archi.ptr64, CC.tptr, CC.tuchar, CC.tint, CC.tulong,
+    CC.typeconv, CC.removeAttributes, CC.tattr,
+    CC.blocksOfEnv, CC.Mem.freeList, CC.emptyEnv, CC.E0, CC.Eapp, empty,
+    entryRead, baseHeader, validHeader, baseHeaderAfter, storeBase, storeValid, readBase] <;> rfl
+
+/-- Actual post-provider storage binding for one selected borrowed cache.
+The entry is separate from the writable cells, whose ranges are disjoint.
+A provider may change their addresses; no pre/post provider purity is assumed. -/
+structure BorrowedCacheStorage (returns : Bool) (frontier b : CC.Block)
+    (ofs : CC.Integers.Ptrofs) (m : CC.Mem) where
+  validBlock : CC.Block
+  baseBlock : CC.Block
+  validOffset : CC.Integers.Ptrofs
+  baseOffset : CC.Integers.Ptrofs
+  validHeader : Arm64EntryMemory.field frontier CC.Mptr m (.Vptr b ofs)
+    (if returns then Arm64Program._return_valid else Arm64Program._sp_valid) =
+      some (.Vptr validBlock validOffset)
+  baseHeader : Arm64EntryMemory.field frontier CC.Mptr m (.Vptr b ofs)
+    (if returns then Arm64Program._return_base else Arm64Program._sp_base) =
+      some (.Vptr baseBlock baseOffset)
+  validOwned : validBlock.toNat < frontier.toNat
+  baseOwned : baseBlock.toNat < frontier.toNat
+  entryValid : b ≠ validBlock
+  entryBase : b ≠ baseBlock
+  separate : baseBlock ≠ validBlock ∨
+    CC.Integers.Ptrofs.unsigned baseOffset + 8 ≤ CC.Integers.Ptrofs.unsigned validOffset ∨
+    CC.Integers.Ptrofs.unsigned validOffset + 1 ≤ CC.Integers.Ptrofs.unsigned baseOffset
+  baseWritable : CC.Mem.validAccess m .Mint64 baseBlock (CC.Integers.Ptrofs.unsigned baseOffset)
+    .Writable = true
+  validWritable : CC.Mem.validAccess m .Mint8unsigned validBlock
+    (CC.Integers.Ptrofs.unsigned validOffset) .Writable = true
+
+/-- The full cold STACK materializer follows the actual external outcome,
+constructs both stores from writable storage, and preserves its trace and
+post-memory except for those stores. Establishing the storage/native-origin
+binding from the real producer remains a separate obligation. -/
+theorem stack_materialize_cold (frontier b vb : CC.Block) (ofs vo : CC.Integers.Ptrofs)
+    (before supplied : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
+    (value base : BitVec 64) (trace : CC.Trace)
+    (entryRead : le.get Arm64Program._entry = some (.Vptr b ofs))
+    (valueRead : le.get Arm64Program.___a64_read_value = some (.Vlong value))
+    (tagRead : le.get Arm64Program.___a64_read_tag = some (.Vint (4#32)))
+    (header : CC.Mem.loadv CC.Mptr before (.Vptr b (CC.Integers.Ptrofs.add ofs
+      (CC.Integers.Ptrofs.repr 48))) = some (.Vptr vb vo))
+    (cold : CC.Mem.loadv .Mint8unsigned before (.Vptr vb vo) = some (.Vint (0#32)))
+    (provider : CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv ge.genv_genv)
+      [.Vint (1#32)] before trace (.Vlong base) supplied)
+    (storage : BorrowedCacheStorage false frontier b ofs supplied) :
+    ∃ middle after,
+      CC.Star (CC.Step2 ge)
+        (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le before) trace
+        (.Returnstate (.Vlong (value + base)) (CC.callCont k) after) ∧
+      CC.Mem.storev .Mint64 supplied (.Vptr storage.baseBlock storage.baseOffset)
+        (.Vlong base) = some middle ∧
+      CC.Mem.storev .Mint8unsigned middle (.Vptr storage.validBlock storage.validOffset)
+        (.Vint (1#32)) = some after ∧
+      WarmEntryCache false frontier after (.Vptr b ofs) base ∧
+      after.access = supplied.access ∧ after.nextblock = supplied.nextblock := by
+  obtain ⟨middle, after, storeBase, storeValid, warm, validHeader, baseHeader,
+      permissions, allocations⟩ := entry_cache_stores false frontier b storage.validBlock
+    storage.baseBlock ofs storage.validOffset storage.baseOffset supplied base
+    storage.validHeader storage.baseHeader storage.validOwned storage.baseOwned storage.entryValid
+    storage.entryBase storage.separate storage.baseWritable storage.validWritable
+  have offsets := cache_offsets false
+  simp only [Bool.false_eq_true, ↓reduceIte] at offsets
+  have beforeCall := stack_read_cold_prefix b vb ofs vo before k le value
+    entryRead valueRead tagRead header cold
+  have readBack := (borrowed_loads warm.choose_spec.2.2)
+  obtain ⟨block, offset, baseHeader', baseRead⟩ := readBack
+  rw [baseHeader] at baseHeader'
+  cases baseHeader'
+  have suffix := stack_read_cold_suffix b storage.validBlock storage.baseBlock ofs
+    storage.validOffset storage.baseOffset supplied middle after k le value base (.Vptr vb vo)
+    entryRead (field_load frontier b ofs supplied _ 16 _ offsets.2 storage.baseHeader)
+    (field_load frontier b ofs middle _ 48 _ offsets.1 validHeader)
+    (field_load frontier b ofs after _ 16 _ offsets.2 baseHeader) storeBase storeValid baseRead
+  have call : CC.Star (CC.Step2 ge)
+      (.Callstate Arm64OriginCache.inputFunction [.Vint (1#32)]
+        (stackInputContinuation le value (.Vptr vb vo) k) before)
+      trace (.Returnstate (.Vlong base) (stackInputContinuation le value (.Vptr vb vo) k) supplied) :=
+    .step _ _ _ _ _ _ (.external_function _ _ _ _ _ _ _ _ _ _ provider) (.refl _)
+      (by simp [CC.Eapp, CC.E0])
+  refine ⟨middle, after, ?_, storeBase, storeValid, warm, permissions, allocations⟩
+  simpa only [CC.E0, CC.Eapp, List.nil_append, List.append_nil] using
+    star_trans (star_trans (internalRun_of_steps beforeCall.2 beforeCall.1).sound call)
+      (internalRun_of_steps suffix.2 suffix.1).sound
+
+/-- The complete actual GPR reader's cold STACK path, for every actual
+provider outcome admitted by the imported external relation. The only memory
+changes after that outcome are the two constructed cache stores. -/
+theorem gpr_read_stack_cold (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs) (i : Fin 31)
+    (before supplied : CC.Mem) (k : CC.Cont) (value base : BitVec 64) (trace : CC.Trace)
+    (observed : Arm64EntryMemory.gpr frontier before (.Vptr b ofs) i.val =
+      some (.Vlong value, .Vint (4#32)))
+    (cold : Arm64EntryMemory.borrowed frontier .Mint8unsigned before (.Vptr b ofs)
+      Arm64Program._sp_valid = some (.Vint (0#32)))
+    (provider : CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv ge.genv_genv)
+      [.Vint (1#32)] before trace (.Vlong base) supplied)
+    (storage : BorrowedCacheStorage false frontier b ofs supplied) :
+    ∃ middle after,
+      CC.Star (CC.Step2 ge)
+        (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
+          [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k before) trace
+        (.Returnstate (.Vlong (value + base)) (CC.callCont k) after) ∧
+      CC.Mem.storev .Mint64 supplied (.Vptr storage.baseBlock storage.baseOffset)
+        (.Vlong base) = some middle ∧
+      CC.Mem.storev .Mint8unsigned middle (.Vptr storage.validBlock storage.validOffset)
+        (.Vint (1#32)) = some after ∧
+      WarmEntryCache false frontier after (.Vptr b ofs) base ∧
+      after.access = supplied.access ∧ after.nextblock = supplied.nextblock := by
+  obtain ⟨cb, co, vb, vo, tb, to, kb, ko, cells, slot, tags, tagSlot, cell, kind⟩ :=
+    Arm64EntryMemory.gpr_loads observed
+  have cellsLoad := field_load frontier b ofs before _ 0 _ layouts.2.2.1 cells
+  simp only [offset_zero] at cellsLoad
+  have beforeCall := gpr_read_prefix i b cb vb tb kb ofs co vo to ko before k (.Vlong value)
+    (4#8) cellsLoad slot (field_load frontier b ofs before _ 8 _ layouts.2.2.2.1 tags)
+    tagSlot cell kind rfl
+  have entryRead : (gprReadTemps (.Vptr b ofs) (.Vptr cb co) (.Vptr vb vo)
+      (.Vptr tb to) (.Vptr kb ko) (.Vlong value) (BitVec.ofNat 64 i.val) (4#8)).get
+      Arm64Program._entry = some (.Vptr b ofs) := by
+    simp +decide [gprReadTemps, readTemps, CC.PTree.gso]
+  have valueRead : (gprReadTemps (.Vptr b ofs) (.Vptr cb co) (.Vptr vb vo)
+      (.Vptr tb to) (.Vptr kb ko) (.Vlong value) (BitVec.ofNat 64 i.val) (4#8)).get
+      Arm64Program.___a64_read_value = some (.Vlong value) := by
+    simp +decide [gprReadTemps, CC.PTree.gso]
+  have tagRead : (gprReadTemps (.Vptr b ofs) (.Vptr cb co) (.Vptr vb vo)
+      (.Vptr tb to) (.Vptr kb ko) (.Vlong value) (BitVec.ofNat 64 i.val) (4#8)).get
+      Arm64Program.___a64_read_tag = some (.Vint (4#32)) := by
+    simp +decide [gprReadTemps, CC.PTree.gso]
+  obtain ⟨validBlock, validOffset, validHeader, validRead⟩ := borrowed_loads cold
+  have offsets := cache_offsets false
+  simp only [Bool.false_eq_true, ↓reduceIte] at offsets
+  obtain ⟨middle, after, run, facts⟩ := stack_materialize_cold frontier b validBlock ofs validOffset
+    before supplied k _ value base trace entryRead valueRead tagRead
+    (field_load frontier b ofs before _ 48 _ offsets.1 validHeader) validRead provider storage
+  refine ⟨middle, after, ?_, facts⟩
+  simpa only [readHandler, CC.E0, CC.Eapp, List.nil_append] using
+    star_trans (internalRun_of_steps beforeCall.2 beforeCall.1).sound run
+
+/-- The complete actual SP reader follows the same cold STACK provider and
+cache stores. Its offset is read before the provider, not from its post-memory. -/
+theorem sp_read_cold (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs)
+    (before supplied : CC.Mem) (k : CC.Cont) (offset base : BitVec 64) (trace : CC.Trace)
+    (observed : Arm64EntryMemory.borrowed frontier .Mint64 before (.Vptr b ofs)
+      Arm64Program._sp = some (.Vlong offset))
+    (cold : Arm64EntryMemory.borrowed frontier .Mint8unsigned before (.Vptr b ofs)
+      Arm64Program._sp_valid = some (.Vint (0#32)))
+    (provider : CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv ge.genv_genv)
+      [.Vint (1#32)] before trace (.Vlong base) supplied)
+    (storage : BorrowedCacheStorage false frontier b ofs supplied) :
+    ∃ middle after,
+      CC.Star (CC.Step2 ge)
+        (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
+          [.Vptr b ofs, .Vlong (32#64)] k before) trace
+        (.Returnstate (.Vlong (offset + base)) (CC.callCont k) after) ∧
+      CC.Mem.storev .Mint64 supplied (.Vptr storage.baseBlock storage.baseOffset)
+        (.Vlong base) = some middle ∧
+      CC.Mem.storev .Mint8unsigned middle (.Vptr storage.validBlock storage.validOffset)
+        (.Vint (1#32)) = some after ∧
+      WarmEntryCache false frontier after (.Vptr b ofs) base ∧
+      after.access = supplied.access ∧ after.nextblock = supplied.nextblock := by
+  obtain ⟨sb, so, header, cell⟩ := borrowed_loads observed
+  have beforeCall := sp_read_prefix b sb ofs so before k offset
+    (field_load frontier b ofs before _ 40 _ sp_offset header) cell
+  have entryRead : (spReadTemps (.Vptr b ofs) (.Vptr sb so) offset).get
+      Arm64Program._entry = some (.Vptr b ofs) := by
+    simp +decide [spReadTemps, readTemps, CC.PTree.gso]
+  have valueRead : (spReadTemps (.Vptr b ofs) (.Vptr sb so) offset).get
+      Arm64Program.___a64_read_value = some (.Vlong offset) := by
+    simp +decide [spReadTemps, CC.PTree.gso]
+  have tagRead : (spReadTemps (.Vptr b ofs) (.Vptr sb so) offset).get
+      Arm64Program.___a64_read_tag = some (.Vint (4#32)) := by
+    simp +decide [spReadTemps, CC.PTree.gso]
+  obtain ⟨validBlock, validOffset, validHeader, validRead⟩ := borrowed_loads cold
+  have offsets := cache_offsets false
+  simp only [Bool.false_eq_true, ↓reduceIte] at offsets
+  obtain ⟨middle, after, run, facts⟩ := stack_materialize_cold frontier b validBlock ofs validOffset
+    before supplied k _ offset base trace entryRead valueRead tagRead
+    (field_load frontier b ofs before _ 48 _ offsets.1 validHeader) validRead provider storage
+  refine ⟨middle, after, ?_, facts⟩
+  simpa only [readHandler, CC.E0, CC.Eapp, List.nil_append] using
+    star_trans (internalRun_of_steps beforeCall.2 beforeCall.1).sound run
 
 end KProgFormal.ClightRefinement.Arm64RegisterReads
