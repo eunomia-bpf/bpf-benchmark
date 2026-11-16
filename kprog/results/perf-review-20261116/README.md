@@ -598,3 +598,41 @@ double-execution cause and no confirmed Cilium packet fix. Those remain open. Th
     Derive current flags from the actual agent build, retaining this historical
     evidence and the current runner intent. No source/benchmark change or
     guest was needed to locate these facts.
+
+19. **Process-wide map discovery uses descriptor order as object identity.**
+
+    The initial companion maps are scoped correctly to the original program:
+    `native_loader.cpp:3022–3037` reads that program's map IDs and their
+    metadata. But alias resolution at :2615 and :2658 can import process-wide
+    maps when a symbol is not yet bound. `collect_open_process_maps:2000–2042`
+    scans /proc/self/fd and queries every open map matching its predicate.
+
+    Two explicit ambiguity paths choose the largest FD:
+    `find_open_process_map_by_name:2075–2080` and
+    `find_open_process_manifest_native_symbol_map:2470–2475`.
+    Their object_scoped flag does not establish which ELF/program owns the
+    matching map; it selects max(fd). For two same-shaped matching maps A/B,
+    A at10 and B at11 choose B. Duplicating A to20 switches selection to A
+    without changing either map's owner or the program being linked. This is
+    a source-derived identity counterexample, not a new runtime experiment.
+
+    Data-map lookup has a similar expansion of scope: find_array_data_map at
+    :2528–2545 first searches companion maps, then imports a matching open
+    process data map. No source/ELF identity is established by a section suffix
+    and value size. Name/shape can narrow a known object binding; it cannot
+    manufacture ownership from a shared loader process.
+
+    The original-source binder already provides stronger facts:
+    `native_loader_source_maps.hpp:9–11` and :119–127 relate original ELF
+    symbol/slot correspondence to intercepted final BPF map-FD instructions.
+    :154 onward binds those actual map capabilities, and native_loader.cpp:4205
+    invokes it before data-symbol binding when source_bpf_object is present.
+    Reuse those facts and the program's actual IDs; retire the process-wide
+    highest-FD heuristic instead of adding another runtime ownership check.
+    Maps needed only by a native optional branch also need the actual object
+    binding/configuration, not an unrelated currently open map.
+
+    The scans are load-time work, not per-invocation branches. Repeating them
+    for unresolved symbols traverses process descriptors and re-queries matching
+    maps; it can increase load cost and code complexity. No elapsed cost,
+    current timed misbinding or packet-path cause has been measured here.

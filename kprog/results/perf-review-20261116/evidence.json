@@ -748,5 +748,19 @@
     "current_native_audit_mode_defined": false,
     "semantic_effect": "policy.h:400 and461 turn policy error into audited allow only with POLICY_AUDIT_MODE",
     "scope": "Historical captured baseline plus current source. Current round headers and actual packet policy decision not compared."
+  },
+  "process_map_identity_review": {
+    "recorded_at": "2026-11-16T16:16:33Z",
+    "program_scoped_start": "native_loader.cpp:3022-3037",
+    "process_scanner": "native_loader.cpp:2000-2042",
+    "largest_fd_selection": [
+      "native_loader.cpp:2075-2080",
+      "native_loader.cpp:2470-2475"
+    ],
+    "data_map_scope_expansion": "native_loader.cpp:2528-2545",
+    "existing_authoritative_path": "native_loader_source_maps.hpp:119-127,154 onward; native_loader.cpp:4205",
+    "source_counterexample": "A(fd10),B(fd11) chooseB; dupA tofd20 changes choice toA without changing object/program ownership",
+    "stage": "load time",
+    "scope": "Source identity ambiguity and complexity; no actual timed misbinding or measured load-cost attribution."
   }
 }
