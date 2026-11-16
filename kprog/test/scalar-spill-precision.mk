@@ -15,6 +15,10 @@ HELPER_SHAPE_BUILD ?= /var/tmp/kprog-tmp/perf/helper-shapes
 SPILL_GROUP_BUILD ?= /var/tmp/kprog-tmp/perf/spill-groups
 HELPER_MEMORY_BUILD ?= /var/tmp/kprog-tmp/perf/helper-memory
 
+.PHONY: spill-liveness-check
+spill-liveness-check:
+	taskset -c 18-19 python3 $(ROOT)/kprog/test/check_spill_lifetimes.py
+
 .PHONY: helper-memory-build helper-memory-run helper-memory-guest
 helper-memory-build:
 	install -d $(HELPER_MEMORY_BUILD) $(OUTPUT)
