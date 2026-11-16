@@ -1,0 +1,35 @@
+{
+  "timestamp": "2026-11-16T01:54:11Z",
+  "compile": {
+    "objects": [
+      {
+        "variant": "original",
+        "object": "/var/tmp/kprog-tmp/perf/helper-memory/original.o",
+        "bytes": 11504
+      },
+      {
+        "variant": "normalized",
+        "object": "/var/tmp/kprog-tmp/perf/helper-memory/normalized.o",
+        "bytes": 11296
+      }
+    ],
+    "helper_contracts": 4,
+    "scope": "Compilation only; kernel execution is separate."
+  },
+  "kernel": [
+    {
+      "object": "/var/tmp/original.o",
+      "phase": "original",
+      "executions": 1060,
+      "failed": 0
+    },
+    {
+      "object": "/var/tmp/normalized.o",
+      "phase": "lowered",
+      "executions": 1060,
+      "failed": 0
+    }
+  ],
+  "raw": "/workspaces/kprog-raw/perf/20261116-helper-memory",
+  "scope": "Real stock-kernel TC execution: lookup key reads, probe destination writes/fault zeroing, overlapping source/destination and unrelated private bytes. No full OTel acceptance."
+}

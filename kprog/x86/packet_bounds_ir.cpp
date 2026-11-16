@@ -15,6 +15,7 @@
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/SourceMgr.h"
+#include "llvm/Support/ModRef.h"
 #include "llvm/Support/ToolOutputFile.h"
 #include <linux/bpf.h>
 #include <cstddef>
@@ -39,6 +40,41 @@ static unsigned remove_empty_memory_barriers(Module &module) {
   }
   for (auto *barrier:barriers) barrier->eraseFromParent();
   return barriers.size();
+}
+// The kernel lookup reads its key without retaining it; probe reads copy from
+// source to destination (including zeroing destination on error). Keep map
+// mutation and kernel-internal effects, and never promise disjoint arguments.
+static unsigned describe_helper_memory(Module &module) {
+  unsigned count=0;
+  for (auto &function:module) for (auto &instruction:instructions(function)) {
+    auto *call=dyn_cast<CallInst>(&instruction);
+    if (!call) continue;
+    auto *target=dyn_cast<ConstantExpr>(call->getCalledOperand());
+    if (!target || target->getOpcode()!=Instruction::IntToPtr) continue;
+    auto *number=dyn_cast<ConstantInt>(target->getOperand(0));
+    if (!number || number->getValue().getActiveBits()>32) continue;
+    unsigned id=number->getZExtValue();
+    if (id==BPF_FUNC_map_lookup_elem && call->arg_size()==2 &&
+        call->getArgOperand(0)->getType()->isPointerTy() &&
+        call->getArgOperand(1)->getType()->isPointerTy()) {
+      call->setMemoryEffects(MemoryEffects::inaccessibleOrArgMemOnly());
+      call->addParamAttr(1,Attribute::ReadOnly);
+      call->addParamAttr(1,Attribute::NoCapture);
+      ++count;
+    } else if ((id==BPF_FUNC_probe_read || id==BPF_FUNC_probe_read_str ||
+                id==BPF_FUNC_probe_read_user || id==BPF_FUNC_probe_read_kernel ||
+                id==BPF_FUNC_probe_read_user_str || id==BPF_FUNC_probe_read_kernel_str) &&
+               call->arg_size()==3 && call->getArgOperand(0)->getType()->isPointerTy() &&
+               call->getArgOperand(2)->getType()->isPointerTy()) {
+      call->setMemoryEffects(MemoryEffects::inaccessibleOrArgMemOnly());
+      call->addParamAttr(0,Attribute::WriteOnly);
+      call->addParamAttr(0,Attribute::NoCapture);
+      call->addParamAttr(2,Attribute::ReadOnly);
+      call->addParamAttr(2,Attribute::NoCapture);
+      ++count;
+    }
+  }
+  return count;
 }
 // The interpreter's private arena is a local memory block. Clight volatile
 // accesses to this block have ordinary Mem load/store semantics and trace E0;
@@ -255,6 +291,7 @@ int main(int argc,char **argv) {
   unsigned constants=fold_constant_identities(*module);
   unsigned live_identities=normalize_live_integer_identities(*module);
   unsigned memory_barriers=remove_empty_memory_barriers(*module);
+  unsigned helper_memory=describe_helper_memory(*module);
   unsigned private_stack=normalize_private_stack_accesses(*module);
   unsigned unused=remove_unused_private_inputs(*module);
   unsigned contexts=canonical_context_loads(*module);
@@ -310,5 +347,6 @@ int main(int argc,char **argv) {
   errs()<<"tied integer constant identities folded="<<constants<<'\n';
   errs()<<"live integer identities normalized="<<live_identities<<'\n';
   errs()<<"empty memory barriers removed="<<memory_barriers<<'\n';
+  errs()<<"helper memory contracts described="<<helper_memory<<'\n';
   errs()<<"private stack accesses normalized="<<private_stack<<'\n';
 }

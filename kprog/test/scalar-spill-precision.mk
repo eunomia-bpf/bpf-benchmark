@@ -13,6 +13,21 @@ CONTEXT_BUILD ?= /var/tmp/kprog-tmp/perf/context-loads-v2
 IDENTITY_ARGS ?=
 HELPER_SHAPE_BUILD ?= /var/tmp/kprog-tmp/perf/helper-shapes
 SPILL_GROUP_BUILD ?= /var/tmp/kprog-tmp/perf/spill-groups
+HELPER_MEMORY_BUILD ?= /var/tmp/kprog-tmp/perf/helper-memory
+
+.PHONY: helper-memory-build helper-memory-run helper-memory-guest
+helper-memory-build:
+	install -d $(HELPER_MEMORY_BUILD) $(OUTPUT)
+	$(CC) -O2 -g -Wall -Wextra -Werror -I$(LIBBPF)/prefix/include $(ROOT)/kprog/test/scalar_spill_values.c $(LIBBPF)/pic-obj/libbpf.a -lelf -lz -o $(HELPER_MEMORY_BUILD)/values-client
+	taskset -c 18-19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_b_helper_memory.py --tool $(CONTEXT_BUILD)/packet-bounds --build $(HELPER_MEMORY_BUILD) --output $(OUTPUT)
+
+helper-memory-run:
+	install -d $(OUTPUT)
+	exec 9>/workspaces/.agent-state/kprog-lanes/locks/image; flock -s 9; \
+	taskset -c 16-17 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir /var/tmp=$(HELPER_MEMORY_BUILD) --rwdir $(OUTPUT) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -f $(ROOT)/kprog/test/scalar-spill-precision.mk helper-memory-guest HELPER_MEMORY_BUILD=/var/tmp OUTPUT=$(OUTPUT)'
+
+helper-memory-guest:
+	$(HELPER_MEMORY_BUILD)/values-client $(HELPER_MEMORY_BUILD)/original.o $(HELPER_MEMORY_BUILD)/normalized.o > $(OUTPUT)/kernel.jsonl 2> $(OUTPUT)/verifier.log
 
 .PHONY: hotspot-spill-replay
 hotspot-spill-replay:
