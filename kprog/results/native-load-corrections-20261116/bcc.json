@@ -1,0 +1,23 @@
+{
+  "app": "bcc/set",
+  "run": "corpus/results/x86_kvm_corpus_20261116_231828_394807",
+  "status": "ok",
+  "error": "",
+  "replacement_events": 25,
+  "native_failure_events": 0,
+  "scope": "Frozen one-sample 10-second functional check; not official timing",
+  "phases": {
+    "baseline": {
+      "programs": 25,
+      "installed_bytes": 7965,
+      "calls": 91688984,
+      "time_ns": 13614878971
+    },
+    "post_rejit": {
+      "programs": 25,
+      "installed_bytes": 7962,
+      "calls": 112397387,
+      "time_ns": 13796478765
+    }
+  }
+}

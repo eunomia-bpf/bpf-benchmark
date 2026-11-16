@@ -20,3 +20,14 @@ benchmark packet and the same live maps/config can be used for both tests,
 without loading another BPF object or retaining a second image. This avoids
 confounding a packet comparison with a later recreated endpoint/MAC/config.
 Packet return, returned skb context and observed redirect target remain to run.
+
+2026-11-16T23:24:48Z: BCC231828_394807 passes25 native replacements and no load errors.
+Cilium232152_617481 passes113 replacements and no load errors. Both arms
+have53 measurement-window programs; installed JIT/native233900/204607B.
+The earlier per-packet host-path difference does not recur here: native
+cil_to_host and cil_from_host have0 calls, while JIT has only two one-off
+calls across those programs. The two cil_from_container records have
+6043120/6108847 JIT calls and17859021/17929970 native calls; raw time and
+all selected path records are in cilium.json. This is a diagnostic window,
+not yet an official timing or proof that every packet takes equal work.
+The same-load paired packet test is the next correctness check.

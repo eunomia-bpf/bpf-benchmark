@@ -1,0 +1,117 @@
+{
+  "app": "cilium/agent",
+  "run": "corpus/results/x86_kvm_corpus_20261116_232152_617481",
+  "status": "ok",
+  "error": "",
+  "replacement_events": 113,
+  "native_failure_events": 0,
+  "scope": "Frozen one-sample 10-second functional check; not official timing",
+  "phases": {
+    "baseline": {
+      "programs": 53,
+      "installed_bytes": 233900,
+      "calls": 12151970,
+      "time_ns": 9211411511,
+      "path_programs": [
+        {
+          "bytes_jited": 863,
+          "bytes_xlated": 1512,
+          "id": 113,
+          "name": "cil_to_host",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        {
+          "bytes_jited": 3949,
+          "bytes_xlated": 7040,
+          "id": 120,
+          "name": "cil_from_host",
+          "run_cnt_delta": 1,
+          "run_time_ns_delta": 1308,
+          "type": "sched_cls"
+        },
+        {
+          "bytes_jited": 863,
+          "bytes_xlated": 1512,
+          "id": 125,
+          "name": "cil_to_host",
+          "run_cnt_delta": 1,
+          "run_time_ns_delta": 644,
+          "type": "sched_cls"
+        },
+        {
+          "bytes_jited": 1093,
+          "bytes_xlated": 1720,
+          "id": 157,
+          "name": "cil_from_contai",
+          "run_cnt_delta": 6043120,
+          "run_time_ns_delta": 4547871858,
+          "type": "sched_cls"
+        },
+        {
+          "bytes_jited": 1093,
+          "bytes_xlated": 1720,
+          "id": 171,
+          "name": "cil_from_contai",
+          "run_cnt_delta": 6108847,
+          "run_time_ns_delta": 4663536231,
+          "type": "sched_cls"
+        }
+      ]
+    },
+    "post_rejit": {
+      "programs": 53,
+      "installed_bytes": 204607,
+      "calls": 35788994,
+      "time_ns": 8635855658,
+      "path_programs": [
+        {
+          "bytes_jited": 1685,
+          "bytes_xlated": 24,
+          "id": 351,
+          "name": "cil_from_host",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        {
+          "bytes_jited": 251,
+          "bytes_xlated": 24,
+          "id": 360,
+          "name": "cil_to_host",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        {
+          "bytes_jited": 251,
+          "bytes_xlated": 24,
+          "id": 381,
+          "name": "cil_to_host",
+          "run_cnt_delta": 0,
+          "run_time_ns_delta": 0,
+          "type": "sched_cls"
+        },
+        {
+          "bytes_jited": 677,
+          "bytes_xlated": 24,
+          "id": 426,
+          "name": "cil_from_contai",
+          "run_cnt_delta": 17859021,
+          "run_time_ns_delta": 4297453460,
+          "type": "sched_cls"
+        },
+        {
+          "bytes_jited": 677,
+          "bytes_xlated": 24,
+          "id": 444,
+          "name": "cil_from_contai",
+          "run_cnt_delta": 17929970,
+          "run_time_ns_delta": 4338398352,
+          "type": "sched_cls"
+        }
+      ]
+    }
+  }
+}
