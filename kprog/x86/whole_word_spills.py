@@ -156,13 +156,63 @@ def lower_text(text, low, high, *, require_final=True, reuse_dead_source=False, 
     return output, changes
 
 
-def narrow_scalar_storage(document):
-    """An8-byte spill used only by32-bit operations has four unobserved bytes.
+def local_u32_stores(body):
+    """Prove zero upper halves from local machine definitions, never live-ins."""
+    known = set()
+    stores = {}
+    for line in body.splitlines():
+        if re.match(r'  bb\.\d+', line):
+            known.clear()
+        if line.lstrip().startswith('DBG_'):
+            continue
+        store = re.match(r'\s*STD (?:killed )?\$r(\d+), %stack\.(\d+), 0(?:,|\s*$)', line)
+        if store:
+            register, slot = map(int, store.groups())
+            stores[slot] = stores.get(slot, True) and register in known
+        before = set(known)
+        for register in re.findall(r'(?:implicit-def|\bdef|early-clobber) (?:dead )?\$[rw](\d+)', line):
+            known.discard(int(register))
+        lhs = line.split('=',1)[0] if '=' in line else ''
+        known.difference_update(int(n) for n in re.findall(r'\$[rw](\d+)',lhs))
+        defined = re.match(r'\s*(?:dead )?\$([rw])(\d+) = (?:(?:nuw|nsw) )*(\w+)(?: (.*))?', line)
+        if not defined:
+            continue
+        lane, register, operation, operands = defined.groups()
+        operands = operands or ''
+        register = int(register)
+        known.discard(register)
+        sources = [int(n) for n in re.findall(r'\$[rw](\d+)', operands.split(', debug-location')[0])]
+        scalar = lane == 'w' and (operation.endswith('_32') or operation in {'LDW32','LDH','LDB'})
+        if operation in {'COPY', 'MOV_rr'} and sources:
+            scalar = sources[0] in before
+        elif operation in {'MOV_ri', 'LD_imm64'}:
+            immediate = re.match(r'(-?\d+)(?:,|\s*$)', operands)
+            scalar = immediate is not None and 0 <= int(immediate[1]) <= 0x7fffffff
+        elif operation == 'SRL_ri':
+            shift = re.match(r'(?:killed )?\$r\d+, (\d+)(?:,|\s*$)', operands)
+            scalar = shift is not None and (32 <= int(shift[1]) <= 63 or
+                0 <= int(shift[1]) <= 31 and bool(sources) and sources[0] in before)
+        elif operation == 'AND_ri':
+            mask = re.match(r'(?:killed )?\$r\d+, (-?\d+)(?:,|\s*$)', operands)
+            scalar = mask is not None and (0 <= int(mask[1]) <= 0x7fffffff or
+                bool(sources) and sources[0] in before)
+        elif operation in {'AND_rr', 'OR_rr', 'XOR_rr'} and len(sources) >= 2:
+            scalar = (any(n in before for n in sources[:2]) if operation == 'AND_rr'
+                      else all(n in before for n in sources[:2]))
+            scalar |= operation == 'XOR_rr' and sources[0] == sources[1]
+        if scalar and 'undef ' not in operands:
+            known.add(register)
+    return {slot for slot, scalar in stores.items() if scalar}
 
-    Keep full-width, partial-offset and address-taking slots unchanged. This
-    exposes the same four-byte scalar shape that the existing packer handles.
+
+def narrow_scalar_storage(document):
+    """Discard unobserved or locally proven-zero upper scalar halves.
+
+    Unknown full-width, partial-offset and address-taking slots stay intact.
+    Proven u32 slots expose the same shape the existing packer handles.
     """
     head, body = document.split('body:             |', 1)
+    scalar_stores = local_u32_stores(body)
     slots = {int(i) for i in re.findall(
         r'  - \{ id: (\d+),[^\n]*type: spill-slot,[^\n]*size: 8, alignment: 8,', head)}
     narrowed = []
@@ -175,8 +225,16 @@ def narrow_scalar_storage(document):
         direct = (r'\s*(?:STW32 (?:killed )?\$w\d+, '
                   r'|(?:dead )?\$w\d+ = LDW32 )%stack\.'+str(slot)+
                   r', 0(?:, debug-location !\d+)?')
-        if not uses or not all(re.fullmatch(direct, line) for line in uses):
+        full = (r'\s*(?:STD (?:killed )?\$r\d+, '
+                r'|(?:dead )?\$r\d+ = LDD )%stack\.'+str(slot)+
+                r', 0(?:, debug-location !\d+)?')
+        if not uses or not all(re.fullmatch(direct, line) or
+                slot in scalar_stores and re.fullmatch(full, line) for line in uses):
             continue
+        body = re.sub(r'STD ((?:killed )?)\$r(\d+)(, %stack\.'+str(slot)+r', 0)(?!\d)',
+                      r'STW32 \g<1>$w\g<2>\g<3>', body)
+        body = re.sub(r'\$r(\d+) = LDD (%stack\.'+str(slot)+r', 0)(?!\d)',
+                      r'$w\g<1> = LDW32 \g<2>', body)
         pattern = r'(  - \{ id: '+str(slot)+r',[^\n]*type: spill-slot,[^\n]*size:) 8,'
         head = re.sub(pattern, r'\g<1> 4,', head)
         narrowed.append(slot)

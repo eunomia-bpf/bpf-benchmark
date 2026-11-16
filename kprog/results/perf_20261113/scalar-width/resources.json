@@ -1,0 +1,35 @@
+{
+  "section": "tp_btf/sched_switch",
+  "maps": [
+    {
+      "name": "cgroup_map",
+      "map_id": 4
+    },
+    {
+      "name": "start",
+      "map_id": 5
+    },
+    {
+      "name": "hists",
+      "map_id": 6
+    },
+    {
+      "name": "runqlat.rodata",
+      "map_id": 8
+    },
+    {
+      "name": "runqlat.bss",
+      "map_id": 9
+    }
+  ],
+  "pin_root": "/sys/fs/bpf/kprog-selftest-nqswojl2",
+  "attach_target_resolution": null,
+  "resource_globalized_entries": [],
+  "resource_view": "maps-and-btf",
+  "resource_pinning": [],
+  "resource_configured_maps": [],
+  "attach_btf_object": {
+    "name": "vmlinux",
+    "id": 1
+  }
+}

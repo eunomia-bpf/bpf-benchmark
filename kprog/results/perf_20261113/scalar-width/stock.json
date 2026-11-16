@@ -1,0 +1,18 @@
+{
+  "scope": "Stock-only retained proof replay; submission cancelled after verification.",
+  "native": "/workspaces/kprog-raw/perf/20261116-scalar-width/final-stock/inputs/main.native.o",
+  "proof": "/workspaces/kprog-raw/perf/20261116-scalar-width/final-stock/inputs/main.bpf.o",
+  "context": "/workspaces/kprog-raw/perf/20261116-scalar-width/final-stock/inputs/main.context.json",
+  "verify_exit": 0,
+  "stock_accepted": true,
+  "context_and_map_shapes_equal": true,
+  "submission_cancelled": true,
+  "replies": [
+    {
+      "request_id": 1,
+      "status": -125,
+      "prog_id": 0
+    }
+  ],
+  "wait_errors": []
+}

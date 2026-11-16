@@ -1,0 +1,107 @@
+{
+  "compile_only": false,
+  "cases": [
+    {
+      "phase": "small-original",
+      "frame_access_depth": 80,
+      "pairs": 0,
+      "object": "/workspaces/kprog-raw/perf/20261116-scalar-width/final-kernel/inputs/fixture.o",
+      "executions": 1060,
+      "failed": 0
+    },
+    {
+      "phase": "small-packed",
+      "frame_access_depth": 48,
+      "pairs": 4,
+      "object": "/workspaces/kprog-raw/perf/20261116-scalar-width/final-kernel/inputs/fixture.o",
+      "executions": 1060,
+      "failed": 0
+    },
+    {
+      "phase": "large-original",
+      "frame_access_depth": 544,
+      "pairs": 0,
+      "stock_rejected": true,
+      "executions": 0
+    },
+    {
+      "phase": "large-packed",
+      "frame_access_depth": 512,
+      "pairs": 4,
+      "object": "/workspaces/kprog-raw/perf/20261116-scalar-width/final-kernel/inputs/fixture.o",
+      "executions": 1060,
+      "failed": 0
+    },
+    {
+      "phase": "pressure-original",
+      "frame_access_depth": 16,
+      "object": "/workspaces/kprog-raw/perf/20261116-scalar-width/final-kernel/inputs/fixture.o",
+      "executions": 1060,
+      "failed": 0
+    },
+    {
+      "phase": "pressure-packed",
+      "frame_access_depth": 8,
+      "object": "/workspaces/kprog-raw/perf/20261116-scalar-width/final-kernel/inputs/fixture.o",
+      "executions": 1060,
+      "failed": 0
+    },
+    {
+      "phase": "pressure-context-original",
+      "frame_access_depth": 16,
+      "object": "/workspaces/kprog-raw/perf/20261116-scalar-width/final-kernel/inputs/fixture.o",
+      "executions": 1060,
+      "failed": 0
+    },
+    {
+      "phase": "pressure-context-packed",
+      "frame_access_depth": 16,
+      "object": "/workspaces/kprog-raw/perf/20261116-scalar-width/final-kernel/inputs/fixture.o",
+      "executions": 1060,
+      "failed": 0
+    },
+    {
+      "phase": "pressure-all-live-original",
+      "frame_access_depth": 16,
+      "object": "/workspaces/kprog-raw/perf/20261116-scalar-width/final-kernel/inputs/fixture.o",
+      "executions": 1060,
+      "failed": 0
+    },
+    {
+      "phase": "pressure-all-live-packed",
+      "frame_access_depth": 24,
+      "object": "/workspaces/kprog-raw/perf/20261116-scalar-width/final-kernel/inputs/fixture.o",
+      "executions": 1060,
+      "failed": 0
+    },
+    {
+      "phase": "wide-descriptor-packed",
+      "frame_access_depth": 48,
+      "normalized_slots": [
+        {
+          "document": 1,
+          "slots": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ]
+        }
+      ],
+      "object": "/workspaces/kprog-raw/perf/20261116-scalar-width/final-kernel/inputs/fixture.o",
+      "executions": 1060,
+      "failed": 0
+    },
+    {
+      "phase": "dead-reload",
+      "frame_access_depth": 48,
+      "object": "/workspaces/kprog-raw/perf/20261116-scalar-width/final-kernel/inputs/fixture.o",
+      "executions": 1060,
+      "failed": 0
+    }
+  ]
+}

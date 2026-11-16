@@ -80,6 +80,21 @@ def replay(args):
         if context['prog_type'] == 0:
             context['prog_type'] = captured_context['prog_type']
             details['prog_type_source'] = 'retained kernel request'
+        # libbpf represents a vmlinux attachment with object ID0, while the
+        # intercepted kernel context records its actual BTF object ID. Resolve
+        # that same object rather than rejecting the two representations.
+        if context['attach_btf_id'] and not context['attach_btf_obj_id'] and captured_context['attach_btf_obj_id']:
+            resources.bind('bpf_btf_get_fd_by_id', c.c_int, c.c_uint32)
+            target = resources.lib.bpf_btf_get_fd_by_id(captured_context['attach_btf_obj_id'])
+            resources.ok(target, 'open captured attachment BTF')
+            try:
+                name = c.create_string_buffer(128)
+                info = resources.info(target, submit.BtfInfo(name=c.addressof(name),name_len=len(name)))
+                if info.kernel_btf and name.value == b'vmlinux':
+                    context['attach_btf_obj_id'] = info.id
+                    details['attach_btf_object'] = dict(name=name.value.decode(),id=info.id)
+            finally:
+                os.close(target)
         for field in sorted(service.CONTEXT | {'gpl_compatible'}):
             if context[field] != captured_context[field]:
                 raise ValueError(f'Source context differs for {field}: {context[field]} != {captured_context[field]}')

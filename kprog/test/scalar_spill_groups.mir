@@ -50,6 +50,8 @@ body:             |
     $w2 = LDW32 $r1, 8
     $w3 = LDW32 killed $r1, 32
     $w6 = COPY $w3, implicit-def $r6
+    $r6 = SLL_ri killed $r6, 32
+    $r6 = OR_rr killed $r6, $r3
     STD $r6, %stack.8, 0
     STW32 $w2, %stack.9, 0
     STW32 $w2, %stack.9, 4

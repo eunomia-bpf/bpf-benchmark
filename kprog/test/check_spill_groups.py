@@ -138,7 +138,7 @@ def check(args):
     if selected != list(range(8)):
         raise ValueError('Wide scalar descriptors or the genuine64-bit slot were misclassified')
     for variant in [
-        wide.replace('STW32 $w2, %stack.0, 0', 'STD $r2, %stack.0, 0'),
+        wide.replace('STW32 $w2, %stack.0, 0', '$r2 = MOV_ri -1\n    STD $r2, %stack.0, 0'),
         wide.replace('LDW32 %stack.0, 0', 'LDW32 %stack.0, 4'),
         wide.replace('    RET implicit $r0',
                      '    $r4 = FI_ri %stack.0, 0\n    RET implicit $r0'),
@@ -152,6 +152,26 @@ def check(args):
     retained, selected = spills.narrow_scalar_storage(ambiguous)
     if 0 in selected or retained.count("id: 0, name: '', type: spill-slot, offset: 0, size: 8,") != 2:
         raise ValueError('An ambiguous declaration must retain its original width without refusal')
+    full = wide.replace('STW32 $w2, %stack.0, 0', 'STD $r2, %stack.0, 0')
+    full = full.replace('$w0 = LDW32 %stack.0, 0', '$r0 = LDD %stack.0, 0')
+    normalized, selected = spills.narrow_scalar_storage(full)
+    if selected != list(range(8)) or '$r0 = LDD %stack.0' in normalized:
+        raise ValueError('A full-width spill of a locally defined u32 was not narrowed')
+    for definition in ['    $r2 = IMPLICIT_DEF',
+                       '    JAL 1, implicit-def $r2',
+                       '  bb.99:\n    liveins: $r2',
+                       '    $r2 = MOV_ri 4294967295',
+                       '    INLINEASM &"", 1, def $r2',
+                       '    INLINEASM &"", 1, early-clobber $r2',
+                       '    renamable $r2 = LDD %stack.8, 0',
+                       '    $r2 = COPY undef $r2']:
+        variant = full.replace('    STD $r2, %stack.0, 0', definition+'\n    STD $r2, %stack.0, 0')
+        _, selected = spills.narrow_scalar_storage(variant)
+        if 0 in selected:
+            raise ValueError('Unknown, caller-clobbered or sign-extended upper bits were discarded')
+    # Execute the full-width access case through the same packer and real BPF
+    # backend as the scalar32 descriptor case below.
+    wide = full
     mir = args.build/'fixture.mir'
     mir.write_text(wide)
     normalizations = []

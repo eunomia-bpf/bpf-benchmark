@@ -13,6 +13,8 @@ CONTEXT_BUILD ?= /var/tmp/kprog-tmp/perf/context-loads-v2
 IDENTITY_ARGS ?=
 HELPER_SHAPE_BUILD ?= /var/tmp/kprog-tmp/perf/helper-shapes
 SPILL_GROUP_BUILD ?= /var/tmp/kprog-tmp/perf/spill-groups
+SPILL_GROUP_CPUS ?= 19
+SCALAR_WIDTH_BUILD ?= /var/tmp/kprog-tmp/perf/scalar-width
 HELPER_MEMORY_BUILD ?= /var/tmp/kprog-tmp/perf/helper-memory
 MAP_EXTERN_BUILD ?= $(CONTEXT_BUILD)/map-externs
 MAP_EXTERN_ARGS ?=
@@ -74,11 +76,33 @@ hotspot-spill-lifetimes:
 spill-groups-main:
 	taskset -c 19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/replay_spill_groups_mir.py --archive /workspaces/kprog-raw/perf/20261114-otel-whole-word-checked/state/session-d1wppo7h/requests/3.success.tar.gz --build $(SPILL_GROUP_BUILD) --output $(OUTPUT)
 
-.PHONY: spill-groups-build spill-groups-run spill-groups-guest
+.PHONY: spill-groups-build spill-groups-run spill-groups-guest scalar-width-build scalar-width-run scalar-width-replay scalar-width-stock scalar-width-stock-guest
+scalar-width-build:
+	install -d $(OUTPUT) $(SCALAR_WIDTH_BUILD)
+	taskset -c 16 prlimit --as=8589934592 -- $(MAKE) -r -f $(ROOT)/kprog/test/scalar-spill-precision.mk spill-groups-build SPILL_GROUP_BUILD=$(SCALAR_WIDTH_BUILD) SPILL_GROUP_CPUS=16 OUTPUT=$(OUTPUT)
+
+scalar-width-run:
+	install -d $(OUTPUT) $(OUTPUT)/inputs
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 16 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(OUTPUT) --rwdir $(OUTPUT)/inputs=$(SCALAR_WIDTH_BUILD) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/scalar-spill-precision.mk spill-groups-guest SPILL_GROUP_BUILD=$(OUTPUT)/inputs OUTPUT=$(OUTPUT)'
+
+scalar-width-replay:
+	taskset -c 16 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/replay_spill_groups_mir.py --archive /workspaces/kprog-raw/perf/20261116-bcc-stack-observation/request20.tar.gz --build $(SCALAR_WIDTH_BUILD) --output $(OUTPUT)
+
+scalar-width-stock:
+	install -d $(OUTPUT) $(OUTPUT)/inputs
+	python3 -c 'import pathlib,tarfile; archive=tarfile.open("/workspaces/kprog-raw/perf/20261116-bcc-stack-observation/request20.tar.gz"); build=pathlib.Path("$(SCALAR_WIDTH_BUILD)"); fields={"kernel.native.o":"main.native.o","generation.metadata.json":"main.metadata.json","kernel.facts.json":"main.context.json"}; [(build/name).write_bytes(archive.extractfile("request/"+source).read()) for source,name in fields.items()]'
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 16 prlimit --as=8589934592 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(OUTPUT) --rodir $(OUTPUT)/inputs=$(SCALAR_WIDTH_BUILD) --overlay-rwdir /tmp --disable-monitor --cpus 1 --memory 2G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/scalar-spill-precision.mk scalar-width-stock-guest OUTPUT=$(OUTPUT)'
+
+scalar-width-stock-guest:
+	mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf
+	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
+	python3 $(ROOT)/kprog/test/verify_retained_proof.py --native $(OUTPUT)/inputs/main.native.o --metadata $(OUTPUT)/inputs/main.metadata.json --context $(OUTPUT)/inputs/main.context.json --source $(ROOT)/vendor/build/.bcc-libbpf/x86/output/runqlat.bpf.o --proof $(OUTPUT)/inputs/main.bpf.o --symbol sched_switch --linker $(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link --output $(OUTPUT)/replay
+
 spill-groups-build:
 	install -d $(SPILL_GROUP_BUILD)
 	$(CC) -O2 -g -Wall -Wextra -Werror -I$(LIBBPF)/prefix/include $(ROOT)/kprog/test/scalar_spill_values.c $(LIBBPF)/pic-obj/libbpf.a -lelf -lz -o $(SPILL_GROUP_BUILD)/values-client
-	taskset -c 19 prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_spill_groups.py --build $(SPILL_GROUP_BUILD) --output $(OUTPUT) --compile-only
+	taskset -c $(SPILL_GROUP_CPUS) prlimit --as=8589934592 -- python3 $(ROOT)/kprog/test/check_spill_groups.py --build $(SPILL_GROUP_BUILD) --output $(OUTPUT) --compile-only
 
 spill-groups-run:
 	install -d $(OUTPUT)

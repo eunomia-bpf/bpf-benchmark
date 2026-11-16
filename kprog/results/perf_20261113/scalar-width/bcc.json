@@ -1,0 +1,189 @@
+{
+  "archive": "/workspaces/kprog-raw/perf/20261116-bcc-stack-observation/request20.tar.gz",
+  "narrowed_scalar_slots": [
+    {
+      "document": 1,
+      "slots": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        43,
+        45,
+        47,
+        49,
+        51,
+        53,
+        55,
+        57,
+        59,
+        61
+      ]
+    }
+  ],
+  "grouped_pairs": [
+    {
+      "low": 66,
+      "high": 67
+    },
+    {
+      "low": 64,
+      "high": 65
+    },
+    {
+      "low": 62,
+      "high": 63
+    },
+    {
+      "low": 60,
+      "high": 61
+    },
+    {
+      "low": 58,
+      "high": 59
+    },
+    {
+      "low": 56,
+      "high": 57
+    },
+    {
+      "low": 54,
+      "high": 55
+    },
+    {
+      "low": 52,
+      "high": 53
+    },
+    {
+      "low": 50,
+      "high": 51
+    },
+    {
+      "low": 48,
+      "high": 49
+    },
+    {
+      "low": 46,
+      "high": 47
+    },
+    {
+      "low": 44,
+      "high": 45
+    },
+    {
+      "low": 41,
+      "high": 43
+    },
+    {
+      "low": 39,
+      "high": 40
+    },
+    {
+      "low": 37,
+      "high": 38
+    },
+    {
+      "low": 35,
+      "high": 36
+    },
+    {
+      "low": 33,
+      "high": 34
+    },
+    {
+      "low": 31,
+      "high": 32
+    },
+    {
+      "low": 29,
+      "high": 30
+    },
+    {
+      "low": 27,
+      "high": 28
+    },
+    {
+      "low": 25,
+      "high": 26
+    },
+    {
+      "low": 23,
+      "high": 24
+    },
+    {
+      "low": 21,
+      "high": 22
+    },
+    {
+      "low": 17,
+      "high": 18
+    },
+    {
+      "low": 15,
+      "high": 16
+    },
+    {
+      "low": 13,
+      "high": 14
+    },
+    {
+      "low": 11,
+      "high": 12
+    },
+    {
+      "low": 9,
+      "high": 10
+    },
+    {
+      "low": 7,
+      "high": 8
+    },
+    {
+      "low": 5,
+      "high": 6
+    },
+    {
+      "low": 3,
+      "high": 4
+    }
+  ],
+  "grouped_mir_equals_accepted": false,
+  "allocated_bytes_equal_accepted": false,
+  "frame_access_depth": 424,
+  "retained_frame_access_depth": 616,
+  "object": "/var/tmp/kprog-tmp/perf/scalar-width/main.bpf.o",
+  "scope": "Captured whole-body MIR/codegen replay; stock verification not repeated"
+}

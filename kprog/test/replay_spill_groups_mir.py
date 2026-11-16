@@ -18,6 +18,17 @@ def allocated(source):
     return {section.name: section.data() for section in elf.iter_sections() if section['sh_flags'] & 2}
 
 
+def stack_depth(source):
+    depth = 0
+    for section in ELFFile(source).iter_sections():
+        if section['sh_flags'] & 4:
+            for opcode, regs, offset, _ in struct.iter_unpack('<BBhi', section.data()):
+                kind, dst, src = opcode & 7, regs & 15, regs >> 4
+                if (kind in (2,3) and dst == 10) or (kind == 1 and src == 10):
+                    depth = max(depth, -offset)
+    return depth
+
+
 def replay(args):
     args.build.mkdir(parents=True, exist_ok=True)
     args.output.mkdir(parents=True, exist_ok=True)
@@ -36,11 +47,8 @@ def replay(args):
     spec.loader.exec_module(spills)
     before = args.build/'main.before.mir'
     before.write_bytes(data['before'])
-    default, selection = spills.automatic(before)
-    if default.encode() != data['accepted']:
-        raise ValueError('Default single-pair MIR differs from actual accepted main')
-    del default
-    grouped, groups = spills.automatic(before)
+    normalizations = []
+    grouped, groups = spills.automatic(before, normalizations)
     same_mir = grouped.encode() == data['accepted']
     output = args.build/'main.groups.mir'
     output.write_text(grouped)
@@ -55,19 +63,12 @@ def replay(args):
     reference = allocated(io.BytesIO(data['object']))
     with obj.open('rb') as file:
         actual = allocated(file)
-        elf = ELFFile(file)
-        depth = 0
-        for section in elf.iter_sections():
-            if section['sh_flags'] & 4:
-                for opcode, regs, offset, _ in struct.iter_unpack('<BBhi', section.data()):
-                    kind, dst, src = opcode & 7, regs & 15, regs >> 4
-                    if (kind == 3 and dst == 10) or (kind == 1 and src == 10):
-                        depth = max(depth, -offset)
-    record = dict(archive=str(args.archive), default_equals_actual_accepted_mir=True,
-        default_pairs=[dict(low=r['low'], high=r['high']) for r in selection],
+        file.seek(0)
+        depth = stack_depth(file)
+    record = dict(archive=str(args.archive), narrowed_scalar_slots=normalizations,
         grouped_pairs=[dict(low=r['low'], high=r['high']) for r in groups],
         grouped_mir_equals_accepted=same_mir, allocated_bytes_equal_accepted=actual == reference,
-        frame_access_depth=depth, object=str(obj),
+        frame_access_depth=depth, retained_frame_access_depth=stack_depth(io.BytesIO(data['object'])), object=str(obj),
         scope='Captured whole-body MIR/codegen replay; stock verification not repeated')
     (args.output/'result.json').write_text(json.dumps(record, indent=2)+'\n')
     print(json.dumps(record))
