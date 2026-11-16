@@ -41,6 +41,18 @@ def storage_observation(path, fds):
 
 def storage_text_observation(text, command=None):
     lines = text.splitlines()
+    assemblies = Counter()
+    private_choices = Counter()
+    operand_counts = Counter(re.findall(r'%[-\w.]+', text))
+    for line in lines:
+        assembly = re.search(r'\basm(?: sideeffect)?(?: alignstack)?(?: inteldialect)? "((?:[^"\\]|\\.)*)", "([^"]*)"', line)
+        if assembly:
+            assemblies[(assembly[1], assembly[2])] += 1
+        choice = re.match(r'\s*(%[-\w.]+) = load volatile i64, ptr @kprog_unspecified_input\b', line)
+        if choice:
+            # SSA use observation only; deciding deadness belongs to LLVM.
+            uses = operand_counts[choice[1]]-1
+            private_choices['with_uses' if uses else 'without_uses'] += 1
     definitions = {}
     for line in lines:
         match = re.match(r'\s*(%[-\w.]+) = (.*)', line)
@@ -70,6 +82,9 @@ def storage_text_observation(text, command=None):
             other_use_examples=[item for item in uses
                                 if 'getelementptr' not in item][:12]))
     return dict(command=command, allocas=objects,
+                inline_assembly=[dict(template=template, constraints=constraints, count=count)
+                                 for (template, constraints), count in assemblies.most_common()],
+                private_choice_uses=dict(private_choices),
                 scope='Direct textual operand observations, not alias/escape proofs or a transformation.')
 
 

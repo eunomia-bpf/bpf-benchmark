@@ -1,0 +1,130 @@
+{
+  "timestamp": "2026-11-16T01:37:08Z",
+  "raw": "/workspaces/kprog-raw/perf/20261116-otel-barrier-observation",
+  "frontend_asm": [
+    {
+      "template": "$0 = $0",
+      "constraints": "=w,0",
+      "count": 1594
+    },
+    {
+      "template": "",
+      "constraints": "~{memory}",
+      "count": 646
+    },
+    {
+      "template": "call -1",
+      "constraints": "~{r0},~{r1},~{r2},~{r3},~{r4},~{r5},~{memory}",
+      "count": 243
+    },
+    {
+      "template": "$0 = *(u64 *)($1 + $2)",
+      "constraints": "=r,r,i,~{memory}",
+      "count": 212
+    },
+    {
+      "template": "$0 = *(u32 *)($1 + $2)",
+      "constraints": "=r,r,i,~{memory}",
+      "count": 177
+    },
+    {
+      "template": "$0 = *(u16 *)($1 + $2)",
+      "constraints": "=r,r,i,~{memory}",
+      "count": 101
+    },
+    {
+      "template": "*(u64 *)($0 + 0) = $1",
+      "constraints": "r,r,~{memory}",
+      "count": 96
+    },
+    {
+      "template": "$0 = *(u8 *)($1 + $2)",
+      "constraints": "=r,r,i,~{memory}",
+      "count": 30
+    },
+    {
+      "template": "*(u8 *)($0 + 0) = $1",
+      "constraints": "r,r,~{memory}",
+      "count": 18
+    },
+    {
+      "template": "*(u32 *)($0 + 0) = $1",
+      "constraints": "r,r,~{memory}",
+      "count": 16
+    },
+    {
+      "template": "*(u16 *)($0 + 0) = $1",
+      "constraints": "r,r,~{memory}",
+      "count": 4
+    }
+  ],
+  "optimized_asm": [
+    {
+      "template": "$0 = $0",
+      "constraints": "=w,0",
+      "count": 1599
+    },
+    {
+      "template": "",
+      "constraints": "~{memory}",
+      "count": 648
+    },
+    {
+      "template": "$0 = *(u64 *)($1 + $2)",
+      "constraints": "=r,r,i,~{memory}",
+      "count": 281
+    },
+    {
+      "template": "call -1",
+      "constraints": "~{r0},~{r1},~{r2},~{r3},~{r4},~{r5},~{memory}",
+      "count": 243
+    },
+    {
+      "template": "$0 = *(u32 *)($1 + $2)",
+      "constraints": "=r,r,i,~{memory}",
+      "count": 177
+    },
+    {
+      "template": "$0 = *(u16 *)($1 + $2)",
+      "constraints": "=r,r,i,~{memory}",
+      "count": 101
+    },
+    {
+      "template": "*(u64 *)($0 + 0) = $1",
+      "constraints": "r,r,~{memory}",
+      "count": 97
+    },
+    {
+      "template": "$0 = *(u8 *)($1 + $2)",
+      "constraints": "=r,r,i,~{memory}",
+      "count": 30
+    },
+    {
+      "template": "*(u8 *)($0 + 0) = $1",
+      "constraints": "r,r,~{memory}",
+      "count": 18
+    },
+    {
+      "template": "*(u32 *)($0 + 0) = $1",
+      "constraints": "r,r,~{memory}",
+      "count": 16
+    },
+    {
+      "template": "*(u16 *)($0 + 0) = $1",
+      "constraints": "r,r,~{memory}",
+      "count": 4
+    }
+  ],
+  "frontend_choices": {
+    "with_uses": 9220
+  },
+  "optimized_choices": {
+    "with_uses": 810,
+    "without_uses": 6
+  },
+  "code_bytes": 289560,
+  "frame": {
+    "trusted_x86_x86_sim_xdp": 824
+  },
+  "scope": "Textual IR observation, not a deadness proof or kernel acceptance."
+}
