@@ -63,3 +63,11 @@ stream-contract cases and loader rebuild pass; stub/stub.json records the
 case count. The production linker CLI refresh also completed successfully.
 This establishes host construction/build coverage; the guest frame and
 packet checks remain separate pending work.
+
+2026-11-16T23:18:02Z: Current source and P confirmation while image603cacfb442a checks.
+The cb/classid fix is already ed85c9c02; it is not a new pending source change.
+The canonical generated answers still give cb48 and classid46. Current
+bpf_lxc.native.o cil_from_container stores its public cb at48/52/56/60/64
+and classid at46. The compiler flags/config and actual packet comparison
+remain open. The shim retains the original program FD, so original and native
+IDs from one load can share the exact packet, endpoint and maps in that test.

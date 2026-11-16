@@ -1,0 +1,8 @@
+{
+  "image": "sha256:603cacfb442a03c9932e91e272cfb98e029aa146244dec384b7b592e77db19d8",
+  "source": "4edcdadc2c3334f6f134e9138922d37099671069",
+  "kernel_source": "83e0fabe355d6cf682ba9ce2bb575f1ee1214a16",
+  "recipe": "make -f kprog/perf/one-image/Makefile image JOBS=8",
+  "check": "make -f kprog/perf/one-image/Makefile check",
+  "raw": "/workspaces/kprog-raw/perf/20261116-native-load-corrections"
+}
