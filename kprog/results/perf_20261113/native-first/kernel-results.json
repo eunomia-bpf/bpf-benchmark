@@ -1,0 +1,102 @@
+[
+  {
+    "case": "verification",
+    "application_returncode": 0,
+    "record": {
+      "request_id": 1,
+      "source_prog_id": 3,
+      "native_sha256": "1d0543179692a67457e3c1921c67c56d5acf003a62eafe096b80ee021c1677b2",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-16T03:39:00.236661+00:00",
+      "prog_id": 8,
+      "phase": "load-direct",
+      "status": 0,
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "simulator_failure": {
+        "stage": "verification",
+        "error": "Command '['/workspaces/kprog-raw/perf/20261116-native-first/kernel3/inputs/recovery', 'verify', '4', '1', '3', '/workspaces/kprog-raw/perf/20261116-native-first/kernel3/verification/state/session-u5qyveu5/requests/request-btzstzu_/generated/request.native.o', 'trusted_entry', '/workspaces/kprog-raw/perf/20261116-native-first/kernel3/verification/state/session-u5qyveu5/requests/request-btzstzu_/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-native-first/kernel3/verification/state/session-u5qyveu5/requests/request-btzstzu_/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0']' returned non-zero exit status 2.",
+        "returncode": 2,
+        "stderr": "trusted-native-loader: service simulator verification failed before native compilation: Invalid argument\nlast insn is not an exit or jmp\nprocessed 0 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0\n\n"
+      },
+      "artifact_archive": "/workspaces/kprog-raw/perf/20261116-native-first/kernel3/verification/state/session-u5qyveu5/requests/1.success.tar.gz",
+      "finished": "2026-11-16T03:39:04.726233+00:00"
+    }
+  },
+  {
+    "case": "generation",
+    "application_returncode": 0,
+    "record": {
+      "request_id": 2,
+      "source_prog_id": 11,
+      "native_sha256": "1d0543179692a67457e3c1921c67c56d5acf003a62eafe096b80ee021c1677b2",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-16T03:39:05.734926+00:00",
+      "prog_id": 14,
+      "phase": "load-direct",
+      "status": 0,
+      "execution_path": "direct-native",
+      "b_generated": false,
+      "b_stock_passed": false,
+      "simulator_failure": {
+        "stage": "generation",
+        "error": "deliberate B generation failure",
+        "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 258, in serve\n    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link,**generation_options)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/test/check_native_first.py\", line 24, in specialize\n    raise ValueError('deliberate B generation failure')\nValueError: deliberate B generation failure\n"
+      },
+      "artifact_archive": "/workspaces/kprog-raw/perf/20261116-native-first/kernel3/generation/state/session-z0518som/requests/2.success.tar.gz",
+      "finished": "2026-11-16T03:39:06.360092+00:00"
+    }
+  },
+  {
+    "case": "transport",
+    "application_returncode": 1,
+    "record": {
+      "request_id": 3,
+      "source_prog_id": 17,
+      "native_sha256": "1d0543179692a67457e3c1921c67c56d5acf003a62eafe096b80ee021c1677b2",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-16T03:39:07.432641+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/kprog-raw/perf/20261116-native-first/kernel3/inputs/recovery', 'verify', '4', '3', '17', '/workspaces/kprog-raw/perf/20261116-native-first/kernel3/transport/state/session-d4h7xcso/requests/request-cmsfdq95/generated/request.native.o', 'trusted_entry', '/workspaces/kprog-raw/perf/20261116-native-first/kernel3/transport/state/session-d4h7xcso/requests/request-cmsfdq95/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-native-first/kernel3/transport/state/session-d4h7xcso/requests/request-cmsfdq95/generated/trusted_x86.bpf.o.missing', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 266, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 183, in load_service_artifacts\n    verified = load('verify', artifacts)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/kprog-raw/perf/20261116-native-first/kernel3/inputs/recovery', 'verify', '4', '3', '17', '/workspaces/kprog-raw/perf/20261116-native-first/kernel3/transport/state/session-d4h7xcso/requests/request-cmsfdq95/generated/request.native.o', 'trusted_entry', '/workspaces/kprog-raw/perf/20261116-native-first/kernel3/transport/state/session-d4h7xcso/requests/request-cmsfdq95/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-native-first/kernel3/transport/state/session-d4h7xcso/requests/request-cmsfdq95/generated/trusted_x86.bpf.o.missing', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/perf/20261116-native-first/kernel3/transport/state/session-d4h7xcso/requests/3.failure.tar.gz",
+      "finished": "2026-11-16T03:39:10.308264+00:00"
+    }
+  },
+  {
+    "case": "native",
+    "application_returncode": 1,
+    "record": {
+      "request_id": 4,
+      "source_prog_id": 22,
+      "native_sha256": "1d0543179692a67457e3c1921c67c56d5acf003a62eafe096b80ee021c1677b2",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-16T03:39:11.434948+00:00",
+      "status": -5,
+      "error": "Command '['/workspaces/kprog-raw/perf/20261116-native-first/kernel3/inputs/recovery', 'load-direct', '4', '4', '22', '/workspaces/kprog-raw/perf/20261116-native-first/kernel3/native/state/session-9_4bo5dp/requests/request-0ngu7jpd/generated/request.native.o', 'missing_native_entry', '/workspaces/kprog-raw/perf/20261116-native-first/kernel3/native/state/session-9_4bo5dp/requests/request-0ngu7jpd/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-native-first/kernel3/native/state/session-9_4bo5dp/requests/request-0ngu7jpd/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0']' returned non-zero exit status 1.",
+      "traceback": "Traceback (most recent call last):\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 266, in serve\n    completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 195, in load_service_artifacts\n    return dict(load('load-direct', artifacts), execution_path='direct-native',\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspaces/repository/kprog/trusted_service.py\", line 174, in load\n    result.check_returncode()\n  File \"/usr/lib/python3.12/subprocess.py\", line 502, in check_returncode\n    raise CalledProcessError(self.returncode, self.args, self.stdout,\nsubprocess.CalledProcessError: Command '['/workspaces/kprog-raw/perf/20261116-native-first/kernel3/inputs/recovery', 'load-direct', '4', '4', '22', '/workspaces/kprog-raw/perf/20261116-native-first/kernel3/native/state/session-9_4bo5dp/requests/request-0ngu7jpd/generated/request.native.o', 'missing_native_entry', '/workspaces/kprog-raw/perf/20261116-native-first/kernel3/native/state/session-9_4bo5dp/requests/request-0ngu7jpd/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-native-first/kernel3/native/state/session-9_4bo5dp/requests/request-0ngu7jpd/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0']' returned non-zero exit status 1.\n",
+      "failure_archive": "/workspaces/kprog-raw/perf/20261116-native-first/kernel3/native/state/session-9_4bo5dp/requests/4.failure.tar.gz",
+      "finished": "2026-11-16T03:39:14.415166+00:00"
+    }
+  },
+  {
+    "case": "accepted",
+    "application_returncode": 0,
+    "record": {
+      "request_id": 5,
+      "source_prog_id": 29,
+      "native_sha256": "1d0543179692a67457e3c1921c67c56d5acf003a62eafe096b80ee021c1677b2",
+      "execution_mode": "checked-sim-c",
+      "started": "2026-11-16T03:39:15.434139+00:00",
+      "prog_id": 35,
+      "phase": "load",
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "artifact_archive": "/workspaces/kprog-raw/perf/20261116-native-first/kernel3/accepted/state/session-1dinfruh/requests/5.success.tar.gz",
+      "finished": "2026-11-16T03:39:20.207878+00:00"
+    }
+  }
+]

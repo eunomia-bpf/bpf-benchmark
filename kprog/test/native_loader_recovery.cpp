@@ -1,5 +1,8 @@
 /* Exercise real ABI parsing, chunking and direct upload; no replacement loader. */
 #include "../libnativeloader/src/native_loader.cpp"
+#define main trusted_loader_bridge_main
+#include "../trusted_loader.cpp"
+#undef main
 #include <iostream>
 
 static void require(bool condition, const char *message)
@@ -114,6 +117,8 @@ static void kernel(const std::filesystem::path &output)
 
 int main(int argc, char **argv)
 try {
+    if (argc > 1 && (std::string(argv[1]) == "verify" || std::string(argv[1]) == "load" ||
+        std::string(argv[1]) == "load-direct")) return trusted_loader_bridge_main(argc, argv);
     if (argc != 3) fail("usage: recovery host|kernel OUTPUT");
     if (std::string(argv[1]) == "host") host(argv[2]);
     else if (std::string(argv[1]) == "kernel") kernel(argv[2]);

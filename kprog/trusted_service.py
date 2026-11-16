@@ -177,12 +177,30 @@ def load_service_artifacts(args, worker, fd, request, actual, envelope, artifact
             raise RuntimeError('loader returned an invalid completion')
         return completion
     if mode == 'checked-sim-c':
-        verified = load('verify', artifacts)
-        (job/'checked-simulator-verification.json').write_text(json.dumps(verified, indent=2)+'\n')
+        failure = artifacts.get('simulator_failure')
+        if failure is None:
+            try:
+                verified = load('verify', artifacts)
+            except subprocess.CalledProcessError as error:
+                # Exit 2 identifies an actual BPF_PROG_LOAD verification
+                # failure. Map binding, transport and native errors propagate.
+                if error.returncode != 2:
+                    raise
+                failure = dict(stage='verification', error=str(error),
+                    returncode=error.returncode, stderr=error.stderr)
+            else:
+                (job/'checked-simulator-verification.json').write_text(json.dumps(verified, indent=2)+'\n')
+        if failure is not None:
+            (job/'simulator-failure.json').write_text(json.dumps(failure, indent=2)+'\n')
+            return dict(load('load-direct', artifacts), execution_path='direct-native',
+                b_generated=failure['stage'] != 'generation', b_stock_passed=False,
+                simulator_failure=failure)
         artifacts = worker.compile_checked_simulator(artifacts, args.native_link, args.sim_native_compiler,
             context_compiler=getattr(args,'sim_context_compiler',None),
             public_layout=getattr(args,'sim_public_layout',None),
             physical_layout=getattr(args,'sim_physical_layout',None))
+        return dict(load('load', artifacts), execution_path='checked-sim-c',
+            b_generated=True, b_stock_passed=True)
     return load('load', artifacts)
 
 
@@ -236,7 +254,15 @@ def serve(args):
                     identities={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in source_paths}
                     (job/'source-identities.json').write_text(json.dumps(identities,indent=2))
                     generation_options = dict(bounds_compiler=args.sim_bounds_compiler) if args.sim_bounds_compiler else {}
-                    artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link,**generation_options)
+                    try:
+                        artifacts = worker.specialize(native,entry,metadata,job/'generated',args.native_link,**generation_options)
+                    except Exception as error:
+                        if args.execution_mode != 'checked-sim-c':
+                            raise
+                        artifacts = dict(native_object=str(job/'kernel.native.o'), symbol=entry,
+                            native_proof_object='', simulator_object='', simulator_program='',
+                            simulator_failure=dict(stage='generation', error=str(error),
+                                traceback=traceback.format_exc()))
                     completion = load_service_artifacts(args,worker,fd,request,actual,envelope,artifacts,job)
                     record.update(completion)
                 except Exception as error:

@@ -697,9 +697,12 @@ DIRECT_RECOVERY_BUILD ?= /var/tmp/kprog-tmp/verified/direct-recovery
 DIRECT_RECOVERY_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-direct-recovery/host
 DIRECT_RECOVERY_KERNEL_OUTPUT ?= /workspaces/kprog-raw/verified/20261114-direct-recovery/kernel
 .PHONY: direct-recovery-check direct-recovery-kvm guest-direct-recovery
-direct-recovery-check:
-	install -d "$(DIRECT_RECOVERY_BUILD)" "$(DIRECT_RECOVERY_OUTPUT)"
-	$(CXX) -std=gnu++20 -O1 -g -ffunction-sections -fdata-sections -Iinclude -I"$(KERNEL_OFFSETS_INCLUDE)" -I"$(LIBBPF_PREFIX)/include" -I"$(REPO_ROOT)/vendor/libbpf/include" -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" ../test/native_loader_recovery.cpp -Wl,--gc-sections "$(LIBBPF_LIBRARY)" -lelf -lz -ldl -pthread -o "$(DIRECT_RECOVERY_BUILD)/recovery"
+$(DIRECT_RECOVERY_BUILD)/recovery: ../test/native_loader_recovery.cpp ../trusted_loader.cpp include/native_loader.hpp src/native_loader.cpp $(wildcard src/native_loader_*.hpp)
+	install -d "$(DIRECT_RECOVERY_BUILD)"
+	$(CXX) -std=gnu++20 -O1 -g -ffunction-sections -fdata-sections -Iinclude -I"$(KERNEL_OFFSETS_INCLUDE)" -I"$(LIBBPF_PREFIX)/include" -I"$(REPO_ROOT)/vendor/libbpf/include" -I"$(REPO_ROOT)/vendor/libbpf/include/uapi" ../test/native_loader_recovery.cpp -Wl,--gc-sections "$(LIBBPF_LIBRARY)" -lelf -lz -ldl -pthread -o "$@"
+
+direct-recovery-check: $(DIRECT_RECOVERY_BUILD)/recovery
+	install -d "$(DIRECT_RECOVERY_OUTPUT)"
 	"$(DIRECT_RECOVERY_BUILD)/recovery" host "$(DIRECT_RECOVERY_OUTPUT)" > "$(DIRECT_RECOVERY_OUTPUT)/host.log"
 	$(MAKE) -C /workspaces/.agent-state/kprog-ck/build-x86 M="$(REPO_ROOT)/kprog/perf/direct-native" MO="$(REPO_ROOT)/kinsn/module/x86/build" ARCH=x86 modules
 	sha256sum src/native_loader.cpp ../perf/direct-native/bpf_x86_native_lab.c ../test/native_loader_recovery.cpp "$(DIRECT_RECOVERY_BUILD)/recovery" "$(REPO_ROOT)/kinsn/module/x86/build/bpf_x86_native_lab.ko" > "$(DIRECT_RECOVERY_OUTPUT)/sha256"
@@ -759,3 +762,23 @@ guest-entry-data-mutable:
 			"$(ENTRY_DATA_KERNEL_OUTPUT)/native-link.real" "$$out" "$(ENTRY_DATA_KERNEL_OUTPUT)/fixture.bpf.o" \
 			> "$$out/service.log" 2>&1 || status=1; cat "$$out/service.log"; \
 	done; exit $$status
+
+# The existing recovery regression binary embeds the production service bridge
+# so this test does not replace the canonical loader used by the timing image.
+.PHONY: native-first-check native-first-kvm guest-native-first
+native-first-check: $(DIRECT_RECOVERY_BUILD)/recovery
+	install -d "$(OUTPUT)"
+	"$(DIRECT_RECOVERY_BUILD)/recovery" host "$(OUTPUT)"
+	python3 ../test/check_trusted_service.py
+
+native-first-kvm:
+	install -d "$(OUTPUT)" "$(OUTPUT)/inputs"
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 16-19 vng --run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+		--cwd "$(REPO_ROOT)" --rwdir "$(REPO_ROOT)" --rwdir "$(OUTPUT)" --rodir "$(OUTPUT)/inputs=$(DIRECT_RECOVERY_BUILD)" --overlay-rwdir /tmp \
+		--disable-monitor --cpus 2 --memory 4G --append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -C kprog/libnativeloader guest-native-first OUTPUT=$(OUTPUT) DIRECT_RECOVERY_BUILD=$(OUTPUT)/inputs'
+
+guest-native-first:
+	@mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
+	BPFREJIT_NATIVE_LINK_BINARY="$(REPO_ROOT)/kprog/x86/native_lab/native_link/target/release/native-link" CLANG="$(REPO_ROOT)/kprog/stock-path/bin/clang" python3 ../test/check_native_first.py --output "$(OUTPUT)" --loader "$(DIRECT_RECOVERY_BUILD)/recovery"

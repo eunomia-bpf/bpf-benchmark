@@ -7,6 +7,7 @@
 #include <linux/bpf.h>
 #include <optional>
 #include <string>
+#include <stdexcept>
 #include <vector>
 
 namespace native_loader {
@@ -48,11 +49,17 @@ struct LoadDiagnostics {
     std::chrono::steady_clock::time_point started;
 };
 
+class SimulatorVerificationError : public std::runtime_error {
+public:
+    using std::runtime_error::runtime_error;
+};
+
 struct FdLoadOptions {
     int original_prog_fd = -1;
     int trusted_service_fd = -1;
     uint64_t trusted_request_id = 0;
     bool trusted_verify_only = false;
+    bool trusted_direct_native = false;
     std::filesystem::path trusted_native_proof_path;
     std::filesystem::path proof_object_path;
     std::string trusted_simulator_program;

@@ -3984,33 +3984,41 @@ native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOpti
         }
         pins.push_back(std::move(fd));
     }
-    // These aliases come from kernel-pinned identities, not process-wide map names.
-    using Object = std::unique_ptr<bpf_object, decltype(&bpf_object__close)>;
-    bpf_object *raw = bpf_object__open_file(options.proof_object_path.c_str(), nullptr);
-    const long open_error = libbpf_get_error(raw);
-    if (open_error || !raw) fail("open service simulator: " + libbpf_error_string(open_error ? open_error : -errno));
-    Object object(raw, bpf_object__close);
-    bpf_program *selected = bpf_object__find_program_by_name(raw, options.trusted_simulator_program.c_str());
-    if (!selected || static_cast<uint32_t>(bpf_program__type(selected)) != info.type)
-        fail("service simulator entry/type differs from original program");
-    const auto *instructions = bpf_program__insns(selected);
-    const size_t count = bpf_program__insn_cnt(selected);
-    if (!instructions || !count) fail("service simulator is empty");
-    std::vector<bpf_insn> proof(instructions, instructions + count);
-    relocate_trusted_proof(raw, options.proof_object_path, options.trusted_simulator_program,
-                           companion, proof, pins, bindings);
-    // B's typed declarations are generated from the running target BTF. Use
-    // those same declarations to resolve the matching calls/addresses in P.
-    const auto *loaded_types = bpf_object__btf(raw);
-    if (loaded_types && btf__find_by_name_kind(loaded_types, ".ksyms", BTF_KIND_DATASEC) > 0) {
-        std::unique_ptr<btf, decltype(&btf__free)> proof_types(
-            btf__parse(options.proof_object_path.c_str(), nullptr), btf__free);
-        if (!proof_types) fail("read simulator BTF for native kernel functions");
-        if (!native_kfunc_declarations(proof_types.get()).empty()) {
-            std::unique_ptr<btf, decltype(&btf__free)> kernel(btf__load_vmlinux_btf(), btf__free);
-            if (!kernel) fail("read target BTF for native kernel functions");
-            companion.kernel_functions = native_kernel_function_targets(options.native_object_path,
-                proof_types.get(), kernel.get());
+    std::vector<bpf_insn> proof;
+    if (options.trusted_direct_native) {
+        // This path executes P after a recorded B failure. The stub is not a
+        // verification of P; its native image uses the same kernel transport.
+        proof = {{.code = BPF_ALU64 | BPF_MOV | BPF_K, .dst_reg = BPF_REG_0},
+                 {.code = BPF_JMP | BPF_EXIT}};
+    } else {
+        // These aliases come from kernel-pinned identities, not process-wide map names.
+        using Object = std::unique_ptr<bpf_object, decltype(&bpf_object__close)>;
+        bpf_object *raw = bpf_object__open_file(options.proof_object_path.c_str(), nullptr);
+        const long open_error = libbpf_get_error(raw);
+        if (open_error || !raw) fail("open service simulator: " + libbpf_error_string(open_error ? open_error : -errno));
+        Object object(raw, bpf_object__close);
+        bpf_program *selected = bpf_object__find_program_by_name(raw, options.trusted_simulator_program.c_str());
+        if (!selected || static_cast<uint32_t>(bpf_program__type(selected)) != info.type)
+            fail("service simulator entry/type differs from original program");
+        const auto *instructions = bpf_program__insns(selected);
+        const size_t count = bpf_program__insn_cnt(selected);
+        if (!instructions || !count) fail("service simulator is empty");
+        proof.assign(instructions, instructions + count);
+        relocate_trusted_proof(raw, options.proof_object_path, options.trusted_simulator_program,
+                               companion, proof, pins, bindings);
+        // B's typed declarations are generated from the running target BTF. Use
+        // those same declarations to resolve the matching calls/addresses in P.
+        const auto *loaded_types = bpf_object__btf(raw);
+        if (loaded_types && btf__find_by_name_kind(loaded_types, ".ksyms", BTF_KIND_DATASEC) > 0) {
+            std::unique_ptr<btf, decltype(&btf__free)> proof_types(
+                btf__parse(options.proof_object_path.c_str(), nullptr), btf__free);
+            if (!proof_types) fail("read simulator BTF for native kernel functions");
+            if (!native_kfunc_declarations(proof_types.get()).empty()) {
+                std::unique_ptr<btf, decltype(&btf__free)> kernel(btf__load_vmlinux_btf(), btf__free);
+                if (!kernel) fail("read target BTF for native kernel functions");
+                companion.kernel_functions = native_kernel_function_targets(options.native_object_path,
+                    proof_types.get(), kernel.get());
+            }
         }
     }
     bpf_prog_load_opts opts{}; opts.sz = sizeof(opts);
@@ -4044,7 +4052,7 @@ native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOpti
         ScopedFd verified(bpf_prog_load(static_cast<bpf_prog_type>(info.type), name.c_str(),
             info.gpl_compatible ? "GPL" : "BSD", proof.data(), proof.size(), &opts));
         if (verified.get() < 0)
-            fail("service simulator verification failed before native compilation: " +
+            throw native_loader::SimulatorVerificationError("service simulator verification failed before native compilation: " +
                 libbpf_error_string(verified.get()) + "\n" + std::string(log.data(), strnlen(log.data(), log.size())));
         native_loader::LoadedProgram out{};
         out.prog_fd = verified.fd; verified.fd = -1;
