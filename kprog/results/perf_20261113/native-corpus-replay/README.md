@@ -49,3 +49,18 @@ covered by its own test, and actual Tracee application confirmation is open.
 Raw inputs, full commands, plan data, object emissions and initial failures stay
 at /workspaces/kprog-raw/perf/20261116-native-corpus-replay. This receipt does
 not establish full current-P runtime correctness or measured performance.
+
+2026-11-16T09:05:57Z
+
+Current CLI + rooted embedded P replay completes all475 candidate proofs and all11 OTel PERF_EVENT conversions. Matching retained plans emit70 kernel images; six Tracee old-plan omissions remain visible. C's later actual canonical Tetragon run reaches unresolved policy-generated CEL bodies, which the two retained Tetragon requests do not cover. This replay does not claim coverage of those absent current-load facts or app installation.
+
+| App | Candidates | Proofs passing | Kernel passing/attempted |
+|---|---:|---:|---:|
+| bcc | 34 | 34 | 25/25 |
+| cilium | 80 | 80 | 28/28 |
+| katran | 3 | 3 | 1/1 |
+| otelcol-ebpf-profiler | 30 | 30 | 14/14 |
+| tetragon | 154 | 154 | 2/2 |
+| tracee | 174 | 174 | 0/6 |
+
+Raw rooted-current/report.json and the committed JSON retain every command/result. Coherent publication is running at /workspaces/kprog-raw/perf/20261116-rooted-image; no new timing result yet.
