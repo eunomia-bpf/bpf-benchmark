@@ -1,0 +1,44 @@
+[
+  {
+    "app": "otelcol-ebpf-profiler/profiling",
+    "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_224734_587583",
+    "status": "error",
+    "native_replacement_events": 2,
+    "native_failure_events": 2
+  },
+  {
+    "app": "bcc/set",
+    "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_225014_025710",
+    "status": "ok",
+    "native_replacement_events": 25,
+    "native_failure_events": 0
+  },
+  {
+    "app": "cilium/agent",
+    "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_225345_805000",
+    "status": "error",
+    "native_replacement_events": 0,
+    "native_failure_events": 2
+  },
+  {
+    "app": "tetragon/observer",
+    "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_225559_070245",
+    "status": "error",
+    "native_replacement_events": 11,
+    "native_failure_events": 2
+  },
+  {
+    "app": "tracee/monitor",
+    "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_225833_719987",
+    "status": "ok",
+    "native_replacement_events": 169,
+    "native_failure_events": 0
+  },
+  {
+    "app": "katran",
+    "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_230228_297953",
+    "status": "ok",
+    "native_replacement_events": 1,
+    "native_failure_events": 0
+  }
+]

@@ -73,3 +73,30 @@ inventory and removes the exact superseded object if it is still present.
 An already absent object requires no deletion. Errors in inventory collection
 or a required removal remain visible. This enforces the existing one-image
 resource rule and does not add a benchmark admission condition.
+
+Completed frozen check, 2026-11-16T23:05:09Z
+
+Image sha256:96a677d6826f341f7d6557a5b2986680e17722e1d51d78d38ad7c6f0416284c9. Kernel source 83e0fabe355d6cf682ba9ce2bb575f1ee1214a16.
+The six-app check completed; app statuses, rather than Make exit0, are:
+
+| App | Status | Native replacement events | JIT/native installed B in window | JIT/native ns per call |
+| --- | --- | ---: | ---: | ---: |
+| otelcol-ebpf-profiler/profiling | error | 2 | native window unavailable | native window unavailable |
+| bcc/set | ok | 25 | 7965/7962 | 144.191/145.304 |
+| cilium/agent | error | 0 | native window unavailable | native window unavailable |
+| tetragon/observer | error | 11 | native window unavailable | native window unavailable |
+| tracee/monitor | ok | 169 | 2068774/1690844 | 367.539/319.616 |
+| katran | ok | 1 | 13641/9442 | 174.749/172.907 |
+
+Replacement events include loads before a measurement window and are not
+the window program count. Tracee has169 replacements and167 records per arm.
+The error arms have partial native loads, with no native timing window.
+These one-sample10-second figures are diagnostic counters, not the official
+three-sample performance claims. No PMU body/helper/map split was collected.
+
+The two failed classes are fixed in source:3940c4bee conditional Jcc tails
+for Tetragon; a53922beb retained LPM symbol for OTel/Cilium. Full host replay
+475/239 and the canonical loader build pass. The next publication waits for
+this check controller to exit and uses a fresh persistent raw directory:
+/workspaces/kprog-raw/perf/20261116-native-load-corrections.
+C starts its next breadth round after the corrected image check succeeds.

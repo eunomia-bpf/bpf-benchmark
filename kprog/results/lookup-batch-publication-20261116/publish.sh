@@ -26,6 +26,8 @@ publish_batch() {
     while IFS= read -r candidate; do
         if [ "$candidate" = "$old_image" ] && [ "$old_image" != "$new_image" ]; then
             docker image rm --no-prune "$old_image" > "$raw/image-cleanup.log" 2>&1
+            printf '\n- %s PERF publication: removed superseded image %s after replacement by %s; one base rebuilt in place and all raw kept. Receipt %s.\n' \
+                "$(date -u +%FT%TZ)" "$old_image" "$new_image" "$raw/image-cleanup.log" >> kprog/docs/cleanup-log.md
         fi
     done < "$raw/image-inventory.txt"
     cat /workspaces/.agent-state/kprog-ck/build-x86/include/config/kernel.release > "$raw/kernel.release"
