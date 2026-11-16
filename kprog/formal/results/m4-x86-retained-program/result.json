@@ -1,0 +1,239 @@
+{
+  "step": "M4 retained Tetragon application C and Clight export",
+  "status": "validated; M4 remains in progress",
+  "raw": "/workspaces/kprog-raw/formal/m4-x86-retained-program",
+  "source": {
+    "retained_body_equal": true,
+    "canonical_c_bytes": 157980,
+    "retained_c_bytes": 157638,
+    "differences": [
+      "provenance comment",
+      "two repository-relative includes"
+    ],
+    "native_entry_instructions": 738,
+    "frame_bytes": 336,
+    "fact_cells": 42,
+    "conditional_branches": 79,
+    "return_cases": [
+      765,
+      1196,
+      1701,
+      2615
+    ]
+  },
+  "export": {
+    "exports": {
+      "X86ProgramProfile": {
+        "bytes": 21212631,
+        "functions": 126,
+        "equal": true
+      },
+      "X86TetragonWake": {
+        "bytes": 31607645,
+        "functions": 144,
+        "equal": true
+      }
+    },
+    "prior_exports_unchanged": [
+      "Arm64Access.lean",
+      "Arm64Address.lean",
+      "Arm64Addressing.lean",
+      "Arm64Entry.lean",
+      "Arm64Numeric.lean",
+      "Arm64PayloadProfile.lean",
+      "Arm64Program.lean",
+      "Arm64ProgramContext.lean",
+      "Arm64ProgramFixture.lean",
+      "Arm64Stack.lean",
+      "X86Context.lean",
+      "X86Helpers.lean",
+      "X86Inline.lean",
+      "X86Memory.lean",
+      "X86Numeric.lean",
+      "X86Pointer.lean",
+      "X86StackProfile200.lean",
+      "X86StackProfile376.lean"
+    ]
+  },
+  "preprocessing": {
+    "clight_extraction": [
+      {
+        "source": "c/TetragonWake.c",
+        "source_bytes": 157980,
+        "preprocessed_bytes": 3344259,
+        "exit": 0,
+        "seconds": 0.22229749101097696,
+        "argv": [
+          "external/clean/clightgen",
+          "-fstruct-passing",
+          "-lean",
+          "-normalize",
+          "-DKPROG_X86_PROGRAM_EXPORT=1",
+          "-include",
+          "c/ProgramSections.h",
+          "-I../../vendor/libbpf/include/uapi",
+          "-I../../vendor/libbpf/src",
+          "-E",
+          "c/TetragonWake.c"
+        ]
+      },
+      {
+        "source": "build/x86_program_profile.bpf.c",
+        "source_bytes": 3804,
+        "preprocessed_bytes": 2620491,
+        "exit": 0,
+        "seconds": 0.15476554300403222,
+        "argv": [
+          "external/clean/clightgen",
+          "-fstruct-passing",
+          "-lean",
+          "-normalize",
+          "-DKPROG_X86_PROGRAM_EXPORT=1",
+          "-include",
+          "c/ProgramSections.h",
+          "-I../../vendor/libbpf/include/uapi",
+          "-I../../vendor/libbpf/src",
+          "-E",
+          "build/x86_program_profile.bpf.c"
+        ]
+      }
+    ],
+    "native_fidelity_preprocessed_bytes": 4605133
+  },
+  "validation": {
+    "exit": 0,
+    "clight_modules": 20,
+    "axiom_queries": 7,
+    "make_clight_final": 0,
+    "host_final": 0,
+    "lean_jobs": 57,
+    "leaf_build_seconds": {
+      "X86ProgramProfile": 199,
+      "X86TetragonWake": 273
+    },
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "public_callee_types": 81,
+    "public_tag_regression": {
+      "old_alias_exit": 1,
+      "current_alias_exit": 0,
+      "public_callee_types": 81,
+      "public_struct_tag_preserved": true,
+      "commands": [
+        [
+          "cc",
+          "-std=c11",
+          "-Wall",
+          "-Wextra",
+          "-O1",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-iquote",
+          "/workspaces/repository/kprog/formal/oracles",
+          "-iquote",
+          "/workspaces/repository/kprog/formal/c",
+          "-x",
+          "c",
+          "-c",
+          "-",
+          "-o",
+          "/workspaces/repository/kprog/formal/build/test_x86_program_callee_abi.o"
+        ],
+        [
+          "cc",
+          "-std=c11",
+          "-Wall",
+          "-Wextra",
+          "-O1",
+          "-I/workspaces/repository/vendor/libbpf/include/uapi",
+          "-I/workspaces/repository/vendor/libbpf/src",
+          "-iquote",
+          "/workspaces/repository/kprog/formal/oracles",
+          "-iquote",
+          "/workspaces/repository/kprog/formal/c",
+          "-c",
+          "/workspaces/repository/kprog/formal/oracles/test_x86_program_callee_abi.c",
+          "-o",
+          "/workspaces/repository/kprog/formal/build/test_x86_program_callee_abi.o"
+        ]
+      ]
+    },
+    "binding_cases_per_mode": 580608,
+    "memory_source_cases_per_mode": 48384,
+    "stack_cases_per_mode": 4296,
+    "binding_modes": [
+      "generic restored macros",
+      "producer-export live binding"
+    ]
+  },
+  "host": {
+    "modes": [
+      "native GNU bodies with explicit typed callees",
+      "CompCert adapters with the same typed callees"
+    ],
+    "complete_returns_per_mode": 16,
+    "helper_refusal_prefixes_per_mode": 24,
+    "seeds": 8,
+    "scenario_input_counts": [
+      65,
+      99,
+      24,
+      41,
+      58
+    ],
+    "scenario_helper_counts": [
+      0,
+      2,
+      1,
+      2,
+      3
+    ],
+    "checks": [
+      "probe source/destination relationships and widths",
+      "full-width stack origin and explicit input counts",
+      "return values",
+      "complete context/task/parent input buffers unchanged"
+    ],
+    "sanitizer": "observer and generic handler/binding grids have UBSan; retained entry compiled without instrumentation",
+    "limitations": "Selected entry paths only. No runtime execution of the retained copy/set loops, private full-frame comparison, kernel helper equivalence or whole-app correctness claim."
+  },
+  "native_fidelity": {
+    "before": "e12d4c34f",
+    "headers": [
+      "kprog/x86/x86_sim_local_bpf.h",
+      "kprog/formal/c/Platform.h",
+      "kprog/x86/x86_sim_inline.h"
+    ],
+    "allocated_sections_equal": true,
+    "allocated_relocations_equal": true,
+    "current_stream_equals_normal_build": true,
+    "allocated_section_bytes": {
+      ".text": 0,
+      "kprobe/trusted": 991912,
+      "license": 4
+    },
+    "allocated_relocations": 410,
+    "scope": "Allocated code/data/relocations from the recorded stock Clang recipe, without a stock verifier or whole-app claim."
+  },
+  "include_replay_regression": {
+    "old_tool_refuses_later_direct_header": true,
+    "diagnostic": "replayed include graph must contain /workspaces/repository/kprog/x86/x86_sim_inline.h",
+    "old_tool_commit": "e12d4c34f"
+  },
+  "cleanup": [
+    {
+      "path": "kprog/formal/build/TetragonWake.bpf.c",
+      "bytes": 157638
+    },
+    {
+      "path": "kprog/formal/build/TetragonWake.lean",
+      "bytes": 31607918
+    }
+  ],
+  "initial_attempts": "Wrong working directories, actual GNU-expression and 79-asm frontend failures, host metadata macros, first-declaration error attribute and missing Clang UBSan runtime were retained. GCC and fully instrumented Clang entry compiles were terminated; final Clang entry plus GCC observer passes.",
+  "m5_refinements_migrated": 0,
+  "remaining": "Continue M4 active producer/C-subset/default-byte work; M5 all 2065 refinements and O1/O2/O4 recount; M6 retirement and final whole lake build/make check."
+}

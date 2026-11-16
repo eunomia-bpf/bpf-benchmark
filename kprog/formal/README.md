@@ -1854,3 +1854,10 @@ The current lookup1/ktime5 units include their decoded private byte store at
 R10-8: the full execution has exact scratch memory and ordered store event,
 under explicit successful-store/slot ownership premises. Prefix and suffix
 composition retains the complete helper result and effects.
+
+The retained Tetragon wake program now has checked-in plain C in
+[c/TetragonWake.c](c/TetragonWake.c) and a real 144-body Clight export. Its
+indirect target reads and conditional branches use the shared C adapters;
+call-only helper aliases preserve public struct tags. See the
+[retained-program receipts](results/m4-x86-retained-program/README.md) for
+selected host paths, exact native code comparisons and remaining M4/M5 limits.

@@ -610,4 +610,14 @@ x86_sim_inline_recover(const struct x86_sim_inline_bindings *__x86_bind,
 #define X86_SIM_L_READ_RECOVERY_MEM(BASE, DST, AUX, DISP) \
     x86_sim_inline_recover(&__x86_inline_bindings, (BASE), (DST), (AUX), (DISP))
 
+#if defined(__COMPCERT__) && defined(KPROG_X86_PROGRAM_EXPORT)
+/* Generated indirect target switches read the live entry binding too. */
+#undef X86_SIM_L_READ_REG_WIDTH_SHIFT
+#define X86_SIM_L_READ_REG_WIDTH_SHIFT(REG, WIDTH, SHIFT) \
+    x86_sim_inline_read_reg(&__x86_inline_bindings, (REG), (WIDTH), (SHIFT))
+#undef X86_SIM_L_REG_TAG
+#define X86_SIM_L_REG_TAG(REG) \
+    x86_sim_inline_reg_tag(&__x86_inline_bindings, (REG))
+#endif
+
 #endif

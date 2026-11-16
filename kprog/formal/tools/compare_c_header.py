@@ -113,10 +113,14 @@ def main():
 
     observations = {}
     for phase, body in (("before", previous), ("after", header.read_text())):
+        # Replay across the complete unit: another changed header may be a
+        # later direct include rather than a child of the selected header.
+        body = (f'#line 1 "{source}"\n' + text[:position] + f'#line 1 "{header}"\n'
+                + body + f'\n#line {resume} "{source}"\n' + text[position + len(directive):])
         for path in nested:
             # Earlier replacements carry #line locations for their own quoted
             # includes. Resolve those against that parent, rather than the root.
-            parent, line, offset, sites = header, 1, 0, []
+            parent, line, offset, sites = source, 1, 0, []
             for row in body.splitlines(keepends=True):
                 marker = re.fullmatch(r'#line (\d+) "([^"]+)"\s*', row)
                 quoted = re.fullmatch(r'\s*#include "([^"]+)"\s*', row)
@@ -129,15 +133,14 @@ def main():
                     line += 1
                 offset += len(row)
             if not sites:
-                raise SystemExit(f"replayed include graph must contain {path}")
+                raise SystemExit(f"replayed translation unit must contain {path}")
             contents = historical_nested[path] if phase == "before" else path.read_text()
             # Replace every occurrence: a guarded header may be included both
             # directly and through another header; its first inclusion wins.
             for at, include, line, parent in reversed(sites):
                 body = (body[:at] + f'#line 1 "{path}"\n' + contents
                         + f'\n#line {line} "{parent}"\n' + body[at + len(include):])
-        unit = (f'#line 1 "{source}"\n' + text[:position] + f'#line 1 "{header}"\n'
-                + body + f'\n#line {resume} "{source}"\n' + text[position + len(directive):])
+        unit = body
         run(phase + "-preprocess", flags + ["-E", "-x", "c", "-", "-o", str(preprocessed)], unit)
         compile_product(phase, preprocessed)
         observations[phase] = allocated(product)

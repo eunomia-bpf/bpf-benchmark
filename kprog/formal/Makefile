@@ -732,6 +732,7 @@ clight: clightgen
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Memory.lean c/X86Memory.c
 	external/clean/clightgen -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Helpers.lean c/X86Helpers.c
 	external/clean/clightgen -fstruct-passing -lean -normalize -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86Inline.lean c/X86Inline.c
+	external/clean/clightgen -fstruct-passing -lean -normalize -DKPROG_X86_PROGRAM_EXPORT=1 -include c/ProgramSections.h -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86TetragonWake.lean c/TetragonWake.c
 	../stock-path/bin/clang -c oracles/x86_program_profile.S -o build/x86_program_profile.proof.o
 	python3 tools/export_x86_stack_fixture.py --name x86_program_profile --object-dir build --output build/x86_program_profile.bpf.c
 	external/clean/clightgen -fstruct-passing -lean -normalize -DKPROG_X86_PROGRAM_EXPORT=1 -include c/ProgramSections.h -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src -o KProgFormal/Clight/X86ProgramProfile.lean build/x86_program_profile.bpf.c
@@ -849,8 +850,11 @@ clight: clightgen
 	./build/test_x86_stack_read_host
 	$(CC) -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_x86_store_selectors_host.c build/x86_pointer_binding.o -o build/test_x86_store_selectors_host
 	./build/test_x86_store_selectors_host
-	$(CC) -D__COMPCERT__ -include oracles/compcert_memory_host.h -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_x86_inline_binding_host.c -o build/test_x86_inline_binding_host
-	./build/test_x86_inline_binding_host
+	for program in 0 1; do \
+	  flags=; if test $$program = 1; then flags=-DKPROG_X86_PROGRAM_EXPORT=1; fi; \
+	  $(CC) -D__COMPCERT__ $$flags -include oracles/compcert_memory_host.h -Wall -Wextra -O2 -fsanitize=undefined -fno-sanitize-recover=undefined -I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/src oracles/test_x86_inline_binding_host.c -o build/test_x86_inline_binding_host && \
+	  ./build/test_x86_inline_binding_host || exit $$?; \
+	done
 	for mode in 0:0 1:0 1:1; do \
 	  flags=; if test $${mode#*:} = 1; then flags=-D__COMPCERT__; fi; \
 	  $(CC) -std=c11 -Wall -Wextra -O1 -fsanitize=undefined -fno-sanitize-recover=undefined \

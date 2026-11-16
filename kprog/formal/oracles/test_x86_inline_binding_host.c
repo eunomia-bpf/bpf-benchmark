@@ -6,6 +6,10 @@
 #include <string.h>
 #define X86_SIM_ENABLE_STACK 1
 #define X86_SIM_USE_STATE_STRUCT 1
+/* The program-export facades borrow this same deliberately sparse binding. */
+#if defined(KPROG_X86_PROGRAM_EXPORT)
+#define __x86_inline_bindings binding
+#endif
 #include "../../x86/x86_sim_inline.h"
 
 static unsigned long cases;
@@ -65,7 +69,7 @@ int main(void)
 		binding.stack = r<16 && r!=4 && t==4 ? &state.stack_mem : NULL;
 		binding.native_stack_base = r==4 || (r<16 && t==4) ? &state.native_stack_base : NULL;
 		check(x86_sim_inline_read_reg(&binding,reg,code,shift)==expected,"cell/stack-origin/width/lane binding");
-		/* Restored facades must resolve the caller's state, not __x86_bind. */
+		/* Generic facades use caller state; program facades use its live binding. */
 		check(X86_SIM_L_READ_REG_WIDTH_SHIFT(reg,code,shift)==expected && X86_SIM_L_REG_TAG(reg)==(reg<16?t:0),"macro scope restoration");
 		check(!memcmp(&state,&before,sizeof(state)),"whole state/arena/flags/environment frame");
 		cases++;

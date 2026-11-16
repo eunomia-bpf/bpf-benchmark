@@ -370,3 +370,5 @@ KEPT incremental kprog_stock.o and source; raw run archives and logs retained.
 - 2026-11-16T04:23:38Z PERF checked-corpus: removed completed guest Docker disk build in /var/tmp/kprog-tmp/perf/retained-proof-replay; raw service/run evidence kept at /workspaces/kprog-raw/perf/20261116-checked-six-apps/cilium.
 - 2026-11-16T04:41:24Z PERF checked-corpus: removed completed guest Docker disk build in /var/tmp/kprog-tmp/perf/checked-bcc-preparation-state; raw service/run evidence kept at /workspaces/kprog-raw/perf/20261116-bcc-preparation-retry.
 - 2026-11-16T06:41:33Z PERF checked-corpus: removed completed guest Docker disk build in /var/tmp/kprog-tmp/perf/checked-bcc-all-stock-state; raw service/run evidence kept at /workspaces/kprog-raw/perf/20261116-bcc-all-stock.
+
+- 2026-11-16T06:46:25.929235+00:00 FORMAL M4 retained Tetragon: removed duplicate frontend probe products kprog/formal/build/TetragonWake.bpf.c, kprog/formal/build/TetragonWake.lean. Canonical checked-in c/TetragonWake.c and Clight/X86TetragonWake.lean replace them; all source archives, measurements and logs remain under /workspaces/kprog-raw/formal/m4-x86-retained-program.

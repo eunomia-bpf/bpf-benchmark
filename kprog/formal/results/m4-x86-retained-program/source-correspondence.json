@@ -1,0 +1,19 @@
+{
+  "retained_body_equal": true,
+  "canonical_c_bytes": 157980,
+  "retained_c_bytes": 157638,
+  "differences": [
+    "provenance comment",
+    "two repository-relative includes"
+  ],
+  "native_entry_instructions": 738,
+  "frame_bytes": 336,
+  "fact_cells": 42,
+  "conditional_branches": 79,
+  "return_cases": [
+    765,
+    1196,
+    1701,
+    2615
+  ]
+}

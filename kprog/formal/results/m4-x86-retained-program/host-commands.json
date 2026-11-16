@@ -1,0 +1,93 @@
+[
+  {
+    "mode": 0,
+    "working_directory": "kprog/formal",
+    "cpu": 18,
+    "address_space_bytes": 34359738368,
+    "commands": [
+      [
+        "clang-18",
+        "-std=c11",
+        "-O1",
+        "-DKPROG_X86_PROGRAM_EXPORT=1",
+        "-D__ksym=",
+        "-D__bpf_fastcall=",
+        "-include",
+        "oracles/compcert_memory_host.h",
+        "-include",
+        "oracles/x86_program_environment_host.h",
+        "-I../../vendor/libbpf/include/uapi",
+        "-I../../vendor/libbpf/src",
+        "-c",
+        "c/TetragonWake.c",
+        "-o",
+        "build/x86_tetragon_host.o"
+      ],
+      [
+        "cc",
+        "-std=c11",
+        "-Wall",
+        "-Wextra",
+        "-O1",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=undefined",
+        "-I../../vendor/libbpf/include/uapi",
+        "-I../../vendor/libbpf/src",
+        "oracles/test_x86_tetragon_host.c",
+        "build/x86_tetragon_host.o",
+        "-o",
+        "build/test_x86_tetragon_host"
+      ],
+      [
+        "./build/test_x86_tetragon_host"
+      ]
+    ],
+    "exit": 0
+  },
+  {
+    "mode": 1,
+    "working_directory": "kprog/formal",
+    "cpu": 18,
+    "address_space_bytes": 34359738368,
+    "commands": [
+      [
+        "clang-18",
+        "-std=c11",
+        "-O1",
+        "-DKPROG_X86_PROGRAM_EXPORT=1",
+        "-D__ksym=",
+        "-D__bpf_fastcall=",
+        "-D__COMPCERT__",
+        "-include",
+        "oracles/compcert_memory_host.h",
+        "-include",
+        "oracles/x86_program_environment_host.h",
+        "-I../../vendor/libbpf/include/uapi",
+        "-I../../vendor/libbpf/src",
+        "-c",
+        "c/TetragonWake.c",
+        "-o",
+        "build/x86_tetragon_host.o"
+      ],
+      [
+        "cc",
+        "-std=c11",
+        "-Wall",
+        "-Wextra",
+        "-O1",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=undefined",
+        "-I../../vendor/libbpf/include/uapi",
+        "-I../../vendor/libbpf/src",
+        "oracles/test_x86_tetragon_host.c",
+        "build/x86_tetragon_host.o",
+        "-o",
+        "build/test_x86_tetragon_host"
+      ],
+      [
+        "./build/test_x86_tetragon_host"
+      ]
+    ],
+    "exit": 0
+  }
+]

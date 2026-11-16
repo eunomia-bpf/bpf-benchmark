@@ -1,0 +1,45 @@
+{
+  "clight_extraction": [
+    {
+      "source": "c/TetragonWake.c",
+      "source_bytes": 157980,
+      "preprocessed_bytes": 3344259,
+      "exit": 0,
+      "seconds": 0.22229749101097696,
+      "argv": [
+        "external/clean/clightgen",
+        "-fstruct-passing",
+        "-lean",
+        "-normalize",
+        "-DKPROG_X86_PROGRAM_EXPORT=1",
+        "-include",
+        "c/ProgramSections.h",
+        "-I../../vendor/libbpf/include/uapi",
+        "-I../../vendor/libbpf/src",
+        "-E",
+        "c/TetragonWake.c"
+      ]
+    },
+    {
+      "source": "build/x86_program_profile.bpf.c",
+      "source_bytes": 3804,
+      "preprocessed_bytes": 2620491,
+      "exit": 0,
+      "seconds": 0.15476554300403222,
+      "argv": [
+        "external/clean/clightgen",
+        "-fstruct-passing",
+        "-lean",
+        "-normalize",
+        "-DKPROG_X86_PROGRAM_EXPORT=1",
+        "-include",
+        "c/ProgramSections.h",
+        "-I../../vendor/libbpf/include/uapi",
+        "-I../../vendor/libbpf/src",
+        "-E",
+        "build/x86_program_profile.bpf.c"
+      ]
+    }
+  ],
+  "native_fidelity_preprocessed_bytes": 4605133
+}

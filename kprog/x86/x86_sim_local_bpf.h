@@ -4380,7 +4380,7 @@ X86_SIM_CONCAT(__x86_sim_jcc_fallthrough_, ID):                              \
 		} else if (X86_SIM_L_EVAL_CC(CC)) {                        \
 			X86_SIM_X86_JMP((CURRENT), (TARGET), LABEL);       \
 		}                                                           \
-		asm volatile("" ::: "memory");                            \
+		KPROG_C_MEMORY_BARRIER();                                  \
 	} while (0)
 
 #define X86_SIM_X86_JCC(CC, CURRENT, TARGET, LABEL)                         \

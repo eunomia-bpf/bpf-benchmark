@@ -3,7 +3,10 @@
 #define KPROG_X86_HELPER(ID, NAME, RESULT, ARGS) typedef __typeof__(NAME) kprog_public_##NAME;
 #include "../c/X86HelperCalls.h"
 #undef KPROG_X86_HELPER
+typedef struct bpf_fib_lookup kprog_public_fib_lookup;
 #include "../c/X86ProgramCallees.h"
+_Static_assert(__builtin_types_compatible_p(struct bpf_fib_lookup, kprog_public_fib_lookup),
+               "x86 program helper alias changed a public struct tag");
 #define KPROG_X86_HELPER(ID, NAME, RESULT, ARGS) \
 _Static_assert(__builtin_types_compatible_p(__typeof__(&kprog_x86_callee_##NAME), kprog_public_##NAME), \
                "x86 program callee ABI: " #NAME);

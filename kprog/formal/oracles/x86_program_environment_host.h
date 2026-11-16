@@ -3,7 +3,8 @@
 #include <stdlib.h>
 extern unsigned long long kprog_x86_observe_time(void);
 extern void kprog_x86_observe_unresolved(void) __attribute__((noreturn));
-static __attribute__((always_inline, noreturn)) inline void
+static __attribute__((always_inline, noreturn,
+    error("indirect target was not eliminated by specialization"))) inline void
 __x86_sim_unresolved_indirect_target(void) { kprog_x86_observe_unresolved(); }
 #if !defined(__COMPCERT__)
 #define __BPF_HELPERS__ 1

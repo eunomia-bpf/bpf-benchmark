@@ -100,12 +100,14 @@ extern __u64 kprog_c_atomic_fetch(void *address, __u64 value, __u32 width,
     do { TYPE __kprog_c_store_value = (TYPE)(VALUE); \
          __builtin_memcpy_aligned((void *)(ADDR), &__kprog_c_store_value, \
              sizeof(TYPE), 1); } while (0)
-/* Empty register asm preserves the value; only native compilation needs the
- * optimizer barrier. This adapter applies only to that identity operation. */
+/* Empty asm has no C data effect; native compilation retains its value or
+ * memory optimizer barrier. These adapters apply only to empty asm. */
+#define KPROG_C_MEMORY_BARRIER() ((void)0)
 #define KPROG_C_BARRIER_VAR(VAR) ((void)(VAR))
 #define KPROG_C_VALUE_BARRIER_VAR(VAR) ((void)(VAR))
 #else
 #define KPROG_C_TRAP() __builtin_trap()
+#define KPROG_C_MEMORY_BARRIER() __asm__ volatile("" ::: "memory")
 #define KPROG_C_BARRIER_VAR(VAR) __asm__ volatile("" : "+r"(VAR))
 #define KPROG_C_VALUE_BARRIER_VAR(VAR) __asm__("" : "+r"(VAR))
 #endif
