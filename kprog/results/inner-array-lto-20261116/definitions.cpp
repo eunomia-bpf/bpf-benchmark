@@ -27,7 +27,7 @@ int main(int argc, char **argv) try {
     std::unique_ptr<Elf,decltype(&elf_end)> image(
         elf_memory(reinterpret_cast<char *>(unmodified.data()),unmodified.size()),elf_end);
     Elf_Scn *section=nullptr;
-    while ((section=elf_nextscn(image.get()))) {
+    while ((section=elf_nextscn(image.get(),section))) {
         GElf_Shdr h{};
         if (!gelf_getshdr(section,&h)) return 1;
         if (h.sh_type==SHT_NOBITS) continue;
