@@ -44,6 +44,17 @@ theorem entry_internal (m : CC.Mem) (ctx continuation : CC.Val) (k : CC.Cont) :
 theorem entry_frame (m : CC.Mem) : FrameBelow m.nextblock m (allocation m).2 :=
   (FrameBelow.allocVariables (allocation_valid m) m.nextblock (Nat.le_refl _)).2
 
+/-- Any actual declared local has a fresh owned block and its complete
+Freeable range. This specializes the imported allocation facts to the real
+producer without requiring a caller-supplied allocation outcome. -/
+theorem local_storage (m : CC.Mem) (id : CC.Ident) (ty : CC.Ty)
+    (present : (id, ty) ∈ producer.fn_vars) :
+    ∃ block, (allocation m).1.get id = some (block, ty) ∧
+      m.nextblock.toNat ≤ block.toNat ∧ block.toNat < (allocation m).2.nextblock.toNat ∧
+      CC.Mem.rangePerm (allocation m).2 block 0 (CC.sizeof ge.genv_cenv ty) .Cur .Freeable = true := by
+  obtain ⟨block, bound⟩ := allocated_local_binding (allocation_valid m) names.1 present
+  exact ⟨block, bound, (allocated_local_storage (allocation_valid m)).1 _ _ bound⟩
+
 def baseName (returns : Bool) : CC.Ident :=
   if returns then Arm64Entry.___a64_numeric_return else Arm64Entry.___a64_numeric_sp
 

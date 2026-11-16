@@ -2020,3 +2020,10 @@ without caller allocation or permission premises. The actual four-initializer
 stage takes 12 internal transitions, zeros both invalid caches and frames all
 caller blocks. Connecting the preceding producer body, header construction
 and continuation remains open.
+
+The [actual raw-prefix proof](results/m5-producer-prefix/README.md) connects
+function entry through all 189 preceding assignments and cache initialization
+in 580 internal transitions. It derives the stage memory from actual execution,
+frames all caller blocks and retains the allocated frame's permissions and
+frontier. Later input calls, header construction and the consumer continuation
+remain open.

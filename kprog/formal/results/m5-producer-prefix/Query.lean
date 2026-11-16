@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.Arm64ProducerPrefix
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.local_storage
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.cache_prefix_source
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.cache_prefix_length
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.prefix_internal
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.entry_caches_initialized
+#check KProgFormal.ClightRefinement.Arm64Producer.local_storage
+#check KProgFormal.ClightRefinement.Arm64Producer.cache_prefix_source
+#check KProgFormal.ClightRefinement.Arm64Producer.cache_prefix_length
+#check KProgFormal.ClightRefinement.Arm64Producer.prefix_internal
+#check KProgFormal.ClightRefinement.Arm64Producer.entry_caches_initialized

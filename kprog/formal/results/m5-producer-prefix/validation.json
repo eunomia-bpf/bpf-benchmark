@@ -1,0 +1,69 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-producer-prefix",
+  "focused_build": {
+    "exit": 0,
+    "jobs": 46,
+    "log": "prefix2.log"
+  },
+  "whole_lake_build": {
+    "exit": 0,
+    "jobs": 272,
+    "log": "lake-build.log"
+  },
+  "public_queries": {
+    "exit": 0,
+    "declarations": 5,
+    "log": "query.log",
+    "source_resource_axioms": "at most propext, Classical.choice and Quot.sound",
+    "internal_run_axioms": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "external_or_assembly_boundary": "not executed",
+    "external_determinism": "not assumed"
+  },
+  "metadata_query": {
+    "exit": 0,
+    "log": "inspect-final.log",
+    "assignments": 189,
+    "ABI_bytes": 216,
+    "ABI_field_offsets": [
+      0,
+      48,
+      68,
+      80,
+      88,
+      208
+    ]
+  },
+  "actual_transition_counts": {
+    "assignments_only": 567,
+    "entry_through_prefix": 568,
+    "entry_through_cache_initialization": 580
+  },
+  "proof_limits": {
+    "heartbeats": 200000,
+    "recursion_depth": 512,
+    "workers": 1,
+    "address_space_GiB": 32,
+    "declaration_elaboration": "synchronous"
+  },
+  "export_comparison": {
+    "baseline": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_byte_identical": true
+  },
+  "canonical_C_external_semantics_frozen_paths": "unchanged from bd04fb1a4",
+  "last_complete_make_check": {
+    "exit": 0,
+    "commit": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "rerun": "not needed for Lean-only proofs"
+  },
+  "complete_ISA_handler_refinements": 0,
+  "M5": "open",
+  "M6": "open"
+}
