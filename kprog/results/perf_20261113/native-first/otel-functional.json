@@ -1,0 +1,382 @@
+{
+  "app": "otelcol-ebpf-profiler/profiling",
+  "app_status": "ok",
+  "app_error": "",
+  "service_archive": "/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/service.tar.gz",
+  "framework_run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_034550_444336",
+  "request_attempts": 15,
+  "programs": 14,
+  "native_installed": 13,
+  "b_generated": 13,
+  "b_stock_passed": 5,
+  "tracked_program_ids": {
+    "baseline": 13,
+    "post_rejit": 12
+  },
+  "definition": "Programs are distinct native ELF SHA256/entry/type bodies submitted to the service; missing manifest entries do not submit a request. Tracked active IDs and request attempts are separate observations.",
+  "bodies": [
+    {
+      "native_sha256": "fd718c11002227ff6c46865d87389d3b7d20b307157322906451284de822d118",
+      "entry": "custom__generic",
+      "prog_type": 2,
+      "attempts": [
+        {
+          "request_id": 14,
+          "status": -5,
+          "native_installed": false,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": null,
+          "request_archive": "14.failure.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/loader-inputs/recovery', 'verify', '4', '14', '102', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-l3hrsa5a/generated/request.native.o', 'custom__generic', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-l3hrsa5a/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-l3hrsa5a/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'with_debug_output', '236', '40', 'reported_pids', '267', 'null', 'custom_context_map', '268', 'null', 'metrics', '265', 'null', 'inhibit_events', '238', 'null', 'stack_ptregs_offset', '236', '36', 'perf_progs', '249', 'null', 'per_cpu_records', '235', 'null', 'report_events', '237', 'null', 'kernel_stackmap', '280', 'null', 'pid_events', '247', 'null', 'interpreter_offsets', '285', 'null', 'pid_page_to_mapping_info', '248', 'null', 'task_stack_offset', '236', '32']' returned non-zero exit status 2."
+          },
+          "error.json": {
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/loader-inputs/recovery', 'load-direct', '4', '14', '102', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-l3hrsa5a/generated/request.native.o', 'custom__generic', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-l3hrsa5a/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-l3hrsa5a/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'with_debug_output', '236', '40', 'reported_pids', '267', 'null', 'custom_context_map', '268', 'null', 'metrics', '265', 'null', 'inhibit_events', '238', 'null', 'stack_ptregs_offset', '236', '36', 'perf_progs', '249', 'null', 'per_cpu_records', '235', 'null', 'report_events', '237', 'null', 'kernel_stackmap', '280', 'null', 'pid_events', '247', 'null', 'interpreter_offsets', '285', 'null', 'pid_page_to_mapping_info', '248', 'null', 'task_stack_offset', '236', '32']' returned non-zero exit status 1."
+          },
+          "verifier_tail": [
+            "trusted-native-loader: service simulator verification failed before native compilation: Invalid argument",
+            "processed 2911 insns (limit 1000000) max_states_per_insn 4 total_states 161 peak_states 160 mark_read 0",
+            ""
+          ]
+        },
+        {
+          "request_id": 15,
+          "status": -5,
+          "native_installed": false,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": null,
+          "request_archive": "15.failure.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/loader-inputs/recovery', 'verify', '4', '15', '107', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-6h4rlpph/generated/request.native.o', 'custom__generic', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-6h4rlpph/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-6h4rlpph/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'with_debug_output', '236', '40', 'reported_pids', '267', 'null', 'custom_context_map', '268', 'null', 'metrics', '265', 'null', 'inhibit_events', '238', 'null', 'stack_ptregs_offset', '236', '36', 'perf_progs', '249', 'null', 'per_cpu_records', '235', 'null', 'report_events', '237', 'null', 'kernel_stackmap', '280', 'null', 'pid_events', '247', 'null', 'interpreter_offsets', '285', 'null', 'pid_page_to_mapping_info', '248', 'null', 'task_stack_offset', '236', '32']' returned non-zero exit status 2."
+          },
+          "error.json": {
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/loader-inputs/recovery', 'load-direct', '4', '15', '107', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-6h4rlpph/generated/request.native.o', 'custom__generic', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-6h4rlpph/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-6h4rlpph/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'with_debug_output', '236', '40', 'reported_pids', '267', 'null', 'custom_context_map', '268', 'null', 'metrics', '265', 'null', 'inhibit_events', '238', 'null', 'stack_ptregs_offset', '236', '36', 'perf_progs', '249', 'null', 'per_cpu_records', '235', 'null', 'report_events', '237', 'null', 'kernel_stackmap', '280', 'null', 'pid_events', '247', 'null', 'interpreter_offsets', '285', 'null', 'pid_page_to_mapping_info', '248', 'null', 'task_stack_offset', '236', '32']' returned non-zero exit status 1."
+          },
+          "verifier_tail": [
+            "trusted-native-loader: service simulator verification failed before native compilation: Invalid argument",
+            "processed 2911 insns (limit 1000000) max_states_per_insn 4 total_states 161 peak_states 160 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "fd718c11002227ff6c46865d87389d3b7d20b307157322906451284de822d118",
+      "entry": "native_tracer_entry",
+      "prog_type": 7,
+      "attempts": [
+        {
+          "request_id": 13,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "13.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "fd718c11002227ff6c46865d87389d3b7d20b307157322906451284de822d118",
+      "entry": "perf_go_labels",
+      "prog_type": 7,
+      "attempts": [
+        {
+          "request_id": 11,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "11.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/loader-inputs/recovery', 'verify', '4', '11', '82', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-410q1jxh/generated/request.native.o', 'perf_go_labels', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-410q1jxh/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-410q1jxh/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'per_cpu_records', '235', 'null', 'trace_events', '272', 'null', 'go_labels_procs', '239', 'null', 'metrics', '265', 'null', 'with_debug_output', '236', '40']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "338: (54) w1 &= 63                    ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=63,var_off=(0x0; 0x3f))",
+            "339: (6f) r2 <<= r1                   ; R1=scalar(smin=smin32=0,smax=umax=smax32=umax32=63,var_off=(0x0; 0x3f)) R2=scalar()",
+            "340: (bf) r1 = r10                    ; R1=fp0 R10=fp0",
+            "341: (07) r1 += -248                  ; R1=fp-248",
+            "342: (1f) r4 -= r1",
+            "math between fp pointer and register with unbounded min value is not allowed",
+            "processed 333 insns (limit 1000000) max_states_per_insn 0 total_states 27 peak_states 27 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "fd718c11002227ff6c46865d87389d3b7d20b307157322906451284de822d118",
+      "entry": "perf_unwind_dotnet",
+      "prog_type": 7,
+      "attempts": [
+        {
+          "request_id": 10,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "10.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/loader-inputs/recovery', 'verify', '4', '10', '76', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-2f5zylwj/generated/request.native.o', 'perf_unwind_dotnet', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-2f5zylwj/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-2f5zylwj/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'perf_progs', '249', 'null', 'interpreter_offsets', '285', 'null', 'per_cpu_records', '235', 'null', 'metrics', '265', 'null', 'pid_page_to_mapping_info', '248', 'null', 'dotnet_procs', '250', 'null', 'with_debug_output', '236', '40']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "1188: (05) goto pc+256",
+            "1445: (bf) r2 = r10                   ; R2=fp0 R10=fp0",
+            "1446: (07) r2 += -216                 ; R2=fp-216",
+            "1447: (79) r3 = *(u64 *)(r10 -240)    ; R3=scalar(id=29) R10=fp0 fp-240=scalar(id=29)",
+            "1448: (1f) r3 -= r2",
+            "math between fp pointer and register with unbounded min value is not allowed",
+            "processed 495 insns (limit 1000000) max_states_per_insn 1 total_states 38 peak_states 38 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "fd718c11002227ff6c46865d87389d3b7d20b307157322906451284de822d118",
+      "entry": "perf_unwind_hotspot",
+      "prog_type": 7,
+      "attempts": [
+        {
+          "request_id": 4,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "4.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/loader-inputs/recovery', 'verify', '4', '4', '39', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-o0o34epj/generated/request.native.o', 'perf_unwind_hotspot', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-o0o34epj/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-o0o34epj/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'perf_progs', '249', 'null', 'interpreter_offsets', '285', 'null', 'pid_page_to_mapping_info', '248', 'null', 'metrics', '265', 'null', 'per_cpu_records', '235', 'null', 'hotspot_procs', '277', 'null', 'with_debug_output', '236', '40']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "7730: (67) r4 <<= 60                  ; R4=0x2000000000000000",
+            "7731: (4f) r3 |= r4                   ; R3=scalar(smin=umin=0x2000ffff00000000,smax=umax=0x2000ffffffffffff,var_off=(0x2000ffff00000000; 0xffffffff)) R4=0x2000000000000000",
+            "7732: (bf) r4 = r6                    ; R4=map_value(map=per_cpu_records,ks=4,vs=5000) R6=map_value(map=per_cpu_records,ks=4,vs=5000)",
+            "7733: (07) r4 += 728                  ; R4=map_value(map=per_cpu_records,ks=4,vs=5000,off=728)",
+            "7734: (7b) *(u64 *)(r10 -520) = r4",
+            "invalid write to stack R10 off=-520 size=8",
+            "processed 1622 insns (limit 1000000) max_states_per_insn 1 total_states 131 peak_states 131 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "fd718c11002227ff6c46865d87389d3b7d20b307157322906451284de822d118",
+      "entry": "perf_unwind_native",
+      "prog_type": 7,
+      "attempts": [
+        {
+          "request_id": 3,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": false,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "3.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "generation",
+            "error": "relative table schedule observes or overwrites private results"
+          }
+        }
+      ]
+    },
+    {
+      "native_sha256": "fd718c11002227ff6c46865d87389d3b7d20b307157322906451284de822d118",
+      "entry": "perf_unwind_perl",
+      "prog_type": 7,
+      "attempts": [
+        {
+          "request_id": 5,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "5.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/loader-inputs/recovery', 'verify', '4', '5', '45', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-x394lukr/generated/request.native.o', 'perf_unwind_perl', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-x394lukr/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-x394lukr/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'perf_progs', '249', 'null', 'perl_procs', '275', 'null', 'per_cpu_records', '235', 'null', 'metrics', '265', 'null', 'tpbase_offset', '236', '24', 'with_debug_output', '236', '40']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "1760: (05) goto pc+1",
+            "1762: (bf) r1 = r10                   ; R1=fp0 R10=fp0",
+            "1763: (07) r1 += -224                 ; R1=fp-224",
+            "1764: (79) r2 = *(u64 *)(r10 -288)    ; R2=scalar(id=22) R10=fp0 fp-288=scalar(id=22)",
+            "1765: (1f) r2 -= r1",
+            "math between fp pointer and register with unbounded min value is not allowed",
+            "processed 270 insns (limit 1000000) max_states_per_insn 0 total_states 20 peak_states 20 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "fd718c11002227ff6c46865d87389d3b7d20b307157322906451284de822d118",
+      "entry": "perf_unwind_php",
+      "prog_type": 7,
+      "attempts": [
+        {
+          "request_id": 6,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "6.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "fd718c11002227ff6c46865d87389d3b7d20b307157322906451284de822d118",
+      "entry": "perf_unwind_python",
+      "prog_type": 7,
+      "attempts": [
+        {
+          "request_id": 7,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "7.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/loader-inputs/recovery', 'verify', '4', '7', '58', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-y318epe0/generated/request.native.o', 'perf_unwind_python', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-y318epe0/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-y318epe0/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'perf_progs', '249', 'null', 'per_cpu_records', '235', 'null', 'py_procs', '281', 'null', 'metrics', '265', 'null', 'tpbase_offset', '236', '24', 'with_debug_output', '236', '40']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "trusted-native-loader: service simulator verification failed before native compilation: Permission denied",
+            "0: R1=ctx() R10=fp0",
+            "0: (b7) r0 = 0                        ; R0=0",
+            "1: (7b) *(u64 *)(r10 -304) = r0       ; R0=0 R10=fp0 fp-304=0",
+            "2: (7b) *(u64 *)(r10 -1112) = r0",
+            "invalid write to stack R10 off=-1112 size=8",
+            "processed 3 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "fd718c11002227ff6c46865d87389d3b7d20b307157322906451284de822d118",
+      "entry": "perf_unwind_ruby",
+      "prog_type": 7,
+      "attempts": [
+        {
+          "request_id": 8,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "8.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/loader-inputs/recovery', 'verify', '4', '8', '64', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-ibjrgtly/generated/request.native.o', 'perf_unwind_ruby', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-ibjrgtly/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-ibjrgtly/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'perf_progs', '249', 'null', 'ruby_procs', '286', 'null', 'per_cpu_records', '235', 'null', 'metrics', '265', 'null', 'tpbase_offset', '236', '24', 'with_debug_output', '236', '40']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "trusted-native-loader: service simulator verification failed before native compilation: Permission denied",
+            "0: R1=ctx() R10=fp0",
+            "0: (b7) r0 = 0                        ; R0=0",
+            "1: (7b) *(u64 *)(r10 -744) = r0",
+            "invalid write to stack R10 off=-744 size=8",
+            "processed 2 insns (limit 1000000) max_states_per_insn 0 total_states 0 peak_states 0 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "fd718c11002227ff6c46865d87389d3b7d20b307157322906451284de822d118",
+      "entry": "perf_unwind_stop",
+      "prog_type": 7,
+      "attempts": [
+        {
+          "request_id": 2,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "2.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "fd718c11002227ff6c46865d87389d3b7d20b307157322906451284de822d118",
+      "entry": "perf_unwind_v8",
+      "prog_type": 7,
+      "attempts": [
+        {
+          "request_id": 9,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": false,
+          "execution_path": "direct-native",
+          "request_archive": "9.success.tar.gz",
+          "simulator-failure.json": {
+            "stage": "verification",
+            "error": "Command '['/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/loader-inputs/recovery', 'verify', '4', '9', '70', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-epqeirkw/generated/request.native.o', 'perf_unwind_v8', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-epqeirkw/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/perf/20261116-checked-six-apps/otelcol-ebpf-profiler/state/session-2xzsl30o/requests/request-epqeirkw/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'perf_progs', '249', 'null', 'interpreter_offsets', '285', 'null', 'pid_page_to_mapping_info', '248', 'null', 'v8_procs', '266', 'null', 'per_cpu_records', '235', 'null', 'metrics', '265', 'null', 'with_debug_output', '236', '40']' returned non-zero exit status 2."
+          },
+          "verifier_tail": [
+            "4055: (bf) r4 = r2                    ; R2=scalar(id=43) R4=scalar(id=43)",
+            "4056: (bf) r3 = r10                   ; R3=fp0 R10=fp0",
+            "4057: (07) r3 += -232                 ; R3=fp-232",
+            "4058: (79) r0 = *(u64 *)(r10 -264)    ; R0=scalar(id=44) R10=fp0 fp-264=scalar(id=44)",
+            "4059: (1f) r0 -= r3",
+            "math between fp pointer and register with unbounded min value is not allowed",
+            "processed 998 insns (limit 1000000) max_states_per_insn 1 total_states 82 peak_states 82 mark_read 0",
+            ""
+          ]
+        }
+      ]
+    },
+    {
+      "native_sha256": "fd718c11002227ff6c46865d87389d3b7d20b307157322906451284de822d118",
+      "entry": "read_task_struct",
+      "prog_type": 17,
+      "attempts": [
+        {
+          "request_id": 1,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "1.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    },
+    {
+      "native_sha256": "fd718c11002227ff6c46865d87389d3b7d20b307157322906451284de822d118",
+      "entry": "tracepoint__sched_process_free",
+      "prog_type": 5,
+      "attempts": [
+        {
+          "request_id": 12,
+          "status": 0,
+          "native_installed": true,
+          "b_generated": true,
+          "b_stock_passed": true,
+          "execution_path": "checked-sim-c",
+          "request_archive": "12.success.tar.gz",
+          "verifier_tail": []
+        }
+      ]
+    }
+  ]
+}

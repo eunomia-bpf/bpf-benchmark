@@ -537,3 +537,15 @@ relative-schedule-replay:
 .PHONY: relative-schedule-b
 relative-schedule-b: $(CONTEXT_TOOL)
 	taskset -c 16-18 prlimit --as=17179869184 -- python3 $(ROOT)/kprog/test/replay_relative_schedule.py --archive $(SCHEDULE_ARCHIVE) --build /var/tmp/kprog-tmp/perf/relative-schedule --output $(OUTPUT) --compile --bounds $(CONTEXT_TOOL)
+
+.PHONY: relative-schedule-stock guest-relative-schedule-stock
+relative-schedule-stock:
+	install -d $(OUTPUT) $(OUTPUT)/inputs
+	python3 -c 'import pathlib,tarfile; build=pathlib.Path("/var/tmp/kprog-tmp/perf/relative-schedule"); archive=tarfile.open("$(SCHEDULE_ARCHIVE)"); fields={"kernel.native.o":"replay.native.o","generation.metadata.json":"replay.metadata.json","kernel.facts.json":"replay.context.json"}; [(build/name).write_bytes(archive.extractfile("request/"+source).read()) for source,name in fields.items()]'
+	flock -s /workspaces/.agent-state/kprog-lanes/locks/image taskset -c 16-18 prlimit --as=17179869184 -- vng --run $(KDIR)/arch/x86/boot/bzImage --cwd $(ROOT) --rwdir $(ROOT) --rwdir $(OUTPUT) --rodir $(OUTPUT)/inputs=/var/tmp/kprog-tmp/perf/relative-schedule --overlay-rwdir /tmp --disable-monitor --cpus 2 --memory 8G --append 'loglevel=4 panic=30 oops=panic' --exec 'make -r -f kprog/test/native-relocations.mk guest-relative-schedule-stock OUTPUT=$(OUTPUT)'
+
+guest-relative-schedule-stock:
+	mountpoint -q /sys/kernel/debug || mount -t debugfs debugfs /sys/kernel/debug
+	mountpoint -q /sys/fs/bpf || mount -t bpf bpffs /sys/fs/bpf
+	insmod /workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko
+	python3 $(ROOT)/kprog/test/verify_retained_proof.py --native $(OUTPUT)/inputs/replay.native.o --metadata $(OUTPUT)/inputs/replay.metadata.json --context $(OUTPUT)/inputs/replay.context.json --source $(ROOT)/vendor/repos/opentelemetry-ebpf-profiler/support/ebpf/tracer.ebpf.amd64 --proof $(OUTPUT)/inputs/replay.bpf.o --symbol perf_unwind_native --linker $(LINKER_BINARY) --output $(OUTPUT)/replay
