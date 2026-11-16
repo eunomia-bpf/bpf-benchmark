@@ -28,6 +28,7 @@ PORT=${PORT:-0}
 LOCK=/workspaces/.agent-state/kprog-lanes/locks/timing
 SAMPLES=${SAMPLES:-1}
 DURATION=${DURATION:-120}
+SETTLE=${SETTLE:-40}
 # The counters are counts, not times, so they do not need the timing CPUs or
 # the timing lock: a run on its own CPU set reports the same numbers while a
 # rotate holds the lock for hours. Set BOTH to run off-lock, and only when the
