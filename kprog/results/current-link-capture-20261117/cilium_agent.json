@@ -1,0 +1,2684 @@
+{
+  "app": "cilium/agent",
+  "guest_returncode": 0,
+  "captures": [
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_ingress_ipv4",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-13kno4fc/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-13kno4fc/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-13kno4fc",
+      "proof_bytes": 198432,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_netdev",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1cycht3i/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1cycht3i/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1cycht3i",
+      "proof_bytes": 167664,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_rev_dnat_ipv4",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2ce8m1_7/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2ce8m1_7/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2ce8m1_7",
+      "proof_bytes": 81776,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_xdp_entry",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-3cqcl0fp/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-3cqcl0fp/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-3cqcl0fp",
+      "proof_bytes": 12032,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_container",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4d9yymr5/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4d9yymr5/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4d9yymr5",
+      "proof_bytes": 27840,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_no_service_ipv4",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4uxpf98g/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4uxpf98g/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4uxpf98g",
+      "proof_bytes": 67384,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_host",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6fga9lbq/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6fga9lbq/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6fga9lbq",
+      "proof_bytes": 26192,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_netdev",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-79btul9d/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-79btul9d/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-79btul9d",
+      "proof_bytes": 166632,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_policy",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8cg5bvgp/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8cg5bvgp/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8cg5bvgp",
+      "proof_bytes": 119160,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_arp",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-91mtb7o3/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-91mtb7o3/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-91mtb7o3",
+      "proof_bytes": 22264,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_egress",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9gsgtcv3/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9gsgtcv3/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9gsgtcv3",
+      "proof_bytes": 137000,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_rev_dnat_ipv4",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_7ys3jh4/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_7ys3jh4/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_7ys3jh4",
+      "proof_bytes": 81776,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_lxc_policy",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_8d03s3p/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_8d03s3p/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_8d03s3p",
+      "proof_bytes": 120384,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_host",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_p5zmjby/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_p5zmjby/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_p5zmjby",
+      "proof_bytes": 57704,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_snat_fwd_ipv4",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-agezr1oz/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-agezr1oz/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-agezr1oz",
+      "proof_bytes": 299784,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_lxc_policy",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f5_4shmk/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f5_4shmk/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f5_4shmk",
+      "proof_bytes": 120376,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_host",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f9ut04aq/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f9ut04aq/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f9ut04aq",
+      "proof_bytes": 11760,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_egress_ipv4",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fhkkm0eb/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fhkkm0eb/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fhkkm0eb",
+      "proof_bytes": 151112,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_snat_fwd_ipv4",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-iwl_z0yi/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-iwl_z0yi/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-iwl_z0yi",
+      "proof_bytes": 299096,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_no_service_ipv4",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jo5rwatf/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jo5rwatf/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jo5rwatf",
+      "proof_bytes": 67384,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_arp",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k027eqh_/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k027eqh_/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k027eqh_",
+      "proof_bytes": 22264,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_to_endpoint",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-l7u92oz8/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-l7u92oz8/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-l7u92oz8",
+      "proof_bytes": 133816,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_egress",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lf1ld_nc/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lf1ld_nc/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lf1ld_nc",
+      "proof_bytes": 137000,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_cont",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lorirdv6/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lorirdv6/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lorirdv6",
+      "proof_bytes": 123664,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_host",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-movvchz0/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-movvchz0/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-movvchz0",
+      "proof_bytes": 57704,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_snat_fwd_ipv4",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nxg7aalt/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nxg7aalt/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nxg7aalt",
+      "proof_bytes": 299392,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_policy",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o3794un8/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o3794un8/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o3794un8",
+      "proof_bytes": 119176,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_netdev",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o8ohgar4/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o8ohgar4/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o8ohgar4",
+      "proof_bytes": 53360,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_netdev",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pkqceosl/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pkqceosl/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pkqceosl",
+      "proof_bytes": 53360,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qw44_dh3/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qw44_dh3/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qw44_dh3",
+      "proof_bytes": 125808,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_host",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rodhoecx/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rodhoecx/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rodhoecx",
+      "proof_bytes": 57704,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_ingress_ipv4",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rxey2hzy/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rxey2hzy/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rxey2hzy",
+      "proof_bytes": 198432,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_container",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-s6hx0gco/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-s6hx0gco/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-s6hx0gco",
+      "proof_bytes": 19520,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_netdev",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-syczdmnk/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-syczdmnk/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-syczdmnk",
+      "proof_bytes": 100344,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-t15zizyt/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-t15zizyt/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-t15zizyt",
+      "proof_bytes": 125808,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_netdev",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-t_ial4wq/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-t_ial4wq/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-t_ial4wq",
+      "proof_bytes": 100336,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_to_endpoint",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uxsybchg/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uxsybchg/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uxsybchg",
+      "proof_bytes": 133808,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_container",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v9h7qeqv/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v9h7qeqv/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v9h7qeqv",
+      "proof_bytes": 27840,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_netdev",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v_946gqq/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v_946gqq/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v_946gqq",
+      "proof_bytes": 53360,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_cont",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vc7e_r5k/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vc7e_r5k/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vc7e_r5k",
+      "proof_bytes": 123656,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_host",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vl_vqe9q/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vl_vqe9q/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vl_vqe9q",
+      "proof_bytes": 11760,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_ingress",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-wbdsc394/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-wbdsc394/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-wbdsc394",
+      "proof_bytes": 107944,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_netdev",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xd5wo9oh/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xd5wo9oh/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xd5wo9oh",
+      "proof_bytes": 100336,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_container",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xno7wtkt/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xno7wtkt/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xno7wtkt",
+      "proof_bytes": 19520,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_ingress",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-y6a0390q/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-y6a0390q/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-y6a0390q",
+      "proof_bytes": 107936,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_host",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-yaomepl8/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-yaomepl8/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-yaomepl8",
+      "proof_bytes": 26192,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_egress_ipv4",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zlk3fva1/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zlk3fva1/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zlk3fva1",
+      "proof_bytes": 151112,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    }
+  ],
+  "capture_errors": [],
+  "other_invocations": [
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0h52o9ht",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/52285ce696a776aa.perf.native.o",
+        "--symbol",
+        "tail_handle_ipv4",
+        "--output",
+        "/tmp/native_kernel_link_cache/6baeadfb34e092b2.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0yg_0ize",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/379964d69aed0157.perf.native.o",
+        "--symbol",
+        "tail_ipv4_ct_ingress",
+        "--output",
+        "/tmp/native_kernel_link_cache/6b2a4c2f2e1471d8.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1eb_0a7j",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/cilium/bpf_host.native.o",
+        "--symbol",
+        "tail_nodeport_nat_ingress_ipv4",
+        "--output",
+        "/tmp/native_kernel_link_cache/8f306306c90264a7.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1tk6nyre",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/cilium/bpf_host.native.o",
+        "--symbol",
+        "tail_nodeport_nat_egress_ipv4",
+        "--output",
+        "/tmp/native_kernel_link_cache/05d8462217280e86.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-39hzu975",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/1836e068c4206cfd.perf.native.o",
+        "--symbol",
+        "tail_handle_ipv4_cont",
+        "--output",
+        "/tmp/native_kernel_link_cache/546ac3d44f5f844e.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-3cu39pt5",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/e030642d0421a0fc.perf.native.o",
+        "--symbol",
+        "tail_ipv4_policy",
+        "--output",
+        "/tmp/native_kernel_link_cache/af06db32f7210f8c.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4c0mr7_3",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/02314e3f88cb9d6f.perf.native.o",
+        "--symbol",
+        "cil_to_container",
+        "--output",
+        "/tmp/native_kernel_link_cache/026d89aeb7f50d0e.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4ljvgiyb",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/cilium/bpf_lxc.native.o",
+        "--symbol",
+        "tail_ipv4_to_endpoint",
+        "--output",
+        "/tmp/native_kernel_link_cache/9e4a84cea5030795.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4vccn8d4",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/cilium/bpf_lxc.native.o",
+        "--symbol",
+        "tail_ipv4_ct_ingress",
+        "--output",
+        "/tmp/native_kernel_link_cache/f0ecd7b16b7f2bac.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-58yolzys",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/cilium/bpf_host.native.o",
+        "--symbol",
+        "cil_from_host",
+        "--output",
+        "/tmp/native_kernel_link_cache/785f3ebf2c85aeb6.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6gnuzq1g",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/1f3895ff94c1c9cb.perf.native.o",
+        "--symbol",
+        "cil_to_netdev",
+        "--output",
+        "/tmp/native_kernel_link_cache/a5dcdd17882fa8dd.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-770dbt69",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/e70ca546e170ff54.perf.native.o",
+        "--symbol",
+        "tail_handle_ipv4_cont",
+        "--output",
+        "/tmp/native_kernel_link_cache/837fdd9f81036d70.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7859cqme",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/49d669c0e5a07ed2.perf.native.o",
+        "--symbol",
+        "cil_from_netdev",
+        "--output",
+        "/tmp/native_kernel_link_cache/88a6f56d1df72516.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-79a6cxon",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/cilium/bpf_lxc.native.o",
+        "--symbol",
+        "tail_nodeport_rev_dnat_ipv4",
+        "--output",
+        "/tmp/native_kernel_link_cache/87254aeb957826c5.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7li2ixij",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/cilium/bpf_xdp.native.o",
+        "--symbol",
+        "cil_xdp_entry",
+        "--output",
+        "/tmp/native_kernel_link_cache/1cd1a055aa1c3f24.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7mx4rxp8",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/cilium/bpf_lxc.native.o",
+        "--symbol",
+        "tail_handle_ipv4_cont",
+        "--output",
+        "/tmp/native_kernel_link_cache/76af1bb21ee12faf.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8eanrf60",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/2b6419abec256c3e.perf.native.o",
+        "--symbol",
+        "tail_ipv4_policy",
+        "--output",
+        "/tmp/native_kernel_link_cache/c71fb3c6e9091bf0.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9dyd9vsx",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/cilium/bpf_lxc.native.o",
+        "--symbol",
+        "tail_handle_arp",
+        "--output",
+        "/tmp/native_kernel_link_cache/e62a3fb1d1104210.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_9hivs7b",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/cilium/bpf_host.native.o",
+        "--symbol",
+        "tail_handle_ipv4_from_netdev",
+        "--output",
+        "/tmp/native_kernel_link_cache/411d485242f190b2.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-__vv3pc1",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/98231bad2687c0e7.perf.native.o",
+        "--symbol",
+        "cil_xdp_entry",
+        "--output",
+        "/tmp/native_kernel_link_cache/6f404131575c7263.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_rsy4f3c",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/cilium/bpf_host.native.o",
+        "--symbol",
+        "cil_to_netdev",
+        "--output",
+        "/tmp/native_kernel_link_cache/922417429f2c1069.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_z_xhcmu",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/cilium/bpf_host.native.o",
+        "--symbol",
+        "cil_to_host",
+        "--output",
+        "/tmp/native_kernel_link_cache/29a3cd93c5e3aff7.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-a6e54tce",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/dd2432a765e644ae.perf.native.o",
+        "--symbol",
+        "cil_from_netdev",
+        "--output",
+        "/tmp/native_kernel_link_cache/1c59b93e43747ddf.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-a7lgmuxh",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/a2a7d88ee25b6ade.perf.native.o",
+        "--symbol",
+        "tail_handle_snat_fwd_ipv4",
+        "--output",
+        "/tmp/native_kernel_link_cache/2965068adfbf8fdd.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ac4li_2i",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/cilium/bpf_host.native.o",
+        "--symbol",
+        "cil_from_netdev",
+        "--output",
+        "/tmp/native_kernel_link_cache/4d552abb03a2d258.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-b1cjtu4o",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/05276626d165965b.perf.native.o",
+        "--symbol",
+        "cil_to_container",
+        "--output",
+        "/tmp/native_kernel_link_cache/ed6c7b7e2d9f2bda.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-b3wgvwvq",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/cilium/bpf_host.native.o",
+        "--symbol",
+        "tail_no_service_ipv4",
+        "--output",
+        "/tmp/native_kernel_link_cache/95289efab5eabe45.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-cg1zb31p",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/cilium/bpf_lxc.native.o",
+        "--symbol",
+        "cil_lxc_policy",
+        "--output",
+        "/tmp/native_kernel_link_cache/42af5cdddf32a6ed.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ch22t83s",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/3c7cfe4fba59179e.perf.native.o",
+        "--symbol",
+        "tail_handle_ipv4",
+        "--output",
+        "/tmp/native_kernel_link_cache/cb7dffc4e724b16a.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-elklc5do",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/29134f84af160125.perf.native.o",
+        "--symbol",
+        "tail_ipv4_to_endpoint",
+        "--output",
+        "/tmp/native_kernel_link_cache/d123c27f700ab998.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-eybmbkb1",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/ff47166dea40cba2.perf.native.o",
+        "--symbol",
+        "cil_lxc_policy",
+        "--output",
+        "/tmp/native_kernel_link_cache/b3b7185309291bfd.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f7tj203b",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/cilium/bpf_host.native.o",
+        "--symbol",
+        "tail_handle_snat_fwd_ipv4",
+        "--output",
+        "/tmp/native_kernel_link_cache/b3f804989d3cc47c.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fxbqltq5",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/cilium/bpf_lxc.native.o",
+        "--symbol",
+        "tail_handle_ipv4",
+        "--output",
+        "/tmp/native_kernel_link_cache/e67ac26a7198b493.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-g1w0qs40",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/5401604773949e0e.perf.native.o",
+        "--symbol",
+        "tail_handle_ipv4_from_host",
+        "--output",
+        "/tmp/native_kernel_link_cache/6ca2428fbd91c194.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-gd4lxzxc",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/4d989ea2a02d02ff.perf.native.o",
+        "--symbol",
+        "tail_nodeport_rev_dnat_ipv4",
+        "--output",
+        "/tmp/native_kernel_link_cache/0b4775439fb1e7e3.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ge3uparh",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/cilium/bpf_lxc.native.o",
+        "--symbol",
+        "tail_ipv4_ct_egress",
+        "--output",
+        "/tmp/native_kernel_link_cache/23961017137f769b.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ghi5cbgw",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/ae1b56a74ee98327.perf.native.o",
+        "--symbol",
+        "tail_nodeport_nat_egress_ipv4",
+        "--output",
+        "/tmp/native_kernel_link_cache/92fcc4ed3eb91a5c.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-gj06608g",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/cilium/bpf_lxc.native.o",
+        "--symbol",
+        "cil_from_container",
+        "--output",
+        "/tmp/native_kernel_link_cache/d89d20f93758e6e1.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-h7u3tfq3",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/bb440e4433d0c611.perf.native.o",
+        "--symbol",
+        "cil_to_netdev",
+        "--output",
+        "/tmp/native_kernel_link_cache/2e01b8669bb4b21a.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hyr6caez",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/638159f6567386d3.perf.native.o",
+        "--symbol",
+        "tail_nodeport_rev_dnat_ipv4",
+        "--output",
+        "/tmp/native_kernel_link_cache/3af29af15a491e0a.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-in_7ay46",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/bb2bc51d47c760bd.perf.native.o",
+        "--symbol",
+        "cil_from_netdev",
+        "--output",
+        "/tmp/native_kernel_link_cache/e86d613699a2d7a6.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-iwiyhsmd",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/fe52e9a0a2c56d58.perf.native.o",
+        "--symbol",
+        "tail_handle_arp",
+        "--output",
+        "/tmp/native_kernel_link_cache/5d7b8a401e783b32.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ix0f5lq9",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/cilium/bpf_lxc.native.o",
+        "--symbol",
+        "tail_ipv4_policy",
+        "--output",
+        "/tmp/native_kernel_link_cache/2fc4fd38ce10b281.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-iy6gipku",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/cc7aad624a5bdb0a.perf.native.o",
+        "--symbol",
+        "cil_lxc_policy",
+        "--output",
+        "/tmp/native_kernel_link_cache/23728a32574e2f7e.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-kv02tgjh",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/cilium/bpf_lxc.native.o",
+        "--symbol",
+        "tail_no_service_ipv4",
+        "--output",
+        "/tmp/native_kernel_link_cache/13af81bcf70cb6c4.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-l4c3x_o3",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/cilium/bpf_host.native.o",
+        "--symbol",
+        "tail_handle_ipv4_from_host",
+        "--output",
+        "/tmp/native_kernel_link_cache/ac85bab907a7b808.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-l88ilati",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/be005ecc639f4f0f.perf.native.o",
+        "--symbol",
+        "tail_handle_snat_fwd_ipv4",
+        "--output",
+        "/tmp/native_kernel_link_cache/7afce75dc48366bb.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lfp0po31",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/fad0bd8bc5788b50.perf.native.o",
+        "--symbol",
+        "tail_handle_arp",
+        "--output",
+        "/tmp/native_kernel_link_cache/72515c40c61c3772.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lul7zdl2",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/3423045ad2728a7d.perf.native.o",
+        "--symbol",
+        "cil_from_container",
+        "--output",
+        "/tmp/native_kernel_link_cache/30081a4fb475d3d6.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mojb5t_3",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/32df21786db1adc7.perf.native.o",
+        "--symbol",
+        "tail_no_service_ipv4",
+        "--output",
+        "/tmp/native_kernel_link_cache/370198af40042d08.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-n5krzjde",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/3b4080f09d256690.perf.native.o",
+        "--symbol",
+        "cil_to_host",
+        "--output",
+        "/tmp/native_kernel_link_cache/a29dc165009d4e1a.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nwjyhdpr",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/cilium/bpf_lxc.native.o",
+        "--symbol",
+        "cil_to_container",
+        "--output",
+        "/tmp/native_kernel_link_cache/d66d1b6848f0a026.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-q_cq3top",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/3d325b311e64ee42.perf.native.o",
+        "--symbol",
+        "tail_handle_ipv4_from_netdev",
+        "--output",
+        "/tmp/native_kernel_link_cache/49b9062fde8599a0.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qirs390i",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/b9d0c8708c919e59.perf.native.o",
+        "--symbol",
+        "tail_nodeport_nat_ingress_ipv4",
+        "--output",
+        "/tmp/native_kernel_link_cache/b86a582c9ce5d951.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r7sp_pvf",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/6b6ba4e09a9db490.perf.native.o",
+        "--symbol",
+        "cil_from_host",
+        "--output",
+        "/tmp/native_kernel_link_cache/a7d7fb9d8c43b91e.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-sahe1gw8",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/1423b90e9949d81f.perf.native.o",
+        "--symbol",
+        "tail_ipv4_ct_egress",
+        "--output",
+        "/tmp/native_kernel_link_cache/ce7af4f6770ad19d.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-sbxj75ss",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/3fe286957f706227.perf.native.o",
+        "--symbol",
+        "cil_from_host",
+        "--output",
+        "/tmp/native_kernel_link_cache/8eba55bcefc99c4d.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-shtiuuvr",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/c55ca08a16a1d7f9.perf.native.o",
+        "--symbol",
+        "tail_handle_ipv4_from_netdev",
+        "--output",
+        "/tmp/native_kernel_link_cache/b2a17ccfb2af2924.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-sly9qqcr",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/780e6f0e4fc84d84.perf.native.o",
+        "--symbol",
+        "cil_to_netdev",
+        "--output",
+        "/tmp/native_kernel_link_cache/3ca24f65c41997a0.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-thu6v4ms",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/d0f3b4172d2e2b11.perf.native.o",
+        "--symbol",
+        "cil_from_container",
+        "--output",
+        "/tmp/native_kernel_link_cache/125df892d64269f2.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uk67tj65",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/c3e4685e3c6f3f5a.perf.native.o",
+        "--symbol",
+        "tail_ipv4_to_endpoint",
+        "--output",
+        "/tmp/native_kernel_link_cache/c71be32194fd6bac.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xizngads",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/ac097bb6d38183cb.perf.native.o",
+        "--symbol",
+        "tail_ipv4_ct_egress",
+        "--output",
+        "/tmp/native_kernel_link_cache/df591940de4be72d.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xy_55n60",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/d48eaaa918b74f70.perf.native.o",
+        "--symbol",
+        "cil_from_host",
+        "--output",
+        "/tmp/native_kernel_link_cache/f3a710c5e1e88a06.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-z182z2qf",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/1fc025c33adf4269.perf.native.o",
+        "--symbol",
+        "tail_handle_snat_fwd_ipv4",
+        "--output",
+        "/tmp/native_kernel_link_cache/eedca5f7ef390150.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zo9bokv_",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/18542ab0003cb2c7.perf.native.o",
+        "--symbol",
+        "tail_ipv4_ct_ingress",
+        "--output",
+        "/tmp/native_kernel_link_cache/231ef686d18b0fb7.entry.proof.o.tmp.3131",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    }
+  ],
+  "scope": "Actual new kernel-link requests, including linker failures, archived by the capture adapter. No helper/layout facts are added. Missing/failed loads remain in the guest and shim logs; an empty capture list does not imply no native work. Functional capture, not official timing."
+}
