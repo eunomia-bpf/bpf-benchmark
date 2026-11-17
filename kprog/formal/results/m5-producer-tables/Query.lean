@@ -1,0 +1,17 @@
+import KProgFormal.ClightRefinement.Arm64ProducerTables
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.pointer_tables_source
+#check KProgFormal.ClightRefinement.Arm64Producer.pointer_tables_source
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.table_declarations
+#check KProgFormal.ClightRefinement.Arm64Producer.table_declarations
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.table_cell_declaration
+#check KProgFormal.ClightRefinement.Arm64Producer.table_cell_declaration
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.table_offsets
+#check KProgFormal.ClightRefinement.Arm64Producer.table_offsets
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.table_locals
+#check KProgFormal.ClightRefinement.Arm64Producer.table_locals
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.initialize_pointer_table
+#check KProgFormal.ClightRefinement.Arm64Producer.initialize_pointer_table
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.pointer_tables_initialized
+#check KProgFormal.ClightRefinement.Arm64Producer.pointer_tables_initialized
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.register30_and_pointer_tables
+#check KProgFormal.ClightRefinement.Arm64Producer.register30_and_pointer_tables

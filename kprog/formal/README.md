@@ -2041,3 +2041,9 @@ covers x0--x29's real provider calls and writebacks; x30's zero branch completes
 without a provider. Each writeback retains the explicit provider post-memory
 permission premise and preserves other local loads relative to that memory.
 The shared first continuation is connected to the existing raw-producer prefix.
+
+The [pointer-table proof](results/m5-producer-tables/README.md) constructs all
+31 cell pointers and 31 tag pointers from actual allocated locals. The real
+source segment completes in 186 internal transitions, with exact pointer
+readback and other-local/caller framing. Composing the preceding x30 zero
+branch gives 196 transitions and preserves its zero word and tag observations.
