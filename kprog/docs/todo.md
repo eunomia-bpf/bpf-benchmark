@@ -39,6 +39,11 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-17T11:22:46Z（lane 恢复后的第一个小时）**：
+1. 正式轮（冻结入口默认 3 × 180 秒，stats 关）：OTel 1.053x、BCC 0.998x（底线 0.985x）、Cilium 2.819x（两臂开关不同，不计）、Tetragon 1.042x（底线 1.009x）；Tracee、Katran 在跑。
+2. 镜像从工作树构建，所以批次建镜像前构建输入必须已提交：批次脚本等这些路径 git status 干净，再从建镜像到最后一次计时持有 locks/batch（COORDINATION 同时间一条）。取时间批次按此重启（91bb52707）；镜像里同时带 PERF 6066b311b（current-task BTF、jiffies）和 omp 8273b93af（尾调用栈帧），Tracee 那一行写明这三项。
+3. 批次 2（uid_gid 叶子例程、内核字符串循环、Cilium 开关、取时间例程改名）交给 omp 排期、PERF 应用（a82942df4，kprog/results/leaf-batch2-20261117）：PERF 正在改同一个 x86_probe_read.rs，一个文件一个写入者。
+
 **多日大任务（运营者 2026-11-17T10:31 UTC："你让 codex / omp 也看看在里面能不能干啥. 给他们持续性几天的大任务, 免得你用完了停下来了. 让 omp 统筹 codex 或者自己做. 恢复omp集群定时任务"）**
 分工（协调者定）：omp（集群值守 bpf-benchmark-supervisor，每 10 分钟续跑同一会话）统筹：给两个 Codex lane 派活、排镜像和计时批次、自己做其中的项；Codex perf 从只审核改为实现；Codex formal 接着做证明迁移 M5–M6；C lane 保持停止（omp 走集群值守）；协调者（Claude）当顾问并做每小时检查。流程见 /workspaces/.agent-state/bpf-benchmark-supervisor/prompt.md：每项改完先过主机测试、提交，再一个批次（建镜像、检查、计时它针对的应用），批次从建镜像到最后一次计时持有 locks/batch。
 - [ ] 1. helper 的 LTO（perf 实现，omp 排批次）。取时间叶子例程（协调者批次在量）、uid_gid + 字符串循环 + Cilium 开关（协调者下一批）之后：
