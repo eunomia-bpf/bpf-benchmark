@@ -1,4 +1,4 @@
-import KProgFormal.ClightRefinement.Arm64ProducerBinding
+import KProgFormal.ClightRefinement.Arm64ProducerLifetime
 #print axioms KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_source
 #check KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_source
 #print axioms KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_wellformed
@@ -25,7 +25,7 @@ import KProgFormal.ClightRefinement.Arm64ProducerBinding
 #check KProgFormal.ClightRefinement.Arm64Producer.Binding.local_layouts
 #print axioms KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_allocation
 #check KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_allocation
-#print axioms KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_entry
-#check KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_entry
-#print axioms KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_entry_internal
-#check KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_entry_internal
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.entry_valid
+#check KProgFormal.ClightRefinement.Arm64Producer.entry_valid
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.entry_internal
+#check KProgFormal.ClightRefinement.Arm64Producer.entry_internal

@@ -83,10 +83,12 @@ theorem vector_loop_value (m before : CC.Mem) (le : CC.TempEnv)
     (index : le.get Arm64Entry._i = some (.Vint (CC.Integers.Int.repr i.val))) :
     CC.doEvalExpr ge (allocation m).1 le before (vectorLoopValue high) =
       some (.Vptr vectors.block (vectorLoopSourceOffset high i)) := by
+  have size := vector_layout.2.1
+  simp only [vectorType, CC.sizeof, vector_layout.1] at size
   cases high
   all_goals simp [vectorLoopValue, vectorLoopIndex, vectorType, vectorArrayType,
     CC.doEvalLvalue, CC.doEvalExpr, CC.lvalOfVar, CC.doDerefLoc, CC.lvalOfField,
-    CC.typeof, CC.accessMode, vectors.binding, index, vector_layout.1,
+    CC.typeof, CC.accessMode, vectors.binding, index, vector_layout.1, size,
     vector_layout.2.2.1, vector_layout.2.2.2.1,
     CC.Cop.semBinaryOperation, CC.Cop.semAdd, CC.Cop.classifyAdd, CC.Cop.semAddPtrInt,
     CC.Cop.ptrofsOfInt, CC.typeconv, CC.removeAttributes, CC.tattr, CC.sizeof,

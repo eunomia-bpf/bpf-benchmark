@@ -1,0 +1,95 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-unified-producer",
+  "focused_build": {
+    "exit": 0,
+    "jobs": 161,
+    "log": "focused5.log",
+    "initialization_prefix_seconds": 531
+  },
+  "public_queries": {
+    "exit": 0,
+    "theorems": 11,
+    "log": "query1.log",
+    "ordinary_axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "execution_additional_imports": [
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem"
+    ],
+    "new_semantic_or_native_reflection_axioms": []
+  },
+  "explicit_linked_execution_queries": {
+    "exit": 0,
+    "log": "next1.log",
+    "header_loop_transitions": 638,
+    "conditional_consumer_call_transitions": 640,
+    "environment": "Arm64Producer.Binding.ge",
+    "input_block": 64,
+    "callback_function_bindings": [
+      184,
+      185
+    ]
+  },
+  "updated_binding_receipt": {
+    "public_queries_exit": 0,
+    "public_queries": 15,
+    "log": "binding-query1.log",
+    "ABI_census_query_exit": 0,
+    "ABI_log": "binding-next1.log"
+  },
+  "migration": {
+    "foundation": "Arm64LinkedProgram.lean below Producer",
+    "producer_ge": "actual linked Entry/Program environment",
+    "old_standalone_input_binding_helpers": "removed",
+    "duplicate_linked_entry_witnesses": "removed; parent entry witnesses now use linked ge",
+    "allocation_comparison": "retained against standalone C export",
+    "provider_premise": "actual linked Genv.toSenv; no cross-Senv equality assumed",
+    "callback_blocks": "184/185 replacing standalone59/60"
+  },
+  "proof_normalization": [
+    "explicit callback metadata and producer ge alias",
+    "explicit volatile tattr before union field layout",
+    "proven vector element size16 before pointer arithmetic"
+  ],
+  "obsolete_build_products": {
+    "removed": 8,
+    "inventory": "obsolete-builds-removed1.txt",
+    "raw_data_deleted": false
+  },
+  "whole_lake_build": {
+    "exit": 0,
+    "jobs": 287,
+    "log": "lake-build1.log",
+    "started": "Tue Nov 17 17:40:22 UTC 2026",
+    "timing_lock": "shared"
+  },
+  "export_comparison": {
+    "exit": 0,
+    "baseline": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_byte_identical": true,
+    "log": "export-parity1.json"
+  },
+  "proof_limits": {
+    "heartbeats": 200000,
+    "recursion_depth": 512,
+    "workers": 1,
+    "address_space_GiB": 32,
+    "CPUs": [
+      17,
+      18
+    ]
+  },
+  "last_complete_make_check": {
+    "exit": 0,
+    "commit": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "rerun": "not repeated for Lean-only changes"
+  },
+  "complete_ISA_handler_refinements": 0,
+  "M5": "open",
+  "M6": "open"
+}

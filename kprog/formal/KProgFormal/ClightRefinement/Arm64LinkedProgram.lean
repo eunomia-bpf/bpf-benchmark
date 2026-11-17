@@ -1,4 +1,6 @@
-import KProgFormal.ClightRefinement.Arm64ProducerLifetime
+import KProgFormal.ClightRefinement.Arm64OriginCache
+import KProgFormal.Clight.Arm64Entry
+import KProgFormal.Clight.Arm64Program
 import CCLib.Linking
 
 set_option Elab.async false
@@ -37,7 +39,7 @@ theorem linked_definitions : program.prog_defs =
 theorem entry_definitions : Arm64Entry.global_definitions.drop 58 =
     [(Arm64Entry._kprog_arm64_payload_load, .Gfun (.Internal Arm64Entry.f_kprog_arm64_payload_load)),
      (Arm64Entry._kprog_arm64_payload_store, .Gfun (.Internal Arm64Entry.f_kprog_arm64_payload_store)),
-     (Arm64Entry._kprog_arm64_entry_raw, .Gfun (.Internal producer)),
+     (Arm64Entry._kprog_arm64_entry_raw, .Gfun (.Internal Arm64Entry.f_kprog_arm64_entry_raw)),
      (Arm64Entry._kprog_arm64_entry_xdp, .Gfun (.Internal Arm64Entry.f_kprog_arm64_entry_xdp)),
      (Arm64Entry._kprog_arm64_entry_skb, .Gfun (.Internal Arm64Entry.f_kprog_arm64_entry_skb))] := rfl
 
@@ -107,7 +109,7 @@ def functionName (i : Fin 5) : CC.Ident :=
    Arm64Entry._kprog_arm64_entry_raw, Arm64Entry._kprog_arm64_entry_xdp, Arm64Entry._kprog_arm64_entry_skb][i]
 def functionBody (i : Fin 5) : CC.Function :=
   [Arm64Entry.f_kprog_arm64_payload_load, Arm64Entry.f_kprog_arm64_payload_store,
-   producer, Arm64Entry.f_kprog_arm64_entry_xdp, Arm64Entry.f_kprog_arm64_entry_skb][i]
+   Arm64Entry.f_kprog_arm64_entry_raw, Arm64Entry.f_kprog_arm64_entry_xdp, Arm64Entry.f_kprog_arm64_entry_skb][i]
 def functionBlock (i : Fin 5) : CC.Block := CC.Positive.ofNat (184 + i.val)
 
 private theorem appended_symbols : ∀ i : Fin 5,
@@ -181,9 +183,9 @@ theorem entry_layouts : ∀ i : Fin 14,
   decide +kernel
 
 /-- Allocation-relevant layout for every actual producer variable is retained. -/
-theorem local_layouts : ∀ row ∈ producer.fn_vars,
-    CC.sizeof ge.genv_cenv row.2 = CC.sizeof Arm64Producer.ge.genv_cenv row.2 ∧
-    CC.alignof ge.genv_cenv row.2 = CC.alignof Arm64Producer.ge.genv_cenv row.2 := by
+theorem local_layouts : ∀ row ∈ Arm64Entry.f_kprog_arm64_entry_raw.fn_vars,
+    CC.sizeof ge.genv_cenv row.2 = CC.sizeof Arm64Entry.prog.globalenv.genv_cenv row.2 ∧
+    CC.alignof ge.genv_cenv row.2 = CC.alignof Arm64Entry.prog.globalenv.genv_cenv row.2 := by
   rw [cenv_source]
   decide +kernel
 
@@ -203,27 +205,9 @@ private theorem allocate_sizes (first second : CC.CompositeEnv) (vars : List (CC
 /-- The linked producer allocates precisely the same local blocks and memory;
 no assumed successful allocation or copied register bank is introduced. -/
 theorem linked_allocation (m : CC.Mem) :
-    CC.doAllocVariables ge.genv_cenv CC.emptyEnv m producer.fn_vars = allocation m :=
+    CC.doAllocVariables ge.genv_cenv CC.emptyEnv m Arm64Entry.f_kprog_arm64_entry_raw.fn_vars =
+      CC.doAllocVariables Arm64Entry.prog.globalenv.genv_cenv CC.emptyEnv m
+        Arm64Entry.f_kprog_arm64_entry_raw.fn_vars :=
   allocate_sizes _ _ _ (fun row member => (local_layouts row member).1) _ _
-
-theorem linked_entry (m : CC.Mem) (ctx continuation : CC.Val) :
-    CC.FunctionEntry2 ge producer [ctx, continuation] m
-      (allocation m).1 (initialTemps ctx continuation) (allocation m).2 := by
-  have names : CC.listNorepet (CC.varNames producer.fn_vars) ∧
-      CC.listNorepet (CC.varNames producer.fn_params) ∧
-      CC.listDisjoint (CC.varNames producer.fn_params) (CC.varNames producer.fn_temps) := by decide +kernel
-  have allocated : CC.AllocVariables ge.genv_cenv CC.emptyEnv m producer.fn_vars
-      (allocation m).1 (allocation m).2 := by
-    apply CC.doAllocVariables_sound
-    rw [linked_allocation]
-  exact .intro names.1 names.2.1 names.2.2 allocated rfl
-
-/-- One real producer-entry transition now runs in the same linked environment
-as the handlers.  No standalone-Entry/Program Step2 composition is assumed. -/
-theorem linked_entry_internal (m : CC.Mem) (ctx continuation : CC.Val) (k : CC.Cont) :
-    InternalRun ge 1 (.Callstate (.Internal producer) [ctx, continuation] k m)
-      (.State producer producer.fn_body k (allocation m).1
-        (initialTemps ctx continuation) (allocation m).2) :=
-  .step trivial (.internal_function _ _ _ _ _ _ _ (linked_entry m ctx continuation)) (.refl _)
 
 end KProgFormal.ClightRefinement.Arm64Producer.Binding

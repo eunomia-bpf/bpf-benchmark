@@ -21,6 +21,12 @@ source is retained in Git history. They are not current refinement coverage.
 Full build validation is recorded with that inventory; M5 correspondence and
 O1/O2/O4 recount remain open.
 
+The [producer proof route](results/m5-unified-producer/README.md) uses Clean's
+link of the complete Entry/Program exports as its environment. The linked
+foundation sits below Producer; input and callback bindings use the actual
+linked blocks. Provider outcomes and the genuine continuation/native
+correspondence remain explicit M5 obligations.
+
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|
 | AArch64 | [eunomia-bpf/LNSym](https://github.com/eunomia-bpf/LNSym), `external/LNSym` | `da428593b21d` | Lean 4.35.0 |

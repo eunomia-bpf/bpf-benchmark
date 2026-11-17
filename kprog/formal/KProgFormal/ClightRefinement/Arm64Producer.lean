@@ -1,12 +1,12 @@
 import Lean
-import KProgFormal.Clight.Arm64Entry
+import KProgFormal.ClightRefinement.Arm64LinkedProgram
 import KProgFormal.ClightRefinement.Deallocation
 import KProgFormal.ClightRefinement.StepEquations
 import KProgFormal.ClightRefinement.InternalExecution
 
 namespace KProgFormal.ClightRefinement.Arm64Producer
 
-def ge : CC.CGenv := Arm64Entry.prog.globalenv
+def ge : CC.CGenv := Binding.ge
 def producer : CC.Function := Arm64Entry.f_kprog_arm64_entry_raw
 
 def allocation (m : CC.Mem) : CC.Env × CC.Mem :=

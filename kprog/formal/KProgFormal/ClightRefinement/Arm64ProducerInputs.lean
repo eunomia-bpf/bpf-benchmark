@@ -5,31 +5,12 @@ set_option Elab.async false
 
 namespace KProgFormal.ClightRefinement.Arm64Producer
 
-private def inputBefore := Arm64Entry.global_definitions.take 57
-private def inputAfter := Arm64Entry.global_definitions.drop 58
-private def inputGlobal : CC.Ident × CC.GlobDef CC.FunDef CC.Ty :=
-  (Arm64Entry._native_lab_entry_input, .Gfun Arm64OriginCache.inputFunction)
-private def inputBeforeEnv : CC.Genv CC.FunDef CC.Ty :=
-  CC.Genv.addGlobals (CC.Genv.emptyGenv Arm64Entry.prog.prog_public) inputBefore
-
-/-- Actual producer-native input declaration, with its full exported type. -/
+/-- Actual producer-native input declaration in the linked program. -/
 theorem producer_input_binding :
     CC.Genv.findSymbol ge.genv_genv Arm64Entry._native_lab_entry_input =
-      some (CC.Positive.ofNat 58) ∧
-    CC.Genv.findFunctPtr ge.genv_genv (CC.Positive.ofNat 58) =
-      some Arm64OriginCache.inputFunction := by
-  have globals : Arm64Entry.global_definitions = inputBefore ++ inputGlobal :: inputAfter := rfl
-  have next : inputBeforeEnv.genv_next = CC.Positive.ofNat 58 := rfl
-  have environment : ge.genv_genv =
-      CC.Genv.addGlobals (CC.Genv.addGlobal inputBeforeEnv inputGlobal) inputAfter := by
-    change CC.Genv.addGlobals (CC.Genv.emptyGenv Arm64Entry.prog.prog_public)
-      Arm64Entry.global_definitions = _
-    rw [globals, addGlobals_append]
-    exact addGlobals_cons _ _ _
-  constructor
-  · decide +kernel
-  · rw [environment, ← next]
-    exact findFunctPtr_next inputBeforeEnv _ Arm64OriginCache.inputFunction inputAfter
+      some (CC.Positive.ofNat 64) ∧
+    CC.Genv.findFunctPtr ge.genv_genv (CC.Positive.ofNat 64) =
+      some Arm64OriginCache.inputFunction := Binding.linked_input
 
 private structure InputParts where
   registerStage : CC.Stmt

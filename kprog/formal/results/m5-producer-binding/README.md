@@ -1,6 +1,6 @@
 # Linking the actual entry and handler exports
 
-`Arm64ProducerBinding.lean` uses Clean's `CC.Link.linkProgram` on the complete
+`Arm64LinkedProgram.lean` uses Clean's `CC.Link.linkProgram` on the complete
 Arm64Program and Arm64Entry exports. The cached output is checked against that
 linker by a closed kernel reflexivity certificate. Ordinary declaration kernel
 checking remains enabled; no native reflection or semantic axiom is added.
@@ -43,7 +43,7 @@ Earlier failed attempts remain in raw.
 Reproduce from kprog/formal with those bounds:
 
 ```
-flock -s /workspaces/.agent-state/kprog-lanes/locks/timing env LEAN_NUM_THREADS=1 lake build KProgFormal.ClightRefinement.Arm64ProducerBinding
+flock -s /workspaces/.agent-state/kprog-lanes/locks/timing env LEAN_NUM_THREADS=1 lake build KProgFormal.ClightRefinement.Arm64LinkedProgram
 flock -s /workspaces/.agent-state/kprog-lanes/locks/timing env LEAN_NUM_THREADS=1 lake env lean -j1 results/m5-producer-binding/Query.lean
 flock -s /workspaces/.agent-state/kprog-lanes/locks/timing env LEAN_NUM_THREADS=1 lake env lean -j1 results/m5-producer-binding/Next.lean
 flock -s /workspaces/.agent-state/kprog-lanes/locks/timing env LEAN_NUM_THREADS=1 lake build
@@ -53,3 +53,9 @@ Raw: /workspaces/kprog-raw/formal/m5-producer-binding. Production C, pinned
 submodules, generated exports and frozen benchmark paths stay unchanged. Last
 full native make check remains PASS at 5236c0e96, not repeated for Lean-only
 proof changes.
+
+Continuation: [the unified producer migration](../m5-unified-producer/README.md)
+moves the linked foundation below Producer, so its existing initialization and
+lifetime witnesses use the linked environment. Query/Next imports and parent
+entry names follow that route; the validation counts above retain this earlier
+binding checkpoint.

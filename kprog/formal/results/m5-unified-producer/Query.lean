@@ -1,0 +1,23 @@
+import KProgFormal.ClightRefinement.Arm64ProducerLifetime
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_source
+#check KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_source
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_allocation
+#check KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_allocation
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.entry_valid
+#check KProgFormal.ClightRefinement.Arm64Producer.entry_valid
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.entry_internal
+#check KProgFormal.ClightRefinement.Arm64Producer.entry_internal
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.producer_input_binding
+#check KProgFormal.ClightRefinement.Arm64Producer.producer_input_binding
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.first_input_returns
+#check KProgFormal.ClightRefinement.Arm64Producer.first_input_returns
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.payload_callback_binding
+#check KProgFormal.ClightRefinement.Arm64Producer.payload_callback_binding
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.header_initialized_before_consumer
+#check KProgFormal.ClightRefinement.Arm64Producer.header_initialized_before_consumer
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.header_caches_before_consumer
+#check KProgFormal.ClightRefinement.Arm64Producer.header_caches_before_consumer
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.header_caches_at_consumer_call
+#check KProgFormal.ClightRefinement.Arm64Producer.header_caches_at_consumer_call
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.consumer_return_releases_locals
+#check KProgFormal.ClightRefinement.Arm64Producer.consumer_return_releases_locals

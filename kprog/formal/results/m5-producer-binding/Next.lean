@@ -1,4 +1,4 @@
-import KProgFormal.ClightRefinement.Arm64ProducerBinding
+import KProgFormal.ClightRefinement.Arm64ProducerLifetime
 set_option Elab.async false
 namespace KProgFormal.ClightRefinement.Arm64Producer.BindingInspection
 private theorem count : Binding.program.prog_defs.length = 188 := by

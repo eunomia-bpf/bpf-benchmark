@@ -27,7 +27,7 @@ import KProgFormal.ClightRefinement.Arm64ProducerHeaderVectors
 import KProgFormal.ClightRefinement.Arm64ProducerHeaderTail
 import KProgFormal.ClightRefinement.Arm64ProducerVectorLoop
 import KProgFormal.ClightRefinement.Arm64ProducerLifetime
-import KProgFormal.ClightRefinement.Arm64ProducerBinding
+import KProgFormal.ClightRefinement.Arm64LinkedProgram
 import KProgFormal.ClightRefinement.Arm64Registers
 import KProgFormal.ClightRefinement.Arm64Width
 import KProgFormal.ClightRefinement.Deallocation

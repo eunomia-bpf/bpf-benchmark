@@ -89,14 +89,20 @@ def payloadCallbackName (store : Bool) : CC.Ident :=
 def payloadCallbackFunction (store : Bool) : CC.FunDef :=
   .Internal (if store then Arm64Entry.f_kprog_arm64_payload_store else Arm64Entry.f_kprog_arm64_payload_load)
 
-def payloadCallbackBlock (store : Bool) : CC.Block := CC.Positive.ofNat (if store then 60 else 59)
+def payloadCallbackBlock (store : Bool) : CC.Block := CC.Positive.ofNat (if store then 185 else 184)
 
 theorem payload_callback_binding (store : Bool) :
     CC.Genv.findSymbol ge.genv_genv (payloadCallbackName store) = some (payloadCallbackBlock store) ∧
     CC.Genv.findFunctPtr ge.genv_genv (payloadCallbackBlock store) = some (payloadCallbackFunction store) := by
   cases store
-  · exact ⟨by decide +kernel, by rfl⟩
-  · exact ⟨by decide +kernel, by rfl⟩
+  · simpa [ge, payloadCallbackName, payloadCallbackBlock, payloadCallbackFunction,
+      Binding.functionName, Binding.functionBody, Binding.functionBlock, Fin.getElem_fin,
+      Bool.false_eq_true, ite_false, ite_true, List.get_eq_getElem, List.getElem_cons] using
+        Binding.appended_functions ⟨0, by decide⟩
+  · simpa [ge, payloadCallbackName, payloadCallbackBlock, payloadCallbackFunction,
+      Binding.functionName, Binding.functionBody, Binding.functionBlock, Fin.getElem_fin,
+      Bool.false_eq_true, ite_false, ite_true, List.get_eq_getElem, List.getElem_cons] using
+        Binding.appended_functions ⟨1, by decide⟩
 
 def tailValue {m : CC.Mem} (sources : (i : Fin 9) → TailLocal m i) (i : Fin 16) : CC.Val :=
   match i.val with
@@ -158,7 +164,7 @@ private theorem tail_rhs_eval_0 (m before : CC.Mem) (le : CC.TempEnv)
   all_goals simp +decide [tailDeclaration, tailParts, tailValue, tailInputValue, CC.doEvalExpr,
     CC.doEvalLvalue, CC.lvalOfVar, CC.lvalOfField, CC.doDerefLoc, CC.typeof,
     CC.accessMode, b0,b1, stack_layout.1, stack_layout.2.1,
-    stack_layout.2.2, uload, ustore, sload, sstore, CC.tvolatile, CC.tarray,
+    stack_layout.2.2, uload, ustore, sload, sstore, CC.tvolatile, CC.tattr, CC.tarray,
     CC.Integers.Ptrofs.add, CC.Integers.Ptrofs.repr, CC.Integers.MI.add,
     CC.Integers.MI.repr, CC.Integers.Ptrofs.zero, CC.Integers.MI.zero]
   all_goals rfl
