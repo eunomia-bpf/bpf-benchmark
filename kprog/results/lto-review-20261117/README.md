@@ -3181,3 +3181,65 @@ not an independently counted routine census. These are cumulative load
 footprints rather than live snapshots, complete-native coverage claims
 or performance measurements. Compat timing on Tetragon/Tracee remains
 pending; PERF started no job and does not add a confirmation gate.
+
+
+### Kernel-string loop: use the decrement flags without adding an opcode
+
+New source finding in `x86_probe_read.rs:189–199` at `d6b4d335e`.
+After each successful source load and R11 recovery check, the loop
+stores AL, advances both pointers, decrements ECX, tests AL, branches on
+NUL, **tests ECX again**, and branches back. The second TEST is needed
+only because the intervening byte TEST replaced the decrement's flags.
+These are hand-emitted bytes; the later LLVM optimizer does not reorder
+this block for us.
+
+Move the existing DEC ECX **after** the existing NUL branch, immediately
+before the existing loop JNE. Then JNE consumes DEC's zero flag and the
+TEST ECX can disappear. On a NUL iteration the remaining count is dead:
+the return length is calculated from RDI minus saved R8, while saved R9D
+still supplies the original size on error. No new register, condition,
+instruction family, helper call, frame or module operation is needed.
+The generated B path already supports DEC and JE/JNE through the
+existing ALU/condition tables; this avoids the JRCXZ issue above.
+
+Expected local effects, with the existing branch encodings retained:
+
+| Copy-loop path | Current | Reordered | Difference |
+| --- | ---: | ---: | ---: |
+| Successful non-NUL byte | 11 instructions | 10 | -1 per byte |
+| Successful NUL byte, before final store/length calculation | 9 instructions | 8 | -1 |
+| Local loop code | existing size | two bytes less | removed TEST ECX |
+
+There is a second related branch-target opportunity. The NUL branch at
+line 195 currently reaches the **unconditional** `dst[-1]=0` at line 199.
+The preceding copy already stored zero there. Point that existing branch
+after this four-byte store, at the length calculation, while count
+exhaustion still falls through the store to terminate a truncated string.
+This removes one executed store on NUL-terminated success and adds no
+branch or installed-byte saving of its own. A truncated non-NUL final
+byte must still be replaced with zero. Zero count must still exit before
+policy/copy; fault detection remains before the store, with the same
+pagefault nesting, -EFAULT and full original-destination clearing.
+Leave the signed-int result conversion and policy-denial path unchanged.
+
+[string_loop_inventory.py](string_loop_inventory.py) records 122 finite
+source-loop illustrations in [string-loop.json](string-loop.json):
+counts 0/1/2/4/8/16, NUL at the first/last/beyond-limit byte, and faults
+at or beyond each possible copied byte. The two source models agree on
+return value, final destination including surrounding bytes, and source
+access order in all 122 illustrations. Their write traces expose exactly
+the redundant successful NUL store being removed. This is not emitted
+native code, a simulator/stock-verifier result, full-u32 proof, race
+model or performance measurement; no candidate was assembled/executed.
+
+The retained [kernel string-copy disassembly](kernel-string-copy.disassembly.txt)
+shows the JIT helper's `strncpy_from_kernel_nofault` byte loop and final
+zero store (`mm/maccess.c:86–108`). The improvement above concerns the
+native emitter's own redundant count TEST and NUL-path store; it does not
+claim that the current kernel already performs either optimization.
+Expected per-call benefit depends on executed string-read frequency and
+length distribution, which the static loop alone does not supply. The
+installed-size opportunity is **two local bytes per emitted kernel-string
+routine**, not a guessed whole-app multiplier. Keep the scheduled scalar
+constant-size/global-address work first; this small compatible follow-up
+requires no new check or separate guest from PERF.

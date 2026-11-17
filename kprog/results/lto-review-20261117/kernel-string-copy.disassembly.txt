@@ -1,0 +1,65 @@
+
+/workspaces/.agent-state/kprog-ck/build-x86/vmlinux:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+ffffffff8153f330 <strncpy_from_kernel_nofault>:
+ffffffff8153f330:	call   ffffffff8127fb90 <__fentry__>
+ffffffff8153f335:	test   %rdx,%rdx
+ffffffff8153f338:	jle    ffffffff8153f3bf <strncpy_from_kernel_nofault+0x8f>
+ffffffff8153f33e:	push   %r12
+ffffffff8153f340:	mov    %rdx,%r12
+ffffffff8153f343:	push   %rbp
+ffffffff8153f344:	mov    %rsi,%rbp
+ffffffff8153f347:	mov    %rdx,%rsi
+ffffffff8153f34a:	push   %rbx
+ffffffff8153f34b:	mov    %rdi,%rbx
+ffffffff8153f34e:	mov    %rbp,%rdi
+ffffffff8153f351:	call   ffffffff81299280 <copy_from_kernel_nofault_allowed>
+ffffffff8153f356:	test   %al,%al
+ffffffff8153f358:	je     ffffffff8153f3c6 <strncpy_from_kernel_nofault+0x96>
+ffffffff8153f35a:	mov    %gs:0x2d70cb6(%rip),%rdx        # ffffffff842b0018 <current_task>
+ffffffff8153f362:	addl   $0x1,0x24ac(%rdx)
+ffffffff8153f369:	mov    %rbp,%rax
+ffffffff8153f36c:	jmp    ffffffff8153f376 <strncpy_from_kernel_nofault+0x46>
+ffffffff8153f36e:	cmp    %r12,%rsi
+ffffffff8153f371:	jge    ffffffff8153f38c <strncpy_from_kernel_nofault+0x5c>
+ffffffff8153f373:	mov    %rdi,%rbx
+ffffffff8153f376:	mov    (%rax),%cl
+ffffffff8153f378:	add    $0x1,%rax
+ffffffff8153f37c:	mov    %cl,(%rbx)
+ffffffff8153f37e:	lea    0x1(%rbx),%rdi
+ffffffff8153f382:	mov    %rax,%rsi
+ffffffff8153f385:	sub    %rbp,%rsi
+ffffffff8153f388:	test   %cl,%cl
+ffffffff8153f38a:	jne    ffffffff8153f36e <strncpy_from_kernel_nofault+0x3e>
+ffffffff8153f38c:	subl   $0x1,0x24ac(%rdx)
+ffffffff8153f393:	movb   $0x0,(%rbx)
+ffffffff8153f396:	pop    %rbx
+ffffffff8153f397:	mov    %rsi,%rax
+ffffffff8153f39a:	pop    %rbp
+ffffffff8153f39b:	pop    %r12
+ffffffff8153f39d:	jmp    ffffffff820138b0 <__pi___x86_return_thunk>
+ffffffff8153f3a2:	mov    $0xfffffffffffffff2,%rsi
+ffffffff8153f3a9:	subl   $0x1,0x24ac(%rdx)
+ffffffff8153f3b0:	mov    %rsi,%rax
+ffffffff8153f3b3:	movb   $0x0,(%rbx)
+ffffffff8153f3b6:	pop    %rbx
+ffffffff8153f3b7:	pop    %rbp
+ffffffff8153f3b8:	pop    %r12
+ffffffff8153f3ba:	jmp    ffffffff820138b0 <__pi___x86_return_thunk>
+ffffffff8153f3bf:	xor    %eax,%eax
+ffffffff8153f3c1:	jmp    ffffffff820138b0 <__pi___x86_return_thunk>
+ffffffff8153f3c6:	mov    $0xffffffffffffffde,%rsi
+ffffffff8153f3cd:	jmp    ffffffff8153f396 <strncpy_from_kernel_nofault+0x66>
+
+Disassembly of section .data:
+
+Disassembly of section .init.text:
+
+Disassembly of section .altinstr_aux:
+
+Disassembly of section .altinstr_replacement:
+
+Disassembly of section .exit.text:
