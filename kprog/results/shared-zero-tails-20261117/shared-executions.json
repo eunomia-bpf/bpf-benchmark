@@ -1,0 +1,482 @@
+[
+  {
+    "name": "kernel-compact-shared.stdout",
+    "stdout": "probe-read host user=0: 1152 vectors, 122 exact-site faults, nesting/zero/error/bounds PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-0-compact-shared.stdout",
+    "stdout": "fixed scalar user=0 size=0: 10 vectors, 0 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-0-shared.stdout",
+    "stdout": "fixed scalar user=0 size=0: 10 vectors, 0 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-1-compact-shared.stdout",
+    "stdout": "fixed scalar user=0 size=1: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-1-shared.stdout",
+    "stdout": "fixed scalar user=0 size=1: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-1024-compact-shared.stdout",
+    "stdout": "fixed scalar user=0 size=1024: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-1024-shared.stdout",
+    "stdout": "fixed scalar user=0 size=1024: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-144-compact-shared.stdout",
+    "stdout": "fixed scalar user=0 size=144: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-144-shared.stdout",
+    "stdout": "fixed scalar user=0 size=144: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-15-compact-shared.stdout",
+    "stdout": "fixed scalar user=0 size=15: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-15-shared.stdout",
+    "stdout": "fixed scalar user=0 size=15: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-16-compact-shared.stdout",
+    "stdout": "fixed scalar user=0 size=16: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-16-shared.stdout",
+    "stdout": "fixed scalar user=0 size=16: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-17-compact-shared.stdout",
+    "stdout": "fixed scalar user=0 size=17: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-17-shared.stdout",
+    "stdout": "fixed scalar user=0 size=17: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-2-compact-shared.stdout",
+    "stdout": "fixed scalar user=0 size=2: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-2-shared.stdout",
+    "stdout": "fixed scalar user=0 size=2: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-257-compact-shared.stdout",
+    "stdout": "fixed scalar user=0 size=257: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-257-shared.stdout",
+    "stdout": "fixed scalar user=0 size=257: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-3-compact-shared.stdout",
+    "stdout": "fixed scalar user=0 size=3: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-3-shared.stdout",
+    "stdout": "fixed scalar user=0 size=3: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-31-compact-shared.stdout",
+    "stdout": "fixed scalar user=0 size=31: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-31-shared.stdout",
+    "stdout": "fixed scalar user=0 size=31: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-32-compact-shared.stdout",
+    "stdout": "fixed scalar user=0 size=32: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-32-shared.stdout",
+    "stdout": "fixed scalar user=0 size=32: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-33-compact-shared.stdout",
+    "stdout": "fixed scalar user=0 size=33: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-33-shared.stdout",
+    "stdout": "fixed scalar user=0 size=33: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-4-compact-shared.stdout",
+    "stdout": "fixed scalar user=0 size=4: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-4-shared.stdout",
+    "stdout": "fixed scalar user=0 size=4: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-512-compact-shared.stdout",
+    "stdout": "fixed scalar user=0 size=512: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-512-shared.stdout",
+    "stdout": "fixed scalar user=0 size=512: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-63-compact-shared.stdout",
+    "stdout": "fixed scalar user=0 size=63: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-63-shared.stdout",
+    "stdout": "fixed scalar user=0 size=63: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-64-compact-shared.stdout",
+    "stdout": "fixed scalar user=0 size=64: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-64-shared.stdout",
+    "stdout": "fixed scalar user=0 size=64: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-65-compact-shared.stdout",
+    "stdout": "fixed scalar user=0 size=65: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-65-shared.stdout",
+    "stdout": "fixed scalar user=0 size=65: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-7-compact-shared.stdout",
+    "stdout": "fixed scalar user=0 size=7: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-7-shared.stdout",
+    "stdout": "fixed scalar user=0 size=7: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-768-compact-shared.stdout",
+    "stdout": "fixed scalar user=0 size=768: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-768-shared.stdout",
+    "stdout": "fixed scalar user=0 size=768: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-8-compact-shared.stdout",
+    "stdout": "fixed scalar user=0 size=8: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-8-shared.stdout",
+    "stdout": "fixed scalar user=0 size=8: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-9-compact-shared.stdout",
+    "stdout": "fixed scalar user=0 size=9: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-fixed-9-shared.stdout",
+    "stdout": "fixed scalar user=0 size=9: 13 vectors, 3 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-shared.stdout",
+    "stdout": "probe-read host user=0: 1152 vectors, 122 exact-site faults, nesting/zero/error/bounds PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-string-compact-shared.stdout",
+    "stdout": "kernel string: NUL/truncation/zero-count/policy/partial-fault/full-zero PASS\nprobe-read host user=0: 193 vectors, 121 exact-site faults, nesting/zero/error/bounds PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "kernel-string-shared.stdout",
+    "stdout": "kernel string: NUL/truncation/zero-count/policy/partial-fault/full-zero PASS\nprobe-read host user=0: 193 vectors, 121 exact-site faults, nesting/zero/error/bounds PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-compact-shared.stdout",
+    "stdout": "probe-read host user=1: 1149 vectors, 121 exact-site faults, nesting/zero/error/bounds PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-0-compact-shared.stdout",
+    "stdout": "fixed scalar user=1 size=0: 12 vectors, 0 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-0-shared.stdout",
+    "stdout": "fixed scalar user=1 size=0: 12 vectors, 0 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-1-compact-shared.stdout",
+    "stdout": "fixed scalar user=1 size=1: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-1-shared.stdout",
+    "stdout": "fixed scalar user=1 size=1: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-1024-compact-shared.stdout",
+    "stdout": "fixed scalar user=1 size=1024: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-1024-shared.stdout",
+    "stdout": "fixed scalar user=1 size=1024: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-144-compact-shared.stdout",
+    "stdout": "fixed scalar user=1 size=144: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-144-shared.stdout",
+    "stdout": "fixed scalar user=1 size=144: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-15-compact-shared.stdout",
+    "stdout": "fixed scalar user=1 size=15: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-15-shared.stdout",
+    "stdout": "fixed scalar user=1 size=15: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-16-compact-shared.stdout",
+    "stdout": "fixed scalar user=1 size=16: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-16-shared.stdout",
+    "stdout": "fixed scalar user=1 size=16: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-17-compact-shared.stdout",
+    "stdout": "fixed scalar user=1 size=17: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-17-shared.stdout",
+    "stdout": "fixed scalar user=1 size=17: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-2-compact-shared.stdout",
+    "stdout": "fixed scalar user=1 size=2: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-2-shared.stdout",
+    "stdout": "fixed scalar user=1 size=2: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-257-compact-shared.stdout",
+    "stdout": "fixed scalar user=1 size=257: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-257-shared.stdout",
+    "stdout": "fixed scalar user=1 size=257: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-3-compact-shared.stdout",
+    "stdout": "fixed scalar user=1 size=3: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-3-shared.stdout",
+    "stdout": "fixed scalar user=1 size=3: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-31-compact-shared.stdout",
+    "stdout": "fixed scalar user=1 size=31: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-31-shared.stdout",
+    "stdout": "fixed scalar user=1 size=31: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-32-compact-shared.stdout",
+    "stdout": "fixed scalar user=1 size=32: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-32-shared.stdout",
+    "stdout": "fixed scalar user=1 size=32: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-33-compact-shared.stdout",
+    "stdout": "fixed scalar user=1 size=33: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-33-shared.stdout",
+    "stdout": "fixed scalar user=1 size=33: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-4-compact-shared.stdout",
+    "stdout": "fixed scalar user=1 size=4: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-4-shared.stdout",
+    "stdout": "fixed scalar user=1 size=4: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-512-compact-shared.stdout",
+    "stdout": "fixed scalar user=1 size=512: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-512-shared.stdout",
+    "stdout": "fixed scalar user=1 size=512: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-63-compact-shared.stdout",
+    "stdout": "fixed scalar user=1 size=63: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-63-shared.stdout",
+    "stdout": "fixed scalar user=1 size=63: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-64-compact-shared.stdout",
+    "stdout": "fixed scalar user=1 size=64: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-64-shared.stdout",
+    "stdout": "fixed scalar user=1 size=64: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-65-compact-shared.stdout",
+    "stdout": "fixed scalar user=1 size=65: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-65-shared.stdout",
+    "stdout": "fixed scalar user=1 size=65: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-7-compact-shared.stdout",
+    "stdout": "fixed scalar user=1 size=7: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-7-shared.stdout",
+    "stdout": "fixed scalar user=1 size=7: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-768-compact-shared.stdout",
+    "stdout": "fixed scalar user=1 size=768: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-768-shared.stdout",
+    "stdout": "fixed scalar user=1 size=768: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-8-compact-shared.stdout",
+    "stdout": "fixed scalar user=1 size=8: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-8-shared.stdout",
+    "stdout": "fixed scalar user=1 size=8: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-9-compact-shared.stdout",
+    "stdout": "fixed scalar user=1 size=9: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-fixed-9-shared.stdout",
+    "stdout": "fixed scalar user=1 size=9: 16 vectors, 4 exact-site faults PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-shared.stdout",
+    "stdout": "probe-read host user=1: 1149 vectors, 121 exact-site faults, nesting/zero/error/bounds PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-string-compact-shared.stdout",
+    "stdout": "user string: masked pointer, word-tail zeroing, byte retry, no extra NMI gate, SMAP bracket PASS\nprobe-read host user=1: 4693 vectors, 239 exact-site faults, nesting/zero/error/bounds PASS\n",
+    "stderr": ""
+  },
+  {
+    "name": "user-string-shared.stdout",
+    "stdout": "user string: masked pointer, word-tail zeroing, byte retry, no extra NMI gate, SMAP bracket PASS\nprobe-read host user=1: 4693 vectors, 239 exact-site faults, nesting/zero/error/bounds PASS\n",
+    "stderr": ""
+  }
+]

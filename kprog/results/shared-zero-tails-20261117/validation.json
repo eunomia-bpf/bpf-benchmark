@@ -1,0 +1,3229 @@
+{
+  "scope": "Decoded retained policy/copy/cleanup prefix and mapped success/error branches for every duplicated suffix in the captured emissions; helper ABI/runtime execution is separately covered by the existing driver matrix.",
+  "duplicates": 358,
+  "failures": 0,
+  "cases": [
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0uk6eny3",
+      "zero_start": 11277,
+      "target": 10996,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_process_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0v55dkrr",
+      "zero_start": 15258,
+      "target": 15037,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_process_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0v55dkrr",
+      "zero_start": 15539,
+      "target": 15037,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_process_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0v55dkrr",
+      "zero_start": 15932,
+      "target": 15037,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_output",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1e1whdkd",
+      "zero_start": 2080,
+      "target": 1799,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_output",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-20u5h7e0",
+      "zero_start": 2080,
+      "target": 1799,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-31f47_a7",
+      "zero_start": 11398,
+      "target": 11117,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "execve_send",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6vbtwxp5",
+      "zero_start": 3980,
+      "target": 3699,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_output",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7xa_4zm5",
+      "zero_start": 2080,
+      "target": 1799,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9p7ocgsk",
+      "zero_start": 11277,
+      "target": 10996,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_process_filter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_gtbajk_",
+      "zero_start": 9939,
+      "target": 9658,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_qtl2kam",
+      "zero_start": 11277,
+      "target": 10996,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_actions",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_vqrdf28",
+      "zero_start": 4019,
+      "target": 3738,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_actions",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-beoa__2d",
+      "zero_start": 3330,
+      "target": 3049,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-c3k1hzvb",
+      "zero_start": 11310,
+      "target": 11029,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ddm5z6l1",
+      "zero_start": 11277,
+      "target": 10996,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_filter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-g_0kedgz",
+      "zero_start": 9942,
+      "target": 9661,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-il4rhakh",
+      "zero_start": 11277,
+      "target": 10996,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-j63keppd",
+      "zero_start": 11277,
+      "target": 10996,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_exit_disassociate_ctty",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jasy1x_7",
+      "zero_start": 1251,
+      "target": 1108,
+      "prefix_instructions": 33,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-juhc192d",
+      "zero_start": 11398,
+      "target": 11117,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_actions",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k6ckpvxv",
+      "zero_start": 3330,
+      "target": 3049,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_process_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-l3wtixm8",
+      "zero_start": 13225,
+      "target": 13004,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_process_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-l3wtixm8",
+      "zero_start": 13506,
+      "target": 13004,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_process_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-l3wtixm8",
+      "zero_start": 13899,
+      "target": 13004,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_process_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lrpau888",
+      "zero_start": 14888,
+      "target": 14667,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_process_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lrpau888",
+      "zero_start": 15169,
+      "target": 14667,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_process_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lrpau888",
+      "zero_start": 15562,
+      "target": 14667,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_process_filter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nqetz_k2",
+      "zero_start": 9939,
+      "target": 9658,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qqafecq5",
+      "zero_start": 11277,
+      "target": 10996,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_execve",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r9kh94rr",
+      "zero_start": 9531,
+      "target": 9250,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_execve",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r9kh94rr",
+      "zero_start": 9832,
+      "target": 9250,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_execve",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r9kh94rr",
+      "zero_start": 10145,
+      "target": 9250,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rmyx34xm",
+      "zero_start": 2361,
+      "target": 2080,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-wdd42hwy",
+      "zero_start": 2361,
+      "target": 2080,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_actions",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xf313ycz",
+      "zero_start": 4229,
+      "target": 3948,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xgsv35ba",
+      "zero_start": 11277,
+      "target": 10996,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xh90hqo_",
+      "zero_start": 13201,
+      "target": 12980,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xh90hqo_",
+      "zero_start": 13482,
+      "target": 12980,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xh90hqo_",
+      "zero_start": 13875,
+      "target": 12980,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_exit_acct_process",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ye4mrb_x",
+      "zero_start": 1227,
+      "target": 1084,
+      "prefix_instructions": 33,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-yuod933z",
+      "zero_start": 13234,
+      "target": 12953,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_wake_up_new_task",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zfitfdx5",
+      "zero_start": 4851,
+      "target": 4570,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_wake_up_new_task",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zfitfdx5",
+      "zero_start": 5152,
+      "target": 4570,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_wake_up_new_task",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zfitfdx5",
+      "zero_start": 5465,
+      "target": 4570,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_do_init_module",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-017c9l0e",
+      "zero_start": 11048,
+      "target": 10827,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_do_init_module",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-017c9l0e",
+      "zero_start": 11329,
+      "target": 10827,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_do_init_module",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-017c9l0e",
+      "zero_start": 11722,
+      "target": 10827,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_mkdir_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-05zpqxw5",
+      "zero_start": 1229,
+      "target": 948,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_mkdir_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-05zpqxw5",
+      "zero_start": 1530,
+      "target": 948,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_mkdir_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-05zpqxw5",
+      "zero_start": 1843,
+      "target": 948,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_proc_create",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-09yg3syu",
+      "zero_start": 6698,
+      "target": 6477,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_proc_create",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-09yg3syu",
+      "zero_start": 7237,
+      "target": 6477,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_permission",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0i4efh97",
+      "zero_start": 7170,
+      "target": 6949,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_permission",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0i4efh97",
+      "zero_start": 7743,
+      "target": 6949,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sched_process_fork_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0yeqcsp9",
+      "zero_start": 3395,
+      "target": 3114,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_dup2",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0zn8n8nm",
+      "zero_start": 10131,
+      "target": 9910,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_dup2",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0zn8n8nm",
+      "zero_start": 10412,
+      "target": 9910,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_dup2",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0zn8n8nm",
+      "zero_start": 10805,
+      "target": 9910,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_sb_mount",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1al7w7n_",
+      "zero_start": 12908,
+      "target": 12687,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_sb_mount",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1al7w7n_",
+      "zero_start": 13447,
+      "target": 12687,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_register_kprobe",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1dlp69ce",
+      "zero_start": 7037,
+      "target": 6816,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_register_kprobe",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1dlp69ce",
+      "zero_start": 7576,
+      "target": 6816,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_fd_install",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-279z4mzn",
+      "zero_start": 11773,
+      "target": 11552,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_recvmsg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2c20f7iq",
+      "zero_start": 6835,
+      "target": 6614,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_mem_dump_trigger",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2euu41id",
+      "zero_start": 5621,
+      "target": 5400,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_mem_dump_trigger",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2euu41id",
+      "zero_start": 5902,
+      "target": 5400,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_truncate",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2ohy4p0m",
+      "zero_start": 7338,
+      "target": 7117,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_truncate",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2ohy4p0m",
+      "zero_start": 7619,
+      "target": 7117,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_truncate",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2ohy4p0m",
+      "zero_start": 8012,
+      "target": 7117,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace___debugfs_create_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2wpohzoo",
+      "zero_start": 7334,
+      "target": 7113,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace___debugfs_create_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2wpohzoo",
+      "zero_start": 7615,
+      "target": 7113,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace___debugfs_create_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2wpohzoo",
+      "zero_start": 8008,
+      "target": 7113,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_bpf_check",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2xmqw18s",
+      "zero_start": 5767,
+      "target": 5546,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_utimes_common",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-3cfra29r",
+      "zero_start": 13310,
+      "target": 13089,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_utimes_common",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-3cfra29r",
+      "zero_start": 13591,
+      "target": 13089,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_utimes_common",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-3cfra29r",
+      "zero_start": 13984,
+      "target": 13089,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_lkm_seeker",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-3oke79hs",
+      "zero_start": 4508,
+      "target": 4287,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_lkm_seeker",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-3oke79hs",
+      "zero_start": 4821,
+      "target": 4287,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_chmod_common",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4hsfozd4",
+      "zero_start": 12413,
+      "target": 12192,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_chmod_common",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4hsfozd4",
+      "zero_start": 12952,
+      "target": 12192,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_execute_finished",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4vy19taj",
+      "zero_start": 20652,
+      "target": 20431,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_execute_finished",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4vy19taj",
+      "zero_start": 20933,
+      "target": 20431,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_execute_finished",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4vy19taj",
+      "zero_start": 21326,
+      "target": 20431,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_process_exec",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-51uw37rf",
+      "zero_start": 15510,
+      "target": 15289,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_process_exec",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-51uw37rf",
+      "zero_start": 15791,
+      "target": 15289,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_process_exec",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-51uw37rf",
+      "zero_start": 16184,
+      "target": 15289,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bprm_creds_for_exec",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-56siaau7",
+      "zero_start": 12792,
+      "target": 12571,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bprm_creds_for_exec",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-56siaau7",
+      "zero_start": 13073,
+      "target": 12571,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bprm_creds_for_exec",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-56siaau7",
+      "zero_start": 13466,
+      "target": 12571,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__cgroup__cgroup_rmdir",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-5gxcl38z",
+      "zero_start": 6886,
+      "target": 6665,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__cgroup__cgroup_rmdir",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-5gxcl38z",
+      "zero_start": 7167,
+      "target": 6665,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__cgroup__cgroup_rmdir",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-5gxcl38z",
+      "zero_start": 7560,
+      "target": 6665,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__accept4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-5llp5ka0",
+      "zero_start": 6687,
+      "target": 6466,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__accept4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-5llp5ka0",
+      "zero_start": 6968,
+      "target": 6466,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bpf_map",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-64h9nush",
+      "zero_start": 6719,
+      "target": 6498,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bpf_map",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-64h9nush",
+      "zero_start": 7255,
+      "target": 6498,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_dup",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6_siljwd",
+      "zero_start": 2182,
+      "target": 1961,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sched_process_exit_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6fbt0i5v",
+      "zero_start": 1352,
+      "target": 1071,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "vfs_writev_magic_return",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7_enltvb",
+      "zero_start": 16175,
+      "target": 15954,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "vfs_writev_magic_return",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7_enltvb",
+      "zero_start": 16456,
+      "target": 15954,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "vfs_writev_magic_return",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7_enltvb",
+      "zero_start": 16849,
+      "target": 15954,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_check_map_func_compatibility",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-89tqz71h",
+      "zero_start": 6008,
+      "target": 5787,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execveat_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8lb6agqq",
+      "zero_start": 17501,
+      "target": 17280,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execveat_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8lb6agqq",
+      "zero_start": 17782,
+      "target": 17280,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execveat_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8lb6agqq",
+      "zero_start": 18175,
+      "target": 17280,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_settime64",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-932_xsv4",
+      "zero_start": 6922,
+      "target": 6701,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_settime64",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-932_xsv4",
+      "zero_start": 7203,
+      "target": 6701,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_mknod",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-96ffhbif",
+      "zero_start": 7189,
+      "target": 6968,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_mknod",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-96ffhbif",
+      "zero_start": 7470,
+      "target": 6968,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_mknod",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-96ffhbif",
+      "zero_start": 7863,
+      "target": 6968,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_set_fs_pwd",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-99z6y52i",
+      "zero_start": 13206,
+      "target": 12985,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_set_fs_pwd",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-99z6y52i",
+      "zero_start": 13519,
+      "target": 12985,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_setsockopt",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9ds10gnw",
+      "zero_start": 8347,
+      "target": 8126,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_setsockopt",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9ds10gnw",
+      "zero_start": 8628,
+      "target": 8126,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__module__module_load",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9yd5aw5c",
+      "zero_start": 13962,
+      "target": 13741,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__module__module_load",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9yd5aw5c",
+      "zero_start": 14243,
+      "target": 13741,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__module__module_load",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9yd5aw5c",
+      "zero_start": 14636,
+      "target": 13741,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execve_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_0s58jbm",
+      "zero_start": 17408,
+      "target": 17187,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execve_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_0s58jbm",
+      "zero_start": 17689,
+      "target": 17187,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execve_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_0s58jbm",
+      "zero_start": 18082,
+      "target": 17187,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_path_notify",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_6a36jlc",
+      "zero_start": 12738,
+      "target": 12517,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_path_notify",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_6a36jlc",
+      "zero_start": 13019,
+      "target": 12517,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_path_notify",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_6a36jlc",
+      "zero_start": 13412,
+      "target": 12517,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_dup3",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_y38j0c7",
+      "zero_start": 2182,
+      "target": 1961,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_listen",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-a7tuahol",
+      "zero_start": 8092,
+      "target": 7871,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_listen",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-a7tuahol",
+      "zero_start": 8373,
+      "target": 7871,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_kallsyms_lookup_name",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ahj1_4pv",
+      "zero_start": 6833,
+      "target": 6612,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_kallsyms_lookup_name",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ahj1_4pv",
+      "zero_start": 7372,
+      "target": 6612,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_mmap_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-amhjcvnr",
+      "zero_start": 24387,
+      "target": 24166,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_mmap_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-amhjcvnr",
+      "zero_start": 24668,
+      "target": 24166,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_mmap_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-amhjcvnr",
+      "zero_start": 25061,
+      "target": 24166,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_cap_capable",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-b7axm1ie",
+      "zero_start": 6588,
+      "target": 6367,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_do_splice",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bbxy8sr7",
+      "zero_start": 14534,
+      "target": 14249,
+      "prefix_instructions": 68,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_do_splice",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bbxy8sr7",
+      "zero_start": 14755,
+      "target": 14249,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_do_splice",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bbxy8sr7",
+      "zero_start": 15148,
+      "target": 14249,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_task_prctl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bdoo7afc",
+      "zero_start": 30562,
+      "target": 30277,
+      "prefix_instructions": 68,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_task_prctl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bdoo7afc",
+      "zero_start": 30783,
+      "target": 30277,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_task_prctl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bdoo7afc",
+      "zero_start": 31176,
+      "target": 30277,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_read_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bin1t79n",
+      "zero_start": 13777,
+      "target": 13556,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_read_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bin1t79n",
+      "zero_start": 14058,
+      "target": 13556,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_read_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bin1t79n",
+      "zero_start": 14451,
+      "target": 13556,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_device_add",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bwp7_2ms",
+      "zero_start": 6810,
+      "target": 6589,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_device_add",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bwp7_2ms",
+      "zero_start": 7123,
+      "target": 6589,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_sys_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ci3jf9ph",
+      "zero_start": 6656,
+      "target": 6435,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_check_helper_call",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-cquz72yx",
+      "zero_start": 6003,
+      "target": 5782,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_mmap_alert",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-cru7pfek",
+      "zero_start": 14787,
+      "target": 14566,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_mmap_alert",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-cru7pfek",
+      "zero_start": 15068,
+      "target": 14566,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_mmap_alert",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-cru7pfek",
+      "zero_start": 15461,
+      "target": 14566,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_task_setrlimit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-cw8vbd3l",
+      "zero_start": 6871,
+      "target": 6650,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_task_setrlimit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-cw8vbd3l",
+      "zero_start": 7152,
+      "target": 6650,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_file_modified",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-d50syq4d",
+      "zero_start": 13855,
+      "target": 13634,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_file_modified",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-d50syq4d",
+      "zero_start": 14136,
+      "target": 13634,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_file_modified",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-d50syq4d",
+      "zero_start": 14529,
+      "target": 13634,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_lkm_seeker_submitter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-dhilq03b",
+      "zero_start": 5204,
+      "target": 4983,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_lkm_seeker_submitter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-dhilq03b",
+      "zero_start": 5485,
+      "target": 4983,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_switch",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-dynocs3e",
+      "zero_start": 7092,
+      "target": 6871,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_switch",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-dynocs3e",
+      "zero_start": 7628,
+      "target": 6871,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_inotify_find_inode",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-dz4c9avv",
+      "zero_start": 12945,
+      "target": 12724,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_inotify_find_inode",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-dz4c9avv",
+      "zero_start": 13226,
+      "target": 12724,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_inotify_find_inode",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-dz4c9avv",
+      "zero_start": 13619,
+      "target": 12724,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_mprotect",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-eb6tcou5",
+      "zero_start": 24679,
+      "target": 24458,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_mprotect",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-eb6tcou5",
+      "zero_start": 24960,
+      "target": 24458,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_mprotect",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-eb6tcou5",
+      "zero_start": 25353,
+      "target": 24458,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__task__task_rename",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-egsoamtt",
+      "zero_start": 6790,
+      "target": 6569,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__task__task_rename",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-egsoamtt",
+      "zero_start": 7103,
+      "target": 6569,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "send_bin_tp",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ekfto0ej",
+      "zero_start": 1329,
+      "target": 1044,
+      "prefix_instructions": 68,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_ptrace",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-eolnj7vr",
+      "zero_start": 10131,
+      "target": 9910,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_ptrace",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-eolnj7vr",
+      "zero_start": 10412,
+      "target": 9910,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_ptrace",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-eolnj7vr",
+      "zero_start": 10805,
+      "target": 9910,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_sys_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f06yp4a3",
+      "zero_start": 6675,
+      "target": 6454,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_kernel_post_read_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fgoiyo4w",
+      "zero_start": 13396,
+      "target": 13175,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_kernel_post_read_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fgoiyo4w",
+      "zero_start": 13677,
+      "target": 13175,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_kernel_post_read_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fgoiyo4w",
+      "zero_start": 14070,
+      "target": 13175,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_readv_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fscgqsh5",
+      "zero_start": 13824,
+      "target": 13539,
+      "prefix_instructions": 68,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_readv_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fscgqsh5",
+      "zero_start": 14045,
+      "target": 13539,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_readv_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fscgqsh5",
+      "zero_start": 14438,
+      "target": 13539,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lsm_file_open_test",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fx044r0o",
+      "zero_start": 6462,
+      "target": 6241,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bpf",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-gmhuwt57",
+      "zero_start": 12502,
+      "target": 12281,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bpf",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-gmhuwt57",
+      "zero_start": 12783,
+      "target": 12281,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bpf",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-gmhuwt57",
+      "zero_start": 13176,
+      "target": 12281,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall_checker",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-gs0e2ldt",
+      "zero_start": 11319,
+      "target": 11098,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe__features_fallback_minimal_tailcall",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-gwrg59pw",
+      "zero_start": 1760,
+      "target": 1539,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hb9cetnn",
+      "zero_start": 6569,
+      "target": 6348,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_rename",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hc4ro7xn",
+      "zero_start": 8129,
+      "target": 7908,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_rename",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hc4ro7xn",
+      "zero_start": 8442,
+      "target": 7908,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_sb_umount",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hdvg450z",
+      "zero_start": 7335,
+      "target": 7114,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_sb_umount",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hdvg450z",
+      "zero_start": 7871,
+      "target": 7114,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_read",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hsk75jw2",
+      "zero_start": 14011,
+      "target": 13790,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_read",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hsk75jw2",
+      "zero_start": 14292,
+      "target": 13790,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_read",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hsk75jw2",
+      "zero_start": 14685,
+      "target": 13790,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execve_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hvb0kyoo",
+      "zero_start": 17320,
+      "target": 17099,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execve_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hvb0kyoo",
+      "zero_start": 17601,
+      "target": 17099,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execve_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hvb0kyoo",
+      "zero_start": 17994,
+      "target": 17099,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_create",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-i3p2v7am",
+      "zero_start": 6828,
+      "target": 6607,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__cgroup__cgroup_attach_task",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-i4_djze4",
+      "zero_start": 6887,
+      "target": 6666,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__cgroup__cgroup_attach_task",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-i4_djze4",
+      "zero_start": 7423,
+      "target": 6666,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_ioctl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ibpjwerv",
+      "zero_start": 8362,
+      "target": 8141,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_ioctl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ibpjwerv",
+      "zero_start": 8643,
+      "target": 8141,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_ioctl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ibpjwerv",
+      "zero_start": 9036,
+      "target": 8141,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_file_update_time",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ibrrmkdz",
+      "zero_start": 13855,
+      "target": 13634,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_file_update_time",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ibrrmkdz",
+      "zero_start": 14136,
+      "target": 13634,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_file_update_time",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ibrrmkdz",
+      "zero_start": 14529,
+      "target": 13634,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_process_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-j3_4yk8e",
+      "zero_start": 6956,
+      "target": 6735,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_process_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-j3_4yk8e",
+      "zero_start": 7237,
+      "target": 6735,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_arch_prctl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jv5nd05b",
+      "zero_start": 2182,
+      "target": 1961,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_sigaction",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jxmj3ryw",
+      "zero_start": 8076,
+      "target": 7855,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_sigaction",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jxmj3ryw",
+      "zero_start": 8357,
+      "target": 7855,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sched_process_exec_event_submit_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k0ty1s40",
+      "zero_start": 15162,
+      "target": 14941,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sched_process_exec_event_submit_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k0ty1s40",
+      "zero_start": 15443,
+      "target": 14941,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sched_process_exec_event_submit_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k0ty1s40",
+      "zero_start": 15836,
+      "target": 14941,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_sendmsg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-kb8wrxm3",
+      "zero_start": 6835,
+      "target": 6614,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_dup2",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-kc6m9ob8",
+      "zero_start": 2182,
+      "target": 1961,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe__features_fallback_helper_tailcall",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-kmzrwgx2",
+      "zero_start": 1760,
+      "target": 1539,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bpf_prog",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ktazrxzj",
+      "zero_start": 7894,
+      "target": 7673,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bpf_prog",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ktazrxzj",
+      "zero_start": 8175,
+      "target": 7673,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bpf_prog",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ktazrxzj",
+      "zero_start": 8568,
+      "target": 7673,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_process_fork",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-kw8tx6mb",
+      "zero_start": 14224,
+      "target": 14003,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_process_fork",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-kw8tx6mb",
+      "zero_start": 14505,
+      "target": 14003,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_write_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lncel1es",
+      "zero_start": 22057,
+      "target": 21836,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_write_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lncel1es",
+      "zero_start": 22338,
+      "target": 21836,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_write_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lncel1es",
+      "zero_start": 22731,
+      "target": 21836,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_readv",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lp_oh_df",
+      "zero_start": 14011,
+      "target": 13790,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_readv",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lp_oh_df",
+      "zero_start": 14292,
+      "target": 13790,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_readv",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lp_oh_df",
+      "zero_start": 14685,
+      "target": 13790,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_writev_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lvmz7ggv",
+      "zero_start": 22545,
+      "target": 22260,
+      "prefix_instructions": 68,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_writev_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lvmz7ggv",
+      "zero_start": 22766,
+      "target": 22260,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_writev_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lvmz7ggv",
+      "zero_start": 23159,
+      "target": 22260,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_filldir64",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lw9gjkt3",
+      "zero_start": 6645,
+      "target": 6424,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_filldir64",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lw9gjkt3",
+      "zero_start": 6958,
+      "target": 6424,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_kset_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-m5q7iw98",
+      "zero_start": 66856,
+      "target": 66635,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_kset_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-m5q7iw98",
+      "zero_start": 67137,
+      "target": 66635,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_kset_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-m5q7iw98",
+      "zero_start": 67530,
+      "target": 66635,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_kernel_write_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mwmqejnt",
+      "zero_start": 22057,
+      "target": 21836,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_kernel_write_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mwmqejnt",
+      "zero_start": 22338,
+      "target": 21836,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_kernel_write_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mwmqejnt",
+      "zero_start": 22731,
+      "target": 21836,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__cgroup__cgroup_mkdir",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mxjcj4ia",
+      "zero_start": 6886,
+      "target": 6665,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__cgroup__cgroup_mkdir",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mxjcj4ia",
+      "zero_start": 7167,
+      "target": 6665,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__cgroup__cgroup_mkdir",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mxjcj4ia",
+      "zero_start": 7560,
+      "target": 6665,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_unlink",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nc6szymi",
+      "zero_start": 7664,
+      "target": 7443,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_unlink",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nc6szymi",
+      "zero_start": 7945,
+      "target": 7443,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_unlink",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nc6szymi",
+      "zero_start": 8338,
+      "target": 7443,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_symlink",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-np0eklc2",
+      "zero_start": 7160,
+      "target": 6939,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_symlink",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-np0eklc2",
+      "zero_start": 7473,
+      "target": 6939,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__exec_test",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nu8vqqcm",
+      "zero_start": 41855,
+      "target": 41634,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_commit_creds",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o1dqggp4",
+      "zero_start": 8369,
+      "target": 8148,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bprm_check",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-oelk4uaw",
+      "zero_start": 26092,
+      "target": 25871,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bprm_check",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-oelk4uaw",
+      "zero_start": 26373,
+      "target": 25871,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bprm_check",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-oelk4uaw",
+      "zero_start": 26766,
+      "target": 25871,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_dup_exit_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ouaht80l",
+      "zero_start": 7355,
+      "target": 7134,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_dup_exit_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ouaht80l",
+      "zero_start": 7636,
+      "target": 7134,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "process_execute_failed_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ovthd3r5",
+      "zero_start": 7762,
+      "target": 7541,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "process_execute_failed_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ovthd3r5",
+      "zero_start": 8043,
+      "target": 7541,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "process_execute_failed_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ovthd3r5",
+      "zero_start": 8436,
+      "target": 7541,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_kernel_write",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pcu_ws2q",
+      "zero_start": 14011,
+      "target": 13790,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_kernel_write",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pcu_ws2q",
+      "zero_start": 14292,
+      "target": 13790,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_kernel_write",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pcu_ws2q",
+      "zero_start": 14685,
+      "target": 13790,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_tracepoint_probe_register_prio_may_exist",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-q4cs2zd0",
+      "zero_start": 7637,
+      "target": 7416,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_tracepoint_probe_register_prio_may_exist",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-q4cs2zd0",
+      "zero_start": 7918,
+      "target": 7416,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_tracepoint_probe_register_prio_may_exist",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-q4cs2zd0",
+      "zero_start": 8311,
+      "target": 7416,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_write",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qcewwz2g",
+      "zero_start": 14008,
+      "target": 13787,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_write",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qcewwz2g",
+      "zero_start": 14289,
+      "target": 13787,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_write",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qcewwz2g",
+      "zero_start": 14682,
+      "target": 13787,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_exit_submit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qhcggx4u",
+      "zero_start": 10123,
+      "target": 9902,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_exit_submit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qhcggx4u",
+      "zero_start": 10404,
+      "target": 9902,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_exit_submit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qhcggx4u",
+      "zero_start": 10797,
+      "target": 9902,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_vfs_utimes",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qret7205",
+      "zero_start": 13310,
+      "target": 13089,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_vfs_utimes",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qret7205",
+      "zero_start": 13591,
+      "target": 13089,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_vfs_utimes",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qret7205",
+      "zero_start": 13984,
+      "target": 13089,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe__features_fallback_arena_tailcall",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qv24j4jt",
+      "zero_start": 1760,
+      "target": 1539,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_seq_ops_trigger",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qwa20mrp",
+      "zero_start": 6048,
+      "target": 5763,
+      "prefix_instructions": 68,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_seq_ops_trigger",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qwa20mrp",
+      "zero_start": 6269,
+      "target": 5763,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_seq_ops_trigger",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qwa20mrp",
+      "zero_start": 6662,
+      "target": 5763,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_open",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r71wb84q",
+      "zero_start": 14937,
+      "target": 14716,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_open",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r71wb84q",
+      "zero_start": 15218,
+      "target": 14716,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_open",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r71wb84q",
+      "zero_start": 15611,
+      "target": 14716,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_enter_submit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rqvx7dtu",
+      "zero_start": 15122,
+      "target": 14901,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_writev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rsd3e2e7",
+      "zero_start": 14011,
+      "target": 13790,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_writev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rsd3e2e7",
+      "zero_start": 14292,
+      "target": 13790,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_writev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rsd3e2e7",
+      "zero_start": 14685,
+      "target": 13790,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_call_usermodehelper",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ry8njcaa",
+      "zero_start": 19626,
+      "target": 19405,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_call_usermodehelper",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ry8njcaa",
+      "zero_start": 19907,
+      "target": 19405,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_call_usermodehelper",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ry8njcaa",
+      "zero_start": 20300,
+      "target": 19405,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_bpf_run_filter_skb",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-t6bkygj4",
+      "zero_start": 4633,
+      "target": 4412,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_dup3",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-t77n255m",
+      "zero_start": 10131,
+      "target": 9910,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_dup3",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-t77n255m",
+      "zero_start": 10412,
+      "target": 9910,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_dup3",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-t77n255m",
+      "zero_start": 10805,
+      "target": 9910,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execveat_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-tdfz29ai",
+      "zero_start": 17584,
+      "target": 17363,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execveat_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-tdfz29ai",
+      "zero_start": 17865,
+      "target": 17363,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execveat_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-tdfz29ai",
+      "zero_start": 18258,
+      "target": 17363,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_switch_task_namespaces",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-tn1yd512",
+      "zero_start": 8225,
+      "target": 8004,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_kernel_read_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-tvm8fo7o",
+      "zero_start": 13200,
+      "target": 12979,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_kernel_read_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-tvm8fo7o",
+      "zero_start": 13481,
+      "target": 12979,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_kernel_read_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-tvm8fo7o",
+      "zero_start": 13874,
+      "target": 12979,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_filp_close",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-u1t__j3b",
+      "zero_start": 11704,
+      "target": 11483,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_exit_init",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ubq6rzri",
+      "zero_start": 2178,
+      "target": 1957,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ptrace",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uim8ws43",
+      "zero_start": 2182,
+      "target": 1961,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_do_mmap",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uj4nfl5d",
+      "zero_start": 13564,
+      "target": 13343,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_do_mmap",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uj4nfl5d",
+      "zero_start": 13845,
+      "target": 13343,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_do_mmap",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uj4nfl5d",
+      "zero_start": 14238,
+      "target": 13343,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_load_elf_phdrs",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uot_ns7d",
+      "zero_start": 13439,
+      "target": 13218,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_load_elf_phdrs",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uot_ns7d",
+      "zero_start": 13720,
+      "target": 13218,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_load_elf_phdrs",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uot_ns7d",
+      "zero_start": 14113,
+      "target": 13218,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__module__module_free",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uotzoinl",
+      "zero_start": 7343,
+      "target": 7122,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__module__module_free",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uotzoinl",
+      "zero_start": 7656,
+      "target": 7122,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_accept",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uycf7jdm",
+      "zero_start": 8504,
+      "target": 8283,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_accept",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uycf7jdm",
+      "zero_start": 8785,
+      "target": 8283,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sched_process_exec_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uz28s8pu",
+      "zero_start": 16505,
+      "target": 16284,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sched_process_exec_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uz28s8pu",
+      "zero_start": 16786,
+      "target": 16284,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sched_process_exec_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uz28s8pu",
+      "zero_start": 17179,
+      "target": 16284,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_connect",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v4xhaj_6",
+      "zero_start": 7863,
+      "target": 7578,
+      "prefix_instructions": 68,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_connect",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v4xhaj_6",
+      "zero_start": 8084,
+      "target": 7578,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret__register_chrdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vechpryf",
+      "zero_start": 7095,
+      "target": 6874,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret__register_chrdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vechpryf",
+      "zero_start": 7376,
+      "target": 6874,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret__register_chrdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vechpryf",
+      "zero_start": 7769,
+      "target": 6874,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "send_bin",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vgy6uwav",
+      "zero_start": 1329,
+      "target": 1044,
+      "prefix_instructions": 68,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_rmdir_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vr0_pgk0",
+      "zero_start": 1201,
+      "target": 920,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_rmdir_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vr0_pgk0",
+      "zero_start": 1502,
+      "target": 920,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_rmdir_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vr0_pgk0",
+      "zero_start": 1815,
+      "target": 920,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_mod_tree_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vtinq8ac",
+      "zero_start": 1110,
+      "target": 889,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_mod_tree_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vtinq8ac",
+      "zero_start": 1423,
+      "target": 889,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_debugfs_create_dir",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vx43mxwm",
+      "zero_start": 7160,
+      "target": 6939,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_debugfs_create_dir",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vx43mxwm",
+      "zero_start": 7473,
+      "target": 6939,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_bind",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vzs62ho7",
+      "zero_start": 7959,
+      "target": 7738,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_bind",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vzs62ho7",
+      "zero_start": 8240,
+      "target": 7738,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_modtree_loop",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vzzawsn6",
+      "zero_start": 77174,
+      "target": 76953,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_modtree_loop",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vzzawsn6",
+      "zero_start": 77455,
+      "target": 76953,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_process_vm_writev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-w280lo0g",
+      "zero_start": 2182,
+      "target": 1961,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_enter_init",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-w6xh1tna",
+      "zero_start": 2312,
+      "target": 2091,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "vfs_write_magic_return",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-w_o1uyks",
+      "zero_start": 16136,
+      "target": 15915,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "vfs_write_magic_return",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-w_o1uyks",
+      "zero_start": 16417,
+      "target": 15915,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "vfs_write_magic_return",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-w_o1uyks",
+      "zero_start": 16810,
+      "target": 15915,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_exec_binprm",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-wtj_sjgm",
+      "zero_start": 12778,
+      "target": 12557,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_exec_binprm",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-wtj_sjgm",
+      "zero_start": 13059,
+      "target": 12557,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_exec_binprm",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-wtj_sjgm",
+      "zero_start": 13452,
+      "target": 12557,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_new_mod_only_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-x_gw7u2r",
+      "zero_start": 3050,
+      "target": 2829,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_new_mod_only_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-x_gw7u2r",
+      "zero_start": 3331,
+      "target": 2829,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_new_mod_only_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-x_gw7u2r",
+      "zero_start": 3724,
+      "target": 2829,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe__features_fallback_arena",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xi6xk428",
+      "zero_start": 3749,
+      "target": 3528,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_dup",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xna2ier_",
+      "zero_start": 10131,
+      "target": 9910,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_dup",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xna2ier_",
+      "zero_start": 10412,
+      "target": 9910,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_dup",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xna2ier_",
+      "zero_start": 10805,
+      "target": 9910,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_sock_alloc_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xrq1dl1n",
+      "zero_start": 6741,
+      "target": 6520,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "kernel_write_magic_return",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ya08zuaa",
+      "zero_start": 16136,
+      "target": 15915,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "kernel_write_magic_return",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ya08zuaa",
+      "zero_start": 16417,
+      "target": 15915,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "kernel_write_magic_return",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ya08zuaa",
+      "zero_start": 16810,
+      "target": 15915,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_proc_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-yi6w6qj8",
+      "zero_start": 61918,
+      "target": 61697,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_proc_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-yi6w6qj8",
+      "zero_start": 62199,
+      "target": 61697,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_proc_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-yi6w6qj8",
+      "zero_start": 62592,
+      "target": 61697,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_process_vm_writev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zahms7i2",
+      "zero_start": 10131,
+      "target": 9910,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_process_vm_writev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zahms7i2",
+      "zero_start": 10412,
+      "target": 9910,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_process_vm_writev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zahms7i2",
+      "zero_start": 10805,
+      "target": 9910,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_arch_prctl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zoagqlra",
+      "zero_start": 10131,
+      "target": 9910,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_arch_prctl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zoagqlra",
+      "zero_start": 10412,
+      "target": 9910,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_arch_prctl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zoagqlra",
+      "zero_start": 10805,
+      "target": 9910,
+      "prefix_instructions": 74,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_syscall_table_check",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zog5yqnb",
+      "zero_start": 73246,
+      "target": 73025,
+      "prefix_instructions": 47,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_syscall_table_check",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zog5yqnb",
+      "zero_start": 73527,
+      "target": 73025,
+      "prefix_instructions": 67,
+      "errors": []
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_syscall_table_check",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zog5yqnb",
+      "zero_start": 73920,
+      "target": 73025,
+      "prefix_instructions": 74,
+      "errors": []
+    }
+  ]
+}
