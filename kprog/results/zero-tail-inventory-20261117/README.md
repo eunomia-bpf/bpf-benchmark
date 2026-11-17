@@ -22,8 +22,8 @@ image. Runtime/helper facts absent from a capture are not synthesized.
 
 `run.sh` runs on CPU 19 under timing SH and retains all raw output in
 `/workspaces/kprog-raw/perf/zero-tail-inventory-20261117`. It records only
-actual output under the Git lock. Results and a source-change decision
-are pending. Any future sharing must carry structural tail offsets
+actual output under the Git lock. Results and the source-change decision
+are recorded below. Any future sharing must carry structural tail offsets
 through branch sizing, preserve success returns and protected loads,
 and avoid fake helper identities or a new public relocation format.
 
