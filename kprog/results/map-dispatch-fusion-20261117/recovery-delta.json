@@ -1,0 +1,5173 @@
+{
+  "scope": "Actual ABI sidecar observations. Removed ARRAY fallback RET has an implicit stack read with destination65535. Classifies its removal; no full recovery semantics, stock or timing claim.",
+  "summary": {
+    "requests": 295,
+    "fused": 162,
+    "explained": 295,
+    "other_differences": 0,
+    "identical_array_prefixes": 162,
+    "identical_lpm_bodies": 162
+  },
+  "requests": [
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_php",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0t9jewb9",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "native_tracer_entry",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6pt2hgn7",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "tracepoint__sched_process_free",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6xjm60mv",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_perl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9jgkf4wo",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_ruby",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bp1f6lmn",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_native",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f2sqjzud",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 14269,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "read_task_struct",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-gv7scc03",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_v8",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-i74g9gvr",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 13581,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_stop",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-isjxl4cd",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_dotnet",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jhlatj24",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 18584,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_go_labels",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-miy7mdp6",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_python",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pzbgnkhi",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_hotspot",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vpdq0hnh",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "custom__generic",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-z69ln99l",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tcp_v4_connect",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1_lto8xz",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_write",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4jklketw",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tracepoint__syscalls__sys_exit_open",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6i31gwia",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tcp_v4_connect_ret",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-794zppcb",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "sys_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7d98s1v6",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "block_rq_issue",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7halu_ke",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "inet_sock_set_state",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8e6fl8jk",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "block_rq_complete",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_1aqp51j",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "blk_account_io_merge_bio",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-a193g4ge",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_open",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ay6ey69x",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_create",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bzxjfd4z",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tracepoint__syscalls__sys_enter_openat",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-dxo2lc2q",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_fsync",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hgq_b00n",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "sched_wakeup_new",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jb3gko01",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "block_rq_insert",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jck9lh2k",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "sched_wakeup",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k46xd0cp",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tracepoint__syscalls__sys_exit_openat",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ll9iyiuh",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tcp_v6_connect_ret",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mlacd5gt",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "kprobe__cap_capable_entry",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o0mz755w",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "kprobe__cap_capable_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rh0ow6sg",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "sched_switch",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-scqqtjed",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tcp_v6_connect",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v27kbtfd",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "sys_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v8lv8ar0",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_read",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-x1s4v62w",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tracepoint__syscalls__sys_enter_open",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ys2epo0_",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_ingress_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-13kno4fc",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6842,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_netdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1cycht3i",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6152,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_rev_dnat_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2ce8m1_7",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 2838,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_xdp_entry",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-3cqcl0fp",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_container",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4d9yymr5",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_no_service_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4uxpf98g",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_host",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6fga9lbq",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_netdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-79btul9d",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6144,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_policy",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8cg5bvgp",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 4059,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_arp",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-91mtb7o3",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_egress",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9gsgtcv3",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 4797,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_rev_dnat_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_7ys3jh4",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 2838,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_lxc_policy",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_8d03s3p",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 4351,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_host",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_p5zmjby",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_snat_fwd_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-agezr1oz",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 10908,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_lxc_policy",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f5_4shmk",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 4351,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_host",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f9ut04aq",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_egress_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fhkkm0eb",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_snat_fwd_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-iwl_z0yi",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 10897,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_no_service_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jo5rwatf",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_arp",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k027eqh_",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_to_endpoint",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-l7u92oz8",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 4522,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_egress",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lf1ld_nc",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 4797,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_cont",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lorirdv6",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_host",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-movvchz0",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_snat_fwd_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nxg7aalt",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 10890,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_policy",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o3794un8",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 4059,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_netdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o8ohgar4",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_netdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pkqceosl",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qw44_dh3",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 4639,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_host",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rodhoecx",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_ingress_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rxey2hzy",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6842,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_container",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-s6hx0gco",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_netdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-syczdmnk",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 3646,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-t15zizyt",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 4639,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_netdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-t_ial4wq",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 3646,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_to_endpoint",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uxsybchg",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 4522,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_container",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v9h7qeqv",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_netdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v_946gqq",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_cont",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vc7e_r5k",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_host",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vl_vqe9q",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_ingress",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-wbdsc394",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 3865,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_netdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xd5wo9oh",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 3646,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_container",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xno7wtkt",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_ingress",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-y6a0390q",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 3865,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_host",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-yaomepl8",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_egress_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zlk3fva1",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "execve_rate",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-04ysigi9",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0uk6eny3",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 10577,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_process_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0v55dkrr",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_output",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1e1whdkd",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_output",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-20u5h7e0",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-31f47_a7",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 10698,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_output",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4vi9ft6v",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "execve_send",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6vbtwxp5",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_output",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7xa_4zm5",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9p7ocgsk",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 10577,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_process_filter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_gtbajk_",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 9221,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_qtl2kam",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 10577,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_actions",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_vqrdf28",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_setup_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ai2k1te5",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_actions",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-beoa__2d",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "execve_map_update",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-blnybbe9",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 231,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-c3k1hzvb",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 10610,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "tg_kp_bprm_committing_creds",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-c_1wmpw5",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ddm5z6l1",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 10577,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_filter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-g_0kedgz",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 9224,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-il4rhakh",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 10577,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-j63keppd",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 10577,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_exit_disassociate_ctty",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jasy1x_7",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-juhc192d",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 10698,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_actions",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k6ckpvxv",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_process_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-l3wtixm8",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_process_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lrpau888",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_process_filter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nqetz_k2",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 9221,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qqafecq5",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 10577,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_execve",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r9kh94rr",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rmyx34xm",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 1619,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-wdd42hwy",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 1619,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_actions",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xf313ycz",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xgsv35ba",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 10577,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xh90hqo_",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_setup_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xuz7oyzt",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_exit_acct_process",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ye4mrb_x",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-yuod933z",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 12492,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_wake_up_new_task",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zfitfdx5",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_do_init_module",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-017c9l0e",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 10345,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_mkdir_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-05zpqxw5",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_proc_create",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-09yg3syu",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 5995,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_permission",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0i4efh97",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6467,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sched_process_fork_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0yeqcsp9",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_dup2",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0zn8n8nm",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 9449,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_sb_mount",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1al7w7n_",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 12205,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_register_kprobe",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1dlp69ce",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6334,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "security_bpf_kprobe",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1rsfl2um",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_register_kprobe",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-25r5ey8n",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_fd_install",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-279z4mzn",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 11070,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_recvmsg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2c20f7iq",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6132,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_mem_dump_trigger",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2euu41id",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 4918,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_truncate",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2ohy4p0m",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6635,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace___debugfs_create_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2wpohzoo",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6631,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_bpf_check",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2xmqw18s",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 5064,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "vfs_writev_magic_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-3aidh7c1",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_utimes_common",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-3cfra29r",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 12607,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_lkm_seeker",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-3oke79hs",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 3829,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_chmod_common",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4hsfozd4",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 11710,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_execute_finished",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4vy19taj",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 19949,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_process_exec",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-51uw37rf",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 14828,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bprm_creds_for_exec",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-56siaau7",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 12110,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__cgroup__cgroup_rmdir",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-5gxcl38z",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6183,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__accept4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-5llp5ka0",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 5984,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bpf_map",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-64h9nush",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6016,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_dup",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6_siljwd",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sched_process_exit_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6fbt0i5v",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "vfs_writev_magic_return",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7_enltvb",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 15472,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_check_map_func_compatibility",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-89tqz71h",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 5305,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__raw_syscalls__sys_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8cgewgox",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_kallsyms_lookup_name",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8kgpa20o",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execveat_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8lb6agqq",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 16798,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_settime64",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-932_xsv4",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6219,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_mknod",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-96ffhbif",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6486,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_set_fs_pwd",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-99z6y52i",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 12503,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_setsockopt",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9ds10gnw",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 7644,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_file_modified",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9qyfm50x",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__raw_syscalls__sys_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9y0d_vd4",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__module__module_load",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9yd5aw5c",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 13259,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execve_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_0s58jbm",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 16705,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_file_update_time",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_2la9k4c",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_path_notify",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_6a36jlc",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 12035,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_dup3",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_y38j0c7",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_listen",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-a7tuahol",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 7389,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_kallsyms_lookup_name",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ahj1_4pv",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6130,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_mmap_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-amhjcvnr",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 23684,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_vfs_readv",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-aop4ljiv",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_cap_capable",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-b7axm1ie",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 5885,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_do_splice",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bbxy8sr7",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 13771,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_task_prctl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bdoo7afc",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 29799,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_read_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bin1t79n",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_device_add",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bwp7_2ms",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6107,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_sys_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ci3jf9ph",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 5953,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_check_helper_call",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-cquz72yx",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 5300,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_mmap_alert",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-cru7pfek",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 14084,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_task_setrlimit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-cw8vbd3l",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6168,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "kernel_write_magic_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-d3zufz99",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_splice",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-d449regs",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_file_modified",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-d50syq4d",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 13152,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_lkm_seeker_submitter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-dhilq03b",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 4501,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_switch",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-dynocs3e",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6389,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_inotify_find_inode",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-dz4c9avv",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 12242,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_mprotect",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-eb6tcou5",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 24001,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__task__task_rename",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-egsoamtt",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6087,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "send_bin_tp",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ekfto0ej",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_ptrace",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-eolnj7vr",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 9449,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_sys_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f06yp4a3",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 5972,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_process_free",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f0fyimi4",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_kernel_post_read_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fgoiyo4w",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 12718,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_readv_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fscgqsh5",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace___register_chrdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ftw94k7c",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lsm_file_open_test",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fx044r0o",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 5759,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bpf",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-gmhuwt57",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 11824,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall_checker",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-gs0e2ldt",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 10616,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe__features_fallback_minimal_tailcall",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-gwrg59pw",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hb9cetnn",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 5866,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_rename",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hc4ro7xn",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 7426,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_sb_umount",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hdvg450z",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6632,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_read",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hsk75jw2",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 13329,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execve_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hvb0kyoo",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 16617,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_create",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-i3p2v7am",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6125,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__cgroup__cgroup_attach_task",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-i4_djze4",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6184,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_ioctl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ibpjwerv",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 7659,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_file_update_time",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ibrrmkdz",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 13152,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_process_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-j3_4yk8e",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6253,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_arch_prctl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jv5nd05b",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_sigaction",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jxmj3ryw",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 7373,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sched_process_exec_event_submit_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k0ty1s40",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_sendmsg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-kb8wrxm3",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6132,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_dup2",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-kc6m9ob8",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe__features_fallback_helper_tailcall",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-kmzrwgx2",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "empty_kprobe",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-krjq8b_5",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bpf_prog",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ktazrxzj",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 7191,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_process_fork",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-kw8tx6mb",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 13521,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "heartbeat_capture",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-le73inl6",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_write_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lncel1es",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 21379,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_readv",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lp_oh_df",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 13329,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_writev_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lvmz7ggv",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 21807,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_filldir64",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lw9gjkt3",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 5942,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_kset_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-m5q7iw98",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_vfs_writev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mhw9lgtg",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_kernel_write_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mwmqejnt",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 21379,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__cgroup__cgroup_mkdir",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mxjcj4ia",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6183,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_skb_ingress",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-n3xtt1s_",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6213,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_unlink",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nc6szymi",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6961,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_mmap",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nfj3hqwm",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_symlink",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-np0eklc2",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6457,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__exec_test",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nu8vqqcm",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 41152,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_commit_creds",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o1dqggp4",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 7666,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_sk_clone",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o_gjhpap",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bprm_check",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-oelk4uaw",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 25389,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_dup_exit_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ouaht80l",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6652,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "process_execute_failed_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ovthd3r5",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_kernel_write",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pcu_ws2q",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 13329,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_kernel_write",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pthqhk7g",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_init_module",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pwa00tt3",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_tracepoint_probe_register_prio_may_exist",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-q4cs2zd0",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6934,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_write",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qcewwz2g",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 13326,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_exit_submit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qhcggx4u",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 9441,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_vfs_utimes",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qret7205",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 12607,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe__features_fallback_arena_tailcall",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qv24j4jt",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_seq_ops_trigger",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qwa20mrp",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 5285,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_sock_alloc_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qwfugkfp",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_open",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r71wb84q",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 14234,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_enter_submit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rqvx7dtu",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 14440,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_writev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rsd3e2e7",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 13329,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_call_usermodehelper",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ry8njcaa",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 18923,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_bpf_run_filter_skb",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-t6bkygj4",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_dup3",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-t77n255m",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 9449,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execveat_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-tdfz29ai",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 16881,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_switch_task_namespaces",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-tn1yd512",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 7522,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_kernel_read_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-tvm8fo7o",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 12497,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_filp_close",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-u1t__j3b",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 11001,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_vfs_read",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-u9oo0ki2",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_exit_init",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ubq6rzri",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ptrace",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uim8ws43",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_do_mmap",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uj4nfl5d",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 12861,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lsm_bpf_check",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uj6pc61t",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_load_elf_phdrs",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uot_ns7d",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 12736,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__module__module_free",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uotzoinl",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6640,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_accept",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uycf7jdm",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 7801,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sched_process_exec_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uz28s8pu",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_connect",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v4xhaj_6",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 7100,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret__register_chrdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vechpryf",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6392,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "send_bin",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vgy6uwav",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_rmdir_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vr0_pgk0",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_mod_tree_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vtinq8ac",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__init_module",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vtx4en2b",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_debugfs_create_dir",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vx43mxwm",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6457,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_bind",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vzs62ho7",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 7256,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_modtree_loop",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vzzawsn6",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_process_vm_writev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-w280lo0g",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_enter_init",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-w6xh1tna",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "vfs_write_magic_return",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-w_o1uyks",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 15433,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_exec_binprm",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-wtj_sjgm",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 12096,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_new_mod_only_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-x_gw7u2r",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 2631,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_skb_egress",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xdnk7sql",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6213,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe__features_fallback_arena",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xi6xk428",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 3067,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_dup",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xna2ier_",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 9449,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_sock_alloc_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xrq1dl1n",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 6038,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_inotify_find_inode",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xxfpxema",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "vfs_write_magic_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-y1nu4s8o",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_vfs_write",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-y2o04drq",
+      "fused": false,
+      "array_prefix_byte_identical": null,
+      "lpm_body_byte_identical": null,
+      "removed_shapes": [],
+      "added_shapes": [],
+      "old_array_fallback_return": null,
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "kernel_write_magic_return",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ya08zuaa",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 15433,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_proc_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-yi6w6qj8",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 61235,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_process_vm_writev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zahms7i2",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 9449,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_arch_prctl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zoagqlra",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 9449,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_syscall_table_check",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zog5yqnb",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 72522,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    },
+    {
+      "app": "katran",
+      "symbol": "balancer_ingress",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r1c7nupu",
+      "fused": true,
+      "array_prefix_byte_identical": true,
+      "lpm_body_byte_identical": true,
+      "removed_shapes": [
+        {
+          "length": 1,
+          "destination": 65535,
+          "count": 1
+        }
+      ],
+      "added_shapes": [],
+      "old_array_fallback_return": {
+        "offset": 8755,
+        "opcode": 195,
+        "registered": true
+      },
+      "explained_by_removed_return": true
+    }
+  ]
+}

@@ -66,3 +66,22 @@ Actual shared wrappers and their final relocation still require E8.
 2026-11-17T22:43:32Z — Production fusion and full host tests completed; actual logs and source.patch committed. Raw: /workspaces/kprog-raw/perf/map-dispatch-fusion-20261117/host-20261117T224241Z-2793351. Production unit-entry build and captured-request emission follow; canonical CLI stays unchanged; installed/time results remain pending.
 
 2026-11-17T22:43:47Z — Actual ARRAY/LPM fusion emission: bcc/set: 25/25 emit, 0 fused, 11028 -> 11028 neutral B; cilium/agent: 47/47 emit, 24 fused, 180945 -> 180609 neutral B; katran: 1/1 emit, 1 fused, 9255 -> 9241 neutral B; otelcol-ebpf-profiler/profiling: 14/14 emit, 3 fused, 130635 -> 130593 neutral B; tetragon/observer: 39/39 emit, 18 fused, 285911 -> 285659 neutral B; tracee/monitor: 169/169 emit, 116 fused, 1747558 -> 1745934 neutral B. All request/error records and helper/map/mask/recovery observations are retained in comparison.json; no installed/per-call/body/helper/map/throughput gain claimed. Owner image/check/affected-app timing remains pending with all LTO on.
+
+## Recovery and unchanged-body classification, 2026-11-17T22:50:20Z
+
+Readers950d1c73f/603352a95 classify all295 requests. In all162 fused images,
+the ARRAY prefix and entire LPM body are each byte-identical to the preceding
+source2c emission. Recovery-shape changes remove exactly one length1/destination
+65535 site per fusion; its original offset names the actual ARRAY fallback
+RET(C3), which reads the stack implicitly. No new shape is added. All133
+non-fused images retain the same recovery shapes; other differences0. This
+explains the162 differences in comparison.json without treating them as equal.
+No new source-read instruction or read policy is changed by the fusion.
+
+Production source b44b673aa and replay receipt990c7d987 are pushed; successful
+host2793351 ended0 at22:43:47Z, publisher2793352 at22:43:51Z.59 tests pass,
+4 ignored,120 new actual-rewriter executions and647 unrelated files identical.
+All295 requests emit. Source2c baseline -> fusion neutral B: Cilium180945->180609,
+Katran9255->9241,OTel130635->130593,Tetragon285911->285659,Tracee1747558->1745934;
+BCC11028 unchanged. Total2268B removed, exactly14B for each merged wrapper.
+Per-call/body/helpers/maps, installed bytes and throughput await Omp image batch.
