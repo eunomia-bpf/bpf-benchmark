@@ -2974,3 +2974,44 @@ and current row, including the interval qualification, in
 [leaf-read-effects.json](leaf-read-effects.json). Other app comparisons
 are retained. Tracee timing continues; no guest, build or new measurement
 was started by PERF.
+
+
+### Kernel-leaf Tracee: retain the first run and its same-image repeat
+
+Coordinator run `075401_648119` reports **1.378x per call** and
+**1.221x throughput**. Raw-derived eBPF/native times are
+**367.178 / 266.503 ns/call**. Against the preceding user-leaf run
+`065240_468797`, baseline time changes by **-0.094%** and native time by
+**-18.951%**. Unlike the BCC and broader-interval Tetragon observations,
+this pair shows a substantial native reduction with a nearly steady
+baseline. It supports the kernel-read direction without proving that
+all cross-run movement comes from one source change.
+
+The first throughput series is eBPF 340,078 / 341,122 / 337,033 and
+native 434,987 / 415,126 / 413,045, ratios 1.279 / 1.217 / 1.226.
+Coordinator same-image repeat `080846_876289` reports **1.401x per call**
+and **1.255x throughput**, with eBPF/native **430.966 / 307.711 ns/call**.
+Its throughput series is eBPF 276,913 / 258,816 / 266,133 and native
+361,303 / 328,043 / 333,899, ratios 1.305 / 1.267 / 1.255. Both runs
+report zero errors. Absolute BPF time rises in the repeat in both arms
+(**+17.37% baseline, +15.46% native**); the repeat preserves the relative
+advantage but is not a second immediately-before/after source experiment.
+Both original attempts remain recorded.
+
+Each arm selects 41 of 167 records in both runs under the existing
+reporting convention. Median active run-count ratios are 1.206 and
+1.186. The two known file-related count differences remain in the
+coordinator receipts (0.180x and 0.197x); they are not filtered away or
+replaced by an equal-work assertion.
+
+Both runs install **169 cumulative native replacements, 1,716,880 B**,
+against **2,068,918 B JIT**: about **0.830x**, an increase of **16,188 B**
+from the preceding user-leaf run. These observations exceed the 20%
+per-call speedup threshold; the throughput 1.30x, native 1.50x and
+installed-byte 0.50x targets remain unmet here. This stats-on 3x60s
+diagnostic is distinct from the later frozen-default confirmation round.
+The [reader](leaf_read_effect_inventory.py) and
+[leaf-read-effects.json](leaf-read-effects.json) retain both kernel-leaf
+rows, exact record counters and comparisons, without replacing the
+original user-leaf pairs. PERF ran only the host reader; no new guest,
+build, source change or measurement gate was introduced.

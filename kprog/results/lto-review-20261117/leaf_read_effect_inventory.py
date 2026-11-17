@@ -37,8 +37,9 @@ for app, before_stage, before, after in [
     ratios = {phase: rows[1]['phases'][phase]['ns_per_call'] / rows[0]['phases'][phase]['ns_per_call']
               for phase in ('baseline', 'post_rejit')}
     entry = dict(app=app, after_before_ns_ratios=ratios, runs=rows)
-    if app == 'bcc__set':
-        kernel = read_run(app, 'kernel_leaf', '073234_717951')
+    kernel_runs = {'bcc__set': '073234_717951', 'tracee__monitor': '075401_648119'}
+    if app in kernel_runs:
+        kernel = read_run(app, 'kernel_leaf', kernel_runs[app])
         entry['subsequent_kernel_leaf'] = kernel
         entry['kernel_leaf_vs_user_leaf_ns_ratios'] = {
             phase: kernel['phases'][phase]['ns_per_call'] / rows[1]['phases'][phase]['ns_per_call']
@@ -46,6 +47,15 @@ for app, before_stage, before, after in [
         print(app, 'kernel_leaf ns/call',
               {phase: round(data['ns_per_call'], 4) for phase, data in kernel['phases'].items()})
         print('kernel/user ns ratios:', entry['kernel_leaf_vs_user_leaf_ns_ratios'])
+        if app == 'tracee__monitor':
+            repeat = read_run(app, 'kernel_leaf_same_image_repeat', '080846_876289')
+            entry['kernel_leaf_repeat'] = repeat
+            entry['kernel_leaf_repeat_vs_first_ns_ratios'] = {
+                phase: repeat['phases'][phase]['ns_per_call'] / kernel['phases'][phase]['ns_per_call']
+                for phase in ('baseline', 'post_rejit')}
+            print(app, 'kernel_leaf repeat ns/call',
+                  {phase: round(data['ns_per_call'], 4) for phase, data in repeat['phases'].items()})
+            print('repeat/first ns ratios:', entry['kernel_leaf_repeat_vs_first_ns_ratios'])
     apps.append(entry)
     for row in rows:
         print(app, row['stage'], 'ns/call',
@@ -53,7 +63,7 @@ for app, before_stage, before, after in [
     print('after/before ns ratios:', ratios)
 
 result = dict(recorded_utc=subprocess.check_output(['date', '-u', '+%FT%TZ'], text=True).strip(),
-              scope='Completed OTel/BCC/Tracee user-leaf coordinator stats-on 3x60s run pairs and first subsequent kernel-leaf BCC run; Tracee reference is the coordinator same-image repeat, and its first post-change attempt remains in zero-remainder-effects.json. Existing >=100-call reporting convention. IDs identify records within their own boot only. Installed receipts count cumulative replacements, not measurement snapshots. No causal gain, PMU split, equal-work proof or new admission check is inferred.',
+              scope='Completed OTel/BCC/Tracee user-leaf coordinator stats-on 3x60s run pairs and subsequent kernel-leaf BCC/Tracee runs; Tracee user-leaf reference is the coordinator same-image repeat, and its first post-change attempt remains in zero-remainder-effects.json. Existing >=100-call reporting convention. IDs identify records within their own boot only. Installed receipts count cumulative replacements, not measurement snapshots. No causal gain, PMU split, equal-work proof or new admission check is inferred.',
               apps=apps)
 tetra_before = read_run('tetragon__observer', 'probe_tails_4_2_1', '043157_792401')
 tetra_after = read_run('tetragon__observer', 'kernel_leaf', '074317_231933')
