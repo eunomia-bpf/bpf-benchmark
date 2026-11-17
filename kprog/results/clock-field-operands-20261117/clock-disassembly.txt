@@ -1,0 +1,75 @@
+
+/workspaces/kprog-raw/perf/clock-field-operands-20261117/host-20261117T182038Z-2700640/fixture/ktime.bin:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	49 bb 01 00 00 00 78 	movabs r11,0x1234567800000001
+   7:	56 34 12 
+   a:	41 8b 3b             	mov    edi,DWORD PTR [r11]
+   d:	4d 8d 53 08          	lea    r10,[r11+0x8]
+  11:	40 f6 c7 01          	test   dil,0x1
+  15:	74 07                	je     0x1e
+  17:	49 81 c2 38 00 00 00 	add    r10,0x38
+  1e:	4d 8b 02             	mov    r8,QWORD PTR [r10]
+  21:	48 b8 02 00 00 00 78 	movabs rax,0x1234567800000002
+  28:	56 34 12 
+  2b:	49 39 c0             	cmp    r8,rax
+  2e:	0f 85 b5 00 00 00    	jne    0xe9
+  34:	65 ff 04 25 00 00 00 	inc    DWORD PTR gs:0x0
+  3b:	00 
+  3c:	65 4c 8b 0c 25 08 00 	mov    r9,QWORD PTR gs:0x8
+  43:	00 00 
+  45:	41 8b 31             	mov    esi,DWORD PTR [r9]
+  48:	83 e6 fe             	and    esi,0xfffffffe
+  4b:	0f ae e8             	lfence
+  4e:	0f 31                	rdtsc
+  50:	48 c1 e2 20          	shl    rdx,0x20
+  54:	48 09 d0             	or     rax,rdx
+  57:	49 2b 41 08          	sub    rax,QWORD PTR [r9+0x8]
+  5b:	41 0f be 49 1c       	movsx  ecx,BYTE PTR [r9+0x1c]
+  60:	85 c9                	test   ecx,ecx
+  62:	78 05                	js     0x69
+  64:	48 d3 e0             	shl    rax,cl
+  67:	eb 05                	jmp    0x6e
+  69:	f7 d9                	neg    ecx
+  6b:	48 d3 e8             	shr    rax,cl
+  6e:	41 8b 51 18          	mov    edx,DWORD PTR [r9+0x18]
+  72:	48 f7 e2             	mul    rdx
+  75:	48 0f ac d0 20       	shrd   rax,rdx,0x20
+  7a:	49 03 41 10          	add    rax,QWORD PTR [r9+0x10]
+  7e:	41 0f b6 51 1d       	movzx  edx,BYTE PTR [r9+0x1d]
+  83:	41 3b 31             	cmp    esi,DWORD PTR [r9]
+  86:	75 bd                	jne    0x45
+  88:	f6 c2 01             	test   dl,0x1
+  8b:	74 4d                	je     0xda
+  8d:	48 b9 03 00 00 00 78 	movabs rcx,0x1234567800000003
+  94:	56 34 12 
+  97:	f6 01 01             	test   BYTE PTR [rcx],0x1
+  9a:	74 3e                	je     0xda
+  9c:	65 ff 0c 25 00 00 00 	dec    DWORD PTR gs:0x0
+  a3:	00 
+  a4:	75 05                	jne    0xab
+  a6:	e8 00 00 00 00       	call   0xab
+  ab:	49 2b 42 10          	sub    rax,QWORD PTR [r10+0x10]
+  af:	49 23 42 08          	and    rax,QWORD PTR [r10+0x8]
+  b3:	49 3b 40 08          	cmp    rax,QWORD PTR [r8+0x8]
+  b7:	77 30                	ja     0xe9
+  b9:	41 8b 52 18          	mov    edx,DWORD PTR [r10+0x18]
+  bd:	48 0f af c2          	imul   rax,rdx
+  c1:	49 03 42 20          	add    rax,QWORD PTR [r10+0x20]
+  c5:	41 8b 4a 1c          	mov    ecx,DWORD PTR [r10+0x1c]
+  c9:	48 d3 e8             	shr    rax,cl
+  cc:	49 03 42 28          	add    rax,QWORD PTR [r10+0x28]
+  d0:	41 3b 3b             	cmp    edi,DWORD PTR [r11]
+  d3:	0f 85 31 ff ff ff    	jne    0xa
+  d9:	c3                   	ret
+  da:	65 ff 0c 25 00 00 00 	dec    DWORD PTR gs:0x0
+  e1:	00 
+  e2:	75 05                	jne    0xe9
+  e4:	e8 00 00 00 00       	call   0xe9
+  e9:	48 83 ec 08          	sub    rsp,0x8
+  ed:	e8 00 00 00 00       	call   0xf2
+  f2:	48 83 c4 08          	add    rsp,0x8
+  f6:	c3                   	ret
