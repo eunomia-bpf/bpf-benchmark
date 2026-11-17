@@ -2339,3 +2339,42 @@ policy CALL. Runtime SMAP selection still remains in this implementation.
 whose raw directory is `/workspaces/kprog-raw/leaf-read-20261117`.
 No measured per-call effect is available yet. The partial-tree status
 above is retained as a dated observation and is now closed by this commit.
+
+## SMAP boot fact: `/proc/cpuinfo` rows are not the global capability set
+
+Source review for the next scheduled SMAP specialization, 2026-11-17.
+The landed user leaf still reads
+`boot_cpu_data.x86_capability[9] & (1 << 20)` on every invocation. The
+kernel's `stac()`/`clac()` alternatives use `X86_FEATURE_SMAP`
+(`arch/x86/include/asm/smap.h:40–47`), and alternatives choose using
+`boot_cpu_has(alt->cpuid)` (`arch/x86/kernel/alternative.c:621`).
+`boot_cpu_has` itself reads `boot_cpu_data` (`asm/cpufeature.h:74`).
+This gives the precise global capability value the link-time choice is
+trying to preserve, rather than a raw host CPUID result.
+
+A possible userspace shortcut needs qualification: guest `/proc/cpuinfo`
+does expose kernel-filtered feature flags, but its **first CPU row is not
+defined as that global structure**. `cpu/proc.c:159–164` iterates online
+CPUs and supplies `&cpu_data(cpu)` to `show_cpuinfo`; lines 104–107 print
+that CPU's `cpu_has(c, bit)` flags. In contrast,
+`cpu/common.c:2086–2101` first applies forced capability options and then
+ANDs each initialized CPU's capability words into `boot_cpu_data`.
+The source explicitly calls the latter the common feature set.
+
+For example, if one CPU has SMAP and another does not, the first row can
+say `smap` while the global AND is false. Reading only currently online
+rows also does not by itself reproduce an accumulated set that included
+a CPU now offline. These are conditional source examples, **not findings
+of heterogeneous or offline CPUs in the benchmark guest**. A uniform guest
+with matching kernel feature filtering can have equal values; this
+inspection does not establish that equivalence from the first row alone.
+
+Use the target kernel's capability meaning when supplying the once-per-load
+fact to the existing serialized-layout/cache boundary. A BTF offset or
+symbol address still does not supply its value, and substituting host
+flags supplies a different machine's facts. This review neither chooses
+a new kernel-memory interface nor proposes an all-CPU validation loop,
+new refusal, hotplug gate, module change or benchmark change. The current
+dynamic test remains the semantic reference while the coordinator develops
+the provider. No additional per-call saving beyond the previously counted
+six instructions/two branches is claimed.
