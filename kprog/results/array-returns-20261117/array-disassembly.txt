@@ -1,0 +1,57 @@
+
+/workspaces/kprog-raw/perf/array-returns-20261117/host-20261117T175955Z-2692136/fixture/known-array-max3.bin:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	8b 06                	mov    eax,DWORD PTR [rsi]
+   2:	83 f8 03             	cmp    eax,0x3
+   5:	73 0d                	jae    0x14
+   7:	48 6b c0 18          	imul   rax,rax,0x18
+   b:	48 8d 84 07 30 01 00 	lea    rax,[rdi+rax*1+0x130]
+  12:	00 
+  13:	c3                   	ret
+  14:	31 c0                	xor    eax,eax
+  16:	c3                   	ret
+
+/workspaces/kprog-raw/perf/array-returns-20261117/host-20261117T175955Z-2692136/fixture/known-array-max4096.bin:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	8b 06                	mov    eax,DWORD PTR [rsi]
+   2:	3d 00 10 00 00       	cmp    eax,0x1000
+   7:	73 0d                	jae    0x16
+   9:	48 6b c0 18          	imul   rax,rax,0x18
+   d:	48 8d 84 07 30 01 00 	lea    rax,[rdi+rax*1+0x130]
+  14:	00 
+  15:	c3                   	ret
+  16:	31 c0                	xor    eax,eax
+  18:	c3                   	ret
+
+/workspaces/kprog-raw/perf/array-returns-20261117/host-20261117T175955Z-2692136/fixture/runtime-array.bin:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	81 bf 0c 00 00 00 02 	cmp    DWORD PTR [rdi+0xc],0x2
+   7:	00 00 00 
+   a:	75 26                	jne    0x32
+   c:	8b 06                	mov    eax,DWORD PTR [rsi]
+   e:	3b 87 18 00 00 00    	cmp    eax,DWORD PTR [rdi+0x18]
+  14:	73 19                	jae    0x2f
+  16:	23 87 24 00 00 00    	and    eax,DWORD PTR [rdi+0x24]
+  1c:	8b 97 20 00 00 00    	mov    edx,DWORD PTR [rdi+0x20]
+  22:	48 0f af c2          	imul   rax,rdx
+  26:	48 8d 84 07 40 00 00 	lea    rax,[rdi+rax*1+0x40]
+  2d:	00 
+  2e:	c3                   	ret
+  2f:	31 c0                	xor    eax,eax
+  31:	c3                   	ret
+  32:	48 83 ec 08          	sub    rsp,0x8
+  36:	e8 00 00 00 00       	call   0x3b
+  3b:	48 83 c4 08          	add    rsp,0x8
+  3f:	c3                   	ret

@@ -22,17 +22,16 @@ fn build_prefix(layout: &RuntimeArrayLayout) -> Result<Vec<u8>> {
     bytes.extend_from_slice(&[0x48, 0x0f, 0xaf, 0xc2]); // imul rax,rdx: u64 product
     bytes.extend_from_slice(&[0x48, 0x8d, 0x84, 0x07]); // lea rax,[rdi+rax+value]
     bytes.extend_from_slice(&i32::try_from(layout.value)?.to_le_bytes());
-    bytes.extend_from_slice(&[0xeb, 4]); // Skip NULL body to the shared return.
+    bytes.push(0xc3); // Successful ARRAY lookup returns directly.
     let null = bytes.len();
-    bytes.extend_from_slice(&[0x31, 0xc0, 0xeb, 0]); // NULL, then shared return.
-    bytes[generic_branch] = u8::try_from(bytes.len() - generic_branch - 1)? + 1; // Other types skip the shared RET.
+    bytes.extend_from_slice(&[0x31, 0xc0, 0xc3]); // NULL returns directly too.
+    bytes[generic_branch] = u8::try_from(bytes.len() - generic_branch - 1)?;
     bytes[null_branch] = u8::try_from(null - null_branch - 1)?;
     Ok(bytes)
 }
 
 fn routine(layout: &RuntimeArrayLayout) -> Result<(Vec<u8>, usize)> {
     let mut bytes = build_prefix(layout)?;
-    bytes.push(0xc3); // ARRAY/NULL return; other types branch past this RET.
     bytes.extend_from_slice(&[0x48, 0x83, 0xec, 8]); // Align nested SysV call.
     let call = bytes.len();
     // Both native loaders require an E8 rel32 helper slot. Keep that ABI,
@@ -69,6 +68,13 @@ mod tests {
             index_mask: 36, value: 64, array_type: 2 };
         {
             let (mut code, call) = routine(&layout)?;
+            let instructions:Vec<_>=Decoder::new(64,&code,DecoderOptions::NONE).into_iter().collect();
+            assert!(instructions.iter().all(|i|!i.is_invalid()
+                && i.flow_control()!=FlowControl::UnconditionalBranch),"no shared-return jump");
+            assert_eq!(instructions.iter().filter(|i|i.mnemonic()==Mnemonic::Ret).count(),3);
+            if let Some(out)=std::env::var_os("NATIVE_LINK_PROBE_TEST_OUTPUT") {
+                std::fs::write(std::path::Path::new(&out).join("runtime-array.bin"),&code)?;
+            }
             let disp = i32::try_from(code.len() as i64 - (call + 5) as i64)?;
             code[call+1..call+5].copy_from_slice(&disp.to_le_bytes());
             {
@@ -120,7 +126,7 @@ mod tests {
             RelocRecord { offset: 5, kind: 1, target: 0x1234 },
             RelocRecord { offset: 10, kind: 1, target: 0x5678 }];
         let range = share(&mut blob, &mut relocs, &layout, 0x1234)?.expect("two lookups");
-        assert_eq!(range, (16, 83), "one67-byte routine, not one per call");
+        assert_eq!(range, (16, 80), "one64-byte routine, not one per call");
         assert_eq!((blob[0],blob[5]),(0xe8,0xe9));
         for site in [0usize, 5] {
             let disp = i32::from_le_bytes(blob[site+1..site+5].try_into()?);
@@ -130,7 +136,7 @@ mod tests {
         assert_eq!(relocs.len(), 2);
         assert!(relocs.iter().any(|r| r.offset == 10 && r.target == 0x5678));
         let external = relocs.iter().find(|r| r.target == 0x1234).expect("generic helper");
-        assert_eq!(external.offset, 16+57);
+        assert_eq!(external.offset, 16+54);
         assert_eq!(&blob[external.offset as usize..external.offset as usize+5],
             X86_HELPER_CALL_REL32_SLOT.as_slice(), "sameE8 slot accepted by both loaders");
         Ok(())

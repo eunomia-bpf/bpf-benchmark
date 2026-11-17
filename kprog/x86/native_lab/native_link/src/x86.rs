@@ -4035,7 +4035,7 @@ fn build_x86_array_lookup_routine(spec: &LookupSiteSpec) -> Result<Vec<u8>> {
         body.extend_from_slice(&(spec.percpu_base_addr as u32).to_le_bytes());
     }
 
-    body.extend_from_slice(&[0xEB, 0x02]); // jmp over null return
+    body.push(0xc3); // Successful lookup returns without a shared-return jump.
     let body_len = u8::try_from(body.len())
         .map_err(|_| anyhow!("array lookup inline body too large: {} bytes", body.len()))?;
 
@@ -4724,6 +4724,13 @@ mod tests {
                 key_offset: 0, max_entries, elem_size: 24, index_mask: max_entries.next_power_of_two()-1,
                 value_offset: 304, percpu_base_addr: 0 };
             let code = build_x86_array_lookup_routine(&spec)?;
+            let instructions:Vec<_>=Decoder::new(64,&code,DecoderOptions::NONE).into_iter().collect();
+            assert!(instructions.iter().all(|i|!i.is_invalid()
+                && i.flow_control()!=FlowControl::UnconditionalBranch),"no shared-return jump");
+            assert_eq!(instructions.iter().filter(|i|i.mnemonic()==Mnemonic::Ret).count(),2);
+            if let Some(out)=std::env::var_os("NATIVE_LINK_PROBE_TEST_OUTPUT") {
+                std::fs::write(std::path::Path::new(&out).join(format!("known-array-max{max_entries}.bin")),&code)?;
+            }
             let mut map = vec![0u8; 304 + max_entries as usize * 24];
             for key in [0, 1, max_entries-1, max_entries, u32::MAX] {
                 let actual = memory::call_blob(&code, map.as_mut_ptr(), &key as *const _ as usize, 0);
