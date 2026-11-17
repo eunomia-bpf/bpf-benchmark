@@ -6,9 +6,9 @@ main() {
     raw="$root/host-$(date -u +%Y%m%dT%H%M%SZ)-$$"
     install -d "$raw/fixture" "$raw/lpm" "$raw/memory" "$raw/tmp"
     trap 'status=$?; printf "%s exit=%s raw=%s\n" "$(date -u +%FT%TZ)" "$status" "$raw" >> "$root/progress.log"' EXIT
-    printf '%s waiting timing SH/image EX raw=%s\n' "$(date -u +%FT%TZ)" "$raw" >> "$root/progress.log"
+    printf '%s waiting timing SH/image SH for tests raw=%s\n' "$(date -u +%FT%TZ)" "$raw" >> "$root/progress.log"
     exec 8>/workspaces/.agent-state/kprog-lanes/locks/timing; flock -s 8
-    exec 9>/workspaces/.agent-state/kprog-lanes/locks/image; flock -x 9
+    exec 9>/workspaces/.agent-state/kprog-lanes/locks/image; flock -s 9
     ulimit -v 33554432
     export CARGO_BUILD_JOBS=1 TMPDIR="$raw/tmp" PYTHONDONTWRITEBYTECODE=1
     export NATIVE_LINK_PROBE_TEST_OUTPUT="$raw/fixture" NATIVE_LINK_LPM_TEST_OUTPUT="$raw/lpm"
@@ -33,6 +33,11 @@ main() {
             printf 'identical %s/%s\n' "$group" "$name" >> "$raw/payload-comparison.txt"
         done
     done
+    printf '%s tests and byte comparisons complete; waiting image EX for canonical main raw=%s\n' "$(date -u +%FT%TZ)" "$raw" >> "$root/progress.log"
+    flock -u 9
+    flock -x 9
+    git rev-parse HEAD > "$raw/main-source-commit.txt"
+    git diff -- kprog/x86/native_lab/native_link/src > "$raw/main-source.patch"
     taskset -c 19 cargo build --release --manifest-path kprog/x86/native_lab/native_link/Cargo.toml > "$raw/build.txt" 2>&1
     taskset -c 19 python3 kprog/results/current-link-capture-20261117/replay.py --output "$raw/replay" > "$raw/replay-output.txt" 2>&1
     printf '%s host complete raw=%s\n' "$(date -u +%FT%TZ)" "$raw" >> "$root/progress.log"

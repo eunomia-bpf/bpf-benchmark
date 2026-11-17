@@ -18,3 +18,15 @@ native_link helper-call path. Reuse existing numeric helper provenance,
 immediate decoding and original-label remapping. Add no runtime check, flag,
 helper catalogue or DCE framework. Body/helper/map/per-call/throughput and
 installed-size effects require the owner image batch with all LTO on.
+
+The first host job (2758708) was stopped by its exact waiting flock PID
+2758713 at 21:11:36Z, before source apply, after confirming the canonical
+main is used by the active checked Tracee guest (run_checked_otel.sh:13).
+Its raw directories and exit143 log remain. Source was unchanged.
+The forward recipe runs source tests under timing SH/image SH: Cargo's
+test executable and raw fixture outputs are separate from the live main
+CLI. After tests and byte comparison, it releases image SH and waits image
+EX before replacing that main and replaying requests. It records the
+actual source commit and patch at main-build time. No checked guest or
+other owner's process is stopped, and no build output or source tree is
+copied. The recipe is stable while it runs.
