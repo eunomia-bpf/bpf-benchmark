@@ -1,0 +1,12 @@
+control: guest rc=0, requests=25, link statuses={'0': 25}, archive errors=0
+query: guest rc=0, requests=25, link statuses={'0': 25}, archive errors=0
+tracepoint__syscalls__sys_exit_openat
+  bpf_get_stack: ['bpf_get_stack'] -> ['bpf_get_stack_tp']
+  bpf_perf_event_output: ['bpf_perf_event_output'] -> ['bpf_perf_event_output_tp']
+tracepoint__syscalls__sys_exit_open
+  bpf_get_stack: ['bpf_get_stack'] -> ['bpf_get_stack_tp']
+  bpf_perf_event_output: ['bpf_perf_event_output'] -> ['bpf_perf_event_output_tp']
+inet_sock_set_state
+  bpf_perf_event_output: ['bpf_perf_event_output'] -> ['bpf_perf_event_output_tp']
+block_rq_complete
+  bpf_perf_event_output: ['bpf_perf_event_output'] -> ['bpf_perf_event_output_raw_tp']
