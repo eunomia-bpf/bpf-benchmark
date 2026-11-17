@@ -415,3 +415,5 @@ KEPT incremental kprog_stock.o and source; raw run archives and logs retained.
 2026-11-17T18:56:27Z — Current-link functional capture bcc/set: the frozen successful-run cleanup removes only /var/tmp/kprog-tmp/one-image/var-tmp/bpf-benchmark-docker.img, the rebuildable guest container store. Raw result/capture/log directories remain under /workspaces.
 
 2026-11-17T18:59:27Z — Current-link functional capture cilium/agent: the frozen successful-run cleanup removes only /var/tmp/kprog-tmp/one-image/var-tmp/bpf-benchmark-docker.img, the rebuildable guest container store. Raw result/capture/log directories remain under /workspaces.
+
+2026-11-17T19:02:59Z — Current-link functional capture tetragon/observer: the frozen successful-run cleanup removes only /var/tmp/kprog-tmp/one-image/var-tmp/bpf-benchmark-docker.img, the rebuildable guest container store. Raw result/capture/log directories remain under /workspaces.

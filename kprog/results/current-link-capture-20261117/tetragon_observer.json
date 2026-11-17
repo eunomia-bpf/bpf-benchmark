@@ -1,0 +1,2158 @@
+{
+  "app": "tetragon/observer",
+  "guest_returncode": 0,
+  "captures": [
+    {
+      "app": "tetragon/observer",
+      "symbol": "execve_rate",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-04ysigi9/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-04ysigi9/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-04ysigi9",
+      "proof_bytes": 40080,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0uk6eny3/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0uk6eny3/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0uk6eny3",
+      "proof_bytes": 333808,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_process_event",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0v55dkrr/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0v55dkrr/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0v55dkrr",
+      "proof_bytes": 442864,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_output",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1e1whdkd/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1e1whdkd/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1e1whdkd",
+      "proof_bytes": 45408,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_output",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-20u5h7e0/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-20u5h7e0/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-20u5h7e0",
+      "proof_bytes": 45392,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_arg",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-31f47_a7/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-31f47_a7/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-31f47_a7",
+      "proof_bytes": 335400,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_output",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4vi9ft6v/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4vi9ft6v/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4vi9ft6v",
+      "proof_bytes": 18480,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "execve_send",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6vbtwxp5/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6vbtwxp5/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6vbtwxp5",
+      "proof_bytes": 104008,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_output",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7xa_4zm5/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7xa_4zm5/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7xa_4zm5",
+      "proof_bytes": 45392,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9p7ocgsk/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9p7ocgsk/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9p7ocgsk",
+      "proof_bytes": 333808,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_process_filter",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_gtbajk_/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_gtbajk_/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_gtbajk_",
+      "proof_bytes": 281688,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_qtl2kam/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_qtl2kam/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_qtl2kam",
+      "proof_bytes": 333808,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_actions",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_vqrdf28/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_vqrdf28/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_vqrdf28",
+      "proof_bytes": 103216,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_setup_event",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ai2k1te5/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ai2k1te5/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ai2k1te5",
+      "proof_bytes": 17528,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_actions",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-beoa__2d/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-beoa__2d/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-beoa__2d",
+      "proof_bytes": 82736,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "execve_map_update",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-blnybbe9/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-blnybbe9/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-blnybbe9",
+      "proof_bytes": 6632,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_filter_arg",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-c3k1hzvb/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-c3k1hzvb/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-c3k1hzvb",
+      "proof_bytes": 331480,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "tg_kp_bprm_committing_creds",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-c_1wmpw5/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-c_1wmpw5/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-c_1wmpw5",
+      "proof_bytes": 44664,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ddm5z6l1/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ddm5z6l1/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ddm5z6l1",
+      "proof_bytes": 333808,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_filter",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-g_0kedgz/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-g_0kedgz/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-g_0kedgz",
+      "proof_bytes": 281728,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-il4rhakh/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-il4rhakh/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-il4rhakh",
+      "proof_bytes": 333808,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-j63keppd/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-j63keppd/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-j63keppd",
+      "proof_bytes": 333808,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_exit_disassociate_ctty",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jasy1x_7/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jasy1x_7/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jasy1x_7",
+      "proof_bytes": 25528,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_filter_arg",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-juhc192d/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-juhc192d/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-juhc192d",
+      "proof_bytes": 335392,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_actions",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k6ckpvxv/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k6ckpvxv/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k6ckpvxv",
+      "proof_bytes": 82768,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_process_event",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-l3wtixm8/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-l3wtixm8/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-l3wtixm8",
+      "proof_bytes": 365384,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_process_event",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lrpau888/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lrpau888/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lrpau888",
+      "proof_bytes": 425896,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_process_filter",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nqetz_k2/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nqetz_k2/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nqetz_k2",
+      "proof_bytes": 281720,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qqafecq5/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qqafecq5/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qqafecq5",
+      "proof_bytes": 333808,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_execve",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r9kh94rr/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r9kh94rr/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r9kh94rr",
+      "proof_bytes": 293104,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_event",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rmyx34xm/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rmyx34xm/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rmyx34xm",
+      "proof_bytes": 46040,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_event",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-wdd42hwy/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-wdd42hwy/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-wdd42hwy",
+      "proof_bytes": 46040,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_actions",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xf313ycz/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xf313ycz/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xf313ycz",
+      "proof_bytes": 109328,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xgsv35ba/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xgsv35ba/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xgsv35ba",
+      "proof_bytes": 333808,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_event",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xh90hqo_/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xh90hqo_/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xh90hqo_",
+      "proof_bytes": 365944,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_setup_event",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xuz7oyzt/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xuz7oyzt/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xuz7oyzt",
+      "proof_bytes": 15152,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_exit_acct_process",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ye4mrb_x/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ye4mrb_x/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ye4mrb_x",
+      "proof_bytes": 23864,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_event",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-yuod933z/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-yuod933z/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-yuod933z",
+      "proof_bytes": 346080,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_wake_up_new_task",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zfitfdx5/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zfitfdx5/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zfitfdx5",
+      "proof_bytes": 128936,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    }
+  ],
+  "capture_errors": [],
+  "other_invocations": [
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2tojm65t",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/10fa48e401332f97.perf.native.o",
+        "--symbol",
+        "generic_kprobe_filter_arg",
+        "--output",
+        "/tmp/native_kernel_link_cache/5e5d6b753e18639b.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6elcowga",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/4d1ac299f1e893e2.perf.native.o",
+        "--symbol",
+        "execve_map_update",
+        "--output",
+        "/tmp/native_kernel_link_cache/dc3dda272b8b2c2b.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6q58i9zp",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_execve_bprm_commit_creds.native.o",
+        "--symbol",
+        "tg_kp_bprm_committing_creds",
+        "--output",
+        "/tmp/native_kernel_link_cache/872d543fa23d2137.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7eqeu3bk",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/ff7e14cf6a32cb32.perf.native.o",
+        "--symbol",
+        "generic_tracepoint_filter",
+        "--output",
+        "/tmp/native_kernel_link_cache/6c5a38b4390b331d.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7l33o_ic",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_generic_rawtp_v61.native.o",
+        "--symbol",
+        "generic_rawtp_actions",
+        "--output",
+        "/tmp/native_kernel_link_cache/225ed52b4ce2fe6f.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7oopy118",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_generic_rawtp_v61.native.o",
+        "--symbol",
+        "generic_rawtp_event",
+        "--output",
+        "/tmp/native_kernel_link_cache/64e319a8dda4393e.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7s4ke7ng",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_execve_event_v61.native.o",
+        "--symbol",
+        "execve_rate",
+        "--output",
+        "/tmp/native_kernel_link_cache/56ef4d3dfe399e7b.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8j1grfqy",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/1a7b23573c55adc7.perf.native.o",
+        "--symbol",
+        "generic_kprobe_filter_arg",
+        "--output",
+        "/tmp/native_kernel_link_cache/501bddc58773dfb4.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-a4_94mr7",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/3d0583c0bb9b7747.perf.native.o",
+        "--symbol",
+        "generic_kprobe_filter_arg",
+        "--output",
+        "/tmp/native_kernel_link_cache/29dc4b341109a6b1.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-a4pkwm8l",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/fce5fde23c0359d3.perf.native.o",
+        "--symbol",
+        "generic_kprobe_process_event",
+        "--output",
+        "/tmp/native_kernel_link_cache/2e90b261d8ea1062.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-a777z_z9",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_generic_retkprobe_v61.native.o",
+        "--symbol",
+        "generic_retkprobe_actions",
+        "--output",
+        "/tmp/native_kernel_link_cache/3e6399783659a79f.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ac84tqdj",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_generic_rawtp_v61.native.o",
+        "--symbol",
+        "generic_rawtp_process_filter",
+        "--output",
+        "/tmp/native_kernel_link_cache/6b5858bae03c14f1.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-asypma12",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_generic_tracepoint_v61.native.o",
+        "--symbol",
+        "generic_tracepoint_event",
+        "--output",
+        "/tmp/native_kernel_link_cache/c04f4bb86431bb6e.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-b94sthf1",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_execve_map_update_v61.native.o",
+        "--symbol",
+        "execve_map_update",
+        "--output",
+        "/tmp/native_kernel_link_cache/600d518f04d72510.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-b9d9md1d",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_generic_tracepoint_v61.native.o",
+        "--symbol",
+        "generic_tracepoint_output",
+        "--output",
+        "/tmp/native_kernel_link_cache/150bf3325c2c7c30.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bwb37fo6",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/68767f16df1d8870.perf.native.o",
+        "--symbol",
+        "execve_send",
+        "--output",
+        "/tmp/native_kernel_link_cache/46c8bc00ea78224b.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-dlig3pvl",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_generic_tracepoint_v61.native.o",
+        "--symbol",
+        "generic_tracepoint_actions",
+        "--output",
+        "/tmp/native_kernel_link_cache/cbf3763ce9cbec6f.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-dp7o50ae",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_generic_kprobe_v61.native.o",
+        "--symbol",
+        "generic_kprobe_setup_event",
+        "--output",
+        "/tmp/native_kernel_link_cache/016f0606c9202e66.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f3vvtdm_",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/154f18802d7f9937.perf.native.o",
+        "--symbol",
+        "generic_kprobe_filter_arg",
+        "--output",
+        "/tmp/native_kernel_link_cache/10aa9dd94262e3e5.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f4i1h9zp",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_generic_kprobe_v61.native.o",
+        "--symbol",
+        "generic_kprobe_event",
+        "--output",
+        "/tmp/native_kernel_link_cache/8972b0758cb7f0ba.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fbb5aemu",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_generic_kprobe_v61.native.o",
+        "--symbol",
+        "generic_kprobe_output",
+        "--output",
+        "/tmp/native_kernel_link_cache/d4882af101e21470.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-gg17l9_4",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/e82d3d6e711117c7.perf.native.o",
+        "--symbol",
+        "generic_kprobe_filter_arg",
+        "--output",
+        "/tmp/native_kernel_link_cache/9dd680de4420a396.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ixdj76tl",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_generic_tracepoint_v61.native.o",
+        "--symbol",
+        "generic_tracepoint_arg",
+        "--output",
+        "/tmp/native_kernel_link_cache/f0af57d6d5a543dc.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-j5hiz1sl",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_generic_rawtp_v61.native.o",
+        "--symbol",
+        "generic_rawtp_setup_event",
+        "--output",
+        "/tmp/native_kernel_link_cache/039a17023374b8ca.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-kieirmso",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_generic_rawtp_v61.native.o",
+        "--symbol",
+        "generic_rawtp_output",
+        "--output",
+        "/tmp/native_kernel_link_cache/49c9a889996115b4.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-l0cafkoq",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_generic_kprobe_v61.native.o",
+        "--symbol",
+        "generic_kprobe_process_filter",
+        "--output",
+        "/tmp/native_kernel_link_cache/63bdc6a09d6fec4d.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lhv2ba6e",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/d64b95d033940706.perf.native.o",
+        "--symbol",
+        "generic_rawtp_process_event",
+        "--output",
+        "/tmp/native_kernel_link_cache/d64d33a1580012a4.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mz0l2sca",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_generic_tracepoint_v61.native.o",
+        "--symbol",
+        "generic_tracepoint_filter",
+        "--output",
+        "/tmp/native_kernel_link_cache/152739854fefa80b.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-neusfo8k",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/ce37cf5dbcd12a64.perf.native.o",
+        "--symbol",
+        "generic_tracepoint_process_event",
+        "--output",
+        "/tmp/native_kernel_link_cache/7b20b0e0f6ed4991.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nk1jk7e7",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_generic_retkprobe_v61.native.o",
+        "--symbol",
+        "generic_retkprobe_output",
+        "--output",
+        "/tmp/native_kernel_link_cache/a52eb132252855ac.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-oy13beqz",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_generic_retkprobe_v61.native.o",
+        "--symbol",
+        "generic_retkprobe_filter_arg",
+        "--output",
+        "/tmp/native_kernel_link_cache/63ef9ec6f6749bc8.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-p_i527at",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/9a2a9cb5a5788515.perf.native.o",
+        "--symbol",
+        "generic_kprobe_process_filter",
+        "--output",
+        "/tmp/native_kernel_link_cache/d4c7fd289271b258.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pcvh4nmj",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_execve_event_v61.native.o",
+        "--symbol",
+        "execve_send",
+        "--output",
+        "/tmp/native_kernel_link_cache/fb25063812dbf5eb.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-piyqwcod",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/ec704c1c698b4617.perf.native.o",
+        "--symbol",
+        "generic_kprobe_filter_arg",
+        "--output",
+        "/tmp/native_kernel_link_cache/31e811418a4e2d54.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pt9xau__",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_generic_rawtp_v61.native.o",
+        "--symbol",
+        "generic_rawtp_process_event",
+        "--output",
+        "/tmp/native_kernel_link_cache/965df28c1f131fa0.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-q_9ilby0",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_generic_kprobe_v61.native.o",
+        "--symbol",
+        "generic_kprobe_actions",
+        "--output",
+        "/tmp/native_kernel_link_cache/e366877c45840303.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qjvnebkj",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_generic_rawtp_v61.native.o",
+        "--symbol",
+        "generic_rawtp_filter_arg",
+        "--output",
+        "/tmp/native_kernel_link_cache/00a004efd5583298.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r5x2vo7a",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_exit_v511.native.o",
+        "--symbol",
+        "event_exit_acct_process",
+        "--output",
+        "/tmp/native_kernel_link_cache/2f17b1b1d35df7a2.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-stl6u4ts",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/32995dfdf848fed3.perf.native.o",
+        "--symbol",
+        "generic_retkprobe_event",
+        "--output",
+        "/tmp/native_kernel_link_cache/76c90a5818a4550d.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-t_okwzrx",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_fork_v511.native.o",
+        "--symbol",
+        "event_wake_up_new_task",
+        "--output",
+        "/tmp/native_kernel_link_cache/0413c48dfe8aec1f.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-veiafaq3",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_exit_v511.native.o",
+        "--symbol",
+        "event_exit_disassociate_ctty",
+        "--output",
+        "/tmp/native_kernel_link_cache/b3c3c7b425b9fb25.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vkmh9pc9",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/71689ea554004cea.perf.native.o",
+        "--symbol",
+        "generic_rawtp_process_filter",
+        "--output",
+        "/tmp/native_kernel_link_cache/be7b11c5b5f2d5d7.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vmgf8ach",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/8b44d5dc349ebfe7.perf.native.o",
+        "--symbol",
+        "generic_kprobe_filter_arg",
+        "--output",
+        "/tmp/native_kernel_link_cache/98df89bd097336a2.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-x_9g4mhw",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_generic_retkprobe_v61.native.o",
+        "--symbol",
+        "generic_retkprobe_event",
+        "--output",
+        "/tmp/native_kernel_link_cache/7c986f77d93089fa.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xmjuzjfw",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/66c8f546dfcac4f7.perf.native.o",
+        "--symbol",
+        "generic_kprobe_filter_arg",
+        "--output",
+        "/tmp/native_kernel_link_cache/b84f5984627acc39.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-y40wd7hj",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_execve_event_v61.native.o",
+        "--symbol",
+        "event_execve",
+        "--output",
+        "/tmp/native_kernel_link_cache/7b54270d56ec8ee2.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-y7ypjrqy",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/b8291a68a808d8c2.perf.native.o",
+        "--symbol",
+        "event_execve",
+        "--output",
+        "/tmp/native_kernel_link_cache/6cd86c0fde6856da.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-yq4tdi5c",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_generic_kprobe_v61.native.o",
+        "--symbol",
+        "generic_kprobe_filter_arg",
+        "--output",
+        "/tmp/native_kernel_link_cache/ddd2e1b044fe3024.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-z5iqhv4f",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_generic_kprobe_v61.native.o",
+        "--symbol",
+        "generic_kprobe_process_event",
+        "--output",
+        "/tmp/native_kernel_link_cache/2df2317405abf0f4.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zqrgldgn",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/tetragon/bpf_generic_tracepoint_v61.native.o",
+        "--symbol",
+        "generic_tracepoint_process_event",
+        "--output",
+        "/tmp/native_kernel_link_cache/7cd2af52f624e4e0.entry.proof.o.tmp.2005",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    }
+  ],
+  "scope": "Actual new kernel-link requests, including linker failures, archived by the capture adapter. No helper/layout facts are added. Missing/failed loads remain in the guest and shim logs; an empty capture list does not imply no native work. Functional capture, not official timing."
+}
