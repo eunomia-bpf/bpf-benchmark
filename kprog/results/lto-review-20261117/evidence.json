@@ -1,6 +1,6 @@
 {
-  "recorded_utc": "2026-11-17T00:29:17Z",
-  "review_source_commit": "a541c006d5b17641ce1f478c843a5609963edb66",
+  "recorded_utc": "2026-11-17T00:37:36Z",
+  "review_source_commit": "a89e42168bb8c72e2cae7b070d6fa050e3a2e649",
   "typed_unwinder": {
     "blob": "/workspaces/kprog-raw/perf/20261116-inner-array-lto/libbpf/otel-typed.blob",
     "payload_bytes": 30410,
@@ -76,6 +76,39 @@
       "16": 4,
       "8": 16
     },
+    "probe_recovery_sites": [
+      {
+        "offset": 29889,
+        "instruction_bytes": 3,
+        "recovery_register": 11
+      },
+      {
+        "offset": 29932,
+        "instruction_bytes": 3,
+        "recovery_register": 11
+      }
+    ],
+    "successful_copy_loop_model": [
+      {
+        "size_bytes": 8,
+        "word_iterations": 1,
+        "instructions": 13,
+        "conditional_branches": 4
+      },
+      {
+        "size_bytes": 16,
+        "word_iterations": 2,
+        "instructions": 22,
+        "conditional_branches": 6
+      },
+      {
+        "size_bytes": 144,
+        "word_iterations": 18,
+        "instructions": 166,
+        "conditional_branches": 38
+      }
+    ],
+    "copy_model_scope": "Decoded 0x74b8..0x74ec path, nonzero multiple-of-eight literal sizes, all loads succeed. Excludes policy, cleanup, callees and cycles.",
     "read_scope": "Local decoded windows, not a complete CFG constant proof or dynamic frequency."
   },
   "tracee": {

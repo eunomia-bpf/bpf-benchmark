@@ -90,6 +90,17 @@ O level alone does not establish that these later candidates control the
 same final policies in recompiled entries. This is an interpretation and
 implementation follow-up, not a reason to discard any completed sample.
 
+Active-study correction, 2026-11-17T00:36:04Z: the retained live
+`/workspaces/kprog-raw/flag-tuning-20261117/progress.log` records at
+23:59:02Z that CMOV-branch and no-unroll were dropped on the operator's
+instruction and the controller restarted with **ORDER=O3 Os O2**. The
+script still lists other candidates, which led the previous note to call
+them later study candidates. They are not in the active sweep. The residual
+option-transfer concern above does **not** affect that sweep; it is relevant
+only if those other policies are investigated later. a541c006d covers the
+active sweep's optimization levels. No new build or option-transfer work is
+needed for the dropped candidates.
+
 ## 1. Read lowering keeps work that constant-size specialization can remove
 
 Source: `kprog/x86/native_lab/native_link/src/x86_probe_read.rs:28–38,
@@ -171,6 +182,46 @@ IR facts are available, or use the resolved CFG for the existing analysis;
 do not infer safety from this local-window extraction. This is another
 reason why merely adding a read case to `memory::Routine::at_call` would
 not deliver the expected OTel benefit.
+
+Read-path detail, 2026-11-17T00:36:04Z: the decoded successful-copy region
+0x74b8–0x74eb has two prefix instructions, nine instructions per 8-byte
+iteration, then two suffix instructions when no byte tail remains. For
+the three observed literal sizes this gives:
+
+| Literal bytes | Word iterations | Copy-region instructions | Conditional branches |
+|---:|---:|---:|---:|
+| 8 | 1 | 13 | 4 |
+| 16 | 2 | 22 | 6 |
+| 144 | 18 | 166 | 38 |
+
+This is a static path count from the retained disassembly, **not** measured
+retired instructions, cycles, branch misses or dynamic size frequency. It
+excludes entry/policy calls, pagefault/SMAP work, return/error handling and
+their callees. evidence.json derives it from those exact decoded windows.
+For constant 8/16-byte copies, indexed fixed-offset loads/stores can avoid
+pointer increments, size decrement/comparison and loop selection. For the
+144-byte copy, kernel `copy_user_generic` already selects a boot-patched
+bulk-copy path; retaining that implementation may beat growing a long
+unrolled native body. This tradeoff needs its actual app measurement.
+
+The fault-status tests are a different category from loop overhead. The
+retained ABI has `load_site 29889,3,11` and `load_site 29932,3,11`, matching
+the word/byte source loads at 0x74c1/0x74ec. Their x86 instruction destination
+is RAX, but the sideband **recovery** register is deliberately R11.
+`x86_probe_read.rs:75,92–105` initializes R11 to one and tests it after
+each load. `kprog/perf/direct-native/bpf_x86_native_lab.c:345–352,387–392`
+maps that register number into pt_regs; the unchanged kernel's
+`arch/x86/net/bpf_jit_comp.c:1481–1503,3825–3828` clears the selected
+register and skips the faulting instruction. The test then reaches the
+error path before a stale RAX can be stored, and that path zeros the whole
+destination and returns -EFAULT.
+
+Therefore do not delete the R11 test on the premise that the kernel already
+zeroes RAX or that a zero loaded value signals a fault. Neither premise
+matches this ABI. A constant-size specialization still needs the established
+fault/error behavior, unless a source is actually proven nonfaulting under
+the existing semantics. No kernel/module change or extra runtime check is
+proposed here.
 
 ## 2. Tracee's legacy read helpers get none of the read lowering
 

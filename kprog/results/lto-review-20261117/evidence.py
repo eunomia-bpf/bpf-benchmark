@@ -70,6 +70,22 @@ with (HERE / 'compat-read-sites.disassembly.txt').open('w') as output:
         for index, line in enumerate(lines):
             if int(line.split(':', 1)[0].strip(), 16) == example['offset']:
                 output.write('\n'.join(lines[max(0, index - 5):index + 1]) + '\n')
+probe_sites = []
+for line in (RAW / 'otel-typed.abi').read_text().splitlines():
+    if line.startswith('load_site\t'):
+        offset, length, destination_register = map(int, line.split('\t')[1].split(','))
+        if read['start'] <= offset < read['end'] and destination_register == 11:
+            probe_sites.append(dict(offset=offset, instruction_bytes=length,
+                                    recovery_register=destination_register))
+prefix = [i for i in instructions if 0x74b8 <= i[0] < 0x74c1]
+word = [i for i in instructions if 0x74c1 <= i[0] < 0x74e4]
+suffix = [i for i in instructions if 0x74e4 <= i[0] < 0x74ec]
+copy_model = []
+for size in sorted(literal_counts):
+    words = size // 8
+    path = prefix + word * words + suffix
+    copy_model.append(dict(size_bytes=size, word_iterations=words, instructions=len(path),
+                           conditional_branches=sum(i[1].startswith('j') for i in path)))
 result = {
     'recorded_utc': subprocess.check_output(['date', '-u', '+%FT%TZ'], text=True).strip(),
     'review_source_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=REPO, text=True).strip(),
@@ -78,6 +94,9 @@ result = {
                       'lpm_start': lpm['start'],
                       'read_call_sites': read_calls,
                       'nearby_esi_literals_bytes': dict(literal_counts),
+                      'probe_recovery_sites': probe_sites,
+                      'successful_copy_loop_model': copy_model,
+                      'copy_model_scope': 'Decoded 0x74b8..0x74ec path, nonzero multiple-of-eight literal sizes, all loads succeed. Excludes policy, cleanup, callees and cycles.',
                       'read_scope': 'Local decoded windows, not a complete CFG constant proof or dynamic frequency.'},
     'tracee': {'inputs': 'kprog/results/host-link-replay-20261116/tracee-inputs.json',
                'captured_programs': len(tracee), 'remaining_static_helper_call_sites': dict(counts),
