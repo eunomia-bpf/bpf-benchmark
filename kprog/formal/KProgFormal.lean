@@ -20,6 +20,7 @@ import KProgFormal.ClightRefinement.Arm64ProducerRegisters
 import KProgFormal.ClightRefinement.Arm64ProducerTables
 import KProgFormal.ClightRefinement.Arm64ProducerFlags
 import KProgFormal.ClightRefinement.Arm64ProducerVectors
+import KProgFormal.ClightRefinement.Arm64ProducerStack
 import KProgFormal.ClightRefinement.Arm64Registers
 import KProgFormal.ClightRefinement.Arm64Width
 import KProgFormal.ClightRefinement.Deallocation

@@ -1,0 +1,92 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-producer-stack",
+  "focused_build": {
+    "exit": 0,
+    "jobs": 153,
+    "log": "focused.log"
+  },
+  "whole_lake_build": {
+    "exit": 0,
+    "jobs": 280,
+    "log": "lake-build.log",
+    "timing_lock": "shared flock for entire build",
+    "started": "2026-11-17T11:56:59Z"
+  },
+  "public_queries": {
+    "exit": 0,
+    "theorems": 7,
+    "log": "query.log",
+    "source_axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "offset_axioms": [
+      "propext"
+    ],
+    "internal_run_axioms": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "external_or_assembly_boundary": "none executed",
+    "external_determinism": "not assumed"
+  },
+  "source_side_preparation": {
+    "exit": 0,
+    "log": "sp1.log",
+    "mode": "result-side read-only Lean check before move into owning library"
+  },
+  "actual_stack_tag_layout": {
+    "bytes": 24,
+    "stores": 24,
+    "chunk": "Mint8unsigned"
+  },
+  "actual_internal_transitions": {
+    "one_tag_store": 3,
+    "all_tag_stores": 72,
+    "SP_zero": 3,
+    "tags_then_SP_zero": 75
+  },
+  "premise": "stage access equals actual producer allocation access",
+  "observations": [
+    "all tag bytes zero",
+    "actual SP word zero",
+    "other declared-local typed loads preserved",
+    "all old caller bytes and Cur/Max permissions preserved",
+    "access and nextblock unchanged"
+  ],
+  "excluded_claims": [
+    "provider purity",
+    "physical native SP origin",
+    "packed tag word readback",
+    "stack payload initialization",
+    "complete ISA refinement"
+  ],
+  "proof_limits": {
+    "heartbeats": 200000,
+    "recursion_depth": 512,
+    "workers": 1,
+    "build_address_space_GiB": 32,
+    "source_query_address_space_GiB": 16
+  },
+  "last_export_comparison": {
+    "baseline": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_byte_identical": true,
+    "log": "/workspaces/kprog-raw/formal/m5-producer-vectors/export-parity.json",
+    "scope": "C and generated exports unchanged since that check"
+  },
+  "last_complete_make_check": {
+    "exit": 0,
+    "commit": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "rerun": "not needed for Lean-only proofs"
+  },
+  "canonical_C_external_semantics_frozen_paths": "unchanged by this step",
+  "complete_ISA_handler_refinements": 0,
+  "M5": "open",
+  "M6": "open"
+}

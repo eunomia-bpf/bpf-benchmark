@@ -2061,3 +2061,10 @@ stated scalar outcome writes and reads back the complete word while framing
 other lanes and locals relative to provider post-memory. The real LR-zero
 declaration reaches the first vector call in six internal transitions; its
 zero word remains readable at that boundary.
+
+The [stack-tag/SP initializer proof](results/m5-producer-stack/README.md)
+executes all 24 actual tag-byte clears and the signed-long SP-zero assignment
+in 75 internal transitions. Every byte and the SP word read back zero, while
+other declared locals and caller blocks retain their contents and permissions.
+This is the metadata/SP initializer; stack payload and physical native-origin
+correspondence remain separate.

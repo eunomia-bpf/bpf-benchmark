@@ -1,0 +1,15 @@
+import KProgFormal.ClightRefinement.Arm64ProducerStack
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.stack_tags_source
+#check KProgFormal.ClightRefinement.Arm64Producer.stack_tags_source
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.stack_tag_offsets
+#check KProgFormal.ClightRefinement.Arm64Producer.stack_tag_offsets
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.stack_tag_local
+#check KProgFormal.ClightRefinement.Arm64Producer.stack_tag_local
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.stack_tags_initialized
+#check KProgFormal.ClightRefinement.Arm64Producer.stack_tags_initialized
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.sp_zero_source
+#check KProgFormal.ClightRefinement.Arm64Producer.sp_zero_source
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.sp_initialized
+#check KProgFormal.ClightRefinement.Arm64Producer.sp_initialized
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.stack_tags_and_sp
+#check KProgFormal.ClightRefinement.Arm64Producer.stack_tags_and_sp
