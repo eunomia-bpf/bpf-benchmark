@@ -71,6 +71,19 @@ TRACEE_NATIVE_OBJECT := $(NATIVE_OUT)/tracee/tracee.native.o
 TRACEE_LSM_SUPPORT_NATIVE_OBJS := $(patsubst %,$(NATIVE_OUT)/tracee/lsm_support/%.native.o,$(TRACEE_LSM_SUPPORT_SRCS))
 TRACEE_NATIVE_OBJS := $(TRACEE_NATIVE_OBJECT) $(TRACEE_LSM_SUPPORT_NATIVE_OBJS)
 
+# The switches cilium-agent itself turns on for the frozen workload, read from the node_config.h, ep_config.h,
+# netdev_config.h and filter_config.h it generates (/workspaces/kprog-raw/perf/20261113-cilium-context-runtime-retry2/
+# baseline-state/state): IPv4 with masquerade and nodeport, every packet traced (ep_config.h #undef
+# MONITOR_AGGREGATION, so lib/trace.h takes TRACE_AGGREGATE_NONE = 0), policy audit and verdict notifications.
+# Node addresses vary per run and stay runtime values; only these compile-time switches are taken.
+CILIUM_AGENT_NODE_OPTIONS := -DSKIP_DEBUG=1 -DENABLE_IPV4=1 -DENABLE_MASQUERADE_IPV4=1 -DENABLE_NODEPORT=1 \
+	-DSERVICE_NO_BACKEND_RESPONSE=1 -DCT_REPORT_FLAGS=0x0007 -DMONITOR_AGGREGATION=0 \
+	-DPOLICY_AUDIT_MODE=1 -DPOLICY_VERDICT_NOTIFY=1
+CILIUM_AGENT_LXC_OPTIONS := $(CILIUM_AGENT_NODE_OPTIONS) -DENABLE_ROUTING=1
+CILIUM_AGENT_HOST_OPTIONS := $(CILIUM_AGENT_LXC_OPTIONS) -DHOST_ENDPOINT=1
+CILIUM_AGENT_XDP_OPTIONS := $(CILIUM_AGENT_NODE_OPTIONS) -DCIDR4_HMAP_ELEMS=20971520 -DCIDR4_LMAP_ELEMS=65536 \
+	-DCIDR4_FILTER -DCIDR4_LPM_PREFILTER -DCIDR6_FILTER -DCIDR6_LPM_PREFILTER
+# Objects the frozen workload leaves unloaded (overlay, sock, wireguard) keep these broader options.
 CILIUM_MAX_BASE_OPTIONS := -DSKIP_DEBUG=1 -DENABLE_IPV4=1 \
 	-DENABLE_ROUTING=1 -DPOLICY_VERDICT_NOTIFY=1 \
 	-DMONITOR_AGGREGATION=3 -DCT_REPORT_FLAGS=0x0002 \
@@ -87,14 +100,8 @@ CILIUM_MAX_OVERLAY_OPTIONS := $(CILIUM_MAX_BASE_OPTIONS) -DENCAP_IFINDEX=1 \
 	-DTUNNEL_MODE=1 \
 	-DLB_SELECTION_PER_SERVICE=1 -DLB_SELECTION_MAGLEV=2 \
 	-DLB_SELECTION_RANDOM=1
-CILIUM_MAX_HOST_OPTIONS := $(filter-out -DENABLE_HOST_FIREWALL=1,$(CILIUM_MAX_BASE_OPTIONS)) -DENCAP_IFINDEX=1
 CILIUM_MAX_WIREGUARD_OPTIONS := $(CILIUM_MAX_BASE_OPTIONS) \
 	-DENCAP_IFINDEX=1 -DTUNNEL_MODE=1 -DENABLE_WIREGUARD=1
-CILIUM_XDP_BASE_OPTIONS := $(filter-out -DENABLE_NODEPORT_ACCELERATION=1,$(CILIUM_MAX_BASE_OPTIONS))
-CILIUM_MAX_XDP_OPTIONS := $(CILIUM_XDP_BASE_OPTIONS) \
-	-DLB_SELECTION_PER_SERVICE=1 -DLB_SELECTION_MAGLEV=2 \
-	-DLB_SELECTION_RANDOM=1
-CILIUM_MAX_LXC_OPTIONS := $(CILIUM_MAX_BASE_OPTIONS) -DENCAP_IFINDEX=1
 CILIUM_SIMPLE_OPTIONS := -DENABLE_IPV4=1
 
 all: vmlinux katran bcc tetragon cilium otel tracee
@@ -232,7 +239,7 @@ tracee:
 			-o "$(OUT)/tracee/lsm_support/$${src}.bpf.o"; \
 	done
 
-$(NATIVE_OUT)/katran/%.native.o: katran/katran/lib/bpf/%.c katran-compat.h
+$(NATIVE_OUT)/katran/%.native.o: katran/katran/lib/bpf/%.c katran-compat.h Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) -include "$(CURDIR)/katran-compat.h" -DDEBUG -D__KERNEL__ \
 		-I"$(CURDIR)/katran" -I"$(CURDIR)/katran/katran/lib/linux_includes" \
@@ -240,7 +247,7 @@ $(NATIVE_OUT)/katran/%.native.o: katran/katran/lib/bpf/%.c katran-compat.h
 		-o "$@" "$<"
 
 $(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c bcc/libbpf-tools/x86/vmlinux.h \
-		core-compat.h $(CORE_ANSWERS)/bcc.h
+		core-compat.h $(CORE_ANSWERS)/bcc.h Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) $(call core_flags,$(CORE_ANSWERS)/bcc.h) \
 		-I"$(CURDIR)/bcc/libbpf-tools" -I"$(CURDIR)/bcc/libbpf-tools/x86" \
@@ -248,15 +255,15 @@ $(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c bcc/libbpf-tools/x86/vmli
 		-I/usr/include -I/usr/include/x86_64-linux-gnu \
 		-o "$@" "$<"
 
-$(NATIVE_OUT)/cilium/bpf_lxc.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_LXC_OPTIONS)
+$(NATIVE_OUT)/cilium/bpf_lxc.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_AGENT_LXC_OPTIONS)
 $(NATIVE_OUT)/cilium/bpf_overlay.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_OVERLAY_OPTIONS)
 $(NATIVE_OUT)/cilium/bpf_sock.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_LB_OPTIONS)
-$(NATIVE_OUT)/cilium/bpf_host.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_HOST_OPTIONS)
+$(NATIVE_OUT)/cilium/bpf_host.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_AGENT_HOST_OPTIONS)
 $(NATIVE_OUT)/cilium/bpf_wireguard.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_WIREGUARD_OPTIONS)
-$(NATIVE_OUT)/cilium/bpf_xdp.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_XDP_OPTIONS)
+$(NATIVE_OUT)/cilium/bpf_xdp.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_AGENT_XDP_OPTIONS)
 $(NATIVE_OUT)/cilium/bpf_alignchecker.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_SIMPLE_OPTIONS)
 
-$(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c core-compat.h $(CORE_ANSWERS)/cilium.h
+$(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c core-compat.h $(CORE_ANSWERS)/cilium.h Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(CILIUM_NATIVE_OPTIONS) $(NATIVE_CFLAGS) \
 		$(call core_flags,$(CORE_ANSWERS)/cilium.h) -DMICRO_NATIVE_CILIUM \
@@ -270,7 +277,7 @@ $(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c core-compat.h $(CORE_ANSWERS)/ci
 $(OTEL_EBPF_DIR)/errors.h: otel/tools/errors-codegen/errors.json otel/tools/errors-codegen/main.go
 	$(MAKE) -C "$(CURDIR)/$(OTEL_EBPF_DIR)" errors.h
 
-$(NATIVE_OUT)/otel/%.native.o: $(OTEL_EBPF_DIR)/%.ebpf.c $(OTEL_EBPF_DIR)/errors.h core-compat.h $(CORE_ANSWERS)/otel.h
+$(NATIVE_OUT)/otel/%.native.o: $(OTEL_EBPF_DIR)/%.ebpf.c $(OTEL_EBPF_DIR)/errors.h core-compat.h $(CORE_ANSWERS)/otel.h Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) $(call core_flags,$(CORE_ANSWERS)/otel.h) \
 		-DMICRO_NATIVE_HELPER_MACROS -D__KPROG_HELPERS_ARE_POINTERS \
@@ -310,7 +317,7 @@ $(OTEL_NATIVE_OBJECT): $(OTEL_NATIVE_UNIT_OBJS) $(NATIVE_IR_LINK)
 	"$(LLVM_OBJCOPY)" --add-section .llvmbc="$(OTEL_NATIVE_IR)" "$@"
 
 $(TRACEE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinux.h \
-		core-compat.h $(CORE_ANSWERS)/tracee.h
+		core-compat.h $(CORE_ANSWERS)/tracee.h Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) $(call core_flags,$(CORE_ANSWERS)/tracee.h) \
 		-D__TARGET_ARCH_x86 -D__BPF_TRACING__ -DCORE -DCOMMON_BUILD \
@@ -318,7 +325,7 @@ $(TRACEE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinu
 		-I/usr/include -I/usr/include/x86_64-linux-gnu \
 		-o "$@" "$<"
 
-$(NATIVE_OUT)/tracee/lsm_support/%.native.o: tracee/pkg/ebpf/c/lsmsupport/%.bpf.c tracee/pkg/ebpf/c/vmlinux.h
+$(NATIVE_OUT)/tracee/lsm_support/%.native.o: tracee/pkg/ebpf/c/lsmsupport/%.bpf.c tracee/pkg/ebpf/c/vmlinux.h Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) \
 		-D__TARGET_ARCH_x86 -D__BPF_TRACING__ \

@@ -64,6 +64,7 @@ PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are 
      PERF 2026-11-17T11:00:43Z：两项源码和主机验证完成：已有执行 fixture 覆盖 BTF 的完整 GS 指针、jiffies 值变化、紧凑地址编码及旧 facts；一项 Rust 测试通过，另 44 项未运行，C++ loader 模板实例化通过 -Werror。配方 58257acf8/8558d7f50，结果 results/task-btf-inline-20261117。应用 per-call、body/helper/map 和 installed bytes 等协调者两个已排批次后测量，本项保持未完成。
   b. bpf_probe_read_user_str 和 bpf_probe_read_compat_str 进叶子例程（用户字符串叶子加 compat 分派）；
      PERF 2026-11-17T11:55:22Z：源码与最终两项主机测试完成（43 项未运行，user-string 4693 向量/239 源故障）；六个 payload 和首轮相同，旧 scalar/kernel-string/compat 字节保持不变。源码和最终收据同次提交，释放构建输入供取时间批次和 batch 2；结果 results/user-string-leaf-20261117。应用计时/installed bytes 未量，不关闭本项。
+     PERF 2026-11-17T13:13:47Z：batch 2 的 uid_gid/字符串循环/clock 命名已提交 8b31e4533，完整 linker 43 passed / 3 existing ignored，canonical loader build 通过；Cilium 七个 P 于13:09:03Z编译并生成 manifest 通过。机器参数统一 O3，Makefile 依赖补齐，应用 installed bytes/per-call/body/helper/map 待 omp 排镜像及 Tracee/Cilium 子集计时，不关闭本项。
   c. 常量大小的 probe_read（perf b80b2dad0 的计数块模型）；全局量用 32 位绝对地址作操作数（perf 66be0e8f0）；
   d. 已知 ARRAY 步长用 IMUL imm8 加 LEA（9f45f3c6a），LPM 的 XOR 和 disp8（97212ec1c、ed9a7d87e），超过 512 字节的 memset 保留已知长度（a0a448a1d）；
   e. 其余 helper 按各应用的占比从大到小：BCC 的 perf_event_output 和 map update，Katran 的 LRU 查找，Tetragon 和 Tracee 的 htab 查找；先量清两臂差别再动手。

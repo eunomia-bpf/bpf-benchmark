@@ -65,5 +65,22 @@ Cilium's producer rules previously did not depend on the Makefile that
 defines their flags. Native object recipes now include that dependency,
 so committed flag changes trigger recompilation across the native object
 families. `run-producer-plan.sh` records the Cilium Make dry run under
-timing SH. Its result and the actual P/image/installed-size/per-call
-measurements remain pending; no additional image has been published here.
+timing SH. The dry run completed at 12:54:28Z: seven compilation commands,
+all using the common `-O3` flags (`producer-plan.json`).
+
+The actual canonical Cilium producer build passed at 13:09:03Z (started
+13:08:55Z, CPU 19, timing SH and image EX, 32 GiB address-space limit).
+Its log is retained at
+`/workspaces/kprog-raw/perf/leaf-batch2-20261117/cilium-20261117T130722Z-2576741/make.log`.
+All seven objects were compiled, staged in place and their manifest generated.
+The three loaded object families now take the agent switches; overlay,
+sock and wireguard retain their previous broader options. Machine optimization
+flags remain the same for all apps. `record-producer.sh` records the staged
+ELF section and file sizes under timing SH and image SH; these include
+embedded IR/debug information and are not installed native sizes.
+
+Batch-2 LTO source is committed as `8b31e4533`. Omp reviews the joined diff
+and schedules image, six-app check and Tracee/Cilium timing after the
+coordinator's clock and quiet rerun batches finish. Installed app bytes,
+per-call time and body/helper/map attribution remain pending. PERF has
+published no additional image or started a guest for this step.
