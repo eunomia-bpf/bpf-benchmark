@@ -49,8 +49,11 @@ derives the zero payload and both pointer tables from 196 actual source
 transitions. The [30-GPR traversal](results/m5-gpr-input-sequence/README.md)
 now composes the actual producer call through all 98 input visits to the
 register relation, deriving its source data and threading both temporary
-updates. Actual provider admissibility and same-invocation native
-origin/register bindings remain open.
+updates. The [source-initialized NOP contract](results/m5-initialized-nop/README.md)
+applies the actual 19-transition procedure to that live entry in the initialized
+global world, retaining global permissions and the old producer frontier.
+Actual provider admissibility, native memory/origin/alias bindings and program
+control closure remain open.
 
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|

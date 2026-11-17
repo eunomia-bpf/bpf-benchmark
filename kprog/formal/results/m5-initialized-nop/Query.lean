@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.Arm64InitializedNop
+#check KProgFormal.ClightRefinement.Arm64InitializedNop.initialized_nop_contract
+#print axioms KProgFormal.ClightRefinement.Arm64InitializedNop.initialized_nop_contract

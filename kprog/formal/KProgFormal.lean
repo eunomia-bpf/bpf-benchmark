@@ -25,6 +25,7 @@ import KProgFormal.ClightRefinement.Arm64ProducerVectorInputs
 import KProgFormal.ClightRefinement.Arm64ProducerFlagInputs
 import KProgFormal.ClightRefinement.Arm64ProducerTablesToRegisters
 import KProgFormal.ClightRefinement.Arm64ProducerGprInputs
+import KProgFormal.ClightRefinement.Arm64InitializedNop
 import KProgFormal.ClightRefinement.Arm64ProducerPrefix
 import KProgFormal.ClightRefinement.Arm64ProducerInputs
 import KProgFormal.ClightRefinement.Arm64ProducerRegisters
