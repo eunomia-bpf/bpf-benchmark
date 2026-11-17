@@ -2954,9 +2954,14 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
                 off = native_data_symbol_offset(types->second.get(),
                     map->btf_value_type_id, section, name);
             }
-            if (off + sym.st_size > map->value_size) {
-                fail("native data symbol " + std::string(name) +
-                     " exceeds BPF data map value_size for " + map->name);
+            // A symbol that ends past the app's map value cannot be placed,
+            // but it is not an error: a native object built from a newer
+            // source can carry strings the loaded app never references.
+            // Tracee is the case in point: .rodata.str1.1 is 261 bytes where
+            // the app's map is 246, the extra bytes being "vdso" at 248 and
+            // "unknown" at 253. The app's own bytecode decides which it uses.
+            if (off >= map->value_size || sym.st_size > map->value_size - off) {
+                continue;
             }
             if (map->value_addr == 0) {
                 fail("native data map " + map->name +
