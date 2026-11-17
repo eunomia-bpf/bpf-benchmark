@@ -1,0 +1,299 @@
+{
+  "captured_utc": "2026-11-17T01:31:35.705328+00:00",
+  "source": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+  "source_bytes": 2948472,
+  "source_mtime_ns": 1794877382291444387,
+  "subprocess_status": {
+    "llvm_dis": 0
+  },
+  "executable_functions": [
+    {
+      "name": "perf_unwind_dotnet",
+      "section": "perf_event/unwind_dotnet",
+      "bytes": 26785,
+      "binding": "LOCAL"
+    },
+    {
+      "name": "kprobe_unwind_dotnet",
+      "section": "kprobe/unwind_dotnet",
+      "bytes": 26785,
+      "binding": "LOCAL"
+    },
+    {
+      "name": "perf_go_labels",
+      "section": "perf_event/go_labels",
+      "bytes": 2206,
+      "binding": "LOCAL"
+    },
+    {
+      "name": "kprobe_go_labels",
+      "section": "kprobe/go_labels",
+      "bytes": 2206,
+      "binding": "LOCAL"
+    },
+    {
+      "name": "perf_unwind_hotspot",
+      "section": "perf_event/unwind_hotspot",
+      "bytes": 27005,
+      "binding": "LOCAL"
+    },
+    {
+      "name": "kprobe_unwind_hotspot",
+      "section": "kprobe/unwind_hotspot",
+      "bytes": 27005,
+      "binding": "LOCAL"
+    },
+    {
+      "name": "perf_unwind_stop",
+      "section": "perf_event/unwind_stop",
+      "bytes": 4786,
+      "binding": "LOCAL"
+    },
+    {
+      "name": "kprobe_unwind_stop",
+      "section": "kprobe/unwind_stop",
+      "bytes": 4786,
+      "binding": "LOCAL"
+    },
+    {
+      "name": "perf_unwind_native",
+      "section": "perf_event/unwind_native",
+      "bytes": 20724,
+      "binding": "LOCAL"
+    },
+    {
+      "name": "kprobe_unwind_native",
+      "section": "kprobe/unwind_native",
+      "bytes": 20724,
+      "binding": "LOCAL"
+    },
+    {
+      "name": "perf_unwind_perl",
+      "section": "perf_event/unwind_perl",
+      "bytes": 27595,
+      "binding": "LOCAL"
+    },
+    {
+      "name": "kprobe_unwind_perl",
+      "section": "kprobe/unwind_perl",
+      "bytes": 27595,
+      "binding": "LOCAL"
+    },
+    {
+      "name": "perf_unwind_php",
+      "section": "perf_event/unwind_php",
+      "bytes": 24254,
+      "binding": "LOCAL"
+    },
+    {
+      "name": "kprobe_unwind_php",
+      "section": "kprobe/unwind_php",
+      "bytes": 24254,
+      "binding": "LOCAL"
+    },
+    {
+      "name": "perf_unwind_python",
+      "section": "perf_event/unwind_python",
+      "bytes": 14311,
+      "binding": "LOCAL"
+    },
+    {
+      "name": "kprobe_unwind_python",
+      "section": "kprobe/unwind_python",
+      "bytes": 14311,
+      "binding": "LOCAL"
+    },
+    {
+      "name": "perf_unwind_ruby",
+      "section": "perf_event/unwind_ruby",
+      "bytes": 22945,
+      "binding": "LOCAL"
+    },
+    {
+      "name": "kprobe_unwind_ruby",
+      "section": "kprobe/unwind_ruby",
+      "bytes": 22945,
+      "binding": "LOCAL"
+    },
+    {
+      "name": "perf_unwind_v8",
+      "section": "perf_event/unwind_v8",
+      "bytes": 27175,
+      "binding": "LOCAL"
+    },
+    {
+      "name": "kprobe_unwind_v8",
+      "section": "kprobe/unwind_v8",
+      "bytes": 27175,
+      "binding": "LOCAL"
+    },
+    {
+      "name": "uprobe__generic",
+      "section": "uprobe/generic",
+      "bytes": 3880,
+      "binding": "GLOBAL"
+    },
+    {
+      "name": "tracepoint__sched_process_free_pre616",
+      "section": "tracepoint/sched/sched_process_free/v1",
+      "bytes": 861,
+      "binding": "GLOBAL"
+    },
+    {
+      "name": "read_kernel_memory",
+      "section": "tracepoint/syscalls/sys_enter_bpf",
+      "bytes": 215,
+      "binding": "GLOBAL"
+    },
+    {
+      "name": "kprobe__dummy",
+      "section": "kprobe/dummy",
+      "bytes": 23,
+      "binding": "GLOBAL"
+    },
+    {
+      "name": "native_tracer_entry",
+      "section": "perf_event/native_tracer_entry",
+      "bytes": 4096,
+      "binding": "GLOBAL"
+    },
+    {
+      "name": "finish_task_switch",
+      "section": "kprobe/finish_task_switch",
+      "bytes": 4036,
+      "binding": "GLOBAL"
+    },
+    {
+      "name": "tracepoint__sched_switch",
+      "section": "tracepoint/sched/sched_switch",
+      "bytes": 158,
+      "binding": "GLOBAL"
+    },
+    {
+      "name": "read_task_struct",
+      "section": "raw_tracepoint/sys_enter",
+      "bytes": 207,
+      "binding": "GLOBAL"
+    },
+    {
+      "name": "custom__generic",
+      "section": "uprobe/custom__generic",
+      "bytes": 3946,
+      "binding": "GLOBAL"
+    },
+    {
+      "name": "tracepoint__sched_process_free",
+      "section": "tracepoint/sched/sched_process_free/v2",
+      "bytes": 861,
+      "binding": "GLOBAL"
+    }
+  ],
+  "executable_bytes": 413855,
+  "ir_definitions": 347,
+  "sectioned_ir_definitions": [
+    "define dso_local i32 @custom__generic(ptr noundef %0) #0 section \"uprobe/custom__generic\" !dbg !1415 {",
+    "define dso_local i32 @perf_unwind_dotnet(ptr noundef %0) #3 section \"perf_event/unwind_dotnet\" !dbg !3120 {",
+    "define dso_local i32 @kprobe_unwind_dotnet(ptr noundef %0) #3 section \"kprobe/unwind_dotnet\" !dbg !4587 {",
+    "define dso_local i32 @perf_go_labels(ptr noundef %0) #3 section \"perf_event/go_labels\" !dbg !4591 {",
+    "define dso_local i32 @kprobe_go_labels(ptr noundef %0) #3 section \"kprobe/go_labels\" !dbg !5439 {",
+    "define dso_local i32 @perf_unwind_hotspot(ptr noundef %0) #3 section \"perf_event/unwind_hotspot\" !dbg !5443 {",
+    "define dso_local i32 @kprobe_unwind_hotspot(ptr noundef %0) #3 section \"kprobe/unwind_hotspot\" !dbg !7690 {",
+    "define dso_local i32 @perf_unwind_stop(ptr noundef %0) #3 section \"perf_event/unwind_stop\" !dbg !7694 {",
+    "define dso_local i32 @kprobe_unwind_stop(ptr noundef %0) #3 section \"kprobe/unwind_stop\" !dbg !8753 {",
+    "define dso_local i32 @native_tracer_entry(ptr noundef %0) #0 section \"perf_event/native_tracer_entry\" !dbg !8757 {",
+    "define dso_local i32 @perf_unwind_native(ptr noundef %0) #3 section \"perf_event/unwind_native\" !dbg !10231 {",
+    "define dso_local i32 @kprobe_unwind_native(ptr noundef %0) #3 section \"kprobe/unwind_native\" !dbg !11228 {",
+    "define dso_local i32 @tracepoint__sched_switch(ptr noundef %0) #0 section \"tracepoint/sched/sched_switch\" !dbg !11232 {",
+    "define dso_local i32 @kprobe__dummy(ptr noundef %0) #0 section \"kprobe/dummy\" !dbg !11360 {",
+    "define dso_local i32 @finish_task_switch(ptr noundef %0) #0 section \"kprobe/finish_task_switch\" !dbg !11409 {",
+    "define dso_local i32 @perf_unwind_perl(ptr noundef %0) #3 section \"perf_event/unwind_perl\" !dbg !12828 {",
+    "define dso_local i32 @kprobe_unwind_perl(ptr noundef %0) #3 section \"kprobe/unwind_perl\" !dbg !14129 {",
+    "define dso_local i32 @perf_unwind_php(ptr noundef %0) #3 section \"perf_event/unwind_php\" !dbg !14133 {",
+    "define dso_local i32 @kprobe_unwind_php(ptr noundef %0) #3 section \"kprobe/unwind_php\" !dbg !15167 {",
+    "define dso_local i32 @perf_unwind_python(ptr noundef %0) #3 section \"perf_event/unwind_python\" !dbg !15171 {",
+    "define dso_local i32 @kprobe_unwind_python(ptr noundef %0) #3 section \"kprobe/unwind_python\" !dbg !16380 {",
+    "define dso_local i32 @perf_unwind_ruby(ptr noundef %0) #3 section \"perf_event/unwind_ruby\" !dbg !16384 {",
+    "define dso_local i32 @kprobe_unwind_ruby(ptr noundef %0) #3 section \"kprobe/unwind_ruby\" !dbg !17319 {",
+    "define dso_local i32 @tracepoint__sched_process_free(ptr noundef %0) #0 section \"tracepoint/sched/sched_process_free/v2\" !dbg !17323 {",
+    "define dso_local i32 @tracepoint__sched_process_free_pre616(ptr noundef %0) #0 section \"tracepoint/sched/sched_process_free/v1\" !dbg !17807 {",
+    "define dso_local i32 @read_kernel_memory(ptr noundef %0) #0 section \"tracepoint/syscalls/sys_enter_bpf\" !dbg !17827 {",
+    "define dso_local i32 @read_task_struct(ptr noundef %0) #0 section \"raw_tracepoint/sys_enter\" !dbg !17957 {",
+    "define dso_local i32 @uprobe__generic(ptr noundef %0) #0 section \"uprobe/generic\" !dbg !18026 {",
+    "define dso_local i32 @perf_unwind_v8(ptr noundef %0) #3 section \"perf_event/unwind_v8\" !dbg !19527 {",
+    "define dso_local i32 @kprobe_unwind_v8(ptr noundef %0) #3 section \"kprobe/unwind_v8\" !dbg !21111 {"
+  ],
+  "ir_attribute_groups": {
+    "0": {
+      "no_red_zone": true,
+      "optimize_for_size": true,
+      "minimum_size": false,
+      "target_cpu": [
+        "arrowlake-s"
+      ],
+      "target_features": [
+        "+64bit,+adx,+bmi,+bmi2,+clflushopt,+clwb,+cmov,+cmpccxadd,+crc32,+cx16,+cx8,+fsgsbase,+fxsr,+hreset,+invpcid,+lzcnt,+movbe,+movdir64b,+movdiri,+pku,+popcnt,+prfchw,+ptwrite,+rdpid,+rdrnd,+rdseed,+sahf,+serialize,+shstk,+uintr,+waitpkg,+wbnoinvd,+xsave,+xsavec,+xsaveopt,+xsaves,-3dnow,-3dnowa,-aes,-amx-bf16,-amx-complex,-amx-fp16,-amx-int8,-amx-tile,-avx,-avx10.1-256,-avx10.1-512,-avx2,-avx512bf16,-avx512bitalg,-avx512bw,-avx512cd,-avx512dq,-avx512er,-avx512f,-avx512fp16,-avx512ifma,-avx512pf,-avx512vbmi,-avx512vbmi2,-avx512vl,-avx512vnni,-avx512vp2intersect,-avx512vpopcntdq,-avxifma,-avxneconvert,-avxvnni,-avxvnniint16,-avxvnniint8,-cldemote,-clzero,-enqcmd,-f16c,-fma,-fma4,-gfni,-kl,-lwp,-mmx,-mwaitx,-pclmul,-pconfig,-prefetchi,-prefetchwt1,-raoint,-rdpru,-rtm,-sgx,-sha,-sha512,-sm3,-sm4,-sse,-sse2,-sse3,-sse4.1,-sse4.2,-sse4a,-ssse3,-tbm,-tsxldtrk,-usermsr,-vaes,-vpclmulqdq,-widekl,-x87,-xop"
+      ]
+    },
+    "1": {
+      "no_red_zone": false,
+      "optimize_for_size": false,
+      "minimum_size": false,
+      "target_cpu": [],
+      "target_features": []
+    },
+    "2": {
+      "no_red_zone": false,
+      "optimize_for_size": false,
+      "minimum_size": false,
+      "target_cpu": [],
+      "target_features": []
+    },
+    "3": {
+      "no_red_zone": true,
+      "optimize_for_size": true,
+      "minimum_size": false,
+      "target_cpu": [
+        "arrowlake-s"
+      ],
+      "target_features": [
+        "+64bit,+adx,+bmi,+bmi2,+clflushopt,+clwb,+cmov,+cmpccxadd,+crc32,+cx16,+cx8,+fsgsbase,+fxsr,+hreset,+invpcid,+lzcnt,+movbe,+movdir64b,+movdiri,+pku,+popcnt,+prfchw,+ptwrite,+rdpid,+rdrnd,+rdseed,+sahf,+serialize,+shstk,+uintr,+waitpkg,+wbnoinvd,+xsave,+xsavec,+xsaveopt,+xsaves,-3dnow,-3dnowa,-aes,-amx-bf16,-amx-complex,-amx-fp16,-amx-int8,-amx-tile,-avx,-avx10.1-256,-avx10.1-512,-avx2,-avx512bf16,-avx512bitalg,-avx512bw,-avx512cd,-avx512dq,-avx512er,-avx512f,-avx512fp16,-avx512ifma,-avx512pf,-avx512vbmi,-avx512vbmi2,-avx512vl,-avx512vnni,-avx512vp2intersect,-avx512vpopcntdq,-avxifma,-avxneconvert,-avxvnni,-avxvnniint16,-avxvnniint8,-cldemote,-clzero,-enqcmd,-f16c,-fma,-fma4,-gfni,-kl,-lwp,-mmx,-mwaitx,-pclmul,-pconfig,-prefetchi,-prefetchwt1,-raoint,-rdpru,-rtm,-sgx,-sha,-sha512,-sm3,-sm4,-sse,-sse2,-sse3,-sse4.1,-sse4.2,-sse4a,-ssse3,-tbm,-tsxldtrk,-usermsr,-vaes,-vpclmulqdq,-widekl,-x87,-xop"
+      ]
+    },
+    "4": {
+      "no_red_zone": false,
+      "optimize_for_size": false,
+      "minimum_size": false,
+      "target_cpu": [],
+      "target_features": []
+    },
+    "5": {
+      "no_red_zone": false,
+      "optimize_for_size": false,
+      "minimum_size": false,
+      "target_cpu": [],
+      "target_features": []
+    },
+    "6": {
+      "no_red_zone": false,
+      "optimize_for_size": false,
+      "minimum_size": false,
+      "target_cpu": [],
+      "target_features": []
+    },
+    "7": {
+      "no_red_zone": false,
+      "optimize_for_size": false,
+      "minimum_size": false,
+      "target_cpu": [],
+      "target_features": []
+    },
+    "8": {
+      "no_red_zone": true,
+      "optimize_for_size": true,
+      "minimum_size": false,
+      "target_cpu": [],
+      "target_features": []
+    }
+  },
+  "scope": "Existing stage P inventory only; no new compiled object, installed-size comparison or compiler timing."
+}

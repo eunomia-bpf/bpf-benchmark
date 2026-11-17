@@ -613,6 +613,48 @@ here. It would target setup CPU and completion time, not directly improve
 per-call execution after startup, and it avoids inventing another readiness
 gate in the frozen launcher.
 
+Existing-module evidence, 2026-11-17T01:32:49Z: the staged Os OTel P,
+mtime 01:03:02Z, is 2,948,472 bytes and has 30 executable function sections
+totalling 413,855 stage bytes. Its embedded frontend IR contains **347
+function definitions and 30 sectioned program roots**, including both
+perf_event and kprobe unwinder variants. Those root definitions have
+external linkage in the IR even where the ELF machine symbol is local.
+`otel-os-module.json` records section/function names, sizes, root IR headers,
+ABI/size attributes and file metadata; no file digest was generated.
+
+This makes the multi-entry load-cost lead concrete: selecting one symbol
+does not first restrict either module optimization pipeline to that symbol's
+closure. Unselected external roots remain live. It does not mean all 347
+definitions become machine functions: LLVM can inline/delete internal
+helpers. The later native-link extraction selects the reachable machine
+closure; the retained older O3 unwinder replay reports only two reachable
+symbols. That older replay and this Os stage are different artifacts, not
+a before/after size or compiler-time comparison. No 30x speedup or measured
+load-time saving is inferred from the root count.
+
+The reader `module_inventory.py` uses readelf and LLVM disassembly of the
+existing in-memory bitcode section; it builds and executes no program. Its
+first attempt incorrectly used an objcopy dump path of /dev/stdout, which
+replaced the device link with a regular bitcode file and gave llvm-dis an
+empty pipe. The device link was restored to /proc/self/fd/1 before the
+successful retry. The failed metadata is `otel-os-module.failed.json`;
+the extracted output and recovery record remain under
+`/workspaces/kprog-raw/perf/20261117-lto-module-review/`. Already-open stdout
+FDs were unchanged, while an explicit pathname open during that interval
+could have reached the file. The corrected script neither uses objcopy nor
+writes a source/object/bitcode copy. It finished successfully in about
+0.05 seconds. No benchmark/build was started or coordinator process
+signalled by this review.
+
+ABI inheritance was also checked rather than presumed missing:
+`kprog/x86/runtime_bpf_callee.hpp:43–50` copies target CPU/features,
+tuning/frame attributes and NoRedZone from the selected entry into imported
+callee definitions. The Os P's program-root attribute groups retain
+NoRedZone and optsize. The generated typed ARRAY helper sets only NoInline/
+NoUnwind (`perf_context_lto.cpp:208–211`), but its retained 27-byte body is
+register-only. These observations do not establish a current SIMD or
+red-zone failure; no new ABI check or compiler flag is proposed here.
+
 ## Existing work that should stay, and attribution limits
 
 - Shared kernel hash: `x86.rs:1799–1801` uses the shared raw kernel routine;
