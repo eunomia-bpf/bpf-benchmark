@@ -45,3 +45,20 @@ No canonical CLI build is claimed: source/build receipts are named unit/test,
 and the frozen image recipe will build the sole canonical CLI later under
 imageEX. Same BPF code path and original arguments, no facts synthesized,
 extra product or benchmark change. Omp owns image/check/affected-app timing.
+
+First active host2791985 ended101 at22:40:54Z; publisher2791986 ended1 because
+no completed replay existed. Baseline compiled and failed as intended: three
+CALLs versus expected two. Forward production fusion then passed58 existing
+tests and CALL cases, but the new test rejected the legacy unshared numeric
+JMP when both ARRAY/LPM layouts are absent (E9 vs incorrectly assumed E8).
+The wrapper's final helper still uses E8; no production change is needed for
+that synthetic no-wrapper shape. fix-test.py narrows the assertion and removes
+an unused initial callback-count assignment. It introduces no runtime change.
+
+resume-host.sh applies only that test correction to the already-fused source,
+copies the actual initial baseline/failing-suite logs, and resumes full tests,
+parity, source commit/push and unit replay. Do not run apply.py/run-host.sh again:
+production fusion and the regression are already applied once. Failed raw stays
+at host-20261117T223923Z-2791985. The test does not establish that the frozen
+module accepts an external E9; it preserves existing facts-absent linker output.
+Actual shared wrappers and their final relocation still require E8.
