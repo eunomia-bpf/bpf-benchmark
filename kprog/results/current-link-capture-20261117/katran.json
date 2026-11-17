@@ -1,0 +1,60 @@
+{
+  "app": "katran",
+  "guest_returncode": 0,
+  "captures": [
+    {
+      "app": "katran",
+      "symbol": "balancer_ingress",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r1c7nupu/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r1c7nupu/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r1c7nupu",
+      "proof_bytes": 272952,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    }
+  ],
+  "capture_errors": [],
+  "other_invocations": [
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-904s4olh",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/katran/balancer.native.o",
+        "--symbol",
+        "balancer_ingress",
+        "--output",
+        "/tmp/native_kernel_link_cache/04b2b903584ea666.entry.proof.o.tmp.2762",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    }
+  ],
+  "scope": "Actual new kernel-link requests, including linker failures, archived by the capture adapter. No helper/layout facts are added. Missing/failed loads remain in the guest and shim logs; an empty capture list does not imply no native work. Functional capture, not official timing."
+}
