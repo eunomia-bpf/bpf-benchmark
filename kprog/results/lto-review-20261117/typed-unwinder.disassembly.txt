@@ -1,0 +1,211 @@
+
+/workspaces/kprog-raw/perf/20261116-inner-array-lto/libbpf/otel-typed.blob:     file format binary
+
+
+Disassembly of section .data:
+
+00000000000073f7 <.data+0x73f7>:
+    73f7:	81 bf 38 00 00 00 02 	cmp    DWORD PTR [rdi+0x38],0x2
+    73fe:	00 00 00 
+    7401:	75 29                	jne    0x742c
+    7403:	8b 06                	mov    eax,DWORD PTR [rsi]
+    7405:	3b 87 44 00 00 00    	cmp    eax,DWORD PTR [rdi+0x44]
+    740b:	73 1a                	jae    0x7427
+    740d:	23 87 24 01 00 00    	and    eax,DWORD PTR [rdi+0x124]
+    7413:	8b 97 20 01 00 00    	mov    edx,DWORD PTR [rdi+0x120]
+    7419:	48 0f af c2          	imul   rax,rdx
+    741d:	48 8d 84 07 30 01 00 	lea    rax,[rdi+rax*1+0x130]
+    7424:	00 
+    7425:	eb 04                	jmp    0x742b
+    7427:	31 c0                	xor    eax,eax
+    7429:	eb 00                	jmp    0x742b
+    742b:	c3                   	ret
+    742c:	48 83 ec 08          	sub    rsp,0x8
+    7430:	e8 4b 01 00 00       	call   0x7580
+    7435:	48 83 c4 08          	add    rsp,0x8
+    7439:	c3                   	ret
+
+/workspaces/kprog-raw/perf/20261116-inner-array-lto/libbpf/otel-typed.blob:     file format binary
+
+
+Disassembly of section .data:
+
+000000000000743a <.data+0x743a>:
+    743a:	53                   	push   rbx
+    743b:	41 54                	push   r12
+    743d:	41 55                	push   r13
+    743f:	41 56                	push   r14
+    7441:	41 57                	push   r15
+    7443:	49 89 fc             	mov    r12,rdi
+    7446:	41 89 f5             	mov    r13d,esi
+    7449:	49 89 d6             	mov    r14,rdx
+    744c:	48 89 d0             	mov    rax,rdx
+    744f:	4c 01 e8             	add    rax,r13
+    7452:	0f 82 de 00 00 00    	jb     0x7536
+    7458:	49 bb 60 46 2e b6 ff 	movabs r11,0xffffffffb62e4660
+    745f:	ff ff ff 
+    7462:	49 3b 03             	cmp    rax,QWORD PTR [r11]
+    7465:	0f 87 cb 00 00 00    	ja     0x7536
+    746b:	e8 00 00 00 00       	call   0x7470
+    7470:	84 c0                	test   al,al
+    7472:	0f 84 be 00 00 00    	je     0x7536
+    7478:	65 48 8b 1c 25 18 00 	mov    rbx,QWORD PTR gs:0xffffffffb62b0018
+    747f:	2b b6 
+    7481:	ff 83 ac 24 00 00    	inc    DWORD PTR [rbx+0x24ac]
+    7487:	49 bb 60 8a 96 b5 ff 	movabs r11,0xffffffffb5968a60
+    748e:	ff ff ff 
+    7491:	41 f7 83 54 00 00 00 	test   DWORD PTR [r11+0x54],0x100000
+    7498:	00 00 10 00 
+    749c:	41 0f 95 c7          	setne  r15b
+    74a0:	0f 84 03 00 00 00    	je     0x74a9
+    74a6:	0f 01 cb             	stac
+    74a9:	4c 89 e7             	mov    rdi,r12
+    74ac:	4c 89 f6             	mov    rsi,r14
+    74af:	44 89 e9             	mov    ecx,r13d
+    74b2:	41 bb 01 00 00 00    	mov    r11d,0x1
+    74b8:	83 f9 08             	cmp    ecx,0x8
+    74bb:	0f 82 23 00 00 00    	jb     0x74e4
+    74c1:	48 8b 06             	mov    rax,QWORD PTR [rsi]
+    74c4:	45 85 db             	test   r11d,r11d
+    74c7:	0f 84 42 00 00 00    	je     0x750f
+    74cd:	48 89 07             	mov    QWORD PTR [rdi],rax
+    74d0:	48 83 c7 08          	add    rdi,0x8
+    74d4:	48 83 c6 08          	add    rsi,0x8
+    74d8:	83 e9 08             	sub    ecx,0x8
+    74db:	83 f9 08             	cmp    ecx,0x8
+    74de:	0f 83 dd ff ff ff    	jae    0x74c1
+    74e4:	85 c9                	test   ecx,ecx
+    74e6:	0f 84 1c 00 00 00    	je     0x7508
+    74ec:	0f b6 06             	movzx  eax,BYTE PTR [rsi]
+    74ef:	45 85 db             	test   r11d,r11d
+    74f2:	0f 84 17 00 00 00    	je     0x750f
+    74f8:	88 07                	mov    BYTE PTR [rdi],al
+    74fa:	48 ff c7             	inc    rdi
+    74fd:	48 ff c6             	inc    rsi
+    7500:	ff c9                	dec    ecx
+    7502:	0f 85 e4 ff ff ff    	jne    0x74ec
+    7508:	31 c0                	xor    eax,eax
+    750a:	e9 07 00 00 00       	jmp    0x7516
+    750f:	48 c7 c0 f2 ff ff ff 	mov    rax,0xfffffffffffffff2
+    7516:	45 84 ff             	test   r15b,r15b
+    7519:	0f 84 03 00 00 00    	je     0x7522
+    751f:	0f 01 ca             	clac
+    7522:	ff 8b ac 24 00 00    	dec    DWORD PTR [rbx+0x24ac]
+    7528:	48 85 c0             	test   rax,rax
+    752b:	0f 84 45 00 00 00    	je     0x7576
+    7531:	e9 07 00 00 00       	jmp    0x753d
+    7536:	48 c7 c0 f2 ff ff ff 	mov    rax,0xfffffffffffffff2
+    753d:	4c 89 e7             	mov    rdi,r12
+    7540:	44 89 e9             	mov    ecx,r13d
+    7543:	31 d2                	xor    edx,edx
+    7545:	83 f9 08             	cmp    ecx,0x8
+    7548:	0f 82 13 00 00 00    	jb     0x7561
+    754e:	48 89 17             	mov    QWORD PTR [rdi],rdx
+    7551:	48 83 c7 08          	add    rdi,0x8
+    7555:	83 e9 08             	sub    ecx,0x8
+    7558:	83 f9 08             	cmp    ecx,0x8
+    755b:	0f 83 ed ff ff ff    	jae    0x754e
+    7561:	85 c9                	test   ecx,ecx
+    7563:	0f 84 0d 00 00 00    	je     0x7576
+    7569:	88 17                	mov    BYTE PTR [rdi],dl
+    756b:	48 ff c7             	inc    rdi
+    756e:	ff c9                	dec    ecx
+    7570:	0f 85 f3 ff ff ff    	jne    0x7569
+    7576:	41 5f                	pop    r15
+    7578:	41 5e                	pop    r14
+    757a:	41 5d                	pop    r13
+    757c:	41 5c                	pop    r12
+    757e:	5b                   	pop    rbx
+    757f:	c3                   	ret
+
+/workspaces/kprog-raw/perf/20261116-inner-array-lto/libbpf/otel-typed.blob:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000007580 <.data+0x7580>:
+    7580:	81 bf 38 00 00 00 0b 	cmp    DWORD PTR [rdi+0x38],0xb
+    7587:	00 00 00 
+    758a:	0f 85 2c 01 00 00    	jne    0x76bc
+    7590:	48 83 bf 88 01 00 00 	cmp    QWORD PTR [rdi+0x188],0xc
+    7597:	0c 
+    7598:	0f 85 1e 01 00 00    	jne    0x76bc
+    759e:	44 8b 96 00 00 00 00 	mov    r10d,DWORD PTR [rsi+0x0]
+    75a5:	4c 3b 97 80 01 00 00 	cmp    r10,QWORD PTR [rdi+0x180]
+    75ac:	0f 87 07 01 00 00    	ja     0x76b9
+    75b2:	45 31 c0             	xor    r8d,r8d
+    75b5:	48 8b 97 20 01 00 00 	mov    rdx,QWORD PTR [rdi+0x120]
+    75bc:	48 85 d2             	test   rdx,rdx
+    75bf:	0f 84 e3 00 00 00    	je     0x76a8
+    75c5:	44 8b 9a 10 00 00 00 	mov    r11d,DWORD PTR [rdx+0x10]
+    75cc:	45 89 d9             	mov    r9d,r11d
+    75cf:	45 39 d1             	cmp    r9d,r10d
+    75d2:	45 0f 47 ca          	cmova  r9d,r10d
+    75d6:	31 ff                	xor    edi,edi
+    75d8:	41 83 fb 60          	cmp    r11d,0x60
+    75dc:	0f 83 2b 00 00 00    	jae    0x760d
+    75e2:	44 89 d9             	mov    ecx,r11d
+    75e5:	c1 e9 03             	shr    ecx,0x3
+    75e8:	0f b6 84 0e 04 00 00 	movzx  eax,BYTE PTR [rsi+rcx*1+0x4]
+    75ef:	00 
+    75f0:	44 89 d9             	mov    ecx,r11d
+    75f3:	83 e1 07             	and    ecx,0x7
+    75f6:	83 f1 07             	xor    ecx,0x7
+    75f9:	d3 e8                	shr    eax,cl
+    75fb:	83 e0 01             	and    eax,0x1
+    75fe:	48 69 c0 08 00 00 00 	imul   rax,rax,0x8
+    7605:	48 8b bc 02 00 00 00 	mov    rdi,QWORD PTR [rdx+rax*1+0x0]
+    760c:	00 
+    760d:	48 8b 82 18 00 00 00 	mov    rax,QWORD PTR [rdx+0x18]
+    7614:	48 33 86 04 00 00 00 	xor    rax,QWORD PTR [rsi+0x4]
+    761b:	48 0f c8             	bswap  rax
+    761e:	48 85 c0             	test   rax,rax
+    7621:	0f 84 0e 00 00 00    	je     0x7635
+    7627:	48 0f bd c8          	bsr    rcx,rax
+    762b:	f7 d9                	neg    ecx
+    762d:	83 c1 3f             	add    ecx,0x3f
+    7630:	e9 3c 00 00 00       	jmp    0x7671
+    7635:	41 83 f9 40          	cmp    r9d,0x40
+    7639:	0f 86 2d 00 00 00    	jbe    0x766c
+    763f:	8b 82 20 00 00 00    	mov    eax,DWORD PTR [rdx+0x20]
+    7645:	33 86 0c 00 00 00    	xor    eax,DWORD PTR [rsi+0xc]
+    764b:	0f c8                	bswap  eax
+    764d:	85 c0                	test   eax,eax
+    764f:	0f 84 0d 00 00 00    	je     0x7662
+    7655:	0f bd c8             	bsr    ecx,eax
+    7658:	f7 d9                	neg    ecx
+    765a:	83 c1 5f             	add    ecx,0x5f
+    765d:	e9 0f 00 00 00       	jmp    0x7671
+    7662:	b9 60 00 00 00       	mov    ecx,0x60
+    7667:	e9 05 00 00 00       	jmp    0x7671
+    766c:	b9 40 00 00 00       	mov    ecx,0x40
+    7671:	44 39 c9             	cmp    ecx,r9d
+    7674:	41 0f 47 c9          	cmova  ecx,r9d
+    7678:	83 f9 60             	cmp    ecx,0x60
+    767b:	0f 84 24 00 00 00    	je     0x76a5
+    7681:	44 39 d9             	cmp    ecx,r11d
+    7684:	0f 82 1e 00 00 00    	jb     0x76a8
+    768a:	f7 82 14 00 00 00 01 	test   DWORD PTR [rdx+0x14],0x1
+    7691:	00 00 00 
+    7694:	0f 85 03 00 00 00    	jne    0x769d
+    769a:	49 89 d0             	mov    r8,rdx
+    769d:	48 89 fa             	mov    rdx,rdi
+    76a0:	e9 17 ff ff ff       	jmp    0x75bc
+    76a5:	49 89 d0             	mov    r8,rdx
+    76a8:	4d 85 c0             	test   r8,r8
+    76ab:	0f 84 08 00 00 00    	je     0x76b9
+    76b1:	49 8d 80 24 00 00 00 	lea    rax,[r8+0x24]
+    76b8:	c3                   	ret
+    76b9:	31 c0                	xor    eax,eax
+    76bb:	c3                   	ret
+    76bc:	48 83 ec 08          	sub    rsp,0x8
+    76c0:	e8 00 00 00 00       	call   0x76c5
+    76c5:	48 83 c4 08          	add    rsp,0x8
+    76c9:	c3                   	ret
+Retained host-linked payload; external helper E8 slots are not yet kernel patched.
+
+{"bytes": 67, "end": 29754, "piece": "runtime_array", "start": 29687}
+
+{"bytes": 326, "end": 30080, "piece": "probe_read", "start": 29754}
+
+{"bytes": 330, "end": 30410, "piece": "lpm_lookup", "start": 30080}

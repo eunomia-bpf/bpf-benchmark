@@ -1,0 +1,70 @@
+{
+  "recorded_utc": "2026-11-17T00:14:43Z",
+  "review_source_commit": "f821e1c771f2908848094b0f88206388c51c79ce",
+  "typed_unwinder": {
+    "blob": "/workspaces/kprog-raw/perf/20261116-inner-array-lto/libbpf/otel-typed.blob",
+    "payload_bytes": 30410,
+    "ranges": [
+      {
+        "bytes": 32,
+        "end": 28764,
+        "piece": "known_array",
+        "start": 28732
+      },
+      {
+        "bytes": 32,
+        "end": 28796,
+        "piece": "known_array",
+        "start": 28764
+      },
+      {
+        "bytes": 27,
+        "end": 28823,
+        "piece": "known_array",
+        "start": 28796
+      },
+      {
+        "bytes": 67,
+        "end": 29754,
+        "piece": "runtime_array",
+        "start": 29687
+      },
+      {
+        "bytes": 326,
+        "end": 30080,
+        "piece": "probe_read",
+        "start": 29754
+      },
+      {
+        "bytes": 330,
+        "end": 30410,
+        "piece": "lpm_lookup",
+        "start": 30080
+      }
+    ],
+    "array_fallback_call": 29744,
+    "array_fallback_destination": 30080,
+    "lpm_start": 30080
+  },
+  "tracee": {
+    "inputs": "kprog/results/host-link-replay-20261116/tracee-inputs.json",
+    "captured_programs": 169,
+    "remaining_static_helper_call_sites": {
+      "bpf_probe_read_compat_str/bpf_probe_read_str": 714,
+      "bpf_probe_read/bpf_probe_read_compat": 2375
+    },
+    "examples": {
+      "bpf_probe_read_compat_str/bpf_probe_read_str": {
+        "symbol": "lkm_seeker_new_mod_only_tail",
+        "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-04mya4zp",
+        "offset": 367
+      },
+      "bpf_probe_read/bpf_probe_read_compat": {
+        "symbol": "lkm_seeker_new_mod_only_tail",
+        "folder": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-04mya4zp",
+        "offset": 768
+      }
+    },
+    "scope": "Static relocation sites in retained per-entry blobs, not dynamic call counts; shared callee text may recur across entries."
+  }
+}
