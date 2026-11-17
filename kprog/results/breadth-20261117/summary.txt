@@ -10,3 +10,6 @@ x86_kvm_corpus_20261117_100803_814231 installed programs 113 JIT 581577 B native
 == tetragon/observer /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_103459_412261
 /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_103459_412261 throughput native/eBPF 1.042x  eBPF [343217, 335571, 337947] native [359895, 347588, 352061] per-sample [1.049, 1.036, 1.042] errors 0
 x86_kvm_corpus_20261117_103459_412261 installed programs 288 JIT 2472912 B native 2078688 B ratio 0.84x
+== tracee/monitor /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_110157_163893
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_110157_163893 throughput native/eBPF 0.886x  eBPF [380788, 384279, 381586] native [273773, 338245, 360468] per-sample [0.719, 0.88, 0.945] errors 0
+x86_kvm_corpus_20261117_110157_163893 installed programs 169 JIT 2068918 B native 1761243 B ratio 0.85x
