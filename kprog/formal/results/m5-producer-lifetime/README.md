@@ -51,3 +51,9 @@ Raw attempts: /workspaces/kprog-raw/formal/m5-producer-lifetime. Production C,
 pinned semantics, exports and frozen benchmark paths are unchanged. Last full
 native make check remains PASS at 5236c0e96 and was not repeated for Lean-only
 proof additions.
+
+Continuation: [the actual linked environment](../m5-producer-binding/README.md)
+now combines both complete exports and proves global/body/layout preservation,
+input/callback/producer bindings, allocation equality and one linked entry
+transition. The earlier initialization runs still need that environment
+migration; the genuine continuation body remains an explicit obligation.

@@ -1,0 +1,31 @@
+import KProgFormal.ClightRefinement.Arm64ProducerBinding
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_source
+#check KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_source
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_wellformed
+#check KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_wellformed
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_definitions
+#check KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_definitions
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.Binding.entry_definitions
+#check KProgFormal.ClightRefinement.Arm64Producer.Binding.entry_definitions
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.Binding.existing_globals
+#check KProgFormal.ClightRefinement.Arm64Producer.Binding.existing_globals
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.Binding.existing_functions
+#check KProgFormal.ClightRefinement.Arm64Producer.Binding.existing_functions
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.Binding.existing_symbols
+#check KProgFormal.ClightRefinement.Arm64Producer.Binding.existing_symbols
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.Binding.appended_functions
+#check KProgFormal.ClightRefinement.Arm64Producer.Binding.appended_functions
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_input
+#check KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_input
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.Binding.program_layouts
+#check KProgFormal.ClightRefinement.Arm64Producer.Binding.program_layouts
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.Binding.entry_layouts
+#check KProgFormal.ClightRefinement.Arm64Producer.Binding.entry_layouts
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.Binding.local_layouts
+#check KProgFormal.ClightRefinement.Arm64Producer.Binding.local_layouts
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_allocation
+#check KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_allocation
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_entry
+#check KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_entry
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_entry_internal
+#check KProgFormal.ClightRefinement.Arm64Producer.Binding.linked_entry_internal
