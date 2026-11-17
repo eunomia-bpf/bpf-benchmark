@@ -3126,8 +3126,8 @@ It is not a newly discovered permission to drop those operations:
   continuing more source loads after a fault changes the established
   error/whole-destination-zeroing sequence. Keep ordered fault handling.
 
-A source-level alternative was considered, **not recommended for this
-batch**: use RCX as the nonzero recovery status and R11D as the byte
+A source-level alternative was considered, **not measured or
+implemented**: use RCX as the nonzero recovery status and R11D as the byte
 counter, replacing TEST-plus-JZ with JRCXZ. The existing module can
 already clear `pt_regs.cx` through recovery destination 1; that is a
 register index, distinct from the exception handler's internal
@@ -3148,19 +3148,33 @@ installed-byte savings. A large unrolled form may not have that reach.
 Fewer architectural instructions do not establish fewer cycles: branch
 implementation, front-end fusion and layout still matter.
 
-More importantly, the current B path does not implement this instruction.
+The current B decoder does not implement this instruction:
 `trusted_specializer.py:20` loads
-`micro-prog/generate_micro_sim_proofs.py`; that generator only recognizes
-flag-condition branches through CC_AUX at lines 569–571 and 1578–1595.
-The generated legacy/full condition tables contain no JRCXZ, and the
-encoder ends in the existing unsupported-mnemonic return at line 1101.
-The local iced-x86 enum documents JRCXZ's rel8 form (`code.rs:5462–5469`),
-but decoder support alone is not simulator/generator support. Introducing
-it here would create additional B-generation work outside the current
-LTO-only production scope. Keep the scheduled constant-size and global
-address-encoding changes ahead of this idea; no new source refusal,
-check, ISA extension, guest or experimental gate was added. This review
-does not stop the current native-first compat batch.
+`micro-prog/generate_micro_sim_proofs.py`, whose CC_AUX branch tables
+contain no JRCXZ. **Correction, 2026-11-17: that decoder limitation does
+not prohibit this late helper optimization.** The earlier recommendation
+against JRCXZ on that basis did not trace the proof-stage boundary:
+
+- `trusted_specializer.py:123–125` invokes native-link with `--mode proof`
+  and parses that output to generate B.
+- `native_link/src/main.rs:451,467–471` supplies the running-kernel layout
+  only outside proof mode.
+- `x86.rs:1809–1816` guards `probe_read::share` with `!proof_mode`; the
+  in-progress clock share has the same guard at 1818–1826.
+- `native_loader.cpp:3223–3242` later links the prepared native proof in
+  `--mode kernel`. The late helper body belongs to that stage.
+
+Consequently, JRCXZ introduced only by this late read emitter would not
+be an instruction in the earlier B-generator input. The same distinction
+applies to the new clock emitter's RDTSC/LFENCE. No new frozen decoder
+support is implied by either late emission. Introducing such instructions
+into P itself would be a different case. Existing B success also does
+not establish equivalence of a later helper expansion: the LTO behavior,
+fault contract, code-size and per-call effect still need their own
+assessment. The 20-byte/register-allocation calculation above remains an
+unmeasured source option, with short reach and microarchitecture caveats;
+this correction neither establishes a gain nor starts an extra run.
+No native candidate, source change, new check or test gate was added.
 
 
 ### Compat-image functional footprint: first completed checks
@@ -3200,7 +3214,7 @@ the return length is calculated from RDI minus saved R8, while saved R9D
 still supplies the original size on error. No new register, condition,
 instruction family, helper call, frame or module operation is needed.
 The generated B path already supports DEC and JE/JNE through the
-existing ALU/condition tables; this avoids the JRCXZ issue above.
+existing ALU/condition tables; no new instruction family is introduced.
 
 Expected local effects, with the existing branch encodings retained:
 
@@ -3607,3 +3621,11 @@ readers now retain component-length arithmetic in their JSON. This
 changes no retained machine bytes, static calls, installed receipts or
 timing result. Later global/branch compaction can change future emission;
 the 85-byte figure describes the historical dispatcher only.
+
+
+Review correction provenance: the earlier JRCXZ exclusion was based on a
+real decoder omission but applied it to the wrong compilation stage.
+Tracing `specialize → --mode proof → B`, followed by the loader's separate
+kernel link, corrects that inference. Previous COORDINATION notices and
+todo decisions citing the decoder as a barrier to late JRCXZ emission
+are superseded by the stage evidence above. No measured result changes.
