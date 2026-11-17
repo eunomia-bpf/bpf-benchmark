@@ -145,6 +145,7 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-16 ~23:58 UTC: "LTO 那边反而需要更关注? 代码让 codex 去 review 一下看看有没有性能问题, 你来整改"
 - 2026-11-17 ~00:41 UTC: "为啥跑这么久"
 - 2026-11-17 ~03:10 UTC: "都用 O3; 不计是什么情况?"
+- 2026-11-17T10:27 UTC: "你让 codex / omp 也看看在里面能不能干啥. 给他们持续性几天的大任务, 免得你用完了停下来了. 让 omp 统筹 codex 或者自己做. 恢复omp集群定时任务"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
