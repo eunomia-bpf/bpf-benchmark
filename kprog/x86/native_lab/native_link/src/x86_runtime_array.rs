@@ -5,20 +5,19 @@
 use super::*;
 
 fn build_prefix(layout: &RuntimeArrayLayout) -> Result<Vec<u8>> {
-    let mut bytes = vec![0x81, 0xbf]; // cmp dword [rdi+map_type], ARRAY
-    bytes.extend_from_slice(&i32::try_from(layout.map_type)?.to_le_bytes());
-    bytes.extend_from_slice(&layout.array_type.to_le_bytes());
+    let mut bytes = Vec::new();
+    let short_type = layout.array_type <= i8::MAX as u32;
+    memory::Routine::operand(&mut bytes, &[if short_type {0x83}else{0x81},0xbf],
+        i32::try_from(layout.map_type)? as u32); // cmp dword [rdi+map_type], ARRAY
+    if short_type {bytes.push(layout.array_type as u8);} else {bytes.extend_from_slice(&layout.array_type.to_le_bytes());}
     bytes.extend_from_slice(&[0x75, 0]); // jne generic helper
     let generic_branch = bytes.len() - 1;
     bytes.extend_from_slice(&[0x8b, 0x06]); // mov eax,[rsi]: u32 key
-    bytes.extend_from_slice(&[0x3b, 0x87]); // cmp eax,[rdi+max_entries]
-    bytes.extend_from_slice(&i32::try_from(layout.max_entries)?.to_le_bytes());
+    memory::Routine::operand(&mut bytes, &[0x3b, 0x87], i32::try_from(layout.max_entries)? as u32); // cmp eax,[rdi+max_entries]
     bytes.extend_from_slice(&[0x73, 0]); // jae null
     let null_branch = bytes.len() - 1;
-    bytes.extend_from_slice(&[0x23, 0x87]); // and eax,[rdi+index_mask]
-    bytes.extend_from_slice(&i32::try_from(layout.index_mask)?.to_le_bytes());
-    bytes.extend_from_slice(&[0x8b, 0x97]); // mov edx,[rdi+elem_size]
-    bytes.extend_from_slice(&i32::try_from(layout.elem_size)?.to_le_bytes());
+    memory::Routine::operand(&mut bytes, &[0x23, 0x87], i32::try_from(layout.index_mask)? as u32); // and eax,[rdi+index_mask]
+    memory::Routine::operand(&mut bytes, &[0x8b, 0x97], i32::try_from(layout.elem_size)? as u32); // mov edx,[rdi+elem_size]
     bytes.extend_from_slice(&[0x48, 0x0f, 0xaf, 0xc2]); // imul rax,rdx: u64 product
     bytes.extend_from_slice(&[0x48, 0x8d, 0x84, 0x07]); // lea rax,[rdi+rax+value]
     bytes.extend_from_slice(&i32::try_from(layout.value)?.to_le_bytes());
@@ -60,6 +59,47 @@ pub(super) fn share(blob: &mut Vec<u8>, relocs: &mut Vec<RelocRecord>,
 #[cfg(all(test, target_arch = "x86_64", target_os = "linux"))]
 mod tests {
     use super::*;
+
+    #[test]
+    fn runtime_field_encodings_preserve_offsets_full_type_and_branch_targets() -> Result<()> {
+        let mut cases=0;
+        for offset in [0u32,1,127,128,4096,i32::MAX as u32] {
+            for kind in [0u32,2,127,128,256,u32::MAX] {
+                let layout=RuntimeArrayLayout{map_type:offset,max_entries:offset,elem_size:offset,
+                    index_mask:offset,value:304,array_type:kind};
+                let (bytes,call)=routine(&layout)?;
+                let instructions:Vec<_>=Decoder::new(64,&bytes,DecoderOptions::NONE).into_iter().collect();
+                assert!(instructions.iter().all(|i|!i.is_invalid()));
+                let fields:Vec<_>=instructions.iter().filter(|i|i.memory_base()==Register::RDI
+                    && i.memory_index()==Register::None).collect();
+                assert_eq!(fields.len(),4,"one live read of each bound field");
+                for (n,field) in fields.iter().enumerate() {
+                    assert_eq!(field.memory_displacement64(),u64::from(offset));
+                    let disp=if offset==0 {0}else if offset<=127 {1}else{4};
+                    let immediate=if n!=0 {0}else if kind<=127 {1}else{4};
+                    assert_eq!(field.len(),2+disp+immediate,"encoded displacement width");
+                    assert_eq!(field.memory_size().size(),4,"u32 field reads");
+                }
+                assert_eq!(fields.iter().map(|i|i.mnemonic()).collect::<Vec<_>>(),
+                    [Mnemonic::Cmp,Mnemonic::Cmp,Mnemonic::And,Mnemonic::Mov]);
+                let first=fields[0];
+                assert_eq!(first.op1_kind(),if kind<=127 {OpKind::Immediate8to32}else{OpKind::Immediate32});
+                let actual=if kind<=127 {first.immediate8to32() as u32}else{first.immediate32()};
+                assert_eq!(actual,kind,"never sign-extend a positive 128..255 type as imm8");
+                for i in &instructions {
+                    if i.mnemonic()==Mnemonic::Jne {assert_eq!(i.near_branch_target() as usize,call-4);}
+                    if i.mnemonic()==Mnemonic::Jae {
+                        let target=i.near_branch_target() as usize;
+                        assert_eq!(&bytes[target..target+3],&[0x31,0xc0,0xc3]);
+                    }
+                }
+                assert_eq!(&bytes[call..call+5],X86_HELPER_CALL_REL32_SLOT.as_slice());
+                cases+=1;
+            }
+        }
+        println!("runtime ARRAY: {cases} offset/type encodings retain fields and branch targets");
+        Ok(())
+    }
 
     #[test]
     fn runtime_array_executes_key_bounds_mask_wide_product_and_other_type_dispatch() -> Result<()> {
@@ -126,7 +166,7 @@ mod tests {
             RelocRecord { offset: 5, kind: 1, target: 0x1234 },
             RelocRecord { offset: 10, kind: 1, target: 0x5678 }];
         let range = share(&mut blob, &mut relocs, &layout, 0x1234)?.expect("two lookups");
-        assert_eq!(range, (16, 80), "one64-byte routine, not one per call");
+        assert_eq!(range, (16, 65), "one49-byte routine, not one per call");
         assert_eq!((blob[0],blob[5]),(0xe8,0xe9));
         for site in [0usize, 5] {
             let disp = i32::from_le_bytes(blob[site+1..site+5].try_into()?);
@@ -136,7 +176,7 @@ mod tests {
         assert_eq!(relocs.len(), 2);
         assert!(relocs.iter().any(|r| r.offset == 10 && r.target == 0x5678));
         let external = relocs.iter().find(|r| r.target == 0x1234).expect("generic helper");
-        assert_eq!(external.offset, 16+54);
+        assert_eq!(external.offset, 16+39);
         assert_eq!(&blob[external.offset as usize..external.offset as usize+5],
             X86_HELPER_CALL_REL32_SLOT.as_slice(), "sameE8 slot accepted by both loaders");
         Ok(())

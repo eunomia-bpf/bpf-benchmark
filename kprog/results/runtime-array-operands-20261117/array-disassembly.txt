@@ -1,0 +1,24 @@
+
+/workspaces/kprog-raw/perf/runtime-array-operands-20261117/host-20261117T180906Z-2696608/fixture/runtime-array.bin:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	83 7f 0c 02          	cmp    DWORD PTR [rdi+0xc],0x2
+   4:	75 1d                	jne    0x23
+   6:	8b 06                	mov    eax,DWORD PTR [rsi]
+   8:	3b 47 18             	cmp    eax,DWORD PTR [rdi+0x18]
+   b:	73 13                	jae    0x20
+   d:	23 47 24             	and    eax,DWORD PTR [rdi+0x24]
+  10:	8b 57 20             	mov    edx,DWORD PTR [rdi+0x20]
+  13:	48 0f af c2          	imul   rax,rdx
+  17:	48 8d 84 07 40 00 00 	lea    rax,[rdi+rax*1+0x40]
+  1e:	00 
+  1f:	c3                   	ret
+  20:	31 c0                	xor    eax,eax
+  22:	c3                   	ret
+  23:	48 83 ec 08          	sub    rsp,0x8
+  27:	e8 00 00 00 00       	call   0x2c
+  2c:	48 83 c4 08          	add    rsp,0x8
+  30:	c3                   	ret
