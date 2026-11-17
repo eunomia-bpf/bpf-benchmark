@@ -3274,3 +3274,67 @@ compat additions cannot be equated to these net totals. Keep the actual
 installed increases beside the upcoming Tetragon/Tracee times; do not
 price a future constant-size variant by its copy body alone or treat a
 successful functional check as attainment of the half-size target.
+
+
+### Read-helper cold zeroing tails are duplicated inside one blob
+
+Source finding at `d6b4d335e`: `x86_probe_read.rs:148` and `:217` pass
+identical saved-argument bytes to the same `zero_fill` emitter at
+`:79–92`. The latter call is used by both kernel scalar and kernel-string
+routines. `share` at `:282–319` can emit all three routines into one
+program blob, each with its own copy. Rust function reuse shares emitter
+source; it does not share the appended native instructions.
+
+The zeroing block takes **RAX = signed helper error, R8 = original dst,
+R9D = original size**, restores RDI/ECX and clears exactly that original
+span. It uses RDX as zero scratch, leaves RAX unchanged and ends at the
+existing return. Its instructions contain no helper-specific absolute
+address, source-read recovery site, SMAP operation or pagefault counter
+access. The source byte count is **57 B before RET**: 27 literal-array
+bytes, six saved-argument bytes and four six-byte conditional branches.
+See [zero_tail_inventory.py](zero_tail_inventory.py) and its
+[zero-tail.json](zero-tail.json) arithmetic receipt; no candidate bytes
+were generated or executed.
+
+A concrete local merge keeps the existing domain policies, copy loops
+and cleanup. Each successful path retains a local RET. Error paths jump
+to one common zeroing block plus RET, registered in the same blob's
+existing code-range metadata. This is a tail transfer: the common RET
+returns to the original helper caller, with no new call frame, argument
+selector, return-address register or module protocol.
+
+| Co-emitted read routines | Current zeroing + local returns | Common tail + local error jumps/returns | Local saving |
+| --- | ---: | ---: | ---: |
+| 2 | 116 B | 70 B | 46 B |
+| 3 | 174 B | 76 B | 98 B |
+
+These figures retain five-byte local JMPs and unchanged branch widths;
+rel8 compaction is separate. The model adds one direct jump only on a
+zeroing/error path. **Successful-read instruction count is unchanged.**
+Per-call effect from layout/cache remains unmeasured; this is an
+installed-size opportunity, not evidence for a speedup. A single emitted
+read routine already has one zeroing copy and offers no duplication to
+remove. The aggregate installed saving requires the actual co-emitted
+routine population; multiplying either table row by every application
+program would invent that population.
+
+The entry conditions matter. User scalar policy denial uses -EFAULT;
+kernel policy denial uses -ERANGE; both reach zeroing before pagefault
+nesting was incremented. A source-copy fault reaches zeroing **after**
+the existing cleanup, including CLAC for a user copy when required and
+the pagefault counter decrement. Keep those predecessor paths distinct.
+The shared tail itself needs neither a domain check nor SMAP normalization.
+Scalar success and nonnegative string success keep their existing return
+branches; string size-zero still returns before policy. RAX and original
+R9D survive to the common block, including zero-sized error cases.
+
+The existing JIT helper calls common kernel copy/zeroing routines rather
+than appending this native zero loop per generated read helper. This
+local duplication is outside LLVM's ordinary IR deduplication: `x86.rs:1810–1814`
+appends the generated read ranges after rewriting. Any implementation
+must keep the shared range and source-load recovery metadata represented
+in the existing link/checked path; this review supplies no stock-verifier
+or emitted-layout result. Scope the merge to the pure cold zero tail;
+keep the scheduled constant-size/global-address work and its per-call
+measurements first. PERF introduced no production change, runtime check,
+pool, build, guest or confirmation gate.

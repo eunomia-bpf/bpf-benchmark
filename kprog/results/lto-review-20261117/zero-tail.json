@@ -1,0 +1,46 @@
+{
+  "recorded_utc": "2026-11-17T08:56:14Z",
+  "scope": "Existing source-byte count and arithmetic layout proposal for two or three co-emitted read leaves. No machine code generated, patched, assembled or executed; no installed-size or performance measurement, runtime check, cross-program pool or module change.",
+  "source": "kprog/x86/native_lab/native_link/src/x86_probe_read.rs",
+  "source_commit": "d6b4d335e",
+  "zero_fill_literal_array_lengths": [
+    5,
+    13,
+    2,
+    7
+  ],
+  "saved_destination_and_original_count_bytes": 6,
+  "near_conditional_branches": 4,
+  "near_conditional_branch_bytes": 6,
+  "zero_fill_bytes_excluding_ret": 57,
+  "comparisons": [
+    {
+      "emitted_copies": 2,
+      "current_local_bytes": 116,
+      "standalone_shared_tail_local_bytes": 70,
+      "local_bytes_saved": 46,
+      "successful_path_added_instructions": 0,
+      "zeroing_path_added_direct_jumps": 1
+    },
+    {
+      "emitted_copies": 3,
+      "current_local_bytes": 174,
+      "standalone_shared_tail_local_bytes": 76,
+      "local_bytes_saved": 98,
+      "successful_path_added_instructions": 0,
+      "zeroing_path_added_direct_jumps": 1
+    }
+  ],
+  "shared_tail_inputs": [
+    "RAX=signed helper error",
+    "R8=original destination",
+    "R9D=original size"
+  ],
+  "predecessor_obligations": [
+    "Policy denial bypasses pagefault enable and SMAP cleanup.",
+    "Copy faults perform the existing domain-specific cleanup before reaching zeroing.",
+    "Scalar success and nonnegative string success keep their existing local return.",
+    "Common tail leaves RAX unchanged and returns to the original helper caller.",
+    "The shared range and existing source-load recovery metadata remain represented."
+  ]
+}
