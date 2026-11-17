@@ -18,3 +18,5 @@ of two emitted leaves, whose error tail reaches the first leaf's suffix.
 Host work uses timing SH/image SH, CPU 19, one Cargo worker and 32 GiB AS.
 The live canonical CLI and checked guest retain their image lease. Omp owns
 the later frozen image/check/affected-app batch with all LTO on.
+
+First run 2817773 ended 101 at 23:44:37Z on compile errors: the new test used Clone on the layout, the decoder needed into_iter, and the fixture Path type needed qualification. The focused baseline also ended on the layout compile error; retained current-zero-tail emissions supply the actual duplication evidence. The source/test stage already applied; resume-host.sh continues full tests and replay after the forward compile correction. All initial raw logs remain.
