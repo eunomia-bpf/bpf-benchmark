@@ -35,8 +35,11 @@ retains the concrete register relation. The [producer entry view](results/m5-pro
 connects actual header flag readbacks to its borrowed-entry reader. The
 [GPR table view](results/m5-producer-gpr-view/README.md) follows the real word/tag
 tables and retains pointer values and tag bits. The [vector view](results/m5-producer-vector-view/README.md)
-follows the embedded pointer arrays and all 32 low/high pairs; native
-admissibility remains open.
+follows the embedded pointer arrays and all 32 low/high pairs. The
+[joint register view](results/m5-producer-register-view/README.md) adds actual
+SP readback and assembles the existing GPR/SP/vector/flag relation over one
+reached memory. Production input, origin and architectural cell-map
+admissibility remain open.
 
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|

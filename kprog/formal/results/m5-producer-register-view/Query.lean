@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.Arm64ProducerRegisterView
+#check KProgFormal.ClightRefinement.Arm64ProducerRegisterView.producer_registers_initialized
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerRegisterView.producer_registers_initialized
