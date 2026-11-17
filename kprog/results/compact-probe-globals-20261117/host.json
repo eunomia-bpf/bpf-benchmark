@@ -1,0 +1,88 @@
+{
+  "recorded_utc": "2026-11-17T14:11:32Z",
+  "raw": "/workspaces/kprog-raw/perf/compact-probe-globals-20261117/host-20261117T141057Z-2595751",
+  "cargo_exit": 0,
+  "payloads": [
+    {
+      "name": "compat-string.bin",
+      "before_bytes": 773,
+      "after_bytes": 765
+    },
+    {
+      "name": "compat.bin",
+      "before_bytes": 827,
+      "after_bytes": 819
+    },
+    {
+      "name": "cpu.bin",
+      "before_bytes": 9,
+      "after_bytes": 9
+    },
+    {
+      "name": "current-task-btf.bin",
+      "before_bytes": 10,
+      "after_bytes": 10
+    },
+    {
+      "name": "current-task.bin",
+      "before_bytes": 10,
+      "after_bytes": 10
+    },
+    {
+      "name": "jiffies.bin",
+      "before_bytes": 11,
+      "after_bytes": 11
+    },
+    {
+      "name": "kernel-compact.bin",
+      "before_bytes": null,
+      "after_bytes": 351
+    },
+    {
+      "name": "kernel-string-compact.bin",
+      "before_bytes": null,
+      "after_bytes": 267
+    },
+    {
+      "name": "kernel-string.bin",
+      "before_bytes": 282,
+      "after_bytes": 278
+    },
+    {
+      "name": "kernel.bin",
+      "before_bytes": 366,
+      "after_bytes": 362
+    },
+    {
+      "name": "ktime.bin",
+      "before_bytes": 341,
+      "after_bytes": 341
+    },
+    {
+      "name": "uid-gid.bin",
+      "before_bytes": 53,
+      "after_bytes": 53
+    },
+    {
+      "name": "user-compact.bin",
+      "before_bytes": null,
+      "after_bytes": 355
+    },
+    {
+      "name": "user-string-compact.bin",
+      "before_bytes": null,
+      "after_bytes": 385
+    },
+    {
+      "name": "user-string.bin",
+      "before_bytes": 400,
+      "after_bytes": 396
+    },
+    {
+      "name": "user.bin",
+      "before_bytes": 370,
+      "after_bytes": 366
+    }
+  ],
+  "scope": "Host leaf/encoding/fault/policy tests and local payload bytes; no installed app size or per-call measurement."
+}

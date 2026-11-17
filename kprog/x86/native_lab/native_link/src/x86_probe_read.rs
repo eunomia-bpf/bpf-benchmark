@@ -8,6 +8,18 @@ fn absolute(bytes: &mut Vec<u8>, opcode: &[u8], address: u64) {
     bytes.extend_from_slice(&address.to_le_bytes());
 }
 
+// Use a 64-bit-address-size absolute SIB operand; disp32 is sign extended.
+// Values remain live. Other addresses use the same R11 scratch as before.
+fn live_global(bytes: &mut Vec<u8>, compact: &[u8], wide: &[u8], address: u64) {
+    if address as u32 as i32 as i64 as u64 == address {
+        bytes.extend_from_slice(compact);
+        bytes.extend_from_slice(&(address as u32).to_le_bytes());
+    } else {
+        absolute(bytes, &[0x49,0xbb], address);
+        bytes.extend_from_slice(wide);
+    }
+}
+
 fn jump(bytes: &mut Vec<u8>) -> usize {
     bytes.push(0xe9);
     let offset = bytes.len();
@@ -150,11 +162,11 @@ fn user_leaf(layout: &RuntimeProbeReadLayout, actual: u64, string: bool)
     let mut denied = Vec::new();
     // __access_ok(src,size): src+size <= USER_PTR_MAX without wrap. USER_PTR_MAX is TASK_SIZE_MAX
     // (at least 2^47 - PAGE_SIZE) and exceeds every u32 size, so this is src <= USER_PTR_MAX-size.
-    absolute(&mut b, &[0x49,0xbb], target(layout.user_ptr_max)?);
+    live_global(&mut b, &[0x48,0x8b,0x04,0x25], &[0x49,0x8b,0x03], target(layout.user_ptr_max)?);
     if string {
-        b.extend_from_slice(&[0x49,0x8b,0x03,0x48,0x39,0xc2,0x48,0x0f,0x47,0xd0]); // rdx=min(src,USER_PTR_MAX)
+        b.extend_from_slice(&[0x48,0x39,0xc2,0x48,0x0f,0x47,0xd0]); // rdx=min(src,USER_PTR_MAX)
     } else {
-        b.extend_from_slice(&[0x49,0x8b,0x03,0x4c,0x29,0xc8,0x48,0x39,0xc2]);
+        b.extend_from_slice(&[0x4c,0x29,0xc8,0x48,0x39,0xc2]);
         denied.push(append_x86_jcc_rel32(&mut b, 0x87));
     }
     // nmi_uaccess_okay: this CPU's cpu_tlbstate.loaded_mm equals current->mm.
@@ -168,9 +180,8 @@ fn user_leaf(layout: &RuntimeProbeReadLayout, actual: u64, string: bool)
     }
     b.extend_from_slice(&[0x41,0xff,0x82]); b.extend_from_slice(&task_offset); // pagefault_disable
     b.extend_from_slice(&[0x48,0x89,0xd6]); // rsi=src
-    absolute(&mut b, &[0x49,0xbb], target(layout.boot_cpu_data)?);
-    b.extend_from_slice(&[0x41,0xf7,0x83]); // test boot_cpu_data.x86_capability[9],SMAP
-    b.extend_from_slice(&i32::try_from(layout.x86_capability+9*4)?.to_le_bytes());
+    live_global(&mut b, &[0xf7,0x04,0x25], &[0x41,0xf7,0x03],
+        target(layout.boot_cpu_data)?.wrapping_add(u64::from(layout.x86_capability)+9*4)); // test capability[9],SMAP
     b.extend_from_slice(&(1u32<<20).to_le_bytes()); // sole x86 cpufeatures.h X86_FEATURE_SMAP
     if !string {b.extend_from_slice(&[0x0f,0x95,0xc2]);} // setne dl
     let no_smap = append_x86_jcc_rel32(&mut b, 0x84);
@@ -225,17 +236,16 @@ fn kernel_routine(layout: &RuntimeProbeReadLayout, actual: u64, string: bool)
     } else {None};
     let mut denied = Vec::new();
     // vaddr < TASK_SIZE_MAX + PAGE_SIZE; this kernel sets USER_PTR_MAX = TASK_SIZE_MAX (cpu/common.c).
-    absolute(&mut b, &[0x49,0xbb], target(layout.user_ptr_max)?);
-    b.extend_from_slice(&[0x49,0x8b,0x03,0x48,0x05,0,0x10,0,0,0x48,0x39,0xc2]); // rax=[r11]+4096; cmp rdx,rax
+    live_global(&mut b, &[0x48,0x8b,0x04,0x25], &[0x49,0x8b,0x03], target(layout.user_ptr_max)?);
+    b.extend_from_slice(&[0x48,0x05,0,0x10,0,0,0x48,0x39,0xc2]); // rax=TASK_SIZE_MAX+4096; cmp rdx,rax
     denied.push(append_x86_jcc_rel32(&mut b, 0x82)); // below
     // is_vsyscall_vaddr: (vaddr & PAGE_MASK) == VSYSCALL_ADDR, -10UL << 20
     b.extend_from_slice(&[0x48,0x89,0xd0,0x48,0x25,0,0xf0,0xff,0xff,0x48,0x3d,0,0,0x60,0xff]);
     denied.push(append_x86_jcc_rel32(&mut b, 0x84));
     // Canonical at boot_cpu_data.x86_virt_bits. Shift counts are taken mod 64, so width zero shifts by zero and
     // the address compares equal: early boot (width zero) allows, as the C source does.
-    absolute(&mut b, &[0x49,0xbb], target(layout.boot_cpu_data)?);
-    b.extend_from_slice(&[0x41,0x0f,0xb6,0x8b]); // movzx ecx,byte[r11+x86_virt_bits]
-    b.extend_from_slice(&i32::try_from(layout.x86_virt_bits)?.to_le_bytes());
+    live_global(&mut b, &[0x0f,0xb6,0x0c,0x25], &[0x41,0x0f,0xb6,0x0b],
+        target(layout.boot_cpu_data)?.wrapping_add(u64::from(layout.x86_virt_bits))); // movzx ecx,byte[virt_bits]
     b.extend_from_slice(&[0xf7,0xd9,0x48,0x89,0xd0,0x48,0xd3,0xe0,0x48,0xd3,0xf8,0x48,0x39,0xd0]); // shl/sar by 64-bits; cmp rax,rdx
     denied.push(append_x86_jcc_rel32(&mut b, 0x85));
     b.extend_from_slice(&[0x65,0x4c,0x8b,0x14,0x25]); b.extend_from_slice(&current); // r10=gs:current_task
@@ -292,8 +302,7 @@ fn compat_dispatch(layout: &RuntimeProbeReadLayout, actual: u64, start: usize, u
     b.extend_from_slice(&[0x41,0xf7,0x82]); b.extend_from_slice(&i32::try_from(layout.task_flags)?.to_le_bytes());
     b.extend_from_slice(&(1u32<<27).to_le_bytes()); // test TIF_ADDR32
     let ia32 = append_x86_jcc_rel32(&mut b, 0x85);
-    absolute(&mut b, &[0x49,0xbb], target(layout.user_ptr_max)?);
-    b.extend_from_slice(&[0x49,0x8b,0x03]); // rax=TASK_SIZE_MAX
+    live_global(&mut b, &[0x48,0x8b,0x04,0x25], &[0x49,0x8b,0x03], target(layout.user_ptr_max)?);
     let to_compare = jump(&mut b);
     let here = b.len(); patch_x86_rel32(&mut b, ia32, here)?;
     b.extend_from_slice(&[0xb8,0x00,0xe0,0xff,0xff]); // eax=0xffffe000
@@ -421,6 +430,39 @@ mod tests {
         Ok(())
     }
 
+    // Catch accidental 0x67 zero-extension and signed-disp32 boundary errors.
+    #[test]
+    fn compact_global_operands_preserve_full_effective_addresses() {
+        for address in [0u64, 0x7fffffff, 0xffffffff80000000, u64::MAX,
+                        0x80000000, 0xffffffff7fffffff, 0x1111222233334444] {
+            let compact_address=address as u32 as i32 as i64 as u64==address;
+            for (compact,wide,test) in [
+                (&[0x48,0x8b,0x04,0x25][..],&[0x49,0x8b,0x03][..],false),
+                (&[0x0f,0xb6,0x0c,0x25][..],&[0x41,0x0f,0xb6,0x0b][..],false),
+                (&[0xf7,0x04,0x25][..],&[0x41,0xf7,0x03][..],true)] {
+                let mut bytes=Vec::new();live_global(&mut bytes,compact,wide,address);
+                if test {bytes.extend_from_slice(&(1u32<<20).to_le_bytes());}
+                let mut decoder=Decoder::new(64,&bytes,DecoderOptions::NONE);
+                if !compact_address {
+                    let load=decoder.decode();
+                    assert_eq!(load.op0_register(),Register::R11);
+                    assert_eq!(load.immediate64(),address);
+                }
+                let operand=decoder.decode();assert!(!operand.is_invalid());
+                assert_eq!(operand.memory_index(),Register::None);
+                if compact_address {
+                    assert_eq!(operand.memory_base(),Register::None);
+                    assert_eq!(operand.memory_displacement64(),address);
+                    assert_eq!(bytes.len(),compact.len()+4+if test {4} else {0});
+                } else {
+                    assert_eq!(operand.memory_base(),Register::R11);
+                    assert_eq!(operand.memory_displacement64(),0);
+                }
+                assert!(!decoder.can_decode());
+            }
+        }
+    }
+
     fn fixture() -> RuntimeProbeReadLayout {
         RuntimeProbeReadLayout { user_helper:0x1000,kernel_helper:0x2000,
             current_task:0,jiffies:Some(0x1111222233334444),
@@ -444,11 +486,16 @@ mod tests {
         fs::write(output.join("compile.stderr"),&compile.stderr)?;
         if !compile.status.success() { bail!("probe-read host fixture compile: {}",String::from_utf8_lossy(&compile.stderr)); }
         let layout = fixture();
-        for mode in 0..4 {
+        for pass in 0..8 {
+            let mode=pass%4;
+            let compact=pass>=4;
+            let mut layout=fixture();
+            if compact {layout.user_ptr_max=0x12340000;layout.boot_cpu_data=0x12350000;}
             let user=mode==1 || mode==3;let string=mode>=2;
             let anchor = if user { layout.user_helper } else { layout.kernel_helper };
             let (bytes,relocs,sites) = if user {user_leaf(&layout,anchor,string)?} else {kernel_routine(&layout,anchor,string)?};
             let stem = if mode==3 {"user-string"} else if string {"kernel-string"} else if user { "user" } else { "kernel" };
+            let stem=format!("{stem}{}",if compact {"-compact"} else {""});
             let binary = output.join(format!("{stem}.bin"));
             let metadata = output.join(format!("{stem}.sites"));
             fs::write(&binary,&bytes)?;

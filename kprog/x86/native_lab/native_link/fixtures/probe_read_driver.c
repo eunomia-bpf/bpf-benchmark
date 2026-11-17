@@ -92,9 +92,22 @@ int main(int argc, char **argv)
     /* Host fixture literals only; no historical guest address is executed. */
     for (long i=0; i+8<=size; ++i) {
         uint64_t value; memcpy(&value,code+i,8);
-        uintptr_t target = value == 0x1111222233334444ULL ? (uintptr_t)&user_max :
-            value == 0x5555666677778888ULL ? (uintptr_t)cpu : 0;
+        uintptr_t target = value == 0x1111222233334444ULL ? (uintptr_t)&user_max : 0;
+        if (value >= 0x5555666677778888ULL && value-0x5555666677778888ULL < sizeof(cpu))
+            target = (uintptr_t)cpu + (value-0x5555666677778888ULL);
         if (target) memcpy(code+i,&target,8);
+    }
+    /* Compact absolute operands carry a signed disp32; -no-pie keeps these
+       fixture globals in range. Include folded boot_cpu_data field offsets. */
+    for (long i=0; i+4<=size; ++i) {
+        uint32_t value; memcpy(&value,code+i,4);
+        uintptr_t target = value == 0x12340000U ? (uintptr_t)&user_max : 0;
+        if (value >= 0x12350000U && value-0x12350000U < sizeof(cpu))
+            target = (uintptr_t)cpu + (value-0x12350000U);
+        if (target) {
+            assert(target == (uintptr_t)(intptr_t)(int32_t)target);
+            uint32_t compact = (uint32_t)target; memcpy(code+i,&compact,4);
+        }
     }
     if (mode == 6) {
         assert(!mprotect(code,size,PROT_READ|PROT_EXEC));
