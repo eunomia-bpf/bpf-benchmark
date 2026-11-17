@@ -3728,3 +3728,31 @@ work. The 341-byte local addition and runtime exceptional branches can
 also cost code/front-end time. The queued one-app per-call/installed-byte
 measurements will determine their balance. PERF started no guest/build,
 added no source change/check and leaves the live coordinator draft intact.
+
+
+### Frozen-default breadth round: first OTel row
+
+Coordinator receipt `e7f2d230d`, run `091405_442941`, reports
+**1.053x throughput**, with stats off, three 180-second samples through
+the frozen entry on image **fc7c4707**. Baseline throughput samples are
+41,588,974 / 41,050,417 / 41,915,686 and native samples
+43,804,129 / 44,492,532 / 43,747,808; reported paired sample ratios are
+1.053 / 1.084 / 1.044 and errors zero. The summary is the ratio of the
+arms' median throughputs, as in the coordinator's existing reader.
+
+Cumulative native replacements are 14, installed native **135,767 B**
+against companion JIT **167,706 B** (about 0.810x), unchanged from the
+compat-image functional check. This is the current read/compat image;
+the draft clock helper, UID/GID and other new review proposals are not
+part of this observation. Stats off supplies no per-invocation timing,
+so it is not passed to the stats-on leaf-effect reader or used to infer
+a per-call improvement.
+
+The reported throughput remains below the recorded historical OTel
+1.849x floor and the 1.30x throughput target; installed size remains above
+half JIT. The previously documented historical OTel context/unwinding
+difference still qualifies interpretation of that old reference. This
+row alone adds no unwind-counter equality proof. The complete raw run
+and series remain retained; no admission rule, rejection or new run was
+introduced. The coordinator's breadth round continues with BCC and the
+remaining apps in its committed order.
