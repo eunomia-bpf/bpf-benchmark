@@ -2679,3 +2679,37 @@ miss, and no extra resolver/fallback/check is needed to fix it. Future
 attempts to prune the helper table to observed bytecode calls would have
 to preserve existing internal anchor users. No production change,
 manual link-plan experiment, guest or build was made for this review.
+
+### User-leaf BCC result: both arms become faster, ratio stays near one
+
+Coordinator run `corpus/results/x86_kvm_corpus_20261117_064150_558773`
+completes BCC on the user-leaf image. It reports **1.001x per call** and
+**1.005x throughput**, with throughput sample ratios
+0.996 / 1.011 / 1.005 (eBPF 525,386 / 521,644 / 523,713;
+native 523,417 / 527,223 / 526,543; zero reported errors).
+
+The raw-derived aggregate is 102.710 ns/call eBPF and 102.626 native.
+Against the zero-remainder run, eBPF falls **4.65%**
+(107.716 → 102.710) and native falls **3.17%**
+(105.984 → 102.626). The eBPF/native ratio consequently changes from
+1.016x to 1.001x despite the lower observed native time. This is another
+reason to keep both arm times alongside the speedup ratio. The baseline
+selection contains 16 records rather than the prior run's 15; native
+selection stays at 15, so the raw per-program counters remain relevant
+to changes in the weighted mixture.
+
+Cumulative installed totals are unchanged at 25 successful replacements,
+7,965 companion JIT bytes and 8,334 native bytes. Unchanged sums alone do
+not prove byte identity, identical dynamic work or a causal control.
+The coordinator's count analysis reports a median native/eBPF count ratio
+of 1.001 among 11 active programs, while the two block-I/O records retain
+lower native counts (0.262x / 0.248x). Keep that context without excluding
+programs or rejecting the run. These are the existing three 60-second
+stats-on samples, and they remain separate from the later kernel-leaf
+batch aimed at BCC's kernel reads.
+
+The [reader](leaf_read_effect_inventory.py) and
+[leaf-read-effects.json](leaf-read-effects.json) now contain both complete
+OTel/BCC before/after pairs, including every record selected by the existing
+reporting convention. PERF started no guest or extra measurement. No gain
+from a particular source operation is inferred from this cross-run pair.

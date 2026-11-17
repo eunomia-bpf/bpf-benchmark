@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Read completed OTel coordinator runs; keep native time and baseline movement separate."""
+"""Read completed coordinator runs; keep native time and baseline movement separate."""
 import json
 from pathlib import Path
 import subprocess
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
-APP = 'otelcol-ebpf-profiler__profiling'
-rows = []
-for stage, suffix in [('zero_remainder', '051422_856006'), ('user_leaf', '063024_376511')]:
+
+
+def read_run(app_name, stage, suffix):
     run = REPO / ('corpus/results/x86_kvm_corpus_20261117_' + suffix)
-    app = json.loads((run / 'details/apps' / (APP + '.json')).read_text())
+    app = json.loads((run / 'details/apps' / (app_name + '.json')).read_text())
     phases = {}
     for phase in ('baseline', 'post_rejit'):
         records = list(app[phase]['bpf'].values())
@@ -25,17 +25,22 @@ for stage, suffix in [('zero_remainder', '051422_856006'), ('user_leaf', '063024
     row = dict(stage=stage, run=str(run.relative_to(REPO)), phases=phases,
                per_call_speedup=phases['baseline']['ns_per_call'] / phases['post_rejit']['ns_per_call'],
                installed_cumulative_receipt=installed)
-    rows.append(row)
-    print(stage, 'ns/call', {phase: round(data['ns_per_call'], 4) for phase, data in phases.items()})
-    for phase, data in phases.items():
-        print(phase, [(r['name'], r['run_cnt_delta'],
-                       round(100 * r['run_time_ns_delta'] / data['elapsed_ns'], 7))
-                      for r in data['selected']])
+    return row
 
-ratios = {phase: rows[1]['phases'][phase]['ns_per_call'] / rows[0]['phases'][phase]['ns_per_call']
-          for phase in ('baseline', 'post_rejit')}
+
+apps = []
+for app, before, after in [('otelcol-ebpf-profiler__profiling', '051422_856006', '063024_376511'),
+                            ('bcc__set', '052524_924865', '064150_558773')]:
+    rows = [read_run(app, 'zero_remainder', before), read_run(app, 'user_leaf', after)]
+    ratios = {phase: rows[1]['phases'][phase]['ns_per_call'] / rows[0]['phases'][phase]['ns_per_call']
+              for phase in ('baseline', 'post_rejit')}
+    apps.append(dict(app=app, after_before_ns_ratios=ratios, runs=rows))
+    for row in rows:
+        print(app, row['stage'], 'ns/call',
+              {phase: round(data['ns_per_call'], 4) for phase, data in row['phases'].items()})
+    print('after/before ns ratios:', ratios)
+
 result = dict(recorded_utc=subprocess.check_output(['date', '-u', '+%FT%TZ'], text=True).strip(),
-              scope='Completed OTel coordinator stats-on 3x60s run pair; existing >=100-call reporting convention. IDs identify records within their own boot only. Installed receipts count cumulative replacements, not measurement snapshots. No causal gain, PMU split, equal-work proof or new admission check is inferred.',
-              after_before_ns_ratios=ratios, runs=rows)
+              scope='Completed OTel/BCC coordinator stats-on 3x60s run pairs; existing >=100-call reporting convention. IDs identify records within their own boot only. Installed receipts count cumulative replacements, not measurement snapshots. No causal gain, PMU split, equal-work proof or new admission check is inferred.',
+              apps=apps)
 (HERE / 'leaf-read-effects.json').write_text(json.dumps(result, indent=2) + '\n')
-print('after/before ns ratios:', ratios)
