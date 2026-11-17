@@ -39,6 +39,16 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-17T06:20:49Z（审核 detour-20261117T03Z 逐条核实后的决定）**：
+1. 每次调用的上限（kprog/results/limits-20261114）：程序体占每次调用 BPF 时间 BCC 约 9%、Tracee 12.0%、Tetragon 25.4%、Katran 36.2%；程序体快 1.57 倍时每次调用到 1.03x、1.05x、1.10x、1.15x。计时用在 helper 的 LTO 上（03:04 起 probe_read 三步已量完，第四步用户读叶子化在量），编译参数定在 O3。
+2. Cilium：原生一侧照旧用示例配置头编译，数照旧不计。下一步原生编译改用 agent 自己生成的配置头（todo 里“Cilium 用 agent 自己的配置头”一项，排在 probe_read 之后），22 次留在 eBPF 的叶子装载一起解决；cilium-packet-20261116 的同包对照在那之后跑，它第一次在抓包一步超时（first-error.txt），抓包方式随这一项一起修好。
+3. 计时噪声：协调者的计时脚本从下一个起在每次 corpus 前后记下主机 /proc/loadavg 和占 CPU 最多的进程；逐样本比值相差超过 5% 的一次运行在同一镜像上重跑（11-17 Tracee 已照此重跑，第二次 1.095/1.079/1.101）。stats 关的六应用广度轮在 probe_read 这一组之后用最新镜像跑一次，和 05-29 底线、11-12 的 3a1906ab1 直接对照。
+4. verified 路径（B 生成、stock 验证）：11-14 并入 PERF 之后，PERF 改成只审核，这条线由协调者负责，排在 probe_read、查找一次选定、Cilium 配置头之后；起点是 todo 里 OTel 的栈帧、Katran 的指令数和 OTel 1.13 GB 的 B 编译这三处。
+5. 11-11 重启时丢掉的修复：shim 的“链接失败保留 eBPF”已在 c03737bf4 恢复。05-29 到 11-11 之间改过 bpfopt/shim、kprog/libnativeloader、native_link 的提交清单在 kprog/results/restart-fixes-20261117，协调者逐条对照当前代码，丢掉的按整类补回（冻结路径里补回需要加行的，先记在这里）。
+6. 05-29 底线照运营者 11-11 的话列为要达到的数；工作量不同的应用在底线旁写明 05-29 那次两臂的差别（每小时 skill 的“表的写法”同步改）。
+7. 冻结选的是当前树：现在 OTel 每次调用 1.174x、吞吐 1.202x（stats 开），Tetragon 1.098x，高于 11-12 树上的数；stats 关的直接对照见第 3 条。
+8. user-instruction.md 里 11-16 23:58 的两条原话日期写成了 11-17，已改正。
+
 **协调者 2026-11-17T05:20:42Z（核实 perf 04:21–05:16 审阅后的决定）**：
 1. 装进去的大小：inst.py 原来按程序名累加，同名程序互相覆盖（perf b6d0e9647），已改成按每次替换的原生程序 ID 配对。更正后 run2：BCC 1.04、Tetragon 0.77、Tracee 0.82（之前报 1.08、0.75、0.86）；O3 组 BCC 1.00、Tracee 0.82；其余不变。每次调用和吞吐不受影响。
 2. probe_read 接下来按这个顺序做，每步单独量：
@@ -115,7 +125,7 @@ PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are 
    2026-11-16T18:33:44Z 已落 35da4bdd4：四份都先选 update/delete ops 指针，再共用原来的一个空指针判断；两个 active x86 模块语法检查通过，绑定保留。
 
 **协调者 2026-11-16T18:20:15Z（审核 15Z 核实后的决定）**：
-1. 每次调用 20% 这个目标，光靠程序体快达不到：程序体只占每次调用 BPF 时间的一部分（BCC 9%、Tracee 12%、Tetragon 25%、Katran 38%），程序体就算快 1.57 倍，每次调用也只到 1.03–1.16 倍。PERF 每一项先把这个应用的每次调用时间拆成程序体、helper、map 三块，改完再拆一次，写进该项的结果。修的顺序在 17:2x 那一块的基础上调整为：(1) Cilium 路径：cb 偏移按唯一内核 BTF 生成，编译开关和配置取自 agent 自己生成的头文件（审核：vendor/bpf/Makefile 81–105 用 CILIUM_MAX_* 和示例配置头），重复保存寄存器一并去掉，再用 BPF_PROG_TEST_RUN 对比 cil_from_container；(2) map update/delete 链接时绑定到具体 ops；(3) bpf_probe_read 路径（Tracee、Tetragon 占 41–46%）内联成和 eBPF 一侧同语义的原生读；(4) 冻结的 BCC 配置进原生 IR LTO、ARRAY/LPM 调度链接时选定；(5) Tetragon CEL；(6) 其余审核项。
+1. 每次调用 20% 这个目标，光靠程序体快达不到：程序体只占每次调用 BPF 时间的一部分（BCC 9%、Tracee 12%、Tetragon 25%、Katran 38%），程序体就算快 1.57 倍，每次调用也只到 1.03–1.16 倍。（协调者 2026-11-17T06:20:49Z 撤回原先“每一项拆成程序体、helper、map 三块”的要求，依据运营者 2026-11-14："不需要这样细粒度区分. 只需要都做就好."；每一项量每次调用和吞吐。）修的顺序在 17:2x 那一块的基础上调整为：(1) Cilium 路径：cb 偏移按唯一内核 BTF 生成，编译开关和配置取自 agent 自己生成的头文件（审核：vendor/bpf/Makefile 81–105 用 CILIUM_MAX_* 和示例配置头），重复保存寄存器一并去掉，再用 BPF_PROG_TEST_RUN 对比 cil_from_container；(2) map update/delete 链接时绑定到具体 ops；(3) bpf_probe_read 路径（Tracee、Tetragon 占 41–46%）内联成和 eBPF 一侧同语义的原生读；(4) 冻结的 BCC 配置进原生 IR LTO、ARRAY/LPM 调度链接时选定；(5) Tetragon CEL；(6) 其余审核项。
 2. 代码量“少一半”按每个应用装进去的原生 / JIT 跟踪，目标 ≤ 0.5；镜像 6641a7e1：Katran 0.77、Tracee 0.86、Tetragon 1.00、Cilium 1.26、BCC 1.57、OTel 1.82（kprog/results/cleanup-check-20261116）。每项修改带上装进去的大小。
 3. 计时：C 在 6641a7e1 上这一轮是清理后的基线，照常跑完；之后只在镜像带上新修改时开新的一轮（广度优先，每个应用 3 个样本再换下一个）。两轮之间，一项修改用冻结入口只跑它影响的那个应用（corpus APPS=<app>，stats 开）。
 4. FORMAL：当前 M5 这一步做完后，把提交在 git 里的生成 Clight 导出（kprog/formal/KProgFormal/Clight，约 444 万行）改成由 formal 构建一条命令从 C 源码重新生成，删掉提交的副本；重新生成在本 Workspace 里逐字节一致才删。

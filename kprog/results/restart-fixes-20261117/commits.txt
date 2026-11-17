@@ -1,0 +1,146 @@
+4da149e82 2026-11-10 23:15:38 +0000 Make the ABI sideband readable by loaders that predate load_site
+cd8996e64 2026-11-10 22:44:25 +0000 Drop the dead helper-id load that the current linker kept
+3676dab5f 2026-11-10 14:34:38 +0000 Bind each raw proof map operand to its own original map identity first
+ea4625f42 2026-11-10 01:34:00 +0000 Serialize measurement snapshots with the existing bound native load lifetime
+9220b9b44 2026-11-10 00:19:58 +0000 Restore the published May29 map snapshot RPC for the frozen corpus driver
+70a4af5a8 2026-11-09 23:53:37 +0000 Use the existing stock loader for the single verified kernel line
+a2a3c62ab 2026-11-09 22:45:55 +0000 Use native branch instructions and original relocation kinds on the verified line
+f05af452e 2026-11-09 22:28:39 +0000 Resolve bounded code targets while planning x86 tail-call entry frames
+fdc68ecea 2026-11-09 22:11:21 +0000 Preserve ARM callee registers in the stock native JIT frame
+c699dc0da 2026-11-09 16:25:56 +0000 Prepare stock x86 six-register entry and tail frames
+725e45398 2026-11-09 12:10:56 +0000 Complete native startup observation after a program falls back to eBPF
+7734afc52 2026-11-09 11:24:31 +0000 Keep application eBPF programs active after native replacement failures
+7f906c429 2026-11-09 10:35:42 +0000 Plan native tail frames from the existing reaching helper targets
+fb23a234d 2026-11-09 09:10:19 +0000 Return the first native load result with its verifier log
+165ac4100 2026-11-09 08:21:34 +0000 Preserve the compiler thunk register domain in relocation decoding
+1048afc13 2026-11-09 08:01:50 +0000 Align thunked tail transfers with the complete JIT save frame
+731a91ee6 2026-11-09 07:49:13 +0000 Resolve native external thunks under kernel branch policy
+64ca0ff0a 2026-11-09 06:57:16 +0000 Resolve native x86 tail frames from the actual JIT stack
+cd0a0c3af 2026-11-09 06:26:56 +0000 Model ARM64 scalar copy faults and vector recovery with narrow LSE lowering
+e46b05a25 2026-11-09 01:07:48 +0000 Model ARM zero-argument preempt and RCU kfunc calls
+f1caa1cd9 2026-11-09 00:13:27 +0000 Register native AArch64 load sites in the stock exception table
+5598b9321 2026-11-08 23:49:46 +0000 Carry native load sites into stock x86 exception-table emission
+dc120a8eb 2026-11-08 23:13:54 +0000 Resolve submitted native helper calls through the existing ABI
+0818f5677 2026-11-08 22:00:00 +0000 Complete plain dynptr helper calls and native string comparison
+15e577c28 2026-11-08 21:55:04 +0000 Model four native dynptr and per-CPU helper calls
+641fd9d43 2026-11-08 17:20:30 +0000 Resolve the ARM kptr exchange address and refresh the queued catalog runtime
+376b9e3fd 2026-11-08 17:00:21 +0000 Model the real ARM kptr exchange helper and synchronize its identity contract
+ec914a3d1 2026-11-08 16:47:24 +0000 Resolve ARM check_mtu context and publish five native helper outcomes
+55c50b34f 2026-11-08 14:47:52 +0000 kprog: preserve x86 PLT32 tail-jump function chains
+be91b11ef 2026-11-08 11:10:41 +0000 Resolve strtol and context-specific MTU native helper targets
+fad78da64 2026-11-08 10:47:53 +0000 Support strtol and MTU helpers on the x86 native path
+dd144b153 2026-11-08 09:45:08 +0000 kprog: submit native program context with the kernel P copy
+7819cab20 2026-11-08 09:34:27 +0000 kprog: remove duplicate loader source and map comparisons
+82f8e9e77 2026-11-08 06:08:22 +0000 kprog: implement the five-step trusted native path
+572c90db4 2026-11-08 01:01:47 +0000 Preserve resolved vmlinux kfunc calls in bound proof transport
+0e1d196b5 2026-11-08 00:52:50 +0000 Resolve proof externs for registered workers with empty map vectors
+0b003bf73 2026-11-08 00:49:17 +0000 Preserve original ELF BTF for proof-call checks
+8cf05d44d 2026-11-08 00:25:23 +0000 Resolve trusted proof kfunc calls against vmlinux BTF
+c664565cc 2026-11-07 23:16:45 +0000 Select trusted native resources through entry and data closure
+4759785dc 2026-11-07 22:43:02 +0000 Preserve authenticated native map aliases during ELF discovery
+5ed0c5831 2026-11-07 22:37:14 +0000 Bind native map capabilities through the kernel-owned request
+57db4da43 2026-11-07 22:16:41 +0000 Integrate ARM readonly labels and coherent trusted service binaries
+ea0afc455 2026-11-07 22:10:17 +0000 Preserve readonly label identity across x86 native link modes
+8c0394e9e 2026-11-07 19:48:07 +0000 Recognize existing feature probes across process map descriptors
+3d0e584b5 2026-11-07 15:56:02 +0000 Retain kernel-owned PROG_ARRAY identities in trusted tail-call linking
+070559db8 2026-11-07 15:13:38 +0000 Bind full update map aliases before neutralizing native templates
+bfbb60d1a 2026-11-07 15:00:36 +0000 Resolve x86 update calls by full source map identity
+e18af21bb 2026-11-07 12:08:09 +0000 Preserve ARM return targets in entry-ABI proof linking
+56965bf5b 2026-11-07 10:22:05 +0000 fix(kprog): preserve verifier log segments and record current BCC blockers
+e189b3a87 2026-11-07 10:18:36 +0000 fix(kprog): retain complete verifier diagnostics for failed native loads
+c52568758 2026-11-07 10:15:43 +0000 fix(corpus): await trusted native loads and retain full BCC request coverage
+deeee301e 2026-11-07 10:11:09 +0000 fix(kprog): bind trusted maps to source resources and preserve ELF symbols
+3d7faa684 2026-11-07 09:29:03 +0000 Capture the actual x86 native entry through the trusted service path
+5d545ea7b 2026-11-07 09:21:16 +0000 Bind trusted proof externs to native map aliases and relative offsets
+95739bb85 2026-11-07 08:25:53 +0000 Route bound native loads through kernel-owned trusted requests
+a4d37a890 2026-11-07 07:14:06 +0000 Preserve dynamic map identity when lowering x86 native helper calls
+bf73a8049 2026-11-07 05:28:31 +0000 Reject understated ARM proof ABI masks before native upload and validate bound controls
+699e0cee1 2026-11-07 05:06:11 +0000 Derive x86 inline ABI preservation from actual native writes and reject understated metadata
+a1d42d745 2026-11-07 04:54:02 +0000 Preserve absolute and 32-bit LEA address semantics through binding
+9f24ca076 2026-11-07 04:34:57 +0000 Bind actual ARM JIT native entries to per-load simple translation-validation certificates
+6a2b787c5 2026-11-07 04:29:45 +0000 Match a manifest entry's own symbol, not just its bytecode shape
+cfa82fc7f 2026-11-07 04:19:14 +0000 Fix Tracee readonly identity and tail-call stack allocation
+b83eef4a6 2026-11-07 03:40:57 +0000 Skip native data symbols the loaded app's map does not cover
+f197f00a9 2026-11-07 03:27:14 +0000 Recover verifier proof dependencies removed by repeated stale index recording
+1508a2e58 2026-11-07 03:23:56 +0000 Restore the per-app table the geomean edit replaced
+a7c4192c2 2026-11-07 03:23:42 +0000 Recover verifier artifact capture and platform proofs removed by stale recording index
+0ce631f6f 2026-11-07 03:22:23 +0000 Confirm otel at the operator recipe and update the geomean
+4001b2e10 2026-11-07 03:10:44 +0000 Bind private readonly data alongside explicit source-map proof relocations
+e86a07dcf 2026-11-07 03:07:31 +0000 Export exact verifier and native JIT artifacts for every successful bound load
+3e95eeb1d 2026-11-07 02:59:08 +0000 Run actual ARM Katran workload on generation-bound native path
+9867777e1 2026-11-06 20:08:11 +0000 Record the app-by-app native state
+de3363887 2026-11-06 20:06:59 +0000 Run actual ARM Katran workload on generation-bound native path
+aabec1349 2026-11-06 19:12:57 +0000 Bind merged map updates to the public helper identity
+30ccd119a 2026-11-06 19:02:24 +0000 Match tracing perf and stack helper targets to kernel prototypes
+5a5575d9f 2026-11-06 19:01:12 +0000 Preserve published validation results across concurrent measurement commit
+3e9a9f7c5 2026-11-06 18:58:09 +0000 Measure bcc on the native arm: 1.004x against 1.005x
+f0d6998e1 2026-11-06 18:57:57 +0000 Avoid resolving kernel symbols for local proof calls
+781ce6e93 2026-11-06 18:42:11 +0000 Bind fresh exclusive-store proof choices to exact native sites
+dc874a473 2026-11-06 18:29:53 +0000 Relocate finite ARM code-address calls and branches on the bound path
+9962aec5e 2026-11-06 18:22:21 +0000 Keep unbound native runs measuring when one program fails to load
+20aae50eb 2026-11-06 18:19:43 +0000 Let libbpf feature probes pass through the verified arm
+4881f1176 2026-11-06 18:09:32 +0000 Record exact ARM exclusive-store positions after native linking
+8dffbd113 2026-11-06 18:01:49 +0000 Generate bound source-map proofs without losing value offsets or aliases
+dd3707caf 2026-11-06 18:00:20 +0000 Require generation-bound replacement for every startup probe
+48e482753 2026-11-06 17:54:04 +0000 Actually ungate the libbpf probe exemption
+d25b4d7f4 2026-11-06 17:46:46 +0000 Bind imported map symbols to original source sites and compiled proof relocations
+3db6fa9f3 2026-11-06 17:37:17 +0000 Let libbpf probes pass and name each fatal
+01e636c94 2026-11-06 17:36:44 +0000 Bind every ARM libbpf startup probe and preserve helper tail branches
+edfbc0348 2026-11-06 17:35:17 +0000 Preserve exact Unicode identities in bound artifact metadata
+aa93f0db4 2026-11-06 17:25:51 +0000 Preserve ARM entry frames and indexed stack adjustments
+189ec6979 2026-11-06 16:55:17 +0000 Preserve external x86 helper tail jumps through proof and kernel linking
+14df099f5 2026-11-06 16:32:40 +0000 fix(arm64): lower complete finite helper target sets on the native path
+0bff849bf 2026-11-06 16:27:13 +0000 Require generation-bound native replacement for application startup probes
+ed94164e8 2026-11-06 16:25:27 +0000 Bind anonymous startup proofs and model coarse-clock and function-IP helpers
+cbe3c16f9 2026-11-06 16:25:25 +0000 Select get_func_ip helper implementations from the captured attachment context
+325311937 2026-11-06 16:15:16 +0000 Resolve the real coarse-clock helper for bound startup proofs
+e43eca549 2026-11-06 16:07:04 +0000 Bind runtime-configured proof map value sizes to original FDs
+b1edd51e3 2026-11-06 16:04:34 +0000 Bind private readonly proof maps to exact native object metadata
+3b19ec714 2026-11-06 16:03:03 +0000 Preserve canonical readonly object identities across native and proof linking
+15b253cb4 2026-11-06 15:23:00 +0000 Bind internal proof maps by canonical BTF data sections
+7dc38531c 2026-11-06 14:52:50 +0000 Preserve AArch64 readonly symbol offsets through native and proof linking
+928d0f604 2026-11-06 14:46:52 +0000 Reuse application-configured capacity for simulator proof maps
+fdb7f884e 2026-11-06 14:21:16 +0000 Generate real x86 BCC entry proofs and preserve native load context
+6836f7d44 2026-11-06 14:14:13 +0000 Bind native proofs to exact load context and source BTF prototype
+26325bd48 2026-11-06 14:05:37 +0000 Preserve complete AArch64 proof readonly objects and relocation offsets
+b4edc1396 2026-11-06 13:16:59 +0000 Select native proof manifests by exact source BTF entry
+78f037780 2026-11-06 13:02:34 +0000 Preserve native code targets and capture actual app loads
+f490af8df 2026-11-06 12:44:22 +0000 Preserve finite helper targets through native control flow
+7354d4f89 2026-11-06 12:38:36 +0000 Reject ambiguous AArch64 map-site matches
+bb0b9c146 2026-11-06 11:58:15 +0000 Require generation-bound proofs in the verified corpus runtime arm
+f272b2b02 2026-11-06 11:40:30 +0000 Bind frozen proof constants to exact native readonly extents
+4fe6b3186 2026-11-06 11:14:00 +0000 Bind simulator internal maps to original BTF data layouts
+13c6725a9 2026-11-06 10:33:37 +0000 Avoid optional kernel symbol scans for pure bound programs and record Spark replays
+c2c261dba 2026-11-06 10:22:34 +0000 Relink raw simulator proof maps to original program identities
+4ff0c34ef 2026-11-06 09:49:51 +0000 Bind helper pointer literals for finite indirect dispatch
+a47510743 2026-11-06 09:32:35 +0000 Pin native external identities and isolate verified stack frames
+6053f43f5 2026-11-06 09:04:15 +0000 Preserve direct native calls to section address zero
+b8fa3fcfd 2026-11-06 08:48:36 +0000 Bind app simulator objects and admit checked helper/map proofs
+8b36bf31f 2026-11-06 07:25:40 +0000 Fix the kernel-symbol scan dominating native load time
+062d9b378 2026-11-06 07:05:46 +0000 Seal native proof snapshots with explicit entry ABI and specialization identity
+1048ae888 2026-10-10 07:27:44 -0700 Enforce Cilium native configuration parity
+8db310e54 2026-10-09 21:32:59 -0700 Pin Cilium map FDs during native discovery
+0f9afa687 2026-10-09 20:46:21 -0700 Skip unrelated native data symbols
+7f70d5ca9 2026-10-09 18:09:00 -0700 Fix native Cilium data symbol layout
+3d6687900 2026-10-06 22:56:14 +0000 refactor: rename prototype interfaces, passes and prober to kinsn
+4ee2af022 2026-10-06 21:42:35 +0000 layout: colocate kprog, kinsn, and ReJIT documentation with their projects
+7494a69c8 2026-10-06 21:38:04 +0000 build: stop tracking CMake outputs and shim test binaries
+040134f9e 2026-10-05 15:22:59 +0000 Add current project entry points and repair active references
+bc1854989 2026-10-05 15:05:26 +0000 Update kinsn module paths and path-sensitive tests
+d8fc48672 2026-09-24 17:35:57 +0000 shim: preserve load-time rewrite evidence
+323fb9948 2026-07-24 19:26:19 -0700 momomo
+99f8c3968 2026-07-23 01:36:00 -0700 bpfopt: add deployment specialization pipeline
+d9bebf610 2026-07-10 23:38:32 -0700 Align remaining docs with KOperation and stock-kernel flow
+2da70ac5c 2026-07-10 23:21:40 -0700 Rename kernel operations to KOperation
+6c0a727c5 2026-07-10 14:26:36 -0700 Integrate speculative optimization profiling workflow
+e2c406fa0 2026-07-01 22:50:10 -0700 bpfopt: add profile-guided LLVM support
+7cf2020a8 2026-06-27 23:18:00 -0700 feat: Complete phase 3 for tetragon/observer and tracee/monitor optimizations
+181b8129b 2026-06-22 10:12:58 -0700 Checkpoint native whole-program diagnostics
+f0f0a0ccf 2026-06-19 15:05:17 -0700 Add loadtime shim and native loader support in bpfopt
+cc070f4d6 2026-06-05 14:59:36 -0700 Add benchmark results and metadata for siphash_rotate64_mixer
+6c02e6c00 2026-06-02 10:53:16 -0700 feat: update LEA and related configurations for enhanced instruction support
+5e365dfe0 2026-05-31 00:49:55 -0700 cleanup: remove unused diagnostic environment variables and related code
+bd6fae74b 2026-05-30 12:14:11 -0700 feat: enhance runner and tracee functionality
+f28ffb371 2026-05-29 18:11:32 -0700 bpf: Refactor register access and improve ARM64 compatibility
+7b1f965d8 2026-05-29 08:45:04 -0700 Add kernel log retrieval and filtering, enhance manifest resolution
+9f3855f6f 2026-05-28 19:22:18 -0700 Add native link plan and enhance map rule handling
