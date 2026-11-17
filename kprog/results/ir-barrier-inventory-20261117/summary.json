@@ -1,0 +1,133 @@
+[
+  {
+    "app": "bcc",
+    "objects": 8,
+    "bitcode_bytes": 5258112,
+    "forms": [],
+    "helper_declarations": 60
+  },
+  {
+    "app": "cilium",
+    "objects": 6,
+    "bitcode_bytes": 3373900,
+    "forms": [
+      {
+        "assembly": "",
+        "constraints": "=r,0,~{memory},~{dirflag},~{fpsr},~{flags}",
+        "count": 6
+      },
+      {
+        "assembly": "",
+        "constraints": "~{memory},~{dirflag},~{fpsr},~{flags}",
+        "count": 20
+      },
+      {
+        "assembly": "",
+        "constraints": "r,~{memory},~{dirflag},~{fpsr},~{flags}",
+        "count": 5
+      }
+    ],
+    "helper_declarations": 0
+  },
+  {
+    "app": "katran",
+    "objects": 3,
+    "bitcode_bytes": 127200,
+    "forms": [],
+    "helper_declarations": 0
+  },
+  {
+    "app": "otelcol-ebpf-profiler",
+    "objects": 1,
+    "bitcode_bytes": 670160,
+    "forms": [
+      {
+        "assembly": "",
+        "constraints": "=r,0,~{memory},~{dirflag},~{fpsr},~{flags}",
+        "count": 10
+      },
+      {
+        "assembly": "",
+        "constraints": "=r,r,r,0,~{memory},~{dirflag},~{fpsr},~{flags}",
+        "count": 15
+      },
+      {
+        "assembly": "",
+        "constraints": "=r,r,r,r,0,~{memory},~{dirflag},~{fpsr},~{flags}",
+        "count": 14
+      },
+      {
+        "assembly": "",
+        "constraints": "=r,r,r,r,r,r,0,~{memory},~{dirflag},~{fpsr},~{flags}",
+        "count": 15
+      },
+      {
+        "assembly": "",
+        "constraints": "=r,r,r,r,r,0,~{memory},~{dirflag},~{fpsr},~{flags}",
+        "count": 6
+      }
+    ],
+    "helper_declarations": 0
+  },
+  {
+    "app": "tetragon",
+    "objects": 35,
+    "bitcode_bytes": 38529576,
+    "forms": [
+      {
+        "assembly": "call *%rax",
+        "constraints": "={ax},={rdi},={rsi},0,{rdi},{rsi},~{rcx},~{rdx},~{r8},~{r9},~{r10},~{r11},~{memory},~{cc},~{dirflag},~{fpsr},~{flags}",
+        "count": 1794
+      },
+      {
+        "assembly": "call *%rax",
+        "constraints": "={ax},={rdi},={rsi},={rdx},0,{rdi},{rsi},{rdx},~{rcx},~{r8},~{r9},~{r10},~{r11},~{memory},~{cc},~{dirflag},~{fpsr},~{flags}",
+        "count": 3029
+      },
+      {
+        "assembly": "call *%rax",
+        "constraints": "={ax},={rdi},={rsi},={rdx},={rcx},0,{rdi},{rsi},{rdx},{rcx},~{r8},~{r9},~{r10},~{r11},~{memory},~{cc},~{dirflag},~{fpsr},~{flags}",
+        "count": 243
+      },
+      {
+        "assembly": "call *%rax",
+        "constraints": "={ax},0,~{rcx},~{rdx},~{rsi},~{rdi},~{r8},~{r9},~{r10},~{r11},~{memory},~{cc},~{dirflag},~{fpsr},~{flags}",
+        "count": 424
+      },
+      {
+        "assembly": "",
+        "constraints": "=r,r,r,r,0,~{memory},~{dirflag},~{fpsr},~{flags}",
+        "count": 25
+      },
+      {
+        "assembly": "call *%rax",
+        "constraints": "={ax},={rdi},={rsi},={rdx},={rcx},={r8},0,{rdi},{rsi},{rdx},{rcx},{r8},~{r9},~{r10},~{r11},~{memory},~{cc},~{dirflag},~{fpsr},~{flags}",
+        "count": 41
+      },
+      {
+        "assembly": "call *%rax",
+        "constraints": "={ax},={rdi},0,{rdi},~{rcx},~{rdx},~{rsi},~{r8},~{r9},~{r10},~{r11},~{memory},~{cc},~{dirflag},~{fpsr},~{flags}",
+        "count": 26
+      },
+      {
+        "assembly": "",
+        "constraints": "~{memory},~{dirflag},~{fpsr},~{flags}",
+        "count": 2
+      }
+    ],
+    "helper_declarations": 5
+  },
+  {
+    "app": "tracee",
+    "objects": 3,
+    "bitcode_bytes": 910224,
+    "forms": [
+      {
+        "assembly": "",
+        "constraints": "~{memory},~{dirflag},~{fpsr},~{flags}",
+        "count": 2
+      }
+    ],
+    "helper_declarations": 26
+  }
+]

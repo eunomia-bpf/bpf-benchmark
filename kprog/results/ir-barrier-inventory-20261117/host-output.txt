@@ -1,0 +1,57 @@
+otelcol-ebpf-profiler otelcol-ebpf-profiler.native.o asm {'empty': 60} helper declarations 0
+bcc biosnoop.native.o asm {} helper declarations 9
+bcc capable.native.o asm {} helper declarations 10
+bcc opensnoop.native.o asm {} helper declarations 9
+bcc runqlat.native.o asm {} helper declarations 7
+bcc syscount.native.o asm {} helper declarations 8
+bcc tcpconnect.native.o asm {} helper declarations 9
+bcc tcplife.native.o asm {} helper declarations 8
+bcc vfsstat.native.o asm {} helper declarations 0
+cilium bpf_host.native.o asm {'empty': 3} helper declarations 0
+cilium bpf_lxc.native.o asm {'empty': 3} helper declarations 0
+cilium bpf_overlay.native.o asm {'empty': 3} helper declarations 0
+cilium bpf_sock.native.o asm {'empty': 16} helper declarations 0
+cilium bpf_wireguard.native.o asm {'empty': 3} helper declarations 0
+cilium bpf_xdp.native.o asm {'empty': 3} helper declarations 0
+tetragon bpf_cgroup.native.o asm {'nonempty': 3} helper declarations 0
+tetragon bpf_cgroup_mkdir_v511.native.o asm {'nonempty': 23, 'empty': 1} helper declarations 0
+tetragon bpf_cgroup_release_v511.native.o asm {'nonempty': 22, 'empty': 1} helper declarations 0
+tetragon bpf_cgroup_rmdir_v511.native.o asm {'nonempty': 22, 'empty': 1} helper declarations 0
+tetragon bpf_cgtracker.native.o asm {'nonempty': 8, 'empty': 1} helper declarations 0
+tetragon bpf_enforcer.native.o asm {'nonempty': 5} helper declarations 0
+tetragon bpf_execve_bprm_commit_creds.native.o asm {'nonempty': 6, 'empty': 1} helper declarations 0
+tetragon bpf_execve_event_v61.native.o asm {'nonempty': 128, 'empty': 3} helper declarations 0
+tetragon bpf_execve_map_update_v61.native.o asm {'nonempty': 2} helper declarations 0
+tetragon bpf_exit_v511.native.o asm {'nonempty': 14} helper declarations 0
+tetragon bpf_fmodret_enforcer.native.o asm {'nonempty': 4} helper declarations 0
+tetragon bpf_fork_v511.native.o asm {'empty': 1, 'nonempty': 52} helper declarations 0
+tetragon bpf_generic_fentry_v61.native.o asm {'nonempty': 320, 'empty': 1} helper declarations 0
+tetragon bpf_generic_fexit_v61.native.o asm {'nonempty': 236, 'empty': 1} helper declarations 0
+tetragon bpf_generic_kprobe_v61.native.o asm {'nonempty': 334, 'empty': 1} helper declarations 0
+tetragon bpf_generic_lsm_core_v511.native.o asm {'nonempty': 333, 'empty': 1} helper declarations 0
+tetragon bpf_generic_lsm_core_v61.native.o asm {'nonempty': 321, 'empty': 1} helper declarations 0
+tetragon bpf_generic_lsm_ima_bprm_v61.native.o asm {'nonempty': 4} helper declarations 0
+tetragon bpf_generic_lsm_ima_file_v61.native.o asm {'nonempty': 4} helper declarations 0
+tetragon bpf_generic_lsm_output_v61.native.o asm {'nonempty': 40} helper declarations 0
+tetragon bpf_generic_rawtp_v61.native.o asm {'nonempty': 320, 'empty': 1} helper declarations 0
+tetragon bpf_generic_retkprobe_v61.native.o asm {'nonempty': 235, 'empty': 1} helper declarations 0
+tetragon bpf_generic_retuprobe_v61.native.o asm {'nonempty': 233, 'empty': 1} helper declarations 0
+tetragon bpf_generic_tracepoint_v61.native.o asm {'nonempty': 334, 'empty': 1} helper declarations 0
+tetragon bpf_generic_uprobe_v61.native.o asm {'nonempty': 341, 'empty': 1} helper declarations 1
+tetragon bpf_generic_usdt_v61.native.o asm {'nonempty': 347, 'empty': 1} helper declarations 1
+tetragon bpf_loader_v511.native.o asm {'nonempty': 11, 'empty': 1} helper declarations 0
+tetragon bpf_multi_enforcer.native.o asm {'nonempty': 5} helper declarations 0
+tetragon bpf_multi_kprobe_v61.native.o asm {'nonempty': 335, 'empty': 1} helper declarations 0
+tetragon bpf_multi_retkprobe_v61.native.o asm {'nonempty': 236, 'empty': 1} helper declarations 0
+tetragon bpf_multi_retuprobe_v61.native.o asm {'nonempty': 234, 'empty': 1} helper declarations 0
+tetragon bpf_multi_uprobe_v61.native.o asm {'nonempty': 342, 'empty': 1} helper declarations 1
+tetragon bpf_multi_usdt_v511.native.o asm {'nonempty': 354, 'empty': 1} helper declarations 1
+tetragon bpf_multi_usdt_v61.native.o asm {'nonempty': 348, 'empty': 1} helper declarations 1
+tetragon bpf_prog_iter.native.o asm {'nonempty': 1} helper declarations 0
+tracee kprobe_check.native.o asm {} helper declarations 0
+tracee lsm_check.native.o asm {} helper declarations 0
+tracee tracee.native.o asm {'empty': 2} helper declarations 26
+katran balancer.native.o asm {} helper declarations 0
+katran healthchecking_ipip.native.o asm {} helper declarations 0
+katran xdp_root.native.o asm {} helper declarations 0
+completed objects 56
