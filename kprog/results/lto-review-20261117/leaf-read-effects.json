@@ -1,6 +1,6 @@
 {
-  "recorded_utc": "2026-11-17T07:08:01Z",
-  "scope": "Completed OTel/BCC/Tracee coordinator stats-on 3x60s run pairs; Tracee reference is the coordinator same-image repeat, and its first post-change attempt remains in zero-remainder-effects.json. Existing >=100-call reporting convention. IDs identify records within their own boot only. Installed receipts count cumulative replacements, not measurement snapshots. No causal gain, PMU split, equal-work proof or new admission check is inferred.",
+  "recorded_utc": "2026-11-17T07:47:29Z",
+  "scope": "Completed OTel/BCC/Tracee user-leaf coordinator stats-on 3x60s run pairs and first subsequent kernel-leaf BCC run; Tracee reference is the coordinator same-image repeat, and its first post-change attempt remains in zero-remainder-effects.json. Existing >=100-call reporting convention. IDs identify records within their own boot only. Installed receipts count cumulative replacements, not measurement snapshots. No causal gain, PMU split, equal-work proof or new admission check is inferred.",
   "apps": [
     {
       "app": "otelcol-ebpf-profiler__profiling",
@@ -590,7 +590,252 @@
           "per_call_speedup": 1.0008206727479478,
           "installed_cumulative_receipt": "x86_kvm_corpus_20261117_064150_558773 installed programs 25 JIT 7965 B native 8334 B ratio 1.05x"
         }
-      ]
+      ],
+      "subsequent_kernel_leaf": {
+        "stage": "kernel_leaf",
+        "run": "corpus/results/x86_kvm_corpus_20261117_073234_717951",
+        "phases": {
+          "baseline": {
+            "records": 25,
+            "selected": [
+              {
+                "id": 30,
+                "name": "tracepoint__sys",
+                "type": "tracepoint",
+                "run_cnt_delta": 38222731,
+                "run_time_ns_delta": 2412369465
+              },
+              {
+                "id": 39,
+                "name": "tracepoint__sys",
+                "type": "tracepoint",
+                "run_cnt_delta": 38222731,
+                "run_time_ns_delta": 48153881328
+              },
+              {
+                "id": 47,
+                "name": "fentry_vfs_read",
+                "type": "tracing",
+                "run_cnt_delta": 727586,
+                "run_time_ns_delta": 59507517
+              },
+              {
+                "id": 49,
+                "name": "fentry_vfs_writ",
+                "type": "tracing",
+                "run_cnt_delta": 740308,
+                "run_time_ns_delta": 57323245
+              },
+              {
+                "id": 52,
+                "name": "kprobe__cap_cap",
+                "type": "kprobe",
+                "run_cnt_delta": 42985966,
+                "run_time_ns_delta": 2944427958
+              },
+              {
+                "id": 54,
+                "name": "sys_enter",
+                "type": "tracepoint",
+                "run_cnt_delta": 1081085688,
+                "run_time_ns_delta": 89240861456
+              },
+              {
+                "id": 56,
+                "name": "kprobe__cap_cap",
+                "type": "kprobe",
+                "run_cnt_delta": 42985963,
+                "run_time_ns_delta": 14408688595
+              },
+              {
+                "id": 58,
+                "name": "fentry_vfs_open",
+                "type": "tracing",
+                "run_cnt_delta": 38223556,
+                "run_time_ns_delta": 1425643976
+              },
+              {
+                "id": 59,
+                "name": "sys_exit",
+                "type": "tracepoint",
+                "run_cnt_delta": 1081085694,
+                "run_time_ns_delta": 95172158579
+              },
+              {
+                "id": 61,
+                "name": "fentry_vfs_crea",
+                "type": "tracing",
+                "run_cnt_delta": 212,
+                "run_time_ns_delta": 14743
+              },
+              {
+                "id": 67,
+                "name": "blk_account_io_",
+                "type": "kprobe",
+                "run_cnt_delta": 180,
+                "run_time_ns_delta": 50037
+              },
+              {
+                "id": 71,
+                "name": "block_rq_issue",
+                "type": "tracing",
+                "run_cnt_delta": 1245,
+                "run_time_ns_delta": 1278119
+              },
+              {
+                "id": 73,
+                "name": "block_rq_comple",
+                "type": "tracing",
+                "run_cnt_delta": 1293,
+                "run_time_ns_delta": 7240955
+              },
+              {
+                "id": 75,
+                "name": "sched_wakeup",
+                "type": "tracing",
+                "run_cnt_delta": 35863432,
+                "run_time_ns_delta": 3279473759
+              },
+              {
+                "id": 77,
+                "name": "sched_wakeup_ne",
+                "type": "tracing",
+                "run_cnt_delta": 119,
+                "run_time_ns_delta": 36805
+              },
+              {
+                "id": 78,
+                "name": "sched_switch",
+                "type": "tracing",
+                "run_cnt_delta": 71638762,
+                "run_time_ns_delta": 8202328518
+              }
+            ],
+            "calls": 2471785466,
+            "elapsed_ns": 265365285055,
+            "ns_per_call": 107.35773338955299
+          },
+          "post_rejit": {
+            "records": 25,
+            "selected": [
+              {
+                "id": 128,
+                "name": "fentry_vfs_read",
+                "type": "tracing",
+                "run_cnt_delta": 718890,
+                "run_time_ns_delta": 60150473
+              },
+              {
+                "id": 130,
+                "name": "fentry_vfs_writ",
+                "type": "tracing",
+                "run_cnt_delta": 740129,
+                "run_time_ns_delta": 58591127
+              },
+              {
+                "id": 137,
+                "name": "fentry_vfs_open",
+                "type": "tracing",
+                "run_cnt_delta": 38452765,
+                "run_time_ns_delta": 1424761412
+              },
+              {
+                "id": 140,
+                "name": "tracepoint__sys",
+                "type": "tracepoint",
+                "run_cnt_delta": 38452311,
+                "run_time_ns_delta": 2334680002
+              },
+              {
+                "id": 145,
+                "name": "kprobe__cap_cap",
+                "type": "kprobe",
+                "run_cnt_delta": 43112666,
+                "run_time_ns_delta": 2872694360
+              },
+              {
+                "id": 148,
+                "name": "blk_account_io_",
+                "type": "kprobe",
+                "run_cnt_delta": 173,
+                "run_time_ns_delta": 35921
+              },
+              {
+                "id": 151,
+                "name": "sys_enter",
+                "type": "tracepoint",
+                "run_cnt_delta": 1092665360,
+                "run_time_ns_delta": 86738578278
+              },
+              {
+                "id": 159,
+                "name": "sched_wakeup",
+                "type": "tracing",
+                "run_cnt_delta": 35725918,
+                "run_time_ns_delta": 2840758986
+              },
+              {
+                "id": 162,
+                "name": "tracepoint__sys",
+                "type": "tracepoint",
+                "run_cnt_delta": 38452311,
+                "run_time_ns_delta": 47248474903
+              },
+              {
+                "id": 164,
+                "name": "kprobe__cap_cap",
+                "type": "kprobe",
+                "run_cnt_delta": 43112662,
+                "run_time_ns_delta": 14225155609
+              },
+              {
+                "id": 165,
+                "name": "sys_exit",
+                "type": "tracepoint",
+                "run_cnt_delta": 1092665361,
+                "run_time_ns_delta": 94272267979
+              },
+              {
+                "id": 171,
+                "name": "sched_wakeup_ne",
+                "type": "tracing",
+                "run_cnt_delta": 118,
+                "run_time_ns_delta": 40771
+              },
+              {
+                "id": 174,
+                "name": "block_rq_issue",
+                "type": "tracing",
+                "run_cnt_delta": 266,
+                "run_time_ns_delta": 303931
+              },
+              {
+                "id": 178,
+                "name": "sched_switch",
+                "type": "tracing",
+                "run_cnt_delta": 71394061,
+                "run_time_ns_delta": 10158475546
+              },
+              {
+                "id": 179,
+                "name": "block_rq_comple",
+                "type": "tracing",
+                "run_cnt_delta": 290,
+                "run_time_ns_delta": 1075449
+              }
+            ],
+            "calls": 2495493281,
+            "elapsed_ns": 262236044747,
+            "ns_per_call": 105.08385125441659
+          }
+        },
+        "per_call_speedup": 1.0216387399966067,
+        "installed_cumulative_receipt": "x86_kvm_corpus_20261117_073234_717951 installed programs 25 JIT 7965 B native 8733 B ratio 1.10x"
+      },
+      "kernel_leaf_vs_user_leaf_ns_ratios": {
+        "baseline": 1.0452494426482613,
+        "post_rejit": 1.0239502569999697
+      }
     },
     {
       "app": "tracee__monitor",

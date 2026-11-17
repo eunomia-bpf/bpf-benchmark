@@ -36,13 +36,23 @@ for app, before_stage, before, after in [
     rows = [read_run(app, before_stage, before), read_run(app, 'user_leaf', after)]
     ratios = {phase: rows[1]['phases'][phase]['ns_per_call'] / rows[0]['phases'][phase]['ns_per_call']
               for phase in ('baseline', 'post_rejit')}
-    apps.append(dict(app=app, after_before_ns_ratios=ratios, runs=rows))
+    entry = dict(app=app, after_before_ns_ratios=ratios, runs=rows)
+    if app == 'bcc__set':
+        kernel = read_run(app, 'kernel_leaf', '073234_717951')
+        entry['subsequent_kernel_leaf'] = kernel
+        entry['kernel_leaf_vs_user_leaf_ns_ratios'] = {
+            phase: kernel['phases'][phase]['ns_per_call'] / rows[1]['phases'][phase]['ns_per_call']
+            for phase in ('baseline', 'post_rejit')}
+        print(app, 'kernel_leaf ns/call',
+              {phase: round(data['ns_per_call'], 4) for phase, data in kernel['phases'].items()})
+        print('kernel/user ns ratios:', entry['kernel_leaf_vs_user_leaf_ns_ratios'])
+    apps.append(entry)
     for row in rows:
         print(app, row['stage'], 'ns/call',
               {phase: round(data['ns_per_call'], 4) for phase, data in row['phases'].items()})
     print('after/before ns ratios:', ratios)
 
 result = dict(recorded_utc=subprocess.check_output(['date', '-u', '+%FT%TZ'], text=True).strip(),
-              scope='Completed OTel/BCC/Tracee coordinator stats-on 3x60s run pairs; Tracee reference is the coordinator same-image repeat, and its first post-change attempt remains in zero-remainder-effects.json. Existing >=100-call reporting convention. IDs identify records within their own boot only. Installed receipts count cumulative replacements, not measurement snapshots. No causal gain, PMU split, equal-work proof or new admission check is inferred.',
+              scope='Completed OTel/BCC/Tracee user-leaf coordinator stats-on 3x60s run pairs and first subsequent kernel-leaf BCC run; Tracee reference is the coordinator same-image repeat, and its first post-change attempt remains in zero-remainder-effects.json. Existing >=100-call reporting convention. IDs identify records within their own boot only. Installed receipts count cumulative replacements, not measurement snapshots. No causal gain, PMU split, equal-work proof or new admission check is inferred.',
               apps=apps)
 (HERE / 'leaf-read-effects.json').write_text(json.dumps(result, indent=2) + '\n')

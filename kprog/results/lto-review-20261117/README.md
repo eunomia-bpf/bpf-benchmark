@@ -2886,3 +2886,54 @@ Both installed growth and future measured time belong in the kernel-leaf
 result; callback/frame removal by itself does not establish the benefit.
 PERF ran only the existing log reader, with no new guest, build or extra
 confirmation. Remaining coordinator checks and timing continue.
+
+### Kernel-leaf six-app footprint comparison is complete
+
+The six-app functional check completed with rc=0 at 07:30:40Z. The
+remaining rows complete the installed-load comparison above:
+
+| App | User-leaf check suffix | Kernel-leaf check suffix | Successful cumulative replacements | Native bytes before → after | Companion JIT bytes |
+| --- | --- | --- | --- | --- | --- |
+| Cilium | `061623_442230` | `071814_807597` | 113 → 113 | 484,353 → 484,353 (unchanged) | 581,577 both |
+| Tracee | `062335_979173` | `072529_244513` | 169 → 169 | 1,700,692 → 1,716,880 (+16,188) | 2,068,918 both |
+| Katran | `062739_275339` | `072936_929753` | 1 → 1 | 9,442 → 9,442 (unchanged) | 13,641 both |
+
+The same `corpus/results/x86_kvm_corpus_20261117_` prefix and cumulative
+replacement population apply. Tracee's addition is 284 units of the
+57-byte kernel-routine growth, without an independent routine census.
+Cilium's successful check and these replacement totals do not establish
+complete native coverage or fix its known configuration/path mismatch.
+
+The baseline byte field also includes BPF subprogram code: the sole
+kernel's `kernel/bpf/syscall.c:5113–5121` sums every
+`prog->aux->func[i]->jited_len` into `info.jited_prog_len` when a function
+array exists, otherwise using `prog->jited_len`. A suspected omission of
+all non-entry JIT functions is therefore **not** an explanation for these
+byte ratios. This source audit changes no size metric or reporting rule.
+Whole-function closure bytes and cumulative/live population are separate
+accounting questions. PERF used the existing installed-byte reader only;
+no guest, additional check or new admission requirement was introduced.
+
+### First kernel-leaf timing row: BCC
+
+Coordinator receipt `c422c3e70`, run
+`corpus/results/x86_kvm_corpus_20261117_073234_717951`, reports
+**1.022x per call** and **1.017x throughput**. The raw-derived BPF times
+are eBPF **107.358 ns/call**, native **105.084 ns/call**. Against the
+user-leaf BCC run, native time rises **2.40%** and baseline time rises
+**4.52%**, so the higher ratio alone does not establish the kernel-leaf
+gain. This cross-run pair does not isolate a source regression either.
+
+Throughput samples are eBPF 507,010 / 507,737 / 511,087 and native
+515,556 / 516,148 / 517,821, with ratios 1.017 / 1.017 / 1.013 and zero
+reported errors. Aggregate selections stay at 16 baseline and 15 native
+records. Cumulative installed totals are 25 native replacements,
+8,733 native bytes and 7,965 companion JIT bytes, versus 8,334 native
+bytes before the kernel-leaf change. The coordinator's median active count
+ratio is 1.003; the known block-I/O count differences remain recorded.
+
+[leaf-read-effects.json](leaf-read-effects.json) now includes this first
+subsequent kernel-leaf row and exact before/after arithmetic from the
+existing [reader](leaf_read_effect_inventory.py). The original user-leaf
+pairs remain unchanged. Tetragon and Tracee timing continue in the
+coordinator's batch; no new measurement or source edit was made by PERF.
