@@ -19,3 +19,9 @@ x86_kvm_corpus_20261117_073234_717951 installed programs 25 JIT 7965 B native 87
 == x86_kvm_corpus_20261117_073234_717951 (bcc__set.json): 11 active programs, median native/eBPF run ratio 1.003
    DIFFERENT block_rq_comple: eBPF 1,293  native 290  ratio 0.224
    DIFFERENT block_rq_issue: eBPF 1,245  native 266  ratio 0.214
+== tetragon/observer /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_074317_231933
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_074317_231933 throughput native/eBPF 1.011x  eBPF [317945, 316201, 323237] native [324708, 319162, 321360] per-sample [1.021, 1.009, 0.994] errors 0
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_074317_231933 ns/inv eBPF 747.0 (21/287 progs) native 704.1 (21/287) speedup 1.061x
+x86_kvm_corpus_20261117_074317_231933 installed programs 288 JIT 2472912 B native 1924132 B ratio 0.78x
+== x86_kvm_corpus_20261117_074317_231933 (tetragon__observer.json): 3 active programs, median native/eBPF run ratio 1.046
+   programs whose counts track the median: 3 of 3
