@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64ProducerGprInputs
+#check KProgFormal.ClightRefinement.Arm64ProducerGprInputs.gpr_inputs_initialized
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerGprInputs.gpr_inputs_initialized
+#check KProgFormal.ClightRefinement.Arm64ProducerGprInputs.gpr_inputs_to_registers
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerGprInputs.gpr_inputs_to_registers
+#check KProgFormal.ClightRefinement.Arm64ProducerGprInputs.producer_registers_initialized
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerGprInputs.producer_registers_initialized

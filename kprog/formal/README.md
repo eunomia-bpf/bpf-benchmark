@@ -46,7 +46,10 @@ provider trace and post-memory. The [four-flag/LR prefix](results/m5-flag-input-
 adds the actual masked flag stores and LR-zero assignment, deriving final
 NZCV bytes in the combined 68-visit execution. The [x30/table prefix](results/m5-table-prefix-registers/README.md)
 derives the zero payload and both pointer tables from 196 actual source
-transitions. Actual provider admissibility and same-invocation native
+transitions. The [30-GPR traversal](results/m5-gpr-input-sequence/README.md)
+now composes the actual producer call through all 98 input visits to the
+register relation, deriving its source data and threading both temporary
+updates. Actual provider admissibility and same-invocation native
 origin/register bindings remain open.
 
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
