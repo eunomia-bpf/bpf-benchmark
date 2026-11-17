@@ -5,7 +5,7 @@ main() {
     local root=/workspaces/kprog-raw/perf/helper-context-query-20261117
     local out=kprog/results/helper-context-query-20261117
     local configs=corpus/results/helper-context-query-20261117
-    local raw="$root/batch-$(date -u +%Y%m%dT%H%M%SZ)-$$"
+    raw="$root/batch-$(date -u +%Y%m%dT%H%M%SZ)-$$"
     install -d "$raw"
     trap 'status=$?; printf "%s exit=%s raw=%s\n" "$(date -u +%FT%TZ)" "$status" "$raw" >> /workspaces/kprog-raw/perf/helper-context-query-20261117/progress.log' EXIT
     printf '%s waiting batch EX, timing SH, image SH raw=%s\n' "$(date -u +%FT%TZ)" "$raw" >> "$root/progress.log"

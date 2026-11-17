@@ -29,3 +29,11 @@ actual original program types and emitted argument setup before interpreting
 any target mismatch as a context semantics difference. Link success alone is
 not a B/stock verification result or evidence of output equivalence. Permanent
 loader-core fixes remain with the coordinator under the freeze contract.
+
+The first preparation attempt (PID 2735977, raw `batch-20261117T200653Z-2735977`)
+stopped before a guest: its archive lookup used the runtime `/opt` path.
+The frozen Dockerfile actually stores these files under
+`artifacts/user/native-bpf/x86_64` and exposes them at `/opt` at runtime.
+The forward recipe separates those paths. Its exit trap also now retains
+the run path after the main function returns. Original errors remain in
+`prepare.txt` and `launcher.log`; no capture or VM ran in that attempt.

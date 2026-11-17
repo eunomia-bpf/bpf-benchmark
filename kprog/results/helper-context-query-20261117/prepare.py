@@ -8,7 +8,8 @@ import tarfile
 output = Path(sys.argv[1])
 output.mkdir(parents=True, exist_ok=True)
 image_path = Path('.cache/container-images/x86_64-runner-runtime.image.tar')
-manifest_path = 'opt/bpf-benchmark/native-bpf/x86_64/bcc/manifest.json'
+manifest_path = 'artifacts/user/native-bpf/x86_64/bcc/manifest.json'
+runtime_dir = PurePosixPath('/opt/bpf-benchmark/native-bpf/x86_64/bcc')
 with tarfile.open(image_path) as image:
     descriptor = json.load(image.extractfile('manifest.json'))[0]
     manifest = None
@@ -30,7 +31,7 @@ for mode in ('control', 'query'):
     for entry in candidate['objects']:
         for key in ('native_object', 'source_bpf_object', 'kernel_kfunc_btf'):
             if key in entry and not PurePosixPath(entry[key]).is_absolute():
-                entry[key] = str(PurePosixPath('/') / PurePosixPath(manifest_path).parent / entry[key])
+                entry[key] = str(runtime_dir / entry[key])
         if mode == 'query':
             entry['kernel_helper_context'] = True
     (output / f'{mode}-manifest.json').write_text(json.dumps(candidate, indent=2)+'\n')
