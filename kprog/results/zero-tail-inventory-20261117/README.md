@@ -45,3 +45,43 @@ Exact generic tails are checked at decoded instruction boundaries.
 Fixed-count tails and uncaptured generated programs remain outside this
 bound. All output, including failures, is recorded; no performance
 candidate or source change is applied by this replay.
+
+The actual replay 2689690 finished at 17:54:20Z. The canonical release
+linker build passed, but **0/239 plans parsed**: every retained plan
+lacks the now-required `kernel_layout.probe_read.cpu_tlbstate` field.
+It therefore emitted no images or ranges. The zero payload/range counts
+in `emitted-summary.txt` are failure coverage, not absence of helper
+work. This is an incompatibility of the historical replay inputs,
+not a finding that current apps fail to load. No runtime address or
+layout fact was guessed to force those plans through.
+
+The completed named-relocation subset gives these bounds only for its
+identified helper combinations:
+
+| App | Captured requests | Requests with named reads | Multiple leaf roles | Upper bound bytes |
+| --- | ---: | ---: | ---: | ---: |
+| BCC | 25 | 10 | 2 | 72 |
+| Tracee | 169 | 151 | 140 | 12,024 |
+
+The other four apps have no named read relocations in those proofs and
+remain uncovered for numeric helper transfers. All eight current generic
+tails decode identically to 42 bytes. Reusing one existing tail with
+a five-byte error jump and local success RET bounds saving at 36 bytes
+per additional **generic** leaf. Smaller known-count tails, branch
+widening and layout costs can reduce that figure. The Tracee bound is
+small next to its retained 1,685,306-byte host payload; that comparison
+is not a new installed-byte ratio or a measured candidate result.
+
+Decision: leave tail-sharing source unchanged while complete current
+load facts are unavailable, rather than add a layout abstraction on
+the strength of a partial bound. The next open source item is review
+finding 11, ARRAY direct returns: removing existing hot-path jumps also
+shrinks the routines and needs no new sharing metadata. The independent
+frozen helper-prototype wiring class still belongs to its coordinator.
+
+Recipes are `f77ff7048` and forward repair `3c5efa762`; the failed
+emission receipt is `52c5c1cfc`. [Named-only inventory](inventory.json),
+[named summary](summary.txt), [emission failures](emitted-inventory.json),
+[emission summary](emitted-summary.txt), [build output](build.txt) and
+[raw location](emitted-host-location.txt) retain the distinctions. No
+new guest, image, performance number or native optimization is claimed.
