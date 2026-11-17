@@ -34,7 +34,9 @@ transitions in that same environment with actual handler/callee bindings and
 retains the concrete register relation. The [producer entry view](results/m5-producer-entry-view/README.md)
 connects actual header flag readbacks to its borrowed-entry reader. The
 [GPR table view](results/m5-producer-gpr-view/README.md) follows the real word/tag
-tables and retains pointer values and tag bits; native admissibility remains open.
+tables and retains pointer values and tag bits. The [vector view](results/m5-producer-vector-view/README.md)
+follows the embedded pointer arrays and all 32 low/high pairs; native
+admissibility remains open.
 
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|

@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64ProducerVectorView
+#check KProgFormal.ClightRefinement.Arm64ProducerVectorView.vector_readback
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerVectorView.vector_readback
+#check KProgFormal.ClightRefinement.Arm64ProducerVectorView.vector_readbacks
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerVectorView.vector_readbacks
+#check KProgFormal.ClightRefinement.Arm64ProducerVectorView.producer_vectors_initialized
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerVectorView.producer_vectors_initialized
