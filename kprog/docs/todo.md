@@ -65,6 +65,7 @@ PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are 
   b. bpf_probe_read_user_str 和 bpf_probe_read_compat_str 进叶子例程（用户字符串叶子加 compat 分派）；
      PERF 2026-11-17T11:55:22Z：源码与最终两项主机测试完成（43 项未运行，user-string 4693 向量/239 源故障）；六个 payload 和首轮相同，旧 scalar/kernel-string/compat 字节保持不变。源码和最终收据同次提交，释放构建输入供取时间批次和 batch 2；结果 results/user-string-leaf-20261117。应用计时/installed bytes 未量，不关闭本项。
      PERF 2026-11-17T13:13:47Z：batch 2 的 uid_gid/字符串循环/clock 命名已提交 8b31e4533，完整 linker 43 passed / 3 existing ignored，canonical loader build 通过；Cilium 七个 P 于13:09:03Z编译并生成 manifest 通过。机器参数统一 O3，Makefile 依赖补齐，应用 installed bytes/per-call/body/helper/map 待 omp 排镜像及 Tracee/Cilium 子集计时，不关闭本项。
+     PERF 2026-11-17T13:34:55Z：先补已支持 helper E9 尾跳的 shared-leaf 接线：x86.rs 生成 E9 helper relocation，probe/clock/ARRAY/LPM 的后续共享只接 E8；uid_gid 共用 probe redirect 也受影响。整类修复与 mixed E8/E9/返回执行测试已准备在 results/shared-helper-tail-20261117（6b877b695、5003d39cc、d0efbfdfa），未应用/未执行；batch2 image snapshot 后先复现再修，外部 kernel helper 继续 E8，冻结 loader 不改。当前六应用 check 通过，未称真实 app 已触发。
   c. 常量大小的 probe_read（perf b80b2dad0 的计数块模型）；全局量用 32 位绝对地址作操作数（perf 66be0e8f0）；
   d. 已知 ARRAY 步长用 IMUL imm8 加 LEA（9f45f3c6a），LPM 的 XOR 和 disp8（97212ec1c、ed9a7d87e），超过 512 字节的 memset 保留已知长度（a0a448a1d）；
   e. 其余 helper 按各应用的占比从大到小：BCC 的 perf_event_output 和 map update，Katran 的 LRU 查找，Tetragon 和 Tracee 的 htab 查找；先量清两臂差别再动手。
