@@ -2605,3 +2605,77 @@ payload grows. Record both measured effects instead of inferring either
 speed or installed size from the table. The larger compat-read family is
 still outside this lowering, as section 2 explains. No rejection gate,
 new sharing framework or extra benchmark is proposed by this review.
+
+## User-leaf OTel timing: installed size falls, invocation gain unestablished
+
+Coordinator receipt `1160dc4f6`, run
+`corpus/results/x86_kvm_corpus_20261117_063024_376511`, completes the first
+user-leaf timing subset. Against the preceding zero-remainder run:
+
+| Observation | Zero remainder | User leaf |
+| --- | --- | --- |
+| eBPF ns/call | 3374.986 | 3203.124 |
+| Native ns/call | 2873.846 | 2899.163 |
+| eBPF/native per-call ratio | 1.174x | 1.105x |
+| Native/eBPF throughput ratio | 1.202x | 1.076x |
+| Cumulative installed native bytes / companion JIT bytes | 135,604 / 167,706 | 135,424 / 167,706 |
+| Successful cumulative native replacements | 14 | 14 |
+
+Native invocation time is **0.88% higher**, while eBPF time is **5.09%
+lower**. This run therefore does not establish an invocation-time gain
+from removing the user callback/frame. It also does not isolate a source
+regression from cross-run variation. Native code is 180 bytes smaller in
+the paired cumulative load population, independently of the time result.
+Neither improvement nor regression is inferred from instruction counts.
+
+The native aggregate now selects two records instead of one under the
+existing >=100-call convention. The added `tracepoint__sch` record has
+101 invocations and **0.0000551%** of selected native elapsed time;
+`native_tracer_e` accounts for the other 99.9999449% and 140,925,219
+invocations. Thus that small record's inclusion does not explain the
+aggregate change. The baseline remains similarly dominated by the root.
+[leaf_read_effect_inventory.py](leaf_read_effect_inventory.py) records
+the raw counts/times and exact aggregate arithmetic in
+[leaf-read-effects.json](leaf-read-effects.json), preserving IDs within
+their own boots and using the existing installed-byte reader.
+
+The new throughput sample ratios are 1.076 / 1.095 / 1.035, from eBPF
+40,971,684 / 40,464,510 / 41,926,081 and native
+44,080,840 / 44,305,466 / 43,378,243. The coordinator reports zero errors
+and a root count ratio of 1.009. These are three 60-second stats-on
+samples; no counter scrape or new equal-work proof was added by PERF.
+BCC/Tracee timing continues. Keep these observed series and population
+labels rather than treating the source's removed operations as a promised
+application gain.
+
+### Kernel-leaf implementation and host footprint now landed
+
+`ac7116e0d` lands the kernel-leaf source reviewed above. The coordinator's
+[receipt](../kernel-leaf-20261117/README.md) reports kernel payload
+**317 → 374 bytes**, agreeing with the review's +57-byte local accounting;
+it is still a host payload size, not a final application installed total.
+It also reports 40 linker tests, 1,152 kernel-read host vectors including
+122 exact-site faults, 193 string vectors and byte-identical user code.
+PERF did not rerun those tests. `adc3fc72e` queues the existing image/check/
+BCC-Tetragon-Tracee batch after the user-leaf batch. Kernel-leaf app
+effects are pending; no concurrent image or competing job was started.
+
+## Closed lead: string-only objects still receive the scalar helper anchor
+
+The extra scalar-helper lookup in `probe_read::share` initially looked
+like a possible missed optimization for string-only programs. Source
+inspection closes that production lead: `native_loader.cpp:1504–1508`
+queries **all canonical helper IDs**, not just helpers called by the
+program. It emits each available prototype address and its historical
+alias at lines 1536–1543; `native_loader_link_schema.hpp:95–97` puts that
+set in the link plan. The non-context construction also includes both
+scalar/string names through `kSupportedHelpers`.
+
+In the sole kernel, `kernel/bpf/helpers.c:2191–2198` exposes scalar and
+string kernel reads under the same LOCKDOWN_BPF_READ_KERNEL condition.
+The scalar anchor therefore does not disappear merely because an object
+calls only the string helper. This is not a production string-only LTO
+miss, and no extra resolver/fallback/check is needed to fix it. Future
+attempts to prune the helper table to observed bytecode calls would have
+to preserve existing internal anchor users. No production change,
+manual link-plan experiment, guest or build was made for this review.

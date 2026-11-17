@@ -1,0 +1,107 @@
+{
+  "recorded_utc": "2026-11-17T06:42:31Z",
+  "scope": "Completed OTel coordinator stats-on 3x60s run pair; existing >=100-call reporting convention. IDs identify records within their own boot only. Installed receipts count cumulative replacements, not measurement snapshots. No causal gain, PMU split, equal-work proof or new admission check is inferred.",
+  "after_before_ns_ratios": {
+    "baseline": 0.9490774930729752,
+    "post_rejit": 1.0088096268011495
+  },
+  "runs": [
+    {
+      "stage": "zero_remainder",
+      "run": "corpus/results/x86_kvm_corpus_20261117_051422_856006",
+      "phases": {
+        "baseline": {
+          "records": 13,
+          "selected": [
+            {
+              "id": 16,
+              "name": "tracepoint__sch",
+              "type": "tracepoint",
+              "run_cnt_delta": 102,
+              "run_time_ns_delta": 290502
+            },
+            {
+              "id": 17,
+              "name": "native_tracer_e",
+              "type": "perf_event",
+              "run_cnt_delta": 132344140,
+              "run_time_ns_delta": 446659729435
+            }
+          ],
+          "calls": 132344242,
+          "elapsed_ns": 446660019937,
+          "ns_per_call": 3374.9864231871907
+        },
+        "post_rejit": {
+          "records": 13,
+          "selected": [
+            {
+              "id": 48,
+              "name": "native_tracer_e",
+              "type": "perf_event",
+              "run_cnt_delta": 137164477,
+              "run_time_ns_delta": 394189547967
+            }
+          ],
+          "calls": 137164477,
+          "elapsed_ns": 394189547967,
+          "ns_per_call": 2873.84574044634
+        }
+      },
+      "per_call_speedup": 1.1743798129759804,
+      "installed_cumulative_receipt": "x86_kvm_corpus_20261117_051422_856006 installed programs 14 JIT 167706 B native 135604 B ratio 0.81x"
+    },
+    {
+      "stage": "user_leaf",
+      "run": "corpus/results/x86_kvm_corpus_20261117_063024_376511",
+      "phases": {
+        "baseline": {
+          "records": 13,
+          "selected": [
+            {
+              "id": 16,
+              "name": "tracepoint__sch",
+              "type": "tracepoint",
+              "run_cnt_delta": 106,
+              "run_time_ns_delta": 228253
+            },
+            {
+              "id": 17,
+              "name": "native_tracer_e",
+              "type": "perf_event",
+              "run_cnt_delta": 139626534,
+              "run_time_ns_delta": 447241165014
+            }
+          ],
+          "calls": 139626640,
+          "elapsed_ns": 447241393267,
+          "ns_per_call": 3203.123653673826
+        },
+        "post_rejit": {
+          "records": 13,
+          "selected": [
+            {
+              "id": 46,
+              "name": "tracepoint__sch",
+              "type": "tracepoint",
+              "run_cnt_delta": 101,
+              "run_time_ns_delta": 224928
+            },
+            {
+              "id": 48,
+              "name": "native_tracer_e",
+              "type": "perf_event",
+              "run_cnt_delta": 140925219,
+              "run_time_ns_delta": 408565283656
+            }
+          ],
+          "calls": 140925320,
+          "elapsed_ns": 408565508584,
+          "ns_per_call": 2899.1632489037456
+        }
+      },
+      "per_call_speedup": 1.1048441838813376,
+      "installed_cumulative_receipt": "x86_kvm_corpus_20261117_063024_376511 installed programs 14 JIT 167706 B native 135424 B ratio 0.81x"
+    }
+  ]
+}
