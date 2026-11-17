@@ -32,8 +32,9 @@ permissions and frontier 189, and separation from the actual producer locals.
 The [linked NOP procedure](results/m5-linked-nop/README.md) executes all 19
 transitions in that same environment with actual handler/callee bindings and
 retains the concrete register relation. The [producer entry view](results/m5-producer-entry-view/README.md)
-connects actual header flag readbacks to its borrowed-entry reader; native
-admissibility remains open.
+connects actual header flag readbacks to its borrowed-entry reader. The
+[GPR table view](results/m5-producer-gpr-view/README.md) follows the real word/tag
+tables and retains pointer values and tag bits; native admissibility remains open.
 
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|

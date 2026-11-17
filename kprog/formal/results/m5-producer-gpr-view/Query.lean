@@ -1,0 +1,7 @@
+import KProgFormal.ClightRefinement.Arm64ProducerGprView
+#check KProgFormal.ClightRefinement.Arm64ProducerGprView.gpr_readback
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerGprView.gpr_readback
+#check KProgFormal.ClightRefinement.Arm64ProducerGprView.table_gpr_readbacks
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerGprView.table_gpr_readbacks
+#check KProgFormal.ClightRefinement.Arm64ProducerGprView.producer_gprs_initialized
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerGprView.producer_gprs_initialized
