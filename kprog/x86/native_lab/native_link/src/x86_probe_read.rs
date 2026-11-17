@@ -20,19 +20,142 @@ fn address(symbol: u64, anchor: u64, actual: u64) -> Result<u64> {
         .map_err(|_| anyhow!("probe-read target address overflow"))
 }
 
-pub(super) fn routine(layout: &RuntimeProbeReadLayout, user: bool, actual: u64)
-    -> Result<(Vec<u8>, Vec<RelocRecord>, Vec<LoadSite>)> {
-    routine_kind(layout,user,actual,false)
+fn gs_disp32(address: u64, what: &str) -> Result<[u8; 4]> {
+    if address as u32 as i32 as i64 as u64 != address {
+        bail!("probe-read {what} GS address is not sign-extended disp32");
+    }
+    Ok((address as u32).to_le_bytes())
 }
 
-fn routine_kind(layout: &RuntimeProbeReadLayout, user: bool, actual: u64, string: bool)
+pub(super) fn routine(layout: &RuntimeProbeReadLayout, user: bool, actual: u64)
     -> Result<(Vec<u8>, Vec<RelocRecord>, Vec<LoadSite>)> {
-    let anchor = if user { layout.user_helper } else { layout.kernel_helper };
-    let target = |symbol| address(symbol, anchor, actual);
-    let current = target(layout.current_task)?;
-    if current as u32 as i32 as i64 as u64 != current {
-        bail!("probe-read current_task GS address is not sign-extended disp32");
-    }
+    if user { user_leaf(layout, actual) } else { kernel_routine(layout, actual, false) }
+}
+
+/// RDI=dst, RSI=src, ECX=size, R11=1. Eight-byte words, then an empty remainder goes straight
+/// to success; otherwise one 4-, one 2- and one 1-byte step, as mm/maccess.c copies. Every load
+/// is a recovered site whose fault clears R11; success leaves EAX=0.
+fn copy_words(b: &mut Vec<u8>, sites: &mut Vec<LoadSite>, faults: &mut Vec<usize>) -> Result<()> {
+    b.extend_from_slice(&[0x83,0xf9,8]);
+    let subword = append_x86_jcc_rel32(b, 0x82);
+    let word_loop = b.len();
+    sites.push(LoadSite { offset: b.len() as u32, insn_len: 3, destination: 11 });
+    b.extend_from_slice(&[0x48,0x8b,0x06]); // mov rax,[rsi]; recovery clears R11
+    b.extend_from_slice(&[0x45,0x85,0xdb]);
+    faults.push(append_x86_jcc_rel32(b, 0x84));
+    b.extend_from_slice(&[0x48,0x89,0x07,0x48,0x83,0xc7,8,0x48,0x83,0xc6,8,0x83,0xe9,8,0x83,0xf9,8]);
+    let again = append_x86_jcc_rel32(b, 0x83);
+    patch_x86_rel32(b, again, word_loop)?;
+    let tail_start = b.len(); patch_x86_rel32(b, subword, tail_start)?;
+    b.extend_from_slice(&[0x85,0xc9]); // test ecx,ecx
+    let empty = append_x86_jcc_rel32(b, 0x84);
+    b.extend_from_slice(&[0x83,0xf9,4]); // cmp ecx,4
+    let below4 = append_x86_jcc_rel32(b, 0x82);
+    sites.push(LoadSite { offset: b.len() as u32, insn_len: 2, destination: 11 });
+    b.extend_from_slice(&[0x8b,0x06,0x45,0x85,0xdb]); // mov eax,[rsi]; status
+    faults.push(append_x86_jcc_rel32(b, 0x84));
+    b.extend_from_slice(&[0x89,0x07,0x48,0x83,0xc7,4,0x48,0x83,0xc6,4,0x83,0xe9,4]);
+    let two = b.len(); patch_x86_rel32(b, below4, two)?;
+    b.extend_from_slice(&[0x83,0xf9,2]); // cmp ecx,2
+    let below2 = append_x86_jcc_rel32(b, 0x82);
+    sites.push(LoadSite { offset: b.len() as u32, insn_len: 3, destination: 11 });
+    b.extend_from_slice(&[0x0f,0xb7,0x06,0x45,0x85,0xdb]); // movzx eax,word[rsi]; status
+    faults.push(append_x86_jcc_rel32(b, 0x84));
+    b.extend_from_slice(&[0x66,0x89,0x07,0x48,0x83,0xc7,2,0x48,0x83,0xc6,2,0x83,0xe9,2]);
+    let one = b.len(); patch_x86_rel32(b, below2, one)?;
+    b.extend_from_slice(&[0x85,0xc9]);
+    let complete = append_x86_jcc_rel32(b, 0x84);
+    sites.push(LoadSite { offset: b.len() as u32, insn_len: 3, destination: 11 });
+    b.extend_from_slice(&[0x0f,0xb6,0x06,0x45,0x85,0xdb]); // movzx eax,byte[rsi]; status
+    faults.push(append_x86_jcc_rel32(b, 0x84));
+    b.extend_from_slice(&[0x88,0x07]);
+    let success = b.len(); patch_x86_rel32(b, complete, success)?; patch_x86_rel32(b, empty, success)?;
+    b.extend_from_slice(&[0x31,0xc0]);
+    Ok(())
+}
+
+/// Zero the whole destination from the saved dst and size that `saved` moves into RDI and ECX;
+/// returns the branch that leaves after a zero-length destination.
+fn zero_fill(b: &mut Vec<u8>, saved: &[u8]) -> Result<usize> {
+    b.extend_from_slice(saved);
+    b.extend_from_slice(&[0x31,0xd2,0x83,0xf9,8]);
+    let zero_tail = append_x86_jcc_rel32(b, 0x82);
+    let zero_word = b.len();
+    b.extend_from_slice(&[0x48,0x89,0x17,0x48,0x83,0xc7,8,0x83,0xe9,8,0x83,0xf9,8]);
+    let again = append_x86_jcc_rel32(b, 0x83); patch_x86_rel32(b, again, zero_word)?;
+    let tail = b.len(); patch_x86_rel32(b, zero_tail, tail)?;
+    b.extend_from_slice(&[0x85,0xc9]);
+    let zero_done = append_x86_jcc_rel32(b, 0x84);
+    let zero_byte = b.len();
+    b.extend_from_slice(&[0x88,0x17,0x48,0xff,0xc7,0xff,0xc9]);
+    let again = append_x86_jcc_rel32(b, 0x85); patch_x86_rel32(b, again, zero_byte)?;
+    Ok(zero_done)
+}
+
+/// copy_from_user_nofault as a leaf: __access_ok, nmi_uaccess_okay, pagefault_disable, STAC
+/// with SMAP, copy, CLAC, pagefault_enable; denial and faults zero the destination. It uses
+/// caller-saved registers only: R8=dst, R9D=size, RDX=src and then the SMAP flag, R10=current.
+fn user_leaf(layout: &RuntimeProbeReadLayout, actual: u64)
+    -> Result<(Vec<u8>, Vec<RelocRecord>, Vec<LoadSite>)> {
+    let target = |symbol| address(symbol, layout.user_helper, actual);
+    let current = gs_disp32(target(layout.current_task)?, "current_task")?;
+    let loaded_mm = gs_disp32(target(layout.cpu_tlbstate)?.wrapping_add(u64::from(layout.tlb_loaded_mm)),
+        "cpu_tlbstate.loaded_mm")?;
+    let task_offset = i32::try_from(layout.pagefault_disabled)?.to_le_bytes();
+    let mm_offset = i32::try_from(layout.task_mm)?.to_le_bytes();
+    let mut b = vec![0x49,0x89,0xf8,0x41,0x89,0xf1]; // r8=dst, r9d=size; RDX keeps src
+    let mut denied = Vec::new();
+    // __access_ok(src,size): src+size <= USER_PTR_MAX without wrap. USER_PTR_MAX is TASK_SIZE_MAX
+    // (at least 2^47 - PAGE_SIZE) and exceeds every u32 size, so this is src <= USER_PTR_MAX-size.
+    absolute(&mut b, &[0x49,0xbb], target(layout.user_ptr_max)?);
+    b.extend_from_slice(&[0x49,0x8b,0x03,0x4c,0x29,0xc8,0x48,0x39,0xc2]); // rax=[r11]-r9; cmp rdx,rax
+    denied.push(append_x86_jcc_rel32(&mut b, 0x87)); // above
+    // nmi_uaccess_okay: this CPU's cpu_tlbstate.loaded_mm equals current->mm.
+    b.extend_from_slice(&[0x65,0x4c,0x8b,0x14,0x25]); b.extend_from_slice(&current); // r10=gs:current_task
+    b.extend_from_slice(&[0x65,0x48,0x8b,0x04,0x25]); b.extend_from_slice(&loaded_mm); // rax=gs:loaded_mm
+    b.extend_from_slice(&[0x49,0x3b,0x82]); b.extend_from_slice(&mm_offset); // cmp rax,[r10+mm]
+    denied.push(append_x86_jcc_rel32(&mut b, 0x85));
+    b.extend_from_slice(&[0x41,0xff,0x82]); b.extend_from_slice(&task_offset); // pagefault_disable
+    b.extend_from_slice(&[0x48,0x89,0xd6]); // rsi=src
+    absolute(&mut b, &[0x49,0xbb], target(layout.boot_cpu_data)?);
+    b.extend_from_slice(&[0x41,0xf7,0x83]); // test boot_cpu_data.x86_capability[9],SMAP
+    b.extend_from_slice(&i32::try_from(layout.x86_capability+9*4)?.to_le_bytes());
+    b.extend_from_slice(&(1u32<<20).to_le_bytes()); // sole x86 cpufeatures.h X86_FEATURE_SMAP
+    b.extend_from_slice(&[0x0f,0x95,0xc2]); // setne dl; retains the feature across the copy
+    let no_smap = append_x86_jcc_rel32(&mut b, 0x84);
+    b.extend_from_slice(&[0x0f,0x01,0xcb]); // STAC only with actual CPU SMAP capability
+    let after = b.len(); patch_x86_rel32(&mut b, no_smap, after)?;
+    b.extend_from_slice(&[0x4c,0x89,0xc7,0x44,0x89,0xc9,0x41,0xbb,1,0,0,0]); // rdi=dst, ecx=size, r11d=1
+    let mut sites = Vec::new(); let mut faults = Vec::new();
+    copy_words(&mut b, &mut sites, &mut faults)?;
+    let cleanup_success = jump(&mut b);
+    let fault = b.len();
+    for branch in faults { patch_x86_rel32(&mut b, branch, fault)?; }
+    b.extend_from_slice(&[0x48,0xc7,0xc0,0xf2,0xff,0xff,0xff]); // -EFAULT, sign extended
+    let cleanup = b.len(); patch_x86_rel32(&mut b, cleanup_success, cleanup)?;
+    b.extend_from_slice(&[0x84,0xd2]); // saved SMAP feature
+    let skip = append_x86_jcc_rel32(&mut b, 0x84);
+    b.extend_from_slice(&[0x0f,0x01,0xca]); // CLAC, both success and fault
+    let after = b.len(); patch_x86_rel32(&mut b, skip, after)?;
+    b.extend_from_slice(&[0x41,0xff,0x8a]); b.extend_from_slice(&task_offset); // pagefault_enable
+    b.extend_from_slice(&[0x48,0x85,0xc0]);
+    let clean_return = append_x86_jcc_rel32(&mut b, 0x84);
+    let zero_fault = jump(&mut b);
+    let deny = b.len();
+    for branch in denied { patch_x86_rel32(&mut b, branch, deny)?; }
+    b.extend_from_slice(&[0x48,0xc7,0xc0,0xf2,0xff,0xff,0xff]); // -EFAULT
+    let zero = b.len(); patch_x86_rel32(&mut b, zero_fault, zero)?;
+    let zero_done = zero_fill(&mut b, &[0x4c,0x89,0xc7,0x44,0x89,0xc9])?; // rdi=r8, ecx=r9d
+    let end = b.len();
+    patch_x86_rel32(&mut b, clean_return, end)?; patch_x86_rel32(&mut b, zero_done, end)?;
+    b.push(0xc3);
+    Ok((b, Vec::new(), sites))
+}
+
+fn kernel_routine(layout: &RuntimeProbeReadLayout, actual: u64, string: bool)
+    -> Result<(Vec<u8>, Vec<RelocRecord>, Vec<LoadSite>)> {
+    let target = |symbol| address(symbol, layout.kernel_helper, actual);
+    let current = gs_disp32(target(layout.current_task)?, "current_task")?;
     let task_offset = i32::try_from(layout.pagefault_disabled)?.to_le_bytes();
     let mut b = vec![0x53,0x41,0x54,0x41,0x55,0x41,0x56,0x41,0x57]; // five saves; aligned calls
     b.extend_from_slice(&[0x49,0x89,0xfc,0x41,0x89,0xf5,0x49,0x89,0xd6]); // r12=dst,r13d=size,r14=src
@@ -42,35 +165,14 @@ fn routine_kind(layout: &RuntimeProbeReadLayout, user: bool, actual: u64, string
     } else {None};
     let mut relocs = Vec::new();
     let mut denied = Vec::new();
-    if user {
-        b.extend_from_slice(&[0x48,0x89,0xd0,0x4c,0x01,0xe8]); // src+u32 size
-        denied.push(append_x86_jcc_rel32(&mut b, 0x82)); // carry
-        absolute(&mut b, &[0x49,0xbb], target(layout.user_ptr_max)?);
-        b.extend_from_slice(&[0x49,0x3b,0x03]); // cmp rax,[r11]: live USER_PTR_MAX
-        denied.push(append_x86_jcc_rel32(&mut b, 0x87)); // above
-    } else {
-        b.extend_from_slice(&[0x4c,0x89,0xf7,0x44,0x89,0xee]); // kernel allowed(src,size)
-    }
-    relocs.push(RelocRecord { offset: b.len() as u32, kind: 1,
-        target: target(if user { layout.nmi_uaccess_okay } else { layout.kernel_allowed })? });
+    b.extend_from_slice(&[0x4c,0x89,0xf7,0x44,0x89,0xee]); // kernel allowed(src,size)
+    relocs.push(RelocRecord { offset: b.len() as u32, kind: 1, target: target(layout.kernel_allowed)? });
     b.extend_from_slice(&X86_HELPER_CALL_REL32_SLOT);
     b.extend_from_slice(&[0x84,0xc0]); // policy callback bool
     denied.push(append_x86_jcc_rel32(&mut b, 0x84));
     b.extend_from_slice(&[0x65,0x48,0x8b,0x1c,0x25]); // rbx=gs:current_task
-    b.extend_from_slice(&(current as u32).to_le_bytes());
+    b.extend_from_slice(&current);
     b.extend_from_slice(&[0xff,0x83]); b.extend_from_slice(&task_offset); // pagefault_disable
-    if user {
-        absolute(&mut b, &[0x49,0xbb], target(layout.boot_cpu_data)?);
-        b.extend_from_slice(&[0x41,0xf7,0x83]); // test boot_cpu_data.x86_capability[9],SMAP
-        b.extend_from_slice(&i32::try_from(layout.x86_capability+9*4)?.to_le_bytes());
-        b.extend_from_slice(&(1u32<<20).to_le_bytes()); // sole x86 cpufeatures.h X86_FEATURE_SMAP
-        b.extend_from_slice(&[0x41,0x0f,0x95,0xc7]); // setne r15b; retains feature across copy
-        let no_smap = append_x86_jcc_rel32(&mut b, 0x84);
-        b.extend_from_slice(&[0x0f,0x01,0xcb]); // STAC only with actual CPU SMAP capability
-        let after = b.len(); patch_x86_rel32(&mut b, no_smap, after)?;
-        // Match sole-target copy_user_generic: STAC/copy/CLAC. Its range
-        // check and nmi_uaccess_okay policy above do not add an LFENCE.
-    }
     b.extend_from_slice(&[0x4c,0x89,0xe7,0x4c,0x89,0xf6,0x44,0x89,0xe9]); // copy args
     b.extend_from_slice(&[0x41,0xbb,1,0,0,0]); // R11 fault status=success
     let mut sites=Vec::new(); let mut faults=Vec::new();
@@ -86,55 +188,13 @@ fn routine_kind(layout: &RuntimeProbeReadLayout, user: bool, actual: u64, string
         let end=b.len();patch_x86_rel32(&mut b,nul,end)?;
         b.extend_from_slice(&[0xc6,0x47,0xff,0,0x48,0x89,0xf8,0x4c,0x29,0xe0,0x48,0x63,0xc0]); // helper common returns signed int
     } else {
-    b.extend_from_slice(&[0x83,0xf9,8]);
-    let subword = append_x86_jcc_rel32(&mut b, 0x82);
-    let word_loop = b.len();
-    sites.push(LoadSite { offset: b.len() as u32, insn_len: 3, destination: 11 });
-    b.extend_from_slice(&[0x48,0x8b,0x06]); // mov rax,[rsi]; recovery clears R11
-    b.extend_from_slice(&[0x45,0x85,0xdb]);
-    faults.push(append_x86_jcc_rel32(&mut b, 0x84));
-    b.extend_from_slice(&[0x48,0x89,0x07,0x48,0x83,0xc7,8,0x48,0x83,0xc6,8,0x83,0xe9,8,0x83,0xf9,8]);
-    let again = append_x86_jcc_rel32(&mut b, 0x83);
-    patch_x86_rel32(&mut b, again, word_loop)?;
-    // Remainder below 8 bytes: an empty remainder goes straight to success; otherwise one 4-,
-    // one 2- and one 1-byte step, as mm/maccess.c copies.
-    let tail_start = b.len(); patch_x86_rel32(&mut b, subword, tail_start)?;
-    b.extend_from_slice(&[0x85,0xc9]); // test ecx,ecx
-    let empty = append_x86_jcc_rel32(&mut b, 0x84);
-    b.extend_from_slice(&[0x83,0xf9,4]); // cmp ecx,4
-    let below4 = append_x86_jcc_rel32(&mut b, 0x82);
-    sites.push(LoadSite { offset: b.len() as u32, insn_len: 2, destination: 11 });
-    b.extend_from_slice(&[0x8b,0x06,0x45,0x85,0xdb]); // mov eax,[rsi]; status
-    faults.push(append_x86_jcc_rel32(&mut b, 0x84));
-    b.extend_from_slice(&[0x89,0x07,0x48,0x83,0xc7,4,0x48,0x83,0xc6,4,0x83,0xe9,4]);
-    let two = b.len(); patch_x86_rel32(&mut b, below4, two)?;
-    b.extend_from_slice(&[0x83,0xf9,2]); // cmp ecx,2
-    let below2 = append_x86_jcc_rel32(&mut b, 0x82);
-    sites.push(LoadSite { offset: b.len() as u32, insn_len: 3, destination: 11 });
-    b.extend_from_slice(&[0x0f,0xb7,0x06,0x45,0x85,0xdb]); // movzx eax,word[rsi]; status
-    faults.push(append_x86_jcc_rel32(&mut b, 0x84));
-    b.extend_from_slice(&[0x66,0x89,0x07,0x48,0x83,0xc7,2,0x48,0x83,0xc6,2,0x83,0xe9,2]);
-    let one = b.len(); patch_x86_rel32(&mut b, below2, one)?;
-    b.extend_from_slice(&[0x85,0xc9]);
-    let complete = append_x86_jcc_rel32(&mut b, 0x84);
-    sites.push(LoadSite { offset: b.len() as u32, insn_len: 3, destination: 11 });
-    b.extend_from_slice(&[0x0f,0xb6,0x06,0x45,0x85,0xdb]); // movzx eax,byte[rsi]; status
-    faults.push(append_x86_jcc_rel32(&mut b, 0x84));
-    b.extend_from_slice(&[0x88,0x07]);
-    let success = b.len(); patch_x86_rel32(&mut b, complete, success)?; patch_x86_rel32(&mut b, empty, success)?;
-    b.extend_from_slice(&[0x31,0xc0]);
+        copy_words(&mut b, &mut sites, &mut faults)?;
     }
     let cleanup_success = jump(&mut b);
     let fault = b.len();
     for branch in faults {patch_x86_rel32(&mut b,branch,fault)?;}
     b.extend_from_slice(&[0x48,0xc7,0xc0,0xf2,0xff,0xff,0xff]); // -EFAULT, sign extended
     let cleanup = b.len(); patch_x86_rel32(&mut b, cleanup_success, cleanup)?;
-    if user {
-        b.extend_from_slice(&[0x45,0x84,0xff]); // saved SMAP feature
-        let skip = append_x86_jcc_rel32(&mut b, 0x84);
-        b.extend_from_slice(&[0x0f,0x01,0xca]); // CLAC, both success and fault
-        let after = b.len(); patch_x86_rel32(&mut b, skip, after)?;
-    }
     b.extend_from_slice(&[0xff,0x8b]); b.extend_from_slice(&task_offset); // pagefault_enable
     b.extend_from_slice(&[0x48,0x85,0xc0]);
     let clean_return = append_x86_jcc_rel32(&mut b, if string {0x89} else {0x84});
@@ -142,19 +202,9 @@ fn routine_kind(layout: &RuntimeProbeReadLayout, user: bool, actual: u64, string
     let deny = b.len();
     for branch in denied { patch_x86_rel32(&mut b, branch, deny)?; }
     b.extend_from_slice(&[0x48,0xc7,0xc0]);
-    b.extend_from_slice(&(if user { -14i32 } else { -34i32 }).to_le_bytes());
+    b.extend_from_slice(&(-34i32).to_le_bytes());
     let zero = b.len(); patch_x86_rel32(&mut b, zero_fault, zero)?;
-    b.extend_from_slice(&[0x4c,0x89,0xe7,0x44,0x89,0xe9,0x31,0xd2,0x83,0xf9,8]);
-    let zero_tail = append_x86_jcc_rel32(&mut b, 0x82);
-    let zero_word = b.len();
-    b.extend_from_slice(&[0x48,0x89,0x17,0x48,0x83,0xc7,8,0x83,0xe9,8,0x83,0xf9,8]);
-    let again = append_x86_jcc_rel32(&mut b, 0x83); patch_x86_rel32(&mut b, again, zero_word)?;
-    let tail = b.len(); patch_x86_rel32(&mut b, zero_tail, tail)?;
-    b.extend_from_slice(&[0x85,0xc9]);
-    let zero_done = append_x86_jcc_rel32(&mut b, 0x84);
-    let zero_byte = b.len();
-    b.extend_from_slice(&[0x88,0x17,0x48,0xff,0xc7,0xff,0xc9]);
-    let again = append_x86_jcc_rel32(&mut b, 0x85); patch_x86_rel32(&mut b, again, zero_byte)?;
+    let zero_done = zero_fill(&mut b, &[0x4c,0x89,0xe7,0x44,0x89,0xe9])?; // rdi=r12, ecx=r13d
     let end = b.len();
     patch_x86_rel32(&mut b, clean_return, end)?; patch_x86_rel32(&mut b, zero_done, end)?;
     if let Some(branch)=zero_return {patch_x86_rel32(&mut b,branch,end)?;}
@@ -174,7 +224,7 @@ pub(super) fn share(blob: &mut Vec<u8>, relocs: &mut Vec<RelocRecord>,
         if calls.is_empty() { continue; }
         let start = blob.len();
         let anchor=if string {let Some(&regular)=helpers.get("bpf_probe_read_kernel") else {continue;};regular} else {helper};
-        let (bytes,mut nested,mut sites) = if string {routine_kind(layout,user,anchor,true)?} else {routine(layout,user,anchor)?};
+        let (bytes,mut nested,mut sites) = if string {kernel_routine(layout,anchor,true)?} else {routine(layout,user,anchor)?};
         for &site in &calls {
             if blob.get(site..site+5) != Some(X86_HELPER_CALL_REL32_SLOT.as_slice()) {
                 bail!("probe-read call at {site:#x} lost its E8 helper slot");
@@ -212,9 +262,10 @@ mod tests {
     use super::*;
     fn fixture() -> RuntimeProbeReadLayout {
         RuntimeProbeReadLayout { user_helper:0x1000,kernel_helper:0x2000,
-            nmi_uaccess_okay:0x3000,kernel_allowed:0x4000,current_task:0,
+            kernel_allowed:0x4000,current_task:0,
             user_ptr_max:0x1111222233334444,boot_cpu_data:0x5555666677778888,
-            pagefault_disabled:4,x86_capability:0 }
+            pagefault_disabled:4,x86_capability:0,
+            cpu_tlbstate:8,tlb_loaded_mm:0,task_mm:8 }
     }
 
     #[test]
@@ -235,15 +286,15 @@ mod tests {
         for mode in 0..3 {
             let user=mode==1;let string=mode==2;
             let anchor = if user { layout.user_helper } else { layout.kernel_helper };
-            let (bytes,relocs,sites) = routine_kind(&layout,user,anchor,string)?;
+            let (bytes,relocs,sites) = if string {kernel_routine(&layout,anchor,true)?} else {routine(&layout,user,anchor)?};
             let stem = if string {"kernel-string"} else if user { "user" } else { "kernel" };
             let binary = output.join(format!("{stem}.bin"));
             let metadata = output.join(format!("{stem}.sites"));
             fs::write(&binary,&bytes)?;
-            assert_eq!(sites.len(),if string {1} else {4}); assert_eq!(relocs.len(),1);
+            assert_eq!(sites.len(),if string {1} else {4}); assert_eq!(relocs.len(),usize::from(!user));
             let mut text = sites.len().to_string();text.push(char::from(10));
             for site in sites { text.push_str(&format!("{} {} {}\n",site.offset,site.insn_len,site.destination)); }
-            text.push_str(&format!("{}\n",relocs[0].offset));
+            if let Some(call)=relocs.first() { text.push_str(&format!("{}\n",call.offset)); }
             fs::write(&metadata,text)?;
             let run = std::process::Command::new(&driver).arg(binary).arg(metadata)
                 .arg(mode.to_string()).output()?;
@@ -280,7 +331,7 @@ mod tests {
             assert_eq!(offset as i64+5+i64::from(disp),range.0 as i64);
         }
         assert!(relocs.iter().any(|r| r.offset==15 && r.target==0x9999));
-        assert_eq!(relocs.len(),3,"one policy callback per shared routine");
+        assert_eq!(relocs.len(),2,"the kernel routine keeps its policy callback; the user routine reads its policy inline");
         let mut strings=X86_HELPER_CALL_REL32_SLOT.repeat(2);
         let mut calls=vec![RelocRecord{offset:0,kind:1,target:0x5000},RelocRecord{offset:5,kind:1,target:0x6000}];
         let names=HashMap::from([("bpf_probe_read_kernel".into(),0x2000),

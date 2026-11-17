@@ -12,7 +12,7 @@
 namespace native_lto {
 
 inline constexpr const char *kernel_symbols[] = {
-    "bpf_probe_read_user", "bpf_probe_read_kernel", "nmi_uaccess_okay",
+    "bpf_probe_read_user", "bpf_probe_read_kernel", "cpu_tlbstate",
     "copy_from_kernel_nofault_allowed", "const_current_task", "USER_PTR_MAX", "boot_cpu_data",
     "ktime_get_mono_fast_ns",
 };
@@ -135,13 +135,15 @@ inline void write_layout(std::ostream &out, const btf *types, Resolver resolve)
 
     out << ",\"probe_read\":{\"user_helper\":" << symbol("bpf_probe_read_user")
         << ",\"kernel_helper\":" << symbol("bpf_probe_read_kernel")
-        << ",\"nmi_uaccess_okay\":" << symbol("nmi_uaccess_okay")
         << ",\"kernel_allowed\":" << symbol("copy_from_kernel_nofault_allowed")
         << ",\"current_task\":" << symbol("const_current_task")
         << ",\"user_ptr_max\":" << symbol("USER_PTR_MAX")
         << ",\"boot_cpu_data\":" << symbol("boot_cpu_data")
         << ",\"pagefault_disabled\":" << offset(types, "task_struct", "pagefault_disabled", true)
-        << ",\"x86_capability\":" << offset(types, "cpuinfo_x86", "x86_capability") << "}}";
+        << ",\"x86_capability\":" << offset(types, "cpuinfo_x86", "x86_capability")
+        << ",\"cpu_tlbstate\":" << symbol("cpu_tlbstate")
+        << ",\"tlb_loaded_mm\":" << offset(types, "tlb_state", "loaded_mm")
+        << ",\"task_mm\":" << offset(types, "task_struct", "mm") << "}}";
     if (!out) throw std::runtime_error("write kernel LTO layout");
 }
 

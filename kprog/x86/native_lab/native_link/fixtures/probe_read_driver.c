@@ -11,7 +11,8 @@
 #include <ucontext.h>
 #include <unistd.h>
 
-static struct { int unused, disabled; } task;
+static struct { int unused, disabled; uintptr_t mm; } task; /* fixture pagefault_disabled=4, task_mm=8 */
+static struct { uintptr_t current, loaded_mm; } percpu; /* GS: current_task=0, cpu_tlbstate.loaded_mm=8 */
 static uintptr_t user_max = UINTPTR_MAX;
 static uint32_t capabilities[10]; /* SMAP deliberately off in user-mode test. */
 static unsigned char *code;
@@ -112,16 +113,23 @@ int main(int argc, char **argv)
         assert(destination == 11 && (lengths[i] == 2 || lengths[i] == 3));
     }
     unsigned call;
-    assert(fscanf(f,"%u",&call) == 1 && code[call] == 0xe8);
-    int64_t disp = (intptr_t)policy - (intptr_t)(code+call+5);
-    assert(disp == (int32_t)disp); int32_t rel = disp;
-    memcpy(code+call+1,&rel,4); assert(!fclose(f));
+    int has_call = fscanf(f,"%u",&call) == 1;
+    assert(has_call == !user); /* The user read is a leaf: its policy reads are inline. */
+    if (has_call) {
+        assert(code[call] == 0xe8);
+        int64_t disp = (intptr_t)policy - (intptr_t)(code+call+5);
+        assert(disp == (int32_t)disp); int32_t rel = disp;
+        memcpy(code+call+1,&rel,4);
+    }
+    assert(!fclose(f));
     assert(!mprotect(code,size,PROT_READ|PROT_EXEC));
     struct sigaction sa = {.sa_sigaction=fault,.sa_flags=SA_SIGINFO};
     assert(!sigemptyset(&sa.sa_mask)); assert(!sigaction(SIGSEGV,&sa,NULL));
-    uintptr_t old_gs, current = (uintptr_t)&task;
+    uintptr_t old_gs;
+    percpu.current = (uintptr_t)&task;
+    task.mm = percpu.loaded_mm = 0x1000;
     assert(!syscall(SYS_arch_prctl,ARCH_GET_GS,&old_gs));
-    assert(!syscall(SYS_arch_prctl,ARCH_SET_GS,&current));
+    assert(!syscall(SYS_arch_prctl,ARCH_SET_GS,&percpu));
     task.disabled = 7;
     unsigned char *src = mmap(NULL,8192,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
     assert(src != MAP_FAILED); for (unsigned i=0;i<4096;++i) src[i]=(i*17)^0x5a;
@@ -149,7 +157,8 @@ int main(int argc, char **argv)
         check(dest+1,src+4096,n,-14); ++vectors;
         if (n>9) { check(dest+1,src+4087,n,-14); ++vectors; }
     }
-    denied=1; check(dest+1,src,33,user ? -14 : -34); ++vectors; denied=0;
+    denied=1; if (user) percpu.loaded_mm = task.mm + 0x1000; /* nmi_uaccess_okay false */
+    check(dest+1,src,33,user ? -14 : -34); ++vectors; denied=0; percpu.loaded_mm = task.mm;
     if (user) {
         unsigned before = callbacks;
         user_max=(uintptr_t)src+16;
