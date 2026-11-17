@@ -1,0 +1,33 @@
+flags: -Os -g -fPIC -c -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -Xclang -fembed-bitcode=all -Wno-unknown-attributes -Wno-compare-distinct-pointer-types
+image: sha256:88234febcb7f29611818fb46bf88717b3d0752783d9df1c4e24125c25c22aa40
+bcc exec_bytes 7170
+cilium exec_bytes 260932
+katran exec_bytes 9376
+otelcol-ebpf-profiler exec_bytes 413855
+tetragon exec_bytes 4974336
+tracee exec_bytes 1431924
+all exec_bytes 7097593
+== otelcol-ebpf-profiler/profiling /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_010914_990572
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_010914_990572 throughput native/eBPF 1.027x  eBPF [38578715, 37377634, 37766498] native [40100740, 37543062, 38772296] per-sample [1.039, 1.004, 1.027] errors 0
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_010914_990572 ns/inv eBPF 3400.9 (2/13 progs) native 3183.0 (2/13) speedup 1.068x
+x86_kvm_corpus_20261117_010914_990572 installed programs 14 JIT 167706 B native 130523 B ratio 0.78x
+== bcc/set 
+== cilium/agent /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_012658_939555
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_012658_939555 throughput native/eBPF 3.036x  eBPF [1255411, 1308056, 1000113] native [3909877, 3811522, 3154272] per-sample [3.114, 2.914, 3.154] errors 0
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_012658_939555 ns/inv eBPF 769.4 (2/56 progs) native 228.9 (2/58) speedup 3.361x
+x86_kvm_corpus_20261117_012658_939555 installed programs 18 JIT 79827 B native 63543 B ratio 0.80x
+== tracee/monitor /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_013735_779007
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/flag-tuning-20261117/may29_ratio.py", line 29, in <module>
+    x, e, n, r, errs = thr(run)
+                       ^^^^^^^^
+  File "/workspaces/repository/kprog/results/flag-tuning-20261117/may29_ratio.py", line 19, in thr
+    return statistics.median(n) / statistics.median(e), e, n, r, errs
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/statistics.py", line 617, in median
+    raise StatisticsError("no median for empty data")
+statistics.StatisticsError: no median for empty data
+== katran /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_014409_932036
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_014409_932036 throughput native/eBPF 1.008x  eBPF [2444182, 2415995, 2427321] native [2432984, 2445892, 2463021] per-sample [0.995, 1.012, 1.015] errors 976562164
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_014409_932036 ns/inv eBPF 176.2 (1/1 progs) native 173.6 (1/1) speedup 1.015x
+x86_kvm_corpus_20261117_014409_932036 installed programs 1 JIT 13641 B native 9085 B ratio 0.67x
