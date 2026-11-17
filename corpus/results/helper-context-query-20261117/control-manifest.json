@@ -1,0 +1,149 @@
+{
+  "app": "bcc",
+  "objects": [
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/biosnoop.native.o",
+      "program": "blk_account_io_",
+      "symbol": "blk_account_io_merge_bio"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/biosnoop.native.o",
+      "program": "block_rq_comple",
+      "symbol": "block_rq_complete"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/biosnoop.native.o",
+      "program": "block_rq_insert",
+      "symbol": "block_rq_insert"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/biosnoop.native.o",
+      "program": "block_rq_issue",
+      "symbol": "block_rq_issue"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/vfsstat.native.o",
+      "program": "fentry_vfs_crea",
+      "symbol": "fentry_vfs_create"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/vfsstat.native.o",
+      "program": "fentry_vfs_fsyn",
+      "symbol": "fentry_vfs_fsync"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/vfsstat.native.o",
+      "program": "fentry_vfs_open",
+      "symbol": "fentry_vfs_open"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/vfsstat.native.o",
+      "program": "fentry_vfs_read",
+      "symbol": "fentry_vfs_read"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/vfsstat.native.o",
+      "program": "fentry_vfs_writ",
+      "symbol": "fentry_vfs_write"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/runqlat.native.o",
+      "program": "handle_sched_sw",
+      "symbol": "handle_sched_switch"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/runqlat.native.o",
+      "program": "handle_sched_wa"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/runqlat.native.o",
+      "program": "handle_switch",
+      "symbol": "handle_switch"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/tcplife.native.o",
+      "program": "inet_sock_set_s",
+      "symbol": "inet_sock_set_state"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/capable.native.o",
+      "program": "kprobe__cap_cap"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/vfsstat.native.o",
+      "program": "kprobe_vfs_crea",
+      "symbol": "kprobe_vfs_create"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/vfsstat.native.o",
+      "program": "kprobe_vfs_fsyn",
+      "symbol": "kprobe_vfs_fsync"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/vfsstat.native.o",
+      "program": "kprobe_vfs_open",
+      "symbol": "kprobe_vfs_open"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/vfsstat.native.o",
+      "program": "kprobe_vfs_read",
+      "symbol": "kprobe_vfs_read"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/vfsstat.native.o",
+      "program": "kprobe_vfs_writ",
+      "symbol": "kprobe_vfs_write"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/runqlat.native.o",
+      "program": "sched_switch",
+      "symbol": "sched_switch"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/runqlat.native.o",
+      "program": "sched_wakeup",
+      "symbol": "sched_wakeup"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/runqlat.native.o",
+      "program": "sched_wakeup_ne",
+      "symbol": "sched_wakeup_new"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/syscount.native.o",
+      "program": "sys_enter",
+      "symbol": "sys_enter"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/syscount.native.o",
+      "program": "sys_exit",
+      "symbol": "sys_exit"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/tcpconnect.native.o",
+      "program": "tcp_v4_connect",
+      "symbol": "tcp_v4_connect"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/tcpconnect.native.o",
+      "program": "tcp_v4_connect_",
+      "symbol": "tcp_v4_connect_ret"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/tcpconnect.native.o",
+      "program": "tcp_v6_connect",
+      "symbol": "tcp_v6_connect"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/tcpconnect.native.o",
+      "program": "tcp_v6_connect_",
+      "symbol": "tcp_v6_connect_ret"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/bcc/opensnoop.native.o",
+      "program": "tracepoint__sys"
+    }
+  ],
+  "status": "native-objects-proof-linked",
+  "version": 1
+}
