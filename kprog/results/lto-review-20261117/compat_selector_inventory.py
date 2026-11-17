@@ -33,9 +33,11 @@ result = dict(recorded_utc=subprocess.check_output(['date', '-u', '+%FT%TZ'], te
               rows=rows)
 (HERE / 'compat-selector.json').write_text(json.dumps(result, indent=2) + '\n')
 vmlinux = Path('/workspaces/.agent-state/kprog-ck/build-x86/vmlinux')
-disassembly = subprocess.check_output(['objdump', '-d', '--no-show-raw-insn',
-                                      '--disassemble=bpf_probe_read_compat', str(vmlinux)], text=True)
-(HERE / 'compat-kernel-helper.disassembly.txt').write_text(disassembly)
-print(len(rows), 'source-selector rows; existing kernel helper disassembly retained')
+for helper, filename in [('bpf_probe_read_compat', 'compat-kernel-helper.disassembly.txt'),
+                         ('copy_from_kernel_nofault', 'kernel-nofault-copy.disassembly.txt')]:
+    disassembly = subprocess.check_output(['objdump', '-d', '--no-show-raw-insn',
+                                          '--disassemble=' + helper, str(vmlinux)], text=True)
+    (HERE / filename).write_text(disassembly)
+print(len(rows), 'source-selector rows; existing kernel helper/copy disassembly retained')
 for recipe in ('boot_limit_only', 'inclusive_selector', 'end_based_selector'):
     print(recipe, sum(row[recipe] != row['kernel_selector'] for row in rows), 'differing illustrations')

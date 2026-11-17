@@ -3093,3 +3093,71 @@ the earlier signed-disp32 global-address opportunity after compat timing,
 together with constant-size specialization. This changes the status of
 those source proposals, not their measured performance: compat results
 and the later encoding/specialization effects remain pending.
+
+
+### Successful copy-loop cost: separate required recovery from loop overhead
+
+Source review after `d6b4d335e`. The retained sole-kernel
+[copy_from_kernel_nofault disassembly](kernel-nofault-copy.disassembly.txt)
+shows seven instructions per successful qword iteration at
+`copy_from_kernel_nofault+0x3a`: load, subtract count, store, increment
+source/destination, compare count and loop branch. It does **not** execute
+a fault-status test/branch after the load. Its exception fixup redirects
+faults out of the ordinary loop. Static `__fentry__` and return-thunk
+entries in this file are not measurements of their runtime patch state
+or cost and are not credited as removed hot-path work.
+
+The current native loop (`x86_probe_read.rs:42–47`) executes nine
+instructions per qword, including TEST R11D and its conditional fault
+branch. Thus 8 / 16 / 144-byte copies execute 1 / 2 / 18 such status tests
+and branches, in addition to loop/tail/policy work. This is a concrete
+reason that copying the same number of bytes with a smaller frame alone
+does not guarantee that the native copy loop beats the kernel loop.
+It is not a newly discovered permission to drop those operations:
+
+- The existing module maps recovery destination 11 to `pt_regs.r11`
+  (`direct-native/bpf_x86_native_lab.c:345–352,387–392`), and unchanged
+  `bpf_jit_comp.c:1481–1503` clears that register and advances RIP.
+- The linker also requires recovery length to equal the decoded source
+  load length (`x86.rs:1905–1912`). Increasing that length to skip a
+  success jump is not supported by the present contract, even though
+  the module's outer length bound by itself would accept some values.
+- Removing the status test, postponing it until after a store, or
+  continuing more source loads after a fault changes the established
+  error/whole-destination-zeroing sequence. Keep ordered fault handling.
+
+A source-level alternative was considered, **not recommended for this
+batch**: use RCX as the nonzero recovery status and R11D as the byte
+counter, replacing TEST-plus-JZ with JRCXZ. The existing module can
+already clear `pt_regs.cx` through recovery destination 1; that is a
+register index, distinct from the exception handler's internal
+DONT_CLEAR offset sentinel. Both registers are caller saved, and the
+error cleanup can restore ECX from saved R9D after status is dead.
+No module change is implied by that register mapping.
+
+Literal source arithmetic for the present generic scalar layout gives
+144 copy-region bytes including success XOR versus 125 with that
+register allocation: four 9-byte test/near-branch groups become four
+2-byte counter-zero branches (-28 B), while nine counter operations
+need one extra REX byte (+9 B). Status initialization saves another byte,
+for **20 local bytes** in total. The first branch's distance to the
+existing nearby fault label would be 115 bytes, with later distances
+67 / 38 / 9; all fit signed rel8 in this particular layout. These are
+source calculations, not emitted candidate code, decoder validation or
+installed-byte savings. A large unrolled form may not have that reach.
+Fewer architectural instructions do not establish fewer cycles: branch
+implementation, front-end fusion and layout still matter.
+
+More importantly, the current B path does not implement this instruction.
+`trusted_specializer.py:20` loads
+`micro-prog/generate_micro_sim_proofs.py`; that generator only recognizes
+flag-condition branches through CC_AUX at lines 569–571 and 1578–1595.
+The generated legacy/full condition tables contain no JRCXZ, and the
+encoder ends in the existing unsupported-mnemonic return at line 1101.
+The local iced-x86 enum documents JRCXZ's rel8 form (`code.rs:5462–5469`),
+but decoder support alone is not simulator/generator support. Introducing
+it here would create additional B-generation work outside the current
+LTO-only production scope. Keep the scheduled constant-size and global
+address-encoding changes ahead of this idea; no new source refusal,
+check, ISA extension, guest or experimental gate was added. This review
+does not stop the current native-first compat batch.

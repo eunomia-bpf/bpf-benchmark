@@ -1,0 +1,74 @@
+
+/workspaces/.agent-state/kprog-ck/build-x86/vmlinux:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+ffffffff8153f1b0 <copy_from_kernel_nofault>:
+ffffffff8153f1b0:	call   ffffffff8127fb90 <__fentry__>
+ffffffff8153f1b5:	push   %r12
+ffffffff8153f1b7:	mov    %rdx,%r12
+ffffffff8153f1ba:	push   %rbp
+ffffffff8153f1bb:	mov    %rdi,%rbp
+ffffffff8153f1be:	push   %rbx
+ffffffff8153f1bf:	mov    %rsi,%rbx
+ffffffff8153f1c2:	mov    %rdx,%rsi
+ffffffff8153f1c5:	mov    %rbx,%rdi
+ffffffff8153f1c8:	call   ffffffff81299280 <copy_from_kernel_nofault_allowed>
+ffffffff8153f1cd:	test   %al,%al
+ffffffff8153f1cf:	je     ffffffff8153f26e <copy_from_kernel_nofault+0xbe>
+ffffffff8153f1d5:	mov    %gs:0x2d70e3b(%rip),%rdx        # ffffffff842b0018 <current_task>
+ffffffff8153f1dd:	addl   $0x1,0x24ac(%rdx)
+ffffffff8153f1e4:	cmp    $0x7,%r12
+ffffffff8153f1e8:	jbe    ffffffff8153f203 <copy_from_kernel_nofault+0x53>
+ffffffff8153f1ea:	mov    (%rbx),%rax
+ffffffff8153f1ed:	sub    $0x8,%r12
+ffffffff8153f1f1:	mov    %rax,0x0(%rbp)
+ffffffff8153f1f5:	add    $0x8,%rbx
+ffffffff8153f1f9:	add    $0x8,%rbp
+ffffffff8153f1fd:	cmp    $0x7,%r12
+ffffffff8153f201:	ja     ffffffff8153f1ea <copy_from_kernel_nofault+0x3a>
+ffffffff8153f203:	cmp    $0x3,%r12
+ffffffff8153f207:	jbe    ffffffff8153f21a <copy_from_kernel_nofault+0x6a>
+ffffffff8153f209:	mov    (%rbx),%eax
+ffffffff8153f20b:	mov    %eax,0x0(%rbp)
+ffffffff8153f20e:	add    $0x4,%rbx
+ffffffff8153f212:	add    $0x4,%rbp
+ffffffff8153f216:	sub    $0x4,%r12
+ffffffff8153f21a:	cmp    $0x1,%r12
+ffffffff8153f21e:	jbe    ffffffff8153f233 <copy_from_kernel_nofault+0x83>
+ffffffff8153f220:	mov    (%rbx),%ax
+ffffffff8153f223:	mov    %ax,0x0(%rbp)
+ffffffff8153f227:	add    $0x2,%rbx
+ffffffff8153f22b:	add    $0x2,%rbp
+ffffffff8153f22f:	sub    $0x2,%r12
+ffffffff8153f233:	test   %r12,%r12
+ffffffff8153f236:	je     ffffffff8153f23d <copy_from_kernel_nofault+0x8d>
+ffffffff8153f238:	mov    (%rbx),%al
+ffffffff8153f23a:	mov    %al,0x0(%rbp)
+ffffffff8153f23d:	xor    %eax,%eax
+ffffffff8153f23f:	subl   $0x1,0x24ac(%rdx)
+ffffffff8153f246:	jmp    ffffffff8153f25a <copy_from_kernel_nofault+0xaa>
+ffffffff8153f248:	mov    %rax,0x0(%rbp)
+ffffffff8153f24c:	subl   $0x1,0x24ac(%rdx)
+ffffffff8153f253:	mov    $0xfffffffffffffff2,%rax
+ffffffff8153f25a:	pop    %rbx
+ffffffff8153f25b:	pop    %rbp
+ffffffff8153f25c:	pop    %r12
+ffffffff8153f25e:	jmp    ffffffff820138b0 <__pi___x86_return_thunk>
+ffffffff8153f263:	mov    %eax,0x0(%rbp)
+ffffffff8153f266:	jmp    ffffffff8153f24c <copy_from_kernel_nofault+0x9c>
+ffffffff8153f268:	mov    %ax,0x0(%rbp)
+ffffffff8153f26c:	jmp    ffffffff8153f24c <copy_from_kernel_nofault+0x9c>
+ffffffff8153f26e:	mov    $0xffffffffffffffde,%rax
+ffffffff8153f275:	jmp    ffffffff8153f25a <copy_from_kernel_nofault+0xaa>
+
+Disassembly of section .data:
+
+Disassembly of section .init.text:
+
+Disassembly of section .altinstr_aux:
+
+Disassembly of section .altinstr_replacement:
+
+Disassembly of section .exit.text:
