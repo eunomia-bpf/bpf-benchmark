@@ -51,3 +51,9 @@ Raw: /workspaces/kprog-raw/formal/m5-producer-header-tail. Canonical C, exports,
 pinned semantics and frozen benchmark paths are unchanged by this proof step.
 Last complete native make check passed at 5236c0e96; it is not repeated for these
 Lean-only additions.
+
+Continuation: [the vector-loop proof](../m5-producer-vector-loop/README.md) now
+executes all 32 iterations and reaches the actual consumer sequence, preserving
+all 92 field observations and both cache contracts in 638 composed transitions.
+Consumer execution and lifetime remain open. The validation counts above
+record this earlier header-tail checkpoint.

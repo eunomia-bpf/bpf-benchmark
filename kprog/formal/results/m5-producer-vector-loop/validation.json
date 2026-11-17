@@ -1,0 +1,104 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-producer-vector-loop",
+  "focused_build": {
+    "exit": 0,
+    "jobs": 159,
+    "log": "focused3.log"
+  },
+  "public_queries": {
+    "exit": 0,
+    "theorems": 16,
+    "log": "query1.log",
+    "ordinary_axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "offset_axioms": [
+      "propext"
+    ],
+    "internal_run_additional_axioms": [
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem"
+    ],
+    "external_assembly_callback_execution": "none",
+    "new_semantic_or_native_reflection_axioms": []
+  },
+  "actual_loop": {
+    "iterations": 32,
+    "stores": 64,
+    "counter": "uint32, final Vint32",
+    "header_bytes": 728,
+    "vector_array_bytes": 512,
+    "header_offsets": [
+      "96+8*i",
+      "352+8*i"
+    ],
+    "pointer_offsets": [
+      "16*i",
+      "16*i+8"
+    ],
+    "index_conversion": "Ptrofs.of_intu, actual tuint temporary"
+  },
+  "internal_transitions": {
+    "initialization": 4,
+    "one_iteration": 11,
+    "all_iterations": 352,
+    "exit": 6,
+    "whole_loop": 362,
+    "header_and_loop": 638
+  },
+  "observations": {
+    "typed_field_readbacks": 92,
+    "both_borrowed_cache_contracts": true,
+    "other_temporary_bindings_preserved": true
+  },
+  "preservation": [
+    "scalar and tail header fields",
+    "other declared-local typed loads including source vector contents",
+    "caller bytes and Cur/Max permissions",
+    "access",
+    "nextblock"
+  ],
+  "premise": "stage access equals actual producer allocation access",
+  "environment_scope": {
+    "run": "Arm64Entry",
+    "memory_contract": "actual Arm64Program composites",
+    "endpoint": "actual continuation call/return sequence, before Scall",
+    "linked_consumer_execution": "open"
+  },
+  "whole_lake_build": {
+    "exit": 0,
+    "jobs": 285,
+    "log": "lake-build1.log",
+    "timing_lock": "shared"
+  },
+  "next_source_query": {
+    "exit": 0,
+    "log": "next1.log",
+    "claim": "actual consumer source and allocated &entry argument only"
+  },
+  "export_comparison": {
+    "exit": 0,
+    "baseline": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_byte_identical": true,
+    "log": "export-parity1.json"
+  },
+  "proof_limits": {
+    "heartbeats": 200000,
+    "recursion_depth": 512,
+    "workers": 1,
+    "address_space_GiB": 32,
+    "CPU": 17
+  },
+  "last_complete_make_check": {
+    "exit": 0,
+    "commit": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "rerun": "not repeated for Lean-only changes"
+  },
+  "complete_ISA_handler_refinements": 0,
+  "M5": "open",
+  "M6": "open"
+}
