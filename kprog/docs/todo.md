@@ -39,6 +39,14 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-17T12:19:22Z（审核 detour-20261117T09Z 逐条核实后的决定）**：
+1. 取时间（成立）：11-15 的时钟绑定只去掉了外层包装；取时间叶子例程（4c32e2ac1）已在计时，BCC、Katran、Tracee 约 13:05 出结果。
+2. Cilium（成立）：两臂差别的来源 10:30 查清（todo 同日块），开关对齐已由 PERF 按批次 2 放进 vendor/bpf/Makefile（12:16），和 uid_gid、字符串循环一起进下一个镜像，单独量 Cilium。
+3. 节奏（成立）：预期效果小于约 3%（同一镜像前后两次的波动）的改动合进同一个镜像一起量；预期更大的单独一批。omp 的 prompt 同步改。
+4. 代码量（成立）：读例程每个程序各带一份，Tetragon 装进去的代码多了 8%。多日大任务第 3 项的做法：每个程序只带它真正调用的叶子变体（compat 分派按需带用户或内核叶子），再做 rel8、共用清零尾部、disp32 全局量；按每个应用装进去的原生 / JIT 量。
+5. verified 路径（成立，运营者 11-16："verify 也要继续做"）：多日大任务第 4 项由 omp 现在就开始，和其他项并行，从每个应用最热程序的 B 生成和 stock 验证起步。
+6. 内核（部分成立）：运营者 11-16 的“整体 patch 也要少于 500 loc?”和“是不是应该几乎不要修改”是问句；内核只许删除是协调者落实“需要有东西冻结并且明确禁止修改, 除了删除死代码”的做法。内核现在比 stock 多 423 行，在 500 行以内；只许删除这条到现在没有挡住任何需要的工作，保持不变。
+
 **协调者 2026-11-17T11:22:46Z（lane 恢复后的第一个小时）**：
 1. 正式轮（冻结入口默认 3 × 180 秒，stats 关）：OTel 1.053x、BCC 0.998x（底线 0.985x）、Cilium 2.819x（两臂开关不同，不计）、Tetragon 1.042x（底线 1.009x）；Tracee、Katran 在跑。
 2. 镜像从工作树构建，所以批次建镜像前构建输入必须已提交：批次脚本等这些路径 git status 干净，再从建镜像到最后一次计时持有 locks/batch（COORDINATION 同时间一条）。取时间批次按此重启（91bb52707）；镜像里同时带 PERF 6066b311b（current-task BTF、jiffies）和 omp 8273b93af（尾调用栈帧），Tracee 那一行写明这三项。
