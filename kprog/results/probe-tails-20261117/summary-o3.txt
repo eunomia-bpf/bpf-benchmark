@@ -32,3 +32,9 @@ x86_kvm_corpus_20261117_035907_339709 installed programs 14 JIT 167706 B native 
 x86_kvm_corpus_20261117_041017_749964 installed programs 21 JIT 6938 B native 7480 B ratio 1.08x
 == x86_kvm_corpus_20261117_041017_749964 (bcc__set.json): 11 active programs, median native/eBPF run ratio 1.002
    DIFFERENT block_rq_comple: eBPF 1,296  native 274  ratio 0.211
+== cilium/agent /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_042102_276469
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_042102_276469 throughput native/eBPF 2.800x  eBPF [1325223, 1300526, 1218755] native [3569932, 3757712, 3641944] per-sample [2.694, 2.889, 2.988] errors 0
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_042102_276469 ns/inv eBPF 700.4 (2/53 progs) native 233.9 (2/56) speedup 2.995x
+x86_kvm_corpus_20261117_042102_276469 installed programs 18 JIT 80282 B native 66314 B ratio 0.83x
+== x86_kvm_corpus_20261117_042102_276469 (cilium__agent.json): 1 active programs, median native/eBPF run ratio 2.853
+   programs whose counts track the median: 1 of 1
