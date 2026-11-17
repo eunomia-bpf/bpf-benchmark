@@ -317,8 +317,8 @@ fn calls_to(relocs: &[RelocRecord], helper: u64) -> Vec<usize> {
 
 pub(super) fn redirect(blob: &mut Vec<u8>, calls: &[usize], start: usize) -> Result<()> {
     for &site in calls {
-        if blob.get(site..site+5) != Some(X86_HELPER_CALL_REL32_SLOT.as_slice()) {
-            bail!("probe-read call at {site:#x} lost its E8 helper slot");
+        if !matches!(blob.get(site..site+5), Some([0xe8 | 0xe9, 0, 0, 0, 0])) {
+            bail!("helper branch at {site:#x} lost its rel32 slot");
         }
         patch_x86_rel32(blob,site+1,start)?;
     }
@@ -406,6 +406,21 @@ pub(super) fn direct_load(layout: Option<&RuntimeProbeReadLayout>, helpers: &Has
 #[cfg(all(test,target_arch="x86_64",target_os="linux"))]
 mod tests {
     use super::*;
+    // A helper tail jump must stay a jump: adding a CALL adds a return frame.
+    #[test]
+    fn shared_leaf_redirect_preserves_call_and_tail_opcodes() -> Result<()> {
+        let mut blob=vec![0xe8,0,0,0,0,0xc3,0xe9,0,0,0,0,0xb8,77,0,0,0,0xc3];
+        redirect(&mut blob,&[0,6],11)?;
+        for (site,opcode) in [(0usize,0xe8),(6,0xe9)] {
+            assert_eq!(blob[site],opcode);
+            let rel=i32::from_le_bytes(blob[site+1..site+5].try_into()?);
+            assert_eq!(site as i64+5+i64::from(rel),11);
+        }
+        assert_eq!(memory::call_blob(&blob,std::ptr::null_mut(),0,0) as usize,77);
+        assert_eq!(memory::call_blob(&blob[6..],std::ptr::null_mut(),0,0) as usize,77);
+        Ok(())
+    }
+
     fn fixture() -> RuntimeProbeReadLayout {
         RuntimeProbeReadLayout { user_helper:0x1000,kernel_helper:0x2000,
             current_task:0,jiffies:Some(0x1111222233334444),

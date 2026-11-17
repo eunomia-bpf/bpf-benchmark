@@ -58,10 +58,11 @@ mod tests {
         fs::write(output.join("uid-gid.stdout"), &run.stdout)?; fs::write(output.join("uid-gid.stderr"), &run.stderr)?;
         assert!(run.status.success(), "uid_gid host execution: {} {}", run.status, String::from_utf8_lossy(&run.stderr));
         println!("{}", String::from_utf8_lossy(&run.stdout));
-        let mut blob = X86_HELPER_CALL_REL32_SLOT.repeat(2); blob.push(0xc3);
+        let mut blob = X86_HELPER_CALL_REL32_SLOT.repeat(2); blob[5]=0xe9; blob.push(0xc3);
         let mut calls = vec![RelocRecord{offset:0,kind:1,target:0x7000}, RelocRecord{offset:5,kind:1,target:0x7000},
             RelocRecord{offset:20,kind:1,target:0x9999}];
         let range = share(&mut blob, &mut calls, 0, &layout, 0x7000)?.expect("one shared leaf");
+        assert_eq!((blob[0],blob[5]),(0xe8,0xe9));
         for offset in [0usize, 5] {
             let rel = i32::from_le_bytes(blob[offset+1..offset+5].try_into()?);
             assert_eq!(offset as i64 + 5 + i64::from(rel), range.0 as i64);

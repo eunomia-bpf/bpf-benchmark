@@ -120,12 +120,7 @@ pub(super) fn share(blob: &mut Vec<u8>, relocs: &mut Vec<RelocRecord>, layout: &
     if calls.is_empty() { return Ok(None); }
     let (bytes, nested) = routine(layout, mono_fast)?;
     let start = blob.len();
-    for &site in &calls {
-        if blob.get(site..site+5) != Some(X86_HELPER_CALL_REL32_SLOT.as_slice()) {
-            bail!("ktime call at {site:#x} lost its E8 helper slot");
-        }
-        patch_x86_rel32(blob, site+1, start)?;
-    }
+    probe_read::redirect(blob, &calls, start)?;
     relocs.retain(|r| !(r.kind == 1 && r.target == mono_fast));
     for mut reloc in nested { reloc.offset = u32::try_from(start + reloc.offset as usize)?; relocs.push(reloc); }
     blob.extend_from_slice(&bytes);
@@ -163,10 +158,11 @@ mod tests {
         fs::write(output.join("ktime.stdout"), &run.stdout)?; fs::write(output.join("ktime.stderr"), &run.stderr)?;
         assert!(run.status.success(), "ktime host execution: {} {}", run.status, String::from_utf8_lossy(&run.stderr));
         println!("{}", String::from_utf8_lossy(&run.stdout));
-        let mut blob = X86_HELPER_CALL_REL32_SLOT.repeat(2); blob.push(0xc3);
+        let mut blob = X86_HELPER_CALL_REL32_SLOT.repeat(2); blob[5]=0xe9; blob.push(0xc3);
         let mut calls = vec![RelocRecord{offset:0,kind:1,target:0x5000}, RelocRecord{offset:5,kind:1,target:0x5000},
             RelocRecord{offset:20,kind:1,target:0x9999}];
         let range = share(&mut blob, &mut calls, &layout, 0x5000)?.expect("one shared leaf");
+        assert_eq!((blob[0],blob[5]),(0xe8,0xe9));
         for offset in [0usize, 5] {
             let rel = i32::from_le_bytes(blob[offset+1..offset+5].try_into()?);
             assert_eq!(offset as i64 + 5 + i64::from(rel), range.0 as i64);

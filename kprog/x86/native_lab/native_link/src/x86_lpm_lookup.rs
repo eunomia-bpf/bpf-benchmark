@@ -79,10 +79,7 @@ pub(super) fn share(blob:&mut Vec<u8>,relocs:&mut Vec<RelocRecord>,layout:&Runti
     let calls:Vec<_>=relocs.iter().filter(|r|r.kind==1&&r.target==helper).map(|r|r.offset as usize).collect();
     if calls.is_empty(){return Ok(None);}
     let start=blob.len();let (bytes,call)=routine(layout)?;
-    for site in calls {
-        if blob.get(site..site+5)!=Some(X86_HELPER_CALL_REL32_SLOT.as_slice()){bail!("LPM LTO lost generic-helper E8 slot");}
-        patch_x86_rel32(blob,site+1,start)?;
-    }
+    probe_read::redirect(blob,&calls,start)?;
     relocs.retain(|r|!(r.kind==1&&r.target==helper));blob.extend_from_slice(&bytes);
     relocs.push(RelocRecord{offset:u32::try_from(start+call)?,kind:1,target:helper});Ok(Some((start,blob.len())))
 }
@@ -107,6 +104,19 @@ mod tests {
         let run=std::process::Command::new(driver).arg(binary).arg(call.to_string()).output()?;
         fs::write(out.join("stdout"),&run.stdout)?;fs::write(out.join("stderr"),&run.stderr)?;
         assert!(run.status.success(),"LPM host: {} {}",run.status,String::from_utf8_lossy(&run.stderr));
-        println!("{}",String::from_utf8_lossy(&run.stdout));Ok(())
+        println!("{}",String::from_utf8_lossy(&run.stdout));
+        let mut blob=vec![0xe8,0,0,0,0,0xe9,0,0,0,0,0xc3];
+        let mut relocs=vec![RelocRecord{offset:0,kind:1,target:0x1234},
+                            RelocRecord{offset:5,kind:1,target:0x1234}];
+        let range=share(&mut blob,&mut relocs,&layout,0x1234)?.expect("shared LPM");
+        assert_eq!((blob[0],blob[5]),(0xe8,0xe9));
+        for site in [0usize,5] {
+            let rel=i32::from_le_bytes(blob[site+1..site+5].try_into()?);
+            assert_eq!(site as i64+5+i64::from(rel),range.0 as i64);
+        }
+        assert_eq!(relocs.len(),1,"only the existing generic kernel call remains");
+        assert_eq!(&blob[relocs[0].offset as usize..relocs[0].offset as usize+5],
+                   X86_HELPER_CALL_REL32_SLOT.as_slice());
+        Ok(())
     }
 }

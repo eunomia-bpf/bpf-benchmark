@@ -50,13 +50,7 @@ pub(super) fn share(blob: &mut Vec<u8>, relocs: &mut Vec<RelocRecord>,
     if sites.is_empty() { return Ok(None); }
     let start = blob.len();
     let (bytes, call) = routine(layout)?;
-    for &site in &sites {
-        if blob.get(site..site+5) != Some(X86_HELPER_CALL_REL32_SLOT.as_slice()) {
-            bail!("shared ARRAY call at {site:#x} lost its helper slot");
-        }
-        let disp = i32::try_from(start as i64 - (site + 5) as i64)?;
-        blob[site+1..site+5].copy_from_slice(&disp.to_le_bytes());
-    }
+    probe_read::redirect(blob, &sites, start)?;
     relocs.retain(|r| !(r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32 && r.target == helper));
     blob.extend_from_slice(&bytes);
     relocs.push(RelocRecord { offset: u32::try_from(start + call)?,
@@ -120,13 +114,14 @@ mod tests {
     fn shared_calls_target_one_routine_and_keep_unrelated_relocations() -> Result<()> {
         let layout = RuntimeArrayLayout { map_type: 12, max_entries: 24, elem_size: 32,
             index_mask: 36, value: 64, array_type: 2 };
-        let mut blob = X86_HELPER_CALL_REL32_SLOT.repeat(3);
+        let mut blob = X86_HELPER_CALL_REL32_SLOT.repeat(3); blob[5]=0xe9;
         blob.push(0xc3);
         let mut relocs = vec![RelocRecord { offset: 0, kind: 1, target: 0x1234 },
             RelocRecord { offset: 5, kind: 1, target: 0x1234 },
             RelocRecord { offset: 10, kind: 1, target: 0x5678 }];
         let range = share(&mut blob, &mut relocs, &layout, 0x1234)?.expect("two lookups");
         assert_eq!(range, (16, 83), "one67-byte routine, not one per call");
+        assert_eq!((blob[0],blob[5]),(0xe8,0xe9));
         for site in [0usize, 5] {
             let disp = i32::from_le_bytes(blob[site+1..site+5].try_into()?);
             assert_eq!((site+5) as i64 + i64::from(disp), 16);
