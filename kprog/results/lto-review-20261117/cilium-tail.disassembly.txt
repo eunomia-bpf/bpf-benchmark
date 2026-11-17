@@ -1,0 +1,110 @@
+Same-load original/native code evidence; packet test did not execute. Offsets are relative to each dump.
+
+original id=275 bytes=1093
+/workspaces/kprog-raw/perf/20261116-cilium-packet/run/post_rejit.jit-lines.d/prog-275.bin
+
+ 27f:	mov    edi,0x1
+ 284:	cmp    r14d,0x8
+ 288:	jne    0x348
+ 28e:	mov    rdi,rbx
+ 291:	movabs rsi,0xffff8e2cc7681c00
+ 29b:	mov    edx,0x7
+ 2a0:	mov    rax,QWORD PTR [rbp-0x70]
+ 2a7:	cmp    QWORD PTR [rax],0x21
+ 2ab:	jae    0x2c9
+ 2ad:	nop    DWORD PTR [rax+rax*1+0x0]
+ 2b2:	add    QWORD PTR [rax],0x1
+ 2b6:	pop    r14
+ 2b8:	pop    r13
+ 2ba:	pop    rbx
+ 2bb:	pop    rax
+ 2bc:	pop    rax
+ 2bd:	add    rsp,0x60
+ 2c4:	jmp    0xfffffffffffe2d44
+
+ 2f7:	xor    eax,eax
+ 2f9:	test   esi,esi
+ 2fb:	je     0x348
+ 2fd:	mov    rdi,rbx
+ 300:	movabs rsi,0xffff8e2cc7681c00
+ 30a:	mov    edx,0x6
+ 30f:	mov    rax,QWORD PTR [rbp-0x70]
+ 316:	cmp    QWORD PTR [rax],0x21
+ 31a:	jae    0x338
+ 31c:	nop    DWORD PTR [rax+rax*1+0x0]
+ 321:	add    QWORD PTR [rax],0x1
+ 325:	pop    r14
+ 327:	pop    r13
+ 329:	pop    rbx
+ 32a:	pop    rax
+ 32b:	pop    rax
+ 32c:	add    rsp,0x60
+ 333:	jmp    0x61c4
+
+ 3e9:	movabs rdi,0xffff8e2cc5b9ec00
+ 3f3:	xor    ecx,ecx
+ 3f5:	call   0xffffffffed09581c
+ 3fa:	mov    rdi,rbx
+ 3fd:	movabs rsi,0xffff8e2cc7681c00
+ 407:	mov    edx,0x1
+ 40c:	mov    rax,QWORD PTR [rbp-0x70]
+ 413:	cmp    QWORD PTR [rax],0x21
+ 417:	jae    0x435
+ 419:	nop    DWORD PTR [rax+rax*1+0x0]
+ 41e:	add    QWORD PTR [rax],0x1
+ 422:	pop    r14
+ 424:	pop    r13
+ 426:	pop    rbx
+ 427:	pop    rax
+ 428:	pop    rax
+ 429:	add    rsp,0x60
+ 430:	jmp    0x9f90
+
+native id=279 bytes=677
+/workspaces/kprog-raw/perf/20261116-cilium-packet/run/post_rejit.jit-lines.d/prog-279.bin
+
+ 127:	mov    edx,0x6
+ 12c:	movabs rsi,0xffff8e2cc7681c00
+ 136:	mov    rdi,rbx
+ 139:	mov    edx,edx
+ 13b:	cmp    DWORD PTR [rsi+0x44],edx
+ 141:	jbe    0x188
+ 147:	mov    rax,QWORD PTR [rbp-0x10]
+ 14e:	cmp    QWORD PTR [rax],0x21
+ 152:	jae    0x188
+ 158:	mov    rcx,QWORD PTR [rsi+rdx*8+0x130]
+ 160:	test   rcx,rcx
+ 163:	je     0x188
+ 169:	add    QWORD PTR [rax],0x1
+ 16d:	add    rsp,0x20
+ 171:	pop    r14
+ 173:	pop    r13
+ 175:	pop    rbx
+ 176:	pop    rax
+ 177:	pop    rax
+ 178:	mov    rcx,QWORD PTR [rcx+0x48]
+ 17f:	add    rcx,0xc
+ 186:	jmp    rcx
+
+ 230:	movabs rsi,0xffff8e2cc7681c00
+ 23a:	mov    rdi,rbx
+ 23d:	mov    edx,0x1
+ 242:	mov    edx,edx
+ 244:	cmp    DWORD PTR [rsi+0x44],edx
+ 24a:	jbe    0x291
+ 250:	mov    rax,QWORD PTR [rbp-0x10]
+ 257:	cmp    QWORD PTR [rax],0x21
+ 25b:	jae    0x291
+ 261:	mov    rcx,QWORD PTR [rsi+rdx*8+0x130]
+ 269:	test   rcx,rcx
+ 26c:	je     0x291
+ 272:	add    QWORD PTR [rax],0x1
+ 276:	add    rsp,0x20
+ 27a:	pop    r14
+ 27c:	pop    r13
+ 27e:	pop    rbx
+ 27f:	pop    rax
+ 280:	pop    rax
+ 281:	mov    rcx,QWORD PTR [rcx+0x48]
+ 288:	add    rcx,0xc
+ 28f:	jmp    rcx

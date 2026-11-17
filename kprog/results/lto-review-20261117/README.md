@@ -28,11 +28,12 @@ whether LTO work earns its footprint.
 |---|---|---|---|
 | 1 | Probe reads retain generic size loops and repeated CPU feature selection | OTel; kernel-read sites in Tracee/Tetragon; BCC | Specialize common small reads; avoid 8/1-only copying and repeated SMAP capability selection. Large opportunity in OTel's retained read range; selective variants can grow code, so retain sharing. |
 | 2 | Compat reads bypass that lowering entirely | Tracee, then Tetragon where present | Address-domain/size specialization can remove wrapper/copy overhead while preserving the helper's user/kernel choice. Actual Tracee blobs retain 2,375 read and 714 string call sites. This is an opportunity shared with the JIT helper, not evidence of a native-only regression. |
-| 3 | Unknown map path nests ARRAY, LPM and generic helper calls | OTel residual dynamic maps, Katran; potential BCC/Cilium/Tracee sites | Remove two extra call/return pairs and their stack adjustments on a non-ARRAY/non-LPM fallback; bind a concrete operation where type facts suffice. Retained Katran dispatcher costs are small, so this alone does not explain its entire gap. |
-| 4 | Proven ARRAY accesses always cross a shared call boundary | OTel, BCC, Cilium, Katran where these sites execute | Selectively expose small constant-key accesses to LLVM, removing call/key materialization and enabling folding. Blanket inlining would undo demonstrated size savings. |
-| 5 | Map identity is discarded at every basic-block boundary and memory reload | All five, site dependent | Recover additional direct lookup/update/delete bindings using actual provenance. Dynamic inner-map identity must remain distinct from its known type. Static source opportunity; no new hot-site count is established here. |
-| 6 | Finite helper-ID joins become another runtime compare chain | Tetragon; other helper-selecting sources | Propagate/split a proven selection earlier where possible, avoiding repeated ID redispatch. Source-confirmed shape; production hot frequency and gain are unmeasured. |
-| 7 | Exact hash key length stops before the LTO plan | Katran, BCC, OTel hash sites | Current JIT/native use the same runtime-length kernel lookup. Exact-shape specialization remains a distinct, unmeasured opportunity; the copied-hash comparison did not test a separately specialized function per proven key length. |
+| 3 | Constant tail slots use the indirect path (section 8) | Cilium, OTel; constant sites in Tracee/Tetragon | Installed Cilium JIT has patched direct jumps; native retains map bound and target loads. A constant-slot LTO subset can remove bound/index bookkeeping, while full direct patching needs the existing map-update/lifetime contract. |
+| 4 | Unknown map path nests ARRAY, LPM and generic helper calls | OTel residual dynamic maps, Katran; potential BCC/Cilium/Tracee sites | Remove two extra call/return pairs and their stack adjustments on a non-ARRAY/non-LPM fallback; bind a concrete operation where type facts suffice. Retained Katran dispatcher costs are small, so this alone does not explain its entire gap. |
+| 5 | Proven ARRAY accesses always cross a shared call boundary | OTel, BCC, Cilium, Katran where these sites execute | Selectively expose small constant-key accesses to LLVM, removing call/key materialization and enabling folding. Blanket inlining would undo demonstrated size savings. |
+| 6 | Map identity is discarded at every basic-block boundary and memory reload | All five, site dependent | Recover additional direct lookup/update/delete bindings using actual provenance. Dynamic inner-map identity must remain distinct from its known type. Static source opportunity; no new hot-site count is established here. |
+| 7 | Finite helper-ID joins become another runtime compare chain | Tetragon; other helper-selecting sources | Propagate/split a proven selection earlier where possible, avoiding repeated ID redispatch. Source-confirmed shape; production hot frequency and gain are unmeasured. |
+| 8 | Exact hash key length stops before the LTO plan | Katran, BCC, OTel hash sites | Current JIT/native use the same runtime-length kernel lookup. Exact-shape specialization remains a distinct, unmeasured opportunity; the copied-hash comparison did not test a separately specialized function per proven key length. |
 
 Tetragon's prior native load failure is **fixed in the retained corrected-image
 check**; it is discussed separately below. It should not be ranked as a
@@ -461,6 +462,71 @@ the existing image/lifetime contract permits, with its installed bytes
 counted; duplicating all 2,444 bytes per program would repeat the earlier
 size problem. No new map query, runtime check, module or kernel change is
 proposed by this review.
+
+## 8. Constant tail slots retain the indirect tail-call path
+
+2026-11-17T00:57:03Z. `x86.rs:1486–1522` sends every recognized tail call
+to `build_x86_tail_call_inline`; it passes frame/cleanup facts, not the
+map identity or a proven index. `x86.rs:3841–3874` zero-extends EDX,
+loads/checks the live map bound, checks the tail count, loads the program
+array slot, checks for null, loads `prog->bpf_func`, adds its tail-entry
+offset and jumps through RCX. Even a constant slot uses all of this work.
+
+The kernel verifier has a different path for a proven map/constant slot:
+`kernel/bpf/verifier.c:23748–23768` records a tail-call poke descriptor.
+`arch/x86/net/bpf_jit_comp.c:816–870,2466–2478` emits the direct form;
+873–907 patches its target/bypass from the current program-array entry.
+It retains the tail-count limit but avoids a live bound check and the
+program/function-pointer loads on each populated direct tail transition.
+
+This difference is present in actual installed code, not only in the
+source. The retained 603cacfb442a packet-diagnostic capture pairs original
+ID275 with native ID279, both named cil_from_contai, in one app load.
+Original installed size is 1,093 B; native is 677 B. The original's tail
+blocks at 0x2a7,0x316,0x413 retain the limit test then use a patched NOP
+bypass and direct jump. Native blocks at 0x14e,0x257 retain the live map
+bound, slot load, null test, function load and indirect jump. See
+[cilium-tail.disassembly.txt](cilium-tail.disassembly.txt) and evidence.json.
+
+The differing number of static blocks does not establish a path mismatch:
+native IR can fold config branches. This capture's packet test timed out
+before executing, and the original is a retained shadow FD whose shared
+program-array entries may already target native callees. These dumps prove
+the caller's code shape; they are not a completed paired-packet test or an
+independent all-eBPF tail chain.
+
+The earlier host emission also exposes actual constants: Cilium
+`/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/34-0/image.blob`
+has literal slots 7,6,1 immediately before the native stubs at
+0x217,0x2b9,0x3d7. Its image.maps binds their RSI immediates to cilium_calls.
+The OTel sampling-entry capture
+`corpus/results/shared-hash-regression-20261116/captures/link-6tuf3oq8/`
+has a constant-zero slot before stub 0x8ed, bound to perf_progs. Its other
+stub and the typed native unwinder's 0x5a17 stub use runtime index operands
+in the retained windows; no full constant proof is provided for them. Do
+not treat all tail calls as constant from these examples.
+
+A bounded LTO-only improvement is to use a proven map and u32 index to
+remove redundant bound/index work for an index known in range, while still
+loading the **live** slot and keeping null handling, count and frame cleanup.
+The loader already has MapMeta.max_entries (`native_loader.cpp:1604`), but
+the retained cilium_calls lookup shape has max_entries=0. Existing machine
+map provenance also returns RDI identities (`x86_known_maps.rs:43–46`),
+whereas a tail call carries its map in RSI. Those facts must reach the
+tail-site transformation; a call ordinal or the context's RDI is not a map
+identity. The constant-analysis switch limitation described in section 1
+also applies where the caller has resolved indirect branches.
+
+Full direct-jump parity is a separate contract. Cilium/Tetragon/OTel can
+populate or replace program-array slots after program load. The stock JIT
+maintains its direct targets through poke descriptors and map-update
+tracking; a one-time target address substituted by LTO would go stale and
+could also outlive its target. Current native emission does not register
+such descriptors. Do not cache the initial target, drop the count/null
+semantics or change the frozen kernel to claim this optimization. The
+source-supported constant-slot subset should reduce caller instructions
+and bytes; its app per-call effect remains unmeasured. No new check, hook
+or guest is proposed here.
 
 ## Tetragon: distinguish the fixed failure from the inventory question
 

@@ -93,6 +93,32 @@ with (HERE / 'hash-dispatch.disassembly.txt').open('w') as output:
     subprocess.run(['objdump', '-D', '-b', 'binary', '-m', 'i386:x86-64', '-M', 'intel',
                     '--start-address=0', '--stop-address=71', str(hash_binary)],
                    stdout=output, check=True)
+packet = Path('/workspaces/kprog-raw/perf/20261116-cilium-packet/run')
+pair = json.loads((packet / 'packet-programs.json').read_text())
+installed = json.loads((packet / 'post_rejit.jit-lines.json').read_text())
+tail_programs = []
+with (HERE / 'cilium-tail.disassembly.txt').open('w') as output:
+    output.write('Same-load original/native code evidence; packet test did not execute. Offsets are relative to each dump.\n')
+    for arm in ('original', 'native'):
+        program = next(p for p in installed['programs'] if p['id'] == pair[arm])
+        binary = packet / program['binary']
+        decoded = subprocess.check_output([
+            'objdump', '-D', '-b', 'binary', '-m', 'i386:x86-64', '-M', 'intel',
+            '--no-show-raw-insn', str(binary)], text=True)
+        lines = [line for line in decoded.splitlines() if re.match(r'^\s*[0-9a-f]+:', line)]
+        sites = []
+        output.write(f'\n{arm} id={program["id"]} bytes={program["jited_bytes"]}\n{binary}\n')
+        for index, line in enumerate(lines):
+            if 'cmp' not in line or 'QWORD PTR [rax],0x21' not in line:
+                continue
+            sites.append(int(line.split(':', 1)[0], 16))
+            end = index + 1
+            while end < len(lines) and not re.search(r':\s+jmp\s', lines[end]):
+                end += 1
+            output.write('\n' + '\n'.join(lines[max(0, index - 7):end + 1]) + '\n')
+        tail_programs.append(dict(arm=arm, id=program['id'], name=program['name'],
+                                  installed_bytes=program['jited_bytes'], binary=str(binary),
+                                  tail_counter_compare_offsets=sites))
 result = {
     'recorded_utc': subprocess.check_output(['date', '-u', '+%FT%TZ'], text=True).strip(),
     'review_source_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=REPO, text=True).strip(),
@@ -114,6 +140,9 @@ result = {
                     'selected_lookup_shapes': [item for item in hash_plan['lookup_maps']
                                                if item['name'] in ('vip_map', 'fallback_cache', 'lru_mapping')],
                     'scope': 'Return offsets include rounded key size, not an exact key-length fact. Copied hash has runtime length dispatch.'},
+    'cilium_tail': {'capture': str(packet), 'boot_id': installed['boot_id'],
+                    'programs': tail_programs,
+                    'scope': 'Same-load shadow original/native functions; live program-array values may already be native. Code-shape evidence, not a standalone eBPF chain or executed packet comparison.'},
 }
 (HERE / 'evidence.json').write_text(json.dumps(result, indent=2) + '\n')
 selected = [r for r in ranges if r['piece'] in ('runtime_array', 'probe_read', 'lpm_lookup')]

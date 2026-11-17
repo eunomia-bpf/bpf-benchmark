@@ -1,6 +1,6 @@
 {
-  "recorded_utc": "2026-11-17T00:48:18Z",
-  "review_source_commit": "0cb0d4f5c974265cfd321007bebc318899793e68",
+  "recorded_utc": "2026-11-17T00:59:08Z",
+  "review_source_commit": "04725fc8e1a7a59bfe9273194f4a1442c8ec097f",
   "typed_unwinder": {
     "blob": "/workspaces/kprog-raw/perf/20261116-inner-array-lto/libbpf/otel-typed.blob",
     "payload_bytes": 30410,
@@ -175,5 +175,35 @@
       }
     ],
     "scope": "Return offsets include rounded key size, not an exact key-length fact. Copied hash has runtime length dispatch."
+  },
+  "cilium_tail": {
+    "capture": "/workspaces/kprog-raw/perf/20261116-cilium-packet/run",
+    "boot_id": "1a6651b0-d7d1-4388-9850-760f707dc2b0",
+    "programs": [
+      {
+        "arm": "original",
+        "id": 275,
+        "name": "cil_from_contai",
+        "installed_bytes": 1093,
+        "binary": "/workspaces/kprog-raw/perf/20261116-cilium-packet/run/post_rejit.jit-lines.d/prog-275.bin",
+        "tail_counter_compare_offsets": [
+          679,
+          790,
+          1043
+        ]
+      },
+      {
+        "arm": "native",
+        "id": 279,
+        "name": "cil_from_contai",
+        "installed_bytes": 677,
+        "binary": "/workspaces/kprog-raw/perf/20261116-cilium-packet/run/post_rejit.jit-lines.d/prog-279.bin",
+        "tail_counter_compare_offsets": [
+          334,
+          599
+        ]
+      }
+    ],
+    "scope": "Same-load shadow original/native functions; live program-array values may already be native. Code-shape evidence, not a standalone eBPF chain or executed packet comparison."
   }
 }
