@@ -143,7 +143,9 @@ inline void write_layout(std::ostream &out, const btf *types, Resolver resolve)
         << ",\"x86_virt_bits\":" << offset(types, "cpuinfo_x86", "x86_virt_bits")
         << ",\"cpu_tlbstate\":" << symbol("cpu_tlbstate")
         << ",\"tlb_loaded_mm\":" << offset(types, "tlb_state", "loaded_mm")
-        << ",\"task_mm\":" << offset(types, "task_struct", "mm") << "}}";
+        << ",\"task_mm\":" << offset(types, "task_struct", "mm")
+        << ",\"task_flags\":" << offset(types, "task_struct", "thread_info") + offset(types, "thread_info", "flags")
+        << ",\"task_personality\":" << offset(types, "task_struct", "personality", true) << "}}";
     if (!out) throw std::runtime_error("write kernel LTO layout");
 }
 

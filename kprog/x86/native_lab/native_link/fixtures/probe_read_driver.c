@@ -11,13 +11,14 @@
 #include <ucontext.h>
 #include <unistd.h>
 
-static struct { int unused, disabled; uintptr_t mm; } task; /* fixture pagefault_disabled=4, task_mm=8 */
+static struct { uint32_t flags; int disabled; uintptr_t mm; unsigned personality; } task;
+/* fixture task_flags=0, pagefault_disabled=4, task_mm=8, task_personality=16 */
 static struct { uintptr_t current, loaded_mm; } percpu; /* GS: current_task=0, cpu_tlbstate.loaded_mm=8 */
 static uintptr_t user_max = UINTPTR_MAX;
 /* boot_cpu_data: x86_capability words from 0 (SMAP stays off: STAC faults in user mode), x86_virt_bits at 40. */
 static uint32_t cpu[11];
 static unsigned char *code;
-static unsigned sites[4], lengths[4], site_count;
+static unsigned sites[8], lengths[8], site_count;
 static unsigned faults;
 
 static void virt_bits(unsigned bits) { ((unsigned char *)cpu)[40] = bits; }
@@ -81,7 +82,7 @@ int main(int argc, char **argv)
             value == 0x5555666677778888ULL ? (uintptr_t)cpu : 0;
         if (target) memcpy(code+i,&target,8);
     }
-    if (mode >= 3) {
+    if (mode == 3 || mode == 4) {
         struct { uintptr_t current; unsigned cpu, pad; uintptr_t offset; } gs =
             {0x123456789abcdef0ULL, 123, 0, 0};
         gs.offset = (uintptr_t)&gs;
@@ -96,7 +97,7 @@ int main(int argc, char **argv)
         return 0;
     }
     f = fopen(argv[2],"r"); assert(f);
-    assert(fscanf(f,"%u",&site_count) == 1 && site_count > 0 && site_count <= 4);
+    assert(fscanf(f,"%u",&site_count) == 1 && site_count > 0 && site_count <= 8);
     for (unsigned i=0; i<site_count; ++i) {
         unsigned destination;
         assert(fscanf(f,"%u %u %u",sites+i,lengths+i,&destination) == 3);
@@ -118,7 +119,29 @@ int main(int argc, char **argv)
     assert((uintptr_t)src >> 40); /* A 40-bit width makes this host address non-canonical. */
     if (!user) { user_max = 0; virt_bits(48); } /* Kernel reads: threshold USER_PTR_MAX + PAGE_SIZE = 4096. */
     unsigned char dest[1026]; unsigned vectors = 0;
-    if (mode == 2) {
+    if (mode == 5) { /* bpf_probe_read (compat): TASK_SIZE picks the user or the kernel leaf */
+        unsigned char *low = mmap(NULL,4096,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_32BIT,-1,0);
+        unsigned char *mid = mmap((void *)0xd0000000UL,4096,PROT_READ|PROT_WRITE,
+                                  MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED_NOREPLACE,-1,0);
+        assert(low != MAP_FAILED && (uintptr_t)low < 0xc0000000UL && mid == (void *)0xd0000000UL);
+        memset(low,0x3c,4096); memset(mid,0x4d,4096);
+        /* 64-bit task: TASK_SIZE_MAX comes from USER_PTR_MAX. */
+        user_max = UINTPTR_MAX >> 1; check(dest+1,src,64,0); ++vectors;            /* user leaf, policy passes */
+        percpu.loaded_mm = task.mm + 0x1000; check(dest+1,src,64,-14); ++vectors;  /* user leaf: nmi_uaccess_okay false */
+        /* From here user_max is 0: the kernel leaf copies host addresses (threshold 4096), and the differing
+           loaded_mm makes every user-leaf read return -14, which tells the two leaves apart. */
+        user_max = 0; check(dest+1,src,64,0); ++vectors;                           /* above TASK_SIZE_MAX: kernel */
+        check(dest+1,src+4096,8,-14); ++vectors;                                   /* kernel leaf fault recovery */
+        task.flags = 1u << 27;                                                     /* TIF_ADDR32 */
+        check(dest+1,low,64,-14); ++vectors;  /* below 0xffffe000: user */
+        check(dest+1,mid,64,-14); ++vectors;  /* 0xd0000000 is below 0xffffe000: user */
+        check(dest+1,src,64,0); ++vectors;    /* above: kernel */
+        task.personality = 0x8000000;         /* ADDR_LIMIT_3GB: TASK_SIZE 0xc0000000 */
+        check(dest+1,mid,64,0); ++vectors;    /* now kernel */
+        check(dest+1,low,64,-14); ++vectors;  /* still user */
+        task.flags = 0; task.personality = 0; percpu.loaded_mm = task.mm;
+        puts("compat probe read: TASK_SIZE_MAX, TIF_ADDR32 and ADDR_LIMIT_3GB dispatch PASS");
+    } else if (mode == 2) {
         check_string(dest+1,src+4096,0,0); ++vectors; /* zero count returns 0 ahead of the policy */
         memset(src,'x',4096);
         for (unsigned n=1;n<=65;++n) {

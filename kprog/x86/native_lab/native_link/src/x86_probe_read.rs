@@ -175,15 +175,13 @@ fn kernel_routine(layout: &RuntimeProbeReadLayout, actual: u64, string: bool)
     // is_vsyscall_vaddr: (vaddr & PAGE_MASK) == VSYSCALL_ADDR, -10UL << 20
     b.extend_from_slice(&[0x48,0x89,0xd0,0x48,0x25,0,0xf0,0xff,0xff,0x48,0x3d,0,0,0x60,0xff]);
     denied.push(append_x86_jcc_rel32(&mut b, 0x84));
-    // x86_virt_bits zero (early boot) allows; otherwise the address is canonical at that width.
+    // Canonical at boot_cpu_data.x86_virt_bits. Shift counts are taken mod 64, so width zero shifts by zero and
+    // the address compares equal: early boot (width zero) allows, as the C source does.
     absolute(&mut b, &[0x49,0xbb], target(layout.boot_cpu_data)?);
     b.extend_from_slice(&[0x41,0x0f,0xb6,0x8b]); // movzx ecx,byte[r11+x86_virt_bits]
     b.extend_from_slice(&i32::try_from(layout.x86_virt_bits)?.to_le_bytes());
-    b.extend_from_slice(&[0x85,0xc9]);
-    let early = append_x86_jcc_rel32(&mut b, 0x84);
     b.extend_from_slice(&[0xf7,0xd9,0x48,0x89,0xd0,0x48,0xd3,0xe0,0x48,0xd3,0xf8,0x48,0x39,0xd0]); // shl/sar by 64-bits; cmp rax,rdx
     denied.push(append_x86_jcc_rel32(&mut b, 0x85));
-    let allowed = b.len(); patch_x86_rel32(&mut b, early, allowed)?;
     b.extend_from_slice(&[0x65,0x4c,0x8b,0x14,0x25]); b.extend_from_slice(&current); // r10=gs:current_task
     b.extend_from_slice(&[0x41,0xff,0x82]); b.extend_from_slice(&task_offset); // pagefault_disable
     b.extend_from_slice(&[0x48,0x89,0xd6,0x4c,0x89,0xc7,0x44,0x89,0xc9,0x41,0xbb,1,0,0,0]); // rsi=src, rdi=dst, ecx=size, r11d=1
@@ -224,30 +222,97 @@ fn kernel_routine(layout: &RuntimeProbeReadLayout, actual: u64, string: bool)
     Ok((b, Vec::new(), sites))
 }
 
+/// bpf_probe_read (compat) as bpf_trace.c defines it: an address below TASK_SIZE is read as user memory,
+/// the rest as kernel memory. TASK_SIZE is TASK_SIZE_MAX (USER_PTR_MAX on this kernel) unless the task has
+/// TIF_ADDR32 (bit 27 of thread_info.flags), where it is IA32_PAGE_OFFSET: 0xc0000000 under the
+/// ADDR_LIMIT_3GB (0x8000000) personality and 0xffffe000 otherwise (page_64_types.h). RDI, ESI and RDX
+/// reach the chosen leaf unchanged.
+fn compat_dispatch(layout: &RuntimeProbeReadLayout, actual: u64, start: usize, user: usize, kernel: usize)
+    -> Result<Vec<u8>> {
+    let target = |symbol| address(symbol, layout.kernel_helper, actual);
+    let current = gs_disp32(target(layout.current_task)?, "current_task")?;
+    let mut b = vec![0x65,0x4c,0x8b,0x14,0x25]; b.extend_from_slice(&current); // r10=gs:current_task
+    b.extend_from_slice(&[0x41,0xf7,0x82]); b.extend_from_slice(&i32::try_from(layout.task_flags)?.to_le_bytes());
+    b.extend_from_slice(&(1u32<<27).to_le_bytes()); // test TIF_ADDR32
+    let ia32 = append_x86_jcc_rel32(&mut b, 0x85);
+    absolute(&mut b, &[0x49,0xbb], target(layout.user_ptr_max)?);
+    b.extend_from_slice(&[0x49,0x8b,0x03]); // rax=TASK_SIZE_MAX
+    let to_compare = jump(&mut b);
+    let here = b.len(); patch_x86_rel32(&mut b, ia32, here)?;
+    b.extend_from_slice(&[0xb8,0x00,0xe0,0xff,0xff]); // eax=0xffffe000
+    b.extend_from_slice(&[0x41,0xf7,0x82]); b.extend_from_slice(&i32::try_from(layout.task_personality)?.to_le_bytes());
+    b.extend_from_slice(&0x0800_0000u32.to_le_bytes()); // test ADDR_LIMIT_3GB
+    let full = append_x86_jcc_rel32(&mut b, 0x84);
+    b.extend_from_slice(&[0xb8,0x00,0x00,0x00,0xc0]); // eax=0xc0000000
+    let compare = b.len(); patch_x86_rel32(&mut b, to_compare, compare)?; patch_x86_rel32(&mut b, full, compare)?;
+    b.extend_from_slice(&[0x48,0x39,0xc2,0x0f,0x82]); // cmp rdx,rax; jb user
+    let rel = i64::try_from(user)? - i64::try_from(start + b.len() + 4)?;
+    b.extend_from_slice(&i32::try_from(rel)?.to_le_bytes());
+    b.push(0xe9); // jmp kernel
+    let rel = i64::try_from(kernel)? - i64::try_from(start + b.len() + 4)?;
+    b.extend_from_slice(&i32::try_from(rel)?.to_le_bytes());
+    Ok(b)
+}
+
+fn calls_to(relocs: &[RelocRecord], helper: u64) -> Vec<usize> {
+    relocs.iter().filter(|r| r.kind == 1 && r.target == helper).map(|r| r.offset as usize).collect()
+}
+
+fn redirect(blob: &mut Vec<u8>, calls: &[usize], start: usize) -> Result<()> {
+    for &site in calls {
+        if blob.get(site..site+5) != Some(X86_HELPER_CALL_REL32_SLOT.as_slice()) {
+            bail!("probe-read call at {site:#x} lost its E8 helper slot");
+        }
+        patch_x86_rel32(blob,site+1,start)?;
+    }
+    Ok(())
+}
+
+fn append(blob: &mut Vec<u8>, relocs: &mut Vec<RelocRecord>, ranges: &mut Vec<(usize,usize)>,
+          loads: &mut Vec<LoadSite>, routine: (Vec<u8>, Vec<RelocRecord>, Vec<LoadSite>)) -> Result<usize> {
+    let (bytes, mut nested, mut sites) = routine;
+    let start = blob.len();
+    for reloc in &mut nested { reloc.offset = u32::try_from(start+reloc.offset as usize)?; }
+    for site in &mut sites { site.offset = u32::try_from(start+site.offset as usize)?; }
+    blob.extend_from_slice(&bytes);
+    relocs.extend(nested); loads.extend(sites); ranges.push((start,blob.len()));
+    Ok(start)
+}
+
 pub(super) fn share(blob: &mut Vec<u8>, relocs: &mut Vec<RelocRecord>,
                     layout: &RuntimeProbeReadLayout, helpers: &HashMap<String,u64>)
     -> Result<(Vec<(usize,usize)>,Vec<LoadSite>)> {
     let mut ranges = Vec::new();
     let mut loads = Vec::new();
+    let mut scalar = [None, None]; // shared kernel and user routine starts
     for (name,user,string) in [("bpf_probe_read_user",true,false),("bpf_probe_read_kernel",false,false),("bpf_probe_read_kernel_str",false,true)] {
         let Some(&helper) = helpers.get(name) else { continue; };
-        let calls: Vec<_> = relocs.iter().filter(|r| r.kind == 1 && r.target == helper)
-            .map(|r| r.offset as usize).collect();
+        let calls = calls_to(relocs, helper);
         if calls.is_empty() { continue; }
-        let start = blob.len();
         let anchor=if string {let Some(&regular)=helpers.get("bpf_probe_read_kernel") else {continue;};regular} else {helper};
-        let (bytes,mut nested,mut sites) = if string {kernel_routine(layout,anchor,true)?} else {routine(layout,user,anchor)?};
-        for &site in &calls {
-            if blob.get(site..site+5) != Some(X86_HELPER_CALL_REL32_SLOT.as_slice()) {
-                bail!("probe-read call at {site:#x} lost its E8 helper slot");
-            }
-            patch_x86_rel32(blob,site+1,start)?;
-        }
+        let built = if string {kernel_routine(layout,anchor,true)?} else {routine(layout,user,anchor)?};
         relocs.retain(|r| !(r.kind == 1 && r.target == helper));
-        for reloc in &mut nested { reloc.offset = u32::try_from(start+reloc.offset as usize)?; }
-        for site in &mut sites { site.offset = u32::try_from(start+site.offset as usize)?; }
-        blob.extend_from_slice(&bytes);
-        relocs.extend(nested); loads.extend(sites); ranges.push((start,blob.len()));
+        let start = append(blob, relocs, &mut ranges, &mut loads, built)?;
+        redirect(blob, &calls, start)?;
+        if !string { scalar[usize::from(user)] = Some(start); }
+    }
+    if let (Some(&compat), Some(&user_anchor), Some(&kernel_anchor)) = (helpers.get("bpf_probe_read_compat"),
+            helpers.get("bpf_probe_read_user"), helpers.get("bpf_probe_read_kernel")) {
+        let calls = calls_to(relocs, compat);
+        if !calls.is_empty() {
+            for user in [false, true] {
+                if scalar[usize::from(user)].is_none() {
+                    let built = routine(layout, user, if user {user_anchor} else {kernel_anchor})?;
+                    scalar[usize::from(user)] = Some(append(blob, relocs, &mut ranges, &mut loads, built)?);
+                }
+            }
+            let (Some(kernel), Some(user)) = (scalar[0], scalar[1]) else { bail!("compat probe read needs both routines"); };
+            relocs.retain(|r| !(r.kind == 1 && r.target == compat));
+            let start = blob.len();
+            let bytes = compat_dispatch(layout, kernel_anchor, start, user, kernel)?;
+            blob.extend_from_slice(&bytes); ranges.push((start, blob.len()));
+            redirect(blob, &calls, start)?;
+        }
     }
     Ok((ranges,loads))
 }
@@ -276,7 +341,7 @@ mod tests {
         RuntimeProbeReadLayout { user_helper:0x1000,kernel_helper:0x2000,
             current_task:0,
             user_ptr_max:0x1111222233334444,boot_cpu_data:0x5555666677778888,
-            pagefault_disabled:4,x86_capability:0,
+            pagefault_disabled:4,x86_capability:0,task_flags:0,task_personality:16,
             cpu_tlbstate:8,tlb_loaded_mm:0,task_mm:8,x86_virt_bits:40 }
     }
 
@@ -314,6 +379,21 @@ mod tests {
             assert!(run.status.success(),"{stem} host execution: {} {}",run.status,String::from_utf8_lossy(&run.stderr));
             println!("{}",String::from_utf8_lossy(&run.stdout));
         }
+        // bpf_probe_read (compat): the call reaches a dispatcher that picks the user or the kernel leaf.
+        let mut blob = X86_HELPER_CALL_REL32_SLOT.to_vec(); blob.push(0xc3);
+        let mut relocs = vec![RelocRecord{offset:0,kind:1,target:0x3000}];
+        let helpers = HashMap::from([("bpf_probe_read_compat".into(),0x3000),
+            ("bpf_probe_read_user".into(),layout.user_helper),("bpf_probe_read_kernel".into(),layout.kernel_helper)]);
+        let (ranges,sites) = share(&mut blob,&mut relocs,&layout,&helpers)?;
+        assert!(relocs.is_empty()); assert_eq!(ranges.len(),3); assert_eq!(sites.len(),8);
+        let mut text = sites.len().to_string(); text.push(char::from(10));
+        for site in sites { text.push_str(&format!("{} {} {}\n",site.offset,site.insn_len,site.destination)); }
+        fs::write(output.join("compat.bin"),&blob)?; fs::write(output.join("compat.sites"),text)?;
+        let run = std::process::Command::new(&driver).arg(output.join("compat.bin")).arg(output.join("compat.sites"))
+            .arg("5").output()?;
+        fs::write(output.join("compat.stdout"),&run.stdout)?; fs::write(output.join("compat.stderr"),&run.stderr)?;
+        assert!(run.status.success(),"compat host execution: {} {}",run.status,String::from_utf8_lossy(&run.stderr));
+        println!("{}",String::from_utf8_lossy(&run.stdout));
         let helpers=HashMap::from([("bpf_probe_read_kernel".into(),layout.kernel_helper),
             (X86_CPU_NUMBER_HELPER_KEY.into(),8)]);
         for (mode,name,inline) in [(3,"current-task",percpu(Some(&layout),&helpers,"bpf_get_current_task")?.unwrap()),

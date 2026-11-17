@@ -197,6 +197,8 @@ struct RuntimeProbeReadLayout {
     tlb_loaded_mm: u32,
     task_mm: u32,
     x86_virt_bits: u32,
+    task_flags: u32,
+    task_personality: u32,
 }
 
 #[derive(Debug, Deserialize)]
