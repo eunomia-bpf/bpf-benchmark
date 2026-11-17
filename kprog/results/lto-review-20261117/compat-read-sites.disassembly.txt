@@ -1,0 +1,19 @@
+External E8 slots remain unpatched; helper identity comes from the retained relocation and plan.
+
+bpf_probe_read_compat_str/bpf_probe_read_str
+/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-04mya4zp/shared.blob
+ 157:	mov    QWORD PTR [rsp],0x0
+ 15f:	mov    rbx,rsp
+ 162:	lea    rdx,[rsp+0x50]
+ 167:	mov    rdi,rbx
+ 16a:	mov    esi,0x40
+ 16f:	call   0x174
+
+bpf_probe_read/bpf_probe_read_compat
+/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-04mya4zp/shared.blob
+ 2e5:	ja     0x496
+ 2eb:	lea    rdi,[rbx+r14*1]
+ 2ef:	add    rdi,0x8a
+ 2f6:	lea    rdx,[rsp+0x50]
+ 2fb:	mov    esi,0x8
+ 300:	call   0x305

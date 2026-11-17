@@ -61,6 +61,35 @@ links/writes their modules; it does not itself run an optimization pipeline.
 Marking those roots external is not evidence that every root executes or
 that all module functions are installed in each selected native image.
 
+Source update, 2026-11-17T00:28:02Z: coordinator commit **a541c006d**
+addresses the fixed-O3 issue. `vendor/bpf/Makefile:299–309` selects the
+compiler's optimization-level macro from NATIVE_CFLAGS and tracks it in a
+level dependency. `perf_context_lto.cpp:37–53,331–345,399` now uses that
+level for both module pipelines and backend optimization. The study's
+single-O-level O3/Os/O2 candidates are covered by this change. This review
+confirms the source wiring; it does not claim a new compiler/image has
+passed a run or assign this change a speedup.
+
+One residual policy issue matters to the later candidates in
+`../flag-tuning-20261117/tune.sh:18–19`: O3-branch adds
+`-mllvm -x86-cmov-converter-force-all=true`, and O3-nounroll adds
+`-fno-unroll-loops`. Only the O level is transferred by a541c006d.
+`native_loader_context_lto.hpp:43–59` does not pass those options to the
+compiler subprocess; `perf_context_lto.cpp:285–299` reads `.llvmbc`, not
+embedded compiler command-line data, and line 340 constructs PassBuilder
+with its default tuning options. LLVM18's local
+`include/llvm/Passes/PassBuilder.h:59–60,124–127` documents default
+LoopUnrolling as true.
+
+Consequently the branch-converter process option does not reach this
+re-emission path through the current option wiring. For no-unroll, explicit
+loop metadata already present in P could still survive, so loss of the
+requested effect cannot be concluded solely from the command line; inspect
+that candidate's embedded IR/installed loop shape. Either way, changing the
+O level alone does not establish that these later candidates control the
+same final policies in recompiled entries. This is an interpretation and
+implementation follow-up, not a reason to discard any completed sample.
+
 ## 1. Read lowering keeps work that constant-size specialization can remove
 
 Source: `kprog/x86/native_lab/native_link/src/x86_probe_read.rs:28–38,
@@ -176,6 +205,32 @@ while user-string copying has word-at-a-time handling in
 This has broader Tracee coverage than improving only already-lowered kernel
 reads. It remains an unmeasured optimization opportunity; static counts
 cannot establish how much of Tracee's per-call time those sites consume.
+
+Source/capture follow-up, 2026-11-17T00:28:02Z: compat-domain selection is
+task dependent. `arch/x86/include/asm/page_64_types.h:59–67` defines TASK_SIZE
+using the current task's TIF_ADDR32 flag and personality (IA32 limit versus
+TASK_SIZE_MAX). A single boot-time USER_PTR_MAX comparison is not a
+substitute for the compat helper's TASK_SIZE branch. An unknown source
+pointer must keep that choice; a source proven to be current kernel-frame
+storage gives a more specific case to optimize.
+
+There are concrete small local-copy cases in upstream Tracee:
+`vendor/bpf/tracee/pkg/ebpf/c/common/buffer.h:192` reads four bytes from the
+local `rsize`, and lines 411/431 read a local four-byte `sz`; line 330 reads
+eight-byte pointer elements. The retained `lkm_seeker_new_mod_only_tail`
+blob also has a compat read at 0x300 preceded by `lea rdx,[rsp+0x50]` and
+`mov esi,8`. Its compat-string call at 0x16f likewise uses that stack
+source with size 64. The plan/relocation establishes helper identity; the
+unpatched E8 displacement itself does not. See
+[compat-read-sites.disassembly.txt](compat-read-sites.disassembly.txt).
+
+These source and machine cases suggest specializing proven local-frame
+copies before attempting to replace arbitrary user reads. Constant size,
+source lifetime/bounds and fault/error behavior still need the compiler's
+actual facts; this review does not prove that all local-looking reads may
+skip their policy/fault handling, nor count their runtime frequency. The
+call-site evidence supports the small-read direction without asserting
+that every one of the 2,375 compat sites has the same shape.
 
 ## 3. A generic lookup pays for two failed specializers before its helper
 

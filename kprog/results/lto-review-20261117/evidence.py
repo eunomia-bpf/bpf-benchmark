@@ -58,6 +58,18 @@ for entry in tracee:
             key = '/'.join(aliases)
             counts[key] += 1
             examples.setdefault(key, dict(symbol=entry['symbol'], folder=str(folder), offset=offset))
+with (HERE / 'compat-read-sites.disassembly.txt').open('w') as output:
+    output.write('External E8 slots remain unpatched; helper identity comes from the retained relocation and plan.\n')
+    for aliases, example in examples.items():
+        example_blob = Path(example['folder']) / 'shared.blob'
+        decoded = subprocess.check_output([
+            'objdump', '-D', '-b', 'binary', '-m', 'i386:x86-64', '-M', 'intel',
+            '--no-show-raw-insn', str(example_blob)], text=True)
+        lines = [line for line in decoded.splitlines() if re.match(r'^\s*[0-9a-f]+:', line)]
+        output.write('\n' + aliases + '\n' + str(example_blob) + '\n')
+        for index, line in enumerate(lines):
+            if int(line.split(':', 1)[0].strip(), 16) == example['offset']:
+                output.write('\n'.join(lines[max(0, index - 5):index + 1]) + '\n')
 result = {
     'recorded_utc': subprocess.check_output(['date', '-u', '+%FT%TZ'], text=True).strip(),
     'review_source_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=REPO, text=True).strip(),
