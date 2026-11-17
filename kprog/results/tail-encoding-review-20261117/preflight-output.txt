@@ -1,0 +1,413 @@
+start 0 otelcol-ebpf-profiler/profiling perf_unwind_php 92 71
+pass 0 executions 480
+start 1 otelcol-ebpf-profiler/profiling native_tracer_entry 95 74
+pass 1 executions 480
+start 2 otelcol-ebpf-profiler/profiling native_tracer_entry 95 74
+pass 2 executions 480
+start 3 otelcol-ebpf-profiler/profiling native_tracer_entry 95 74
+pass 3 executions 480
+start 4 otelcol-ebpf-profiler/profiling perf_unwind_perl 92 71
+pass 4 executions 480
+start 5 otelcol-ebpf-profiler/profiling perf_unwind_ruby 92 71
+pass 5 executions 480
+start 6 otelcol-ebpf-profiler/profiling perf_unwind_native 95 74
+pass 6 executions 480
+start 7 otelcol-ebpf-profiler/profiling perf_unwind_v8 92 71
+pass 7 executions 480
+start 8 otelcol-ebpf-profiler/profiling perf_unwind_stop 81 60
+pass 8 executions 480
+start 9 otelcol-ebpf-profiler/profiling perf_unwind_dotnet 92 71
+pass 9 executions 480
+start 10 otelcol-ebpf-profiler/profiling perf_unwind_python 92 71
+pass 10 executions 480
+start 11 otelcol-ebpf-profiler/profiling perf_unwind_hotspot 95 74
+pass 11 executions 480
+start 12 otelcol-ebpf-profiler/profiling custom__generic 95 74
+pass 12 executions 480
+start 13 cilium/agent tail_nodeport_nat_ingress_ipv4 95 74
+pass 13 executions 480
+start 14 cilium/agent tail_nodeport_nat_ingress_ipv4 95 74
+pass 14 executions 480
+start 15 cilium/agent tail_handle_ipv4_from_netdev 95 74
+pass 15 executions 480
+start 16 cilium/agent tail_handle_ipv4_from_netdev 95 74
+pass 16 executions 480
+start 17 cilium/agent tail_handle_ipv4_from_netdev 95 74
+pass 17 executions 480
+start 18 cilium/agent tail_nodeport_rev_dnat_ipv4 95 74
+pass 18 executions 480
+start 19 cilium/agent cil_to_container 92 71
+pass 19 executions 480
+start 20 cilium/agent cil_to_container 92 71
+pass 20 executions 480
+start 21 cilium/agent tail_no_service_ipv4 92 71
+pass 21 executions 480
+start 22 cilium/agent tail_handle_ipv4_from_host 90 69
+pass 22 executions 480
+start 23 cilium/agent tail_handle_ipv4_from_host 90 69
+pass 23 executions 480
+start 24 cilium/agent tail_handle_ipv4_from_netdev 95 74
+pass 24 executions 480
+start 25 cilium/agent tail_handle_ipv4_from_netdev 95 74
+pass 25 executions 480
+start 26 cilium/agent tail_handle_ipv4_from_netdev 95 74
+pass 26 executions 480
+start 27 cilium/agent tail_ipv4_policy 95 74
+pass 27 executions 480
+start 28 cilium/agent tail_handle_arp 79 58
+pass 28 executions 480
+start 29 cilium/agent tail_ipv4_ct_egress 92 71
+pass 29 executions 480
+start 30 cilium/agent tail_ipv4_ct_egress 92 71
+pass 30 executions 480
+start 31 cilium/agent tail_nodeport_rev_dnat_ipv4 95 74
+pass 31 executions 480
+start 32 cilium/agent cil_lxc_policy 92 71
+pass 32 executions 480
+start 33 cilium/agent cil_lxc_policy 92 71
+pass 33 executions 480
+start 34 cilium/agent cil_lxc_policy 92 71
+pass 34 executions 480
+start 35 cilium/agent cil_from_host 92 71
+pass 35 executions 480
+start 36 cilium/agent cil_from_host 92 71
+pass 36 executions 480
+start 37 cilium/agent cil_from_host 92 71
+pass 37 executions 480
+start 38 cilium/agent tail_handle_snat_fwd_ipv4 95 74
+pass 38 executions 480
+start 39 cilium/agent cil_lxc_policy 92 71
+pass 39 executions 480
+start 40 cilium/agent cil_lxc_policy 92 71
+pass 40 executions 480
+start 41 cilium/agent cil_lxc_policy 92 71
+pass 41 executions 480
+start 42 cilium/agent tail_nodeport_nat_egress_ipv4 95 74
+pass 42 executions 480
+start 43 cilium/agent tail_handle_snat_fwd_ipv4 95 74
+pass 43 executions 480
+start 44 cilium/agent tail_no_service_ipv4 92 71
+pass 44 executions 480
+start 45 cilium/agent tail_handle_arp 79 58
+pass 45 executions 480
+start 46 cilium/agent tail_ipv4_to_endpoint 95 74
+pass 46 executions 480
+start 47 cilium/agent tail_ipv4_ct_egress 92 71
+pass 47 executions 480
+start 48 cilium/agent tail_ipv4_ct_egress 92 71
+pass 48 executions 480
+start 49 cilium/agent tail_handle_ipv4_cont 95 74
+pass 49 executions 480
+start 50 cilium/agent tail_handle_ipv4_cont 95 74
+pass 50 executions 480
+start 51 cilium/agent tail_handle_ipv4_cont 95 74
+pass 51 executions 480
+start 52 cilium/agent cil_from_host 92 71
+pass 52 executions 480
+start 53 cilium/agent cil_from_host 92 71
+pass 53 executions 480
+start 54 cilium/agent cil_from_host 92 71
+pass 54 executions 480
+start 55 cilium/agent tail_handle_snat_fwd_ipv4 95 74
+pass 55 executions 480
+start 56 cilium/agent tail_ipv4_policy 95 74
+pass 56 executions 480
+start 57 cilium/agent cil_from_netdev 90 69
+pass 57 executions 480
+start 58 cilium/agent cil_from_netdev 90 69
+pass 58 executions 480
+start 59 cilium/agent cil_from_netdev 90 69
+pass 59 executions 480
+start 60 cilium/agent cil_from_netdev 90 69
+pass 60 executions 480
+start 61 cilium/agent cil_from_netdev 90 69
+pass 61 executions 480
+start 62 cilium/agent cil_from_netdev 90 69
+pass 62 executions 480
+start 63 cilium/agent tail_handle_ipv4 95 74
+pass 63 executions 480
+start 64 cilium/agent tail_handle_ipv4 95 74
+pass 64 executions 480
+start 65 cilium/agent tail_handle_ipv4 95 74
+pass 65 executions 480
+start 66 cilium/agent cil_from_host 92 71
+pass 66 executions 480
+start 67 cilium/agent cil_from_host 92 71
+pass 67 executions 480
+start 68 cilium/agent cil_from_host 92 71
+pass 68 executions 480
+start 69 cilium/agent tail_nodeport_nat_ingress_ipv4 95 74
+pass 69 executions 480
+start 70 cilium/agent tail_nodeport_nat_ingress_ipv4 95 74
+pass 70 executions 480
+start 71 cilium/agent cil_from_container 81 60
+pass 71 executions 480
+start 72 cilium/agent cil_from_container 81 60
+pass 72 executions 480
+start 73 cilium/agent cil_to_netdev 95 74
+pass 73 executions 480
+start 74 cilium/agent cil_to_netdev 95 74
+pass 74 executions 480
+start 75 cilium/agent tail_handle_ipv4 95 74
+pass 75 executions 480
+start 76 cilium/agent tail_handle_ipv4 95 74
+pass 76 executions 480
+start 77 cilium/agent tail_handle_ipv4 95 74
+pass 77 executions 480
+start 78 cilium/agent cil_to_netdev 95 74
+pass 78 executions 480
+start 79 cilium/agent cil_to_netdev 95 74
+pass 79 executions 480
+start 80 cilium/agent tail_ipv4_to_endpoint 95 74
+pass 80 executions 480
+start 81 cilium/agent cil_to_container 92 71
+pass 81 executions 480
+start 82 cilium/agent cil_to_container 92 71
+pass 82 executions 480
+start 83 cilium/agent cil_from_netdev 90 69
+pass 83 executions 480
+start 84 cilium/agent cil_from_netdev 90 69
+pass 84 executions 480
+start 85 cilium/agent cil_from_netdev 90 69
+pass 85 executions 480
+start 86 cilium/agent tail_handle_ipv4_cont 95 74
+pass 86 executions 480
+start 87 cilium/agent tail_handle_ipv4_cont 95 74
+pass 87 executions 480
+start 88 cilium/agent tail_handle_ipv4_cont 95 74
+pass 88 executions 480
+start 89 cilium/agent tail_ipv4_ct_ingress 92 71
+pass 89 executions 480
+start 90 cilium/agent tail_ipv4_ct_ingress 92 71
+pass 90 executions 480
+start 91 cilium/agent cil_to_netdev 95 74
+pass 91 executions 480
+start 92 cilium/agent cil_to_netdev 95 74
+pass 92 executions 480
+start 93 cilium/agent cil_from_container 81 60
+pass 93 executions 480
+start 94 cilium/agent cil_from_container 81 60
+pass 94 executions 480
+start 95 cilium/agent tail_ipv4_ct_ingress 92 71
+pass 95 executions 480
+start 96 cilium/agent tail_ipv4_ct_ingress 92 71
+pass 96 executions 480
+start 97 cilium/agent tail_handle_ipv4_from_host 90 69
+pass 97 executions 480
+start 98 cilium/agent tail_handle_ipv4_from_host 90 69
+pass 98 executions 480
+start 99 cilium/agent tail_nodeport_nat_egress_ipv4 95 74
+pass 99 executions 480
+start 100 tetragon/observer execve_rate 92 71
+pass 100 executions 480
+start 101 tetragon/observer generic_kprobe_filter_arg 92 71
+pass 101 executions 480
+start 102 tetragon/observer generic_kprobe_filter_arg 92 71
+pass 102 executions 480
+start 103 tetragon/observer generic_kprobe_filter_arg 92 71
+pass 103 executions 480
+start 104 tetragon/observer generic_kprobe_process_event 95 74
+pass 104 executions 480
+start 105 tetragon/observer generic_kprobe_process_event 95 74
+pass 105 executions 480
+start 106 tetragon/observer generic_tracepoint_arg 92 71
+pass 106 executions 480
+start 107 tetragon/observer generic_tracepoint_arg 92 71
+pass 107 executions 480
+start 108 tetragon/observer generic_tracepoint_arg 92 71
+pass 108 executions 480
+start 109 tetragon/observer generic_kprobe_filter_arg 92 71
+pass 109 executions 480
+start 110 tetragon/observer generic_kprobe_filter_arg 92 71
+pass 110 executions 480
+start 111 tetragon/observer generic_kprobe_filter_arg 92 71
+pass 111 executions 480
+start 112 tetragon/observer generic_kprobe_process_filter 95 74
+pass 112 executions 480
+start 113 tetragon/observer generic_kprobe_process_filter 95 74
+pass 113 executions 480
+start 114 tetragon/observer generic_kprobe_filter_arg 92 71
+pass 114 executions 480
+start 115 tetragon/observer generic_kprobe_filter_arg 92 71
+pass 115 executions 480
+start 116 tetragon/observer generic_kprobe_filter_arg 92 71
+pass 116 executions 480
+start 117 tetragon/observer generic_tracepoint_actions 81 60
+pass 117 executions 480
+start 118 tetragon/observer generic_kprobe_setup_event 79 58
+pass 118 executions 480
+start 119 tetragon/observer generic_kprobe_setup_event 79 58
+pass 119 executions 480
+start 120 tetragon/observer generic_retkprobe_actions 81 60
+pass 120 executions 480
+start 121 tetragon/observer generic_retkprobe_filter_arg 92 71
+pass 121 executions 480
+start 122 tetragon/observer generic_retkprobe_filter_arg 92 71
+pass 122 executions 480
+start 123 tetragon/observer generic_retkprobe_filter_arg 92 71
+pass 123 executions 480
+start 124 tetragon/observer generic_kprobe_filter_arg 92 71
+pass 124 executions 480
+start 125 tetragon/observer generic_kprobe_filter_arg 92 71
+pass 125 executions 480
+start 126 tetragon/observer generic_kprobe_filter_arg 92 71
+pass 126 executions 480
+start 127 tetragon/observer generic_tracepoint_filter 95 74
+pass 127 executions 480
+start 128 tetragon/observer generic_tracepoint_filter 95 74
+pass 128 executions 480
+start 129 tetragon/observer generic_kprobe_filter_arg 92 71
+pass 129 executions 480
+start 130 tetragon/observer generic_kprobe_filter_arg 92 71
+pass 130 executions 480
+start 131 tetragon/observer generic_kprobe_filter_arg 92 71
+pass 131 executions 480
+start 132 tetragon/observer generic_kprobe_filter_arg 92 71
+pass 132 executions 480
+start 133 tetragon/observer generic_kprobe_filter_arg 92 71
+pass 133 executions 480
+start 134 tetragon/observer generic_kprobe_filter_arg 92 71
+pass 134 executions 480
+start 135 tetragon/observer generic_rawtp_filter_arg 92 71
+pass 135 executions 480
+start 136 tetragon/observer generic_rawtp_filter_arg 92 71
+pass 136 executions 480
+start 137 tetragon/observer generic_rawtp_filter_arg 92 71
+pass 137 executions 480
+start 138 tetragon/observer generic_rawtp_actions 81 60
+pass 138 executions 480
+start 139 tetragon/observer generic_tracepoint_process_event 95 74
+pass 139 executions 480
+start 140 tetragon/observer generic_tracepoint_process_event 95 74
+pass 140 executions 480
+start 141 tetragon/observer generic_rawtp_process_event 95 74
+pass 141 executions 480
+start 142 tetragon/observer generic_rawtp_process_event 95 74
+pass 142 executions 480
+start 143 tetragon/observer generic_rawtp_process_filter 95 74
+pass 143 executions 480
+start 144 tetragon/observer generic_rawtp_process_filter 95 74
+pass 144 executions 480
+start 145 tetragon/observer generic_kprobe_filter_arg 92 71
+pass 145 executions 480
+start 146 tetragon/observer generic_kprobe_filter_arg 92 71
+pass 146 executions 480
+start 147 tetragon/observer generic_kprobe_filter_arg 92 71
+pass 147 executions 480
+start 148 tetragon/observer event_execve 95 74
+pass 148 executions 480
+start 149 tetragon/observer generic_rawtp_event 95 74
+pass 149 executions 480
+start 150 tetragon/observer generic_kprobe_event 95 74
+pass 150 executions 480
+start 151 tetragon/observer generic_kprobe_actions 81 60
+pass 151 executions 480
+start 152 tetragon/observer generic_kprobe_filter_arg 92 71
+pass 152 executions 480
+start 153 tetragon/observer generic_kprobe_filter_arg 92 71
+pass 153 executions 480
+start 154 tetragon/observer generic_kprobe_filter_arg 92 71
+pass 154 executions 480
+start 155 tetragon/observer generic_retkprobe_event 95 74
+pass 155 executions 480
+start 156 tetragon/observer generic_rawtp_setup_event 77 56
+pass 156 executions 480
+start 157 tetragon/observer generic_rawtp_setup_event 77 56
+pass 157 executions 480
+start 158 tetragon/observer generic_tracepoint_event 95 74
+pass 158 executions 480
+start 159 tracee/monitor trace_ret_dup2 95 74
+pass 159 executions 480
+start 160 tracee/monitor uprobe_lkm_seeker 95 74
+pass 160 executions 480
+start 161 tracee/monitor tracepoint__sched__sched_process_exec 95 74
+pass 161 executions 480
+start 162 tracee/monitor trace_security_bprm_creds_for_exec 95 74
+pass 162 executions 480
+start 163 tracee/monitor trace_dup 92 71
+pass 163 executions 480
+start 164 tracee/monitor tracepoint__raw_syscalls__sys_enter 77 56
+pass 164 executions 480
+start 165 tracee/monitor tracepoint__raw_syscalls__sys_exit 77 56
+pass 165 executions 480
+start 166 tracee/monitor trace_dup3 92 71
+pass 166 executions 480
+start 167 tracee/monitor trace_ret_vfs_read_tail 95 74
+pass 167 executions 480
+start 168 tracee/monitor trace_security_file_mprotect 95 74
+pass 168 executions 480
+start 169 tracee/monitor send_bin_tp 92 71
+pass 169 executions 480
+start 170 tracee/monitor trace_ret_ptrace 95 74
+pass 170 executions 480
+start 171 tracee/monitor trace_security_kernel_post_read_file 95 74
+pass 171 executions 480
+start 172 tracee/monitor trace_ret_vfs_readv_tail 95 74
+pass 172 executions 480
+start 173 tracee/monitor trace_security_bpf 95 74
+pass 173 executions 480
+start 174 tracee/monitor trace_ret_vfs_read 95 74
+pass 174 executions 480
+start 175 tracee/monitor trace_arch_prctl 92 71
+pass 175 executions 480
+start 176 tracee/monitor trace_dup2 92 71
+pass 176 executions 480
+start 177 tracee/monitor trace_ret_vfs_write_tail 95 74
+pass 177 executions 480
+start 178 tracee/monitor trace_ret_vfs_readv 95 74
+pass 178 executions 480
+start 179 tracee/monitor trace_ret_vfs_writev_tail 95 74
+pass 179 executions 480
+start 180 tracee/monitor lkm_seeker_kset_tail 95 74
+pass 180 executions 480
+start 181 tracee/monitor trace_ret_kernel_write_tail 95 74
+pass 181 executions 480
+start 182 tracee/monitor trace_ret_kernel_write 95 74
+pass 182 executions 480
+start 183 tracee/monitor trace_ret_vfs_write 95 74
+pass 183 executions 480
+start 184 tracee/monitor sys_exit_submit 95 74
+pass 184 executions 480
+start 185 tracee/monitor sys_enter_submit 95 74
+pass 185 executions 480
+start 186 tracee/monitor trace_ret_vfs_writev 95 74
+pass 186 executions 480
+start 187 tracee/monitor trace_ret_dup3 95 74
+pass 187 executions 480
+start 188 tracee/monitor sys_exit_init 92 71
+pass 188 executions 480
+start 189 tracee/monitor sys_exit_init 92 71
+pass 189 executions 480
+start 190 tracee/monitor trace_ptrace 92 71
+pass 190 executions 480
+start 191 tracee/monitor send_bin 92 71
+pass 191 executions 480
+start 192 tracee/monitor lkm_seeker_mod_tree_tail 79 58
+pass 192 executions 480
+start 193 tracee/monitor lkm_seeker_mod_tree_tail 79 58
+pass 193 executions 480
+start 194 tracee/monitor syscall__init_module 83 62
+pass 194 executions 480
+start 195 tracee/monitor lkm_seeker_modtree_loop 95 74
+pass 195 executions 480
+start 196 tracee/monitor lkm_seeker_modtree_loop 95 74
+pass 196 executions 480
+start 197 tracee/monitor trace_process_vm_writev 92 71
+pass 197 executions 480
+start 198 tracee/monitor sys_enter_init 92 71
+pass 198 executions 480
+start 199 tracee/monitor sys_enter_init 92 71
+pass 199 executions 480
+start 200 tracee/monitor trace_exec_binprm 95 74
+pass 200 executions 480
+start 201 tracee/monitor uprobe__features_fallback_arena 95 74
+pass 201 executions 480
+start 202 tracee/monitor trace_ret_dup 95 74
+pass 202 executions 480
+start 203 tracee/monitor lkm_seeker_proc_tail 95 74
+pass 203 executions 480
+start 204 tracee/monitor trace_ret_process_vm_writev 95 74
+pass 204 executions 480
+start 205 tracee/monitor trace_ret_arch_prctl 95 74
+pass 205 executions 480
+PASS stubs 206 executions 98880 bytes 18956 14630

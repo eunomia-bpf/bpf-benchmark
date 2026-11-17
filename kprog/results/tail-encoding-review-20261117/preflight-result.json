@@ -1,0 +1,2069 @@
+{
+  "scope": "Host retained-fragment functional preflight with synthetic maps, counters, program target and stack. No real kernel address executes. No production transformation, stock verification, installed-size or timing claim.",
+  "stubs": 206,
+  "executions": 98880,
+  "old_bytes": 18956,
+  "short_bytes": 14630,
+  "reports": [
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_php",
+      "counter_field": 3123,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "native_tracer_entry",
+      "counter_field": 1330,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "native_tracer_entry",
+      "counter_field": 1463,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "native_tracer_entry",
+      "counter_field": 1820,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_perl",
+      "counter_field": 3664,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_ruby",
+      "counter_field": 523,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_native",
+      "counter_field": 1875,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_v8",
+      "counter_field": 12209,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_stop",
+      "counter_field": 1988,
+      "old_bytes": 81,
+      "short_bytes": 60,
+      "old_field": 17,
+      "short_field": 10,
+      "executions": 480
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_dotnet",
+      "counter_field": 8525,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_python",
+      "counter_field": 2071,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_hotspot",
+      "counter_field": 711,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "custom__generic",
+      "counter_field": 910,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_ingress_ipv4",
+      "counter_field": 137,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_ingress_ipv4",
+      "counter_field": 1153,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_netdev",
+      "counter_field": 799,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_netdev",
+      "counter_field": 1134,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_netdev",
+      "counter_field": 3620,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_rev_dnat_ipv4",
+      "counter_field": 2065,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_container",
+      "counter_field": 372,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_container",
+      "counter_field": 1023,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_no_service_ipv4",
+      "counter_field": 538,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_host",
+      "counter_field": 628,
+      "old_bytes": 90,
+      "short_bytes": 69,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_host",
+      "counter_field": 1013,
+      "old_bytes": 90,
+      "short_bytes": 69,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_netdev",
+      "counter_field": 808,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_netdev",
+      "counter_field": 1142,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_netdev",
+      "counter_field": 5177,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_policy",
+      "counter_field": 3152,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_arp",
+      "counter_field": 683,
+      "old_bytes": 79,
+      "short_bytes": 58,
+      "old_field": 17,
+      "short_field": 10,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_egress",
+      "counter_field": 3949,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_egress",
+      "counter_field": 4209,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_rev_dnat_ipv4",
+      "counter_field": 2065,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_lxc_policy",
+      "counter_field": 3090,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_lxc_policy",
+      "counter_field": 3355,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_lxc_policy",
+      "counter_field": 3638,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_host",
+      "counter_field": 1339,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_host",
+      "counter_field": 1858,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_host",
+      "counter_field": 2126,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_snat_fwd_ipv4",
+      "counter_field": 691,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_lxc_policy",
+      "counter_field": 3090,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_lxc_policy",
+      "counter_field": 3355,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_lxc_policy",
+      "counter_field": 3638,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_egress_ipv4",
+      "counter_field": 690,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_snat_fwd_ipv4",
+      "counter_field": 681,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_no_service_ipv4",
+      "counter_field": 538,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_arp",
+      "counter_field": 683,
+      "old_bytes": 79,
+      "short_bytes": 58,
+      "old_field": 17,
+      "short_field": 10,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_to_endpoint",
+      "counter_field": 518,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_egress",
+      "counter_field": 3949,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_egress",
+      "counter_field": 4209,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_cont",
+      "counter_field": 824,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_cont",
+      "counter_field": 3607,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_cont",
+      "counter_field": 3824,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_host",
+      "counter_field": 1339,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_host",
+      "counter_field": 1858,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_host",
+      "counter_field": 2126,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_snat_fwd_ipv4",
+      "counter_field": 722,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_policy",
+      "counter_field": 3152,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_netdev",
+      "counter_field": 819,
+      "old_bytes": 90,
+      "short_bytes": 69,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_netdev",
+      "counter_field": 1811,
+      "old_bytes": 90,
+      "short_bytes": 69,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_netdev",
+      "counter_field": 2072,
+      "old_bytes": 90,
+      "short_bytes": 69,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_netdev",
+      "counter_field": 819,
+      "old_bytes": 90,
+      "short_bytes": 69,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_netdev",
+      "counter_field": 1811,
+      "old_bytes": 90,
+      "short_bytes": 69,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_netdev",
+      "counter_field": 2072,
+      "old_bytes": 90,
+      "short_bytes": 69,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4",
+      "counter_field": 626,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4",
+      "counter_field": 1626,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4",
+      "counter_field": 4205,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_host",
+      "counter_field": 1339,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_host",
+      "counter_field": 1858,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_host",
+      "counter_field": 2126,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_ingress_ipv4",
+      "counter_field": 137,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_ingress_ipv4",
+      "counter_field": 1153,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_container",
+      "counter_field": 484,
+      "old_bytes": 81,
+      "short_bytes": 60,
+      "old_field": 17,
+      "short_field": 10,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_container",
+      "counter_field": 751,
+      "old_bytes": 81,
+      "short_bytes": 60,
+      "old_field": 17,
+      "short_field": 10,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_netdev",
+      "counter_field": 2583,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_netdev",
+      "counter_field": 2882,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4",
+      "counter_field": 626,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4",
+      "counter_field": 1626,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4",
+      "counter_field": 4205,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_netdev",
+      "counter_field": 2583,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_netdev",
+      "counter_field": 2882,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_to_endpoint",
+      "counter_field": 518,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_container",
+      "counter_field": 372,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_container",
+      "counter_field": 1023,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_netdev",
+      "counter_field": 819,
+      "old_bytes": 90,
+      "short_bytes": 69,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_netdev",
+      "counter_field": 1811,
+      "old_bytes": 90,
+      "short_bytes": 69,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_netdev",
+      "counter_field": 2072,
+      "old_bytes": 90,
+      "short_bytes": 69,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_cont",
+      "counter_field": 824,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_cont",
+      "counter_field": 3607,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_cont",
+      "counter_field": 3824,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_ingress",
+      "counter_field": 3022,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_ingress",
+      "counter_field": 3287,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_netdev",
+      "counter_field": 2583,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_netdev",
+      "counter_field": 2882,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_container",
+      "counter_field": 484,
+      "old_bytes": 81,
+      "short_bytes": 60,
+      "old_field": 17,
+      "short_field": 10,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_container",
+      "counter_field": 751,
+      "old_bytes": 81,
+      "short_bytes": 60,
+      "old_field": 17,
+      "short_field": 10,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_ingress",
+      "counter_field": 3022,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_ingress",
+      "counter_field": 3287,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_host",
+      "counter_field": 628,
+      "old_bytes": 90,
+      "short_bytes": 69,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_host",
+      "counter_field": 1013,
+      "old_bytes": 90,
+      "short_bytes": 69,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_egress_ipv4",
+      "counter_field": 690,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "execve_rate",
+      "counter_field": 953,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "counter_field": 453,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "counter_field": 1004,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "counter_field": 1119,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_process_event",
+      "counter_field": 3643,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_process_event",
+      "counter_field": 3772,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_arg",
+      "counter_field": 453,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_arg",
+      "counter_field": 1004,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_arg",
+      "counter_field": 1119,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "counter_field": 453,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "counter_field": 1004,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "counter_field": 1119,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_process_filter",
+      "counter_field": 8834,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_process_filter",
+      "counter_field": 8974,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "counter_field": 453,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "counter_field": 1004,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "counter_field": 1119,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_actions",
+      "counter_field": 334,
+      "old_bytes": 81,
+      "short_bytes": 60,
+      "old_field": 17,
+      "short_field": 10,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_setup_event",
+      "counter_field": 558,
+      "old_bytes": 79,
+      "short_bytes": 58,
+      "old_field": 17,
+      "short_field": 10,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_setup_event",
+      "counter_field": 660,
+      "old_bytes": 79,
+      "short_bytes": 58,
+      "old_field": 17,
+      "short_field": 10,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_actions",
+      "counter_field": 334,
+      "old_bytes": 81,
+      "short_bytes": 60,
+      "old_field": 17,
+      "short_field": 10,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_filter_arg",
+      "counter_field": 364,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_filter_arg",
+      "counter_field": 915,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_filter_arg",
+      "counter_field": 1030,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "counter_field": 453,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "counter_field": 1004,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "counter_field": 1119,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_filter",
+      "counter_field": 8837,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_filter",
+      "counter_field": 8977,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "counter_field": 453,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "counter_field": 1004,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "counter_field": 1119,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "counter_field": 453,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "counter_field": 1004,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "counter_field": 1119,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_filter_arg",
+      "counter_field": 453,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_filter_arg",
+      "counter_field": 1004,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_filter_arg",
+      "counter_field": 1119,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_actions",
+      "counter_field": 334,
+      "old_bytes": 81,
+      "short_bytes": 60,
+      "old_field": 17,
+      "short_field": 10,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_process_event",
+      "counter_field": 1712,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_process_event",
+      "counter_field": 3481,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_process_event",
+      "counter_field": 1500,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_process_event",
+      "counter_field": 3631,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_process_filter",
+      "counter_field": 8834,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_process_filter",
+      "counter_field": 8974,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "counter_field": 453,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "counter_field": 1004,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "counter_field": 1119,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_execve",
+      "counter_field": 7232,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_event",
+      "counter_field": 1437,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_event",
+      "counter_field": 1437,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_actions",
+      "counter_field": 334,
+      "old_bytes": 81,
+      "short_bytes": 60,
+      "old_field": 17,
+      "short_field": 10,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "counter_field": 453,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "counter_field": 1004,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "counter_field": 1119,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_event",
+      "counter_field": 5981,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_setup_event",
+      "counter_field": 474,
+      "old_bytes": 77,
+      "short_bytes": 56,
+      "old_field": 17,
+      "short_field": 10,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_setup_event",
+      "counter_field": 574,
+      "old_bytes": 77,
+      "short_bytes": 56,
+      "old_field": 17,
+      "short_field": 10,
+      "executions": 480
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_event",
+      "counter_field": 11871,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_dup2",
+      "counter_field": 8691,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_lkm_seeker",
+      "counter_field": 3052,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_process_exec",
+      "counter_field": 10412,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bprm_creds_for_exec",
+      "counter_field": 6585,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_dup",
+      "counter_field": 465,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__raw_syscalls__sys_enter",
+      "counter_field": 118,
+      "old_bytes": 77,
+      "short_bytes": 56,
+      "old_field": 17,
+      "short_field": 10,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__raw_syscalls__sys_exit",
+      "counter_field": 148,
+      "old_bytes": 77,
+      "short_bytes": 56,
+      "old_field": 17,
+      "short_field": 10,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_dup3",
+      "counter_field": 465,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_read_tail",
+      "counter_field": 6535,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_mprotect",
+      "counter_field": 14546,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "send_bin_tp",
+      "counter_field": 683,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_ptrace",
+      "counter_field": 8691,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_kernel_post_read_file",
+      "counter_field": 7293,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_readv_tail",
+      "counter_field": 11166,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bpf",
+      "counter_field": 11019,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_read",
+      "counter_field": 8229,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_arch_prctl",
+      "counter_field": 465,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_dup2",
+      "counter_field": 465,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_write_tail",
+      "counter_field": 10654,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_readv",
+      "counter_field": 8229,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_writev_tail",
+      "counter_field": 10909,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_kset_tail",
+      "counter_field": 64172,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_kernel_write_tail",
+      "counter_field": 10654,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_kernel_write",
+      "counter_field": 8229,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_write",
+      "counter_field": 8226,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_exit_submit",
+      "counter_field": 8684,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_enter_submit",
+      "counter_field": 11913,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_writev",
+      "counter_field": 8229,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_dup3",
+      "counter_field": 8691,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_exit_init",
+      "counter_field": 264,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_exit_init",
+      "counter_field": 373,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ptrace",
+      "counter_field": 465,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "send_bin",
+      "counter_field": 683,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_mod_tree_tail",
+      "counter_field": 465,
+      "old_bytes": 79,
+      "short_bytes": 58,
+      "old_field": 17,
+      "short_field": 10,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_mod_tree_tail",
+      "counter_field": 555,
+      "old_bytes": 79,
+      "short_bytes": 58,
+      "old_field": 17,
+      "short_field": 10,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__init_module",
+      "counter_field": 500,
+      "old_bytes": 83,
+      "short_bytes": 62,
+      "old_field": 17,
+      "short_field": 10,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_modtree_loop",
+      "counter_field": 76383,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_modtree_loop",
+      "counter_field": 76522,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_process_vm_writev",
+      "counter_field": 465,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_enter_init",
+      "counter_field": 507,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_enter_init",
+      "counter_field": 616,
+      "old_bytes": 92,
+      "short_bytes": 71,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_exec_binprm",
+      "counter_field": 6574,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe__features_fallback_arena",
+      "counter_field": 2378,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_dup",
+      "counter_field": 8691,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_proc_tail",
+      "counter_field": 60650,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_process_vm_writev",
+      "counter_field": 8691,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_arch_prctl",
+      "counter_field": 8691,
+      "old_bytes": 95,
+      "short_bytes": 74,
+      "old_field": 25,
+      "short_field": 18,
+      "executions": 480
+    }
+  ]
+}

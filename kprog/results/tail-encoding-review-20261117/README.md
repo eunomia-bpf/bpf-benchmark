@@ -67,3 +67,31 @@ The earlier dynamic probe zero-tail population is already in
 results/current-link-capture-20261117/replay-summary.txt; it was not rerun or
 counted as another new result here. All raw stays at
 /workspaces/kprog-raw/perf/tail-encoding-review-20261117.
+
+## Actual host functional preflight, 2026-11-17T22:24:20Z
+
+Recipebb7811b7b passed98,880 actual native executions across all206 retained
+stubs:480 per stub, old/short forms and both counter displacements(-16/-32).
+The matrix covers live bounds0/1/4, counter0/32/33/34, empty/populated slots,
+indices0/1/4/u32-max and an index with nonzero upper32 bits. Bounds/count/null
+misses and successful transitions agree. A successful transition increments
+exactly the selected counter; misses leave both counters unchanged. Physical
+context, map and narrowed index are preserved; bounds misses keep original
+RAX12. Old and short synthetic stack exits agree, including real native
+cleanup and BPF callee pops from every retained stub. A local callback restores
+the actual host frame before returning; no kernel address is executed.
+
+Tested fragments total18,956 ->14,630B,4,326B fewer, matching the static
+encoding opportunity. This is candidate-fragment evidence, not an applied
+production transform, stock proof, installed-byte result or app timing.
+
+The callback targets, map/program/counter storage and frames are synthetic
+host data. Real retained instructions and their kind10 offsets provide the
+stubs; final program->bpf_func is directed to the callback with the retained
+entry offset. These tests exercise the branch, counter and cleanup ABI; the
+queued Rust tests still need to validate the compactor's mapped field/chunks,
+original source labels, actual ELF rewrite and load metadata.
+
+Job2785209 ended0 at22:23:14Z. Raw: /workspaces/kprog-raw/perf/tail-encoding-review-20261117/preflight-20261117T222313Z-2785209.
+Small preflight result/output/location are committed here. Existing dead-ID,
+fusion and tail-source workers remain queued, with their scripts unchanged.
