@@ -92,7 +92,7 @@ elif sys.argv[1]=='fix':
         for n in successors {
             let merged=match &states[n] {
                 None=>registers.clone(),
-                Some(old)=>old.iter().filter(|(r,name)|registers.get(r)==Some(*name))
+                Some(old)=>old.iter().filter(|(r,name)|registers.get(*r)==Some(*name))
                     .map(|(&r,name)|(r,name.clone())).collect(),
             };
             if states[n].as_ref()!=Some(&merged) {states[n]=Some(merged);queue.push_back(n);}
