@@ -34,8 +34,9 @@ if sys.argv[1]=='test':
                     let load=decoded.iter().find(|i|i.mnemonic()==Mnemonic::Mov && i.op0_register()==Register::RAX
                         && i.memory_base()==if live_rbp {Register::RBP}else{Register::RAX}).expect("counter pointer load");
                     assert_eq!(load.memory_displacement64() as i64,-32);
-                    let decoder=Decoder::new(64,&bytes,DecoderOptions::NONE);
-                    let offsets=decoder.get_constant_offsets(load);
+                    let mut decoder=Decoder::new(64,&bytes[load.ip() as usize..],DecoderOptions::NONE);
+                    let instruction=decoder.decode();
+                    let offsets=decoder.get_constant_offsets(&instruction);
                     assert_eq!(offsets.displacement_size(),4,"kind10 always patches four bytes");
                     assert_eq!(load.ip() as usize+offsets.displacement_offset(),field,"counter offset follows branch sizing");
                     cases+=1;
@@ -75,7 +76,7 @@ elif sys.argv[1]=='fix':
     let marker=RelocRecord {offset:u32::try_from(tail_count_field-3)?,
         kind:NATIVE_LAB_RELOC_X86_TAIL_COUNT,target:0};
     let (mut bytes,markers,_)=probe_read::compact((bytes,vec![marker],Vec::new()))?;
-    bytes.pop(); // The label remains the byte immediately after the stub.
+    bytes.truncate(bytes.len()-1); // The label remains the byte immediately after the stub.
     let field=markers[0].offset as usize+3;
     Ok((declared_byte_chunks(&bytes)?, field))'''
     assert s.count(old)==1;s=s.replace(old,new)
