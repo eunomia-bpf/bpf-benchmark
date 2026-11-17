@@ -23,3 +23,5 @@ canonical guest CLI stays untouched. Source and emitted gain are pending until
 actual results; native helper bindings/bytes and call-site changes must be
 reported before any per-call claim. Omp owns later image/check/target timing,
 with all LTO on. Raw: /workspaces/kprog-raw/perf/map-provenance-cfg-20261117.
+
+2026-11-17T23:25:24Z — Named map CFG source and full host tests completed; actual logs and source.patch committed. Raw: /workspaces/kprog-raw/perf/map-provenance-cfg-20261117/host-20261117T232351Z-2807862. Production unit-entry build and captured-request emission follow; canonical CLI stays unchanged; installed/time results remain pending.

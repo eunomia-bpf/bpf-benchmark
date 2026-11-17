@@ -1,0 +1,21 @@
+   Compiling native-link v0.1.0 (/workspaces/repository/kprog/x86/native_lab/native_link)
+    Finished `release` profile [optimized] target(s) in 46.06s
+     Running unittests src/main.rs (kprog/x86/native_lab/native_link/target/release/deps/native_link-62ccb5c6f5eda54e)
+
+running 1 test
+test x86::known_maps::tests::map_bindings_meet_across_branches_and_loops ... 
+thread 'x86::known_maps::tests::map_bindings_meet_across_branches_and_loops' (2808071) panicked at src/x86_known_maps.rs:107:9:
+assertion `left == right` failed
+  left: None
+ right: Some("map")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+FAILED
+
+failures:
+
+failures:
+    x86::known_maps::tests::map_bindings_meet_across_branches_and_loops
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 63 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--bin native-link`
