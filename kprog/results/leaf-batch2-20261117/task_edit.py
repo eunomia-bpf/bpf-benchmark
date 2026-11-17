@@ -17,8 +17,9 @@ def edit(path, pairs):
 
 
 S = 'kprog/x86/native_lab/native_link/src'
-io.open(f'{S}/x86_task.rs', 'w', encoding='utf-8').write(read('/var/tmp/kprog-tmp/x86_task.rs'))
-io.open('kprog/x86/native_lab/native_link/fixtures/task_driver.c', 'w', encoding='utf-8').write(read('/var/tmp/kprog-tmp/task_driver.c'))
+assets = os.path.dirname(os.path.abspath(__file__))
+io.open(f'{S}/x86_task.rs', 'w', encoding='utf-8').write(read(f'{assets}/x86_task.rs'))
+io.open('kprog/x86/native_lab/native_link/fixtures/task_driver.c', 'w', encoding='utf-8').write(read(f'{assets}/task_driver.c'))
 
 edit(f'{S}/main.rs', [
     ('    #[serde(default)]\n    ktime: Option<RuntimeKtimeLayout>,\n}\n',

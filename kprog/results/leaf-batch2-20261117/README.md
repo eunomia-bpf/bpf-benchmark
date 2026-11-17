@@ -13,15 +13,22 @@ The coordinator wrote these changes and hands them to omp (operator 2026-11-17: 
 ## Apply and test
 
 ```
-mkdir -p /var/tmp/kprog-tmp && cp kprog/results/leaf-batch2-20261117/{x86_task.rs,task_driver.c} /var/tmp/kprog-tmp/
 python3 kprog/results/leaf-batch2-20261117/task_edit.py
 python3 kprog/results/leaf-batch2-20261117/cilium_edit.py
 python3 kprog/results/leaf-batch2-20261117/rename_edit.py
 ( exec 8>/workspaces/.agent-state/kprog-lanes/locks/timing; flock -s 8; cd kprog/x86/native_lab/native_link && taskset -c 8-23 cargo test --release )
-( exec 8>/workspaces/.agent-state/kprog-lanes/locks/timing; flock -s 8; cmake --build kprog/libnativeloader/build -j8 )
+( exec 8>/workspaces/.agent-state/kprog-lanes/locks/timing; flock -s 8; cmake --build runner/build-llvmbpf --target native_loader_shared -j1 )
 ```
 
 Each edit script asserts the exact text it replaces; when an anchor moved (for example after PERF's jiffies fields in main.rs), place the same change by hand. Expected host results: 41 linker tests plus the uid_gid test; the kernel-string fixture (193 vectors) passes with the shorter loop; kernel.bin and user.bin stay byte-identical, kernel-string.bin shrinks.
+
+PERF 2026-11-17: `task_edit.py` reads its committed component assets directly.
+The loader check uses the canonical `runner/build-llvmbpf` target used by
+the frozen image recipe; the old component-local CMake cache still names
+`native-sim/libnativeloader` and is not another build to refresh. The
+committed `run-host.sh` runs the full linker suite and this loader target
+on CPU 19 under timing SH, with persistent output including all fixture
+temporaries. Its actual test count supersedes the early estimate above.
 
 ## Batch
 
