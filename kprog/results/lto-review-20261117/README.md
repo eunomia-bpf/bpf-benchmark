@@ -3629,3 +3629,102 @@ Tracing `specialize → --mode proof → B`, followed by the loader's separate
 kernel link, corrects that inference. Previous COORDINATION notices and
 todo decisions citing the decoder as a barrier to late JRCXZ emission
 are superseded by the stage evidence above. No measured result changes.
+
+
+### Draft fast-clock LTO: semantics, scope and installed-cost review
+
+The coordinator's in-progress `x86_ktime.rs` is reviewed as source,
+not as code in image fc7c4707. Todo decision `998469741` schedules its
+BCC/Katran timing after the current breadth round. The late helper keeps
+one local body per linked program that calls the targeted clock; it is
+not a Workspace-wide shared code allocation.
+
+The following source correspondence is present in this draft:
+
+| Draft path | Sole-kernel counterpart |
+| --- | --- |
+| Read latch sequence, choose base[seq & 1], retry after result | timekeeping.c:442–455 |
+| Preempt count increment, this CPU's pvti, decrement/reschedule | kvmclock.c:75–82; asm/preempt.h:89–98,118–136 |
+| Version masked even, read data/TSC, compare version and retry | asm/pvclock.h:23–37; pvclock.c:75–79 |
+| Signed TSC shift, unsigned multiply and SHRD32, system-time add | asm/pvclock.h:44–89 |
+| Require stable flag in both vCPU and valid_flags | pvclock.c:86–88 |
+| Delta mask/max_cycles, normal mult/add/shift | timekeeping.c:378–400 |
+
+The unstable-clock branch closes preemption and calls the original
+monotonic function. That preserves the kernel's last_value/atomic
+monotonic correction at `pvclock.c:104–108`. The kernel read is the
+**nowd** path: no guest-stopped watchdog work is required at
+`pvclock.c:81–84` when dowd is false. The large-delta path delegates to
+the original safe/negative-motion handling. These branches do not
+provide a measured count of how often the inline fast path runs.
+
+The scheduler target is the PREEMPT_DYNAMIC static-call trampoline,
+whose enabled target is the register-saving notrace thunk
+(`asm/preempt.h:118–136`, `entry/thunk.S:13`). The x86 THUNK macro at
+`entry/calling.h:433–463` saves/restores the caller-saved registers,
+including RAX. Thus the draft's dependence on the timestamp and
+R8/R9/R10/R11 surviving that special call has source support; treating
+it as an ordinary clobbering C call would misdescribe this target.
+The reschedule test on a decrement reaching zero matches the inverted
+PREEMPT_NEED_RESCHED convention in the same preempt header.
+
+Three limits of this review remain explicit:
+
+1. The draft uses LFENCE;RDTSC unconditionally. The kernel's
+   `asm/tsc.h:39–63` uses CPU alternatives for RDTSC, LFENCE;RDTSC or
+   RDTSCP. Equivalence of that ordering choice needs the target's ordering
+   property, rather than a host instruction test alone. No claim is made
+   that the current guest lacks it. Existing boot-kernel facts or the
+   kernel's selected implementation are the relevant source, without
+   adding a per-call capability check or a new admission gate.
+2. `native_loader_lto.hpp:178–212` intentionally omits the optional clock
+   object when facts are absent, following the coordinator's eligibility
+   policy. Its empty runtime_error catch also hides a bad BTF field path
+   or other provider error. This is a diagnostic distinction to preserve,
+   not an observed load failure or a request to reject a run. The existing
+   `ktime` LTO range marker is evidence of an actually emitted body;
+   provider intent alone is not. No result field or new checker is added.
+3. The B decoder's lack of RDTSC/LFENCE is not itself a late-clock blocker:
+   proof mode excludes this emission, as corrected in the stage audit
+   above. B success does not verify the later clock expansion. Source
+   equivalence and its own ABI/ordering/size behavior remain separate.
+
+[clock_review_inventory.py](clock_review_inventory.py) counts the draft's
+literal builder at read time: **341 local bytes**, comprising 144 literal
+bytes, 76 field-displacement bytes, 16 GS displacement bytes, 24 absolute
+address bytes, 60 conditional-branch bytes, five direct-jump bytes,
+15 external-call-slot bytes and one final RET byte. See
+[clock-review.json](clock-review.json). This is source accounting before
+compaction or later edits, not an emitted decoder/installed-size result.
+The [original kernel disassembly](clock-kernel.disassembly.txt) is retained
+for the monotonic, KVM and pvclock functions. Their static fentry/thunk
+presence is not credited as measured runtime work.
+
+The extended [relocation census](helper-parity.json) finds targeted
+monotonic-fast calls: BCC **13**, Cilium **115**, Katran **8**, OTel **7**.
+The retained Tetragon/Tracee entries instead have **2 / 158 boot-clock
+calls**. `helpers.c:178–193` returns monotonic-fast for get_ns and
+boot-fast for get_boot_ns. Keep the new rewrite confined to the targeted
+helper and preserve the different time domain. Counts are historical
+static sites, not executed clock frequencies or projected whole-app gains.
+The cited 8.14% pvclock profile share in the coordinator's todo uses all
+guest samples; it is not by itself the fraction of BPF per-call time.
+
+One concrete constant fold is available inside the already-matched KVM
+branch. `kvmclock.c:158–163` sets `kvm_clock.mask = CLOCKSOURCE_MASK(64)`,
+and `timekeeping.c:318–322` copies that mask into the read bases. Under a
+successful KVM clock match and latch validation, the draft's
+`AND RAX,[tkr+mask]` at `x86_ktime.rs:89` is an identity operation.
+Omitting it saves **one instruction, one data read and seven local bytes**;
+other clocksource handling still delegates to the kernel. This depends on
+the existing clock/latch invariant, adds no runtime selector, and should
+not be generalized by removing the clocksource match or safe-delta path.
+The JSON includes boundary arithmetic illustrations; no candidate was
+emitted or gain measured.
+
+Expected benefit of the full leaf is removal of the clock-read indirect
+call and intermediate KVM/pvclock call boundaries while retaining their
+work. The 341-byte local addition and runtime exceptional branches can
+also cost code/front-end time. The queued one-app per-call/installed-byte
+measurements will determine their balance. PERF started no guest/build,
+added no source change/check and leaves the live coordinator draft intact.

@@ -1,5 +1,5 @@
 {
-  "recorded_utc": "2026-11-17T09:21:51Z",
+  "recorded_utc": "2026-11-17T09:57:48Z",
   "source_inventory": "/workspaces/repository/kprog/results/host-link-replay-20261116/emission-report.json",
   "emitted_entries": 239,
   "scope": "External CALL relocations in historical host outputs; static per-entry sites can repeat shared source callees. No dynamic-frequency or current-image claim.",
@@ -7,21 +7,28 @@
     "bcc": {
       "bpf_get_current_pid_tgid": 18,
       "bpf_get_current_comm": 9,
+      "__native_x86_ktime_get_mono_fast_ns": 13,
       "bpf_get_current_uid_gid": 9
     },
     "cilium": {
+      "__native_x86_ktime_get_mono_fast_ns": 115,
       "bpf_jiffies64": 91
     },
-    "katran": {},
+    "katran": {
+      "__native_x86_ktime_get_mono_fast_ns": 8
+    },
     "otelcol-ebpf-profiler": {
       "bpf_get_current_pid_tgid": 3,
+      "__native_x86_ktime_get_mono_fast_ns": 7,
       "bpf_get_current_comm": 3
     },
     "tetragon": {
-      "bpf_get_current_pid_tgid": 2
+      "bpf_get_current_pid_tgid": 2,
+      "bpf_ktime_get_boot_ns": 2
     },
     "tracee": {
       "bpf_get_current_pid_tgid": 185,
+      "bpf_ktime_get_boot_ns": 158,
       "bpf_get_current_task_btf": 121,
       "bpf_get_current_uid_gid": 514,
       "bpf_get_current_comm": 515
@@ -40,8 +47,18 @@
     },
     {
       "app": "bcc",
+      "helper": "__native_x86_ktime_get_mono_fast_ns",
+      "distinct_entry_symbols": 11
+    },
+    {
+      "app": "bcc",
       "helper": "bpf_get_current_uid_gid",
       "distinct_entry_symbols": 9
+    },
+    {
+      "app": "cilium",
+      "helper": "__native_x86_ktime_get_mono_fast_ns",
+      "distinct_entry_symbols": 15
     },
     {
       "app": "cilium",
@@ -49,9 +66,19 @@
       "distinct_entry_symbols": 13
     },
     {
+      "app": "katran",
+      "helper": "__native_x86_ktime_get_mono_fast_ns",
+      "distinct_entry_symbols": 1
+    },
+    {
       "app": "otelcol-ebpf-profiler",
       "helper": "bpf_get_current_pid_tgid",
       "distinct_entry_symbols": 3
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "helper": "__native_x86_ktime_get_mono_fast_ns",
+      "distinct_entry_symbols": 4
     },
     {
       "app": "otelcol-ebpf-profiler",
@@ -64,9 +91,19 @@
       "distinct_entry_symbols": 2
     },
     {
+      "app": "tetragon",
+      "helper": "bpf_ktime_get_boot_ns",
+      "distinct_entry_symbols": 2
+    },
+    {
       "app": "tracee",
       "helper": "bpf_get_current_pid_tgid",
       "distinct_entry_symbols": 136
+    },
+    {
+      "app": "tracee",
+      "helper": "bpf_ktime_get_boot_ns",
+      "distinct_entry_symbols": 125
     },
     {
       "app": "tracee",
@@ -125,6 +162,25 @@
     },
     {
       "app": "bcc",
+      "helper": "__native_x86_ktime_get_mono_fast_ns",
+      "symbol": "block_rq_complete",
+      "blob": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/1-0/image.blob",
+      "relocations": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/1-0/image.relocs",
+      "offset": 55,
+      "helper_aliases": [
+        "__native_x86_ktime_get_mono_fast_ns"
+      ],
+      "disassembly": [
+        "  2e:\ttest   rax,rax",
+        "  31:\tje     0x1e3",
+        "  37:\tcall   0x3c",
+        "  3c:\tmov    r14,rax",
+        "  3f:\tmov    QWORD PTR [rsp+0x40],0x0",
+        "  48:\tmov    QWORD PTR [rsp+0x38],0x0"
+      ]
+    },
+    {
+      "app": "bcc",
       "helper": "bpf_get_current_uid_gid",
       "symbol": "kprobe__cap_capable_exit",
       "blob": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/15-0/image.blob",
@@ -140,6 +196,25 @@
         "  91:\tmov    DWORD PTR [rsp+0x30],eax",
         "  95:\tlea    rdi,[rsp+0x40]",
         "  9a:\tmov    esi,0x10"
+      ]
+    },
+    {
+      "app": "cilium",
+      "helper": "__native_x86_ktime_get_mono_fast_ns",
+      "symbol": "cil_from_host",
+      "blob": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/35-0/image.blob",
+      "relocations": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/35-0/image.relocs",
+      "offset": 1612,
+      "helper_aliases": [
+        "__native_x86_ktime_get_mono_fast_ns"
+      ],
+      "disassembly": [
+        "     645:\tmov    ecx,0x5",
+        "     64a:\txor    eax,eax",
+        "     64c:\tcall   0x651",
+        "     651:\tsub    rax,r15",
+        "     654:\tmovabs rcx,0x0",
+        "     65e:\tcmp    rax,QWORD PTR [rcx]"
       ]
     },
     {
@@ -162,6 +237,25 @@
       ]
     },
     {
+      "app": "katran",
+      "helper": "__native_x86_ktime_get_mono_fast_ns",
+      "symbol": "balancer_ingress",
+      "blob": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/114-0/image.blob",
+      "relocations": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/114-0/image.relocs",
+      "offset": 3948,
+      "helper_aliases": [
+        "__native_x86_ktime_get_mono_fast_ns"
+      ],
+      "disassembly": [
+        "     f65:\tjne    0xf93",
+        "     f67:\tmov    eax,0x5",
+        "     f6c:\tcall   0xf71",
+        "     f71:\tmov    rcx,rax",
+        "     f74:\tsub    rcx,QWORD PTR [r13+0x8]",
+        "     f78:\tmovabs rdx,0x6fc23ac00"
+      ]
+    },
+    {
       "app": "otelcol-ebpf-profiler",
       "helper": "bpf_get_current_pid_tgid",
       "symbol": "custom__generic",
@@ -178,6 +272,25 @@
         "      17:\tmov    r15,rax",
         "      1a:\txor    eax,eax",
         "      1c:\ttest   r15d,r15d"
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "helper": "__native_x86_ktime_get_mono_fast_ns",
+      "symbol": "custom__generic",
+      "blob": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/117-0/image.blob",
+      "relocations": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/117-0/image.relocs",
+      "offset": 57,
+      "helper_aliases": [
+        "__native_x86_ktime_get_mono_fast_ns"
+      ],
+      "disassembly": [
+        "      2e:\tje     0xa86",
+        "      34:\tmov    eax,0x5",
+        "      39:\tcall   0x3e",
+        "      3e:\tmov    r12,rax",
+        "      41:\tmov    DWORD PTR [rsp+0xf4],0x0",
+        "      4c:\tmovabs rdi,0x0"
       ]
     },
     {
@@ -219,6 +332,25 @@
       ]
     },
     {
+      "app": "tetragon",
+      "helper": "bpf_ktime_get_boot_ns",
+      "symbol": "event_exit_acct_process",
+      "blob": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/158-0/image.blob",
+      "relocations": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/158-0/image.relocs",
+      "offset": 166,
+      "helper_aliases": [
+        "bpf_ktime_get_boot_ns"
+      ],
+      "disassembly": [
+        "  9d:\tmov    QWORD PTR [r12],rax",
+        "  a1:\tmov    eax,0x7d",
+        "  a6:\tcall   0xab",
+        "  ab:\tmov    QWORD PTR [r12+0x8],rax",
+        "  b0:\tmov    DWORD PTR [r12+0x10],r14d",
+        "  b5:\tmov    DWORD PTR [r12+0x14],0x0"
+      ]
+    },
+    {
       "app": "tracee",
       "helper": "bpf_get_current_pid_tgid",
       "symbol": "cgroup_bpf_run_filter_skb",
@@ -235,6 +367,25 @@
         "     1d0:\tmov    DWORD PTR [r15+0x28],eax",
         "     1d4:\tshr    rax,0x20",
         "     1d8:\tmov    DWORD PTR [r15+0x24],eax"
+      ]
+    },
+    {
+      "app": "tracee",
+      "helper": "bpf_ktime_get_boot_ns",
+      "symbol": "cgroup_bpf_run_filter_skb",
+      "blob": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/301-0/image.blob",
+      "relocations": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/301-0/image.relocs",
+      "offset": 484,
+      "helper_aliases": [
+        "bpf_ktime_get_boot_ns"
+      ],
+      "disassembly": [
+        "     1d8:\tmov    DWORD PTR [r15+0x24],eax",
+        "     1dc:\tmov    DWORD PTR [r15+0x70],0x31b",
+        "     1e4:\tcall   0x1e9",
+        "     1e9:\tmov    QWORD PTR [r15],rax",
+        "     1ec:\tmov    eax,DWORD PTR gs:0xffffffffb52b0034",
+        "     1f4:\tmov    WORD PTR [r15+0x7c],ax"
       ]
     },
     {

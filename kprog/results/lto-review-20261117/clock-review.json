@@ -1,0 +1,45 @@
+{
+  "recorded_utc": "2026-11-17T09:56:45Z",
+  "scope": "Draft WIP source-byte accounting at read time, original sole-kernel disassembly and arithmetic examples. No native candidate generated/patched/assembled/executed, no installed/per-call result or new check. Counts describe this literal builder, not later revisions.",
+  "source": "kprog/x86/native_lab/native_link/src/x86_ktime.rs",
+  "source_parts_bytes": {
+    "literal_arrays": 144,
+    "displacement_fields": 76,
+    "gs_displacements": 16,
+    "absolute_addresses": 24,
+    "conditional_branches": 60,
+    "direct_jumps": 5,
+    "external_call_slots": 15,
+    "one_byte_pushes": 1
+  },
+  "literal_builder_total_bytes": 341,
+  "kvm_mask_source": "vendor/linux-framework/arch/x86/kernel/kvmclock.c:158-163",
+  "timekeeper_mask_source": "vendor/linux-framework/kernel/time/timekeeping.c:318-322",
+  "mask_identity_examples": [
+    {
+      "delta": "0x0",
+      "masked": "0x0",
+      "same": true
+    },
+    {
+      "delta": "0x1",
+      "masked": "0x1",
+      "same": true
+    },
+    {
+      "delta": "0x7fffffffffffffff",
+      "masked": "0x7fffffffffffffff",
+      "same": true
+    },
+    {
+      "delta": "0x8000000000000000",
+      "masked": "0x8000000000000000",
+      "same": true
+    },
+    {
+      "delta": "0xffffffffffffffff",
+      "masked": "0xffffffffffffffff",
+      "same": true
+    }
+  ]
+}

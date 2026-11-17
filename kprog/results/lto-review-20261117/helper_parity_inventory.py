@@ -13,7 +13,9 @@ inventory = repo / 'kprog/results/host-link-replay-20261116/emission-report.json
 entries = json.loads(inventory.read_text())['entries']
 wanted = {'bpf_get_current_task', 'bpf_get_current_task_btf',
           'bpf_get_smp_processor_id', 'bpf_jiffies64',
-          'bpf_get_current_pid_tgid', 'bpf_get_current_uid_gid', 'bpf_get_current_comm'}
+          'bpf_get_current_pid_tgid', 'bpf_get_current_uid_gid', 'bpf_get_current_comm',
+          'bpf_ktime_get_ns', '__native_x86_ktime_get_mono_fast_ns', 'ktime_get_mono_fast_ns',
+          'bpf_ktime_get_boot_ns'}
 counts = collections.defaultdict(collections.Counter)
 examples = {}
 programs = collections.defaultdict(set)

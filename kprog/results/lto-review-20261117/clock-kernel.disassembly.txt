@@ -1,0 +1,97 @@
+
+/workspaces/.agent-state/kprog-ck/build-x86/vmlinux:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+ffffffff813b93b0 <ktime_get_mono_fast_ns>:
+ffffffff813b93b0:	push   %r13
+ffffffff813b93b2:	push   %r12
+ffffffff813b93b4:	push   %rbp
+ffffffff813b93b5:	push   %rbx
+ffffffff813b93b6:	mov    0x2423b03(%rip),%r12d        # ffffffff837dcec0 <tk_fast_mono>
+ffffffff813b93bd:	mov    %r12d,%ebx
+ffffffff813b93c0:	and    $0x1,%ebx
+ffffffff813b93c3:	neg    %rbx
+ffffffff813b93c6:	and    $0x38,%ebx
+ffffffff813b93c9:	mov    -0x7c823138(%rbx),%rdi
+ffffffff813b93d0:	lea    -0x7c823138(%rbx),%r13
+ffffffff813b93d7:	mov    0x28(%r13),%rbp
+ffffffff813b93db:	mov    (%rdi),%rax
+ffffffff813b93de:	call   ffffffff82012c80 <__x86_indirect_thunk_array>
+ffffffff813b93e3:	mov    -0x7c823138(%rbx),%rdx
+ffffffff813b93ea:	mov    %rax,%rcx
+ffffffff813b93ed:	mov    0x8(%r13),%rax
+ffffffff813b93f1:	sub    0x10(%r13),%rcx
+ffffffff813b93f5:	and    %rax,%rcx
+ffffffff813b93f8:	cmp    %rcx,0x28(%rdx)
+ffffffff813b93fc:	jb     ffffffff813b942a <ktime_get_mono_fast_ns+0x7a>
+ffffffff813b93fe:	mov    0x18(%r13),%eax
+ffffffff813b9402:	imul   %rcx,%rax
+ffffffff813b9406:	mov    0x1c(%r13),%ecx
+ffffffff813b940a:	add    0x20(%r13),%rax
+ffffffff813b940e:	shr    %cl,%rax
+ffffffff813b9411:	mov    0x2423aa9(%rip),%edx        # ffffffff837dcec0 <tk_fast_mono>
+ffffffff813b9417:	cmp    %edx,%r12d
+ffffffff813b941a:	jne    ffffffff813b93b6 <ktime_get_mono_fast_ns+0x6>
+ffffffff813b941c:	pop    %rbx
+ffffffff813b941d:	add    %rbp,%rax
+ffffffff813b9420:	pop    %rbp
+ffffffff813b9421:	pop    %r12
+ffffffff813b9423:	pop    %r13
+ffffffff813b9425:	jmp    ffffffff820138b0 <__pi___x86_return_thunk>
+ffffffff813b942a:	shr    $1,%rax
+ffffffff813b942d:	not    %rax
+ffffffff813b9430:	test   %rcx,%rax
+ffffffff813b9433:	je     ffffffff813b9442 <ktime_get_mono_fast_ns+0x92>
+ffffffff813b9435:	mov    0x1c(%r13),%ecx
+ffffffff813b9439:	mov    0x20(%r13),%rax
+ffffffff813b943d:	shr    %cl,%rax
+ffffffff813b9440:	jmp    ffffffff813b9411 <ktime_get_mono_fast_ns+0x61>
+ffffffff813b9442:	mov    0x20(%r13),%rdx
+ffffffff813b9446:	mov    0x1c(%r13),%esi
+ffffffff813b944a:	mov    0x18(%r13),%edi
+ffffffff813b944e:	call   ffffffff813b8330 <delta_to_ns_safe.isra.0>
+ffffffff813b9453:	jmp    ffffffff813b9411 <ktime_get_mono_fast_ns+0x61>
+
+Disassembly of section .data:
+
+Disassembly of section .init.text:
+
+Disassembly of section .altinstr_aux:
+
+Disassembly of section .altinstr_replacement:
+
+Disassembly of section .exit.text:
+
+
+/workspaces/.agent-state/kprog-ck/build-x86/vmlinux:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+Disassembly of section .data:
+
+Disassembly of section .init.text:
+
+Disassembly of section .altinstr_aux:
+
+Disassembly of section .altinstr_replacement:
+
+Disassembly of section .exit.text:
+
+
+/workspaces/.agent-state/kprog-ck/build-x86/vmlinux:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+Disassembly of section .data:
+
+Disassembly of section .init.text:
+
+Disassembly of section .altinstr_aux:
+
+Disassembly of section .altinstr_replacement:
+
+Disassembly of section .exit.text:
