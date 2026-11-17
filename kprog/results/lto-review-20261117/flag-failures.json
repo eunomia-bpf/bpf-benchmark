@@ -1,0 +1,96 @@
+{
+  "captured_utc": "2026-11-17T02:26:35.186186+00:00",
+  "scope": "Retained Os logs only; no new measurement or native execution.",
+  "tracee": {
+    "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_013735_779007",
+    "shim_log": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_013735_779007/details/shim-logs/tracee__monitor.post_rejit.log",
+    "string_maps": [
+      {
+        "line": 519,
+        "type": 2,
+        "key_size": 4,
+        "value_size": 246,
+        "max_entries": 1,
+        "name": ".rodata.str1.1"
+      }
+    ],
+    "failing_loads": [
+      {
+        "line": 919,
+        "name": "trace_ret_vfs_w",
+        "insn_count": 3942
+      },
+      {
+        "line": 929,
+        "name": "trace_ret_vfs_w",
+        "insn_count": 6288
+      },
+      {
+        "line": 931,
+        "name": "trace_ret_vfs_w",
+        "insn_count": 6288
+      }
+    ],
+    "failures": [
+      {
+        "line": 930,
+        "program": "trace_ret_vfs_w",
+        "error": "native data symbol .L.str.6 exceeds BPF data map value_size for .rodata.str1.1"
+      },
+      {
+        "line": 933,
+        "program": "trace_ret_vfs_w",
+        "error": "native data symbol .L.str.6 exceeds BPF data map value_size for .rodata.str1.1"
+      }
+    ],
+    "replacement_events": 79,
+    "program_name_scope": "Kernel name is truncated; full ELF symbol not established here."
+  },
+  "bcc": {
+    "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_012030_406547",
+    "log": "/workspaces/kprog-raw/flag-tuning-20261117/2-Os/bcc_set.log",
+    "retained_files": [
+      "details/progress.json",
+      "details/shim-logs/bcc__set.baseline.log",
+      "details/shim-logs/bcc__set.post_rejit.log",
+      "metadata.json"
+    ],
+    "progress_status": "running",
+    "events": [
+      {
+        "app": "bcc/set",
+        "event": "app_start",
+        "runner": "bcc_set",
+        "workload": "stress_ng_bcc_hook_hot"
+      },
+      {
+        "app": "bcc/set",
+        "event": "measurement_start",
+        "phase": "baseline",
+        "runner": "bcc_set",
+        "samples": 3,
+        "workload": "stress_ng_bcc_hook_hot"
+      },
+      {
+        "app": "bcc/set",
+        "event": "measurement_done",
+        "phase": "baseline",
+        "runner": "bcc_set",
+        "status": "ok"
+      },
+      {
+        "app": "bcc/set",
+        "event": "rejit_skipped",
+        "runner": "bcc_set"
+      }
+    ],
+    "make_errors": [
+      "make: *** [kprog/perf/one-image/Makefile:106: corpus] Error 255"
+    ],
+    "native_replacement_events": 22,
+    "native_failure_events": 0,
+    "shim_last_line_number": 506,
+    "shim_last_event": "  LINK_CREATE -> fd=18 errno=0 kernel_link_id=41",
+    "cause": "Not established: retained files contain no native loader or kernel console failure."
+  }
+}

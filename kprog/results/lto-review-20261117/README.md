@@ -729,3 +729,68 @@ Reproduce the lightweight extraction with
 It reads retained plans, relocations and blobs, then writes only derived
 evidence in this directory. It neither executes native code nor establishes
 a performance result. Full raw captures remain under /workspaces.
+
+## Os load failures: private string pools cross the wrong layout boundary
+
+2026-11-17T02:26:35Z source review at fbbe797ef. This finding concerns
+pipeline correctness before any per-call optimization. The coordinator's
+Os run `x86_kvm_corpus_20261117_013735_779007` ends during Tracee startup.
+Its `details/shim-logs/tracee__monitor.post_rejit.log:519` records an ARRAY
+map named `.rodata.str1.1` with a 246-byte value. Lines 929–933 record two
+loads of kernel name `trace_ret_vfs_w`, 6,288 instructions, each failing
+with `native data symbol .L.str.6 exceeds BPF data map value_size for
+.rodata.str1.1`. There are 79 preceding native replacement events in this
+log, rather than a successful whole-app native phase. The 15-byte kernel
+name does not distinguish the four upstream `trace_ret_vfs_write*`
+symbols; the full failing ELF symbol is not established by this receipt.
+
+The source explains the class. At
+`kprog/libnativeloader/src/native_loader.cpp:2934–2955`, the native data
+section name selects the original loaded map. Ordinary globals bind by
+BTF variable name, but `SHF_STRINGS` sections keep the **native** symbol's
+section offset. Lines 2957–2968 compare that offset and native symbol size
+with the **eBPF** map's extent and bind its address. Those two compiler
+literal pools have no shared offset contract. By comparison, the sole
+kernel tree's `tools/lib/bpf/libbpf.c:1983,2009–2010` builds the original
+map from the original section's size and bytes; its data relocation at
+6380–6382 uses that object's symbol offset. No native pool layout enters
+the JIT arm. The observed exception proves an extent mismatch, without
+retaining the exact Os symbol offset in this log. In-bounds offsets can
+also name different bytes; removing the existing bounds refusal would
+leave that correctness problem unresolved.
+
+The ordering matters for remediation. `native_loader.cpp:4154–4160`
+extracts the P entry and binds these symbols **before** calling the
+context LTO compiler at 4190. It binds them again at 4197–4204 if LTO
+returns a new object. A private-pool rename introduced only by the
+load-time compiler would arrive after the first failure. Also,
+`native_loader_entry_data.hpp:24–27` collects every named proof symbol;
+being defined in the proof does not by itself exempt a private literal
+from the original-map binder. The existing native readonly-data machinery
+(`native_link/src/x86_readonly_relocs.rs:5–6,287–306`) is relevant, but its
+presence alone does not prevent this earlier binding.
+
+The forward correction needs to distinguish compiler-owned immutable
+literals from source globals whose identity and actual loaded map values
+must be preserved, at both binding stages. Private literal bytes can stay
+with their native image; program-visible configuration/global data still
+needs canonical source-map binding. This is a coordinator implementation
+finding, not authorization to edit the frozen loader core. It adds no
+check and makes no speedup claim: its immediate effect would be allowing
+the Os Tracee native phase to load correctly. Installed bytes and per-call
+time for that successful phase are not available from this failed run.
+
+BCC Os is a separate unresolved failure. Run
+`x86_kvm_corpus_20261117_012030_406547` retains baseline completion and
+outer Make exit 255, with no result or app JSON. Its native shim log has
+22 replacement events, zero `native-loader failed` events, and ends at
+line 506 with a successful `LINK_CREATE`. This bounds the observed
+progress; it does not identify a panic, OOM or LTO/helper defect. Neither
+the BCC log interval ending 01:25:30 nor Tracee's run starting 01:37:35
+falls inside the separately documented 01:29–01:31 stdout-path incident.
+
+The committed reader `flag_failure_inventory.py` reproduces these counts
+and selected events in `flag-failures.json` from retained logs, on CPUs
+16–19. It executes no guest or compiled native code. The stage objects
+have since been replaced by the coordinator's O2 build, so this review
+does not attribute the current stage object's offsets to the Os run.
