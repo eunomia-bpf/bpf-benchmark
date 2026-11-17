@@ -1,0 +1,19 @@
+{
+  "started": "2026-11-17T20:44:29.986257+00:00",
+  "command": [
+    "python3",
+    "/workspaces/repository/kprog/test/verified_corpus.py",
+    "bcc/set",
+    "1",
+    "10",
+    "1"
+  ],
+  "service": {
+    "ready": true,
+    "arch": 1,
+    "endpoint": "/sys/kernel/debug/bpf_x86_native_lab/specializer"
+  },
+  "returncode": 0,
+  "service_returncode": -15,
+  "finished": "2026-11-17T20:51:01.353367+00:00"
+}
