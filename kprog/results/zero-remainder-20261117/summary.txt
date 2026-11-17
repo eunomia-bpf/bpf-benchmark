@@ -26,3 +26,9 @@ x86_kvm_corpus_20261117_053609_920585 installed programs 169 JIT 2068918 B nativ
 == x86_kvm_corpus_20261117_053609_920585 (tracee__monitor.json): 26 active programs, median native/eBPF run ratio 0.841
    DIFFERENT trace_ret_file_: eBPF 1,313  native 254  ratio 0.193
    DIFFERENT trace_file_upda: eBPF 1,313  native 254  ratio 0.193
+== tracee/monitor second run /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_054943_357840
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_054943_357840 throughput native/eBPF 1.098x  eBPF [338109, 336676, 336951] native [370122, 363433, 370991] per-sample [1.095, 1.079, 1.101] errors 0
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_054943_357840 ns/inv eBPF 365.7 (41/167 progs) native 317.0 (41/167) speedup 1.154x
+x86_kvm_corpus_20261117_054943_357840 installed programs 169 JIT 2068918 B native 1700836 B ratio 0.82x
+== x86_kvm_corpus_20261117_054943_357840 (tracee__monitor.json): 24 active programs, median native/eBPF run ratio 1.064
+   programs whose counts track the median: 24 of 24
