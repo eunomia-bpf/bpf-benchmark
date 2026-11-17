@@ -36,11 +36,13 @@
     "external_determinism": "not assumed"
   },
   "whole_lake_build": {
-    "status": "queued under timing SH",
-    "controller_pid": 2516839,
-    "flock_pid": 2516846,
-    "log": "lake-final-build.log",
-    "exit_file": "lake-final-build.exit"
+    "status": "passed",
+    "exit": 0,
+    "jobs": 278,
+    "log": "lake-retry-build.log",
+    "timing_lock": "shared flock for entire build",
+    "started": "2026-11-17T11:27:41Z",
+    "scope": "final arithmetic proof and unchanged pointer tables"
   },
   "prior_batch_build": {
     "exit": 0,
@@ -89,5 +91,29 @@
   },
   "complete_ISA_handler_refinements": 0,
   "M5": "open",
-  "M6": "open"
+  "M6": "open",
+  "public_compiled_queries": {
+    "exit": 0,
+    "theorems": 8,
+    "log": "query-final.log",
+    "bit_value_axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "execution_axioms": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "native_reflection_assumption": "absent"
+  },
+  "abandoned_prior_queue": {
+    "controller_pid": 2516839,
+    "flock_pid": 2516846,
+    "result": "no start or exit record; processes absent",
+    "evidence": "lake-final-abandoned.json",
+    "termination_cause": "not established"
+  }
 }

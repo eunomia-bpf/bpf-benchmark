@@ -22,10 +22,12 @@ readable at that 189-transition boundary. No flag outcome is assumed there.
 
 The focused build passes 151 jobs. The revised arithmetic proof and eight
 source-based public queries pass without native reflection assumptions. All
-23 Clight exports remain byte-identical to `9c617740f`. The first full batch
-build passes 278 jobs; it preceded that arithmetic revision, whose final
-confirmation is queued under timing SH. Status is in `validation.json`. The
-proof keeps default heartbeats/depth and one worker. This step
+23 Clight exports remain byte-identical to `9c617740f`. The final full batch
+build passes 278 jobs under timing SH, and eight normal compiled-module
+queries confirm the ordinary arithmetic proof and standard axioms. The earlier
+queue ended without a recorded start/result; its evidence is retained and the
+confirmation was restarted. Details are in `validation.json`. The proof keeps
+default heartbeats/depth and one worker. This step
 changes no C, external semantics, frozen benchmark, image or kernel. Last full
 `make check` passed at `5236c0e96`.
 
