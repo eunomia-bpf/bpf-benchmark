@@ -1,0 +1,45 @@
+{
+  "captured_utc": "2026-11-17T02:35:21.977645+00:00",
+  "scope": "Existing stage metadata only. Native P and staged proofs are not an input/output pair; no Os layout claim.",
+  "objects": [
+    {
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/tracee.native.o",
+      "bytes": 8997376,
+      "mtime_utc": "2026-11-17T01:55:50.118405+00:00",
+      "literal_symbols": [
+        "6: 000000000000001f    15 OBJECT  LOCAL  DEFAULT  318 .L.str.2",
+        "31: 000000000000002e    68 OBJECT  LOCAL  DEFAULT  318 .L.str.3",
+        "79: 00000000000000a4    72 OBJECT  LOCAL  DEFAULT  318 .L.str.6"
+      ],
+      "data_sections": [
+        "[318] .rodata.str1.1    PROGBITS        0000000000000000 162fc0 0000f7 01 AMS  0   0  1"
+      ]
+    },
+    {
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/trace_ret_vfs_write_tail.proof.o",
+      "bytes": 28072,
+      "mtime_utc": "2026-11-11T02:34:56.325808+00:00",
+      "literal_symbols": [
+        "2: 0000000000000000    15 OBJECT  GLOBAL HIDDEN     3 .L.str.2",
+        "3: 0000000000000010    72 OBJECT  GLOBAL HIDDEN     3 .L.str.5"
+      ],
+      "data_sections": [
+        "[ 3] .native_link_rodata PROGBITS        0000000000000000 0060b0 000058 00   A  0   0 16"
+      ]
+    },
+    {
+      "path": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/trace_ret_vfs_writev_tail.proof.o",
+      "bytes": 28600,
+      "mtime_utc": "2026-11-11T02:34:56.325866+00:00",
+      "literal_symbols": [
+        "2: 0000000000000000    15 OBJECT  GLOBAL HIDDEN     3 .L.str.2",
+        "3: 0000000000000010    72 OBJECT  GLOBAL HIDDEN     3 .L.str.5"
+      ],
+      "data_sections": [
+        "[ 3] .native_link_rodata PROGBITS        0000000000000000 0062c0 000058 00   A  0   0 16"
+      ]
+    }
+  ],
+  "stage_proof_count": 175,
+  "stage_proof_bytes": 2032296
+}
