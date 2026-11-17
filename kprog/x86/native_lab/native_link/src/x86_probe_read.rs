@@ -20,7 +20,7 @@ fn address(symbol: u64, anchor: u64, actual: u64) -> Result<u64> {
         .map_err(|_| anyhow!("probe-read target address overflow"))
 }
 
-fn gs_disp32(address: u64, what: &str) -> Result<[u8; 4]> {
+pub(super) fn gs_disp32(address: u64, what: &str) -> Result<[u8; 4]> {
     if address as u32 as i32 as i64 as u64 != address {
         bail!("probe-read {what} GS address is not sign-extended disp32");
     }
@@ -247,12 +247,13 @@ fn kernel_routine(layout: &RuntimeProbeReadLayout, actual: u64, string: bool)
         sites.push(LoadSite{offset:b.len() as u32,insn_len:3,destination:11});
         b.extend_from_slice(&[0x0f,0xb6,0x06,0x45,0x85,0xdb]);
         faults.push(append_x86_jcc_rel32(&mut b,0x84));
-        b.extend_from_slice(&[0x88,0x07,0x48,0xff,0xc7,0x48,0xff,0xc6,0xff,0xc9,0x84,0xc0]);
+        b.extend_from_slice(&[0x88,0x07,0x48,0xff,0xc7,0x48,0xff,0xc6,0x84,0xc0]); // store; dst++; src++; test al,al
         let nul=append_x86_jcc_rel32(&mut b,0x84);
-        b.extend_from_slice(&[0x85,0xc9]);
+        b.extend_from_slice(&[0xff,0xc9]); // dec ecx: its zero flag ends the count
         let again=append_x86_jcc_rel32(&mut b,0x85);patch_x86_rel32(&mut b,again,loop_start)?;
-        let end=b.len();patch_x86_rel32(&mut b,nul,end)?;
-        b.extend_from_slice(&[0xc6,0x47,0xff,0,0x48,0x89,0xf8,0x4c,0x29,0xc0,0x48,0x63,0xc0]); // dst[-1]=0; length as signed int
+        b.extend_from_slice(&[0xc6,0x47,0xff,0]); // count reached: dst[-1]=0
+        let end=b.len();patch_x86_rel32(&mut b,nul,end)?; // a copied NUL already ends the string
+        b.extend_from_slice(&[0x48,0x89,0xf8,0x4c,0x29,0xc0,0x48,0x63,0xc0]); // length as signed int
     } else {
         copy_words(&mut b, &mut sites, &mut faults)?;
     }
@@ -314,7 +315,7 @@ fn calls_to(relocs: &[RelocRecord], helper: u64) -> Vec<usize> {
     relocs.iter().filter(|r| r.kind == 1 && r.target == helper).map(|r| r.offset as usize).collect()
 }
 
-fn redirect(blob: &mut Vec<u8>, calls: &[usize], start: usize) -> Result<()> {
+pub(super) fn redirect(blob: &mut Vec<u8>, calls: &[usize], start: usize) -> Result<()> {
     for &site in calls {
         if blob.get(site..site+5) != Some(X86_HELPER_CALL_REL32_SLOT.as_slice()) {
             bail!("probe-read call at {site:#x} lost its E8 helper slot");
@@ -409,7 +410,7 @@ mod tests {
         RuntimeProbeReadLayout { user_helper:0x1000,kernel_helper:0x2000,
             current_task:0,jiffies:Some(0x1111222233334444),
             user_ptr_max:0x1111222233334444,boot_cpu_data:0x5555666677778888,
-            pagefault_disabled:4,x86_capability:0,task_flags:0,task_personality:16,ktime:None,
+            pagefault_disabled:4,x86_capability:0,task_flags:0,task_personality:16,ktime:None,cred:None,
             cpu_tlbstate:8,tlb_loaded_mm:0,task_mm:8,x86_virt_bits:40 }
     }
 

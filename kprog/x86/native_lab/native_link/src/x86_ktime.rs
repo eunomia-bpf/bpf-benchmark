@@ -50,7 +50,7 @@ pub(super) fn routine(l: &RuntimeKtimeLayout, mono_fast: u64) -> Result<(Vec<u8>
     b.extend_from_slice(&[0x4d,0x8b,0x82]); b.extend_from_slice(&disp(l.tkr_clock)?); // r8=READ_ONCE(tkr->clock)
     b.extend_from_slice(&[0x48,0xb8]); b.extend_from_slice(&l.kvm_clock.to_le_bytes()); // rax=&kvm_clock
     b.extend_from_slice(&[0x49,0x39,0xc0]); // cmp r8,rax
-    let mut fallback = vec![append_x86_jcc_rel32(&mut b, 0x85)];
+    let mut kernel_call = vec![append_x86_jcc_rel32(&mut b, 0x85)];
     // kvm_clock_read: preempt_disable_notrace(); pvclock_clocksource_read_nowd(this_cpu_pvti())
     b.extend_from_slice(&[0x65,0xff,0x04,0x25]); b.extend_from_slice(&preempt); // incl gs:__preempt_count
     b.extend_from_slice(&[0x65,0x4c,0x8b,0x0c,0x25]); b.extend_from_slice(&hv); // r9=this_cpu_read(hv_clock_per_cpu)
@@ -88,7 +88,7 @@ pub(super) fn routine(l: &RuntimeKtimeLayout, mono_fast: u64) -> Result<(Vec<u8>
     b.extend_from_slice(&[0x49,0x2b,0x82]); b.extend_from_slice(&disp(l.tkr_cycle_last)?);
     b.extend_from_slice(&[0x49,0x23,0x82]); b.extend_from_slice(&disp(l.tkr_mask)?);
     b.extend_from_slice(&[0x49,0x3b,0x80]); b.extend_from_slice(&disp(l.max_cycles)?); // delta > clock->max_cycles
-    fallback.push(append_x86_jcc_rel32(&mut b, 0x87));
+    kernel_call.push(append_x86_jcc_rel32(&mut b, 0x87));
     b.extend_from_slice(&[0x41,0x8b,0x92]); b.extend_from_slice(&disp(l.tkr_mult)?); // edx=mult
     b.extend_from_slice(&[0x48,0x0f,0xaf,0xc2]); // delta * mult
     b.extend_from_slice(&[0x49,0x03,0x82]); b.extend_from_slice(&disp(l.tkr_xtime_nsec)?);
@@ -102,10 +102,10 @@ pub(super) fn routine(l: &RuntimeKtimeLayout, mono_fast: u64) -> Result<(Vec<u8>
     let unstable = b.len();
     patch_x86_rel32(&mut b, unstable_flags, unstable)?; patch_x86_rel32(&mut b, unstable_valid, unstable)?;
     b.extend_from_slice(&[0x65,0xff,0x0c,0x25]); b.extend_from_slice(&preempt);
-    fallback.push(append_x86_jcc_rel32(&mut b, 0x85));
+    kernel_call.push(append_x86_jcc_rel32(&mut b, 0x85));
     call(&mut b, &mut relocs, l.preempt_schedule_notrace);
     let here = b.len();
-    for branch in fallback { patch_x86_rel32(&mut b, branch, here)?; }
+    for branch in kernel_call { patch_x86_rel32(&mut b, branch, here)?; }
     b.extend_from_slice(&[0x48,0x83,0xec,0x08]); // sub rsp,8
     call(&mut b, &mut relocs, mono_fast);
     b.extend_from_slice(&[0x48,0x83,0xc4,0x08,0xc3]); // add rsp,8; ret
@@ -144,7 +144,7 @@ mod tests {
     }
 
     #[test]
-    fn ktime_leaf_follows_the_kernel_formula_and_falls_back() -> Result<()> {
+    fn ktime_leaf_follows_the_kernel_formula_and_calls_the_kernel() -> Result<()> {
         let output = std::env::var_os("NATIVE_LINK_PROBE_TEST_OUTPUT").map(PathBuf::from)
             .unwrap_or_else(|| std::env::temp_dir().join(format!("ktime-{}",std::process::id())));
         fs::create_dir_all(&output)?;

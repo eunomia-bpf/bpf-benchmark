@@ -211,6 +211,10 @@ inline void write_layout(std::ostream &out, const btf *types, Resolver resolve)
         }
     } catch (const std::runtime_error &) {
     }
+    // Credential facts for bpf_get_current_uid_gid: current->cred and its uid/gid.
+    out << ",\"cred\":{\"task_cred\":" << offset(types, "task_struct", "cred")
+        << ",\"cred_uid\":" << offset(types, "cred", "uid", true)
+        << ",\"cred_gid\":" << offset(types, "cred", "gid", true) << "}";
     out << "}}";
     if (!out) throw std::runtime_error("write kernel LTO layout");
 }

@@ -56,6 +56,8 @@ mod runtime_array;
 mod probe_read;
 #[path = "x86_ktime.rs"]
 mod ktime;
+#[path = "x86_task.rs"]
+mod task;
 #[path = "x86_lpm_lookup.rs"]
 mod lpm_lookup;
 
@@ -1820,6 +1822,16 @@ pub(super) fn rewrite_x86(
         if let Some(&mono_fast) = helper_addrs.get(MONO_FAST_HELPER_KEY) {
             if let Some(range) = ktime::share(&mut blob, &mut relocs, layout, mono_fast)? {
                 show_lto_range(show, "ktime", range);
+                code_ranges.push(range);
+            }
+        }
+    }
+
+    // bpf_get_current_uid_gid calls reach one shared leaf that reads current->cred.
+    if let Some(layout) = runtime_probe_read_layout.filter(|_| !proof_mode) {
+        if let (Some(cred), Some(&helper)) = (layout.cred.as_ref(), helper_addrs.get("bpf_get_current_uid_gid")) {
+            if let Some(range) = task::share(&mut blob, &mut relocs, layout.current_task, cred, helper)? {
+                show_lto_range(show, "uid_gid", range);
                 code_ranges.push(range);
             }
         }
@@ -4304,7 +4316,6 @@ mod tests {
                 write_proof_object(&path, object::Architecture::X86_64, "entry", &proof.blob,
                     &proof.proof_symbols, &proof.proof_relocs, &proof.proof_data_relocs, proof.callee_saved_mask)?;
                 let roundtrip = fs::read(&path)?;
-                fs::remove_file(&path)?;
                 let elf = object::File::parse(roundtrip.as_slice())?;
                 let entry = find_symbol_by_name(&elf, "entry")?;
                 let included = discover_reachable(&elf, &entry)?;

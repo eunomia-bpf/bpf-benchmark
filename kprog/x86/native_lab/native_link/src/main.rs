@@ -204,6 +204,16 @@ struct RuntimeProbeReadLayout {
     /// Fast-clock facts for bpf_ktime_get_ns; a boot without them keeps the direct call.
     #[serde(default)]
     ktime: Option<RuntimeKtimeLayout>,
+    /// Credential facts for bpf_get_current_uid_gid; older captured plans may omit them.
+    #[serde(default)]
+    cred: Option<RuntimeCredLayout>,
+}
+
+#[derive(Debug, Deserialize)]
+struct RuntimeCredLayout {
+    task_cred: u32,
+    cred_uid: u32,
+    cred_gid: u32,
 }
 
 #[derive(Debug, Deserialize)]

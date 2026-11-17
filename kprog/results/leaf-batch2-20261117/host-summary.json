@@ -1,0 +1,67 @@
+{
+  "recorded_utc": "2026-11-17T12:45:12Z",
+  "scope": "Batch-two LTO host execution and canonical loader build; no new P, image or app timing.",
+  "raw": "/workspaces/kprog-raw/perf/leaf-batch2-20261117/host-20261117T121810Z-2564495",
+  "rust_passed": 43,
+  "rust_failed": 0,
+  "rust_ignored": 3,
+  "rust_filtered": 0,
+  "ignored_cases": [
+    "test x86::code_provenance::tests::retained_cel_code_pointer_executes ... ignored, uses the retained upstream CEL compiler output",
+    "test x86::memory::tests::execution::memory_host_microbenchmark ... ignored, opt-in host timing evidence, not a correctness or workload gate",
+    "test x86::tests::retained_lto_diagnostics_preserve_payload_bytes ... ignored, uses retained application load plans"
+  ],
+  "fixtures": {
+    "kernel": {
+      "payload_bytes": 366,
+      "stdout": "probe-read host user=0: 1152 vectors, 122 exact-site faults, nesting/zero/error/bounds PASS",
+      "previous_bytes": 366,
+      "byte_identical": true
+    },
+    "user": {
+      "payload_bytes": 370,
+      "stdout": "probe-read host user=1: 1149 vectors, 121 exact-site faults, nesting/zero/error/bounds PASS",
+      "previous_bytes": 370,
+      "byte_identical": true
+    },
+    "kernel-string": {
+      "payload_bytes": 282,
+      "stdout": "kernel string: NUL/truncation/zero-count/policy/partial-fault/full-zero PASS\nprobe-read host user=0: 193 vectors, 121 exact-site faults, nesting/zero/error/bounds PASS",
+      "previous_bytes": 284,
+      "byte_identical": false
+    },
+    "user-string": {
+      "payload_bytes": 400,
+      "stdout": "user string: masked pointer, word-tail zeroing, byte retry, no extra NMI gate, SMAP bracket PASS\nprobe-read host user=1: 4693 vectors, 239 exact-site faults, nesting/zero/error/bounds PASS",
+      "previous_bytes": 400,
+      "byte_identical": true
+    },
+    "compat": {
+      "payload_bytes": 827,
+      "stdout": "compat probe read: TASK_SIZE_MAX, TIF_ADDR32 and ADDR_LIMIT_3GB dispatch PASS\nprobe-read host user=0: 9 vectors, 1 exact-site faults, nesting/zero/error/bounds PASS",
+      "previous_bytes": 827,
+      "byte_identical": true
+    },
+    "compat-string": {
+      "payload_bytes": 773,
+      "stdout": "compat string: task-sized user/kernel dispatch and distinct NUL padding PASS\nprobe-read host user=0: 9 vectors, 7 exact-site faults, nesting/zero/error/bounds PASS",
+      "previous_bytes": 775,
+      "byte_identical": false
+    },
+    "uid-gid": {
+      "payload_bytes": 53,
+      "stdout": "uid_gid leaf: current->cred ids and NULL current, 6 vectors PASS"
+    },
+    "ktime": {
+      "payload_bytes": 341,
+      "stdout": "ktime leaf: latch copies, pvclock scaling, preemption bracket and kernel calls, 15 vectors PASS"
+    }
+  },
+  "loader_target": "runner/build-llvmbpf native_loader_shared",
+  "loader_exit": 0,
+  "retained_proof_fixture_count": 10,
+  "app_per_call_ns": null,
+  "app_installed_bytes": null,
+  "app_body_helper_map_split": null,
+  "producer_status": "Agent switches applied; native object Makefile prerequisites added; separate Make dry run queued before producer commit."
+}

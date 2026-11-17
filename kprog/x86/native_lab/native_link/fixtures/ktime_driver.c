@@ -24,7 +24,7 @@ unsigned resched_calls;
 #define SENTINEL 0x5eedf00dULL
 #define NO_RESCHED ((int32_t)0x80000000)  /* PREEMPT_NEED_RESCHED is folded in inverted */
 
-static uint64_t fallback(void) { return SENTINEL; }
+static uint64_t kernel_ktime(void) { return SENTINEL; } /* the kernel's own ktime_get_mono_fast_ns */
 /* Stands in for the PREEMPT_DYNAMIC static call: it keeps every register, as preempt_schedule_notrace_thunk does. */
 __attribute__((naked)) static void resched(void) { __asm__ volatile("lock incl resched_calls(%rip)\n\tret"); }
 
@@ -69,7 +69,7 @@ int main(int argc, char **argv)
     for (unsigned i = 0; i < count; ++i) {
         unsigned offset, kind;
         assert(fscanf(f, "%u %u", &offset, &kind) == 2 && code[offset] == 0xe8);
-        int64_t disp = (intptr_t)(kind ? (void *)fallback : (void *)resched) - (intptr_t)(code + offset + 5);
+        int64_t disp = (intptr_t)(kind ? (void *)kernel_ktime : (void *)resched) - (intptr_t)(code + offset + 5);
         assert(disp == (int32_t)disp); int32_t rel = disp; memcpy(code + offset + 1, &rel, 4);
     }
     assert(!fclose(f));
@@ -116,6 +116,6 @@ int main(int argc, char **argv)
     tk.base[0].clock = &other_clock; assert(read_balanced(0) == SENTINEL && resched_calls == 2); ++vectors;
 
     assert(!syscall(SYS_arch_prctl, ARCH_SET_GS, old_gs));
-    printf("ktime leaf: latch copies, pvclock scaling, preemption bracket and kernel fallbacks, %u vectors PASS\n", vectors);
+    printf("ktime leaf: latch copies, pvclock scaling, preemption bracket and kernel calls, %u vectors PASS\n", vectors);
     return 0;
 }

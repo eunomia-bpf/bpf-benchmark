@@ -33,3 +33,37 @@ temporaries. Its actual test count supersedes the early estimate above.
 ## Batch
 
 Image, one-image check (native replacements per app unchanged, zero native-loader failures), then Tracee (uid_gid, kernel strings) and Cilium (switches) through the frozen entry, stats on, 3 x 60 s, holding locks/batch from image build to last timing. Cilium's ratio is expected to fall from its unequal-work 2.8x toward an equal-work value; check its per-program paths with arm-paths-20261116/paths.py.
+
+## Applied host receipts
+
+PERF 2026-11-17T12:45:12Z: applied after the clock image's `image ok` at
+12:07:47Z, preserving the prior user/compat string leaves. The full linker
+suite passes 43 tests, with three existing opt-in tests ignored and no
+filter. The canonical loader target builds successfully. Raw:
+`/workspaces/kprog-raw/perf/leaf-batch2-20261117/host-20261117T121810Z-2564495`;
+small receipts: `host-summary.json`, `host-output.txt`, `loader-output.txt`.
+
+The UID/GID fixture executes six current-credential/NULL-current vectors
+in a 53-byte shared body. It reuses the existing GS encoding and call-slot
+helpers instead of duplicating their validation. Credential BTF lookups
+use the existing error propagation; the proposed additional empty catch
+was not added. Older captured plans may omit credential facts.
+
+Kernel strings shrink 284 to 282 host payload bytes and pass the existing
+193 vectors. The compat-string fixture shrinks 775 to 773 B because it
+shares that shorter kernel leaf. Kernel/user scalars, user strings and
+scalar compat remain byte-identical at 366 / 370 / 400 / 827 B. Clock
+renaming leaves the emitter's byte literals unchanged; its 341-byte
+fixture passes 15 vectors. These are host payload sizes, not installed
+app totals or per-call gains.
+
+The full suite now retains its ten generated proof fixtures in persistent
+`TMPDIR`; the one cleanup call that deleted them was removed. No new app
+program filter, runtime check or optimization switch was introduced.
+
+Cilium's producer rules previously did not depend on the Makefile that
+defines their flags. Native object recipes now include that dependency,
+so committed flag changes trigger recompilation across the native object
+families. `run-producer-plan.sh` records the Cilium Make dry run under
+timing SH. Its result and the actual P/image/installed-size/per-call
+measurements remain pending; no additional image has been published here.
