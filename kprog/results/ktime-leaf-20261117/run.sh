@@ -1,16 +1,23 @@
 #!/bin/bash
 # Coordinator 2026-11-17: bpf_ktime_get_ns reaches one shared leaf per image: ktime_get_mono_fast_ns with the kvm-clock
 # read inline (timekeeping.c latch, kvmclock.c preemption bracket, pvclock.c version loop and TSC scaling), the kernel
-# function itself for another clocksource, an unstable TSC or a delta above max_cycles. Waits for the breadth round,
+# function itself for another clocksource, an unstable TSC or a delta above max_cycles. Waits for the breadth round and
+# for committed build inputs (the image builds the working tree), holds locks/batch from image build to last timing,
 # rebuilds the one image with the frozen recipe, runs the one-image check, then times BCC, Katran and Tracee through the
-# frozen corpus entry, stats on, 3 x 60 s; host load is logged around each run.
+# frozen corpus entry, stats on, 3 x 60 s; host load is logged around each run. The image also carries PERF 6066b311b
+# (current-task BTF and jiffies) and omp 8273b93af (tail-call frame), so the Tracee row joins those changes.
 set -u
 cd /workspaces/repository
 R=kprog/results/ktime-leaf-20261117
 T=kprog/results/flag-tuning-20261117
 RAW=/workspaces/kprog-raw/ktime-leaf-20261117
+INPUTS="kprog/x86/native_lab/native_link kprog/libnativeloader kprog/x86/perf_context_lto.cpp kprog/x86/link_embedded_ir.cpp vendor/bpf/Makefile bpfopt"
 mkdir -p "$RAW"
-until grep -Eq "^[0-9T:-]+Z done$" /workspaces/kprog-raw/breadth-20261117/progress.log; do sleep 60; done
+until grep -Eq '^[0-9T:-]+Z done$' /workspaces/kprog-raw/breadth-20261117/progress.log; do sleep 60; done
+while [ -n "$(git status --porcelain -- $INPUTS; ls vendor/bpf/*compat*.h | xargs git status --porcelain --)" ]; do
+  echo "$(date -u +%FT%TZ) waiting for committed build inputs" >> "$RAW/progress.log"; sleep 120
+done
+exec 7>/workspaces/.agent-state/kprog-lanes/locks/batch; flock -x 7
 load() { { echo "== $(date -u +%FT%TZ) $1"; cat /proc/loadavg; ps -eo pcpu,pid,comm --sort=-pcpu | head -6; } >> "$RAW/hostload.log"; }
 echo "$(date -u +%FT%TZ) build at $(git rev-parse --short HEAD)" >> "$RAW/progress.log"
 if ! ( exec 9>/workspaces/.agent-state/kprog-lanes/locks/image; flock -x 9
@@ -18,7 +25,7 @@ if ! ( exec 9>/workspaces/.agent-state/kprog-lanes/locks/image; flock -x 9
   echo "$(date -u +%FT%TZ) image FAILED" >> "$RAW/progress.log"; exit 1
 fi
 echo "$(date -u +%FT%TZ) image ok" >> "$RAW/progress.log"
-{ echo "image: $(docker image inspect --format '{{.Id}}' bpf-benchmark/kprog:current)"
+{ echo "image: $(docker image inspect --format '{{.Id}}' bpf-benchmark/kprog:current) at $(git rev-parse --short HEAD)"
   python3 "$T/textsize.py" vendor/build/native-bpf/x86/stage; } > "$RAW/summary.txt"
 ( exec 8>/workspaces/.agent-state/kprog-lanes/locks/timing; flock -x 8
   make -f kprog/perf/one-image/Makefile check ) > "$RAW/check.log" 2>&1
