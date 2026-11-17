@@ -1076,3 +1076,56 @@ and decoded instructions under
 Default replay reads that persistent capture, so the evidence does not
 depend on the fixture remaining under /var/tmp. No second executable
 build, guest, source modification or deletion was made.
+
+## Pipeline inputs: included headers are missing from build prerequisites
+
+2026-11-17T03:35:56Z source review, including the coordinator's O3 cleanup
+now published as 5a6941d73. This is a build-correctness
+finding, separate from per-call code. It can leave the measured binary
+unchanged after a relevant source change; it does not add work on each
+invocation.
+
+`vendor/bpf/Makefile:292` lists only `perf_context_lto.cpp` as the staged
+context compiler's prerequisite. That C++ file directly includes
+`native_loader_lto.hpp`, `bpf_function_bodies.hpp` and
+`runtime_bpf_callee.hpp` at 21–23. The published pre-cleanup rule at
+1036df3ad:307 also omitted these headers, while additionally depending on
+the optimization-level file. If the compiler output is newer than its
+`.cpp`, editing an included header alone does not make this target out of
+date. In particular, `native_loader_lto.hpp` is one of the open LTO
+performance paths: its changes must reach the compiler that emits the
+installed code, as well as the loader. No currently stale compiler output
+is asserted here; this is a source-derived dependency counterexample.
+
+There are two more direct omissions in P production. The Cilium object
+rule at `vendor/bpf/Makefile:259` lists only its `.c`, but its command at
+262 uses `core_flags`: that expands to `-include core-compat.h` and the
+generated Cilium CO-RE answer header (160). Neither input is a prerequisite
+of that rule. The OTel unit rule at 273 names its answer header and
+`errors.h`, but omits the same included `core-compat.h`. BCC's rule at
+242–243 already lists both inputs. A `core-answers` goal existing elsewhere
+does not give the Cilium object a dependency on its generated header:
+`native-cilium` at 358 depends on the objects alone. An outer recipe may
+generate the header first, but a later header change still does not
+invalidate this object's rule.
+
+The just-observed stale-P incident is related but distinct. The study's
+`tune.sh:29–31` deletes native build outputs before each command-line flag
+candidate. The first probe-tail `run.sh` did not do so when returning to
+default O3. The coordinator recorded at 03:26:28 that five apps retained
+the O2 group's stage executable sizes and stopped that series. Commit
+1036df3ad's `run2.sh` removes those rebuildable outputs before the new O3
+image. Its old runs remain raw evidence; they are not an O3 per-call
+comparison. There is no reason to reopen alternative flag levels: the
+operator has fixed O3.
+
+The lean correction is to express the actual included project headers
+and generated inputs in the existing producer/compiler build dependencies,
+including the transitive inputs they use. No binary-admission validator,
+new refusal, flag-study framework or runtime check is needed. The current
+forced O3 rebuild repairs the retained flag outputs, but does not by
+itself supply the missing header edges for later LTO/compat changes.
+This review changed no source, touched no input timestamp, invoked no
+Make/compiler target and interrupted no coordinator job. Per-call effects
+and installed bytes belong to the source change once its actual rebuilt
+binary is measured.
