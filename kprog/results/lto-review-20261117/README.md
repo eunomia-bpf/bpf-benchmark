@@ -2937,3 +2937,40 @@ subsequent kernel-leaf row and exact before/after arithmetic from the
 existing [reader](leaf_read_effect_inventory.py). The original user-leaf
 pairs remain unchanged. Tetragon and Tracee timing continue in the
 coordinator's batch; no new measurement or source edit was made by PERF.
+
+### Kernel-leaf Tetragon row: retain the broader reference interval
+
+Coordinator run `corpus/results/x86_kvm_corpus_20261117_074317_231933`
+reports **1.061x per call** and **1.011x throughput**. Raw-derived times
+are eBPF **746.970 ns/call**, native **704.100 ns/call**. The last timed
+Tetragon reference is run2 `043157_792401`, before zero-remainder and both
+leaf steps, at roughly 766.5 / 698.1 ns and 1.098x per call. Compared
+with that broader reference, baseline time is **2.54% lower** and native
+time **0.86% higher**. This is not an isolated immediately-before/after
+kernel-leaf comparison and establishes no separable source effect.
+
+The current throughput series is eBPF
+317,945 / 316,201 / 323,237 and native
+324,708 / 319,162 / 321,360, with ratios 1.021 / 1.009 / 0.994 and zero
+reported errors. The earlier run's ratios were 1.118 / 1.026 / 1.022,
+with an aggregate throughput ratio of 1.031x. Keep both series rather
+than assigning the changed scalar ratio to one source transformation.
+Both timings select 21 records out of 287 per arm under the existing
+reporting convention. The current median active count ratio is 1.046
+across the three roots reported by the coordinator's count reader.
+
+Cumulative current native load bytes are **1,924,132** against unchanged
+companion JIT **2,472,912**, with **288** replacements. The prior timed
+run's corrected ID-paired native total is **1,913,889** (+10,243 across
+that interval); the more recent user-leaf functional check was 1,914,841,
+so the kernel-leaf check-to-check addition remains +9,291 as recorded
+above. The old name-overwriting summary's 17-program byte total is not
+used here. These are cumulative load counts, distinct from 287 programs
+present in the timing inventory.
+
+The [reader](leaf_read_effect_inventory.py) records the Tetragon reference
+and current row, including the interval qualification, in
+`additional_kernel_leaf_comparisons` in
+[leaf-read-effects.json](leaf-read-effects.json). Other app comparisons
+are retained. Tracee timing continues; no guest, build or new measurement
+was started by PERF.

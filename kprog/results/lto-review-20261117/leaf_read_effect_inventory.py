@@ -55,4 +55,16 @@ for app, before_stage, before, after in [
 result = dict(recorded_utc=subprocess.check_output(['date', '-u', '+%FT%TZ'], text=True).strip(),
               scope='Completed OTel/BCC/Tracee user-leaf coordinator stats-on 3x60s run pairs and first subsequent kernel-leaf BCC run; Tracee reference is the coordinator same-image repeat, and its first post-change attempt remains in zero-remainder-effects.json. Existing >=100-call reporting convention. IDs identify records within their own boot only. Installed receipts count cumulative replacements, not measurement snapshots. No causal gain, PMU split, equal-work proof or new admission check is inferred.',
               apps=apps)
+tetra_before = read_run('tetragon__observer', 'probe_tails_4_2_1', '043157_792401')
+tetra_after = read_run('tetragon__observer', 'kernel_leaf', '074317_231933')
+tetra_ratios = {
+    phase: tetra_after['phases'][phase]['ns_per_call'] / tetra_before['phases'][phase]['ns_per_call']
+    for phase in ('baseline', 'post_rejit')}
+result['additional_kernel_leaf_comparisons'] = [dict(
+    app='tetragon__observer', before=tetra_before, after=tetra_after,
+    after_before_ns_ratios=tetra_ratios,
+    qualification='The prior timed Tetragon run precedes zero-remainder and both leaf steps. This is the last timed reference, not an isolated immediately-before kernel-leaf comparison.')]
+print('Tetragon ns/call:', {phase: round(data['ns_per_call'], 4)
+                          for phase, data in tetra_after['phases'].items()})
+print('Tetragon after/before ns ratios:', tetra_ratios)
 (HERE / 'leaf-read-effects.json').write_text(json.dumps(result, indent=2) + '\n')

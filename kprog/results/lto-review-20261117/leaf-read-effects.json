@@ -1,5 +1,5 @@
 {
-  "recorded_utc": "2026-11-17T07:47:29Z",
+  "recorded_utc": "2026-11-17T07:56:02Z",
   "scope": "Completed OTel/BCC/Tracee user-leaf coordinator stats-on 3x60s run pairs and first subsequent kernel-leaf BCC run; Tracee reference is the coordinator same-image repeat, and its first post-change attempt remains in zero-remainder-effects.json. Existing >=100-call reporting convention. IDs identify records within their own boot only. Installed receipts count cumulative replacements, not measurement snapshots. No causal gain, PMU split, equal-work proof or new admission check is inferred.",
   "apps": [
     {
@@ -2041,6 +2041,652 @@
           "installed_cumulative_receipt": "x86_kvm_corpus_20261117_065240_468797 installed programs 169 JIT 2068918 B native 1700692 B ratio 0.82x"
         }
       ]
+    }
+  ],
+  "additional_kernel_leaf_comparisons": [
+    {
+      "app": "tetragon__observer",
+      "before": {
+        "stage": "probe_tails_4_2_1",
+        "run": "corpus/results/x86_kvm_corpus_20261117_043157_792401",
+        "phases": {
+          "baseline": {
+            "records": 287,
+            "selected": [
+              {
+                "id": 100,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 52851374,
+                "run_time_ns_delta": 47924130108
+              },
+              {
+                "id": 109,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 52665042,
+                "run_time_ns_delta": 48272311315
+              },
+              {
+                "id": 133,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 63094580,
+                "run_time_ns_delta": 14366491473
+              },
+              {
+                "id": 135,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 77763343,
+                "run_time_ns_delta": 45576078379
+              },
+              {
+                "id": 143,
+                "name": "generic_retkpro",
+                "type": "kprobe",
+                "run_cnt_delta": 77763343,
+                "run_time_ns_delta": 3939796575
+              },
+              {
+                "id": 148,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 18874187,
+                "run_time_ns_delta": 118124489492
+              },
+              {
+                "id": 153,
+                "name": "generic_retkpro",
+                "type": "kprobe",
+                "run_cnt_delta": 18874187,
+                "run_time_ns_delta": 958871396
+              },
+              {
+                "id": 210,
+                "name": "generic_tracepo",
+                "type": "tracepoint",
+                "run_cnt_delta": 438259105,
+                "run_time_ns_delta": 356495758095
+              },
+              {
+                "id": 227,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 4900,
+                "run_time_ns_delta": 14456942
+              },
+              {
+                "id": 236,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 229,
+                "run_time_ns_delta": 1081902
+              },
+              {
+                "id": 246,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 13225860,
+                "run_time_ns_delta": 5886704868
+              },
+              {
+                "id": 254,
+                "name": "generic_retkpro",
+                "type": "kprobe",
+                "run_cnt_delta": 13225860,
+                "run_time_ns_delta": 727800939
+              },
+              {
+                "id": 261,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 13225876,
+                "run_time_ns_delta": 14387983185
+              },
+              {
+                "id": 268,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 143,
+                "run_time_ns_delta": 235318
+              },
+              {
+                "id": 304,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 32915554,
+                "run_time_ns_delta": 31507508213
+              },
+              {
+                "id": 61,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 13225860,
+                "run_time_ns_delta": 5852104767
+              },
+              {
+                "id": 64,
+                "name": "generic_retkpro",
+                "type": "kprobe",
+                "run_cnt_delta": 13225860,
+                "run_time_ns_delta": 725385174
+              },
+              {
+                "id": 69,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 13225876,
+                "run_time_ns_delta": 13671035165
+              },
+              {
+                "id": 84,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 13225860,
+                "run_time_ns_delta": 5884932863
+              },
+              {
+                "id": 90,
+                "name": "generic_retkpro",
+                "type": "kprobe",
+                "run_cnt_delta": 13225860,
+                "run_time_ns_delta": 692010760
+              },
+              {
+                "id": 96,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 13225876,
+                "run_time_ns_delta": 14726951294
+              }
+            ],
+            "calls": 952098775,
+            "elapsed_ns": 729736118223,
+            "ns_per_call": 766.4500127342354
+          },
+          "post_rejit": {
+            "records": 287,
+            "selected": [
+              {
+                "id": 398,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 14004263,
+                "run_time_ns_delta": 5522125939
+              },
+              {
+                "id": 414,
+                "name": "generic_retkpro",
+                "type": "kprobe",
+                "run_cnt_delta": 14004263,
+                "run_time_ns_delta": 763652993
+              },
+              {
+                "id": 420,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 14004279,
+                "run_time_ns_delta": 13417945595
+              },
+              {
+                "id": 450,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 14004263,
+                "run_time_ns_delta": 5567373629
+              },
+              {
+                "id": 460,
+                "name": "generic_retkpro",
+                "type": "kprobe",
+                "run_cnt_delta": 14004263,
+                "run_time_ns_delta": 727776075
+              },
+              {
+                "id": 468,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 14004279,
+                "run_time_ns_delta": 14273461473
+              },
+              {
+                "id": 488,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 58267493,
+                "run_time_ns_delta": 44332508792
+              },
+              {
+                "id": 504,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 57991546,
+                "run_time_ns_delta": 44509848443
+              },
+              {
+                "id": 540,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 65458930,
+                "run_time_ns_delta": 14573354008
+              },
+              {
+                "id": 554,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 81775755,
+                "run_time_ns_delta": 44519175818
+              },
+              {
+                "id": 572,
+                "name": "generic_retkpro",
+                "type": "kprobe",
+                "run_cnt_delta": 81775755,
+                "run_time_ns_delta": 3965835609
+              },
+              {
+                "id": 582,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 23007102,
+                "run_time_ns_delta": 110519547967
+              },
+              {
+                "id": 592,
+                "name": "generic_retkpro",
+                "type": "kprobe",
+                "run_cnt_delta": 23007102,
+                "run_time_ns_delta": 1044092210
+              },
+              {
+                "id": 710,
+                "name": "generic_tracepo",
+                "type": "tracepoint",
+                "run_cnt_delta": 460422203,
+                "run_time_ns_delta": 351549502414
+              },
+              {
+                "id": 736,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 5026,
+                "run_time_ns_delta": 15183335
+              },
+              {
+                "id": 756,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 229,
+                "run_time_ns_delta": 1105701
+              },
+              {
+                "id": 774,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 14004263,
+                "run_time_ns_delta": 5693878838
+              },
+              {
+                "id": 786,
+                "name": "generic_retkpro",
+                "type": "kprobe",
+                "run_cnt_delta": 14004263,
+                "run_time_ns_delta": 815854256
+              },
+              {
+                "id": 794,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 14004279,
+                "run_time_ns_delta": 14140460124
+              },
+              {
+                "id": 818,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 139,
+                "run_time_ns_delta": 230817
+              },
+              {
+                "id": 892,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 35095480,
+                "run_time_ns_delta": 31098639225
+              }
+            ],
+            "calls": 1012845175,
+            "elapsed_ns": 707051553261,
+            "ns_per_call": 698.0845352410353
+          }
+        },
+        "per_call_speedup": 1.097932949437986,
+        "installed_cumulative_receipt": "x86_kvm_corpus_20261117_043157_792401 installed programs 288 JIT 2472912 B native 1913889 B ratio 0.77x"
+      },
+      "after": {
+        "stage": "kernel_leaf",
+        "run": "corpus/results/x86_kvm_corpus_20261117_074317_231933",
+        "phases": {
+          "baseline": {
+            "records": 287,
+            "selected": [
+              {
+                "id": 100,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 53992115,
+                "run_time_ns_delta": 48729985621
+              },
+              {
+                "id": 112,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 53766204,
+                "run_time_ns_delta": 49584419662
+              },
+              {
+                "id": 127,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 64096411,
+                "run_time_ns_delta": 14952767737
+              },
+              {
+                "id": 134,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 79043208,
+                "run_time_ns_delta": 45986435744
+              },
+              {
+                "id": 142,
+                "name": "generic_retkpro",
+                "type": "kprobe",
+                "run_cnt_delta": 79043208,
+                "run_time_ns_delta": 3882827219
+              },
+              {
+                "id": 149,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 18861484,
+                "run_time_ns_delta": 116975938333
+              },
+              {
+                "id": 154,
+                "name": "generic_retkpro",
+                "type": "kprobe",
+                "run_cnt_delta": 18861484,
+                "run_time_ns_delta": 968506485
+              },
+              {
+                "id": 213,
+                "name": "generic_tracepo",
+                "type": "tracepoint",
+                "run_cnt_delta": 446517455,
+                "run_time_ns_delta": 348188521269
+              },
+              {
+                "id": 227,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 4986,
+                "run_time_ns_delta": 13789978
+              },
+              {
+                "id": 230,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 229,
+                "run_time_ns_delta": 1085914
+              },
+              {
+                "id": 246,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 13352899,
+                "run_time_ns_delta": 5910525078
+              },
+              {
+                "id": 254,
+                "name": "generic_retkpro",
+                "type": "kprobe",
+                "run_cnt_delta": 13352899,
+                "run_time_ns_delta": 705887303
+              },
+              {
+                "id": 255,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 13352916,
+                "run_time_ns_delta": 14468351734
+              },
+              {
+                "id": 268,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 149,
+                "run_time_ns_delta": 225820
+              },
+              {
+                "id": 301,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 33616646,
+                "run_time_ns_delta": 31580317123
+              },
+              {
+                "id": 58,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 13352899,
+                "run_time_ns_delta": 5893400494
+              },
+              {
+                "id": 65,
+                "name": "generic_retkpro",
+                "type": "kprobe",
+                "run_cnt_delta": 13352899,
+                "run_time_ns_delta": 691382471
+              },
+              {
+                "id": 68,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 13352916,
+                "run_time_ns_delta": 13362726174
+              },
+              {
+                "id": 84,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 13352899,
+                "run_time_ns_delta": 5927016550
+              },
+              {
+                "id": 88,
+                "name": "generic_retkpro",
+                "type": "kprobe",
+                "run_cnt_delta": 13352899,
+                "run_time_ns_delta": 688713271
+              },
+              {
+                "id": 95,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 13352916,
+                "run_time_ns_delta": 14538948107
+              }
+            ],
+            "calls": 967979721,
+            "elapsed_ns": 723051772087,
+            "ns_per_call": 746.9699585648655
+          },
+          "post_rejit": {
+            "records": 287,
+            "selected": [
+              {
+                "id": 402,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 13937413,
+                "run_time_ns_delta": 5412643519
+              },
+              {
+                "id": 410,
+                "name": "generic_retkpro",
+                "type": "kprobe",
+                "run_cnt_delta": 13937413,
+                "run_time_ns_delta": 707375577
+              },
+              {
+                "id": 428,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 13937429,
+                "run_time_ns_delta": 13392869640
+              },
+              {
+                "id": 456,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 13937413,
+                "run_time_ns_delta": 5736436159
+              },
+              {
+                "id": 464,
+                "name": "generic_retkpro",
+                "type": "kprobe",
+                "run_cnt_delta": 13937413,
+                "run_time_ns_delta": 720829912
+              },
+              {
+                "id": 480,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 13937429,
+                "run_time_ns_delta": 14496522881
+              },
+              {
+                "id": 492,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 57464588,
+                "run_time_ns_delta": 43386364899
+              },
+              {
+                "id": 508,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 57188130,
+                "run_time_ns_delta": 44049570054
+              },
+              {
+                "id": 542,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 64948183,
+                "run_time_ns_delta": 14407006264
+              },
+              {
+                "id": 558,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 80424669,
+                "run_time_ns_delta": 42960552891
+              },
+              {
+                "id": 570,
+                "name": "generic_retkpro",
+                "type": "kprobe",
+                "run_cnt_delta": 80424669,
+                "run_time_ns_delta": 3906120431
+              },
+              {
+                "id": 576,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 23346361,
+                "run_time_ns_delta": 112013432053
+              },
+              {
+                "id": 594,
+                "name": "generic_retkpro",
+                "type": "kprobe",
+                "run_cnt_delta": 23346361,
+                "run_time_ns_delta": 1144068950
+              },
+              {
+                "id": 714,
+                "name": "generic_tracepo",
+                "type": "tracepoint",
+                "run_cnt_delta": 457205286,
+                "run_time_ns_delta": 353285522530
+              },
+              {
+                "id": 730,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 5000,
+                "run_time_ns_delta": 15178869
+              },
+              {
+                "id": 756,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 229,
+                "run_time_ns_delta": 1100570
+              },
+              {
+                "id": 774,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 13937413,
+                "run_time_ns_delta": 5475541014
+              },
+              {
+                "id": 790,
+                "name": "generic_retkpro",
+                "type": "kprobe",
+                "run_cnt_delta": 13937413,
+                "run_time_ns_delta": 739851982
+              },
+              {
+                "id": 796,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 13937429,
+                "run_time_ns_delta": 14181528305
+              },
+              {
+                "id": 810,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 142,
+                "run_time_ns_delta": 238707
+              },
+              {
+                "id": 898,
+                "name": "generic_kprobe_",
+                "type": "kprobe",
+                "run_cnt_delta": 34115893,
+                "run_time_ns_delta": 30817651919
+              }
+            ],
+            "calls": 1003906276,
+            "elapsed_ns": 706850407126,
+            "ns_per_call": 704.0999982014257
+          }
+        },
+        "per_call_speedup": 1.0608861816119133,
+        "installed_cumulative_receipt": "x86_kvm_corpus_20261117_074317_231933 installed programs 288 JIT 2472912 B native 1924132 B ratio 0.78x"
+      },
+      "after_before_ns_ratios": {
+        "baseline": 0.974584051346184,
+        "post_rejit": 1.0086170981546145
+      },
+      "qualification": "The prior timed Tetragon run precedes zero-remainder and both leaf steps. This is the last timed reference, not an isolated immediately-before kernel-leaf comparison."
     }
   ]
 }
