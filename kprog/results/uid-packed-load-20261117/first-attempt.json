@@ -1,0 +1,13 @@
+{
+  "recorded_utc": "2026-11-17T17:21:47Z",
+  "raw": "/workspaces/kprog-raw/perf/uid-packed-load-20261117/host-20261117T171158Z-2675962",
+  "host_pid": 2675962,
+  "exit_code": 101,
+  "tests_passed": 53,
+  "tests_failed": 1,
+  "tests_ignored": 3,
+  "failure": "Expanded task_driver.c printf contains a literal newline in the quoted C string; -Werror stops fixture compilation before UID execution.",
+  "kernel_layout_extraction": "Succeeded: task_cred3328, cred_uid8, cred_gid12, both ID fields4 bytes.",
+  "source_published": false,
+  "forward_recipe": "b6615cb0c / run-retry.sh repairs the fixture formatting and an existing unused counter print; source/host publication is handled by that separate run."
+}
