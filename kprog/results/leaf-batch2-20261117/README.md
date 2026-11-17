@@ -78,6 +78,9 @@ sock and wireguard retain their previous broader options. Machine optimization
 flags remain the same for all apps. `record-producer.sh` records the staged
 ELF section and file sizes under timing SH and image SH; these include
 embedded IR/debug information and are not installed native sizes.
+The reader completed at 13:37:21Z; `producer-sizes.txt` preserves every
+section and file size. Program code also lives in named sections such as
+`tc/tail`, so `.text` alone is not the producer's executable-byte total.
 
 Batch-2 LTO source is committed as `8b31e4533`. Omp reviews the joined diff
 and schedules image, six-app check and Tracee/Cilium timing after the

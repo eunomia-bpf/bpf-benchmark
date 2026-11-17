@@ -1,0 +1,210 @@
+Recorded UTC: 2026-11-17T13:37:21Z
+Producer build: 2026-11-17T13:08:55Z to 13:09:03Z, exit 0
+Raw: /workspaces/kprog-raw/perf/leaf-batch2-20261117/cilium-20261117T130722Z-2576741/make.log
+Canonical staged object file bytes (includes embedded IR and debug information):
+/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_alignchecker.native.o 250024
+/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o 1323144
+/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o 1405520
+/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o 1111408
+/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o 302248
+/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o 1086536
+/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_xdp.native.o 739488
+
+ELF section sizes; these are producer objects, not installed native sizes:
+/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_alignchecker.native.o  :
+section                  size   addr
+.text                      10      0
+tc/tail                  3937      0
+.rodata.config            189      0
+.rodata.aux                16      0
+.maps                    2704      0
+.bss                     1368      0
+.llvmbc                133524      0
+.llvmcmd                 4166      0
+.debug_loclists          4225      0
+.debug_abbrev            1147      0
+.debug_info             25752      0
+.debug_rnglists           148      0
+.debug_str_offsets       4048      0
+.debug_str              17575      0
+.debug_addr              2848      0
+.comment                   40      0
+.note.GNU-stack             0      0
+.debug_frame              224      0
+.debug_line              4052      0
+.debug_line_str           715      0
+.llvm_addrsig             123      0
+Total                  206811
+
+
+/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_host.native.o  :
+section                  size   addr
+.text                      43      0
+tc/tail                 47866      0
+.rodata                   176      0
+tc/entry                20467      0
+.rodata.config            221      0
+.maps                    3040      0
+license                    13      0
+.rodata.aux                16      0
+.llvmbc                701588      0
+.llvmcmd                 4396      0
+.debug_loclists        149835      0
+.debug_abbrev            1557      0
+.debug_info            131158      0
+.debug_rnglists         11295      0
+.debug_str_offsets       6684      0
+.debug_str              28615      0
+.debug_addr             21784      0
+.comment                   40      0
+.note.GNU-stack             0      0
+.debug_frame             1576      0
+.debug_line             51996      0
+.debug_line_str           968      0
+.llvm_addrsig             184      0
+Total                 1183518
+
+
+/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_lxc.native.o  :
+section                  size   addr
+.text                      27      0
+tc/tail                 65692      0
+.rodata                   232      0
+tc/entry                 8968      0
+.rodata.config            241      0
+.maps                    3120      0
+license                    13      0
+.rodata.aux                16      0
+.llvmbc                722208      0
+.llvmcmd                 4376      0
+.debug_loclists        173990      0
+.debug_abbrev            1557      0
+.debug_info            142571      0
+.debug_rnglists         11494      0
+.debug_str_offsets       6748      0
+.debug_str              28802      0
+.debug_addr             24616      0
+.comment                   40      0
+.note.GNU-stack             0      0
+.debug_frame             1736      0
+.debug_line             56542      0
+.debug_line_str           947      0
+.llvm_addrsig             195      0
+Total                 1254131
+
+
+/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_overlay.native.o  :
+section                  size   addr
+.text                      27      0
+tc/tail                 40696      0
+tc/entry                 4865      0
+.rodata.config            184      0
+.maps                    2640      0
+license                    13      0
+.rodata.aux                16      0
+.llvmbc                657760      0
+.llvmcmd                 4625      0
+.debug_loclists         95429      0
+.debug_abbrev            1508      0
+.debug_info             99669      0
+.debug_rnglists          7551      0
+.debug_str_offsets       6244      0
+.debug_str              26464      0
+.debug_addr             15840      0
+.comment                   40      0
+.note.GNU-stack             0      0
+.debug_frame             1120      0
+.debug_line             37135      0
+.debug_line_str           914      0
+.llvm_addrsig             130      0
+Total                 1002870
+
+
+/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_sock.native.o  :
+section                   size   addr
+.text                       10      0
+cgroup/connect4           1886      0
+cgroup/post_bind4          420      0
+cgroup/sendmsg4           1864      0
+cgroup/recvmsg4            712      0
+cgroup/post_bind6          644      0
+cgroup/connect6           1995      0
+cgroup/sendmsg6           1998      0
+cgroup/recvmsg6            772      0
+cgroup/sock_release        177      0
+.rodata.config             140      0
+license                     13      0
+.maps                     1328      0
+.llvmbc                 161700      0
+.llvmcmd                  4622      0
+.debug_loclists          17195      0
+.debug_abbrev             1055      0
+.debug_info              27177      0
+.debug_rnglists           1621      0
+.debug_str_offsets        2752      0
+.debug_str               13430      0
+.debug_addr               4888      0
+.comment                    40      0
+.note.GNU-stack              0      0
+.debug_frame               712      0
+.debug_line              10303      0
+.debug_line_str            465      0
+.llvm_addrsig               76      0
+Total                   257995
+
+
+/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_wireguard.native.o  :
+section                  size   addr
+.text                      27      0
+tc/tail                 37246      0
+tc/entry                 4230      0
+.rodata.config            183      0
+.maps                    2544      0
+license                    13      0
+.rodata.aux                16      0
+.llvmbc                657008      0
+.llvmcmd                 4569      0
+.debug_loclists         88772      0
+.debug_abbrev            1508      0
+.debug_info             95892      0
+.debug_rnglists          6482      0
+.debug_str_offsets       6188      0
+.debug_str              26246      0
+.debug_addr             15032      0
+.comment                   40      0
+.note.GNU-stack             0      0
+.debug_frame             1080      0
+.debug_line             34085      0
+.debug_line_str           877      0
+.llvm_addrsig             122      0
+Total                  982160
+
+
+/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/bpf_xdp.native.o  :
+section                  size   addr
+.text                      27      0
+xdp/tail                20547      0
+xdp/entry                 920      0
+.rodata.config            178      0
+.maps                    2696      0
+license                    13      0
+.rodata.aux                16      0
+.rodata.cst8                8      0
+.llvmbc                473636      0
+.llvmcmd                 4489      0
+.debug_loclists         50410      0
+.debug_abbrev            1439      0
+.debug_info             57555      0
+.debug_rnglists          4473      0
+.debug_str_offsets       4988      0
+.debug_str              21696      0
+.debug_addr              7432      0
+.comment                   40      0
+.note.GNU-stack             0      0
+.debug_frame              576      0
+.debug_line             18728      0
+.debug_line_str           733      0
+.llvm_addrsig             118      0
+Total                  670718
+
+

@@ -57,3 +57,7 @@ source copy is needed. Commit source and receipts
 after validation and let Omp schedule the next image/check. Successful E8
 paths should keep their emitted bytes; E9 previously refused, so its new
 native installed bytes/per-call measurements cannot be inferred here.
+
+Preview receipt, 2026-11-17T13:40:17Z: source-anchor preview exited 0 at13:37:21Z, with empty stderr. `preview.json` records its persistent raw patch path. This checks the prepared edit only; runtime source remains unchanged and Rust/host validation is pending.
+
+`run-host.sh` applies this edit and runs the complete canonical linker suite under timing SH on CPU19, with a fresh persistent attempt directory and32GiB address-space bound. Start it after the batch-2 snapshot. It compares every retained batch-2 leaf payload and recovered-load sites file against the new output; successful E8 leaf bodies should stay identical. It does not publish an image or start a guest, and it does not rebuild the unchanged loader. Inspect/reduce the prepared patch before starting it.

@@ -30,3 +30,5 @@ and record actual sizes; commit source and optimizations.md only after
 host validation. Omp schedules image/check and target-app timing under the
 batch lock. Constant-size probe specialization remains the next part of
 item 1c; this prepared change does not implement it.
+
+Preview receipt, 2026-11-17T13:40:17Z: source-anchor preview exited 0 at13:37:21Z, with empty stderr. `preview.json` records its persistent raw patch path. This checks the prepared edit only; runtime source remains unchanged and Rust/host validation is pending.
