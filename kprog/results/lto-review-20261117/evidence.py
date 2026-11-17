@@ -86,6 +86,13 @@ for size in sorted(literal_counts):
     path = prefix + word * words + suffix
     copy_model.append(dict(size_bytes=size, word_iterations=words, instructions=len(path),
                            conditional_branches=sum(i[1].startswith('j') for i in path)))
+hash_plan_path = REPO / 'kprog/results/shared-hash-regression-20261116/katran-copy.link-plan.json'
+hash_plan = json.loads(hash_plan_path.read_text())
+hash_binary = Path('/workspaces/kprog-raw/perf/20261116-shared-hash-regression/katran.copied-hash.bin')
+with (HERE / 'hash-dispatch.disassembly.txt').open('w') as output:
+    subprocess.run(['objdump', '-D', '-b', 'binary', '-m', 'i386:x86-64', '-M', 'intel',
+                    '--start-address=0', '--stop-address=71', str(hash_binary)],
+                   stdout=output, check=True)
 result = {
     'recorded_utc': subprocess.check_output(['date', '-u', '+%FT%TZ'], text=True).strip(),
     'review_source_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=REPO, text=True).strip(),
@@ -102,6 +109,11 @@ result = {
                'captured_programs': len(tracee), 'remaining_static_helper_call_sites': dict(counts),
                'examples': examples,
                'scope': 'Static relocation sites in retained per-entry blobs, not dynamic call counts; shared callee text may recur across entries.'},
+    'katran_hash': {'plan': str(hash_plan_path), 'copied_hash': str(hash_binary),
+                    'copied_bytes': hash_binary.stat().st_size,
+                    'selected_lookup_shapes': [item for item in hash_plan['lookup_maps']
+                                               if item['name'] in ('vip_map', 'fallback_cache', 'lru_mapping')],
+                    'scope': 'Return offsets include rounded key size, not an exact key-length fact. Copied hash has runtime length dispatch.'},
 }
 (HERE / 'evidence.json').write_text(json.dumps(result, indent=2) + '\n')
 selected = [r for r in ranges if r['piece'] in ('runtime_array', 'probe_read', 'lpm_lookup')]

@@ -32,6 +32,7 @@ whether LTO work earns its footprint.
 | 4 | Proven ARRAY accesses always cross a shared call boundary | OTel, BCC, Cilium, Katran where these sites execute | Selectively expose small constant-key accesses to LLVM, removing call/key materialization and enabling folding. Blanket inlining would undo demonstrated size savings. |
 | 5 | Map identity is discarded at every basic-block boundary and memory reload | All five, site dependent | Recover additional direct lookup/update/delete bindings using actual provenance. Dynamic inner-map identity must remain distinct from its known type. Static source opportunity; no new hot-site count is established here. |
 | 6 | Finite helper-ID joins become another runtime compare chain | Tetragon; other helper-selecting sources | Propagate/split a proven selection earlier where possible, avoiding repeated ID redispatch. Source-confirmed shape; production hot frequency and gain are unmeasured. |
+| 7 | Exact hash key length stops before the LTO plan | Katran, BCC, OTel hash sites | Current JIT/native use the same runtime-length kernel lookup. Exact-shape specialization remains a distinct, unmeasured opportunity; the copied-hash comparison did not test a separately specialized function per proven key length. |
 
 Tetragon's prior native load failure is **fixed in the retained corrected-image
 check**; it is discussed separately below. It should not be ranked as a
@@ -402,6 +403,64 @@ an unresolved function pointer cannot be guessed. There is no production
 frequency measurement here, so this ranks below the measured read/map
 opportunities and is not a reason to replace the functioning finite-call
 support.
+
+## 7. Hash binding removes wrappers, but stops before key-length specialization
+
+2026-11-17T00:46:15Z. `x86.rs:1550–1576,1799–1801` binds known hash
+lookups to the shared raw kernel routine, with return adjustment and LRU/
+per-CPU handling still in native text. This matches the verifier's
+`kernel/bpf/hashtab.c:773–784` generated call. It saves duplicated code
+and dispatch wrappers, but does not specialize the hash or key comparison
+using the particular map's key length.
+
+The exact length exists in the loader's `MapMeta.key_size`
+(`kprog/libnativeloader/src/native_loader.cpp:1597–1604`). The lookup shape
+builder at 2715–2734 instead carries the **rounded return offset**.
+`native_loader_link_schema.hpp:40–49` and the linker's
+`main.rs:141–150` have no exact key-size field. The IR-side
+`perf_context_lto.cpp:55–60` likewise has type/inner-type and value sizes,
+not key sizes. Thus changing P's optimization flags cannot constant-fold
+the length inside the external kernel function it calls.
+
+In that function, `hashtab.c:741–747` reloads `map->key_size`, hashes the
+key, selects a bucket and compares candidate keys with that runtime length.
+`hashtab.c:674–678` selects jhash2 for word-sized lengths, otherwise jhash;
+`include/linux/jhash.h:117–140` loops and selects the remaining words from
+that length. Both arms currently pay for this kernel algorithm. This is
+one concrete reason why a smaller/faster P body can leave app per-call
+time near 1.0x. It is not evidence of a native-only map regression.
+
+Retained Katran plan shapes in evidence.json give vip_map return offset
+72 and fallback_cache offset 88. Upstream `balancer_structs.h:26–40,62–69`
+declares the usual x86 C flow/VIP layouts of 40/20 bytes, and
+`balancer_maps.h:31–64` uses those types for the hash/LRU maps and inner
+LRU template. The rounded offsets agree with those source shapes, but
+**must not be inverted into exact key lengths**: several lengths have the
+same rounded offset. Use the existing actual map/template fact when
+implementing a specialization, not a guessed length from this plan.
+
+The old copied routine is also not a separately compiled function for one
+proven key length. Its first instruction loads the live key size, followed
+by comparisons for 4, 8, 12, 16 and 20, then a generic word path and a raw
+fallback. [hash-dispatch.disassembly.txt](hash-dispatch.disassembly.txt)
+extracts that prefix from the retained 2,444-byte routine. It already has
+special cases for those short lengths; the paired result therefore cannot
+be described as testing only a byte-for-byte copy of stock kernel code.
+Equally, its no-gain result is not a measurement of a 40-byte constant
+specialization without runtime length dispatch. The original shared/copy
+measurements remain unchanged and support keeping the current smaller
+shared implementation until an alternative earns its size.
+
+Expected opportunity is elimination of length selection/loop bounds and
+unrolling exact-length key comparisons. Bucket memory latency, collision walking,
+nulls-list retry on concurrent movement, hash seed and LRU marking remain.
+No 20% or 50% gain follows from the source alone. The retained external hash
+PMU roots have no exclusive caller ownership and cannot be treated as a
+fully removable per-call budget. Any future variant must be shared where
+the existing image/lifetime contract permits, with its installed bytes
+counted; duplicating all 2,444 bytes per program would repeat the earlier
+size problem. No new map query, runtime check, module or kernel change is
+proposed by this review.
 
 ## Tetragon: distinguish the fixed failure from the inventory question
 

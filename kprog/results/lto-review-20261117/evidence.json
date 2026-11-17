@@ -1,6 +1,6 @@
 {
-  "recorded_utc": "2026-11-17T00:37:36Z",
-  "review_source_commit": "a89e42168bb8c72e2cae7b070d6fa050e3a2e649",
+  "recorded_utc": "2026-11-17T00:48:18Z",
+  "review_source_commit": "0cb0d4f5c974265cfd321007bebc318899793e68",
   "typed_unwinder": {
     "blob": "/workspaces/kprog-raw/perf/20261116-inner-array-lto/libbpf/otel-typed.blob",
     "payload_bytes": 30410,
@@ -131,5 +131,49 @@
       }
     },
     "scope": "Static relocation sites in retained per-entry blobs, not dynamic call counts; shared callee text may recur across entries."
+  },
+  "katran_hash": {
+    "plan": "/workspaces/repository/kprog/results/shared-hash-regression-20261116/katran-copy.link-plan.json",
+    "copied_hash": "/workspaces/kprog-raw/perf/20261116-shared-hash-regression/katran.copied-hash.bin",
+    "copied_bytes": 2444,
+    "selected_lookup_shapes": [
+      {
+        "name": "fallback_cache",
+        "kind": "lru_hash",
+        "target_addr": 18446744071583853008,
+        "key_offset": 88,
+        "max_entries": 0,
+        "elem_size": 0,
+        "index_mask": 0,
+        "value_offset": 35,
+        "percpu_base_addr": 0,
+        "map_name": "fallback_cache"
+      },
+      {
+        "name": "lru_mapping",
+        "kind": "call",
+        "target_addr": 18446744071583872384,
+        "key_offset": 0,
+        "max_entries": 0,
+        "elem_size": 0,
+        "index_mask": 0,
+        "value_offset": 0,
+        "percpu_base_addr": 0,
+        "map_name": "lru_mapping"
+      },
+      {
+        "name": "vip_map",
+        "kind": "hash",
+        "target_addr": 18446744071583853008,
+        "key_offset": 72,
+        "max_entries": 0,
+        "elem_size": 0,
+        "index_mask": 0,
+        "value_offset": 0,
+        "percpu_base_addr": 0,
+        "map_name": "vip_map"
+      }
+    ],
+    "scope": "Return offsets include rounded key size, not an exact key-length fact. Copied hash has runtime length dispatch."
   }
 }

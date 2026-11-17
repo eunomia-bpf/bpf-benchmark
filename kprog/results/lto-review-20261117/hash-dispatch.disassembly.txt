@@ -1,0 +1,22 @@
+
+/workspaces/kprog-raw/perf/20261116-shared-hash-regression/katran.copied-hash.bin:     file format binary
+
+
+Disassembly of section .data:
+
+0000000000000000 <.data>:
+   0:	8b 8f 3c 00 00 00    	mov    ecx,DWORD PTR [rdi+0x3c]
+   6:	83 f9 04             	cmp    ecx,0x4
+   9:	0f 84 06 02 00 00    	je     0x215
+   f:	83 f9 08             	cmp    ecx,0x8
+  12:	0f 84 22 03 00 00    	je     0x33a
+  18:	83 f9 0c             	cmp    ecx,0xc
+  1b:	0f 84 3d 04 00 00    	je     0x45e
+  21:	83 f9 10             	cmp    ecx,0x10
+  24:	0f 84 ab 05 00 00    	je     0x5d5
+  2a:	83 f9 14             	cmp    ecx,0x14
+  2d:	0f 84 4d 07 00 00    	je     0x780
+  33:	f7 c1 03 00 00 00    	test   ecx,0x3
+  39:	0f 85 3f 09 00 00    	jne    0x97e
+  3f:	85 c9                	test   ecx,ecx
+  41:	0f 84 37 09 00 00    	je     0x97e
