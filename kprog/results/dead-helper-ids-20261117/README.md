@@ -56,3 +56,5 @@ pending**, as are image publication and app installed-size/per-call/body/helper/
 map/throughput measurements. The static inventory has 59/444/1643 ordinary
 sites in Katran/OTel/Tetragon; branch-label filtering can retain some of them,
 so those counts are not actual removal or installed-size measurements.
+
+2026-11-17T22:33:48Z — Current source now emits all295 actual requests through the exact production link(Args) function in the existing Cargo unit executable, without replacing the checked guest's canonical CLI. Detailed receipt and source refactor are in ../link-entry-replay-20261117. Actual reduction10,753 neutral B across54 payloads,241 unchanged, all helper/map/mask/recovery observations equal. Canonical main rebuild/publication remains a separate queued stage; installed/time metrics are pending.

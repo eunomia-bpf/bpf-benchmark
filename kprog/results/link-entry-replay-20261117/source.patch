@@ -1,0 +1,31 @@
+diff --git a/kprog/x86/native_lab/native_link/src/main.rs b/kprog/x86/native_lab/native_link/src/main.rs
+index 5c579bf2e..3add27ed2 100644
+--- a/kprog/x86/native_lab/native_link/src/main.rs
++++ b/kprog/x86/native_lab/native_link/src/main.rs
+@@ -459,7 +459,10 @@ struct SymInfo {
+ }
+ 
+ fn main() -> Result<()> {
+-    let args = Args::parse();
++    link(Args::parse())
++}
++
++fn link(args: Args) -> Result<()> {
+     let proof_mode = args.mode == LinkMode::Proof;
+     let bytes = fs::read(&args.input).with_context(|| format!("read {}", args.input.display()))?;
+     let elf = object::File::parse(&*bytes)
+@@ -2407,6 +2410,14 @@ fn disasm_arm64_words(blob: &[u8]) {
+ mod tests {
+     use super::*;
+ 
++    #[test]
++    #[ignore = "requires a captured CLI argument file"]
++    fn replay_captured_link_request() -> Result<()> {
++        let path=std::env::var("NATIVE_LINK_CAPTURE_ARGV")?;
++        let argv:Vec<String>=serde_json::from_slice(&fs::read(path)?)?;
++        link(Args::try_parse_from(argv)?)
++    }
++
+     #[test]
+     fn arm64_entry_abi_strip_allows_multiple_epilogues() {
+         let mut bytes = Vec::new();

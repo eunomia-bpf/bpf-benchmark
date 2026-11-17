@@ -459,7 +459,10 @@ struct SymInfo {
 }
 
 fn main() -> Result<()> {
-    let args = Args::parse();
+    link(Args::parse())
+}
+
+fn link(args: Args) -> Result<()> {
     let proof_mode = args.mode == LinkMode::Proof;
     let bytes = fs::read(&args.input).with_context(|| format!("read {}", args.input.display()))?;
     let elf = object::File::parse(&*bytes)
@@ -2406,6 +2409,14 @@ fn disasm_arm64_words(blob: &[u8]) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    #[ignore = "requires a captured CLI argument file"]
+    fn replay_captured_link_request() -> Result<()> {
+        let path=std::env::var("NATIVE_LINK_CAPTURE_ARGV")?;
+        let argv:Vec<String>=serde_json::from_slice(&fs::read(path)?)?;
+        link(Args::try_parse_from(argv)?)
+    }
 
     #[test]
     fn arm64_entry_abi_strip_allows_multiple_epilogues() {
