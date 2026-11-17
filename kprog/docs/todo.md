@@ -44,7 +44,8 @@ PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are 
 2. probe_read 剩余字节：8 的整倍数（OTel 的 24 处是 8、16、144 B）现在多走两次比较和跳转（perf 03:18，remainder-paths.json）。下一项“常量大小特化”在编译期按已知大小选路径，零余数时剩余部分整段省掉；运行时大小的路径把零余数判断放在最前面。
 3. LTO 清单加两项（perf 02:47）：bpf_get_current_task_btf 和 bpf_get_current_task 返回同一个指针（bpf_trace.c:755-768），并入已有的 current-task 内联（Tracee 121 处）；bpf_jiffies64 照内核 verifier 的做法换成对 jiffies 变量的一次读（Cilium 91 处）。
 4. ARRAY→LPM 的内部转发（perf 02:56）归入“通用查找一次选定”。
-5. Tetragon（603cacfb 起全部装上）在 probe_read 这组五个应用之后用同一个镜像计时（probe-tails-20261117/tetragon.sh）。
+5. Tetragon（603cacfb 起全部装上）在 probe_read 这组五个应用之后用同一个镜像计时（probe-tails-20261117/tetragon.sh）。03:29 起改由 run2.sh 计时：03:04 的镜像带着 O2 组的五个应用 P 对象，那组停掉，run2 删原生输出后按 O3 重建，计时六个应用。
+6. kprog/x86/micro-prog 里 30 个生成的模拟器源文件（run_micro_sim_batch.py 每次镜像构建先就地重写再编译，11-16 16:22 起一直显示为改动）从 git 里拿掉（984eca760），构建照旧生成，本地 exclude 登记。vendor/bpf 下两份 vmlinux 头每次重新生成时两个枚举值按去重顺序互换（393b4056e，程序用不到），留在冻结的上游树里照旧。
 
 **协调者 2026-11-17T03:10:41Z（运营者“都用 O3”）**：所有应用的 P 和装载时 LTO 都用 -O3。Os、O2 相关的后续（字符串池按段大小绑定、O2 下上下文转换漏转、Os 作代码量候选）不再做；装载时 LTO 编译器里按级别选择的分支（a541c006d）在下一批改动里删掉，回到固定 O3，NATIVE_OPT_LEVEL 和级别文件一起删。
 
