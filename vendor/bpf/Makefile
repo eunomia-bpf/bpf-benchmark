@@ -256,7 +256,7 @@ $(NATIVE_OUT)/cilium/bpf_wireguard.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_M
 $(NATIVE_OUT)/cilium/bpf_xdp.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_XDP_OPTIONS)
 $(NATIVE_OUT)/cilium/bpf_alignchecker.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_SIMPLE_OPTIONS)
 
-$(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c
+$(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c core-compat.h $(CORE_ANSWERS)/cilium.h
 	install -d "$(dir $@)"
 	"$(CLANG)" $(CILIUM_NATIVE_OPTIONS) $(NATIVE_CFLAGS) \
 		$(call core_flags,$(CORE_ANSWERS)/cilium.h) -DMICRO_NATIVE_CILIUM \
@@ -270,7 +270,7 @@ $(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c
 $(OTEL_EBPF_DIR)/errors.h: otel/tools/errors-codegen/errors.json otel/tools/errors-codegen/main.go
 	$(MAKE) -C "$(CURDIR)/$(OTEL_EBPF_DIR)" errors.h
 
-$(NATIVE_OUT)/otel/%.native.o: $(OTEL_EBPF_DIR)/%.ebpf.c $(OTEL_EBPF_DIR)/errors.h $(CORE_ANSWERS)/otel.h
+$(NATIVE_OUT)/otel/%.native.o: $(OTEL_EBPF_DIR)/%.ebpf.c $(OTEL_EBPF_DIR)/errors.h core-compat.h $(CORE_ANSWERS)/otel.h
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) $(call core_flags,$(CORE_ANSWERS)/otel.h) \
 		-DMICRO_NATIVE_HELPER_MACROS -D__KPROG_HELPERS_ARE_POINTERS \
@@ -289,7 +289,8 @@ $(NATIVE_IR_LINK): $(ROOT)/kprog/x86/link_embedded_ir.cpp
 
 # The loader runs this compiler at load time; it ships in the stage. It optimizes at -O3, as P does.
 PERF_CONTEXT_LTO ?= $(NATIVE_STAGE_ROOT)/kprog-perf-context-lto
-$(PERF_CONTEXT_LTO): $(ROOT)/kprog/x86/perf_context_lto.cpp
+$(PERF_CONTEXT_LTO): $(ROOT)/kprog/x86/perf_context_lto.cpp $(ROOT)/kprog/libnativeloader/src/native_loader_lto.hpp \
+		$(ROOT)/kprog/x86/bpf_function_bodies.hpp $(ROOT)/kprog/x86/runtime_bpf_callee.hpp
 	install -d "$(dir $@)"
 	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -fexceptions -Wall -Wextra -Wno-unused-parameter \
 		-I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include "$<" -o "$@" \

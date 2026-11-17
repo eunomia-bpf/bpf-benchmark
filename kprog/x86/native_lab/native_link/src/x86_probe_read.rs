@@ -96,8 +96,11 @@ fn routine_kind(layout: &RuntimeProbeReadLayout, user: bool, actual: u64, string
     b.extend_from_slice(&[0x48,0x89,0x07,0x48,0x83,0xc7,8,0x48,0x83,0xc6,8,0x83,0xe9,8,0x83,0xf9,8]);
     let again = append_x86_jcc_rel32(&mut b, 0x83);
     patch_x86_rel32(&mut b, again, word_loop)?;
-    // Remainder below 8 bytes: one 4-, one 2- and one 1-byte step, as mm/maccess.c copies.
+    // Remainder below 8 bytes: an empty remainder goes straight to success; otherwise one 4-,
+    // one 2- and one 1-byte step, as mm/maccess.c copies.
     let tail_start = b.len(); patch_x86_rel32(&mut b, subword, tail_start)?;
+    b.extend_from_slice(&[0x85,0xc9]); // test ecx,ecx
+    let empty = append_x86_jcc_rel32(&mut b, 0x84);
     b.extend_from_slice(&[0x83,0xf9,4]); // cmp ecx,4
     let below4 = append_x86_jcc_rel32(&mut b, 0x82);
     sites.push(LoadSite { offset: b.len() as u32, insn_len: 2, destination: 11 });
@@ -118,7 +121,7 @@ fn routine_kind(layout: &RuntimeProbeReadLayout, user: bool, actual: u64, string
     b.extend_from_slice(&[0x0f,0xb6,0x06,0x45,0x85,0xdb]); // movzx eax,byte[rsi]; status
     faults.push(append_x86_jcc_rel32(&mut b, 0x84));
     b.extend_from_slice(&[0x88,0x07]);
-    let success = b.len(); patch_x86_rel32(&mut b, complete, success)?;
+    let success = b.len(); patch_x86_rel32(&mut b, complete, success)?; patch_x86_rel32(&mut b, empty, success)?;
     b.extend_from_slice(&[0x31,0xc0]);
     }
     let cleanup_success = jump(&mut b);
