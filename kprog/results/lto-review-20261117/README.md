@@ -552,6 +552,67 @@ activity for the absent records. The read-only follow-up is FD/program-array
 lifetime and counter-window identity; it is not a license to change the
 frozen framework or filter programs. No new guest was run in this review.
 
+Timeline follow-up, 2026-11-17T01:17:26Z: retained logs narrow this gap
+substantially. Of the 63 absent IDs, **62 form a strict final load suffix**.
+The latest native load represented in the window is ID788 at guest
+monotonic 195.717379 s. Missing ID790 loads at 195.772010 s, and the suffix
+continues through ID912 at 200.996473 s. The remaining absent ID336
+(event_exit_disa) loaded much earlier at 160.155894 s and is a separate
+lifetime/selection question. The repeated seven-size/eight-copy pattern
+therefore need not imply a special failure of those function bodies.
+
+Ten suffix programs have successful `BPF_TASK_FD_QUERY` attachment evidence:
+sk_alloc return, __sk_free, tcp_set_state, two tcp_close instances,
+tcp_create_openreq_child entry/return, tcp_connect, tcp_sendmsg and tty_write.
+For example, native ID890 attached to tcp_sendmsg at 200.276279 s but is
+absent from the window; baseline ID302 at that hook has 1,174,423 calls.
+Hook matches can be nonunique across policies and are not a one-to-one
+program equivalence proof. Exact load times, IDs, attachment types and
+baseline hook records are in [tetragon-timeline.json](tetragon-timeline.json).
+These are not ten failed native installations or ten proven-zero programs.
+
+The frozen startup path explains why startup timing is a strong lead:
+`runner/libs/app_runners/tetragon.py:35–42` explicitly requests zero stable
+time and a minimum of 100 tracked programs. `runner/libs/rejit.py:369–373`
+returns on that count; it does not wait for the remaining policies.
+`rejit.py:459–470` then runs the configured warmup, starts measurement,
+runs the samples and finishes measurement. This check used one ten-second
+warmup and one ten-second sample, while the native first-to-last load span
+alone is about 40.85 seconds. Baseline and native can consequently have
+different policy exposure in a short functional window.
+
+This is **not** a fixed-start-list explanation: the current shim at
+`bpfopt/shim/shim_measure.h:99–108` already includes programs registered
+after measure_start, using zero initial counters. Its start/finish queries
+also synchronize with native loading (48–74,94–104). A program still alive
+and tracked before finish is not intentionally excluded merely for loading
+after start. The ordered suffix and late attachment evidence are consistent
+with measurement ending while sensor loading continues; the exact
+measure_start/finish request timestamps are not retained, so the ordering
+alone does not prove that timing explains every missing record. ID336
+remains separate. This narrows the next investigation without claiming a
+completed equal-work check.
+
+Keep this run's raw counters and functional result. It is not an official
+default-duration timing round, and no new delay, count threshold, exclusion
+or benchmark change follows from this review. The planned full confirmation
+retains its existing entry and settings. In particular, do not turn a short
+check's 287/225 aggregate into a steady-state Tetragon speedup.
+
+One source-side load-cost lead stays inside LTO: `link_embedded_ir.cpp:23–30`
+makes every sectioned program entry external. The load-time compiler
+selects F but runs both module pipelines and code generation on the entire
+module (`perf_context_lto.cpp:318–345,399–404`), without first internalizing
+unselected roots. Selected-program native linking trims reachable machine
+code later. Thus the source pipeline can repeatedly optimize/emit other
+public entries while preparing one program. Internalizing unselected roots
+and retaining the selected reachable/address-taken closure is a possible
+way to reduce that load work; callback tables and injected functions must
+remain reachable. No compiler timing or gain for that change is established
+here. It would target setup CPU and completion time, not directly improve
+per-call execution after startup, and it avoids inventing another readiness
+gate in the frozen launcher.
+
 ## Existing work that should stay, and attribution limits
 
 - Shared kernel hash: `x86.rs:1799–1801` uses the shared raw kernel routine;

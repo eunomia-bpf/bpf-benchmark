@@ -119,6 +119,47 @@ with (HERE / 'cilium-tail.disassembly.txt').open('w') as output:
         tail_programs.append(dict(arm=arm, id=program['id'], name=program['name'],
                                   installed_bytes=program['jited_bytes'], binary=str(binary),
                                   tail_counter_compare_offsets=sites))
+tetragon_run = REPO / 'corpus/results/x86_kvm_corpus_20261116_232540_669421'
+tetragon_app = json.loads((tetragon_run / 'details/apps/tetragon__observer.json').read_text())
+tetragon_result = json.loads((tetragon_run / 'details/result.json').read_text())
+tetragon_logs = {phase: tetragon_run / f'details/shim-logs/tetragon__observer.{phase}.log'
+                 for phase in ('baseline', 'post_rejit')}
+native_loads = []
+attachments = {}
+for phase, path in tetragon_logs.items():
+    hooks = {}
+    for line in path.read_text().splitlines():
+        match = re.match(r'\[([0-9.]+).*BPF_TASK_FD_QUERY .*fd_type=(\d+) prog_id=(\d+).*symbol=(\S+)', line)
+        if match:
+            hooks[int(match[3])] = dict(symbol=match[4], monotonic_s=float(match[1]), fd_type=int(match[2]))
+        if phase == 'post_rejit':
+            match = re.match(r'\[([0-9.]+).*native-loader jit-info native .*? id=(\d+) ', line)
+            if match:
+                native_loads.append(dict(monotonic_s=float(match[1]), id=int(match[2])))
+    attachments[phase] = hooks
+native_window = {int(value['id']) for value in tetragon_app['post_rejit']['bpf'].values()}
+represented = [row for row in native_loads if row['id'] in native_window]
+absent = [row for row in native_loads if row['id'] not in native_window]
+last_represented = max(represented, key=lambda row: row['monotonic_s'])
+late = [row for row in absent if row['monotonic_s'] > last_represented['monotonic_s']]
+outside_attached = []
+for load in absent:
+    hook = attachments['post_rejit'].get(load['id'])
+    if hook:
+        baseline_matches = [value for value in tetragon_app['baseline']['bpf'].values()
+                            if (candidate := attachments['baseline'].get(int(value['id'])))
+                            and candidate['symbol'] == hook['symbol'] and candidate['fd_type'] == hook['fd_type']]
+        outside_attached.append(dict(native_id=load['id'], **hook,
+                                      baseline_hook_records=[{'id': value['id'], 'calls': value['run_cnt_delta']}
+                                                             for value in baseline_matches]))
+timeline = dict(run=str(tetragon_run), logs={key: str(path) for key, path in tetragon_logs.items()},
+                protocol={key: tetragon_result[key] for key in ('warmups', 'samples', 'workload_seconds')},
+                native_loads=len(native_loads), native_window_ids=len(native_window),
+                absent_ids=len(absent), last_represented_load=last_represented,
+                absent_loaded_later=late, absent_loaded_earlier=[row for row in absent if row not in late],
+                outside_window_attached=outside_attached,
+                scope='Load/attachment timestamps only, not exact measurement-request times. Hook matches can be nonunique; no equality of exposure or zero-call conclusion.')
+(HERE / 'tetragon-timeline.json').write_text(json.dumps(timeline, indent=2) + '\n')
 result = {
     'recorded_utc': subprocess.check_output(['date', '-u', '+%FT%TZ'], text=True).strip(),
     'review_source_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=REPO, text=True).strip(),

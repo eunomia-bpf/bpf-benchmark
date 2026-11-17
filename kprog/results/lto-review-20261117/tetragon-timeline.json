@@ -1,0 +1,422 @@
+{
+  "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_232540_669421",
+  "logs": {
+    "baseline": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_232540_669421/details/shim-logs/tetragon__observer.baseline.log",
+    "post_rejit": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_232540_669421/details/shim-logs/tetragon__observer.post_rejit.log"
+  },
+  "protocol": {
+    "warmups": 1,
+    "samples": 1,
+    "workload_seconds": 10.0
+  },
+  "native_loads": 288,
+  "native_window_ids": 225,
+  "absent_ids": 63,
+  "last_represented_load": {
+    "monotonic_s": 195.717379,
+    "id": 788
+  },
+  "absent_loaded_later": [
+    {
+      "monotonic_s": 195.77201,
+      "id": 790
+    },
+    {
+      "monotonic_s": 195.872904,
+      "id": 792
+    },
+    {
+      "monotonic_s": 195.928665,
+      "id": 794
+    },
+    {
+      "monotonic_s": 196.09792,
+      "id": 796
+    },
+    {
+      "monotonic_s": 196.217566,
+      "id": 798
+    },
+    {
+      "monotonic_s": 196.32951,
+      "id": 800
+    },
+    {
+      "monotonic_s": 196.348891,
+      "id": 802
+    },
+    {
+      "monotonic_s": 196.366615,
+      "id": 804
+    },
+    {
+      "monotonic_s": 196.412028,
+      "id": 806
+    },
+    {
+      "monotonic_s": 196.559026,
+      "id": 808
+    },
+    {
+      "monotonic_s": 196.611591,
+      "id": 810
+    },
+    {
+      "monotonic_s": 196.782916,
+      "id": 812
+    },
+    {
+      "monotonic_s": 196.801667,
+      "id": 814
+    },
+    {
+      "monotonic_s": 196.912865,
+      "id": 816
+    },
+    {
+      "monotonic_s": 196.932112,
+      "id": 818
+    },
+    {
+      "monotonic_s": 196.949238,
+      "id": 820
+    },
+    {
+      "monotonic_s": 197.089029,
+      "id": 822
+    },
+    {
+      "monotonic_s": 197.141908,
+      "id": 824
+    },
+    {
+      "monotonic_s": 197.161097,
+      "id": 826
+    },
+    {
+      "monotonic_s": 197.178628,
+      "id": 828
+    },
+    {
+      "monotonic_s": 197.290708,
+      "id": 830
+    },
+    {
+      "monotonic_s": 197.463416,
+      "id": 832
+    },
+    {
+      "monotonic_s": 197.482147,
+      "id": 834
+    },
+    {
+      "monotonic_s": 197.635866,
+      "id": 836
+    },
+    {
+      "monotonic_s": 197.653289,
+      "id": 838
+    },
+    {
+      "monotonic_s": 197.697845,
+      "id": 840
+    },
+    {
+      "monotonic_s": 197.817095,
+      "id": 842
+    },
+    {
+      "monotonic_s": 197.988463,
+      "id": 844
+    },
+    {
+      "monotonic_s": 198.017461,
+      "id": 846
+    },
+    {
+      "monotonic_s": 198.035374,
+      "id": 848
+    },
+    {
+      "monotonic_s": 198.227522,
+      "id": 850
+    },
+    {
+      "monotonic_s": 198.329281,
+      "id": 852
+    },
+    {
+      "monotonic_s": 198.345536,
+      "id": 854
+    },
+    {
+      "monotonic_s": 198.399829,
+      "id": 856
+    },
+    {
+      "monotonic_s": 198.823213,
+      "id": 858
+    },
+    {
+      "monotonic_s": 198.945918,
+      "id": 860
+    },
+    {
+      "monotonic_s": 198.970248,
+      "id": 862
+    },
+    {
+      "monotonic_s": 199.017116,
+      "id": 864
+    },
+    {
+      "monotonic_s": 199.036439,
+      "id": 866
+    },
+    {
+      "monotonic_s": 199.054334,
+      "id": 868
+    },
+    {
+      "monotonic_s": 199.166857,
+      "id": 870
+    },
+    {
+      "monotonic_s": 199.214614,
+      "id": 872
+    },
+    {
+      "monotonic_s": 199.238368,
+      "id": 874
+    },
+    {
+      "monotonic_s": 199.258333,
+      "id": 876
+    },
+    {
+      "monotonic_s": 199.377555,
+      "id": 878
+    },
+    {
+      "monotonic_s": 199.552477,
+      "id": 880
+    },
+    {
+      "monotonic_s": 199.599442,
+      "id": 882
+    },
+    {
+      "monotonic_s": 199.713831,
+      "id": 884
+    },
+    {
+      "monotonic_s": 199.761037,
+      "id": 886
+    },
+    {
+      "monotonic_s": 199.87845,
+      "id": 888
+    },
+    {
+      "monotonic_s": 199.897532,
+      "id": 890
+    },
+    {
+      "monotonic_s": 199.916151,
+      "id": 892
+    },
+    {
+      "monotonic_s": 200.090459,
+      "id": 894
+    },
+    {
+      "monotonic_s": 200.209423,
+      "id": 896
+    },
+    {
+      "monotonic_s": 200.255674,
+      "id": 898
+    },
+    {
+      "monotonic_s": 200.494996,
+      "id": 900
+    },
+    {
+      "monotonic_s": 200.519767,
+      "id": 902
+    },
+    {
+      "monotonic_s": 200.567533,
+      "id": 904
+    },
+    {
+      "monotonic_s": 200.682429,
+      "id": 906
+    },
+    {
+      "monotonic_s": 200.858838,
+      "id": 908
+    },
+    {
+      "monotonic_s": 200.97775,
+      "id": 910
+    },
+    {
+      "monotonic_s": 200.996473,
+      "id": 912
+    }
+  ],
+  "absent_loaded_earlier": [
+    {
+      "monotonic_s": 160.155894,
+      "id": 336
+    }
+  ],
+  "outside_window_attached": [
+    {
+      "native_id": 790,
+      "symbol": "sk_alloc",
+      "monotonic_s": 195.888645,
+      "fd_type": 3,
+      "baseline_hook_records": [
+        {
+          "id": 251,
+          "calls": 900037
+        },
+        {
+          "id": 64,
+          "calls": 990733
+        },
+        {
+          "id": 88,
+          "calls": 990733
+        }
+      ]
+    },
+    {
+      "native_id": 802,
+      "symbol": "__sk_free",
+      "monotonic_s": 196.430843,
+      "fd_type": 2,
+      "baseline_hook_records": [
+        {
+          "id": 256,
+          "calls": 855578
+        },
+        {
+          "id": 71,
+          "calls": 990735
+        },
+        {
+          "id": 96,
+          "calls": 990735
+        }
+      ]
+    },
+    {
+      "native_id": 818,
+      "symbol": "tcp_set_state",
+      "monotonic_s": 196.967415,
+      "fd_type": 2,
+      "baseline_hook_records": [
+        {
+          "id": 268,
+          "calls": 15
+        }
+      ]
+    },
+    {
+      "native_id": 834,
+      "symbol": "tcp_close",
+      "monotonic_s": 197.503191,
+      "fd_type": 2,
+      "baseline_hook_records": [
+        {
+          "id": 274,
+          "calls": 5
+        },
+        {
+          "id": 295,
+          "calls": 5
+        }
+      ]
+    },
+    {
+      "native_id": 846,
+      "symbol": "tcp_create_openreq_child",
+      "monotonic_s": 198.054389,
+      "fd_type": 2,
+      "baseline_hook_records": [
+        {
+          "id": 282,
+          "calls": 1
+        }
+      ]
+    },
+    {
+      "native_id": 856,
+      "symbol": "tcp_create_openreq_child",
+      "monotonic_s": 198.415663,
+      "fd_type": 3,
+      "baseline_hook_records": [
+        {
+          "id": 283,
+          "calls": 1
+        }
+      ]
+    },
+    {
+      "native_id": 868,
+      "symbol": "tcp_connect",
+      "monotonic_s": 199.186823,
+      "fd_type": 2,
+      "baseline_hook_records": [
+        {
+          "id": 288,
+          "calls": 1
+        }
+      ]
+    },
+    {
+      "native_id": 874,
+      "symbol": "tcp_close",
+      "monotonic_s": 199.735795,
+      "fd_type": 2,
+      "baseline_hook_records": [
+        {
+          "id": 274,
+          "calls": 5
+        },
+        {
+          "id": 295,
+          "calls": 5
+        }
+      ]
+    },
+    {
+      "native_id": 890,
+      "symbol": "tcp_sendmsg",
+      "monotonic_s": 200.276279,
+      "fd_type": 2,
+      "baseline_hook_records": [
+        {
+          "id": 302,
+          "calls": 1174423
+        }
+      ]
+    },
+    {
+      "native_id": 902,
+      "symbol": "tty_write",
+      "monotonic_s": 201.017557,
+      "fd_type": 2,
+      "baseline_hook_records": [
+        {
+          "id": 310,
+          "calls": 0
+        }
+      ]
+    }
+  ],
+  "scope": "Load/attachment timestamps only, not exact measurement-request times. Hook matches can be nonunique; no equality of exposure or zero-call conclusion."
+}
