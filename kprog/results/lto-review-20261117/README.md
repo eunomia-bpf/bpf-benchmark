@@ -1773,6 +1773,20 @@ per-call counters and the uniform-O3 P stage sizes remain as recorded.
 No guest, image build or source optimization was started. Implementation
 of the summary correction remains coordinator-owned.
 
+Follow-up 2026-11-17T05:23:06Z at 7f458722f: the coordinator fixed name overwrites by pairing
+same-thread original/native log records and keying pairs by native program
+ID. A light replay of that corrected script reproduces this receipt's
+cumulative totals: BCC 25 / 7,965 / 8,286 B; Cilium 113 / 581,577 /
+484,353 B; Tetragon 288 / 2,472,912 / 1,913,889 B; Tracee 169 / 2,068,918 /
+1,699,564 B. The name-overwrite defect is therefore corrected in the
+current summary helper. Its output remains cumulative paired loads, not
+the measurement snapshot: it never joins to the snapshot inventory.
+The Cilium 113-versus-47 distinction and nine retained-eBPF records still
+matter when describing a live footprint. Also, its “original” log record
+is the same-load eBPF companion in the native arm, rather than the first
+timing arm's program. These are population/label qualifications, not
+reasons to change or reject the completed timing results.
+
 ## 16. User-read range arithmetic can drop the carry branch
 
 2026-11-17T05:06:00Z review at 4e63113e7; refinement of the first-ranked
@@ -1925,3 +1939,59 @@ variant sharing deliberate and measure the whole reachable image, including
 exception metadata, along with per-call time. Expected benefit is reduced
 loop/pointer bookkeeping at executed proven-size reads; actual gain and
 app installed bytes remain unmeasured. Coordinator owns implementation.
+
+## 18. LPM prefix arithmetic can replace NEG/ADD with XOR
+
+2026-11-17T05:21:21Z review at b80b2dad0. This is a small simplification of
+the generated 12-data-byte LPM path, below the read and generic-dispatch
+items. It requires no new CPU instruction feature, runtime policy branch
+or map fact.
+
+`x86_lpm_lookup.rs:38` computes the first differing bit using BSR RCX,RAX,
+NEG ECX, ADD ECX,63. Its existing nonzero branch guarantees the BSR result
+`k` lies in 0..63. In that domain, `63-k == k XOR 63`: complementing the
+six low bits gives the same count. Retain BSR and replace the two following
+instructions with XOR ECX,63. The second chunk at line 47 has a nonzero
+32-bit BSR result in 0..31; `95-k == k XOR 95`, since the low five bits
+are complemented and bit 6 contributes 64. It likewise needs only XOR
+after BSR.
+
+Actual retained code contains both sequences at 0x7627–0x762d and
+0x7655–0x765a in `otel-typed.blob`. Each NEG/ADD pair occupies five bytes;
+XOR ECX,imm8 occupies three. The two replacements remove four local bytes
+and one executed instruction on whichever BSR case a node comparison
+takes. This is arithmetic/encoding analysis, not a rebuilt 326-byte LPM
+routine or a measured per-call reduction.
+
+Flags differ between ADD and XOR, but are dead here. Both paths jump
+directly to the limit-clamp CMP ECX,R9D at 0x7671, which supplies the flags
+for the following CMOVA. Source line 55 has that same overwrite. Preserve
+the existing TEST/JE zero handling: when the 64-bit XOR is zero, the code
+can inspect the remaining 32 bits or use the short-prefix case, and a
+fully equal key produces 96 directly. This simplification does not remove
+those branches or apply BSR to a newly reachable zero operand.
+
+`lpm_prefix_inventory.py` records all 64 and 32 possible nonzero-BSR
+results, retained native instructions and the sole kernel's compiled
+`trie_lookup_elem` in `lpm-prefix.json`. Every value agrees over the full
+stated domains. No candidate code was emitted, assembled or executed.
+Local labels and external helper-relocation offsets still need to follow
+the shorter emitted vector, as they do for any emitter layout change.
+
+The JIT's known-LPM path calls the kernel's trie operation. Kernel source
+`kernel/bpf/lpm_trie.c:183–204` expresses the same counts as `64-fls64`
+and accumulated `32-fls`; its compiled general routine uses BSR with
+MOV/SUB for the first chunk and SUB/ADD for later chunks, not the proposed
+XOR sequence. That body also supports other key sizes and an accumulator,
+so this receipt does not extrapolate the replacement into kernel code.
+The native fixed 12-byte shape exposes the smaller finite domains.
+
+Only generated-LPM node comparisons taking a nonzero-BSR case save an
+instruction. An all-equal or short-prefix bypass gains no instruction;
+a non-LPM generic fallback does not execute this code. Known LPM sites
+already bound directly to the kernel trie function are unaffected too.
+The retained Katran LPM bucket was only 2.5 cycles per app call, so this
+is not an explanation for a large Katran gap. Dynamic case frequencies
+and current per-call gain remain unknown. No new check, default switch,
+flag set, kernel/module change or source implementation was introduced;
+coordinator owns the small forward change and its measurement.

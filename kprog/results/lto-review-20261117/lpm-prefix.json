@@ -1,0 +1,520 @@
+{
+  "recorded_utc": "2026-11-17T05:21:21Z",
+  "scope": "Source/retained-byte and finite-domain arithmetic review only. No candidate byte sequence assembled/emitted/executed; no runtime check/feature/dispatch change. Applies only after the existing nonzero guards in the generated 12-byte LPM path.",
+  "retained_blob": "/workspaces/kprog-raw/perf/20261116-inner-array-lto/libbpf/otel-typed.blob",
+  "retained_native_disassembly": "\n/workspaces/kprog-raw/perf/20261116-inner-array-lto/libbpf/otel-typed.blob:     file format binary\n\n\nDisassembly of section .data:\n\n000000000000761e <.data+0x761e>:\n    761e:\ttest   rax,rax\n    7621:\tje     0x7635\n    7627:\tbsr    rcx,rax\n    762b:\tneg    ecx\n    762d:\tadd    ecx,0x3f\n    7630:\tjmp    0x7671\n    7635:\tcmp    r9d,0x40\n    7639:\tjbe    0x766c\n    763f:\tmov    eax,DWORD PTR [rdx+0x20]\n    7645:\txor    eax,DWORD PTR [rsi+0xc]\n    764b:\tbswap  eax\n    764d:\ttest   eax,eax\n    764f:\tje     0x7662\n    7655:\tbsr    ecx,eax\n    7658:\tneg    ecx\n    765a:\tadd    ecx,0x5f\n    765d:\tjmp    0x7671\n    7662:\tmov    ecx,0x60\n    7667:\tjmp    0x7671\n    766c:\tmov    ecx,0x40\n    7671:\tcmp    ecx,r9d\n    7674:\tcmova  ecx,r9d\n",
+  "kernel_image": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+  "kernel_trie_disassembly": "\n/workspaces/.agent-state/kprog-ck/build-x86/vmlinux:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\nffffffff814ced00 <trie_lookup_elem>:\nffffffff814ced00:\tpush   r15\nffffffff814ced02:\tpush   r14\nffffffff814ced04:\tpush   r13\nffffffff814ced06:\tpush   r12\nffffffff814ced08:\tpush   rbp\nffffffff814ced09:\tpush   rbx\nffffffff814ced0a:\tsub    rsp,0x10\nffffffff814ced0e:\tmov    eax,DWORD PTR [rsi]\nffffffff814ced10:\tmov    r13,QWORD PTR [rdi+0x180]\nffffffff814ced17:\tcmp    r13,rax\nffffffff814ced1a:\tjb     ffffffff814ceee9 <trie_lookup_elem+0x1e9>\nffffffff814ced20:\tmov    r10,QWORD PTR [rdi+0x120]\nffffffff814ced27:\ttest   r10,r10\nffffffff814ced2a:\tje     ffffffff814cee34 <trie_lookup_elem+0x134>\nffffffff814ced30:\tmov    rbp,QWORD PTR [rdi+0x188]\nffffffff814ced37:\tmov    r11,rsi\nffffffff814ced3a:\tmov    rsi,rax\nffffffff814ced3d:\txor    eax,eax\nffffffff814ced3f:\tmov    QWORD PTR [rsp+0x8],r13\nffffffff814ced44:\tmov    r12d,0xffffffff\nffffffff814ced4a:\tmov    r14d,0x3f\nffffffff814ced50:\tcmp    rbp,0x7\nffffffff814ced54:\tseta   al\nffffffff814ced57:\txor    r9d,r9d\nffffffff814ced5a:\tlea    r15d,[rax*8+0x0]\nffffffff814ced62:\tmov    edi,r15d\nffffffff814ced65:\tmov    ecx,DWORD PTR [r10+0x10]\nffffffff814ced69:\tcmp    esi,ecx\nffffffff814ced6b:\tmov    r15d,ecx\nffffffff814ced6e:\tcmovbe r15d,esi\nffffffff814ced72:\tcmp    rbp,0x7\nffffffff814ced76:\tjbe    ffffffff814cee4a <trie_lookup_elem+0x14a>\nffffffff814ced7c:\tmov    rbx,QWORD PTR [r10+0x18]\nffffffff814ced80:\tmov    r8,QWORD PTR [r11+0x4]\nffffffff814ced84:\tmov    edx,r12d\nffffffff814ced87:\tmov    rax,rbx\nffffffff814ced8a:\txor    rax,r8\nffffffff814ced8d:\tbswap  rax\nffffffff814ced90:\tbsr    rdx,rax\nffffffff814ced94:\tmov    eax,r14d\nffffffff814ced97:\tsub    eax,edx\nffffffff814ced99:\tcmp    eax,r15d\nffffffff814ced9c:\tjae    ffffffff814ceed5 <trie_lookup_elem+0x1d5>\nffffffff814ceda2:\tcmp    rbx,r8\nffffffff814ceda5:\tjne    ffffffff814cedef <trie_lookup_elem+0xef>\nffffffff814ceda7:\tmov    DWORD PTR [rsp+0x4],esi\nffffffff814cedab:\tmov    edx,edi\nffffffff814cedad:\tlea    esi,[rdx+0x4]\nffffffff814cedb0:\tmov    ebx,edx\nffffffff814cedb2:\tmov    rdx,rsi\nffffffff814cedb5:\tcmp    rbp,rsi\nffffffff814cedb8:\tjb     ffffffff814cee51 <trie_lookup_elem+0x151>\nffffffff814cedbe:\tmov    r13d,DWORD PTR [r10+rbx*1+0x18]\nffffffff814cedc3:\tmov    ebx,DWORD PTR [r11+rbx*1+0x4]\nffffffff814cedc8:\tmov    esi,r12d\nffffffff814cedcb:\tmov    r8d,r13d\nffffffff814cedce:\txor    r8d,ebx\nffffffff814cedd1:\tbswap  r8d\nffffffff814cedd4:\tbsr    esi,r8d\nffffffff814cedd8:\tsub    eax,esi\nffffffff814cedda:\tadd    eax,0x1f\nffffffff814ceddd:\tcmp    eax,r15d\nffffffff814cede0:\tjae    ffffffff814ceedd <trie_lookup_elem+0x1dd>\nffffffff814cede6:\tcmp    r13d,ebx\nffffffff814cede9:\tje     ffffffff814cedad <trie_lookup_elem+0xad>\nffffffff814cedeb:\tmov    esi,DWORD PTR [rsp+0x4]\nffffffff814cedef:\tcmp    QWORD PTR [rsp+0x8],rax\nffffffff814cedf4:\tje     ffffffff814cee2f <trie_lookup_elem+0x12f>\nffffffff814cedf6:\tmov    edx,ecx\nffffffff814cedf8:\tcmp    rax,rdx\nffffffff814cedfb:\tjb     ffffffff814cee27 <trie_lookup_elem+0x127>\nffffffff814cedfd:\ttest   BYTE PTR [r10+0x14],0x1\nffffffff814cee02:\tnot    ecx\nffffffff814cee04:\tcmove  r9,r10\nffffffff814cee08:\tshr    rdx,0x3\nffffffff814cee0c:\tand    ecx,0x7\nffffffff814cee0f:\tmovzx  eax,BYTE PTR [r11+rdx*1+0x4]\nffffffff814cee15:\tsar    eax,cl\nffffffff814cee17:\tand    eax,0x1\nffffffff814cee1a:\tmov    r10,QWORD PTR [r10+rax*8]\nffffffff814cee1e:\ttest   r10,r10\nffffffff814cee21:\tjne    ffffffff814ced65 <trie_lookup_elem+0x65>\nffffffff814cee27:\tmov    r10,r9\nffffffff814cee2a:\ttest   r9,r9\nffffffff814cee2d:\tje     ffffffff814cee34 <trie_lookup_elem+0x134>\nffffffff814cee2f:\tlea    r10,[r10+rbp*1+0x18]\nffffffff814cee34:\tadd    rsp,0x10\nffffffff814cee38:\tmov    rax,r10\nffffffff814cee3b:\tpop    rbx\nffffffff814cee3c:\tpop    rbp\nffffffff814cee3d:\tpop    r12\nffffffff814cee3f:\tpop    r13\nffffffff814cee41:\tpop    r14\nffffffff814cee43:\tpop    r15\nffffffff814cee45:\tjmp    ffffffff820138b0 <__pi___x86_return_thunk>\nffffffff814cee4a:\txor    eax,eax\nffffffff814cee4c:\tjmp    ffffffff814ceda7 <trie_lookup_elem+0xa7>\nffffffff814cee51:\tlea    edx,[rbx+0x2]\nffffffff814cee54:\tmov    esi,DWORD PTR [rsp+0x4]\nffffffff814cee58:\tmov    r8,rdx\nffffffff814cee5b:\tcmp    rbp,rdx\nffffffff814cee5e:\tjb     ffffffff814cee9f <trie_lookup_elem+0x19f>\nffffffff814cee60:\tmovzx  edx,WORD PTR [r10+rbx*1+0x18]\nffffffff814cee66:\tmovzx  ebx,WORD PTR [r11+rbx*1+0x4]\nffffffff814cee6c:\tmov    r13d,edx\nffffffff814cee6f:\txor    edx,ebx\nffffffff814cee71:\tmov    WORD PTR [rsp+0x4],bx\nffffffff814cee76:\tmov    ebx,r12d\nffffffff814cee79:\trol    dx,0x8\nffffffff814cee7d:\tmovzx  edx,dx\nffffffff814cee80:\tbsr    ebx,edx\nffffffff814cee83:\tsub    eax,ebx\nffffffff814cee85:\tadd    eax,0xf\nffffffff814cee88:\tcmp    eax,r15d\nffffffff814cee8b:\tjae    ffffffff814ceed5 <trie_lookup_elem+0x1d5>\nffffffff814cee8d:\tmovzx  ebx,WORD PTR [rsp+0x4]\nffffffff814cee92:\tcmp    r13w,bx\nffffffff814cee96:\tjne    ffffffff814cedef <trie_lookup_elem+0xef>\nffffffff814cee9c:\tmov    ebx,r8d\nffffffff814cee9f:\tlea    edx,[rbx+0x1]\nffffffff814ceea2:\tcmp    rbp,rdx\nffffffff814ceea5:\tjb     ffffffff814cedef <trie_lookup_elem+0xef>\nffffffff814ceeab:\tmov    r8d,ebx\nffffffff814ceeae:\tmovzx  edx,BYTE PTR [r10+r8*1+0x18]\nffffffff814ceeb4:\txor    dl,BYTE PTR [r11+r8*1+0x4]\nffffffff814ceeb9:\tmov    r8d,0xffffffff\nffffffff814ceebf:\tmovzx  edx,dl\nffffffff814ceec2:\tbsr    r8d,edx\nffffffff814ceec6:\tsub    eax,r8d\nffffffff814ceec9:\tadd    eax,0x7\nffffffff814ceecc:\tcmp    eax,r15d\nffffffff814ceecf:\tjb     ffffffff814cedef <trie_lookup_elem+0xef>\nffffffff814ceed5:\tmov    eax,r15d\nffffffff814ceed8:\tjmp    ffffffff814cedef <trie_lookup_elem+0xef>\nffffffff814ceedd:\tmov    esi,DWORD PTR [rsp+0x4]\nffffffff814ceee1:\tmov    eax,r15d\nffffffff814ceee4:\tjmp    ffffffff814cedef <trie_lookup_elem+0xef>\nffffffff814ceee9:\txor    r10d,r10d\nffffffff814ceeec:\tjmp    ffffffff814cee34 <trie_lookup_elem+0x134>\n\nDisassembly of section .data:\n\nDisassembly of section .init.text:\n\nDisassembly of section .altinstr_aux:\n\nDisassembly of section .altinstr_replacement:\n\nDisassembly of section .exit.text:\n",
+  "domains": [
+    {
+      "input_width": 64,
+      "nonzero_bsr_results": 64,
+      "constant": 63,
+      "values": [
+        {
+          "bsr_result": 0,
+          "old_prefix": 63,
+          "xor_prefix": 63
+        },
+        {
+          "bsr_result": 1,
+          "old_prefix": 62,
+          "xor_prefix": 62
+        },
+        {
+          "bsr_result": 2,
+          "old_prefix": 61,
+          "xor_prefix": 61
+        },
+        {
+          "bsr_result": 3,
+          "old_prefix": 60,
+          "xor_prefix": 60
+        },
+        {
+          "bsr_result": 4,
+          "old_prefix": 59,
+          "xor_prefix": 59
+        },
+        {
+          "bsr_result": 5,
+          "old_prefix": 58,
+          "xor_prefix": 58
+        },
+        {
+          "bsr_result": 6,
+          "old_prefix": 57,
+          "xor_prefix": 57
+        },
+        {
+          "bsr_result": 7,
+          "old_prefix": 56,
+          "xor_prefix": 56
+        },
+        {
+          "bsr_result": 8,
+          "old_prefix": 55,
+          "xor_prefix": 55
+        },
+        {
+          "bsr_result": 9,
+          "old_prefix": 54,
+          "xor_prefix": 54
+        },
+        {
+          "bsr_result": 10,
+          "old_prefix": 53,
+          "xor_prefix": 53
+        },
+        {
+          "bsr_result": 11,
+          "old_prefix": 52,
+          "xor_prefix": 52
+        },
+        {
+          "bsr_result": 12,
+          "old_prefix": 51,
+          "xor_prefix": 51
+        },
+        {
+          "bsr_result": 13,
+          "old_prefix": 50,
+          "xor_prefix": 50
+        },
+        {
+          "bsr_result": 14,
+          "old_prefix": 49,
+          "xor_prefix": 49
+        },
+        {
+          "bsr_result": 15,
+          "old_prefix": 48,
+          "xor_prefix": 48
+        },
+        {
+          "bsr_result": 16,
+          "old_prefix": 47,
+          "xor_prefix": 47
+        },
+        {
+          "bsr_result": 17,
+          "old_prefix": 46,
+          "xor_prefix": 46
+        },
+        {
+          "bsr_result": 18,
+          "old_prefix": 45,
+          "xor_prefix": 45
+        },
+        {
+          "bsr_result": 19,
+          "old_prefix": 44,
+          "xor_prefix": 44
+        },
+        {
+          "bsr_result": 20,
+          "old_prefix": 43,
+          "xor_prefix": 43
+        },
+        {
+          "bsr_result": 21,
+          "old_prefix": 42,
+          "xor_prefix": 42
+        },
+        {
+          "bsr_result": 22,
+          "old_prefix": 41,
+          "xor_prefix": 41
+        },
+        {
+          "bsr_result": 23,
+          "old_prefix": 40,
+          "xor_prefix": 40
+        },
+        {
+          "bsr_result": 24,
+          "old_prefix": 39,
+          "xor_prefix": 39
+        },
+        {
+          "bsr_result": 25,
+          "old_prefix": 38,
+          "xor_prefix": 38
+        },
+        {
+          "bsr_result": 26,
+          "old_prefix": 37,
+          "xor_prefix": 37
+        },
+        {
+          "bsr_result": 27,
+          "old_prefix": 36,
+          "xor_prefix": 36
+        },
+        {
+          "bsr_result": 28,
+          "old_prefix": 35,
+          "xor_prefix": 35
+        },
+        {
+          "bsr_result": 29,
+          "old_prefix": 34,
+          "xor_prefix": 34
+        },
+        {
+          "bsr_result": 30,
+          "old_prefix": 33,
+          "xor_prefix": 33
+        },
+        {
+          "bsr_result": 31,
+          "old_prefix": 32,
+          "xor_prefix": 32
+        },
+        {
+          "bsr_result": 32,
+          "old_prefix": 31,
+          "xor_prefix": 31
+        },
+        {
+          "bsr_result": 33,
+          "old_prefix": 30,
+          "xor_prefix": 30
+        },
+        {
+          "bsr_result": 34,
+          "old_prefix": 29,
+          "xor_prefix": 29
+        },
+        {
+          "bsr_result": 35,
+          "old_prefix": 28,
+          "xor_prefix": 28
+        },
+        {
+          "bsr_result": 36,
+          "old_prefix": 27,
+          "xor_prefix": 27
+        },
+        {
+          "bsr_result": 37,
+          "old_prefix": 26,
+          "xor_prefix": 26
+        },
+        {
+          "bsr_result": 38,
+          "old_prefix": 25,
+          "xor_prefix": 25
+        },
+        {
+          "bsr_result": 39,
+          "old_prefix": 24,
+          "xor_prefix": 24
+        },
+        {
+          "bsr_result": 40,
+          "old_prefix": 23,
+          "xor_prefix": 23
+        },
+        {
+          "bsr_result": 41,
+          "old_prefix": 22,
+          "xor_prefix": 22
+        },
+        {
+          "bsr_result": 42,
+          "old_prefix": 21,
+          "xor_prefix": 21
+        },
+        {
+          "bsr_result": 43,
+          "old_prefix": 20,
+          "xor_prefix": 20
+        },
+        {
+          "bsr_result": 44,
+          "old_prefix": 19,
+          "xor_prefix": 19
+        },
+        {
+          "bsr_result": 45,
+          "old_prefix": 18,
+          "xor_prefix": 18
+        },
+        {
+          "bsr_result": 46,
+          "old_prefix": 17,
+          "xor_prefix": 17
+        },
+        {
+          "bsr_result": 47,
+          "old_prefix": 16,
+          "xor_prefix": 16
+        },
+        {
+          "bsr_result": 48,
+          "old_prefix": 15,
+          "xor_prefix": 15
+        },
+        {
+          "bsr_result": 49,
+          "old_prefix": 14,
+          "xor_prefix": 14
+        },
+        {
+          "bsr_result": 50,
+          "old_prefix": 13,
+          "xor_prefix": 13
+        },
+        {
+          "bsr_result": 51,
+          "old_prefix": 12,
+          "xor_prefix": 12
+        },
+        {
+          "bsr_result": 52,
+          "old_prefix": 11,
+          "xor_prefix": 11
+        },
+        {
+          "bsr_result": 53,
+          "old_prefix": 10,
+          "xor_prefix": 10
+        },
+        {
+          "bsr_result": 54,
+          "old_prefix": 9,
+          "xor_prefix": 9
+        },
+        {
+          "bsr_result": 55,
+          "old_prefix": 8,
+          "xor_prefix": 8
+        },
+        {
+          "bsr_result": 56,
+          "old_prefix": 7,
+          "xor_prefix": 7
+        },
+        {
+          "bsr_result": 57,
+          "old_prefix": 6,
+          "xor_prefix": 6
+        },
+        {
+          "bsr_result": 58,
+          "old_prefix": 5,
+          "xor_prefix": 5
+        },
+        {
+          "bsr_result": 59,
+          "old_prefix": 4,
+          "xor_prefix": 4
+        },
+        {
+          "bsr_result": 60,
+          "old_prefix": 3,
+          "xor_prefix": 3
+        },
+        {
+          "bsr_result": 61,
+          "old_prefix": 2,
+          "xor_prefix": 2
+        },
+        {
+          "bsr_result": 62,
+          "old_prefix": 1,
+          "xor_prefix": 1
+        },
+        {
+          "bsr_result": 63,
+          "old_prefix": 0,
+          "xor_prefix": 0
+        }
+      ],
+      "agreeing_results": 64
+    },
+    {
+      "input_width": 32,
+      "nonzero_bsr_results": 32,
+      "constant": 95,
+      "values": [
+        {
+          "bsr_result": 0,
+          "old_prefix": 95,
+          "xor_prefix": 95
+        },
+        {
+          "bsr_result": 1,
+          "old_prefix": 94,
+          "xor_prefix": 94
+        },
+        {
+          "bsr_result": 2,
+          "old_prefix": 93,
+          "xor_prefix": 93
+        },
+        {
+          "bsr_result": 3,
+          "old_prefix": 92,
+          "xor_prefix": 92
+        },
+        {
+          "bsr_result": 4,
+          "old_prefix": 91,
+          "xor_prefix": 91
+        },
+        {
+          "bsr_result": 5,
+          "old_prefix": 90,
+          "xor_prefix": 90
+        },
+        {
+          "bsr_result": 6,
+          "old_prefix": 89,
+          "xor_prefix": 89
+        },
+        {
+          "bsr_result": 7,
+          "old_prefix": 88,
+          "xor_prefix": 88
+        },
+        {
+          "bsr_result": 8,
+          "old_prefix": 87,
+          "xor_prefix": 87
+        },
+        {
+          "bsr_result": 9,
+          "old_prefix": 86,
+          "xor_prefix": 86
+        },
+        {
+          "bsr_result": 10,
+          "old_prefix": 85,
+          "xor_prefix": 85
+        },
+        {
+          "bsr_result": 11,
+          "old_prefix": 84,
+          "xor_prefix": 84
+        },
+        {
+          "bsr_result": 12,
+          "old_prefix": 83,
+          "xor_prefix": 83
+        },
+        {
+          "bsr_result": 13,
+          "old_prefix": 82,
+          "xor_prefix": 82
+        },
+        {
+          "bsr_result": 14,
+          "old_prefix": 81,
+          "xor_prefix": 81
+        },
+        {
+          "bsr_result": 15,
+          "old_prefix": 80,
+          "xor_prefix": 80
+        },
+        {
+          "bsr_result": 16,
+          "old_prefix": 79,
+          "xor_prefix": 79
+        },
+        {
+          "bsr_result": 17,
+          "old_prefix": 78,
+          "xor_prefix": 78
+        },
+        {
+          "bsr_result": 18,
+          "old_prefix": 77,
+          "xor_prefix": 77
+        },
+        {
+          "bsr_result": 19,
+          "old_prefix": 76,
+          "xor_prefix": 76
+        },
+        {
+          "bsr_result": 20,
+          "old_prefix": 75,
+          "xor_prefix": 75
+        },
+        {
+          "bsr_result": 21,
+          "old_prefix": 74,
+          "xor_prefix": 74
+        },
+        {
+          "bsr_result": 22,
+          "old_prefix": 73,
+          "xor_prefix": 73
+        },
+        {
+          "bsr_result": 23,
+          "old_prefix": 72,
+          "xor_prefix": 72
+        },
+        {
+          "bsr_result": 24,
+          "old_prefix": 71,
+          "xor_prefix": 71
+        },
+        {
+          "bsr_result": 25,
+          "old_prefix": 70,
+          "xor_prefix": 70
+        },
+        {
+          "bsr_result": 26,
+          "old_prefix": 69,
+          "xor_prefix": 69
+        },
+        {
+          "bsr_result": 27,
+          "old_prefix": 68,
+          "xor_prefix": 68
+        },
+        {
+          "bsr_result": 28,
+          "old_prefix": 67,
+          "xor_prefix": 67
+        },
+        {
+          "bsr_result": 29,
+          "old_prefix": 66,
+          "xor_prefix": 66
+        },
+        {
+          "bsr_result": 30,
+          "old_prefix": 65,
+          "xor_prefix": 65
+        },
+        {
+          "bsr_result": 31,
+          "old_prefix": 64,
+          "xor_prefix": 64
+        }
+      ],
+      "agreeing_results": 32
+    }
+  ],
+  "changes": {
+    "first": [
+      "BSR RCX,RAX; NEG ECX; ADD ECX,63",
+      "BSR RCX,RAX; XOR ECX,63"
+    ],
+    "second": [
+      "BSR ECX,EAX; NEG ECX; ADD ECX,95",
+      "BSR ECX,EAX; XOR ECX,95"
+    ],
+    "instructions_removed_per_taken_bsr_case": 1,
+    "local_bytes_removed_per_case": 2,
+    "total_local_routine_bytes_removed": 4
+  },
+  "flags": "Both result paths jump to CMP ECX,R9D before any flag-dependent consumer. Preserve zero handling, limit clamp and branch targets."
+}
