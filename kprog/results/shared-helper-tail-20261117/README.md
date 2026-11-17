@@ -18,16 +18,26 @@ existing refusal even though the earlier x86 emission explicitly supports
 that transfer. Current six-app functional checks pass; those checks do not
 demonstrate this source shape is absent from other native programs.
 
+The same predicate appears in generic ARRAY sharing
+(`x86_runtime_array.rs:53-60`) and LPM sharing (`x86_lpm_lookup.rs:82-85`).
+The prepared class fix routes both through the existing common redirect
+too. Their nested external kernel-helper slots remain E8: the direct
+loader requires those external call slots, whereas these retargeted local
+branches no longer have an external helper relocation. Do not widen the
+frozen loader or change the nested fallback to a tail JMP.
+
 The prepared edit widens that one existing slot predicate to accept E8 or
 E9 with zero displacement, patches only disp32, and makes clock sharing use
-the same redirect function. It removes the duplicated clock predicate and
+the same redirect function. It removes duplicated clock/map predicates and
 adds no new check, refusal, kernel or metadata format. A helper tail jump
 must remain E9: changing it to E8 would add a return frame. A leaf's RET then
 uses the original caller's return address, just as the external helper does.
 The x86 tail cleanup and nested leaf/kernel relocations remain unchanged.
 
 The edit adds a direct relocation regression case and makes the existing
-clock/credential sharing fixtures contain both opcodes. Required validation
+clock/credential/ARRAY sharing fixtures contain both opcodes; the LPM
+execution fixture also checks mixed sharing and its retained E8 external
+kernel call. Required validation
 after applying: observe failure with only those test changes on the old
 implementation, then run the complete existing linker suite with the fix,
 including native execution/fault and recovered-site metadata. Test both
