@@ -46,3 +46,33 @@ Full commands, before/after logs, source patch, emitted images/relocations
 and per-request replay metadata remain at `host-location.txt`'s raw path.
 The affected application branch sites are classified separately from mere
 byte-layout differences; no branch execution frequency is inferred here.
+
+Paired comparison (`bb86bb333`) identifies **seven changed payloads** and
+**eight actual incoming source branches** to the affected helper calls:
+
+| App / entry | Helper | Neutral payload bytes before → after | Static incoming branches |
+| --- | --- | ---: | ---: |
+| OTel `perf_unwind_ruby` | tail call | 19,238 → 19,064 | 1 |
+| OTel `perf_unwind_stop` | tail call | 2,977 → 2,876 | 1 |
+| OTel `perf_unwind_python` | tail call | 9,812 → 9,408 | 1 |
+| OTel `custom__generic` | tail call | 3,039 → 2,957 | 1 |
+| Cilium `tail_handle_ipv4_from_netdev` | tail call | 6,622 → 6,405 | 1 |
+| Tracee `uprobe_lkm_seeker` | tail call | 5,094 → 5,015 | 1 |
+| Tracee `syscall_checker` | current task | 11,926 → 11,409 | 2 |
+
+The exact branch addresses, helper source offsets, before/after outputs and
+proof-disassembly paths are in `comparison.json`. These witnesses establish
+that real retained application code contains this edge shape; they do not
+measure branch frequency or prove that each branch ran in a workload window.
+For the remaining **288 requests**, payload, helper relocations, map patches
+and ABI files are all byte-identical. BCC, Katran and Tetragon totals stay
+unchanged. The OTel/Cilium/Tracee neutral sums shrink by 761/217/596 bytes,
+respectively, as branch layout now uses the retained labels. Those totals
+are per captured request set, not installed per-app bytes. No result is
+discarded or relabeled and no per-call improvement is inferred.
+
+The normal template cache already keys the linker file identity
+(`native_loader.cpp:3129`), so this source change requires no new cache
+version field, runtime check or cache framework. The owner can publish the
+fixed linker with the already host-validated all-LTO cohort through the
+frozen image recipe, then check all apps and time the affected app subset.
