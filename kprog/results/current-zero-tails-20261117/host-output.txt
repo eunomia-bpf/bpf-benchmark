@@ -1,0 +1,6 @@
+bcc/set: 25/25 emit, 9 probe regions, 9 zero tails, 0 duplicate copies, 0 B local bound, protected/relocated suffixes 0/0, RET recovery sites 9
+cilium/agent: 47/47 emit, 0 probe regions, 0 zero tails, 0 duplicate copies, 0 B local bound, protected/relocated suffixes 0/0, RET recovery sites 0
+katran: 1/1 emit, 0 probe regions, 0 zero tails, 0 duplicate copies, 0 B local bound, protected/relocated suffixes 0/0, RET recovery sites 0
+otelcol-ebpf-profiler/profiling: 14/14 emit, 17 probe regions, 17 zero tails, 0 duplicate copies, 0 B local bound, protected/relocated suffixes 0/0, RET recovery sites 17
+tetragon/observer: 39/39 emit, 119 probe regions, 80 zero tails, 45 duplicate copies, 1552 B local bound, protected/relocated suffixes 0/0, RET recovery sites 80
+tracee/monitor: 169/169 emit, 683 probe regions, 485 zero tails, 313 duplicate copies, 11268 B local bound, protected/relocated suffixes 0/0, RET recovery sites 485
