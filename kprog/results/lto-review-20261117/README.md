@@ -3338,3 +3338,50 @@ or emitted-layout result. Scope the merge to the pure cold zero tail;
 keep the scheduled constant-size/global-address work and its per-call
 measurements first. PERF introduced no production change, runtime check,
 pool, build, guest or confirmation gate.
+
+
+Compat functional batch completion: the coordinator's Katran check
+`084633_961827` returned rc=0 at **08:47:38 UTC**, completing all six
+entry checks. The existing installed reader reports one cumulative native
+replacement, **9,442 native B / 13,641 companion JIT B**, unchanged from
+kernel-leaf check `072936_929753`. This completes the functional footprint
+comparison above, with no new per-call observation or all-native coverage
+claim. Tetragon/Tracee compat timing remains pending in the coordinator's
+existing batch; PERF starts no confirmation job.
+
+
+### First compat timing row: Tetragon, with installed growth retained
+
+Coordinator receipt `dd36e684e`, run `084929_629134`, reports
+**1.113x per call** and **1.035x throughput**. Raw-derived eBPF/native
+BPF time is **735.425 / 660.928 ns/call**. Against the immediately
+preceding kernel-leaf timing `074317_231933` (746.970 / 704.100 ns),
+baseline time falls **1.55%** and native time **6.13%**. This is a
+more specific reference than the earlier pre-zero-remainder run2
+comparison. The batch includes compat dispatch and width-zero branch
+removal; these cross-run numbers do not independently attribute a gain
+to either transformation or remove environment differences.
+
+Throughput samples are eBPF 319,951 / 322,372 / 319,543 and native
+331,025 / 333,110 / 325,220, ratios 1.035 / 1.033 / 1.018, with zero
+reported errors. The preceding kernel-leaf throughput ratio was 1.011x.
+Both arms select 21 of 287 measurement records. The coordinator reports
+three active roots whose counts track a median native/eBPF ratio of
+1.069; these counts remain part of the evidence rather than becoming a
+new admission rule or a full equal-work assertion.
+
+Cumulative installed totals are **288 native replacements, 2,078,688 B**,
+against unchanged companion JIT **2,472,912 B**. The native increase
+**154,556 B (+8.03%)** accompanies the observed lower native per-call
+time, with installed native/JIT about **0.841x**. Per-call 1.20x,
+throughput 1.30x, native 1.50x and half-size goals remain unmet for this
+row. This is a stats-on 3x60s diagnostic, distinct from later frozen-default
+confirmation. Tracee compat timing remains pending.
+
+The existing [reader](leaf_read_effect_inventory.py) and
+[leaf-read-effects.json](leaf-read-effects.json) retain this subsequent
+compat row and its exact reference/counters under the Tetragon entry in
+`additional_kernel_leaf_comparisons`; all earlier rows are preserved.
+PERF ran the host reader only. A concurrent coordinator commit completed
+while this documentation was being staged; the original local edit was
+kept and committed forward without changing either lane's history.

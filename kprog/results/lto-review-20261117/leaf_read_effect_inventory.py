@@ -63,7 +63,7 @@ for app, before_stage, before, after in [
     print('after/before ns ratios:', ratios)
 
 result = dict(recorded_utc=subprocess.check_output(['date', '-u', '+%FT%TZ'], text=True).strip(),
-              scope='Completed OTel/BCC/Tracee user-leaf coordinator stats-on 3x60s run pairs and subsequent kernel-leaf BCC/Tracee runs; Tracee user-leaf reference is the coordinator same-image repeat, and its first post-change attempt remains in zero-remainder-effects.json. Existing >=100-call reporting convention. IDs identify records within their own boot only. Installed receipts count cumulative replacements, not measurement snapshots. No causal gain, PMU split, equal-work proof or new admission check is inferred.',
+              scope='Completed OTel/BCC/Tracee user-leaf coordinator stats-on 3x60s run pairs and subsequent kernel-leaf BCC/Tracee runs and compat Tetragon; Tracee user-leaf reference is the coordinator same-image repeat, and its first post-change attempt remains in zero-remainder-effects.json. Existing >=100-call reporting convention. IDs identify records within their own boot only. Installed receipts count cumulative replacements, not measurement snapshots. No causal gain, PMU split, equal-work proof or new admission check is inferred.',
               apps=apps)
 tetra_before = read_run('tetragon__observer', 'probe_tails_4_2_1', '043157_792401')
 tetra_after = read_run('tetragon__observer', 'kernel_leaf', '074317_231933')
@@ -74,6 +74,15 @@ result['additional_kernel_leaf_comparisons'] = [dict(
     app='tetragon__observer', before=tetra_before, after=tetra_after,
     after_before_ns_ratios=tetra_ratios,
     qualification='The prior timed Tetragon run precedes zero-remainder and both leaf steps. This is the last timed reference, not an isolated immediately-before kernel-leaf comparison.')]
+tetra_compat = read_run('tetragon__observer', 'compat_dispatch', '084929_629134')
+tetra_compat_ratios = {
+    phase: tetra_compat['phases'][phase]['ns_per_call'] / tetra_after['phases'][phase]['ns_per_call']
+    for phase in ('baseline', 'post_rejit')}
+result['additional_kernel_leaf_comparisons'][0]['subsequent_compat'] = tetra_compat
+result['additional_kernel_leaf_comparisons'][0]['compat_vs_kernel_leaf_ns_ratios'] = tetra_compat_ratios
+print('Tetragon compat ns/call:', {phase: round(data['ns_per_call'], 4)
+                                 for phase, data in tetra_compat['phases'].items()})
+print('Tetragon compat/kernel ns ratios:', tetra_compat_ratios)
 print('Tetragon ns/call:', {phase: round(data['ns_per_call'], 4)
                           for phase, data in tetra_after['phases'].items()})
 print('Tetragon after/before ns ratios:', tetra_ratios)
