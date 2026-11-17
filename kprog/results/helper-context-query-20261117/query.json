@@ -1,0 +1,1620 @@
+{
+  "app": "bcc/set",
+  "guest_returncode": 0,
+  "captures": [
+    {
+      "app": "bcc/set",
+      "symbol": "sys_enter",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-12qnqnc5/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-12qnqnc5/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-12qnqnc5",
+      "proof_bytes": 3032,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tracepoint__syscalls__sys_exit_openat",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2bkowezd/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2bkowezd/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2bkowezd",
+      "proof_bytes": 16096,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_create",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2p3fb4dz/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2p3fb4dz/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2p3fb4dz",
+      "proof_bytes": 1432,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_fsync",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4ywbpbv9/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4ywbpbv9/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4ywbpbv9",
+      "proof_bytes": 1424,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tracepoint__syscalls__sys_enter_open",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6a9_quia/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6a9_quia/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6a9_quia",
+      "proof_bytes": 3600,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "block_rq_issue",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6ap_dl0r/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6ap_dl0r/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6ap_dl0r",
+      "proof_bytes": 11752,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "sched_wakeup_new",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6ql4ppcv/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6ql4ppcv/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6ql4ppcv",
+      "proof_bytes": 3328,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_write",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-77brlu4i/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-77brlu4i/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-77brlu4i",
+      "proof_bytes": 1424,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tcp_v6_connect_ret",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9998lcxf/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9998lcxf/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9998lcxf",
+      "proof_bytes": 12584,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "sched_switch",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-999h2fur/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-999h2fur/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-999h2fur",
+      "proof_bytes": 24312,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tcp_v4_connect",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9bmyadtf/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9bmyadtf/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9bmyadtf",
+      "proof_bytes": 3208,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_read",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-awtkn9vs/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-awtkn9vs/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-awtkn9vs",
+      "proof_bytes": 1424,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tracepoint__syscalls__sys_exit_open",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-coesqoya/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-coesqoya/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-coesqoya",
+      "proof_bytes": 16088,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_open",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-cqj8ef6_/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-cqj8ef6_/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-cqj8ef6_",
+      "proof_bytes": 1424,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "kprobe__cap_capable_exit",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-eu_9q3i1/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-eu_9q3i1/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-eu_9q3i1",
+      "proof_bytes": 9224,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "sys_exit",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-h3aeczbh/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-h3aeczbh/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-h3aeczbh",
+      "proof_bytes": 7200,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "inet_sock_set_state",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lkbru945/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lkbru945/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lkbru945",
+      "proof_bytes": 33104,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "block_rq_complete",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nk88utas/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nk88utas/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nk88utas",
+      "proof_bytes": 10640,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "sched_wakeup",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o5qpw2s1/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o5qpw2s1/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o5qpw2s1",
+      "proof_bytes": 3328,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tcp_v4_connect_ret",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pon9gyc3/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pon9gyc3/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pon9gyc3",
+      "proof_bytes": 12424,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "blk_account_io_merge_bio",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r5pyvomc/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r5pyvomc/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r5pyvomc",
+      "proof_bytes": 4080,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "block_rq_insert",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rqxnfucw/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rqxnfucw/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rqxnfucw",
+      "proof_bytes": 9600,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tcp_v6_connect",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-w1mk_e6j/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-w1mk_e6j/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-w1mk_e6j",
+      "proof_bytes": 3208,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tracepoint__syscalls__sys_enter_openat",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-x6vhhqc6/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-x6vhhqc6/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-x6vhhqc6",
+      "proof_bytes": 3600,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "kprobe__cap_capable_entry",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xwzkpq6s/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xwzkpq6s/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xwzkpq6s",
+      "proof_bytes": 3664,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    }
+  ],
+  "capture_errors": [],
+  "other_invocations": [
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0lwc34q7",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/biosnoop.native.o",
+        "--symbol",
+        "blk_account_io_merge_bio",
+        "--output",
+        "/tmp/native_kernel_link_cache/9a2a866a03da3df6.entry.proof.o.tmp.1970",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0mwrkzud",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/6039c30c9b74179f.perf.native.o",
+        "--symbol",
+        "blk_account_io_merge_bio",
+        "--output",
+        "/tmp/native_kernel_link_cache/76ace562fa42da7b.entry.proof.o.tmp.1970",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2qqxrfvd",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/biosnoop.native.o",
+        "--symbol",
+        "block_rq_issue",
+        "--output",
+        "/tmp/native_kernel_link_cache/0298c7b05657511d.entry.proof.o.tmp.1970",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-32nuj4l3",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/3556804684dd5ca0.perf.native.o",
+        "--symbol",
+        "sys_exit",
+        "--output",
+        "/tmp/native_kernel_link_cache/baa4b01cf3e3dd41.entry.proof.o.tmp.1983",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-38g3fpnc",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/syscount.native.o",
+        "--symbol",
+        "sys_enter",
+        "--output",
+        "/tmp/native_kernel_link_cache/a03eb3b2f9e4cd71.entry.proof.o.tmp.1983",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-3haxb513",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/18615e0245babe07.perf.native.o",
+        "--symbol",
+        "block_rq_insert",
+        "--output",
+        "/tmp/native_kernel_link_cache/918b08a060f64965.entry.proof.o.tmp.1970",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-45pd6uxx",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/a8d48d450cda52e6.perf.native.o",
+        "--symbol",
+        "sched_switch",
+        "--output",
+        "/tmp/native_kernel_link_cache/c2e4913dd988b437.entry.proof.o.tmp.1997",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-47j6f_5h",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/vfsstat.native.o",
+        "--symbol",
+        "fentry_vfs_create",
+        "--output",
+        "/tmp/native_kernel_link_cache/82d9633fe62294c5.entry.proof.o.tmp.1974",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6ov2_gl5",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/opensnoop.native.o",
+        "--symbol",
+        "tracepoint__syscalls__sys_enter_open",
+        "--output",
+        "/tmp/native_kernel_link_cache/d0f7084bf0e79617.entry.proof.o.tmp.1979",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7cwa9hyl",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/512687063206cde1.perf.native.o",
+        "--symbol",
+        "tcp_v6_connect",
+        "--output",
+        "/tmp/native_kernel_link_cache/b6865f71dc8e5de7.entry.proof.o.tmp.1988",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7t2qotxw",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/capable.native.o",
+        "--symbol",
+        "kprobe__cap_capable_entry",
+        "--output",
+        "/tmp/native_kernel_link_cache/3e101b93ef6bd0f8.entry.proof.o.tmp.1967",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8224u577",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/tcpconnect.native.o",
+        "--symbol",
+        "tcp_v6_connect_ret",
+        "--output",
+        "/tmp/native_kernel_link_cache/63c933ff027ec2d5.entry.proof.o.tmp.1988",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8hs6jcct",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/capable.native.o",
+        "--symbol",
+        "kprobe__cap_capable_exit",
+        "--output",
+        "/tmp/native_kernel_link_cache/fdbb1177f0ac8ffd.entry.proof.o.tmp.1967",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8qjps_xn",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/6f6c2b12a2cde559.perf.native.o",
+        "--symbol",
+        "kprobe__cap_capable_exit",
+        "--output",
+        "/tmp/native_kernel_link_cache/fa8671c880a2616f.entry.proof.o.tmp.1967",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9smkoi8y",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/356c04c60ae2ae9e.perf.native.o",
+        "--symbol",
+        "tcp_v4_connect_ret",
+        "--output",
+        "/tmp/native_kernel_link_cache/d461890d1756f268.entry.proof.o.tmp.1988",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-afefokr4",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/tcpconnect.native.o",
+        "--symbol",
+        "tcp_v4_connect_ret",
+        "--output",
+        "/tmp/native_kernel_link_cache/1602a84aae9fd693.entry.proof.o.tmp.1988",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-b0tyy1ia",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/syscount.native.o",
+        "--symbol",
+        "sys_exit",
+        "--output",
+        "/tmp/native_kernel_link_cache/6f52d5bfc6029714.entry.proof.o.tmp.1983",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-cnhlbqy2",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/opensnoop.native.o",
+        "--symbol",
+        "tracepoint__syscalls__sys_exit_open",
+        "--output",
+        "/tmp/native_kernel_link_cache/ee96e735fd879acc.entry.proof.o.tmp.1979",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-egrve42g",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/tcpconnect.native.o",
+        "--symbol",
+        "tcp_v6_connect",
+        "--output",
+        "/tmp/native_kernel_link_cache/e0d85aa05b163221.entry.proof.o.tmp.1988",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-eu8wjlj7",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/vfsstat.native.o",
+        "--symbol",
+        "fentry_vfs_write",
+        "--output",
+        "/tmp/native_kernel_link_cache/057b0e7282b59141.entry.proof.o.tmp.1974",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-exrd_70y",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/runqlat.native.o",
+        "--symbol",
+        "sched_wakeup_new",
+        "--output",
+        "/tmp/native_kernel_link_cache/1757e1c66c12c19a.entry.proof.o.tmp.1997",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-firsk9bo",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/biosnoop.native.o",
+        "--symbol",
+        "block_rq_insert",
+        "--output",
+        "/tmp/native_kernel_link_cache/4be2ccb36fb120c0.entry.proof.o.tmp.1970",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fset05sj",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/d207a6fe123fd0de.perf.native.o",
+        "--symbol",
+        "block_rq_issue",
+        "--output",
+        "/tmp/native_kernel_link_cache/7ffd9be11dfff35c.entry.proof.o.tmp.1970",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-htz8o8h9",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/dc2f6da4a87410f1.perf.native.o",
+        "--symbol",
+        "inet_sock_set_state",
+        "--output",
+        "/tmp/native_kernel_link_cache/609c70b3a3ea4b29.entry.proof.o.tmp.1993",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ii_0ux64",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/biosnoop.native.o",
+        "--symbol",
+        "block_rq_complete",
+        "--output",
+        "/tmp/native_kernel_link_cache/a7aee886da58e344.entry.proof.o.tmp.1970",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-j2tdm9gy",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/5a92a3d7dba97872.perf.native.o",
+        "--symbol",
+        "block_rq_complete",
+        "--output",
+        "/tmp/native_kernel_link_cache/7a685e2287e22db2.entry.proof.o.tmp.1970",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-j32_9no0",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/runqlat.native.o",
+        "--symbol",
+        "sched_switch",
+        "--output",
+        "/tmp/native_kernel_link_cache/497efd7102bc302a.entry.proof.o.tmp.1997",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jvn6wfsu",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/tcplife.native.o",
+        "--symbol",
+        "inet_sock_set_state",
+        "--output",
+        "/tmp/native_kernel_link_cache/d5d320985738923e.entry.proof.o.tmp.1993",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lyyjmihl",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/c6d2953761ec6bcf.perf.native.o",
+        "--symbol",
+        "tracepoint__syscalls__sys_exit_open",
+        "--output",
+        "/tmp/native_kernel_link_cache/34972e64b0fd28aa.entry.proof.o.tmp.1979",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-m2_6dqmc",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/3dc920ad14547ebb.perf.native.o",
+        "--symbol",
+        "tcp_v4_connect",
+        "--output",
+        "/tmp/native_kernel_link_cache/6afe4ce8c42c1d28.entry.proof.o.tmp.1988",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mln0aj28",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/9f9b41a070da0ea6.perf.native.o",
+        "--symbol",
+        "tracepoint__syscalls__sys_enter_open",
+        "--output",
+        "/tmp/native_kernel_link_cache/164a0ac9a4797fe4.entry.proof.o.tmp.1979",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-neyvy5jz",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/6f7d8011c0a6e0d5.perf.native.o",
+        "--symbol",
+        "sched_wakeup_new",
+        "--output",
+        "/tmp/native_kernel_link_cache/bdf4341cd34c226f.entry.proof.o.tmp.1997",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qzqd8vrt",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/39d17fb8357d7ba9.perf.native.o",
+        "--symbol",
+        "kprobe__cap_capable_entry",
+        "--output",
+        "/tmp/native_kernel_link_cache/f5db99043d9331e5.entry.proof.o.tmp.1967",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r1sl5967",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/54ac6e89b4192308.perf.native.o",
+        "--symbol",
+        "tracepoint__syscalls__sys_exit_openat",
+        "--output",
+        "/tmp/native_kernel_link_cache/3045be7dcdc64616.entry.proof.o.tmp.1979",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r7v2wn0j",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/84296deee049f09a.perf.native.o",
+        "--symbol",
+        "sched_wakeup",
+        "--output",
+        "/tmp/native_kernel_link_cache/35350addf03176ae.entry.proof.o.tmp.1997",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-s851knv2",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/runqlat.native.o",
+        "--symbol",
+        "sched_wakeup",
+        "--output",
+        "/tmp/native_kernel_link_cache/c89172d9a2b8061f.entry.proof.o.tmp.1997",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-s_5cqchj",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/vfsstat.native.o",
+        "--symbol",
+        "fentry_vfs_read",
+        "--output",
+        "/tmp/native_kernel_link_cache/baa2a1dc3494e48b.entry.proof.o.tmp.1974",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-t4o5smti",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/vfsstat.native.o",
+        "--symbol",
+        "fentry_vfs_open",
+        "--output",
+        "/tmp/native_kernel_link_cache/660bba70d7ed34ab.entry.proof.o.tmp.1974",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-u209w5lw",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/98492632b45104c8.perf.native.o",
+        "--symbol",
+        "tcp_v6_connect_ret",
+        "--output",
+        "/tmp/native_kernel_link_cache/d9a5fa1032225224.entry.proof.o.tmp.1988",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-u6t6oh9c",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/opensnoop.native.o",
+        "--symbol",
+        "tracepoint__syscalls__sys_enter_openat",
+        "--output",
+        "/tmp/native_kernel_link_cache/6a16af4c9c921dd4.entry.proof.o.tmp.1979",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ui7ucy6i",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/a548beade703466d.perf.native.o",
+        "--symbol",
+        "tracepoint__syscalls__sys_enter_openat",
+        "--output",
+        "/tmp/native_kernel_link_cache/6ae046c98f6e4684.entry.proof.o.tmp.1979",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-wjt1iz01",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/vfsstat.native.o",
+        "--symbol",
+        "fentry_vfs_fsync",
+        "--output",
+        "/tmp/native_kernel_link_cache/513f60b453e1a81b.entry.proof.o.tmp.1974",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-wxa8d0x9",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/758e46c21b3bbf81.perf.native.o",
+        "--symbol",
+        "sys_enter",
+        "--output",
+        "/tmp/native_kernel_link_cache/e606927078e7e4f8.entry.proof.o.tmp.1983",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xh4mp4ja",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/tcpconnect.native.o",
+        "--symbol",
+        "tcp_v4_connect",
+        "--output",
+        "/tmp/native_kernel_link_cache/6c539ae0c1e5f1ef.entry.proof.o.tmp.1988",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-y7yuqe4e",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/bcc/opensnoop.native.o",
+        "--symbol",
+        "tracepoint__syscalls__sys_exit_openat",
+        "--output",
+        "/tmp/native_kernel_link_cache/86264ec81940b70f.entry.proof.o.tmp.1979",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    }
+  ],
+  "scope": "Actual new kernel-link requests, including linker failures, archived by the capture adapter. No helper/layout facts are added. Missing/failed loads remain in the guest and shim logs; an empty capture list does not imply no native work. Functional capture, not official timing."
+}

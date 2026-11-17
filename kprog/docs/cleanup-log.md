@@ -423,3 +423,5 @@ KEPT incremental kprog_stock.o and source; raw run archives and logs retained.
 2026-11-17T19:09:56Z — Current-link functional capture katran: the frozen successful-run cleanup removes only /var/tmp/kprog-tmp/one-image/var-tmp/bpf-benchmark-docker.img, the rebuildable guest container store. Raw result/capture/log directories remain under /workspaces.
 
 2026-11-17T20:11:46Z — BCC helper-context control functional diagnostic: frozen successful-run cleanup removes only the rebuildable /var/tmp/kprog-tmp/one-image/var-tmp/bpf-benchmark-docker.img. All raw captures, console and corpus results remain under /workspaces.
+
+2026-11-17T20:14:40Z — BCC helper-context query functional diagnostic: frozen successful-run cleanup removes only the rebuildable /var/tmp/kprog-tmp/one-image/var-tmp/bpf-benchmark-docker.img. All raw captures, console and corpus results remain under /workspaces.
