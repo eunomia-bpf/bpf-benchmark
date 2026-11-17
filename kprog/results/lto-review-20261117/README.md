@@ -2162,3 +2162,65 @@ sign-extension definition with the equivalent two-interval description;
 the negative-only restriction is deliberately recorded as a counterexample.
 This is source review only: no code emission, candidate execution, guest,
 build, per-call saving or installed-byte reduction is claimed.
+
+## Zero-remainder measurement receipt: baseline movement and installed cost
+
+Review of coordinator change `0dcf97880`, 2026-11-17. This is a result
+interpretation for an implemented item, not another source change. The
+`x86_probe_read.rs` diff adds `TEST ECX,ECX; JE success` ahead of the 4/2/1
+remainder path. Its current near-branch form is eight added bytes per
+scalar-read routine. An empty remainder formerly executes three tests and
+three conditional branches; it now executes one test and one conditional
+branch. Thus this region saves **four instructions and two conditional
+branches** when the remainder is zero, including a size-zero request after
+its policy work. Nonempty remainders execute the new test/branch as extra
+work. String routines do not use this scalar remainder path.
+
+The following compares completed O3 run2 and first zero-remainder runs.
+All times are the existing aggregate ns per BPF invocation, with its
+existing >=100-call reporting convention. These are **cross-run observed
+changes**, not isolated causal estimates or a body/helpers/maps split.
+
+| App | Before → after eBPF ns/call | Before → after native ns/call | Reported eBPF/native time ratio | Cumulative installed native bytes | Same-load companion JIT bytes |
+| --- | --- | --- | --- | --- | --- |
+| OTel | 3212.8 → 3375.0 | 2926.5 → 2873.8 | 1.098x → 1.174x | 135,468 → 135,604 (+136) | 167,706 both |
+| BCC | 104.1 → 107.7 | 102.8 → 106.0 | 1.013x → 1.016x | 8,286 → 8,334 (+48) | 7,965 both |
+| Tracee, first attempt | 365.9 → 367.7 | 319.6 → 376.4 | 1.145x → 0.977x | 1,699,564 → 1,700,836 (+1,272) | 2,068,918 both |
+
+OTel's native time falls **1.80%**, while its eBPF baseline rises **5.05%**.
+The larger increase in the eBPF/native ratio therefore cannot all be
+credited to the new branch. BCC's native time rises **3.09%**, alongside
+a **3.45%** eBPF increase; the small ratio change does not establish a
+native-time improvement. Its baseline aggregation also changes from 16
+to 15 selected records, while the native aggregation stays at 15. Keep
+the invocation mixture in view when using these aggregate figures.
+
+Tracee's first post-change native throughput series is
+366,127 / 204,491 / 319,601 against eBPF
+326,173 / 340,675 / 342,630. Native/eBPF per-sample ratios are
+1.122 / 0.600 / 0.933. The coordinator started a second run on the same
+image (`b4c325eba`, `zero-remainder-20261117/tracee2.sh`); its result was
+not complete at this receipt. The first result stays recorded beside
+that follow-up. Neither the spread nor the absence of fresh PMU attribution
+is a reason to discard it or manufacture a body/helper/map time split.
+
+[zero_remainder_effect_inventory.py](zero_remainder_effect_inventory.py)
+reads the six retained app JSON files and replacement logs, writing
+[zero-remainder-effects.json](zero-remainder-effects.json). Installed
+populations are cumulative unique successful native replacement IDs:
+14/25/169 for OTel/BCC/Tracee in both runs. Within each boot, original and
+native are paired by the replacement's process/thread and native ID.
+Across boots, `(original type, name, JIT size)` **multisets**, including
+duplicate counts, agree in these pairs; no kernel ID is joined across
+boots and a multiset is not proof of source identity. The additions are
+17/6/159 eight-byte units, consistent with the scalar-routine source
+change, not independently measured routine counts. They are installed
+code costs, separate from unchanged P executable totals. They are not
+measurement-window snapshot sizes.
+
+The source diff also fixes build prerequisites. That part has no intended
+per-call code effect, but these observations alone do not prove the build
+had no other effective-input differences. Current-stage code, fresh PMU
+ownership and the coordinator's next runs remain the evidence for more
+specific attribution. No benchmark, source or runtime check was changed
+by this review, and no extra measurement was started.

@@ -1,0 +1,3177 @@
+{
+  "recorded_utc": "2026-11-17T05:52:43Z",
+  "scope": "Completed coordinator run pairs, cumulative replacement populations. IDs are joined only within a boot; cross-run groups are type/name/original-size multisets, not proof of program identity. This inventory uses the existing >=100-call reporting convention, adds no admission check and discards no run. Tracee first post-change run retained; second run belongs to coordinator. No PMU/body/helper/map attribution or causal speedup inferred.",
+  "apps": [
+    {
+      "app": "otelcol-ebpf-profiler__profiling",
+      "before": {
+        "run": "corpus/results/x86_kvm_corpus_20261117_035907_339709",
+        "phases": {
+          "baseline": {
+            "records": 13,
+            "selected": 2,
+            "calls": 139647887,
+            "elapsed_ns": 448658504792,
+            "ns_per_call": 3212.7840558876483
+          },
+          "post_rejit": {
+            "records": 13,
+            "selected": 1,
+            "calls": 139111645,
+            "elapsed_ns": 407106917742,
+            "ns_per_call": 2926.476196453575
+          }
+        },
+        "cumulative_replacement_programs": 14,
+        "original_bytes": 167706,
+        "native_bytes": 135468
+      },
+      "after": {
+        "run": "corpus/results/x86_kvm_corpus_20261117_051422_856006",
+        "phases": {
+          "baseline": {
+            "records": 13,
+            "selected": 2,
+            "calls": 132344242,
+            "elapsed_ns": 446660019937,
+            "ns_per_call": 3374.9864231871907
+          },
+          "post_rejit": {
+            "records": 13,
+            "selected": 1,
+            "calls": 137164477,
+            "elapsed_ns": 394189547967,
+            "ns_per_call": 2873.84574044634
+          }
+        },
+        "cumulative_replacement_programs": 14,
+        "original_bytes": 167706,
+        "native_bytes": 135604
+      },
+      "groups": [
+        {
+          "type": 2,
+          "name": "custom__generic",
+          "original_program_bytes": 3679,
+          "before": {
+            "count": 1,
+            "original_bytes": 3679,
+            "native_bytes": 2917
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 3679,
+            "native_bytes": 2925
+          }
+        },
+        {
+          "type": 5,
+          "name": "tracepoint__sch",
+          "original_program_bytes": 792,
+          "before": {
+            "count": 1,
+            "original_bytes": 792,
+            "native_bytes": 595
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 792,
+            "native_bytes": 595
+          }
+        },
+        {
+          "type": 7,
+          "name": "native_tracer_e",
+          "original_program_bytes": 3815,
+          "before": {
+            "count": 1,
+            "original_bytes": 3815,
+            "native_bytes": 3534
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 3815,
+            "native_bytes": 3542
+          }
+        },
+        {
+          "type": 7,
+          "name": "perf_go_labels",
+          "original_program_bytes": 1572,
+          "before": {
+            "count": 1,
+            "original_bytes": 1572,
+            "native_bytes": 1644
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 1572,
+            "native_bytes": 1652
+          }
+        },
+        {
+          "type": 7,
+          "name": "perf_unwind_dot",
+          "original_program_bytes": 22797,
+          "before": {
+            "count": 1,
+            "original_bytes": 22797,
+            "native_bytes": 19559
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 22797,
+            "native_bytes": 19567
+          }
+        },
+        {
+          "type": 7,
+          "name": "perf_unwind_hot",
+          "original_program_bytes": 18424,
+          "before": {
+            "count": 1,
+            "original_bytes": 18424,
+            "native_bytes": 14965
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 18424,
+            "native_bytes": 14973
+          }
+        },
+        {
+          "type": 7,
+          "name": "perf_unwind_nat",
+          "original_program_bytes": 21868,
+          "before": {
+            "count": 1,
+            "original_bytes": 21868,
+            "native_bytes": 15260
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 21868,
+            "native_bytes": 15268
+          }
+        },
+        {
+          "type": 7,
+          "name": "perf_unwind_per",
+          "original_program_bytes": 18264,
+          "before": {
+            "count": 1,
+            "original_bytes": 18264,
+            "native_bytes": 15034
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 18264,
+            "native_bytes": 15050
+          }
+        },
+        {
+          "type": 7,
+          "name": "perf_unwind_php",
+          "original_program_bytes": 14983,
+          "before": {
+            "count": 1,
+            "original_bytes": 14983,
+            "native_bytes": 14084
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 14983,
+            "native_bytes": 14092
+          }
+        },
+        {
+          "type": 7,
+          "name": "perf_unwind_pyt",
+          "original_program_bytes": 19605,
+          "before": {
+            "count": 1,
+            "original_bytes": 19605,
+            "native_bytes": 10122
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 19605,
+            "native_bytes": 10138
+          }
+        },
+        {
+          "type": 7,
+          "name": "perf_unwind_rub",
+          "original_program_bytes": 17840,
+          "before": {
+            "count": 1,
+            "original_bytes": 17840,
+            "native_bytes": 19548
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 17840,
+            "native_bytes": 19564
+          }
+        },
+        {
+          "type": 7,
+          "name": "perf_unwind_sto",
+          "original_program_bytes": 3650,
+          "before": {
+            "count": 1,
+            "original_bytes": 3650,
+            "native_bytes": 3046
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 3650,
+            "native_bytes": 3062
+          }
+        },
+        {
+          "type": 7,
+          "name": "perf_unwind_v8",
+          "original_program_bytes": 20215,
+          "before": {
+            "count": 1,
+            "original_bytes": 20215,
+            "native_bytes": 14641
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 20215,
+            "native_bytes": 14649
+          }
+        },
+        {
+          "type": 17,
+          "name": "read_task_struc",
+          "original_program_bytes": 202,
+          "before": {
+            "count": 1,
+            "original_bytes": 202,
+            "native_bytes": 519
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 202,
+            "native_bytes": 527
+          }
+        }
+      ],
+      "native_byte_delta": 136,
+      "baseline_ns_ratio": 1.0504865451514849,
+      "native_ns_ratio": 0.9820157580399886
+    },
+    {
+      "app": "bcc__set",
+      "before": {
+        "run": "corpus/results/x86_kvm_corpus_20261117_041017_749964",
+        "phases": {
+          "baseline": {
+            "records": 25,
+            "selected": 16,
+            "calls": 2529324237,
+            "elapsed_ns": 263362862179,
+            "ns_per_call": 104.12380442428821
+          },
+          "post_rejit": {
+            "records": 25,
+            "selected": 15,
+            "calls": 2532332729,
+            "elapsed_ns": 260334860003,
+            "ns_per_call": 102.80436572243188
+          }
+        },
+        "cumulative_replacement_programs": 25,
+        "original_bytes": 7965,
+        "native_bytes": 8286
+      },
+      "after": {
+        "run": "corpus/results/x86_kvm_corpus_20261117_052524_924865",
+        "phases": {
+          "baseline": {
+            "records": 25,
+            "selected": 15,
+            "calls": 2434570983,
+            "elapsed_ns": 262242412207,
+            "ns_per_call": 107.71606744604004
+          },
+          "post_rejit": {
+            "records": 25,
+            "selected": 15,
+            "calls": 2493161215,
+            "elapsed_ns": 264236307824,
+            "ns_per_call": 105.98444506285166
+          }
+        },
+        "cumulative_replacement_programs": 25,
+        "original_bytes": 7965,
+        "native_bytes": 8334
+      },
+      "groups": [
+        {
+          "type": 2,
+          "name": "blk_account_io_",
+          "original_program_bytes": 121,
+          "before": {
+            "count": 1,
+            "original_bytes": 121,
+            "native_bytes": 110
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 121,
+            "native_bytes": 110
+          }
+        },
+        {
+          "type": 2,
+          "name": "kprobe__cap_cap",
+          "original_program_bytes": 143,
+          "before": {
+            "count": 1,
+            "original_bytes": 143,
+            "native_bytes": 99
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 143,
+            "native_bytes": 99
+          }
+        },
+        {
+          "type": 2,
+          "name": "kprobe__cap_cap",
+          "original_program_bytes": 383,
+          "before": {
+            "count": 1,
+            "original_bytes": 383,
+            "native_bytes": 281
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 383,
+            "native_bytes": 281
+          }
+        },
+        {
+          "type": 2,
+          "name": "tcp_v4_connect",
+          "original_program_bytes": 110,
+          "before": {
+            "count": 1,
+            "original_bytes": 110,
+            "native_bytes": 78
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 110,
+            "native_bytes": 78
+          }
+        },
+        {
+          "type": 2,
+          "name": "tcp_v4_connect_",
+          "original_program_bytes": 493,
+          "before": {
+            "count": 1,
+            "original_bytes": 493,
+            "native_bytes": 724
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 493,
+            "native_bytes": 732
+          }
+        },
+        {
+          "type": 2,
+          "name": "tcp_v6_connect",
+          "original_program_bytes": 110,
+          "before": {
+            "count": 1,
+            "original_bytes": 110,
+            "native_bytes": 78
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 110,
+            "native_bytes": 78
+          }
+        },
+        {
+          "type": 2,
+          "name": "tcp_v6_connect_",
+          "original_program_bytes": 496,
+          "before": {
+            "count": 1,
+            "original_bytes": 496,
+            "native_bytes": 728
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 496,
+            "native_bytes": 736
+          }
+        },
+        {
+          "type": 5,
+          "name": "inet_sock_set_s",
+          "original_program_bytes": 1501,
+          "before": {
+            "count": 1,
+            "original_bytes": 1501,
+            "native_bytes": 1391
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 1501,
+            "native_bytes": 1399
+          }
+        },
+        {
+          "type": 5,
+          "name": "sys_enter",
+          "original_program_bytes": 108,
+          "before": {
+            "count": 1,
+            "original_bytes": 108,
+            "native_bytes": 74
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 108,
+            "native_bytes": 74
+          }
+        },
+        {
+          "type": 5,
+          "name": "sys_exit",
+          "original_program_bytes": 406,
+          "before": {
+            "count": 1,
+            "original_bytes": 406,
+            "native_bytes": 272
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 406,
+            "native_bytes": 272
+          }
+        },
+        {
+          "type": 5,
+          "name": "tracepoint__sys",
+          "original_program_bytes": 141,
+          "before": {
+            "count": 2,
+            "original_bytes": 282,
+            "native_bytes": 188
+          },
+          "after": {
+            "count": 2,
+            "original_bytes": 282,
+            "native_bytes": 188
+          }
+        },
+        {
+          "type": 5,
+          "name": "tracepoint__sys",
+          "original_program_bytes": 602,
+          "before": {
+            "count": 2,
+            "original_bytes": 1204,
+            "native_bytes": 1038
+          },
+          "after": {
+            "count": 2,
+            "original_bytes": 1204,
+            "native_bytes": 1038
+          }
+        },
+        {
+          "type": 26,
+          "name": "block_rq_comple",
+          "original_program_bytes": 437,
+          "before": {
+            "count": 1,
+            "original_bytes": 437,
+            "native_bytes": 365
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 437,
+            "native_bytes": 365
+          }
+        },
+        {
+          "type": 26,
+          "name": "block_rq_insert",
+          "original_program_bytes": 354,
+          "before": {
+            "count": 1,
+            "original_bytes": 354,
+            "native_bytes": 609
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 354,
+            "native_bytes": 617
+          }
+        },
+        {
+          "type": 26,
+          "name": "block_rq_issue",
+          "original_program_bytes": 440,
+          "before": {
+            "count": 1,
+            "original_bytes": 440,
+            "native_bytes": 677
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 440,
+            "native_bytes": 685
+          }
+        },
+        {
+          "type": 26,
+          "name": "fentry_vfs_crea",
+          "original_program_bytes": 40,
+          "before": {
+            "count": 1,
+            "original_bytes": 40,
+            "native_bytes": 35
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 40,
+            "native_bytes": 35
+          }
+        },
+        {
+          "type": 26,
+          "name": "fentry_vfs_fsyn",
+          "original_program_bytes": 40,
+          "before": {
+            "count": 1,
+            "original_bytes": 40,
+            "native_bytes": 35
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 40,
+            "native_bytes": 35
+          }
+        },
+        {
+          "type": 26,
+          "name": "fentry_vfs_open",
+          "original_program_bytes": 40,
+          "before": {
+            "count": 1,
+            "original_bytes": 40,
+            "native_bytes": 35
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 40,
+            "native_bytes": 35
+          }
+        },
+        {
+          "type": 26,
+          "name": "fentry_vfs_read",
+          "original_program_bytes": 40,
+          "before": {
+            "count": 1,
+            "original_bytes": 40,
+            "native_bytes": 34
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 40,
+            "native_bytes": 34
+          }
+        },
+        {
+          "type": 26,
+          "name": "fentry_vfs_writ",
+          "original_program_bytes": 40,
+          "before": {
+            "count": 1,
+            "original_bytes": 40,
+            "native_bytes": 35
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 40,
+            "native_bytes": 35
+          }
+        },
+        {
+          "type": 26,
+          "name": "sched_switch",
+          "original_program_bytes": 935,
+          "before": {
+            "count": 1,
+            "original_bytes": 935,
+            "native_bytes": 1236
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 935,
+            "native_bytes": 1244
+          }
+        },
+        {
+          "type": 26,
+          "name": "sched_wakeup",
+          "original_program_bytes": 121,
+          "before": {
+            "count": 1,
+            "original_bytes": 121,
+            "native_bytes": 82
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 121,
+            "native_bytes": 82
+          }
+        },
+        {
+          "type": 26,
+          "name": "sched_wakeup_ne",
+          "original_program_bytes": 121,
+          "before": {
+            "count": 1,
+            "original_bytes": 121,
+            "native_bytes": 82
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 121,
+            "native_bytes": 82
+          }
+        }
+      ],
+      "native_byte_delta": 48,
+      "baseline_ns_ratio": 1.0344999209509664,
+      "native_ns_ratio": 1.030933310254604
+    },
+    {
+      "app": "tracee__monitor",
+      "before": {
+        "run": "corpus/results/x86_kvm_corpus_20261117_044227_741393",
+        "phases": {
+          "baseline": {
+            "records": 167,
+            "selected": 41,
+            "calls": 2292782573,
+            "elapsed_ns": 838982731349,
+            "ns_per_call": 365.923372424813
+          },
+          "post_rejit": {
+            "records": 167,
+            "selected": 41,
+            "calls": 2483412409,
+            "elapsed_ns": 793674579844,
+            "ns_per_call": 319.5903253795814
+          }
+        },
+        "cumulative_replacement_programs": 169,
+        "original_bytes": 2068918,
+        "native_bytes": 1699564
+      },
+      "after": {
+        "run": "corpus/results/x86_kvm_corpus_20261117_053609_920585",
+        "phases": {
+          "baseline": {
+            "records": 167,
+            "selected": 41,
+            "calls": 2277403613,
+            "elapsed_ns": 837426303238,
+            "ns_per_call": 367.7109751024181
+          },
+          "post_rejit": {
+            "records": 167,
+            "selected": 41,
+            "calls": 2012485241,
+            "elapsed_ns": 757571927829,
+            "ns_per_call": 376.43601671958794
+          }
+        },
+        "cumulative_replacement_programs": 169,
+        "original_bytes": 2068918,
+        "native_bytes": 1700836
+      },
+      "groups": [
+        {
+          "type": 2,
+          "name": "cgroup_bpf_run_",
+          "original_program_bytes": 5743,
+          "before": {
+            "count": 1,
+            "original_bytes": 5743,
+            "native_bytes": 4787
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 5743,
+            "native_bytes": 4795
+          }
+        },
+        {
+          "type": 2,
+          "name": "empty_kprobe",
+          "original_program_bytes": 20,
+          "before": {
+            "count": 1,
+            "original_bytes": 20,
+            "native_bytes": 20
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 20,
+            "native_bytes": 20
+          }
+        },
+        {
+          "type": 2,
+          "name": "heartbeat_captu",
+          "original_program_bytes": 157,
+          "before": {
+            "count": 1,
+            "original_bytes": 157,
+            "native_bytes": 154
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 157,
+            "native_bytes": 154
+          }
+        },
+        {
+          "type": 2,
+          "name": "kernel_write_ma",
+          "original_program_bytes": 283,
+          "before": {
+            "count": 1,
+            "original_bytes": 283,
+            "native_bytes": 545
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 283,
+            "native_bytes": 553
+          }
+        },
+        {
+          "type": 2,
+          "name": "kernel_write_ma",
+          "original_program_bytes": 23672,
+          "before": {
+            "count": 1,
+            "original_bytes": 23672,
+            "native_bytes": 16382
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 23672,
+            "native_bytes": 16390
+          }
+        },
+        {
+          "type": 2,
+          "name": "lkm_seeker_kset",
+          "original_program_bytes": 58814,
+          "before": {
+            "count": 1,
+            "original_bytes": 58814,
+            "native_bytes": 67220
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 58814,
+            "native_bytes": 67228
+          }
+        },
+        {
+          "type": 2,
+          "name": "lkm_seeker_mod_",
+          "original_program_bytes": 659,
+          "before": {
+            "count": 1,
+            "original_bytes": 659,
+            "native_bytes": 1054
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 659,
+            "native_bytes": 1062
+          }
+        },
+        {
+          "type": 2,
+          "name": "lkm_seeker_modt",
+          "original_program_bytes": 55771,
+          "before": {
+            "count": 1,
+            "original_bytes": 55771,
+            "native_bytes": 77598
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 55771,
+            "native_bytes": 77606
+          }
+        },
+        {
+          "type": 2,
+          "name": "lkm_seeker_new_",
+          "original_program_bytes": 3766,
+          "before": {
+            "count": 1,
+            "original_bytes": 3766,
+            "native_bytes": 3566
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 3766,
+            "native_bytes": 3574
+          }
+        },
+        {
+          "type": 2,
+          "name": "lkm_seeker_proc",
+          "original_program_bytes": 52694,
+          "before": {
+            "count": 1,
+            "original_bytes": 52694,
+            "native_bytes": 62184
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 52694,
+            "native_bytes": 62192
+          }
+        },
+        {
+          "type": 2,
+          "name": "process_execute",
+          "original_program_bytes": 11649,
+          "before": {
+            "count": 1,
+            "original_bytes": 11649,
+            "native_bytes": 7890
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 11649,
+            "native_bytes": 7898
+          }
+        },
+        {
+          "type": 2,
+          "name": "security_bpf_kp",
+          "original_program_bytes": 72,
+          "before": {
+            "count": 1,
+            "original_bytes": 72,
+            "native_bytes": 67
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 72,
+            "native_bytes": 67
+          }
+        },
+        {
+          "type": 2,
+          "name": "send_bin",
+          "original_program_bytes": 953,
+          "before": {
+            "count": 1,
+            "original_bytes": 953,
+            "native_bytes": 1563
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 953,
+            "native_bytes": 1579
+          }
+        },
+        {
+          "type": 2,
+          "name": "sys_dup_exit_ta",
+          "original_program_bytes": 12318,
+          "before": {
+            "count": 1,
+            "original_bytes": 12318,
+            "native_bytes": 7586
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 12318,
+            "native_bytes": 7594
+          }
+        },
+        {
+          "type": 2,
+          "name": "syscall_checker",
+          "original_program_bytes": 14971,
+          "before": {
+            "count": 1,
+            "original_bytes": 14971,
+            "native_bytes": 12096
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 14971,
+            "native_bytes": 12104
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace___debugfs",
+          "original_program_bytes": 9474,
+          "before": {
+            "count": 1,
+            "original_bytes": 9474,
+            "native_bytes": 7574
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 9474,
+            "native_bytes": 7582
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace___registe",
+          "original_program_bytes": 156,
+          "before": {
+            "count": 1,
+            "original_bytes": 156,
+            "native_bytes": 131
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 156,
+            "native_bytes": 131
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_arch_prct",
+          "original_program_bytes": 2363,
+          "before": {
+            "count": 1,
+            "original_bytes": 2363,
+            "native_bytes": 2344
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 2363,
+            "native_bytes": 2352
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_bpf_check",
+          "original_program_bytes": 6418,
+          "before": {
+            "count": 1,
+            "original_bytes": 6418,
+            "native_bytes": 6007
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 6418,
+            "native_bytes": 6015
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_call_user",
+          "original_program_bytes": 25524,
+          "before": {
+            "count": 1,
+            "original_bytes": 25524,
+            "native_bytes": 19866
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 25524,
+            "native_bytes": 19874
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_cap_capab",
+          "original_program_bytes": 8225,
+          "before": {
+            "count": 1,
+            "original_bytes": 8225,
+            "native_bytes": 6828
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 8225,
+            "native_bytes": 6836
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_check_hel",
+          "original_program_bytes": 6656,
+          "before": {
+            "count": 1,
+            "original_bytes": 6656,
+            "native_bytes": 6249
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 6656,
+            "native_bytes": 6257
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_check_map",
+          "original_program_bytes": 6647,
+          "before": {
+            "count": 1,
+            "original_bytes": 6647,
+            "native_bytes": 6254
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 6647,
+            "native_bytes": 6262
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_chmod_com",
+          "original_program_bytes": 17293,
+          "before": {
+            "count": 1,
+            "original_bytes": 17293,
+            "native_bytes": 12653
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 17293,
+            "native_bytes": 12661
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_commit_cr",
+          "original_program_bytes": 10802,
+          "before": {
+            "count": 1,
+            "original_bytes": 10802,
+            "native_bytes": 8605
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 10802,
+            "native_bytes": 8613
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_debugfs_c",
+          "original_program_bytes": 9167,
+          "before": {
+            "count": 1,
+            "original_bytes": 9167,
+            "native_bytes": 7400
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 9167,
+            "native_bytes": 7408
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_device_ad",
+          "original_program_bytes": 8753,
+          "before": {
+            "count": 1,
+            "original_bytes": 8753,
+            "native_bytes": 7050
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 8753,
+            "native_bytes": 7058
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_do_exit",
+          "original_program_bytes": 8102,
+          "before": {
+            "count": 1,
+            "original_bytes": 8102,
+            "native_bytes": 6809
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 8102,
+            "native_bytes": 6817
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_do_init_m",
+          "original_program_bytes": 156,
+          "before": {
+            "count": 1,
+            "original_bytes": 156,
+            "native_bytes": 131
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 156,
+            "native_bytes": 131
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_do_mmap",
+          "original_program_bytes": 156,
+          "before": {
+            "count": 1,
+            "original_bytes": 156,
+            "native_bytes": 131
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 156,
+            "native_bytes": 131
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_do_sigact",
+          "original_program_bytes": 10216,
+          "before": {
+            "count": 1,
+            "original_bytes": 10216,
+            "native_bytes": 8316
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 10216,
+            "native_bytes": 8324
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_do_splice",
+          "original_program_bytes": 156,
+          "before": {
+            "count": 1,
+            "original_bytes": 156,
+            "native_bytes": 131
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 156,
+            "native_bytes": 131
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_do_trunca",
+          "original_program_bytes": 9573,
+          "before": {
+            "count": 1,
+            "original_bytes": 9573,
+            "native_bytes": 7578
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 9573,
+            "native_bytes": 7586
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_dup",
+          "original_program_bytes": 2363,
+          "before": {
+            "count": 1,
+            "original_bytes": 2363,
+            "native_bytes": 2344
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 2363,
+            "native_bytes": 2352
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_dup2",
+          "original_program_bytes": 2363,
+          "before": {
+            "count": 1,
+            "original_bytes": 2363,
+            "native_bytes": 2344
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 2363,
+            "native_bytes": 2352
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_dup3",
+          "original_program_bytes": 2363,
+          "before": {
+            "count": 1,
+            "original_bytes": 2363,
+            "native_bytes": 2344
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 2363,
+            "native_bytes": 2352
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_exec_binp",
+          "original_program_bytes": 16269,
+          "before": {
+            "count": 1,
+            "original_bytes": 16269,
+            "native_bytes": 13053
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 16269,
+            "native_bytes": 13061
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_execute_f",
+          "original_program_bytes": 26658,
+          "before": {
+            "count": 1,
+            "original_bytes": 26658,
+            "native_bytes": 20888
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 26658,
+            "native_bytes": 20896
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_fd_instal",
+          "original_program_bytes": 16497,
+          "before": {
+            "count": 1,
+            "original_bytes": 16497,
+            "native_bytes": 12013
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 16497,
+            "native_bytes": 12021
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_file_modi",
+          "original_program_bytes": 487,
+          "before": {
+            "count": 1,
+            "original_bytes": 487,
+            "native_bytes": 675
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 487,
+            "native_bytes": 683
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_file_upda",
+          "original_program_bytes": 473,
+          "before": {
+            "count": 1,
+            "original_bytes": 473,
+            "native_bytes": 675
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 473,
+            "native_bytes": 683
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_filldir64",
+          "original_program_bytes": 8246,
+          "before": {
+            "count": 1,
+            "original_bytes": 8246,
+            "native_bytes": 6871
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 8246,
+            "native_bytes": 6879
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_filp_clos",
+          "original_program_bytes": 16410,
+          "before": {
+            "count": 1,
+            "original_bytes": 16410,
+            "native_bytes": 11944
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 16410,
+            "native_bytes": 11952
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_inotify_f",
+          "original_program_bytes": 156,
+          "before": {
+            "count": 1,
+            "original_bytes": 156,
+            "native_bytes": 131
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 156,
+            "native_bytes": 131
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_kallsyms_",
+          "original_program_bytes": 156,
+          "before": {
+            "count": 1,
+            "original_bytes": 156,
+            "native_bytes": 131
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 156,
+            "native_bytes": 131
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_kernel_wr",
+          "original_program_bytes": 156,
+          "before": {
+            "count": 1,
+            "original_bytes": 156,
+            "native_bytes": 131
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 156,
+            "native_bytes": 131
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_load_elf_",
+          "original_program_bytes": 18205,
+          "before": {
+            "count": 1,
+            "original_bytes": 18205,
+            "native_bytes": 13679
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 18205,
+            "native_bytes": 13687
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_mmap_aler",
+          "original_program_bytes": 20526,
+          "before": {
+            "count": 1,
+            "original_bytes": 20526,
+            "native_bytes": 15019
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 20526,
+            "native_bytes": 15027
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_proc_crea",
+          "original_program_bytes": 8351,
+          "before": {
+            "count": 1,
+            "original_bytes": 8351,
+            "native_bytes": 6938
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 8351,
+            "native_bytes": 6946
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_process_v",
+          "original_program_bytes": 2363,
+          "before": {
+            "count": 1,
+            "original_bytes": 2363,
+            "native_bytes": 2344
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 2363,
+            "native_bytes": 2352
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ptrace",
+          "original_program_bytes": 2363,
+          "before": {
+            "count": 1,
+            "original_bytes": 2363,
+            "native_bytes": 2344
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 2363,
+            "native_bytes": 2352
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_register_",
+          "original_program_bytes": 156,
+          "before": {
+            "count": 1,
+            "original_bytes": 156,
+            "native_bytes": 131
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 156,
+            "native_bytes": 131
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret__regi",
+          "original_program_bytes": 8846,
+          "before": {
+            "count": 1,
+            "original_bytes": 8846,
+            "native_bytes": 7335
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 8846,
+            "native_bytes": 7343
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_arch_",
+          "original_program_bytes": 11766,
+          "before": {
+            "count": 1,
+            "original_bytes": 11766,
+            "native_bytes": 10406
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 11766,
+            "native_bytes": 10414
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_do_in",
+          "original_program_bytes": 14730,
+          "before": {
+            "count": 1,
+            "original_bytes": 14730,
+            "native_bytes": 11288
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 14730,
+            "native_bytes": 11296
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_do_mm",
+          "original_program_bytes": 20243,
+          "before": {
+            "count": 1,
+            "original_bytes": 20243,
+            "native_bytes": 13804
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 20243,
+            "native_bytes": 13812
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_do_sp",
+          "original_program_bytes": 19447,
+          "before": {
+            "count": 1,
+            "original_bytes": 19447,
+            "native_bytes": 15094
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 19447,
+            "native_bytes": 15110
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_dup",
+          "original_program_bytes": 11766,
+          "before": {
+            "count": 1,
+            "original_bytes": 11766,
+            "native_bytes": 10406
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 11766,
+            "native_bytes": 10414
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_dup2",
+          "original_program_bytes": 11766,
+          "before": {
+            "count": 1,
+            "original_bytes": 11766,
+            "native_bytes": 10406
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 11766,
+            "native_bytes": 10414
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_dup3",
+          "original_program_bytes": 11766,
+          "before": {
+            "count": 1,
+            "original_bytes": 11766,
+            "native_bytes": 10406
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 11766,
+            "native_bytes": 10414
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_file_",
+          "original_program_bytes": 18993,
+          "before": {
+            "count": 1,
+            "original_bytes": 18993,
+            "native_bytes": 14101
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 18993,
+            "native_bytes": 14109
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_file_",
+          "original_program_bytes": 19181,
+          "before": {
+            "count": 1,
+            "original_bytes": 19181,
+            "native_bytes": 14101
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 19181,
+            "native_bytes": 14109
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_inoti",
+          "original_program_bytes": 17743,
+          "before": {
+            "count": 1,
+            "original_bytes": 17743,
+            "native_bytes": 13185
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 17743,
+            "native_bytes": 13193
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_kalls",
+          "original_program_bytes": 8481,
+          "before": {
+            "count": 1,
+            "original_bytes": 8481,
+            "native_bytes": 7073
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 8481,
+            "native_bytes": 7081
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_kerne",
+          "original_program_bytes": 19031,
+          "before": {
+            "count": 1,
+            "original_bytes": 19031,
+            "native_bytes": 14292
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 19031,
+            "native_bytes": 14300
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_kerne",
+          "original_program_bytes": 28515,
+          "before": {
+            "count": 1,
+            "original_bytes": 28515,
+            "native_bytes": 22357
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 28515,
+            "native_bytes": 22365
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_proce",
+          "original_program_bytes": 11766,
+          "before": {
+            "count": 1,
+            "original_bytes": 11766,
+            "native_bytes": 10406
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 11766,
+            "native_bytes": 10414
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_ptrac",
+          "original_program_bytes": 11766,
+          "before": {
+            "count": 1,
+            "original_bytes": 11766,
+            "native_bytes": 10406
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 11766,
+            "native_bytes": 10414
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_regis",
+          "original_program_bytes": 8861,
+          "before": {
+            "count": 1,
+            "original_bytes": 8861,
+            "native_bytes": 7277
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 8861,
+            "native_bytes": 7285
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_sock_",
+          "original_program_bytes": 8689,
+          "before": {
+            "count": 1,
+            "original_bytes": 8689,
+            "native_bytes": 6987
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 8689,
+            "native_bytes": 6995
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_vfs_r",
+          "original_program_bytes": 16710,
+          "before": {
+            "count": 1,
+            "original_bytes": 16710,
+            "native_bytes": 13967
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 16710,
+            "native_bytes": 13975
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_vfs_r",
+          "original_program_bytes": 16744,
+          "before": {
+            "count": 1,
+            "original_bytes": 16744,
+            "native_bytes": 14334
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 16744,
+            "native_bytes": 14350
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_vfs_r",
+          "original_program_bytes": 19027,
+          "before": {
+            "count": 1,
+            "original_bytes": 19027,
+            "native_bytes": 14292
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 19027,
+            "native_bytes": 14300
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_vfs_r",
+          "original_program_bytes": 19031,
+          "before": {
+            "count": 1,
+            "original_bytes": 19031,
+            "native_bytes": 14292
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 19031,
+            "native_bytes": 14300
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_vfs_w",
+          "original_program_bytes": 19027,
+          "before": {
+            "count": 1,
+            "original_bytes": 19027,
+            "native_bytes": 14292
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 19027,
+            "native_bytes": 14300
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_vfs_w",
+          "original_program_bytes": 19028,
+          "before": {
+            "count": 1,
+            "original_bytes": 19028,
+            "native_bytes": 14289
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 19028,
+            "native_bytes": 14297
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_vfs_w",
+          "original_program_bytes": 28515,
+          "before": {
+            "count": 1,
+            "original_bytes": 28515,
+            "native_bytes": 22357
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 28515,
+            "native_bytes": 22365
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_ret_vfs_w",
+          "original_program_bytes": 28677,
+          "before": {
+            "count": 1,
+            "original_bytes": 28677,
+            "native_bytes": 23165
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 28677,
+            "native_bytes": 23181
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 348,
+          "before": {
+            "count": 1,
+            "original_bytes": 348,
+            "native_bytes": 599
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 348,
+            "native_bytes": 607
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 8411,
+          "before": {
+            "count": 1,
+            "original_bytes": 8411,
+            "native_bytes": 6959
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 8411,
+            "native_bytes": 6967
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 8531,
+          "before": {
+            "count": 1,
+            "original_bytes": 8531,
+            "native_bytes": 7068
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 8531,
+            "native_bytes": 7076
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 8674,
+          "before": {
+            "count": 1,
+            "original_bytes": 8674,
+            "native_bytes": 7162
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 8674,
+            "native_bytes": 7170
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 8683,
+          "before": {
+            "count": 1,
+            "original_bytes": 8683,
+            "native_bytes": 7111
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 8683,
+            "native_bytes": 7119
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 8763,
+          "before": {
+            "count": 1,
+            "original_bytes": 8763,
+            "native_bytes": 7396
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 8763,
+            "native_bytes": 7404
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 8937,
+          "before": {
+            "count": 2,
+            "original_bytes": 17874,
+            "native_bytes": 14150
+          },
+          "after": {
+            "count": 2,
+            "original_bytes": 17874,
+            "native_bytes": 14166
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 9171,
+          "before": {
+            "count": 1,
+            "original_bytes": 9171,
+            "native_bytes": 7429
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 9171,
+            "native_bytes": 7437
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 9175,
+          "before": {
+            "count": 1,
+            "original_bytes": 9175,
+            "native_bytes": 7400
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 9175,
+            "native_bytes": 7408
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 9456,
+          "before": {
+            "count": 1,
+            "original_bytes": 9456,
+            "native_bytes": 7575
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 9456,
+            "native_bytes": 7583
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 9729,
+          "before": {
+            "count": 1,
+            "original_bytes": 9729,
+            "native_bytes": 8142
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 9729,
+            "native_bytes": 8150
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 9746,
+          "before": {
+            "count": 1,
+            "original_bytes": 9746,
+            "native_bytes": 8369
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 9746,
+            "native_bytes": 8377
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 10005,
+          "before": {
+            "count": 1,
+            "original_bytes": 10005,
+            "native_bytes": 7904
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 10005,
+            "native_bytes": 7912
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 10156,
+          "before": {
+            "count": 1,
+            "original_bytes": 10156,
+            "native_bytes": 8419
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 10156,
+            "native_bytes": 8435
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 10678,
+          "before": {
+            "count": 1,
+            "original_bytes": 10678,
+            "native_bytes": 8195
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 10678,
+            "native_bytes": 8203
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 10843,
+          "before": {
+            "count": 1,
+            "original_bytes": 10843,
+            "native_bytes": 8332
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 10843,
+            "native_bytes": 8340
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 11156,
+          "before": {
+            "count": 1,
+            "original_bytes": 11156,
+            "native_bytes": 8583
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 11156,
+            "native_bytes": 8591
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 11397,
+          "before": {
+            "count": 1,
+            "original_bytes": 11397,
+            "native_bytes": 8740
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 11397,
+            "native_bytes": 8748
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 11718,
+          "before": {
+            "count": 1,
+            "original_bytes": 11718,
+            "native_bytes": 8608
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 11718,
+            "native_bytes": 8616
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 15782,
+          "before": {
+            "count": 1,
+            "original_bytes": 15782,
+            "native_bytes": 12787
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 15782,
+            "native_bytes": 12795
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 16477,
+          "before": {
+            "count": 1,
+            "original_bytes": 16477,
+            "native_bytes": 13067
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 16477,
+            "native_bytes": 13075
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 16868,
+          "before": {
+            "count": 1,
+            "original_bytes": 16868,
+            "native_bytes": 13675
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 16868,
+            "native_bytes": 13683
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 17940,
+          "before": {
+            "count": 1,
+            "original_bytes": 17940,
+            "native_bytes": 13148
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 17940,
+            "native_bytes": 13156
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 18316,
+          "before": {
+            "count": 1,
+            "original_bytes": 18316,
+            "native_bytes": 13440
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 18316,
+            "native_bytes": 13448
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 18479,
+          "before": {
+            "count": 1,
+            "original_bytes": 18479,
+            "native_bytes": 12978
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 18479,
+            "native_bytes": 12986
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 22789,
+          "before": {
+            "count": 1,
+            "original_bytes": 22789,
+            "native_bytes": 15173
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 22789,
+            "native_bytes": 15181
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 34215,
+          "before": {
+            "count": 1,
+            "original_bytes": 34215,
+            "native_bytes": 24954
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 34215,
+            "native_bytes": 24962
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 35546,
+          "before": {
+            "count": 1,
+            "original_bytes": 35546,
+            "native_bytes": 26332
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 35546,
+            "native_bytes": 26340
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 36704,
+          "before": {
+            "count": 1,
+            "original_bytes": 36704,
+            "native_bytes": 24627
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 36704,
+            "native_bytes": 24635
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_security_",
+          "original_program_bytes": 45467,
+          "before": {
+            "count": 1,
+            "original_bytes": 45467,
+            "native_bytes": 30822
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 45467,
+            "native_bytes": 30838
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_set_fs_pw",
+          "original_program_bytes": 18787,
+          "before": {
+            "count": 1,
+            "original_bytes": 18787,
+            "native_bytes": 13442
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 18787,
+            "native_bytes": 13450
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_sock_allo",
+          "original_program_bytes": 335,
+          "before": {
+            "count": 1,
+            "original_bytes": 335,
+            "native_bytes": 571
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 335,
+            "native_bytes": 579
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_switch_ta",
+          "original_program_bytes": 10102,
+          "before": {
+            "count": 1,
+            "original_bytes": 10102,
+            "native_bytes": 8465
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 10102,
+            "native_bytes": 8473
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_tracepoin",
+          "original_program_bytes": 9892,
+          "before": {
+            "count": 1,
+            "original_bytes": 9892,
+            "native_bytes": 7883
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 9892,
+            "native_bytes": 7891
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_utimes_co",
+          "original_program_bytes": 18296,
+          "before": {
+            "count": 1,
+            "original_bytes": 18296,
+            "native_bytes": 13550
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 18296,
+            "native_bytes": 13558
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_vfs_read",
+          "original_program_bytes": 156,
+          "before": {
+            "count": 1,
+            "original_bytes": 156,
+            "native_bytes": 131
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 156,
+            "native_bytes": 131
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_vfs_readv",
+          "original_program_bytes": 156,
+          "before": {
+            "count": 1,
+            "original_bytes": 156,
+            "native_bytes": 131
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 156,
+            "native_bytes": 131
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_vfs_utime",
+          "original_program_bytes": 18296,
+          "before": {
+            "count": 1,
+            "original_bytes": 18296,
+            "native_bytes": 13550
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 18296,
+            "native_bytes": 13558
+          }
+        },
+        {
+          "type": 2,
+          "name": "trace_vfs_write",
+          "original_program_bytes": 156,
+          "before": {
+            "count": 2,
+            "original_bytes": 312,
+            "native_bytes": 262
+          },
+          "after": {
+            "count": 2,
+            "original_bytes": 312,
+            "native_bytes": 262
+          }
+        },
+        {
+          "type": 2,
+          "name": "uprobe__feature",
+          "original_program_bytes": 2007,
+          "before": {
+            "count": 3,
+            "original_bytes": 6021,
+            "native_bytes": 5661
+          },
+          "after": {
+            "count": 3,
+            "original_bytes": 6021,
+            "native_bytes": 5685
+          }
+        },
+        {
+          "type": 2,
+          "name": "uprobe__feature",
+          "original_program_bytes": 3430,
+          "before": {
+            "count": 1,
+            "original_bytes": 3430,
+            "native_bytes": 4020
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 3430,
+            "native_bytes": 4028
+          }
+        },
+        {
+          "type": 2,
+          "name": "uprobe_lkm_seek",
+          "original_program_bytes": 4339,
+          "before": {
+            "count": 1,
+            "original_bytes": 4339,
+            "native_bytes": 4865
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 4339,
+            "native_bytes": 4873
+          }
+        },
+        {
+          "type": 2,
+          "name": "uprobe_lkm_seek",
+          "original_program_bytes": 6141,
+          "before": {
+            "count": 1,
+            "original_bytes": 6141,
+            "native_bytes": 5444
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 6141,
+            "native_bytes": 5452
+          }
+        },
+        {
+          "type": 2,
+          "name": "uprobe_mem_dump",
+          "original_program_bytes": 6542,
+          "before": {
+            "count": 1,
+            "original_bytes": 6542,
+            "native_bytes": 5861
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 6542,
+            "native_bytes": 5869
+          }
+        },
+        {
+          "type": 2,
+          "name": "uprobe_seq_ops_",
+          "original_program_bytes": 6853,
+          "before": {
+            "count": 1,
+            "original_bytes": 6853,
+            "native_bytes": 6608
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 6853,
+            "native_bytes": 6624
+          }
+        },
+        {
+          "type": 2,
+          "name": "uprobe_syscall_",
+          "original_program_bytes": 55731,
+          "before": {
+            "count": 1,
+            "original_bytes": 55731,
+            "native_bytes": 73461
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 55731,
+            "native_bytes": 73469
+          }
+        },
+        {
+          "type": 2,
+          "name": "vfs_write_magic",
+          "original_program_bytes": 283,
+          "before": {
+            "count": 1,
+            "original_bytes": 283,
+            "native_bytes": 545
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 283,
+            "native_bytes": 553
+          }
+        },
+        {
+          "type": 2,
+          "name": "vfs_write_magic",
+          "original_program_bytes": 23672,
+          "before": {
+            "count": 1,
+            "original_bytes": 23672,
+            "native_bytes": 16382
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 23672,
+            "native_bytes": 16390
+          }
+        },
+        {
+          "type": 2,
+          "name": "vfs_writev_magi",
+          "original_program_bytes": 283,
+          "before": {
+            "count": 1,
+            "original_bytes": 283,
+            "native_bytes": 545
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 283,
+            "native_bytes": 553
+          }
+        },
+        {
+          "type": 2,
+          "name": "vfs_writev_magi",
+          "original_program_bytes": 23766,
+          "before": {
+            "count": 1,
+            "original_bytes": 23766,
+            "native_bytes": 16421
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 23766,
+            "native_bytes": 16429
+          }
+        },
+        {
+          "type": 8,
+          "name": "cgroup_skb_egre",
+          "original_program_bytes": 19474,
+          "before": {
+            "count": 1,
+            "original_bytes": 19474,
+            "native_bytes": 6631
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 19474,
+            "native_bytes": 6631
+          }
+        },
+        {
+          "type": 8,
+          "name": "cgroup_skb_ingr",
+          "original_program_bytes": 19474,
+          "before": {
+            "count": 1,
+            "original_bytes": 19474,
+            "native_bytes": 6631
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 19474,
+            "native_bytes": 6631
+          }
+        },
+        {
+          "type": 17,
+          "name": "cgroup_mkdir_si",
+          "original_program_bytes": 946,
+          "before": {
+            "count": 1,
+            "original_bytes": 946,
+            "native_bytes": 1049
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 946,
+            "native_bytes": 1057
+          }
+        },
+        {
+          "type": 17,
+          "name": "cgroup_rmdir_si",
+          "original_program_bytes": 928,
+          "before": {
+            "count": 1,
+            "original_bytes": 928,
+            "native_bytes": 1021
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 928,
+            "native_bytes": 1029
+          }
+        },
+        {
+          "type": 17,
+          "name": "sched_process_e",
+          "original_program_bytes": 1203,
+          "before": {
+            "count": 1,
+            "original_bytes": 1203,
+            "native_bytes": 1170
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 1203,
+            "native_bytes": 1178
+          }
+        },
+        {
+          "type": 17,
+          "name": "sched_process_e",
+          "original_program_bytes": 22751,
+          "before": {
+            "count": 1,
+            "original_bytes": 22751,
+            "native_bytes": 15290
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 22751,
+            "native_bytes": 15298
+          }
+        },
+        {
+          "type": 17,
+          "name": "sched_process_e",
+          "original_program_bytes": 24424,
+          "before": {
+            "count": 1,
+            "original_bytes": 24424,
+            "native_bytes": 16631
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 24424,
+            "native_bytes": 16639
+          }
+        },
+        {
+          "type": 17,
+          "name": "sched_process_f",
+          "original_program_bytes": 4509,
+          "before": {
+            "count": 1,
+            "original_bytes": 4509,
+            "native_bytes": 3213
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 4509,
+            "native_bytes": 3221
+          }
+        },
+        {
+          "type": 17,
+          "name": "send_bin_tp",
+          "original_program_bytes": 953,
+          "before": {
+            "count": 1,
+            "original_bytes": 953,
+            "native_bytes": 1563
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 953,
+            "native_bytes": 1579
+          }
+        },
+        {
+          "type": 17,
+          "name": "sys_enter_init",
+          "original_program_bytes": 2524,
+          "before": {
+            "count": 1,
+            "original_bytes": 2524,
+            "native_bytes": 2495
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 2524,
+            "native_bytes": 2503
+          }
+        },
+        {
+          "type": 17,
+          "name": "sys_enter_submi",
+          "original_program_bytes": 17661,
+          "before": {
+            "count": 1,
+            "original_bytes": 17661,
+            "native_bytes": 15097
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 17661,
+            "native_bytes": 15105
+          }
+        },
+        {
+          "type": 17,
+          "name": "sys_exit_init",
+          "original_program_bytes": 2103,
+          "before": {
+            "count": 1,
+            "original_bytes": 2103,
+            "native_bytes": 2361
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 2103,
+            "native_bytes": 2369
+          }
+        },
+        {
+          "type": 17,
+          "name": "sys_exit_submit",
+          "original_program_bytes": 12117,
+          "before": {
+            "count": 1,
+            "original_bytes": 12117,
+            "native_bytes": 10398
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 12117,
+            "native_bytes": 10406
+          }
+        },
+        {
+          "type": 17,
+          "name": "syscall__accept",
+          "original_program_bytes": 9262,
+          "before": {
+            "count": 1,
+            "original_bytes": 9262,
+            "native_bytes": 6918
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 9262,
+            "native_bytes": 6926
+          }
+        },
+        {
+          "type": 17,
+          "name": "syscall__execve",
+          "original_program_bytes": 22769,
+          "before": {
+            "count": 1,
+            "original_bytes": 22769,
+            "native_bytes": 17551
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 22769,
+            "native_bytes": 17559
+          }
+        },
+        {
+          "type": 17,
+          "name": "syscall__execve",
+          "original_program_bytes": 22904,
+          "before": {
+            "count": 1,
+            "original_bytes": 22904,
+            "native_bytes": 17639
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 22904,
+            "native_bytes": 17647
+          }
+        },
+        {
+          "type": 17,
+          "name": "syscall__execve",
+          "original_program_bytes": 23045,
+          "before": {
+            "count": 1,
+            "original_bytes": 23045,
+            "native_bytes": 17732
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 23045,
+            "native_bytes": 17740
+          }
+        },
+        {
+          "type": 17,
+          "name": "syscall__execve",
+          "original_program_bytes": 23180,
+          "before": {
+            "count": 1,
+            "original_bytes": 23180,
+            "native_bytes": 17815
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 23180,
+            "native_bytes": 17823
+          }
+        },
+        {
+          "type": 17,
+          "name": "syscall__init_m",
+          "original_program_bytes": 628,
+          "before": {
+            "count": 1,
+            "original_bytes": 628,
+            "native_bytes": 1013
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 628,
+            "native_bytes": 1021
+          }
+        },
+        {
+          "type": 17,
+          "name": "trace_sys_enter",
+          "original_program_bytes": 8194,
+          "before": {
+            "count": 1,
+            "original_bytes": 8194,
+            "native_bytes": 6896
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 8194,
+            "native_bytes": 6904
+          }
+        },
+        {
+          "type": 17,
+          "name": "trace_sys_exit",
+          "original_program_bytes": 8227,
+          "before": {
+            "count": 1,
+            "original_bytes": 8227,
+            "native_bytes": 6915
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 8227,
+            "native_bytes": 6923
+          }
+        },
+        {
+          "type": 17,
+          "name": "tracepoint__cgr",
+          "original_program_bytes": 8685,
+          "before": {
+            "count": 2,
+            "original_bytes": 17370,
+            "native_bytes": 14252
+          },
+          "after": {
+            "count": 2,
+            "original_bytes": 17370,
+            "native_bytes": 14268
+          }
+        },
+        {
+          "type": 17,
+          "name": "tracepoint__cgr",
+          "original_program_bytes": 8722,
+          "before": {
+            "count": 1,
+            "original_bytes": 8722,
+            "native_bytes": 7127
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 8722,
+            "native_bytes": 7135
+          }
+        },
+        {
+          "type": 17,
+          "name": "tracepoint__exe",
+          "original_program_bytes": 58722,
+          "before": {
+            "count": 1,
+            "original_bytes": 58722,
+            "native_bytes": 42095
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 58722,
+            "native_bytes": 42103
+          }
+        },
+        {
+          "type": 17,
+          "name": "tracepoint__mod",
+          "original_program_bytes": 9084,
+          "before": {
+            "count": 1,
+            "original_bytes": 9084,
+            "native_bytes": 7583
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 9084,
+            "native_bytes": 7591
+          }
+        },
+        {
+          "type": 17,
+          "name": "tracepoint__mod",
+          "original_program_bytes": 19657,
+          "before": {
+            "count": 1,
+            "original_bytes": 19657,
+            "native_bytes": 14198
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 19657,
+            "native_bytes": 14206
+          }
+        },
+        {
+          "type": 17,
+          "name": "tracepoint__raw",
+          "original_program_bytes": 240,
+          "before": {
+            "count": 1,
+            "original_bytes": 240,
+            "native_bytes": 536
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 240,
+            "native_bytes": 544
+          }
+        },
+        {
+          "type": 17,
+          "name": "tracepoint__raw",
+          "original_program_bytes": 269,
+          "before": {
+            "count": 1,
+            "original_bytes": 269,
+            "native_bytes": 566
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 269,
+            "native_bytes": 574
+          }
+        },
+        {
+          "type": 17,
+          "name": "tracepoint__sch",
+          "original_program_bytes": 255,
+          "before": {
+            "count": 1,
+            "original_bytes": 255,
+            "native_bytes": 550
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 255,
+            "native_bytes": 558
+          }
+        },
+        {
+          "type": 17,
+          "name": "tracepoint__sch",
+          "original_program_bytes": 8748,
+          "before": {
+            "count": 1,
+            "original_bytes": 8748,
+            "native_bytes": 7196
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 8748,
+            "native_bytes": 7204
+          }
+        },
+        {
+          "type": 17,
+          "name": "tracepoint__sch",
+          "original_program_bytes": 9016,
+          "before": {
+            "count": 1,
+            "original_bytes": 9016,
+            "native_bytes": 7332
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 9016,
+            "native_bytes": 7340
+          }
+        },
+        {
+          "type": 17,
+          "name": "tracepoint__sch",
+          "original_program_bytes": 20290,
+          "before": {
+            "count": 1,
+            "original_bytes": 20290,
+            "native_bytes": 15785
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 20290,
+            "native_bytes": 15793
+          }
+        },
+        {
+          "type": 17,
+          "name": "tracepoint__sch",
+          "original_program_bytes": 20746,
+          "before": {
+            "count": 1,
+            "original_bytes": 20746,
+            "native_bytes": 14488
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 20746,
+            "native_bytes": 14496
+          }
+        },
+        {
+          "type": 17,
+          "name": "tracepoint__tas",
+          "original_program_bytes": 8545,
+          "before": {
+            "count": 1,
+            "original_bytes": 8545,
+            "native_bytes": 7030
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 8545,
+            "native_bytes": 7038
+          }
+        },
+        {
+          "type": 29,
+          "name": "lsm_bpf_check",
+          "original_program_bytes": 72,
+          "before": {
+            "count": 1,
+            "original_bytes": 72,
+            "native_bytes": 67
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 72,
+            "native_bytes": 67
+          }
+        },
+        {
+          "type": 29,
+          "name": "lsm_file_open_t",
+          "original_program_bytes": 7361,
+          "before": {
+            "count": 1,
+            "original_bytes": 7361,
+            "native_bytes": 6702
+          },
+          "after": {
+            "count": 1,
+            "original_bytes": 7361,
+            "native_bytes": 6710
+          }
+        }
+      ],
+      "native_byte_delta": 1272,
+      "baseline_ns_ratio": 1.004885183107489,
+      "native_ns_ratio": 1.177870501156411
+    }
+  ]
+}
