@@ -30,6 +30,10 @@ for mode in ('control', 'query'):
         disassembly = subprocess.run(['objdump', '-dr', row['proof']], check=True,
                                      capture_output=True, text=True).stdout
         (raw / mode / (Path(row['capture']).name+'-proof.txt')).write_text(disassembly)
+        emitted = subprocess.run(['objdump', '-D', '-b', 'binary', '-m', 'i386:x86-64',
+                                  str(Path(row['capture'])/'image.blob')], check=True,
+                                 capture_output=True, text=True).stdout
+        (raw / mode / (Path(row['capture']).name+'-emitted.txt')).write_text(emitted)
         used = sorted(set(re.findall(r'R_X86_64_PLT32\s+(bpf_\w+)', disassembly)))
         relocs = list(struct.iter_unpack('<IIQ', (Path(row['capture'])/'image.relocs').read_bytes()))
         targets = {}

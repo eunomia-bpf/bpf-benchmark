@@ -137,3 +137,10 @@ The small raw corpus JSON for both runs is committed beside their original
 results; full console, shim logs, captured proof/plan/relocations and both
 failed-preparation logs remain under `/workspaces`. `targets-summary.txt`
 and `installed.txt` are analysis outputs, not framework result fields.
+
+The emitted openat blob confirms the same argument path after linking:
+RDI is saved to RBX at offset 7, then restored at 0x9f and 0xda immediately
+before the stack and output call setups (CALL slots 0xa7 and 0xdd).
+`analyze.py` retains actual emitted-blob disassembly beside the proof
+disassembly in the raw batch; relocations remain authoritative for external
+targets because these captured blobs are neutral before kernel patching.
