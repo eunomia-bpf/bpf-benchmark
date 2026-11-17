@@ -3085,3 +3085,11 @@ recorded rel8/disp8 work. Both leaves currently reload current_task, so
 compat adds a GS load before the selected leaf's GS load. Avoid inventing
 a new multi-entry register protocol merely to remove that load; compare
 installed bytes and per-call effect before expanding the design.
+
+Coordinator follow-up: the reviewed dispatcher subsequently landed in
+`d6b4d335e`; `b77dc89de` records its image/check/Tetragon/Tracee batch,
+whose image build started at 08:20 UTC. Todo decision `d79f60c45` accepts
+the earlier signed-disp32 global-address opportunity after compat timing,
+together with constant-size specialization. This changes the status of
+those source proposals, not their measured performance: compat results
+and the later encoding/specialization effects remain pending.

@@ -5,7 +5,6 @@ from pathlib import Path
 import subprocess
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parents[2]
 rows = []
 for paging_bits in (47, 56):
     user_max = (1 << paging_bits) - 4096
