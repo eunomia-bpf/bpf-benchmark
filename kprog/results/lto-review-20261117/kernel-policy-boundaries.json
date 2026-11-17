@@ -1,0 +1,955 @@
+{
+  "recorded_utc": "2026-11-17T05:47:01Z",
+  "source": "vendor/linux-framework/arch/x86/mm/maccess.c:9-36",
+  "scope": "Finite source arithmetic only. Widths/paging choices are scenarios, not measured guest facts. Negative-only is a rejected simplification. No candidate, compiler, guest or benchmark execution.",
+  "cases": 108,
+  "interval_disagreements": 0,
+  "negative_only_counterexamples": [
+    {
+      "threshold_bits": 47,
+      "width": 0,
+      "address": "0x800000000000",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 0,
+      "address": "0x800000000001",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 0,
+      "address": "0xffffffffffffff",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 0,
+      "address": "0x100000000000000",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 0,
+      "address": "0x100000000000001",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 57,
+      "address": "0x800000000000",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 57,
+      "address": "0x800000000001",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 57,
+      "address": "0xffffffffffffff",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 0,
+      "address": "0x100000000000000",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 0,
+      "address": "0x100000000000001",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": false
+    }
+  ],
+  "boundaries": [
+    {
+      "threshold_bits": 47,
+      "width": 0,
+      "address": "0x0",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 0,
+      "address": "0x7fffffffffff",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 0,
+      "address": "0x800000000000",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 0,
+      "address": "0x800000000001",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 0,
+      "address": "0xffffffffffffff",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 0,
+      "address": "0x100000000000000",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 0,
+      "address": "0x100000000000001",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 0,
+      "address": "0xfeffffffffffffff",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 47,
+      "width": 0,
+      "address": "0xff00000000000000",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 47,
+      "width": 0,
+      "address": "0xff00000000000001",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 47,
+      "width": 0,
+      "address": "0xffff7fffffffffff",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 47,
+      "width": 0,
+      "address": "0xffff800000000000",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 47,
+      "width": 0,
+      "address": "0xffff800000000001",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 47,
+      "width": 0,
+      "address": "0xffffffffff5fffff",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 47,
+      "width": 0,
+      "address": "0xffffffffff600000",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 0,
+      "address": "0xffffffffff600fff",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 0,
+      "address": "0xffffffffff601000",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 47,
+      "width": 0,
+      "address": "0xffffffffffffffff",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 47,
+      "width": 48,
+      "address": "0x0",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 48,
+      "address": "0x7fffffffffff",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 48,
+      "address": "0x800000000000",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 48,
+      "address": "0x800000000001",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 48,
+      "address": "0xffffffffffffff",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 48,
+      "address": "0x100000000000000",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 48,
+      "address": "0x100000000000001",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 48,
+      "address": "0xfeffffffffffffff",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 48,
+      "address": "0xff00000000000000",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 48,
+      "address": "0xff00000000000001",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 48,
+      "address": "0xffff7fffffffffff",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 48,
+      "address": "0xffff800000000000",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 47,
+      "width": 48,
+      "address": "0xffff800000000001",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 47,
+      "width": 48,
+      "address": "0xffffffffff5fffff",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 47,
+      "width": 48,
+      "address": "0xffffffffff600000",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 48,
+      "address": "0xffffffffff600fff",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 48,
+      "address": "0xffffffffff601000",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 47,
+      "width": 48,
+      "address": "0xffffffffffffffff",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 47,
+      "width": 57,
+      "address": "0x0",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 57,
+      "address": "0x7fffffffffff",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 57,
+      "address": "0x800000000000",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 57,
+      "address": "0x800000000001",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 57,
+      "address": "0xffffffffffffff",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 57,
+      "address": "0x100000000000000",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 57,
+      "address": "0x100000000000001",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 57,
+      "address": "0xfeffffffffffffff",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 57,
+      "address": "0xff00000000000000",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 47,
+      "width": 57,
+      "address": "0xff00000000000001",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 47,
+      "width": 57,
+      "address": "0xffff7fffffffffff",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 47,
+      "width": 57,
+      "address": "0xffff800000000000",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 47,
+      "width": 57,
+      "address": "0xffff800000000001",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 47,
+      "width": 57,
+      "address": "0xffffffffff5fffff",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 47,
+      "width": 57,
+      "address": "0xffffffffff600000",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 57,
+      "address": "0xffffffffff600fff",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 47,
+      "width": 57,
+      "address": "0xffffffffff601000",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 47,
+      "width": 57,
+      "address": "0xffffffffffffffff",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 56,
+      "width": 0,
+      "address": "0x0",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 0,
+      "address": "0x7fffffffffff",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 0,
+      "address": "0x800000000000",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 0,
+      "address": "0x800000000001",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 0,
+      "address": "0xffffffffffffff",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 0,
+      "address": "0x100000000000000",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 0,
+      "address": "0x100000000000001",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 0,
+      "address": "0xfeffffffffffffff",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 56,
+      "width": 0,
+      "address": "0xff00000000000000",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 56,
+      "width": 0,
+      "address": "0xff00000000000001",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 56,
+      "width": 0,
+      "address": "0xffff7fffffffffff",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 56,
+      "width": 0,
+      "address": "0xffff800000000000",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 56,
+      "width": 0,
+      "address": "0xffff800000000001",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 56,
+      "width": 0,
+      "address": "0xffffffffff5fffff",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 56,
+      "width": 0,
+      "address": "0xffffffffff600000",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 0,
+      "address": "0xffffffffff600fff",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 0,
+      "address": "0xffffffffff601000",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 56,
+      "width": 0,
+      "address": "0xffffffffffffffff",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 56,
+      "width": 48,
+      "address": "0x0",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 48,
+      "address": "0x7fffffffffff",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 48,
+      "address": "0x800000000000",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 48,
+      "address": "0x800000000001",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 48,
+      "address": "0xffffffffffffff",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 48,
+      "address": "0x100000000000000",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 48,
+      "address": "0x100000000000001",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 48,
+      "address": "0xfeffffffffffffff",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 48,
+      "address": "0xff00000000000000",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 48,
+      "address": "0xff00000000000001",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 48,
+      "address": "0xffff7fffffffffff",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 48,
+      "address": "0xffff800000000000",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 56,
+      "width": 48,
+      "address": "0xffff800000000001",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 56,
+      "width": 48,
+      "address": "0xffffffffff5fffff",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 56,
+      "width": 48,
+      "address": "0xffffffffff600000",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 48,
+      "address": "0xffffffffff600fff",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 48,
+      "address": "0xffffffffff601000",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 56,
+      "width": 48,
+      "address": "0xffffffffffffffff",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 56,
+      "width": 57,
+      "address": "0x0",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 57,
+      "address": "0x7fffffffffff",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 57,
+      "address": "0x800000000000",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 57,
+      "address": "0x800000000001",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 57,
+      "address": "0xffffffffffffff",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 57,
+      "address": "0x100000000000000",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 57,
+      "address": "0x100000000000001",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 57,
+      "address": "0xfeffffffffffffff",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 57,
+      "address": "0xff00000000000000",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 56,
+      "width": 57,
+      "address": "0xff00000000000001",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 56,
+      "width": 57,
+      "address": "0xffff7fffffffffff",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 56,
+      "width": 57,
+      "address": "0xffff800000000000",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 56,
+      "width": 57,
+      "address": "0xffff800000000001",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 56,
+      "width": 57,
+      "address": "0xffffffffff5fffff",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 56,
+      "width": 57,
+      "address": "0xffffffffff600000",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 57,
+      "address": "0xffffffffff600fff",
+      "source_allowed": false,
+      "interval_allowed": false,
+      "negative_only_allowed": false
+    },
+    {
+      "threshold_bits": 56,
+      "width": 57,
+      "address": "0xffffffffff601000",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    },
+    {
+      "threshold_bits": 56,
+      "width": 57,
+      "address": "0xffffffffffffffff",
+      "source_allowed": true,
+      "interval_allowed": true,
+      "negative_only_allowed": true
+    }
+  ]
+}

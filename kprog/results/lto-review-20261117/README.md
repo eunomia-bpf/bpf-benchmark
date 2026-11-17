@@ -2103,3 +2103,62 @@ adds an already-removed-cost boundary to that work, rather than a new
 optimization result. No source, runtime check, benchmark, guest, build,
 candidate or cache output was changed; per-call effects remain with the
 coordinator's actual implementation and measurements.
+
+## Kernel-read leaf policy: CPU width and paging mode are distinct facts
+
+Source audit, 2026-11-17. This refines the kernel-policy part of section 14;
+it identifies a simplification to avoid, not another measured optimization.
+The user-read leaf remains first in the coordinator's order.
+
+`arch/x86/mm/maccess.c:17–36` accepts a source only after the user/guard
+threshold and the **whole vsyscall page** have been excluded. It then
+accepts zero `boot_cpu_data.x86_virt_bits` during early boot, or checks
+canonicality at that width. The size argument is unused. Two distinct
+inputs feed this policy:
+
+- `arch/x86/kernel/cpu/common.c:1085–1107` obtains `x86_virt_bits` from
+  CPUID leaf 0x80000008, with a 48-bit fallback on x86-64.
+- `arch/x86/include/asm/page_64.h:138–146` selects `TASK_SIZE_MAX` through
+  the LA57 alternative: `(1 << 47) - PAGE_SIZE` or
+  `(1 << 56) - PAGE_SIZE`. `common.c:1835–1842` explicitly clears the LA57
+  capability when five-level paging is inactive; it does not rewrite the
+  separately obtained `x86_virt_bits` there. Thus the CPUID width cannot be
+  inferred from the active user-address limit, or vice versa.
+
+For a nonzero canonical width `w`, the policy's canonical set is
+`[0, 2^(w-1)-1]` together with `[2^64-2^(w-1), 2^64-1]`.
+Intersect it with `src >= TASK_SIZE_MAX + PAGE_SIZE` and exclude
+`[0xffffffffff600000, 0xffffffffff600fff]`, as
+`asm/vsyscall.h:32–34` does. Some illustrative source-policy results are:
+
+| User/guard threshold | CPU virtual width | Source | Allowed by this policy |
+| --- | --- | --- | --- |
+| `2^47` | 48 | `0x0000800000000000` | No: not canonical at width 48 |
+| `2^47` | 57 | `0x0000800000000000` | Yes: above the threshold and canonical at width 57 |
+| `2^56` | 57 | `0x0000800000000000` | No: below the threshold |
+| `2^47` | 48 or 57 | `0xffffffffff600fff` | No: last byte of the excluded vsyscall page |
+
+These are conditional cases, **not claims about the running guest's CPU
+width**. In the second case an unmapped/noncanonical-for-active-paging
+source reaches the protected copy and can return `-EFAULT`; rejecting all
+nonnegative addresses in the replacement instead returns `-ERANGE`.
+`include/linux/bpf.h:3381–3389` forwards a negative kernel-read result
+after zeroing the destination, so matching zeroed bytes alone would miss
+this return-value change. A single address equality would also fail to
+exclude the remaining 4,095 bytes of the vsyscall page.
+
+The sole on-disk kernel's `copy_from_kernel_nofault_allowed` disassembly is
+already retained in [policy-leaf.json](policy-leaf.json): threshold ADD/CMP,
+page-mask/CMP, byte load of the CPU width, zero-width branch, then variable
+SHL/SAR/CMP. Its initial threshold MOV is an alternative site, not a proof
+of the running guest's active paging. Boot facts may select constants for
+these operations; the existing predicates and error behavior remain the
+reference. No new predicate or runtime check is proposed.
+
+[kernel_policy_model.py](kernel_policy_model.py) records boundary arithmetic
+in [kernel-policy-boundaries.json](kernel-policy-boundaries.json): 108 cases,
+including the early-boot branch and both address widths. It compares the source's
+sign-extension definition with the equivalent two-interval description;
+the negative-only restriction is deliberately recorded as a counterexample.
+This is source review only: no code emission, candidate execution, guest,
+build, per-call saving or installed-byte reduction is claimed.
