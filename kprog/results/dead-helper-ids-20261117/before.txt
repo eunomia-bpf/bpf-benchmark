@@ -1,0 +1,21 @@
+   Compiling native-link v0.1.0 (/workspaces/repository/kprog/x86/native_lab/native_link)
+    Finished `release` profile [optimized] target(s) in 41.80s
+     Running unittests src/main.rs (kprog/x86/native_lab/native_link/target/release/deps/native_link-62ccb5c6f5eda54e)
+
+running 1 test
+test x86::tests::bound_helpers_drop_only_dead_adjacent_rax_ids_and_keep_proof_and_tail_state ... 
+thread 'x86::tests::bound_helpers_drop_only_dead_adjacent_rax_ids_and_keep_proof_and_tail_state' (2761016) panicked at src/x86.rs:4998:13:
+assertion `left == right` failed: dead ID form0
+  left: 1
+ right: 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+FAILED
+
+failures:
+
+failures:
+    x86::tests::bound_helpers_drop_only_dead_adjacent_rax_ids_and_keep_proof_and_tail_state
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 60 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--bin native-link`
