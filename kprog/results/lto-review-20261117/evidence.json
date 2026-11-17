@@ -1,6 +1,6 @@
 {
-  "recorded_utc": "2026-11-17T00:14:43Z",
-  "review_source_commit": "f821e1c771f2908848094b0f88206388c51c79ce",
+  "recorded_utc": "2026-11-17T00:23:34Z",
+  "review_source_commit": "ef7353c9f6e0c0858c99584ba7612be226e4a639",
   "typed_unwinder": {
     "blob": "/workspaces/kprog-raw/perf/20261116-inner-array-lto/libbpf/otel-typed.blob",
     "payload_bytes": 30410,
@@ -44,7 +44,39 @@
     ],
     "array_fallback_call": 29744,
     "array_fallback_destination": 30080,
-    "lpm_start": 30080
+    "lpm_start": 30080,
+    "read_call_sites": [
+      2664,
+      2923,
+      3292,
+      3685,
+      3919,
+      3966,
+      9515,
+      9769,
+      9999,
+      10407,
+      10700,
+      11968,
+      16376,
+      16630,
+      16860,
+      17268,
+      17561,
+      18727,
+      24008,
+      24480,
+      24710,
+      25118,
+      25419,
+      26693
+    ],
+    "nearby_esi_literals_bytes": {
+      "144": 4,
+      "16": 4,
+      "8": 16
+    },
+    "read_scope": "Local decoded windows, not a complete CFG constant proof or dynamic frequency."
   },
   "tracee": {
     "inputs": "kprog/results/host-link-replay-20261116/tracee-inputs.json",

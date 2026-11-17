@@ -18,7 +18,11 @@ Ranking is expected opportunity, informed by the retained profiles, not a
 claim that a proposed change has achieved a measured speedup. Static sites
 are not execution frequencies. All changes still need their isolated app
 measurement through the frozen entry, with installed bytes and per-call
-time; native/JIT installed bytes <= 0.5 remains the size target.
+time. The 00:19:11Z audit withdraws the coordinator's earlier interpretation
+that every app's installed native/JIT ratio must be <= 0.5: the flag study
+measures stage executable bytes against the operator's code-halving request,
+and reports installed bytes separately. Both sizes matter when evaluating
+whether LTO work earns its footprint.
 
 | Rank | Finding | Most affected apps | Expected per-call effect and size direction |
 |---|---|---|---|
@@ -112,6 +116,32 @@ the current image's cost split. See
 Cycles are not nanoseconds; external roots lack exclusive caller ownership,
 and the remaining program-text bucket is not pure arithmetic body. The
 profile locates an opportunity, not a promised percentage reduction.
+
+Follow-up, 2026-11-17T00:23:40Z: the same retained blob contains 24 direct
+calls to this user-read routine. In the two preceding decoded instructions,
+all 24 have a visible `mov esi,constant`: 16 use 8 bytes, four use 16 bytes
+and four use 144 bytes. The intervening instruction, when present, is a
+move that does not write RSI. Exact windows and offsets are in
+[read-call-sites.disassembly.txt](read-call-sites.disassembly.txt), with
+counts in evidence.json. These are local instruction patterns, not a full
+CFG proof or dynamic read-size distribution. They make an 8-byte shared
+specialization a concrete first candidate; unrolling the 144-byte case
+would have a different code-size tradeoff. The missing 4/2-byte tail is a
+general weakness but does not apply to these 24 literal sizes.
+
+There is a second implementation constraint: the existing constant analysis
+cannot simply be reused unchanged for this unwinder.
+`x86.rs:1119,1469` computes `memory::constants` and consults it for memory
+routines. `x86_memory.rs:155–162` returns an empty result for the entire
+function if **any** indirect branch exists, without accepting the resolved
+jump-table destinations already used by helper/map provenance. The retained
+typed-kernel log shows `jmp rax` at 0x09f9 and `jmp r9` at 0x0ca3, among
+others. A resolved switch therefore erases constants even at an adjacent
+literal-size read in the same function. Expose the specialization while its
+IR facts are available, or use the resolved CFG for the existing analysis;
+do not infer safety from this local-window extraction. This is another
+reason why merely adding a read case to `memory::Routine::at_call` would
+not deliver the expected OTel benefit.
 
 ## 2. Tracee's legacy read helpers get none of the read lowering
 

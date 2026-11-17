@@ -3,6 +3,7 @@
 import collections
 import json
 from pathlib import Path
+import re
 import struct
 import subprocess
 
@@ -19,6 +20,29 @@ array = next(r for r in ranges if r['piece'] == 'runtime_array')
 lpm = next(r for r in ranges if r['piece'] == 'lpm_lookup')
 call = array['start'] + 57
 destination = call + 5 + int.from_bytes(data[call + 1:call + 5], 'little', signed=True)
+read = next(r for r in ranges if r['piece'] == 'probe_read')
+assembly = subprocess.check_output([
+    'objdump', '-D', '-b', 'binary', '-m', 'i386:x86-64', '-M', 'intel',
+    '--no-show-raw-insn', str(blob)], text=True)
+instructions = []
+for line in assembly.splitlines():
+    match = re.match(r'^\s*([0-9a-f]+):\s+(\S+)\s*(.*)$', line)
+    if match:
+        instructions.append((int(match[1], 16), match[2], match[3], line))
+read_calls = []
+literal_counts = collections.Counter()
+with (HERE / 'read-call-sites.disassembly.txt').open('w') as output:
+    output.write('Local windows only: nearby ESI literals are not full CFG proofs or execution frequencies.\n')
+    for index, instruction in enumerate(instructions):
+        if instruction[1:3] != ('call', hex(read['start'])):
+            continue
+        read_calls.append(instruction[0])
+        window = instructions[max(0, index - 2):index + 1]
+        for previous in reversed(window[:-1]):
+            if previous[1] == 'mov' and previous[2].startswith('esi,0x'):
+                literal_counts[int(previous[2].split(',')[1], 16)] += 1
+                break
+        output.write('\n' + '\n'.join(item[3] for item in window) + '\n')
 tracee = json.loads((REPO / 'kprog/results/host-link-replay-20261116/tracee-inputs.json').read_text())
 counts = collections.Counter()
 examples = {}
@@ -39,7 +63,10 @@ result = {
     'review_source_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=REPO, text=True).strip(),
     'typed_unwinder': {'blob': str(blob), 'payload_bytes': len(data), 'ranges': ranges,
                       'array_fallback_call': call, 'array_fallback_destination': destination,
-                      'lpm_start': lpm['start']},
+                      'lpm_start': lpm['start'],
+                      'read_call_sites': read_calls,
+                      'nearby_esi_literals_bytes': dict(literal_counts),
+                      'read_scope': 'Local decoded windows, not a complete CFG constant proof or dynamic frequency.'},
     'tracee': {'inputs': 'kprog/results/host-link-replay-20261116/tracee-inputs.json',
                'captured_programs': len(tracee), 'remaining_static_helper_call_sites': dict(counts),
                'examples': examples,

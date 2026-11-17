@@ -1,0 +1,97 @@
+Local windows only: nearby ESI literals are not full CFG proofs or execution frequencies.
+
+     a5f:	add    rdx,0x28
+     a63:	mov    esi,0x90
+     a68:	call   0x743a
+
+     b63:	mov    rdx,QWORD PTR [rsi]
+     b66:	mov    esi,0x10
+     b6b:	call   0x743a
+
+     cd4:	mov    esi,0x8
+     cd9:	mov    rdx,r12
+     cdc:	call   0x743a
+
+     e5d:	mov    esi,0x8
+     e62:	mov    rbx,rdx
+     e65:	call   0x743a
+
+     f47:	mov    rdi,r10
+     f4a:	mov    esi,0x8
+     f4f:	call   0x743a
+
+     f76:	mov    rdi,r14
+     f79:	mov    esi,0x8
+     f7e:	call   0x743a
+
+    2523:	mov    rdx,r14
+    2526:	mov    esi,0x8
+    252b:	call   0x743a
+
+    2620:	add    rdx,0x28
+    2624:	mov    esi,0x90
+    2629:	call   0x743a
+
+    2707:	mov    rdx,QWORD PTR [rdx]
+    270a:	mov    esi,0x10
+    270f:	call   0x743a
+
+    289f:	mov    esi,0x8
+    28a4:	mov    rdx,r12
+    28a7:	call   0x743a
+
+    29c4:	mov    esi,0x8
+    29c9:	mov    rdx,r12
+    29cc:	call   0x743a
+
+    2eb3:	mov    rdi,QWORD PTR [rsp+0x138]
+    2ebb:	mov    esi,0x8
+    2ec0:	call   0x743a
+
+    3ff0:	mov    rdx,r14
+    3ff3:	mov    esi,0x8
+    3ff8:	call   0x743a
+
+    40ed:	add    rdx,0x28
+    40f1:	mov    esi,0x90
+    40f6:	call   0x743a
+
+    41d4:	mov    rdx,QWORD PTR [rdx]
+    41d7:	mov    esi,0x10
+    41dc:	call   0x743a
+
+    436c:	mov    esi,0x8
+    4371:	mov    rdx,r12
+    4374:	call   0x743a
+
+    4491:	mov    esi,0x8
+    4496:	mov    rdx,r12
+    4499:	call   0x743a
+
+    491a:	mov    rdi,QWORD PTR [rsp+0x138]
+    4922:	mov    esi,0x8
+    4927:	call   0x743a
+
+    5dc0:	mov    rdx,r14
+    5dc3:	mov    esi,0x8
+    5dc8:	call   0x743a
+
+    5f97:	add    rdx,0x28
+    5f9b:	mov    esi,0x90
+    5fa0:	call   0x743a
+
+    607e:	mov    rdx,QWORD PTR [rdx]
+    6081:	mov    esi,0x10
+    6086:	call   0x743a
+
+    6216:	mov    esi,0x8
+    621b:	mov    rdx,r12
+    621e:	call   0x743a
+
+    6343:	mov    esi,0x8
+    6348:	mov    rdx,r12
+    634b:	call   0x743a
+
+    6838:	mov    rdi,QWORD PTR [rsp+0x138]
+    6840:	mov    esi,0x8
+    6845:	call   0x743a
