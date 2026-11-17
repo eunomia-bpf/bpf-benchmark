@@ -3820,3 +3820,34 @@ The published code retains the earlier ordered-TSC and provider-diagnostic
 questions, and the all-ones KVM mask fold remains a source opportunity.
 It has not joined the running breadth image. PERF changed only this
 review directory and preserved the queued publication and all raw runs.
+
+
+### Frozen-default breadth round: BCC throughput and bytes
+
+Coordinator receipt `5bfc51552`, run `094120_596590`, reports
+**0.998x throughput**, stats off and three 180-second samples through
+the frozen entry on fc7c4707. Baseline samples are
+665,069 / 668,507 / 666,823 and native samples
+663,464 / 665,767 / 669,301. The reported paired ratios are
+0.998 / 0.996 / 1.004, with zero errors; the aggregate uses the existing
+ratio of arm medians. The series is retained without an admission cutoff.
+
+Cumulative replacements remain **25**, native **8,677 B** and companion
+JIT **7,965 B**, as in the compat-image functional check. Native/JIT size
+is about **1.089x**, above the half-size target. The scalar throughput is
+above the recorded historical BCC 0.985x floor and below the 1.30x
+throughput target. Stats off provides no per-call measurement, so it
+cannot establish attainment of the per-call/native-speed goals.
+
+The source clock commit followed the image used by this row: the new
+341-byte body is not part of this observation. Queue recipe `2ac7d9d41`
+will build the checkout present after the breadth round ends; its
+recorded build revision/image and actual installed receipts will describe
+that later comparison. A recipe title or an earlier source commit is
+not a substitute for those observed inputs if more changes join it.
+PERF leaves the recipe and queue intact and requests no new gate.
+
+BCC completed at **10:06:10 UTC**. The breadth round continues with
+Cilium, then Tetragon, Tracee and Katran. PERF ran only retained-data and
+source readers; all production changes and the optimization ledger remain
+with the coordinator.
