@@ -1,0 +1,7 @@
+app requests stubs matching_stubs stub_bytes_saved source_width_changes source_width_bytes_saved conditional_rel32_to_rel8 jump_rel32_to_rel8 other lost_source_rows gained_source_rows mapped_target_mismatches total_bytes_saved
+bcc/set 25 0 0 0 0 0 0 0 0 0 0 0 0
+cilium/agent 47 87 87 1827 4 16 4 0 0 0 0 0 1843
+katran 1 0 0 0 0 0 0 0 0 0 0 0 0
+otelcol-ebpf-profiler/profiling 14 13 13 273 0 0 0 0 0 0 0 0 273
+tetragon/observer 39 59 59 1239 5 17 2 3 0 0 0 0 1256
+tracee/monitor 169 47 47 987 12 45 9 3 0 0 0 0 1032

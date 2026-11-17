@@ -1,0 +1,6271 @@
+{
+  "scope": "Read-only actual paired blobs, kind10 relocations and retained source-map records. Source-map rows name retained source instructions only; synthetic/deleted/expanded rows are never guessed. Encoding identity and mapped target observations are not installed-size, timing or complete proof evidence.",
+  "summary": {
+    "bcc/set": {
+      "requests": 25,
+      "lost_source_rows": 0,
+      "gained_source_rows": 0,
+      "total_bytes_saved": 0
+    },
+    "cilium/agent": {
+      "requests": 47,
+      "stubs": 87,
+      "stub_bytes_saved": 1827,
+      "matching_stubs": 87,
+      "source_width_bytes_saved": 16,
+      "source_width_changes": 4,
+      "conditional_rel32_to_rel8": 4,
+      "lost_source_rows": 0,
+      "gained_source_rows": 0,
+      "total_bytes_saved": 1843
+    },
+    "katran": {
+      "requests": 1,
+      "lost_source_rows": 0,
+      "gained_source_rows": 0,
+      "total_bytes_saved": 0
+    },
+    "otelcol-ebpf-profiler/profiling": {
+      "requests": 14,
+      "stubs": 13,
+      "stub_bytes_saved": 273,
+      "matching_stubs": 13,
+      "lost_source_rows": 0,
+      "gained_source_rows": 0,
+      "total_bytes_saved": 273
+    },
+    "tetragon/observer": {
+      "requests": 39,
+      "stubs": 59,
+      "stub_bytes_saved": 1239,
+      "matching_stubs": 59,
+      "lost_source_rows": 0,
+      "gained_source_rows": 0,
+      "total_bytes_saved": 1256,
+      "source_width_bytes_saved": 17,
+      "source_width_changes": 5,
+      "conditional_rel32_to_rel8": 2,
+      "jump_rel32_to_rel8": 3
+    },
+    "tracee/monitor": {
+      "requests": 169,
+      "lost_source_rows": 0,
+      "gained_source_rows": 0,
+      "total_bytes_saved": 1032,
+      "stubs": 47,
+      "stub_bytes_saved": 987,
+      "matching_stubs": 47,
+      "source_width_bytes_saved": 45,
+      "source_width_changes": 12,
+      "jump_rel32_to_rel8": 3,
+      "conditional_rel32_to_rel8": 9
+    }
+  },
+  "requests": [
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_php",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0t9jewb9",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 3019,
+          "new_field": 3012,
+          "recognized": true,
+          "old_start": 2994,
+          "new_start": 2994,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "native_tracer_entry",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6pt2hgn7",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 1275,
+          "new_field": 1268,
+          "recognized": true,
+          "old_start": 1250,
+          "new_start": 1250,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1408,
+          "new_field": 1380,
+          "recognized": true,
+          "old_start": 1383,
+          "new_start": 1362,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1760,
+          "new_field": 1711,
+          "recognized": true,
+          "old_start": 1735,
+          "new_start": 1693,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "tracepoint__sched_process_free",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6xjm60mv",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_perl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9jgkf4wo",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 3484,
+          "new_field": 3477,
+          "recognized": true,
+          "old_start": 3459,
+          "new_start": 3459,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_ruby",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bp1f6lmn",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 483,
+          "new_field": 476,
+          "recognized": true,
+          "old_start": 458,
+          "new_start": 458,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_native",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f2sqjzud",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 1840,
+          "new_field": 1833,
+          "recognized": true,
+          "old_start": 1815,
+          "new_start": 1815,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "read_task_struct",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-gv7scc03",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_v8",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-i74g9gvr",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 11950,
+          "new_field": 11943,
+          "recognized": true,
+          "old_start": 11925,
+          "new_start": 11925,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_stop",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-isjxl4cd",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 1864,
+          "new_field": 1857,
+          "recognized": true,
+          "old_start": 1847,
+          "new_start": 1847,
+          "old_bytes": 81,
+          "new_bytes": 60,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_dotnet",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jhlatj24",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 8376,
+          "new_field": 8369,
+          "recognized": true,
+          "old_start": 8351,
+          "new_start": 8351,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_go_labels",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-miy7mdp6",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_python",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pzbgnkhi",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 1976,
+          "new_field": 1969,
+          "recognized": true,
+          "old_start": 1951,
+          "new_start": 1951,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_hotspot",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vpdq0hnh",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 676,
+          "new_field": 669,
+          "recognized": true,
+          "old_start": 651,
+          "new_start": 651,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "custom__generic",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-z69ln99l",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 865,
+          "new_field": 858,
+          "recognized": true,
+          "old_start": 840,
+          "new_start": 840,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tcp_v4_connect",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1_lto8xz",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_write",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4jklketw",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tracepoint__syscalls__sys_exit_open",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6i31gwia",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tcp_v4_connect_ret",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-794zppcb",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "sys_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7d98s1v6",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "block_rq_issue",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7halu_ke",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "inet_sock_set_state",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8e6fl8jk",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "block_rq_complete",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_1aqp51j",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "blk_account_io_merge_bio",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-a193g4ge",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_open",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ay6ey69x",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_create",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bzxjfd4z",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tracepoint__syscalls__sys_enter_openat",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-dxo2lc2q",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_fsync",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hgq_b00n",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "sched_wakeup_new",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jb3gko01",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "block_rq_insert",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jck9lh2k",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "sched_wakeup",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k46xd0cp",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tracepoint__syscalls__sys_exit_openat",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ll9iyiuh",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tcp_v6_connect_ret",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mlacd5gt",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "kprobe__cap_capable_entry",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o0mz755w",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "kprobe__cap_capable_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rh0ow6sg",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "sched_switch",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-scqqtjed",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tcp_v6_connect",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v27kbtfd",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "sys_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v8lv8ar0",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_read",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-x1s4v62w",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tracepoint__syscalls__sys_enter_open",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ys2epo0_",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_ingress_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-13kno4fc",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 137,
+          "new_field": 126,
+          "recognized": true,
+          "old_start": 112,
+          "new_start": 108,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1153,
+          "new_field": 1121,
+          "recognized": true,
+          "old_start": 1128,
+          "new_start": 1103,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [
+        {
+          "section": 1,
+          "symbol": "tail_nodeport_nat_ingress_ipv4",
+          "input_offset": 76,
+          "old_offset": 76,
+          "new_offset": 76,
+          "old_bytes": "0f8588000000",
+          "new_bytes": "7573",
+          "bytes_saved": 4,
+          "kind": "conditional_rel32_to_rel8",
+          "mapped_target_equal": true
+        }
+      ],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 46,
+      "attributed_bytes": 46
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_netdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1cycht3i",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 799,
+          "new_field": 792,
+          "recognized": true,
+          "old_start": 774,
+          "new_start": 774,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1134,
+          "new_field": 1106,
+          "recognized": true,
+          "old_start": 1109,
+          "new_start": 1088,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 3620,
+          "new_field": 3571,
+          "recognized": true,
+          "old_start": 3595,
+          "new_start": 3553,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_rev_dnat_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2ce8m1_7",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 2065,
+          "new_field": 2058,
+          "recognized": true,
+          "old_start": 2040,
+          "new_start": 2040,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_xdp_entry",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-3cqcl0fp",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_container",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4d9yymr5",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 372,
+          "new_field": 365,
+          "recognized": true,
+          "old_start": 347,
+          "new_start": 347,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1023,
+          "new_field": 995,
+          "recognized": true,
+          "old_start": 998,
+          "new_start": 977,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 42,
+      "attributed_bytes": 42
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_no_service_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4uxpf98g",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 538,
+          "new_field": 531,
+          "recognized": true,
+          "old_start": 513,
+          "new_start": 513,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_host",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6fga9lbq",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 628,
+          "new_field": 621,
+          "recognized": true,
+          "old_start": 603,
+          "new_start": 603,
+          "old_bytes": 90,
+          "new_bytes": 69,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1013,
+          "new_field": 985,
+          "recognized": true,
+          "old_start": 988,
+          "new_start": 967,
+          "old_bytes": 90,
+          "new_bytes": 69,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 42,
+      "attributed_bytes": 42
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_netdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-79btul9d",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 808,
+          "new_field": 801,
+          "recognized": true,
+          "old_start": 783,
+          "new_start": 783,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1142,
+          "new_field": 1114,
+          "recognized": true,
+          "old_start": 1117,
+          "new_start": 1096,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 5177,
+          "new_field": 5128,
+          "recognized": true,
+          "old_start": 5152,
+          "new_start": 5110,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_policy",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8cg5bvgp",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 3152,
+          "new_field": 3145,
+          "recognized": true,
+          "old_start": 3127,
+          "new_start": 3127,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_arp",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-91mtb7o3",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 683,
+          "new_field": 676,
+          "recognized": true,
+          "old_start": 666,
+          "new_start": 666,
+          "old_bytes": 79,
+          "new_bytes": 58,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_egress",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9gsgtcv3",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 3949,
+          "new_field": 3942,
+          "recognized": true,
+          "old_start": 3924,
+          "new_start": 3924,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 4209,
+          "new_field": 4181,
+          "recognized": true,
+          "old_start": 4184,
+          "new_start": 4163,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 42,
+      "attributed_bytes": 42
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_rev_dnat_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_7ys3jh4",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 2065,
+          "new_field": 2058,
+          "recognized": true,
+          "old_start": 2040,
+          "new_start": 2040,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_lxc_policy",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_8d03s3p",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 3090,
+          "new_field": 3083,
+          "recognized": true,
+          "old_start": 3065,
+          "new_start": 3065,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 3355,
+          "new_field": 3327,
+          "recognized": true,
+          "old_start": 3330,
+          "new_start": 3309,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 3638,
+          "new_field": 3589,
+          "recognized": true,
+          "old_start": 3613,
+          "new_start": 3571,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_host",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_p5zmjby",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 1339,
+          "new_field": 1332,
+          "recognized": true,
+          "old_start": 1314,
+          "new_start": 1314,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1858,
+          "new_field": 1830,
+          "recognized": true,
+          "old_start": 1833,
+          "new_start": 1812,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 2126,
+          "new_field": 2077,
+          "recognized": true,
+          "old_start": 2101,
+          "new_start": 2059,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_snat_fwd_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-agezr1oz",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 691,
+          "new_field": 684,
+          "recognized": true,
+          "old_start": 666,
+          "new_start": 666,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_lxc_policy",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f5_4shmk",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 3090,
+          "new_field": 3083,
+          "recognized": true,
+          "old_start": 3065,
+          "new_start": 3065,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 3355,
+          "new_field": 3327,
+          "recognized": true,
+          "old_start": 3330,
+          "new_start": 3309,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 3638,
+          "new_field": 3589,
+          "recognized": true,
+          "old_start": 3613,
+          "new_start": 3571,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_host",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f9ut04aq",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_egress_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fhkkm0eb",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 690,
+          "new_field": 683,
+          "recognized": true,
+          "old_start": 665,
+          "new_start": 665,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_snat_fwd_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-iwl_z0yi",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 681,
+          "new_field": 674,
+          "recognized": true,
+          "old_start": 656,
+          "new_start": 656,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_no_service_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jo5rwatf",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 538,
+          "new_field": 531,
+          "recognized": true,
+          "old_start": 513,
+          "new_start": 513,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_arp",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k027eqh_",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 683,
+          "new_field": 676,
+          "recognized": true,
+          "old_start": 666,
+          "new_start": 666,
+          "old_bytes": 79,
+          "new_bytes": 58,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_to_endpoint",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-l7u92oz8",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 518,
+          "new_field": 511,
+          "recognized": true,
+          "old_start": 493,
+          "new_start": 493,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_egress",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lf1ld_nc",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 3949,
+          "new_field": 3942,
+          "recognized": true,
+          "old_start": 3924,
+          "new_start": 3924,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 4209,
+          "new_field": 4181,
+          "recognized": true,
+          "old_start": 4184,
+          "new_start": 4163,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 42,
+      "attributed_bytes": 42
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_cont",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lorirdv6",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 824,
+          "new_field": 817,
+          "recognized": true,
+          "old_start": 799,
+          "new_start": 799,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 3607,
+          "new_field": 3579,
+          "recognized": true,
+          "old_start": 3582,
+          "new_start": 3561,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 3824,
+          "new_field": 3775,
+          "recognized": true,
+          "old_start": 3799,
+          "new_start": 3757,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_host",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-movvchz0",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 1339,
+          "new_field": 1332,
+          "recognized": true,
+          "old_start": 1314,
+          "new_start": 1314,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1858,
+          "new_field": 1830,
+          "recognized": true,
+          "old_start": 1833,
+          "new_start": 1812,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 2126,
+          "new_field": 2077,
+          "recognized": true,
+          "old_start": 2101,
+          "new_start": 2059,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_snat_fwd_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nxg7aalt",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 722,
+          "new_field": 715,
+          "recognized": true,
+          "old_start": 697,
+          "new_start": 697,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_policy",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o3794un8",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 3152,
+          "new_field": 3145,
+          "recognized": true,
+          "old_start": 3127,
+          "new_start": 3127,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_netdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o8ohgar4",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 819,
+          "new_field": 812,
+          "recognized": true,
+          "old_start": 794,
+          "new_start": 794,
+          "old_bytes": 90,
+          "new_bytes": 69,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1811,
+          "new_field": 1783,
+          "recognized": true,
+          "old_start": 1786,
+          "new_start": 1765,
+          "old_bytes": 90,
+          "new_bytes": 69,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 2072,
+          "new_field": 2023,
+          "recognized": true,
+          "old_start": 2047,
+          "new_start": 2005,
+          "old_bytes": 90,
+          "new_bytes": 69,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_netdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pkqceosl",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 819,
+          "new_field": 812,
+          "recognized": true,
+          "old_start": 794,
+          "new_start": 794,
+          "old_bytes": 90,
+          "new_bytes": 69,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1811,
+          "new_field": 1783,
+          "recognized": true,
+          "old_start": 1786,
+          "new_start": 1765,
+          "old_bytes": 90,
+          "new_bytes": 69,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 2072,
+          "new_field": 2023,
+          "recognized": true,
+          "old_start": 2047,
+          "new_start": 2005,
+          "old_bytes": 90,
+          "new_bytes": 69,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qw44_dh3",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 626,
+          "new_field": 619,
+          "recognized": true,
+          "old_start": 601,
+          "new_start": 601,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1626,
+          "new_field": 1598,
+          "recognized": true,
+          "old_start": 1601,
+          "new_start": 1580,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 4205,
+          "new_field": 4156,
+          "recognized": true,
+          "old_start": 4180,
+          "new_start": 4138,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_host",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rodhoecx",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 1339,
+          "new_field": 1332,
+          "recognized": true,
+          "old_start": 1314,
+          "new_start": 1314,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1858,
+          "new_field": 1830,
+          "recognized": true,
+          "old_start": 1833,
+          "new_start": 1812,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 2126,
+          "new_field": 2077,
+          "recognized": true,
+          "old_start": 2101,
+          "new_start": 2059,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_ingress_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rxey2hzy",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 137,
+          "new_field": 126,
+          "recognized": true,
+          "old_start": 112,
+          "new_start": 108,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1153,
+          "new_field": 1121,
+          "recognized": true,
+          "old_start": 1128,
+          "new_start": 1103,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [
+        {
+          "section": 1,
+          "symbol": "tail_nodeport_nat_ingress_ipv4",
+          "input_offset": 76,
+          "old_offset": 76,
+          "new_offset": 76,
+          "old_bytes": "0f8588000000",
+          "new_bytes": "7573",
+          "bytes_saved": 4,
+          "kind": "conditional_rel32_to_rel8",
+          "mapped_target_equal": true
+        }
+      ],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 46,
+      "attributed_bytes": 46
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_container",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-s6hx0gco",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 484,
+          "new_field": 473,
+          "recognized": true,
+          "old_start": 467,
+          "new_start": 463,
+          "old_bytes": 81,
+          "new_bytes": 60,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 751,
+          "new_field": 719,
+          "recognized": true,
+          "old_start": 734,
+          "new_start": 709,
+          "old_bytes": 81,
+          "new_bytes": 60,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [
+        {
+          "section": 1,
+          "symbol": "cil_from_container",
+          "input_offset": 395,
+          "old_offset": 414,
+          "new_offset": 414,
+          "old_bytes": "0f8585000000",
+          "new_bytes": "7570",
+          "bytes_saved": 4,
+          "kind": "conditional_rel32_to_rel8",
+          "mapped_target_equal": true
+        }
+      ],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 46,
+      "attributed_bytes": 46
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_netdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-syczdmnk",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 2583,
+          "new_field": 2576,
+          "recognized": true,
+          "old_start": 2558,
+          "new_start": 2558,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 2882,
+          "new_field": 2854,
+          "recognized": true,
+          "old_start": 2857,
+          "new_start": 2836,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 42,
+      "attributed_bytes": 42
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-t15zizyt",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 626,
+          "new_field": 619,
+          "recognized": true,
+          "old_start": 601,
+          "new_start": 601,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1626,
+          "new_field": 1598,
+          "recognized": true,
+          "old_start": 1601,
+          "new_start": 1580,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 4205,
+          "new_field": 4156,
+          "recognized": true,
+          "old_start": 4180,
+          "new_start": 4138,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_netdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-t_ial4wq",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 2583,
+          "new_field": 2576,
+          "recognized": true,
+          "old_start": 2558,
+          "new_start": 2558,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 2882,
+          "new_field": 2854,
+          "recognized": true,
+          "old_start": 2857,
+          "new_start": 2836,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 42,
+      "attributed_bytes": 42
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_to_endpoint",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uxsybchg",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 518,
+          "new_field": 511,
+          "recognized": true,
+          "old_start": 493,
+          "new_start": 493,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_container",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v9h7qeqv",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 372,
+          "new_field": 365,
+          "recognized": true,
+          "old_start": 347,
+          "new_start": 347,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1023,
+          "new_field": 995,
+          "recognized": true,
+          "old_start": 998,
+          "new_start": 977,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 42,
+      "attributed_bytes": 42
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_netdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v_946gqq",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 819,
+          "new_field": 812,
+          "recognized": true,
+          "old_start": 794,
+          "new_start": 794,
+          "old_bytes": 90,
+          "new_bytes": 69,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1811,
+          "new_field": 1783,
+          "recognized": true,
+          "old_start": 1786,
+          "new_start": 1765,
+          "old_bytes": 90,
+          "new_bytes": 69,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 2072,
+          "new_field": 2023,
+          "recognized": true,
+          "old_start": 2047,
+          "new_start": 2005,
+          "old_bytes": 90,
+          "new_bytes": 69,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_cont",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vc7e_r5k",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 824,
+          "new_field": 817,
+          "recognized": true,
+          "old_start": 799,
+          "new_start": 799,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 3607,
+          "new_field": 3579,
+          "recognized": true,
+          "old_start": 3582,
+          "new_start": 3561,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 3824,
+          "new_field": 3775,
+          "recognized": true,
+          "old_start": 3799,
+          "new_start": 3757,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_host",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vl_vqe9q",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_ingress",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-wbdsc394",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 3022,
+          "new_field": 3015,
+          "recognized": true,
+          "old_start": 2997,
+          "new_start": 2997,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 3287,
+          "new_field": 3259,
+          "recognized": true,
+          "old_start": 3262,
+          "new_start": 3241,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 42,
+      "attributed_bytes": 42
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_netdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xd5wo9oh",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 2583,
+          "new_field": 2576,
+          "recognized": true,
+          "old_start": 2558,
+          "new_start": 2558,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 2882,
+          "new_field": 2854,
+          "recognized": true,
+          "old_start": 2857,
+          "new_start": 2836,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 42,
+      "attributed_bytes": 42
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_container",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xno7wtkt",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 484,
+          "new_field": 473,
+          "recognized": true,
+          "old_start": 467,
+          "new_start": 463,
+          "old_bytes": 81,
+          "new_bytes": 60,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 751,
+          "new_field": 719,
+          "recognized": true,
+          "old_start": 734,
+          "new_start": 709,
+          "old_bytes": 81,
+          "new_bytes": 60,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [
+        {
+          "section": 1,
+          "symbol": "cil_from_container",
+          "input_offset": 395,
+          "old_offset": 414,
+          "new_offset": 414,
+          "old_bytes": "0f8585000000",
+          "new_bytes": "7570",
+          "bytes_saved": 4,
+          "kind": "conditional_rel32_to_rel8",
+          "mapped_target_equal": true
+        }
+      ],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 46,
+      "attributed_bytes": 46
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_ingress",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-y6a0390q",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 3022,
+          "new_field": 3015,
+          "recognized": true,
+          "old_start": 2997,
+          "new_start": 2997,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 3287,
+          "new_field": 3259,
+          "recognized": true,
+          "old_start": 3262,
+          "new_start": 3241,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 42,
+      "attributed_bytes": 42
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_host",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-yaomepl8",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 628,
+          "new_field": 621,
+          "recognized": true,
+          "old_start": 603,
+          "new_start": 603,
+          "old_bytes": 90,
+          "new_bytes": 69,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1013,
+          "new_field": 985,
+          "recognized": true,
+          "old_start": 988,
+          "new_start": 967,
+          "old_bytes": 90,
+          "new_bytes": 69,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 42,
+      "attributed_bytes": 42
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_egress_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zlk3fva1",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 690,
+          "new_field": 683,
+          "recognized": true,
+          "old_start": 665,
+          "new_start": 665,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "execve_rate",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-04ysigi9",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 910,
+          "new_field": 903,
+          "recognized": true,
+          "old_start": 885,
+          "new_start": 885,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0uk6eny3",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 443,
+          "new_field": 436,
+          "recognized": true,
+          "old_start": 418,
+          "new_start": 418,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 979,
+          "new_field": 951,
+          "recognized": true,
+          "old_start": 954,
+          "new_start": 933,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1094,
+          "new_field": 1045,
+          "recognized": true,
+          "old_start": 1069,
+          "new_start": 1027,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_process_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0v55dkrr",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 3503,
+          "new_field": 3488,
+          "recognized": true,
+          "old_start": 3478,
+          "new_start": 3470,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 3632,
+          "new_field": 3596,
+          "recognized": true,
+          "old_start": 3607,
+          "new_start": 3578,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [
+        {
+          "section": 1,
+          "symbol": "generic_kprobe_process_event",
+          "input_offset": 3370,
+          "old_offset": 3422,
+          "new_offset": 3422,
+          "old_bytes": "0f8491000000",
+          "new_bytes": "7478",
+          "bytes_saved": 4,
+          "kind": "conditional_rel32_to_rel8",
+          "mapped_target_equal": true
+        },
+        {
+          "section": 1,
+          "symbol": "generic_kprobe_process_event",
+          "input_offset": 3386,
+          "old_offset": 3442,
+          "new_offset": 3438,
+          "old_bytes": "0f847d000000",
+          "new_bytes": "7468",
+          "bytes_saved": 4,
+          "kind": "conditional_rel32_to_rel8",
+          "mapped_target_equal": true
+        }
+      ],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 50,
+      "attributed_bytes": 50
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_output",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1e1whdkd",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_output",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-20u5h7e0",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-31f47_a7",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 443,
+          "new_field": 436,
+          "recognized": true,
+          "old_start": 418,
+          "new_start": 418,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 979,
+          "new_field": 951,
+          "recognized": true,
+          "old_start": 954,
+          "new_start": 933,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1094,
+          "new_field": 1045,
+          "recognized": true,
+          "old_start": 1069,
+          "new_start": 1027,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_output",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4vi9ft6v",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "execve_send",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6vbtwxp5",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_output",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7xa_4zm5",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9p7ocgsk",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 443,
+          "new_field": 436,
+          "recognized": true,
+          "old_start": 418,
+          "new_start": 418,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 979,
+          "new_field": 951,
+          "recognized": true,
+          "old_start": 954,
+          "new_start": 933,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1094,
+          "new_field": 1045,
+          "recognized": true,
+          "old_start": 1069,
+          "new_start": 1027,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_process_filter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_gtbajk_",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 8530,
+          "new_field": 8523,
+          "recognized": true,
+          "old_start": 8505,
+          "new_start": 8505,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 8670,
+          "new_field": 8642,
+          "recognized": true,
+          "old_start": 8645,
+          "new_start": 8624,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [
+        {
+          "section": 1,
+          "symbol": "generic_kprobe_process_filter",
+          "input_offset": 8135,
+          "old_offset": 8740,
+          "new_offset": 8698,
+          "old_bytes": "e96fffffff",
+          "new_bytes": "eb87",
+          "bytes_saved": 3,
+          "kind": "jump_rel32_to_rel8",
+          "mapped_target_equal": true
+        }
+      ],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 45,
+      "attributed_bytes": 45
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_qtl2kam",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 443,
+          "new_field": 436,
+          "recognized": true,
+          "old_start": 418,
+          "new_start": 418,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 979,
+          "new_field": 951,
+          "recognized": true,
+          "old_start": 954,
+          "new_start": 933,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1094,
+          "new_field": 1045,
+          "recognized": true,
+          "old_start": 1069,
+          "new_start": 1027,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_actions",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_vqrdf28",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 319,
+          "new_field": 312,
+          "recognized": true,
+          "old_start": 302,
+          "new_start": 302,
+          "old_bytes": 81,
+          "new_bytes": 60,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_setup_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ai2k1te5",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 518,
+          "new_field": 511,
+          "recognized": true,
+          "old_start": 501,
+          "new_start": 501,
+          "old_bytes": 79,
+          "new_bytes": 58,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 620,
+          "new_field": 592,
+          "recognized": true,
+          "old_start": 603,
+          "new_start": 582,
+          "old_bytes": 79,
+          "new_bytes": 58,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 42,
+      "attributed_bytes": 42
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_actions",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-beoa__2d",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 319,
+          "new_field": 312,
+          "recognized": true,
+          "old_start": 302,
+          "new_start": 302,
+          "old_bytes": 81,
+          "new_bytes": 60,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "execve_map_update",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-blnybbe9",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-c3k1hzvb",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 354,
+          "new_field": 347,
+          "recognized": true,
+          "old_start": 329,
+          "new_start": 329,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 890,
+          "new_field": 862,
+          "recognized": true,
+          "old_start": 865,
+          "new_start": 844,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1005,
+          "new_field": 956,
+          "recognized": true,
+          "old_start": 980,
+          "new_start": 938,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "tg_kp_bprm_committing_creds",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-c_1wmpw5",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ddm5z6l1",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 443,
+          "new_field": 436,
+          "recognized": true,
+          "old_start": 418,
+          "new_start": 418,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 979,
+          "new_field": 951,
+          "recognized": true,
+          "old_start": 954,
+          "new_start": 933,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1094,
+          "new_field": 1045,
+          "recognized": true,
+          "old_start": 1069,
+          "new_start": 1027,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_filter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-g_0kedgz",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 8533,
+          "new_field": 8526,
+          "recognized": true,
+          "old_start": 8508,
+          "new_start": 8508,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 8673,
+          "new_field": 8645,
+          "recognized": true,
+          "old_start": 8648,
+          "new_start": 8627,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [
+        {
+          "section": 1,
+          "symbol": "generic_tracepoint_filter",
+          "input_offset": 8138,
+          "old_offset": 8743,
+          "new_offset": 8701,
+          "old_bytes": "e96fffffff",
+          "new_bytes": "eb87",
+          "bytes_saved": 3,
+          "kind": "jump_rel32_to_rel8",
+          "mapped_target_equal": true
+        }
+      ],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 45,
+      "attributed_bytes": 45
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-il4rhakh",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 443,
+          "new_field": 436,
+          "recognized": true,
+          "old_start": 418,
+          "new_start": 418,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 979,
+          "new_field": 951,
+          "recognized": true,
+          "old_start": 954,
+          "new_start": 933,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1094,
+          "new_field": 1045,
+          "recognized": true,
+          "old_start": 1069,
+          "new_start": 1027,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-j63keppd",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 443,
+          "new_field": 436,
+          "recognized": true,
+          "old_start": 418,
+          "new_start": 418,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 979,
+          "new_field": 951,
+          "recognized": true,
+          "old_start": 954,
+          "new_start": 933,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1094,
+          "new_field": 1045,
+          "recognized": true,
+          "old_start": 1069,
+          "new_start": 1027,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_exit_disassociate_ctty",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jasy1x_7",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-juhc192d",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 443,
+          "new_field": 436,
+          "recognized": true,
+          "old_start": 418,
+          "new_start": 418,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 979,
+          "new_field": 951,
+          "recognized": true,
+          "old_start": 954,
+          "new_start": 933,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1094,
+          "new_field": 1045,
+          "recognized": true,
+          "old_start": 1069,
+          "new_start": 1027,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_actions",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k6ckpvxv",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 319,
+          "new_field": 312,
+          "recognized": true,
+          "old_start": 302,
+          "new_start": 302,
+          "old_bytes": 81,
+          "new_bytes": 60,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_process_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-l3wtixm8",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 1622,
+          "new_field": 1615,
+          "recognized": true,
+          "old_start": 1597,
+          "new_start": 1597,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 3351,
+          "new_field": 3323,
+          "recognized": true,
+          "old_start": 3326,
+          "new_start": 3305,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 42,
+      "attributed_bytes": 42
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_process_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lrpau888",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 1407,
+          "new_field": 1400,
+          "recognized": true,
+          "old_start": 1382,
+          "new_start": 1382,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 3488,
+          "new_field": 3460,
+          "recognized": true,
+          "old_start": 3463,
+          "new_start": 3442,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 42,
+      "attributed_bytes": 42
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_process_filter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nqetz_k2",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 8530,
+          "new_field": 8523,
+          "recognized": true,
+          "old_start": 8505,
+          "new_start": 8505,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 8670,
+          "new_field": 8642,
+          "recognized": true,
+          "old_start": 8645,
+          "new_start": 8624,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [
+        {
+          "section": 1,
+          "symbol": "generic_rawtp_process_filter",
+          "input_offset": 8135,
+          "old_offset": 8740,
+          "new_offset": 8698,
+          "old_bytes": "e96fffffff",
+          "new_bytes": "eb87",
+          "bytes_saved": 3,
+          "kind": "jump_rel32_to_rel8",
+          "mapped_target_equal": true
+        }
+      ],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 45,
+      "attributed_bytes": 45
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qqafecq5",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 443,
+          "new_field": 436,
+          "recognized": true,
+          "old_start": 418,
+          "new_start": 418,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 979,
+          "new_field": 951,
+          "recognized": true,
+          "old_start": 954,
+          "new_start": 933,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1094,
+          "new_field": 1045,
+          "recognized": true,
+          "old_start": 1069,
+          "new_start": 1027,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_execve",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r9kh94rr",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 6718,
+          "new_field": 6711,
+          "recognized": true,
+          "old_start": 6693,
+          "new_start": 6693,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rmyx34xm",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 1297,
+          "new_field": 1290,
+          "recognized": true,
+          "old_start": 1272,
+          "new_start": 1272,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-wdd42hwy",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 1297,
+          "new_field": 1290,
+          "recognized": true,
+          "old_start": 1272,
+          "new_start": 1272,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_actions",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xf313ycz",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 319,
+          "new_field": 312,
+          "recognized": true,
+          "old_start": 302,
+          "new_start": 302,
+          "old_bytes": 81,
+          "new_bytes": 60,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xgsv35ba",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 443,
+          "new_field": 436,
+          "recognized": true,
+          "old_start": 418,
+          "new_start": 418,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 979,
+          "new_field": 951,
+          "recognized": true,
+          "old_start": 954,
+          "new_start": 933,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 1094,
+          "new_field": 1045,
+          "recognized": true,
+          "old_start": 1069,
+          "new_start": 1027,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 63,
+      "attributed_bytes": 63
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xh90hqo_",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 5696,
+          "new_field": 5689,
+          "recognized": true,
+          "old_start": 5671,
+          "new_start": 5671,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_setup_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xuz7oyzt",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 444,
+          "new_field": 437,
+          "recognized": true,
+          "old_start": 427,
+          "new_start": 427,
+          "old_bytes": 77,
+          "new_bytes": 56,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 544,
+          "new_field": 516,
+          "recognized": true,
+          "old_start": 527,
+          "new_start": 506,
+          "old_bytes": 77,
+          "new_bytes": 56,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 42,
+      "attributed_bytes": 42
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_exit_acct_process",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ye4mrb_x",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-yuod933z",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 10961,
+          "new_field": 10954,
+          "recognized": true,
+          "old_start": 10936,
+          "new_start": 10936,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_wake_up_new_task",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zfitfdx5",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_do_init_module",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-017c9l0e",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_mkdir_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-05zpqxw5",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_proc_create",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-09yg3syu",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_permission",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0i4efh97",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sched_process_fork_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0yeqcsp9",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_dup2",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0zn8n8nm",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 8691,
+          "new_field": 8684,
+          "recognized": true,
+          "old_start": 8666,
+          "new_start": 8666,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_sb_mount",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1al7w7n_",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_register_kprobe",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1dlp69ce",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "security_bpf_kprobe",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1rsfl2um",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_register_kprobe",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-25r5ey8n",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_fd_install",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-279z4mzn",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_recvmsg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2c20f7iq",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_mem_dump_trigger",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2euu41id",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_truncate",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2ohy4p0m",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace___debugfs_create_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2wpohzoo",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_bpf_check",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2xmqw18s",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "vfs_writev_magic_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-3aidh7c1",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_utimes_common",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-3cfra29r",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_lkm_seeker",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-3oke79hs",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 3052,
+          "new_field": 3042,
+          "recognized": true,
+          "old_start": 3027,
+          "new_start": 3024,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [
+        {
+          "section": 1,
+          "symbol": "uprobe_lkm_seeker",
+          "input_offset": 2788,
+          "old_offset": 2983,
+          "new_offset": 2983,
+          "old_bytes": "e98b000000",
+          "new_bytes": "eb76",
+          "bytes_saved": 3,
+          "kind": "jump_rel32_to_rel8",
+          "mapped_target_equal": true
+        }
+      ],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 24,
+      "attributed_bytes": 24
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_chmod_common",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4hsfozd4",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_execute_finished",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4vy19taj",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_process_exec",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-51uw37rf",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 10412,
+          "new_field": 10405,
+          "recognized": true,
+          "old_start": 10387,
+          "new_start": 10387,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bprm_creds_for_exec",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-56siaau7",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 6585,
+          "new_field": 6578,
+          "recognized": true,
+          "old_start": 6560,
+          "new_start": 6560,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__cgroup__cgroup_rmdir",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-5gxcl38z",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__accept4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-5llp5ka0",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bpf_map",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-64h9nush",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_dup",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6_siljwd",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 465,
+          "new_field": 458,
+          "recognized": true,
+          "old_start": 440,
+          "new_start": 440,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sched_process_exit_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6fbt0i5v",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "vfs_writev_magic_return",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7_enltvb",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_check_map_func_compatibility",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-89tqz71h",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__raw_syscalls__sys_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8cgewgox",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 118,
+          "new_field": 111,
+          "recognized": true,
+          "old_start": 101,
+          "new_start": 101,
+          "old_bytes": 77,
+          "new_bytes": 56,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_kallsyms_lookup_name",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8kgpa20o",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execveat_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8lb6agqq",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_settime64",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-932_xsv4",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_mknod",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-96ffhbif",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_set_fs_pwd",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-99z6y52i",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_setsockopt",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9ds10gnw",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_file_modified",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9qyfm50x",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__raw_syscalls__sys_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9y0d_vd4",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 148,
+          "new_field": 141,
+          "recognized": true,
+          "old_start": 131,
+          "new_start": 131,
+          "old_bytes": 77,
+          "new_bytes": 56,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__module__module_load",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9yd5aw5c",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execve_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_0s58jbm",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_file_update_time",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_2la9k4c",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_path_notify",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_6a36jlc",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_dup3",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_y38j0c7",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 465,
+          "new_field": 458,
+          "recognized": true,
+          "old_start": 440,
+          "new_start": 440,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_listen",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-a7tuahol",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_kallsyms_lookup_name",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ahj1_4pv",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_mmap_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-amhjcvnr",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_vfs_readv",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-aop4ljiv",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_cap_capable",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-b7axm1ie",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_do_splice",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bbxy8sr7",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_task_prctl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bdoo7afc",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_read_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bin1t79n",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 6535,
+          "new_field": 6524,
+          "recognized": true,
+          "old_start": 6510,
+          "new_start": 6506,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [
+        {
+          "section": 1,
+          "symbol": "trace_ret_vfs_read_tail",
+          "input_offset": 6239,
+          "old_offset": 6455,
+          "new_offset": 6455,
+          "old_bytes": "0f8790000000",
+          "new_bytes": "777b",
+          "bytes_saved": 4,
+          "kind": "conditional_rel32_to_rel8",
+          "mapped_target_equal": true
+        }
+      ],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 25,
+      "attributed_bytes": 25
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_device_add",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bwp7_2ms",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_sys_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ci3jf9ph",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_check_helper_call",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-cquz72yx",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_mmap_alert",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-cru7pfek",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_task_setrlimit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-cw8vbd3l",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "kernel_write_magic_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-d3zufz99",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_splice",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-d449regs",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_file_modified",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-d50syq4d",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_lkm_seeker_submitter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-dhilq03b",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_switch",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-dynocs3e",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_inotify_find_inode",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-dz4c9avv",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_mprotect",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-eb6tcou5",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 14546,
+          "new_field": 14535,
+          "recognized": true,
+          "old_start": 14521,
+          "new_start": 14517,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [
+        {
+          "section": 1,
+          "symbol": "trace_security_file_mprotect",
+          "input_offset": 13981,
+          "old_offset": 14468,
+          "new_offset": 14468,
+          "old_bytes": "0f878e000000",
+          "new_bytes": "7779",
+          "bytes_saved": 4,
+          "kind": "conditional_rel32_to_rel8",
+          "mapped_target_equal": true
+        }
+      ],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 25,
+      "attributed_bytes": 25
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__task__task_rename",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-egsoamtt",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "send_bin_tp",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ekfto0ej",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 683,
+          "new_field": 676,
+          "recognized": true,
+          "old_start": 658,
+          "new_start": 658,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_ptrace",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-eolnj7vr",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 8691,
+          "new_field": 8684,
+          "recognized": true,
+          "old_start": 8666,
+          "new_start": 8666,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_sys_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f06yp4a3",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_process_free",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f0fyimi4",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_kernel_post_read_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fgoiyo4w",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 7293,
+          "new_field": 7282,
+          "recognized": true,
+          "old_start": 7268,
+          "new_start": 7264,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [
+        {
+          "section": 1,
+          "symbol": "trace_security_kernel_post_read_file",
+          "input_offset": 6904,
+          "old_offset": 7213,
+          "new_offset": 7213,
+          "old_bytes": "0f8790000000",
+          "new_bytes": "777b",
+          "bytes_saved": 4,
+          "kind": "conditional_rel32_to_rel8",
+          "mapped_target_equal": true
+        }
+      ],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 25,
+      "attributed_bytes": 25
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_readv_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fscgqsh5",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 11166,
+          "new_field": 11155,
+          "recognized": true,
+          "old_start": 11141,
+          "new_start": 11137,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [
+        {
+          "section": 1,
+          "symbol": "trace_ret_vfs_readv_tail",
+          "input_offset": 10846,
+          "old_offset": 11091,
+          "new_offset": 11091,
+          "old_bytes": "0f878b000000",
+          "new_bytes": "7776",
+          "bytes_saved": 4,
+          "kind": "conditional_rel32_to_rel8",
+          "mapped_target_equal": true
+        }
+      ],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 25,
+      "attributed_bytes": 25
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace___register_chrdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ftw94k7c",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lsm_file_open_test",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fx044r0o",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bpf",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-gmhuwt57",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 11019,
+          "new_field": 11008,
+          "recognized": true,
+          "old_start": 10994,
+          "new_start": 10990,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [
+        {
+          "section": 1,
+          "symbol": "trace_security_bpf",
+          "input_offset": 10458,
+          "old_offset": 10946,
+          "new_offset": 10946,
+          "old_bytes": "0f8789000000",
+          "new_bytes": "7774",
+          "bytes_saved": 4,
+          "kind": "conditional_rel32_to_rel8",
+          "mapped_target_equal": true
+        }
+      ],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 25,
+      "attributed_bytes": 25
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall_checker",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-gs0e2ldt",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe__features_fallback_minimal_tailcall",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-gwrg59pw",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hb9cetnn",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_rename",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hc4ro7xn",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_sb_umount",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hdvg450z",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_read",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hsk75jw2",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 8229,
+          "new_field": 8222,
+          "recognized": true,
+          "old_start": 8204,
+          "new_start": 8204,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execve_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hvb0kyoo",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_create",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-i3p2v7am",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__cgroup__cgroup_attach_task",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-i4_djze4",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_ioctl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ibpjwerv",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_file_update_time",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ibrrmkdz",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_process_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-j3_4yk8e",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_arch_prctl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jv5nd05b",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 465,
+          "new_field": 458,
+          "recognized": true,
+          "old_start": 440,
+          "new_start": 440,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_sigaction",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jxmj3ryw",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sched_process_exec_event_submit_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k0ty1s40",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_sendmsg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-kb8wrxm3",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_dup2",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-kc6m9ob8",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 465,
+          "new_field": 458,
+          "recognized": true,
+          "old_start": 440,
+          "new_start": 440,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe__features_fallback_helper_tailcall",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-kmzrwgx2",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "empty_kprobe",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-krjq8b_5",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bpf_prog",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ktazrxzj",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_process_fork",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-kw8tx6mb",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "heartbeat_capture",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-le73inl6",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_write_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lncel1es",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 10654,
+          "new_field": 10643,
+          "recognized": true,
+          "old_start": 10629,
+          "new_start": 10625,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [
+        {
+          "section": 1,
+          "symbol": "trace_ret_vfs_write_tail",
+          "input_offset": 10165,
+          "old_offset": 10579,
+          "new_offset": 10579,
+          "old_bytes": "0f878b000000",
+          "new_bytes": "7776",
+          "bytes_saved": 4,
+          "kind": "conditional_rel32_to_rel8",
+          "mapped_target_equal": true
+        }
+      ],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 25,
+      "attributed_bytes": 25
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_readv",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lp_oh_df",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 8229,
+          "new_field": 8222,
+          "recognized": true,
+          "old_start": 8204,
+          "new_start": 8204,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_writev_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lvmz7ggv",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 10909,
+          "new_field": 10898,
+          "recognized": true,
+          "old_start": 10884,
+          "new_start": 10880,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [
+        {
+          "section": 1,
+          "symbol": "trace_ret_vfs_writev_tail",
+          "input_offset": 10417,
+          "old_offset": 10834,
+          "new_offset": 10834,
+          "old_bytes": "0f878b000000",
+          "new_bytes": "7776",
+          "bytes_saved": 4,
+          "kind": "conditional_rel32_to_rel8",
+          "mapped_target_equal": true
+        }
+      ],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 25,
+      "attributed_bytes": 25
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_filldir64",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lw9gjkt3",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_kset_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-m5q7iw98",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 64172,
+          "new_field": 64162,
+          "recognized": true,
+          "old_start": 64147,
+          "new_start": 64144,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [
+        {
+          "section": 1,
+          "symbol": "lkm_seeker_kset_tail",
+          "input_offset": 62539,
+          "old_offset": 64119,
+          "new_offset": 64119,
+          "old_bytes": "e991000000",
+          "new_bytes": "eb7c",
+          "bytes_saved": 3,
+          "kind": "jump_rel32_to_rel8",
+          "mapped_target_equal": true
+        }
+      ],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 24,
+      "attributed_bytes": 24
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_vfs_writev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mhw9lgtg",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_kernel_write_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mwmqejnt",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 10654,
+          "new_field": 10643,
+          "recognized": true,
+          "old_start": 10629,
+          "new_start": 10625,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [
+        {
+          "section": 1,
+          "symbol": "trace_ret_kernel_write_tail",
+          "input_offset": 10165,
+          "old_offset": 10579,
+          "new_offset": 10579,
+          "old_bytes": "0f878b000000",
+          "new_bytes": "7776",
+          "bytes_saved": 4,
+          "kind": "conditional_rel32_to_rel8",
+          "mapped_target_equal": true
+        }
+      ],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 25,
+      "attributed_bytes": 25
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__cgroup__cgroup_mkdir",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mxjcj4ia",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_skb_ingress",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-n3xtt1s_",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_unlink",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nc6szymi",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_mmap",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nfj3hqwm",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_symlink",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-np0eklc2",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__exec_test",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nu8vqqcm",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_commit_creds",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o1dqggp4",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_sk_clone",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o_gjhpap",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bprm_check",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-oelk4uaw",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_dup_exit_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ouaht80l",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "process_execute_failed_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ovthd3r5",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_kernel_write",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pcu_ws2q",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 8229,
+          "new_field": 8222,
+          "recognized": true,
+          "old_start": 8204,
+          "new_start": 8204,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_kernel_write",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pthqhk7g",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_init_module",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pwa00tt3",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_tracepoint_probe_register_prio_may_exist",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-q4cs2zd0",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_write",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qcewwz2g",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 8226,
+          "new_field": 8219,
+          "recognized": true,
+          "old_start": 8201,
+          "new_start": 8201,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_exit_submit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qhcggx4u",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 8684,
+          "new_field": 8677,
+          "recognized": true,
+          "old_start": 8659,
+          "new_start": 8659,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_vfs_utimes",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qret7205",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe__features_fallback_arena_tailcall",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qv24j4jt",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_seq_ops_trigger",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qwa20mrp",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_sock_alloc_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qwfugkfp",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_open",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r71wb84q",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_enter_submit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rqvx7dtu",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 11913,
+          "new_field": 11906,
+          "recognized": true,
+          "old_start": 11888,
+          "new_start": 11888,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_writev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rsd3e2e7",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 8229,
+          "new_field": 8222,
+          "recognized": true,
+          "old_start": 8204,
+          "new_start": 8204,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_call_usermodehelper",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ry8njcaa",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_bpf_run_filter_skb",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-t6bkygj4",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_dup3",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-t77n255m",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 8691,
+          "new_field": 8684,
+          "recognized": true,
+          "old_start": 8666,
+          "new_start": 8666,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execveat_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-tdfz29ai",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_switch_task_namespaces",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-tn1yd512",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_kernel_read_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-tvm8fo7o",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_filp_close",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-u1t__j3b",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_vfs_read",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-u9oo0ki2",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_exit_init",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ubq6rzri",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 264,
+          "new_field": 257,
+          "recognized": true,
+          "old_start": 239,
+          "new_start": 239,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 373,
+          "new_field": 345,
+          "recognized": true,
+          "old_start": 348,
+          "new_start": 327,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 42,
+      "attributed_bytes": 42
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ptrace",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uim8ws43",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 465,
+          "new_field": 458,
+          "recognized": true,
+          "old_start": 440,
+          "new_start": 440,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_do_mmap",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uj4nfl5d",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lsm_bpf_check",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uj6pc61t",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_load_elf_phdrs",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uot_ns7d",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__module__module_free",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uotzoinl",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_accept",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uycf7jdm",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sched_process_exec_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uz28s8pu",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_connect",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v4xhaj_6",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret__register_chrdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vechpryf",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "send_bin",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vgy6uwav",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 683,
+          "new_field": 676,
+          "recognized": true,
+          "old_start": 658,
+          "new_start": 658,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_rmdir_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vr0_pgk0",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_mod_tree_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vtinq8ac",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 465,
+          "new_field": 458,
+          "recognized": true,
+          "old_start": 448,
+          "new_start": 448,
+          "old_bytes": 79,
+          "new_bytes": 58,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 555,
+          "new_field": 527,
+          "recognized": true,
+          "old_start": 538,
+          "new_start": 517,
+          "old_bytes": 79,
+          "new_bytes": 58,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 42,
+      "attributed_bytes": 42
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__init_module",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vtx4en2b",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 500,
+          "new_field": 489,
+          "recognized": true,
+          "old_start": 483,
+          "new_start": 479,
+          "old_bytes": 83,
+          "new_bytes": 62,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [
+        {
+          "section": 1,
+          "symbol": "syscall__init_module",
+          "input_offset": 383,
+          "old_offset": 433,
+          "new_offset": 433,
+          "old_bytes": "0f877f000000",
+          "new_bytes": "776a",
+          "bytes_saved": 4,
+          "kind": "conditional_rel32_to_rel8",
+          "mapped_target_equal": true
+        }
+      ],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 25,
+      "attributed_bytes": 25
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_debugfs_create_dir",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vx43mxwm",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_bind",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vzs62ho7",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_modtree_loop",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vzzawsn6",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 76383,
+          "new_field": 76376,
+          "recognized": true,
+          "old_start": 76358,
+          "new_start": 76358,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 76522,
+          "new_field": 76494,
+          "recognized": true,
+          "old_start": 76497,
+          "new_start": 76476,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 42,
+      "attributed_bytes": 42
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_process_vm_writev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-w280lo0g",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 465,
+          "new_field": 458,
+          "recognized": true,
+          "old_start": 440,
+          "new_start": 440,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_enter_init",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-w6xh1tna",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 507,
+          "new_field": 500,
+          "recognized": true,
+          "old_start": 482,
+          "new_start": 482,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        },
+        {
+          "old_field": 616,
+          "new_field": 588,
+          "recognized": true,
+          "old_start": 591,
+          "new_start": 570,
+          "old_bytes": 92,
+          "new_bytes": 71,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 42,
+      "attributed_bytes": 42
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "vfs_write_magic_return",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-w_o1uyks",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_exec_binprm",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-wtj_sjgm",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 6574,
+          "new_field": 6567,
+          "recognized": true,
+          "old_start": 6549,
+          "new_start": 6549,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_new_mod_only_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-x_gw7u2r",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_skb_egress",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xdnk7sql",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe__features_fallback_arena",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xi6xk428",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 2378,
+          "new_field": 2371,
+          "recognized": true,
+          "old_start": 2353,
+          "new_start": 2353,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_dup",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xna2ier_",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 8691,
+          "new_field": 8684,
+          "recognized": true,
+          "old_start": 8666,
+          "new_start": 8666,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_sock_alloc_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xrq1dl1n",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_inotify_find_inode",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xxfpxema",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "vfs_write_magic_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-y1nu4s8o",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_vfs_write",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-y2o04drq",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "kernel_write_magic_return",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ya08zuaa",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_proc_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-yi6w6qj8",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 60650,
+          "new_field": 60640,
+          "recognized": true,
+          "old_start": 60625,
+          "new_start": 60622,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [
+        {
+          "section": 1,
+          "symbol": "lkm_seeker_proc_tail",
+          "input_offset": 60040,
+          "old_offset": 60600,
+          "new_offset": 60600,
+          "old_bytes": "e98e000000",
+          "new_bytes": "eb79",
+          "bytes_saved": 3,
+          "kind": "jump_rel32_to_rel8",
+          "mapped_target_equal": true
+        }
+      ],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 24,
+      "attributed_bytes": 24
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_process_vm_writev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zahms7i2",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 8691,
+          "new_field": 8684,
+          "recognized": true,
+          "old_start": 8666,
+          "new_start": 8666,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_arch_prctl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zoagqlra",
+      "returncode": 0,
+      "stubs": [
+        {
+          "old_field": 8691,
+          "new_field": 8684,
+          "recognized": true,
+          "old_start": 8666,
+          "new_start": 8666,
+          "old_bytes": 95,
+          "new_bytes": 74,
+          "matches_preflight_encoding": true,
+          "counter_bytes_preserved": true
+        }
+      ],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 21,
+      "attributed_bytes": 21
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_syscall_table_check",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zog5yqnb",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    },
+    {
+      "app": "katran",
+      "symbol": "balancer_ingress",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r1c7nupu",
+      "returncode": 0,
+      "stubs": [],
+      "source_width_changes": [],
+      "lost_source_rows": [],
+      "gained_source_rows": [],
+      "total_bytes_saved": 0,
+      "attributed_bytes": 0
+    }
+  ]
+}
