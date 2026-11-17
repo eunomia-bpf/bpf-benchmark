@@ -197,7 +197,7 @@ fn copy_user_string(b: &mut Vec<u8>, sites: &mut Vec<LoadSite>, faults: &mut Vec
 /// caller-saved registers only: R8=dst, R9D=size, R10=current. Scalar keeps SMAP in DL;
 /// string keeps it in R9 bit32 so its word-mask scratch cannot destroy the cleanup state.
 fn user_leaf(layout: &RuntimeProbeReadLayout, actual: u64, string: bool, fixed: Option<u32>)
-    -> Result<(Vec<u8>, Vec<RelocRecord>, Vec<LoadSite>)> {
+    -> Result<(Vec<u8>, Vec<RelocRecord>, Vec<LoadSite>, usize)> {
     let target = |symbol| address(symbol, layout.user_helper, actual);
     let current = gs_disp32(target(layout.current_task)?, "current_task")?;
     let task_offset = i32::try_from(layout.pagefault_disabled)?.to_le_bytes();
@@ -258,14 +258,15 @@ fn user_leaf(layout: &RuntimeProbeReadLayout, actual: u64, string: bool, fixed: 
         for branch in denied { patch_x86_rel32(&mut b, branch, deny)?; }
         b.extend_from_slice(&[0x48,0xc7,0xc0,0xf2,0xff,0xff,0xff]); // -EFAULT
     }
-    let zero = b.len(); patch_x86_rel32(&mut b, zero_fault, zero)?;
+    let mut zero = b.len(); patch_x86_rel32(&mut b, zero_fault, zero)?;
     let zero_done = zero_fill(&mut b, if string {None}else{fixed})?;
     let end = b.len();
     patch_x86_rel32(&mut b, clean_return, end)?;
     if let Some(branch)=zero_done {patch_x86_rel32(&mut b,branch,end)?;}
     if let Some(branch)=zero_return {patch_x86_rel32(&mut b,branch,end)?;}
     b.push(0xc3);
-    compact((b, Vec::new(), sites))
+    let (bytes,relocs,sites)=compact_at((b,Vec::new(),sites),std::slice::from_mut(&mut zero))?;
+    Ok((bytes,relocs,sites,zero))
 }
 
 /// copy_from_kernel_nofault and strncpy_from_kernel_nofault as leaves: copy_from_kernel_nofault_allowed
@@ -274,7 +275,7 @@ fn user_leaf(layout: &RuntimeProbeReadLayout, actual: u64, string: bool, fixed: 
 /// pagefault_enable; denial and faults zero the destination. It uses caller-saved registers only:
 /// R8=dst, R9D=size, RDX=src, R10=current.
 fn kernel_routine(layout: &RuntimeProbeReadLayout, actual: u64, string: bool, fixed: Option<u32>)
-    -> Result<(Vec<u8>, Vec<RelocRecord>, Vec<LoadSite>)> {
+    -> Result<(Vec<u8>, Vec<RelocRecord>, Vec<LoadSite>, usize)> {
     let target = |symbol| address(symbol, layout.kernel_helper, actual);
     let current = gs_disp32(target(layout.current_task)?, "current_task")?;
     let task_offset = i32::try_from(layout.pagefault_disabled)?.to_le_bytes();
@@ -331,14 +332,15 @@ fn kernel_routine(layout: &RuntimeProbeReadLayout, actual: u64, string: bool, fi
     for branch in denied { patch_x86_rel32(&mut b, branch, deny)?; }
     b.extend_from_slice(&[0x48,0xc7,0xc0]);
     b.extend_from_slice(&(-34i32).to_le_bytes()); // -ERANGE
-    let zero = b.len(); patch_x86_rel32(&mut b, zero_fault, zero)?;
+    let mut zero = b.len(); patch_x86_rel32(&mut b, zero_fault, zero)?;
     let zero_done = zero_fill(&mut b, if string {None}else{fixed})?;
     let end = b.len();
     patch_x86_rel32(&mut b, clean_return, end)?;
     if let Some(branch)=zero_done {patch_x86_rel32(&mut b,branch,end)?;}
     if let Some(branch)=zero_return {patch_x86_rel32(&mut b,branch,end)?;}
     b.push(0xc3);
-    compact((b, Vec::new(), sites))
+    let (bytes,relocs,sites)=compact_at((b,Vec::new(),sites),std::slice::from_mut(&mut zero))?;
+    Ok((bytes,relocs,sites,zero))
 }
 
 /// bpf_probe_read (compat) as bpf_trace.c defines it: an address below TASK_SIZE is read as user memory,
@@ -388,6 +390,11 @@ pub(super) fn redirect(blob: &mut Vec<u8>, calls: &[usize], start: usize) -> Res
 
 pub(super) fn compact(routine: (Vec<u8>, Vec<RelocRecord>, Vec<LoadSite>))
     -> Result<(Vec<u8>, Vec<RelocRecord>, Vec<LoadSite>)> {
+    compact_at(routine,&mut [])
+}
+
+fn compact_at(routine: (Vec<u8>,Vec<RelocRecord>,Vec<LoadSite>), marks: &mut [usize])
+    -> Result<(Vec<u8>,Vec<RelocRecord>,Vec<LoadSite>)> {
     let (bytes, mut relocs, mut sites) = routine;
     let mut decoder = Decoder::new(64, &bytes, DecoderOptions::NONE);
     let instructions: Vec<_> = decoder.iter().collect();
@@ -395,6 +402,7 @@ pub(super) fn compact(routine: (Vec<u8>, Vec<RelocRecord>, Vec<LoadSite>))
         .map(|(i,insn)| (insn.ip() as u32,i)).collect();
     let encoded = BlockEncoder::encode(64, InstructionBlock::new(&instructions,0),
         BlockEncoderOptions::RETURN_NEW_INSTRUCTION_OFFSETS)?;
+    for mark in marks {*mark=encoded.new_instruction_offsets[indices[&(*mark as u32)]] as usize;}
     for reloc in &mut relocs {reloc.offset=encoded.new_instruction_offsets[indices[&reloc.offset]];}
     for site in &mut sites {site.offset=encoded.new_instruction_offsets[indices[&site.offset]];}
     Ok((encoded.code_buffer,relocs,sites))
@@ -409,6 +417,32 @@ fn append(blob: &mut Vec<u8>, relocs: &mut Vec<RelocRecord>, ranges: &mut Vec<(u
     blob.extend_from_slice(&bytes);
     relocs.extend(nested); loads.extend(sites); ranges.push((start,blob.len()));
     Ok(start)
+}
+
+// Reuse a structurally identified zero suffix after each leaf's own cleanup.
+// Prefix success branches keep their original RET label and fault loads retain
+// their original instruction index through the existing block encoder.
+fn append_read(blob: &mut Vec<u8>, relocs: &mut Vec<RelocRecord>, ranges: &mut Vec<(usize,usize)>,
+               loads: &mut Vec<LoadSite>, tails: &mut HashMap<Vec<u8>,usize>,
+               routine: (Vec<u8>,Vec<RelocRecord>,Vec<LoadSite>,usize)) -> Result<usize> {
+    let (mut bytes,mut nested,mut sites,zero)=routine;
+    let start=blob.len();
+    if bytes.len()-zero>6 {
+        if let Some(&target)=tails.get(&bytes[zero..]) {
+            let original:Vec<_>=Decoder::with_ip(64,&bytes,start as u64,DecoderOptions::NONE).into_iter().collect();
+            let mut kept:Vec<_>=original.iter().copied().take_while(|i|i.ip()<(start+zero) as u64).collect();
+            let indices:HashMap<_,_>=kept.iter().enumerate().map(|(n,i)|((i.ip() as usize-start) as u32,n)).collect();
+            let mut branch=Instruction::with_branch(Code::Jmp_rel32_64,target as u64)?;
+            branch.set_ip((start+zero) as u64);kept.push(branch);
+            kept.push(*original.last().expect("read leaf return"));
+            let encoded=BlockEncoder::encode(64,InstructionBlock::new(&kept,start as u64),
+                BlockEncoderOptions::RETURN_NEW_INSTRUCTION_OFFSETS)?;
+            for site in &mut sites {site.offset=encoded.new_instruction_offsets[indices[&site.offset]];}
+            for reloc in &mut nested {reloc.offset=encoded.new_instruction_offsets[indices[&reloc.offset]];}
+            bytes=encoded.code_buffer;
+        } else {tails.insert(bytes[zero..].to_vec(),start+zero);}
+    }
+    append(blob,relocs,ranges,loads,(bytes,nested,sites))
 }
 
 pub(super) fn constant_size(name: &str, facts: Option<&HashMap<Register,u64>>) -> Option<u32> {
@@ -427,6 +461,7 @@ pub(super) fn share(blob: &mut Vec<u8>, relocs: &mut Vec<RelocRecord>,
     -> Result<(Vec<(usize,usize)>,Vec<LoadSite>)> {
     let mut ranges = Vec::new();
     let mut loads = Vec::new();
+    let mut tails=HashMap::new();
     let sizes=[false,true].map(|user| {
         let mut calls=Vec::new();
         for name in [if user {"bpf_probe_read_user"} else {"bpf_probe_read_kernel"},"bpf_probe_read_compat"] {
@@ -443,7 +478,7 @@ pub(super) fn share(blob: &mut Vec<u8>, relocs: &mut Vec<RelocRecord>,
         let anchor=if string {let Some(&regular)=helpers.get(if user {"bpf_probe_read_user"} else {"bpf_probe_read_kernel"}) else {continue;};regular} else {helper};
         let built = if user {user_leaf(layout,anchor,string,if string {None} else {sizes[1]})?} else {kernel_routine(layout,anchor,string,if string {None} else {sizes[0]})?};
         relocs.retain(|r| !(r.kind == 1 && r.target == helper));
-        let start = append(blob, relocs, &mut ranges, &mut loads, built)?;
+        let start = append_read(blob, relocs, &mut ranges, &mut loads, &mut tails, built)?;
         redirect(blob, &calls, start)?;
         leaves[usize::from(string)][usize::from(user)] = Some(start);
     }
@@ -457,7 +492,7 @@ pub(super) fn share(blob: &mut Vec<u8>, relocs: &mut Vec<RelocRecord>,
             let slot=&mut leaves[usize::from(string)][usize::from(user)];
             let start=if let Some(start)=*slot {start} else {
                 let built=if user {user_leaf(layout,user_anchor,string,if string {None} else {sizes[1]})?} else {kernel_routine(layout,kernel_anchor,string,if string {None} else {sizes[0]})?};
-                let start=append(blob,relocs,&mut ranges,&mut loads,built)?;
+                let start=append_read(blob,relocs,&mut ranges,&mut loads,&mut tails,built)?;
                 *slot=Some(start);start
             };
             targets[usize::from(user)]=start;
@@ -659,12 +694,57 @@ mod tests {
         Ok(())
     }
 
+    #[test]
+    fn identical_zero_tails_share_after_domain_cleanup() -> Result<()> {
+        let layout=fixture();
+        for string in [false,true] {
+            let user=user_leaf(&layout,layout.user_helper,string,None)?.0.len();
+            let kernel=kernel_routine(&layout,layout.kernel_helper,string,None)?.0.len();
+            let mut blob=X86_HELPER_CALL_REL32_SLOT.repeat(2);blob.push(0xc3);
+            let mut relocs=vec![RelocRecord{offset:0,kind:1,target:0x5000},
+                                RelocRecord{offset:5,kind:1,target:0x6000}];
+            let helpers=HashMap::from([("bpf_probe_read_user".into(),layout.user_helper),
+                ("bpf_probe_read_kernel".into(),layout.kernel_helper),
+                ((if string {"bpf_probe_read_user_str"}else{"bpf_probe_read_user"}).into(),0x5000),
+                ((if string {"bpf_probe_read_kernel_str"}else{"bpf_probe_read_kernel"}).into(),0x6000)]);
+            // Keep relocation and layout anchors identical in the scalar case.
+            let mut bound=fixture();
+            if !string {bound.user_helper=0x5000;bound.kernel_helper=0x6000;}
+            let (ranges,loads)=share(&mut blob,&mut relocs,&bound,&helpers,&HashMap::new())?;
+            assert_eq!(ranges.len(),2);assert!(relocs.is_empty());
+            assert!(blob.len()<=11+user+kernel-36,"duplicate zero block remains");
+            assert!(loads.iter().all(|site|site.destination==11));
+        }
+        Ok(())
+    }
+
     fn fixture() -> RuntimeProbeReadLayout {
         RuntimeProbeReadLayout { user_helper:0x1000,kernel_helper:0x2000,
             current_task:0,jiffies:Some(0x1111222233334444),
             user_ptr_max:0x1111222233334444,boot_cpu_data:0x5555666677778888,
             pagefault_disabled:4,x86_capability:0,task_flags:0,task_personality:16,ktime:None,cred:None,
             cpu_tlbstate:8,tlb_loaded_mm:0,task_mm:8,x86_virt_bits:40 }
+    }
+
+    fn execute_shared(driver: &std::path::Path, output: &std::path::Path, stem: &str, mode: usize, size: Option<u32>,
+        routine: (Vec<u8>,Vec<RelocRecord>,Vec<LoadSite>,usize)) -> Result<()> {
+        let mut blob=vec![0xe9,0,0,0,0];let mut relocs=Vec::new();let mut ranges=Vec::new();
+        let mut loads=Vec::new();let mut tails=HashMap::new();
+        append_read(&mut blob,&mut relocs,&mut ranges,&mut loads,&mut tails,routine.clone())?;
+        let target=append_read(&mut blob,&mut relocs,&mut ranges,&mut loads,&mut tails,routine)?;
+        patch_x86_rel32(&mut blob,1,target)?;
+        let binary=output.join(format!("{stem}-shared.bin"));fs::write(&binary,&blob)?;
+        let metadata=output.join(format!("{stem}-shared.sites"));
+        let mut text=format!("{}\n",loads.len());
+        for site in loads {text.push_str(&format!("{} {} {}\n",site.offset,site.insn_len,site.destination));}
+        fs::write(&metadata,text)?;
+        let mut command=std::process::Command::new(driver);command.arg(binary).arg(metadata).arg(mode.to_string());
+        if let Some(size)=size {command.arg(size.to_string());}
+        let run=command.output()?;
+        fs::write(output.join(format!("{stem}-shared.stdout")),&run.stdout)?;
+        fs::write(output.join(format!("{stem}-shared.stderr")),&run.stderr)?;
+        assert!(run.status.success(),"{stem} shared: {} {}",run.status,String::from_utf8_lossy(&run.stderr));
+        Ok(())
     }
 
     #[test]
@@ -689,9 +769,11 @@ mod tests {
             if compact {layout.user_ptr_max=0x12340000;layout.boot_cpu_data=0x12350000;}
             let user=mode==1 || mode==3;let string=mode>=2;
             let anchor = if user { layout.user_helper } else { layout.kernel_helper };
-            let (bytes,relocs,sites) = if user {user_leaf(&layout,anchor,string,None)?} else {kernel_routine(&layout,anchor,string,None)?};
+            let (bytes,relocs,sites,zero) = if user {user_leaf(&layout,anchor,string,None)?} else {kernel_routine(&layout,anchor,string,None)?};
             let stem = if mode==3 {"user-string"} else if string {"kernel-string"} else if user { "user" } else { "kernel" };
             let stem=format!("{stem}{}",if compact {"-compact"} else {""});
+            execute_shared(&driver,&output,&stem,if mode==3 {7}else{mode},None,
+                (bytes.clone(),relocs.clone(),sites.clone(),zero))?;
             let binary = output.join(format!("{stem}.bin"));
             let metadata = output.join(format!("{stem}.sites"));
             fs::write(&binary,&bytes)?;
@@ -730,10 +812,12 @@ mod tests {
             for user in [false,true] {
                 let anchor=if user {fixed_layout.user_helper} else {fixed_layout.kernel_helper};
                 for size in [0u32,1,2,3,4,7,8,9,15,16,17,31,32,33,63,64,65,144,257,512,768,1024] {
-                    let (bytes,relocs,sites)=if user {user_leaf(&fixed_layout,anchor,false,Some(size))?}
+                    let (bytes,relocs,sites,zero)=if user {user_leaf(&fixed_layout,anchor,false,Some(size))?}
                         else {kernel_routine(&fixed_layout,anchor,false,Some(size))?};
                     assert!(relocs.is_empty());
                     let stem=format!("{}-fixed-{size}{}",if user {"user"} else {"kernel"},if compact {"-compact"} else {""});
+                    execute_shared(&driver,&output,&stem,if user {11}else{10},Some(size),
+                        (bytes.clone(),relocs.clone(),sites.clone(),zero))?;
                     let binary=output.join(format!("{stem}.bin"));fs::write(&binary,&bytes)?;
                     let metadata=output.join(format!("{stem}.sites"));
                     let mut text=format!("{}\n",sites.len());
