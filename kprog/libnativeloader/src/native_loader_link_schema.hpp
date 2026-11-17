@@ -68,12 +68,6 @@ NativeLinkArgs build_native_link_args(
     uint64_t this_cpu_off_addr = 0;
 #if defined(__x86_64__)
     {
-        uint64_t cpu_number_addr = kallsyms_lookup("cpu_number");
-        this_cpu_off_addr = kallsyms_lookup("this_cpu_off");
-        if (cpu_number_addr != 0 && this_cpu_off_addr != 0) {
-            add_name_addr(out.helpers, kX86CpuNumberHelperKey, cpu_number_addr);
-            add_name_addr(out.helpers, kX86ThisCpuOffHelperKey, this_cpu_off_addr);
-        }
         add_name_addr(out.helpers, kX86BpfMapMaxEntriesOffsetKey,
                       K_BPF_MAP_MAX_ENTRIES_OFFSET);
         add_name_addr(out.helpers, kX86BpfArrayPtrsOffsetKey,
@@ -81,9 +75,19 @@ NativeLinkArgs build_native_link_args(
         add_name_addr(out.helpers, kX86BpfProgBpfFuncOffsetKey,
                       K_BPF_PROG_BPF_FUNC_OFFSET);
         add_name_addr(out.helpers, kX86TailCallOffsetKey, 12);
-        uint64_t mono_fast = kallsyms_lookup("ktime_get_mono_fast_ns");
-        if (!mono_fast) fail("ktime_get_mono_fast_ns not in boot kernel kallsyms");
-        add_name_addr(out.helpers, kX86MonoFastHelperKey, mono_fast);
+        // A program whose calls stay inside its own blob needs no kernel
+        // address at all; scanning kallsyms for them only costs startup.
+        if (companion.needs_kernel_symbols) {
+            uint64_t cpu_number_addr = kallsyms_lookup("cpu_number");
+            this_cpu_off_addr = kallsyms_lookup("this_cpu_off");
+            if (cpu_number_addr != 0 && this_cpu_off_addr != 0) {
+                add_name_addr(out.helpers, kX86CpuNumberHelperKey, cpu_number_addr);
+                add_name_addr(out.helpers, kX86ThisCpuOffHelperKey, this_cpu_off_addr);
+            }
+            uint64_t mono_fast = kallsyms_lookup("ktime_get_mono_fast_ns");
+            if (!mono_fast) fail("ktime_get_mono_fast_ns not in boot kernel kallsyms");
+            add_name_addr(out.helpers, kX86MonoFastHelperKey, mono_fast);
+        }
     }
 #elif defined(__aarch64__)
     {
@@ -91,11 +95,10 @@ NativeLinkArgs build_native_link_args(
         add_name_addr(out.helpers, kArm64ThreadInfoCpuOffsetHelperKey, cpu_offset);
     }
 #endif
-
     if (companion.context_helpers) {
         for (const auto &[name, address] : *companion.context_helpers)
             add_name_addr(out.helpers, name, address);
-    } else {
+    } else if (companion.needs_kernel_symbols) {
         for (const auto &helper : kSupportedHelpers) {
             uint64_t addr = kallsyms_lookup(helper.symbol);
             if (addr != 0) {
@@ -127,10 +130,12 @@ NativeLinkArgs build_native_link_args(
     }
     for (const auto &[name, address] : companion.kernel_functions)
         add_name_addr(out.helpers, name, address);
-    for (const char *symbol : kRuntimeCallSymbols) {
-        uint64_t addr = kallsyms_lookup(symbol);
-        if (addr != 0) {
-            add_name_addr(out.helpers, symbol, addr);
+    if (companion.needs_kernel_symbols) {
+        for (const char *symbol : kRuntimeCallSymbols) {
+            uint64_t addr = kallsyms_lookup(symbol);
+            if (addr != 0) {
+                add_name_addr(out.helpers, symbol, addr);
+            }
         }
     }
 

@@ -42,7 +42,8 @@ run-handoff:
 	./build-arm64/cpu-differential-handoff $(CASES) $(OUT)
 
 .PHONY: check-loader-kallsyms
-build-x86/test-kallsyms: test_kallsyms.cpp ../libnativeloader/src/native_loader.cpp
+LOADER_HEADERS := $(wildcard ../libnativeloader/src/*.hpp)
+build-x86/test-kallsyms: test_kallsyms.cpp ../libnativeloader/src/native_loader.cpp $(LOADER_HEADERS)
 	install -d build-x86
 	$(CXX) -O2 -std=c++20 -I../libnativeloader/include -I../../micro/programs/build-x86 \
 		-I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/include \
@@ -53,7 +54,7 @@ check-loader-kallsyms: build-x86/test-kallsyms
 	./build-x86/test-kallsyms ../x86/native_lab/native_link/target/release/native-link
 
 .PHONY: check-loader-data-symbols
-build-x86/test_data_symbol_bounds: test_data_symbol_bounds.cpp test_data_symbol_bounds.S ../libnativeloader/src/native_loader.cpp
+build-x86/test_data_symbol_bounds: test_data_symbol_bounds.cpp test_data_symbol_bounds.S ../libnativeloader/src/native_loader.cpp $(LOADER_HEADERS)
 	install -d build-x86
 	$(CC_x86) -c test_data_symbol_bounds.S -o build-x86/data-symbols.o
 	$(CXX) -O2 -std=c++20 -I../libnativeloader/include -I../../micro/programs/build-x86 \
@@ -63,6 +64,17 @@ build-x86/test_data_symbol_bounds: test_data_symbol_bounds.cpp test_data_symbol_
 
 check-loader-data-symbols: build-x86/test_data_symbol_bounds
 	./build-x86/test_data_symbol_bounds build-x86/data-symbols.o
+
+.PHONY: check-loader-verifier-log
+build-x86/test_verifier_log: test_verifier_log.cpp ../libnativeloader/src/native_loader.cpp $(LOADER_HEADERS)
+	install -d build-x86
+	$(CXX) -O2 -std=c++20 -I../libnativeloader/include -I../../micro/programs/build-x86 \
+		-I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/include \
+		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+		$< ../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -ldl -o $@
+
+check-loader-verifier-log: build-x86/test_verifier_log
+	./build-x86/test_verifier_log
 
 .PHONY: tcb
 TCB_OUT ?= ../results/kprog_fidelity_20261106/tcb

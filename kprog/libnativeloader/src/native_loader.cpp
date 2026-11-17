@@ -31,6 +31,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <charconv>
 #include <cctype>
 #include <cstddef>
 #include <cstdint>
@@ -48,6 +49,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <unordered_map>
 #include <unordered_set>
@@ -1092,6 +1094,21 @@ std::vector<bpf_insn> native_stub_program(int tail_map_fd)
     };
 }
 
+// The verifier writes its whole log into one buffer, the buffer's real size
+// being log_size; keep all of it, because the instruction that failed is
+// thousands of lines above the summary the buffer ends with. Segments the
+// verifier separates with NUL are joined into lines, since a consumer reading
+// the exception as a C string would stop at the first one.
+std::string verifier_log_text(const std::vector<char> &log, size_t log_size)
+{
+    std::string text;
+    text.reserve(log_size);
+    for (size_t i = 0; i < log_size; i++) {
+        text += log[i] ? log[i] : char('\n');
+    }
+    return text;
+}
+
 int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
                    uint32_t prog_type_value,
                    const StubLoadAttrs &attrs,
@@ -1162,12 +1179,8 @@ int load_stub_prog(int kfunc_btf_id, int mod_btf_fd, uint32_t chunks,
             log_size--;
         }
         if (log_size != 0) {
-            constexpr size_t kMaxVerifierLogTail = 8192;
-            const size_t start = log_size > kMaxVerifierLogTail
-                ? log_size - kMaxVerifierLogTail
-                : 0;
-            message += "\nverifier log tail:\n";
-            message.append(verifier_log.data() + start, log_size - start);
+            message += "\nverifier log:\n";
+            message += verifier_log_text(verifier_log, log_size);
         }
         fail(message);
     }
@@ -1422,62 +1435,64 @@ const std::unordered_map<std::string, uint64_t> &kallsyms_table()
         return table;
     }
 
-    std::vector<const char *> wanted;
+    std::unordered_set<std::string_view> wanted;
 #if defined(__x86_64__)
-    wanted.push_back("cpu_number");
-    wanted.push_back("this_cpu_off");
+    wanted.insert("cpu_number");
+    wanted.insert("this_cpu_off");
 #endif
     for (const auto &helper : kSupportedHelpers) {
-        wanted.push_back(helper.symbol);
+        wanted.insert(helper.symbol);
     }
     for (const char *symbol : kTypedHelperSymbols) {
-        wanted.push_back(symbol);
+        wanted.insert(symbol);
     }
     for (const char *symbol : kRuntimeCallSymbols) {
-        wanted.push_back(symbol);
+        wanted.insert(symbol);
     }
-    wanted.push_back(kHtabLookupElemSymbol);
-    wanted.push_back(kArrayOfMapLookupElemSymbol);
-    wanted.push_back(kHtabLruPercpuMapLookupElemSymbol);
-    wanted.push_back("trie_lookup_elem");
-    wanted.push_back("bpf_verifier_ops");
+    wanted.insert(kHtabLookupElemSymbol);
+    wanted.insert(kArrayOfMapLookupElemSymbol);
+    wanted.insert(kHtabLruPercpuMapLookupElemSymbol);
+    wanted.insert("trie_lookup_elem");
+    wanted.insert("bpf_verifier_ops");
 #if defined(__x86_64__)
     for (const char *symbol : native_lto::kernel_symbols) {
-        if (std::none_of(wanted.begin(), wanted.end(), [symbol](const char *name) {
-                return std::strcmp(name, symbol) == 0;
-            })) wanted.push_back(symbol);
+        wanted.insert(symbol);
     }
 #endif
-    const size_t wanted_count = wanted.size();
 
-    FILE *f = std::fopen("/proc/kallsyms", "re");
-    if (!f) {
+    std::ifstream input("/proc/kallsyms");
+    if (!input) {
         fail("open /proc/kallsyms: " + std::string(std::strerror(errno)));
     }
-    char line[512];
-    size_t found = 0;
-    while (std::fgets(line, sizeof(line), f)) {
-        char addr_text[32] = {};
-        char type = '\0';
-        char name[256] = {};
-        if (std::sscanf(line, "%31s %c %255s", addr_text, &type, name) != 3) {
+    std::string line;
+    while (std::getline(input, line)) {
+        const size_t address_end = line.find(' ');
+        const size_t type = line.find_first_not_of(" \t", address_end);
+        const size_t name_start = line.find_first_not_of(" \t", type + 1);
+        if (address_end == std::string::npos || type == std::string::npos ||
+            name_start == std::string::npos) {
+            fail("malformed /proc/kallsyms record");
+        }
+        const size_t name_end = line.find_first_of(" \t", name_start);
+        const std::string_view name(line.data() + name_start,
+            (name_end == std::string::npos ? line.size() : name_end) - name_start);
+        if (!wanted.erase(name)) {
             continue;
         }
-        (void)type;
-        for (size_t i = 0; i < wanted_count; i++) {
-            if (std::strcmp(name, wanted[i]) != 0 || table.count(wanted[i])) {
-                continue;
-            }
-            uint64_t addr = std::strtoull(addr_text, nullptr, 16);
-            table.emplace(wanted[i], addr);
-            found++;
-            break;
+        uint64_t address = 0;
+        const auto parsed = std::from_chars(line.data(), line.data() + address_end,
+                                            address, 16);
+        if (parsed.ec != std::errc{} || parsed.ptr != line.data() + address_end) {
+            fail("invalid address in /proc/kallsyms for " + std::string(name));
         }
-        if (found == wanted_count) {
+        table.emplace(name, address);
+        if (wanted.empty()) {
             break;
         }
     }
-    std::fclose(f);
+    if (input.bad()) {
+        fail("read /proc/kallsyms failed");
+    }
     return table;
 }
 
@@ -2193,12 +2208,25 @@ struct LinkedBlob {
     std::vector<native_lab_load_site> load_sites;
     std::vector<uint32_t> relocated_map_ids;
 };
+/* A proof that calls any kernel helper or kfunc needs the kernel catalogue;
+ * a local BPF-to-BPF call stays inside the program. An empty proof keeps the
+ * catalogue, since its calls cannot be classified. */
+bool proof_needs_kernel_symbols(const std::vector<bpf_insn> &proof)
+{
+    return proof.empty() || std::any_of(proof.begin(), proof.end(),
+        [](const bpf_insn &insn) {
+            return insn.code == (BPF_JMP | BPF_CALL) &&
+                insn.src_reg != BPF_PSEUDO_CALL;
+        });
+}
+
 
 struct CompanionLoad {
     uint64_t map_ptr_extract_ns = 0;
     uint64_t lookup_spec_ns = 0;
     uint64_t source_bytecode_bytes = 0;
     bool has_tail_call = false;
+    bool needs_kernel_symbols = false;
     std::unordered_map<std::string, uint64_t> map_addrs;
     std::unordered_map<std::string, uint32_t> map_addr_ids;
     std::unordered_set<std::string> native_data_symbols;
@@ -2900,7 +2928,10 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
             // data relocations. Other entries' globals need no map capability.
             if (entry_symbols && (!name || !entry_symbols->contains(name))) continue;
             if (sym.st_shndx == SHN_UNDEF && GELF_ST_TYPE(sym.st_info) != STT_FUNC) {
-                if (name && name[0]) load.native_data_symbols.insert(name);
+                if (name && name[0]) {
+                    load.needs_kernel_symbols = true;
+                    load.native_data_symbols.insert(name);
+                }
             }
             if (GELF_ST_TYPE(sym.st_info) != STT_OBJECT ||
                 sym.st_size == 0 ||
@@ -3046,6 +3077,7 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
     std::vector<SourceHelperCall> source_calls =
         collect_source_helper_calls(insns, insn_cnt, &meta_by_source_fd,
                                     &out.map_rules);
+    out.needs_kernel_symbols |= !source_calls.empty();
 
     BpfArrayOffsets array_offsets{
         K_BPF_ARRAY_VALUE_OFFSET,
@@ -3056,7 +3088,15 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
         K_HTAB_ELEM_LRU_REF_OFFSET,
     };
 #if defined(__x86_64__)
-    uint64_t this_cpu_off_addr = kallsyms_lookup("this_cpu_off");
+    const bool has_percpu_map = std::any_of(out.maps.begin(), out.maps.end(),
+        [](const MapMeta &map) {
+            return map.type == BPF_MAP_TYPE_PERCPU_ARRAY ||
+                   map.type == BPF_MAP_TYPE_PERCPU_HASH ||
+                   map.type == BPF_MAP_TYPE_LRU_PERCPU_HASH;
+        });
+    out.needs_kernel_symbols |= has_percpu_map;
+    uint64_t this_cpu_off_addr = has_percpu_map
+        ? kallsyms_lookup("this_cpu_off") : 0;
 #else
     uint64_t this_cpu_off_addr = 0;
 #endif
@@ -4020,6 +4060,10 @@ native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOpti
         out.bpf_bytecode_bytes = proof.size() * sizeof(bpf_insn);
         return out;
     }
+    // The simulator's proof is what the kernel verifies, so its calls decide
+    // whether the link needs kernel addresses. A direct native image builds
+    // its proof after linking, so this keeps the catalogue for it.
+    companion.needs_kernel_symbols |= proof_needs_kernel_symbols(proof);
     LinkedBlob linked = load_or_link_native_blob(options.native_link_path, options.native_object_path,
         options.symbol_name, companion, options.trusted_native_proof_path);
     ScopedFd tail_call_marker;
