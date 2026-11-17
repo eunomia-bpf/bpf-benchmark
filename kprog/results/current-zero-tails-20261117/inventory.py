@@ -58,13 +58,18 @@ for request in report['requests']:
         if len(candidates) != 1 or instructions[-1] != (end-1, 'ret', ''):
             raise ValueError(f'zero-tail shape {folder}: {start}:{end}, {candidates}')
         zero = candidates[0]
-        protected = [site for site in loads if zero <= site[0] < end]
+        recovery = [site for site in loads if zero <= site[0] < end]
+        # The ABI also describes RET's implicit stack read (destination 65535).
+        # Keep it separate from protected source-copy loads and preserve both.
+        returns = [site for site in recovery if site == (end-1, 1, 65535)]
+        protected = [site for site in recovery if site not in returns]
         nested = [reloc for reloc in relocs if zero <= reloc[0] < end]
         tail = data[zero:end]
         entry = dict(region_start=start, region_end=end, zero_start=zero,
                      bytes=len(tail), byte_sequence=tail.hex(),
                      mode='dynamic' if tail.startswith(bytes.fromhex('4c89c74489c9')) else 'fixed',
-                     protected_loads=protected, relocations=nested,
+                     protected_loads=protected, return_sites=returns,
+                     recovery_sites=recovery, relocations=nested,
                      instructions=[r for r in instructions if r[0] >= zero])
         row['tails'].append(entry)
         groups[tail].append(entry)
@@ -86,6 +91,7 @@ for request in report['requests']:
         duplicate_copies=sum(r['copies']-1 for r in duplicates),
         local_saving_bound=row['local_saving_bound'],
         protected_suffixes=sum(bool(r['protected_loads']) for r in row['tails']),
+        return_sites=sum(len(r['return_sites']) for r in row['tails']),
         relocated_suffixes=sum(bool(r['relocations']) for r in row['tails']))
     rows.append(row)
 
@@ -100,7 +106,8 @@ a.output.mkdir(parents=True, exist_ok=True)
 lines = [f"{app}: {s.get('emitted',0)}/{s['requests']} emit, "
          f"{s['probe_ranges']} probe regions, {s['zero_tails']} zero tails, "
          f"{s['duplicate_copies']} duplicate copies, {s['local_saving_bound']} B local bound, "
-         f"protected/relocated suffixes {s['protected_suffixes']}/{s['relocated_suffixes']}"
+         f"protected/relocated suffixes {s['protected_suffixes']}/{s['relocated_suffixes']}, "
+         f"RET recovery sites {s['return_sites']}"
          for app, s in result['summary'].items()]
 (a.output / 'summary.txt').write_text('\n'.join(lines) + '\n')
 print('\n'.join(lines))
