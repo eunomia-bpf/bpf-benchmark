@@ -34,6 +34,8 @@ main() {
     done
     # Keep the image lock until the tested source and receipts are committed,
     # so the next publisher sees complete inputs rather than a host-test WIP.
+    exec 7>/workspaces/.agent-state/kprog-lanes/locks/git
+    flock -x 7
     export KPROG_TAIL_RAW="$raw"
     python3 - <<'PY'
 from pathlib import Path
