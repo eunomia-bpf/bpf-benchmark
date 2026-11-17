@@ -1,3 +1,6 @@
 == otelcol-ebpf-profiler/profiling /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_091405_442941
 /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_091405_442941 throughput native/eBPF 1.053x  eBPF [41588974, 41050417, 41915686] native [43804129, 44492532, 43747808] per-sample [1.053, 1.084, 1.044] errors 0
 x86_kvm_corpus_20261117_091405_442941 installed programs 14 JIT 167706 B native 135767 B ratio 0.81x
+== bcc/set /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_094120_596590
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_094120_596590 throughput native/eBPF 0.998x  eBPF [665069, 668507, 666823] native [663464, 665767, 669301] per-sample [0.998, 0.996, 1.004] errors 0
+x86_kvm_corpus_20261117_094120_596590 installed programs 25 JIT 7965 B native 8677 B ratio 1.09x
