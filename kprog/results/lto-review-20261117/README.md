@@ -3243,3 +3243,34 @@ installed-size opportunity is **two local bytes per emitted kernel-string
 routine**, not a guessed whole-app multiplier. Keep the scheduled scalar
 constant-size/global-address work first; this small compatible follow-up
 requires no new check or separate guest from PERF.
+
+
+### Compat-image functional footprint: Cilium, Tetragon and Tracee
+
+Three more coordinator checks completed with rc=0. The same installed
+reader gives the following cumulative replacement-load comparison, using
+the immediately preceding kernel-leaf functional checks as references:
+
+| App | Kernel-leaf check | Compat check | Replacements | Companion JIT B | Native B before → after | Delta |
+| --- | --- | --- | ---: | ---: | ---: | ---: |
+| Cilium | 071814_807597 | 083532_496542 | 113 | 581,577 | 484,353 → 484,353 | 0 |
+| Tetragon | 072157_986675 | 083929_625195 | 288 | 2,472,912 | 1,924,132 → 2,078,688 | +154,556 |
+| Tracee | 072529_244513 | 084250_208606 | 169 | 2,068,918 | 1,716,880 → 1,761,243 | +44,363 |
+
+All run IDs have prefix
+`corpus/results/x86_kvm_corpus_20261117_`. Cumulative replacement counts
+and companion original-byte totals are unchanged. Native size grows
+**8.03% for Tetragon** and **2.58% for Tracee**, reaching approximately
+**0.841x / 0.851x JIT**. These functional observations do not supply
+per-call gains or an equal-work conclusion; Cilium's known configuration
+path difference is still unresolved.
+
+The source at `x86_probe_read.rs:282–319` reuses scalar leaves already
+emitted for direct helpers, but creates either missing user/kernel leaf
+and a dispatcher when compat calls need them. This explains a mechanism
+for growth, rather than a per-program attribution of the aggregate
+receipt. The batch also removes the width-zero branch, so the gross
+compat additions cannot be equated to these net totals. Keep the actual
+installed increases beside the upcoming Tetragon/Tracee times; do not
+price a future constant-size variant by its copy body alone or treat a
+successful functional check as attainment of the half-size target.
