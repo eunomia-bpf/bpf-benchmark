@@ -11,6 +11,7 @@ main() {
     exec 8>/workspaces/.agent-state/kprog-lanes/locks/timing
     flock -s 8
     ulimit -v 2097152
+    bash -n kprog/results/shared-helper-tail-20261117/run-host.sh > "$raw/host-recipe.stdout" 2> "$raw/host-recipe.stderr"
     taskset -c 19 python3 kprog/results/shared-helper-tail-20261117/edit.py > "$raw/proposed.patch" 2> "$raw/stderr.txt"
 }
 main
