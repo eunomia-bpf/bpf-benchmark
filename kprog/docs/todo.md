@@ -39,6 +39,12 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-17T06:23:10Z（核实 perf 05:24–06:16 审阅后的决定）**：
+1. 下一项是内核读叶子化：copy_from_kernel_nofault_allowed 照源码逐条内联（perf db9526a6e）。阈值取 USER_PTR_MAX+PAGE_SIZE 的实时值（本内核 common.c:2616 USER_PTR_MAX = TASK_SIZE_MAX，跟随 LA57）；整页排除 vsyscall；x86_virt_bits 为 0 时放行；否则按 boot_cpu_data.x86_virt_bits 做规范地址判断；拒绝返回 -ERANGE 并清零。宽度和阈值分开读，两者都按实时值。内核字符串读一起改，只用调用方保存的寄存器。
+2. SMAP 选定：内核的 STAC/CLAC 看全局 boot_cpu_data（perf acc436a24），值可以在装载时经 /proc/kcore 读出 x86_capability 第 9 个字的 4 个字节（perf 2bcb0de27）。剩下的动态判断只有 6 条指令，这一项排在内核读叶子化和常量大小之后。
+3. 已核对、只作记录：__check_object_size 原生读本来就省掉了，后面不重复计入收益（perf 53236f741）；零余数的提升里 OTel 的 eBPF 一侧这次慢了 5.05%，比值的变化里原生自己的部分是 1.8%（perf 0d1baea4c，README 已写明）。
+4. LPM：BSR 之后的 NEG/ADD 换成 XOR（perf 97212ec1c），归入“查找一次选定”一起做。
+
 **协调者 2026-11-17T06:20:49Z（审核 detour-20261117T03Z 逐条核实后的决定）**：
 1. 每次调用的上限（kprog/results/limits-20261114）：程序体占每次调用 BPF 时间 BCC 约 9%、Tracee 12.0%、Tetragon 25.4%、Katran 36.2%；程序体快 1.57 倍时每次调用到 1.03x、1.05x、1.10x、1.15x。计时用在 helper 的 LTO 上（03:04 起 probe_read 三步已量完，第四步用户读叶子化在量），编译参数定在 O3。
 2. Cilium：原生一侧照旧用示例配置头编译，数照旧不计。下一步原生编译改用 agent 自己生成的配置头（todo 里“Cilium 用 agent 自己的配置头”一项，排在 probe_read 之后），22 次留在 eBPF 的叶子装载一起解决；cilium-packet-20261116 的同包对照在那之后跑，它第一次在抓包一步超时（first-error.txt），抓包方式随这一项一起修好。
