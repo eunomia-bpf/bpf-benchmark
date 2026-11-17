@@ -24,11 +24,22 @@ for row in comparison['requests']:
         old_return=dict(offset=offset,opcode=data[offset],registered=(offset,1,65535) in before)
     explained=(removed==Counter({(1,65535):1}) and not added
         and old_return is not None and old_return['opcode']==0xc3 and old_return['registered']) if fused else a==b
+    prefix_equal=lpm_equal=None
+    if fused:
+        lpm=next(r for r in row['previous_ranges'] if r['piece']=='lpm_lookup')
+        current=row['fused_ranges'][0]
+        previous=(Path(row['before_output'])/'image.blob').read_bytes()
+        emitted=(Path(row['after_output'])/'image.blob').read_bytes()[current['start']:current['end']]
+        prefix=previous[array['start']:array['end']-14]
+        prefix_equal=emitted[:len(prefix)]==prefix
+        lpm_equal=emitted[len(prefix):]==previous[lpm['start']:lpm['end']]
     rows.append(dict(app=row['app'],symbol=row['symbol'],capture=row['capture'],fused=fused,
+        array_prefix_byte_identical=prefix_equal,lpm_body_byte_identical=lpm_equal,
         removed_shapes=[dict(length=k[0],destination=k[1],count=v) for k,v in removed.items()],
         added_shapes=[dict(length=k[0],destination=k[1],count=v) for k,v in added.items()],
         old_array_fallback_return=old_return,explained_by_removed_return=explained))
-    summary.update(requests=1,fused=int(fused),explained=int(explained),other_differences=int(not explained))
+    summary.update(requests=1,fused=int(fused),explained=int(explained),other_differences=int(not explained),
+        identical_array_prefixes=int(prefix_equal is True),identical_lpm_bodies=int(lpm_equal is True))
 j=dict(scope='Actual ABI sidecar observations. Removed ARRAY fallback RET has an implicit stack read '
     'with destination65535. Classifies its removal; no full recovery semantics, stock or timing claim.',
     summary=dict(summary),requests=rows)
