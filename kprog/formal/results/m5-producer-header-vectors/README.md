@@ -47,3 +47,7 @@ the second passes after an explicit definitional equality and rewriting typeof
 before reducing the cast/store. Canonical C, exports, imported semantics and
 frozen benchmarks are unchanged by this proof step. Last complete native make
 check passed at 5236c0e96; it is not repeated for these Lean-only additions.
+
+The following sixteen header fields now execute in 48 transitions in
+`Arm64ProducerHeaderTail`; see ../m5-producer-header-tail for the complete
+276-transition pre-loop header and callback bindings.

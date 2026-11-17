@@ -1,0 +1,17 @@
+import KProgFormal.ClightRefinement.Arm64ProducerHeaderTail
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.tail_source
+#check KProgFormal.ClightRefinement.Arm64Producer.tail_source
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.tail_layout
+#check KProgFormal.ClightRefinement.Arm64Producer.tail_layout
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.tail_offsets
+#check KProgFormal.ClightRefinement.Arm64Producer.tail_offsets
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.tail_local
+#check KProgFormal.ClightRefinement.Arm64Producer.tail_local
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.payload_callback_binding
+#check KProgFormal.ClightRefinement.Arm64Producer.payload_callback_binding
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.tail_initialized
+#check KProgFormal.ClightRefinement.Arm64Producer.tail_initialized
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.header_initialized_before_loop
+#check KProgFormal.ClightRefinement.Arm64Producer.header_initialized_before_loop
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.header_caches_before_loop
+#check KProgFormal.ClightRefinement.Arm64Producer.header_caches_before_loop

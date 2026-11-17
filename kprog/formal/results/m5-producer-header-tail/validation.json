@@ -1,0 +1,117 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-producer-header-tail",
+  "focused_build": {
+    "exit": 0,
+    "jobs": 158,
+    "log": "focused1.log"
+  },
+  "public_queries": {
+    "exit": 0,
+    "theorems": 8,
+    "log": "query1.log",
+    "source_layout_local_callback_axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "offset_axioms": [
+      "propext"
+    ],
+    "internal_run_additional_axioms": [
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem"
+    ],
+    "external_assembly_callback_execution": "none",
+    "new_semantic_or_native_reflection_axioms": []
+  },
+  "actual_header_tail": {
+    "stores": 16,
+    "source_locals": 9,
+    "offsets": [
+      608,
+      616,
+      624,
+      632,
+      640,
+      648,
+      656,
+      660,
+      664,
+      672,
+      680,
+      688,
+      696,
+      704,
+      712,
+      720
+    ],
+    "callback_function_blocks": {
+      "load": 59,
+      "store": 60
+    },
+    "profile_readbacks": {
+      "capacity": "Vint160",
+      "payload_words": "Vint20",
+      "tag_bytes": "Vint24",
+      "bias": "Vlong96"
+    },
+    "RHS_scalar_forms": "Vlong160/20/24 before long-to-int field casts"
+  },
+  "internal_transitions": {
+    "one_store": 3,
+    "sixteen_tail_stores": 48,
+    "complete_header_before_loop": 276
+  },
+  "observations": {
+    "typed_readbacks": 92,
+    "previous_pointer_slots_preserved": 76,
+    "both_borrowed_cache_contracts": true
+  },
+  "preservation": [
+    "other declared-local typed loads",
+    "caller bytes and Cur/Max permissions",
+    "access",
+    "nextblock"
+  ],
+  "premise": "stage access equals actual producer allocation access",
+  "environment_scope": {
+    "run": "Arm64Entry",
+    "memory_contract": "actual Arm64Program composites",
+    "linked_consumer_execution": "open"
+  },
+  "whole_lake_build": {
+    "exit": 0,
+    "jobs": 284,
+    "log": "lake-build1.log",
+    "started": "Tue Nov 17 14:57:45 UTC 2026",
+    "timing_lock": "shared"
+  },
+  "next_source_query": {
+    "exit": 0,
+    "log": "next1.log",
+    "claim": "actual loop initializer/body/increment/consumer source only, no execution"
+  },
+  "export_comparison": {
+    "exit": 0,
+    "baseline": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_byte_identical": true,
+    "log": "export-parity1.json"
+  },
+  "proof_limits": {
+    "heartbeats": 200000,
+    "recursion_depth": 512,
+    "workers": 1,
+    "address_space_GiB": 32,
+    "CPU": 17
+  },
+  "last_complete_make_check": {
+    "exit": 0,
+    "commit": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "rerun": "not needed for Lean-only changes"
+  },
+  "complete_ISA_handler_refinements": 0,
+  "M5": "open",
+  "M6": "open"
+}
