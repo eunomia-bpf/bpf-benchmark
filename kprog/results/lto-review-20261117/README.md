@@ -2284,3 +2284,58 @@ kernel-read policy and constant-size specialization remain later work.
 The existing plan/cache facts boundary described above is still the
 integration point. No new check, guard, source edit, execution, measured
 per-call gain or installed-size result is introduced by this receipt.
+
+### Tracee same-image repeat now complete
+
+Coordinator receipt `a66b7f436` completes the follow-up that was pending
+above. Run `corpus/results/x86_kvm_corpus_20261117_054943_357840` gives
+365.699 ns/call eBPF and 316.975 native, or **1.154x**. Throughput is
+**1.098x**, with per-sample native/eBPF ratios
+1.095 / 1.079 / 1.101 (eBPF 338,109 / 336,676 / 336,951;
+native 370,122 / 363,433 / 370,991). Both coordinator scripts use stats
+on and three 60-second samples through the corpus entry.
+
+Against pre-change run2, native time is **0.82% lower** (319.590 →
+316.975), while baseline time is **0.06% lower** (365.923 → 365.699).
+The same post-change image also produced the first attempt's
+376.436 native ns/call. That **59.461 ns** same-image difference is far
+larger than the **2.616 ns** before/change/repeat difference. It supports
+keeping the repeat beside the first attempt; it does not identify the
+cause as host scheduling, instruction changes, map state or workload mix.
+
+The repeated load has the same 169 successful replacement IDs counted
+within its own boot, 2,068,918 companion JIT bytes and 1,700,836 installed
+native bytes. Every `(original type, name, JIT size)` group's count and
+native-byte sum agrees with the first attempt. Their measurement-window
+records also both number 167, with 41 selected by the existing per-call
+analysis. These population observations do not turn code-size equality
+into proof of identical dynamic work. The +1,272 installed-byte cost
+against run2 remains; body/helper/map attribution remains unavailable.
+
+The existing [reader](zero_remainder_effect_inventory.py) now records this
+repeat in [zero-remainder-effects.json](zero-remainder-effects.json) without
+replacing the first attempt or changing its raw counters. No additional
+guest or measurement was started for this review.
+
+### User-leaf integration landed while this review was running
+
+`6beae45cc` (2026-11-17T06:01:31Z) completes the fact/schema integration
+that was still in progress in the earlier receipt. Source review confirms
+`native_loader_lto.hpp:14–18` collects `cpu_tlbstate`; its layout output
+obtains `tlb_state.loaded_mm` and `task_struct.mm` from running-kernel BTF,
+and the matching `RuntimeProbeReadLayout` fields are present in `main.rs`.
+The old `nmi_uaccess_okay` symbol and serialized field are removed. The
+existing complete-layout cache input therefore includes the added facts;
+no separate cache epoch or validation layer is needed.
+
+The coordinator's [leaf-read receipt](../leaf-read-20261117/README.md)
+reports 40 linker tests, 1,149 user-read host vectors, a user payload
+reduction **388 → 370 bytes**, and byte-identical kernel scalar/string
+bodies. These are reported host results, not tests rerun by this review
+or installed application-size totals. The fixture diff uses a live
+GS-backed task/mm pair and a mismatch case rather than patching a user
+policy CALL. Runtime SMAP selection still remains in this implementation.
+`d08e60c83` starts the coordinator's image/check/three-app timing batch,
+whose raw directory is `/workspaces/kprog-raw/leaf-read-20261117`.
+No measured per-call effect is available yet. The partial-tree status
+above is retained as a dated observation and is now closed by this commit.

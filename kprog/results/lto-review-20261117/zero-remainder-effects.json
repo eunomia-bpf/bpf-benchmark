@@ -1,6 +1,6 @@
 {
-  "recorded_utc": "2026-11-17T05:52:43Z",
-  "scope": "Completed coordinator run pairs, cumulative replacement populations. IDs are joined only within a boot; cross-run groups are type/name/original-size multisets, not proof of program identity. This inventory uses the existing >=100-call reporting convention, adds no admission check and discards no run. Tracee first post-change run retained; second run belongs to coordinator. No PMU/body/helper/map attribution or causal speedup inferred.",
+  "recorded_utc": "2026-11-17T06:01:29Z",
+  "scope": "Completed coordinator run pairs and Tracee same-image repeat, cumulative replacement populations. IDs are joined only within a boot; cross-run groups are type/name/original-size multisets, not proof of program identity. This inventory uses the existing >=100-call reporting convention, adds no admission check and discards no run. Both Tracee post-change runs are retained. No PMU/body/helper/map attribution or causal speedup inferred.",
   "apps": [
     {
       "app": "otelcol-ebpf-profiler__profiling",
@@ -3171,7 +3171,34 @@
       ],
       "native_byte_delta": 1272,
       "baseline_ns_ratio": 1.004885183107489,
-      "native_ns_ratio": 1.177870501156411
+      "native_ns_ratio": 1.177870501156411,
+      "same_image_repeat": {
+        "run": "corpus/results/x86_kvm_corpus_20261117_054943_357840",
+        "phases": {
+          "baseline": {
+            "records": 167,
+            "selected": 41,
+            "calls": 2298940889,
+            "elapsed_ns": 840720511656,
+            "ns_per_call": 365.6990554557925
+          },
+          "post_rejit": {
+            "records": 167,
+            "selected": 41,
+            "calls": 2512678662,
+            "elapsed_ns": 796455449535,
+            "ns_per_call": 316.9746540136775
+          }
+        },
+        "cumulative_replacement_programs": 169,
+        "original_bytes": 2068918,
+        "native_bytes": 1700836
+      },
+      "repeat_vs_before": {
+        "baseline_ns_ratio": 0.9993869837623816,
+        "native_ns_ratio": 0.9918155489757169
+      },
+      "repeat_group_differences_from_first_after": []
     }
   ]
 }

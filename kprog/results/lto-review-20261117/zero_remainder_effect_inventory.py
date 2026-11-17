@@ -68,11 +68,22 @@ for app, first, second in RUNS:
                native_byte_delta=after['native_bytes'] - before['native_bytes'],
                baseline_ns_ratio=after['phases']['baseline']['ns_per_call'] / before['phases']['baseline']['ns_per_call'],
                native_ns_ratio=after['phases']['post_rejit']['ns_per_call'] / before['phases']['post_rejit']['ns_per_call'])
+    if app == 'tracee__monitor':
+        repeat, c = read_run(app, '054943_357840')
+        row['same_image_repeat'] = repeat
+        row['repeat_vs_before'] = dict(
+            baseline_ns_ratio=repeat['phases']['baseline']['ns_per_call'] / before['phases']['baseline']['ns_per_call'],
+            native_ns_ratio=repeat['phases']['post_rejit']['ns_per_call'] / before['phases']['post_rejit']['ns_per_call'])
+        row['repeat_group_differences_from_first_after'] = [
+            dict(type=k[0], name=k[1], original_program_bytes=k[2],
+                 first=a_group, repeat=c.get(k))
+            for k in sorted(b.keys() | c.keys())
+            if (a_group := b.get(k)) != c.get(k)]
     apps.append(row)
     print(app, 'native byte delta', row['native_byte_delta'],
           'after/before baseline ns', round(row['baseline_ns_ratio'], 4),
           'native ns', round(row['native_ns_ratio'], 4))
 
 result = dict(recorded_utc=subprocess.check_output(['date', '-u', '+%FT%TZ'], text=True).strip(),
-              scope='Completed coordinator run pairs, cumulative replacement populations. IDs are joined only within a boot; cross-run groups are type/name/original-size multisets, not proof of program identity. This inventory uses the existing >=100-call reporting convention, adds no admission check and discards no run. Tracee first post-change run retained; second run belongs to coordinator. No PMU/body/helper/map attribution or causal speedup inferred.', apps=apps)
+              scope='Completed coordinator run pairs and Tracee same-image repeat, cumulative replacement populations. IDs are joined only within a boot; cross-run groups are type/name/original-size multisets, not proof of program identity. This inventory uses the existing >=100-call reporting convention, adds no admission check and discards no run. Both Tracee post-change runs are retained. No PMU/body/helper/map attribution or causal speedup inferred.', apps=apps)
 (HERE / 'zero-remainder-effects.json').write_text(json.dumps(result, indent=2) + '\n')
