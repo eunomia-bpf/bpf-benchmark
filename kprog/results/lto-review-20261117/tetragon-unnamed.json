@@ -1,0 +1,295 @@
+{
+  "recorded_utc": "2026-11-17T04:19:51Z",
+  "reviewed_tree": "566f94ed1",
+  "scope": "Source and retained load-metadata attribution. No captured original instruction bytes or caller stacks are available in this run directory; count/type/license/attach/ordering matches are not exact-byte binding or runtime-frequency measurements.",
+  "source_instruction_shapes": [
+    {
+      "purpose": "program-type probe",
+      "source": "vendor/repos/tetragon/vendor/github.com/cilium/ebpf/features/prog.go",
+      "first_line": 26,
+      "last_line": 29,
+      "encoded_slots": 3,
+      "operations": [
+        {
+          "line": 27,
+          "operation": "LoadImm",
+          "encoded_slots": 2
+        },
+        {
+          "line": 28,
+          "operation": "Return",
+          "encoded_slots": 1
+        }
+      ]
+    },
+    {
+      "purpose": "mixed BPF and tail calls probe",
+      "source": "vendor/repos/tetragon/pkg/bpf/detect_linux.go",
+      "first_line": 693,
+      "last_line": 704,
+      "encoded_slots": 11,
+      "operations": [
+        {
+          "line": 694,
+          "operation": "Mov.Reg",
+          "encoded_slots": 1
+        },
+        {
+          "line": 695,
+          "operation": "Call.Label",
+          "encoded_slots": 1
+        },
+        {
+          "line": 696,
+          "operation": "Mov.Reg",
+          "encoded_slots": 1
+        },
+        {
+          "line": 697,
+          "operation": "LoadMapPtr",
+          "encoded_slots": 2
+        },
+        {
+          "line": 698,
+          "operation": "Mov.Imm",
+          "encoded_slots": 1
+        },
+        {
+          "line": 699,
+          "operation": "FnTailCall.Call",
+          "encoded_slots": 1
+        },
+        {
+          "line": 700,
+          "operation": "Mov.Imm",
+          "encoded_slots": 1
+        },
+        {
+          "line": 701,
+          "operation": "Return",
+          "encoded_slots": 1
+        },
+        {
+          "line": 702,
+          "operation": "Mov.Imm",
+          "encoded_slots": 1
+        },
+        {
+          "line": 703,
+          "operation": "Return",
+          "encoded_slots": 1
+        }
+      ]
+    },
+    {
+      "purpose": "per-CPU stats update",
+      "source": "vendor/repos/tetragon/pkg/sensors/map_update.go",
+      "first_line": 24,
+      "last_line": 52,
+      "encoded_slots": 18,
+      "operations": [
+        {
+          "line": 26,
+          "operation": "LoadMapPtr",
+          "encoded_slots": 2
+        },
+        {
+          "line": 29,
+          "operation": "LoadImm",
+          "encoded_slots": 2
+        },
+        {
+          "line": 30,
+          "operation": "StoreMem",
+          "encoded_slots": 1
+        },
+        {
+          "line": 33,
+          "operation": "Mov.Reg",
+          "encoded_slots": 1
+        },
+        {
+          "line": 34,
+          "operation": "Add.Imm",
+          "encoded_slots": 1
+        },
+        {
+          "line": 36,
+          "operation": "FnMapLookupElem.Call",
+          "encoded_slots": 1
+        },
+        {
+          "line": 39,
+          "operation": "JEq.Imm",
+          "encoded_slots": 1
+        },
+        {
+          "line": 42,
+          "operation": "LoadImm",
+          "encoded_slots": 2
+        },
+        {
+          "line": 43,
+          "operation": "StoreXAdd",
+          "encoded_slots": 1
+        },
+        {
+          "line": 46,
+          "operation": "LoadImm",
+          "encoded_slots": 2
+        },
+        {
+          "line": 47,
+          "operation": "Return",
+          "encoded_slots": 1
+        },
+        {
+          "line": 50,
+          "operation": "LoadImm",
+          "encoded_slots": 2
+        },
+        {
+          "line": 51,
+          "operation": "Return",
+          "encoded_slots": 1
+        }
+      ]
+    }
+  ],
+  "unnamed_loads": [
+    {
+      "phase": "baseline",
+      "log": "corpus/results/x86_kvm_corpus_20261117_034829_591728/details/shim-logs/tetragon__observer.baseline.log",
+      "line": 53,
+      "type": 29,
+      "type_name": "lsm",
+      "insn_count": 3,
+      "license": "GPL",
+      "expected_attach": 27,
+      "attach_btf_id": 71220
+    },
+    {
+      "phase": "baseline",
+      "log": "corpus/results/x86_kvm_corpus_20261117_034829_591728/details/shim-logs/tetragon__observer.baseline.log",
+      "line": 71,
+      "type": 17,
+      "type_name": "raw_tracepoint",
+      "insn_count": 11,
+      "license": "Dual BSD/GPL",
+      "expected_attach": 0,
+      "attach_btf_id": 0
+    },
+    {
+      "phase": "baseline",
+      "log": "corpus/results/x86_kvm_corpus_20261117_034829_591728/details/shim-logs/tetragon__observer.baseline.log",
+      "line": 73,
+      "type": 26,
+      "type_name": "tracing",
+      "insn_count": 3,
+      "license": "",
+      "expected_attach": 24,
+      "attach_btf_id": 70809
+    },
+    {
+      "phase": "baseline",
+      "log": "corpus/results/x86_kvm_corpus_20261117_034829_591728/details/shim-logs/tetragon__observer.baseline.log",
+      "line": 749,
+      "type": 1,
+      "type_name": "socket_filter",
+      "insn_count": 18,
+      "license": "GPL",
+      "expected_attach": 0,
+      "attach_btf_id": 0
+    },
+    {
+      "phase": "baseline",
+      "log": "corpus/results/x86_kvm_corpus_20261117_034829_591728/details/shim-logs/tetragon__observer.baseline.log",
+      "line": 751,
+      "type": 1,
+      "type_name": "socket_filter",
+      "insn_count": 3,
+      "license": "MIT",
+      "expected_attach": 0,
+      "attach_btf_id": 0
+    },
+    {
+      "phase": "post_rejit",
+      "log": "corpus/results/x86_kvm_corpus_20261117_034829_591728/details/shim-logs/tetragon__observer.post_rejit.log",
+      "line": 62,
+      "type": 29,
+      "type_name": "lsm",
+      "insn_count": 3,
+      "license": "GPL",
+      "expected_attach": 27,
+      "attach_btf_id": 71220
+    },
+    {
+      "phase": "post_rejit",
+      "log": "corpus/results/x86_kvm_corpus_20261117_034829_591728/details/shim-logs/tetragon__observer.post_rejit.log",
+      "line": 84,
+      "type": 17,
+      "type_name": "raw_tracepoint",
+      "insn_count": 11,
+      "license": "Dual BSD/GPL",
+      "expected_attach": 0,
+      "attach_btf_id": 0
+    },
+    {
+      "phase": "post_rejit",
+      "log": "corpus/results/x86_kvm_corpus_20261117_034829_591728/details/shim-logs/tetragon__observer.post_rejit.log",
+      "line": 87,
+      "type": 26,
+      "type_name": "tracing",
+      "insn_count": 3,
+      "license": "",
+      "expected_attach": 24,
+      "attach_btf_id": 70809
+    },
+    {
+      "phase": "post_rejit",
+      "log": "corpus/results/x86_kvm_corpus_20261117_034829_591728/details/shim-logs/tetragon__observer.post_rejit.log",
+      "line": 815,
+      "type": 1,
+      "type_name": "socket_filter",
+      "insn_count": 18,
+      "license": "GPL",
+      "expected_attach": 0,
+      "attach_btf_id": 0
+    },
+    {
+      "phase": "post_rejit",
+      "log": "corpus/results/x86_kvm_corpus_20261117_034829_591728/details/shim-logs/tetragon__observer.post_rejit.log",
+      "line": 818,
+      "type": 1,
+      "type_name": "socket_filter",
+      "insn_count": 3,
+      "license": "MIT",
+      "expected_attach": 0,
+      "attach_btf_id": 0
+    }
+  ],
+  "current_manifest": "vendor/build/native-bpf/x86/stage/tetragon/manifest.json",
+  "current_manifest_empty_program_entries": 0,
+  "call_sites": [
+    {
+      "source": "vendor/repos/tetragon/pkg/celbpf/celbpf.go",
+      "line": 39,
+      "call": "Supported -> DetectMixBpfAndTailCalls"
+    },
+    {
+      "source": "vendor/repos/tetragon/pkg/sensors/exec/procevents/proc_reader_linux.go",
+      "line": 138,
+      "call": "writeExecveMap -> updateExecveMapStats(len(procs))"
+    },
+    {
+      "source": "vendor/repos/tetragon/pkg/sensors/exec/procevents/proc_reader_linux.go",
+      "line": 94,
+      "call": "updateExecveMapStats -> sensors.UpdateStatsMap(m, procs)"
+    },
+    {
+      "source": "vendor/repos/tetragon/pkg/sensors/map_update.go",
+      "line": 67,
+      "call": "UpdateStatsMap -> prog.Run"
+    }
+  ]
+}

@@ -1327,3 +1327,61 @@ This is a phase-1 coverage finding ahead of further LTO attribution. No
 per-call gain, installed-size saving or equal-work conclusion follows from
 the load counts. Preserve the completed timing results and report their
 actual replacement coverage alongside them.
+
+### Tetragon unnamed loads: source attribution, 2026-11-17T04:20:30Z
+
+The next source pass narrows the four unclassified misses above. Two of
+the unnamed Go-generated programs have particularly specific source matches:
+
+| Logged native-arm load | Best source match | Evidence and purpose |
+|---|---|---|
+| raw_tracepoint, 11 slots, Dual BSD/GPL; log 84–86 | `pkg/bpf/detect_linux.go:657–712`, `detectMixBpfAndTailCalls` | Creates a one-entry program array, loads a two-slot return program into key 0, then loads a program combining a local BPF call and helper tail call. Ten Go instruction constructors encode eleven BPF slots because LoadMapPtr occupies two. The source closes both programs and the map without attaching or running them. |
+| socket_filter, 18 slots, GPL; log 815–817 | `pkg/sensors/map_update.go:13–73`, `UpdateStatsMap` | Looks up key 0 in a per-CPU ARRAY and atomically adds the caller's value. Thirteen constructors encode eighteen slots: five LD_IMM64 constructors occupy two slots each. It calls `prog.Run` with 20 bytes of input and then closes the program. This changes application state; it is not a capability probe. |
+
+The first match also fits the exact preceding log sequence: unnamed
+one-entry program array at 77–78, two-slot raw-tracepoint return program
+at 79–81, successful key-0 publication at 82, then the eleven-slot load
+at 84. `pkg/celbpf/celbpf.go:34–39` invokes this capability test through
+`Supported`. It tests whether CEL's combination of BPF subprogram calls
+and tail calls is supported; it does not establish a failure in installed
+CEL functions.
+
+The stats updater has a real application caller.
+`pkg/sensors/exec/procevents/proc_reader_linux.go:138` invokes
+`updateExecveMapStats(len(procs))` after populating the process map.
+Lines 83–95 open the pinned `execve_map_stats` map and pass it to
+`sensors.UpdateStatsMap`. The generated program's value is the number of
+processes discovered during initialization. Its map lookup, atomic add,
+return code and per-CPU selection must be preserved. Omitting it as a
+probe would lose that update. This is separate from the named
+`execve_map_upda` program loaded immediately beforehand; that named program
+is successfully replaced by native program 350, while the unnamed 18-slot
+program stays as original BPF program 351.
+
+The LSM/3-slot and tracing/3-slot loads fit the program-type probes in the
+vendored `features/prog.go`: 24–35 supplies LD_IMM64 R0=0 and EXIT; 159–168
+sets GPL/LSM/AttachLSMMac/file_mprotect; 92–101 sets
+tracing/AttachTraceFEntry/bpf_init with an empty license. Those metadata
+match the log's GPL/attach-27 and empty-license/attach-24 cases. This review
+has not independently mapped logged BTF IDs 71220/70809 to those target
+functions. Both the eleven-slot and eighteen-slot metadata shapes also
+occur once in the baseline arm, as do the two three-slot type probes.
+
+`tetragon_unnamed_inventory.py` retains the source operation/slot arithmetic,
+caller locations and both arms' load metadata in `tetragon-unnamed.json`.
+No captured original instruction bytes or caller stacks are present in
+this run directory. The metadata, ordering and source matches provide
+attribution evidence; they are not exact-byte binding of the logged load
+to its source. Current Tetragon manifest has zero empty-program entries.
+These runtime Go instruction sequences have no selected native manifest
+counterpart in this run.
+
+The coverage correction is therefore more specific than “four failed
+application programs” or “four feature probes”: three source matches are
+capability tests and one is an application-state initializer. None is
+shown here to be an event-frequency hot path. Filling native coverage for
+the generated stats updater matters to the native-first requirement; no
+measured per-call improvement is predicted from its setup-only source use.
+Do not broaden name/length exclusions or count its B as generated/passing
+without actual artifacts. The completed app and timing results stay as
+recorded, with this coverage qualification and no added run gate.
