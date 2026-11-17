@@ -67,6 +67,20 @@ for phase in ['baseline','post_rejit']:
         'all_installed_bytes':sum(r['bytes_jited'] for r in rows),
         'all_records':rows,'groups_by_name_and_type':sorted(summary,key=lambda g:g['time_ns'],reverse=True),
     }
+# The existing query is opt-in per manifest entry, not implied by its presence.
+manifest_rows=[]
+for manifest in sorted((ROOT/'vendor/build/native-bpf/x86/stage').glob('*/manifest.json')):
+    data=json.loads(manifest.read_text())
+    entries=data['objects']
+    manifest_rows.append({'path':str(manifest),'app':data.get('app',manifest.parent.name),
+        'entries':len(entries),
+        'helper_context_true':sum(row.get('kernel_helper_context',False) is True for row in entries),
+        'helper_context_false_or_absent':sum(row.get('kernel_helper_context',False) is not True for row in entries)})
+result['staged_manifest_audit']={
+    'scope':'Prepared host inputs at analysis time, not an inspection of the shipped image.',
+    'loader_path':'kernel_helper_context controls query_program_helper_targets; absent manifest value defaults false.',
+    'manifests':manifest_rows,
+}
 args.output.mkdir(parents=True,exist_ok=True)
 (args.output/'costs.json').write_text(json.dumps(result,indent=2)+'\n')
 lines=['Historical BCC sampled ownership (cpu-clock, not cycles or ns/call)',
@@ -90,5 +104,8 @@ for name,kind in sorted(set(by_phase['baseline'])|set(by_phase['post_rejit'])):
 for phase,p in phases.items():
     lines.append(f"{phase}: {p['selected_records']}/{p['all_program_records']} selected, "
                  f"{p['selected_ns_per_call']:.3f} ns/call, {p['all_installed_bytes']} installed bytes")
+lines+=['','Prepared manifest helper-context enablement (not shipped-image evidence)']
+for row in manifest_rows:
+    lines.append(f"{row['app']}: {row['helper_context_true']}/{row['entries']} entries enable original-prototype query")
 (args.output/'readout.txt').write_text('\n'.join(lines)+'\n')
 print('\n'.join(lines))
