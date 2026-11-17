@@ -2224,3 +2224,63 @@ had no other effective-input differences. Current-stage code, fresh PMU
 ownership and the coordinator's next runs remain the evidence for more
 specific attribution. No benchmark, source or runtime check was changed
 by this review, and no extra measurement was started.
+
+## User-leaf work in progress: savings attribution and live-register audit
+
+Read-only inspection at 2026-11-17T05:57:44Z of the coordinator's **uncommitted**
+`x86_probe_read.rs` change. The references below describe that working
+state, not an installed image, a finished build or an execution test.
+No copy of the working source or candidate code was made. Fact-provider
+and schema edits are still being written; their absence in this partial
+tree is not reported as a landed regression.
+
+The new `user_leaf` at lines 98–152 contains no nested helper CALL and no
+RBX/R12–R15 saves. It uses only SysV caller-saved registers:
+
+| Register | Lifetime in this source |
+| --- | --- |
+| R8 | Original destination through full-buffer failure zeroing |
+| R9 | Zero-extended original u32 size, through the range subtraction and zeroing |
+| R10 | Current task through the mm predicate and pagefault nesting decrement |
+| RDX / DL | Source until copied into RSI; then SMAP decision until cleanup; only then zeroing scratch |
+| R11 | Address scratch before copying; fixed success/fault status throughout protected source loads |
+| RAX, RDI, RSI, RCX | Policy temporary, advancing copy pointers/count and return value |
+
+This establishes a useful attribution boundary in the source: **the leaf
+change removes all ten push/pop instructions without first specializing
+the size or the SMAP bit**. Those saves occupied 18 bytes in the old
+routine. Earlier sections describe their potential removal from the
+pre-leaf five-save body; later SMAP/constant-size results must not claim
+their removal again. Kernel scalar and kernel-string bodies at lines
+155–212 still retain their callback and saved registers in this working
+state, so this observation is specifically about user reads.
+
+The remaining SMAP decision is explicit at lines 120–127 and 136–139:
+MOVABS (10 bytes), memory TEST (11), SETNE DL (3), near JZ (6), TEST DL,DL
+(2), near JZ (6). That is **six decision instructions, two branches and
+38 bytes**, excluding the 3-byte STAC and 3-byte CLAC themselves. The old
+R15b choice used 40 bytes, as retained in `remainder-paths.json`; DL avoids
+two REX bytes without removing feature selection. A future boot-fact
+choice can remove this decision sequence and retain or omit STAC/CLAC
+as appropriate. It buys no further push/pop removal from this user body.
+These are source encoding counts, not emitted final-byte or cycle results.
+
+The source ordering also preserves the intended register lifetimes:
+RSI receives the source before SETNE overwrites DL; SETNE leaves the TEST
+flags intact for the following JZ; the shared copy body at lines 38–74
+does not overwrite R8/R9/R10/RDX. Each protected 8/4/2/1-byte source load
+has a 3/2/3/3-byte recovery site, a TEST R11D and a fault branch before
+its destination store. Success sets EAX to zero. Faults set sign-extended
+`-EFAULT`, join CLAC/pagefault cleanup, then zero the original full
+destination. Policy denial skips that cleanup because nesting was not
+incremented, and also zeros the original destination. `zero_fill` uses
+EDX only after SMAP cleanup and leaves the RAX error intact. These are
+source control-flow observations; emitted offsets, exception recovery
+and runtime behavior remain for the coordinator's completed change.
+
+The live GS task/mm comparison and single range comparison match the
+planned direction. SMAP selection remains per invocation here, and
+kernel-read policy and constant-size specialization remain later work.
+The existing plan/cache facts boundary described above is still the
+integration point. No new check, guard, source edit, execution, measured
+per-call gain or installed-size result is introduced by this receipt.
