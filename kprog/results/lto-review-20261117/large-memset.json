@@ -1,0 +1,244 @@
+{
+  "recorded_utc": "2026-11-17T03:59:34Z",
+  "blob": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/130-0/image.blob",
+  "helper_start": 6869,
+  "helper_bytes": 98,
+  "direct_call_sites": [
+    {
+      "offset": 301,
+      "preceding_instructions": [
+        [
+          290,
+          "lea",
+          "rdi,[r15+0x20]"
+        ],
+        [
+          294,
+          "mov",
+          "edx,0x29c"
+        ],
+        [
+          299,
+          "xor",
+          "esi,esi"
+        ],
+        [
+          301,
+          "call",
+          "0x1ad5"
+        ]
+      ]
+    },
+    {
+      "offset": 718,
+      "preceding_instructions": [
+        [
+          707,
+          "lea",
+          "rdi,[r14+0x20]"
+        ],
+        [
+          711,
+          "mov",
+          "edx,0x29c"
+        ],
+        [
+          716,
+          "xor",
+          "esi,esi"
+        ],
+        [
+          718,
+          "call",
+          "0x1ad5"
+        ]
+      ]
+    }
+  ],
+  "helper_disassembly": [
+    [
+      6869,
+      "mov",
+      "rax,rdi"
+    ],
+    [
+      6872,
+      "xor",
+      "r8d,r8d"
+    ],
+    [
+      6875,
+      "cmp",
+      "rdx,0x20"
+    ],
+    [
+      6879,
+      "jb",
+      "0x1afe"
+    ],
+    [
+      6881,
+      "mov",
+      "QWORD PTR [rdi],r8"
+    ],
+    [
+      6884,
+      "mov",
+      "QWORD PTR [rdi+0x8],r8"
+    ],
+    [
+      6888,
+      "mov",
+      "QWORD PTR [rdi+0x10],r8"
+    ],
+    [
+      6892,
+      "mov",
+      "QWORD PTR [rdi+0x18],r8"
+    ],
+    [
+      6896,
+      "add",
+      "rdi,0x20"
+    ],
+    [
+      6900,
+      "sub",
+      "rdx,0x20"
+    ],
+    [
+      6904,
+      "cmp",
+      "rdx,0x20"
+    ],
+    [
+      6908,
+      "jae",
+      "0x1ae1"
+    ],
+    [
+      6910,
+      "cmp",
+      "rdx,0x8"
+    ],
+    [
+      6914,
+      "jb",
+      "0x1b15"
+    ],
+    [
+      6916,
+      "mov",
+      "QWORD PTR [rdi],r8"
+    ],
+    [
+      6919,
+      "add",
+      "rdi,0x8"
+    ],
+    [
+      6923,
+      "sub",
+      "rdx,0x8"
+    ],
+    [
+      6927,
+      "cmp",
+      "rdx,0x8"
+    ],
+    [
+      6931,
+      "jae",
+      "0x1b04"
+    ],
+    [
+      6933,
+      "test",
+      "dl,0x4"
+    ],
+    [
+      6936,
+      "je",
+      "0x1b21"
+    ],
+    [
+      6938,
+      "mov",
+      "DWORD PTR [rdi],r8d"
+    ],
+    [
+      6941,
+      "add",
+      "rdi,0x4"
+    ],
+    [
+      6945,
+      "test",
+      "dl,0x2"
+    ],
+    [
+      6948,
+      "je",
+      "0x1b2e"
+    ],
+    [
+      6950,
+      "mov",
+      "WORD PTR [rdi],r8w"
+    ],
+    [
+      6954,
+      "add",
+      "rdi,0x2"
+    ],
+    [
+      6958,
+      "test",
+      "dl,0x1"
+    ],
+    [
+      6961,
+      "je",
+      "0x1b36"
+    ],
+    [
+      6963,
+      "mov",
+      "BYTE PTR [rdi],r8b"
+    ],
+    [
+      6966,
+      "ret",
+      ""
+    ]
+  ],
+  "successful_668_byte_path": {
+    "instructions": 190,
+    "conditional_branches": 28,
+    "loop32_iterations": 20,
+    "loop8_iterations": 3,
+    "final_store_bytes": 4
+  },
+  "stage_P": {
+    "path": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+    "mtime_ns": 1794886322838349657,
+    "literal_668_windows": [
+      [
+        "     11a:\t49 8d 7f 20          \tlea    rdi,[r15+0x20]",
+        "     11e:\tba 9c 02 00 00       \tmov    edx,0x29c",
+        "     123:\t31 f6                \txor    esi,esi",
+        "     125:\te8 00 00 00 00       \tcall   12a <native_tracer_entry+0x12a>\t126: R_X86_64_PLT32\tmemset-0x4",
+        "     12a:\t41 c7 87 c4 02 00 00 01 00 00 00 \tmov    DWORD PTR [r15+0x2c4],0x1"
+      ],
+      [
+        "     2a0:\t49 8d 7e 20          \tlea    rdi,[r14+0x20]",
+        "     2a4:\tba 9c 02 00 00       \tmov    edx,0x29c",
+        "     2a9:\t31 f6                \txor    esi,esi",
+        "     2ab:\te8 00 00 00 00       \tcall   2b0 <native_tracer_entry+0x2b0>\t2ac: R_X86_64_PLT32\tmemset-0x4",
+        "     2b0:\t41 c7 86 c4 02 00 00 01 00 00 00 \tmov    DWORD PTR [r14+0x2c4],0x1"
+      ]
+    ],
+    "scope": "Current producer P only; not a post-context installed object."
+  },
+  "scope": "Historical host-emitted local memset body and static successful path. Excludes caller setup/CALL and other program work; no dynamic frequency, current installed-cost, cycle or speedup claim."
+}

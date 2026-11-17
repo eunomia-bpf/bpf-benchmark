@@ -40,6 +40,7 @@ whether LTO work earns its footprint.
 | 7 | Finite helper-ID joins become another runtime compare chain | Tetragon; other helper-selecting sources | Propagate/split a proven selection earlier where possible, avoiding repeated ID redispatch. Source-confirmed shape; production hot frequency and gain are unmeasured. |
 | 8 | Exact hash key length stops before the LTO plan | Katran, BCC, OTel hash sites | Current JIT/native use the same runtime-length kernel lookup. Exact-shape specialization remains a distinct, unmeasured opportunity; the copied-hash comparison did not test a separately specialized function per proven key length. |
 | 9 | Current-task BTF and jiffies helpers retain calls the JIT removes | Tracee, Cilium | Remove a call/return per executed covered site. Historical outputs have 121/91 static calls; dynamic importance is unknown, and inline loads can grow installed text. |
+| 10 | Large known memory lengths become unknown at the unroll cutoff | OTel zero-fill example; other sites unmeasured | Preserve the known count in a compact loop and fixed tail. Retained 668-byte zero-fill uses 190 helper instructions; no current cycle cost or candidate gain is established. |
 
 Tetragon's prior native load failure is **fixed in the retained corrected-image
 check**; it is discussed separately below. It should not be ranked as a
@@ -1188,3 +1189,54 @@ region. Feature folding must preserve that control flow, while successful
 and faulted copies still close the access region. This review supplies
 instruction and ABI evidence for the already-ranked read work, not a
 measured per-call gain or a proposed extra runtime check.
+
+## 10. A known 668-byte zero-fill is emitted as a dynamic-length routine
+
+2026-11-17T03:59:34Z review at 9a3a369f8. The memory emitter has a
+specific information-loss point: `x86_memory.rs:31–35` takes the proven
+RDX length, discards it when greater than 512, and then stores the
+remaining value as `Option<u16>`. The 512 bound selects full unrolling,
+but also decides whether the routine remembers any count. The separate
+zero-byte fact survives at 36–39. This is an emission-policy cutoff, not
+a program-load refusal or a proposed new limit.
+
+The retained OTel entry host emission has two calls, at 0x12d and 0x2ce,
+with `mov edx,0x29c; xor esi,esi` immediately before each. Both target
+the same zero-fill routine at 0x1ad5. Its 98-byte body first selects a
+32-byte loop, then an 8-byte loop, then tests the 4/2/1-byte remainder.
+At 668 bytes, its successful path executes 20 iterations of 32 bytes,
+three of 8 bytes and one 4-byte store: 190 helper instructions and 28
+conditional branches including loop exits. The count includes helper
+setup and RET, but excludes caller argument setup/CALL, surrounding
+program work and cycles. The zero-fill stores themselves still do useful
+work. These are static decoded path counts, not a measured cost.
+
+`large_memset_inventory.py` preserves call windows, the helper decode and
+path arithmetic in `large-memset.json`. It also records that the current
+O3 producer P still calls `memset` with the same literal 668 in
+`native_tracer_entry`. That P is not the post-context installed object,
+so the historical 98 B and 190 instructions are not asserted as current
+installed costs. In the source, trace reset and the custom-label clearing
+loop are at `otel/support/ebpf/tracemgmt.h:220–265`. The corresponding
+eBPF path executes the BPF memory operations emitted by its compiler;
+the x86 JIT's ordinary stores are handled at
+`arch/x86/net/bpf_jit_comp.c:2133–2150`. This native-link unroll threshold
+does not govern that JIT path. No retained JIT instruction-count comparison
+for this exact zero-fill range is claimed.
+
+Keep a proven count independently of choosing full unrolling. A compact
+counted loop can retain 20 bulk iterations and a known 28-byte tail,
+avoiding the dynamic tail selection and preserving the actual zero-fill.
+Simply raising the unroll cutoff would expose a code-size tradeoff;
+arbitrarily large known lengths should not require fully unrolled output.
+The two demonstrated calls currently share one body, so any replacement
+should retain that sharing. If a program has mixed unknown/known lengths,
+an additional specialized body has to earn its installed bytes. Preserve
+the original destination return value and every required write; a zero
+label count alone does not authorize deleting observable clearing.
+
+This is below read/map work in priority. It adds a concrete large-count
+example to the already documented memory-emitter coverage, rather than
+claiming all native memcpy/memset calls are generic. No source change,
+emitted candidate, executable run, input check or performance gain was
+introduced here.
