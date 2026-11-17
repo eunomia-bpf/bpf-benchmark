@@ -20,3 +20,5 @@ The live canonical CLI and checked guest retain their image lease. Omp owns
 the later frozen image/check/affected-app batch with all LTO on.
 
 First run 2817773 ended 101 at 23:44:37Z on compile errors: the new test used Clone on the layout, the decoder needed into_iter, and the fixture Path type needed qualification. The focused baseline also ended on the layout compile error; retained current-zero-tail emissions supply the actual duplication evidence. The source/test stage already applied; resume-host.sh continues full tests and replay after the forward compile correction. All initial raw logs remain.
+
+Resume 2818089 passed all 61 tests with four existing opt-in tests at 23:46:09Z. It then ended 1 because the blanket old-fixture cmp reached compat-string.bin, which combines user/kernel leaves and intentionally changes under this sharing. after-tests.sh retains the completed suite and reports every fixture equality/difference before source publication and 295-request emission. It repeats neither the source application nor the completed full tests. Existing compat execution vectors passed in the full suite.
