@@ -534,7 +534,7 @@ mod tests {
                 cases+=1;
             }
         }
-        println!("Probe branch layout:24 mixed-edge/relocation/recovery/append cases PASS");
+        println!("Probe branch layout:{cases} mixed-edge/relocation/recovery/append cases PASS");
         Ok(())
     }
 

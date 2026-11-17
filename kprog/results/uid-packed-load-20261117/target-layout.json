@@ -1,0 +1,27 @@
+{
+  "kernel": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+  "reader": "vendor/bpf/core-answers.py",
+  "layout": {
+    "task_cred": 3328,
+    "cred_uid": 8,
+    "cred_gid": 12
+  },
+  "fields": {
+    "task_cred": {
+      "type": "(anon)",
+      "size": null,
+      "bit_offset": 26624
+    },
+    "cred_uid": {
+      "type": "(anon)",
+      "size": 4,
+      "bit_offset": 64
+    },
+    "cred_gid": {
+      "type": "(anon)",
+      "size": 4,
+      "bit_offset": 96
+    }
+  },
+  "uid_then_gid_adjacent": true
+}

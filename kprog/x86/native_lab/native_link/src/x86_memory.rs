@@ -10,7 +10,7 @@ pub(super) struct Routine {
 }
 
 impl Routine {
-    fn operand(bytes: &mut Vec<u8>, opcode: &[u8], offset: u32) {
+    pub(super) fn operand(bytes: &mut Vec<u8>, opcode: &[u8], offset: u32) {
         bytes.extend_from_slice(opcode);
         let modrm = bytes.last_mut().expect("memory operand opcode");
         if offset == 0 {

@@ -139,8 +139,7 @@ int main(int argc, char **argv)
     percpu.current = NULL; assert(uid_gid() == (uint64_t)-22); ++vectors;
     assert(!syscall(SYS_arch_prctl, ARCH_SET_GS, old_gs));
     assert(!munmap(pages, 8192) && !munmap(code, size)); free(task);
-    printf("uid_gid leaf: read-only/guard/unaligned/live IDs/NULL current, %u vectors PASS
-", vectors);
+    printf("uid_gid leaf: read-only/guard/unaligned/live IDs/NULL current, %u vectors PASS\n", vectors);
     return 0;
 }
 ''')

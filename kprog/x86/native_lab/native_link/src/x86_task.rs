@@ -5,8 +5,10 @@
 //! (user_namespace.c map_write takes a map only while it has no extents). A NULL current returns -EINVAL.
 use super::*;
 
-fn disp(value: u32) -> Result<[u8; 4]> {
-    Ok(i32::try_from(value)?.to_le_bytes())
+fn load_field(bytes: &mut Vec<u8>, opcode: &[u8], offset: u32) -> Result<()> {
+    let offset = i32::try_from(offset)?;
+    memory::Routine::operand(bytes, opcode, offset as u32);
+    Ok(())
 }
 
 /// RAX=current, then current->cred; EDX=gid; result in RAX. Caller-saved registers only.
@@ -15,13 +17,21 @@ pub(super) fn uid_gid(current_task: u64, l: &RuntimeCredLayout) -> Result<Vec<u8
     let mut b = vec![0x65,0x48,0x8b,0x04,0x25]; b.extend_from_slice(&current); // rax=current
     b.extend_from_slice(&[0x48,0x85,0xc0]); // test rax,rax
     let null = append_x86_jcc_rel32(&mut b, 0x84);
-    b.extend_from_slice(&[0x48,0x8b,0x80]); b.extend_from_slice(&disp(l.task_cred)?); // rax=current->cred
-    b.extend_from_slice(&[0x8b,0x90]); b.extend_from_slice(&disp(l.cred_gid)?); // edx=cred->gid
-    b.extend_from_slice(&[0x8b,0x80]); b.extend_from_slice(&disp(l.cred_uid)?); // eax=cred->uid
-    b.extend_from_slice(&[0x48,0xc1,0xe2,0x20,0x48,0x09,0xd0,0xc3]); // rax|=rdx<<32; ret
+    load_field(&mut b, &[0x48,0x8b,0x80], l.task_cred)?; // rax=current->cred
+    // Published credentials are immutable; the existing BTF facts require u32 fields.
+    // On x86 the adjacent UID/GID pair already has the helper's packed order.
+    if u64::from(l.cred_gid) == u64::from(l.cred_uid) + 4 {
+        load_field(&mut b, &[0x48,0x8b,0x80], l.cred_uid)?;
+    } else {
+        load_field(&mut b, &[0x8b,0x90], l.cred_gid)?;
+        load_field(&mut b, &[0x8b,0x80], l.cred_uid)?;
+        b.extend_from_slice(&[0x48,0xc1,0xe2,0x20,0x48,0x09,0xd0]);
+    }
+    b.push(0xc3);
     let here = b.len(); patch_x86_rel32(&mut b, null, here)?;
     b.extend_from_slice(&[0x48,0xc7,0xc0,0xea,0xff,0xff,0xff,0xc3]); // -EINVAL
-    Ok(b)
+    let (bytes, _, _) = probe_read::compact((b, Vec::new(), Vec::new()))?;
+    Ok(bytes)
 }
 
 /// Every bpf_get_current_uid_gid call reaches one shared leaf.
@@ -53,11 +63,41 @@ mod tests {
             .arg(source).arg("-o").arg(&driver).output()?;
         if !compile.status.success() { bail!("task fixture compile: {}",String::from_utf8_lossy(&compile.stderr)); }
         let layout = RuntimeCredLayout { task_cred:16, cred_uid:8, cred_gid:12 };
-        fs::write(output.join("uid-gid.bin"), uid_gid(0, &layout)?)?;
-        let run = std::process::Command::new(&driver).arg(output.join("uid-gid.bin")).output()?;
-        fs::write(output.join("uid-gid.stdout"), &run.stdout)?; fs::write(output.join("uid-gid.stderr"), &run.stderr)?;
-        assert!(run.status.success(), "uid_gid host execution: {} {}", run.status, String::from_utf8_lossy(&run.stderr));
-        println!("{}", String::from_utf8_lossy(&run.stdout));
+        let mut layouts=vec![
+            RuntimeCredLayout{task_cred:16,cred_uid:8,cred_gid:12},
+            RuntimeCredLayout{task_cred:17,cred_uid:7,cred_gid:11},
+            RuntimeCredLayout{task_cred:0,cred_uid:0,cred_gid:4},
+            RuntimeCredLayout{task_cred:100,cred_uid:123,cred_gid:127},
+            RuntimeCredLayout{task_cred:128,cred_uid:124,cred_gid:128},
+            RuntimeCredLayout{task_cred:256,cred_uid:128,cred_gid:132},
+            RuntimeCredLayout{task_cred:128,cred_uid:0,cred_gid:8},
+            RuntimeCredLayout{task_cred:127,cred_uid:24,cred_gid:4},
+            RuntimeCredLayout{task_cred:0,cred_uid:128,cred_gid:256}];
+        if let Some(path)=std::env::var_os("NATIVE_LINK_TASK_LAYOUT") {
+            let facts:serde_json::Value=serde_json::from_str(&fs::read_to_string(path)?)?;
+            layouts.push(serde_json::from_value(facts["layout"].clone())?);
+        }
+        let mut sizes=String::from("layout task_cred uid gid packed bytes\n");
+        for (i,l) in layouts.iter().enumerate() {
+            let bytes=uid_gid(0,l)?;
+            let packed=u64::from(l.cred_gid)==u64::from(l.cred_uid)+4;
+            let mut decoder=Decoder::new(64,&bytes,DecoderOptions::NONE);let mut reads=0;
+            while decoder.can_decode() {
+                let insn=decoder.decode();assert!(!insn.is_invalid());
+                reads+=usize::from((0..insn.op_count()).any(|op|insn.op_kind(op)==OpKind::Memory));
+            }
+            assert_eq!(reads,if packed {3}else{4},"do not fuse nonadjacent/reversed fields");
+            let name=if i==0 {"uid-gid".to_owned()}else{format!("uid-gid-layout{i}")};
+            let binary=output.join(format!("{name}.bin"));fs::write(&binary,&bytes)?;
+            let run=std::process::Command::new(&driver).arg(binary)
+                .args([l.task_cred.to_string(),l.cred_uid.to_string(),l.cred_gid.to_string()]).output()?;
+            fs::write(output.join(format!("{name}.stdout")),&run.stdout)?;
+            fs::write(output.join(format!("{name}.stderr")),&run.stderr)?;
+            assert!(run.status.success(),"UID layout{i}: {} {}",run.status,String::from_utf8_lossy(&run.stderr));
+            println!("{}",String::from_utf8_lossy(&run.stdout));
+            sizes.push_str(&format!("{i} {} {} {} {packed} {}\n",l.task_cred,l.cred_uid,l.cred_gid,bytes.len()));
+        }
+        fs::write(output.join("uid-gid-sizes.txt"),sizes)?;
         let mut blob = X86_HELPER_CALL_REL32_SLOT.repeat(2); blob[5]=0xe9; blob.push(0xc3);
         let mut calls = vec![RelocRecord{offset:0,kind:1,target:0x7000}, RelocRecord{offset:5,kind:1,target:0x7000},
             RelocRecord{offset:20,kind:1,target:0x9999}];

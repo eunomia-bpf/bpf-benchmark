@@ -1,0 +1,11 @@
+layout task_cred uid gid packed bytes
+0 16 8 12 true 31
+1 17 7 11 true 31
+2 0 0 4 true 29
+3 100 123 127 true 31
+4 128 124 128 true 34
+5 256 128 132 true 37
+6 128 0 8 false 42
+7 127 24 4 false 40
+8 0 128 256 false 45
+9 3328 8 12 true 34
