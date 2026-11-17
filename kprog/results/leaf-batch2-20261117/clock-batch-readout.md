@@ -1,6 +1,6 @@
 # Joined clock-batch observations before batch 2
 
-Read at 2026-11-17T13:26Z from the coordinator's
+Read at 2026-11-17T13:26:13Z from the coordinator's
 `kprog/results/ktime-leaf-20261117/summary.txt` and persistent
 `/workspaces/kprog-raw/ktime-leaf-20261117/hostload.log`.
 Image `cb4bd4d8` predates batch-2 UID/GID, kernel-string loop and Cilium
