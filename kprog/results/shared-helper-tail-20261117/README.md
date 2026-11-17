@@ -25,6 +25,9 @@ too. Their nested external kernel-helper slots remain E8: the direct
 loader requires those external call slots, whereas these retargeted local
 branches no longer have an external helper relocation. Do not widen the
 frozen loader or change the nested fallback to a tail JMP.
+The direct-loader predicate is in
+`kprog/perf/direct-native/bpf_x86_native_lab.c:222,250-256`; it compares the
+external slot against E8 followed by four zero displacement bytes.
 
 The prepared edit widens that one existing slot predicate to accept E8 or
 E9 with zero displacement, patches only disp32, and makes clock sharing use
@@ -39,9 +42,7 @@ and tail-jump entries through the existing native host harness and returns
 from the same constant-result body. It makes the existing
 clock/credential/ARRAY sharing fixtures contain both opcodes; the LPM
 execution fixture also checks mixed sharing and its retained E8 external
-kernel call. Required validation
-after applying: observe failure with only those test changes on the old
-implementation, then run the complete existing linker suite with the fix,
+kernel call. After applying, run the complete existing linker suite with the fix,
 including native execution/fault and recovered-site metadata. Test both
 opcodes target the same single shared body and retain their original byte.
 An end-to-end compiler sibling-call fixture is useful if actual link
@@ -50,7 +51,9 @@ provenance is unclear; do not change the benchmark to manufacture it.
 `edit.py` previews by default and applies only with `--apply`. Host preview
 and validation take timing SH on CPU 19, with persistent raw logs. Apply
 after Omp's batch-2 image snapshot, before the prepared compact-global
-optimization: this is pipeline correctness. Commit source and receipts
+optimization: this is pipeline correctness. The old predicate directly
+rejects the mixed test's E9 slot; no separate old-version build or second
+source copy is needed. Commit source and receipts
 after validation and let Omp schedule the next image/check. Successful E8
 paths should keep their emitted bytes; E9 previously refused, so its new
 native installed bytes/per-call measurements cannot be inferred here.
