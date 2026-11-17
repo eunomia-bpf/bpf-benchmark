@@ -1,9 +1,12 @@
 {
-  "recorded_utc": "2026-11-17T05:47:01Z",
+  "recorded_utc": "2026-11-17T06:27:26Z",
   "source": "vendor/linux-framework/arch/x86/mm/maccess.c:9-36",
   "scope": "Finite source arithmetic only. Widths/paging choices are scenarios, not measured guest facts. Negative-only is a rejected simplification. No candidate, compiler, guest or benchmark execution.",
   "cases": 108,
   "interval_disagreements": 0,
+  "shift_pair_disagreements": 0,
+  "shift_count_inputs": 256,
+  "shift_count_disagreements": 0,
   "negative_only_counterexamples": [
     {
       "threshold_bits": 47,
@@ -11,6 +14,7 @@
       "address": "0x800000000000",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": false
     },
     {
@@ -19,6 +23,7 @@
       "address": "0x800000000001",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": false
     },
     {
@@ -27,6 +32,7 @@
       "address": "0xffffffffffffff",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": false
     },
     {
@@ -35,6 +41,7 @@
       "address": "0x100000000000000",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": false
     },
     {
@@ -43,6 +50,7 @@
       "address": "0x100000000000001",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": false
     },
     {
@@ -51,6 +59,7 @@
       "address": "0x800000000000",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": false
     },
     {
@@ -59,6 +68,7 @@
       "address": "0x800000000001",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": false
     },
     {
@@ -67,6 +77,7 @@
       "address": "0xffffffffffffff",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": false
     },
     {
@@ -75,6 +86,7 @@
       "address": "0x100000000000000",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": false
     },
     {
@@ -83,6 +95,7 @@
       "address": "0x100000000000001",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": false
     }
   ],
@@ -93,6 +106,7 @@
       "address": "0x0",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -101,6 +115,7 @@
       "address": "0x7fffffffffff",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -109,6 +124,7 @@
       "address": "0x800000000000",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": false
     },
     {
@@ -117,6 +133,7 @@
       "address": "0x800000000001",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": false
     },
     {
@@ -125,6 +142,7 @@
       "address": "0xffffffffffffff",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": false
     },
     {
@@ -133,6 +151,7 @@
       "address": "0x100000000000000",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": false
     },
     {
@@ -141,6 +160,7 @@
       "address": "0x100000000000001",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": false
     },
     {
@@ -149,6 +169,7 @@
       "address": "0xfeffffffffffffff",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -157,6 +178,7 @@
       "address": "0xff00000000000000",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -165,6 +187,7 @@
       "address": "0xff00000000000001",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -173,6 +196,7 @@
       "address": "0xffff7fffffffffff",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -181,6 +205,7 @@
       "address": "0xffff800000000000",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -189,6 +214,7 @@
       "address": "0xffff800000000001",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -197,6 +223,7 @@
       "address": "0xffffffffff5fffff",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -205,6 +232,7 @@
       "address": "0xffffffffff600000",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -213,6 +241,7 @@
       "address": "0xffffffffff600fff",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -221,6 +250,7 @@
       "address": "0xffffffffff601000",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -229,6 +259,7 @@
       "address": "0xffffffffffffffff",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -237,6 +268,7 @@
       "address": "0x0",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -245,6 +277,7 @@
       "address": "0x7fffffffffff",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -253,6 +286,7 @@
       "address": "0x800000000000",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -261,6 +295,7 @@
       "address": "0x800000000001",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -269,6 +304,7 @@
       "address": "0xffffffffffffff",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -277,6 +313,7 @@
       "address": "0x100000000000000",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -285,6 +322,7 @@
       "address": "0x100000000000001",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -293,6 +331,7 @@
       "address": "0xfeffffffffffffff",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -301,6 +340,7 @@
       "address": "0xff00000000000000",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -309,6 +349,7 @@
       "address": "0xff00000000000001",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -317,6 +358,7 @@
       "address": "0xffff7fffffffffff",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -325,6 +367,7 @@
       "address": "0xffff800000000000",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -333,6 +376,7 @@
       "address": "0xffff800000000001",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -341,6 +385,7 @@
       "address": "0xffffffffff5fffff",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -349,6 +394,7 @@
       "address": "0xffffffffff600000",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -357,6 +403,7 @@
       "address": "0xffffffffff600fff",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -365,6 +412,7 @@
       "address": "0xffffffffff601000",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -373,6 +421,7 @@
       "address": "0xffffffffffffffff",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -381,6 +430,7 @@
       "address": "0x0",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -389,6 +439,7 @@
       "address": "0x7fffffffffff",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -397,6 +448,7 @@
       "address": "0x800000000000",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": false
     },
     {
@@ -405,6 +457,7 @@
       "address": "0x800000000001",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": false
     },
     {
@@ -413,6 +466,7 @@
       "address": "0xffffffffffffff",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": false
     },
     {
@@ -421,6 +475,7 @@
       "address": "0x100000000000000",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -429,6 +484,7 @@
       "address": "0x100000000000001",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -437,6 +493,7 @@
       "address": "0xfeffffffffffffff",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -445,6 +502,7 @@
       "address": "0xff00000000000000",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -453,6 +511,7 @@
       "address": "0xff00000000000001",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -461,6 +520,7 @@
       "address": "0xffff7fffffffffff",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -469,6 +529,7 @@
       "address": "0xffff800000000000",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -477,6 +538,7 @@
       "address": "0xffff800000000001",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -485,6 +547,7 @@
       "address": "0xffffffffff5fffff",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -493,6 +556,7 @@
       "address": "0xffffffffff600000",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -501,6 +565,7 @@
       "address": "0xffffffffff600fff",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -509,6 +574,7 @@
       "address": "0xffffffffff601000",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -517,6 +583,7 @@
       "address": "0xffffffffffffffff",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -525,6 +592,7 @@
       "address": "0x0",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -533,6 +601,7 @@
       "address": "0x7fffffffffff",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -541,6 +610,7 @@
       "address": "0x800000000000",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -549,6 +619,7 @@
       "address": "0x800000000001",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -557,6 +628,7 @@
       "address": "0xffffffffffffff",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -565,6 +637,7 @@
       "address": "0x100000000000000",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": false
     },
     {
@@ -573,6 +646,7 @@
       "address": "0x100000000000001",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": false
     },
     {
@@ -581,6 +655,7 @@
       "address": "0xfeffffffffffffff",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -589,6 +664,7 @@
       "address": "0xff00000000000000",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -597,6 +673,7 @@
       "address": "0xff00000000000001",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -605,6 +682,7 @@
       "address": "0xffff7fffffffffff",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -613,6 +691,7 @@
       "address": "0xffff800000000000",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -621,6 +700,7 @@
       "address": "0xffff800000000001",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -629,6 +709,7 @@
       "address": "0xffffffffff5fffff",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -637,6 +718,7 @@
       "address": "0xffffffffff600000",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -645,6 +727,7 @@
       "address": "0xffffffffff600fff",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -653,6 +736,7 @@
       "address": "0xffffffffff601000",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -661,6 +745,7 @@
       "address": "0xffffffffffffffff",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -669,6 +754,7 @@
       "address": "0x0",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -677,6 +763,7 @@
       "address": "0x7fffffffffff",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -685,6 +772,7 @@
       "address": "0x800000000000",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -693,6 +781,7 @@
       "address": "0x800000000001",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -701,6 +790,7 @@
       "address": "0xffffffffffffff",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -709,6 +799,7 @@
       "address": "0x100000000000000",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -717,6 +808,7 @@
       "address": "0x100000000000001",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -725,6 +817,7 @@
       "address": "0xfeffffffffffffff",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -733,6 +826,7 @@
       "address": "0xff00000000000000",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -741,6 +835,7 @@
       "address": "0xff00000000000001",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -749,6 +844,7 @@
       "address": "0xffff7fffffffffff",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -757,6 +853,7 @@
       "address": "0xffff800000000000",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -765,6 +862,7 @@
       "address": "0xffff800000000001",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -773,6 +871,7 @@
       "address": "0xffffffffff5fffff",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -781,6 +880,7 @@
       "address": "0xffffffffff600000",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -789,6 +889,7 @@
       "address": "0xffffffffff600fff",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -797,6 +898,7 @@
       "address": "0xffffffffff601000",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -805,6 +907,7 @@
       "address": "0xffffffffffffffff",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -813,6 +916,7 @@
       "address": "0x0",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -821,6 +925,7 @@
       "address": "0x7fffffffffff",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -829,6 +934,7 @@
       "address": "0x800000000000",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -837,6 +943,7 @@
       "address": "0x800000000001",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -845,6 +952,7 @@
       "address": "0xffffffffffffff",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -853,6 +961,7 @@
       "address": "0x100000000000000",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -861,6 +970,7 @@
       "address": "0x100000000000001",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -869,6 +979,7 @@
       "address": "0xfeffffffffffffff",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -877,6 +988,7 @@
       "address": "0xff00000000000000",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -885,6 +997,7 @@
       "address": "0xff00000000000001",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -893,6 +1006,7 @@
       "address": "0xffff7fffffffffff",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -901,6 +1015,7 @@
       "address": "0xffff800000000000",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -909,6 +1024,7 @@
       "address": "0xffff800000000001",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -917,6 +1033,7 @@
       "address": "0xffffffffff5fffff",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -925,6 +1042,7 @@
       "address": "0xffffffffff600000",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -933,6 +1051,7 @@
       "address": "0xffffffffff600fff",
       "source_allowed": false,
       "interval_allowed": false,
+      "shift_pair_allowed": false,
       "negative_only_allowed": false
     },
     {
@@ -941,6 +1060,7 @@
       "address": "0xffffffffff601000",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     },
     {
@@ -949,6 +1069,7 @@
       "address": "0xffffffffffffffff",
       "source_allowed": true,
       "interval_allowed": true,
+      "shift_pair_allowed": true,
       "negative_only_allowed": true
     }
   ]

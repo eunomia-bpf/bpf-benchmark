@@ -30,6 +30,16 @@ def interval_policy(address, threshold, width):
             and (address < half or address >= (1 << 64) - half))
 
 
+def shift_pair_policy(address, threshold, width):
+    # 64-bit x86 legacy shifts use CL & 63, including an identity at count zero.
+    count = (-width) & 63
+    left = (address << count) & MASK
+    signed = left if left < (1 << 63) else left - (1 << 64)
+    restored = (signed >> count) & MASK
+    return (address >= threshold and address & (MASK ^ (PAGE - 1)) != VSYSCALL
+            and restored == address)
+
+
 rows = []
 for threshold_bits in (47, 56):
     for width in (0, 48, 57):
@@ -46,6 +56,7 @@ for threshold_bits in (47, 56):
             rows.append(dict(threshold_bits=threshold_bits, width=width,
                              address=hex(address), source_allowed=accepted,
                              interval_allowed=interval_policy(address, threshold, width),
+                             shift_pair_allowed=shift_pair_policy(address, threshold, width),
                              negative_only_allowed=accepted and bool(address >> 63)))
 
 result = dict(
@@ -53,8 +64,13 @@ result = dict(
     source='vendor/linux-framework/arch/x86/mm/maccess.c:9-36',
     scope='Finite source arithmetic only. Widths/paging choices are scenarios, not measured guest facts. Negative-only is a rejected simplification. No candidate, compiler, guest or benchmark execution.',
     cases=len(rows), interval_disagreements=sum(r['source_allowed'] != r['interval_allowed'] for r in rows),
+    shift_pair_disagreements=sum(r['source_allowed'] != r['shift_pair_allowed'] for r in rows),
+    shift_count_inputs=256,
+    shift_count_disagreements=sum(((64 - w) & 63) != (((-w) & 0xffffffff) & 63) for w in range(256)),
     negative_only_counterexamples=[r for r in rows if r['source_allowed'] != r['negative_only_allowed']],
     boundaries=rows)
 Path(__file__).with_name('kernel-policy-boundaries.json').write_text(json.dumps(result, indent=2) + '\n')
 print('boundary cases:', result['cases'], '; interval disagreements:', result['interval_disagreements'])
 print('negative-only counterexamples:', len(result['negative_only_counterexamples']))
+print('NEG-width shift count disagreements:', result['shift_count_disagreements'],
+      '; branch-free canonical boundary disagreements:', result['shift_pair_disagreements'])

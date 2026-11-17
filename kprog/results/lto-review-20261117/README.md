@@ -2496,3 +2496,60 @@ worklist or give their dynamic frequencies. It introduces no analyzer,
 production source edit, emitted candidate, build, guest, additional check
 or new measured gain. Final specialized read sharing and installed bytes
 remain part of the coordinator's implementation and timing work.
+
+## Kernel-leaf canonicality can use the masked negative width
+
+Refinement for the next item in the coordinator's 06:23 todo update,
+2026-11-17. Keep both source-policy inputs live and distinct: the
+`USER_PTR_MAX + PAGE_SIZE` threshold and the byte
+`boot_cpu_data.x86_virt_bits`. The threshold and whole-vsyscall-page
+exclusions remain ahead of canonicality. This does not specialize the
+width to 48, infer it from the paging threshold, or add a capability check.
+
+`asm/page.h:71–78` canonicalizes by shifting left and arithmetically right
+by `64 - width`. Legacy x86 shifts of a 64-bit operand mask their count
+with 63; the local reference encodes this at
+`kprog/formal/KProgFormal/Reference/X86.lean:200–201` and the host oracle
+at `formal/oracles/test_x86_shift_flags_host.c:64`. Therefore
+`(64 - width) & 63 == (-width) & 63`.
+With the live byte loaded directly into ECX, the count setup can be
+`NEG ECX` before `SHL RAX,CL; SAR RAX,CL`, then compare RAX with the
+unchanged source. This is one instruction/two bytes for count preparation
+instead of the on-disk kernel's `MOV ECX,64; SUB ECX,EAX` pair
+(two instructions/seven bytes), excluding the width load and all other
+policy code. Flags from count preparation are overwritten by the final
+address CMP before its result is used.
+
+The same shift pair also preserves the **width-zero allowance without
+a separate zero-width branch**: with CL zero both shifts leave the source
+unchanged, so the final comparison is equal. The earlier threshold and
+vsyscall tests still apply, as in the source's explicit early-boot return.
+No C expression that shifts by 64 is introduced: this suggestion is for
+the linker-owned x86 instruction sequence, whose masked count is zero.
+The zero-width path would execute the register sequence instead of taking
+its old shortcut; no current guest is asserted to use that boot state.
+
+The existing [policy model](kernel_policy_model.py) now records count
+congruence for all 256 byte values and the branch-free predicate on its
+108 boundary cases at widths 0/48/57 and both user-limit scenarios.
+Both comparisons have zero disagreements in
+[kernel-policy-boundaries.json](kernel-policy-boundaries.json). The broad
+count congruence is an instruction-arithmetic statement, not a claim about
+C canonicality expressions at arbitrary unsupported CPUID widths. This
+is a local simplification within the planned policy inlining; removing
+the callback/frame remains the larger source opportunity. No emitted
+candidate, test execution of native code, per-call saving or final
+installed-byte reduction is claimed.
+
+One entry-order detail matters when the kernel-string body becomes a leaf:
+`mm/maccess.c:86–95` returns zero for a nonpositive string count **before**
+evaluating the policy or changing pagefault nesting. The BPF helper takes
+a u32 size, so this early case is size zero. Kernel scalar reads instead
+evaluate the policy even at size zero (`mm/maccess.c:29–46`). Thus an
+invalid/denied source with size zero returns 0 for the kernel-string
+helper but can return `-ERANGE` for the scalar helper. Preserve that
+existing distinction when sharing the policy body. Positive string
+errors are still forwarded and the full destination zeroed by
+`kernel/trace/bpf_trace.c:264–267`; error values must not be collapsed
+merely because the destination bytes match. This introduces no new
+runtime predicate or required verification gate.
