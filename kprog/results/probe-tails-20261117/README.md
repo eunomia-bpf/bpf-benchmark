@@ -9,7 +9,7 @@ destination. Host execution: kernel reads 1,147 vectors and user reads 1,149 vec
 all 40 linker tests pass. `run.sh` rebuilds the image, runs the check and times five apps (stats on, 3 x 60 s) for
 comparison with kprog/results/flag-tuning-20261117/1-O3.txt (same flags, previous code).
 
-## 2026-11-17T03:45Z: rerun at -O3 (run2.sh)
+## 2026-11-17T03:29Z: rerun at -O3 (run2.sh)
 
 run.sh's image (03:04) carried the O2 group's P objects for OTel, BCC, Cilium, Tracee and Katran: NATIVE_CFLAGS sits
 outside Make's prerequisites, and the stage executable bytes equal 3-O2.txt (Tetragon, rebuilt by its recipe every time,
