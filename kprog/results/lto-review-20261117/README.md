@@ -3493,3 +3493,105 @@ change or optimization-ledger edit was introduced by PERF. The existing
 source-domain/constant-size proposals in this report remain proposals;
 these observations give no basis for an app-specific switch or a blanket
 replacement of compat selection with kernel-only reads.
+
+
+### Current UID/GID helper: eliminate initial-namespace identity conversions
+
+New source opportunity for Tracee, then BCC, after the measured read/map
+work. `kernel/bpf/helpers.c:241–258` obtains the current task's UID/GID
+and converts both through **init_user_ns**, not the caller's current
+namespace. The retained sole-kernel
+[helper disassembly](credential-helpers.disassembly.txt) shows these are
+real calls to `from_kgid` and `from_kuid`, with two callee-save pushes/pops
+and argument/result moves. They remain external calls in the native
+route. Removing these conversions has a clearer per-executed-helper
+mechanism than merely copying a small accessor into every call site.
+
+The source establishes why the conversions are identity operations here:
+
+- `kernel/user.c:37–63` initializes both initial-namespace maps to one
+  extent, first=0, lower_first=0, count=0xffffffff.
+- `user_namespace.c:348–406` maps an in-range ID by subtracting
+  lower_first and adding first. All IDs 0 through 0xfffffffe are unchanged.
+  ID 0xffffffff is outside that extent, but the failed conversion returns
+  `(u32)-1`, the **same bit pattern**. The identity therefore holds across
+  the entire u32 domain, including the invalid-ID sentinel.
+- `from_kuid` and `from_kgid` at lines 441–444 and 509–512 call that mapping
+  on the corresponding map. The existing map writer at 980–981 permits
+  only the first successful write; these initialized maps already have
+  a nonzero extent count. This is a fixed initial-namespace mapping fact,
+  rather than an observation that the benchmark happens to run as root.
+
+A native implementation can read **live** `current->cred->uid` and
+`current->cred->gid`, zero-extend both u32 values, and return
+`gid << 32 | uid`, preserving the helper's existing null-current
+**-EINVAL** path. Use **task->cred**, the subjective credentials;
+`current_cred()` at `include/linux/cred.h:289–296` and
+`current_uid_gid` at 401–406 use that pointer. Substituting real_cred,
+euid/egid, fsuid/fsgid or caller-namespace-relative IDs changes semantics.
+Changing credentials must remain visible at a later helper call; do not
+cache a task's UID/GID or replace them with zero.
+
+Reuse the existing current-task symbol and running-kernel BTF field
+provider for the needed credential offsets. Two ordinary field loads
+already eliminate both conversions. In this sole compiled kernel the
+fields are adjacent at cred offsets 8/12, so a single 64-bit load can
+pack both on little-endian x86 when the actual field layout supports it.
+The published credential object is immutable for these fields
+(`Documentation/security/credentials.rst:289–295`); the current-credential
+access is RCU-safe because other tasks do not modify it (`cred.h:292–296`).
+This allows using the same live credential pointer without a new lock,
+reference operation, credential-null check or mapping query. Keep ordinary
+separate loads when a different resolved layout requires them; the
+proposal adds no new refusal or runtime namespace selector.
+
+The extended existing [helper relocation reader](helper_parity_inventory.py)
+retains its prior findings and adds this accessor cohort in
+[helper-parity.json](helper-parity.json):
+
+| App in retained 239-entry host replay | UID/GID sites | PID/TGID sites | comm sites |
+| --- | ---: | ---: | ---: |
+| BCC | 9 | 18 | 9 |
+| OTel | 0 | 3 | 3 |
+| Tetragon | 0 | 2 | 0 |
+| Tracee | 514 | 185 | 515 |
+
+Tracee's UID/GID sites occur across 132 distinct entry symbols and BCC's
+across nine. These are static per-emission relocation counts, potentially
+repeating shared source callees; they establish neither runtime frequency
+nor current-image coverage. Cilium and Katran have no such retained sites
+in this cohort. Existing BTF-current-task and jiffies counts are retained.
+
+Expected effect on an executed UID/GID helper: remove **two namespace
+conversion call/return boundaries**, their map-range work, and the
+helper's associated saved-register/argument moves. A local shared body
+can serve its calls within a blob; blanket per-site expansion would add
+code. A compact caller-saved body retaining the null-current case is
+roughly **37 local bytes** for the adjacent-field form at current near
+branch widths, or **48** for separate fields, before optional encoding
+compaction. Those are source estimates, **additional native code**, not
+installed savings; the old external call reaches kernel text outside
+the native-byte total. Sharing/IR exposure and actual per-call benefit
+must earn that footprint. No numeric cycle gain, whole-app gain or
+permission to discard a completed run follows from the static counts.
+
+Two neighbouring accessor shortcuts do not follow from this proof.
+`bpf_get_current_pid_tgid` at `helpers.c:225–232` sign-extends pid_t;
+its actual disassembly uses MOVSLQ for both fields. A raw adjacent u64
+load is not generally equivalent for a negative low PID value without
+an additional invariant. `bpf_get_current_comm` at 261–273 calls
+strscpy_pad: copying fixed raw comm bytes does not by itself implement
+its NUL/padding contract. Neither accessor supplies another identity
+conversion to remove. The existing current-task-BTF alias remains the
+smaller already-queued accessor change.
+
+[credential_helper_inventory.py](credential_helper_inventory.py) retains
+36 boundary arithmetic examples, including 0xffffffff, in
+[credential-helpers.json](credential-helpers.json), plus PID sign-extension
+counterexamples and the original three kernel helper disassemblies.
+The UID/GID expressions agree in all examples; the all-u32 identity
+argument above comes from the source mapping, not finite sampling alone.
+No native code was emitted/assembled/executed, no field layout was added,
+no helper availability changed and no guest, build, new check or gate
+was introduced. This remains a source proposal for the coordinator,
+with measured per-call/installed-byte results pending.

@@ -1,33 +1,147 @@
 {
-  "recorded_utc": "2026-11-17T02:45:48Z",
+  "recorded_utc": "2026-11-17T09:21:51Z",
   "source_inventory": "/workspaces/repository/kprog/results/host-link-replay-20261116/emission-report.json",
   "emitted_entries": 239,
   "scope": "External CALL relocations in historical host outputs; static per-entry sites can repeat shared source callees. No dynamic-frequency or current-image claim.",
   "external_calls_by_app": {
-    "bcc": {},
+    "bcc": {
+      "bpf_get_current_pid_tgid": 18,
+      "bpf_get_current_comm": 9,
+      "bpf_get_current_uid_gid": 9
+    },
     "cilium": {
       "bpf_jiffies64": 91
     },
     "katran": {},
-    "otelcol-ebpf-profiler": {},
-    "tetragon": {},
+    "otelcol-ebpf-profiler": {
+      "bpf_get_current_pid_tgid": 3,
+      "bpf_get_current_comm": 3
+    },
+    "tetragon": {
+      "bpf_get_current_pid_tgid": 2
+    },
     "tracee": {
-      "bpf_get_current_task_btf": 121
+      "bpf_get_current_pid_tgid": 185,
+      "bpf_get_current_task_btf": 121,
+      "bpf_get_current_uid_gid": 514,
+      "bpf_get_current_comm": 515
     }
   },
   "represented_programs": [
+    {
+      "app": "bcc",
+      "helper": "bpf_get_current_pid_tgid",
+      "distinct_entry_symbols": 15
+    },
+    {
+      "app": "bcc",
+      "helper": "bpf_get_current_comm",
+      "distinct_entry_symbols": 8
+    },
+    {
+      "app": "bcc",
+      "helper": "bpf_get_current_uid_gid",
+      "distinct_entry_symbols": 9
+    },
     {
       "app": "cilium",
       "helper": "bpf_jiffies64",
       "distinct_entry_symbols": 13
     },
     {
+      "app": "otelcol-ebpf-profiler",
+      "helper": "bpf_get_current_pid_tgid",
+      "distinct_entry_symbols": 3
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "helper": "bpf_get_current_comm",
+      "distinct_entry_symbols": 2
+    },
+    {
+      "app": "tetragon",
+      "helper": "bpf_get_current_pid_tgid",
+      "distinct_entry_symbols": 2
+    },
+    {
+      "app": "tracee",
+      "helper": "bpf_get_current_pid_tgid",
+      "distinct_entry_symbols": 136
+    },
+    {
       "app": "tracee",
       "helper": "bpf_get_current_task_btf",
       "distinct_entry_symbols": 109
+    },
+    {
+      "app": "tracee",
+      "helper": "bpf_get_current_uid_gid",
+      "distinct_entry_symbols": 132
+    },
+    {
+      "app": "tracee",
+      "helper": "bpf_get_current_comm",
+      "distinct_entry_symbols": 132
     }
   ],
   "examples": [
+    {
+      "app": "bcc",
+      "helper": "bpf_get_current_pid_tgid",
+      "symbol": "blk_account_io_merge_bio",
+      "blob": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/0-0/image.blob",
+      "relocations": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/0-0/image.relocs",
+      "offset": 49,
+      "helper_aliases": [
+        "bpf_get_current_pid_tgid"
+      ],
+      "disassembly": [
+        "  2b:\tje     0x79",
+        "  2d:\tmov    QWORD PTR [rsp],rbx",
+        "  31:\tcall   0x36",
+        "  36:\tmov    QWORD PTR [rsp+0x10],0x0",
+        "  3f:\tmov    QWORD PTR [rsp+0x8],0x0",
+        "  48:\tshr    rax,0x20"
+      ]
+    },
+    {
+      "app": "bcc",
+      "helper": "bpf_get_current_comm",
+      "symbol": "blk_account_io_merge_bio",
+      "blob": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/0-0/image.blob",
+      "relocations": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/0-0/image.relocs",
+      "offset": 93,
+      "helper_aliases": [
+        "bpf_get_current_comm"
+      ],
+      "disassembly": [
+        "  55:\tmov    rdi,rbx",
+        "  58:\tmov    esi,0x8",
+        "  5d:\tcall   0x62",
+        "  62:\tmovabs rdi,0x0",
+        "  6c:\tmov    rsi,rsp",
+        "  6f:\tmov    rdx,rbx"
+      ]
+    },
+    {
+      "app": "bcc",
+      "helper": "bpf_get_current_uid_gid",
+      "symbol": "kprobe__cap_capable_exit",
+      "blob": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/15-0/image.blob",
+      "relocations": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/15-0/image.relocs",
+      "offset": 140,
+      "helper_aliases": [
+        "bpf_get_current_uid_gid"
+      ],
+      "disassembly": [
+        "  85:\tmov    eax,DWORD PTR [r14]",
+        "  88:\tmov    DWORD PTR [rsp+0x28],eax",
+        "  8c:\tcall   0x91",
+        "  91:\tmov    DWORD PTR [rsp+0x30],eax",
+        "  95:\tlea    rdi,[rsp+0x40]",
+        "  9a:\tmov    esi,0x10"
+      ]
+    },
     {
       "app": "cilium",
       "helper": "bpf_jiffies64",
@@ -48,6 +162,82 @@
       ]
     },
     {
+      "app": "otelcol-ebpf-profiler",
+      "helper": "bpf_get_current_pid_tgid",
+      "symbol": "custom__generic",
+      "blob": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/117-0/image.blob",
+      "relocations": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/117-0/image.relocs",
+      "offset": 18,
+      "helper_aliases": [
+        "bpf_get_current_pid_tgid"
+      ],
+      "disassembly": [
+        "       a:\tmov    rbx,rdi",
+        "       d:\tmov    eax,0xe",
+        "      12:\tcall   0x17",
+        "      17:\tmov    r15,rax",
+        "      1a:\txor    eax,eax",
+        "      1c:\ttest   r15d,r15d"
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler",
+      "helper": "bpf_get_current_comm",
+      "symbol": "custom__generic",
+      "blob": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/117-0/image.blob",
+      "relocations": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/117-0/image.relocs",
+      "offset": 463,
+      "helper_aliases": [
+        "bpf_get_current_comm"
+      ],
+      "disassembly": [
+        "     1c5:\tmov    ecx,0x10",
+        "     1ca:\tmov    esi,0x10",
+        "     1cf:\tcall   0x1d4",
+        "     1d4:\ttest   rax,rax",
+        "     1d7:\tmovabs r13,0x0",
+        "     1e1:\tjns    0x21f"
+      ]
+    },
+    {
+      "app": "tetragon",
+      "helper": "bpf_get_current_pid_tgid",
+      "symbol": "event_exit_acct_process",
+      "blob": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/158-0/image.blob",
+      "relocations": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/158-0/image.relocs",
+      "offset": 14,
+      "helper_aliases": [
+        "bpf_get_current_pid_tgid"
+      ],
+      "disassembly": [
+        "   6:\tmov    r15,rdi",
+        "   9:\tmov    eax,0xe",
+        "   e:\tcall   0x13",
+        "  13:\tmov    r14,rax",
+        "  16:\tshr    r14,0x20",
+        "  1a:\tmov    DWORD PTR [rsp],r14d"
+      ]
+    },
+    {
+      "app": "tracee",
+      "helper": "bpf_get_current_pid_tgid",
+      "symbol": "cgroup_bpf_run_filter_skb",
+      "blob": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/301-0/image.blob",
+      "relocations": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/301-0/image.relocs",
+      "offset": 459,
+      "helper_aliases": [
+        "bpf_get_current_pid_tgid"
+      ],
+      "disassembly": [
+        "     1bb:\tmov    QWORD PTR [r15+0x60],0x0",
+        "     1c3:\tmov    QWORD PTR [r15+0x68],0x0",
+        "     1cb:\tcall   0x1d0",
+        "     1d0:\tmov    DWORD PTR [r15+0x28],eax",
+        "     1d4:\tshr    rax,0x20",
+        "     1d8:\tmov    DWORD PTR [r15+0x24],eax"
+      ]
+    },
+    {
       "app": "tracee",
       "helper": "bpf_get_current_task_btf",
       "symbol": "cgroup_bpf_run_filter_skb",
@@ -64,6 +254,44 @@
         "     230:\tmov    rdi,rax",
         "     233:\tcall   0x238",
         "     238:\tlea    rdx,[rax+0x78]"
+      ]
+    },
+    {
+      "app": "tracee",
+      "helper": "bpf_get_current_uid_gid",
+      "symbol": "cgroup_bpf_run_filter_skb",
+      "blob": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/301-0/image.blob",
+      "relocations": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/301-0/image.relocs",
+      "offset": 1951,
+      "helper_aliases": [
+        "bpf_get_current_uid_gid"
+      ],
+      "disassembly": [
+        "     794:\tmov    eax,DWORD PTR [rsp+0x128]",
+        "     79b:\tmov    DWORD PTR [r13+0x2c],eax",
+        "     79f:\tcall   0x7a4",
+        "     7a4:\tmov    DWORD PTR [r13+0x28],eax",
+        "     7a8:\tmov    rax,QWORD PTR [rsp+0x28]",
+        "     7ad:\tlea    rdx,[rax+0x50]"
+      ]
+    },
+    {
+      "app": "tracee",
+      "helper": "bpf_get_current_comm",
+      "symbol": "cgroup_bpf_run_filter_skb",
+      "blob": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/301-0/image.blob",
+      "relocations": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/301-0/image.relocs",
+      "offset": 2122,
+      "helper_aliases": [
+        "bpf_get_current_comm"
+      ],
+      "disassembly": [
+        "     83d:\tmov    QWORD PTR [r13+0x34],0x0",
+        "     845:\tmov    esi,0x10",
+        "     84a:\tcall   0x84f",
+        "     84f:\tlea    rdi,[rsp+0x60]",
+        "     854:\tmov    esi,0x8",
+        "     859:\tmov    rdx,QWORD PTR [rsp+0x8]"
       ]
     }
   ]
