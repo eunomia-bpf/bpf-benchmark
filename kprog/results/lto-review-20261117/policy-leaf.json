@@ -1,0 +1,96 @@
+{
+  "recorded_utc": "2026-11-17T04:48:24Z",
+  "kernel_image": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+  "kernel_config": "/workspaces/.agent-state/kprog-ck/build-x86/.config",
+  "selected_config_lines": [
+    "CONFIG_X86_64=y",
+    "CONFIG_MITIGATION_RETHUNK=y",
+    "# CONFIG_DEBUG_VM is not set",
+    "# CONFIG_DEBUG_VM_PGTABLE is not set",
+    "CONFIG_FUNCTION_TRACER=y"
+  ],
+  "policies": [
+    {
+      "symbol": "nmi_uaccess_okay",
+      "on_disk_disassembly": "\n/workspaces/.agent-state/kprog-ck/build-x86/vmlinux:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\nffffffff812991b0 <nmi_uaccess_okay>:\nffffffff812991b0:\tcall   ffffffff8127fb90 <__fentry__>\nffffffff812991b5:\tmov    rdx,QWORD PTR gs:[rip+0x3016e5b]        # ffffffff842b0018 <current_task>\nffffffff812991bd:\tmov    rax,QWORD PTR gs:[rip+0x302e8bb]        # ffffffff842c7a80 <cpu_tlbstate>\nffffffff812991c5:\tcmp    QWORD PTR [rdx+0xa78],rax\nffffffff812991cc:\tsete   al\nffffffff812991cf:\tjmp    ffffffff820138b0 <__pi___x86_return_thunk>\n\nDisassembly of section .data:\n\nDisassembly of section .init.text:\n\nDisassembly of section .altinstr_aux:\n\nDisassembly of section .altinstr_replacement:\n\nDisassembly of section .exit.text:\n"
+    },
+    {
+      "symbol": "copy_from_kernel_nofault_allowed",
+      "on_disk_disassembly": "\n/workspaces/.agent-state/kprog-ck/build-x86/vmlinux:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\nffffffff81299280 <copy_from_kernel_nofault_allowed>:\nffffffff81299280:\tcall   ffffffff8127fb90 <__fentry__>\nffffffff81299285:\tmovabs rax,0x7ffffffff000\nffffffff8129928f:\tadd    rax,0x1000\nffffffff81299295:\txor    edx,edx\nffffffff81299297:\tcmp    rdi,rax\nffffffff8129929a:\tjb     ffffffff812992d3 <copy_from_kernel_nofault_allowed+0x53>\nffffffff8129929c:\tmov    rax,rdi\nffffffff8129929f:\tand    rax,0xfffffffffffff000\nffffffff812992a5:\tcmp    rax,0xffffffffff600000\nffffffff812992ab:\tje     ffffffff812992d3 <copy_from_kernel_nofault_allowed+0x53>\nffffffff812992ad:\tmovzx  eax,BYTE PTR [rip+0x26cf7cc]        # ffffffff83968a80 <__pi_boot_cpu_data+0x20>\nffffffff812992b4:\tmov    edx,0x1\nffffffff812992b9:\ttest   al,al\nffffffff812992bb:\tje     ffffffff812992d3 <copy_from_kernel_nofault_allowed+0x53>\nffffffff812992bd:\tmov    ecx,0x40\nffffffff812992c2:\tsub    ecx,eax\nffffffff812992c4:\tmov    rax,rdi\nffffffff812992c7:\tshl    rax,cl\nffffffff812992ca:\tsar    rax,cl\nffffffff812992cd:\tcmp    rax,rdi\nffffffff812992d0:\tsete   dl\nffffffff812992d3:\tmov    eax,edx\nffffffff812992d5:\tjmp    ffffffff820138b0 <__pi___x86_return_thunk>\n\nDisassembly of section .data:\n\nDisassembly of section .init.text:\n\nDisassembly of section .altinstr_aux:\n\nDisassembly of section .altinstr_replacement:\n\nDisassembly of section .exit.text:\n"
+    }
+  ],
+  "existing_user_fixture": {
+    "capture": "/workspaces/kprog-raw/perf/20261117-remainder-review/user-fixture.json",
+    "bytes": 380,
+    "frame_instructions": [
+      [
+        0,
+        "push",
+        "rbx"
+      ],
+      [
+        1,
+        "push",
+        "r12"
+      ],
+      [
+        3,
+        "push",
+        "r13"
+      ],
+      [
+        5,
+        "push",
+        "r14"
+      ],
+      [
+        7,
+        "push",
+        "r15"
+      ],
+      [
+        370,
+        "pop",
+        "r15"
+      ],
+      [
+        372,
+        "pop",
+        "r14"
+      ],
+      [
+        374,
+        "pop",
+        "r13"
+      ],
+      [
+        376,
+        "pop",
+        "r12"
+      ],
+      [
+        378,
+        "pop",
+        "rbx"
+      ]
+    ],
+    "external_call_slots": [
+      {
+        "offset": 49,
+        "operation": "call"
+      }
+    ]
+  },
+  "possible_leaf_register_assignment": {
+    "RAX": "policy temporary, then copy load/result",
+    "RDI": "advancing destination",
+    "RSI": "advancing source",
+    "RDX": "SMAP decision after source has moved, if not boot-folded; zeroing scratch after cleanup",
+    "RCX": "remaining copy/zero count",
+    "R8": "original destination",
+    "R9D": "original u32 size",
+    "R10": "current task for mm comparison and pagefault nesting",
+    "R11": "policy/feature temporary before copy, then source-load fault status"
+  },
+  "scope": "Source/on-disk kernel policy inspection plus historical fixture frame counts. Kernel fentry and return sites can be patched at boot, so their on-disk instructions are not asserted as executed guest costs. Register assignment is a design witness, not emitted or tested candidate code, a minimum-register proof, or a measured speedup."
+}

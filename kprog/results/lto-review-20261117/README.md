@@ -31,7 +31,7 @@ whether LTO work earns its footprint.
 
 | Rank | Finding | Most affected apps | Expected per-call effect and size direction |
 |---|---|---|---|
-| 1 | Probe reads retain runtime-size loops and repeated CPU feature selection | OTel; kernel-read sites in Tracee/Tetragon; BCC | Specialize common small reads and repeated SMAP capability selection. The 8/1-only remainder is addressed in c03737bf4; its historical costs below are not current measurements. Selective variants can grow code, so retain sharing. |
+| 1 | Probe reads retain runtime-size loops, feature selection and a nested policy call | OTel; kernel-read sites in Tracee/Tetragon; BCC | Specialize common small reads/SMAP; inline the live target policy to allow a leaf routine (section 14). The 8/1-only remainder is addressed in c03737bf4; its historical costs below are not current measurements. Selective variants can grow code, so retain sharing. |
 | 2 | Compat reads bypass that lowering entirely | Tracee, then Tetragon where present | Address-domain/size specialization can remove wrapper/copy overhead while preserving the helper's user/kernel choice. Actual Tracee blobs retain 2,375 read and 714 string call sites. This is an opportunity shared with the JIT helper, not evidence of a native-only regression. |
 | 3 | Constant tail slots use the indirect path (section 8) | Cilium, OTel; constant sites in Tracee/Tetragon | Installed Cilium JIT has patched direct jumps; native retains map bound and target loads. A constant-slot LTO subset can remove bound/index bookkeeping, while full direct patching needs the existing map-update/lifetime contract. |
 | 4 | Unknown map path nests ARRAY, LPM and generic helper calls | OTel residual dynamic maps, Katran; potential BCC/Cilium/Tracee sites | Remove two extra call/return pairs and their stack adjustments on a non-ARRAY/non-LPM fallback; bind a concrete operation where type facts suffice. Retained Katran dispatcher costs are small, so this alone does not explain its entire gap. |
@@ -1608,3 +1608,92 @@ as a constant would be wrong. Keep existing live bounds/masks where facts
 do not justify specialization; this review proposes no blanket mask
 deletion, frozen module/core change or new per-call policy check. The
 separate-return opportunity above does not depend on either policy fact.
+
+## 14. Inline read policy to make the copying routine a leaf
+
+2026-11-17T04:49:19Z review at 778ee0ae7. This extends the first-ranked
+read item beyond constant size and SMAP selection. Those changes still
+leave a nested policy CALL, which is why the earlier register-layout
+discussion retained three callee-saved registers across it. Inlining the
+actual predicate can remove that call boundary while retaining the policy.
+
+The sole kernel's `nmi_uaccess_okay` is small:
+`arch/x86/mm/tlb.c:1767–1789` compares the live per-CPU
+`cpu_tlbstate.loaded_mm` with `current->mm`. The current build has
+CONFIG_DEBUG_VM disabled, so its VM_WARN_ON_ONCE diagnostics and CR3
+comparison do not execute. The on-disk function body confirms the
+effective predicate:
+
+```text
+CALL __fentry__
+MOV RDX, GS:[current_task]
+MOV RAX, GS:[cpu_tlbstate.loaded_mm]
+CMP [RDX + task_struct.mm], RAX
+SETE AL
+JMP __x86_return_thunk
+```
+
+`policy_leaf_inventory.py` reads this exact function and the kernel-address
+policy from the one vmlinux, records the relevant config lines, and counts
+the existing captured read fixture's frame/CALL instructions in
+`policy-leaf.json`. The objdump outputs are on-disk code. Ftrace and return
+sites can be patched at boot; neither the __fentry__ CALL nor the particular
+return thunk is claimed as executed guest overhead. The definite boundary
+is the read routine's external policy CALL and its corresponding return
+transfer, in addition to live policy work that must remain.
+
+At present `x86_probe_read.rs:37–38` saves five registers and copies its
+arguments into R12/R13/R14; 54–58 calls the policy and tests its bool result.
+Line 59 then loads current_task again for pagefault nesting. The NMI policy
+itself has already read that pointer. Keeping it in a caller-saved register
+through an inline predicate avoids that duplicate GS read as well as the
+CALL/return boundary and materialized bool/test sequence.
+
+A feasible leaf-state assignment is:
+
+| Register | State |
+|---|---|
+| RAX | Policy temporary, then copy load/result |
+| RDI / RSI | Advancing destination / source |
+| RCX | Remaining copy or zero count |
+| R8 / R9D | Original destination / original u32 size |
+| R10 | Current task for mm comparison and pagefault nesting |
+| R11 | Policy/feature temporary before copy, then source-load fault status |
+| RDX | SMAP decision after moving the source, if not boot-folded; zero scratch after cleanup |
+
+These are all SysV caller-saved registers. The source pointer moves out of
+RDX before its feature role, and feature cleanup finishes before zeroing
+uses RDX. R11 remains reserved for fault status during every protected
+source load. This is a design witness rather than emitted/tested code or
+a minimum-register proof. It shows why eliminating the nested call can
+eliminate the need for the current ten PUSH/POP instructions, rather than
+merely reducing five saves to three. A leaf has no nested CALL alignment
+requirement; the program frame and tail-call frame contract need not change.
+Net instruction count, local bytes and app installed size remain unmeasured.
+
+Bind `cpu_tlbstate` and the two structure offsets from the same boot/layout
+facts as the current task binding. Do not embed the displayed System.map
+addresses or the on-disk task offset as a portable ABI. Read loaded_mm and
+current->mm on every policy evaluation, preserve their comparison before
+pagefault_disable, and branch to the existing denied/error/zero path when
+they differ. The function does not short-circuit on `!in_nmi()`; adding
+that shortcut, caching the comparison across calls, or treating it as a
+boot constant would change the check. No extra NULL test, CR3 read or
+debug-only check is needed for this kernel configuration.
+
+Kernel-read policy is the next case, not a function to assume true.
+`arch/x86/mm/maccess.c:9–36` rejects the user/guard range and vsyscall page,
+then checks canonicality using boot_cpu_data.x86_virt_bits, with an
+early-boot zero-width case. Its compiled body does not consume the size
+argument. Folding actual boot address-width facts can simplify it while
+retaining those predicates and the existing -ERANGE denial. This does not
+authorize replacing compat reads' task-dependent user/kernel selection.
+
+The first target is OTel's lowered user reads. Other apps benefit at
+actually lowered read sites; Tracee's still-external compat family is not
+counted as already covered. Expected savings come from the call/frame and
+duplicate task-pointer work on each executed read, while policy/fault
+semantics remain. This ranks above the return-layout/branch-width items.
+No guest, optimizer/codegen invocation, source change or candidate execution
+was performed. Coordinator owns implementation and its isolated app timing;
+no new runtime switch, check, refusal or kernel/module change is proposed.
