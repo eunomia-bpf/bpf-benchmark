@@ -4,3 +4,6 @@ x86_kvm_corpus_20261117_091405_442941 installed programs 14 JIT 167706 B native 
 == bcc/set /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_094120_596590
 /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_094120_596590 throughput native/eBPF 0.998x  eBPF [665069, 668507, 666823] native [663464, 665767, 669301] per-sample [0.998, 0.996, 1.004] errors 0
 x86_kvm_corpus_20261117_094120_596590 installed programs 25 JIT 7965 B native 8677 B ratio 1.09x
+== cilium/agent /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_100803_814231
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_100803_814231 throughput native/eBPF 2.819x  eBPF [1334080, 1374683, 1385519] native [4372350, 3605064, 3875166] per-sample [3.277, 2.622, 2.797] errors 0
+x86_kvm_corpus_20261117_100803_814231 installed programs 113 JIT 581577 B native 484353 B ratio 0.83x
