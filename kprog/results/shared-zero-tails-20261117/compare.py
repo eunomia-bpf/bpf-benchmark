@@ -79,7 +79,7 @@ for app, s in result['summary'].items():
                  f"{s.get('before_bytes',0)} -> {s.get('after_bytes',0)} neutral B, "
                  f"{s.get('changed_payloads',0)} changed / {s.get('grew',0)} grew, "
                  f"other size delta {s.get('other_size_delta',0)}; "
-                 ' '.join(f"{name}:{s.get(name+'_differences',0)}" for name in
+                 + ' '.join(f"{name}:{s.get(name+'_differences',0)}" for name in
                           ['helpers','tails','maps','masks','recovery','r11']))
 (a.output / 'comparison-summary.txt').write_text('\n'.join(lines)+'\n')
 print('\n'.join(lines))
