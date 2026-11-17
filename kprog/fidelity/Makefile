@@ -76,6 +76,17 @@ build-x86/test_verifier_log: test_verifier_log.cpp ../libnativeloader/src/native
 check-loader-verifier-log: build-x86/test_verifier_log
 	./build-x86/test_verifier_log
 
+.PHONY: check-loader-data-layout
+build-x86/test_data_symbol_layout: test_data_symbol_layout.cpp ../libnativeloader/src/native_loader.cpp $(LOADER_HEADERS)
+	install -d build-x86
+	$(CXX) -O2 -std=c++20 -I../libnativeloader/include -I../../micro/programs/build-x86 \
+		-I../../vendor/libbpf/include/uapi -I../../vendor/libbpf/include \
+		-I../../runner/build-llvmbpf/vendor/libbpf/prefix/include \
+		$< ../../runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -ldl -o $@
+
+check-loader-data-layout: build-x86/test_data_symbol_layout
+	./build-x86/test_data_symbol_layout build-x86/data-symbols.o
+
 .PHONY: tcb
 TCB_OUT ?= ../results/kprog_fidelity_20261106/tcb
 tcb:

@@ -2966,12 +2966,18 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
             if (!map) {
                 continue;
             }
-            // Source DATASEC names bind globals to their loaded map layout;
-            // native compiler alignment does not describe that layout.
-            uint64_t off = sym.st_value - target_shdr.sh_addr;
-            // Merged string pools have section offsets rather than BTF VARs.
-            // Bind them to the application's corresponding literal-pool map.
-            if (!(target_shdr.sh_flags & SHF_STRINGS)) {
+            // Private readonly constants are the native linker's own core
+            // readonly storage; compiler string pools carry section offsets
+            // rather than source BTF VARs, so both bind by section offset.
+            const bool local_readonly =
+                ELF64_ST_BIND(sym.st_info) == STB_LOCAL &&
+                std::string_view(section).rfind(".rodata", 0) == 0;
+            const bool string_pool = (target_shdr.sh_flags & SHF_STRINGS) != 0;
+            const uint64_t native_off = sym.st_value - target_shdr.sh_addr;
+            std::optional<uint64_t> resolved = string_pool
+                ? std::optional<uint64_t>(native_off)
+                : std::nullopt;
+            if (!string_pool) {
                 auto types = data_types.find(map->btf_id);
                 if (types == data_types.end()) {
                     if (!map->btf_id) fail("BPF data map " + map->name + " lacks BTF");
@@ -2982,9 +2988,13 @@ void add_native_data_symbol_addrs(const std::filesystem::path &native_object,
                         fail("load BPF data map BTF: " + libbpf_error_string(error ? error : -errno));
                     types = data_types.emplace(map->btf_id, std::move(loaded)).first;
                 }
-                off = native_data_symbol_offset(types->second.get(),
-                    map->btf_value_type_id, section, name);
+                resolved = native_data_symbol_offset(types->second.get(),
+                    map->btf_value_type_id, section, name, native_off, local_readonly);
             }
+            if (!resolved) {
+                continue;
+            }
+            const uint64_t off = *resolved;
             // A symbol that ends past the app's map value cannot be placed,
             // but it is not an error: a native object built from a newer
             // source can carry strings the loaded app never references.
