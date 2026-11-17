@@ -3934,3 +3934,25 @@ config comparison, rather than adding a new macro checker, gate or
 benchmark requirement. No performance gain or complete equal-work claim
 is assigned to this source model. Production changes remain with the
 coordinator after the clock image stage.
+
+### Cilium breadth row and implementation handoff
+
+2026-11-17T10:47:47Z. The frozen stats-off breadth row
+`x86_kvm_corpus_20261117_100803_814231` completes on image fc7c4707.
+Reported throughput is 2.819x; paired sample ratios are 3.277, 2.622 and
+2.797. Raw eBPF rates are 1,334,080 / 1,374,683 / 1,385,519; native rates
+are 4,372,350 / 3,605,064 / 3,875,166, with zero reported errors.
+`inst.py` reports 113 cumulative replacements, JIT 581,577 B and installed
+native 484,353 B (0.833x), unchanged from the preceding functional receipt.
+This row retains the configuration and work differences described above;
+it is not an equal-work gain. Stats off provides no per-call time or
+body/helper/map split. No completed sample is discarded.
+
+The coordinator's 10:31:33Z handoff ends review-only mode. PERF owns the
+multi-day helper implementation and installed-size items; the coordinator
+retains the queued clock and leaf-batch2 publications. Item 1a starts with
+current-task BTF and live jiffies loads in the existing native helper
+replacement. Implementation and focused host receipts are tracked in
+`../task-btf-inline-20261117/`; the section-9 review-only statement records
+the earlier state rather than current ownership. No new image or guest
+is started during the reserved batches.
