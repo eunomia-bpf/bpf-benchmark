@@ -34,7 +34,9 @@ must remain E9: changing it to E8 would add a return frame. A leaf's RET then
 uses the original caller's return address, just as the external helper does.
 The x86 tail cleanup and nested leaf/kernel relocations remain unchanged.
 
-The edit adds a direct relocation regression case and makes the existing
+The edit adds a direct relocation regression case that also executes call
+and tail-jump entries through the existing native host harness and returns
+from the same constant-result body. It makes the existing
 clock/credential/ARRAY sharing fixtures contain both opcodes; the LPM
 execution fixture also checks mixed sharing and its retained E8 external
 kernel call. Required validation

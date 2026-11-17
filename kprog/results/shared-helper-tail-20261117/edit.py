@@ -21,14 +21,15 @@ changes = {
         ('    fn fixture() -> RuntimeProbeReadLayout {', '''    // A helper tail jump must stay a jump: adding a CALL adds a return frame.
     #[test]
     fn shared_leaf_redirect_preserves_call_and_tail_opcodes() -> Result<()> {
-        let mut blob=vec![0xe8,0,0,0,0,0xe9,0,0,0,0,0xc3];
-        redirect(&mut blob,&[0,5],10)?;
-        for (site,opcode) in [(0usize,0xe8),(5,0xe9)] {
+        let mut blob=vec![0xe8,0,0,0,0,0xc3,0xe9,0,0,0,0,0xb8,77,0,0,0,0xc3];
+        redirect(&mut blob,&[0,6],11)?;
+        for (site,opcode) in [(0usize,0xe8),(6,0xe9)] {
             assert_eq!(blob[site],opcode);
             let rel=i32::from_le_bytes(blob[site+1..site+5].try_into()?);
-            assert_eq!(site as i64+5+i64::from(rel),10);
+            assert_eq!(site as i64+5+i64::from(rel),11);
         }
-        assert_eq!(blob[10],0xc3);
+        assert_eq!(memory::call_blob(&blob,std::ptr::null_mut(),0,0) as usize,77);
+        assert_eq!(memory::call_blob(&blob[6..],std::ptr::null_mut(),0,0) as usize,77);
         Ok(())
     }
 
