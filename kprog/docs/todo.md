@@ -39,6 +39,13 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-17T00:19:11Z（审核 21Z 核实后的决定）**：
+1. shim 在一个程序链接失败时返回 EINVAL，整个应用退出（bpfopt/shim/shim_native_loader.h 失败分支）；11-09 的 7734afc52 曾改成保留原 eBPF 程序，11-11 从 05-29 源码重新开始（e6808c073）时丢了。协调者在编译参数研究结束后删掉失败分支里的 dlclose/errno/return 三行，让它落到下面已有的“保留原 BPF fd”分支：只删不加，恢复 11-09 的行为。
+2. Katran 的吞吐里 BPF 只占约 5% 的 CPU，看 Katran 以每次调用为准；先做的是 OTel 的退步、probe_read 路径（Tracee、Tetragon 每次调用的 41–46%）和 LTO 审核的结果。
+3. 05-29 底线照运营者的话照列，凡是 05-29 工作量不同的（OTel、Katran、Tetragon、Cilium）写成参考，表里另加一列“工作量相同时的最好每次调用”。
+4. 代码量：协调者之前把“少一半”落成“每个应用装进去的原生 / JIT ≤ 0.5”，这是协调者自己的落法，撤回；运营者原话是“通过调优编译参数做到…代码量少一半”，编译参数研究量的是参数直接决定的 stage 对象可执行字节，装进去的大小（含 LTO 内联的 helper 和 map）照报。
+5. 计时隔离：lane 已停，参数研究在空闲主机上跑；eBPF 一侧的绝对值和 11-11/12 的安静值（BCC stats 关约 66 万、Tracee 约 40 万）对照，作为隔离的检验。
+
 **冻结（运营者 2026-11-16：“需要有东西冻结并且明确禁止修改, 除了删除死代码”；协调者 2026-11-16T23:44:41Z 落实，全文见 AGENTS.md 和 CLAUDE.md 的 Freeze 一节）**：冻结的路径只许删除死代码，由 tools/freeze-check（pre-commit、pre-push）和内核仓库的只许删除钩子执行。开放的只有设计里放优化的两处：产生 P 时的编译参数和头文件（vendor/bpf/Makefile、vendor/bpf/*compat*.h）和 LTO（kprog/x86/native_lab/native_link/，装载器的 native_loader_lto/link_plan/link_schema/context_lto.hpp）；记录（results、docs）和证明（kprog/formal）照常。C：统一一组编译参数的研究（运营者“也得通过调优编译参数做到native 快 50%、代码量少一半”“编译参数所有 app 统一”），每个候选量六个应用装进去的原生 / JIT 和每次调用。PERF：只做 LTO，一项一项量。
 
 **协调者 2026-11-16T23:36:46Z（运营者“内核公共路径 为啥改? 我觉得内核是不是应该几乎不要修改, 整体 patch 也要少于 500 loc?”）**：内核补丁对 stock c23719abc330 共 13 个文件 +423/-4，在 500 行以内。公共路径里 kernel/fork.c、include/linux/sched.h 这 10 行（74d1097af561，每个任务一个待绑定镜像槽）拿掉：镜像只经 BPF_PROG_LOAD 里已有的显式字段绑定。内核从此只减不加；x86/arm64 mm/fault.c 的 15 行（SMAP 缺页沿用 BPF 异常恢复，冷路径）保留。
