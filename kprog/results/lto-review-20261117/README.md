@@ -904,3 +904,52 @@ caller spills that LLVM chose around the original call; removing those
 would require exposing the load to the existing IR optimization. Neither
 variant has been built or timed here. No source or optimization record
 was changed, and the coordinator retains implementation ownership.
+
+### Lookup chain: remove the internal boundary while preserving E8 ABI
+
+2026-11-17T02:54:36Z follow-up to section 3, at 6353b4cad. The
+loader-format constraint and the internal dispatcher composition are
+separable. In the retained successful typed OTel blob, ARRAY's fallback
+at 0x742c is exactly 14 B: `sub rsp,8; call 0x7580; add rsp,8; ret`.
+LPM's fallback at 0x76bc has the same 14 B form, but its CALL at 0x76c0
+still has the unpatched external helper slot. The first CALL's destination
+is an image-local routine; the second needs loader relocation. The reader
+`dispatch_inventory.py` records both spans in `dispatch-fallbacks.json`.
+Its decoded destination for the unpatched external slot is only the
+placeholder's next instruction, not the installed helper address.
+
+The final external E8 requirement is real:
+`kprog/perf/direct-native/bpf_x86_native_lab.c:250–255` accepts the exact
+E8 slot for relocation kind 1. Changing that slot to E9 would fail this
+existing ABI. In contrast, `runtime_array::share` has already resolved
+the callers into the image before `lpm_lookup::share` resolves ARRAY's
+fallback (`x86.rs:1802–1818`). The internal ARRAY→LPM edge does not need a
+helper relocation in the final image. It need not retain an E8 boundary
+merely because the final external edge requires one.
+
+A combined dispatcher can retain ARRAY's success/NULL return and put the
+LPM body directly at its other-type destination. That deletes the first
+14-byte fallback wrapper rather than leaving unreachable instructions.
+An internal E9 instead of adjacency replaces those 14 B with 5 B. These
+are local emitted-byte differences, not a measured installed-image size
+change; branch layout, routine placement and all affected relocation and
+fault-site offsets still have to be emitted consistently. The final LPM
+fallback keeps its existing aligned E8 call and return. ARRAY and LPM
+prefixes use caller-saved registers without allocating a stack frame;
+entering LPM at ARRAY's original RSP preserves its call-entry alignment
+and lets its success return directly to the original lookup caller.
+This is an internal function handoff, not a BPF program tail call: no
+tail counter or program-frame transition is involved.
+
+This narrower change removes one call/return pair and two stack
+adjustments when ARRAY falls through to LPM, including a non-ARRAY,
+non-LPM lookup. It retains the actual map-type selection, live bounds,
+index mask, LPM semantics and final generic helper. It introduces no
+pointer cache, new check, loader format or module change. It also leaves
+one extra wrapper boundary relative to a direct generic helper call;
+the broader link-time type/operation selection remains preferable when
+actual facts prove the map shape. The retained 3.360/2.500-cycle Katran
+ARRAY/LPM buckets already cited in section 3 bound the opportunity in
+that diagnostic; they are not two wholly removable costs. This is a
+source-derived implementation direction, with no generated candidate,
+guest run, per-call gain or installed-size result claimed here.

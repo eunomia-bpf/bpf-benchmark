@@ -1,0 +1,26 @@
+{
+  "recorded_utc": "2026-11-17T02:54:19Z",
+  "blob": "/workspaces/kprog-raw/perf/20261116-inner-array-lto/libbpf/otel-typed.blob",
+  "payload_bytes": 30410,
+  "fallbacks": [
+    {
+      "piece": "runtime_array",
+      "fallback_start": 29740,
+      "bytes": 14,
+      "instruction_bytes": "4883ec08e84b0100004883c408c3",
+      "call_opcode_offset": 29744,
+      "encoded_destination": 30080,
+      "disassembly": "000000000000742c <.data+0x742c>:\n    742c:\t48 83 ec 08          \tsub    rsp,0x8\n    7430:\te8 4b 01 00 00       \tcall   0x7580\n    7435:\t48 83 c4 08          \tadd    rsp,0x8\n    7439:\tc3                   \tret"
+    },
+    {
+      "piece": "lpm_lookup",
+      "fallback_start": 30396,
+      "bytes": 14,
+      "instruction_bytes": "4883ec08e8000000004883c408c3",
+      "call_opcode_offset": 30400,
+      "encoded_destination": 30405,
+      "disassembly": "00000000000076bc <.data+0x76bc>:\n    76bc:\t48 83 ec 08          \tsub    rsp,0x8\n    76c0:\te8 00 00 00 00       \tcall   0x76c5\n    76c5:\t48 83 c4 08          \tadd    rsp,0x8\n    76c9:\tc3                   \tret"
+    }
+  ],
+  "scope": "Retained successful typed OTel host emission, before external relocation. Encoded destination of a zero external E8 slot is not its installed helper address. No patch or performance measurement."
+}
