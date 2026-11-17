@@ -1,0 +1,70 @@
+{
+  "recorded_utc": "2026-11-17T02:45:48Z",
+  "source_inventory": "/workspaces/repository/kprog/results/host-link-replay-20261116/emission-report.json",
+  "emitted_entries": 239,
+  "scope": "External CALL relocations in historical host outputs; static per-entry sites can repeat shared source callees. No dynamic-frequency or current-image claim.",
+  "external_calls_by_app": {
+    "bcc": {},
+    "cilium": {
+      "bpf_jiffies64": 91
+    },
+    "katran": {},
+    "otelcol-ebpf-profiler": {},
+    "tetragon": {},
+    "tracee": {
+      "bpf_get_current_task_btf": 121
+    }
+  },
+  "represented_programs": [
+    {
+      "app": "cilium",
+      "helper": "bpf_jiffies64",
+      "distinct_entry_symbols": 13
+    },
+    {
+      "app": "tracee",
+      "helper": "bpf_get_current_task_btf",
+      "distinct_entry_symbols": 109
+    }
+  ],
+  "examples": [
+    {
+      "app": "cilium",
+      "helper": "bpf_jiffies64",
+      "symbol": "cil_lxc_policy",
+      "blob": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/40-0/image.blob",
+      "relocations": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/40-0/image.relocs",
+      "offset": 1882,
+      "helper_aliases": [
+        "bpf_jiffies64"
+      ],
+      "disassembly": [
+        "     753:\tmov    ecx,0x76",
+        "     758:\txor    eax,eax",
+        "     75a:\tcall   0x75f",
+        "     75f:\tshr    rax,0x8",
+        "     763:\tjmp    0x78b",
+        "     765:\tmov    ecx,0x5"
+      ]
+    },
+    {
+      "app": "tracee",
+      "helper": "bpf_get_current_task_btf",
+      "symbol": "cgroup_bpf_run_filter_skb",
+      "blob": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/301-0/image.blob",
+      "relocations": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/301-0/image.relocs",
+      "offset": 555,
+      "helper_aliases": [
+        "bpf_get_current_task_btf"
+      ],
+      "disassembly": [
+        "     220:\tmov    eax,0xffffffff",
+        "     225:\tjne    0x2b0",
+        "     22b:\tcall   0x230",
+        "     230:\tmov    rdi,rax",
+        "     233:\tcall   0x238",
+        "     238:\tlea    rdx,[rax+0x78]"
+      ]
+    }
+  ]
+}

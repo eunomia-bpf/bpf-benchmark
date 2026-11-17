@@ -34,6 +34,7 @@ whether LTO work earns its footprint.
 | 6 | Map identity is discarded at every basic-block boundary and memory reload | All five, site dependent | Recover additional direct lookup/update/delete bindings using actual provenance. Dynamic inner-map identity must remain distinct from its known type. Static source opportunity; no new hot-site count is established here. |
 | 7 | Finite helper-ID joins become another runtime compare chain | Tetragon; other helper-selecting sources | Propagate/split a proven selection earlier where possible, avoiding repeated ID redispatch. Source-confirmed shape; production hot frequency and gain are unmeasured. |
 | 8 | Exact hash key length stops before the LTO plan | Katran, BCC, OTel hash sites | Current JIT/native use the same runtime-length kernel lookup. Exact-shape specialization remains a distinct, unmeasured opportunity; the copied-hash comparison did not test a separately specialized function per proven key length. |
+| 9 | Current-task BTF and jiffies helpers retain calls the JIT removes | Tracee, Cilium | Remove a call/return per executed covered site. Historical outputs have 121/91 static calls; dynamic importance is unknown, and inline loads can grow installed text. |
 
 Tetragon's prior native load failure is **fixed in the retained corrected-image
 check**; it is discussed separately below. It should not be ranked as a
@@ -852,3 +853,54 @@ recipe (`vendor/bpf/Makefile:484–497`) replaces native objects without
 refreshing those proof files. They are stale build-output cleanup
 candidates, not evidence of current literal identity or of a failed
 load-time proof. No build output or raw data was removed by this review.
+
+## 9. Two small helpers retain calls that the JIT removes
+
+2026-11-17T02:44:47Z review at 93d17d3c5. This is below the demonstrated
+read/map opportunities in priority: it removes call overhead at covered
+sites, rather than a large helper body. The retained 239-entry host
+emission inventory contains 121 external `bpf_get_current_task_btf` CALL
+relocations across 109 distinct Tracee entry symbols, and 91 external
+`bpf_jiffies64` CALL relocations across 13 Cilium entry symbols.
+`helper_parity_inventory.py` reproduces these counts and bounded decoded
+call windows in `helper-parity.json`. Shared source callees can recur in
+different per-entry payloads. These are historical static sites, not
+dynamic counts, unique source sites or a current-image performance result.
+
+- **Current task, BTF variant:** `x86_probe_read.rs:180` recognizes only
+  `bpf_get_current_task` for its wide GS-relative load. The BTF variant
+  therefore falls through the selection at `x86.rs:1524` to an external
+  helper call. Example: retained Tracee `cgroup_bpf_run_filter_skb` has
+  a CALL at 0x22b whose relocation targets `bpf_get_current_task_btf`.
+  Both kernel helper bodies return the current task pointer
+  (`kernel/trace/bpf_trace.c:755–768`); their verifier return types differ,
+  but the runtime pointer value agrees. The verifier explicitly inlines
+  both (`kernel/bpf/verifier.c:24026–24041`), using the same current-task
+  per-CPU address. Its eligibility condition is JIT plus per-CPU instruction
+  support (18293–18302); the sole x86 JIT implements that support at
+  `arch/x86/net/bpf_jit_comp.c:4087`. Reusing the existing same-boot current
+  task lowering for the BTF helper closes this runtime-code gap without a
+  new module reply or per-call check.
+- **Jiffies:** the native helper name table recognizes ID 118
+  (`x86.rs:205`), but there is no matching inline load. Cilium's retained
+  `cil_lxc_policy` has the external CALL at 0x75a, followed by `shr rax,8`.
+  The verifier replaces this helper with an address and 64-bit load
+  (`kernel/bpf/verifier.c:23973–23995`). The helper itself just returns
+  `get_jiffies_64()` (`kernel/bpf/helpers.c:394–397`), which is a read of
+  volatile `jiffies` on this 64-bit kernel (`include/linux/jiffies.h:86,
+  99–102`). Equivalent native lowering needs that variable's actual
+  same-boot address; neither the helper's code address nor a cached tick
+  value can substitute. Preserve a fresh volatile read at each call site.
+
+No external `bpf_get_current_task` or `bpf_get_smp_processor_id` CALL
+relocations remain in this inventory; the source already lowers those
+two names. This finding extends that implemented coverage, rather than
+proposing a second helper dispatcher. The likely per-call effect is one
+less external CALL/return per executed covered site. It is not evidence
+for a 20% app gain. Size also needs measurement: the current GS-load form
+is 9 B versus a 5 B direct CALL, a local increase of 4 B per replacement
+before other layout changes. A machine-only replacement also leaves any
+caller spills that LLVM chose around the original call; removing those
+would require exposing the load to the existing IR optimization. Neither
+variant has been built or timed here. No source or optimization record
+was changed, and the coordinator retains implementation ownership.
