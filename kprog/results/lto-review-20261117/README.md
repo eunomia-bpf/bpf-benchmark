@@ -1129,3 +1129,62 @@ This review changed no source, touched no input timestamp, invoked no
 Make/compiler target and interrupted no coordinator job. Per-call effects
 and installed bytes belong to the source change once its actual rebuilt
 binary is measured.
+
+### User reads: SMAP selection and constant size share a register-save benefit
+
+2026-11-17T03:46:21Z follow-up to section 1 at c55f8cdf6. The persistent
+380-byte user-read fixture also exposes the cost of choosing the same boot
+feature on every read. Its selection instructions are:
+
+```text
+0x04d movabs r11,boot_cpu_data
+0x057 test   [r11+x86_capability_word],SMAP_bit
+0x062 setne  r15b
+0x066 je     after_stac
+ ... copy ...
+0x112 test   r15b,r15b
+0x115 je     after_clac
+```
+
+The decoded fixture addresses are offsets, not installed helper addresses.
+The six decision instructions occupy 40 B and include two conditional
+branches. STAC and CLAC themselves are excluded: if the target kernel
+requires them, they remain required. The new `smap_selection` receipt in
+`remainder-paths.json` derives this count from the existing captured
+instructions; no new instruction stream was generated or executed.
+The real emitter's matching source is `x86_probe_read.rs:62–70,129–133`.
+
+This reinforces an interaction between two existing opportunities, rather
+than another standalone dispatcher. R15b's only role here is preserving
+the feature choice; R13 preserves the dynamic size. A version with both a
+proven constant size and a bound feature choice needs neither role. R12
+and R14 preserve destination/source across the policy call; this emitter
+uses RBX for task/pagefault state after that call. Keeping these three
+registers gives a valid save frame, not a claim of minimum register use.
+Three saves align the nested SysV call. Removing just R15 leaves four
+saves and requires alignment work, so its isolated benefit cannot be
+estimated by deleting a push/pop alone. The source must continue to
+preserve every callee-saved register it writes, including on failures.
+The 40 B is local decision code, not a net installed-image saving for a
+completed specialization.
+
+The fact belongs to the booted target. The sole kernel uses alternatives
+for STAC/CLAC (`arch/x86/include/asm/smap.h:18–22,40–47`) and enables CR4
+SMAP from its CPU capability decision (`arch/x86/kernel/cpu/common.c:377–385`).
+That decision can include forced capability clearing (952–957); raw host
+CPUID and the P compiler's `-march=native` cannot establish it. The guest
+kernel's `/proc/cpuinfo` flags are themselves emitted from kernel CPU
+capability data (`arch/x86/kernel/cpu/proc.c:104–107`), rather than being a
+dump of the build host's compiler features. This identifies a relevant
+target-side source of information; it does not establish an actual guest
+SMAP value here or prescribe an unchecked substitute for boot_cpu_data.
+Any specialization must bind its feature fact to the same target boot as
+its helper/layout facts and retain it with the emitted-code inputs.
+
+Range/NMI policy, pagefault nesting and load-fault zeroing remain required.
+In particular, policy-denial paths currently bypass the STAC/CLAC and
+pagefault-enable cleanup because they never entered that protected copy
+region. Feature folding must preserve that control flow, while successful
+and faulted copies still close the access region. This review supplies
+instruction and ABI evidence for the already-ranked read work, not a
+measured per-call gain or a proposed extra runtime check.

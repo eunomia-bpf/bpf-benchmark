@@ -1,5 +1,5 @@
 {
-  "recorded_utc": "2026-11-17T03:19:16Z",
+  "recorded_utc": "2026-11-17T03:46:20Z",
   "scope": "Static successful copy-region paths only, ending before success XOR. Excludes policy, saves, SMAP, cleanup and cycles. No execution, build or measured regression.",
   "old_blob": "/workspaces/kprog-raw/perf/20261116-inner-array-lto/libbpf/otel-typed.blob",
   "old_user_routine_bytes": 326,
@@ -11,6 +11,44 @@
     "144": 4,
     "16": 4,
     "8": 16
+  },
+  "smap_selection": {
+    "instructions": [
+      [
+        77,
+        "movabs",
+        "r11,0x5555666677778888"
+      ],
+      [
+        87,
+        "test",
+        "DWORD PTR [r11+0x24],0x100000"
+      ],
+      [
+        98,
+        "setne",
+        "r15b"
+      ],
+      [
+        102,
+        "je",
+        "0x6f"
+      ],
+      [
+        274,
+        "test",
+        "r15b,r15b"
+      ],
+      [
+        277,
+        "je",
+        "0x11e"
+      ]
+    ],
+    "instruction_count": 6,
+    "conditional_branches": 2,
+    "instruction_bytes": 40,
+    "scope": "Feature-decision instructions only; excludes STAC/CLAC, saves and policy. Guest enabled-state is not inferred from this host fixture."
   },
   "old_fragments": {
     "prefix": [

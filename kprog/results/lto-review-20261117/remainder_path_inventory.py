@@ -49,6 +49,14 @@ old_fragments = dict(prefix=cut(old, old_word-9, old_word),
                      zero=cut(old, old_byte-8, old_byte),
                      byte=cut(old, old_byte, success(old, old_byte)))
 new = [tuple(row) for row in capture['instructions']]
+feature_setup = next(i for i, row in enumerate(new) if row[1:] == ('setne', 'r15b'))
+feature_cleanup = next(i for i, row in enumerate(new) if row[1:] == ('test', 'r15b,r15b'))
+selection_indices = list(range(feature_setup-2, feature_setup+2)) + [feature_cleanup, feature_cleanup+1]
+smap_selection = dict(instructions=[new[i] for i in selection_indices],
+                      instruction_count=len(selection_indices),
+                      conditional_branches=sum(new[i][1].startswith('j') for i in selection_indices),
+                      instruction_bytes=sum(new[i+1][0]-new[i][0] for i in selection_indices),
+                      scope='Feature-decision instructions only; excludes STAC/CLAC, saves and policy. Guest enabled-state is not inferred from this host fixture.')
 site_lines = capture['sites'].splitlines()
 word, four, two, one = [int(line.split()[0]) for line in site_lines[1:5]]
 new_fragments = dict(prefix=cut(new, word-9, word), word=cut(new, word, four-9),
@@ -74,6 +82,7 @@ result = dict(recorded_utc=subprocess.check_output(['date', '-u', '+%FT%TZ'], te
               fixture_capture=str(capture_path),
               fixture_user_routine_bytes=len(bytes.fromhex(capture['instruction_bytes'])),
               observed_historical_literal_sizes=prior['nearby_esi_literals_bytes'],
+              smap_selection=smap_selection,
               old_fragments=old_fragments, new_fragments=new_fragments, paths=models,
               captured_new_copy_instruction_bytes=bytes.fromhex(capture['instruction_bytes'])[word-9:success(new, one)].hex())
 (here / 'remainder-paths.json').write_text(json.dumps(result, indent=2) + '\n')
