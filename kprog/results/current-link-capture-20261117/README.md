@@ -38,3 +38,19 @@ logs stay in place. The only removal follows the frozen entry's successful
 run cleanup of the rebuildable STATE Docker disk; raw result/capture
 directories are retained. No image or second base is created. Source
 changes and timing publication still follow the separate all-LTO batch.
+
+First integration result: OTel guest finished at 18:53:34Z with rc 0
+and app status `ok` (run `185119_973034`). Index `c98f65f3d` records 14
+successful kernel-link requests and 28 successful proof invocations,
+with no archive errors. All 14 supplied probe layouts contain
+`cpu_tlbstate`; each has 16 actual supplied field names. These are request
+counts, not a substitute for installed-program or B/stock totals.
+The remaining apps continue in the background on the same image.
+
+After capture, `run-replay.sh` queues under batch EX, timing SH and image
+EX, builds the sole canonical host linker, and replays every captured
+kernel request with its actual flags and paired proof/plan. It records
+all failed classes and emitted LTO ranges. Generic zero-tail suffix
+counts are static sharing bounds, not installed-byte or per-call gains.
+The replay does not add missing facts, infer a helper name, or skip failed
+captured requests. Actual replay results remain pending.
