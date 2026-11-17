@@ -1847,3 +1847,81 @@ and the NMI/pagefault/fault-recovery work still runs after an accepted
 range. Expected per-call benefit is one fewer conditional branch on a
 successful lowered user read; actual effect remains unmeasured and
 implementation remains coordinator-owned.
+
+## 17. A counted block keeps long constant reads compact
+
+2026-11-17T05:14:44Z review at 22de1e918.
+
+This refines the first-ranked size-specialization item. The existing
+144-byte example should not force a choice between the generic eight-byte
+loop and eighteen fully unrolled protected word operations. A counted
+four-word block with a fixed two-word tail offers a third source shape.
+This section is a static schedule/encoding model, not emitted candidate
+code, a tested lowering or a measured speedup.
+
+The current normal-copy loop in `x86_probe_read.rs:89–100` executes nine
+instructions per qword: source load, R11 status test, fault branch, store,
+two pointer increments, size subtraction/comparison and the loop branch.
+With 0dcf97880, a zero remainder now skips the 4/2/1 tail using TEST/JE.
+For successful copies of positive constant multiples of eight, the source model is
+two initial instructions plus nine per word plus two empty-tail
+instructions. `constant_copy_model.py` reads the retained pre-0dcf
+instruction inventory and models that explicit eight-byte source addition.
+It does not rerun the old decoder against a new binary or present the
+old 380-byte fixture as current installed code.
+
+| Known size | 0dcf generic source-model copy instructions / conditional branches | Fully unrolled copy instructions / conditional branches | Fully unrolled copy-only bytes with near fault branches |
+|---|---:|---:|---:|
+| 8 B | 13 / 4 | 4 / 1 | 15 |
+| 16 B | 22 / 6 | 8 / 2 | 32 |
+| 144 B | 166 / 38 | 72 / 18 | 316 |
+
+Every unrolled word still has MOV-load, TEST R11D, JE-fault and MOV-store.
+The 144-byte byte count includes the longer displacement encodings for
+the final two accesses at offsets 128/136. It is not eighteen copies of
+the zero-offset instruction width.
+
+For 144 bytes, use four iterations copying 32 bytes each, then 16 fixed
+tail bytes. The four-word block has sixteen load/status/branch/store
+instructions, followed by two pointer increments, DEC of a four-iteration
+counter and JNE. Counting the initial counter MOV and two protected tail
+words gives 89 executed copy instructions and 22 conditional branches,
+versus 166/38 in the generic source model. The static copy-only schedule
+is 119 bytes with the existing near fault/loop branch widths, versus 316
+for full unrolling. The existing generic copy region is modeled as 142 B
+after the empty-tail addition. These are local encoding counts; they
+exclude policy, frame, SMAP, copy setup, success result, cleanup, zeroing,
+exception metadata and the rest of the program.
+
+This is appropriate only after the call site's actual size is proven.
+The four historical 144-byte nearby literals remain static leads, not
+full CFG proofs or dynamic frequencies. Keep the already identified 8/16
+cases simpler: a counted block is not an improvement over their one/two
+fixed words. The 144-byte schedule needs no runtime size discriminator;
+the existing original-size value or a literal still supplies full-buffer
+zeroing on a fault, while ECX is free to be the bulk iteration counter.
+No SIMD, REP, kernel routine, extra helper CALL or new runtime check is
+required by this layout.
+
+Preserve load order and first-fault behavior. Each word must test R11
+before its store and before any later source load; a single status test
+after four speculative loads is not this model. The eighteen loads remain
+at source offsets 0,8,...,136, with no read beyond the requested 144 bytes.
+Fault handling still produces the same error and zeros the entire original
+destination. Pair loads/stores in their original order rather than loading
+all four words before storing them; that also preserves the existing
+behavior for overlapping source and destination. There are six static protected load sites in the counted
+shape (four in the reused block, two in the tail), each needing its actual
+instruction length. Those lengths are 3/4/4/4 and 3/4 bytes, not all the
+old zero-offset loop's three bytes. Keep R11 as the recovery destination.
+
+`constant-copy-model.json` retains the arithmetic, assumed instruction
+widths, source-order offsets and stated exclusions. No assembler/compiler
+or native candidate was invoked. The original generic routine is shared
+across callers: adding separate constant variants can grow total installed
+code even when each copy region is smaller. In particular, duplicating
+policy/frame/cleanup for every length can erase this local benefit. Keep
+variant sharing deliberate and measure the whole reachable image, including
+exception metadata, along with per-call time. Expected benefit is reduced
+loop/pointer bookkeeping at executed proven-size reads; actual gain and
+app installed bytes remain unmeasured. Coordinator owns implementation.

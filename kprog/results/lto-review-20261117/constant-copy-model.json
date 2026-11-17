@@ -1,0 +1,85 @@
+{
+  "recorded_utc": "2026-11-17T05:16:05Z",
+  "scope": "Static successful-copy scalar instruction/encoding arithmetic only; no assembler, optimizer, emitted candidate or execution. Excludes policy, frame, SMAP, copy-setup, success-result, cleanup and zeroing. Fault branches retain current six-byte form; actual installed size/cycles unmeasured.",
+  "base_receipt": "remainder-paths.json",
+  "generic_copy_region_bytes_source_model": 142,
+  "source_model_change": "0dcf97880 adds two-byte TEST ECX,ECX and six-byte JE before existing remainder; zero remainder skips every old tail test.",
+  "constant_paths": [
+    {
+      "size": 8,
+      "empty_remainder_source_model": {
+        "instructions": 13,
+        "conditional_branches": 4
+      },
+      "fully_unrolled_copy_only": {
+        "instructions": 4,
+        "conditional_branches": 1,
+        "bytes": 15
+      }
+    },
+    {
+      "size": 16,
+      "empty_remainder_source_model": {
+        "instructions": 22,
+        "conditional_branches": 6
+      },
+      "fully_unrolled_copy_only": {
+        "instructions": 8,
+        "conditional_branches": 2,
+        "bytes": 32
+      }
+    },
+    {
+      "size": 144,
+      "empty_remainder_source_model": {
+        "instructions": 166,
+        "conditional_branches": 38
+      },
+      "fully_unrolled_copy_only": {
+        "instructions": 72,
+        "conditional_branches": 18,
+        "bytes": 316
+      }
+    }
+  ],
+  "counted_144_copy_only": {
+    "size": 144,
+    "bulk_iterations": 4,
+    "bulk_bytes": 32,
+    "tail_bytes": 16,
+    "source_access_order": [
+      0,
+      8,
+      16,
+      24,
+      32,
+      40,
+      48,
+      56,
+      64,
+      72,
+      80,
+      88,
+      96,
+      104,
+      112,
+      120,
+      128,
+      136
+    ],
+    "instructions": 89,
+    "conditional_branches": 22,
+    "static_copy_only_bytes": 119,
+    "bulk_word_load_instruction_lengths": [
+      3,
+      4,
+      4,
+      4
+    ],
+    "tail_word_load_instruction_lengths": [
+      3,
+      4
+    ]
+  },
+  "fault_contract": "One protected qword load, R11 status test and fault branch before its store. Keep original load order, no overreads, full-destination zeroing/error on first failed load, and actual per-site instruction lengths. No checks are coalesced across loads."
+}
