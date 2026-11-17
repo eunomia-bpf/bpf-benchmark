@@ -3956,3 +3956,50 @@ replacement. Implementation and focused host receipts are tracked in
 `../task-btf-inline-20261117/`; the section-9 review-only statement records
 the earlier state rather than current ownership. No new image or guest
 is started during the reserved batches.
+
+### Item 1b: user strings need their own copy semantics
+
+2026-11-17T10:51:00Z. Source preparation while the item-1a host test waits
+on timing SH; no user-string production change or new runtime check.
+`bpf_probe_read_user_str_common` calls `strncpy_from_user_nofault`, then
+zeros the entire requested destination only on a negative signed-int
+result (`kernel/trace/bpf_trace.c:199–223`). Compat strings select that
+helper below the task's actual `TASK_SIZE`, otherwise the kernel-string
+helper (305–313), so the existing compat address split is reusable.
+
+The copy body is not interchangeable with the existing scalar user leaf
+or the kernel byte-string leaf:
+
+- `lib/strncpy_from_user.c:54–59` masks everything after the first NUL
+  within a successfully fetched word and stores that entire word. On the
+  sole kernel `CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS=y`, so the word loop
+  is not restricted to aligned strings (15–20, 34–37). For a valid
+  eight-byte source `41 00 78 78 78 78 78 78` and destination initially
+  `a5` bytes, the successful word path writes `41 00 00 00 00 00 00 00`
+  and the helper returns 2. A byte-until-NUL replacement leaves six `a5`
+  bytes instead; BPF map keys can observe that difference. This is a
+  source-derived example, not an executed candidate result.
+- A failed word source load retries at the same source offset bytewise
+  (`strncpy_from_user.c:40–41,68–80`). Thus a NUL before an inaccessible
+  next page can still succeed. The current scalar leaf's immediate full
+  zero/error branch on any failed word cannot implement that behavior.
+- The sole x86 header supplies `masked_user_access_begin`
+  (`arch/x86/include/asm/uaccess_64.h:64–78`). Its unsigned compare/CMOVA
+  clamps the starting pointer to live `USER_PTR_MAX`, then begins user
+  access; `include/linux/uaccess.h:37–44` selects this capability, and
+  `strncpy_from_user.c:125–133` copies through it. This path does not use
+  scalar `copy_from_user_nofault`'s whole-range `__access_ok(src,size)` or
+  `nmi_uaccess_okay()` tests (`mm/maccess.c:120–135`). Cloning those tests
+  into a string routine would introduce different refusals.
+- Zero count returns 0 before entering pagefault-disabled copy; normal
+  returns include the NUL, and exhaustion forces the final destination
+  byte to zero (`mm/maccess.c:183–202`). The common helper stores the
+  result in `int` before its negative-result/full-zero decision. Preserve
+  that conversion, original requested size and pagefault/SMAP cleanup.
+
+The implementation can share the existing compat selection and recovery
+metadata machinery while generating the correct user-string word/byte
+copy at link time. The word-fault retry is kernel behavior to preserve,
+not a newly invented recovery mode. Dynamic helper share, emitted bytes
+and per-call impact still need measurement; static sites alone do not
+justify inlining every byte sequence separately.
