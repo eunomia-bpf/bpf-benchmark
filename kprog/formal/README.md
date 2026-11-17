@@ -38,8 +38,10 @@ tables and retains pointer values and tag bits. The [vector view](results/m5-pro
 follows the embedded pointer arrays and all 32 low/high pairs. The
 [joint register view](results/m5-producer-register-view/README.md) adds actual
 SP readback and assembles the existing GPR/SP/vector/flag relation over one
-reached memory. Production input, origin and architectural cell-map
-admissibility remain open.
+reached memory. The [RAW setup composition](results/m5-entry-admissibility/README.md)
+derives SP, x0 context and x0/x30 tags from the actual preceding stores, with
+the source register index as cell map. Provider outcomes and same-invocation
+native origin/register bindings remain open.
 
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|

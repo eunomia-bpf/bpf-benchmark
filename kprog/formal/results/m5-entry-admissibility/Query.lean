@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.Arm64EntryAdmissibility
+#check KProgFormal.ClightRefinement.Arm64EntryAdmissibility.raw_registers_initialized
+#print axioms KProgFormal.ClightRefinement.Arm64EntryAdmissibility.raw_registers_initialized

@@ -1,0 +1,103 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-entry-admissibility",
+  "focused": {
+    "exit": 0,
+    "jobs": 167,
+    "log": "focused4.log"
+  },
+  "public_queries": {
+    "exit": 0,
+    "theorems": 1,
+    "log": "Query-1.log",
+    "axioms": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "source_queries": {
+    "exit": 0,
+    "examples": 2,
+    "log": "Next-2.log",
+    "checks": [
+      "all31 exported register indices and actual context/tag table targets",
+      "actual one-kind external input signature and linked block64 lookup"
+    ]
+  },
+  "bridge": {
+    "setup_transitions": 90,
+    "header_transitions": 638,
+    "total_transitions": 728,
+    "derived_source_fields": [
+      "SP offset0",
+      "x0 represented context",
+      "x0 ABI tag1",
+      "x30 RETURN tag10"
+    ],
+    "source_cell_map": "architectural Fin31 index",
+    "retained_source_premises": [
+      "initialized tables",
+      "non-x0 scalar data including zero x30 payload",
+      "non-x0/x30 scalar tags",
+      "flag and vector data"
+    ],
+    "native_premises": [
+      "context ValueRep",
+      "native context word",
+      "other native GPR input words",
+      "native return origin",
+      "native stack origin"
+    ],
+    "production_input_admissibility": "open",
+    "preservation": [
+      "caller contents and both permission maps",
+      "access map",
+      "nextblock"
+    ]
+  },
+  "whole_lake_build": {
+    "exit": 0,
+    "jobs": 294,
+    "log": "lake-build1.log",
+    "timing_lock": "shared"
+  },
+  "export_comparison": {
+    "exit": 0,
+    "baseline": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_byte_identical": true,
+    "log": "export-parity1.json"
+  },
+  "attempts": {
+    "focused1": "wrong repository-root working directory; exit1 before module checking",
+    "focused2": "PASS167 jobs; initial theorem",
+    "focused3": "wrong repository-root working directory; exit1 before module checking",
+    "focused4": "PASS167 jobs; deprecated simp lemma replaced",
+    "Query-1": "PASS",
+    "Next-1": "expression equality lacks Decidable instance; exit1",
+    "Next-2": "PASS; AST equalities by rfl",
+    "lake-build1": "PASS294 jobs",
+    "export-parity1": "PASS23 files"
+  },
+  "limits": {
+    "heartbeats": 200000,
+    "recursion_depth": 512,
+    "workers": 1,
+    "address_space_GiB": 32,
+    "CPUs": [
+      17,
+      18
+    ]
+  },
+  "last_complete_make_check": {
+    "exit": 0,
+    "commit": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "rerun": false
+  },
+  "complete_ISA_handler_refinements": 0,
+  "M5": "open",
+  "M6": "open"
+}
