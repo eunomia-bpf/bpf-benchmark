@@ -1,0 +1,90 @@
+{
+  "recorded_utc": "2026-11-17T03:06:57Z",
+  "scope": "Raw entry counters and scrape availability only. Entry counts do not measure unwind attempts, and tail-program zero counts do not prove tail nonexecution. O2 equal-work status and cause remain unresolved.",
+  "candidates": [
+    {
+      "candidate": "Os",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_010914_990572",
+      "app_status": "ok",
+      "phases": {
+        "baseline": {
+          "record": {
+            "bytes_jited": 3815,
+            "bytes_xlated": 5904,
+            "id": 17,
+            "name": "native_tracer_e",
+            "run_cnt_delta": 129570118,
+            "run_time_ns_delta": 440658774440,
+            "type": "perf_event"
+          },
+          "ns_per_invocation": 3400.9290200692726,
+          "positive_count_programs": [
+            "tracepoint__sch",
+            "native_tracer_e"
+          ]
+        },
+        "post_rejit": {
+          "record": {
+            "bytes_jited": 3362,
+            "bytes_xlated": 24,
+            "id": 48,
+            "name": "native_tracer_e",
+            "run_cnt_delta": 123498235,
+            "run_time_ns_delta": 393095963329,
+            "type": "perf_event"
+          },
+          "ns_per_invocation": 3183.0087557850525,
+          "positive_count_programs": [
+            "tracepoint__sch",
+            "native_tracer_e"
+          ]
+        }
+      },
+      "native_replacement_events": 14,
+      "native_failure_events": 0,
+      "retained_collector_scrapes": []
+    },
+    {
+      "candidate": "O2",
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_020132_158734",
+      "app_status": "ok",
+      "phases": {
+        "baseline": {
+          "record": {
+            "bytes_jited": 3815,
+            "bytes_xlated": 5904,
+            "id": 17,
+            "name": "native_tracer_e",
+            "run_cnt_delta": 138518973,
+            "run_time_ns_delta": 445085206992,
+            "type": "perf_event"
+          },
+          "ns_per_invocation": 3213.1714331436747,
+          "positive_count_programs": [
+            "tracepoint__sch",
+            "native_tracer_e"
+          ]
+        },
+        "post_rejit": {
+          "record": {
+            "bytes_jited": 3427,
+            "bytes_xlated": 24,
+            "id": 48,
+            "name": "native_tracer_e",
+            "run_cnt_delta": 144264207,
+            "run_time_ns_delta": 40081168617,
+            "type": "perf_event"
+          },
+          "ns_per_invocation": 277.83169124549374,
+          "positive_count_programs": [
+            "tracepoint__sch",
+            "native_tracer_e"
+          ]
+        }
+      },
+      "native_replacement_events": 14,
+      "native_failure_events": 0,
+      "retained_collector_scrapes": []
+    }
+  ]
+}

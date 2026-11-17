@@ -26,7 +26,7 @@ whether LTO work earns its footprint.
 
 | Rank | Finding | Most affected apps | Expected per-call effect and size direction |
 |---|---|---|---|
-| 1 | Probe reads retain generic size loops and repeated CPU feature selection | OTel; kernel-read sites in Tracee/Tetragon; BCC | Specialize common small reads; avoid 8/1-only copying and repeated SMAP capability selection. Large opportunity in OTel's retained read range; selective variants can grow code, so retain sharing. |
+| 1 | Probe reads retain runtime-size loops and repeated CPU feature selection | OTel; kernel-read sites in Tracee/Tetragon; BCC | Specialize common small reads and repeated SMAP capability selection. The 8/1-only remainder is addressed in c03737bf4; its historical costs below are not current measurements. Selective variants can grow code, so retain sharing. |
 | 2 | Compat reads bypass that lowering entirely | Tracee, then Tetragon where present | Address-domain/size specialization can remove wrapper/copy overhead while preserving the helper's user/kernel choice. Actual Tracee blobs retain 2,375 read and 714 string call sites. This is an opportunity shared with the JIT helper, not evidence of a native-only regression. |
 | 3 | Constant tail slots use the indirect path (section 8) | Cilium, OTel; constant sites in Tracee/Tetragon | Installed Cilium JIT has patched direct jumps; native retains map bound and target loads. A constant-slot LTO subset can remove bound/index bookkeeping, while full direct patching needs the existing map-update/lifetime contract. |
 | 4 | Unknown map path nests ARRAY, LPM and generic helper calls | OTel residual dynamic maps, Katran; potential BCC/Cilium/Tracee sites | Remove two extra call/return pairs and their stack adjustments on a non-ARRAY/non-LPM fallback; bind a concrete operation where type facts suffice. Retained Katran dispatcher costs are small, so this alone does not explain its entire gap. |
@@ -108,6 +108,14 @@ needed for the dropped candidates.
 
 Source: `kprog/x86/native_lab/native_link/src/x86_probe_read.rs:28–38,
 59–108,118–146,150–173`.
+
+Update after c03737bf4 (2026-11-17): the coordinator has replaced the
+byte-only remainder with 4/2/1-byte steps. Source inspection confirms the
+new load-site lengths are 2/3/3 bytes and recovery still clears/tests R11.
+The older retained disassembly and path counts below describe the
+pre-change output. Constant-size specialization, the five-save frame and
+per-read SMAP selection remain separate opportunities; no current-image
+gain is inferred from those historical counts.
 
 Each lowered read enters one shared routine for its helper kind. It saves
 RBX and R12–R15, copies its three arguments, checks the address policy,
@@ -953,3 +961,66 @@ ARRAY/LPM buckets already cited in section 3 bound the opportunity in
 that diagnostic; they are not two wholly removable costs. This is a
 source-derived implementation direction, with no generated candidate,
 guest run, per-call gain or installed-size result claimed here.
+
+## OTel O2: the large time change still needs an unwind-path explanation
+
+2026-11-17T03:07:52Z review at 20786f06d. The newly committed O2 study
+row (d2a96a706) reports 1.849x throughput and 11.565x per-call speedup.
+The raw entry counters below retain that observation rather than
+interpreting it as an established equal-work improvement. The comparator
+Os row is from the same study, not a paired isolated LTO change.
+The coordinator's 02:59 decision attributes the O2 result to missed
+context conversion/unequal work and keeps uniform O3. This receipt records
+the observed counters; it does not independently establish the missing
+load or unwind-attempt values behind that diagnosis.
+
+| Candidate and arm | Entry calls | Entry time, ns | ns/call | Installed entry bytes |
+|---|---:|---:|---:|---:|
+| Os eBPF | 129,570,118 | 440,658,774,440 | 3,400.9 | 3,815 |
+| Os native | 123,498,235 | 393,095,963,329 | 3,183.0 | 3,362 |
+| O2 eBPF | 138,518,973 | 445,085,206,992 | 3,213.2 | 3,815 |
+| O2 native | 144,264,207 | 40,081,168,617 | 277.8 | 3,427 |
+
+`otel_flag_inventory.py` reads these from runs
+`x86_kvm_corpus_20261117_010914_990572` and
+`x86_kvm_corpus_20261117_020132_158734`, preserving exact fields in
+`otel-flag-paths.json`. Each native shim log has 14 replacement events and
+zero loader failures. Entry invocation counts and the small code-size
+change do not identify what work happens inside those invocations.
+Neither retained details directory contains the collector-8888/6060
+scrapes used by the earlier equal-work investigation. No unwind-attempt
+value is inferred from their absence. Tail-program `run_cnt_delta` is
+also not a substitute for the application's unwind counters.
+
+There is a concrete context-pass coverage question to investigate,
+without claiming it caused this run. `perf_context_lto.cpp:345` optimizes
+first, then 363–366 selects only entry-function `LoadInst`s whose
+`getUnderlyingObject` equals the entry argument. LLVM 18's
+`Analysis/ValueTracking.h:674–690` documents that the single-object utility
+strips GEPs/casts, whereas the plural utility additionally traverses PHI
+and select nodes. A load through a mixed context/local-buffer pointer
+can therefore be omitted from this selection. Memory-intrinsic sources
+and surviving callee accesses are outside this direct-load loop too.
+The later dynamic-offset exception at 372 only sees loads already
+selected; it does not cover the omitted uses. Adding a refusal for them
+is not the remedy requested by the operator.
+
+OTel has both context and local register views in its actual source:
+`tracemgmt.h:683–701` either copies kernel-stack registers into a local
+buffer or reads the context registers. It then reaches state-copy code
+at 584–605. A complete lowering must preserve that distinction under
+optimization. It must also preserve the original physical context for
+`bpf_get_stackid` and BPF tail-call operands (`tracemgmt.h:747,774`), as
+the pass already intends at 386. Replacing every context argument with
+the dereferenced register pointer would break those helper uses.
+
+One tempting diagnosis was ruled out by inspection: the current O2 P's
+frontend IR gives `collect_trace.100` and `get_usermode_regs.109` the
+`alwaysinline` attribute, and the P's machine entry already contains their
+inlined work. Merely observing frontend calls to those functions does not
+establish a missed-inlining defect. The optimized post-context object
+and OTel's own unwind/error counters from this run are not retained here,
+so neither an omitted PHI load nor a broken tail transition is asserted
+as its cause. The coordinator owns that implementation/diagnostic work.
+No guest, optimizer/code-generation invocation, source change, new check
+or benchmark change was introduced by this review.
