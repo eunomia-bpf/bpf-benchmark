@@ -1,0 +1,21 @@
+
+/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/114-0/image.blob:     file format binary
+
+
+Disassembly of section .data:
+
+00000000000022a2 <.data+0x22a2>:
+    22a2:	48 69 c0 18 00 00 00 	imul   $0x18,%rax,%rax
+    22a9:	48 01 f8             	add    %rdi,%rax
+    22ac:	48 05 30 01 00 00    	add    $0x130,%rax
+
+
+/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/114-0/image.blob:     file format binary
+
+
+Disassembly of section .data:
+
+000000000000230a <.data+0x230a>:
+    230a:	48 69 c0 18 00 00 00 	imul   $0x18,%rax,%rax
+    2311:	48 01 f8             	add    %rdi,%rax
+    2314:	48 05 30 01 00 00    	add    $0x130,%rax

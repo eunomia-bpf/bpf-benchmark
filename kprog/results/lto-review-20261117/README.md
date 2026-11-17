@@ -3385,3 +3385,67 @@ compat row and its exact reference/counters under the Tetragon entry in
 PERF ran the host reader only. A concurrent coordinator commit completed
 while this documentation was being staged; the original local edit was
 kept and committed forward without changing either lane's history.
+
+
+### Known ARRAY arithmetic: short multiply immediate and folded pointer addition
+
+New source finding in `x86.rs:3916–3959`. For a non-power-of-two element
+stride, `append_x86_scale_rax` always emits a seven-byte 64-bit
+IMUL-immediate32. The kernel JIT explicitly chooses immediate8 when it
+fits (`arch/x86/net/bpf_jit_comp.c:1950–1963`); stride 24 needs only the
+four-byte 64-bit form. This changes encoding, not the multiply operation
+or register width. Positive non-power-of-two strides through 127 can use
+that form; other strides retain their existing shift or full immediate.
+No new limit/refusal or compilation flag is needed.
+
+After scaling for strides outside the SIB scale set 1/2/4/8,
+`append_x86_array_value_ptr` emits two pointer additions: ADD RAX,RDI and
+ADD RAX,value_offset. A single 64-bit LEA using RDI plus the already-scaled
+RAX plus the same displacement computes their result. For the retained
+304-byte value offset this replaces 3+6 bytes with an eight-byte LEA,
+saving **one byte and one executed instruction**. The helper-call ABI
+leaves condition flags caller clobbered; pointer result and GPR inputs
+are preserved. Bounds, null result, index policy and per-CPU behavior
+remain in their existing positions. For power-of-two strides above eight,
+the same addition fold applies after the existing shift; no multiply
+change is implied.
+
+The retained Katran link plan
+`corpus/results/shared-hash-regression-20261116/captures/link-ie2fmz97/link-plan.json`
+contains two ordinary ARRAY shapes with stride **24**, value offset
+**304**: `reals` (4,096 entries) and `vip_miss_stats` (one entry).
+Its static binding inventory has six and two sites respectively. The
+retained 9,410-byte native replay
+`/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/114-0/image.blob`
+has the corresponding 16-byte arithmetic sequences at offsets
+**8,866** and **8,970**: seven-byte multiply, three-byte map-pointer add,
+six-byte value-offset add. Their actual original instructions are retained
+in [array-strides.disassembly.txt](array-strides.disassembly.txt).
+
+| Arithmetic region, once per retained routine | Original | Source opportunity | Difference |
+| --- | ---: | ---: | ---: |
+| Multiply by 24 | 7 B / 1 instruction | 4 B / 1 instruction | -3 B |
+| Add map pointer and 304 | 9 B / 2 instructions | 8 B / 1 instruction | -1 B / -1 instruction |
+| Combined | 16 B / 3 instructions | 12 B / 2 instructions | **-4 B / -1 instruction** |
+
+Thus these two retained routines offer **eight local bytes**, not eight
+bytes for every static call site. Existing same-shape routine sharing
+already avoids per-call copies. Their execution frequency and any whole
+BPF-call speedup remain unknown. This is a small encoding/arithmetic
+follow-up after the current constants/globals and lookup work, not a
+new explanation for the earlier large timing differences.
+
+[array_stride_inventory.py](array_stride_inventory.py) reads only those
+retained facts/original bytes and writes [array-strides.json](array-strides.json).
+Eighteen finite arithmetic examples include full-u32 products and
+64-bit pointer wrap; the current and folded integer expressions agree.
+Out-of-range keys in those arithmetic examples still return null before
+this region in a real lookup. Keep the multiply, product and LEA **64-bit**;
+a 32-bit multiply can truncate a valid large product. The sample 304
+fits the displacement form; preserve existing forms when another case
+cannot be represented, with no new runtime predicate or rejection.
+No candidate was generated, assembled or executed and no current-image
+byte identity, installed saving or measured per-call effect is claimed.
+This is separate from the prior LPM/LRU displacement and return-tail
+savings. The per-CPU fused GS add and the previously audited mask policy
+already have their intended forms and supply no new removal here.

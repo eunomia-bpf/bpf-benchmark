@@ -1,0 +1,199 @@
+{
+  "recorded_utc": "2026-11-17T09:09:17Z",
+  "scope": "Retained Katran load facts and original native bytes, plus finite unsigned arithmetic examples. Static site counts are not dynamic frequencies. Model savings are not an emitted or installed candidate, per-call result or admission check. No machine code generated/assembled/executed.",
+  "plan": "corpus/results/shared-hash-regression-20261116/captures/link-ie2fmz97/link-plan.json",
+  "blob": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/114-0/image.blob",
+  "blob_bytes": 9410,
+  "shapes": [
+    {
+      "map_name": "reals",
+      "kind": "array",
+      "elem_size": 24,
+      "max_entries": 4096,
+      "value_offset": 304
+    },
+    {
+      "map_name": "vip_miss_stats",
+      "kind": "array",
+      "elem_size": 24,
+      "max_entries": 1,
+      "value_offset": 304
+    }
+  ],
+  "static_bound_sites": {
+    "reals": 6,
+    "vip_miss_stats": 2
+  },
+  "original_windows": [
+    {
+      "offset": 8866,
+      "original_bytes": "4869c0180000004801f8480530010000",
+      "original_arithmetic_bytes": 16,
+      "source_model_arithmetic_bytes": 12,
+      "source_model_bytes_saved": 4,
+      "source_model_instructions_removed": 1
+    },
+    {
+      "offset": 8970,
+      "original_bytes": "4869c0180000004801f8480530010000",
+      "original_arithmetic_bytes": 16,
+      "source_model_arithmetic_bytes": 12,
+      "source_model_bytes_saved": 4,
+      "source_model_instructions_removed": 1
+    }
+  ],
+  "scalar_immediate_bytes_before_after": [
+    7,
+    4
+  ],
+  "pointer_add_bytes_before_after": [
+    9,
+    8
+  ],
+  "arithmetic_illustrations": [
+    {
+      "u32_key": 0,
+      "base": "0x0",
+      "product": 0,
+      "current_result": "0x130",
+      "folded_result": "0x130",
+      "equal": true
+    },
+    {
+      "u32_key": 0,
+      "base": "0xffff888000001000",
+      "product": 0,
+      "current_result": "0xffff888000001130",
+      "folded_result": "0xffff888000001130",
+      "equal": true
+    },
+    {
+      "u32_key": 0,
+      "base": "0xfffffffffffffff0",
+      "product": 0,
+      "current_result": "0x120",
+      "folded_result": "0x120",
+      "equal": true
+    },
+    {
+      "u32_key": 1,
+      "base": "0x0",
+      "product": 24,
+      "current_result": "0x148",
+      "folded_result": "0x148",
+      "equal": true
+    },
+    {
+      "u32_key": 1,
+      "base": "0xffff888000001000",
+      "product": 24,
+      "current_result": "0xffff888000001148",
+      "folded_result": "0xffff888000001148",
+      "equal": true
+    },
+    {
+      "u32_key": 1,
+      "base": "0xfffffffffffffff0",
+      "product": 24,
+      "current_result": "0x138",
+      "folded_result": "0x138",
+      "equal": true
+    },
+    {
+      "u32_key": 4095,
+      "base": "0x0",
+      "product": 98280,
+      "current_result": "0x18118",
+      "folded_result": "0x18118",
+      "equal": true
+    },
+    {
+      "u32_key": 4095,
+      "base": "0xffff888000001000",
+      "product": 98280,
+      "current_result": "0xffff888000019118",
+      "folded_result": "0xffff888000019118",
+      "equal": true
+    },
+    {
+      "u32_key": 4095,
+      "base": "0xfffffffffffffff0",
+      "product": 98280,
+      "current_result": "0x18108",
+      "folded_result": "0x18108",
+      "equal": true
+    },
+    {
+      "u32_key": 4096,
+      "base": "0x0",
+      "product": 98304,
+      "current_result": "0x18130",
+      "folded_result": "0x18130",
+      "equal": true
+    },
+    {
+      "u32_key": 4096,
+      "base": "0xffff888000001000",
+      "product": 98304,
+      "current_result": "0xffff888000019130",
+      "folded_result": "0xffff888000019130",
+      "equal": true
+    },
+    {
+      "u32_key": 4096,
+      "base": "0xfffffffffffffff0",
+      "product": 98304,
+      "current_result": "0x18120",
+      "folded_result": "0x18120",
+      "equal": true
+    },
+    {
+      "u32_key": 2147483647,
+      "base": "0x0",
+      "product": 51539607528,
+      "current_result": "0xc00000118",
+      "folded_result": "0xc00000118",
+      "equal": true
+    },
+    {
+      "u32_key": 2147483647,
+      "base": "0xffff888000001000",
+      "product": 51539607528,
+      "current_result": "0xffff888c00001118",
+      "folded_result": "0xffff888c00001118",
+      "equal": true
+    },
+    {
+      "u32_key": 2147483647,
+      "base": "0xfffffffffffffff0",
+      "product": 51539607528,
+      "current_result": "0xc00000108",
+      "folded_result": "0xc00000108",
+      "equal": true
+    },
+    {
+      "u32_key": 4294967295,
+      "base": "0x0",
+      "product": 103079215080,
+      "current_result": "0x1800000118",
+      "folded_result": "0x1800000118",
+      "equal": true
+    },
+    {
+      "u32_key": 4294967295,
+      "base": "0xffff888000001000",
+      "product": 103079215080,
+      "current_result": "0xffff889800001118",
+      "folded_result": "0xffff889800001118",
+      "equal": true
+    },
+    {
+      "u32_key": 4294967295,
+      "base": "0xfffffffffffffff0",
+      "product": 103079215080,
+      "current_result": "0x1800000108",
+      "folded_result": "0x1800000108",
+      "equal": true
+    }
+  ]
+}
