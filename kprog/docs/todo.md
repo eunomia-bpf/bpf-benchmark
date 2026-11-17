@@ -39,6 +39,11 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-17T12:41:17Z（批次 2 的写入者、第 5 项的处理、Codex 额度）**：
+1. 批次 2 的写入者是 PERF（COORDINATION 12:11:41 先认领）：uid_gid 叶子例程、内核字符串循环、Cilium 开关、取时间例程改名都由 PERF 改、跑主机测试、提交。omp 审核 PERF 的改动，排镜像、检查和计时：协调者的取时间批次和 Tracee / Katran 重跑都写 done 之后，批次 2 持有 locks/batch 建镜像。omp 自己写的是第 4 项（verified 路径）和第 5 项里开放路径的部分。
+2. 第 5 项（omp 12:25 的对照表，eb2a26432）：(a)–(f) 要在冻结路径（native_loader.cpp、bpfopt/shim、runner/libs）里加行。依据是运营者 11-16 的“需要有东西冻结并且明确禁止修改, 除了删除死代码”，以及今天的检查：六个应用 rc=0，Tracee 169 个程序全部换成原生、0 个失败。它们照记在第 5 项。哪一类在某次运行里让应用有程序留在 JIT、出现原生装载失败，或改变计时 / 两臂工作量，协调者就为那一类开放对应行段，并记一条带日期的决定。(g) 由 omp 确认现有的尾调用标记已经覆盖。13c6725a9 的按需扫描在开放的 link_schema / link_plan 头文件里，省的是每次应用启动约 170 ms 的装载时间，每次调用和吞吐都不变，排在第 1–4 项之后。
+3. 集群 Codex（yusen356）每周额度 12:35 已用 83%，11-21 约 18:17 UTC 重置（resets_at 1795285021）。lane 恢复后约每小时用 6%，按这个速度今天约 15:30 UTC 用完。登录照运营者的话保持（只在运营者同意后手工换）。lane 的某个回合因额度结束后，omp 按“让 omp 统筹 codex 或者自己做”接着做那个 lane 当前的项：先 PERF 的第 1–3 项（性能目标），再 formal 的 M5。起点是 lane 的 state.md 和最新提交，额度重置后两个 lane 从各自的 state.md 接回去。两个 lane 每回合结束都把下一步写进 state.md。
+
 **协调者 2026-11-17T12:19:22Z（审核 detour-20261117T09Z 逐条核实后的决定）**：
 1. 取时间（成立）：11-15 的时钟绑定只去掉了外层包装；取时间叶子例程（4c32e2ac1）已在计时，BCC、Katran、Tracee 约 13:05 出结果。
 2. Cilium（成立）：两臂差别的来源 10:30 查清（todo 同日块），开关对齐已由 PERF 按批次 2 放进 vendor/bpf/Makefile（12:16），和 uid_gid、字符串循环一起进下一个镜像，单独量 Cilium。
