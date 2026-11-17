@@ -34,23 +34,9 @@ static cl::opt<std::string> FunctionBodies("bpf-function-bodies");
 static cl::opt<std::string> ImmutableGlobals("immutable-globals");
 static cl::opt<std::string> MapTypes("map-types");
 
-// The -O level of NATIVE_CFLAGS in vendor/bpf/Makefile, so P and its load-time LTO follow one policy.
-#if defined(NATIVE_LTO_OPT_Os)
-static const OptimizationLevel NativeOptLevel = OptimizationLevel::Os;
-static const CodeGenOptLevel NativeCodegenLevel = CodeGenOptLevel::Default;
-#elif defined(NATIVE_LTO_OPT_Oz)
-static const OptimizationLevel NativeOptLevel = OptimizationLevel::Oz;
-static const CodeGenOptLevel NativeCodegenLevel = CodeGenOptLevel::Default;
-#elif defined(NATIVE_LTO_OPT_O2)
-static const OptimizationLevel NativeOptLevel = OptimizationLevel::O2;
-static const CodeGenOptLevel NativeCodegenLevel = CodeGenOptLevel::Default;
-#elif defined(NATIVE_LTO_OPT_O1)
-static const OptimizationLevel NativeOptLevel = OptimizationLevel::O1;
-static const CodeGenOptLevel NativeCodegenLevel = CodeGenOptLevel::Less;
-#else
+// -O3, the level vendor/bpf/Makefile compiles P at, so P and its load-time LTO follow one policy.
 static const OptimizationLevel NativeOptLevel = OptimizationLevel::O3;
 static const CodeGenOptLevel NativeCodegenLevel = CodeGenOptLevel::Aggressive;
-#endif
 
 struct NativeMapType {
   int64_t type = 0, inner = 0;

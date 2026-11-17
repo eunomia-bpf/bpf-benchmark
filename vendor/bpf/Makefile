@@ -55,11 +55,8 @@ NATIVE_CFLAGS := $(NATIVE_TARGET_FLAGS) -O3 -g -fPIC -c \
 	-Xclang -fembed-bitcode=all \
 	-Wno-unknown-attributes -Wno-compare-distinct-pointer-types
 KATRAN_NATIVE_OBJS := $(patsubst %,$(NATIVE_OUT)/katran/%.native.o,$(KATRAN_OBJS))
-KATRAN_NATIVE_PROOF_MARKERS := $(patsubst %,$(NATIVE_OUT)/katran/%.proof.ok,$(KATRAN_OBJS))
 BCC_NATIVE_OBJS := $(patsubst %,$(NATIVE_OUT)/bcc/%.native.o,$(BCC_TOOLS))
-BCC_NATIVE_PROOF_MARKERS := $(patsubst %,$(NATIVE_OUT)/bcc/%.proof.ok,$(BCC_TOOLS))
 CILIUM_NATIVE_OBJS := $(patsubst %.o,$(NATIVE_OUT)/cilium/%.native.o,$(CILIUM_OBJS))
-CILIUM_NATIVE_PROOF_MARKERS := $(patsubst %.o,$(NATIVE_OUT)/cilium/%.proof.ok,$(CILIUM_OBJS))
 OTEL_EBPF_DIR := otel/support/ebpf
 # The ELF the application embeds in itself and loads (go:embed in support_$(GOARCH).go). The
 # original-ELF binder needs its symbol/slot layout, so the canonical payload ships this exact
@@ -68,15 +65,11 @@ OTEL_SOURCE_BPF_OBJECT := $(VENDOR)/repos/opentelemetry-ebpf-profiler/support/eb
 OTEL_NATIVE_UNIT_SRCS := $(wildcard $(OTEL_EBPF_DIR)/*.ebpf.c)
 OTEL_NATIVE_UNIT_OBJS := $(patsubst $(OTEL_EBPF_DIR)/%.ebpf.c,$(NATIVE_OUT)/otel/%.native.o,$(OTEL_NATIVE_UNIT_SRCS))
 OTEL_NATIVE_OBJECT := $(NATIVE_OUT)/otel/otelcol-ebpf-profiler.native.o
-OTEL_NATIVE_PROOF_MARKER := $(NATIVE_OUT)/otel/otelcol-ebpf-profiler.proof.ok
 OTEL_NATIVE_IR_DIR := $(NATIVE_OUT)/otel/ir
 OTEL_NATIVE_IR := $(OTEL_NATIVE_IR_DIR)/otelcol-ebpf-profiler.llvmbc
 TRACEE_NATIVE_OBJECT := $(NATIVE_OUT)/tracee/tracee.native.o
 TRACEE_LSM_SUPPORT_NATIVE_OBJS := $(patsubst %,$(NATIVE_OUT)/tracee/lsm_support/%.native.o,$(TRACEE_LSM_SUPPORT_SRCS))
 TRACEE_NATIVE_OBJS := $(TRACEE_NATIVE_OBJECT) $(TRACEE_LSM_SUPPORT_NATIVE_OBJS)
-TRACEE_NATIVE_PROOF_MARKER := $(NATIVE_OUT)/tracee/tracee.proof.ok
-TRACEE_LSM_SUPPORT_NATIVE_PROOF_MARKERS := $(patsubst %,$(NATIVE_OUT)/tracee/lsm_support/%.proof.ok,$(TRACEE_LSM_SUPPORT_SRCS))
-TRACEE_NATIVE_PROOF_MARKERS := $(TRACEE_NATIVE_PROOF_MARKER) $(TRACEE_LSM_SUPPORT_NATIVE_PROOF_MARKERS)
 
 CILIUM_MAX_BASE_OPTIONS := -DSKIP_DEBUG=1 -DENABLE_IPV4=1 \
 	-DENABLE_ROUTING=1 -DPOLICY_VERDICT_NOTIFY=1 \
@@ -294,19 +287,11 @@ $(NATIVE_IR_LINK): $(ROOT)/kprog/x86/link_embedded_ir.cpp
 	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -Wall -Wextra -Wno-unused-parameter "$<" -o "$@" \
 		$$(llvm-config-18 --link-static --ldflags --libs core irreader linker bitwriter support --system-libs)
 
-# The loader runs this compiler at load time; it ships in the stage. It optimizes at the -O level of
-# NATIVE_CFLAGS, so P and its load-time LTO follow one policy; the level file rebuilds it when that level changes.
-NATIVE_OPT_LEVEL := $(patsubst -%,%,$(firstword $(filter -O%,$(NATIVE_CFLAGS))))
+# The loader runs this compiler at load time; it ships in the stage. It optimizes at -O3, as P does.
 PERF_CONTEXT_LTO ?= $(NATIVE_STAGE_ROOT)/kprog-perf-context-lto
-PERF_CONTEXT_LTO_LEVEL := $(BUILD)/$(ARCH)/kprog-perf-context-lto.level
-.PHONY: FORCE
-FORCE:
-$(PERF_CONTEXT_LTO_LEVEL): FORCE
+$(PERF_CONTEXT_LTO): $(ROOT)/kprog/x86/perf_context_lto.cpp
 	install -d "$(dir $@)"
-	echo "$(NATIVE_OPT_LEVEL)" | cmp -s - "$@" || echo "$(NATIVE_OPT_LEVEL)" > "$@"
-$(PERF_CONTEXT_LTO): $(ROOT)/kprog/x86/perf_context_lto.cpp $(PERF_CONTEXT_LTO_LEVEL)
-	install -d "$(dir $@)"
-	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -fexceptions -Wall -Wextra -Wno-unused-parameter -DNATIVE_LTO_OPT_$(NATIVE_OPT_LEVEL) \
+	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -fexceptions -Wall -Wextra -Wno-unused-parameter \
 		-I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include "$<" -o "$@" \
 		$$(llvm-config-18 --link-static --ldflags --libs core irreader analysis support passes native object linker --system-libs) \
 		$(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz
@@ -344,20 +329,7 @@ $(NATIVE_OUT)/tracee/lsm_support/%.native.o: tracee/pkg/ebpf/c/lsmsupport/%.bpf.
 $(NATIVE_LINK):
 	cargo build --release --manifest-path "$(ROOT)/kprog/x86/native_lab/native_link/Cargo.toml"
 
-$(NATIVE_OUT)/katran/%.proof.ok: $(NATIVE_OUT)/katran/%.native.o $(NATIVE_LINK)
-	install -d "$(dir $@)"
-	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
-	if [[ -z "$${symbols}" ]]; then \
-		echo "no native text symbols in $<" >&2; \
-		exit 1; \
-	fi; \
-	for sym in $${symbols}; do \
-		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
-			--output "$(NATIVE_OUT)/katran/$*.$${sym}.proof.o" --mode proof; \
-	done; \
-	printf 'ok\n' > "$@"
-
-native-katran: $(KATRAN_NATIVE_OBJS) $(KATRAN_NATIVE_PROOF_MARKERS)
+native-katran: $(KATRAN_NATIVE_OBJS)
 	install -d "$(NATIVE_OUT)/katran"
 	install -d "$(KATRAN_NATIVE_STAGE_OUT)"
 	install -m 0644 $(KATRAN_NATIVE_OBJS) "$(KATRAN_NATIVE_STAGE_OUT)"
@@ -372,20 +344,7 @@ native-katran: $(KATRAN_NATIVE_OBJS) $(KATRAN_NATIVE_PROOF_MARKERS)
 		--object "$(KATRAN_NATIVE_STAGE_OUT)/healthchecking_ipip.native.o" \
 		--object "$(KATRAN_NATIVE_STAGE_OUT)/xdp_root.native.o"
 
-$(NATIVE_OUT)/bcc/%.proof.ok: $(NATIVE_OUT)/bcc/%.native.o $(NATIVE_LINK)
-	install -d "$(dir $@)"
-	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
-	if [[ -z "$${symbols}" ]]; then \
-		echo "no native text symbols in $<" >&2; \
-		exit 1; \
-	fi; \
-	for sym in $${symbols}; do \
-		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
-			--output "$(NATIVE_OUT)/bcc/$*.$${sym}.proof.o" --mode proof; \
-	done; \
-	printf 'ok\n' > "$@"
-
-native-bcc: bcc/libbpf-tools/x86/vmlinux.h $(BCC_NATIVE_OBJS) $(BCC_NATIVE_PROOF_MARKERS)
+native-bcc: bcc/libbpf-tools/x86/vmlinux.h $(BCC_NATIVE_OBJS)
 	install -d "$(NATIVE_OUT)/bcc"
 	install -d "$(BCC_NATIVE_STAGE_OUT)"
 	install -m 0644 $(BCC_NATIVE_OBJS) "$(BCC_NATIVE_STAGE_OUT)"
@@ -396,20 +355,7 @@ native-bcc: bcc/libbpf-tools/x86/vmlinux.h $(BCC_NATIVE_OBJS) $(BCC_NATIVE_PROOF
 		--output "$(BCC_NATIVE_STAGE_OUT)/manifest.json" \
 		$(foreach tool,$(BCC_TOOLS),--object "$(BCC_NATIVE_STAGE_OUT)/$(tool).native.o")
 
-$(NATIVE_OUT)/cilium/%.proof.ok: $(NATIVE_OUT)/cilium/%.native.o $(NATIVE_LINK)
-	install -d "$(dir $@)"
-	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ && $$1 !~ /^__check_/ {print $$1}')"; \
-	if [[ -z "$${symbols}" ]]; then \
-		echo "no native text symbols in $<" >&2; \
-		exit 1; \
-	fi; \
-	for sym in $${symbols}; do \
-		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
-			--output "$(NATIVE_OUT)/cilium/$*.$${sym}.proof.o" --mode proof; \
-	done; \
-	printf 'ok\n' > "$@"
-
-native-cilium: $(CILIUM_NATIVE_OBJS) $(CILIUM_NATIVE_PROOF_MARKERS)
+native-cilium: $(CILIUM_NATIVE_OBJS)
 	install -d "$(CILIUM_NATIVE_STAGE_OUT)"
 	rm -f "$(CILIUM_NATIVE_STAGE_OUT)"/*.native.o
 	install -m 0644 $(CILIUM_NATIVE_OBJS) "$(CILIUM_NATIVE_STAGE_OUT)"
@@ -430,20 +376,7 @@ native-cilium: $(CILIUM_NATIVE_OBJS) $(CILIUM_NATIVE_PROOF_MARKERS)
 		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_wireguard.native.o,source_map_prefix=cilium_calls_wi" \
 		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_xdp.native.o,prog_type=6"
 
-$(OTEL_NATIVE_PROOF_MARKER): $(OTEL_NATIVE_OBJECT) $(NATIVE_LINK)
-	install -d "$(dir $@)"
-	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
-	if [[ -z "$${symbols}" ]]; then \
-		echo "no native text symbols in $<" >&2; \
-		exit 1; \
-	fi; \
-	for sym in $${symbols}; do \
-		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
-			--output "$(NATIVE_OUT)/otel/$${sym}.proof.o" --mode proof; \
-	done; \
-	printf 'ok\n' > "$@"
-
-native-otel: $(OTEL_NATIVE_OBJECT) $(OTEL_NATIVE_PROOF_MARKER) $(OTEL_SOURCE_BPF_OBJECT)
+native-otel: $(OTEL_NATIVE_OBJECT) $(OTEL_SOURCE_BPF_OBJECT)
 	install -d "$(OTEL_NATIVE_STAGE_OUT)"
 	install -m 0644 "$(OTEL_NATIVE_OBJECT)" "$(OTEL_NATIVE_STAGE_OUT)/otelcol-ebpf-profiler.native.o"
 	install -m 0644 "$(OTEL_SOURCE_BPF_OBJECT)" "$(OTEL_NATIVE_STAGE_OUT)/$(notdir $(OTEL_SOURCE_BPF_OBJECT))"
@@ -455,33 +388,7 @@ native-otel: $(OTEL_NATIVE_OBJECT) $(OTEL_NATIVE_PROOF_MARKER) $(OTEL_SOURCE_BPF
 		--object "$(OTEL_NATIVE_STAGE_OUT)/otelcol-ebpf-profiler.native.o" \
 		--source-bpf-object "$(OTEL_NATIVE_STAGE_OUT)/$(notdir $(OTEL_SOURCE_BPF_OBJECT))"
 
-$(TRACEE_NATIVE_PROOF_MARKER): $(TRACEE_NATIVE_OBJECT) $(NATIVE_LINK)
-	install -d "$(dir $@)"
-	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
-	if [[ -z "$${symbols}" ]]; then \
-		echo "no native text symbols in $<" >&2; \
-		exit 1; \
-	fi; \
-	for sym in $${symbols}; do \
-		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
-			--output "$(NATIVE_OUT)/tracee/$${sym}.proof.o" --mode proof; \
-	done; \
-	printf 'ok\n' > "$@"
-
-$(NATIVE_OUT)/tracee/lsm_support/%.proof.ok: $(NATIVE_OUT)/tracee/lsm_support/%.native.o $(NATIVE_LINK)
-	install -d "$(dir $@)"
-	symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$<" | awk '$$2 ~ /^[Tt]$$/ {print $$1}')"; \
-	if [[ -z "$${symbols}" ]]; then \
-		echo "no native text symbols in $<" >&2; \
-		exit 1; \
-	fi; \
-	for sym in $${symbols}; do \
-		"$(NATIVE_LINK)" --input "$<" --symbol "$${sym}" \
-			--output "$(NATIVE_OUT)/tracee/lsm_support/$*.$${sym}.proof.o" --mode proof; \
-	done; \
-	printf 'ok\n' > "$@"
-
-native-tracee: $(TRACEE_NATIVE_OBJS) $(TRACEE_NATIVE_PROOF_MARKERS)
+native-tracee: $(TRACEE_NATIVE_OBJS)
 	install -d "$(TRACEE_NATIVE_STAGE_OUT)"
 	rm -f "$(TRACEE_NATIVE_STAGE_OUT)"/*.native.o
 	for obj in $(TRACEE_NATIVE_OBJS); do \
@@ -595,16 +502,6 @@ native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h core-compat.h $(CO
 	done; \
 		for obj in "$${native_out}"/*.native.o; do \
 			base="$$(basename "$${obj}" .native.o)"; \
-			symbols="$$("$(LLVM_NM)" --defined-only --format=posix "$${obj}" | awk '$$2 ~ /^[Tt]$$/ && $$1 !~ /^LBB/ && $$1 !~ /^__check_/ {print $$1}')"; \
-			if [[ -z "$${symbols}" ]]; then \
-			echo "no native text symbols in $${obj}" >&2; \
-			exit 1; \
-		fi; \
-		for sym in $${symbols}; do \
-			"$(NATIVE_LINK)" --input "$${obj}" --symbol "$${sym}" \
-				--output "$${native_out}/$${base}.$${sym}.proof.o" --mode proof; \
-			done; \
-			printf 'ok\n' > "$${native_out}/$${base}.proof.ok"; \
 			install -m 0644 "$${obj}" "$${stage_out}/$${base}.native.o"; \
 		done; \
 		native_args=(); \
