@@ -19,8 +19,10 @@ wanted = {'bpf_get_current_task', 'bpf_get_current_task_btf',
 counts = collections.defaultdict(collections.Counter)
 examples = {}
 programs = collections.defaultdict(set)
+emission_entries = collections.defaultdict(collections.Counter)
 for entry in entries:
     counts[entry['app']]
+    entry_names = set()
     helpers = collections.defaultdict(list)
     for helper in json.loads(Path(entry['plan']).read_text())['helpers']:
         helpers[helper['addr']].append(helper['name'])
@@ -32,6 +34,7 @@ for entry in entries:
         if kind != 1 or not names:
             continue
         name = '/'.join(sorted(names))
+        entry_names.add(name)
         counts[entry['app']][name] += 1
         programs[(entry['app'], name)].add(entry['symbol'])
         key = (entry['app'], name)
@@ -45,10 +48,13 @@ for entry in entries:
                                  blob=str(blob), relocations=str(relocs), offset=offset,
                                  helper_aliases=sorted(helpers[target]),
                                  disassembly=assembly[max(0, index-2):index+4])
+    for name in entry_names:
+        emission_entries[entry['app']][name] += 1
 result = dict(recorded_utc=subprocess.check_output(['date', '-u', '+%FT%TZ'], text=True).strip(),
               source_inventory=str(inventory), emitted_entries=len(entries),
               scope='External CALL relocations in historical host outputs; static per-entry sites can repeat shared source callees. No dynamic-frequency or current-image claim.',
               external_calls_by_app=dict(counts),
+              emission_entries_with_calls_by_app=dict(emission_entries),
               represented_programs=[dict(app=app, helper=name, distinct_entry_symbols=len(values))
                                     for (app, name), values in programs.items()],
               examples=list(examples.values()))

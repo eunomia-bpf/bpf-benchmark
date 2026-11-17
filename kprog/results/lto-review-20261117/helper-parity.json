@@ -1,5 +1,5 @@
 {
-  "recorded_utc": "2026-11-17T09:57:48Z",
+  "recorded_utc": "2026-11-17T10:17:51Z",
   "source_inventory": "/workspaces/repository/kprog/results/host-link-replay-20261116/emission-report.json",
   "emitted_entries": 239,
   "scope": "External CALL relocations in historical host outputs; static per-entry sites can repeat shared source callees. No dynamic-frequency or current-image claim.",
@@ -32,6 +32,37 @@
       "bpf_get_current_task_btf": 121,
       "bpf_get_current_uid_gid": 514,
       "bpf_get_current_comm": 515
+    }
+  },
+  "emission_entries_with_calls_by_app": {
+    "bcc": {
+      "bpf_get_current_pid_tgid": 15,
+      "bpf_get_current_comm": 8,
+      "__native_x86_ktime_get_mono_fast_ns": 11,
+      "bpf_get_current_uid_gid": 9
+    },
+    "cilium": {
+      "__native_x86_ktime_get_mono_fast_ns": 20,
+      "bpf_jiffies64": 16
+    },
+    "katran": {
+      "__native_x86_ktime_get_mono_fast_ns": 1
+    },
+    "otelcol-ebpf-profiler": {
+      "bpf_get_current_pid_tgid": 3,
+      "__native_x86_ktime_get_mono_fast_ns": 4,
+      "bpf_get_current_comm": 2
+    },
+    "tetragon": {
+      "bpf_ktime_get_boot_ns": 2,
+      "bpf_get_current_pid_tgid": 2
+    },
+    "tracee": {
+      "bpf_get_current_comm": 132,
+      "bpf_ktime_get_boot_ns": 125,
+      "bpf_get_current_uid_gid": 132,
+      "bpf_get_current_task_btf": 109,
+      "bpf_get_current_pid_tgid": 136
     }
   },
   "represented_programs": [

@@ -1,6 +1,6 @@
 {
-  "recorded_utc": "2026-11-17T09:56:45Z",
-  "scope": "Draft WIP source-byte accounting at read time, original sole-kernel disassembly and arithmetic examples. No native candidate generated/patched/assembled/executed, no installed/per-call result or new check. Counts describe this literal builder, not later revisions.",
+  "recorded_utc": "2026-11-17T10:17:51Z",
+  "scope": "Literal emitter source-byte accounting at read time, original sole-kernel disassembly and arithmetic examples. No native candidate generated/patched/assembled/executed, no installed/per-call result or new check. Counts describe this literal builder, not later revisions.",
   "source": "kprog/x86/native_lab/native_link/src/x86_ktime.rs",
   "source_parts_bytes": {
     "literal_arrays": 144,
@@ -41,5 +41,26 @@
       "masked": "0xffffffffffffffff",
       "same": true
     }
-  ]
+  ],
+  "source_history_commit": "4c32e2ac1",
+  "source_working_changes": [],
+  "historical_emission_body_budget": {
+    "scope": "One body per retained emission with a target call, assuming clock eligibility. Not current loaded-program counts, an installed result or a gate.",
+    "entries_with_target_call": {
+      "bcc": 11,
+      "cilium": 20,
+      "katran": 1,
+      "otelcol-ebpf-profiler": 4,
+      "tetragon": 0,
+      "tracee": 0
+    },
+    "body_bytes_if_each_emission_gets_the_current_literal_body": {
+      "bcc": 3751,
+      "cilium": 6820,
+      "katran": 341,
+      "otelcol-ebpf-profiler": 1364,
+      "tetragon": 0,
+      "tracee": 0
+    }
+  }
 }

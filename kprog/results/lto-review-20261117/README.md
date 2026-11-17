@@ -3756,3 +3756,67 @@ row alone adds no unwind-counter equality proof. The complete raw run
 and series remain retained; no admission rule, rejection or new run was
 introduced. The coordinator's breadth round continues with BCC and the
 remaining apps in its committed order.
+
+
+### Clock publication review: binding, cache and per-emission code budget
+
+The coordinator published source `4c32e2ac1` and queue recipe `2ac7d9d41`.
+The literal clock builder remains **341 B**, matching the reviewed draft;
+the updated [source counter](clock_review_inventory.py) records the source
+history revision and working changes in [clock-review.json](clock-review.json).
+This is source publication, not an image or installed-clock receipt.
+The coordinator records 41 linker checks and 15 host vectors; PERF did
+not repeat them or execute a native candidate.
+
+Read-only integration inspection found the expected existing wiring:
+
+- `native_loader.cpp:1445–1489` includes the clock symbols in its wanted
+  kallsyms table; `kallsyms_lookup` returns zero for a missing optional
+  name. The list is not a newly required all-symbols load check.
+- `native_loader_link_plan.hpp:124–138` resolves the layout from running
+  vmlinux BTF and live kallsyms. The new addresses are live boot facts,
+  not old link-time addresses requiring a second KASLR adjustment.
+- The writer serializes the full layout at line 163, and
+  `native_loader.cpp:3132` includes that string in the existing cache key.
+  Optional clock fields therefore participate without a separate cache.
+- The code reads current pvclock flags and scale data, timekeeper values,
+  and the current PREEMPT_DYNAMIC trampoline. The cached layout contains
+  addresses/offsets, not a cached timestamp or stable-flag value.
+
+Source coverage is narrower than generic clock usage. The share function
+matches relocations to the monotonic-fast target; `runtime_call_target`
+only retargets get_ns. Its boot-clock sibling retains the existing
+kernel call. Recipe `2ac7d9d41` queues BCC, Katran and Tracee after the
+breadth round. In the retained cohort, Tracee's 158 clock sites are
+boot-clock sites and none match this new monotonic target. That makes
+the queued Tracee slot an unchanged-clock-path comparison unless the
+current rebuilt inputs or another joined change differ. This finding
+does not change the coordinator's queue or add a control requirement.
+
+The extended [helper census](helper-parity.json) now records **emission
+entries with a call**, separately from total call sites and distinct
+entry-symbol names. A source symbol can appear in several linked outputs;
+Cilium has 20 target-bearing emission entries but only 15 such names.
+Each output can receive one body, regardless of how many calls it has.
+
+| Historical app cohort | Target clock sites | Emission entries with target | 341-B body budget for those outputs |
+| --- | ---: | ---: | ---: |
+| BCC | 13 | 11 | 3,751 B |
+| Cilium | 115 | 20 | 6,820 B |
+| Katran | 8 | 1 | 341 B |
+| OTel | 7 | 4 | 1,364 B |
+| Tetragon | 0 | 0 | 0 |
+| Tracee | 0 | 0 | 0 |
+
+The last column is a **historical-output source budget assuming eligibility**,
+not an installed prediction for the current app. Source cohorts, actual
+load multiplicity, optional facts and subsequent code revisions can
+differ. It avoids multiplying a shared body by every call or treating
+one function name as one runtime program. The existing range/installed
+receipts can describe the actual new image when it is built; no extra
+capture or admission rule is requested.
+
+The published code retains the earlier ordered-TSC and provider-diagnostic
+questions, and the all-ones KVM mask fold remains a source opportunity.
+It has not joined the running breadth image. PERF changed only this
+review directory and preserved the queued publication and all raw runs.
