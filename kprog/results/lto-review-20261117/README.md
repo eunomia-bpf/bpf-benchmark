@@ -41,6 +41,7 @@ whether LTO work earns its footprint.
 | 8 | Exact hash key length stops before the LTO plan | Katran, BCC, OTel hash sites | Current JIT/native use the same runtime-length kernel lookup. Exact-shape specialization remains a distinct, unmeasured opportunity; the copied-hash comparison did not test a separately specialized function per proven key length. |
 | 9 | Current-task BTF and jiffies helpers retain calls the JIT removes | Tracee, Cilium | Remove a call/return per executed covered site. Historical outputs have 121/91 static calls; dynamic importance is unknown, and inline loads can grow installed text. |
 | 10 | Large known memory lengths become unknown at the unroll cutoff | OTel zero-fill example; other sites unmeasured | Preserve the known count in a compact loop and fixed tail. Retained 668-byte zero-fill uses 190 helper instructions; no current cycle cost or candidate gain is established. |
+| 11 | Generated read/LPM branches keep near encodings within short range | OTel demonstrated; other apps with these routines | Static local opportunities are 70 B in the captured user-read routine and 41 B in historical LPM. Instruction/branch counts stay the same; fetch/cache benefit and app installed-size effect remain unmeasured. |
 
 Tetragon's prior native load failure is **fixed in the retained corrected-image
 check**; it is discussed separately below. It should not be ranked as a
@@ -1385,3 +1386,68 @@ measured per-call improvement is predicted from its setup-only source use.
 Do not broaden name/length exclusions or count its B as generated/passing
 without actual artifacts. The completed app and timing results stay as
 recorded, with this coverage qualification and no added run gate.
+
+## 12. Generated helper branches retain avoidable rel32 width
+
+2026-11-17T04:26:36Z review at 011950744. The original native function
+encoder already has branch sizing (`x86.rs:804–806`). This finding concerns
+the separately constructed helper byte vectors, rather than all native
+branches. `append_x86_jcc_rel32` at 3775–3779 always reserves six bytes;
+`patch_x86_rel32` only fills its displacement. Probe reads use it for
+copy, cleanup and fault branches, with unconditional five-byte E9 branches
+from `x86_probe_read.rs:11–15`. LPM uses the same conditional emitter and
+its own E9 builder. These routines are appended after ordinary function
+encoding (`x86.rs:1627,1809–1819`); the later load-site decoder at 1905–1912
+does not resize them.
+
+The retained bytes contain internal branches which fit signed rel8 even
+if only that one instruction shrinks. No candidate has been emitted:
+
+| Existing routine | Bytes | Near conditional/unconditional branches | Independently shortenable conditional/unconditional branches | Local branch bytes removable before alignment/layout effects |
+|---|---:|---:|---:|---:|
+| Captured 4/2/1 user-read fixture | 380 | 19 / 2 | 16 / 2 | 70 |
+| Historical OTel user-read routine | 326 | 16 / 2 | 13 / 2 | 58 |
+| Historical OTel LPM routine | 330 | 12 / 4 | 8 / 3 | 41 |
+
+For example, in the 380-byte fixture, JE at 0x66 targets 0x6f and carries
+a three-byte displacement in a six-byte instruction. JAE at 0xa4 targets
+0x87 with displacement -35; replacing only that branch with its two-byte
+form leaves displacement -31. The conditions and destinations do not
+change. Sixteen such conditional branches account for 64 B, and two
+internal E9 branches account for another 6 B. This is static encoding
+arithmetic, not a 70-byte installed-image measurement or a cycle saving.
+Further compaction could bring other branches into range; it is not
+included in the table.
+
+`branch_width_inventory.py` reads the existing fixture capture and one
+retained OTel blob, decodes that blob once, and records exact candidate
+offsets/destinations in `branch-widths.json`. It changes no instruction
+bytes. The historical 67-byte runtime ARRAY routine and three known ARRAY
+ranges have no near-branch candidates under this count; ARRAY already uses
+short local branches. Thus this is not a reason to rework all map routines.
+CALL rel32 sites are counted separately and preserved.
+
+The kernel JIT already chooses short conditional/unconditional encodings
+when distance fits (`arch/x86/net/bpf_jit_comp.c:2608–2635,2693–2720`).
+Its final-pass jump padding can retain bytes for convergence, so these
+source rules alone do not prove that a matched JIT program has smaller
+installed bytes. The native linker also already has rel8 emit/patch helpers
+at `x86.rs:4094–4108`; missing instruction support is not the obstacle.
+
+One routine-local sizing step can use existing encoding machinery before
+publishing offsets. It must remap internal branch labels, external helper
+relocation offsets, returned code ranges and probe-recovery load-site
+offsets together. Preserve the existing E8 helper slot contract; changing
+an external transfer's encoding to save bytes is a different ABI issue.
+Probe source instruction lengths and R11 recovery destinations must still
+describe the actual faulting loads. Applying a blind byte splice to a
+finished blob would leave those offsets wrong. No new runtime test or
+refusal is proposed.
+
+This ranks below eliminating read/map instructions. Dynamic branch count,
+helper work and call depth remain unchanged; the possible per-call effect
+is from a smaller fetch/cache footprint and needs measurement. The local
+70 B and 41 B opportunities recur only where these generated routines are
+actually present. They are not multiplied by static call sites: calls in
+one program already share each routine. App installed bytes and per-call
+effect remain unmeasured. Implementation stays with the coordinator.

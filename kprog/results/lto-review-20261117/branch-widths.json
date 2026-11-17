@@ -1,0 +1,539 @@
+{
+  "recorded_utc": "2026-11-17T04:26:13Z",
+  "scope": "Static branch widths in existing generated code ranges. Candidates fit signed rel8 when each is shrunk in isolation. No candidate bytes emitted, cycle estimate, installed-image size, or whole-image saving is claimed. External transfers, CALL slots, fault sites and relocations require their existing contracts.",
+  "artifacts": [
+    {
+      "artifact": "captured 4/2/1 user-read fixture",
+      "source": "/workspaces/kprog-raw/perf/20261117-remainder-review/user-fixture.json",
+      "routines": [
+        {
+          "piece": "user_probe_read",
+          "start": 0,
+          "end": 380,
+          "bytes": 380,
+          "counts": {
+            "near_conditional": 19,
+            "call_rel32_slots_preserved": 1,
+            "shortenable_conditional": 16,
+            "local_bytes_removable": 70,
+            "near_unconditional": 2,
+            "shortenable_unconditional": 2
+          },
+          "independently_shortenable": [
+            {
+              "offset": 102,
+              "operation": "je",
+              "target": 111,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 3,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 129,
+              "operation": "jb",
+              "target": 170,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 35,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 141,
+              "operation": "je",
+              "target": 267,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 120,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 164,
+              "operation": "jae",
+              "target": 135,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": -31,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 173,
+              "operation": "jb",
+              "target": 203,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 24,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 184,
+              "operation": "je",
+              "target": 267,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 77,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 206,
+              "operation": "jb",
+              "target": 238,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 26,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 218,
+              "operation": "je",
+              "target": 267,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 43,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 240,
+              "operation": "je",
+              "target": 260,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 14,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 252,
+              "operation": "je",
+              "target": 267,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 9,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 262,
+              "operation": "jmp",
+              "target": 274,
+              "current_length": 5,
+              "displacement_if_only_this_branch_shrinks": 7,
+              "bytes_removable": 3
+            },
+            {
+              "offset": 277,
+              "operation": "je",
+              "target": 286,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 3,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 295,
+              "operation": "je",
+              "target": 370,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 69,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 301,
+              "operation": "jmp",
+              "target": 313,
+              "current_length": 5,
+              "displacement_if_only_this_branch_shrinks": 7,
+              "bytes_removable": 3
+            },
+            {
+              "offset": 324,
+              "operation": "jb",
+              "target": 349,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 19,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 343,
+              "operation": "jae",
+              "target": 330,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": -15,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 351,
+              "operation": "je",
+              "target": 370,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 13,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 364,
+              "operation": "jne",
+              "target": 357,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": -9,
+              "bytes_removable": 4
+            }
+          ],
+          "other_near_branches": [
+            {
+              "offset": 24,
+              "operation": "jb",
+              "target": 306,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 276
+            },
+            {
+              "offset": 43,
+              "operation": "ja",
+              "target": 306,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 257
+            },
+            {
+              "offset": 56,
+              "operation": "je",
+              "target": 306,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 244
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "artifact": "historical OTel typed-inner host emission",
+      "source": "/workspaces/kprog-raw/perf/20261116-inner-array-lto/libbpf/otel-typed.blob",
+      "routines": [
+        {
+          "piece": "known_array",
+          "start": 28732,
+          "end": 28764,
+          "bytes": 32,
+          "counts": {},
+          "independently_shortenable": [],
+          "other_near_branches": []
+        },
+        {
+          "piece": "known_array",
+          "start": 28764,
+          "end": 28796,
+          "bytes": 32,
+          "counts": {},
+          "independently_shortenable": [],
+          "other_near_branches": []
+        },
+        {
+          "piece": "known_array",
+          "start": 28796,
+          "end": 28823,
+          "bytes": 27,
+          "counts": {},
+          "independently_shortenable": [],
+          "other_near_branches": []
+        },
+        {
+          "piece": "runtime_array",
+          "start": 29687,
+          "end": 29754,
+          "bytes": 67,
+          "counts": {
+            "call_rel32_slots_preserved": 1
+          },
+          "independently_shortenable": [],
+          "other_near_branches": []
+        },
+        {
+          "piece": "probe_read",
+          "start": 29754,
+          "end": 30080,
+          "bytes": 326,
+          "counts": {
+            "near_conditional": 16,
+            "call_rel32_slots_preserved": 1,
+            "shortenable_conditional": 13,
+            "local_bytes_removable": 58,
+            "near_unconditional": 2,
+            "shortenable_unconditional": 2
+          },
+          "independently_shortenable": [
+            {
+              "offset": 29856,
+              "operation": "je",
+              "target": 29865,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 3,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 29883,
+              "operation": "jb",
+              "target": 29924,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 35,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 29895,
+              "operation": "je",
+              "target": 29967,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 66,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 29918,
+              "operation": "jae",
+              "target": 29889,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": -31,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 29926,
+              "operation": "je",
+              "target": 29960,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 28,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 29938,
+              "operation": "je",
+              "target": 29967,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 23,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 29954,
+              "operation": "jne",
+              "target": 29932,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": -24,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 29962,
+              "operation": "jmp",
+              "target": 29974,
+              "current_length": 5,
+              "displacement_if_only_this_branch_shrinks": 7,
+              "bytes_removable": 3
+            },
+            {
+              "offset": 29977,
+              "operation": "je",
+              "target": 29986,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 3,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 29995,
+              "operation": "je",
+              "target": 30070,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 69,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 30001,
+              "operation": "jmp",
+              "target": 30013,
+              "current_length": 5,
+              "displacement_if_only_this_branch_shrinks": 7,
+              "bytes_removable": 3
+            },
+            {
+              "offset": 30024,
+              "operation": "jb",
+              "target": 30049,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 19,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 30043,
+              "operation": "jae",
+              "target": 30030,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": -15,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 30051,
+              "operation": "je",
+              "target": 30070,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 13,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 30064,
+              "operation": "jne",
+              "target": 30057,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": -9,
+              "bytes_removable": 4
+            }
+          ],
+          "other_near_branches": [
+            {
+              "offset": 29778,
+              "operation": "jb",
+              "target": 30006,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 222
+            },
+            {
+              "offset": 29797,
+              "operation": "ja",
+              "target": 30006,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 203
+            },
+            {
+              "offset": 29810,
+              "operation": "je",
+              "target": 30006,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 190
+            }
+          ]
+        },
+        {
+          "piece": "lpm_lookup",
+          "start": 30080,
+          "end": 30410,
+          "bytes": 330,
+          "counts": {
+            "near_conditional": 12,
+            "shortenable_conditional": 8,
+            "local_bytes_removable": 41,
+            "near_unconditional": 4,
+            "shortenable_unconditional": 3,
+            "call_rel32_slots_preserved": 1
+          },
+          "independently_shortenable": [
+            {
+              "offset": 30172,
+              "operation": "jae",
+              "target": 30221,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 43,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 30241,
+              "operation": "je",
+              "target": 30261,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 14,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 30256,
+              "operation": "jmp",
+              "target": 30321,
+              "current_length": 5,
+              "displacement_if_only_this_branch_shrinks": 60,
+              "bytes_removable": 3
+            },
+            {
+              "offset": 30265,
+              "operation": "jbe",
+              "target": 30316,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 45,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 30287,
+              "operation": "je",
+              "target": 30306,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 13,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 30301,
+              "operation": "jmp",
+              "target": 30321,
+              "current_length": 5,
+              "displacement_if_only_this_branch_shrinks": 15,
+              "bytes_removable": 3
+            },
+            {
+              "offset": 30311,
+              "operation": "jmp",
+              "target": 30321,
+              "current_length": 5,
+              "displacement_if_only_this_branch_shrinks": 5,
+              "bytes_removable": 3
+            },
+            {
+              "offset": 30331,
+              "operation": "je",
+              "target": 30373,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 36,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 30340,
+              "operation": "jb",
+              "target": 30376,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 30,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 30356,
+              "operation": "jne",
+              "target": 30365,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 3,
+              "bytes_removable": 4
+            },
+            {
+              "offset": 30379,
+              "operation": "je",
+              "target": 30393,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 8,
+              "bytes_removable": 4
+            }
+          ],
+          "other_near_branches": [
+            {
+              "offset": 30090,
+              "operation": "jne",
+              "target": 30396,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 300
+            },
+            {
+              "offset": 30104,
+              "operation": "jne",
+              "target": 30396,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 286
+            },
+            {
+              "offset": 30124,
+              "operation": "ja",
+              "target": 30393,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 263
+            },
+            {
+              "offset": 30143,
+              "operation": "je",
+              "target": 30376,
+              "current_length": 6,
+              "displacement_if_only_this_branch_shrinks": 227
+            },
+            {
+              "offset": 30368,
+              "operation": "jmp",
+              "target": 30140,
+              "current_length": 5,
+              "displacement_if_only_this_branch_shrinks": -230
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
