@@ -66,7 +66,20 @@ PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are 
 - [ ] 3. 代码量（perf）：装进去的原生 / JIT 现在 0.69–1.09，目标一半。每个程序各带一份叶子例程（Tetragon 288 个程序）是最大的一块；其次是跳转 rel8、共用清零尾部、disp8。
 - [ ] 4. verified 路径（omp 或 perf）：每个应用最热程序的 B 生成和 stock 验证（OTel 栈帧 784 > 512，Katran 超过 1M 指令，OTel 的 B 编译 1.13 GB）。
 - [ ] 5. 11-11 重启时丢掉的修复（omp）：kprog/results/restart-fixes-20261117 里 13 个修复类提交逐条对照当前代码，按整类补回；冻结路径里需要加行的先记在这里。
+  omp 2026-11-17T12:10Z：13 条逐条对过当前代码，结论表在 kprog/results/restart-fixes-20261117/README.md。已补回：cfa82fc7f 的 x86.rs 一半（8273b93af，先写失败测试）。其余需在冻结路径加行，按整类列在下面，加行前不改代码：
+  (a) 内核符号扫描快路径（8b36bf31f）+ 只在该程序需要时才扫（13c6725a9）：native_loader.cpp:1418-1483 线性 sscanf/strcmp 扫 /proc/kallsyms 44 万行，实测每次启动 457–473 ms，8b36bf31f 的 unordered_set<string_view>+from_chars 版本 286–292 ms（同 108 个符号），每次启动多付约 170 ms；调用点 native_loader_link_schema.hpp:71,72,84,100,131、native_loader_link_plan.hpp:134。
+  (b) verifier 日志段保留（56965bf5b、e189b3a87）：native_loader.cpp:1163-1171 只留 8192 字节尾部，且把内嵌 NUL 原样 append；原做法把 NUL 换成换行并保留完整日志。
+  (c) b83eef4a6 的跳过而不是失败：native_loader.cpp:2957-2960 又对超出 map value_size 的符号 fail（应为 continue，且用 off >= size || st_size > size - off 防回绕）。Tracee .rodata.str1.1 是这一类的实例。
+  (d) cfa82fc7f 的装载器一半：native_loader_data_layout.hpp 的 native_data_symbol_offset 没有 local_readonly 参数，native_loader.cpp:2910-2977 缺 STB_LOCAL + .rodata 段的判定。
+  (e) deeee301e 的 original_map_ids 源资源过滤：native_loader.cpp:3572-3602 的 trusted 提交循环无过滤（现按每个符号的 map_addr_ids 查），Python 侧已回。
+  (f) c52568758 的 native_loads_inflight/native_bound_completed 两个计数（bpfopt/shim/libbpfrejit_shim.c:1166 只发 ok/progs；runner/libs/rejit.py:314-360 只读这两个字段），以及 9962aec5e 的 requires_bound_proof / fatal_reason 判定（shim_native_loader.h:310-328 失败后只记日志）。
+  (g) 3d0e584b5 的 source_tail_call_maps：现由 companion.has_tail_call + create_tail_call_marker_map + NATIVE_LAB_RELOC_X86_TAIL_COUNT 承担（native_loader.cpp:1065,1073,2201,3060,3421,4023），补前先确认仍缺东西。
+  不补：14df099f5（arm64 目标集，x86 KVM 不量）、1508a2e58（kprog/tv 已不存在）、f197f00a9/a7c4192c2（证明采集文件已不存在，仅 write_binary_file 形状差异，无行为影响）。9220b9b44 全部在，7734afc52/c03737bf4 的 fallback 在。
 - [ ] 6. 证明迁移 M5–M6（formal）：照 formal/prompt.md 的顺序。
+- [x] 7. 正式轮全部六个应用跑完（kprog/results/breadth-20261117/summary.txt，逐应用提交，镜像 fc7c4707，冻结入口 3 × 180 秒，stats 关）：OTel 1.053x、BCC 0.998x、Cilium 2.819x（两臂开关不同，不计）、Tetragon 1.042x、Tracee 0.886x、Katran 1.086x；装进去的原生 / JIT 0.69–1.09（Katran 0.69、Cilium 0.83、Tetragon 0.84、Tracee 0.85、OTel 0.81、BCC 1.09）。
+  - Tracee 0.886x（每样本 0.719、0.880、0.945）是在 loadavg 9.04–12.05 下跑的：run 前 lean 97.2%、cc1 93.3%、lake 32.5%（formal 的 Lake 构建），run 后降到 23.7。同一镜像上单独重跑 Tracee 再定它是否跌破 0.948x 底线；现在不当地板失守。
+  - Katran 的 errors 2 121 429 769 是应用自己的 fatcat 计数行（每样本约 1.0e8，应用 Result: OK，corpus status=ok），不是失败；per-sample 0.754、1.101、1.237 波动大，1.086x 只作参考。
+  - Tetragon 装进去 288 个程序，per-程序 2472912 B 原生 / 2078688 B JIT；第 3 项（代码量）的最大一块仍在这里。
 每完成一项在本块打 [x] 并写提交号；新发现的事项加在本块末尾。
 
 **协调者 2026-11-17T10:19:33Z（正式轮前两个应用、Cilium 两臂差别的来源、下一批）**：
