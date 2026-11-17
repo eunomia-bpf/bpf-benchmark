@@ -5,7 +5,7 @@ use std::collections::VecDeque;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub(super) struct Routine {
     copy: bool,
-    length: Option<u16>,
+    length: Option<u64>,
     zero: bool,
 }
 
@@ -30,9 +30,7 @@ impl Routine {
         };
         let length = constants
             .and_then(|c| c.get(&Register::RDX))
-            .copied()
-            .filter(|&n| n <= 512)
-            .map(|n| n as u16);
+            .copied();
         let zero = !copy
             && constants
                 .and_then(|c| c.get(&Register::RSI))
@@ -94,9 +92,25 @@ impl Routine {
             }
         }
         if let Some(length) = self.length {
+            // The existing unroll cutoff selects layout, not whether a count is known.
+            let remainder = if length > 512 {
+                let blocks = length / 32;
+                if let Ok(short) = u32::try_from(blocks) {
+                    b.push(0xb9); b.extend_from_slice(&short.to_le_bytes()); // mov ecx,blocks
+                } else {
+                    b.extend_from_slice(&[0x48,0xb9]); b.extend_from_slice(&blocks.to_le_bytes());
+                }
+                let loop32 = b.len();
+                for offset in [0,8,16,24] { self.word(&mut b,offset,8); }
+                self.advance(&mut b,32);
+                b.extend_from_slice(&[0x48,0xff,0xc9]); // dec rcx (positive known block count)
+                let again = append_x86_jcc_rel32(&mut b,0x85);
+                patch_x86_rel32(&mut b,again,loop32)?;
+                (length % 32) as u32
+            } else { length as u32 };
             let mut offset = 0;
             for width in [8, 4, 2, 1] {
-                while u32::from(length) - offset >= u32::from(width) {
+                while remainder - offset >= u32::from(width) {
                     self.word(&mut b, offset, width);
                     offset += u32::from(width);
                 }
@@ -385,7 +399,8 @@ mod tests {
         #[test]
         fn memory_routines_execute_unaligned_boundaries_fill_and_return() -> Result<()> {
             let lengths: Vec<usize> = (0..=65)
-                .chain([127, 128, 129, 367, 368, 369, 511, 512, 513, 4096, 17111])
+                .chain(513..=575)
+                .chain([127, 128, 129, 367, 368, 369, 511, 512, 668, 4096, 17111])
                 .collect();
             for copy in [false, true] {
                 for specialized in [false, true] {
@@ -393,10 +408,13 @@ mod tests {
                         for zero in [false, true].into_iter().filter(|z| !copy || !z) {
                             let routine = Routine {
                                 copy,
-                                length: (specialized && length <= 512).then_some(length as u16),
+                                length: specialized.then_some(length as u64),
                                 zero,
                             };
                             let bytes = routine.bytes()?;
+                            if let Some(out) = std::env::var_os("NATIVE_LINK_MEMORY_TEST_OUTPUT") {
+                                fs::write(std::path::Path::new(&out).join(format!("{}.bin",routine.name())),&bytes)?;
+                            }
                             let code = Mapping::code(&bytes);
                             let f: unsafe extern "C" fn(*mut u8, usize, usize) -> *mut u8 =
                                 unsafe { std::mem::transmute(code.address) };
@@ -470,7 +488,7 @@ mod tests {
 
         #[test]
         fn memory_routines_do_not_read_or_write_past_guard_page() -> Result<()> {
-            for length in (0..=65).chain([127, 128, 129, 367, 368, 369, 511, 512, 513, 4096]) {
+            for length in (0..=65).chain(513..=575).chain([127, 128, 129, 367, 368, 369, 511, 512, 668, 4095, 4096]) {
                 let source = Mapping::new(8192);
                 let dest = Mapping::new(8192);
                 for map in [&source, &dest] {
@@ -488,7 +506,7 @@ mod tests {
                     for specialized in [false, true] {
                         let routine = Routine {
                             copy,
-                            length: (specialized && length <= 512).then_some(length as u16),
+                            length: specialized.then_some(length as u64),
                             zero: false,
                         };
                         let arg = if copy { src as usize } else { 0x1234 };
@@ -508,6 +526,49 @@ mod tests {
                     assert!(call_blob(&routine.bytes()?, std::ptr::null_mut(), 0, 0).is_null());
                 }
             }
+            Ok(())
+        }
+
+        #[test]
+        fn known_large_counts_keep_full_width_without_dynamic_dispatch() -> Result<()> {
+            // Catch loss of counts above512, sign extension at2^31 blocks,
+            // or truncation at2^32 blocks, without allocating huge buffers.
+            let mut sizes=String::from("copy zero count known_bytes dynamic_bytes\n");
+            for length in [513u64,543,544,545,668,4096,17111,u32::MAX as u64,
+                (1u64<<31)*32,(1u64<<32)*32-1,(1u64<<32)*32,u64::MAX] {
+                for (copy,zero) in [(false,false),(false,true),(true,false)] {
+                    let facts=HashMap::from([(Register::RDX,length),
+                        (Register::RSI,if zero {0x100}else{0x1234})]);
+                    let routine=Routine::at_call(if copy {"memcpy"}else{"memset"},Some(&facts)).unwrap();
+                    assert_eq!(routine.length,Some(length));assert_eq!(routine.zero,zero);
+                    let bytes=routine.bytes()?;
+                    let mut decoder=Decoder::new(64,&bytes,DecoderOptions::NONE);
+                    let mut info=InstructionInfoFactory::new();
+                    let mut count=None;let mut conditional=0;
+                    while decoder.can_decode() {
+                        let insn=decoder.decode();assert!(!insn.is_invalid());
+                        if insn.mnemonic()==Mnemonic::Mov {
+                            if insn.op0_register()==Register::ECX {count=Some(insn.immediate32() as u64);}
+                            if insn.op0_register()==Register::RCX {count=Some(insn.immediate64());}
+                        }
+                        conditional+=usize::from(insn.flow_control()==FlowControl::ConditionalBranch);
+                        assert!(!info.info(&insn).used_registers().iter().any(|r|
+                            x86_gpr64_family(r.register())==Some(Register::RDX)),
+                            "known count must not redispatch through runtime RDX");
+                    }
+                    assert_eq!(count,Some(length/32));assert_eq!(conditional,1);
+                    let dynamic=Routine{copy,length:None,zero}.bytes()?;
+                    assert!(bytes.len()<dynamic.len(),"{routine:?} must stay a compact loop");
+                    sizes.push_str(&format!("{copy} {zero} {length} {} {}\n",bytes.len(),dynamic.len()));
+                }
+            }
+            for name in ["memcpy","memset"] {
+                assert_eq!(Routine::at_call(name,None).unwrap().length,None);
+            }
+            if let Some(out)=std::env::var_os("NATIVE_LINK_MEMORY_TEST_OUTPUT") {
+                fs::write(std::path::Path::new(&out).join("sizes.txt"),&sizes)?;
+            }
+            println!("Known large memory:36 full-width count/dispatch cases PASS");
             Ok(())
         }
 
@@ -546,7 +607,7 @@ mod tests {
                             "gpr_unrolled",
                             Routine {
                                 copy,
-                                length: Some(length as u16),
+                                length: Some(length as u64),
                                 zero: !copy,
                             }
                             .bytes()?,
