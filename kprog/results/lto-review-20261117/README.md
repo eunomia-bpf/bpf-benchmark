@@ -2553,3 +2553,55 @@ errors are still forwarded and the full destination zeroed by
 `kernel/trace/bpf_trace.c:264–267`; error values must not be collapsed
 merely because the destination bytes match. This introduces no new
 runtime predicate or required verification gate.
+
+## Kernel-leaf source in progress: preserved semantics and payload growth
+
+Read-only review of the coordinator's uncommitted kernel-leaf change,
+2026-11-17. References describe the working source at 06:33, not a finished
+build or installed image. The callback's removal is consistent with the
+planned direction, with one size tradeoff to measure alongside per-call
+time and throughput.
+
+`kernel_routine` at `x86_probe_read.rs:160–224` now saves original dst/size
+in R8/R9, uses RDX as source and R10 for the task, and has no nested policy
+CALL or RBX/R12–R15 frame. Its policy loads the live user limit, adds 4096,
+compares unsigned source/threshold, excludes the masked whole vsyscall
+page, and loads the live CPU width through its BTF offset. It uses
+NEG ECX for the canonical shift count. The separate width-zero branch is
+still present; removing it as in the preceding arithmetic receipt remains
+an optional local refinement, not a correctness issue.
+
+The source preserves string size-zero return **ahead of** policy/nesting,
+scalar size-zero policy evaluation, sign-extended `-ERANGE` on denial,
+`-EFAULT` on a source fault, one nesting decrement after an entered copy,
+and full original-buffer zeroing on negative results. String successful
+length is still narrowed/sign-extended as the helper's int return, so its
+negative-result handling is preserved too. The loader/schema changes add
+only the BTF offset for `cpuinfo_x86.x86_virt_bits` and remove the obsolete
+policy callback symbol/field. They keep the width **value** live rather
+than recording it as a boot constant. No defect is established by these
+source observations; final emitted metadata and execution are untested
+by PERF.
+
+The current fixed near-branch encodings give this local byte accounting
+against committed `6beae45cc`:
+
+| Changed region, once per kernel scalar or kernel-string routine | Before | Working source | Delta |
+| --- | --- | --- | --- |
+| Policy arguments + CALL + bool test/branch, replaced by inline threshold/vsyscall/canonicality | 19 B | 95 B (28 + 21 + 46) | +76 B |
+| Five saves and five restores | 18 B | 0 B | −18 B |
+| Original argument preservation | 9 B | 6 B | −3 B |
+| Task nesting INC/DEC encodings, RBX → R10 | 12 B | 14 B | +2 B |
+| Other copy/zero/string/result regions | Same encoding lengths | Same encoding lengths | 0 B |
+| **Routine payload arithmetic** | | | **+57 B** |
+
+This is source-literal arithmetic, not emitted code or final installed
+bytes. Removing the policy CALL can also affect external relocation
+veneers and installation layout, which this table does not count. A
+program using both scalar and string forms contains two policy copies in
+this design; static routines are not dynamic call counts. The removal of
+call/frame overhead can still improve invocation time while this local
+payload grows. Record both measured effects instead of inferring either
+speed or installed size from the table. The larger compat-read family is
+still outside this lowering, as section 2 explains. No rejection gate,
+new sharing framework or extra benchmark is proposed by this review.
