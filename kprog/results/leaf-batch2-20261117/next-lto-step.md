@@ -26,7 +26,10 @@ branches and genuine local calls still need their current conservative
 semantics; do not guess a target or turn an unproven count into a constant.
 
 Keep constant-size probe specialization separate from source-domain proof:
-a known RDX size does not imply user or kernel source memory. Preserve
+a known RSI size does not imply user or kernel source memory. Probe-read's
+SysV arguments are RDI destination, RSI size and RDX source; the memory
+routine analysis originally consumes RDX as memcpy/memset length instead.
+Use the correct register when reusing those general constant facts. Preserve
 zero-size returns, signed size/result conversion, exact fault recovery,
 zero-fill length, pagefault/SMAP cleanup and the compat address split.
 Known size variants also consume installed bytes; count their actual
