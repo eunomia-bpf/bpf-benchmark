@@ -6,7 +6,7 @@ from pathlib import Path
 import struct
 import sys
 raw=Path(sys.argv[1]);out=Path('kprog/results/map-dispatch-fusion-20261117')
-baseline=Path('/workspaces/kprog-raw/perf/dead-helper-ids-20261117/host-20261117T211219Z-2760806/replay/replay.json')
+baseline=Path('/workspaces/kprog-raw/perf/link-entry-replay-20261117/host-20261117T223029Z-2788020/replay/replay.json')
 before={r['capture']:r for r in json.loads(baseline.read_text())['requests']}
 after=json.loads((raw/'replay/replay.json').read_text())
 counts=defaultdict(Counter);rows=[]

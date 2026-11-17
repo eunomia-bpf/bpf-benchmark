@@ -12,7 +12,7 @@ main() {
     taskset -c 19 python3 kprog/results/map-dispatch-fusion-20261117/compare.py "$raw" > "$root/comparison-output.txt" 2>&1
     exec 7>/workspaces/.agent-state/kprog-lanes/locks/git; flock -x 7
     out=kprog/results/map-dispatch-fusion-20261117
-    for name in build.txt main-source-commit.txt main-source.patch replay-output.txt; do cp "$raw/$name" "$out/$name"; done
+    for name in test-build.txt test-executable.txt unit-source-commit.txt unit-source.patch main-before.txt main-after.txt replay-output.txt; do cp "$raw/$name" "$out/$name"; done
     cp "$raw/replay/replay.json" "$out/replay.json"
     cp "$raw/replay/replay-summary.txt" "$out/replay-summary.txt"
     STAMP="$(date -u +%FT%TZ)" python3 - <<'PY'

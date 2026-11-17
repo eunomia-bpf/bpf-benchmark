@@ -25,3 +25,23 @@ Raw parent: `/workspaces/kprog-raw/perf/map-dispatch-fusion-20261117`.
 Production source and measurements are pending until the run actually finishes.
 Omp owns image/check/affected-app timing with all LTO on. Report installed bytes,
 per-call body/helpers/maps and throughput there; this recipe supplies no timing.
+
+## Active unit-entry recipe, 2026-11-17
+
+The exclusive-main-build queue was replaced after99a3a5e72 established the same
+production link(Args) entry in the existing unit executable. At22:37:29-30Z,
+only our waiting processes2760806/2765360/2776222/2776223/2782317/2782318 ended143,
+via their exact waiting tail/flock children, in reverse dependency order.
+All their raw directories remain; fusion/tail had applied no source. Checked
+Tracee2754970 continues with the original canonical CLI. The historical recipe
+above describes that stopped attempt; this paragraph describes the active one.
+
+Current run-host.sh uses timingSH/imageSH, preserves CLI size/mtime, executes
+the baseline/fix/full suite and source commit/push, then builds only the normal
+unit executable and invokes production link(Args) with all295 captured requests.
+The actual preceding dead-ID baseline is the successful unit replay at
+/workspaces/kprog-raw/perf/link-entry-replay-20261117/host-20261117T223029Z-2788020/replay/replay.json.
+No canonical CLI build is claimed: source/build receipts are named unit/test,
+and the frozen image recipe will build the sole canonical CLI later under
+imageEX. Same BPF code path and original arguments, no facts synthesized,
+extra product or benchmark change. Omp owns image/check/affected-app timing.
