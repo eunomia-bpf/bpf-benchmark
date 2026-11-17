@@ -51,7 +51,13 @@
     "workers": 1,
     "address_space_GiB": 32
   },
-  "whole_lake_build": "deferred to end of current proof batch under timing SH",
+  "whole_lake_build": {
+    "exit": 0,
+    "jobs": 278,
+    "log": "/workspaces/kprog-raw/formal/m5-producer-flags/lake-build.log",
+    "timing_lock": "shared flock",
+    "scope": "table proofs unchanged; later flag arithmetic revision has separate final confirmation"
+  },
   "previous_whole_lake_build": {
     "jobs": 275,
     "exit": 0,

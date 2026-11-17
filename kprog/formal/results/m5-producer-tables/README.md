@@ -20,9 +20,10 @@ continuation are retained. Only the stage-start access map matching the actual
 allocation is assumed; the earlier external-provider ABI obligations remain.
 The pointers are Clight local-block addresses, not physical native addresses.
 
-Focused build passes 150 jobs. Public queries and the batch's full confirmation
-are recorded in `validation.json` and the subsequent batch receipt. The last
-complete full build before this step passed 275 jobs at `6048b066f`; last full
+Focused build passes 150 jobs and eight public queries pass. The batch full
+build passes 278 jobs under timing SH with these table proofs unchanged; a
+later flag-proof revision has its own final confirmation. Details are in
+`validation.json` and the flag receipt. Last full
 `make check` passed at `5236c0e96`. No C, external semantics, frozen benchmark,
 image or kernel changes. No proof limits were raised.
 

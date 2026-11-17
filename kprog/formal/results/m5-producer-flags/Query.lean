@@ -1,0 +1,17 @@
+import KProgFormal.ClightRefinement.Arm64ProducerFlags
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.flag_names
+#check KProgFormal.ClightRefinement.Arm64Producer.flag_names
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.flag_declarations_source
+#check KProgFormal.ClightRefinement.Arm64Producer.flag_declarations_source
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.flag_declarations_chain
+#check KProgFormal.ClightRefinement.Arm64Producer.flag_declarations_chain
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.first_flag_stage
+#check KProgFormal.ClightRefinement.Arm64Producer.first_flag_stage
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.flag_word_bit
+#check KProgFormal.ClightRefinement.Arm64Producer.flag_word_bit
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.flag_input_ready
+#check KProgFormal.ClightRefinement.Arm64Producer.flag_input_ready
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.flag_input_returns
+#check KProgFormal.ClightRefinement.Arm64Producer.flag_input_returns
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.pointer_tables_first_flag
+#check KProgFormal.ClightRefinement.Arm64Producer.pointer_tables_first_flag

@@ -1,0 +1,93 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-producer-flags",
+  "focused_build": {
+    "exit": 0,
+    "jobs": 151,
+    "log": "flags5.log",
+    "scope": "before replacing native-reflection proof with ordinary arithmetic"
+  },
+  "revised_source_check": {
+    "exit": 0,
+    "log": "arithmetic-check.log",
+    "mode": "Lean source check without emitting a second build product"
+  },
+  "public_source_queries": {
+    "exit": 0,
+    "theorems": 8,
+    "log": "source-query.log",
+    "mode": "exact current module source plus Query.lean commands checked through lean --stdin; no copied source tree or emitted product",
+    "source_axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "bit_value_axioms": [
+      "propext",
+      "Quot.sound"
+    ],
+    "execution_axioms": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "native_reflection_assumption": "removed from final source; earlier query finding retained in query.log",
+    "external_determinism": "not assumed"
+  },
+  "whole_lake_build": {
+    "status": "queued under timing SH",
+    "controller_pid": 2516839,
+    "flock_pid": 2516846,
+    "log": "lake-final-build.log",
+    "exit_file": "lake-final-build.exit"
+  },
+  "prior_batch_build": {
+    "exit": 0,
+    "jobs": 278,
+    "log": "lake-build.log",
+    "scope": "completed before final arithmetic proof revision; validates unchanged pointer-table step"
+  },
+  "actual_flag_inputs": {
+    "names": [
+      "N",
+      "Z",
+      "C",
+      "V"
+    ],
+    "source_type_equations": 4,
+    "successor_equations": 3,
+    "stored_value": "exact Clight unsigned-byte cast of input AND 1, proved zero or one"
+  },
+  "actual_internal_transitions": {
+    "per_flag_before_external_call": 3,
+    "per_flag_after_external_outcome": 4,
+    "pointer_tables_to_first_flag_call": 189
+  },
+  "provider_ABI_premises": [
+    "stated scalar outcome of actual kind-6 external relation",
+    "supplied post-memory access equals actual producer allocation access"
+  ],
+  "preservation_scope": "exact low-bit byte readback; all other declared-local loads and old caller blocks, access/frontier preserved relative to provider post-memory; no provider existence/purity/final native-flag claim",
+  "proof_limits": {
+    "heartbeats": 200000,
+    "recursion_depth": 512,
+    "workers": 1,
+    "address_space_GiB": 32
+  },
+  "export_comparison": {
+    "baseline": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_byte_identical": true
+  },
+  "canonical_C_external_semantics_frozen_paths": "unchanged by this step",
+  "last_complete_make_check": {
+    "exit": 0,
+    "commit": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "rerun": "not needed for Lean-only proofs"
+  },
+  "complete_ISA_handler_refinements": 0,
+  "M5": "open",
+  "M6": "open"
+}

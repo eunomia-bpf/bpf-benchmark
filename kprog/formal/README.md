@@ -2047,3 +2047,10 @@ The [pointer-table proof](results/m5-producer-tables/README.md) constructs all
 source segment completes in 186 internal transitions, with exact pointer
 readback and other-local/caller framing. Composing the preceding x30 zero
 branch gives 196 transitions and preserves its zero word and tag observations.
+
+The [flag-input proof](results/m5-producer-flags/README.md) binds the actual N,
+Z, C and V declaration blocks. Every stated scalar provider outcome resumes
+the real continuation and stores a checked zero-or-one byte in four internal
+transitions. The preceding complete pointer tables reach the first flag call
+in 189 transitions and remain readable there. Provider post-memory and local
+permission ABI premises remain explicit.
