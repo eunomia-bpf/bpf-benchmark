@@ -1,0 +1,3 @@
+import KProgFormal.ClightRefinement.Arm64ProducerTablesToRegisters
+#check KProgFormal.ClightRefinement.Arm64ProducerTablesToRegisters.tables_to_registers
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerTablesToRegisters.tables_to_registers
