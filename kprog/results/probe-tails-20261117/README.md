@@ -17,3 +17,21 @@ equals 1-O3.txt). The coordinator stopped that series during its one-image check
 /workspaces/kprog-raw/probe-tails-20261117. run2.sh removes the native build outputs, rebuilds at -O3 and times all six
 apps; its raw goes to /workspaces/kprog-raw/probe-tails-20261117/o3 and its table to summary-o3.txt. tetragon.sh is
 folded into run2.sh.
+
+## Result at -O3 (run2, 2026-11-17 03:59–05:02 UTC, stats on, 3 x 60 s)
+
+Image 47ba298b; stage executable bytes equal 1-O3.txt for all six apps (7 440 157). One-image check: six apps rc=0.
+
+| App | Per call, O3 group → run2 | Throughput, O3 group → run2 | Installed native / JIT |
+|---|---|---|---|
+| OTel | 0.874x → **1.098x** | 1.119x → 1.077x | 0.81 |
+| BCC | 0.912x → **1.013x** | 0.905x → 0.998x | 1.08 |
+| Cilium | 3.243x → 2.995x (arms compile different configs; set aside) | 3.012x → 2.800x | 0.83 |
+| Tetragon | first timing → **1.098x** | first timing → 1.031x | 0.75 |
+| Tracee | 1.152x → 1.145x | 1.074x → 1.058x | 0.86 |
+| Katran | 1.013x → 1.040x | 1.006x → 1.014x | 0.69 |
+
+- OTel: native_tracer_entry runs 0.996 times as often natively as in eBPF (0.826 in the O3 group); native 3726 → 2926 ns per call, eBPF 3255 → 3213 ns.
+- BCC block_rq_complete and Tracee trace_ret_file_* differ in count (about 1 300 against 250 calls), small against each app's totals.
+- Katran's "errors" figure from may29_ratio.py sums the third sample field, which holds about 1.6e8 per sample in both arms of both runs; the run reports ok.
+- Equal-work per-call geomean over OTel, BCC, Tetragon, Tracee and Katran: 1.078x.
