@@ -1,0 +1,106 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-vector-input-sequence",
+  "focused": {
+    "exit": 0,
+    "jobs": 168,
+    "log": "focused4.log"
+  },
+  "public_queries": {
+    "exit": 0,
+    "theorems": 2,
+    "log": "Query-1.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64ProducerVectorInputs.vector_inputs_initialized": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProducerVectorInputs.vector_inputs_and_raw_registers": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "source_queries": {
+    "exit": 0,
+    "examples": 1,
+    "log": "Next-1.log",
+    "checks": [
+      "all32 actual low/high target fields and 16*lane+0/8 offsets, including496/504"
+    ]
+  },
+  "bridge": {
+    "external_visits": 64,
+    "trace": "ordered list of64 provider traces, concatenated in imported Star",
+    "start": "actual vectorStart",
+    "vector_end": "actual afterVectorInputs",
+    "composed_suffix_internal_transitions": 728,
+    "combined_end": "actual afterVectorLoop",
+    "vector_words": 64,
+    "native_vector_pairs": 32,
+    "post_memory": "explicit per-visit supplied memory; no supplied=before assumption",
+    "provider_premises": [
+      "actual linked externalCall and Senv",
+      "returned vector word",
+      "access and nextblock preservation",
+      "caller contents and permission frame",
+      "allocated local load preservation"
+    ],
+    "temporary_environment": "actual per-return set; all other names preserved, including _ctx",
+    "retained_obligations": [
+      "runtime provider admissibility",
+      "earlier GPR/table/tag/flag initializers",
+      "native invocation origins/register/pointer ABI",
+      "memory/events/fault/control",
+      "program continuation"
+    ],
+    "complete_register_relation": "existing Arm64Registers.Represents with source index cell map"
+  },
+  "whole_lake_build": {
+    "exit": 0,
+    "jobs": 295,
+    "log": "lake-build1.log",
+    "timing_lock": "shared"
+  },
+  "export_comparison": {
+    "exit": 0,
+    "baseline": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_byte_identical": true,
+    "log": "export-parity1.json"
+  },
+  "attempts": {
+    "focused1": "existential binder syntax; exit1",
+    "focused2": "CC.Eapp versus list append unfolding; exit1",
+    "focused3": "core traversal PASS168 jobs",
+    "focused4": "final traversal and RAW composition PASS168 jobs",
+    "Query-1": "PASS",
+    "Next-1": "PASS",
+    "lake-build1": "PASS295 jobs",
+    "export-parity1": "PASS23 files"
+  },
+  "limits": {
+    "heartbeats": 200000,
+    "recursion_depth": 512,
+    "workers": 1,
+    "address_space_GiB": 32,
+    "CPUs": [
+      17,
+      18
+    ]
+  },
+  "last_complete_make_check": {
+    "exit": 0,
+    "commit": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "rerun": false
+  },
+  "complete_ISA_handler_refinements": 0,
+  "M5": "open",
+  "M6": "open"
+}

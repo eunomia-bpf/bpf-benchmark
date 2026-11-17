@@ -40,8 +40,10 @@ follows the embedded pointer arrays and all 32 low/high pairs. The
 SP readback and assembles the existing GPR/SP/vector/flag relation over one
 reached memory. The [RAW setup composition](results/m5-entry-admissibility/README.md)
 derives SP, x0 context and x0/x30 tags from the actual preceding stores, with
-the source register index as cell map. Provider outcomes and same-invocation
-native origin/register bindings remain open.
+the source register index as cell map. The [64-visit vector input proof](results/m5-vector-input-sequence/README.md)
+derives the vector buffer and composes it with that RAW setup, retaining each
+provider trace and post-memory. Actual provider admissibility and
+same-invocation native origin/register bindings remain open.
 
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|

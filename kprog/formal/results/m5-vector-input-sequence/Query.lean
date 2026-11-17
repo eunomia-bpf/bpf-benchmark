@@ -1,0 +1,5 @@
+import KProgFormal.ClightRefinement.Arm64ProducerVectorInputs
+#check KProgFormal.ClightRefinement.Arm64ProducerVectorInputs.vector_inputs_initialized
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerVectorInputs.vector_inputs_initialized
+#check KProgFormal.ClightRefinement.Arm64ProducerVectorInputs.vector_inputs_and_raw_registers
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerVectorInputs.vector_inputs_and_raw_registers

@@ -21,6 +21,7 @@ import KProgFormal.ClightRefinement.Arm64ProducerGprView
 import KProgFormal.ClightRefinement.Arm64ProducerVectorView
 import KProgFormal.ClightRefinement.Arm64ProducerRegisterView
 import KProgFormal.ClightRefinement.Arm64EntryAdmissibility
+import KProgFormal.ClightRefinement.Arm64ProducerVectorInputs
 import KProgFormal.ClightRefinement.Arm64ProducerPrefix
 import KProgFormal.ClightRefinement.Arm64ProducerInputs
 import KProgFormal.ClightRefinement.Arm64ProducerRegisters
