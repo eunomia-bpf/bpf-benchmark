@@ -152,29 +152,41 @@ fn user_leaf(layout: &RuntimeProbeReadLayout, actual: u64)
     Ok((b, Vec::new(), sites))
 }
 
+/// copy_from_kernel_nofault and strncpy_from_kernel_nofault as leaves: copy_from_kernel_nofault_allowed
+/// inline (an address below TASK_SIZE_MAX + PAGE_SIZE, in the vsyscall page, or non-canonical at
+/// boot_cpu_data.x86_virt_bits gets -ERANGE; width zero allows), pagefault_disable, copy,
+/// pagefault_enable; denial and faults zero the destination. It uses caller-saved registers only:
+/// R8=dst, R9D=size, RDX=src, R10=current.
 fn kernel_routine(layout: &RuntimeProbeReadLayout, actual: u64, string: bool)
     -> Result<(Vec<u8>, Vec<RelocRecord>, Vec<LoadSite>)> {
     let target = |symbol| address(symbol, layout.kernel_helper, actual);
     let current = gs_disp32(target(layout.current_task)?, "current_task")?;
     let task_offset = i32::try_from(layout.pagefault_disabled)?.to_le_bytes();
-    let mut b = vec![0x53,0x41,0x54,0x41,0x55,0x41,0x56,0x41,0x57]; // five saves; aligned calls
-    b.extend_from_slice(&[0x49,0x89,0xfc,0x41,0x89,0xf5,0x49,0x89,0xd6]); // r12=dst,r13d=size,r14=src
+    let mut b = vec![0x49,0x89,0xf8,0x41,0x89,0xf1]; // r8=dst, r9d=size; RDX keeps src
     let zero_return=if string {
-        b.extend_from_slice(&[0x31,0xc0,0x45,0x85,0xed]);
+        b.extend_from_slice(&[0x31,0xc0,0x45,0x85,0xc9]); // a zero count returns 0 ahead of the policy
         Some(append_x86_jcc_rel32(&mut b,0x84))
     } else {None};
-    let mut relocs = Vec::new();
     let mut denied = Vec::new();
-    b.extend_from_slice(&[0x4c,0x89,0xf7,0x44,0x89,0xee]); // kernel allowed(src,size)
-    relocs.push(RelocRecord { offset: b.len() as u32, kind: 1, target: target(layout.kernel_allowed)? });
-    b.extend_from_slice(&X86_HELPER_CALL_REL32_SLOT);
-    b.extend_from_slice(&[0x84,0xc0]); // policy callback bool
+    // vaddr < TASK_SIZE_MAX + PAGE_SIZE; this kernel sets USER_PTR_MAX = TASK_SIZE_MAX (cpu/common.c).
+    absolute(&mut b, &[0x49,0xbb], target(layout.user_ptr_max)?);
+    b.extend_from_slice(&[0x49,0x8b,0x03,0x48,0x05,0,0x10,0,0,0x48,0x39,0xc2]); // rax=[r11]+4096; cmp rdx,rax
+    denied.push(append_x86_jcc_rel32(&mut b, 0x82)); // below
+    // is_vsyscall_vaddr: (vaddr & PAGE_MASK) == VSYSCALL_ADDR, -10UL << 20
+    b.extend_from_slice(&[0x48,0x89,0xd0,0x48,0x25,0,0xf0,0xff,0xff,0x48,0x3d,0,0,0x60,0xff]);
     denied.push(append_x86_jcc_rel32(&mut b, 0x84));
-    b.extend_from_slice(&[0x65,0x48,0x8b,0x1c,0x25]); // rbx=gs:current_task
-    b.extend_from_slice(&current);
-    b.extend_from_slice(&[0xff,0x83]); b.extend_from_slice(&task_offset); // pagefault_disable
-    b.extend_from_slice(&[0x4c,0x89,0xe7,0x4c,0x89,0xf6,0x44,0x89,0xe9]); // copy args
-    b.extend_from_slice(&[0x41,0xbb,1,0,0,0]); // R11 fault status=success
+    // x86_virt_bits zero (early boot) allows; otherwise the address is canonical at that width.
+    absolute(&mut b, &[0x49,0xbb], target(layout.boot_cpu_data)?);
+    b.extend_from_slice(&[0x41,0x0f,0xb6,0x8b]); // movzx ecx,byte[r11+x86_virt_bits]
+    b.extend_from_slice(&i32::try_from(layout.x86_virt_bits)?.to_le_bytes());
+    b.extend_from_slice(&[0x85,0xc9]);
+    let early = append_x86_jcc_rel32(&mut b, 0x84);
+    b.extend_from_slice(&[0xf7,0xd9,0x48,0x89,0xd0,0x48,0xd3,0xe0,0x48,0xd3,0xf8,0x48,0x39,0xd0]); // shl/sar by 64-bits; cmp rax,rdx
+    denied.push(append_x86_jcc_rel32(&mut b, 0x85));
+    let allowed = b.len(); patch_x86_rel32(&mut b, early, allowed)?;
+    b.extend_from_slice(&[0x65,0x4c,0x8b,0x14,0x25]); b.extend_from_slice(&current); // r10=gs:current_task
+    b.extend_from_slice(&[0x41,0xff,0x82]); b.extend_from_slice(&task_offset); // pagefault_disable
+    b.extend_from_slice(&[0x48,0x89,0xd6,0x4c,0x89,0xc7,0x44,0x89,0xc9,0x41,0xbb,1,0,0,0]); // rsi=src, rdi=dst, ecx=size, r11d=1
     let mut sites=Vec::new(); let mut faults=Vec::new();
     if string {
         let loop_start=b.len();
@@ -186,7 +198,7 @@ fn kernel_routine(layout: &RuntimeProbeReadLayout, actual: u64, string: bool)
         b.extend_from_slice(&[0x85,0xc9]);
         let again=append_x86_jcc_rel32(&mut b,0x85);patch_x86_rel32(&mut b,again,loop_start)?;
         let end=b.len();patch_x86_rel32(&mut b,nul,end)?;
-        b.extend_from_slice(&[0xc6,0x47,0xff,0,0x48,0x89,0xf8,0x4c,0x29,0xe0,0x48,0x63,0xc0]); // helper common returns signed int
+        b.extend_from_slice(&[0xc6,0x47,0xff,0,0x48,0x89,0xf8,0x4c,0x29,0xc0,0x48,0x63,0xc0]); // dst[-1]=0; length as signed int
     } else {
         copy_words(&mut b, &mut sites, &mut faults)?;
     }
@@ -195,21 +207,21 @@ fn kernel_routine(layout: &RuntimeProbeReadLayout, actual: u64, string: bool)
     for branch in faults {patch_x86_rel32(&mut b,branch,fault)?;}
     b.extend_from_slice(&[0x48,0xc7,0xc0,0xf2,0xff,0xff,0xff]); // -EFAULT, sign extended
     let cleanup = b.len(); patch_x86_rel32(&mut b, cleanup_success, cleanup)?;
-    b.extend_from_slice(&[0xff,0x8b]); b.extend_from_slice(&task_offset); // pagefault_enable
+    b.extend_from_slice(&[0x41,0xff,0x8a]); b.extend_from_slice(&task_offset); // pagefault_enable
     b.extend_from_slice(&[0x48,0x85,0xc0]);
     let clean_return = append_x86_jcc_rel32(&mut b, if string {0x89} else {0x84});
     let zero_fault = jump(&mut b);
     let deny = b.len();
     for branch in denied { patch_x86_rel32(&mut b, branch, deny)?; }
     b.extend_from_slice(&[0x48,0xc7,0xc0]);
-    b.extend_from_slice(&(-34i32).to_le_bytes());
+    b.extend_from_slice(&(-34i32).to_le_bytes()); // -ERANGE
     let zero = b.len(); patch_x86_rel32(&mut b, zero_fault, zero)?;
-    let zero_done = zero_fill(&mut b, &[0x4c,0x89,0xe7,0x44,0x89,0xe9])?; // rdi=r12, ecx=r13d
+    let zero_done = zero_fill(&mut b, &[0x4c,0x89,0xc7,0x44,0x89,0xc9])?; // rdi=r8, ecx=r9d
     let end = b.len();
     patch_x86_rel32(&mut b, clean_return, end)?; patch_x86_rel32(&mut b, zero_done, end)?;
     if let Some(branch)=zero_return {patch_x86_rel32(&mut b,branch,end)?;}
-    b.extend_from_slice(&[0x41,0x5f,0x41,0x5e,0x41,0x5d,0x41,0x5c,0x5b,0xc3]);
-    Ok((b,relocs,sites))
+    b.push(0xc3);
+    Ok((b, Vec::new(), sites))
 }
 
 pub(super) fn share(blob: &mut Vec<u8>, relocs: &mut Vec<RelocRecord>,
@@ -262,10 +274,10 @@ mod tests {
     use super::*;
     fn fixture() -> RuntimeProbeReadLayout {
         RuntimeProbeReadLayout { user_helper:0x1000,kernel_helper:0x2000,
-            kernel_allowed:0x4000,current_task:0,
+            current_task:0,
             user_ptr_max:0x1111222233334444,boot_cpu_data:0x5555666677778888,
             pagefault_disabled:4,x86_capability:0,
-            cpu_tlbstate:8,tlb_loaded_mm:0,task_mm:8 }
+            cpu_tlbstate:8,tlb_loaded_mm:0,task_mm:8,x86_virt_bits:40 }
     }
 
     #[test]
@@ -291,10 +303,9 @@ mod tests {
             let binary = output.join(format!("{stem}.bin"));
             let metadata = output.join(format!("{stem}.sites"));
             fs::write(&binary,&bytes)?;
-            assert_eq!(sites.len(),if string {1} else {4}); assert_eq!(relocs.len(),usize::from(!user));
+            assert_eq!(sites.len(),if string {1} else {4}); assert!(relocs.is_empty());
             let mut text = sites.len().to_string();text.push(char::from(10));
             for site in sites { text.push_str(&format!("{} {} {}\n",site.offset,site.insn_len,site.destination)); }
-            if let Some(call)=relocs.first() { text.push_str(&format!("{}\n",call.offset)); }
             fs::write(&metadata,text)?;
             let run = std::process::Command::new(&driver).arg(binary).arg(metadata)
                 .arg(mode.to_string()).output()?;
@@ -331,7 +342,7 @@ mod tests {
             assert_eq!(offset as i64+5+i64::from(disp),range.0 as i64);
         }
         assert!(relocs.iter().any(|r| r.offset==15 && r.target==0x9999));
-        assert_eq!(relocs.len(),2,"the kernel routine keeps its policy callback; the user routine reads its policy inline");
+        assert_eq!(relocs.len(),1,"both shared routines read their policy inline; the other helper call stays");
         let mut strings=X86_HELPER_CALL_REL32_SLOT.repeat(2);
         let mut calls=vec![RelocRecord{offset:0,kind:1,target:0x5000},RelocRecord{offset:5,kind:1,target:0x6000}];
         let names=HashMap::from([("bpf_probe_read_kernel".into(),0x2000),
@@ -339,7 +350,6 @@ mod tests {
         let (on,loads)=share(&mut strings,&mut calls,&layout,&names)?;
         assert_eq!(on.len(),1);assert_eq!(loads.len(),1);assert_eq!(loads[0].destination,11);
         assert!(calls.iter().any(|r|r.offset==5 && r.target==0x6000),"user strings retain original helper");
-        assert!(calls.iter().any(|r|r.target==layout.kernel_allowed),"rebase policy from regular helper, not string helper");
         assert!(!calls.iter().any(|r|r.target==0x5000));
         for site in sites {
             assert_eq!(site.destination,11);

@@ -188,7 +188,6 @@ struct RuntimeLpmLayout {
 struct RuntimeProbeReadLayout {
     user_helper: u64,
     kernel_helper: u64,
-    kernel_allowed: u64,
     current_task: u64,
     user_ptr_max: u64,
     boot_cpu_data: u64,
@@ -197,6 +196,7 @@ struct RuntimeProbeReadLayout {
     cpu_tlbstate: u64,
     tlb_loaded_mm: u32,
     task_mm: u32,
+    x86_virt_bits: u32,
 }
 
 #[derive(Debug, Deserialize)]
