@@ -1,0 +1,451 @@
+{
+  "recorded_utc": "2026-11-17T10:34:00Z",
+  "scope": "Selected raw directives from current producer/sample sources and historical 2026-11-13 agent captures, plus finite models of lib/trace.h and conntrack.h. Not full preprocessing, current-run configuration proof, native/eBPF execution, dynamic frequency, packet parity or an admission check. No source header copied or edited.",
+  "makefile_source_revision": "0dcf97880",
+  "selected_inputs": [
+    {
+      "path": "/workspaces/repository/vendor/bpf/cilium/bpf/node_config.h",
+      "directives": [
+        {
+          "line": 37,
+          "action": "define",
+          "name": "CT_CONNECTION_LIFETIME_TCP",
+          "value": "21600"
+        },
+        {
+          "line": 39,
+          "action": "define",
+          "name": "CT_SERVICE_LIFETIME_TCP",
+          "value": "21600"
+        },
+        {
+          "line": 41,
+          "action": "define",
+          "name": "CT_SERVICE_CLOSE_REBALANCE",
+          "value": "30"
+        },
+        {
+          "line": 42,
+          "action": "define",
+          "name": "CT_SYN_TIMEOUT",
+          "value": "60"
+        },
+        {
+          "line": 44,
+          "action": "define",
+          "name": "CT_REPORT_INTERVAL",
+          "value": "5"
+        },
+        {
+          "line": 46,
+          "action": "define",
+          "name": "CT_REPORT_FLAGS",
+          "value": "0xff"
+        },
+        {
+          "line": 50,
+          "action": "define",
+          "name": "IPV4_GATEWAY",
+          "value": "0xfffff50a"
+        },
+        {
+          "line": 108,
+          "action": "define",
+          "name": "MONITOR_AGGREGATION",
+          "value": "5"
+        }
+      ]
+    },
+    {
+      "path": "/workspaces/repository/vendor/bpf/cilium/bpf/ep_config.h",
+      "directives": [
+        {
+          "line": 16,
+          "action": "define",
+          "name": "TRACE_NOTIFY",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261113-cilium-live-config/baseline-state/state/globals/node_config.h",
+      "directives": [
+        {
+          "line": 25,
+          "action": "define",
+          "name": "CT_CONNECTION_LIFETIME_TCP",
+          "value": "8000"
+        },
+        {
+          "line": 26,
+          "action": "define",
+          "name": "CT_REPORT_FLAGS",
+          "value": "0x0007"
+        },
+        {
+          "line": 27,
+          "action": "define",
+          "name": "CT_REPORT_INTERVAL",
+          "value": "5"
+        },
+        {
+          "line": 28,
+          "action": "define",
+          "name": "CT_SERVICE_CLOSE_REBALANCE",
+          "value": "60"
+        },
+        {
+          "line": 30,
+          "action": "define",
+          "name": "CT_SERVICE_LIFETIME_TCP",
+          "value": "8000"
+        },
+        {
+          "line": 31,
+          "action": "define",
+          "name": "CT_SYN_TIMEOUT",
+          "value": "60"
+        },
+        {
+          "line": 45,
+          "action": "define",
+          "name": "IPV4_GATEWAY",
+          "value": "0x1900f40a"
+        }
+      ]
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261113-cilium-live-config/baseline-state/state/templates/a30c8211105e72194d480856eaf6f61059bece002ca0d4ca506bad7483e1f5a5/ep_config.h",
+      "directives": [
+        {
+          "line": 8,
+          "action": "undef",
+          "name": "MONITOR_AGGREGATION",
+          "value": ""
+        },
+        {
+          "line": 9,
+          "action": "define",
+          "name": "POLICY_AUDIT_MODE",
+          "value": "1"
+        },
+        {
+          "line": 12,
+          "action": "define",
+          "name": "TRACE_NOTIFY",
+          "value": "1"
+        }
+      ]
+    },
+    {
+      "path": "/workspaces/kprog-raw/perf/20261113-cilium-live-config/baseline-state/state/templates/b30a0ef067ce85f859f04913364a347da896cfc7b8a82923e90f2d3fa3be4385/ep_config.h",
+      "directives": [
+        {
+          "line": 9,
+          "action": "undef",
+          "name": "MONITOR_AGGREGATION",
+          "value": ""
+        },
+        {
+          "line": 10,
+          "action": "define",
+          "name": "POLICY_AUDIT_MODE",
+          "value": "1"
+        },
+        {
+          "line": 13,
+          "action": "define",
+          "name": "TRACE_NOTIFY",
+          "value": "1"
+        }
+      ]
+    }
+  ],
+  "monitor_cases": [
+    {
+      "case": "current_native",
+      "effective_monitor_level": 3,
+      "trace_notify_enabled_decisions": [
+        {
+          "rx_observation": false,
+          "monitor": 0,
+          "emit": false
+        },
+        {
+          "rx_observation": false,
+          "monitor": 128,
+          "emit": true
+        },
+        {
+          "rx_observation": true,
+          "monitor": 0,
+          "emit": false
+        },
+        {
+          "rx_observation": true,
+          "monitor": 128,
+          "emit": false
+        }
+      ]
+    },
+    {
+      "case": "remove_cli_define_only",
+      "effective_monitor_level": 5,
+      "trace_notify_enabled_decisions": [
+        {
+          "rx_observation": false,
+          "monitor": 0,
+          "emit": false
+        },
+        {
+          "rx_observation": false,
+          "monitor": 128,
+          "emit": true
+        },
+        {
+          "rx_observation": true,
+          "monitor": 0,
+          "emit": false
+        },
+        {
+          "rx_observation": true,
+          "monitor": 128,
+          "emit": false
+        }
+      ]
+    },
+    {
+      "case": "command_line_undef_only",
+      "effective_monitor_level": 5,
+      "trace_notify_enabled_decisions": [
+        {
+          "rx_observation": false,
+          "monitor": 0,
+          "emit": false
+        },
+        {
+          "rx_observation": false,
+          "monitor": 128,
+          "emit": true
+        },
+        {
+          "rx_observation": true,
+          "monitor": 0,
+          "emit": false
+        },
+        {
+          "rx_observation": true,
+          "monitor": 128,
+          "emit": false
+        }
+      ]
+    },
+    {
+      "case": "explicit_numeric_zero",
+      "effective_monitor_level": 0,
+      "trace_notify_enabled_decisions": [
+        {
+          "rx_observation": false,
+          "monitor": 0,
+          "emit": true
+        },
+        {
+          "rx_observation": false,
+          "monitor": 128,
+          "emit": true
+        },
+        {
+          "rx_observation": true,
+          "monitor": 0,
+          "emit": true
+        },
+        {
+          "rx_observation": true,
+          "monitor": 128,
+          "emit": true
+        }
+      ]
+    },
+    {
+      "case": "agent_endpoint_undef",
+      "effective_monitor_level": 0,
+      "trace_notify_enabled_decisions": [
+        {
+          "rx_observation": false,
+          "monitor": 0,
+          "emit": true
+        },
+        {
+          "rx_observation": false,
+          "monitor": 128,
+          "emit": true
+        },
+        {
+          "rx_observation": true,
+          "monitor": 0,
+          "emit": true
+        },
+        {
+          "rx_observation": true,
+          "monitor": 128,
+          "emit": true
+        }
+      ]
+    }
+  ],
+  "ct_assumptions": "TRACE_NOTIFY enabled; accumulated flags zero; last report within interval. Existing source branch writes flags and report time when new masked flags differ.",
+  "ct_report_mask_examples": [
+    {
+      "tcp_flags": 0,
+      "results": [
+        {
+          "origin": "native",
+          "report_mask": 2,
+          "seen_flags": 0,
+          "flags_and_last_report_writes": false,
+          "emit_trace_notify_returns_true_at_none": true
+        },
+        {
+          "origin": "retained_agent",
+          "report_mask": 7,
+          "seen_flags": 0,
+          "flags_and_last_report_writes": false,
+          "emit_trace_notify_returns_true_at_none": true
+        }
+      ]
+    },
+    {
+      "tcp_flags": 1,
+      "results": [
+        {
+          "origin": "native",
+          "report_mask": 2,
+          "seen_flags": 0,
+          "flags_and_last_report_writes": false,
+          "emit_trace_notify_returns_true_at_none": true
+        },
+        {
+          "origin": "retained_agent",
+          "report_mask": 7,
+          "seen_flags": 1,
+          "flags_and_last_report_writes": true,
+          "emit_trace_notify_returns_true_at_none": true
+        }
+      ]
+    },
+    {
+      "tcp_flags": 2,
+      "results": [
+        {
+          "origin": "native",
+          "report_mask": 2,
+          "seen_flags": 2,
+          "flags_and_last_report_writes": true,
+          "emit_trace_notify_returns_true_at_none": true
+        },
+        {
+          "origin": "retained_agent",
+          "report_mask": 7,
+          "seen_flags": 2,
+          "flags_and_last_report_writes": true,
+          "emit_trace_notify_returns_true_at_none": true
+        }
+      ]
+    },
+    {
+      "tcp_flags": 4,
+      "results": [
+        {
+          "origin": "native",
+          "report_mask": 2,
+          "seen_flags": 0,
+          "flags_and_last_report_writes": false,
+          "emit_trace_notify_returns_true_at_none": true
+        },
+        {
+          "origin": "retained_agent",
+          "report_mask": 7,
+          "seen_flags": 4,
+          "flags_and_last_report_writes": true,
+          "emit_trace_notify_returns_true_at_none": true
+        }
+      ]
+    },
+    {
+      "tcp_flags": 16,
+      "results": [
+        {
+          "origin": "native",
+          "report_mask": 2,
+          "seen_flags": 0,
+          "flags_and_last_report_writes": false,
+          "emit_trace_notify_returns_true_at_none": true
+        },
+        {
+          "origin": "retained_agent",
+          "report_mask": 7,
+          "seen_flags": 0,
+          "flags_and_last_report_writes": false,
+          "emit_trace_notify_returns_true_at_none": true
+        }
+      ]
+    },
+    {
+      "tcp_flags": 17,
+      "results": [
+        {
+          "origin": "native",
+          "report_mask": 2,
+          "seen_flags": 0,
+          "flags_and_last_report_writes": false,
+          "emit_trace_notify_returns_true_at_none": true
+        },
+        {
+          "origin": "retained_agent",
+          "report_mask": 7,
+          "seen_flags": 1,
+          "flags_and_last_report_writes": true,
+          "emit_trace_notify_returns_true_at_none": true
+        }
+      ]
+    },
+    {
+      "tcp_flags": 18,
+      "results": [
+        {
+          "origin": "native",
+          "report_mask": 2,
+          "seen_flags": 2,
+          "flags_and_last_report_writes": true,
+          "emit_trace_notify_returns_true_at_none": true
+        },
+        {
+          "origin": "retained_agent",
+          "report_mask": 7,
+          "seen_flags": 2,
+          "flags_and_last_report_writes": true,
+          "emit_trace_notify_returns_true_at_none": true
+        }
+      ]
+    },
+    {
+      "tcp_flags": 20,
+      "results": [
+        {
+          "origin": "native",
+          "report_mask": 2,
+          "seen_flags": 0,
+          "flags_and_last_report_writes": false,
+          "emit_trace_notify_returns_true_at_none": true
+        },
+        {
+          "origin": "retained_agent",
+          "report_mask": 7,
+          "seen_flags": 4,
+          "flags_and_last_report_writes": true,
+          "emit_trace_notify_returns_true_at_none": true
+        }
+      ]
+    }
+  ]
+}

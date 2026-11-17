@@ -3851,3 +3851,86 @@ BCC completed at **10:06:10 UTC**. The breadth round continues with
 Cilium, then Tetragon, Tracee and Katran. PERF ran only retained-data and
 source readers; all production changes and the optimization ledger remain
 with the coordinator.
+
+
+### Cilium input alignment: guarded defaults, numeric settings and state writes
+
+Source follow-up to coordinator decision `26dac33e1`, before its planned
+producer change. `vendor/bpf/Makefile:74–97,251–267` still passes the
+CILIUM_MAX feature sets and sample-header include path. Two retained
+agent endpoint headers under the 2026-11-13 live-config capture both
+undefine MONITOR_AGGREGATION and define POLICY_AUDIT_MODE. Their node
+header records CT_REPORT_FLAGS=0x7. These are historical source inputs,
+not a new capture of the current guest.
+
+The include order matters. `bpf_lxc.c:9–11` includes node config before
+endpoint config; `include/bpf/config/node.h:16` includes node_config.h
+and `config/endpoint.h:14` includes ep_config.h. The sample node header
+sets monitor aggregation **only under #ifndef** at lines 107–109.
+The real endpoint undef then lets `lib/trace.h:61–62` choose NONE=0;
+the sample endpoint has no such undef. Current native's -D value 3 wins
+over the guarded sample default 5. It is not redefined to 5 at present.
+
+| Selected monitor input model | Effective value at trace consumer |
+| --- | ---: |
+| Current native command-line 3 + sample headers | 3 |
+| Remove the command-line define only | 5 |
+| Command-line undef only, before source includes | 5 |
+| Explicit numeric zero + current sample defaults | 0 |
+| Agent endpoint undef, followed by trace.h default | 0 |
+
+Thus removing the extra -D alone leaves aggregation enabled. Numeric
+zero is suitable **for this setting**: its real consumers compare the
+value, including >=RX and >=ACTIVE_CT at `trace.h:181,203`. When zero,
+those two suppression conditions are false in the TRACE_NOTIFY-enabled
+path. This differs from feature switches checked with #ifdef/defined:
+for example `bpf_xdp.c:96` tests ENABLE_NODEPORT_ACCELERATION and
+`bpf_lxc.c:773` tests TUNNEL_MODE by presence. Defining those as zero
+still defines them. Align the loaded object's actual feature presence,
+not a universal list of =0 definitions or the union of all seven P
+object options. The common O3/machine flag policy remains separate from
+upstream per-object feature configuration.
+
+A second concrete difference survives making monitor level zero.
+Current native CILIUM_MAX sets **CT_REPORT_FLAGS=0x2**, while the retained
+agent node header sets **0x7**. `lib/conntrack.h:167–185` masks incoming
+TCP flags and ORs them with flags already seen. Its branch at 217–229
+writes the accumulated flags and last-report time when the masked set
+changes, and returns a monitor length. These are persistent map-state
+writes, not just trace-event filtering. With zero accumulated flags and
+an unexpired report interval, FIN (0x1) or RST (0x4) causes that update
+under mask 0x7 and not under mask 0x2; SYN (0x2) updates under both.
+At aggregation NONE, the trace consumer can return true in either case
+while the conntrack state work still differs.
+
+Other selected legacy constants also have direct consumers. The sample
+TCP connection/service lifetimes are **21,600** versus **8,000** in the
+retained agent node header; `conntrack.h:247–259` chooses them for
+established TCP and line 176 writes the resulting lifetime. This is a
+source/data difference, not a claim that expiry happened within a timed
+run or that every constant changes its dynamic path. Similarly the
+sample IPv4 gateway is a literal macro, but the shown use at
+`nodeport.h:2566–2575` is under TUNNEL_MODE: it need not survive into an
+object whose corrected flags remove that branch.
+
+Keep legacy literal macros distinct from the modern CONFIG route.
+`lib/static_data.h:44–48,65–68` declares volatile __config_ globals and
+uses direct global reads in native C. Legacy lifetime/gateway macros
+are preprocessor constants; binding a CONFIG global alone does not
+change a separate literal use. Conversely, differences in map-declaration
+size macros are not automatically executed-work differences when the
+loader binds the actual maps. Follow concrete consumers rather than
+requiring all raw macro text to match.
+
+[cilium_config_inventory.py](cilium_config_inventory.py) records selected
+raw directives and finite models in
+[cilium-config-inputs.json](cilium-config-inputs.json): five monitor input
+cases, RX/other observation decisions, and eight TCP-flag examples for
+the report masks. It performs no full preprocessing, native compilation,
+packet execution or runtime-config proof. The original agent headers
+remain in their raw capture; no header/source copy or edit was made.
+These findings refine the phase-1 switch alignment and existing packet/
+config comparison, rather than adding a new macro checker, gate or
+benchmark requirement. No performance gain or complete equal-work claim
+is assigned to this source model. Production changes remain with the
+coordinator after the clock image stage.
