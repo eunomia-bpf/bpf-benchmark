@@ -55,6 +55,9 @@ global world, retaining global permissions and the old producer frontier.
 The [register storage proof](results/m5-register-storage/README.md) now carries
 actual roots, 62 writable cells, SP data and allocation separation through that
 same 98-visit construction; observer APIs project the stronger witnesses.
+The [scalar writer contract](results/m5-register-write/README.md) executes the
+actual 67-transition procedure for ordinary GPRs at widths 4 and 8, derives its
+two stores from those permissions, and preserves other cells and caller memory.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 

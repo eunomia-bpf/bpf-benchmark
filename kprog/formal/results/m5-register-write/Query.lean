@@ -1,0 +1,9 @@
+import KProgFormal.ClightRefinement.Arm64RegisterWrite
+#check KProgFormal.ClightRefinement.Arm64RegisterWrite.execute_stores
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterWrite.execute_stores
+#check KProgFormal.ClightRefinement.Arm64RegisterWrite.write
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterWrite.write
+#check KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.local_load
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.local_load
+#check KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.other_cell
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.other_cell

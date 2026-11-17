@@ -1,0 +1,144 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-register-write",
+  "focused": {
+    "exit": 0,
+    "jobs": 173,
+    "log": "focused30.log"
+  },
+  "public_queries": {
+    "exit": 0,
+    "theorems": 4,
+    "log": "Query-1.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64RegisterWrite.execute_stores": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64RegisterWrite.write": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.local_load": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.other_cell": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "procedure": {
+    "source": "Arm64Program.f_kprog_arm64_program_write",
+    "destinations": "Fin31 ordinary GPRs",
+    "widths": [
+      4,
+      8
+    ],
+    "actual_transitions_each": 67,
+    "arguments": [
+      "entry pointer",
+      "64bit destination",
+      "64bit value",
+      "uchar width"
+    ],
+    "eager_SP_read": true,
+    "stores": [
+      "Mint64 zero-extended32 or full64",
+      "Mint8unsigned scalar tag0"
+    ],
+    "source_parts": "extracted export; assembled body checked by rfl",
+    "proof": "67 imported doStep_sound steps, kernel checked"
+  },
+  "effects": [
+    "word/tag readback",
+    "caller raw contents/both permission maps below original producer frontier",
+    "exact access map and unchanged nextblock",
+    "all other register-cell loads for any chunk/offset",
+    "all differently named allocated producer-local loads"
+  ],
+  "whole_lake_build": {
+    "exit": 0,
+    "jobs": 301,
+    "log": "lake-build1.log",
+    "timing_lock": "shared"
+  },
+  "export_comparison": {
+    "exit": 0,
+    "baseline": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_byte_identical": true,
+    "log": "export-parity1.json"
+  },
+  "attempt_exits": {
+    "focused1": 1,
+    "focused2": 1,
+    "focused3": 1,
+    "focused4": 1,
+    "focused5": 1,
+    "focused6": 1,
+    "focused7": 1,
+    "focused8": 1,
+    "focused9": 1,
+    "focused10": 1,
+    "focused11": 1,
+    "focused12": 1,
+    "focused13": 1,
+    "focused14": 1,
+    "focused15": 1,
+    "focused16": 1,
+    "focused17": 1,
+    "focused18": 1,
+    "focused19": 1,
+    "focused20": 1,
+    "focused21": 1,
+    "focused22": 1,
+    "focused23": 1,
+    "focused24": 1,
+    "focused25": 1,
+    "focused26": 1,
+    "focused27": 1,
+    "focused28": 0,
+    "focused29": 0,
+    "focused30": 0
+  },
+  "attempt_notes": "Exploratory 1-27 retained: symbolic one-shot simplification exceeded normal limits; source-cache, per-transition tactic syntax/hygiene, parameterized pointer-type normalization, source integer constants, table union aliases, casts and store-premise normalization were repaired without raising budgets. 28 executes both complete paths; 29 adds public store/effect laws; 30 removes unused scaffolding and shares source extraction. Full Lake ran once on final source.",
+  "count_query": {
+    "log": "count1.log",
+    "exit": 0,
+    "purpose": "metadata only; actual doStep count67 for both widths; not theorem evidence"
+  },
+  "limits": {
+    "heartbeats": 200000,
+    "recursion_depth": 512,
+    "workers": 1,
+    "address_space_GiB": 32,
+    "CPUs": [
+      17,
+      18
+    ]
+  },
+  "last_complete_make_check": {
+    "exit": 0,
+    "commit": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "rerun": false,
+    "reason": "Lean-only; C/runtime unchanged; fresh Lake and make check still required at M5/M6 closure"
+  },
+  "next": "preserved borrowed-entry storage and mature native GPR-update relation from this same procedure result; actual caller/control edge separately",
+  "complete_ISA_handler_refinements": 0,
+  "M5": "open",
+  "M6": "open"
+}
