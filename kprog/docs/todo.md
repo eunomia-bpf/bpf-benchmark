@@ -39,6 +39,8 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-17T05:05:44Z（run2 结果和下一项）**：O3 下 probe_read 剩余字节 4/2/1 一步之后，每次调用 OTel 1.098x、BCC 1.013x、Tetragon 1.098x（第一次计时）、Tracee 1.145x、Katran 1.040x，五个工作量相同的应用几何平均 1.078x；Cilium 2.995x 两臂配置不同，不计（probe-tails-20261117/README.md）。下一项零余数判断提前和 Makefile 的真实输入已提交（0dcf97880，链接器 40 个测试、probe_read 主机向量全部通过），zero-remainder-20261117/run.sh 在 OTel、BCC、Tracee 上计时。
+
 **协调者 2026-11-17T04:21:19Z（核实 perf 03:37–04:16 审阅后的决定）**：
 1. vendor/bpf/Makefile 补上真实输入：kprog-perf-context-lto 依赖它 include 的 native_loader_lto.hpp、bpf_function_bodies.hpp、runtime_bpf_callee.hpp；Cilium 原生对象依赖 core-compat.h 和 answers/cilium.h；OTel 编译单元依赖 core-compat.h（perf c55f8cdf6）。run2 计时结束后和“零余数判断提前”一起进下一个镜像，依赖本身保持生成的代码原样。
 2. SMAP：按启动时的 CPU 能力在链接时选定 STAC/CLAC，加上常量大小，保存的寄存器从 5 个减到 3 个（perf 9a3a369f8）；排在零余数判断之后，作为“probe_read 按启动事实特化”一项。
