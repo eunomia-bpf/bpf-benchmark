@@ -294,11 +294,19 @@ $(NATIVE_IR_LINK): $(ROOT)/kprog/x86/link_embedded_ir.cpp
 	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -Wall -Wextra -Wno-unused-parameter "$<" -o "$@" \
 		$$(llvm-config-18 --link-static --ldflags --libs core irreader linker bitwriter support --system-libs)
 
-# The loader runs this compiler for perf-event context programs; it ships in the stage.
+# The loader runs this compiler at load time; it ships in the stage. It optimizes at the -O level of
+# NATIVE_CFLAGS, so P and its load-time LTO follow one policy; the level file rebuilds it when that level changes.
+NATIVE_OPT_LEVEL := $(patsubst -%,%,$(firstword $(filter -O%,$(NATIVE_CFLAGS))))
 PERF_CONTEXT_LTO ?= $(NATIVE_STAGE_ROOT)/kprog-perf-context-lto
-$(PERF_CONTEXT_LTO): $(ROOT)/kprog/x86/perf_context_lto.cpp
+PERF_CONTEXT_LTO_LEVEL := $(BUILD)/$(ARCH)/kprog-perf-context-lto.level
+.PHONY: FORCE
+FORCE:
+$(PERF_CONTEXT_LTO_LEVEL): FORCE
 	install -d "$(dir $@)"
-	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -fexceptions -Wall -Wextra -Wno-unused-parameter \
+	echo "$(NATIVE_OPT_LEVEL)" | cmp -s - "$@" || echo "$(NATIVE_OPT_LEVEL)" > "$@"
+$(PERF_CONTEXT_LTO): $(ROOT)/kprog/x86/perf_context_lto.cpp $(PERF_CONTEXT_LTO_LEVEL)
+	install -d "$(dir $@)"
+	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -fexceptions -Wall -Wextra -Wno-unused-parameter -DNATIVE_LTO_OPT_$(NATIVE_OPT_LEVEL) \
 		-I$(ROOT)/vendor/libbpf/include/uapi -I$(ROOT)/runner/build-llvmbpf/vendor/libbpf/prefix/include "$<" -o "$@" \
 		$$(llvm-config-18 --link-static --ldflags --libs core irreader analysis support passes native object linker --system-libs) \
 		$(ROOT)/runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz

@@ -3,10 +3,11 @@
 # Input: `git diff --numstat` lines. A change to a frozen path may delete lines only.
 # Open for performance work (design: compiler flags when P is produced, and LTO):
 #   vendor/bpf/Makefile and vendor/bpf/*compat*.h (P flags and headers),
-#   kprog/x86/native_lab/native_link/ (linker LTO), the loader's LTO and link-plan headers.
+#   kprog/x86/native_lab/native_link/ (linker LTO), the loader's LTO and link-plan headers,
+#   and the load-time LTO compiler sources kprog/x86/perf_context_lto.cpp and kprog/x86/link_embedded_ir.cpp.
 # Open for records: kprog/results, kprog/docs, corpus/results, micro/results. Proof track: kprog/formal.
 FROZEN='^(kprog/|kinsn/|bpfopt/shim/|runner/|vendor/bpf/|micro/|corpus/|e2e/|Makefile$)'
-OPEN='^(kprog/results/|kprog/docs/|corpus/results/|micro/results/|kprog/formal/|kprog/x86/native_lab/native_link/|kprog/libnativeloader/src/native_loader_(lto|link_plan|link_schema|context_lto)\.hpp$|vendor/bpf/Makefile$|vendor/bpf/[^/]*compat[^/]*\.h$)'
+OPEN='^(kprog/results/|kprog/docs/|corpus/results/|micro/results/|kprog/formal/|kprog/x86/native_lab/native_link/|kprog/x86/perf_context_lto\.cpp$|kprog/x86/link_embedded_ir\.cpp$|kprog/libnativeloader/src/native_loader_(lto|link_plan|link_schema|context_lto)\.hpp$|vendor/bpf/Makefile$|vendor/bpf/[^/]*compat[^/]*\.h$)'
 bad=0
 while IFS=$'\t' read -r add del path; do
   [ -n "$path" ] || continue

@@ -34,6 +34,24 @@ static cl::opt<std::string> FunctionBodies("bpf-function-bodies");
 static cl::opt<std::string> ImmutableGlobals("immutable-globals");
 static cl::opt<std::string> MapTypes("map-types");
 
+// The -O level of NATIVE_CFLAGS in vendor/bpf/Makefile, so P and its load-time LTO follow one policy.
+#if defined(NATIVE_LTO_OPT_Os)
+static const OptimizationLevel NativeOptLevel = OptimizationLevel::Os;
+static const CodeGenOptLevel NativeCodegenLevel = CodeGenOptLevel::Default;
+#elif defined(NATIVE_LTO_OPT_Oz)
+static const OptimizationLevel NativeOptLevel = OptimizationLevel::Oz;
+static const CodeGenOptLevel NativeCodegenLevel = CodeGenOptLevel::Default;
+#elif defined(NATIVE_LTO_OPT_O2)
+static const OptimizationLevel NativeOptLevel = OptimizationLevel::O2;
+static const CodeGenOptLevel NativeCodegenLevel = CodeGenOptLevel::Default;
+#elif defined(NATIVE_LTO_OPT_O1)
+static const OptimizationLevel NativeOptLevel = OptimizationLevel::O1;
+static const CodeGenOptLevel NativeCodegenLevel = CodeGenOptLevel::Less;
+#else
+static const OptimizationLevel NativeOptLevel = OptimizationLevel::O3;
+static const CodeGenOptLevel NativeCodegenLevel = CodeGenOptLevel::Aggressive;
+#endif
+
 struct NativeMapType {
   int64_t type = 0, inner = 0;
   uint64_t value_size = 0, inner_value_size = 0;
@@ -312,7 +330,7 @@ int main(int argc, char **argv) {
   TargetOptions Options;
   std::unique_ptr<TargetMachine> Machine(Target->createTargetMachine(
       M->getTargetTriple(), sys::getHostCPUName(), "", Options,
-      Reloc::PIC_, std::nullopt, CodeGenOptLevel::Aggressive));
+      Reloc::PIC_, std::nullopt, NativeCodegenLevel));
   M->setDataLayout(Machine->createDataLayout());
   auto Folded = foldImmutableGlobals(*M, ImmutableGlobals);
   if (!Folded) { errs() << toString(Folded.takeError()) << '\n'; return 1; }
@@ -324,7 +342,7 @@ int main(int argc, char **argv) {
   PB.registerFunctionAnalyses(FAM); PB.registerLoopAnalyses(LAM);
   PB.crossRegisterProxies(LAM, FAM, CGAM, MAM);
   // Embedded cc1 IR precedes promotion/inlining; expose its context uses first.
-  PB.buildPerModuleDefaultPipeline(OptimizationLevel::O3).run(*M, MAM);
+  PB.buildPerModuleDefaultPipeline(NativeOptLevel).run(*M, MAM);
   try {
     unsigned Converted = 0;
     if (ProgType == BPF_PROG_TYPE_PERF_EVENT) {
@@ -378,7 +396,7 @@ int main(int argc, char **argv) {
     std::error_code EC;
     ToolOutputFile Out(Output, EC, sys::fs::OF_None);
     if (EC) { errs() << EC.message() << '\n'; return 1; }
-    PB.buildPerModuleDefaultPipeline(OptimizationLevel::O3).run(*M, MAM);
+    PB.buildPerModuleDefaultPipeline(NativeOptLevel).run(*M, MAM);
     legacy::PassManager Codegen;
     if (Machine->addPassesToEmitFile(Codegen, Out.os(), nullptr, CodeGenFileType::ObjectFile)) {
       errs() << "target cannot emit a native object\n"; return 1;
