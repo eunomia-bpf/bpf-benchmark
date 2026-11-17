@@ -40,12 +40,13 @@ main() {
     cp "$raw/cargo.log" "$out/host-output.txt"
     cp "$raw/payload-comparison.log" "$out/payload-comparison.txt"
     cp "$raw/memory-comparison.log" "$out/memory-comparison.txt"
-    cp "$raw/sizes.txt" "$raw/sizes-and-loads.json" "$raw/load-comparison.log" "$out/"
+    cp "$raw/sizes.txt" "$raw/sizes-and-loads.json" "$out/"
+    cp "$raw/load-comparison.log" "$out/load-comparison.txt"
     printf '%s raw=%s\n' "$(date -u +%FT%TZ)" "$raw" > "$out/host-location.txt"
     printf '\n%s — Probe routine-local branch sizing uses the existing iced-x86 encoder before user/kernel scalar/string builders return bytes and recovery metadata. Instruction-offset maps move protected load sites and nested helper relocations together; existing append shifts to global offsets once. External E8 slots, protected-load lengths/R11 destination and all read policy/fault/zeroing behavior stay intact. Compat dispatch external jumps are unchanged. No new runtime check, limit, flag, resolver or module/schema change. Full host suite and 24 synthetic branch/call/load/append cases pass; mapped source-load bytes are compared against retained forms, with other leaves and memory bodies identical. Results: results/probe-short-branches-20261117; raw %s. Local sizes are not app installed bytes or per-call gains; Omp schedules image/check/target timing with all LTO on.\n' "$(date -u +%FT%TZ)" "$raw" >> kprog/docs/optimizations.md
     local paths=(kprog/x86/native_lab/native_link/src/x86_probe_read.rs kprog/docs/optimizations.md \
         "$out/host-output.txt" "$out/payload-comparison.txt" "$out/memory-comparison.txt" \
-        "$out/sizes.txt" "$out/sizes-and-loads.json" "$out/load-comparison.log" "$out/host-location.txt")
+        "$out/sizes.txt" "$out/sizes-and-loads.json" "$out/load-comparison.txt" "$out/host-location.txt")
     git status --short --branch --untracked-files=no > "$raw/git-status.txt"
     git diff --check -- "${paths[@]}"
     git add -- "${paths[@]}"
