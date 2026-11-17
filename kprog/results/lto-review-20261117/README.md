@@ -2446,3 +2446,53 @@ snapshot. OTel's −180-byte installed sum is distinct from the reported
 BCC's unchanged sums do not independently prove byte identity or equal
 dynamic work. The remaining checks and timing continue in the existing
 coordinator batch; no guest or extra confirmation was run by PERF.
+
+## Constant-read integration can reuse the existing resolved branch targets
+
+Source refinement for the scheduled constant-size step, 2026-11-17. Section
+1 already identifies the retained OTel unwinder's jump tables as the reason
+`memory::constants` loses its size facts. The current source provides a
+small integration route; it does not need another ELF table resolver or a
+new general CFG framework:
+
+- `x86_helper_provenance.rs:24–38` already calls
+  `readonly_relocs::control_targets` and returns the result in
+  `Calls.branch_targets`. The resolver at
+  `x86_readonly_relocs.rs:238–266` handles code-table relocation bases and
+  neighbouring-table limits.
+- `x86.rs:1119–1121` currently computes memory constants **before** those
+  helper facts. Reordering these existing computations makes the resolved
+  destinations available to the existing constant worklist.
+- `x86.rs:1159–1161` already passes the same destinations to
+  `known_maps::arguments`. Its source at `x86_known_maps.rs:20–24` even
+  distinguishes resolved from unresolved indirect branches. Memory
+  analysis currently makes no such distinction at
+  `x86_memory.rs:155–162`, so it abandons facts for both.
+
+The target map uses **absolute input-symbol IPs**: its branch keys match
+the decoder's `Instruction::ip()`, and its target values belong in the
+same input address space. Constant-analysis results instead use
+`instruction.ip() - symbol.address` for call-site keys, which the helper
+rewriter consumes as `local_ip`. Passing the targets after instruction
+rewriting, confusing those two key spaces, or adding the symbol base a
+second time would invalidate the reasoning.
+
+Reuse the branch destinations, **not the helper-ID value domain**.
+`x86_helper_provenance.rs:83–88` seeds immediate IDs only up to 255 and
+copies their sets; its joins at lines 122–127 union alternatives so that
+one indirect call can legitimately denote several helpers. That domain
+does not assert that a size register has one constant value. The memory
+worklist already handles general MOV constants, XOR-zero, partial writes,
+call clobbers and same-value predecessor intersection
+(`x86_memory.rs:178–224,250–257`). Its intersection semantics are the
+appropriate ones for selecting one specialized size: paths assigning
+8 and 16 must not become a single-size 8 or 16 read. The existing handling
+of unresolved branches and internal calls can stay; no new refusal or
+runtime predicate is needed.
+
+This narrows the earlier source suggestion to data already being computed.
+It does not yet prove the 24 historical nearby literals through that
+worklist or give their dynamic frequencies. It introduces no analyzer,
+production source edit, emitted candidate, build, guest, additional check
+or new measured gain. Final specialized read sharing and installed bytes
+remain part of the coordinator's implementation and timing work.
