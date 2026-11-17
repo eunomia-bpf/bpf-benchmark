@@ -40,7 +40,22 @@ for mode in ('control', 'query'):
         records.append(dict(symbol=row['symbol'], capture=row['capture'],
                             linker_returncode=row['linker_returncode'],
                             used_named_helpers=used, targets=targets))
+    guest_log = (raw / mode / 'guest.log').read_text()
+    runs = re.findall(r'"artifact_run_dir": "([^"]+)"', guest_log)
+    corpus_run = Path(runs[-1]) if runs else None
+    app = json.loads((corpus_run / 'details/apps/bcc__set.json').read_text()) if corpus_run else None
+    phase_counts = {}
+    if app:
+        for phase in ('baseline', 'post_rejit'):
+            programs = app.get(phase, {}).get('bpf', {})
+            phase_counts[phase] = dict(programs=len(programs),
+                total_calls=sum(p['run_cnt_delta'] for p in programs.values()),
+                by_name=[dict(id=p['id'], name=p['name'], type=p['type'],
+                              calls=p['run_cnt_delta']) for p in programs.values()])
     reports[mode] = dict(guest_returncode=index['guest_returncode'],
+                         corpus_run=str(corpus_run) if corpus_run else None,
+                         app_status=app.get('status') if app else None,
+                         phase_counts=phase_counts,
                          capture_errors=index['capture_errors'], requests=records)
 
 control = defaultdict(list)
