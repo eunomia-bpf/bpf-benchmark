@@ -1,0 +1,19 @@
+import KProgFormal.ClightRefinement.Arm64GlobalMemory
+#check KProgFormal.ClightRefinement.Arm64GlobalMemory.init_mem
+#print axioms KProgFormal.ClightRefinement.Arm64GlobalMemory.init_mem
+#check KProgFormal.ClightRefinement.Arm64GlobalMemory.initial_next
+#print axioms KProgFormal.ClightRefinement.Arm64GlobalMemory.initial_next
+#check KProgFormal.ClightRefinement.Arm64GlobalMemory.initial_access
+#print axioms KProgFormal.ClightRefinement.Arm64GlobalMemory.initial_access
+#check KProgFormal.ClightRefinement.Arm64GlobalMemory.function_permissions
+#print axioms KProgFormal.ClightRefinement.Arm64GlobalMemory.function_permissions
+#check KProgFormal.ClightRefinement.Arm64GlobalMemory.string_access
+#print axioms KProgFormal.ClightRefinement.Arm64GlobalMemory.string_access
+#check KProgFormal.ClightRefinement.Arm64GlobalMemory.stderr_access
+#print axioms KProgFormal.ClightRefinement.Arm64GlobalMemory.stderr_access
+#check KProgFormal.ClightRefinement.Arm64GlobalMemory.entry_preserves_globals
+#print axioms KProgFormal.ClightRefinement.Arm64GlobalMemory.entry_preserves_globals
+#check KProgFormal.ClightRefinement.Arm64GlobalMemory.local_after_globals
+#print axioms KProgFormal.ClightRefinement.Arm64GlobalMemory.local_after_globals
+#check KProgFormal.ClightRefinement.Arm64GlobalMemory.local_global_disjoint
+#print axioms KProgFormal.ClightRefinement.Arm64GlobalMemory.local_global_disjoint

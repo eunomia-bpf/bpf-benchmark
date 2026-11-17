@@ -1,0 +1,80 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-global-memory",
+  "focused": {
+    "log": "focused7.log",
+    "exit": 0,
+    "jobs": 146
+  },
+  "public_queries": {
+    "log": "Query-1.log",
+    "exit": 0,
+    "theorems": 9,
+    "axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "source_and_resource_queries": {
+    "log": "Next-1.log",
+    "exit": 0,
+    "functions": 186,
+    "data_globals": 2,
+    "global_frontier": 189,
+    "string": {
+      "block": 20,
+      "bytes": 48,
+      "permission": "Readable"
+    },
+    "stderr": {
+      "block": 61,
+      "bytes": 0,
+      "permission": "none"
+    },
+    "actual_function_blocks_checked": [
+      64,
+      184,
+      185,
+      186,
+      188
+    ],
+    "string_boundaries_checked": [
+      -1,
+      47,
+      48
+    ],
+    "actual_entry_local_allocation_checked": true
+  },
+  "whole_lake_build": {
+    "log": "lake-build1.log",
+    "exit": 0,
+    "jobs": 288,
+    "timing_lock": "shared"
+  },
+  "export_comparison": {
+    "log": "export-parity1.json",
+    "exit": 0,
+    "baseline": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_byte_identical": true
+  },
+  "limits": {
+    "heartbeats": 200000,
+    "recursion_depth": 512,
+    "workers": 1,
+    "address_space_GiB": 32,
+    "CPUs": [
+      17,
+      18
+    ]
+  },
+  "last_complete_make_check": {
+    "exit": 0,
+    "commit": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "rerun": false
+  },
+  "complete_ISA_handler_refinements": 0,
+  "M5": "open",
+  "M6": "open"
+}
