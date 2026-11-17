@@ -121,6 +121,117 @@ theorem allocated_local_storage {ce : CC.CompositeEnv} {m m1 : CC.Mem} {e : CC.E
   have frame := LocalFrame.allocVariables halloc initial
   exact ⟨frame.live, frame.distinct⟩
 
+/-- A successful free-list changes permissions only. -/
+theorem free_list_shape {before after : CC.Mem} {blocks : List (CC.Block × CC.Z × CC.Z)}
+    (freed : CC.Mem.freeList before blocks = some after) :
+    after.contents = before.contents ∧ after.nextblock = before.nextblock := by
+  induction blocks generalizing before with
+  | nil =>
+    simp only [CC.Mem.freeList, Option.some.injEq] at freed
+    subst after
+    exact ⟨rfl, rfl⟩
+  | cons row rest ih =>
+    rcases row with ⟨block, lo, hi⟩
+    cases step : CC.Mem.free before block lo hi with
+    | none => simp [CC.Mem.freeList, step] at freed
+    | some middle =>
+      simp only [CC.Mem.freeList, step] at freed
+      obtain ⟨contents, next⟩ := ih freed
+      rw [CC.Mem.free_result step] at contents next
+      exact ⟨contents, next⟩
+
+private theorem free_list_denied {before after : CC.Mem}
+    {blocks : List (CC.Block × CC.Z × CC.Z)}
+    (freed : CC.Mem.freeList before blocks = some after)
+    (block : CC.Block) (ofs : CC.Z) (kind : CC.PermKind) (permission : CC.Permission)
+    (denied : CC.Mem.perm before block ofs kind permission = false) :
+    CC.Mem.perm after block ofs kind permission = false := by
+  induction blocks generalizing before with
+  | nil =>
+    simp only [CC.Mem.freeList, Option.some.injEq] at freed
+    subst after
+    exact denied
+  | cons row rest ih =>
+    rcases row with ⟨freedBlock, lo, hi⟩
+    cases step : CC.Mem.free before freedBlock lo hi with
+    | none => simp [CC.Mem.freeList, step] at freed
+    | some middle =>
+      simp only [CC.Mem.freeList, step] at freed
+      apply ih freed
+      rw [CC.Mem.free_result step]
+      by_cases same : block = freedBlock
+      · subst block
+        by_cases inside : lo ≤ ofs ∧ ofs < hi
+        · exact CC.Mem.perm_free_inside before freedBlock lo hi ofs kind permission inside.1 inside.2
+        · have outside : ofs < lo ∨ hi ≤ ofs := by
+            by_cases lower : lo ≤ ofs
+            · exact .inr (Int.le_of_not_gt (fun upper => inside ⟨lower, upper⟩))
+            · exact .inl (Int.lt_of_not_ge lower)
+          rw [CC.Mem.perm_free_outside before freedBlock lo hi ofs kind permission outside]
+          exact denied
+      · rw [CC.Mem.perm_free_other before freedBlock lo hi block same ofs kind permission]
+        exact denied
+
+/-- Every range in the actual free-list loses both Cur and Max permissions;
+later frees cannot restore access to an already freed local. -/
+theorem free_list_released {before after : CC.Mem}
+    {blocks : List (CC.Block × CC.Z × CC.Z)}
+    (freed : CC.Mem.freeList before blocks = some after) :
+    ∀ row ∈ blocks, ∀ ofs, row.2.1 ≤ ofs → ofs < row.2.2 →
+      ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false := by
+  induction blocks generalizing before with
+  | nil => intro row member; cases member
+  | cons head rest ih =>
+    rcases head with ⟨block, lo, hi⟩
+    cases step : CC.Mem.free before block lo hi with
+    | none => simp [CC.Mem.freeList, step] at freed
+    | some middle =>
+      simp only [CC.Mem.freeList, step] at freed
+      intro row member ofs lower upper kind permission
+      rcases List.mem_cons.mp member with same | later
+      · subst row
+        apply free_list_denied freed block ofs kind permission
+        rw [CC.Mem.free_result step]
+        exact CC.Mem.perm_free_inside before block lo hi ofs kind permission lower upper
+      · exact ih freed row later ofs lower upper kind permission
+
+/-- Actual Freeable local ranges suffice for return.  Local contents and other
+blocks may change arbitrarily; the free-list consumes the declared ranges while
+retaining all caller bytes and permission maps. -/
+theorem deallocate_live_locals {ce : CC.CompositeEnv} {m allocated before : CC.Mem}
+    {e : CC.Env} {vars : List (CC.Ident × CC.Ty)}
+    (halloc : CC.AllocVariables ce CC.emptyEnv m vars e allocated)
+    (owned : ∀ id value, e.get id = some value →
+      CC.Mem.rangePerm before value.1 0 (CC.sizeof ce value.2) .Cur .Freeable = true) :
+    ∃ after, CC.Mem.freeList before (CC.blocksOfEnv ce e) = some after ∧
+      FrameBelow m.nextblock before after ∧ after.contents = before.contents ∧
+      after.nextblock = before.nextblock ∧
+      (∀ row ∈ CC.blocksOfEnv ce e, ∀ ofs, row.2.1 ≤ ofs → ofs < row.2.2 →
+        ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) := by
+  obtain ⟨live, separate⟩ := allocated_local_storage halloc
+  have rows := CC.PTree.forall_elements_of_get
+    (fun v : CC.Block × CC.Ty => m.nextblock.toNat ≤ v.1.toNat ∧
+      v.1.toNat < allocated.nextblock.toNat ∧
+      CC.Mem.rangePerm before v.1 0 (CC.sizeof ce v.2) .Cur .Freeable = true) e
+      (fun id value binding => ⟨(live id value binding).1,
+        (live id value binding).2.1, owned id value binding⟩)
+  have distinct := CC.PTree.pairwise_elements_of_get
+    (fun v w : CC.Block × CC.Ty => v.1 ≠ w.1) e separate
+  have ranges : ∀ row ∈ CC.blocksOfEnv ce e,
+      CC.Mem.rangePerm before row.1 row.2.1 row.2.2 .Cur .Freeable = true := by
+    intro row member
+    rcases List.mem_map.mp member with ⟨binding, present, rfl⟩
+    exact (rows binding present).2.2
+  have pairwise : (CC.blocksOfEnv ce e).Pairwise (fun p q => p.1 ≠ q.1) :=
+    distinct.map (CC.blockOfBinding ce) (fun _ _ h => h)
+  have fresh : ∀ row ∈ CC.blocksOfEnv ce e, m.nextblock.toNat ≤ row.1.toNat := by
+    intro row member
+    rcases List.mem_map.mp member with ⟨binding, present, rfl⟩
+    exact (rows binding present).1
+  obtain ⟨after, freed⟩ := CC.freeList_isSome_of_rangePerm (CC.blocksOfEnv ce e) before ranges pairwise
+  obtain ⟨contents, next⟩ := free_list_shape freed
+  exact ⟨after, freed, FrameBelow.freeList fresh freed, contents, next, free_list_released freed⟩
+
 /-- The upstream allocator and free-list always complete for an initially
 empty local environment. No name, size, memory, or enumeration-order premise
 is imposed; any overwritten allocation stays outside the caller's old frame. -/
@@ -129,27 +240,8 @@ theorem deallocate_locals {ce : CC.CompositeEnv} {m m1 : CC.Mem} {e : CC.Env}
     (halloc : CC.AllocVariables ce CC.emptyEnv m vars e m1) :
     ∃ m2, CC.Mem.freeList m1 (CC.blocksOfEnv ce e) = some m2 ∧
       FrameBelow m.nextblock m m2 := by
-  obtain ⟨live, separate⟩ := allocated_local_storage halloc
-  have rows := CC.PTree.forall_elements_of_get
-    (fun v : CC.Block × CC.Ty => m.nextblock.toNat ≤ v.1.toNat ∧
-      v.1.toNat < m1.nextblock.toNat ∧
-      CC.Mem.rangePerm m1 v.1 0 (CC.sizeof ce v.2) .Cur .Freeable = true) e live
-  have distinct := CC.PTree.pairwise_elements_of_get
-    (fun v w : CC.Block × CC.Ty => v.1 ≠ w.1) e separate
-  have ranges : ∀ p ∈ CC.blocksOfEnv ce e,
-      CC.Mem.rangePerm m1 p.1 p.2.1 p.2.2 .Cur .Freeable = true := by
-    intro p hp
-    rcases List.mem_map.mp hp with ⟨row, hr, rfl⟩
-    exact (rows row hr).2.2
-  have pairwise : (CC.blocksOfEnv ce e).Pairwise (fun p q => p.1 ≠ q.1) := by
-    exact distinct.map (CC.blockOfBinding ce) (fun _ _ h => h)
-  have fresh : ∀ p ∈ CC.blocksOfEnv ce e, m.nextblock.toNat ≤ p.1.toNat := by
-    intro p hp
-    rcases List.mem_map.mp hp with ⟨row, hr, rfl⟩
-    exact (rows row hr).1
-  obtain ⟨m2, hfree⟩ := CC.freeList_isSome_of_rangePerm (CC.blocksOfEnv ce e) m1 ranges pairwise
-  exact ⟨m2, hfree, FrameBelow.trans
-    (FrameBelow.allocVariables halloc m.nextblock (Nat.le_refl _)).2
-    (FrameBelow.freeList fresh hfree)⟩
+  obtain ⟨after, freed, frame, _, _, _⟩ := deallocate_live_locals halloc
+    (fun id value binding => ((allocated_local_storage halloc).1 id value binding).2.2)
+  exact ⟨after, freed, ((FrameBelow.allocVariables halloc m.nextblock (Nat.le_refl _)).2).trans frame⟩
 
 end KProgFormal.ClightRefinement

@@ -1,0 +1,27 @@
+import KProgFormal.ClightRefinement.Arm64ProducerLifetime
+#print axioms KProgFormal.ClightRefinement.free_list_shape
+#check KProgFormal.ClightRefinement.free_list_shape
+#print axioms KProgFormal.ClightRefinement.free_list_released
+#check KProgFormal.ClightRefinement.free_list_released
+#print axioms KProgFormal.ClightRefinement.deallocate_live_locals
+#check KProgFormal.ClightRefinement.deallocate_live_locals
+#print axioms KProgFormal.ClightRefinement.deallocate_locals
+#check KProgFormal.ClightRefinement.deallocate_locals
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.consumer_source
+#check KProgFormal.ClightRefinement.Arm64Producer.consumer_source
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.consumer_argument
+#check KProgFormal.ClightRefinement.Arm64Producer.consumer_argument
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.consumer_arguments
+#check KProgFormal.ClightRefinement.Arm64Producer.consumer_arguments
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.consumer_ready
+#check KProgFormal.ClightRefinement.Arm64Producer.consumer_ready
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.consumer_call_with_binding
+#check KProgFormal.ClightRefinement.Arm64Producer.consumer_call_with_binding
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.consumer_temp_distinct
+#check KProgFormal.ClightRefinement.Arm64Producer.consumer_temp_distinct
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.producer_locals_live_of_access
+#check KProgFormal.ClightRefinement.Arm64Producer.producer_locals_live_of_access
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.header_caches_at_consumer_call
+#check KProgFormal.ClightRefinement.Arm64Producer.header_caches_at_consumer_call
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.consumer_return_releases_locals
+#check KProgFormal.ClightRefinement.Arm64Producer.consumer_return_releases_locals

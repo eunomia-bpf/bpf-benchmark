@@ -50,3 +50,8 @@ Raw attempts remain at /workspaces/kprog-raw/formal/m5-producer-vector-loop.
 Canonical C, all exports, pinned semantics and frozen benchmark paths are
 unchanged. Last complete native make check passed at 5236c0e96; it was not
 repeated for these Lean-only additions.
+
+Continuation: [the lifetime proof](../m5-producer-lifetime/README.md) now binds
+the actual call boundary under explicit callee lookup/type premises, and the
+three returning-continuation transitions that free the producer locals. A real
+linked consumer body and its resource preservation remain open.
