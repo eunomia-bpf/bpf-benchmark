@@ -11,7 +11,7 @@ fn mem(b:&mut Vec<u8>,op:&[u8],modrm:usize,offset:u32)->Result<()> {
     Ok(())
 }
 fn jmp(b:&mut Vec<u8>)->usize {b.push(0xe9);let at=b.len();b.extend_from_slice(&[0;4]);at}
-pub(super) fn routine(l:&RuntimeLpmLayout)->Result<(Vec<u8>,usize)> {
+pub(super) fn routine(l:&RuntimeLpmLayout,helper:u64)->Result<(Vec<u8>,Vec<RelocRecord>)> {
     let mut b=Vec::new();
     mem(&mut b,&[0x81,0xbf],1,l.map_type)?;b.extend_from_slice(&l.lpm_type.to_le_bytes());
     let other_type=append_x86_jcc_rel32(&mut b,0x85);
@@ -78,16 +78,20 @@ pub(super) fn routine(l:&RuntimeLpmLayout)->Result<(Vec<u8>,usize)> {
     b.extend_from_slice(&[0x31,0xc0,0xc3]);
     let fallback=b.len();patch_x86_rel32(&mut b,other_type,fallback)?;patch_x86_rel32(&mut b,other_size,fallback)?;
     b.extend_from_slice(&[0x48,0x83,0xec,8]);let call=b.len();b.extend_from_slice(&X86_HELPER_CALL_REL32_SLOT);
-    b.extend_from_slice(&[0x48,0x83,0xc4,8,0xc3]);Ok((b,call))
+    b.extend_from_slice(&[0x48,0x83,0xc4,8,0xc3]);
+    let nested=vec![RelocRecord{offset:call as u32,kind:1,target:helper}];
+    let (bytes,relocs,_)=probe_read::compact((b,nested,Vec::new()))?;
+    Ok((bytes,relocs))
 }
 pub(super) fn share(blob:&mut Vec<u8>,relocs:&mut Vec<RelocRecord>,layout:&RuntimeLpmLayout,
                     helper:u64)->Result<Option<(usize,usize)>> {
     let calls:Vec<_>=relocs.iter().filter(|r|r.kind==1&&r.target==helper).map(|r|r.offset as usize).collect();
     if calls.is_empty(){return Ok(None);}
-    let start=blob.len();let (bytes,call)=routine(layout)?;
+    let start=blob.len();let (bytes,nested)=routine(layout,helper)?;
     probe_read::redirect(blob,&calls,start)?;
     relocs.retain(|r|!(r.kind==1&&r.target==helper));blob.extend_from_slice(&bytes);
-    relocs.push(RelocRecord{offset:u32::try_from(start+call)?,kind:1,target:helper});Ok(Some((start,blob.len())))
+    for mut r in nested {r.offset=u32::try_from(start+r.offset as usize)?;relocs.push(r);}
+    Ok(Some((start,blob.len())))
 }
 
 #[cfg(all(test,target_arch="x86_64",target_os="linux"))]
@@ -133,7 +137,7 @@ mod tests {
                 max_prefixlen:56+pad,data_size:64+pad,child:8+pad,child_stride:8,
                 node_prefixlen:32+pad,node_flags:36+pad,node_data:48+pad,
                 key_prefixlen:pad,key_data:4+pad};
-            let (code,_)=routine(&l)?;
+            let (code,_)=routine(&l,0x1234)?;
             let mut map=[0u8;256];let mut node=[0u8;256];let mut key=[0u8;256];
             let put32=|bytes:&mut [u8],offset:u32,value:u32| bytes[offset as usize..offset as usize+4].copy_from_slice(&value.to_le_bytes());
             let put64=|bytes:&mut [u8],offset:u32,value:u64| bytes[offset as usize..offset as usize+8].copy_from_slice(&value.to_le_bytes());
@@ -180,7 +184,11 @@ mod tests {
             .arg(root.join("kprog/build/test-lpm-lookup.c")).arg("-o").arg(&driver).output()?;
         fs::write(out.join("compile.stdout"),&cc.stdout)?;fs::write(out.join("compile.stderr"),&cc.stderr)?;
         if !cc.status.success(){bail!("LPM fixture compile: {}",String::from_utf8_lossy(&cc.stderr));}
-        let (bytes,call)=routine(&layout)?;let binary=out.join("lpm.bin");fs::write(&binary,&bytes)?;
+        let (bytes,nested)=routine(&layout,0x1234)?;
+        assert_eq!(nested.len(),1);assert_eq!((nested[0].kind,nested[0].target),(1,0x1234));
+        let call=nested[0].offset as usize;
+        assert_eq!(&bytes[call..call+5],X86_HELPER_CALL_REL32_SLOT.as_slice());
+        let binary=out.join("lpm.bin");fs::write(&binary,&bytes)?;
         let run=std::process::Command::new(driver).arg(binary).arg(call.to_string()).output()?;
         fs::write(out.join("stdout"),&run.stdout)?;fs::write(out.join("stderr"),&run.stderr)?;
         assert!(run.status.success(),"LPM host: {} {}",run.status,String::from_utf8_lossy(&run.stderr));
@@ -195,6 +203,8 @@ mod tests {
             assert_eq!(site as i64+5+i64::from(rel),range.0 as i64);
         }
         assert_eq!(relocs.len(),1,"only the existing generic kernel call remains");
+        assert_eq!((relocs[0].offset as usize,relocs[0].target),(range.0+call,0x1234),
+            "sized helper slot must receive the shared leaf shift exactly once");
         assert_eq!(&blob[relocs[0].offset as usize..relocs[0].offset as usize+5],
                    X86_HELPER_CALL_REL32_SLOT.as_slice());
         Ok(())

@@ -109,7 +109,8 @@ pub(super) fn routine(l: &RuntimeKtimeLayout, mono_fast: u64) -> Result<(Vec<u8>
     b.extend_from_slice(&[0x48,0x83,0xec,0x08]); // sub rsp,8
     call(&mut b, &mut relocs, mono_fast);
     b.extend_from_slice(&[0x48,0x83,0xc4,0x08,0xc3]); // add rsp,8; ret
-    Ok((b, relocs))
+    let (bytes, relocs, _) = probe_read::compact((b, relocs, Vec::new()))?;
+    Ok((bytes, relocs))
 }
 
 /// Every bpf_ktime_get_ns call, bound to ktime_get_mono_fast_ns, reaches one shared leaf.
@@ -151,6 +152,11 @@ mod tests {
         let layout = fixture();
         let (bytes, relocs) = routine(&layout, 0x5000)?;
         assert_eq!(relocs.len(), 3);
+        assert_eq!(relocs.iter().map(|r|r.target).collect::<Vec<_>>(),[0x4000,0x4000,0x5000]);
+        for r in &relocs {
+            assert_eq!(&bytes[r.offset as usize..r.offset as usize+5],X86_HELPER_CALL_REL32_SLOT.as_slice(),
+                "sizing must preserve each external E8+zero patch slot");
+        }
         let mut text = relocs.len().to_string(); text.push(char::from(10));
         for r in &relocs { text.push_str(&format!("{} {}\n", r.offset, u32::from(r.target == 0x5000))); }
         fs::write(output.join("ktime.bin"), &bytes)?; fs::write(output.join("ktime.relocs"), text)?;
@@ -166,6 +172,10 @@ mod tests {
         for offset in [0usize, 5] {
             let rel = i32::from_le_bytes(blob[offset+1..offset+5].try_into()?);
             assert_eq!(offset as i64 + 5 + i64::from(rel), range.0 as i64);
+        }
+        for r in calls.iter().filter(|r|r.target!=0x9999) {
+            assert_eq!(&blob[r.offset as usize..r.offset as usize+5],X86_HELPER_CALL_REL32_SLOT.as_slice(),
+                "shared helper relocation must include the final leaf offset exactly once");
         }
         assert_eq!(calls.len(), 4, "the other call stays and the leaf brings its three calls");
         assert_eq!(calls.iter().filter(|r| r.target == 0x5000).count(), 1, "only the leaf's own fallback calls the kernel");

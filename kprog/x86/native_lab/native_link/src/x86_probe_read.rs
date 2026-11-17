@@ -364,7 +364,7 @@ pub(super) fn redirect(blob: &mut Vec<u8>, calls: &[usize], start: usize) -> Res
     Ok(())
 }
 
-fn compact(routine: (Vec<u8>, Vec<RelocRecord>, Vec<LoadSite>))
+pub(super) fn compact(routine: (Vec<u8>, Vec<RelocRecord>, Vec<LoadSite>))
     -> Result<(Vec<u8>, Vec<RelocRecord>, Vec<LoadSite>)> {
     let (bytes, mut relocs, mut sites) = routine;
     let mut decoder = Decoder::new(64, &bytes, DecoderOptions::NONE);
