@@ -18,16 +18,29 @@ static uintptr_t user_max = UINTPTR_MAX;
 /* boot_cpu_data: x86_capability words from 0 (SMAP stays off: STAC faults in user mode), x86_virt_bits at 40. */
 static uint32_t cpu[11];
 static unsigned char *code;
+static unsigned long code_length;
 static unsigned sites[8], lengths[8], site_count;
 static unsigned faults;
+static volatile sig_atomic_t smap_depth, smap_enters, smap_leaves;
 
 static void virt_bits(unsigned bits) { ((unsigned char *)cpu)[40] = bits; }
 
 static void fault(int sig, siginfo_t *info, void *context)
 {
-    (void)sig; (void)info;
+    (void)info;
     ucontext_t *uc = context;
     uintptr_t ip = uc->uc_mcontext.gregs[REG_RIP];
+    if (sig == SIGILL && ip >= (uintptr_t)code && ip+3 <= (uintptr_t)code+code_length) {
+        const unsigned char *op = (const unsigned char *)ip;
+        if (op[0] == 0x0f && op[1] == 0x01 && (op[2] == 0xcb || op[2] == 0xca)) {
+            /* Host cannot change AC at CPL3. Record the emitted STAC/CLAC bracket. */
+            assert(task.disabled == 8);
+            if (op[2] == 0xcb) { assert(!smap_depth); smap_depth=1; ++smap_enters; }
+            else { assert(smap_depth==1); smap_depth=0; ++smap_leaves; }
+            uc->uc_mcontext.gregs[REG_RIP] += 3;
+            return;
+        }
+    }
     for (unsigned i = 0; i < site_count; ++i) {
         if (ip != (uintptr_t)code + sites[i]) continue;
         assert(task.disabled == 8);
@@ -52,16 +65,16 @@ static void check(void *dst, const void *src, unsigned n, long expected)
     else for (unsigned i=0; i<n; ++i) assert(d[i] == 0);
 }
 
-static void check_string(void *dst, const void *src, unsigned n, long expected)
+static void check_string(void *dst, const void *src, unsigned n, long expected, unsigned padded)
 {
     unsigned char *d = dst;
     memset(d-1,0xa5,n+2);
     long result=((long (*)(void *,unsigned,const void *))code)(dst,n,src);
-    assert(result==expected && task.disabled==7);
+    assert(result==expected && task.disabled==7 && !smap_depth);
     assert(d[-1]==0xa5 && d[n]==0xa5);
     if (expected>0) {
         assert(!memcmp(d,src,expected-1) && d[expected-1]==0);
-        for (unsigned i=expected;i<n;++i) assert(d[i]==0xa5);
+        for (unsigned i=expected;i<n;++i) assert(d[i]==(i<padded ? 0 : 0xa5));
     } else if (expected<0) for (unsigned i=0;i<n;++i) assert(d[i]==0);
 }
 
@@ -69,9 +82,10 @@ int main(int argc, char **argv)
 {
     assert(argc == 4);
     int mode = atoi(argv[3]);
-    int user = mode == 1;
+    int user = mode == 1 || mode == 7;
     FILE *f = fopen(argv[1],"rb"); assert(f);
     assert(!fseek(f,0,SEEK_END)); long size = ftell(f); assert(size > 0);
+    code_length = size;
     rewind(f);
     code = mmap(NULL,size,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_32BIT,-1,0);
     assert(code != MAP_FAILED && fread(code,1,size,f) == (size_t)size); assert(!fclose(f));
@@ -117,6 +131,7 @@ int main(int argc, char **argv)
     assert(!mprotect(code,size,PROT_READ|PROT_EXEC));
     struct sigaction sa = {.sa_sigaction=fault,.sa_flags=SA_SIGINFO};
     assert(!sigemptyset(&sa.sa_mask)); assert(!sigaction(SIGSEGV,&sa,NULL));
+    assert(!sigaction(SIGILL,&sa,NULL));
     uintptr_t old_gs;
     percpu.current = (uintptr_t)&task;
     task.mm = percpu.loaded_mm = 0x1000;
@@ -152,20 +167,83 @@ int main(int argc, char **argv)
         task.flags = 0; task.personality = 0; percpu.loaded_mm = task.mm;
         puts("compat probe read: TASK_SIZE_MAX, TIF_ADDR32 and ADDR_LIMIT_3GB dispatch PASS");
     } else if (mode == 2) {
-        check_string(dest+1,src+4096,0,0); ++vectors; /* zero count returns 0 ahead of the policy */
+        check_string(dest+1,src+4096,0,0,0); ++vectors; /* zero count returns 0 ahead of the policy */
         memset(src,'x',4096);
         for (unsigned n=1;n<=65;++n) {
-            check_string(dest+1,src+4096-n,n,n); ++vectors;
-            check_string(dest+1,src+4096,n,-14); ++vectors;
-            if (n>9) {check_string(dest+1,src+4087,n,-14); ++vectors;}
+            check_string(dest+1,src+4096-n,n,n,0); ++vectors;
+            check_string(dest+1,src+4096,n,-14,0); ++vectors;
+            if (n>9) {check_string(dest+1,src+4087,n,-14,0); ++vectors;}
         }
-        src[4095]=0;check_string(dest+1,src+4088,65,8); ++vectors;
-        src[0]=0;check_string(dest+1,src,65,1); ++vectors;
-        user_max=(uintptr_t)src-4095; check_string(dest+1,src,33,-34); ++vectors; user_max=0; /* last denied address */
-        virt_bits(40); check_string(dest+1,src,33,-34); ++vectors; virt_bits(48);
-        check_string(dest+1,(void *)0xffffffffff600123ULL,8,-34); ++vectors;
-        check_string(dest+1,(void *)0xffffffffff600123ULL,0,0); ++vectors;
+        src[4095]=0;check_string(dest+1,src+4088,65,8,0); ++vectors;
+        src[0]=0;check_string(dest+1,src,65,1,0); ++vectors;
+        user_max=(uintptr_t)src-4095; check_string(dest+1,src,33,-34,0); ++vectors; user_max=0; /* last denied address */
+        virt_bits(40); check_string(dest+1,src,33,-34,0); ++vectors; virt_bits(48);
+        check_string(dest+1,(void *)0xffffffffff600123ULL,8,-34,0); ++vectors;
+        check_string(dest+1,(void *)0xffffffffff600123ULL,0,0,0); ++vectors;
         puts("kernel string: NUL/truncation/zero-count/policy/partial-fault/full-zero PASS");
+    } else if (mode == 7) {
+        check_string(dest+1,src+4096,0,0,0); ++vectors;
+        for (unsigned align=0;align<8;++align) for (unsigned n=1;n<=33;++n) {
+            for (unsigned at=0;at<n;++at) {
+                memset(src,'x',128); src[align+at]=0;
+                unsigned word_end=(at+8)&~7u;
+                check_string(dest+1+align,src+align,n,at+1,word_end<=n ? word_end : 0); ++vectors;
+            }
+        }
+        memset(src,1,16);src[0]=0;
+        check_string(dest+1,src,16,1,8); ++vectors; /* borrow bits after NUL do not change its position */
+        memset(src,0xff,16);
+        check_string(dest+1,src,16,16,0); ++vectors; /* high-bit bytes are not NUL */
+        src[14]=0;check_string(dest+1,src,16,15,16); ++vectors;
+        memset(src,'x',4096);
+        for (unsigned n=1;n<=65;++n) {
+            check_string(dest+1,src+4096-n,n,n,0); ++vectors;
+            unsigned before=faults;
+            check_string(dest+1,src+4096,n,-14,0); ++vectors;
+            assert(faults-before==(n>=8 ? 2u : 1u)); /* word retry, then byte error */
+            if (n>9) {check_string(dest+1,src+4087,n,-14,0); ++vectors;}
+        }
+        src[4095]=0;
+        for (unsigned before=1;before<=8;++before) {
+            unsigned saved=faults;
+            check_string(dest+1,src+4096-before,65,before,0); ++vectors;
+            assert(faults-saved==(before<8 ? 1u : 0u)); /* NUL before a guarded page succeeds */
+        }
+        src[0]=0;user_max=(uintptr_t)src;
+        check_string(dest+1,src,65,1,8); ++vectors; /* count extends beyond max, NUL still succeeds */
+        check_string(dest+1,src+32,65,1,8); ++vectors; /* source is clamped to max */
+        percpu.loaded_mm=task.mm+0x1000;
+        check_string(dest+1,src,65,1,8); ++vectors; /* user strings have no scalar NMI-mm test */
+        percpu.loaded_mm=task.mm;user_max=UINTPTR_MAX;
+        cpu[9]=1u<<20; /* Exercise the emitted cleanup flag through host SIGILL recording. */
+        unsigned entered=smap_enters,left=smap_leaves;
+        check_string(dest+1,src,65,1,8); ++vectors;
+        check_string(dest+1,src+4095,65,1,0); ++vectors;
+        check_string(dest+1,src+4096,65,-14,0); ++vectors;
+        check_string(dest+1,src+4096,0,0,0); ++vectors;
+        assert(smap_enters-entered==3 && smap_leaves-left==3);cpu[9]=0;
+        puts("user string: masked pointer, word-tail zeroing, byte retry, no extra NMI gate, SMAP bracket PASS");
+    } else if (mode == 8) {
+        unsigned char *low=mmap(NULL,4096,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_32BIT,-1,0);
+        unsigned char *mid=mmap((void *)0xd0000000UL,4096,PROT_READ|PROT_WRITE,
+                               MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED_NOREPLACE,-1,0);
+        assert(low!=MAP_FAILED && (uintptr_t)low<0xc0000000UL && mid==(void *)0xd0000000UL);
+        memset(src,'x',4096);src[0]=0;memset(low,0,4096);memset(mid,0,4096);
+        user_max=UINTPTR_MAX>>1;
+        check_string(dest+1,src,65,1,8); ++vectors;
+        percpu.loaded_mm=task.mm+0x1000;
+        check_string(dest+1,src,65,1,8); ++vectors;
+        user_max=0;
+        check_string(dest+1,src,65,1,0); ++vectors; /* kernel string leaves bytes after NUL alone */
+        check_string(dest+1,src+4096,8,-14,0); ++vectors;
+        task.flags=1u<<27;
+        check_string(dest+1,low,64,-14,0); ++vectors;
+        check_string(dest+1,mid,64,-14,0); ++vectors;
+        check_string(dest+1,src,65,1,0); ++vectors;
+        task.personality=0x8000000;
+        check_string(dest+1,mid,64,1,0); ++vectors;
+        check_string(dest+1,low,64,-14,0); ++vectors;
+        puts("compat string: task-sized user/kernel dispatch and distinct NUL padding PASS");
     } else {
     for (unsigned n=0;n<=1024;++n) { check(dest+1,src+4096-n,n,0); ++vectors; }
     for (unsigned n=1;n<=65;++n) {

@@ -27,11 +27,6 @@ fn gs_disp32(address: u64, what: &str) -> Result<[u8; 4]> {
     Ok((address as u32).to_le_bytes())
 }
 
-pub(super) fn routine(layout: &RuntimeProbeReadLayout, user: bool, actual: u64)
-    -> Result<(Vec<u8>, Vec<RelocRecord>, Vec<LoadSite>)> {
-    if user { user_leaf(layout, actual) } else { kernel_routine(layout, actual, false) }
-}
-
 /// RDI=dst, RSI=src, ECX=size, R11=1. Eight-byte words, then an empty remainder goes straight
 /// to success; otherwise one 4-, one 2- and one 1-byte step, as mm/maccess.c copies. Every load
 /// is a recovered site whose fault clears R11; success leaves EAX=0.
@@ -92,62 +87,123 @@ fn zero_fill(b: &mut Vec<u8>, saved: &[u8]) -> Result<usize> {
     Ok(zero_done)
 }
 
-/// copy_from_user_nofault as a leaf: __access_ok, nmi_uaccess_okay, pagefault_disable, STAC
+/// strncpy_from_user's word path masks the bytes after NUL. A word fault retries at the same
+/// address bytewise; only a byte fault fails. RDX and R11 are scratch after each status test.
+fn copy_user_string(b: &mut Vec<u8>, sites: &mut Vec<LoadSite>, faults: &mut Vec<usize>) -> Result<()> {
+    b.extend_from_slice(&[0x83,0xf9,8]);
+    let short = append_x86_jcc_rel32(b,0x82);
+    let words = b.len();
+    b.extend_from_slice(&[0x41,0xbb,1,0,0,0]);
+    sites.push(LoadSite{offset:b.len() as u32,insn_len:3,destination:11});
+    b.extend_from_slice(&[0x48,0x8b,0x06,0x45,0x85,0xdb]);
+    let retry = append_x86_jcc_rel32(b,0x84);
+    absolute(b,&[0x48,0xba],0xfefefefefefefeff);
+    b.extend_from_slice(&[0x48,0x01,0xc2,0x49,0x89,0xc3,0x49,0xf7,0xd3,0x4c,0x21,0xda]);
+    absolute(b,&[0x49,0xbb],0x8080808080808080);
+    b.extend_from_slice(&[0x4c,0x21,0xda]); // (word - ones) & ~word & high_bits
+    let zero_word = append_x86_jcc_rel32(b,0x85);
+    b.extend_from_slice(&[0x48,0x89,0x07,0x48,0x83,0xc7,8,0x48,0x83,0xc6,8,0x83,0xe9,8,0x83,0xf9,8]);
+    let again = append_x86_jcc_rel32(b,0x83); patch_x86_rel32(b,again,words)?;
+    let remainder = jump(b);
+    let nul = b.len(); patch_x86_rel32(b,zero_word,nul)?;
+    // BSF selects the first zero byte even when subtraction borrows across later bytes.
+    b.extend_from_slice(&[0x48,0x0f,0xbc,0xca,0x83,0xe1,0xf8,0x48,0xc7,0xc2,0xff,0xff,0xff,0xff,
+        0x48,0xd3,0xe2,0x48,0xf7,0xd2,0x48,0x21,0xd0,0x48,0x89,0x07,
+        0xc1,0xe9,3,0x48,0x8d,0x7c,0x0f,1]); // mask/store word; rdi += first_zero + 1
+    let word_done = jump(b);
+    let bytes = b.len();
+    for branch in [short,retry,remainder] {patch_x86_rel32(b,branch,bytes)?;}
+    b.extend_from_slice(&[0x85,0xc9]);
+    let empty = append_x86_jcc_rel32(b,0x84);
+    let byte = b.len();
+    b.extend_from_slice(&[0x41,0xbb,1,0,0,0]); // reset after a word fault or mask scratch
+    sites.push(LoadSite{offset:b.len() as u32,insn_len:3,destination:11});
+    b.extend_from_slice(&[0x0f,0xb6,0x06,0x45,0x85,0xdb]);
+    faults.push(append_x86_jcc_rel32(b,0x84));
+    b.extend_from_slice(&[0x88,0x07,0x48,0xff,0xc7,0x48,0xff,0xc6,0x84,0xc0]);
+    let zero_byte = append_x86_jcc_rel32(b,0x84);
+    b.extend_from_slice(&[0xff,0xc9]);
+    let again = append_x86_jcc_rel32(b,0x85); patch_x86_rel32(b,again,byte)?;
+    let truncated = b.len(); patch_x86_rel32(b,empty,truncated)?;
+    b.extend_from_slice(&[0xc6,0x47,0xff,0]); // count exhaustion forces the last copied byte to NUL
+    let done = b.len();
+    for branch in [zero_byte,word_done] {patch_x86_rel32(b,branch,done)?;}
+    b.extend_from_slice(&[0x48,0x89,0xf8,0x4c,0x29,0xc0,0x48,0x63,0xc0]); // length includes NUL, cast to int
+    Ok(())
+}
+
+/// User read leaves: scalar __access_ok/nmi_uaccess_okay or string masked_user_access_begin,
+/// pagefault_disable, STAC
 /// with SMAP, copy, CLAC, pagefault_enable; denial and faults zero the destination. It uses
-/// caller-saved registers only: R8=dst, R9D=size, RDX=src and then the SMAP flag, R10=current.
-fn user_leaf(layout: &RuntimeProbeReadLayout, actual: u64)
+/// caller-saved registers only: R8=dst, R9D=size, R10=current. Scalar keeps SMAP in DL;
+/// string keeps it in R9 bit32 so its word-mask scratch cannot destroy the cleanup state.
+fn user_leaf(layout: &RuntimeProbeReadLayout, actual: u64, string: bool)
     -> Result<(Vec<u8>, Vec<RelocRecord>, Vec<LoadSite>)> {
     let target = |symbol| address(symbol, layout.user_helper, actual);
     let current = gs_disp32(target(layout.current_task)?, "current_task")?;
-    let loaded_mm = gs_disp32(target(layout.cpu_tlbstate)?.wrapping_add(u64::from(layout.tlb_loaded_mm)),
-        "cpu_tlbstate.loaded_mm")?;
     let task_offset = i32::try_from(layout.pagefault_disabled)?.to_le_bytes();
-    let mm_offset = i32::try_from(layout.task_mm)?.to_le_bytes();
     let mut b = vec![0x49,0x89,0xf8,0x41,0x89,0xf1]; // r8=dst, r9d=size; RDX keeps src
+    let zero_return=if string {
+        b.extend_from_slice(&[0x31,0xc0,0x45,0x85,0xc9]);
+        Some(append_x86_jcc_rel32(&mut b,0x84))
+    } else {None};
     let mut denied = Vec::new();
     // __access_ok(src,size): src+size <= USER_PTR_MAX without wrap. USER_PTR_MAX is TASK_SIZE_MAX
     // (at least 2^47 - PAGE_SIZE) and exceeds every u32 size, so this is src <= USER_PTR_MAX-size.
     absolute(&mut b, &[0x49,0xbb], target(layout.user_ptr_max)?);
-    b.extend_from_slice(&[0x49,0x8b,0x03,0x4c,0x29,0xc8,0x48,0x39,0xc2]); // rax=[r11]-r9; cmp rdx,rax
-    denied.push(append_x86_jcc_rel32(&mut b, 0x87)); // above
+    if string {
+        b.extend_from_slice(&[0x49,0x8b,0x03,0x48,0x39,0xc2,0x48,0x0f,0x47,0xd0]); // rdx=min(src,USER_PTR_MAX)
+    } else {
+        b.extend_from_slice(&[0x49,0x8b,0x03,0x4c,0x29,0xc8,0x48,0x39,0xc2]);
+        denied.push(append_x86_jcc_rel32(&mut b, 0x87));
+    }
     // nmi_uaccess_okay: this CPU's cpu_tlbstate.loaded_mm equals current->mm.
     b.extend_from_slice(&[0x65,0x4c,0x8b,0x14,0x25]); b.extend_from_slice(&current); // r10=gs:current_task
-    b.extend_from_slice(&[0x65,0x48,0x8b,0x04,0x25]); b.extend_from_slice(&loaded_mm); // rax=gs:loaded_mm
-    b.extend_from_slice(&[0x49,0x3b,0x82]); b.extend_from_slice(&mm_offset); // cmp rax,[r10+mm]
-    denied.push(append_x86_jcc_rel32(&mut b, 0x85));
+    if !string {
+        let loaded_mm = gs_disp32(target(layout.cpu_tlbstate)?.wrapping_add(u64::from(layout.tlb_loaded_mm)),
+            "cpu_tlbstate.loaded_mm")?;
+        b.extend_from_slice(&[0x65,0x48,0x8b,0x04,0x25]); b.extend_from_slice(&loaded_mm);
+        b.extend_from_slice(&[0x49,0x3b,0x82]); b.extend_from_slice(&i32::try_from(layout.task_mm)?.to_le_bytes());
+        denied.push(append_x86_jcc_rel32(&mut b, 0x85));
+    }
     b.extend_from_slice(&[0x41,0xff,0x82]); b.extend_from_slice(&task_offset); // pagefault_disable
     b.extend_from_slice(&[0x48,0x89,0xd6]); // rsi=src
     absolute(&mut b, &[0x49,0xbb], target(layout.boot_cpu_data)?);
     b.extend_from_slice(&[0x41,0xf7,0x83]); // test boot_cpu_data.x86_capability[9],SMAP
     b.extend_from_slice(&i32::try_from(layout.x86_capability+9*4)?.to_le_bytes());
     b.extend_from_slice(&(1u32<<20).to_le_bytes()); // sole x86 cpufeatures.h X86_FEATURE_SMAP
-    b.extend_from_slice(&[0x0f,0x95,0xc2]); // setne dl; retains the feature across the copy
+    if !string {b.extend_from_slice(&[0x0f,0x95,0xc2]);} // setne dl
     let no_smap = append_x86_jcc_rel32(&mut b, 0x84);
     b.extend_from_slice(&[0x0f,0x01,0xcb]); // STAC only with actual CPU SMAP capability
+    if string {b.extend_from_slice(&[0x49,0x0f,0xba,0xe9,32]);} // bts r9,32
     let after = b.len(); patch_x86_rel32(&mut b, no_smap, after)?;
-    b.extend_from_slice(&[0x4c,0x89,0xc7,0x44,0x89,0xc9,0x41,0xbb,1,0,0,0]); // rdi=dst, ecx=size, r11d=1
+    b.extend_from_slice(&[0x4c,0x89,0xc7,0x44,0x89,0xc9]); // rdi=dst, ecx=size
+    if !string {b.extend_from_slice(&[0x41,0xbb,1,0,0,0]);}
     let mut sites = Vec::new(); let mut faults = Vec::new();
-    copy_words(&mut b, &mut sites, &mut faults)?;
+    if string {copy_user_string(&mut b,&mut sites,&mut faults)?;} else {copy_words(&mut b,&mut sites,&mut faults)?;}
     let cleanup_success = jump(&mut b);
     let fault = b.len();
     for branch in faults { patch_x86_rel32(&mut b, branch, fault)?; }
     b.extend_from_slice(&[0x48,0xc7,0xc0,0xf2,0xff,0xff,0xff]); // -EFAULT, sign extended
     let cleanup = b.len(); patch_x86_rel32(&mut b, cleanup_success, cleanup)?;
-    b.extend_from_slice(&[0x84,0xd2]); // saved SMAP feature
-    let skip = append_x86_jcc_rel32(&mut b, 0x84);
+    if string {b.extend_from_slice(&[0x49,0x0f,0xba,0xe1,32]);} else {b.extend_from_slice(&[0x84,0xd2]);}
+    let skip = append_x86_jcc_rel32(&mut b, if string {0x83} else {0x84});
     b.extend_from_slice(&[0x0f,0x01,0xca]); // CLAC, both success and fault
     let after = b.len(); patch_x86_rel32(&mut b, skip, after)?;
     b.extend_from_slice(&[0x41,0xff,0x8a]); b.extend_from_slice(&task_offset); // pagefault_enable
     b.extend_from_slice(&[0x48,0x85,0xc0]);
-    let clean_return = append_x86_jcc_rel32(&mut b, 0x84);
+    let clean_return = append_x86_jcc_rel32(&mut b, if string {0x89} else {0x84});
     let zero_fault = jump(&mut b);
-    let deny = b.len();
-    for branch in denied { patch_x86_rel32(&mut b, branch, deny)?; }
-    b.extend_from_slice(&[0x48,0xc7,0xc0,0xf2,0xff,0xff,0xff]); // -EFAULT
+    if !string {
+        let deny = b.len();
+        for branch in denied { patch_x86_rel32(&mut b, branch, deny)?; }
+        b.extend_from_slice(&[0x48,0xc7,0xc0,0xf2,0xff,0xff,0xff]); // -EFAULT
+    }
     let zero = b.len(); patch_x86_rel32(&mut b, zero_fault, zero)?;
     let zero_done = zero_fill(&mut b, &[0x4c,0x89,0xc7,0x44,0x89,0xc9])?; // rdi=r8, ecx=r9d
     let end = b.len();
     patch_x86_rel32(&mut b, clean_return, end)?; patch_x86_rel32(&mut b, zero_done, end)?;
+    if let Some(branch)=zero_return {patch_x86_rel32(&mut b,branch,end)?;}
     b.push(0xc3);
     Ok((b, Vec::new(), sites))
 }
@@ -284,35 +340,40 @@ pub(super) fn share(blob: &mut Vec<u8>, relocs: &mut Vec<RelocRecord>,
     -> Result<(Vec<(usize,usize)>,Vec<LoadSite>)> {
     let mut ranges = Vec::new();
     let mut loads = Vec::new();
-    let mut scalar = [None, None]; // shared kernel and user routine starts
-    for (name,user,string) in [("bpf_probe_read_user",true,false),("bpf_probe_read_kernel",false,false),("bpf_probe_read_kernel_str",false,true)] {
+    let mut leaves = [[None,None],[None,None]]; // [string][user] shared routine starts
+    for (name,user,string) in [("bpf_probe_read_user",true,false),("bpf_probe_read_kernel",false,false),
+            ("bpf_probe_read_kernel_str",false,true),("bpf_probe_read_user_str",true,true)] {
         let Some(&helper) = helpers.get(name) else { continue; };
         let calls = calls_to(relocs, helper);
         if calls.is_empty() { continue; }
-        let anchor=if string {let Some(&regular)=helpers.get("bpf_probe_read_kernel") else {continue;};regular} else {helper};
-        let built = if string {kernel_routine(layout,anchor,true)?} else {routine(layout,user,anchor)?};
+        let anchor=if string {let Some(&regular)=helpers.get(if user {"bpf_probe_read_user"} else {"bpf_probe_read_kernel"}) else {continue;};regular} else {helper};
+        let built = if user {user_leaf(layout,anchor,string)?} else {kernel_routine(layout,anchor,string)?};
         relocs.retain(|r| !(r.kind == 1 && r.target == helper));
         let start = append(blob, relocs, &mut ranges, &mut loads, built)?;
         redirect(blob, &calls, start)?;
-        if !string { scalar[usize::from(user)] = Some(start); }
+        leaves[usize::from(string)][usize::from(user)] = Some(start);
     }
-    if let (Some(&compat), Some(&user_anchor), Some(&kernel_anchor)) = (helpers.get("bpf_probe_read_compat"),
-            helpers.get("bpf_probe_read_user"), helpers.get("bpf_probe_read_kernel")) {
+    for (name,string) in [("bpf_probe_read_compat",false),("bpf_probe_read_compat_str",true)] {
+        let (Some(&compat), Some(&user_anchor), Some(&kernel_anchor)) = (helpers.get(name),
+            helpers.get("bpf_probe_read_user"), helpers.get("bpf_probe_read_kernel")) else {continue;};
         let calls = calls_to(relocs, compat);
-        if !calls.is_empty() {
-            for user in [false, true] {
-                if scalar[usize::from(user)].is_none() {
-                    let built = routine(layout, user, if user {user_anchor} else {kernel_anchor})?;
-                    scalar[usize::from(user)] = Some(append(blob, relocs, &mut ranges, &mut loads, built)?);
-                }
-            }
-            let (Some(kernel), Some(user)) = (scalar[0], scalar[1]) else { bail!("compat probe read needs both routines"); };
-            relocs.retain(|r| !(r.kind == 1 && r.target == compat));
-            let start = blob.len();
-            let bytes = compat_dispatch(layout, kernel_anchor, start, user, kernel)?;
-            blob.extend_from_slice(&bytes); ranges.push((start, blob.len()));
-            redirect(blob, &calls, start)?;
+        if calls.is_empty() {continue;}
+        let mut targets=[0usize;2];
+        for user in [false, true] {
+            let slot=&mut leaves[usize::from(string)][usize::from(user)];
+            let start=if let Some(start)=*slot {start} else {
+                let built=if user {user_leaf(layout,user_anchor,string)?} else {kernel_routine(layout,kernel_anchor,string)?};
+                let start=append(blob,relocs,&mut ranges,&mut loads,built)?;
+                *slot=Some(start);start
+            };
+            targets[usize::from(user)]=start;
         }
+        let [kernel,user]=targets;
+        relocs.retain(|r| !(r.kind == 1 && r.target == compat));
+        let start = blob.len();
+        let bytes = compat_dispatch(layout, kernel_anchor, start, user, kernel)?;
+        blob.extend_from_slice(&bytes); ranges.push((start, blob.len()));
+        redirect(blob, &calls, start)?;
     }
     Ok((ranges,loads))
 }
@@ -367,40 +428,43 @@ mod tests {
         fs::write(output.join("compile.stderr"),&compile.stderr)?;
         if !compile.status.success() { bail!("probe-read host fixture compile: {}",String::from_utf8_lossy(&compile.stderr)); }
         let layout = fixture();
-        for mode in 0..3 {
-            let user=mode==1;let string=mode==2;
+        for mode in 0..4 {
+            let user=mode==1 || mode==3;let string=mode>=2;
             let anchor = if user { layout.user_helper } else { layout.kernel_helper };
-            let (bytes,relocs,sites) = if string {kernel_routine(&layout,anchor,true)?} else {routine(&layout,user,anchor)?};
-            let stem = if string {"kernel-string"} else if user { "user" } else { "kernel" };
+            let (bytes,relocs,sites) = if user {user_leaf(&layout,anchor,string)?} else {kernel_routine(&layout,anchor,string)?};
+            let stem = if mode==3 {"user-string"} else if string {"kernel-string"} else if user { "user" } else { "kernel" };
             let binary = output.join(format!("{stem}.bin"));
             let metadata = output.join(format!("{stem}.sites"));
             fs::write(&binary,&bytes)?;
-            assert_eq!(sites.len(),if string {1} else {4}); assert!(relocs.is_empty());
+            assert_eq!(sites.len(),if mode==3 {2} else if string {1} else {4}); assert!(relocs.is_empty());
             let mut text = sites.len().to_string();text.push(char::from(10));
             for site in sites { text.push_str(&format!("{} {} {}\n",site.offset,site.insn_len,site.destination)); }
             fs::write(&metadata,text)?;
             let run = std::process::Command::new(&driver).arg(binary).arg(metadata)
-                .arg(mode.to_string()).output()?;
+                .arg((if mode==3 {7} else {mode}).to_string()).output()?;
             fs::write(output.join(format!("{stem}.stdout")),&run.stdout)?;
             fs::write(output.join(format!("{stem}.stderr")),&run.stderr)?;
             assert!(run.status.success(),"{stem} host execution: {} {}",run.status,String::from_utf8_lossy(&run.stderr));
             println!("{}",String::from_utf8_lossy(&run.stdout));
         }
-        // bpf_probe_read (compat): the call reaches a dispatcher that picks the user or the kernel leaf.
+        // Both compat helpers select the corresponding user/kernel leaves, sharing each one once.
+        for (stem,name,target,mode,load_count) in [("compat","bpf_probe_read_compat",0x3000,5,8),
+                ("compat-string","bpf_probe_read_compat_str",0x7000,8,3)] {
         let mut blob = X86_HELPER_CALL_REL32_SLOT.to_vec(); blob.push(0xc3);
-        let mut relocs = vec![RelocRecord{offset:0,kind:1,target:0x3000}];
-        let helpers = HashMap::from([("bpf_probe_read_compat".into(),0x3000),
+        let mut relocs = vec![RelocRecord{offset:0,kind:1,target}];
+        let helpers = HashMap::from([(name.into(),target),
             ("bpf_probe_read_user".into(),layout.user_helper),("bpf_probe_read_kernel".into(),layout.kernel_helper)]);
         let (ranges,sites) = share(&mut blob,&mut relocs,&layout,&helpers)?;
-        assert!(relocs.is_empty()); assert_eq!(ranges.len(),3); assert_eq!(sites.len(),8);
+        assert!(relocs.is_empty()); assert_eq!(ranges.len(),3); assert_eq!(sites.len(),load_count);
         let mut text = sites.len().to_string(); text.push(char::from(10));
         for site in sites { text.push_str(&format!("{} {} {}\n",site.offset,site.insn_len,site.destination)); }
-        fs::write(output.join("compat.bin"),&blob)?; fs::write(output.join("compat.sites"),text)?;
-        let run = std::process::Command::new(&driver).arg(output.join("compat.bin")).arg(output.join("compat.sites"))
-            .arg("5").output()?;
-        fs::write(output.join("compat.stdout"),&run.stdout)?; fs::write(output.join("compat.stderr"),&run.stderr)?;
-        assert!(run.status.success(),"compat host execution: {} {}",run.status,String::from_utf8_lossy(&run.stderr));
+        fs::write(output.join(format!("{stem}.bin")),&blob)?; fs::write(output.join(format!("{stem}.sites")),text)?;
+        let run = std::process::Command::new(&driver).arg(output.join(format!("{stem}.bin"))).arg(output.join(format!("{stem}.sites")))
+            .arg(mode.to_string()).output()?;
+        fs::write(output.join(format!("{stem}.stdout")),&run.stdout)?; fs::write(output.join(format!("{stem}.stderr")),&run.stderr)?;
+        assert!(run.status.success(),"{stem} host execution: {} {}",run.status,String::from_utf8_lossy(&run.stderr));
         println!("{}",String::from_utf8_lossy(&run.stdout));
+        }
         let helpers=HashMap::from([("bpf_probe_read_kernel".into(),layout.kernel_helper),
             (X86_CPU_NUMBER_HELPER_KEY.into(),8)]);
         for (mode,name,inline) in [(3,"current-task",direct_load(Some(&layout),&helpers,"bpf_get_current_task")?.unwrap()),
@@ -439,14 +503,19 @@ mod tests {
         }
         assert!(relocs.iter().any(|r| r.offset==15 && r.target==0x9999));
         assert_eq!(relocs.len(),1,"both shared routines read their policy inline; the other helper call stays");
-        let mut strings=X86_HELPER_CALL_REL32_SLOT.repeat(2);
-        let mut calls=vec![RelocRecord{offset:0,kind:1,target:0x5000},RelocRecord{offset:5,kind:1,target:0x6000}];
-        let names=HashMap::from([("bpf_probe_read_kernel".into(),0x2000),
-            ("bpf_probe_read_kernel_str".into(),0x5000),("bpf_probe_read_user_str".into(),0x6000)]);
+        let mut strings=X86_HELPER_CALL_REL32_SLOT.repeat(4);
+        let mut calls=vec![RelocRecord{offset:0,kind:1,target:0x5000},RelocRecord{offset:5,kind:1,target:0x6000},
+            RelocRecord{offset:10,kind:1,target:0x7000},RelocRecord{offset:15,kind:1,target:0x7000}];
+        let names=HashMap::from([("bpf_probe_read_kernel".into(),0x2000),("bpf_probe_read_user".into(),0x1000),
+            ("bpf_probe_read_kernel_str".into(),0x5000),("bpf_probe_read_user_str".into(),0x6000),
+            ("bpf_probe_read_compat_str".into(),0x7000)]);
         let (on,loads)=share(&mut strings,&mut calls,&layout,&names)?;
-        assert_eq!(on.len(),1);assert_eq!(loads.len(),1);assert_eq!(loads[0].destination,11);
-        assert!(calls.iter().any(|r|r.offset==5 && r.target==0x6000),"user strings retain original helper");
-        assert!(!calls.iter().any(|r|r.target==0x5000));
+        assert_eq!(on.len(),3);assert_eq!(loads.len(),3);assert!(loads.iter().all(|s|s.destination==11));
+        assert!(calls.is_empty(),"compat calls reuse the existing user/kernel string leaves");
+        for (site,target) in [(0,on[0].0),(5,on[1].0),(10,on[2].0),(15,on[2].0)] {
+            let displacement=i32::from_le_bytes(strings[site+1..site+5].try_into()?);
+            assert_eq!(site as i64+5+i64::from(displacement),target as i64);
+        }
         for site in sites {
             assert_eq!(site.destination,11);
             let decoded = x86_decoded_load_sites(&blob,&ranges).into_iter()

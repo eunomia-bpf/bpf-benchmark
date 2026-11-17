@@ -1,0 +1,57 @@
+{
+  "recorded_utc": "2026-11-17T11:56:31Z",
+  "scope": "Final focused native-helper execution, recovery metadata and shared-call validation. No app timing or installed app result.",
+  "raw": "/workspaces/kprog-raw/perf/user-string-leaf-20261117/host-20261117T113604Z-2528303",
+  "progress": [
+    "2026-11-17T11:20:53Z waiting for timing SH raw=/workspaces/kprog-raw/perf/user-string-leaf-20261117/host-20261117T112053Z-2523432",
+    "2026-11-17T11:27:41Z start at 057ad88cb raw=/workspaces/kprog-raw/perf/user-string-leaf-20261117/host-20261117T112053Z-2523432",
+    "2026-11-17T11:28:23Z exit=0 raw=/workspaces/kprog-raw/perf/user-string-leaf-20261117/host-20261117T112053Z-2523432",
+    "2026-11-17T11:36:04Z waiting for timing SH raw=/workspaces/kprog-raw/perf/user-string-leaf-20261117/host-20261117T113604Z-2528303",
+    "2026-11-17T11:54:45Z start at c8c5f4da8 raw=/workspaces/kprog-raw/perf/user-string-leaf-20261117/host-20261117T113604Z-2528303",
+    "2026-11-17T11:55:22Z exit=0 raw=/workspaces/kprog-raw/perf/user-string-leaf-20261117/host-20261117T113604Z-2528303"
+  ],
+  "test_passed": 2,
+  "test_failed": 0,
+  "test_filtered": 43,
+  "fixtures": {
+    "kernel": {
+      "bytes_including_return": 366,
+      "stdout": "probe-read host user=0: 1152 vectors, 122 exact-site faults, nesting/zero/error/bounds PASS",
+      "byte_identical_to_retained_scalar_batch": true,
+      "byte_identical_to_first_pass": true
+    },
+    "user": {
+      "bytes_including_return": 370,
+      "stdout": "probe-read host user=1: 1149 vectors, 121 exact-site faults, nesting/zero/error/bounds PASS",
+      "byte_identical_to_retained_scalar_batch": true,
+      "byte_identical_to_first_pass": true
+    },
+    "kernel-string": {
+      "bytes_including_return": 284,
+      "stdout": "kernel string: NUL/truncation/zero-count/policy/partial-fault/full-zero PASS\nprobe-read host user=0: 193 vectors, 121 exact-site faults, nesting/zero/error/bounds PASS",
+      "byte_identical_to_retained_scalar_batch": true,
+      "byte_identical_to_first_pass": true
+    },
+    "user-string": {
+      "bytes_including_return": 400,
+      "stdout": "user string: masked pointer, word-tail zeroing, byte retry, no extra NMI gate, SMAP bracket PASS\nprobe-read host user=1: 4693 vectors, 239 exact-site faults, nesting/zero/error/bounds PASS",
+      "byte_identical_to_first_pass": true
+    },
+    "compat": {
+      "bytes_including_return": 827,
+      "stdout": "compat probe read: TASK_SIZE_MAX, TIF_ADDR32 and ADDR_LIMIT_3GB dispatch PASS\nprobe-read host user=0: 9 vectors, 1 exact-site faults, nesting/zero/error/bounds PASS",
+      "byte_identical_to_retained_scalar_batch": true,
+      "byte_identical_to_first_pass": true
+    },
+    "compat-string": {
+      "bytes_including_return": 775,
+      "stdout": "compat string: task-sized user/kernel dispatch and distinct NUL padding PASS\nprobe-read host user=0: 9 vectors, 7 exact-site faults, nesting/zero/error/bounds PASS",
+      "byte_identical_to_first_pass": true
+    }
+  },
+  "host_smap": "SIGILL records/skips emitted STAC/CLAC; hardware access protection not tested.",
+  "destination_domain": "Original BPF valid destination ranges; kernel usercopy instrumentation is not emitted or validated here.",
+  "app_per_call_ns": null,
+  "app_installed_bytes": null,
+  "app_body_helper_map_split": null
+}

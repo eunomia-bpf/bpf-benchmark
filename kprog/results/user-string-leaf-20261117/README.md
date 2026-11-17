@@ -35,6 +35,13 @@ through SIGILL to exercise cleanup-state preservation; this tests the
 emitted bracket and registers, not hardware SMAP access protection.
 Existing scalar, kernel-string, compat, task-BTF and jiffies cases remain.
 
+The emitted leaf covers the valid destination ranges admitted by the
+original BPF program. It does not emit the kernel's `might_fault` or
+`check_object_size` instrumentation. The sole build enables hardened
+usercopy, with fault injection and KASAN disabled; these host cases do
+not establish parity for invalid native destination pointers or kernel
+usercopy rejection paths.
+
 The first host run passes at 2026-11-17T11:28:23Z: two focused tests, no
 failures, 43 other tests filtered. User strings execute 4,693 vectors with
 239 exact source-site faults, including the successful word-to-byte retry
@@ -47,9 +54,11 @@ Retained scalar-batch payload comparisons are byte-identical: kernel
 user-string body is 400 B including its return; the compat-string fixture
 is 775 B including its six-byte test caller and both string leaves. These
 are host payload bytes, not installed app totals. `first-pass.json` and
-`first-pass-output.txt` retain these receipts. A final rerun is queued
-after simplifying the equivalent selector guards; the source commit
-follows that result.
+`first-pass-output.txt` retain these receipts. The final rerun after the
+selector-guard simplification passes at 2026-11-17T11:55:22Z: two tests,
+no failures, 43 filtered. All six payloads are byte-identical to the first
+pass, and the four retained payloads still match the earlier scalar batch.
+Final receipts are `host-summary.json` and `host-output.txt`.
 
 Installed app bytes and per-call/body/helper/map effects remain pending.
 No image or guest starts here; the coordinator's reserved
