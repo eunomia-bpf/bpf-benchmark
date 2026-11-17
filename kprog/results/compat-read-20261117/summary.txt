@@ -1,0 +1,20 @@
+image: sha256:fc7c4707cae7753d3f7d6f2d859ae25f664f3667d974df6e23c9c362deaa688e
+bcc exec_bytes 8015
+cilium exec_bytes 275918
+katran exec_bytes 9830
+otelcol-ebpf-profiler exec_bytes 547799
+tetragon exec_bytes 5140692
+tracee exec_bytes 1457903
+all exec_bytes 7440157
+2026-11-17T08:30:25Z check otelcol-ebpf-profiler/profiling rc=0 run=/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_082840_370504
+2026-11-17T08:33:43Z check bcc/set rc=0 run=/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_083213_583327
+2026-11-17T08:37:45Z check cilium/agent rc=0 run=/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_083532_496542
+2026-11-17T08:41:05Z check tetragon/observer rc=0 run=/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_083929_625195
+2026-11-17T08:44:51Z check tracee/monitor rc=0 run=/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_084250_208606
+2026-11-17T08:47:38Z check katran rc=0 run=/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_084633_961827
+== tetragon/observer /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_084929_629134
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_084929_629134 throughput native/eBPF 1.035x  eBPF [319951, 322372, 319543] native [331025, 333110, 325220] per-sample [1.035, 1.033, 1.018] errors 0
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_084929_629134 ns/inv eBPF 735.4 (21/287 progs) native 660.9 (21/287) speedup 1.113x
+x86_kvm_corpus_20261117_084929_629134 installed programs 288 JIT 2472912 B native 2078688 B ratio 0.84x
+== x86_kvm_corpus_20261117_084929_629134 (tetragon__observer.json): 3 active programs, median native/eBPF run ratio 1.069
+   programs whose counts track the median: 3 of 3
