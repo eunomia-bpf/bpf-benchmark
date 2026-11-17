@@ -2763,3 +2763,44 @@ Recompute branches and later load-site positions from final layout as
 usual; no extra validation gate or encoding framework is needed. There
 is no production edit, candidate assembly/execution, image build, guest,
 whole-image saving or app speed claim in this receipt.
+
+### User-leaf batch complete: Tracee row and current target gaps
+
+Coordinator `8a822b41f` completes Tracee in
+`corpus/results/x86_kvm_corpus_20261117_065240_468797`. It reports
+**1.118x per call** and **1.068x throughput**: eBPF 367.523 ns/call,
+native 328.817 ns/call. Throughput sample ratios are
+1.068 / 1.032 / 1.096 (eBPF 339,304 / 345,228 / 335,348;
+native 362,333 / 356,251 / 367,484), with zero reported errors.
+
+Against the coordinator's preceding same-image zero-remainder repeat,
+native time is **3.74% higher** (316.975 → 328.817), while baseline time
+is **0.50% higher** (365.699 → 367.523). Its cumulative installed native
+total falls **144 bytes**, from 1,700,836 to 1,700,692, against unchanged
+companion JIT 2,068,918 bytes and 169 successful replacements. Both
+measurement-window inventories contain 167 records and 41 selected
+records per arm. The coordinator's active median count ratio is 1.042;
+the `trace_ret_file_`/`trace_file_upda` pair still has a lower native ratio
+(0.209x). No program is excluded from reporting here.
+
+The first zero-remainder attempt at 376.436 native ns/call remains beside
+its 316.975 repeat in `zero-remainder-effects.json`; the new row is added
+to `leaf-read-effects.json`. These differing observations do not isolate
+a user-leaf regression, a gain, or a specific noise/work-state cause.
+There is no new guest or repeated confirmation from PERF.
+
+The completed three-app subset currently reads:
+
+| App | Per-call eBPF/native ratio | Native/eBPF throughput | Cumulative native / companion JIT bytes |
+| --- | --- | --- | --- |
+| OTel | 1.105x | 1.076x | 135,424 / 167,706 |
+| BCC | 1.001x | 1.005x | 8,334 / 7,965 |
+| Tracee | 1.118x | 1.068x | 1,700,692 / 2,068,918 |
+
+These stats-on three-by-60-second diagnostic subsets have not reached
+the requested 1.20x per-call or 1.30x throughput targets, and the paired
+native/JIT installed ratios are still above 0.5. That records the remaining
+work; it does not discard a run or stop the next queued optimization.
+The kernel-leaf batch follows, then constant-size reads in the ordered
+source work. Final stats-off breadth/floor comparison remains with the
+coordinator after this read group, as the 06:20 todo update specifies.

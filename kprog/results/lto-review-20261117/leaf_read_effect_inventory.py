@@ -29,9 +29,11 @@ def read_run(app_name, stage, suffix):
 
 
 apps = []
-for app, before, after in [('otelcol-ebpf-profiler__profiling', '051422_856006', '063024_376511'),
-                            ('bcc__set', '052524_924865', '064150_558773')]:
-    rows = [read_run(app, 'zero_remainder', before), read_run(app, 'user_leaf', after)]
+for app, before_stage, before, after in [
+        ('otelcol-ebpf-profiler__profiling', 'zero_remainder', '051422_856006', '063024_376511'),
+        ('bcc__set', 'zero_remainder', '052524_924865', '064150_558773'),
+        ('tracee__monitor', 'zero_remainder_repeat', '054943_357840', '065240_468797')]:
+    rows = [read_run(app, before_stage, before), read_run(app, 'user_leaf', after)]
     ratios = {phase: rows[1]['phases'][phase]['ns_per_call'] / rows[0]['phases'][phase]['ns_per_call']
               for phase in ('baseline', 'post_rejit')}
     apps.append(dict(app=app, after_before_ns_ratios=ratios, runs=rows))
@@ -41,6 +43,6 @@ for app, before, after in [('otelcol-ebpf-profiler__profiling', '051422_856006',
     print('after/before ns ratios:', ratios)
 
 result = dict(recorded_utc=subprocess.check_output(['date', '-u', '+%FT%TZ'], text=True).strip(),
-              scope='Completed OTel/BCC coordinator stats-on 3x60s run pairs; existing >=100-call reporting convention. IDs identify records within their own boot only. Installed receipts count cumulative replacements, not measurement snapshots. No causal gain, PMU split, equal-work proof or new admission check is inferred.',
+              scope='Completed OTel/BCC/Tracee coordinator stats-on 3x60s run pairs; Tracee reference is the coordinator same-image repeat, and its first post-change attempt remains in zero-remainder-effects.json. Existing >=100-call reporting convention. IDs identify records within their own boot only. Installed receipts count cumulative replacements, not measurement snapshots. No causal gain, PMU split, equal-work proof or new admission check is inferred.',
               apps=apps)
 (HERE / 'leaf-read-effects.json').write_text(json.dumps(result, indent=2) + '\n')
