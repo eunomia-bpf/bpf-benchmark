@@ -1,0 +1,2777 @@
+{
+  "recorded_utc": "2026-11-17T04:41:49Z",
+  "source_report": "kprog/results/host-link-replay-20261116/emission-report.json",
+  "scope": "Historical per-entry input-function definitions, not dynamic calls or app installed bytes. Representative final emitted bodies are decoded separately. The >=128 selection only bounds this report; no new production cutoff or check is proposed.",
+  "groups": [
+    {
+      "app": "bcc",
+      "zero_bytes": 312,
+      "definitions": 2,
+      "distinct_entry_symbols": 2,
+      "input_function_sizes": {
+        "231": 2
+      },
+      "summed_input_function_bytes": 462
+    },
+    {
+      "app": "tracee",
+      "zero_bytes": 200,
+      "definitions": 115,
+      "distinct_entry_symbols": 115,
+      "input_function_sizes": {
+        "133": 115
+      },
+      "summed_input_function_bytes": 15295
+    },
+    {
+      "app": "tracee",
+      "zero_bytes": 256,
+      "definitions": 6,
+      "distinct_entry_symbols": 6,
+      "input_function_sizes": {
+        "182": 6
+      },
+      "summed_input_function_bytes": 1092
+    },
+    {
+      "app": "tracee",
+      "zero_bytes": 368,
+      "definitions": 108,
+      "distinct_entry_symbols": 108,
+      "input_function_sizes": {
+        "280": 108
+      },
+      "summed_input_function_bytes": 30240
+    }
+  ],
+  "definitions": [
+    {
+      "app": "bcc",
+      "entry": "tracepoint__syscalls__sys_exit_open",
+      "routine": "__native_link_local_memset_zero_312",
+      "zero_bytes": 312,
+      "input_function_bytes": 231,
+      "input_function_address": 263,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/32-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "bcc",
+      "entry": "tracepoint__syscalls__sys_exit_openat",
+      "routine": "__native_link_local_memset_zero_312",
+      "zero_bytes": 312,
+      "input_function_bytes": 231,
+      "input_function_address": 263,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/33-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "cgroup_bpf_run_filter_skb",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 3440,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/301-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "cgroup_bpf_run_filter_skb",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 3720,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/301-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "kernel_write_magic_return",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 14289,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/311-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "kernel_write_magic_return",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 14569,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/311-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "kernel_write_magic_return",
+      "routine": "__native_link_local_memset_zero_256",
+      "zero_bytes": 256,
+      "input_function_bytes": 182,
+      "input_function_address": 14702,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/311-0/stderr",
+      "line": 5
+    },
+    {
+      "app": "tracee",
+      "entry": "lsm_file_open_test",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 4901,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/318-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "lsm_file_open_test",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5181,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/318-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "sched_process_exec_signal",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 15600,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/322-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "sys_enter_init",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 1446,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/329-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "sys_exit_init",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 1308,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/331-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "sys_exit_submit",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 8430,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/332-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "sys_exit_submit",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 8710,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/332-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "syscall_checker",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 9260,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/339-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "syscall_checker",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 9540,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/339-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace___debugfs_create_file",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5763,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/340-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace___debugfs_create_file",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 6043,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/340-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_arch_prctl",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 1389,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/342-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_bpf_check",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 4209,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/343-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_bpf_check",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 4489,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/343-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_call_usermodehelper",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 18065,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/344-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_call_usermodehelper",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 18345,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/344-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_cap_capable",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5027,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/345-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_cap_capable",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5307,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/345-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_check_helper_call",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 4427,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/346-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_check_helper_call",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 4707,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/346-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_check_map_func_compatibility",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 4432,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/347-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_check_map_func_compatibility",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 4712,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/347-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_chmod_common",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 10846,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/348-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_chmod_common",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 11126,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/348-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_commit_creds",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 6804,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/349-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_commit_creds",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 7084,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/349-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_debugfs_create_dir",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5585,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/350-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_debugfs_create_dir",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5865,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/350-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_device_add",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5249,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/351-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_device_add",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5529,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/351-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_do_exit",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5008,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/352-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_do_exit",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5288,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/352-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_do_sigaction",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 6515,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/355-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_do_sigaction",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 6795,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/355-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_do_truncate",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5771,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/357-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_do_truncate",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 6051,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/357-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_dup",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 1389,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/358-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_dup2",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 1389,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/359-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_dup3",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 1389,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/360-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_exec_binprm",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 11142,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/361-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_exec_binprm",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 11422,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/361-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_execute_finished",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 19087,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/362-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_execute_finished",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 19367,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/362-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_fd_install",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 10209,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/363-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_fd_install",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 10489,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/363-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_filldir64",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5084,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/366-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_filldir64",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5364,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/366-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_filp_close",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 10140,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/367-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_filp_close",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 10420,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/367-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_load_elf_phdrs",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 11876,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/371-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_load_elf_phdrs",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 12156,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/371-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_mmap_alert",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 13208,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/372-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_mmap_alert",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 13488,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/372-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_proc_create",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5137,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/373-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_proc_create",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5417,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/373-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_process_vm_writev",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 1389,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/374-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ptrace",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 1389,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/375-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret__register_chrdev",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5519,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/377-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret__register_chrdev",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5799,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/377-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_arch_prctl",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 8438,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/378-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_arch_prctl",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 8718,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/378-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_do_init_module",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 9316,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/379-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_do_init_module",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 9596,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/379-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_do_mmap",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 11985,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/380-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_do_mmap",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 12265,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/380-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_do_splice",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 12888,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/381-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_do_splice",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 13168,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/381-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_dup",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 8438,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/382-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_dup",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 8718,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/382-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_dup2",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 8438,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/383-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_dup2",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 8718,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/383-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_dup3",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 8438,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/384-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_dup3",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 8718,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/384-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_file_update_time",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 12248,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/385-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_file_update_time",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 12528,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/385-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_file_modified",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 12248,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/386-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_file_modified",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 12528,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/386-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_inotify_find_inode",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 11363,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/387-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_inotify_find_inode",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 11643,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/387-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_kallsyms_lookup_name",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5257,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/388-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_kallsyms_lookup_name",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5537,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/388-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_kernel_write",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 12332,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/389-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_kernel_write",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 12612,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/389-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_kernel_write_tail",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 20091,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/390-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_kernel_write_tail",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 20371,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/390-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_process_vm_writev",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 8438,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/391-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_process_vm_writev",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 8718,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/391-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_ptrace",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 8438,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/392-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_ptrace",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 8718,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/392-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_register_kprobe",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5461,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/393-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_register_kprobe",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5741,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/393-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_sock_alloc_file",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5177,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/394-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_sock_alloc_file",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5457,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/394-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_vfs_read",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 12332,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/395-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_vfs_read",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 12612,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/395-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_vfs_read_tail",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 12274,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/396-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_vfs_read_tail",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 12554,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/396-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_vfs_readv",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 12332,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/397-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_vfs_readv",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 12612,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/397-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_vfs_readv_tail",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 12261,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/398-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_vfs_readv_tail",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 12541,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/398-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_vfs_write",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 12329,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/399-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_vfs_write",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 12609,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/399-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_vfs_write_tail",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 20091,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/400-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_vfs_write_tail",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 20371,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/400-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_vfs_writev",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 12332,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/401-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_vfs_writev",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 12612,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/401-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_vfs_writev_tail",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 20516,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/402-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_ret_vfs_writev_tail",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 20796,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/402-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_file_ioctl",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 6772,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/403-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_file_ioctl",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 7052,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/403-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_bprm_check",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 24529,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/404-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_bprm_check",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 24809,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/404-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_file_open",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 13123,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/405-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_file_open",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 13403,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/405-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_file_open",
+      "routine": "__native_link_local_memset_zero_256",
+      "zero_bytes": 256,
+      "input_function_bytes": 182,
+      "input_function_address": 13536,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/405-0/stderr",
+      "line": 5
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_sb_mount",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 11341,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/406-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_sb_mount",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 11621,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/406-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_inode_unlink",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 6094,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/407-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_inode_unlink",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 6374,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/407-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_socket_create",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5267,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/408-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_socket_create",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5547,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/408-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_inode_symlink",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5585,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/409-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_inode_symlink",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5865,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/409-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_socket_listen",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 6531,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/410-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_socket_listen",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 6811,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/410-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_socket_connect",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 6238,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/411-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_socket_connect",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 6518,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/411-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_socket_accept",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 6921,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/412-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_socket_accept",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 7201,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/412-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_socket_bind",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 6394,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/413-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_socket_bind",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 6674,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/413-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_socket_setsockopt",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 6782,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/414-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_socket_setsockopt",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 7062,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/414-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_mmap_file",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 22414,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/415-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_mmap_file",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 22694,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/415-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_mmap_file",
+      "routine": "__native_link_local_memset_zero_256",
+      "zero_bytes": 256,
+      "input_function_bytes": 182,
+      "input_function_address": 22827,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/415-0/stderr",
+      "line": 5
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_file_mprotect",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 22862,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/416-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_file_mprotect",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 23142,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/416-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_bpf",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 10684,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/417-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_bpf",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 10964,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/417-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_bpf_map",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5158,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/418-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_bpf_map",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5438,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/418-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_bpf_prog",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 6261,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/419-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_bpf_prog",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 6541,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/419-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_kernel_read_file",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 11626,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/420-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_kernel_read_file",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 11906,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/420-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_kernel_post_read_file",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 11757,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/421-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_kernel_post_read_file",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 12037,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/421-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_inode_mknod",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5618,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/422-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_inode_mknod",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5898,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/422-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_file_permission",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5585,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/423-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_file_permission",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5865,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/423-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_inode_rename",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 6556,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/424-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_inode_rename",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 6836,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/424-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_bprm_creds_for_exec",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 11156,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/425-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_bprm_creds_for_exec",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 11436,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/425-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_path_notify",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 11171,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/426-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_path_notify",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 11451,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/426-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_task_setrlimit",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5310,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/427-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_task_setrlimit",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5590,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/427-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_settime64",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5361,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/428-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_settime64",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5641,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/428-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_sb_umount",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5760,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/430-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_sb_umount",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 6040,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/430-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_socket_recvmsg",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5296,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/432-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_socket_recvmsg",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5576,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/432-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_socket_sendmsg",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5296,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/433-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_security_socket_sendmsg",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5576,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/433-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_set_fs_pwd",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 11639,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/434-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_set_fs_pwd",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 11919,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/434-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_switch_task_namespaces",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 6664,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/436-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_switch_task_namespaces",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 6944,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/436-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_sys_enter",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5079,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/437-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_sys_enter",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5359,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/437-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_sys_exit",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5098,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/438-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_sys_exit",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5378,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/438-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_tracepoint_probe_register_prio_may_exist",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 6051,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/439-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_tracepoint_probe_register_prio_may_exist",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 6331,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/439-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_utimes_common",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 11736,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/440-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_utimes_common",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 12016,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/440-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_vfs_utimes",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 11736,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/443-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "trace_vfs_utimes",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 12016,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/443-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "tracepoint__cgroup__cgroup_attach_task",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5326,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/446-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "tracepoint__cgroup__cgroup_attach_task",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5606,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/446-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "tracepoint__cgroup__cgroup_mkdir",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5325,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/447-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "tracepoint__cgroup__cgroup_mkdir",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5605,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/447-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "tracepoint__cgroup__cgroup_rmdir",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5325,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/448-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "tracepoint__cgroup__cgroup_rmdir",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5605,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/448-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "tracepoint__exec_test",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 38873,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/449-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "tracepoint__exec_test",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 39153,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/449-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "tracepoint__module__module_load",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 12362,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/450-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "tracepoint__module__module_load",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 12642,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/450-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "tracepoint__module__module_free",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5761,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/451-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "tracepoint__module__module_free",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 6041,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/451-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "tracepoint__sched__sched_process_fork",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 12143,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/454-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "tracepoint__sched__sched_process_fork",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 12423,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/454-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "tracepoint__sched__sched_process_exec",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 13553,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/455-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "tracepoint__sched__sched_process_exec",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 13833,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/455-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "tracepoint__sched__sched_process_exec",
+      "routine": "__native_link_local_memset_zero_256",
+      "zero_bytes": 256,
+      "input_function_bytes": 182,
+      "input_function_address": 13966,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/455-0/stderr",
+      "line": 5
+    },
+    {
+      "app": "tracee",
+      "entry": "tracepoint__sched__sched_process_exit",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5392,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/456-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "tracepoint__sched__sched_process_exit",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5672,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/456-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "tracepoint__sched__sched_switch",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5528,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/458-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "tracepoint__sched__sched_switch",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5808,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/458-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "tracepoint__task__task_rename",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 5229,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/459-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "tracepoint__task__task_rename",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 5509,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/459-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "uprobe__features_fallback_arena",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 2261,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/460-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "uprobe__features_fallback_arena",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 2541,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/460-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "uprobe_lkm_seeker_submitter",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 3786,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/466-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "uprobe_lkm_seeker_submitter",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 4066,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/466-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "uprobe_lkm_seeker",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 2967,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/467-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "uprobe_lkm_seeker",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 3247,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/467-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "uprobe_mem_dump_trigger",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 4177,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/468-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "uprobe_mem_dump_trigger",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 4457,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/468-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "uprobe_seq_ops_trigger",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 4546,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/469-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "uprobe_seq_ops_trigger",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 4826,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/469-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "uprobe_syscall_table_check",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 71344,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/470-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "uprobe_syscall_table_check",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 71624,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/470-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "vfs_write_magic_return",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 14289,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/472-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "vfs_write_magic_return",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 14569,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/472-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "vfs_write_magic_return",
+      "routine": "__native_link_local_memset_zero_256",
+      "zero_bytes": 256,
+      "input_function_bytes": 182,
+      "input_function_address": 14702,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/472-0/stderr",
+      "line": 5
+    },
+    {
+      "app": "tracee",
+      "entry": "vfs_writev_magic_return",
+      "routine": "__native_link_local_memset_zero_368",
+      "zero_bytes": 368,
+      "input_function_bytes": 280,
+      "input_function_address": 14328,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/474-0/stderr",
+      "line": 3
+    },
+    {
+      "app": "tracee",
+      "entry": "vfs_writev_magic_return",
+      "routine": "__native_link_local_memset_zero_200",
+      "zero_bytes": 200,
+      "input_function_bytes": 133,
+      "input_function_address": 14608,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/474-0/stderr",
+      "line": 4
+    },
+    {
+      "app": "tracee",
+      "entry": "vfs_writev_magic_return",
+      "routine": "__native_link_local_memset_zero_256",
+      "zero_bytes": 256,
+      "input_function_bytes": 182,
+      "input_function_address": 14741,
+      "log": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/474-0/stderr",
+      "line": 5
+    }
+  ],
+  "final_output_example": {
+    "blob": "/workspaces/kprog-raw/perf/20261116-host-link-replay/emission-current/301-0/image.blob",
+    "bytes": 4701,
+    "entry": "cgroup_bpf_run_filter_skb",
+    "zero_routines": [
+      {
+        "start": 3706,
+        "end": 3986,
+        "bytes": 280,
+        "instructions": 49,
+        "qword_stores": 46,
+        "zero_bytes": 368,
+        "disassembly": [
+          [
+            3706,
+            "mov",
+            "rax,rdi"
+          ],
+          [
+            3709,
+            "xor",
+            "r8d,r8d"
+          ],
+          [
+            3712,
+            "mov",
+            "QWORD PTR [rdi],r8"
+          ],
+          [
+            3715,
+            "mov",
+            "QWORD PTR [rdi+0x8],r8"
+          ],
+          [
+            3719,
+            "mov",
+            "QWORD PTR [rdi+0x10],r8"
+          ],
+          [
+            3723,
+            "mov",
+            "QWORD PTR [rdi+0x18],r8"
+          ],
+          [
+            3727,
+            "mov",
+            "QWORD PTR [rdi+0x20],r8"
+          ],
+          [
+            3731,
+            "mov",
+            "QWORD PTR [rdi+0x28],r8"
+          ],
+          [
+            3735,
+            "mov",
+            "QWORD PTR [rdi+0x30],r8"
+          ],
+          [
+            3739,
+            "mov",
+            "QWORD PTR [rdi+0x38],r8"
+          ],
+          [
+            3743,
+            "mov",
+            "QWORD PTR [rdi+0x40],r8"
+          ],
+          [
+            3747,
+            "mov",
+            "QWORD PTR [rdi+0x48],r8"
+          ],
+          [
+            3751,
+            "mov",
+            "QWORD PTR [rdi+0x50],r8"
+          ],
+          [
+            3755,
+            "mov",
+            "QWORD PTR [rdi+0x58],r8"
+          ],
+          [
+            3759,
+            "mov",
+            "QWORD PTR [rdi+0x60],r8"
+          ],
+          [
+            3763,
+            "mov",
+            "QWORD PTR [rdi+0x68],r8"
+          ],
+          [
+            3767,
+            "mov",
+            "QWORD PTR [rdi+0x70],r8"
+          ],
+          [
+            3771,
+            "mov",
+            "QWORD PTR [rdi+0x78],r8"
+          ],
+          [
+            3775,
+            "mov",
+            "QWORD PTR [rdi+0x80],r8"
+          ],
+          [
+            3782,
+            "mov",
+            "QWORD PTR [rdi+0x88],r8"
+          ],
+          [
+            3789,
+            "mov",
+            "QWORD PTR [rdi+0x90],r8"
+          ],
+          [
+            3796,
+            "mov",
+            "QWORD PTR [rdi+0x98],r8"
+          ],
+          [
+            3803,
+            "mov",
+            "QWORD PTR [rdi+0xa0],r8"
+          ],
+          [
+            3810,
+            "mov",
+            "QWORD PTR [rdi+0xa8],r8"
+          ],
+          [
+            3817,
+            "mov",
+            "QWORD PTR [rdi+0xb0],r8"
+          ],
+          [
+            3824,
+            "mov",
+            "QWORD PTR [rdi+0xb8],r8"
+          ],
+          [
+            3831,
+            "mov",
+            "QWORD PTR [rdi+0xc0],r8"
+          ],
+          [
+            3838,
+            "mov",
+            "QWORD PTR [rdi+0xc8],r8"
+          ],
+          [
+            3845,
+            "mov",
+            "QWORD PTR [rdi+0xd0],r8"
+          ],
+          [
+            3852,
+            "mov",
+            "QWORD PTR [rdi+0xd8],r8"
+          ],
+          [
+            3859,
+            "mov",
+            "QWORD PTR [rdi+0xe0],r8"
+          ],
+          [
+            3866,
+            "mov",
+            "QWORD PTR [rdi+0xe8],r8"
+          ],
+          [
+            3873,
+            "mov",
+            "QWORD PTR [rdi+0xf0],r8"
+          ],
+          [
+            3880,
+            "mov",
+            "QWORD PTR [rdi+0xf8],r8"
+          ],
+          [
+            3887,
+            "mov",
+            "QWORD PTR [rdi+0x100],r8"
+          ],
+          [
+            3894,
+            "mov",
+            "QWORD PTR [rdi+0x108],r8"
+          ],
+          [
+            3901,
+            "mov",
+            "QWORD PTR [rdi+0x110],r8"
+          ],
+          [
+            3908,
+            "mov",
+            "QWORD PTR [rdi+0x118],r8"
+          ],
+          [
+            3915,
+            "mov",
+            "QWORD PTR [rdi+0x120],r8"
+          ],
+          [
+            3922,
+            "mov",
+            "QWORD PTR [rdi+0x128],r8"
+          ],
+          [
+            3929,
+            "mov",
+            "QWORD PTR [rdi+0x130],r8"
+          ],
+          [
+            3936,
+            "mov",
+            "QWORD PTR [rdi+0x138],r8"
+          ],
+          [
+            3943,
+            "mov",
+            "QWORD PTR [rdi+0x140],r8"
+          ],
+          [
+            3950,
+            "mov",
+            "QWORD PTR [rdi+0x148],r8"
+          ],
+          [
+            3957,
+            "mov",
+            "QWORD PTR [rdi+0x150],r8"
+          ],
+          [
+            3964,
+            "mov",
+            "QWORD PTR [rdi+0x158],r8"
+          ],
+          [
+            3971,
+            "mov",
+            "QWORD PTR [rdi+0x160],r8"
+          ],
+          [
+            3978,
+            "mov",
+            "QWORD PTR [rdi+0x168],r8"
+          ],
+          [
+            3985,
+            "ret",
+            ""
+          ]
+        ],
+        "static_direct_calls": [
+          909
+        ]
+      },
+      {
+        "start": 3986,
+        "end": 4119,
+        "bytes": 133,
+        "instructions": 28,
+        "qword_stores": 25,
+        "zero_bytes": 200,
+        "disassembly": [
+          [
+            3986,
+            "mov",
+            "rax,rdi"
+          ],
+          [
+            3989,
+            "xor",
+            "r8d,r8d"
+          ],
+          [
+            3992,
+            "mov",
+            "QWORD PTR [rdi],r8"
+          ],
+          [
+            3995,
+            "mov",
+            "QWORD PTR [rdi+0x8],r8"
+          ],
+          [
+            3999,
+            "mov",
+            "QWORD PTR [rdi+0x10],r8"
+          ],
+          [
+            4003,
+            "mov",
+            "QWORD PTR [rdi+0x18],r8"
+          ],
+          [
+            4007,
+            "mov",
+            "QWORD PTR [rdi+0x20],r8"
+          ],
+          [
+            4011,
+            "mov",
+            "QWORD PTR [rdi+0x28],r8"
+          ],
+          [
+            4015,
+            "mov",
+            "QWORD PTR [rdi+0x30],r8"
+          ],
+          [
+            4019,
+            "mov",
+            "QWORD PTR [rdi+0x38],r8"
+          ],
+          [
+            4023,
+            "mov",
+            "QWORD PTR [rdi+0x40],r8"
+          ],
+          [
+            4027,
+            "mov",
+            "QWORD PTR [rdi+0x48],r8"
+          ],
+          [
+            4031,
+            "mov",
+            "QWORD PTR [rdi+0x50],r8"
+          ],
+          [
+            4035,
+            "mov",
+            "QWORD PTR [rdi+0x58],r8"
+          ],
+          [
+            4039,
+            "mov",
+            "QWORD PTR [rdi+0x60],r8"
+          ],
+          [
+            4043,
+            "mov",
+            "QWORD PTR [rdi+0x68],r8"
+          ],
+          [
+            4047,
+            "mov",
+            "QWORD PTR [rdi+0x70],r8"
+          ],
+          [
+            4051,
+            "mov",
+            "QWORD PTR [rdi+0x78],r8"
+          ],
+          [
+            4055,
+            "mov",
+            "QWORD PTR [rdi+0x80],r8"
+          ],
+          [
+            4062,
+            "mov",
+            "QWORD PTR [rdi+0x88],r8"
+          ],
+          [
+            4069,
+            "mov",
+            "QWORD PTR [rdi+0x90],r8"
+          ],
+          [
+            4076,
+            "mov",
+            "QWORD PTR [rdi+0x98],r8"
+          ],
+          [
+            4083,
+            "mov",
+            "QWORD PTR [rdi+0xa0],r8"
+          ],
+          [
+            4090,
+            "mov",
+            "QWORD PTR [rdi+0xa8],r8"
+          ],
+          [
+            4097,
+            "mov",
+            "QWORD PTR [rdi+0xb0],r8"
+          ],
+          [
+            4104,
+            "mov",
+            "QWORD PTR [rdi+0xb8],r8"
+          ],
+          [
+            4111,
+            "mov",
+            "QWORD PTR [rdi+0xc0],r8"
+          ],
+          [
+            4118,
+            "ret",
+            ""
+          ]
+        ],
+        "static_direct_calls": [
+          1076
+        ]
+      }
+    ]
+  }
+}

@@ -40,7 +40,7 @@ whether LTO work earns its footprint.
 | 7 | Finite helper-ID joins become another runtime compare chain | Tetragon; other helper-selecting sources | Propagate/split a proven selection earlier where possible, avoiding repeated ID redispatch. Source-confirmed shape; production hot frequency and gain are unmeasured. |
 | 8 | Exact hash key length stops before the LTO plan | Katran, BCC, OTel hash sites | Current JIT/native use the same runtime-length kernel lookup. Exact-shape specialization remains a distinct, unmeasured opportunity; the copied-hash comparison did not test a separately specialized function per proven key length. |
 | 9 | Current-task BTF and jiffies helpers retain calls the JIT removes | Tracee, Cilium | Remove a call/return per executed covered site. Historical outputs have 121/91 static calls; dynamic importance is unknown, and inline loads can grow installed text. |
-| 10 | Large known memory lengths become unknown at the unroll cutoff | OTel zero-fill example; other sites unmeasured | Preserve the known count in a compact loop and fixed tail. Retained 668-byte zero-fill uses 190 helper instructions; no current cycle cost or candidate gain is established. |
+| 10 | Memory emission conflates a known count with full unrolling | OTel dynamic 668-byte zero fill; Tracee/BCC unrolled zero fills | Keep count facts independently of the loop/unroll decision. Tracee's retained entry proofs repeat 200/368-byte fills with 133/280-byte bodies; compactness competes with the unrolled path's lower branch count. No measured per-call gain. |
 | 11 | ARRAY routines jump to shared return instructions | All apps using these ARRAY routines; OTel retained bytes demonstrated | Separate returns remove one jump on each successful covered lookup, also on runtime ARRAY misses. Static size falls 1 B per known routine and 3 B per runtime routine; per-call effect unmeasured. |
 | 12 | Generated read/LPM branches keep near encodings within short range | OTel demonstrated; other apps with these routines | Static local opportunities are 70 B in the captured user-read routine and 41 B in historical LPM. Instruction/branch counts stay the same; fetch/cache benefit and app installed-size effect remain unmeasured. |
 
@@ -1242,6 +1242,69 @@ example to the already documented memory-emitter coverage, rather than
 claiming all native memcpy/memset calls are generic. No source change,
 emitted candidate, executable run, input check or performance gain was
 introduced here.
+
+### Below the cutoff: repeated unrolled fills in Tracee and BCC
+
+2026-11-17T04:41:13Z source/retained-output follow-up at dccc430b0.
+The other side of the same policy is visible in real inputs:
+`x86_memory.rs:96–103` emits every known size up to 512 as a straight
+sequence of 8/4/2/1-byte operations. Above offset 127, `operand` at 13–23
+uses a four-byte displacement for each store. `Routine` identity includes
+the exact length, so the 200- and 368-byte zero fills remain separate
+functions even within one linked program.
+
+The existing 239-entry host replay logs list these input-function
+definitions, after entry-proof construction but before the final link:
+
+| App | Constant zero length | Distinct entry symbols containing it | Input function bytes each | Summed input-function bytes |
+|---|---:|---:|---:|---:|
+| BCC | 312 | 2 | 231 | 462 |
+| Tracee | 200 | 115 | 133 | 15,295 |
+| Tracee | 256 | 6 | 182 | 1,092 |
+| Tracee | 368 | 108 | 280 | 30,240 |
+
+The Tracee sum is 46,627 B across per-entry definitions. This is neither
+the P stage's executable size nor an app installed-size total: the same
+source helper can recur in multiple entry proofs, and the log sizes precede
+final encoding. It is also not a count of runtime calls. The new reader
+reports this provenance explicitly, rather than presenting the sum as
+already removable native code.
+
+One final emitted Tracee blob demonstrates that the large definitions
+survive into output. `emission-current/301-0/image.blob`, entry
+`cgroup_bpf_run_filter_skb`, has a 280-byte routine at 0xe7a with 46 qword
+stores (368 bytes), and a 133-byte routine at 0xf92 with 25 qword stores
+(200 bytes). They execute 49 and 28 instructions including their own RET
+on a call, respectively. Each has one direct call site in this particular
+blob. Both start with MOV RAX,RDI and XOR R8D,R8D; their stores use R8 and
+the RET preserves the original destination result. Together they occupy
+413 of the payload's 4,701 bytes. This is an actual historical output
+range, not a current-image measurement or a claim that both calls execute
+on every invocation.
+
+`zero_unroll_inventory.py` retains the definition inventory, exact log
+locations and this representative final disassembly in `zero-unroll.json`.
+It reads existing files and decodes one blob; it does not emit or run a
+candidate. The report's selection of lengths >=128 merely bounds the
+inventory, and introduces no production threshold or load check.
+
+The useful optimization class is to separate known length from code-layout
+policy on both sides of 512. A compact bulk loop with a fixed tail can
+retain exact counts for 200/368 as well as 668. Within a program, sharing a
+bulk operation between different sizes is another size opportunity, but
+requires preserving each call's count, destination result and all required
+writes. Per-program sharing of an identical size already works and should
+stay. No kernel routine, global cross-program code cache or new helper ABI
+is proposed here.
+
+There is an explicit speed tradeoff: these unrolled bodies have no loop
+branches, so a compact counted loop adds instructions that the present
+straight-line path does not execute. Smaller displacement/store code may
+help the instruction cache, but that is not an established per-call win.
+Do not lower the cutoff blindly, fully unroll arbitrarily large lengths,
+or delete stores because a higher-level count happens to be zero. Keep
+this behind the higher-priority read/map work and measure the affected
+Tracee/BCC sites before claiming either speed or app code-size progress.
 
 ## 11. Cilium leaf programs retain eBPF despite existing native functions
 
