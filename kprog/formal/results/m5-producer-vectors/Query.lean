@@ -1,0 +1,25 @@
+import KProgFormal.ClightRefinement.Arm64ProducerVectors
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.vector_layout
+#check KProgFormal.ClightRefinement.Arm64Producer.vector_layout
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.lr_zero_source
+#check KProgFormal.ClightRefinement.Arm64Producer.lr_zero_source
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.vector_inputs_source
+#check KProgFormal.ClightRefinement.Arm64Producer.vector_inputs_source
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.vector_stage_next
+#check KProgFormal.ClightRefinement.Arm64Producer.vector_stage_next
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.final_vector_stage
+#check KProgFormal.ClightRefinement.Arm64Producer.final_vector_stage
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.vector_field_offsets
+#check KProgFormal.ClightRefinement.Arm64Producer.vector_field_offsets
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.vector_offsets
+#check KProgFormal.ClightRefinement.Arm64Producer.vector_offsets
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.vector_local
+#check KProgFormal.ClightRefinement.Arm64Producer.vector_local
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.vector_input_ready
+#check KProgFormal.ClightRefinement.Arm64Producer.vector_input_ready
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.vector_input_returns
+#check KProgFormal.ClightRefinement.Arm64Producer.vector_input_returns
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.lr_initialized
+#check KProgFormal.ClightRefinement.Arm64Producer.lr_initialized
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.lr_and_first_vector
+#check KProgFormal.ClightRefinement.Arm64Producer.lr_and_first_vector

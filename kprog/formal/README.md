@@ -2054,3 +2054,10 @@ the real continuation and stores a checked zero-or-one byte in four internal
 transitions. The preceding complete pointer tables reach the first flag call
 in 189 transitions and remain readable there. Provider post-memory and local
 permission ABI premises remain explicit.
+
+The [LR/vector initializer proof](results/m5-producer-vectors/README.md) binds
+all 64 actual vector word inputs to their real low/high field offsets. Each
+stated scalar outcome writes and reads back the complete word while framing
+other lanes and locals relative to provider post-memory. The real LR-zero
+declaration reaches the first vector call in six internal transitions; its
+zero word remains readable at that boundary.

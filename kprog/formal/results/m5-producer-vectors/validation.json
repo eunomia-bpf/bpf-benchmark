@@ -1,0 +1,94 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-producer-vectors",
+  "focused_build": {
+    "exit": 0,
+    "jobs": 152,
+    "log": "focused.log"
+  },
+  "public_queries": {
+    "exit": 0,
+    "theorems": 12,
+    "log": "query.log",
+    "source_axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "offset_axioms": [
+      "propext"
+    ],
+    "execution_axioms": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "external_determinism": "not assumed"
+  },
+  "source_side_preparation": {
+    "final_exit": 0,
+    "log": "lr2.log",
+    "mode": "read-only Lean checks in results while previous full build waited; file moved into owning library after that confirmation"
+  },
+  "actual_layout": {
+    "elements": 32,
+    "element_bytes": 16,
+    "field_offsets": [
+      0,
+      8
+    ],
+    "array_bytes": 512,
+    "input_words": 64,
+    "word_offset": "8 * initializer index"
+  },
+  "actual_internal_transitions": {
+    "vector_to_provider": 3,
+    "vector_after_provider_outcome": 4,
+    "LR_zero": 3,
+    "LR_to_first_vector_provider": 6
+  },
+  "provider_ABI_premises": [
+    "stated scalar outcome of actual kind-6 external relation",
+    "supplied post-memory access equals actual producer allocation access"
+  ],
+  "preservation_scope": "exact full-word readback; other lanes and declared-local loads and caller blocks/access/frontier preserved relative to supplied post-memory; no provider purity/existence/native-vector claim",
+  "proof_limits": {
+    "heartbeats": 200000,
+    "recursion_depth": 512,
+    "workers": 1,
+    "build_address_space_GiB": 32,
+    "source_query_address_space_GiB": 16
+  },
+  "whole_lake_build": {
+    "status": "queued under timing SH",
+    "log": "lake-build.log",
+    "exit_file": "lake-build.exit"
+  },
+  "previous_flags_confirmation": {
+    "commit": "bb7bdb66b",
+    "exit": 0,
+    "jobs": 278,
+    "log": "/workspaces/kprog-raw/formal/m5-producer-flags/lake-retry-build.log"
+  },
+  "next_source_query": {
+    "exit": 0,
+    "log": "next.log",
+    "stack_tag_bytes": 24
+  },
+  "export_comparison": {
+    "baseline": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_byte_identical": true
+  },
+  "last_complete_make_check": {
+    "exit": 0,
+    "commit": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "rerun": "not needed for Lean-only proofs"
+  },
+  "canonical_C_external_semantics_frozen_paths": "unchanged by this step",
+  "complete_ISA_handler_refinements": 0,
+  "M5": "open",
+  "M6": "open"
+}
