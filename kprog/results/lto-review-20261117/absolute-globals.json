@@ -1,0 +1,68 @@
+{
+  "recorded_utc": "2026-11-17T07:21:47Z",
+  "scope": "Captured guest address facts and encoding arithmetic only. No candidate bytes, assembler, compiler, guest, kernel-memory read, new refusal or installed-size/per-call claim. Absolute addressing uses default 64-bit address size, signed disp32 and SIB base/index none; 67h would change semantics. Other addresses can retain existing MOVABS form.",
+  "retained_plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ie2fmz97/link-plan.json",
+  "captured_addresses": [
+    {
+      "field": "USER_PTR_MAX",
+      "address": "0xffffffffae2e4660",
+      "absolute_disp32_encodable": true
+    },
+    {
+      "field": "SMAP capability word",
+      "address": "0xffffffffad968ab4",
+      "absolute_disp32_encodable": true
+    }
+  ],
+  "boundary_encodability": [
+    {
+      "address": "0x0",
+      "encodable": true
+    },
+    {
+      "address": "0x7fffffff",
+      "encodable": true
+    },
+    {
+      "address": "0x80000000",
+      "encodable": false
+    },
+    {
+      "address": "0xffffffff7fffffff",
+      "encodable": false
+    },
+    {
+      "address": "0xffffffff80000000",
+      "encodable": true
+    },
+    {
+      "address": "0xffffffffffffffff",
+      "encodable": true
+    },
+    {
+      "address": "0xffff888000000000",
+      "encodable": false
+    }
+  ],
+  "source_encoding_lengths": [
+    {
+      "operation": "MOV RAX,live qword",
+      "before_bytes": 13,
+      "absolute_bytes": 8,
+      "instructions_removed": 1
+    },
+    {
+      "operation": "TEST live capability dword,imm32",
+      "before_bytes": 21,
+      "absolute_bytes": 11,
+      "instructions_removed": 1
+    },
+    {
+      "operation": "MOVZX ECX,live width byte",
+      "before_bytes": 18,
+      "absolute_bytes": 8,
+      "instructions_removed": 1
+    }
+  ],
+  "qualifications": "Width-byte length is a generic source encoding case, not a captured width address here. Test the effective resolved address including field offset for encoding choice. No assumption that heap/map addresses or future guest addresses fit; no address-size override, no RIP-rel32 slot or literal pool needed."
+}

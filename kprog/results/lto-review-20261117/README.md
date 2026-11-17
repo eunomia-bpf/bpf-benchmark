@@ -2804,3 +2804,58 @@ work; it does not discard a run or stop the next queued optimization.
 The kernel-leaf batch follows, then constant-size reads in the ordered
 source work. Final stats-off breadth/floor comparison remains with the
 coordinator after this read group, as the 06:20 todo update specifies.
+
+## Kernel globals can avoid MOVABS with an absolute signed-disp32 operand
+
+Source/retained-plan review, 2026-11-17. The leaf routines currently load
+`USER_PTR_MAX` and fields of `boot_cpu_data` by materializing the global
+address in R11, then reading through R11. For an effective target address
+equal to the sign extension of its low 32 bits, x86's **default 64-bit
+address-size absolute SIB form** can read that global directly. It needs
+neither the eventual native image PC nor another relocation kind. It
+still reads the live value on every invocation.
+
+The retained guest plan resolves `USER_PTR_MAX` to `0xffffffffae2e4660`
+and the SMAP capability word to `0xffffffffad968ab4`. Both are encodable
+in that form, including the captured guest's KASLR displacement.
+[absolute_global_inventory.py](absolute_global_inventory.py) records these
+actual captured values and boundary cases in
+[absolute-globals.json](absolute-globals.json). They are examples, not
+assumptions about a future guest: use the actual resolved/rebased address
+**including the field offset** to choose the form. Other addresses retain
+the existing MOVABS form rather than cause a new refusal. Heap/map pointers
+need not fit this range, and per-CPU GS accesses retain their segment
+semantics.
+
+| Global access | Current address setup + memory operation | Absolute operand | Local saving |
+| --- | --- | --- | --- |
+| Load live USER_PTR_MAX into RAX | 13 B / 2 instructions | 8 B / 1 instruction | 5 B / 1 instruction |
+| TEST live SMAP word with imm32 | 21 B / 2 instructions | 11 B / 1 instruction | 10 B / 1 instruction |
+| MOVZX live width byte into ECX | 18 B / 2 instructions | 8 B / 1 instruction | 10 B / 1 instruction |
+
+The width row is a source encoding case, not a captured width address in
+that older plan. For two eligible globals, a user or kernel leaf can lose
+**15 local bytes and two executed address-setup instructions** without
+changing its memory reads or policy. These are encoding counts only,
+not emitted code or a measured application gain. Do not add the capability
+row's saving again if boot-time SMAP selection removes that entire read,
+or combine it with savings for shortening the displacement of the same
+old R11-based access.
+
+The address-size detail is essential: adding `67h` would instead select
+32-bit address arithmetic and zero-extend a high-bit disp32 into the low
+address space. Use the normal address size and SIB base/index-none form.
+The installed iced-x86 decoder sign-extends its 32-bit displacement in
+64-bit addressing; its encoder likewise requires the signed-i32 range
+and selects SIB for a 64-bit operand with no base/index. The existing
+GS-absolute helper forms also use the corresponding absolute-disp32
+addressing shape. No assembler or candidate was run for this review.
+
+A RIP-relative global load was considered separately. The frozen direct
+module's kind-1 relocation validates a five-byte E8 call slot and patches
+only that slot (`kprog/perf/direct-native/bpf_x86_native_lab.c:250–274`);
+it is not a generic RIP-relative data relocation. Do not repurpose that
+call relocation or add a module ABI change for this encoding opportunity.
+The absolute form above works with link-time target addresses and existing
+raw literal emission. No pool, extra field, runtime check, cache service,
+kernel/module change or benchmark change is proposed.
