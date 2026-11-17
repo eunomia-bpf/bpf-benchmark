@@ -65,6 +65,10 @@ The [complete writer register contract](results/m5-register-write-frame/README.m
 also carries the actual flag/vector pointer bindings, preserves all SIMD/NZCV
 reads, and proves every relational execution is a silent prefix of the same
 register-refining return, with no infinite execution.
+The [MOV immediate dispatch proof](results/m5-arm64-mov-immediate/README.md)
+links the complete Numeric unit through the imported linker and proves the
+first 54 generic-handler transitions, including real allocation and both
+width and path-selector calls. The eager SRC read and data-writing suffix remain.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 

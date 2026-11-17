@@ -1,0 +1,25 @@
+import KProgFormal.ClightRefinement.Arm64MovImmediateDispatch
+#check KProgFormal.ClightRefinement.Arm64NumericProgram.linked_source
+#print axioms KProgFormal.ClightRefinement.Arm64NumericProgram.linked_source
+#check KProgFormal.ClightRefinement.Arm64NumericProgram.composites_same
+#print axioms KProgFormal.ClightRefinement.Arm64NumericProgram.composites_same
+#check KProgFormal.ClightRefinement.Arm64NumericProgram.old_names
+#print axioms KProgFormal.ClightRefinement.Arm64NumericProgram.old_names
+#check KProgFormal.ClightRefinement.Arm64MovImmediate.selector_internal
+#print axioms KProgFormal.ClightRefinement.Arm64MovImmediate.selector_internal
+#check KProgFormal.ClightRefinement.Arm64MovImmediate.width_binding
+#print axioms KProgFormal.ClightRefinement.Arm64MovImmediate.width_binding
+#check KProgFormal.ClightRefinement.Arm64MovImmediate.selector_binding
+#print axioms KProgFormal.ClightRefinement.Arm64MovImmediate.selector_binding
+#check KProgFormal.ClightRefinement.Arm64MovImmediate.reader_binding
+#print axioms KProgFormal.ClightRefinement.Arm64MovImmediate.reader_binding
+#check KProgFormal.ClightRefinement.Arm64MovImmediate.writer_binding
+#print axioms KProgFormal.ClightRefinement.Arm64MovImmediate.writer_binding
+#check KProgFormal.ClightRefinement.Arm64MovImmediate.handler_binding
+#print axioms KProgFormal.ClightRefinement.Arm64MovImmediate.handler_binding
+#check KProgFormal.ClightRefinement.Arm64MovImmediate.Dispatch.body_source
+#print axioms KProgFormal.ClightRefinement.Arm64MovImmediate.Dispatch.body_source
+#check KProgFormal.ClightRefinement.Arm64MovImmediate.Dispatch.body_dispatch
+#print axioms KProgFormal.ClightRefinement.Arm64MovImmediate.Dispatch.body_dispatch
+#check KProgFormal.ClightRefinement.Arm64MovImmediate.Dispatch.call_dispatch
+#print axioms KProgFormal.ClightRefinement.Arm64MovImmediate.Dispatch.call_dispatch

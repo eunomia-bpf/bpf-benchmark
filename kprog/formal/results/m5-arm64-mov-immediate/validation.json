@@ -1,0 +1,209 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-arm64-mov-immediate",
+  "source_link": {
+    "exit": 0,
+    "jobs": 177,
+    "log": "link4.log",
+    "API": "CC.Link.linkProgram over complete Entry/Program plus complete Numeric",
+    "global_definitions": 203,
+    "old_symbol_positions_retained": 188,
+    "resolved_existing_declarations": 6,
+    "appended_definitions": 15,
+    "composite_environment": "kernel-proved equal",
+    "cache": "11 groups of references to original source rows, complete result kernel-checked",
+    "unsafe_or_native_reflection_proof": false
+  },
+  "dispatch": {
+    "focused_exit": 0,
+    "jobs": 180,
+    "log": "dispatch3.log",
+    "opcode": 1,
+    "width_codes": [
+      4,
+      8
+    ],
+    "body_internal_transitions": 53,
+    "procedure_prefix_transitions": 54,
+    "selector_internal_transitions": 23,
+    "actual_allocation": "all generic fn_vars; unshadowing derived from actual declarations",
+    "caller_frame": "exact raw bytes and both permission maps below original nextblock",
+    "endpoint": "actual scalar branch, before eager SRC reader call",
+    "other_values": "unrestricted in the proved prefix",
+    "remaining_suffix": "SRC read, immediate switch, writer call, actual frame free and return; symbolic post-state and native step open"
+  },
+  "binding_blocks": {
+    "width": 66,
+    "mov_path": 67,
+    "program_read": 76,
+    "program_write": 79,
+    "generic_execute": 85,
+    "kind": "Clight blocks, not native addresses"
+  },
+  "public_queries": {
+    "exit": 0,
+    "theorems": 12,
+    "log": "Query-1.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64NumericProgram.linked_source": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericProgram.composites_same": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericProgram.old_names": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.selector_internal": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.width_binding": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.selector_binding": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.reader_binding": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.writer_binding": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.handler_binding": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.Dispatch.body_source": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.Dispatch.body_dispatch": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.Dispatch.call_dispatch": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "whole_lake_build": {
+    "exit": 0,
+    "jobs": 307,
+    "log": "lake-build1.log",
+    "runs_on_final_source": 1,
+    "timing_lock": "shared"
+  },
+  "export_comparison": {
+    "exit": 0,
+    "baseline": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_byte_identical": true,
+    "log": "export-parity1.json"
+  },
+  "metadata": {
+    "old_two_unit_probe": {
+      "process_exit": 0,
+      "value": "Except.error at transition28, unresolved external selector",
+      "log": "count1.log"
+    },
+    "three_unit_replay": {
+      "process_exit": 0,
+      "value": "203 transitions for both widths with SRC NONE255; selector23",
+      "log": "count2.log",
+      "proof_evidence": false
+    },
+    "source_rows": {
+      "exit": 0,
+      "log": "source-rows2.json",
+      "committed_script": "SourceRows.lean"
+    },
+    "link_query": {
+      "exit": 0,
+      "log": "link-query2.log"
+    },
+    "committed_replay": "Replay.lean"
+  },
+  "attempt_exits": {
+    "Query-1": 0,
+    "count1": 0,
+    "count2": 0,
+    "dispatch1": 1,
+    "dispatch2": 0,
+    "dispatch3": 0,
+    "export-parity1": 0,
+    "focused1": 1,
+    "lake-build1": 0,
+    "link-query1": 1,
+    "link-query2": 0,
+    "link1": 1,
+    "link2": 1,
+    "link3": 1,
+    "link4": 0,
+    "selector1": 1,
+    "selector2": 1,
+    "selector3": 1,
+    "selector4": 1,
+    "selector5": 1,
+    "selector6": 0,
+    "source-rows1": 1,
+    "source-rows2": 0
+  },
+  "attempt_notes": [
+    "link-query1: unused namespace error; corrected query2",
+    "link1: monolithic linker elaboration exceeds recursion; cache source-row references instead, no raised cap",
+    "link2: rejected use of unsafe Meta.evalExpr; removed entirely from final source",
+    "source-rows1: missing lambda type; corrected source-rows2",
+    "link3: dependent build started after the failed metadata query and lacked definitions; retained, sequencing corrected",
+    "selector1: scoped doc/import error; corrected",
+    "focused1 and selector2-5/dispatch1: broad simplification reaches normal recursion limit at switch; pointwise kernel reduction solves all23 without simplification scaffolding",
+    "selector6/dispatch2: succeeds; final selector trimmed to rfl at each transition; body dispatch53 certified",
+    "dispatch3: real function entry, derived unshadowing and exact caller frame,54 certified"
+  ],
+  "limits": {
+    "heartbeats": 200000,
+    "recursion_depth": 512,
+    "workers": 1,
+    "address_space_GiB": 32,
+    "CPUs": [
+      17,
+      18
+    ]
+  },
+  "last_complete_make_check": {
+    "exit": 0,
+    "commit": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "rerun": false,
+    "reason": "Lean-only changes; C/exports/runtime unchanged in this step; fresh full Lake and make check still needed at final M5/M6 closure"
+  },
+  "new_global_initialization": "nextblock204 expected; old189 world is not silently reused as a complete new-world initialization witness",
+  "complete_ISA_handler_refinements": 0,
+  "M5": "open",
+  "M6": "open"
+}
