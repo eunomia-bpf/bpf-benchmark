@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/workspaces/repository/kprog/results/shared-hash-regression-20261116/profile.py", line 10, in <module>
+    spec.loader.exec_module(profile)
+  File "<frozen importlib._bootstrap_external>", line 991, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 1128, in get_code
+  File "<frozen importlib._bootstrap_external>", line 1186, in get_data
+FileNotFoundError: [Errno 2] No such file or directory: '/workspaces/repository/kprog/perf/profile/phase-profile.py'

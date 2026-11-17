@@ -85,3 +85,18 @@ emission receipt is `52c5c1cfc`. [Named-only inventory](inventory.json),
 [emission summary](emitted-summary.txt), [build output](build.txt) and
 [raw location](emitted-host-location.txt) retain the distinctions. No
 new guest, image, performance number or native optimization is claimed.
+
+Capture-entry preflight after the clock operand change found another stale
+reference: `shared-hash-regression-20261116/profile.py shared --help` imports
+the deleted `kprog/perf/profile/phase-profile.py` and exits before argument
+parsing. [Actual preflight output](capture-preflight.txt) is retained;
+no guest started. The old Make target still dry-runs, so its printed
+command alone does not establish a usable capture entry.
+
+The native-link override itself is supported by
+`native_loader.cpp:2128` and forwarded by
+`runner/libs/suite_commands.py:34`. The next experiment needs a current
+diagnostic entry under results, using the frozen single-image guest
+recipe and this native tool override. It must retain actual paired
+proof/plan inputs, keep the benchmark and shared Makefile unchanged,
+and avoid recreating the deleted profile framework in frozen paths.
