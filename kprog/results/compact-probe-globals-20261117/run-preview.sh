@@ -10,6 +10,8 @@ main() {
     printf '%s preview waiting timing SH raw=%s\n' "$(date -u +%FT%TZ)" "$raw" >> "$root/progress.log"
     exec 8>/workspaces/.agent-state/kprog-lanes/locks/timing
     flock -s 8
+    exec 9>/workspaces/.agent-state/kprog-lanes/locks/image
+    flock -s 9
     ulimit -v 2097152
     taskset -c 19 python3 kprog/results/compact-probe-globals-20261117/edit.py > "$raw/proposed.patch" 2> "$raw/stderr.txt"
 }
