@@ -1772,3 +1772,78 @@ measurement gate or a reason to discard any completed run. Throughput,
 per-call counters and the uniform-O3 P stage sizes remain as recorded.
 No guest, image build or source optimization was started. Implementation
 of the summary correction remains coordinator-owned.
+
+## 16. User-read range arithmetic can drop the carry branch
+
+2026-11-17T05:06:00Z review at 4e63113e7; refinement of the first-ranked
+read item.
+
+The range predicate in `x86_probe_read.rs:45–50` currently computes an
+unsigned source-plus-size, rejects carry, then compares that sum with the
+live USER_PTR_MAX. The retained 4/2/1 fixture has exactly six instructions,
+31 bytes and two conditional branches for that portion. This is separate
+from NMI policy, SMAP selection, copy faults and full-destination zeroing.
+
+For unsigned source `s`, zero-extended u32 size `n` and user limit `L`,
+the target's invariant `0 <= n <= L < 2^64` gives:
+
+```text
+no carry in (s + n) AND (s + n <= L)
+                  iff s <= L - n
+```
+
+If the left side holds, ordinary integer addition gives `s <= L - n`.
+Conversely, that inequality gives `s + n <= L < 2^64`, which establishes
+both no carry and the existing upper bound. This preserves the original
+end-of-range predicate, including overflow rejection. It does not relax
+the helper to a start-address-only test or rely on a later fault to repair
+an access that the old range test rejected.
+
+The side condition comes from actual target source, not container
+privilege or host CPUID. `x86_probe_read.rs:38` retains size via R13D,
+zero-extending its u32 value. `arch/x86/kernel/cpu/common.c:2615–2623`
+initializes USER_PTR_MAX from TASK_SIZE_MAX before userspace loads these
+programs. `arch/x86/include/asm/page_64.h:138–146` selects either
+`2^47 - PAGE_SIZE` or `2^56 - PAGE_SIZE`; this kernel has 4 KiB pages.
+Even the smaller limit exceeds UINT32_MAX. No exact guest address-width
+value needs to be inferred, and the rewrite can still load the live limit
+on each helper invocation. No runtime `L >= n` check is proposed.
+
+Using the present argument/register layout, the shape is:
+
+```text
+MOVABS R11, &USER_PTR_MAX
+MOV    RAX, [R11]
+SUB    RAX, R13               # n was zero-extended through R13D
+CMP    RDX, RAX               # original source, not the wrapped sum
+JA     existing_denied
+```
+
+This is five instructions and one conditional branch, with 25 bytes if
+the existing rel32 branch form is retained, compared with six/two/31 in
+the capture. The memory read of USER_PTR_MAX remains once per check.
+These are encoding arithmetic and a proposed sequence, not assembled
+candidate bytes, a timed instruction path or an installed-size saving.
+The existing frame-size/leaf-policy and branch-compaction changes would
+alter the surrounding layout independently.
+
+`user_range_inventory.py` reads the captured instructions and records
+340 agreeing arithmetic boundary vectors in `user-range.json`: zero/max
+u32 sizes, ordinary small sizes, limit-minus-size and neighboring source
+addresses, high kernel addresses and wraparound cases for both target
+limit alternatives. It also preserves a counterexample outside the
+hypothesis (`L=0,n=1,s=0`), where subtracting underflows and would wrongly
+accept. The script is an offline arithmetic reader; it introduces no
+production check or candidate execution. The algebra, rather than these
+finite vectors, establishes the equivalence under the stated invariant.
+
+Keep the size truncation explicit. Subtracting an unproven 64-bit RSI
+value or truncating the 64-bit limit to 32 bits would invalidate the
+argument. Likewise, this is not permission to use another architecture's
+or an uninitialized user limit. The sole-kernel/userspace-load contract
+already supplies the needed bound; no kernel/module change or new fact
+query is required. Denial still follows the same -EFAULT/zeroing path,
+and the NMI/pagefault/fault-recovery work still runs after an accepted
+range. Expected per-call benefit is one fewer conditional branch on a
+successful lowered user read; actual effect remains unmeasured and
+implementation remains coordinator-owned.
