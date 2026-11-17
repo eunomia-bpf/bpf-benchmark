@@ -1995,3 +1995,54 @@ is not an explanation for a large Katran gap. Dynamic case frequencies
 and current per-call gain remain unknown. No new check, default switch,
 flag set, kernel/module change or source implementation was introduced;
 coordinator owns the small forward change and its measurement.
+
+## Leaf-read fact wiring already has a plan/cache boundary
+
+2026-11-17T05:30:47Z source review at 97212ec1c.
+
+The next implementation is the coordinator's leaf-read item, so this
+source pass checks how its facts reach emitted code. The existing path
+supports the change inside the open LTO headers/linker; a new module
+query, loader-core cache or per-program boot validation layer is not
+needed by the proposed NMI-predicate lowering.
+
+| Fact or boundary | Existing source | Consequence for the leaf work |
+|---|---|---|
+| Filtered kernel-symbol collection | `native_loader.cpp:1445–1448` iterates `native_lto::kernel_symbols`, declared in `native_loader_lto.hpp:14–18` | Add the needed `cpu_tlbstate` name in the open list when introducing its use. Merely requesting it later from the resolver does not make it a collected symbol. |
+| Structure-field positions | `native_loader_lto.hpp:39–81` resolves named/anonymous BTF members; `write_layout` at 107 onward emits facts | Use task_struct.mm and tlb_state.loaded_mm offsets from the running BTF, beside the current pagefault_disabled offset. Do not borrow a numeric displacement from the on-disk disassembly. |
+| Running target and one layout string | `native_loader_link_plan.hpp:124–138` loads running-vmlinux BTF and resolves symbols through the existing resolver | The provider executes in the loader's running kernel environment, rather than the P build host. Its string is initialized once in that process. |
+| Link-plan input | `native_loader_link_plan.hpp:163` writes that same string as kernel_layout | New emitted-code facts belong here, with Rust RuntimeProbeReadLayout at `main.rs:188–199` consuming their meaning. |
+| Final emission cache | `native_loader.cpp:3131–3132` incorporates the whole layout string | A changed serialized fact automatically participates in this cache identity; it need not be added to another frozen core field list or a new cache generation mechanism. |
+| Kernel-only lowering | `main.rs:432–436,481–483` requires/passes the layout for x86 kernel emission, while proof mode does not use it | Keep boot-policy specialization at this boundary. It does not require a new host-CPU dependency in frontend P or a new boot-fact requirement in entry-proof generation. |
+
+The first row matters because the earlier trie_lookup_elem regression
+was exactly a wanted-symbol omission, corrected by a53922beb. The existing
+symbol-list hook already avoids that need for another frozen core edit.
+The plan and cache rows also use the same value, rather than two similar
+serializations. This is a positive source check of the current design,
+not discovery of a present stale-cache defect or a request for new checks.
+
+There is one fact-type distinction to retain. Current probe_read JSON
+(`native_loader_lto.hpp:136–144`) contains addresses and field offsets,
+including boot_cpu_data and x86_capability. Those locate the capability
+bit; BTF and a symbol address do not supply its enabled value. The planned
+SMAP link-time selection needs an actual target-boot capability fact in
+the same serialized layout. It must not come from the build host's CPUID
+or be inferred as false from an absent value. This audit did not read or
+establish a new guest SMAP value, and introduces no provider implementation
+or missing-fact rejection.
+
+By contrast, inlined NMI policy must keep loaded_mm and current->mm as
+live kernel reads on every invocation. Their addresses/offsets may be
+link facts; the equality result is not one. The existing final-emission
+cache is the relevant boundary for this machine-code specialization.
+The earlier embedded-IR compiler cache need not acquire CPU facts that
+its LLVM transformations do not consume.
+
+The 0dcf97880 build-input change already makes the staged LTO compiler
+depend on native_loader_lto.hpp and its other included headers
+(`vendor/bpf/Makefile:292`); that prior missing dependency is fixed. No
+new source change, guest, build, candidate or cache output was produced
+in this pass. The existing runtime checks/ABI and all other LTO pieces
+stay as they are. Per-call effect and installed bytes belong to the
+forthcoming implementation, not this wiring review.
