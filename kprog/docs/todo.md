@@ -48,7 +48,7 @@ PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are 
 
 **冻结（运营者 2026-11-16：“需要有东西冻结并且明确禁止修改, 除了删除死代码”；协调者 2026-11-16T23:44:41Z 落实，全文见 AGENTS.md 和 CLAUDE.md 的 Freeze 一节）**：冻结的路径只许删除死代码，由 tools/freeze-check（pre-commit、pre-push）和内核仓库的只许删除钩子执行。开放的只有设计里放优化的两处：产生 P 时的编译参数和头文件（vendor/bpf/Makefile、vendor/bpf/*compat*.h）和 LTO（kprog/x86/native_lab/native_link/，装载器的 native_loader_lto/link_plan/link_schema/context_lto.hpp）；记录（results、docs）和证明（kprog/formal）照常。C：统一一组编译参数的研究（运营者“也得通过调优编译参数做到native 快 50%、代码量少一半”“编译参数所有 app 统一”），每个候选量六个应用装进去的原生 / JIT 和每次调用。PERF：只做 LTO，一项一项量。
 
-**协调者 2026-11-16T23:36:46Z（运营者“内核公共路径 为啥改? 我觉得内核是不是应该几乎不要修改, 整体 patch 也要少于 500 loc?”）**：内核补丁对 stock c23719abc330 共 13 个文件 +423/-4，在 500 行以内。公共路径里 kernel/fork.c、include/linux/sched.h 这 10 行（74d1097af561，每个任务一个待绑定镜像槽）拿掉：镜像只经 BPF_PROG_LOAD 里已有的显式字段绑定。内核从此只减不加；x86/arm64 mm/fault.c 的 15 行（SMAP 缺页沿用 BPF 异常恢复，冷路径）保留。
+**协调者 2026-11-16T23:36:46Z（运营者“内核公共路径 为啥改? 我觉得内核是不是应该几乎不要修改, 整体 patch 也要少于 500 loc?”）**：内核补丁对 stock c23719abc330 共 13 个文件 +423/-4，在 500 行以内。公共路径里 kernel/fork.c、include/linux/sched.h 这 10 行（74d1097af561，每个任务一个待绑定镜像槽）拿掉：镜像只经 BPF_PROG_LOAD 里已有的显式字段绑定。（2026-11-17T00:20:41Z 协调者改正：BPF_PROG_LOAD 里的 BPF_F_NATIVE_IMAGE 只是一个标志，镜像本身就从这个任务槽交接（core.c bpf_native_image_arm/bind）；拿掉槽需要新写交接代码，和“内核只减不加”冲突，所以这 10 行保留，内核维持 +423/-4。）内核从此只减不加；x86/arm64 mm/fault.c 的 15 行（SMAP 缺页沿用 BPF 异常恢复，冷路径）保留。
 
 **协调者 2026-11-16T23:27:56Z（运营者“你看看数据, 是不是越来越慢了? 为啥这样?”“你到底这周在干啥? 反思一下?”“要不要从 5/29 的基础上重新改?”“你要看看你都在调啥”；数据见 kprog/results/trend-20261116）**：
 1. 计时环境：C 跑计时的时候，Workspace 里的重活（镜像和工具构建、内核构建、全量 lake build、诊断来宾）在两轮之间做；重活用 `flock -s /workspaces/.agent-state/kprog-lanes/locks/timing` 包起来，计时持 -x，两边自然错开。依据：11-16 起 eBPF 一侧本身变慢 24–28%，逐样本波动从约 2% 变成 15–30%。
