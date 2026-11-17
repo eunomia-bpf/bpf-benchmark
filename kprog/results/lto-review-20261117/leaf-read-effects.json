@@ -1,6 +1,6 @@
 {
-  "recorded_utc": "2026-11-17T08:59:24Z",
-  "scope": "Completed OTel/BCC/Tracee user-leaf coordinator stats-on 3x60s run pairs and subsequent kernel-leaf BCC/Tracee runs and compat Tetragon; Tracee user-leaf reference is the coordinator same-image repeat, and its first post-change attempt remains in zero-remainder-effects.json. Existing >=100-call reporting convention. IDs identify records within their own boot only. Installed receipts count cumulative replacements, not measurement snapshots. No causal gain, PMU split, equal-work proof or new admission check is inferred.",
+  "recorded_utc": "2026-11-17T09:12:49Z",
+  "scope": "Completed OTel/BCC/Tracee user-leaf coordinator stats-on 3x60s run pairs and subsequent kernel-leaf BCC/Tracee runs and compat Tetragon/Tracee; Tracee user-leaf reference is the coordinator same-image repeat, and its first post-change attempt remains in zero-remainder-effects.json. Existing >=100-call reporting convention. IDs identify records within their own boot only. Installed receipts count cumulative replacements, not measurement snapshots. No causal gain, PMU split, equal-work proof or new admission check is inferred.",
   "apps": [
     {
       "app": "otelcol-ebpf-profiler__profiling",
@@ -3244,6 +3244,614 @@
       "kernel_leaf_repeat_vs_first_ns_ratios": {
         "baseline": 1.1737249443457183,
         "post_rejit": 1.154623379142765
+      },
+      "subsequent_compat": {
+        "stage": "compat_dispatch",
+        "run": "corpus/results/x86_kvm_corpus_20261117_090004_528468",
+        "phases": {
+          "baseline": {
+            "records": 167,
+            "selected": [
+              {
+                "id": 106,
+                "name": "trace_vfs_read",
+                "type": "kprobe",
+                "run_cnt_delta": 49614773,
+                "run_time_ns_delta": 3231863671
+              },
+              {
+                "id": 107,
+                "name": "trace_ret_vfs_r",
+                "type": "kprobe",
+                "run_cnt_delta": 49614773,
+                "run_time_ns_delta": 31812185405
+              },
+              {
+                "id": 112,
+                "name": "trace_mmap_aler",
+                "type": "kprobe",
+                "run_cnt_delta": 453,
+                "run_time_ns_delta": 92252
+              },
+              {
+                "id": 113,
+                "name": "trace_do_mmap",
+                "type": "kprobe",
+                "run_cnt_delta": 444,
+                "run_time_ns_delta": 40539
+              },
+              {
+                "id": 114,
+                "name": "trace_ret_do_mm",
+                "type": "kprobe",
+                "run_cnt_delta": 444,
+                "run_time_ns_delta": 354616
+              },
+              {
+                "id": 115,
+                "name": "trace_security_",
+                "type": "kprobe",
+                "run_cnt_delta": 444,
+                "run_time_ns_delta": 365466
+              },
+              {
+                "id": 118,
+                "name": "trace_security_",
+                "type": "kprobe",
+                "run_cnt_delta": 700,
+                "run_time_ns_delta": 104837
+              },
+              {
+                "id": 122,
+                "name": "trace_security_",
+                "type": "kprobe",
+                "run_cnt_delta": 167,
+                "run_time_ns_delta": 56991
+              },
+              {
+                "id": 139,
+                "name": "trace_security_",
+                "type": "kprobe",
+                "run_cnt_delta": 62286302,
+                "run_time_ns_delta": 3412161860
+              },
+              {
+                "id": 140,
+                "name": "tracepoint__tas",
+                "type": "raw_tracepoint",
+                "run_cnt_delta": 60582,
+                "run_time_ns_delta": 59971823
+              },
+              {
+                "id": 144,
+                "name": "trace_do_sigact",
+                "type": "kprobe",
+                "run_cnt_delta": 121212,
+                "run_time_ns_delta": 116326181
+              },
+              {
+                "id": 148,
+                "name": "trace_fd_instal",
+                "type": "kprobe",
+                "run_cnt_delta": 6241759,
+                "run_time_ns_delta": 3509167300
+              },
+              {
+                "id": 149,
+                "name": "trace_filp_clos",
+                "type": "kprobe",
+                "run_cnt_delta": 181464,
+                "run_time_ns_delta": 190312553
+              },
+              {
+                "id": 150,
+                "name": "trace_file_upda",
+                "type": "kprobe",
+                "run_cnt_delta": 1378,
+                "run_time_ns_delta": 997235
+              },
+              {
+                "id": 151,
+                "name": "trace_ret_file_",
+                "type": "kprobe",
+                "run_cnt_delta": 1378,
+                "run_time_ns_delta": 3390087
+              },
+              {
+                "id": 162,
+                "name": "trace_security_",
+                "type": "kprobe",
+                "run_cnt_delta": 12432111,
+                "run_time_ns_delta": 5446859013
+              },
+              {
+                "id": 165,
+                "name": "trace_security_",
+                "type": "kprobe",
+                "run_cnt_delta": 5560740,
+                "run_time_ns_delta": 2864923177
+              },
+              {
+                "id": 18,
+                "name": "tracepoint__raw",
+                "type": "raw_tracepoint",
+                "run_cnt_delta": 475331547,
+                "run_time_ns_delta": 102779885769
+              },
+              {
+                "id": 181,
+                "name": "lsm_file_open_t",
+                "type": "lsm",
+                "run_cnt_delta": 6241653,
+                "run_time_ns_delta": 2688433325
+              },
+              {
+                "id": 21,
+                "name": "tracepoint__raw",
+                "type": "raw_tracepoint",
+                "run_cnt_delta": 475331580,
+                "run_time_ns_delta": 232043093641
+              },
+              {
+                "id": 24,
+                "name": "trace_sys_enter",
+                "type": "raw_tracepoint",
+                "run_cnt_delta": 475331581,
+                "run_time_ns_delta": 194386655569
+              },
+              {
+                "id": 25,
+                "name": "trace_sys_exit",
+                "type": "raw_tracepoint",
+                "run_cnt_delta": 475331578,
+                "run_time_ns_delta": 193382702902
+              },
+              {
+                "id": 30,
+                "name": "trace_arch_prct",
+                "type": "kprobe",
+                "run_cnt_delta": 15895986,
+                "run_time_ns_delta": 1678072705
+              },
+              {
+                "id": 31,
+                "name": "trace_ret_arch_",
+                "type": "kprobe",
+                "run_cnt_delta": 15895986,
+                "run_time_ns_delta": 7059356943
+              },
+              {
+                "id": 43,
+                "name": "tracepoint__sch",
+                "type": "raw_tracepoint",
+                "run_cnt_delta": 60481,
+                "run_time_ns_delta": 167060641
+              },
+              {
+                "id": 44,
+                "name": "sched_process_f",
+                "type": "raw_tracepoint",
+                "run_cnt_delta": 60481,
+                "run_time_ns_delta": 187590392
+              },
+              {
+                "id": 46,
+                "name": "heartbeat_captu",
+                "type": "kprobe",
+                "run_cnt_delta": 181,
+                "run_time_ns_delta": 619745
+              },
+              {
+                "id": 56,
+                "name": "tracepoint__sch",
+                "type": "raw_tracepoint",
+                "run_cnt_delta": 60490,
+                "run_time_ns_delta": 71577019
+              },
+              {
+                "id": 57,
+                "name": "sched_process_e",
+                "type": "raw_tracepoint",
+                "run_cnt_delta": 60490,
+                "run_time_ns_delta": 204293406
+              },
+              {
+                "id": 58,
+                "name": "tracepoint__sch",
+                "type": "raw_tracepoint",
+                "run_cnt_delta": 60483,
+                "run_time_ns_delta": 53201830
+              },
+              {
+                "id": 60,
+                "name": "tracepoint__sch",
+                "type": "raw_tracepoint",
+                "run_cnt_delta": 66492566,
+                "run_time_ns_delta": 31259320688
+              },
+              {
+                "id": 61,
+                "name": "trace_filldir64",
+                "type": "kprobe",
+                "run_cnt_delta": 15041981,
+                "run_time_ns_delta": 372679542
+              },
+              {
+                "id": 63,
+                "name": "trace_do_exit",
+                "type": "kprobe",
+                "run_cnt_delta": 60490,
+                "run_time_ns_delta": 60385528
+              },
+              {
+                "id": 73,
+                "name": "trace_security_",
+                "type": "kprobe",
+                "run_cnt_delta": 6241653,
+                "run_time_ns_delta": 5346046176
+              },
+              {
+                "id": 76,
+                "name": "trace_commit_cr",
+                "type": "kprobe",
+                "run_cnt_delta": 8305560,
+                "run_time_ns_delta": 3037643939
+              },
+              {
+                "id": 77,
+                "name": "trace_switch_ta",
+                "type": "kprobe",
+                "run_cnt_delta": 60490,
+                "run_time_ns_delta": 34871319
+              },
+              {
+                "id": 78,
+                "name": "trace_cap_capab",
+                "type": "kprobe",
+                "run_cnt_delta": 14738408,
+                "run_time_ns_delta": 4900888547
+              },
+              {
+                "id": 91,
+                "name": "trace_vfs_write",
+                "type": "kprobe",
+                "run_cnt_delta": 12527288,
+                "run_time_ns_delta": 828664678
+              },
+              {
+                "id": 92,
+                "name": "vfs_write_magic",
+                "type": "kprobe",
+                "run_cnt_delta": 12527288,
+                "run_time_ns_delta": 488444281
+              },
+              {
+                "id": 93,
+                "name": "trace_ret_vfs_w",
+                "type": "kprobe",
+                "run_cnt_delta": 12527288,
+                "run_time_ns_delta": 7975988983
+              },
+              {
+                "id": 94,
+                "name": "vfs_write_magic",
+                "type": "kprobe",
+                "run_cnt_delta": 12527288,
+                "run_time_ns_delta": 541011047
+              }
+            ],
+            "calls": 2286831941,
+            "elapsed_ns": 840197661621,
+            "ns_per_call": 367.4068245056929
+          },
+          "post_rejit": {
+            "records": 167,
+            "selected": [
+              {
+                "id": 203,
+                "name": "tracepoint__raw",
+                "type": "raw_tracepoint",
+                "run_cnt_delta": 612474078,
+                "run_time_ns_delta": 100404093937
+              },
+              {
+                "id": 209,
+                "name": "tracepoint__raw",
+                "type": "raw_tracepoint",
+                "run_cnt_delta": 612474073,
+                "run_time_ns_delta": 189891675023
+              },
+              {
+                "id": 215,
+                "name": "trace_sys_enter",
+                "type": "raw_tracepoint",
+                "run_cnt_delta": 612474092,
+                "run_time_ns_delta": 173318236753
+              },
+              {
+                "id": 217,
+                "name": "trace_sys_exit",
+                "type": "raw_tracepoint",
+                "run_cnt_delta": 612474098,
+                "run_time_ns_delta": 176399226188
+              },
+              {
+                "id": 227,
+                "name": "trace_arch_prct",
+                "type": "kprobe",
+                "run_cnt_delta": 14450275,
+                "run_time_ns_delta": 1078978160
+              },
+              {
+                "id": 229,
+                "name": "trace_ret_arch_",
+                "type": "kprobe",
+                "run_cnt_delta": 14450275,
+                "run_time_ns_delta": 4510050476
+              },
+              {
+                "id": 253,
+                "name": "tracepoint__sch",
+                "type": "raw_tracepoint",
+                "run_cnt_delta": 54980,
+                "run_time_ns_delta": 101912138
+              },
+              {
+                "id": 255,
+                "name": "sched_process_f",
+                "type": "raw_tracepoint",
+                "run_cnt_delta": 54980,
+                "run_time_ns_delta": 152585926
+              },
+              {
+                "id": 259,
+                "name": "heartbeat_captu",
+                "type": "kprobe",
+                "run_cnt_delta": 180,
+                "run_time_ns_delta": 770785
+              },
+              {
+                "id": 279,
+                "name": "tracepoint__sch",
+                "type": "raw_tracepoint",
+                "run_cnt_delta": 54980,
+                "run_time_ns_delta": 68374689
+              },
+              {
+                "id": 281,
+                "name": "sched_process_e",
+                "type": "raw_tracepoint",
+                "run_cnt_delta": 54980,
+                "run_time_ns_delta": 195171802
+              },
+              {
+                "id": 283,
+                "name": "tracepoint__sch",
+                "type": "raw_tracepoint",
+                "run_cnt_delta": 54987,
+                "run_time_ns_delta": 9775170
+              },
+              {
+                "id": 287,
+                "name": "tracepoint__sch",
+                "type": "raw_tracepoint",
+                "run_cnt_delta": 69128829,
+                "run_time_ns_delta": 22789013265
+              },
+              {
+                "id": 289,
+                "name": "trace_filldir64",
+                "type": "kprobe",
+                "run_cnt_delta": 18554223,
+                "run_time_ns_delta": 455727436
+              },
+              {
+                "id": 293,
+                "name": "trace_do_exit",
+                "type": "kprobe",
+                "run_cnt_delta": 54980,
+                "run_time_ns_delta": 57409164
+              },
+              {
+                "id": 313,
+                "name": "trace_security_",
+                "type": "kprobe",
+                "run_cnt_delta": 6445890,
+                "run_time_ns_delta": 3777031784
+              },
+              {
+                "id": 319,
+                "name": "trace_commit_cr",
+                "type": "kprobe",
+                "run_cnt_delta": 10586948,
+                "run_time_ns_delta": 4521783723
+              },
+              {
+                "id": 321,
+                "name": "trace_switch_ta",
+                "type": "kprobe",
+                "run_cnt_delta": 54980,
+                "run_time_ns_delta": 38339085
+              },
+              {
+                "id": 323,
+                "name": "trace_cap_capab",
+                "type": "kprobe",
+                "run_cnt_delta": 17106760,
+                "run_time_ns_delta": 4429327546
+              },
+              {
+                "id": 349,
+                "name": "trace_vfs_write",
+                "type": "kprobe",
+                "run_cnt_delta": 12935458,
+                "run_time_ns_delta": 857390214
+              },
+              {
+                "id": 351,
+                "name": "vfs_write_magic",
+                "type": "kprobe",
+                "run_cnt_delta": 12935458,
+                "run_time_ns_delta": 462207827
+              },
+              {
+                "id": 353,
+                "name": "trace_ret_vfs_w",
+                "type": "kprobe",
+                "run_cnt_delta": 12935458,
+                "run_time_ns_delta": 16393326363
+              },
+              {
+                "id": 355,
+                "name": "vfs_write_magic",
+                "type": "kprobe",
+                "run_cnt_delta": 12935458,
+                "run_time_ns_delta": 560559975
+              },
+              {
+                "id": 379,
+                "name": "trace_vfs_read",
+                "type": "kprobe",
+                "run_cnt_delta": 61520571,
+                "run_time_ns_delta": 3837512219
+              },
+              {
+                "id": 381,
+                "name": "trace_ret_vfs_r",
+                "type": "kprobe",
+                "run_cnt_delta": 61520571,
+                "run_time_ns_delta": 43628769273
+              },
+              {
+                "id": 391,
+                "name": "trace_mmap_aler",
+                "type": "kprobe",
+                "run_cnt_delta": 452,
+                "run_time_ns_delta": 80561
+              },
+              {
+                "id": 393,
+                "name": "trace_do_mmap",
+                "type": "kprobe",
+                "run_cnt_delta": 443,
+                "run_time_ns_delta": 39873
+              },
+              {
+                "id": 395,
+                "name": "trace_ret_do_mm",
+                "type": "kprobe",
+                "run_cnt_delta": 443,
+                "run_time_ns_delta": 240420
+              },
+              {
+                "id": 397,
+                "name": "trace_security_",
+                "type": "kprobe",
+                "run_cnt_delta": 443,
+                "run_time_ns_delta": 245369
+              },
+              {
+                "id": 403,
+                "name": "trace_security_",
+                "type": "kprobe",
+                "run_cnt_delta": 565,
+                "run_time_ns_delta": 79394
+              },
+              {
+                "id": 411,
+                "name": "trace_security_",
+                "type": "kprobe",
+                "run_cnt_delta": 167,
+                "run_time_ns_delta": 40015
+              },
+              {
+                "id": 445,
+                "name": "trace_security_",
+                "type": "kprobe",
+                "run_cnt_delta": 74614988,
+                "run_time_ns_delta": 12376161425
+              },
+              {
+                "id": 447,
+                "name": "tracepoint__tas",
+                "type": "raw_tracepoint",
+                "run_cnt_delta": 55085,
+                "run_time_ns_delta": 62076467
+              },
+              {
+                "id": 455,
+                "name": "trace_do_sigact",
+                "type": "kprobe",
+                "run_cnt_delta": 110218,
+                "run_time_ns_delta": 104436236
+              },
+              {
+                "id": 463,
+                "name": "trace_fd_instal",
+                "type": "kprobe",
+                "run_cnt_delta": 6445996,
+                "run_time_ns_delta": 933554949
+              },
+              {
+                "id": 465,
+                "name": "trace_filp_clos",
+                "type": "kprobe",
+                "run_cnt_delta": 164973,
+                "run_time_ns_delta": 159900129
+              },
+              {
+                "id": 467,
+                "name": "trace_file_upda",
+                "type": "kprobe",
+                "run_cnt_delta": 248,
+                "run_time_ns_delta": 22816
+              },
+              {
+                "id": 469,
+                "name": "trace_ret_file_",
+                "type": "kprobe",
+                "run_cnt_delta": 248,
+                "run_time_ns_delta": 42564
+              },
+              {
+                "id": 491,
+                "name": "trace_security_",
+                "type": "kprobe",
+                "run_cnt_delta": 16003707,
+                "run_time_ns_delta": 5045546499
+              },
+              {
+                "id": 497,
+                "name": "trace_security_",
+                "type": "kprobe",
+                "run_cnt_delta": 5055016,
+                "run_time_ns_delta": 3554576659
+              },
+              {
+                "id": 528,
+                "name": "lsm_file_open_t",
+                "type": "lsm",
+                "run_cnt_delta": 6445890,
+                "run_time_ns_delta": 2012202735
+              }
+            ],
+            "calls": 2884686444,
+            "elapsed_ns": 772188495032,
+            "ns_per_call": 267.68541746993424
+          }
+        },
+        "per_call_speedup": 1.3725320862760824,
+        "installed_cumulative_receipt": "x86_kvm_corpus_20261117_090004_528468 installed programs 169 JIT 2068918 B native 1761243 B ratio 0.85x"
+      },
+      "compat_vs_kernel_leaf_ns_ratios": {
+        "first": {
+          "baseline": 1.0006232528442882,
+          "post_rejit": 1.0044368863086774
+        },
+        "same_image_repeat": {
+          "baseline": 0.8525193723322256,
+          "post_rejit": 0.8699259901132511
+        }
       }
     }
   ],

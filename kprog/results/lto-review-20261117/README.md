@@ -3449,3 +3449,47 @@ byte identity, installed saving or measured per-call effect is claimed.
 This is separate from the prior LPM/LRU displacement and return-tail
 savings. The per-CPU fused GS add and the previously audited mask policy
 already have their intended forms and supply no new removal here.
+
+
+### Completed compat timing: Tracee per-call time stays near the first kernel-leaf run
+
+Coordinator receipt `89053b317`, run `090004_528468`, reports
+**1.373x per call** and **1.281x throughput**, raw eBPF/native
+**367.407 / 267.685 ns/call**. Against the first kernel-leaf run
+`075401_648119` (367.178 / 266.503 ns), baseline is **0.062% higher** and
+native **0.444% higher**. This pair shows no separable native per-call
+reduction from the compat batch, despite its higher workload throughput.
+Keep the same-image kernel-leaf repeat `080846_876289` as well: compared
+with that repeat, the current baseline/native times fall **14.75% / 13.01%**.
+Those absolute movements in both arms are not independent compat gains.
+
+The current throughput series is eBPF 335,063 / 342,850 / 344,427 and
+native 449,639 / 438,189 / 439,104, ratios 1.342 / 1.278 / 1.275,
+with zero reported errors. Earlier kernel-leaf throughput was 1.221x
+and 1.255x on the first run and repeat. Both current arms select
+41 of 167 records. Median active native/eBPF count ratio is now **1.033**,
+versus 1.206 / 1.186 previously. The known file-related pairs remain at
+0.180x and are retained; these aggregate counters do not establish that
+all inputs or helper-call mixes match.
+
+Cumulative native replacements remain **169**, companion JIT
+**2,068,918 B**, and native **1,761,243 B**. The compat batch adds
+**44,363 installed B (+2.58%)**, reaching about **0.851x JIT**. Thus this
+row retains the observed per-call advantage over JIT while its incremental
+compat effect is not resolved and its size cost is visible. Throughput
+1.30x, native 1.50x and installed-byte 0.50x goals remain unmet. The
+Tetragon row above shows a different incremental observation: native
+-6.13% alongside +8.03% installed bytes. Preserve both app results rather
+than assigning one shared outcome to the class.
+
+The coordinator batch completed at **09:09:32 UTC**, after all six
+functional checks and the two stats-on 3x60s app timings. The existing
+[reader](leaf_read_effect_inventory.py) and
+[leaf-read-effects.json](leaf-read-effects.json) now retain the Tracee
+compat row and both first/repeat kernel-leaf references, exact counters
+and arithmetic. Earlier rows and the noisier original attempts remain.
+No additional guest, run-rejection rule, PMU requirement, production
+change or optimization-ledger edit was introduced by PERF. The existing
+source-domain/constant-size proposals in this report remain proposals;
+these observations give no basis for an app-specific switch or a blanket
+replacement of compat selection with kernel-only reads.
