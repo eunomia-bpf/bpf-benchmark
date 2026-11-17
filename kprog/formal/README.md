@@ -58,6 +58,9 @@ same 98-visit construction; observer APIs project the stronger witnesses.
 The [scalar writer contract](results/m5-register-write/README.md) executes the
 actual 67-transition procedure for ordinary GPRs at widths 4 and 8, derives its
 two stores from those permissions, and preserves other cells and caller memory.
+The [writer view proof](results/m5-register-write-view/README.md) retains the
+same writable storage, characterizes all GPR reads after writing, and relates
+the GPR bank and SP to LNSym's public register write with identity cell binding.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 

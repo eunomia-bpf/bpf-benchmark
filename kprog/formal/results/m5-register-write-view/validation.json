@@ -1,0 +1,117 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-register-write-view",
+  "focused": {
+    "exit": 0,
+    "jobs": 174,
+    "log": "focused5.log"
+  },
+  "public_queries": {
+    "exit": 0,
+    "theorems": 6,
+    "log": "Query-1.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.storage": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64RegisterWrite.storage_gpr": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.gpr": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.sp": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.gpr_update": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.sp_update": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "storage": {
+    "same_allocation_bound_tables": true,
+    "writable_cells": 62,
+    "same_SP_local_and_value": true,
+    "new_producer_or_storage_choice": false
+  },
+  "reader_laws": {
+    "GPR": "selected word/tag0; all other reads exactly unchanged, including pointer/undefined/failure",
+    "SP": "actual signed-long borrowed read unchanged",
+    "frontier": "original before.nextblock retained using actual result.nextblock equality",
+    "bounds": "existing checked_load derives liveness from imported Mem.perm_valid_block; no extra bound premise"
+  },
+  "native_correspondence": {
+    "GPR_bank": "actual writer Result agrees with LNSym public w and external read-over-write laws",
+    "SP": "unchanged external GPR31/SP; source ordinary Fin31 excludes it",
+    "cell_map": "explicit identity (fun r => r.val)",
+    "tag": "selected scalar0 through existing provenance materialize",
+    "other_register_frame": "open; actual source-derived header/vector pointer bindings required",
+    "complete_instruction_refinement": false
+  },
+  "whole_lake_build": {
+    "exit": 0,
+    "jobs": 302,
+    "log": "lake-build1.log",
+    "timing_lock": "shared"
+  },
+  "export_comparison": {
+    "exit": 0,
+    "baseline": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_byte_identical": true,
+    "log": "export-parity1.json"
+  },
+  "attempt_exits": {
+    "focused1": 1,
+    "focused2": 1,
+    "focused3": 1,
+    "focused4": 1,
+    "focused5": 0
+  },
+  "attempt_notes": "1: declaration namespace/field-alias matching; 2: explicit Option bind reduction; 3: reflexive native branch and byte-zero extension; 4: byte-zero representation normalization; 5: all proofs pass. All raw retained, no budget increase or new semantic axioms. Full Lake ran once on final source.",
+  "limits": {
+    "heartbeats": 200000,
+    "recursion_depth": 512,
+    "workers": 1,
+    "address_space_GiB": 32,
+    "CPUs": [
+      17,
+      18
+    ]
+  },
+  "last_complete_make_check": {
+    "exit": 0,
+    "commit": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "rerun": false,
+    "reason": "Lean-only; C/runtime unchanged; fresh Lake and make check still required at M5/M6 closure"
+  },
+  "next": "retain source-derived header/vector pointer bindings to finish flags/vector preservation and complete register relation, then actual caller/data-writing handler",
+  "complete_ISA_handler_refinements": 0,
+  "M5": "open",
+  "M6": "open"
+}

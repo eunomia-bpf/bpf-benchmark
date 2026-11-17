@@ -1,0 +1,13 @@
+import KProgFormal.ClightRefinement.Arm64RegisterWriteView
+#check KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.storage
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.storage
+#check KProgFormal.ClightRefinement.Arm64RegisterWrite.storage_gpr
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterWrite.storage_gpr
+#check KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.gpr
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.gpr
+#check KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.sp
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.sp
+#check KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.gpr_update
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.gpr_update
+#check KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.sp_update
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.sp_update
