@@ -39,6 +39,14 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-17T05:20:42Z（核实 perf 04:21–05:16 审阅后的决定）**：
+1. 装进去的大小：inst.py 原来按程序名累加，同名程序互相覆盖（perf b6d0e9647），已改成按每次替换的原生程序 ID 配对。更正后 run2：BCC 1.04、Tetragon 0.77、Tracee 0.82（之前报 1.08、0.75、0.86）；O3 组 BCC 1.00、Tracee 0.82；其余不变。每次调用和吞吐不受影响。
+2. probe_read 接下来按这个顺序做，每步单独量：
+   a. 叶子化：nmi_uaccess_okay 的判断（GS current_task、GS cpu_tlbstate.loaded_mm、比较 task->mm）直接内联，保留两次实时读取和比较；current_task 只读一次；内部调用去掉之后，十条 push/pop 一起省掉（perf 16c0758bd）。同一步里，用户读的范围判断改成 src <= L−n 一次比较（perf 22de1e918），SMAP 按启动时的 CPU 能力在链接时选定（perf 9a3a369f8）。内核读的 copy_from_kernel_nofault_allowed 判断随后照同样做法内联。
+   b. 常量大小特化（perf b80b2dad0 的计数块模型），量装进去的总字节。
+3. 代码量的几项排在 probe_read 之后：生成的跳转按距离用 rel8（perf 5ee83174d），ARRAY 返回尾部的多余跳转（perf dccc430b0），512 字节以下的 memset 全展开（perf 778ee0ae7）。
+4. Tetragon 4 次来源待分类的装载核实为能力探测和统计初始化（perf 14868e1b4），只在启动时跑一次，保持原样。
+
 **协调者 2026-11-17T05:05:44Z（run2 结果和下一项）**：O3 下 probe_read 剩余字节 4/2/1 一步之后，每次调用 OTel 1.098x、BCC 1.013x、Tetragon 1.098x（第一次计时）、Tracee 1.145x、Katran 1.040x，五个工作量相同的应用几何平均 1.078x；Cilium 2.995x 两臂配置不同，不计（probe-tails-20261117/README.md）。下一项零余数判断提前和 Makefile 的真实输入已提交（0dcf97880，链接器 40 个测试、probe_read 主机向量全部通过），zero-remainder-20261117/run.sh 在 OTel、BCC、Tracee 上计时。
 
 **协调者 2026-11-17T04:21:19Z（核实 perf 03:37–04:16 审阅后的决定）**：

@@ -32,3 +32,10 @@ Lanes are stopped, so the host is quiet. Each candidate's summary is committed a
 Decision (coordinator): the one flag set stays -O3 for every app. Compile flags move per call by a few percent at most;
 the operator's targets need the LTO work (operator 2026-11-17: "LTO 那边反而需要更关注?"). Os comes back as the
 code-size candidate after the string-pool binding and the shim's link-failure path are fixed.
+
+## Installed bytes, corrected 2026-11-17
+
+inst.py now pairs each replacement's original and native jit-info lines by thread and keys the pair by native program
+ID (perf review b6d0e9647: the name-keyed sums let later loads overwrite programs with the same truncated name).
+O3 group, recomputed: OTel 0.80, BCC 1.00 (25 programs, 7 965 → 7 962 B), Cilium 0.83 (113), Tracee 0.82
+(169 programs, 2 068 918 → 1 690 978 B), Katran 0.69. Per-call and throughput figures are unchanged.
