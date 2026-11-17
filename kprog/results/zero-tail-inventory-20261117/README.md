@@ -26,3 +26,22 @@ actual output under the Git lock. Results and a source-change decision
 are pending. Any future sharing must carry structural tail offsets
 through branch sizing, preserve success returns and protected loads,
 and avoid fake helper identities or a new public relocation format.
+
+First run 2688184 completed the named-relocation inventory at 17:49:46Z,
+then publication exited 1 because the repository ignores `output.txt`.
+Its raw files remain at
+`/workspaces/kprog-raw/perf/zero-tail-inventory-20261117/host-20261117T174944Z-2688184`.
+The forward publication repair uses `host-output.txt` and retains the
+already completed analysis without repeating it. The named-only result
+does not cover numeric helper transfers: its zero OTel count does not
+mean OTel has no read leaves.
+
+`run-emitted.sh` closes that inventory gap with actual emitted ranges.
+It builds the sole canonical release linker under timing SH then image
+EX and replays the same 239 retained entry proofs and their recorded
+plans with `--show`. This is a current-linker replay of historical
+extracted input, not a current-P rebuild or installed-program census.
+Exact generic tails are checked at decoded instruction boundaries.
+Fixed-count tails and uncaptured generated programs remain outside this
+bound. All output, including failures, is recorded; no performance
+candidate or source change is applied by this replay.

@@ -15,9 +15,10 @@ main() {
     exec 7>/workspaces/.agent-state/kprog-lanes/locks/git
     flock -x 7
     out=kprog/results/zero-tail-inventory-20261117
-    cp "$raw/inventory.json" "$raw/summary.txt" "$raw/output.txt" "$out/"
+    cp "$raw/inventory.json" "$raw/summary.txt" "$out/"
+    cp "$raw/output.txt" "$out/host-output.txt"
     printf '%s raw=%s\n' "$(date -u +%FT%TZ)" "$raw" > "$out/host-location.txt"
-    local paths=("$out/inventory.json" "$out/summary.txt" "$out/output.txt" "$out/host-location.txt")
+    local paths=("$out/inventory.json" "$out/summary.txt" "$out/host-output.txt" "$out/host-location.txt")
     git status --short --branch --untracked-files=no > "$raw/git-status.txt"
     git diff --check -- "${paths[@]}"
     git add -- "${paths[@]}"
