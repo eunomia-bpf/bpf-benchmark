@@ -88,9 +88,45 @@ replace('    fn fixture() -> RuntimeProbeReadLayout {', '''    // Catch accident
     }
 
     fn fixture() -> RuntimeProbeReadLayout {''')
+replace('        for mode in 0..4 {', '''        for pass in 0..8 {
+            let mode=pass%4;
+            let compact=pass>=4;
+            let mut layout=fixture();
+            if compact {layout.user_ptr_max=0x12340000;layout.boot_cpu_data=0x12350000;}''')
+replace('            let binary = output.join(format!("{stem}.bin"));',
+        '''            let stem=format!("{stem}{}",if compact {"-compact"} else {""});
+            let binary = output.join(format!("{stem}.bin"));''')
+
+driver = path.parent.parent / 'fixtures/probe_read_driver.c'
+driver_original = driver.read_text()
+old = '''        uintptr_t target = value == 0x1111222233334444ULL ? (uintptr_t)&user_max :
+            value == 0x5555666677778888ULL ? (uintptr_t)cpu : 0;
+        if (target) memcpy(code+i,&target,8);
+    }'''
+new = '''        uintptr_t target = value == 0x1111222233334444ULL ? (uintptr_t)&user_max : 0;
+        if (value >= 0x5555666677778888ULL && value-0x5555666677778888ULL < sizeof(cpu))
+            target = (uintptr_t)cpu + (value-0x5555666677778888ULL);
+        if (target) memcpy(code+i,&target,8);
+    }
+    /* Compact absolute operands carry a signed disp32; -no-pie keeps these
+       fixture globals in range. Include folded boot_cpu_data field offsets. */
+    for (long i=0; i+4<=size; ++i) {
+        uint32_t value; memcpy(&value,code+i,4);
+        uintptr_t target = value == 0x12340000U ? (uintptr_t)&user_max : 0;
+        if (value >= 0x12350000U && value-0x12350000U < sizeof(cpu))
+            target = (uintptr_t)cpu + (value-0x12350000U);
+        if (target) {
+            assert(target == (uintptr_t)(intptr_t)(int32_t)target);
+            uint32_t compact = (uint32_t)target; memcpy(code+i,&compact,4);
+        }
+    }'''
+assert driver_original.count(old) == 1
+driver_text = driver_original.replace(old, new)
 
 if args.apply:
     path.write_text(text)
+    driver.write_text(driver_text)
 else:
-    print(''.join(difflib.unified_diff(original.splitlines(True), text.splitlines(True),
-                                    fromfile=str(path), tofile=str(path))), end='')
+    for file, before, after in [(path, original, text), (driver, driver_original, driver_text)]:
+        print(''.join(difflib.unified_diff(before.splitlines(True), after.splitlines(True),
+                                        fromfile=str(file), tofile=str(file))), end='')

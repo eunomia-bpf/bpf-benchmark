@@ -32,3 +32,5 @@ batch lock. Constant-size probe specialization remains the next part of
 item 1c; this prepared change does not implement it.
 
 Preview receipt, 2026-11-17T13:40:17Z: source-anchor preview exited 0 at13:37:21Z, with empty stderr. `preview.json` records its persistent raw patch path. This checks the prepared edit only; runtime source remains unchanged and Rust/host validation is pending.
+
+Prepared fixture refinement, 2026-11-17T14:03:29Z: folded wide field addresses need relocation relative to the boot_cpu_data marker, not just an exact base match. The edit now includes that C fixture relocation and low signed-disp32 marker relocation into the existing -no-pie globals. Four compact scalar/string execution cases are added beside the four wide ones, with distinct output names, while the seven-boundary decoder test covers high-half sign extension. No production source has been applied and these refined cases are not yet run. Apply after the helper-tail job finishes, under timing SH/image EX; the old snapshot-wait wording is superseded by image-lock ordering in shared-helper-tail-20261117.
