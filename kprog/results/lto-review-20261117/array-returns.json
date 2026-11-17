@@ -1,0 +1,55 @@
+{
+  "recorded_utc": "2026-11-17T04:32:57Z",
+  "scope": "Retained historical OTel helper byte patterns and decoded control flow. Separate-return layout is arithmetic only; no candidate byte vector was emitted or executed. Per-call/app size effects unmeasured; non-ARRAY fallback unaffected.",
+  "blob": "/workspaces/kprog-raw/perf/20261116-inner-array-lto/libbpf/otel-typed.blob",
+  "routines": [
+    {
+      "piece": "known_array",
+      "start": 28732,
+      "end": 28764,
+      "original_bytes": 32,
+      "marker_offset": 28759,
+      "marker_bytes": "eb0231c0c3",
+      "successful_path_unconditional_jumps_removable": 1,
+      "missing_path_unconditional_jumps_removable": 0,
+      "local_bytes_removable_with_separate_returns": 1,
+      "disassembly": "\n/workspaces/kprog-raw/perf/20261116-inner-array-lto/libbpf/otel-typed.blob:     file format binary\n\n\nDisassembly of section .data:\n\n000000000000703c <.data+0x703c>:\n    703c:\tmov    eax,DWORD PTR [rsi]\n    703e:\tcmp    eax,0x1\n    7041:\tjae    0x7059\n    7043:\tlea    rax,[rdi+rax*8+0x130]\n    704b:\tmov    rax,QWORD PTR [rax]\n    704e:\tadd    rax,QWORD PTR gs:0xffffffffb62b0028\n    7057:\tjmp    0x705b\n    7059:\txor    eax,eax\n    705b:\tret\n"
+    },
+    {
+      "piece": "known_array",
+      "start": 28764,
+      "end": 28796,
+      "original_bytes": 32,
+      "marker_offset": 28791,
+      "marker_bytes": "eb0231c0c3",
+      "successful_path_unconditional_jumps_removable": 1,
+      "missing_path_unconditional_jumps_removable": 0,
+      "local_bytes_removable_with_separate_returns": 1,
+      "disassembly": "\n/workspaces/kprog-raw/perf/20261116-inner-array-lto/libbpf/otel-typed.blob:     file format binary\n\n\nDisassembly of section .data:\n\n000000000000705c <.data+0x705c>:\n    705c:\tmov    eax,DWORD PTR [rsi]\n    705e:\tcmp    eax,0x63\n    7061:\tjae    0x7079\n    7063:\tlea    rax,[rdi+rax*8+0x130]\n    706b:\tmov    rax,QWORD PTR [rax]\n    706e:\tadd    rax,QWORD PTR gs:0xffffffffb62b0028\n    7077:\tjmp    0x707b\n    7079:\txor    eax,eax\n    707b:\tret\n"
+    },
+    {
+      "piece": "known_array",
+      "start": 28796,
+      "end": 28823,
+      "original_bytes": 27,
+      "marker_offset": 28818,
+      "marker_bytes": "eb0231c0c3",
+      "successful_path_unconditional_jumps_removable": 1,
+      "missing_path_unconditional_jumps_removable": 0,
+      "local_bytes_removable_with_separate_returns": 1,
+      "disassembly": "\n/workspaces/kprog-raw/perf/20261116-inner-array-lto/libbpf/otel-typed.blob:     file format binary\n\n\nDisassembly of section .data:\n\n000000000000707c <.data+0x707c>:\n    707c:\tmov    eax,DWORD PTR [rsi]\n    707e:\tcmp    eax,0x4000\n    7083:\tjae    0x7094\n    7085:\tshl    rax,0x4\n    7089:\tadd    rax,rdi\n    708c:\tadd    rax,0x130\n    7092:\tjmp    0x7096\n    7094:\txor    eax,eax\n    7096:\tret\n"
+    },
+    {
+      "piece": "runtime_array",
+      "start": 29687,
+      "end": 29754,
+      "original_bytes": 67,
+      "marker_offset": 29733,
+      "marker_bytes": "eb0431c0eb00c3",
+      "successful_path_unconditional_jumps_removable": 1,
+      "missing_path_unconditional_jumps_removable": 1,
+      "local_bytes_removable_with_separate_returns": 3,
+      "disassembly": "\n/workspaces/kprog-raw/perf/20261116-inner-array-lto/libbpf/otel-typed.blob:     file format binary\n\n\nDisassembly of section .data:\n\n00000000000073f7 <.data+0x73f7>:\n    73f7:\tcmp    DWORD PTR [rdi+0x38],0x2\n    7401:\tjne    0x742c\n    7403:\tmov    eax,DWORD PTR [rsi]\n    7405:\tcmp    eax,DWORD PTR [rdi+0x44]\n    740b:\tjae    0x7427\n    740d:\tand    eax,DWORD PTR [rdi+0x124]\n    7413:\tmov    edx,DWORD PTR [rdi+0x120]\n    7419:\timul   rax,rdx\n    741d:\tlea    rax,[rdi+rax*1+0x130]\n    7425:\tjmp    0x742b\n    7427:\txor    eax,eax\n    7429:\tjmp    0x742b\n    742b:\tret\n    742c:\tsub    rsp,0x8\n    7430:\tcall   0x7580\n    7435:\tadd    rsp,0x8\n    7439:\tret\n"
+    }
+  ]
+}

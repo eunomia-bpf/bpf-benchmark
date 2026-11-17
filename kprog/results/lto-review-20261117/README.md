@@ -41,7 +41,8 @@ whether LTO work earns its footprint.
 | 8 | Exact hash key length stops before the LTO plan | Katran, BCC, OTel hash sites | Current JIT/native use the same runtime-length kernel lookup. Exact-shape specialization remains a distinct, unmeasured opportunity; the copied-hash comparison did not test a separately specialized function per proven key length. |
 | 9 | Current-task BTF and jiffies helpers retain calls the JIT removes | Tracee, Cilium | Remove a call/return per executed covered site. Historical outputs have 121/91 static calls; dynamic importance is unknown, and inline loads can grow installed text. |
 | 10 | Large known memory lengths become unknown at the unroll cutoff | OTel zero-fill example; other sites unmeasured | Preserve the known count in a compact loop and fixed tail. Retained 668-byte zero-fill uses 190 helper instructions; no current cycle cost or candidate gain is established. |
-| 11 | Generated read/LPM branches keep near encodings within short range | OTel demonstrated; other apps with these routines | Static local opportunities are 70 B in the captured user-read routine and 41 B in historical LPM. Instruction/branch counts stay the same; fetch/cache benefit and app installed-size effect remain unmeasured. |
+| 11 | ARRAY routines jump to shared return instructions | All apps using these ARRAY routines; OTel retained bytes demonstrated | Separate returns remove one jump on each successful covered lookup, also on runtime ARRAY misses. Static size falls 1 B per known routine and 3 B per runtime routine; per-call effect unmeasured. |
+| 12 | Generated read/LPM branches keep near encodings within short range | OTel demonstrated; other apps with these routines | Static local opportunities are 70 B in the captured user-read routine and 41 B in historical LPM. Instruction/branch counts stay the same; fetch/cache benefit and app installed-size effect remain unmeasured. |
 
 Tetragon's prior native load failure is **fixed in the retained corrected-image
 check**; it is discussed separately below. It should not be ranked as a
@@ -1451,3 +1452,96 @@ is from a smaller fetch/cache footprint and needs measurement. The local
 actually present. They are not multiplied by static call sites: calls in
 one program already share each routine. App installed bytes and per-call
 effect remain unmeasured. Implementation stays with the coordinator.
+
+## 13. ARRAY return sharing adds a jump to successful lookups
+
+2026-11-17T04:33:56Z review at 5ee83174d. This is distinct from shortening
+an existing branch: the following unconditional transfers can disappear
+without increasing code size or inlining every lookup call.
+
+`x86.rs:3987–3997` builds each known ARRAY/PERCPU_ARRAY routine with a
+two-byte jump over the null result to a shared return:
+
+```text
+success: ... produce RAX
+         JMP return          # EB 02
+missing: XOR EAX,EAX
+return:  RET
+```
+
+Ending the successful path with its own RET uses one byte instead of
+two. The missing path keeps its existing XOR/RET. Each successful lookup
+loses one executed jump; a missing known-map lookup already branches
+straight to XOR/RET and gains no instruction reduction. Current source
+contains the same tail as all three retained known ARRAY ranges in the
+OTel host blob: 32, 32 and 27 B respectively. The local size opportunity
+is one byte per routine, with sharing between callers preserved.
+
+The dynamic ARRAY dispatcher uses a more elaborate shared return
+(`x86_runtime_array.rs:24–35`):
+
+```text
+success: ... produce RAX
+         JMP return          # EB 04
+missing: XOR EAX,EAX
+         JMP return          # EB 00, next instruction is already RET
+return:  RET
+generic: ... external helper fallback
+```
+
+Two separate RETs replace both jumps and the old shared RET: four bytes
+of jumps plus one RET become two RETs, saving three bytes. Successful and
+missing ARRAY paths each lose one executed jump. The non-ARRAY branch
+already goes to the generic fallback before this tail, so that path has
+no instruction-count gain. In the retained 67-byte dispatcher the exact
+seven-byte marker `EB 04 31 C0 EB 00 C3` starts at 0x7425. The zero-distance
+jump at 0x7429 is still a real emitted instruction; this receipt does not
+assign it a cycle cost or assume how the host predicts it.
+
+`array_return_inventory.py` records these four actual ranges, marker
+offsets and disassembly in `array-returns.json`. The total local byte
+opportunity in this one payload is only six bytes. Dynamic instruction
+savings recur at executed lookups, but their frequency and per-call effect
+have not been measured. No candidate code was emitted or run. Ordinary
+LLVM-generated typed-inner routines are not counted by these byte-pattern
+matches.
+
+The JIT's ARRAY generator emits address/bounds/index operations directly
+into its caller (`kernel/bpf/arraymap.c:232–249`), with no leaf-helper RET
+to share. Its existing success jump over the null result is a separate
+control-flow shape. This native-only function-tail overhead is below the
+larger call/key-materialization issue in section 4. A routine-local return
+layout can remove it without broad inlining, a runtime switch or a new
+check. Local null/generic branch targets, code ranges and helper-relocation
+offsets still have to describe the new layout; the external E8 call slot
+stays unchanged. Implementation remains coordinator-owned.
+
+### ARRAY mask attribution: policy conditions remain necessary
+
+The same source pass checked whether removing the live mask would be
+another straightforward win. `perf_context_lto.cpp:215–219` retains
+`index & mask` for typed inner arrays; the runtime dispatcher emits the
+memory-form AND at `x86_runtime_array.rs:18–19`. Retained runtime code
+at 0x740d is `and eax,[rdi+0x124]`: one instruction with a memory operand,
+not a separately decoded load and register AND. The known-map routine
+above has no AND in its emitted lookup body already. There is no universal
+extra mask cost across all native ARRAY paths.
+
+The kernel callable `array_map_lookup_elem` always masks at
+`arraymap.c:167–175`. Its JIT generator omits that operation only when
+`map->bypass_spec_v1` is true (234–239); maps flagged BPF_F_INNER_MAP decline
+the generator at 229–230 and retain the callable path. Allocation records
+the map's policy at 89 and 146–147, using `bpf_bypass_spec_v1` from
+`include/linux/bpf.h:2741–2745`, which considers kernel policy and capability
+facts. Root in the build container is not a captured per-map policy fact.
+The native map-type facts carry type/value sizes, not this policy bit
+(`native_loader.cpp:4181–4183`, `perf_context_lto.cpp:42–46`). No actual
+policy value for these timed maps is established here.
+
+Likewise, inner ARRAY capacity is fixed by the kernel's template match
+only when BPF_F_INNER_MAP is absent (`arraymap.c:594–600` and
+`map_in_map.c:83–91,105–109`). Treating every inner-map template capacity
+as a constant would be wrong. Keep existing live bounds/masks where facts
+do not justify specialization; this review proposes no blanket mask
+deletion, frozen module/core change or new per-call policy check. The
+separate-return opportunity above does not depend on either policy fact.
