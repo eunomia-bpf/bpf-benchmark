@@ -39,6 +39,12 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-17T10:19:33Z（正式轮前两个应用、Cilium 两臂差别的来源、下一批）**：
+1. 正式轮（冻结入口默认 3 × 180 秒，stats 关，镜像 fc7c4707）：OTel 1.053x（11-16 那一轮 0.801x），BCC 0.998x（底线 0.985x，11-16 那一轮 0.929x）。其余四个应用 11:45 前后跑完。
+2. Cilium 两臂差别的来源：agent 生成的 ep_config.h #undef MONITOR_AGGREGATION，lib/trace.h 落到 TRACE_AGGREGATE_NONE，eBPF 一侧逐包发 trace 事件；原生编译用示例 node_config.h（MONITOR_AGGREGATION 5）加 CILIUM_MAX 的 -DMONITOR_AGGREGATION=3，事件大多被聚合掉，另外多开 DSR、HOST_FIREWALL、NODEPORT_ACCELERATION、WIREGUARD、TUNNEL_MODE，少开 POLICY_AUDIT_MODE。节点地址（IPV4_GATEWAY 等）每次运行都变，整份头文件搬不过来；只把装载的 lxc、host、xdp 三个对象的编译开关换成 agent 的那一套（vendor/bpf/Makefile，开放路径）。
+3. 下一批（取时间镜像建好后放进工作树，单独一个镜像，量 Tracee、Cilium）：bpf_get_current_uid_gid 叶子例程、内核字符串循环少一条指令、Cilium 开关对齐；取时间例程里的 fallback 改名 kernel_call，退回的是内核自己的函数（审核脚本按字样把它归到模拟器一类）。
+4. perf 10:07：取到 kvm_clock 时 tkr->mask 是全 1，那次 AND 可以省掉（c660546ab），和下一批一起做。
+
 **协调者 2026-11-17T09:38:39Z（compat 结果、取时间叶子例程、perf 08:24–09:36 审阅）**：
 1. compat 读（d6b4d335e）：Tetragon 每次调用 1.061x → 1.113x（原生 704.1 → 660.9 ns），Tracee 吞吐 1.281x、每次调用 1.373x；六应用检查替换次数不变、失败 0 次（compat-read-20261117/README.md）。
 2. 取时间：客户机时钟源是 kvm-clock，Katran 原生一侧 pvclock 读占全部客户机采样 8.14%（limits/katran post_rejit.report.txt）。协调者写了 bpf_ktime_get_ns 的叶子例程（x86_ktime.rs）：照 timekeeping.c、kvmclock.c、pvclock.c 内联 tk_fast_mono 的 latch、kvm_clock_read（preempt 计数和 PREEMPT_DYNAMIC 静态调用）、pvclock 版本循环和 TSC 换算；时钟源换掉、TSC 不稳定、周期差超过 max_cycles 时调用内核自己的 ktime_get_mono_fast_ns。布局事实由装载器从 kallsyms 和 BTF 取，缺一项就保留直接调用。正式轮之后建镜像，量 BCC、Katran。
