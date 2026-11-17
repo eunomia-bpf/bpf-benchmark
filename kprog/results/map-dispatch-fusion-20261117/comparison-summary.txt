@@ -1,0 +1,8 @@
+app requests passed failed changed fused_images before_bytes after_bytes helper_targets_differences map_names_differences callee_mask_differences recovery_shapes_differences
+bcc/set 25 25 0 0 0 11028 11028 0 0 0 0
+cilium/agent 47 47 0 24 24 180945 180609 0 0 0 24
+katran 1 1 0 1 1 9255 9241 0 0 0 1
+otelcol-ebpf-profiler/profiling 14 14 0 3 3 130635 130593 0 0 0 3
+tetragon/observer 39 39 0 18 18 285911 285659 0 0 0 18
+tracee/monitor 169 169 0 116 116 1747558 1745934 0 0 0 116
+index_errors 0

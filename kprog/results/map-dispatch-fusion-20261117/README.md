@@ -64,3 +64,5 @@ module accepts an external E9; it preserves existing facts-absent linker output.
 Actual shared wrappers and their final relocation still require E8.
 
 2026-11-17T22:43:32Z — Production fusion and full host tests completed; actual logs and source.patch committed. Raw: /workspaces/kprog-raw/perf/map-dispatch-fusion-20261117/host-20261117T224241Z-2793351. Production unit-entry build and captured-request emission follow; canonical CLI stays unchanged; installed/time results remain pending.
+
+2026-11-17T22:43:47Z — Actual ARRAY/LPM fusion emission: bcc/set: 25/25 emit, 0 fused, 11028 -> 11028 neutral B; cilium/agent: 47/47 emit, 24 fused, 180945 -> 180609 neutral B; katran: 1/1 emit, 1 fused, 9255 -> 9241 neutral B; otelcol-ebpf-profiler/profiling: 14/14 emit, 3 fused, 130635 -> 130593 neutral B; tetragon/observer: 39/39 emit, 18 fused, 285911 -> 285659 neutral B; tracee/monitor: 169/169 emit, 116 fused, 1747558 -> 1745934 neutral B. All request/error records and helper/map/mask/recovery observations are retained in comparison.json; no installed/per-call/body/helper/map/throughput gain claimed. Owner image/check/affected-app timing remains pending with all LTO on.
