@@ -1,8 +1,10 @@
 # Shared helper leaves must accept helper tail jumps
 
-Source finding at `5ddd51986`, 2026-11-17. Prepared fix only: no source
-application, failing execution, actual app failure or validation is claimed.
-The pending batch-2 image inputs remain unchanged.
+Source finding at `5ddd51986`, 2026-11-17. Source and host validation now
+landed as `bf74aa5dc`: 44 tests passed, 3 existing tests ignored, all 18
+retained body/recovery files byte-identical. No actual app trigger or
+per-call gain is claimed; Omp schedules image/check. The sections below
+retain the preparation rationale.
 
 `native_link/src/x86.rs:1232` creates `HelperBranchRel32` with opcode E9 for
 a resolved external helper tail transfer. `:1735-1755` validates its original
@@ -63,3 +65,5 @@ Preview receipt, 2026-11-17T13:40:17Z: source-anchor preview exited 0 at13:37:21
 `run-host.sh` applies this edit and runs the complete canonical linker suite under timing SH on CPU19, with a fresh persistent attempt directory and32GiB address-space bound. It takes image EX after timing SH and holds both through test, receipt, explicit-path commit and push. If publication wins the lock first it gets the earlier source; if this host job wins first it leaves tested, committed inputs. It compares every retained batch-2 leaf payload and recovered-load sites file against the new output; successful E8 leaf bodies should stay identical. It does not publish an image or start a guest, and it does not rebuild the unchanged loader. Inspect/reduce the prepared patch before starting it.
 
 The earlier snapshot wait was a lane sequencing choice, not a coordinator requirement. Image-lock ordering replaces it. The runner records only this class's five open source files and its host receipts; unrelated staged or modified paths stay untouched. Failed tests or byte comparisons retain raw logs and exit before committing. No image or guest is started by this job.
+
+Validated 2026-11-17T14:15:55Z: host job2591610 exited0 at14:06:42Z and pushed bf74aa5dc under timing SH/image EX/Git EX. `host-output.txt`, `host.json` and `payload-comparison.txt` preserve the actual result, mixed opcode/native-return tests and18 byte comparisons. No PERF image or guest was started. Existing E8 payloads stay identical; newly accepted local E9 transfers preserve their tail semantics. Actual installed-app/per-call/body/helper/map effects remain pending the scheduled image.
