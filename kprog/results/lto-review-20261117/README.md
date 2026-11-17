@@ -2046,3 +2046,60 @@ new source change, guest, build, candidate or cache output was produced
 in this pass. The existing runtime checks/ABI and all other LTO pieces
 stay as they are. Per-call effect and installed bytes belong to the
 forthcoming implementation, not this wiring review.
+
+## User-read cost already omitted: destination object checking
+
+2026-11-17T05:37:24Z review at 9d9ffdd6f. The read performance comparison
+must distinguish work the native emitter still executes from work it
+already omits. The compiled kernel's `copy_from_user_nofault` contains a
+CALL to `__check_object_size` before its raw copy. The native scalar read
+routine has no corresponding call; its one external CALL in the retained
+fixture is the source/NMI policy call identified in the source, not this
+destination-object operation. Its removal cannot be counted again as a
+benefit of the forthcoming leaf-read change.
+
+The kernel call chain and conditions are concrete:
+
+- `kernel/trace/bpf_trace.c:177–186` calls copy_from_user_nofault and clears
+  the whole destination on a negative result.
+- `mm/maccess.c:124–131` checks the source range and NMI access, disables
+  pagefaults and calls __copy_from_user_inatomic.
+- `include/linux/uaccess.h:99–106` performs destination-object checking
+  before raw_copy_from_user.
+- `include/linux/ucopysize.h:16–23` calls __check_object_size only when
+  size is not a C compile-time constant and the usercopy jump label is
+  enabled. This target enables HARDENED_USERCOPY and DEFAULT_ON. A boot
+  parameter can change the jump-label choice (`mm/usercopy.c:265–284`).
+- `mm/usercopy.c:223–261` returns immediately for zero length, otherwise
+  examines bogus addresses, stack extent, heap objects and kernel-text
+  overlap. A valid stack object returns after its stack classification;
+  every call does not necessarily execute every heap/text operation.
+
+Source-range/NMI checks and destination object extent are different
+questions. The helper prototype describes the destination as
+ARG_PTR_TO_UNINIT_MEM with ARG_CONST_SIZE_OR_ZERO
+(`bpf_trace.c:189–195`), placing destination extent/provenance in the
+existing caller/verifier contract. Kernel code itself permits this
+particular hardening wrapper to disappear for a known C constant size.
+This source comparison does not independently prove every generated
+native destination's extent, and proposes no new runtime object checker,
+admission gate or kernel hardening change. It does not justify deleting
+the live source/NMI policy or the existing error/full-zeroing behavior.
+
+`usercopy_path_inventory.py` retains the sole kernel's on-disk copy
+function and relevant config, the captured native fixture's CALL count,
+and selected historical profile data in `usercopy-path.json`. The retained
+OTel shared-hash diagnostic has 6,196,886,309 baseline PMU periods rooted
+at __check_object_size and 12,870,151 in the native phase. These are the
+existing profile's external roots without caller ownership, not BPF-owned
+cycles, nanoseconds or a saved-time estimate. Other guest code can call
+the same function; residual native-phase samples do not establish that
+this native read routine calls it. The config/default and on-disk CALL
+also do not by themselves establish a timed guest's jump-label state.
+
+The next source gain remains removal of the current nested policy call,
+its saved-register lifetimes and copy-loop bookkeeping. This receipt
+adds an already-removed-cost boundary to that work, rather than a new
+optimization result. No source, runtime check, benchmark, guest, build,
+candidate or cache output was changed; per-call effects remain with the
+coordinator's actual implementation and measurements.

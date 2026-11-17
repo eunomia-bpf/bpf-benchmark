@@ -1,0 +1,29 @@
+{
+  "recorded_utc": "2026-11-17T05:37:24Z",
+  "kernel_image": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+  "selected_config": [
+    "CONFIG_HARDENED_USERCOPY=y",
+    "CONFIG_HARDENED_USERCOPY_DEFAULT_ON=y"
+  ],
+  "on_disk_copy_from_user_nofault": "\n/workspaces/.agent-state/kprog-ck/build-x86/vmlinux:     file format elf64-x86-64\n\n\nDisassembly of section .text:\n\nffffffff8153f040 <copy_from_user_nofault>:\nffffffff8153f040:\tcall   ffffffff8127fb90 <__fentry__>\nffffffff8153f045:\tpush   r13\nffffffff8153f047:\txor    eax,eax\nffffffff8153f049:\tpush   r12\nffffffff8153f04b:\tpush   rbp\nffffffff8153f04c:\tpush   rbx\nffffffff8153f04d:\tmov    rbx,rdx\nffffffff8153f050:\tadd    rdx,rsi\nffffffff8153f053:\tsetb   al\nffffffff8153f056:\tmovabs rcx,0x123456789abcdef\nffffffff8153f060:\ttest   rax,rax\nffffffff8153f063:\tjne    ffffffff8153f0c6 <copy_from_user_nofault+0x86>\nffffffff8153f065:\tcmp    rcx,rdx\nffffffff8153f068:\tjb     ffffffff8153f0c6 <copy_from_user_nofault+0x86>\nffffffff8153f06a:\tmov    r12,rdi\nffffffff8153f06d:\tmov    rbp,rsi\nffffffff8153f070:\tcall   ffffffff812991b0 <nmi_uaccess_okay>\nffffffff8153f075:\ttest   al,al\nffffffff8153f077:\tje     ffffffff8153f0c6 <copy_from_user_nofault+0x86>\nffffffff8153f079:\tmov    r13,QWORD PTR gs:[rip+0x2d70f97]        # ffffffff842b0018 <current_task>\nffffffff8153f081:\tadd    DWORD PTR [r13+0x24ac],0x1\nffffffff8153f089:\txchg   ax,ax\nffffffff8153f08b:\txor    edx,edx\nffffffff8153f08d:\tmov    rsi,rbx\nffffffff8153f090:\tmov    rdi,r12\nffffffff8153f093:\tcall   ffffffff81658710 <__check_object_size>\nffffffff8153f098:\tnop\nffffffff8153f099:\tnop\nffffffff8153f09a:\tnop\nffffffff8153f09b:\tmov    rcx,rbx\nffffffff8153f09e:\tmov    rdi,r12\nffffffff8153f0a1:\tmov    rsi,rbp\nffffffff8153f0a4:\trep movs BYTE PTR es:[rdi],BYTE PTR ds:[rsi]\nffffffff8153f0a6:\tnop\nffffffff8153f0a7:\tnop\nffffffff8153f0a8:\tnop\nffffffff8153f0a9:\tnop\nffffffff8153f0aa:\tnop\nffffffff8153f0ab:\tnop\nffffffff8153f0ac:\tsub    DWORD PTR [r13+0x24ac],0x1\nffffffff8153f0b4:\ttest   rcx,rcx\nffffffff8153f0b7:\tjne    ffffffff8153f0c6 <copy_from_user_nofault+0x86>\nffffffff8153f0b9:\tpop    rbx\nffffffff8153f0ba:\txor    eax,eax\nffffffff8153f0bc:\tpop    rbp\nffffffff8153f0bd:\tpop    r12\nffffffff8153f0bf:\tpop    r13\nffffffff8153f0c1:\tjmp    ffffffff820138b0 <__pi___x86_return_thunk>\nffffffff8153f0c6:\tpop    rbx\nffffffff8153f0c7:\tmov    rax,0xfffffffffffffff2\nffffffff8153f0ce:\tpop    rbp\nffffffff8153f0cf:\tpop    r12\nffffffff8153f0d1:\tpop    r13\nffffffff8153f0d3:\tjmp    ffffffff820138b0 <__pi___x86_return_thunk>\n\nDisassembly of section .data:\n\nDisassembly of section .init.text:\n\nDisassembly of section .altinstr_aux:\n\nDisassembly of section .altinstr_replacement:\n\nDisassembly of section .exit.text:\n",
+  "current_native_emitter": "kprog/x86/native_lab/native_link/src/x86_probe_read.rs",
+  "retained_fixture": "/workspaces/kprog-raw/perf/20261117-remainder-review/user-fixture.json",
+  "retained_fixture_call_slots": [
+    {
+      "offset": 49,
+      "instruction": "call"
+    }
+  ],
+  "historical_profile": "kprog/results/shared-hash-regression-20261116/otel-shared.costs.json",
+  "historical_profile_run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261116_211320_080784",
+  "external_root_pmu_periods_without_caller_ownership": {
+    "baseline": {
+      "__check_object_size": 6196886309,
+      "check_stack_object": 1832007248
+    },
+    "post_rejit": {
+      "__check_object_size": 12870151
+    }
+  },
+  "scope": "On-disk kernel and current emitter source comparison, with retained historical fixture/profile data. Jump-label/boot settings and sampled callers are not established by this receipt. External PMU roots include other guest work; no BPF-owned cycles/ns or speedup inferred. No candidate, runtime check, source change, build or guest."
+}
