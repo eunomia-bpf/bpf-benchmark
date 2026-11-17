@@ -126,3 +126,41 @@ and [host location](host-location.txt). Both reader runs remain under
 `/workspaces/kprog-raw/perf/bcc-helper-costs-20261117`. All workers exited 0.
 No tests were added for this reversible analysis; the regenerated category
 and aggregate counters agree with the retained source readouts.
+
+## Next output-helper work, 2026-11-17T23:03:07Z
+
+The source review distinguishes the output machinery from a removable wrapper:
+
+- kernel/trace/bpf_trace.c:615-643 defines __bpf_perf_event_output as
+  static always_inline. It selects the live CPU slot, checks the live bound,
+  empty entry, event type/config and event CPU, saves raw sample data, then
+  calls perf_event_output. The sole build's System.map contains the public
+  ordinary/TP/raw-TP helpers and perf_event_output, with no separate
+  __bpf_perf_event_output entry to bind as a smaller kernel leaf.
+- bpf_trace.c:657-695 prepares the raw record, uses per-CPU sample storage,
+  maintains nested normal/IRQ/NMI ownership and preemption, initializes the
+  sample and runs the common body. The TP helper at1372-1382 unwraps the first
+  context word and calls the always-inlined C body. It does not add another
+  runtime CALL to the ordinary helper. Raw-TP at1594-1607 additionally obtains
+  and fills the correct saved registers with its own nesting contract.
+- kernel/bpf/arraymap.c:1264-1286 accepts perf-event FDs whose local-read
+  operation is supported. It does not require software/BPF_OUTPUT attributes.
+  A known PERF_EVENT_ARRAY map therefore does not establish that every current
+  or later entry can skip the output helper's event type/config/CPU checks.
+  Slots remain live across updates/deletes. Do not freeze an initially read
+  event pointer or remove those existing semantics from an LTO candidate.
+- include/linux/perf_event.h:1360-1372 initializes sample_flags, period and
+  dyn_size;1392 onward handles raw-sample selection and fragment sizes. These
+  stores and downstream event output are part of the actual work, not loader
+  or verifier checks. Constant current-CPU flags can eliminate only the known
+  flags/index selection paths; that does not eliminate the sample/output work.
+
+The old27% output ownership includes this machinery, so it is not an estimate
+of removable prefix cost. Actual context-family binding remains the first
+correctness change: ordinary/TP/raw-TP helper targets are not interchangeable.
+Copying the whole output helper into each program has no demonstrated gain to
+pay for its size. The next useful comparison uses correct helper targets and
+current per-call/profile evidence from the all-LTO batch, separating wrapper,
+map-slot/sample preparation and perf-event output time. This is an analysis
+priority, not a new admission gate or refusal; no source, check, image, guest
+or benchmark change was made for this review.
