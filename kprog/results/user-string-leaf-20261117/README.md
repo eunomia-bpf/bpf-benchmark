@@ -35,8 +35,24 @@ through SIGILL to exercise cleanup-state preservation; this tests the
 emitted bracket and registers, not hardware SMAP access protection.
 Existing scalar, kernel-string, compat, task-BTF and jiffies cases remain.
 
-Host validation, installed app bytes and per-call/body/helper/map effects
-are pending. No image or guest starts here; the coordinator's reserved
+The first host run passes at 2026-11-17T11:28:23Z: two focused tests, no
+failures, 43 other tests filtered. User strings execute 4,693 vectors with
+239 exact source-site faults, including the successful word-to-byte retry
+and cleanup bracket cases. Compat strings execute nine domain/padding
+vectors; the sharing test proves direct and repeated compat calls reuse
+the existing two string leaves and one dispatcher.
+
+Retained scalar-batch payload comparisons are byte-identical: kernel
+366 B, user 370 B, kernel string 284 B and compat scalar 827 B. The new
+user-string body is 400 B including its return; the compat-string fixture
+is 775 B including its six-byte test caller and both string leaves. These
+are host payload bytes, not installed app totals. `first-pass.json` and
+`first-pass-output.txt` retain these receipts. A final rerun is queued
+after simplifying the equivalent selector guards; the source commit
+follows that result.
+
+Installed app bytes and per-call/body/helper/map effects remain pending.
+No image or guest starts here; the coordinator's reserved
 clock and leaf-batch2 publications precede PERF timing. Their working-tree
 builds may include joined source, which must be named when interpreting
 results. No isolated app-level gain is claimed from source changes.
