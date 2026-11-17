@@ -1,0 +1,705 @@
+{
+  "recorded_utc": "2026-11-17T04:14:32Z",
+  "reviewed_tree": "e833763a2",
+  "scope": "Corrected O3 check load events, including no-match retention. Counts are not unique programs, execution frequencies, timings, or B verification results. Current stage manifest and symbols are inspected separately; no image-byte identity is asserted.",
+  "apps": [
+    {
+      "app": "otelcol-ebpf-profiler__profiling",
+      "run": "corpus/results/x86_kvm_corpus_20261117_033743_984421",
+      "log": "corpus/results/x86_kvm_corpus_20261117_033743_984421/details/shim-logs/otelcol-ebpf-profiler__profiling.post_rejit.log",
+      "status": "ok",
+      "error": "",
+      "native_replacement_events": 14,
+      "native_loader_failed_events": 0,
+      "explicit_feature_probe_skip_events": 2,
+      "no_match_events": 0,
+      "no_match_by_name": {},
+      "unmatched_loads": []
+    },
+    {
+      "app": "bcc__set",
+      "run": "corpus/results/x86_kvm_corpus_20261117_034122_540932",
+      "log": "corpus/results/x86_kvm_corpus_20261117_034122_540932/details/shim-logs/bcc__set.post_rejit.log",
+      "status": "ok",
+      "error": "",
+      "native_replacement_events": 25,
+      "native_loader_failed_events": 0,
+      "explicit_feature_probe_skip_events": 52,
+      "no_match_events": 0,
+      "no_match_by_name": {},
+      "unmatched_loads": []
+    },
+    {
+      "app": "cilium__agent",
+      "run": "corpus/results/x86_kvm_corpus_20261117_034447_636111",
+      "log": "corpus/results/x86_kvm_corpus_20261117_034447_636111/details/shim-logs/cilium__agent.post_rejit.log",
+      "status": "ok",
+      "error": "",
+      "native_replacement_events": 113,
+      "native_loader_failed_events": 0,
+      "explicit_feature_probe_skip_events": 33,
+      "no_match_events": 22,
+      "no_match_by_name": {
+        "tail_drop_notif": 11,
+        "cil_host_policy": 9,
+        "cil_lxc_policy_": 2
+      },
+      "unmatched_loads": [
+        {
+          "load_line": 837,
+          "pid": 3128,
+          "tid": 3142,
+          "program": "tail_drop_notif",
+          "type": 3,
+          "type_name": "sched_cls",
+          "insn_count": 185,
+          "no_match_line": 838,
+          "return_line": 839,
+          "fd": 75,
+          "errno": 0,
+          "kernel_prog_id": 214,
+          "program_array_publications": [
+            {
+              "line": 895,
+              "pid": 3128,
+              "map_name": "cilium_calls_ho",
+              "map_fd": 82,
+              "key": 1,
+              "prog_fd": 75,
+              "kernel_prog_id": 214,
+              "flags": 0,
+              "ret": 0,
+              "errno": 0
+            }
+          ]
+        },
+        {
+          "load_line": 860,
+          "pid": 3128,
+          "tid": 3142,
+          "program": "cil_host_policy",
+          "type": 3,
+          "type_name": "sched_cls",
+          "insn_count": 2,
+          "no_match_line": 861,
+          "return_line": 862,
+          "fd": 102,
+          "errno": 0,
+          "kernel_prog_id": 221,
+          "program_array_publications": []
+        },
+        {
+          "load_line": 915,
+          "pid": 3128,
+          "tid": 3142,
+          "program": "tail_drop_notif",
+          "type": 3,
+          "type_name": "sched_cls",
+          "insn_count": 185,
+          "no_match_line": 916,
+          "return_line": 917,
+          "fd": 138,
+          "errno": 0,
+          "kernel_prog_id": 232,
+          "program_array_publications": [
+            {
+              "line": 983,
+              "pid": 3128,
+              "map_name": "cilium_calls_ne",
+              "map_fd": 135,
+              "key": 1,
+              "prog_fd": 138,
+              "kernel_prog_id": 232,
+              "flags": 0,
+              "ret": 0,
+              "errno": 0
+            }
+          ]
+        },
+        {
+          "load_line": 941,
+          "pid": 3128,
+          "tid": 3142,
+          "program": "cil_host_policy",
+          "type": 3,
+          "type_name": "sched_cls",
+          "insn_count": 2,
+          "no_match_line": 942,
+          "return_line": 943,
+          "fd": 4,
+          "errno": 0,
+          "kernel_prog_id": 241,
+          "program_array_publications": []
+        },
+        {
+          "load_line": 999,
+          "pid": 3128,
+          "tid": 3142,
+          "program": "tail_drop_notif",
+          "type": 3,
+          "type_name": "sched_cls",
+          "insn_count": 185,
+          "no_match_line": 1000,
+          "return_line": 1001,
+          "fd": 181,
+          "errno": 0,
+          "kernel_prog_id": 254,
+          "program_array_publications": [
+            {
+              "line": 1065,
+              "pid": 3128,
+              "map_name": "cilium_calls_ne",
+              "map_fd": 178,
+              "key": 1,
+              "prog_fd": 181,
+              "kernel_prog_id": 254,
+              "flags": 0,
+              "ret": 0,
+              "errno": 0
+            }
+          ]
+        },
+        {
+          "load_line": 1028,
+          "pid": 3128,
+          "tid": 3142,
+          "program": "cil_host_policy",
+          "type": 3,
+          "type_name": "sched_cls",
+          "insn_count": 2,
+          "no_match_line": 1029,
+          "return_line": 1030,
+          "fd": 182,
+          "errno": 0,
+          "kernel_prog_id": 265,
+          "program_array_publications": []
+        },
+        {
+          "load_line": 1083,
+          "pid": 3128,
+          "tid": 3142,
+          "program": "cil_host_policy",
+          "type": 3,
+          "type_name": "sched_cls",
+          "insn_count": 2,
+          "no_match_line": 1084,
+          "return_line": 1085,
+          "fd": 223,
+          "errno": 0,
+          "kernel_prog_id": 276,
+          "program_array_publications": []
+        },
+        {
+          "load_line": 1117,
+          "pid": 3128,
+          "tid": 3142,
+          "program": "tail_drop_notif",
+          "type": 3,
+          "type_name": "sched_cls",
+          "insn_count": 185,
+          "no_match_line": 1118,
+          "return_line": 1119,
+          "fd": 224,
+          "errno": 0,
+          "kernel_prog_id": 289,
+          "program_array_publications": [
+            {
+              "line": 1145,
+              "pid": 3128,
+              "map_name": "cilium_calls_ho",
+              "map_fd": 209,
+              "key": 1,
+              "prog_fd": 224,
+              "kernel_prog_id": 289,
+              "flags": 0,
+              "ret": 0,
+              "errno": 0
+            }
+          ]
+        },
+        {
+          "load_line": 1183,
+          "pid": 3128,
+          "tid": 3142,
+          "program": "tail_drop_notif",
+          "type": 3,
+          "type_name": "sched_cls",
+          "insn_count": 185,
+          "no_match_line": 1184,
+          "return_line": 1185,
+          "fd": 261,
+          "errno": 0,
+          "kernel_prog_id": 306,
+          "program_array_publications": [
+            {
+              "line": 1221,
+              "pid": 3128,
+              "map_name": "cilium_calls_ne",
+              "map_fd": 260,
+              "key": 1,
+              "prog_fd": 261,
+              "kernel_prog_id": 306,
+              "flags": 0,
+              "ret": 0,
+              "errno": 0
+            }
+          ]
+        },
+        {
+          "load_line": 1196,
+          "pid": 3128,
+          "tid": 3142,
+          "program": "cil_host_policy",
+          "type": 3,
+          "type_name": "sched_cls",
+          "insn_count": 2,
+          "no_match_line": 1197,
+          "return_line": 1198,
+          "fd": 267,
+          "errno": 0,
+          "kernel_prog_id": 311,
+          "program_array_publications": []
+        },
+        {
+          "load_line": 1237,
+          "pid": 3128,
+          "tid": 3139,
+          "program": "tail_drop_notif",
+          "type": 3,
+          "type_name": "sched_cls",
+          "insn_count": 185,
+          "no_match_line": 1238,
+          "return_line": 1239,
+          "fd": 114,
+          "errno": 0,
+          "kernel_prog_id": 318,
+          "program_array_publications": [
+            {
+              "line": 1296,
+              "pid": 3128,
+              "map_name": "cilium_calls_ne",
+              "map_fd": 100,
+              "key": 1,
+              "prog_fd": 114,
+              "kernel_prog_id": 318,
+              "flags": 0,
+              "ret": 0,
+              "errno": 0
+            }
+          ]
+        },
+        {
+          "load_line": 1291,
+          "pid": 3128,
+          "tid": 3139,
+          "program": "cil_host_policy",
+          "type": 3,
+          "type_name": "sched_cls",
+          "insn_count": 2,
+          "no_match_line": 1292,
+          "return_line": 1293,
+          "fd": 115,
+          "errno": 0,
+          "kernel_prog_id": 339,
+          "program_array_publications": []
+        },
+        {
+          "load_line": 1358,
+          "pid": 3128,
+          "tid": 3139,
+          "program": "tail_drop_notif",
+          "type": 3,
+          "type_name": "sched_cls",
+          "insn_count": 185,
+          "no_match_line": 1359,
+          "return_line": 1360,
+          "fd": 172,
+          "errno": 0,
+          "kernel_prog_id": 350,
+          "program_array_publications": [
+            {
+              "line": 1398,
+              "pid": 3128,
+              "map_name": "cilium_calls_ho",
+              "map_fd": 165,
+              "key": 1,
+              "prog_fd": 172,
+              "kernel_prog_id": 350,
+              "flags": 0,
+              "ret": 0,
+              "errno": 0
+            }
+          ]
+        },
+        {
+          "load_line": 1381,
+          "pid": 3128,
+          "tid": 3139,
+          "program": "cil_host_policy",
+          "type": 3,
+          "type_name": "sched_cls",
+          "insn_count": 2,
+          "no_match_line": 1382,
+          "return_line": 1383,
+          "fd": 177,
+          "errno": 0,
+          "kernel_prog_id": 359,
+          "program_array_publications": []
+        },
+        {
+          "load_line": 1412,
+          "pid": 3128,
+          "tid": 3139,
+          "program": "tail_drop_notif",
+          "type": 3,
+          "type_name": "sched_cls",
+          "insn_count": 185,
+          "no_match_line": 1413,
+          "return_line": 1414,
+          "fd": 221,
+          "errno": 0,
+          "kernel_prog_id": 362,
+          "program_array_publications": [
+            {
+              "line": 1481,
+              "pid": 3128,
+              "map_name": "cilium_calls_ne",
+              "map_fd": 199,
+              "key": 1,
+              "prog_fd": 221,
+              "kernel_prog_id": 362,
+              "flags": 0,
+              "ret": 0,
+              "errno": 0
+            }
+          ]
+        },
+        {
+          "load_line": 1461,
+          "pid": 3128,
+          "tid": 3500,
+          "program": "cil_host_policy",
+          "type": 3,
+          "type_name": "sched_cls",
+          "insn_count": 2,
+          "no_match_line": 1462,
+          "return_line": 1463,
+          "fd": 224,
+          "errno": 0,
+          "kernel_prog_id": 381,
+          "program_array_publications": []
+        },
+        {
+          "load_line": 1491,
+          "pid": 3128,
+          "tid": 3500,
+          "program": "tail_drop_notif",
+          "type": 3,
+          "type_name": "sched_cls",
+          "insn_count": 185,
+          "no_match_line": 1492,
+          "return_line": 1493,
+          "fd": 309,
+          "errno": 0,
+          "kernel_prog_id": 384,
+          "program_array_publications": [
+            {
+              "line": 1550,
+              "pid": 3128,
+              "map_name": "cilium_calls_ne",
+              "map_fd": 298,
+              "key": 1,
+              "prog_fd": 309,
+              "kernel_prog_id": 384,
+              "flags": 0,
+              "ret": 0,
+              "errno": 0
+            }
+          ]
+        },
+        {
+          "load_line": 1545,
+          "pid": 3128,
+          "tid": 3500,
+          "program": "cil_host_policy",
+          "type": 3,
+          "type_name": "sched_cls",
+          "insn_count": 2,
+          "no_match_line": 1546,
+          "return_line": 1547,
+          "fd": 310,
+          "errno": 0,
+          "kernel_prog_id": 405,
+          "program_array_publications": []
+        },
+        {
+          "load_line": 1613,
+          "pid": 3128,
+          "tid": 3134,
+          "program": "cil_lxc_policy_",
+          "type": 3,
+          "type_name": "sched_cls",
+          "insn_count": 2,
+          "no_match_line": 1614,
+          "return_line": 1615,
+          "fd": 353,
+          "errno": 0,
+          "kernel_prog_id": 414,
+          "program_array_publications": []
+        },
+        {
+          "load_line": 1616,
+          "pid": 3128,
+          "tid": 3134,
+          "program": "tail_drop_notif",
+          "type": 3,
+          "type_name": "sched_cls",
+          "insn_count": 178,
+          "no_match_line": 1617,
+          "return_line": 1618,
+          "fd": 358,
+          "errno": 0,
+          "kernel_prog_id": 415,
+          "program_array_publications": [
+            {
+              "line": 1675,
+              "pid": 3128,
+              "map_name": "cilium_calls_00",
+              "map_fd": 350,
+              "key": 1,
+              "prog_fd": 358,
+              "kernel_prog_id": 415,
+              "flags": 0,
+              "ret": 0,
+              "errno": 0
+            }
+          ]
+        },
+        {
+          "load_line": 1693,
+          "pid": 3128,
+          "tid": 3134,
+          "program": "tail_drop_notif",
+          "type": 3,
+          "type_name": "sched_cls",
+          "insn_count": 178,
+          "no_match_line": 1694,
+          "return_line": 1695,
+          "fd": 106,
+          "errno": 0,
+          "kernel_prog_id": 432,
+          "program_array_publications": [
+            {
+              "line": 1775,
+              "pid": 3128,
+              "map_name": "cilium_calls_02",
+              "map_fd": 101,
+              "key": 1,
+              "prog_fd": 106,
+              "kernel_prog_id": 432,
+              "flags": 0,
+              "ret": 0,
+              "errno": 0
+            }
+          ]
+        },
+        {
+          "load_line": 1756,
+          "pid": 3128,
+          "tid": 3134,
+          "program": "cil_lxc_policy_",
+          "type": 3,
+          "type_name": "sched_cls",
+          "insn_count": 2,
+          "no_match_line": 1757,
+          "return_line": 1758,
+          "fd": 112,
+          "errno": 0,
+          "kernel_prog_id": 457,
+          "program_array_publications": []
+        }
+      ]
+    },
+    {
+      "app": "tetragon__observer",
+      "run": "corpus/results/x86_kvm_corpus_20261117_034829_591728",
+      "log": "corpus/results/x86_kvm_corpus_20261117_034829_591728/details/shim-logs/tetragon__observer.post_rejit.log",
+      "status": "ok",
+      "error": "",
+      "native_replacement_events": 288,
+      "native_loader_failed_events": 0,
+      "explicit_feature_probe_skip_events": 16,
+      "no_match_events": 4,
+      "no_match_by_name": {
+        "": 4
+      },
+      "unmatched_loads": [
+        {
+          "load_line": 62,
+          "pid": 1970,
+          "tid": 1982,
+          "program": "",
+          "type": 29,
+          "type_name": "lsm",
+          "insn_count": 3,
+          "no_match_line": 63,
+          "return_line": 64,
+          "fd": 7,
+          "errno": 0,
+          "kernel_prog_id": 326,
+          "program_array_publications": []
+        },
+        {
+          "load_line": 84,
+          "pid": 1970,
+          "tid": 1983,
+          "program": "",
+          "type": 17,
+          "type_name": "raw_tracepoint",
+          "insn_count": 11,
+          "no_match_line": 85,
+          "return_line": 86,
+          "fd": 11,
+          "errno": 0,
+          "kernel_prog_id": 330,
+          "program_array_publications": []
+        },
+        {
+          "load_line": 87,
+          "pid": 1970,
+          "tid": 1983,
+          "program": "",
+          "type": 26,
+          "type_name": "tracing",
+          "insn_count": 3,
+          "no_match_line": 88,
+          "return_line": 89,
+          "fd": 7,
+          "errno": 0,
+          "kernel_prog_id": 331,
+          "program_array_publications": []
+        },
+        {
+          "load_line": 815,
+          "pid": 1970,
+          "tid": 1985,
+          "program": "",
+          "type": 1,
+          "type_name": "socket_filter",
+          "insn_count": 18,
+          "no_match_line": 816,
+          "return_line": 817,
+          "fd": 25,
+          "errno": 0,
+          "kernel_prog_id": 351,
+          "program_array_publications": []
+        }
+      ]
+    },
+    {
+      "app": "tracee__monitor",
+      "run": "corpus/results/x86_kvm_corpus_20261117_035153_064790",
+      "log": "corpus/results/x86_kvm_corpus_20261117_035153_064790/details/shim-logs/tracee__monitor.post_rejit.log",
+      "status": "ok",
+      "error": "",
+      "native_replacement_events": 169,
+      "native_loader_failed_events": 0,
+      "explicit_feature_probe_skip_events": 13,
+      "no_match_events": 0,
+      "no_match_by_name": {},
+      "unmatched_loads": []
+    },
+    {
+      "app": "katran",
+      "run": "corpus/results/x86_kvm_corpus_20261117_035600_460257",
+      "log": "corpus/results/x86_kvm_corpus_20261117_035600_460257/details/shim-logs/katran.post_rejit.log",
+      "status": "ok",
+      "error": "",
+      "native_replacement_events": 1,
+      "native_loader_failed_events": 0,
+      "explicit_feature_probe_skip_events": 5,
+      "no_match_events": 0,
+      "no_match_by_name": {},
+      "unmatched_loads": []
+    }
+  ],
+  "current_cilium_manifest": "vendor/build/native-bpf/x86/stage/cilium/manifest.json",
+  "cilium_manifest_candidates": [
+    {
+      "program": "cil_host_policy",
+      "native_object": "bpf_host.native.o",
+      "symbol": "cil_host_policy",
+      "source_map_prefix": "cilium_calls_ho"
+    },
+    {
+      "program": "cil_host_policy",
+      "native_object": "bpf_host.native.o",
+      "symbol": "cil_host_policy",
+      "source_map_prefix": "cilium_calls_ne"
+    },
+    {
+      "program": "cil_lxc_policy_",
+      "native_object": "bpf_lxc.native.o",
+      "symbol": "cil_lxc_policy_egress",
+      "source_map_prefix": "cilium_calls_0"
+    },
+    {
+      "program": "tail_drop_notif",
+      "native_object": "bpf_host.native.o",
+      "symbol": "tail_drop_notify",
+      "source_map_prefix": "cilium_calls_ho"
+    },
+    {
+      "program": "tail_drop_notif",
+      "native_object": "bpf_host.native.o",
+      "symbol": "tail_drop_notify",
+      "source_map_prefix": "cilium_calls_ne"
+    },
+    {
+      "program": "tail_drop_notif",
+      "native_object": "bpf_lxc.native.o",
+      "symbol": "tail_drop_notify",
+      "source_map_prefix": "cilium_calls_0"
+    },
+    {
+      "program": "tail_drop_notif",
+      "native_object": "bpf_overlay.native.o",
+      "symbol": "tail_drop_notify",
+      "source_map_prefix": "cilium_calls_ov"
+    },
+    {
+      "program": "tail_drop_notif",
+      "native_object": "bpf_wireguard.native.o",
+      "symbol": "tail_drop_notify",
+      "source_map_prefix": "cilium_calls_wi"
+    },
+    {
+      "program": "tail_drop_notif",
+      "native_object": "bpf_xdp.native.o",
+      "symbol": "tail_drop_notify",
+      "prog_type": 6
+    }
+  ],
+  "current_cilium_function_sizes": [
+    {
+      "object": "bpf_host.native.o",
+      "symbol": "tail_drop_notify",
+      "bytes": 943
+    },
+    {
+      "object": "bpf_host.native.o",
+      "symbol": "cil_host_policy",
+      "bytes": 3
+    },
+    {
+      "object": "bpf_lxc.native.o",
+      "symbol": "tail_drop_notify",
+      "bytes": 699
+    },
+    {
+      "object": "bpf_lxc.native.o",
+      "symbol": "cil_lxc_policy_egress",
+      "bytes": 3
+    }
+  ]
+}

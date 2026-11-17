@@ -1240,3 +1240,90 @@ example to the already documented memory-emitter coverage, rather than
 claiming all native memcpy/memset calls are generic. No source change,
 emitted candidate, executable run, input check or performance gain was
 introduced here.
+
+## 11. Cilium leaf programs retain eBPF despite existing native functions
+
+2026-11-17T04:14:42Z review at e833763a2. The corrected O3 check finished
+successfully for all six apps. Its load logs distinguish native replacements,
+native-loader failures and no-manifest-match retention:
+
+| App | Check run suffix | Native replacement events | Native-loader failed events | No-match retention events |
+|---|---|---:|---:|---:|
+| OTel | 033743_984421 | 14 | 0 | 0 |
+| BCC | 034122_540932 | 25 | 0 | 0 |
+| Cilium | 034447_636111 | 113 | 0 | 22 |
+| Tetragon | 034829_591728 | 288 | 0 | 4 |
+| Tracee | 035153_064790 | 169 | 0 | 0 |
+| Katran | 035600_460257 | 1 | 0 | 0 |
+
+These are load events, including repeated loads, rather than unique
+program counts. They do not establish B generation/stock acceptance or
+execution frequencies. The check's app status and absence of loader-failed
+events do not mean that every application program was replaced.
+`native_coverage_inventory.py` reads the existing logs and app results;
+`native-coverage.json` retains each unmatched load, its returned program ID
+and later program-array publications. No guest or build is involved.
+
+The Cilium cases are eleven `tail_drop_notif`, nine `cil_host_policy`, and
+two `cil_lxc_policy_` loads. The current stage manifest contains all three
+names and its ELF files contain their native functions. Host
+`tail_drop_notify` is 943 B; the LXC version is 699 B. The corresponding
+policy stubs are 3 B. These are current P function sizes, not newly installed
+native bytes or a byte-identity comparison of the check image's manifest.
+
+The selector's object discriminator is the problem class:
+
+- `vendor/bpf/Makefile:364–376` supplies `source_map_prefix=cilium_calls_*`
+  for each host/LXC/overlay/wireguard object. The manifest writer applies
+  this object attribute to program entries (`write_native_manifest.py:305–307,
+  337–347`).
+- `native_loader_manifest.hpp:626–630` rejects an entry unless the original
+  program itself references that prefix. `source_has_map_prefix` at 514–539
+  scans only that program's LD_IMM64 map-FD/map-value operands. It does not
+  identify the object from a map which merely holds that program as a tail
+  target.
+- A two-instruction return-only policy stub cannot carry a map LD_IMM64
+  plus its terminating EXIT. The source policy entries exist at
+  `bpf_host.c:1855–1858` and `bpf_lxc.c:2560–2563`; their substantive bodies
+  are conditional on HOST_FIREWALL/L7_LB. A stub's lack of map references
+  does not make it a capability probe.
+- `lib/drop.h:69–119` declares drop notification as a tail destination and
+  writes its event through `cilium_events`; being called through a
+  `cilium_calls_*` map does not require this leaf to reference that map.
+  The named extension hook defaults to an empty macro at line 30.
+
+The log proves these leaves are deployed as real tail targets. For example,
+`034447_636111/details/shim-logs/cilium__agent.post_rejit.log:837–839`
+loads `tail_drop_notif` (185 instructions), retains original program 214,
+and returns FD 75. Line 895 installs exactly program 214 into
+`cilium_calls_ho`, key 1, successfully. All eleven unmatched drop-notify
+loads have successful key-1 publications: nine host/netdev instances and
+two LXC instances (`cilium_calls_00` and `cilium_calls_02`). The receipt
+preserves their IDs and line numbers. This is stronger evidence than
+inferring purpose from program length. It establishes installation, not a
+nonzero dynamic drop frequency or the cause of the separate Cilium host-path
+difference.
+
+`bpfopt/shim/shim_native_loader.h:316–319` explicitly keeps the original
+BPF FD on a manifest miss. The needed correction is object selection for
+leaf/stub programs using their actual load/object provenance or caller's
+program-array relationship. Selecting the first same-name entry or deleting
+all object scoping would be wrong: the host and LXC notification functions
+are different. This finding requests no new refusal, probe exclusion or
+runtime performance check. Implementation remains with the coordinator;
+the selector and shim are in frozen paths.
+
+Tetragon's four unmatched loads are unnamed LSM/3-insn, raw-tracepoint/11,
+tracing/3 and socket-filter/18 programs (log lines 63, 85, 88, 816).
+Their purposes remain unclassified in this receipt. The vendored feature
+library does emit a three-instruction LD_IMM64-zero/EXIT probe
+(`features/prog.go:24–35`), with LSM and tracing specifications at 159–168
+and 92–101. That is a source lead, not proof of the exact logged callers;
+the two other unnamed loads also need their own attribution. The shim's
+sixteen explicit feature-probe skip events are counted separately and are
+not silently combined with these four misses.
+
+This is a phase-1 coverage finding ahead of further LTO attribution. No
+per-call gain, installed-size saving or equal-work conclusion follows from
+the load counts. Preserve the completed timing results and report their
+actual replacement coverage alongside them.
