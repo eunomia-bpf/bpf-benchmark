@@ -38,10 +38,18 @@ def Result.storage {m before after : CC.Mem} {entry : HeaderLocal m}
   spRead :=
     (result.local_load _ _ _ storage.sp.binding (cell_sp false i) (cell_sp true i)
       .Mint64 0).trans storage.spRead
+  flags := storage.flags
+  flagPointers := fun flag =>
+    (result.local_load _ _ _ entry.binding (cell_header false i) (cell_header true i)
+      CC.Mptr _).trans (storage.flagPointers flag)
+  vectors := storage.vectors
+  vectorPointers := fun high j =>
+    (result.local_load _ _ _ entry.binding (cell_header false i) (cell_header true i)
+      CC.Mptr _).trans (storage.vectorPointers high j)
 
 /-- Imported Mem permission validity also covers unsuccessful loads: the
 checked reader at the real nextblock is exactly the imported load. -/
-private theorem checked_load_eq (chunk : CC.Chunk) (memory : CC.Mem) (block : CC.Block)
+theorem checked_load_eq (chunk : CC.Chunk) (memory : CC.Mem) (block : CC.Block)
     (offset : CC.Integers.Ptrofs) :
     Arm64EntryMemory.load memory.nextblock chunk memory (.Vptr block offset) =
       CC.Mem.load chunk memory block (CC.Integers.Ptrofs.unsigned offset) := by

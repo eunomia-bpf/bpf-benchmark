@@ -7,7 +7,7 @@ namespace KProgFormal.ClightRefinement.Arm64ProducerVectorView
 open Arm64Producer
 open Arm64ProducerEntryView
 
-private def arrayField (high : Bool) : CC.Ident :=
+def arrayField (high : Bool) : CC.Ident :=
   if high then Arm64Program._vector_hi else Arm64Program._vector_lo
 
 private def consumerComposite : CC.Composite :=
@@ -19,7 +19,7 @@ private theorem array_layout :
       consumerComposite.co_members = .OK ((if high then 352 else 96), .Full) := by
   exact ⟨by decide +kernel, by decide +kernel⟩
 
-private theorem array_address (entry : CC.Block) (high : Bool) :
+theorem array_address (entry : CC.Block) (high : Bool) :
     Arm64EntryMemory.fieldAddress (.Vptr entry 0) (arrayField high) =
       some (.Vptr entry (CC.Integers.Ptrofs.repr (if high then 352 else 96))) := by
   simp [Arm64EntryMemory.fieldAddress, array_layout.1, array_layout.2 high,
@@ -32,7 +32,7 @@ private theorem slot_offsets : ∀ high : Bool, ∀ i : Fin 32,
       (CC.Integers.Ptrofs.repr (8 * (i.val : Int))) = vectorLoopHeaderOffset high i := by
   decide +kernel
 
-private theorem slot_readback (memory : CC.Mem) (entry : CC.Block) (high : Bool)
+theorem slot_readback (memory : CC.Mem) (entry : CC.Block) (high : Bool)
     (i : Fin 32) (value : CC.Val)
     (read : CC.Mem.load CC.Mptr memory entry ((if high then 352 else 96) + 8 * (i.val : Int)) = some value) :
     Arm64EntryMemory.load memory.nextblock CC.Mptr memory

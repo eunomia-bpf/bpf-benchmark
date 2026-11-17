@@ -1,0 +1,139 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-register-write-frame",
+  "focused": {
+    "storage1": {
+      "exit": 0,
+      "jobs": 174,
+      "log": "storage1.log"
+    },
+    "focused1": {
+      "exit": 0,
+      "jobs": 175,
+      "log": "focused1.log",
+      "purpose": "full register relation"
+    },
+    "focused2": {
+      "exit": 0,
+      "jobs": 175,
+      "log": "focused2.log",
+      "purpose": "all relational behaviors"
+    }
+  },
+  "public_queries": {
+    "exit": 0,
+    "theorems": 7,
+    "log": "Query-1.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64ProducerGprInputs.producer_registers_initialized_with_storage": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.storage": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.flags": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.vector": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.represents": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64RegisterWrite.write_represents": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64RegisterWrite.write_all_behaviors": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "source_resource": {
+    "constructor": "same actual producer header/loop witness; existing of_header caller extended",
+    "flags": 4,
+    "vector_pointer_slots": 64,
+    "write_cells": 62,
+    "same_tables_SP_and_actual_locals": true,
+    "new_producer_run_or_alias_assumption": false
+  },
+  "frame": {
+    "flag_reads": "all four exact, including failure/undefined",
+    "SIMD_reads": "all32 actual low/high pairs exact, including failure/undefined",
+    "layout": "reuse actual ProducerVectorView array_address and slot_readback",
+    "frontier": "old allocated-register reader frontier; caller frontier remains distinct"
+  },
+  "refinement": {
+    "procedure": "actual exported scalar writer, ordinary Fin31, width4/8",
+    "actual_transitions_each": 67,
+    "native": "LNSym public w and r_of_w_different; explicit identity cell map",
+    "relation": "complete current Arm64Registers.Represents: GPR/SP/SIMD/NZCV",
+    "stores": "success derived from actual producer permissions; full64/zeroextended32, scalar tag0",
+    "finite_behaviors": "every arbitrary-trace relational execution is a silent prefix of the same return",
+    "stuck_endpoint": "unique returned memory and native register relation",
+    "infinite_behavior": "excluded",
+    "actual_instruction_step": "open; generic source inlining/caller/fetch/physical native memory remain separate"
+  },
+  "whole_lake_build": {
+    "exit": 0,
+    "jobs": 303,
+    "log": "lake-build1.log",
+    "timing_lock": "shared",
+    "runs_on_final_source": 1
+  },
+  "export_comparison": {
+    "exit": 0,
+    "baseline": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_byte_identical": true,
+    "log": "export-parity1.json"
+  },
+  "attempts": "storage1, focused1, focused2 and final validation all pass first attempt; no failed run or budget increase",
+  "limits": {
+    "heartbeats": 200000,
+    "recursion_depth": 512,
+    "workers": 1,
+    "address_space_GiB": 32,
+    "CPUs": [
+      17,
+      18
+    ]
+  },
+  "last_complete_make_check": {
+    "exit": 0,
+    "commit": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "rerun": false,
+    "reason": "Lean-only; C/runtime unchanged; fresh full Lake and make check still required at M5/M6 closure"
+  },
+  "next": "actual generic MOV_IMM source path, allocation/free and mature move-wide instruction semantics without a fabricated helper call or producer continuation edge",
+  "complete_ISA_handler_refinements": 0,
+  "M5": "open",
+  "M6": "open"
+}

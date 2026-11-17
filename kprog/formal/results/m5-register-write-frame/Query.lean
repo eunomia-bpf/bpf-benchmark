@@ -1,0 +1,15 @@
+import KProgFormal.ClightRefinement.Arm64RegisterWriteFrame
+#check KProgFormal.ClightRefinement.Arm64ProducerGprInputs.producer_registers_initialized_with_storage
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerGprInputs.producer_registers_initialized_with_storage
+#check KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.storage
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.storage
+#check KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.flags
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.flags
+#check KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.vector
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.vector
+#check KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.represents
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterWrite.Result.represents
+#check KProgFormal.ClightRefinement.Arm64RegisterWrite.write_represents
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterWrite.write_represents
+#check KProgFormal.ClightRefinement.Arm64RegisterWrite.write_all_behaviors
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterWrite.write_all_behaviors

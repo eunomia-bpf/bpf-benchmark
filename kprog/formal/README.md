@@ -61,6 +61,10 @@ two stores from those permissions, and preserves other cells and caller memory.
 The [writer view proof](results/m5-register-write-view/README.md) retains the
 same writable storage, characterizes all GPR reads after writing, and relates
 the GPR bank and SP to LNSym's public register write with identity cell binding.
+The [complete writer register contract](results/m5-register-write-frame/README.md)
+also carries the actual flag/vector pointer bindings, preserves all SIMD/NZCV
+reads, and proves every relational execution is a silent prefix of the same
+register-refining return, with no infinite execution.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 

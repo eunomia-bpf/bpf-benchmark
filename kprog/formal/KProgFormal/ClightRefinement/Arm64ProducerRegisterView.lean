@@ -100,7 +100,7 @@ theorem producer_registers_with_storage
       Arm64Program._sp = some (.Vlong sp) :=
     header_borrowed_readback after entry.block 5 .Mint64 (header 5).block 0 (.Vlong sp) (pointers 5) spData
   have storage : Nonempty (Arm64ProducerRegisterStorage.Storage m after entry) :=
-    ⟨Arm64ProducerRegisterStorage.of_header m after entry header sourceTables (accessAfter.trans access)
+    ⟨Arm64ProducerRegisterStorage.of_header m after entry header sourceTables vectors vectorPointers (accessAfter.trans access)
       pointers tableSlots sp spData⟩
   refine ⟨entry, after, finalLe, run, ?_, storage, frame, accessAfter, next⟩
   refine ⟨?_, ⟨sp, spRead, nativeSp⟩, vectorReads, flagReads⟩

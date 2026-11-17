@@ -9,7 +9,8 @@ open Arm64Producer
 def cellChunk (tags : Bool) : CC.Chunk := if tags then .Mint8unsigned else .Mint64
 
 /-- Actual allocation-bound roots, cells and current write permissions, plus
-SP's real borrowed read. This is C storage evidence, not a second ISA model. -/
+SP's real borrowed read and allocated flag/vector pointer bindings.
+This is C storage evidence, not a second ISA model. -/
 structure Storage (m memory : CC.Mem) (entry : HeaderLocal m) where
   tables : (tags : Bool) → TableLocals tags m
   roots : ∀ tags, CC.Mem.load CC.Mptr memory entry.block (if tags then 8 else 0) =
@@ -22,6 +23,13 @@ structure Storage (m memory : CC.Mem) (entry : HeaderLocal m) where
   spPointer : CC.Mem.load CC.Mptr memory entry.block 40 = some (.Vptr sp.block 0)
   spValue : BitVec 64
   spRead : CC.Mem.load .Mint64 memory sp.block 0 = some (.Vlong spValue)
+  flags : (i : Fin 4) → HeaderSourceLocal m (Arm64ProducerEntryView.flagIndex i)
+  flagPointers : ∀ i, CC.Mem.load CC.Mptr memory entry.block
+    (8 * ((Arm64ProducerEntryView.flagIndex i).val : Int)) = some (.Vptr (flags i).block 0)
+  vectors : VectorLocal m
+  vectorPointers : ∀ high (i : Fin 32), CC.Mem.load CC.Mptr memory entry.block
+    ((if high then 352 else 96) + 8 * (i.val : Int)) =
+      some (.Vptr vectors.block (vectorLoopSourceOffset high i))
 
 private theorem local_writable (m memory : CC.Mem) (tags : Bool) (i : Fin 31)
     (table : TableLocals tags m) (access : memory.access = (allocation m).2.access) :
@@ -42,6 +50,10 @@ comes from its typed allocation lookup, every permission from imported local
 allocation and the reached access map. -/
 def of_header (m memory : CC.Mem) (entry : HeaderLocal m)
     (header : (i : Fin 12) → HeaderSourceLocal m i) (tables : (tags : Bool) → TableLocals tags m)
+    (vectors : VectorLocal m)
+    (vectorPointers : ∀ high (i : Fin 32), CC.Mem.load CC.Mptr memory entry.block
+      ((if high then 352 else 96) + 8 * (i.val : Int)) =
+        some (.Vptr vectors.block (vectorLoopSourceOffset high i)))
     (access : memory.access = (allocation m).2.access)
     (pointers : ∀ i, CC.Mem.load CC.Mptr memory entry.block (8 * (i.val : Int)) =
       some (.Vptr (header i).block 0))
@@ -68,7 +80,11 @@ def of_header (m memory : CC.Mem) (entry : HeaderLocal m)
   sp := header 5
   spPointer := pointers 5
   spValue := spValue
-  spRead := spRead }
+  spRead := spRead
+  flags := fun i => header (Arm64ProducerEntryView.flagIndex i)
+  flagPointers := fun i => pointers (Arm64ProducerEntryView.flagIndex i)
+  vectors := vectors
+  vectorPointers := vectorPointers }
 
 /-- Any cell is separate from every differently named actual producer local,
 including header/tables/SP/flags/vectors; no numeric-address guess is used. -/
