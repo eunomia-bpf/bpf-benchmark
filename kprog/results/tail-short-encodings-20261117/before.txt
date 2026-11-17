@@ -1,0 +1,19 @@
+   Compiling native-link v0.1.0 (/workspaces/repository/kprog/x86/native_lab/native_link)
+    Finished `release` profile [optimized] target(s) in 1m 11s
+     Running unittests src/main.rs (kprog/x86/native_lab/native_link/target/release/deps/native_link-62ccb5c6f5eda54e)
+
+running 1 test
+test x86::tests::tail_count_patch_preserves_target_entry ... 
+thread 'x86::tests::tail_count_patch_preserves_target_entry' (2796470) panicked at src/x86.rs:4906:44:
+opaque tail branches should fit rel8
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+FAILED
+
+failures:
+
+failures:
+    x86::tests::tail_count_patch_preserves_target_entry
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 62 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--bin native-link`

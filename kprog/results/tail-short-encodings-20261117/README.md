@@ -41,3 +41,5 @@ Test/unit source/build receipts are named accurately; canonical CLI is rebuilt
 once later by the frozen image recipe under imageEX. Comparator baseline follows
 the actual preceding fusion unit replay through its current-raw.txt. No new
 benchmark setting, helper catalogue, product or module change. Omp owns timing.
+
+2026-11-17T22:47:12Z — Tail encoding source and full host tests completed; actual logs and source.patch committed. Raw: /workspaces/kprog-raw/perf/tail-short-encodings-20261117/host-20261117T224510Z-2795880. Production unit-entry build and captured-request emission follow; canonical CLI stays unchanged; installed/time results remain pending.
