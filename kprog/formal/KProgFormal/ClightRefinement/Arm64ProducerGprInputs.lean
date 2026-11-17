@@ -151,7 +151,7 @@ theorem gpr_inputs_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Con
 /-- All30 GPR visits compose with x30 zero, tables, four flags,64 vector
 visits and RAW setup. No initial GPR/tag/table/flag/vector contents are assumed;
 provider outcomes and same-invocation native bindings remain explicit. -/
-theorem gpr_inputs_to_registers
+theorem gpr_inputs_to_registers_with_storage
     (addresses : Arm64Registers.PointerOrigins) (origins : Reference.Provenance.AArch64.Origins)
     (ctx : CC.Val) (ctxWord : BitVec 64) (represented : Arm64Registers.ValueRep addresses ctx ctxWord)
     (m before : CC.Mem) (le : CC.TempEnv) (input : le.get Arm64Entry._ctx = some ctx)
@@ -170,6 +170,7 @@ theorem gpr_inputs_to_registers
         traces.flatten (.State producer afterVectorLoop k (allocation m).1 finalLe after) ∧
       Arm64Registers.Represents addresses origins (fun r => r.val)
         after.nextblock after (.Vptr entry.block 0) s ∧
+      Nonempty (Arm64ProducerRegisterStorage.Storage m after entry) ∧
       FrameBelow m.nextblock before after ∧ after.access = before.access ∧
       after.nextblock = before.nextblock := by
   obtain ⟨blocks, middle, gprLe, traces, length, bindings, gprRun, reads,
@@ -201,19 +202,88 @@ theorem gpr_inputs_to_registers
     have same : block = blocks true j := congrArg Prod.fst (Option.some.inj (bound.symm.trans slot))
     rw [same]
     exact (reads j).2
-  obtain ⟨entry, after, finalLe, suffixTraces, suffixLength, suffix, registers,
+  obtain ⟨entry, after, finalLe, suffixTraces, suffixLength, suffix, registers, storage,
       suffixFrame, suffixAccess, suffixNext⟩ :=
-    Arm64ProducerTablesToRegisters.tables_to_registers addresses origins ctx ctxWord represented
+    Arm64ProducerTablesToRegisters.tables_to_registers_with_storage addresses origins ctx ctxWord represented
       m middle gprLe ctxInput k s inputs flagInputs flagProvider flagMatches vectorProvider
       (gprAccess.trans access) words tags nativeContext nativeReturn nativeOther nativeSp
-  refine ⟨entry, after, finalLe, traces ++ suffixTraces, by simp [length, suffixLength], ?_, registers,
+  refine ⟨entry, after, finalLe, traces ++ suffixTraces, by simp [length, suffixLength], ?_, registers, storage,
     gprFrame.trans suffixFrame, suffixAccess.trans gprAccess, suffixNext.trans gprNext⟩
   simpa only [List.flatten_append, CC.Eapp] using star_trans gprRun suffix
+
+/-- Observer projection of the same resource-carrying source execution. -/
+theorem gpr_inputs_to_registers
+    (addresses : Arm64Registers.PointerOrigins) (origins : Reference.Provenance.AArch64.Origins)
+    (ctx : CC.Val) (ctxWord : BitVec 64) (represented : Arm64Registers.ValueRep addresses ctx ctxWord)
+    (m before : CC.Mem) (le : CC.TempEnv) (input : le.get Arm64Entry._ctx = some ctx)
+    (k : CC.Cont) (s : Reference.AArch64.State) (inputs : Fin 31 → BitVec 64)
+    (gprProvider : Provider m inputs)
+    (flagInputs : Fin 4 → BitVec 64) (flagProvider : Arm64ProducerFlagInputs.Provider m flagInputs)
+    (flagMatches : ∀ i, .Vint (flagWord (flagInputs i)) = Arm64ProducerEntryView.flagValues s i)
+    (vectorProvider : Arm64ProducerVectorInputs.Provider m (Arm64ProducerVectorInputs.nativeVectorWord s))
+    (access : before.access = (allocation m).2.access)
+    (nativeContext : Reference.AArch64.gpr s 0 = ctxWord)
+    (nativeReturn : Reference.AArch64.gpr s 30 = origins.returnAddress)
+    (nativeOther : ∀ i : Fin 31, i ≠ 0 → i ≠ 30 → Reference.AArch64.gpr s i = inputs i)
+    (nativeSp : Reference.AArch64.sp s = origins.stack) :
+    ∃ entry : HeaderLocal m, ∃ after finalLe, ∃ traces : List CC.Trace, traces.length = 98 ∧
+      CC.Star (CC.Step2 ge) (.State producer (registerDeclarationStage 0) k (allocation m).1 le before)
+        traces.flatten (.State producer afterVectorLoop k (allocation m).1 finalLe after) ∧
+      Arm64Registers.Represents addresses origins (fun r => r.val)
+        after.nextblock after (.Vptr entry.block 0) s ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock := by
+  obtain ⟨entry, after, finalLe, traces, length, run, registers, _, frame, access, next⟩ :=
+    gpr_inputs_to_registers_with_storage addresses origins ctx ctxWord represented m before le input k s inputs gprProvider flagInputs flagProvider flagMatches vectorProvider access nativeContext nativeReturn nativeOther nativeSp
+  exact ⟨entry, after, finalLe, traces, length, run, registers, frame, access, next⟩
 
 /-- The actual producer call allocates/initializes its frame and executes all
 98 input visits before constructing the register view. No first-call prefix
 is duplicated; the existing580 cache prefix plus9 RAW setup transitions stop
 at register declaration0 before its actual kind-6 call. -/
+theorem producer_registers_initialized_with_storage
+    (addresses : Arm64Registers.PointerOrigins) (origins : Reference.Provenance.AArch64.Origins)
+    (ctx : CC.Val) (ctxWord : BitVec 64) (represented : Arm64Registers.ValueRep addresses ctx ctxWord)
+    (m : CC.Mem) (continuation : CC.Val) (k : CC.Cont)
+    (s : Reference.AArch64.State) (inputs : Fin 31 → BitVec 64)
+    (gprProvider : Provider m inputs)
+    (flagInputs : Fin 4 → BitVec 64) (flagProvider : Arm64ProducerFlagInputs.Provider m flagInputs)
+    (flagMatches : ∀ i, .Vint (flagWord (flagInputs i)) = Arm64ProducerEntryView.flagValues s i)
+    (vectorProvider : Arm64ProducerVectorInputs.Provider m (Arm64ProducerVectorInputs.nativeVectorWord s))
+    (nativeContext : Reference.AArch64.gpr s 0 = ctxWord)
+    (nativeReturn : Reference.AArch64.gpr s 30 = origins.returnAddress)
+    (nativeOther : ∀ i : Fin 31, i ≠ 0 → i ≠ 30 → Reference.AArch64.gpr s i = inputs i)
+    (nativeSp : Reference.AArch64.sp s = origins.stack) :
+    ∃ entry : HeaderLocal m, ∃ after finalLe, ∃ traces : List CC.Trace, traces.length = 98 ∧
+      CC.Star (CC.Step2 ge) (.Callstate (.Internal producer) [ctx, continuation] k m)
+        traces.flatten (.State producer afterVectorLoop k (allocation m).1 finalLe after) ∧
+      Arm64Registers.Represents addresses origins (fun r => r.val)
+        after.nextblock after (.Vptr entry.block 0) s ∧
+      Nonempty (Arm64ProducerRegisterStorage.Storage m after entry) ∧
+      FrameBelow m.nextblock m after ∧ after.access = (allocation m).2.access ∧
+      after.nextblock = (allocation m).2.nextblock := by
+  obtain ⟨cached, cacheRun, _, cacheFrame, cacheAccess, cacheNext⟩ := entry_caches_initialized m ctx continuation k
+  obtain ⟨ready, setupRun, _, setupFrame, setupAccess, setupNext⟩ :=
+    setup_register_input m cached (initialTemps ctx continuation) k cacheAccess
+  change InternalRun ge 9
+    (.State producer afterCacheStage k (allocation m).1 (initialTemps ctx continuation) cached)
+    (.State producer (registerDeclarationStage 0) k (allocation m).1 (initialTemps ctx continuation) ready) at setupRun
+  have ctxSeparate : Arm64Entry._continuation ≠ Arm64Entry._ctx := by decide +kernel
+  have ctxInput : (initialTemps ctx continuation).get Arm64Entry._ctx = some ctx :=
+    (CC.PTree.gso _ _ _ _ ctxSeparate).trans (CC.PTree.gss _ _ _)
+  have prefixRun : InternalRun ge 589 (.Callstate (.Internal producer) [ctx, continuation] k m)
+      (.State producer (registerDeclarationStage 0) k (allocation m).1 (initialTemps ctx continuation) ready) :=
+    cacheRun.trans setupRun
+  obtain ⟨entry, after, finalLe, traces, length, run, registers, storage, frame, access, next⟩ :=
+    gpr_inputs_to_registers_with_storage addresses origins ctx ctxWord represented m ready (initialTemps ctx continuation)
+      ctxInput k s inputs gprProvider flagInputs flagProvider flagMatches vectorProvider
+      (setupAccess.trans cacheAccess) nativeContext nativeReturn nativeOther nativeSp
+  refine ⟨entry, after, finalLe, traces, length, ?_, registers, storage,
+    (cacheFrame.trans setupFrame).trans frame, access.trans (setupAccess.trans cacheAccess),
+    next.trans (setupNext.trans cacheNext)⟩
+  simpa only [CC.E0, CC.Eapp, List.nil_append] using star_trans prefixRun.sound run
+
+/-- Observer projection of the same resource-carrying source execution. -/
 theorem producer_registers_initialized
     (addresses : Arm64Registers.PointerOrigins) (origins : Reference.Provenance.AArch64.Origins)
     (ctx : CC.Val) (ctxWord : BitVec 64) (represented : Arm64Registers.ValueRep addresses ctx ctxWord)
@@ -234,25 +304,8 @@ theorem producer_registers_initialized
         after.nextblock after (.Vptr entry.block 0) s ∧
       FrameBelow m.nextblock m after ∧ after.access = (allocation m).2.access ∧
       after.nextblock = (allocation m).2.nextblock := by
-  obtain ⟨cached, cacheRun, _, cacheFrame, cacheAccess, cacheNext⟩ := entry_caches_initialized m ctx continuation k
-  obtain ⟨ready, setupRun, _, setupFrame, setupAccess, setupNext⟩ :=
-    setup_register_input m cached (initialTemps ctx continuation) k cacheAccess
-  change InternalRun ge 9
-    (.State producer afterCacheStage k (allocation m).1 (initialTemps ctx continuation) cached)
-    (.State producer (registerDeclarationStage 0) k (allocation m).1 (initialTemps ctx continuation) ready) at setupRun
-  have ctxSeparate : Arm64Entry._continuation ≠ Arm64Entry._ctx := by decide +kernel
-  have ctxInput : (initialTemps ctx continuation).get Arm64Entry._ctx = some ctx :=
-    (CC.PTree.gso _ _ _ _ ctxSeparate).trans (CC.PTree.gss _ _ _)
-  have prefixRun : InternalRun ge 589 (.Callstate (.Internal producer) [ctx, continuation] k m)
-      (.State producer (registerDeclarationStage 0) k (allocation m).1 (initialTemps ctx continuation) ready) :=
-    cacheRun.trans setupRun
-  obtain ⟨entry, after, finalLe, traces, length, run, registers, frame, access, next⟩ :=
-    gpr_inputs_to_registers addresses origins ctx ctxWord represented m ready (initialTemps ctx continuation)
-      ctxInput k s inputs gprProvider flagInputs flagProvider flagMatches vectorProvider
-      (setupAccess.trans cacheAccess) nativeContext nativeReturn nativeOther nativeSp
-  refine ⟨entry, after, finalLe, traces, length, ?_, registers,
-    (cacheFrame.trans setupFrame).trans frame, access.trans (setupAccess.trans cacheAccess),
-    next.trans (setupNext.trans cacheNext)⟩
-  simpa only [CC.E0, CC.Eapp, List.nil_append] using star_trans prefixRun.sound run
+  obtain ⟨entry, after, finalLe, traces, length, run, registers, _, frame, access, next⟩ :=
+    producer_registers_initialized_with_storage addresses origins ctx ctxWord represented m continuation k s inputs gprProvider flagInputs flagProvider flagMatches vectorProvider nativeContext nativeReturn nativeOther nativeSp
+  exact ⟨entry, after, finalLe, traces, length, run, registers, frame, access, next⟩
 
 end KProgFormal.ClightRefinement.Arm64ProducerGprInputs

@@ -153,7 +153,7 @@ theorem flag_inputs_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Co
 /-- Four flag outcomes, LR zero, all64 vector outcomes and the RAW suffix
 establish the existing register relation. Only masked flag bits are bound to
 native NZCV; the full64-bit provider outcomes remain unconstrained otherwise. -/
-theorem flag_vector_inputs_and_raw_registers
+theorem flag_vector_inputs_and_raw_registers_with_storage
     (addresses : Arm64Registers.PointerOrigins) (origins : Reference.Provenance.AArch64.Origins)
     (ctx : CC.Val) (ctxWord : BitVec 64) (represented : Arm64Registers.ValueRep addresses ctx ctxWord)
     (m before : CC.Mem) (le : CC.TempEnv) (input : le.get Arm64Entry._ctx = some ctx)
@@ -179,6 +179,7 @@ theorem flag_vector_inputs_and_raw_registers
         traces.flatten (.State producer afterVectorLoop k (allocation m).1 finalLe after) ∧
       Arm64Registers.Represents addresses origins (fun r => r.val)
         after.nextblock after (.Vptr entry.block 0) s ∧
+      Nonempty (Arm64ProducerRegisterStorage.Storage m after entry) ∧
       FrameBelow m.nextblock before after ∧ after.access = before.access ∧
       after.nextblock = before.nextblock := by
   obtain ⟨blocks, _, middle, flagLe, traces, length, bindings, _, flagRun, flagReads, _,
@@ -224,13 +225,46 @@ theorem flag_vector_inputs_and_raw_registers
     have same : block = blocks i := congrArg Prod.fst (Option.some.inj (bound.symm.trans (bindings i)))
     subst block
     simpa only [flagMatches i] using flagReads i
-  obtain ⟨entry, after, finalLe, vectorTraces, vectorLength, vectorRun, registers,
+  obtain ⟨entry, after, finalLe, vectorTraces, vectorLength, vectorRun, registers, storage,
       vectorFrame, vectorAccess, vectorNext⟩ :=
-    Arm64ProducerVectorInputs.vector_inputs_and_raw_registers addresses origins ctx ctxWord represented
+    Arm64ProducerVectorInputs.vector_inputs_and_raw_registers_with_storage addresses origins ctx ctxWord represented
       m middle flagLe ctxInput k s inputs (flagAccess.trans access) vectorProvider tables words tags flags
       nativeContext nativeReturn nativeOther nativeSp
-  refine ⟨entry, after, finalLe, traces ++ vectorTraces, by simp [length, vectorLength], ?_, registers,
+  refine ⟨entry, after, finalLe, traces ++ vectorTraces, by simp [length, vectorLength], ?_, registers, storage,
     flagFrame.trans vectorFrame, vectorAccess.trans flagAccess, vectorNext.trans flagNext⟩
   simpa only [List.flatten_append, CC.Eapp] using star_trans flagRun vectorRun
+
+/-- Observer projection of the same resource-carrying source execution. -/
+theorem flag_vector_inputs_and_raw_registers
+    (addresses : Arm64Registers.PointerOrigins) (origins : Reference.Provenance.AArch64.Origins)
+    (ctx : CC.Val) (ctxWord : BitVec 64) (represented : Arm64Registers.ValueRep addresses ctx ctxWord)
+    (m before : CC.Mem) (le : CC.TempEnv) (input : le.get Arm64Entry._ctx = some ctx)
+    (k : CC.Cont) (s : Reference.AArch64.State) (inputs : Fin 31 → BitVec 64)
+    (flagInputs : Fin 4 → BitVec 64) (flagProvider : Provider m flagInputs)
+    (flagMatches : ∀ i, .Vint (flagWord (flagInputs i)) = Arm64ProducerEntryView.flagValues s i)
+    (vectorProvider : Arm64ProducerVectorInputs.Provider m (Arm64ProducerVectorInputs.nativeVectorWord s))
+    (access : before.access = (allocation m).2.access)
+    (tablesBefore : ∀ tags, ∃ table : TableLocals tags m, ∀ i,
+      CC.Mem.load CC.Mptr before table.tableBlock (8 * (i.val : Int)) = some (.Vptr (table.cellBlock i) 0))
+    (wordsBefore : ∀ (i : Fin 31), i ≠ 0 → ∀ block : CC.Block,
+      (allocation m).1.get (tableCellName false i) = some (block, tableCellType false) →
+      CC.Mem.load .Mint64 before block 0 = some (.Vlong (if i = 30 then 0 else inputs i)))
+    (tagsBefore : ∀ (i : Fin 31), i ≠ 0 → i ≠ 30 → ∀ block : CC.Block,
+      (allocation m).1.get (tableCellName true i) = some (block, tableCellType true) →
+      CC.Mem.load .Mint8unsigned before block 0 = some (.Vint 0))
+    (nativeContext : Reference.AArch64.gpr s 0 = ctxWord)
+    (nativeReturn : Reference.AArch64.gpr s 30 = origins.returnAddress)
+    (nativeOther : ∀ i : Fin 31, i ≠ 0 → i ≠ 30 → Reference.AArch64.gpr s i = inputs i)
+    (nativeSp : Reference.AArch64.sp s = origins.stack) :
+    ∃ entry : HeaderLocal m, ∃ after finalLe, ∃ traces : List CC.Trace, traces.length = 68 ∧
+      CC.Star (CC.Step2 ge) (.State producer afterPointerTables k (allocation m).1 le before)
+        traces.flatten (.State producer afterVectorLoop k (allocation m).1 finalLe after) ∧
+      Arm64Registers.Represents addresses origins (fun r => r.val)
+        after.nextblock after (.Vptr entry.block 0) s ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock := by
+  obtain ⟨entry, after, finalLe, traces, length, run, registers, _, frame, access, next⟩ :=
+    flag_vector_inputs_and_raw_registers_with_storage addresses origins ctx ctxWord represented m before le input k s inputs flagInputs flagProvider flagMatches vectorProvider access tablesBefore wordsBefore tagsBefore nativeContext nativeReturn nativeOther nativeSp
+  exact ⟨entry, after, finalLe, traces, length, run, registers, frame, access, next⟩
 
 end KProgFormal.ClightRefinement.Arm64ProducerFlagInputs

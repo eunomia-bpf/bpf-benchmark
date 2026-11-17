@@ -1,0 +1,115 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-register-storage",
+  "focused": {
+    "exit": 0,
+    "jobs": 173,
+    "log": "focused3.log",
+    "initial_storage_header_jobs": 167
+  },
+  "public_queries": {
+    "exit": 0,
+    "theorems": 4,
+    "log": "Query-1.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64ProducerGprInputs.producer_registers_initialized_with_storage": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProducerRegisterStorage.Storage.separate_local": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProducerRegisterStorage.Storage.cells_distinct": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProducerRegisterStorage.Storage.cell_fresh": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "storage": {
+    "tables": 2,
+    "cells_each": 31,
+    "cell_write_chunks": [
+      "Mint64 word at0",
+      "Mint8unsigned tag at0"
+    ],
+    "header_roots_offsets": [
+      0,
+      8
+    ],
+    "SP_pointer_offset": 40,
+    "SP_data": "actual signed-long local word readback",
+    "ownership_source": "typed actual allocation bindings, imported permissions and reached access map",
+    "separation": [
+      "all62 cell blocks pairwise distinct",
+      "cell distinct from any differently named allocated producer local"
+    ],
+    "caller_freshness": "cell block >= original producer nextblock",
+    "native_physical_aliasing": "open"
+  },
+  "source_threading": {
+    "single_header_loop_transitions": 638,
+    "full_provider_visits": 98,
+    "same_reached_memory": true,
+    "strong_witnesses": [
+      "joint register/header view",
+      "RAW setup",
+      "vector inputs",
+      "flag inputs/LR",
+      "x30zero/tables",
+      "GPR input sequence",
+      "actual producer Callstate"
+    ],
+    "observer_APIs": "unchanged signatures, projections of stronger witnesses",
+    "existing_initialized_NOP": "still passes"
+  },
+  "whole_lake_build": {
+    "exit": 0,
+    "jobs": 300,
+    "log": "lake-build1.log",
+    "timing_lock": "shared"
+  },
+  "export_comparison": {
+    "exit": 0,
+    "baseline": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_byte_identical": true,
+    "log": "export-parity1.json"
+  },
+  "attempts": {
+    "focused1": "PASS167 jobs; initial storage/header",
+    "focused2": "factored proof first-tactic indentation error; exit1",
+    "focused3": "PASS173 jobs; complete resource threading and existing NOP",
+    "Query-1": "PASS4 public queries",
+    "lake-build1": "PASS300 jobs",
+    "export-parity1": "PASS23 files"
+  },
+  "limits": {
+    "heartbeats": 200000,
+    "recursion_depth": 512,
+    "workers": 1,
+    "address_space_GiB": 32,
+    "CPUs": [
+      17,
+      18
+    ]
+  },
+  "last_complete_make_check": {
+    "exit": 0,
+    "commit": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "rerun": false
+  },
+  "complete_ISA_handler_refinements": 0,
+  "M5": "open",
+  "M6": "open"
+}

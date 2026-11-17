@@ -19,6 +19,7 @@ import KProgFormal.ClightRefinement.Arm64LinkedNop
 import KProgFormal.ClightRefinement.Arm64ProducerEntryView
 import KProgFormal.ClightRefinement.Arm64ProducerGprView
 import KProgFormal.ClightRefinement.Arm64ProducerVectorView
+import KProgFormal.ClightRefinement.Arm64ProducerRegisterStorage
 import KProgFormal.ClightRefinement.Arm64ProducerRegisterView
 import KProgFormal.ClightRefinement.Arm64EntryAdmissibility
 import KProgFormal.ClightRefinement.Arm64ProducerVectorInputs

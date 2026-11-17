@@ -52,6 +52,9 @@ register relation, deriving its source data and threading both temporary
 updates. The [source-initialized NOP contract](results/m5-initialized-nop/README.md)
 applies the actual 19-transition procedure to that live entry in the initialized
 global world, retaining global permissions and the old producer frontier.
+The [register storage proof](results/m5-register-storage/README.md) now carries
+actual roots, 62 writable cells, SP data and allocation separation through that
+same 98-visit construction; observer APIs project the stronger witnesses.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 
