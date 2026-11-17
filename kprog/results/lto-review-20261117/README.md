@@ -2859,3 +2859,30 @@ call relocation or add a module ABI change for this encoding opportunity.
 The absolute form above works with link-time target addresses and existing
 raw literal emission. No pool, extra field, runtime check, cache service,
 kernel/module change or benchmark change is proposed.
+
+### Kernel-leaf functional checks: installed growth is now observable
+
+The coordinator's completed functional checks provide installed-byte
+observations in addition to the host payload arithmetic:
+
+| App | User-leaf check suffix | Kernel-leaf check suffix | Successful cumulative replacements | Native bytes before → after | Companion JIT bytes |
+| --- | --- | --- | --- | --- | --- |
+| OTel | `060939_178921` | `071102_841349` | 14 → 14 | 135,424 → 135,823 (+399) | 167,706 both |
+| BCC | `061308_930333` | `071441_096459` | 25 → 25 | 8,334 → 8,733 (+399) | 7,965 both |
+| Tetragon | `062009_586769` | `072157_986675` | 288 → 288 | 1,914,841 → 1,924,132 (+9,291) | 2,472,912 both |
+
+All suffixes have prefix `corpus/results/x86_kvm_corpus_20261117_`.
+Totals come from the already committed ID-pairing `inst.py`, with original
+and native IDs paired within each boot's replacement log. They describe
+cumulative installed loads, including any startup-only replacement,
+and are not measurement-window live-code totals. Check completion records
+show rc=0; none of these short functional checks supplies the pending
+three-sample per-call effect.
+
+The increases are 7/7/163 units of 57 bytes, consistent with the source
+and reported host-payload change. Those quotients are not an independently
+counted list of routines or a proof that every other byte stayed identical.
+Both installed growth and future measured time belong in the kernel-leaf
+result; callback/frame removal by itself does not establish the benefit.
+PERF ran only the existing log reader, with no new guest, build or extra
+confirmation. Remaining coordinator checks and timing continue.
