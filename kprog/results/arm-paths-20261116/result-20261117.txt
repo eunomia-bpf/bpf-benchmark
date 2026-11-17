@@ -1,0 +1,13 @@
+== x86_kvm_corpus_20261117_165519_616823 (otelcol-ebpf-profiler__profiling.json): 1 active programs, median native/eBPF run ratio 0.909
+   programs whose counts track the median: 1 of 1
+== x86_kvm_corpus_20261117_165851_063935 (bcc__set.json): 9 active programs, median native/eBPF run ratio 0.897
+   programs whose counts track the median: 9 of 9
+== x86_kvm_corpus_20261117_170144_141033 (cilium__agent.json): 1 active programs, median native/eBPF run ratio 0.985
+   programs whose counts track the median: 1 of 1
+== x86_kvm_corpus_20261117_170444_997304 (tetragon__observer.json): 3 active programs, median native/eBPF run ratio 0.727
+   DIFFERENT generic_tracepo: eBPF 31,719,545  native 0  ratio 0.000
+   programs whose counts track the median: 2 of 3
+== x86_kvm_corpus_20261117_170828_760536 (tracee__monitor.json): 24 active programs, median native/eBPF run ratio 1.107
+   programs whose counts track the median: 24 of 24
+== x86_kvm_corpus_20261117_171249_269819 (katran.json): 1 active programs, median native/eBPF run ratio 0.996
+   programs whose counts track the median: 1 of 1
