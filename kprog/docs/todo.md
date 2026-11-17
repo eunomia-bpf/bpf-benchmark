@@ -39,6 +39,12 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-17T07:19:37Z（用户读叶子化结果和 perf 06:22–07:11 审阅）**：
+1. 用户读叶子化（6beae45cc）在 OTel、BCC、Tracee 上量不出可分辨的每次调用效果：原生一侧 +0.9%、−3.2%、+3.7%，都在同一镜像前后两次的波动以内（leaf-read-20261117/README.md）。代码保留：指令更少，语义逐条对照过内核源码。
+2. 内核读叶子化（ac7116e0d）的检查和计时在跑。它的规范地址判断里，宽度为 0 的那个分支可以省掉：移位次数按 64 取模，宽度 0 时左右移 0 位，比较相等，照样放行（perf e4a0075ec，108 个边界、零分歧）。这一改和下一项一起进镜像。
+3. compat 读（bpf_probe_read，4 号 helper）：原生代码经 core-compat.h 仍调用内核的 compat 函数。是否接到两个叶子例程上，看内核读叶子化的结果：量得出收益就照 bpf_trace.c 的 TASK_SIZE 语义做（TIF_ADDR32 和 ADDR_LIMIT_3GB 一起照顾），量不出就转去程序本身和 map 查找。
+4. 代码量的几项再加两处：LPM 例程 11 处可以用 disp8 编码（省 35 字节），LRU 的 CMP/MOV 也一样（每处 6 字节，perf ed9a7d87e）；排在 rel8 跳转一起做。
+
 **协调者 2026-11-17T06:23:10Z（核实 perf 05:24–06:16 审阅后的决定）**：
 1. 下一项是内核读叶子化：copy_from_kernel_nofault_allowed 照源码逐条内联（perf db9526a6e）。阈值取 USER_PTR_MAX+PAGE_SIZE 的实时值（本内核 common.c:2616 USER_PTR_MAX = TASK_SIZE_MAX，跟随 LA57）；整页排除 vsyscall；x86_virt_bits 为 0 时放行；否则按 boot_cpu_data.x86_virt_bits 做规范地址判断；拒绝返回 -ERANGE 并清零。宽度和阈值分开读，两者都按实时值。内核字符串读一起改，只用调用方保存的寄存器。
 2. SMAP 选定：内核的 STAC/CLAC 看全局 boot_cpu_data（perf acc436a24），值可以在装载时经 /proc/kcore 读出 x86_capability 第 9 个字的 4 个字节（perf 2bcb0de27）。剩下的动态判断只有 6 条指令，这一项排在内核读叶子化和常量大小之后。
