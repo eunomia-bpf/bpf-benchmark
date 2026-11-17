@@ -145,6 +145,7 @@ impl Routine {
 pub(super) fn constants(
     bytes: &[u8],
     address: u64,
+    branch_targets: &HashMap<u64, Vec<u64>>,
 ) -> Result<HashMap<u64, HashMap<Register, u64>>> {
     let instructions: Vec<_> = Decoder::with_ip(64, bytes, address, DecoderOptions::NONE)
         .into_iter()
@@ -152,8 +153,12 @@ pub(super) fn constants(
     if instructions.iter().any(|i| i.is_invalid()) {
         bail!("invalid memory-specialization input");
     }
+    let indices: HashMap<_, _> = instructions.iter().enumerate()
+        .map(|(n,i)| (i.ip(),n)).collect();
     if instructions.iter().any(|i| {
-        i.flow_control() == FlowControl::IndirectBranch
+        (i.flow_control() == FlowControl::IndirectBranch
+            && !branch_targets.get(&i.ip()).is_some_and(|targets|
+                !targets.is_empty() && targets.iter().all(|target| indices.contains_key(target))))
             || (i.flow_control() == FlowControl::Call
                 && i.near_branch_target() != i.next_ip()
                 && i.near_branch_target() >= address
@@ -161,11 +166,6 @@ pub(super) fn constants(
     }) {
         return Ok(HashMap::new());
     }
-    let indices: HashMap<_, _> = instructions
-        .iter()
-        .enumerate()
-        .map(|(n, i)| (i.ip(), n))
-        .collect();
     let mut states: Vec<Option<HashMap<Register, u64>>> = vec![None; instructions.len()];
     if states.is_empty() {
         return Ok(HashMap::new());
@@ -229,6 +229,11 @@ pub(super) fn constants(
             clear_x86_call_clobbered_registers(&mut after);
         }
         let mut successors = Vec::new();
+        if i.flow_control() == FlowControl::IndirectBranch {
+            for target in &branch_targets[&i.ip()] {
+                successors.push(indices[target]);
+            }
+        }
         if matches!(
             i.flow_control(),
             FlowControl::UnconditionalBranch | FlowControl::ConditionalBranch
@@ -281,24 +286,42 @@ mod tests {
             0x85, 0xff, 0x74, 7, 0xba, 3, 0, 0, 0, 0xeb, 5, 0xba, 4, 0, 0, 0, 0xe8, 0, 0, 0, 0,
             0xc3,
         ];
-        assert!(!constants(&branch, 0)?[&16].contains_key(&Register::RDX));
+        assert!(!constants(&branch, 0, &HashMap::new())?[&16].contains_key(&Register::RDX));
         let equal = [
             0xba, 0x70, 1, 0, 0, 0x31, 0xf6, 0xe8, 0, 0, 0, 0, 0xe8, 0, 0, 0, 0, 0xc3,
         ];
-        let states = constants(&equal, 0)?;
+        let states = constants(&equal, 0, &HashMap::new())?;
         assert_eq!(states[&7].get(&Register::RDX), Some(&368));
         assert_eq!(states[&7].get(&Register::RSI), Some(&0));
         assert!(!states[&12].contains_key(&Register::RDX));
         let partial = [0xba, 3, 0, 0, 0, 0xb2, 4, 0xe8, 0, 0, 0, 0, 0xc3];
-        assert!(!constants(&partial, 0)?[&7].contains_key(&Register::RDX));
+        assert!(!constants(&partial, 0, &HashMap::new())?[&7].contains_key(&Register::RDX));
         let looped = [
             0xba, 3, 0, 0, 0, 0x48, 0xff, 0xca, 0x75, 0xfb, 0xe8, 0, 0, 0, 0, 0xc3,
         ];
-        assert!(!constants(&looped, 0)?[&10].contains_key(&Register::RDX));
+        assert!(!constants(&looped, 0, &HashMap::new())?[&10].contains_key(&Register::RDX));
         let indirect = [0xba, 3, 0, 0, 0, 0xff, 0xe0];
-        assert!(constants(&indirect, 0)?.is_empty());
+        assert!(constants(&indirect, 0, &HashMap::new())?.is_empty());
         let local_call = [0xba, 3, 0, 0, 0, 0xe8, 1, 0, 0, 0, 0xc3, 0xc3];
-        assert!(constants(&local_call, 0)?.is_empty());
+        assert!(constants(&local_call, 0, &HashMap::new())?.is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn constant_counts_meet_all_resolved_table_edges_at_nonzero_addresses() -> Result<()> {
+        // The indirect jump reaches either size8 or size16, then one call.
+        // Ignoring one edge would specialize that call to the wrong count.
+        let mut bytes=vec![0xbe,8,0,0,0,0xff,0xe0,
+            0xbe,8,0,0,0,0xeb,5,0xbe,16,0,0,0,0xe8,0,0,0,0,0xc3];
+        let base=0x4000;
+        let edges=HashMap::from([(base+5,vec![base+7,base+14])]);
+        let facts=constants(&bytes,base,&edges)?;
+        assert!(!facts[&19].contains_key(&Register::RSI));
+        bytes[15]=8;
+        assert_eq!(constants(&bytes,base,&edges)?[&19].get(&Register::RSI),Some(&8));
+        assert!(constants(&bytes,base,&HashMap::new())?.is_empty());
+        let invalid=HashMap::from([(base+5,vec![base+7,base+15])]);
+        assert!(constants(&bytes,base,&invalid)?.is_empty(),"mid-instruction edge is not a fact");
         Ok(())
     }
 

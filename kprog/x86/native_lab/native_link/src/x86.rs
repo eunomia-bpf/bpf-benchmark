@@ -1120,9 +1120,9 @@ pub(super) fn rewrite_x86(
         let bytes = read_symbol_bytes(elf, sym)?;
         let mut tail_transfers = x86_direct_tail_transfers(elf, sym)?;
         let mut tail_calls = Vec::new();
-        let memory_constants = memory::constants(&bytes, sym.address)?;
         let helper_calls = if symbol_key(sym) == symbol_key(entry) { entry_helpers.clone() }
             else { helper_provenance::calls(elf, sym, &got_relocations, helper_addrs)? };
+        let memory_constants = memory::constants(&bytes, sym.address, &helper_calls.branch_targets)?;
         for ip in &helper_calls.tails {
             if let Some(name) = helper_calls.single.get(ip) {
                 tail_transfers.insert(*ip, DirectTailTransfer { symbol: name.clone(), addend: -4,
