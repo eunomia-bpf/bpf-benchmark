@@ -20,14 +20,15 @@ permissions, access and allocation frontier are preserved.
 The stage access map and actual context temp binding remain explicit premises.
 No external or assembly boundary executes here; no input-provider purity,
 complete native memory/origin/control correspondence or ISA-handler refinement
-is claimed. Header/cache-pointer construction and the actual borrowed consumer
-remain the next M5 work, followed by full handler migration and O1/O2/O4 recount.
+is claimed. Remaining header fields, vector pointers and the actual borrowed consumer
+remain M5 work, followed by full handler migration and O1/O2/O4 recount.
 M5 and M6 stay open; complete ISA-handler count stays zero.
 
 Focused build passes 154 jobs and all seven compiled public type/axiom queries
 pass. Source/allocation/cast facts use the three standard axioms; internal runs
 also mention the imported opaque external/assembly relations, without executing
-either boundary. Full batch confirmation follows the header step. Default proof
+either boundary. Final context/header batch confirmation passes 282 jobs under timing SH;
+see `../m5-producer-header/validation.json`. Default proof
 limits, one Lean worker, CPU 17 and 32 GiB AS are retained. All Lean checks, including focused
 checks and queries, take timing SH under the coordinator's 12:10 notice.
 Raw attempts: `/workspaces/kprog-raw/formal/m5-producer-context`.
