@@ -1697,3 +1697,78 @@ semantics remain. This ranks above the return-layout/branch-width items.
 No guest, optimizer/codegen invocation, source change or candidate execution
 was performed. Coordinator owns implementation and its isolated app timing;
 no new runtime switch, check, refusal or kernel/module change is proposed.
+
+## 15. Installed-size summaries overwrite same-name programs
+
+2026-11-17T04:58:06Z review at 9521a9cf2. The per-call audit found no
+name-key overwrite in its aggregate: `native_eval_20260529.py:194–204`
+iterates the phase's full record list and sums time/count for the existing
+min-runs population. OTel's second retained baseline program contributes
+only 100 calls beside roughly 139 million entry calls in the new run.
+This does not explain the observed OTel per-call improvement; its work
+attribution remains a separate question. No per-call formula was changed.
+
+The installed-byte summary has a different implementation.
+`kprog/results/flag-tuning-20261117/inst.py:8–14` parses kernel IDs and
+types out of its regex match, then discards them and assigns each size to
+`o[name]` or `n[name]`. Later loads with the same kernel name replace
+earlier ones, including loads of different source functions with truncated
+names. Intersecting those dictionaries produces a last-load-per-name
+population rather than all installed programs. Adding type to this key
+would still lose multiple same-name programs of the same type.
+
+Five completed corrected-O3 timing runs show the difference. The first
+byte column below preserves the already published name-based result. The
+next two columns use unique program IDs from the same load log, and keep
+cumulative loads separate from the measurement-window snapshot:
+
+| App/run suffix | Reported name population, original/native B | Successful replacement IDs, cumulative original/native B | Snapshot native IDs matched to those loads, companion-original/native B |
+|---|---|---|---|
+| OTel / 035907_339709 | 14; 167,706 / 135,468 | 14; 167,706 / 135,468 | 13; 167,504 / 134,949 |
+| BCC / 041017_749964 | 21; 6,938 / 7,480 | 25; 7,965 / 8,286 | 25; 7,965 / 8,286 |
+| Cilium / 042102_276469 | 18; 80,282 / 66,314 | 113; 581,577 / 484,353 | 47; 236,653 / 204,484 |
+| Tetragon / 043157_792401 | 17; 105,568 / 79,549 | 288; 2,472,912 / 1,913,889 | 287; 2,471,824 / 1,912,832 |
+| Tracee / 044227_741393 | 110; 1,237,382 / 1,068,760 | 169; 2,068,918 / 1,699,564 | 167; 2,068,774 / 1,699,430 |
+
+Here “original” means the eBPF companion loaded immediately before its
+replacement in the native arm, not a name-based match into the other
+arm's fresh kernel IDs. The snapshot-matched population's native/original
+ratios are BCC 1.0403, Tetragon 0.77385 and Tracee 0.82147. These describe
+that explicit population; they do not replace stage P executable sizes,
+which the flag study measures independently.
+
+For example, Tetragon's 287-program snapshot contains 1,912,832 native
+bytes, while the name-based report says 79,549 B across seventeen names.
+BCC's 25 records include four `tracepoint__sys` programs and two
+`kprobe__cap_cap` programs. Tracee has 31 `trace_security_` records of the
+same type among other collisions. These are separate kernel programs,
+not duplicate text lines that should be discarded because their names
+match. The last selected name's size also depends on load order.
+
+Cumulative load bytes are not the measurement-window footprint either:
+Cilium replaced 113 program IDs during startup/reconfiguration, but only
+47 of them occur in the final 56-record native-arm snapshot. Its other
+nine records have no native replacement pair and total 2,079 B: five
+drop-notify programs, two host-policy programs and two LXC-policy programs.
+They fit the earlier manifest-miss class. All have zero recorded run count;
+that does not establish that a tail target never ran. The whole snapshot
+contains 206,563 B, including this retained eBPF code. This is a size and
+coverage receipt, not resolution of Cilium's separate packet-path question.
+
+`installed_population_inventory.py` pairs original/native jit-info records
+with their replacement event on the same PID/TID, retains kernel IDs and
+source log lines, then joins native IDs to that run's measurement snapshot.
+`installed-populations.json` contains the ledger and each population. IDs
+are compared only within one run/boot. The reader also reproduces the
+legacy name-based sums so the correction can be checked directly against
+the published row. No raw result, benchmark or coordinator script was
+modified; `inst.py` lies outside this lane's review-write directory.
+
+Use a stated snapshot or load-event population when recording an LTO
+piece's installed bytes, with per-instance IDs/provenance instead of
+names as identity. Keep startup-only and retained-eBPF programs visible
+in their own explicit counts. This is an analysis correction, not a new
+measurement gate or a reason to discard any completed run. Throughput,
+per-call counters and the uniform-O3 P stage sizes remain as recorded.
+No guest, image build or source optimization was started. Implementation
+of the summary correction remains coordinator-owned.
