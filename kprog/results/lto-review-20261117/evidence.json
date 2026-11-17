@@ -1,6 +1,6 @@
 {
-  "recorded_utc": "2026-11-17T01:20:01Z",
-  "review_source_commit": "2bbdda4585158e760cfa4ab5cbf7f1062cde12d9",
+  "recorded_utc": "2026-11-17T02:02:53Z",
+  "review_source_commit": "04cb40e0a84496a8f45f59b198a8f02ce61373b3",
   "typed_unwinder": {
     "blob": "/workspaces/kprog-raw/perf/20261116-inner-array-lto/libbpf/otel-typed.blob",
     "payload_bytes": 30410,
@@ -205,5 +205,37 @@
       }
     ],
     "scope": "Same-load shadow original/native functions; live program-array values may already be native. Code-shape evidence, not a standalone eBPF chain or executed packet comparison."
+  },
+  "entry_wrapper_coverage": {
+    "inventory": "kprog/results/host-link-replay-20261116/emission-report.json",
+    "apps": {
+      "bcc": {
+        "available": 25,
+        "wrapped_prefix": 0
+      },
+      "cilium": {
+        "available": 28,
+        "wrapped_prefix": 0
+      },
+      "katran": {
+        "available": 1,
+        "wrapped_prefix": 0
+      },
+      "otelcol-ebpf-profiler": {
+        "available": 14,
+        "wrapped_prefix": 0
+      },
+      "tetragon": {
+        "available": 2,
+        "wrapped_prefix": 0
+      },
+      "tracee": {
+        "available": 169,
+        "wrapped_prefix": 0
+      }
+    },
+    "positive_fixture": "/workspaces/kprog-raw/perf/20261116-conditional-tail/after-abi/choose.blob",
+    "positive_fixture_prefix_hex": "4883ec08e8090000004883c408e915000000",
+    "scope": "Exact 18-byte entry-wrapper opcode shape only, ignoring call/jump displacements. Historical host emissions; Tetragon coverage is only two programs, not the later CEL-loaded set."
   }
 }

@@ -225,6 +225,33 @@ fault/error behavior, unless a source is actually proven nonfaulting under
 the existing semantics. No kernel/module change or extra runtime check is
 proposed here.
 
+Constant-size implementation detail, 2026-11-17T02:02:53Z: the current read
+routine uses R12 for the destination, R14 for the source, RBX for current
+task/pagefault nesting, R13 for size and R15b for the user SMAP choice.
+With a proven constant size, R13 need not retain a live size across the
+policy callback. A kernel-read variant also has no SMAP flag to preserve.
+Those two roles can disappear together, leaving three saved registers
+instead of five. This is an opportunity in a specialized routine, not a
+claim that the existing variable-size routine can drop its live operands.
+
+Keep nested-call alignment explicit: SysV routine entry has RSP mod16=8;
+five pushes or three pushes align the policy call, but four pushes do not.
+Removing only one save needs another alignment adjustment and can lose the
+expected size/instruction benefit. A user-read variant with dynamic SMAP
+still needs its flag or equivalent lifetime; do not fold it from host CPU
+identity. This is why blindly deleting an apparently unused push is not a
+per-call optimization by itself.
+
+Unrolled loads also need their own existing ABI metadata. The retained
+`mov rax,[rsi]` is three bytes; `mov rax,[rsi+8]` has a displacement and a
+different instruction length. Each LoadSite must retain its actual load
+offset/length and R11 recovery register, rather than copying the loop's
+three-byte record onto every unrolled word. Otherwise the unchanged kernel
+would resume at the wrong byte after a fault. Preserve full-destination
+zeroing and the original error return. No new runtime validation, metadata
+format or fault handler is needed for these constraints. No specialized
+routine was built or timed in this review.
+
 ## 2. Tracee's legacy read helpers get none of the read lowering
 
 `x86_probe_read.rs:155` recognizes only `bpf_probe_read_user`,
@@ -656,6 +683,19 @@ register-only. These observations do not establish a current SIMD or
 red-zone failure; no new ABI check or compiler flag is proposed here.
 
 ## Existing work that should stay, and attribution limits
+
+Entry-wrapper coverage, 2026-11-17T02:02:53Z: another reviewed candidate was
+the 18-byte SysV wrapper at `x86.rs:1080–1102`, used to preserve entry tail
+transfers. In the 239 retained host-emission outputs, its exact opcode
+prefix occurs in zero entries: BCC 0/25, Cilium 0/28, Katran 0/1, OTel 0/14,
+Tracee 0/169 and Tetragon 0/2. The existing conditional-tail `choose.blob`
+fixture does contain that prefix, so the shape being counted is present
+in a real emitted output. Counts and fixture prefix are in evidence.json.
+This does not cover differently encoded wrappers or the later Tetragon CEL
+loads; it is not evidence that tail support is dead. It is a reason to put
+speculative wrapper removal below the read/map/tail-slot findings with
+actual app-code evidence. A wrapper CALL followed by a helper tail jump
+also must not automatically be counted as two helper CALL/RET pairs.
 
 - Shared kernel hash: `x86.rs:1799–1801` uses the shared raw kernel routine;
   `x86.rs:4034–4073` retains null/value/per-CPU/inner-map/LRU postprocessing.

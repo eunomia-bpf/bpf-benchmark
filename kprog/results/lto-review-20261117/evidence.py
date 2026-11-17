@@ -160,6 +160,18 @@ timeline = dict(run=str(tetragon_run), logs={key: str(path) for key, path in tet
                 outside_window_attached=outside_attached,
                 scope='Load/attachment timestamps only, not exact measurement-request times. Hook matches can be nonunique; no equality of exposure or zero-call conclusion.')
 (HERE / 'tetragon-timeline.json').write_text(json.dumps(timeline, indent=2) + '\n')
+emissions = json.loads((REPO / 'kprog/results/host-link-replay-20261116/emission-report.json').read_text())
+wrapper_coverage = collections.defaultdict(lambda: dict(available=0, wrapped_prefix=0))
+for entry in emissions['entries']:
+    command = entry['command']
+    output = Path(command[command.index('--output') + 1])
+    prefix = output.read_bytes()[:18]
+    row = wrapper_coverage[entry['app']]
+    row['available'] += 1
+    row['wrapped_prefix'] += int(prefix.startswith(bytes.fromhex('4883ec08e8'))
+                                  and prefix[9:14] == bytes.fromhex('4883c408e9'))
+wrapper_fixture = Path('/workspaces/kprog-raw/perf/20261116-conditional-tail/after-abi/choose.blob')
+fixture_prefix = wrapper_fixture.read_bytes()[:18]
 result = {
     'recorded_utc': subprocess.check_output(['date', '-u', '+%FT%TZ'], text=True).strip(),
     'review_source_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=REPO, text=True).strip(),
@@ -184,6 +196,11 @@ result = {
     'cilium_tail': {'capture': str(packet), 'boot_id': installed['boot_id'],
                     'programs': tail_programs,
                     'scope': 'Same-load shadow original/native functions; live program-array values may already be native. Code-shape evidence, not a standalone eBPF chain or executed packet comparison.'},
+    'entry_wrapper_coverage': {'inventory': 'kprog/results/host-link-replay-20261116/emission-report.json',
+                                'apps': dict(wrapper_coverage),
+                                'positive_fixture': str(wrapper_fixture),
+                                'positive_fixture_prefix_hex': fixture_prefix.hex(),
+                                'scope': 'Exact 18-byte entry-wrapper opcode shape only, ignoring call/jump displacements. Historical host emissions; Tetragon coverage is only two programs, not the later CEL-loaded set.'},
 }
 (HERE / 'evidence.json').write_text(json.dumps(result, indent=2) + '\n')
 selected = [r for r in ranges if r['piece'] in ('runtime_array', 'probe_read', 'lpm_lookup')]
