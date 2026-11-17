@@ -42,7 +42,7 @@ for name in ['otelcol-ebpf-profiler_profiling', 'bcc_set', 'cilium_agent',
             proof=request['proof'], plan=request['plan'], output=str(folder),
             captured_linker_returncode=request['linker_returncode'], returncode=status)
         c = summaries[request['app']]
-        c.update(requests=1, ok=status==0, failed=status!=0)
+        c.update(requests=1, ok=int(status==0), failed=int(status!=0))
         if status == 0:
             data = (folder/'image.blob').read_bytes()
             previous = capture/'image.blob'

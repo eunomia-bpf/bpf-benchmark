@@ -45,7 +45,7 @@ successful kernel-link requests and 28 successful proof invocations,
 with no archive errors. All 14 supplied probe layouts contain
 `cpu_tlbstate`; each has 16 actual supplied field names. These are request
 counts, not a substitute for installed-program or B/stock totals.
-The remaining apps continue in the background on the same image.
+All six captures subsequently finished successfully at 19:10:00Z.
 
 After capture, `run-replay.sh` queues under batch EX, timing SH and image
 EX, builds the sole canonical host linker, and replays every captured
@@ -53,4 +53,35 @@ kernel request with its actual flags and paired proof/plan. It records
 all failed classes and emitted LTO ranges. Generic zero-tail suffix
 counts are static sharing bounds, not installed-byte or per-call gains.
 The replay does not add missing facts, infer a helper name, or skip failed
-captured requests. Actual replay results remain pending.
+captured requests. The replay finished at 19:10:43Z: **295/295 kernel
+requests emitted successfully**, with no index errors. The source build
+passed in 29.71 seconds. Neither the capture nor the replay built an image.
+
+| App | Captured kernel requests | Current host replay passed | Generic zero tails | Sharing bound bytes |
+| --- | ---: | ---: | ---: | ---: |
+| OTel | 14 | 14 | 12 | 0 |
+| BCC | 25 | 25 | 8 | 0 |
+| Cilium | 47 | 47 | 0 | 0 |
+| Tetragon | 39 | 39 | 75 | 1,548 |
+| Tracee | 169 | 169 | 462 | 11,268 |
+| Katran | 1 | 1 | 0 | 0 |
+
+The current schema limit is resolved by actual captured facts, without
+changing the parser or synthesizing addresses. Requests are fewer than
+installed programs when the loader reuses a neutral template; this is
+not a complete installed-program or B/stock verification census. The
+generic-tail bound counts exact emitted suffixes per request: retain
+one existing 42-byte tail and charge five bytes for each error jump and
+one for its local success RET. Fixed tails and added layout costs remain
+outside that bound. No sharing source change is justified as a route to
+half-size on these figures alone.
+
+Capture raw: `/workspaces/kprog-raw/perf/current-link-capture-20261117/batch-20261117T184952Z-2708492`.
+Replay raw: `/workspaces/kprog-raw/perf/current-link-capture-20261117/replay-20261117T190803Z-2714324`.
+Small per-app indexes and raw corpus JSON are committed; binary captures,
+console, command and per-request output remain in place. Replay receipt
+`7693b6276` retains the actual emitter results. The first summary rendered
+Katran's one success as Python `True`: the forward fix makes counters
+integers and regenerates the summary from the same completed raw result.
+All request return codes and payloads stay unchanged; no emission is
+repeated for this presentation correction.
