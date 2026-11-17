@@ -1,0 +1,962 @@
+{
+  "app": "otelcol-ebpf-profiler/profiling",
+  "guest_returncode": 0,
+  "captures": [
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_php",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0t9jewb9/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0t9jewb9/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0t9jewb9",
+      "proof_bytes": 393480,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "native_tracer_entry",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6pt2hgn7/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6pt2hgn7/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6pt2hgn7",
+      "proof_bytes": 75592,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "tracepoint__sched_process_free",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6xjm60mv/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6xjm60mv/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6xjm60mv",
+      "proof_bytes": 14840,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_perl",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9jgkf4wo/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9jgkf4wo/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9jgkf4wo",
+      "proof_bytes": 421648,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_ruby",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bp1f6lmn/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bp1f6lmn/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bp1f6lmn",
+      "proof_bytes": 551672,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_native",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f2sqjzud/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f2sqjzud/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f2sqjzud",
+      "proof_bytes": 453264,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "read_task_struct",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-gv7scc03/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-gv7scc03/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-gv7scc03",
+      "proof_bytes": 6040,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_v8",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-i74g9gvr/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-i74g9gvr/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-i74g9gvr",
+      "proof_bytes": 438392,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_stop",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-isjxl4cd/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-isjxl4cd/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-isjxl4cd",
+      "proof_bytes": 59328,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_dotnet",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jhlatj24/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jhlatj24/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jhlatj24",
+      "proof_bytes": 507112,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_go_labels",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-miy7mdp6/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-miy7mdp6/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-miy7mdp6",
+      "proof_bytes": 37440,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_python",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pzbgnkhi/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pzbgnkhi/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pzbgnkhi",
+      "proof_bytes": 278024,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_hotspot",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vpdq0hnh/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vpdq0hnh/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vpdq0hnh",
+      "proof_bytes": 429632,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "custom__generic",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-z69ln99l/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-z69ln99l/link-plan.json",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-z69ln99l",
+      "proof_bytes": 63472,
+      "linker_returncode": 0,
+      "kernel_layout_sections": [
+        "array",
+        "lpm",
+        "probe_read"
+      ],
+      "probe_read_fields": [
+        "boot_cpu_data",
+        "cpu_tlbstate",
+        "cred",
+        "current_task",
+        "jiffies",
+        "kernel_helper",
+        "ktime",
+        "pagefault_disabled",
+        "task_flags",
+        "task_mm",
+        "task_personality",
+        "tlb_loaded_mm",
+        "user_helper",
+        "user_ptr_max",
+        "x86_capability",
+        "x86_virt_bits"
+      ]
+    }
+  ],
+  "capture_errors": [],
+  "other_invocations": [
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-04odjlv8",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/0aa3fa2a8dd5a95e.perf.native.o",
+        "--symbol",
+        "perf_unwind_php",
+        "--output",
+        "/tmp/native_kernel_link_cache/880f24e21c583d95.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1l84jg5_",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/735124e7cdd9c2d9.perf.native.o",
+        "--symbol",
+        "perf_unwind_python",
+        "--output",
+        "/tmp/native_kernel_link_cache/e6f1a9ceb84049f1.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-356z_0gy",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/13858c4b66c1a882.perf.native.o",
+        "--symbol",
+        "perf_unwind_perl",
+        "--output",
+        "/tmp/native_kernel_link_cache/0d4283116f660279.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-5bptzcps",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+        "--symbol",
+        "perf_unwind_hotspot",
+        "--output",
+        "/tmp/native_kernel_link_cache/6f7236f7ef66204e.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-5kxru0g2",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+        "--symbol",
+        "tracepoint__sched_process_free",
+        "--output",
+        "/tmp/native_kernel_link_cache/1dc379a2aabeafdf.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6o161jni",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/b621ee0015f5d591.perf.native.o",
+        "--symbol",
+        "perf_unwind_ruby",
+        "--output",
+        "/tmp/native_kernel_link_cache/2e788937979343ee.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7wuqlz68",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+        "--symbol",
+        "perf_unwind_stop",
+        "--output",
+        "/tmp/native_kernel_link_cache/5bbfbf0debcd966c.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-88rs3s05",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+        "--symbol",
+        "perf_unwind_dotnet",
+        "--output",
+        "/tmp/native_kernel_link_cache/be1cf2e4c78be6b8.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8obbm3s5",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/6e44c05c4e5ced22.perf.native.o",
+        "--symbol",
+        "native_tracer_entry",
+        "--output",
+        "/tmp/native_kernel_link_cache/1944f64758ce99c9.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_0jng_wa",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+        "--symbol",
+        "perf_unwind_perl",
+        "--output",
+        "/tmp/native_kernel_link_cache/3b9faff6786f2c65.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-b_t0h1z6",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/dd73c52f20b831d7.perf.native.o",
+        "--symbol",
+        "perf_unwind_dotnet",
+        "--output",
+        "/tmp/native_kernel_link_cache/004787f186762cd5.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bedkngse",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+        "--symbol",
+        "perf_unwind_v8",
+        "--output",
+        "/tmp/native_kernel_link_cache/31f46e3e4fab9bd4.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-codlm708",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/1391c3a21a0e34a1.perf.native.o",
+        "--symbol",
+        "perf_unwind_hotspot",
+        "--output",
+        "/tmp/native_kernel_link_cache/add38095f7fac205.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-d8lw7zl1",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+        "--symbol",
+        "perf_unwind_python",
+        "--output",
+        "/tmp/native_kernel_link_cache/3342b8bdc042af68.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-erwzd_8n",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/a9a7e34fbcd94577.perf.native.o",
+        "--symbol",
+        "perf_unwind_v8",
+        "--output",
+        "/tmp/native_kernel_link_cache/fb38f3ba1af7051b.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-gv10g652",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/ba90cff8bc488683.perf.native.o",
+        "--symbol",
+        "custom__generic",
+        "--output",
+        "/tmp/native_kernel_link_cache/58e3a02fe1ae3f92.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-huoo43vv",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+        "--symbol",
+        "custom__generic",
+        "--output",
+        "/tmp/native_kernel_link_cache/16db9e2a6ea6208d.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-iuay7m_o",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+        "--symbol",
+        "perf_unwind_php",
+        "--output",
+        "/tmp/native_kernel_link_cache/44283b0795637361.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-j91smiou",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/dd972566351e88d3.perf.native.o",
+        "--symbol",
+        "read_task_struct",
+        "--output",
+        "/tmp/native_kernel_link_cache/c4657c2b9edfe8e0.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-juqyg87n",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/8696368e4fa25a92.perf.native.o",
+        "--symbol",
+        "tracepoint__sched_process_free",
+        "--output",
+        "/tmp/native_kernel_link_cache/b054883197ac7cf2.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-le3kmb1f",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/f2acf1f8147ffcde.perf.native.o",
+        "--symbol",
+        "perf_unwind_stop",
+        "--output",
+        "/tmp/native_kernel_link_cache/9a6faabd502cc294.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lfpkoe3t",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+        "--symbol",
+        "perf_unwind_native",
+        "--output",
+        "/tmp/native_kernel_link_cache/ff86687175408a79.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mngow3ec",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+        "--symbol",
+        "read_task_struct",
+        "--output",
+        "/tmp/native_kernel_link_cache/4cc30cb17999c99e.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-of5gt004",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+        "--symbol",
+        "perf_unwind_ruby",
+        "--output",
+        "/tmp/native_kernel_link_cache/4ae343079a1bdec4.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-q4tg7auw",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/68fe553c6cbe96bf.perf.native.o",
+        "--symbol",
+        "perf_go_labels",
+        "--output",
+        "/tmp/native_kernel_link_cache/80e1cbd5676b774e.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qbyk3p7i",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+        "--symbol",
+        "native_tracer_entry",
+        "--output",
+        "/tmp/native_kernel_link_cache/9054dba21d907651.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ux3_ia5d",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+        "--symbol",
+        "perf_go_labels",
+        "--output",
+        "/tmp/native_kernel_link_cache/b4844b226330c444.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    },
+    {
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uyiqnnnm",
+      "mode": "proof",
+      "argv": [
+        "--input",
+        "/tmp/native_kernel_link_cache/0513859b04c054f8.perf.native.o",
+        "--symbol",
+        "perf_unwind_native",
+        "--output",
+        "/tmp/native_kernel_link_cache/945c222c3209eff8.entry.proof.o.tmp.1918",
+        "--mode",
+        "proof"
+      ],
+      "returncode": 0,
+      "outputs": [
+        "image.blob"
+      ]
+    }
+  ],
+  "scope": "Actual new kernel-link requests, including linker failures, archived by the capture adapter. No helper/layout facts are added. Missing/failed loads remain in the guest and shim logs; an empty capture list does not imply no native work. Functional capture, not official timing."
+}
