@@ -3,7 +3,9 @@
 #include <bpf/btf.h>
 #include <cstdint>
 #include <cstring>
+#include <initializer_list>
 #include <ostream>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 
@@ -14,7 +16,8 @@ namespace native_lto {
 inline constexpr const char *kernel_symbols[] = {
     "bpf_probe_read_user", "bpf_probe_read_kernel", "cpu_tlbstate",
     "const_current_task", "USER_PTR_MAX", "boot_cpu_data",
-    "ktime_get_mono_fast_ns",
+    "ktime_get_mono_fast_ns", "tk_fast_mono", "kvm_clock", "__preempt_count", "hv_clock_per_cpu", "valid_flags",
+    "__SCT__preempt_schedule_notrace",
 };
 
 inline const btf_type *type(const btf *types, uint32_t id)
@@ -89,6 +92,30 @@ inline uint32_t relative(const btf *types, const char *parent, const char *name,
     return result - base;
 }
 
+inline uint32_t path_offset(const btf *types, const char *parent, std::initializer_list<const char *> names)
+{
+    const btf_type *current = structure(types, parent);
+    uint32_t total = 0;
+    for (const char *name : names) {
+        Member found{};
+        if (!member(types, current, name, found))
+            throw std::runtime_error(std::string("LTO BTF: missing field ") + parent + "." + name);
+        total += found.offset;
+        int id = btf__resolve_type(types, found.type_id);
+        if (id < 0) throw std::runtime_error(std::string("LTO BTF: invalid member type ") + name);
+        current = type(types, id);
+    }
+    return total;
+}
+
+inline uint32_t struct_size(const btf *types, const char *name)
+{
+    int id = btf__find_by_name_kind(types, name, BTF_KIND_STRUCT);
+    long size = id < 0 ? -1 : btf__resolve_size(types, id);
+    if (size <= 0) throw std::runtime_error(std::string("LTO BTF: missing struct ") + name);
+    return static_cast<uint32_t>(size);
+}
+
 inline int map_type(const btf *types, const char *wanted)
 {
     int id = btf__find_by_name_kind(types, "bpf_map_type", BTF_KIND_ENUM);
@@ -145,7 +172,45 @@ inline void write_layout(std::ostream &out, const btf *types, Resolver resolve)
         << ",\"tlb_loaded_mm\":" << offset(types, "tlb_state", "loaded_mm")
         << ",\"task_mm\":" << offset(types, "task_struct", "mm")
         << ",\"task_flags\":" << offset(types, "task_struct", "thread_info") + offset(types, "thread_info", "flags")
-        << ",\"task_personality\":" << offset(types, "task_struct", "personality", true) << "}}";
+        << ",\"task_personality\":" << offset(types, "task_struct", "personality", true);
+    // Fast-clock facts for bpf_ktime_get_ns (ktime_get_mono_fast_ns with the kvm-clock read inline). A boot
+    // that lacks any of them leaves the object out, and the linker keeps the direct call.
+    try {
+        uint64_t tk = resolve("tk_fast_mono"), kvm = resolve("kvm_clock"), preempt = resolve("__preempt_count"),
+                 hv = resolve("hv_clock_per_cpu"), valid = resolve("valid_flags"),
+                 resched = resolve("__SCT__preempt_schedule_notrace");
+        if (tk && kvm && preempt && hv && valid && resched) {
+            std::ostringstream k;
+            k << ",\"ktime\":{\"tk_fast_mono\":" << tk
+              << ",\"seq\":" << path_offset(types, "tk_fast", {"seq", "seqcount", "sequence"})
+              << ",\"base\":" << offset(types, "tk_fast", "base")
+              << ",\"tkr_size\":" << struct_size(types, "tk_read_base")
+              << ",\"tkr_clock\":" << offset(types, "tk_read_base", "clock")
+              << ",\"tkr_mask\":" << offset(types, "tk_read_base", "mask")
+              << ",\"tkr_cycle_last\":" << offset(types, "tk_read_base", "cycle_last")
+              << ",\"tkr_mult\":" << offset(types, "tk_read_base", "mult", true)
+              << ",\"tkr_shift\":" << offset(types, "tk_read_base", "shift", true)
+              << ",\"tkr_xtime_nsec\":" << offset(types, "tk_read_base", "xtime_nsec")
+              << ",\"tkr_base\":" << offset(types, "tk_read_base", "base")
+              << ",\"max_cycles\":" << offset(types, "clocksource", "max_cycles")
+              << ",\"kvm_clock\":" << kvm
+              << ",\"preempt_count\":" << preempt
+              << ",\"hv_clock_per_cpu\":" << hv
+              << ",\"pvti\":" << offset(types, "pvclock_vsyscall_time_info", "pvti")
+              << ",\"pv_version\":" << offset(types, "pvclock_vcpu_time_info", "version", true)
+              << ",\"pv_tsc_timestamp\":" << offset(types, "pvclock_vcpu_time_info", "tsc_timestamp")
+              << ",\"pv_system_time\":" << offset(types, "pvclock_vcpu_time_info", "system_time")
+              << ",\"pv_mul\":" << offset(types, "pvclock_vcpu_time_info", "tsc_to_system_mul", true)
+              << ",\"pv_tsc_shift\":" << offset(types, "pvclock_vcpu_time_info", "tsc_shift")
+              << ",\"pv_flags\":" << offset(types, "pvclock_vcpu_time_info", "flags")
+              << ",\"valid_flags\":" << valid
+              << ",\"preempt_schedule_notrace\":" << resched
+              << "}";
+            out << k.str();
+        }
+    } catch (const std::runtime_error &) {
+    }
+    out << "}}";
     if (!out) throw std::runtime_error("write kernel LTO layout");
 }
 

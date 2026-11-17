@@ -199,6 +199,37 @@ struct RuntimeProbeReadLayout {
     x86_virt_bits: u32,
     task_flags: u32,
     task_personality: u32,
+    /// Fast-clock facts for bpf_ktime_get_ns; a boot without them keeps the direct call.
+    #[serde(default)]
+    ktime: Option<RuntimeKtimeLayout>,
+}
+
+#[derive(Debug, Deserialize)]
+struct RuntimeKtimeLayout {
+    tk_fast_mono: u64,
+    seq: u32,
+    base: u32,
+    tkr_size: u32,
+    tkr_clock: u32,
+    tkr_mask: u32,
+    tkr_cycle_last: u32,
+    tkr_mult: u32,
+    tkr_shift: u32,
+    tkr_xtime_nsec: u32,
+    tkr_base: u32,
+    max_cycles: u32,
+    kvm_clock: u64,
+    preempt_count: u64,
+    hv_clock_per_cpu: u64,
+    pvti: u32,
+    pv_version: u32,
+    pv_tsc_timestamp: u32,
+    pv_system_time: u32,
+    pv_mul: u32,
+    pv_tsc_shift: u32,
+    pv_flags: u32,
+    valid_flags: u64,
+    preempt_schedule_notrace: u64,
 }
 
 #[derive(Debug, Deserialize)]

@@ -341,7 +341,7 @@ mod tests {
         RuntimeProbeReadLayout { user_helper:0x1000,kernel_helper:0x2000,
             current_task:0,
             user_ptr_max:0x1111222233334444,boot_cpu_data:0x5555666677778888,
-            pagefault_disabled:4,x86_capability:0,task_flags:0,task_personality:16,
+            pagefault_disabled:4,x86_capability:0,task_flags:0,task_personality:16,ktime:None,
             cpu_tlbstate:8,tlb_loaded_mm:0,task_mm:8,x86_virt_bits:40 }
     }
 

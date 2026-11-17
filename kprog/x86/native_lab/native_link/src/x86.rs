@@ -54,6 +54,8 @@ mod known_maps;
 mod runtime_array;
 #[path = "x86_probe_read.rs"]
 mod probe_read;
+#[path = "x86_ktime.rs"]
+mod ktime;
 #[path = "x86_lpm_lookup.rs"]
 mod lpm_lookup;
 
@@ -1812,6 +1814,16 @@ pub(super) fn rewrite_x86(
         code_ranges.extend(ranges);
         sites
     } else { Vec::new() };
+
+    // bpf_ktime_get_ns calls, bound to ktime_get_mono_fast_ns, reach one shared fast-clock leaf.
+    if let Some(layout) = runtime_probe_read_layout.and_then(|l| l.ktime.as_ref()).filter(|_| !proof_mode) {
+        if let Some(&mono_fast) = helper_addrs.get(MONO_FAST_HELPER_KEY) {
+            if let Some(range) = ktime::share(&mut blob, &mut relocs, layout, mono_fast)? {
+                show_lto_range(show, "ktime", range);
+                code_ranges.push(range);
+            }
+        }
+    }
 
     if let Some(layout)=runtime_lpm_layout.filter(|_| !proof_mode) {
         if let Some(range)=lpm_lookup::share(&mut blob,&mut relocs,layout,map_lookup_helper_addr)? {
