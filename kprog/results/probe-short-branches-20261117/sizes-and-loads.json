@@ -1,0 +1,1442 @@
+[
+  {
+    "name": "compat-string",
+    "before_bytes": 765,
+    "after_bytes": 647,
+    "bytes_saved": 118,
+    "loads": 3,
+    "load_offsets_before": [
+      137,
+      392,
+      526
+    ],
+    "load_offsets_after": [
+      129,
+      338,
+      450
+    ]
+  },
+  {
+    "name": "compat",
+    "before_bytes": 819,
+    "after_bytes": 679,
+    "bytes_saved": 140,
+    "loads": 8,
+    "load_offsets_before": [
+      135,
+      187,
+      220,
+      254,
+      490,
+      542,
+      575,
+      609
+    ],
+    "load_offsets_after": [
+      131,
+      167,
+      192,
+      218,
+      416,
+      452,
+      477,
+      503
+    ]
+  },
+  {
+    "name": "kernel-compact",
+    "before_bytes": 351,
+    "after_bytes": 285,
+    "bytes_saved": 66,
+    "loads": 4,
+    "load_offsets_before": [
+      118,
+      170,
+      203,
+      237
+    ],
+    "load_offsets_after": [
+      114,
+      150,
+      175,
+      201
+    ]
+  },
+  {
+    "name": "kernel-fixed-0-compact",
+    "before_bytes": 206,
+    "after_bytes": 168,
+    "bytes_saved": 38,
+    "loads": 0,
+    "load_offsets_before": [],
+    "load_offsets_after": []
+  },
+  {
+    "name": "kernel-fixed-0",
+    "before_bytes": 217,
+    "after_bytes": 179,
+    "bytes_saved": 38,
+    "loads": 0,
+    "load_offsets_before": [],
+    "load_offsets_after": []
+  },
+  {
+    "name": "kernel-fixed-1-compact",
+    "before_bytes": 220,
+    "after_bytes": 178,
+    "bytes_saved": 42,
+    "loads": 1,
+    "load_offsets_before": [
+      106
+    ],
+    "load_offsets_after": [
+      94
+    ]
+  },
+  {
+    "name": "kernel-fixed-1",
+    "before_bytes": 231,
+    "after_bytes": 189,
+    "bytes_saved": 42,
+    "loads": 1,
+    "load_offsets_before": [
+      117
+    ],
+    "load_offsets_after": [
+      105
+    ]
+  },
+  {
+    "name": "kernel-fixed-1024-compact",
+    "before_bytes": 242,
+    "after_bytes": 196,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      111
+    ],
+    "load_offsets_after": [
+      99
+    ]
+  },
+  {
+    "name": "kernel-fixed-1024",
+    "before_bytes": 253,
+    "after_bytes": 211,
+    "bytes_saved": 42,
+    "loads": 1,
+    "load_offsets_before": [
+      122
+    ],
+    "load_offsets_after": [
+      114
+    ]
+  },
+  {
+    "name": "kernel-fixed-144-compact",
+    "before_bytes": 242,
+    "after_bytes": 196,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      111
+    ],
+    "load_offsets_after": [
+      99
+    ]
+  },
+  {
+    "name": "kernel-fixed-144",
+    "before_bytes": 253,
+    "after_bytes": 211,
+    "bytes_saved": 42,
+    "loads": 1,
+    "load_offsets_before": [
+      122
+    ],
+    "load_offsets_after": [
+      114
+    ]
+  },
+  {
+    "name": "kernel-fixed-15-compact",
+    "before_bytes": 287,
+    "after_bytes": 241,
+    "bytes_saved": 46,
+    "loads": 4,
+    "load_offsets_before": [
+      106,
+      129,
+      150,
+      173
+    ],
+    "load_offsets_after": [
+      102,
+      121,
+      138,
+      157
+    ]
+  },
+  {
+    "name": "kernel-fixed-15",
+    "before_bytes": 298,
+    "after_bytes": 252,
+    "bytes_saved": 46,
+    "loads": 4,
+    "load_offsets_before": [
+      117,
+      140,
+      161,
+      184
+    ],
+    "load_offsets_after": [
+      113,
+      132,
+      149,
+      168
+    ]
+  },
+  {
+    "name": "kernel-fixed-16-compact",
+    "before_bytes": 242,
+    "after_bytes": 196,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      111
+    ],
+    "load_offsets_after": [
+      99
+    ]
+  },
+  {
+    "name": "kernel-fixed-16",
+    "before_bytes": 253,
+    "after_bytes": 211,
+    "bytes_saved": 42,
+    "loads": 1,
+    "load_offsets_before": [
+      122
+    ],
+    "load_offsets_after": [
+      114
+    ]
+  },
+  {
+    "name": "kernel-fixed-17-compact",
+    "before_bytes": 256,
+    "after_bytes": 210,
+    "bytes_saved": 46,
+    "loads": 2,
+    "load_offsets_before": [
+      111,
+      142
+    ],
+    "load_offsets_after": [
+      103,
+      126
+    ]
+  },
+  {
+    "name": "kernel-fixed-17",
+    "before_bytes": 267,
+    "after_bytes": 221,
+    "bytes_saved": 46,
+    "loads": 2,
+    "load_offsets_before": [
+      122,
+      153
+    ],
+    "load_offsets_after": [
+      114,
+      137
+    ]
+  },
+  {
+    "name": "kernel-fixed-2-compact",
+    "before_bytes": 221,
+    "after_bytes": 179,
+    "bytes_saved": 42,
+    "loads": 1,
+    "load_offsets_before": [
+      106
+    ],
+    "load_offsets_after": [
+      94
+    ]
+  },
+  {
+    "name": "kernel-fixed-2",
+    "before_bytes": 232,
+    "after_bytes": 190,
+    "bytes_saved": 42,
+    "loads": 1,
+    "load_offsets_before": [
+      117
+    ],
+    "load_offsets_after": [
+      105
+    ]
+  },
+  {
+    "name": "kernel-fixed-257-compact",
+    "before_bytes": 256,
+    "after_bytes": 210,
+    "bytes_saved": 46,
+    "loads": 2,
+    "load_offsets_before": [
+      111,
+      142
+    ],
+    "load_offsets_after": [
+      103,
+      126
+    ]
+  },
+  {
+    "name": "kernel-fixed-257",
+    "before_bytes": 267,
+    "after_bytes": 221,
+    "bytes_saved": 46,
+    "loads": 2,
+    "load_offsets_before": [
+      122,
+      153
+    ],
+    "load_offsets_after": [
+      114,
+      137
+    ]
+  },
+  {
+    "name": "kernel-fixed-3-compact",
+    "before_bytes": 243,
+    "after_bytes": 197,
+    "bytes_saved": 46,
+    "loads": 2,
+    "load_offsets_before": [
+      106,
+      129
+    ],
+    "load_offsets_after": [
+      94,
+      113
+    ]
+  },
+  {
+    "name": "kernel-fixed-3",
+    "before_bytes": 254,
+    "after_bytes": 212,
+    "bytes_saved": 42,
+    "loads": 2,
+    "load_offsets_before": [
+      117,
+      140
+    ],
+    "load_offsets_after": [
+      109,
+      128
+    ]
+  },
+  {
+    "name": "kernel-fixed-31-compact",
+    "before_bytes": 300,
+    "after_bytes": 254,
+    "bytes_saved": 46,
+    "loads": 4,
+    "load_offsets_before": [
+      111,
+      142,
+      163,
+      186
+    ],
+    "load_offsets_after": [
+      111,
+      134,
+      151,
+      170
+    ]
+  },
+  {
+    "name": "kernel-fixed-31",
+    "before_bytes": 311,
+    "after_bytes": 265,
+    "bytes_saved": 46,
+    "loads": 4,
+    "load_offsets_before": [
+      122,
+      153,
+      174,
+      197
+    ],
+    "load_offsets_after": [
+      122,
+      145,
+      162,
+      181
+    ]
+  },
+  {
+    "name": "kernel-fixed-32-compact",
+    "before_bytes": 242,
+    "after_bytes": 196,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      111
+    ],
+    "load_offsets_after": [
+      99
+    ]
+  },
+  {
+    "name": "kernel-fixed-32",
+    "before_bytes": 253,
+    "after_bytes": 211,
+    "bytes_saved": 42,
+    "loads": 1,
+    "load_offsets_before": [
+      122
+    ],
+    "load_offsets_after": [
+      114
+    ]
+  },
+  {
+    "name": "kernel-fixed-33-compact",
+    "before_bytes": 256,
+    "after_bytes": 210,
+    "bytes_saved": 46,
+    "loads": 2,
+    "load_offsets_before": [
+      111,
+      142
+    ],
+    "load_offsets_after": [
+      103,
+      126
+    ]
+  },
+  {
+    "name": "kernel-fixed-33",
+    "before_bytes": 267,
+    "after_bytes": 221,
+    "bytes_saved": 46,
+    "loads": 2,
+    "load_offsets_before": [
+      122,
+      153
+    ],
+    "load_offsets_after": [
+      114,
+      137
+    ]
+  },
+  {
+    "name": "kernel-fixed-4-compact",
+    "before_bytes": 219,
+    "after_bytes": 177,
+    "bytes_saved": 42,
+    "loads": 1,
+    "load_offsets_before": [
+      106
+    ],
+    "load_offsets_after": [
+      94
+    ]
+  },
+  {
+    "name": "kernel-fixed-4",
+    "before_bytes": 230,
+    "after_bytes": 188,
+    "bytes_saved": 42,
+    "loads": 1,
+    "load_offsets_before": [
+      117
+    ],
+    "load_offsets_after": [
+      105
+    ]
+  },
+  {
+    "name": "kernel-fixed-512-compact",
+    "before_bytes": 242,
+    "after_bytes": 196,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      111
+    ],
+    "load_offsets_after": [
+      99
+    ]
+  },
+  {
+    "name": "kernel-fixed-512",
+    "before_bytes": 253,
+    "after_bytes": 211,
+    "bytes_saved": 42,
+    "loads": 1,
+    "load_offsets_before": [
+      122
+    ],
+    "load_offsets_after": [
+      114
+    ]
+  },
+  {
+    "name": "kernel-fixed-63-compact",
+    "before_bytes": 300,
+    "after_bytes": 254,
+    "bytes_saved": 46,
+    "loads": 4,
+    "load_offsets_before": [
+      111,
+      142,
+      163,
+      186
+    ],
+    "load_offsets_after": [
+      111,
+      134,
+      151,
+      170
+    ]
+  },
+  {
+    "name": "kernel-fixed-63",
+    "before_bytes": 311,
+    "after_bytes": 265,
+    "bytes_saved": 46,
+    "loads": 4,
+    "load_offsets_before": [
+      122,
+      153,
+      174,
+      197
+    ],
+    "load_offsets_after": [
+      122,
+      145,
+      162,
+      181
+    ]
+  },
+  {
+    "name": "kernel-fixed-64-compact",
+    "before_bytes": 242,
+    "after_bytes": 196,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      111
+    ],
+    "load_offsets_after": [
+      99
+    ]
+  },
+  {
+    "name": "kernel-fixed-64",
+    "before_bytes": 253,
+    "after_bytes": 211,
+    "bytes_saved": 42,
+    "loads": 1,
+    "load_offsets_before": [
+      122
+    ],
+    "load_offsets_after": [
+      114
+    ]
+  },
+  {
+    "name": "kernel-fixed-65-compact",
+    "before_bytes": 256,
+    "after_bytes": 210,
+    "bytes_saved": 46,
+    "loads": 2,
+    "load_offsets_before": [
+      111,
+      142
+    ],
+    "load_offsets_after": [
+      103,
+      126
+    ]
+  },
+  {
+    "name": "kernel-fixed-65",
+    "before_bytes": 267,
+    "after_bytes": 221,
+    "bytes_saved": 46,
+    "loads": 2,
+    "load_offsets_before": [
+      122,
+      153
+    ],
+    "load_offsets_after": [
+      114,
+      137
+    ]
+  },
+  {
+    "name": "kernel-fixed-7-compact",
+    "before_bytes": 264,
+    "after_bytes": 218,
+    "bytes_saved": 46,
+    "loads": 3,
+    "load_offsets_before": [
+      106,
+      127,
+      150
+    ],
+    "load_offsets_after": [
+      98,
+      115,
+      134
+    ]
+  },
+  {
+    "name": "kernel-fixed-7",
+    "before_bytes": 275,
+    "after_bytes": 233,
+    "bytes_saved": 42,
+    "loads": 3,
+    "load_offsets_before": [
+      117,
+      138,
+      161
+    ],
+    "load_offsets_after": [
+      113,
+      130,
+      149
+    ]
+  },
+  {
+    "name": "kernel-fixed-768-compact",
+    "before_bytes": 242,
+    "after_bytes": 196,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      111
+    ],
+    "load_offsets_after": [
+      99
+    ]
+  },
+  {
+    "name": "kernel-fixed-768",
+    "before_bytes": 253,
+    "after_bytes": 211,
+    "bytes_saved": 42,
+    "loads": 1,
+    "load_offsets_before": [
+      122
+    ],
+    "load_offsets_after": [
+      114
+    ]
+  },
+  {
+    "name": "kernel-fixed-8-compact",
+    "before_bytes": 221,
+    "after_bytes": 179,
+    "bytes_saved": 42,
+    "loads": 1,
+    "load_offsets_before": [
+      106
+    ],
+    "load_offsets_after": [
+      94
+    ]
+  },
+  {
+    "name": "kernel-fixed-8",
+    "before_bytes": 232,
+    "after_bytes": 190,
+    "bytes_saved": 42,
+    "loads": 1,
+    "load_offsets_before": [
+      117
+    ],
+    "load_offsets_after": [
+      105
+    ]
+  },
+  {
+    "name": "kernel-fixed-9-compact",
+    "before_bytes": 243,
+    "after_bytes": 197,
+    "bytes_saved": 46,
+    "loads": 2,
+    "load_offsets_before": [
+      106,
+      129
+    ],
+    "load_offsets_after": [
+      94,
+      113
+    ]
+  },
+  {
+    "name": "kernel-fixed-9",
+    "before_bytes": 254,
+    "after_bytes": 212,
+    "bytes_saved": 42,
+    "loads": 2,
+    "load_offsets_before": [
+      117,
+      140
+    ],
+    "load_offsets_after": [
+      109,
+      128
+    ]
+  },
+  {
+    "name": "kernel-string-compact",
+    "before_bytes": 267,
+    "after_bytes": 221,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      120
+    ],
+    "load_offsets_after": [
+      112
+    ]
+  },
+  {
+    "name": "kernel-string",
+    "before_bytes": 278,
+    "after_bytes": 232,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      131
+    ],
+    "load_offsets_after": [
+      123
+    ]
+  },
+  {
+    "name": "kernel",
+    "before_bytes": 362,
+    "after_bytes": 296,
+    "bytes_saved": 66,
+    "loads": 4,
+    "load_offsets_before": [
+      129,
+      181,
+      214,
+      248
+    ],
+    "load_offsets_after": [
+      125,
+      161,
+      186,
+      212
+    ]
+  },
+  {
+    "name": "user-compact",
+    "before_bytes": 355,
+    "after_bytes": 281,
+    "bytes_saved": 74,
+    "loads": 4,
+    "load_offsets_before": [
+      111,
+      163,
+      196,
+      230
+    ],
+    "load_offsets_after": [
+      103,
+      139,
+      164,
+      190
+    ]
+  },
+  {
+    "name": "user-fixed-0-compact",
+    "before_bytes": 210,
+    "after_bytes": 168,
+    "bytes_saved": 42,
+    "loads": 0,
+    "load_offsets_before": [],
+    "load_offsets_after": []
+  },
+  {
+    "name": "user-fixed-0",
+    "before_bytes": 221,
+    "after_bytes": 179,
+    "bytes_saved": 42,
+    "loads": 0,
+    "load_offsets_before": [],
+    "load_offsets_after": []
+  },
+  {
+    "name": "user-fixed-1-compact",
+    "before_bytes": 224,
+    "after_bytes": 178,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      99
+    ],
+    "load_offsets_after": [
+      87
+    ]
+  },
+  {
+    "name": "user-fixed-1",
+    "before_bytes": 235,
+    "after_bytes": 189,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      110
+    ],
+    "load_offsets_after": [
+      98
+    ]
+  },
+  {
+    "name": "user-fixed-1024-compact",
+    "before_bytes": 246,
+    "after_bytes": 200,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      104
+    ],
+    "load_offsets_after": [
+      96
+    ]
+  },
+  {
+    "name": "user-fixed-1024",
+    "before_bytes": 257,
+    "after_bytes": 211,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      115
+    ],
+    "load_offsets_after": [
+      107
+    ]
+  },
+  {
+    "name": "user-fixed-144-compact",
+    "before_bytes": 246,
+    "after_bytes": 200,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      104
+    ],
+    "load_offsets_after": [
+      96
+    ]
+  },
+  {
+    "name": "user-fixed-144",
+    "before_bytes": 257,
+    "after_bytes": 211,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      115
+    ],
+    "load_offsets_after": [
+      107
+    ]
+  },
+  {
+    "name": "user-fixed-15-compact",
+    "before_bytes": 291,
+    "after_bytes": 241,
+    "bytes_saved": 50,
+    "loads": 4,
+    "load_offsets_before": [
+      99,
+      122,
+      143,
+      166
+    ],
+    "load_offsets_after": [
+      95,
+      114,
+      131,
+      150
+    ]
+  },
+  {
+    "name": "user-fixed-15",
+    "before_bytes": 302,
+    "after_bytes": 252,
+    "bytes_saved": 50,
+    "loads": 4,
+    "load_offsets_before": [
+      110,
+      133,
+      154,
+      177
+    ],
+    "load_offsets_after": [
+      106,
+      125,
+      142,
+      161
+    ]
+  },
+  {
+    "name": "user-fixed-16-compact",
+    "before_bytes": 246,
+    "after_bytes": 200,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      104
+    ],
+    "load_offsets_after": [
+      96
+    ]
+  },
+  {
+    "name": "user-fixed-16",
+    "before_bytes": 257,
+    "after_bytes": 211,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      115
+    ],
+    "load_offsets_after": [
+      107
+    ]
+  },
+  {
+    "name": "user-fixed-17-compact",
+    "before_bytes": 260,
+    "after_bytes": 210,
+    "bytes_saved": 50,
+    "loads": 2,
+    "load_offsets_before": [
+      104,
+      135
+    ],
+    "load_offsets_after": [
+      96,
+      119
+    ]
+  },
+  {
+    "name": "user-fixed-17",
+    "before_bytes": 271,
+    "after_bytes": 221,
+    "bytes_saved": 50,
+    "loads": 2,
+    "load_offsets_before": [
+      115,
+      146
+    ],
+    "load_offsets_after": [
+      107,
+      130
+    ]
+  },
+  {
+    "name": "user-fixed-2-compact",
+    "before_bytes": 225,
+    "after_bytes": 179,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      99
+    ],
+    "load_offsets_after": [
+      87
+    ]
+  },
+  {
+    "name": "user-fixed-2",
+    "before_bytes": 236,
+    "after_bytes": 190,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      110
+    ],
+    "load_offsets_after": [
+      98
+    ]
+  },
+  {
+    "name": "user-fixed-257-compact",
+    "before_bytes": 260,
+    "after_bytes": 210,
+    "bytes_saved": 50,
+    "loads": 2,
+    "load_offsets_before": [
+      104,
+      135
+    ],
+    "load_offsets_after": [
+      96,
+      119
+    ]
+  },
+  {
+    "name": "user-fixed-257",
+    "before_bytes": 271,
+    "after_bytes": 221,
+    "bytes_saved": 50,
+    "loads": 2,
+    "load_offsets_before": [
+      115,
+      146
+    ],
+    "load_offsets_after": [
+      107,
+      130
+    ]
+  },
+  {
+    "name": "user-fixed-3-compact",
+    "before_bytes": 247,
+    "after_bytes": 201,
+    "bytes_saved": 46,
+    "loads": 2,
+    "load_offsets_before": [
+      99,
+      122
+    ],
+    "load_offsets_after": [
+      91,
+      110
+    ]
+  },
+  {
+    "name": "user-fixed-3",
+    "before_bytes": 258,
+    "after_bytes": 212,
+    "bytes_saved": 46,
+    "loads": 2,
+    "load_offsets_before": [
+      110,
+      133
+    ],
+    "load_offsets_after": [
+      102,
+      121
+    ]
+  },
+  {
+    "name": "user-fixed-31-compact",
+    "before_bytes": 304,
+    "after_bytes": 250,
+    "bytes_saved": 54,
+    "loads": 4,
+    "load_offsets_before": [
+      104,
+      135,
+      156,
+      179
+    ],
+    "load_offsets_after": [
+      100,
+      123,
+      140,
+      159
+    ]
+  },
+  {
+    "name": "user-fixed-31",
+    "before_bytes": 315,
+    "after_bytes": 261,
+    "bytes_saved": 54,
+    "loads": 4,
+    "load_offsets_before": [
+      115,
+      146,
+      167,
+      190
+    ],
+    "load_offsets_after": [
+      111,
+      134,
+      151,
+      170
+    ]
+  },
+  {
+    "name": "user-fixed-32-compact",
+    "before_bytes": 246,
+    "after_bytes": 200,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      104
+    ],
+    "load_offsets_after": [
+      96
+    ]
+  },
+  {
+    "name": "user-fixed-32",
+    "before_bytes": 257,
+    "after_bytes": 211,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      115
+    ],
+    "load_offsets_after": [
+      107
+    ]
+  },
+  {
+    "name": "user-fixed-33-compact",
+    "before_bytes": 260,
+    "after_bytes": 210,
+    "bytes_saved": 50,
+    "loads": 2,
+    "load_offsets_before": [
+      104,
+      135
+    ],
+    "load_offsets_after": [
+      96,
+      119
+    ]
+  },
+  {
+    "name": "user-fixed-33",
+    "before_bytes": 271,
+    "after_bytes": 221,
+    "bytes_saved": 50,
+    "loads": 2,
+    "load_offsets_before": [
+      115,
+      146
+    ],
+    "load_offsets_after": [
+      107,
+      130
+    ]
+  },
+  {
+    "name": "user-fixed-4-compact",
+    "before_bytes": 223,
+    "after_bytes": 177,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      99
+    ],
+    "load_offsets_after": [
+      87
+    ]
+  },
+  {
+    "name": "user-fixed-4",
+    "before_bytes": 234,
+    "after_bytes": 188,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      110
+    ],
+    "load_offsets_after": [
+      98
+    ]
+  },
+  {
+    "name": "user-fixed-512-compact",
+    "before_bytes": 246,
+    "after_bytes": 200,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      104
+    ],
+    "load_offsets_after": [
+      96
+    ]
+  },
+  {
+    "name": "user-fixed-512",
+    "before_bytes": 257,
+    "after_bytes": 211,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      115
+    ],
+    "load_offsets_after": [
+      107
+    ]
+  },
+  {
+    "name": "user-fixed-63-compact",
+    "before_bytes": 304,
+    "after_bytes": 250,
+    "bytes_saved": 54,
+    "loads": 4,
+    "load_offsets_before": [
+      104,
+      135,
+      156,
+      179
+    ],
+    "load_offsets_after": [
+      100,
+      123,
+      140,
+      159
+    ]
+  },
+  {
+    "name": "user-fixed-63",
+    "before_bytes": 315,
+    "after_bytes": 261,
+    "bytes_saved": 54,
+    "loads": 4,
+    "load_offsets_before": [
+      115,
+      146,
+      167,
+      190
+    ],
+    "load_offsets_after": [
+      111,
+      134,
+      151,
+      170
+    ]
+  },
+  {
+    "name": "user-fixed-64-compact",
+    "before_bytes": 246,
+    "after_bytes": 200,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      104
+    ],
+    "load_offsets_after": [
+      96
+    ]
+  },
+  {
+    "name": "user-fixed-64",
+    "before_bytes": 257,
+    "after_bytes": 211,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      115
+    ],
+    "load_offsets_after": [
+      107
+    ]
+  },
+  {
+    "name": "user-fixed-65-compact",
+    "before_bytes": 260,
+    "after_bytes": 210,
+    "bytes_saved": 50,
+    "loads": 2,
+    "load_offsets_before": [
+      104,
+      135
+    ],
+    "load_offsets_after": [
+      96,
+      119
+    ]
+  },
+  {
+    "name": "user-fixed-65",
+    "before_bytes": 271,
+    "after_bytes": 221,
+    "bytes_saved": 50,
+    "loads": 2,
+    "load_offsets_before": [
+      115,
+      146
+    ],
+    "load_offsets_after": [
+      107,
+      130
+    ]
+  },
+  {
+    "name": "user-fixed-7-compact",
+    "before_bytes": 268,
+    "after_bytes": 218,
+    "bytes_saved": 50,
+    "loads": 3,
+    "load_offsets_before": [
+      99,
+      120,
+      143
+    ],
+    "load_offsets_after": [
+      91,
+      108,
+      127
+    ]
+  },
+  {
+    "name": "user-fixed-7",
+    "before_bytes": 279,
+    "after_bytes": 229,
+    "bytes_saved": 50,
+    "loads": 3,
+    "load_offsets_before": [
+      110,
+      131,
+      154
+    ],
+    "load_offsets_after": [
+      102,
+      119,
+      138
+    ]
+  },
+  {
+    "name": "user-fixed-768-compact",
+    "before_bytes": 246,
+    "after_bytes": 200,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      104
+    ],
+    "load_offsets_after": [
+      96
+    ]
+  },
+  {
+    "name": "user-fixed-768",
+    "before_bytes": 257,
+    "after_bytes": 211,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      115
+    ],
+    "load_offsets_after": [
+      107
+    ]
+  },
+  {
+    "name": "user-fixed-8-compact",
+    "before_bytes": 225,
+    "after_bytes": 179,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      99
+    ],
+    "load_offsets_after": [
+      87
+    ]
+  },
+  {
+    "name": "user-fixed-8",
+    "before_bytes": 236,
+    "after_bytes": 190,
+    "bytes_saved": 46,
+    "loads": 1,
+    "load_offsets_before": [
+      110
+    ],
+    "load_offsets_after": [
+      98
+    ]
+  },
+  {
+    "name": "user-fixed-9-compact",
+    "before_bytes": 247,
+    "after_bytes": 201,
+    "bytes_saved": 46,
+    "loads": 2,
+    "load_offsets_before": [
+      99,
+      122
+    ],
+    "load_offsets_after": [
+      91,
+      110
+    ]
+  },
+  {
+    "name": "user-fixed-9",
+    "before_bytes": 258,
+    "after_bytes": 212,
+    "bytes_saved": 46,
+    "loads": 2,
+    "load_offsets_before": [
+      110,
+      133
+    ],
+    "load_offsets_after": [
+      102,
+      121
+    ]
+  },
+  {
+    "name": "user-string-compact",
+    "before_bytes": 385,
+    "after_bytes": 313,
+    "bytes_saved": 72,
+    "loads": 2,
+    "load_offsets_before": [
+      97,
+      231
+    ],
+    "load_offsets_after": [
+      89,
+      201
+    ]
+  },
+  {
+    "name": "user-string",
+    "before_bytes": 396,
+    "after_bytes": 324,
+    "bytes_saved": 72,
+    "loads": 2,
+    "load_offsets_before": [
+      108,
+      242
+    ],
+    "load_offsets_after": [
+      100,
+      212
+    ]
+  },
+  {
+    "name": "user",
+    "before_bytes": 366,
+    "after_bytes": 292,
+    "bytes_saved": 74,
+    "loads": 4,
+    "load_offsets_before": [
+      122,
+      174,
+      207,
+      241
+    ],
+    "load_offsets_after": [
+      114,
+      150,
+      175,
+      201
+    ]
+  }
+]
