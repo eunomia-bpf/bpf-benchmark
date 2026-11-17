@@ -19,3 +19,6 @@ x86_kvm_corpus_20261117_113013_185030 installed programs 1 JIT 13641 B native 94
 == rerun tracee/monitor /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_131128_369581
 /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_131128_369581 throughput native/eBPF 1.466x  eBPF [259051, 247198, 283997] native [379674, 390726, 370744] per-sample [1.466, 1.581, 1.305] errors 0
 x86_kvm_corpus_20261117_131128_369581 installed programs 169 JIT 2068918 B native 1805760 B ratio 0.87x
+== rerun katran /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_133959_280315
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_133959_280315 throughput native/eBPF 1.027x  eBPF [2787615, 2733168, 2908071] native [2810046, 2902745, 2862093] per-sample [1.008, 1.062, 0.984] errors 2295239548
+x86_kvm_corpus_20261117_133959_280315 installed programs 1 JIT 13641 B native 9783 B ratio 0.72x
