@@ -26,7 +26,7 @@ binding remains separate.
 
 Focused Lake build passes 152 jobs; twelve compiled public type/axiom queries
 pass. All 23 Clight exports remain byte-identical to `9c617740f`. The final
-full build is queued under timing SH; its status is in `validation.json`.
+full build passes 279 jobs under timing SH; details are in `validation.json`.
 The previous flags batch is fully confirmed at 278 jobs and its bit proof
 uses ordinary arithmetic without native reflection assumptions. Last full
 `make check` passed at `5236c0e96`; no native rerun for these Lean-only changes.

@@ -61,9 +61,12 @@
     "source_query_address_space_GiB": 16
   },
   "whole_lake_build": {
-    "status": "queued under timing SH",
+    "status": "passed",
+    "exit": 0,
+    "jobs": 279,
     "log": "lake-build.log",
-    "exit_file": "lake-build.exit"
+    "timing_lock": "shared flock for entire build",
+    "started": "2026-11-17T11:54:45Z"
   },
   "previous_flags_confirmation": {
     "commit": "bb7bdb66b",
