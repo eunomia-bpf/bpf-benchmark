@@ -42,8 +42,10 @@ reached memory. The [RAW setup composition](results/m5-entry-admissibility/READM
 derives SP, x0 context and x0/x30 tags from the actual preceding stores, with
 the source register index as cell map. The [64-visit vector input proof](results/m5-vector-input-sequence/README.md)
 derives the vector buffer and composes it with that RAW setup, retaining each
-provider trace and post-memory. Actual provider admissibility and
-same-invocation native origin/register bindings remain open.
+provider trace and post-memory. The [four-flag/LR prefix](results/m5-flag-input-sequence/README.md)
+adds the actual masked flag stores and LR-zero assignment, deriving final
+NZCV bytes in the combined 68-visit execution. Actual provider admissibility
+and same-invocation native origin/register bindings remain open.
 
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|
