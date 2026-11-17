@@ -598,7 +598,7 @@ enum PatchKind {
     /// `call rel32` placeholder for a kernel helper/map target. The module
     /// must patch the rel32 displacement after the blob lands in executable
     /// memory.
-    HelperBranchRel32 { target_addr: u64, opcode: u8 },
+    HelperBranchRel32 { target_addr: u64, opcode: u8, probe_size: Option<u32> },
     LocalMemory { routine: memory::Routine },
     LocalArray { bytes: Vec<u8> },
     /// Rewritten `mov reg, [rip+GOT]` against a map symbol. The runner
@@ -1122,7 +1122,8 @@ pub(super) fn rewrite_x86(
         let mut tail_calls = Vec::new();
         let helper_calls = if symbol_key(sym) == symbol_key(entry) { entry_helpers.clone() }
             else { helper_provenance::calls(elf, sym, &got_relocations, helper_addrs)? };
-        let memory_constants = memory::constants(&bytes, sym.address, &helper_calls.branch_targets)?;
+        let helper_tails=helper_calls.tails.iter().map(|ip| sym.address+ip).collect();
+        let memory_constants = memory::constants(&bytes, sym.address, &helper_calls.branch_targets,&helper_tails)?;
         for ip in &helper_calls.tails {
             if let Some(name) = helper_calls.single.get(ip) {
                 tail_transfers.insert(*ip, DirectTailTransfer { symbol: name.clone(), addend: -4,
@@ -1201,7 +1202,7 @@ pub(super) fn rewrite_x86(
                     append_x86_numeric_helper_dispatch(&mut local, &mut kinds,
                         &mut insn_local_ip, &mut next_synthetic_ip, local_ip,
                         insn.next_ip()-sym.address, x86_gpr64_family(insn.op0_register()).unwrap(),
-                        alternatives, helper_addrs, true, proof_mode, &mut tail_calls)?;
+                        alternatives, helper_addrs, memory_constants.get(&local_ip), true, proof_mode, &mut tail_calls)?;
                     resolved_helper_call_sites.insert(site_key);
                     continue;
                 }
@@ -1229,7 +1230,8 @@ pub(super) fn rewrite_x86(
                         None => runtime_call_target(&tail.symbol, helper_addrs,
                             &format!("x86 helper tail branch {}", tail.symbol))?,
                     };
-                    Some(PatchKind::HelperBranchRel32 { target_addr, opcode: 0xe9 })
+                    Some(PatchKind::HelperBranchRel32 { target_addr, opcode: 0xe9,
+                        probe_size: probe_read::constant_size(&tail.symbol,memory_constants.get(&local_ip)) })
                 } else { None };
                 let index = local.len();
                 if conditional {
@@ -1241,7 +1243,9 @@ pub(super) fn rewrite_x86(
                         local_ip, jump, kind);
                 }
                 if let Some(offset) = tail.relocation_offset {
-                    canonicalized_relocations.insert(local_site_key(sym, offset));
+                    let key=local_site_key(sym,offset);
+                    canonicalized_relocations.insert(key);
+                    resolved_got_relocations.insert(key); // Native emission consumed this field too.
                 }
                 if proof_mode { tail_calls.push((index, tail)); }
                 else { resolved_helper_call_sites.insert(site_key); }
@@ -1457,7 +1461,7 @@ pub(super) fn rewrite_x86(
                         append_x86_numeric_helper_dispatch(&mut local,&mut kinds,
                             &mut insn_local_ip,&mut next_synthetic_ip,local_ip,
                             insn.next_ip()-sym.address,call_reg.unwrap(),alternatives,helper_addrs,
-                            false, false, &mut tail_calls)?;
+                            memory_constants.get(&local_ip), false, false, &mut tail_calls)?;
                     }
                     resolved_helper_call_sites.insert(site_key);
                     continue;
@@ -1565,7 +1569,7 @@ pub(super) fn rewrite_x86(
                                     &mut kinds,
                                     &mut insn_local_ip,
                                     local_ip,
-                                    helper_addr,
+                                    helper_addr, None,
                                 )?;
                                 for ib in build_x86_lookup_call_postprocess(&spec)? {
                                     push_x86_synthetic(
@@ -1585,7 +1589,7 @@ pub(super) fn rewrite_x86(
                     // Use the actual native RDI provenance, never source call order.
                     if let Some(target) = map_op_target(map_ops, proven_maps.get(&local_ip), &name) {
                         push_x86_helper_call_reloc(&mut local, &mut kinds,
-                            &mut insn_local_ip, local_ip, target)?;
+                            &mut insn_local_ip, local_ip, target, None)?;
                         resolved_helper_call_sites.insert(site_key);
                         continue;
                     }
@@ -1600,7 +1604,7 @@ pub(super) fn rewrite_x86(
                         &mut kinds,
                         &mut insn_local_ip,
                         local_ip,
-                        helper_addr,
+                        helper_addr, probe_read::constant_size(&name,memory_constants.get(&local_ip)),
                     )?;
                     resolved_helper_call_sites.insert(site_key);
                     continue;
@@ -1717,6 +1721,7 @@ pub(super) fn rewrite_x86(
 
     let mut map_patches = Vec::new();
     let mut relocs = Vec::new();
+    let mut probe_sizes=HashMap::new();
     for p in &patches {
         match &p.kind {
             PatchKind::MapImmediate { name, imm_offset } => {
@@ -1732,7 +1737,8 @@ pub(super) fn rewrite_x86(
                     offset,
                 });
             }
-            PatchKind::HelperBranchRel32 { target_addr, opcode } => {
+            PatchKind::HelperBranchRel32 { target_addr, opcode, probe_size } => {
+                if let Some(size)=probe_size {probe_sizes.insert(p.global_offset,*size);}
                 let offset = u32::try_from(p.global_offset)
                     .map_err(|_| anyhow!("helper call reloc offset exceeds u32"))?;
                 let end = p
@@ -1811,7 +1817,7 @@ pub(super) fn rewrite_x86(
     }
 
     let read_sites = if let Some(layout) = runtime_probe_read_layout.filter(|_| !proof_mode) {
-        let (ranges,sites) = probe_read::share(&mut blob, &mut relocs, layout, helper_addrs)?;
+        let (ranges,sites) = probe_read::share(&mut blob, &mut relocs, layout, helper_addrs,&probe_sizes)?;
         for &range in &ranges { show_lto_range(show, "probe_read", range); }
         code_ranges.extend(ranges);
         sites
@@ -2363,7 +2369,7 @@ fn apply_elf_relocations(
             // Local offset of the patch site within the owning symbol.
             let local_patch_off = reloc_offset - layout.sym.address;
 
-            if matches!(r_type, 1 | 2 | 10 | 11) && resolved_got_relocations
+            if matches!(r_type, 1 | 2 | 4 | 10 | 11) && resolved_got_relocations
                 .contains(&local_site_key(&layout.sym, local_patch_off)) {
                 continue;
             }
@@ -3723,6 +3729,7 @@ fn push_x86_helper_call_reloc(
     insn_local_ip: &mut Vec<u64>,
     local_ip: u64,
     helper_addr: u64,
+    probe_size: Option<u32>,
 ) -> Result<()> {
     let insn = build_x86_helper_call_rel32_slot()?;
     push_x86_replacement(
@@ -3733,7 +3740,7 @@ fn push_x86_helper_call_reloc(
         insn,
         Some(PatchKind::HelperBranchRel32 {
             target_addr: helper_addr,
-            opcode: 0xe8,
+            opcode: 0xe8, probe_size,
         }),
     );
     Ok(())
@@ -3743,7 +3750,7 @@ fn append_x86_numeric_helper_dispatch(
     local: &mut Vec<Instruction>, kinds: &mut Vec<Option<PatchKind>>,
     source_ips: &mut Vec<u64>, next_ip: &mut u64, source_ip: u64,
     continuation: u64, register: Register, alternatives: &[(u64,String)],
-    helpers: &HashMap<String,u64>,
+    helpers: &HashMap<String,u64>, constants: Option<&HashMap<Register,u64>>,
     tail: bool, proof: bool, proof_tails: &mut Vec<(usize,DirectTailTransfer)>,
 ) -> Result<()> {
     let registers=[Register::RAX,Register::RCX,Register::RDX,Register::RBX,
@@ -3776,8 +3783,8 @@ fn append_x86_numeric_helper_dispatch(
     for (index,mut instruction) in Decoder::with_ip(64,&bytes,base,DecoderOptions::NONE).into_iter().enumerate() {
         let offset=(instruction.ip()-base) as usize;
         if returns.contains(&offset) { instruction.set_near_branch64(continuation); }
-        let kind=calls.get(&offset).filter(|_| !proof).map(|(_,target)| PatchKind::HelperBranchRel32 {
-            target_addr:*target,opcode:if tail {0xe9} else {0xe8} });
+        let kind=calls.get(&offset).filter(|_| !proof).map(|(name,target)| PatchKind::HelperBranchRel32 {
+            target_addr:*target,opcode:if tail {0xe9} else {0xe8},probe_size:probe_read::constant_size(name,constants) });
         if let Some((name,_)) = calls.get(&offset).filter(|_| tail) {
             instruction.set_near_branch64(X86_JMP_END_PLACEHOLDER_TARGET);
             if proof { proof_tails.push((local.len(),DirectTailTransfer { symbol:(*name).clone(),
@@ -4203,6 +4210,50 @@ mod tests {
             let relocations = |result: &RewriteResult| result.relocs.iter()
                 .map(|r| (r.offset, r.kind, r.target)).collect::<Vec<_>>();
             assert_eq!(relocations(&normal), relocations(&shown));
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn scalar_count_facts_survive_call_layout_conditional_tails_and_numeric_joins() -> Result<()> {
+        let layout=RuntimeProbeReadLayout{user_helper:0x1000,kernel_helper:0x2000,current_task:0,
+            jiffies:None,user_ptr_max:0x1111222233334444,boot_cpu_data:0x5555666677778888,
+            pagefault_disabled:4,x86_capability:0,task_flags:0,task_personality:16,ktime:None,cred:None,
+            cpu_tlbstate:8,tlb_loaded_mm:0,task_mm:8,x86_virt_bits:40};
+        let helpers=HashMap::from([("bpf_probe_read_user".into(),0x1000),("bpf_probe_read_kernel".into(),0x2000)]);
+        for (form,expected) in [(0,1),(1,1),(2,2),(3,4),(4,8),(5,0),(6,2)] {
+            let mut object=WriteObject::new(BinaryFormat::Elf,object::Architecture::X86_64,Endianness::Little);
+            let text=object.add_section(Vec::new(),b".text".to_vec(),SectionKind::Text);
+            let normal=vec![0xbe,8,0,0,0,0xb8,113,0,0,0,0xff,0xd0,0xc3];
+            let finite=vec![0xbe,8,0,0,0,0x85,0xff,0x74,7,0xb8,112,0,0,0,0xeb,5,
+                            0xb8,113,0,0,0,0xff,0xd0,0xc3];
+            let bytes=match form {
+                0=>normal,
+                1=>vec![0xbe,8,0,0,0,0x85,0xff,0x0f,0x84,0,0,0,0,0xc3],
+                2=>finite,
+                3=>normal[5..].to_vec(),
+                4=>finite[5..].to_vec(),
+                5=>{let mut b=normal;b[1]=0;b},
+                6=>{let mut b=finite;b[22]=0xe0;b.pop();b},
+                _=>unreachable!(),
+            };
+            object.append_section_data(text,&bytes,1);
+            object.add_symbol(WriteSymbol{name:b"entry".to_vec(),value:0,size:bytes.len() as u64,
+                kind:SymbolKind::Text,scope:SymbolScope::Linkage,weak:false,
+                section:WriteSymbolSection::Section(text),flags:SymbolFlags::None});
+            if form==1 {
+                let helper=object.add_symbol(WriteSymbol{name:b"bpf_probe_read_kernel".to_vec(),value:0,size:0,
+                    kind:SymbolKind::Text,scope:SymbolScope::Linkage,weak:false,
+                    section:WriteSymbolSection::Undefined,flags:SymbolFlags::None});
+                object.add_relocation(text,WriteRelocation{offset:9,symbol:helper,addend:-4,
+                    flags:RelocationFlags::Elf{r_type:4}})?;
+            }
+            let encoded=object.write()?;let elf=object::File::parse(encoded.as_slice())?;
+            let entry=find_symbol_by_name(&elf,"entry")?;
+            let result=rewrite_x86(&elf,&entry,&[entry.clone()],&helpers,&HashMap::new(),&HashMap::new(),
+                &[],false,false,None,Some(&layout),None,false)?;
+            assert_eq!(result.load_sites.iter().filter(|site| site.destination==11).count(),expected,
+                       "count fact lost or invented in helper form {form}");
         }
         Ok(())
     }

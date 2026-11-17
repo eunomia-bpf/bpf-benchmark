@@ -80,9 +80,9 @@ static void check_string(void *dst, const void *src, unsigned n, long expected, 
 
 int main(int argc, char **argv)
 {
-    assert(argc == 4);
+    assert(argc == 4 || argc == 5);
     int mode = atoi(argv[3]);
-    int user = mode == 1 || mode == 7;
+    int user = mode == 1 || mode == 7 || mode == 11;
     FILE *f = fopen(argv[1],"rb"); assert(f);
     assert(!fseek(f,0,SEEK_END)); long size = ftell(f); assert(size > 0);
     code_length = size;
@@ -134,7 +134,7 @@ int main(int argc, char **argv)
         return 0;
     }
     f = fopen(argv[2],"r"); assert(f);
-    assert(fscanf(f,"%u",&site_count) == 1 && site_count > 0 && site_count <= 8);
+    assert(fscanf(f,"%u",&site_count) == 1 && site_count <= 8);
     for (unsigned i=0; i<site_count; ++i) {
         unsigned destination;
         assert(fscanf(f,"%u %u %u",sites+i,lengths+i,&destination) == 3);
@@ -157,6 +157,27 @@ int main(int argc, char **argv)
     assert((uintptr_t)src >> 40); /* A 40-bit width makes this host address non-canonical. */
     if (!user) { user_max = 0; virt_bits(48); } /* Kernel reads: threshold USER_PTR_MAX + PAGE_SIZE = 4096. */
     unsigned char dest[1026]; unsigned vectors = 0;
+    if (mode == 10 || mode == 11) {
+        assert(argc == 5); unsigned n=strtoul(argv[4],NULL,0); assert(n<=1024);
+        for (unsigned offset=0;offset<8;++offset) {check(dest+1,src+offset,n,0);++vectors;}
+        check(dest+1,src+4096-n,n,0);++vectors;
+        if (n) {
+            const unsigned remains[]={0,n/2,n-1};
+            for (unsigned i=0;i<3;++i) {check(dest+1,src+4096-remains[i],n,-14);++vectors;}
+        }
+        if (user) {
+            percpu.loaded_mm=task.mm+0x1000;check(dest+1,src,n,-14);++vectors;percpu.loaded_mm=task.mm;
+            user_max=(uintptr_t)src-1;check(dest+1,src,n,-14);++vectors;user_max=UINTPTR_MAX;
+            cpu[9]=1u<<20;check(dest+1,src,n,0);++vectors;
+            if (n) {check(dest+1,src+4096-(n-1),n,-14);++vectors;}
+            assert(smap_enters==smap_leaves && !smap_depth);
+        } else {
+            virt_bits(40);check(dest+1,src,n,-34);++vectors;virt_bits(48);
+        }
+        assert(!syscall(SYS_arch_prctl,ARCH_SET_GS,old_gs));
+        printf("fixed scalar user=%d size=%u: %u vectors, %u exact-site faults PASS\n",user,n,vectors,faults);
+        return 0;
+    }
     if (mode == 5) { /* bpf_probe_read (compat): TASK_SIZE picks the user or the kernel leaf */
         unsigned char *low = mmap(NULL,4096,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_32BIT,-1,0);
         unsigned char *mid = mmap((void *)0xd0000000UL,4096,PROT_READ|PROT_WRITE,

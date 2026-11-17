@@ -42,7 +42,34 @@ pub(super) fn gs_disp32(address: u64, what: &str) -> Result<[u8; 4]> {
 /// RDI=dst, RSI=src, ECX=size, R11=1. Eight-byte words, then an empty remainder goes straight
 /// to success; otherwise one 4-, one 2- and one 1-byte step, as mm/maccess.c copies. Every load
 /// is a recovered site whose fault clears R11; success leaves EAX=0.
-fn copy_words(b: &mut Vec<u8>, sites: &mut Vec<LoadSite>, faults: &mut Vec<usize>) -> Result<()> {
+fn copy_fixed(b: &mut Vec<u8>, sites: &mut Vec<LoadSite>, faults: &mut Vec<usize>, size: u32) -> Result<()> {
+    let words=size/8;
+    if words>1 {b.push(0xb9);b.extend_from_slice(&words.to_le_bytes());}
+    let word_loop=b.len();
+    for width in [8u32,4,2,1] {
+        let present=if width==8 {words!=0} else {size & width != 0};
+        if !present {continue;}
+        let load:&[u8]=match width {8=>&[0x48,0x8b,0x06],4=>&[0x8b,0x06],
+            2=>&[0x0f,0xb7,0x06],1=>&[0x0f,0xb6,0x06],_=>unreachable!()};
+        sites.push(LoadSite{offset:b.len() as u32,insn_len:load.len() as u16,destination:11});
+        b.extend_from_slice(load);b.extend_from_slice(&[0x45,0x85,0xdb]);
+        faults.push(append_x86_jcc_rel32(b,0x84));
+        b.extend_from_slice(match width {8=>&[0x48,0x89,0x07][..],4=>&[0x89,0x07],
+            2=>&[0x66,0x89,0x07],1=>&[0x88,0x07],_=>unreachable!()});
+        if (width==8 && words>1) || size & (width-1)!=0 {
+            b.extend_from_slice(&[0x48,0x83,0xc7,width as u8,0x48,0x83,0xc6,width as u8]);
+        }
+        if width==8 && words>1 {
+            b.extend_from_slice(&[0xff,0xc9]);
+            let again=append_x86_jcc_rel32(b,0x85);patch_x86_rel32(b,again,word_loop)?;
+        }
+    }
+    b.extend_from_slice(&[0x31,0xc0]);
+    Ok(())
+}
+
+fn copy_words(b: &mut Vec<u8>, sites: &mut Vec<LoadSite>, faults: &mut Vec<usize>, fixed: Option<u32>) -> Result<()> {
+    if let Some(size)=fixed {return copy_fixed(b,sites,faults,size);}
     b.extend_from_slice(&[0x83,0xf9,8]);
     let subword = append_x86_jcc_rel32(b, 0x82);
     let word_loop = b.len();
@@ -149,7 +176,7 @@ fn copy_user_string(b: &mut Vec<u8>, sites: &mut Vec<LoadSite>, faults: &mut Vec
 /// with SMAP, copy, CLAC, pagefault_enable; denial and faults zero the destination. It uses
 /// caller-saved registers only: R8=dst, R9D=size, R10=current. Scalar keeps SMAP in DL;
 /// string keeps it in R9 bit32 so its word-mask scratch cannot destroy the cleanup state.
-fn user_leaf(layout: &RuntimeProbeReadLayout, actual: u64, string: bool)
+fn user_leaf(layout: &RuntimeProbeReadLayout, actual: u64, string: bool, fixed: Option<u32>)
     -> Result<(Vec<u8>, Vec<RelocRecord>, Vec<LoadSite>)> {
     let target = |symbol| address(symbol, layout.user_helper, actual);
     let current = gs_disp32(target(layout.current_task)?, "current_task")?;
@@ -188,10 +215,11 @@ fn user_leaf(layout: &RuntimeProbeReadLayout, actual: u64, string: bool)
     b.extend_from_slice(&[0x0f,0x01,0xcb]); // STAC only with actual CPU SMAP capability
     if string {b.extend_from_slice(&[0x49,0x0f,0xba,0xe9,32]);} // bts r9,32
     let after = b.len(); patch_x86_rel32(&mut b, no_smap, after)?;
-    b.extend_from_slice(&[0x4c,0x89,0xc7,0x44,0x89,0xc9]); // rdi=dst, ecx=size
+    b.extend_from_slice(&[0x4c,0x89,0xc7]); // rdi=dst
+    if string || fixed.is_none() {b.extend_from_slice(&[0x44,0x89,0xc9]);} // ecx=size
     if !string {b.extend_from_slice(&[0x41,0xbb,1,0,0,0]);}
     let mut sites = Vec::new(); let mut faults = Vec::new();
-    if string {copy_user_string(&mut b,&mut sites,&mut faults)?;} else {copy_words(&mut b,&mut sites,&mut faults)?;}
+    if string {copy_user_string(&mut b,&mut sites,&mut faults)?;} else {copy_words(&mut b,&mut sites,&mut faults,fixed)?;}
     let cleanup_success = jump(&mut b);
     let fault = b.len();
     for branch in faults { patch_x86_rel32(&mut b, branch, fault)?; }
@@ -224,7 +252,7 @@ fn user_leaf(layout: &RuntimeProbeReadLayout, actual: u64, string: bool)
 /// boot_cpu_data.x86_virt_bits gets -ERANGE; width zero allows), pagefault_disable, copy,
 /// pagefault_enable; denial and faults zero the destination. It uses caller-saved registers only:
 /// R8=dst, R9D=size, RDX=src, R10=current.
-fn kernel_routine(layout: &RuntimeProbeReadLayout, actual: u64, string: bool)
+fn kernel_routine(layout: &RuntimeProbeReadLayout, actual: u64, string: bool, fixed: Option<u32>)
     -> Result<(Vec<u8>, Vec<RelocRecord>, Vec<LoadSite>)> {
     let target = |symbol| address(symbol, layout.kernel_helper, actual);
     let current = gs_disp32(target(layout.current_task)?, "current_task")?;
@@ -250,7 +278,9 @@ fn kernel_routine(layout: &RuntimeProbeReadLayout, actual: u64, string: bool)
     denied.push(append_x86_jcc_rel32(&mut b, 0x85));
     b.extend_from_slice(&[0x65,0x4c,0x8b,0x14,0x25]); b.extend_from_slice(&current); // r10=gs:current_task
     b.extend_from_slice(&[0x41,0xff,0x82]); b.extend_from_slice(&task_offset); // pagefault_disable
-    b.extend_from_slice(&[0x48,0x89,0xd6,0x4c,0x89,0xc7,0x44,0x89,0xc9,0x41,0xbb,1,0,0,0]); // rsi=src, rdi=dst, ecx=size, r11d=1
+    b.extend_from_slice(&[0x48,0x89,0xd6,0x4c,0x89,0xc7]); // rsi=src, rdi=dst
+    if string || fixed.is_none() {b.extend_from_slice(&[0x44,0x89,0xc9]);}
+    b.extend_from_slice(&[0x41,0xbb,1,0,0,0]); // r11d=1
     let mut sites=Vec::new(); let mut faults=Vec::new();
     if string {
         let loop_start=b.len();
@@ -265,7 +295,7 @@ fn kernel_routine(layout: &RuntimeProbeReadLayout, actual: u64, string: bool)
         let end=b.len();patch_x86_rel32(&mut b,nul,end)?; // a copied NUL already ends the string
         b.extend_from_slice(&[0x48,0x89,0xf8,0x4c,0x29,0xc0,0x48,0x63,0xc0]); // length as signed int
     } else {
-        copy_words(&mut b, &mut sites, &mut faults)?;
+        copy_words(&mut b, &mut sites, &mut faults,fixed)?;
     }
     let cleanup_success = jump(&mut b);
     let fault = b.len();
@@ -345,11 +375,29 @@ fn append(blob: &mut Vec<u8>, relocs: &mut Vec<RelocRecord>, ranges: &mut Vec<(u
     Ok(start)
 }
 
+pub(super) fn constant_size(name: &str, facts: Option<&HashMap<Register,u64>>) -> Option<u32> {
+    if matches!(name,"bpf_probe_read_kernel"|"bpf_probe_read_user"|"bpf_probe_read_compat"|"bpf_probe_read") {
+        facts?.get(&Register::RSI).map(|size| *size as u32)
+    } else {None}
+}
+
+fn common_size(calls: &[usize], counts: &HashMap<usize,u32>) -> Option<u32> {
+    let first=*counts.get(calls.first()?)?;
+    calls.iter().all(|site| counts.get(site)==Some(&first)).then_some(first)
+}
+
 pub(super) fn share(blob: &mut Vec<u8>, relocs: &mut Vec<RelocRecord>,
-                    layout: &RuntimeProbeReadLayout, helpers: &HashMap<String,u64>)
+                    layout: &RuntimeProbeReadLayout, helpers: &HashMap<String,u64>, counts: &HashMap<usize,u32>)
     -> Result<(Vec<(usize,usize)>,Vec<LoadSite>)> {
     let mut ranges = Vec::new();
     let mut loads = Vec::new();
+    let sizes=[false,true].map(|user| {
+        let mut calls=Vec::new();
+        for name in [if user {"bpf_probe_read_user"} else {"bpf_probe_read_kernel"},"bpf_probe_read_compat"] {
+            if let Some(&helper)=helpers.get(name) {calls.extend(calls_to(relocs,helper));}
+        }
+        common_size(&calls,counts)
+    });
     let mut leaves = [[None,None],[None,None]]; // [string][user] shared routine starts
     for (name,user,string) in [("bpf_probe_read_user",true,false),("bpf_probe_read_kernel",false,false),
             ("bpf_probe_read_kernel_str",false,true),("bpf_probe_read_user_str",true,true)] {
@@ -357,7 +405,7 @@ pub(super) fn share(blob: &mut Vec<u8>, relocs: &mut Vec<RelocRecord>,
         let calls = calls_to(relocs, helper);
         if calls.is_empty() { continue; }
         let anchor=if string {let Some(&regular)=helpers.get(if user {"bpf_probe_read_user"} else {"bpf_probe_read_kernel"}) else {continue;};regular} else {helper};
-        let built = if user {user_leaf(layout,anchor,string)?} else {kernel_routine(layout,anchor,string)?};
+        let built = if user {user_leaf(layout,anchor,string,if string {None} else {sizes[1]})?} else {kernel_routine(layout,anchor,string,if string {None} else {sizes[0]})?};
         relocs.retain(|r| !(r.kind == 1 && r.target == helper));
         let start = append(blob, relocs, &mut ranges, &mut loads, built)?;
         redirect(blob, &calls, start)?;
@@ -372,7 +420,7 @@ pub(super) fn share(blob: &mut Vec<u8>, relocs: &mut Vec<RelocRecord>,
         for user in [false, true] {
             let slot=&mut leaves[usize::from(string)][usize::from(user)];
             let start=if let Some(start)=*slot {start} else {
-                let built=if user {user_leaf(layout,user_anchor,string)?} else {kernel_routine(layout,kernel_anchor,string)?};
+                let built=if user {user_leaf(layout,user_anchor,string,if string {None} else {sizes[1]})?} else {kernel_routine(layout,kernel_anchor,string,if string {None} else {sizes[0]})?};
                 let start=append(blob,relocs,&mut ranges,&mut loads,built)?;
                 *slot=Some(start);start
             };
@@ -463,6 +511,40 @@ mod tests {
         }
     }
 
+    #[test]
+    fn fixed_scalar_counts_join_all_callers_and_bound_copy_code() -> Result<()> {
+        let registers=HashMap::from([(Register::RSI,0x100000008),(Register::RDX,16)]);
+        assert_eq!(constant_size("bpf_probe_read_kernel",Some(&registers)),Some(8));
+        assert_eq!(constant_size("bpf_probe_read_user_str",Some(&registers)),None);
+        assert_eq!(constant_size("bpf_probe_read_user",None),None);
+        let counts=HashMap::from([(0usize,8u32),(5,8),(10,16)]);
+        assert_eq!(common_size(&[0,5],&counts),Some(8));
+        assert_eq!(common_size(&[0,10],&counts),None);
+        assert_eq!(common_size(&[0,15],&counts),None);
+        let mut generic=Vec::new();copy_words(&mut generic,&mut Vec::new(),&mut Vec::new(),None)?;
+        for size in [0u32,1,2,3,4,7,8,9,15,16,17,144,1024,u32::MAX] {
+            let mut bytes=Vec::new();let mut sites=Vec::new();
+            copy_words(&mut bytes,&mut sites,&mut Vec::new(),Some(size))?;
+            assert!(bytes.len()<generic.len(),"counted body must not unroll a large size");
+            assert_eq!(sites.len(),usize::from(size>=8)+(size&7).count_ones() as usize);
+        }
+        let layout=fixture();
+        let helpers=HashMap::from([("bpf_probe_read_user".into(),layout.user_helper),
+            ("bpf_probe_read_kernel".into(),layout.kernel_helper),("bpf_probe_read_compat".into(),0x3000)]);
+        for (user_size,compat_size,expected) in [(Some(8),Some(8),2),(Some(16),Some(8),5),(Some(8),None,8)] {
+            let mut blob=X86_HELPER_CALL_REL32_SLOT.repeat(3);blob[5]=0xe9;blob.push(0xc3);
+            let mut relocs=vec![RelocRecord{offset:0,kind:1,target:layout.kernel_helper},
+                RelocRecord{offset:5,kind:1,target:0x3000},RelocRecord{offset:10,kind:1,target:layout.user_helper}];
+            let mut facts=HashMap::from([(0usize,8u32)]);
+            if let Some(size)=user_size {facts.insert(10,size);}
+            if let Some(size)=compat_size {facts.insert(5,size);}
+            let (ranges,sites)=share(&mut blob,&mut relocs,&layout,&helpers,&facts)?;
+            assert_eq!(ranges.len(),3,"reuse one user and one kernel body plus compat dispatcher");
+            assert_eq!(sites.len(),expected,"meet direct and compat counts for each domain");
+        }
+        Ok(())
+    }
+
     fn fixture() -> RuntimeProbeReadLayout {
         RuntimeProbeReadLayout { user_helper:0x1000,kernel_helper:0x2000,
             current_task:0,jiffies:Some(0x1111222233334444),
@@ -493,7 +575,7 @@ mod tests {
             if compact {layout.user_ptr_max=0x12340000;layout.boot_cpu_data=0x12350000;}
             let user=mode==1 || mode==3;let string=mode>=2;
             let anchor = if user { layout.user_helper } else { layout.kernel_helper };
-            let (bytes,relocs,sites) = if user {user_leaf(&layout,anchor,string)?} else {kernel_routine(&layout,anchor,string)?};
+            let (bytes,relocs,sites) = if user {user_leaf(&layout,anchor,string,None)?} else {kernel_routine(&layout,anchor,string,None)?};
             let stem = if mode==3 {"user-string"} else if string {"kernel-string"} else if user { "user" } else { "kernel" };
             let stem=format!("{stem}{}",if compact {"-compact"} else {""});
             let binary = output.join(format!("{stem}.bin"));
@@ -517,7 +599,7 @@ mod tests {
         let mut relocs = vec![RelocRecord{offset:0,kind:1,target}];
         let helpers = HashMap::from([(name.into(),target),
             ("bpf_probe_read_user".into(),layout.user_helper),("bpf_probe_read_kernel".into(),layout.kernel_helper)]);
-        let (ranges,sites) = share(&mut blob,&mut relocs,&layout,&helpers)?;
+        let (ranges,sites) = share(&mut blob,&mut relocs,&layout,&helpers,&HashMap::new())?;
         assert!(relocs.is_empty()); assert_eq!(ranges.len(),3); assert_eq!(sites.len(),load_count);
         let mut text = sites.len().to_string(); text.push(char::from(10));
         for site in sites { text.push_str(&format!("{} {} {}\n",site.offset,site.insn_len,site.destination)); }
@@ -527,6 +609,30 @@ mod tests {
         fs::write(output.join(format!("{stem}.stdout")),&run.stdout)?; fs::write(output.join(format!("{stem}.stderr")),&run.stderr)?;
         assert!(run.status.success(),"{stem} host execution: {} {}",run.status,String::from_utf8_lossy(&run.stderr));
         println!("{}",String::from_utf8_lossy(&run.stdout));
+        }
+        for compact in [false,true] {
+            let mut fixed_layout=fixture();
+            if compact {fixed_layout.user_ptr_max=0x12340000;fixed_layout.boot_cpu_data=0x12350000;}
+            for user in [false,true] {
+                let anchor=if user {fixed_layout.user_helper} else {fixed_layout.kernel_helper};
+                for size in [0u32,1,2,3,4,7,8,9,15,16,17,31,32,33,63,64,65,144,257,512,768,1024] {
+                    let (bytes,relocs,sites)=if user {user_leaf(&fixed_layout,anchor,false,Some(size))?}
+                        else {kernel_routine(&fixed_layout,anchor,false,Some(size))?};
+                    assert!(relocs.is_empty());
+                    let stem=format!("{}-fixed-{size}{}",if user {"user"} else {"kernel"},if compact {"-compact"} else {""});
+                    let binary=output.join(format!("{stem}.bin"));fs::write(&binary,&bytes)?;
+                    let metadata=output.join(format!("{stem}.sites"));
+                    let mut text=format!("{}\n",sites.len());
+                    for site in sites {text.push_str(&format!("{} {} {}\n",site.offset,site.insn_len,site.destination));}
+                    fs::write(&metadata,text)?;
+                    let run=std::process::Command::new(&driver).arg(binary).arg(metadata)
+                        .arg(if user {"11"} else {"10"}).arg(size.to_string()).output()?;
+                    fs::write(output.join(format!("{stem}.stdout")),&run.stdout)?;
+                    fs::write(output.join(format!("{stem}.stderr")),&run.stderr)?;
+                    assert!(run.status.success(),"{stem}: {} {}",run.status,String::from_utf8_lossy(&run.stderr));
+                    println!("{}",String::from_utf8_lossy(&run.stdout));
+                }
+            }
         }
         let helpers=HashMap::from([("bpf_probe_read_kernel".into(),layout.kernel_helper),
             (X86_CPU_NUMBER_HELPER_KEY.into(),8)]);
@@ -558,7 +664,7 @@ mod tests {
             RelocRecord{offset:5,kind:1,target:0x1000},RelocRecord{offset:10,kind:1,target:0x2000},
             RelocRecord{offset:15,kind:1,target:0x9999}];
         let helpers = HashMap::from([("bpf_probe_read_user".into(),0x1000),("bpf_probe_read_kernel".into(),0x2000)]);
-        let (ranges,sites) = share(&mut blob,&mut relocs,&layout,&helpers)?;
+        let (ranges,sites) = share(&mut blob,&mut relocs,&layout,&helpers,&HashMap::new())?;
         assert_eq!(ranges.len(),2); assert_eq!(sites.len(),8);
         for (offset,range) in [(0,ranges[0]),(5,ranges[0]),(10,ranges[1])] {
             let disp = i32::from_le_bytes(blob[offset+1..offset+5].try_into()?);
@@ -572,7 +678,7 @@ mod tests {
         let names=HashMap::from([("bpf_probe_read_kernel".into(),0x2000),("bpf_probe_read_user".into(),0x1000),
             ("bpf_probe_read_kernel_str".into(),0x5000),("bpf_probe_read_user_str".into(),0x6000),
             ("bpf_probe_read_compat_str".into(),0x7000)]);
-        let (on,loads)=share(&mut strings,&mut calls,&layout,&names)?;
+        let (on,loads)=share(&mut strings,&mut calls,&layout,&names,&HashMap::new())?;
         assert_eq!(on.len(),3);assert_eq!(loads.len(),3);assert!(loads.iter().all(|s|s.destination==11));
         assert!(calls.is_empty(),"compat calls reuse the existing user/kernel string leaves");
         for (site,target) in [(0,on[0].0),(5,on[1].0),(10,on[2].0),(15,on[2].0)] {
