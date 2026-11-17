@@ -46,3 +46,39 @@ coverage must retain wide addresses as well as the compact kernel case.
 Next implementation validation belongs under timing SH on CPU 19, after
 Omp's image snapshot. App per-call, body/helper/map attribution and installed
 native/JIT totals remain the measurement, rather than these source savings.
+
+## Constant-size scalar reads without cloning policy bodies
+
+Implementation direction, 2026-11-17, still unimplemented: first specialize
+a shared scalar leaf only when every original call that reaches it has the
+same known u32 RSI size. Include compat callers in both possible domains.
+Keep one body for that domain; conflicting or unknown counts require the
+current dynamic body. This avoids duplicating the full policy/SMAP/fault
+cleanup for each size. Strings remain unchanged in this first step.
+
+For a known scalar count, emit a counted qword loop and fixed 4/2/1 tail.
+Zero words need no word loop; one word needs no loop counter. Larger
+counts need a fixed-size loop with count N/8, not N/8 copies of its text.
+Keep each protected load's status branch before its store and retain the
+original full N for fault zeroing. Do not introduce a size refusal or an
+unroll limit. Static code and executed-instruction effects need actual
+host/app measurement; the old fully-unrolled model is not the code-size
+decision for this implementation.
+
+Carry the count with the helper branch patch through encoding. Inferring
+it solely from `insn_local_ip` during final layout is insufficient:
+`push_x86_synthetic` writes `u64::MAX` (`x86.rs:648`), including the
+conditional helper-tail rewrite at `:1235-1239`. The ordinary and finite
+numeric helper paths also need the same original-site fact. An optional
+internal count on `HelperBranchRel32`, then a map keyed by its final
+global slot offset at relocation construction, avoids guessing a source
+IP or changing the existing synthetic-IP layout contract. This is internal
+linker metadata, with no new loader/module schema or public ABI.
+
+Native helper size is the low u32 of RSI, even if a constant fact carries
+64 bits; it is not a source-domain proof. Exercise equal/different joins,
+missing facts, calls clobbering RSI, partial writes, normal and conditional
+tails, finite helper-ID joins and a nonzero ELF address. Compare source
+read order, faults/full zeroing, policy/nesting and actual native bytes
+across boundary sizes. Leave unresolved paths dynamic; do not invent facts
+to increase the specialized count.
