@@ -39,6 +39,21 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**多日大任务（运营者 2026-11-17T10:31 UTC："你让 codex / omp 也看看在里面能不能干啥. 给他们持续性几天的大任务, 免得你用完了停下来了. 让 omp 统筹 codex 或者自己做. 恢复omp集群定时任务"）**
+分工（协调者定）：omp（集群值守 bpf-benchmark-supervisor，每 10 分钟续跑同一会话）统筹：给两个 Codex lane 派活、排镜像和计时批次、自己做其中的项；Codex perf 从只审核改为实现；Codex formal 接着做证明迁移 M5–M6；C lane 保持停止（omp 走集群值守）；协调者（Claude）当顾问并做每小时检查。流程见 /workspaces/.agent-state/bpf-benchmark-supervisor/prompt.md：每项改完先过主机测试、提交，再一个批次（建镜像、检查、计时它针对的应用），批次从建镜像到最后一次计时持有 locks/batch。
+- [ ] 1. helper 的 LTO（perf 实现，omp 排批次）。取时间叶子例程（协调者批次在量）、uid_gid + 字符串循环 + Cilium 开关（协调者下一批）之后：
+  a. bpf_get_current_task_btf 并入 current-task 内联（Tracee 121 处）；bpf_jiffies64 换成对 jiffies 的一次读（Cilium 91 处）；
+  b. bpf_probe_read_user_str 和 bpf_probe_read_compat_str 进叶子例程（用户字符串叶子加 compat 分派）；
+  c. 常量大小的 probe_read（perf b80b2dad0 的计数块模型）；全局量用 32 位绝对地址作操作数（perf 66be0e8f0）；
+  d. 已知 ARRAY 步长用 IMUL imm8 加 LEA（9f45f3c6a），LPM 的 XOR 和 disp8（97212ec1c、ed9a7d87e），超过 512 字节的 memset 保留已知长度（a0a448a1d）；
+  e. 其余 helper 按各应用的占比从大到小：BCC 的 perf_event_output 和 map update，Katran 的 LRU 查找，Tetragon 和 Tracee 的 htab 查找；先量清两臂差别再动手。
+- [ ] 2. 两臂工作量（omp）：Cilium 开关对齐后的两臂逐程序路径（paths.py）；22 次留在 eBPF 的 Cilium 叶子装载（manifest 的 source_map_prefix 选择）；Tracee 的 trace_file_update / trace_ret_file_* 和 BCC 的 block_rq_* 两臂次数差。
+- [ ] 3. 代码量（perf）：装进去的原生 / JIT 现在 0.69–1.09，目标一半。每个程序各带一份叶子例程（Tetragon 288 个程序）是最大的一块；其次是跳转 rel8、共用清零尾部、disp8。
+- [ ] 4. verified 路径（omp 或 perf）：每个应用最热程序的 B 生成和 stock 验证（OTel 栈帧 784 > 512，Katran 超过 1M 指令，OTel 的 B 编译 1.13 GB）。
+- [ ] 5. 11-11 重启时丢掉的修复（omp）：kprog/results/restart-fixes-20261117 里 13 个修复类提交逐条对照当前代码，按整类补回；冻结路径里需要加行的先记在这里。
+- [ ] 6. 证明迁移 M5–M6（formal）：照 formal/prompt.md 的顺序。
+每完成一项在本块打 [x] 并写提交号；新发现的事项加在本块末尾。
+
 **协调者 2026-11-17T10:19:33Z（正式轮前两个应用、Cilium 两臂差别的来源、下一批）**：
 1. 正式轮（冻结入口默认 3 × 180 秒，stats 关，镜像 fc7c4707）：OTel 1.053x（11-16 那一轮 0.801x），BCC 0.998x（底线 0.985x，11-16 那一轮 0.929x）。其余四个应用 11:45 前后跑完。
 2. Cilium 两臂差别的来源：agent 生成的 ep_config.h #undef MONITOR_AGGREGATION，lib/trace.h 落到 TRACE_AGGREGATE_NONE，eBPF 一侧逐包发 trace 事件；原生编译用示例 node_config.h（MONITOR_AGGREGATION 5）加 CILIUM_MAX 的 -DMONITOR_AGGREGATION=3，事件大多被聚合掉，另外多开 DSR、HOST_FIREWALL、NODEPORT_ACCELERATION、WIREGUARD、TUNNEL_MODE，少开 POLICY_AUDIT_MODE。节点地址（IPV4_GATEWAY 等）每次运行都变，整份头文件搬不过来；只把装载的 lxc、host、xdp 三个对象的编译开关换成 agent 的那一套（vendor/bpf/Makefile，开放路径）。
