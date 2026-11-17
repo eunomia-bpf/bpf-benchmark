@@ -1,0 +1,21 @@
+   Compiling native-link v0.1.0 (/workspaces/repository/kprog/x86/native_lab/native_link)
+    Finished `release` profile [optimized] target(s) in 37.99s
+     Running unittests src/main.rs (kprog/x86/native_lab/native_link/target/release/deps/native_link-62ccb5c6f5eda54e)
+
+running 1 test
+test x86::tests::branches_enter_direct_loads_and_tail_stubs_at_the_original_call_label ... 
+thread 'x86::tests::branches_enter_direct_loads_and_tail_stubs_at_the_original_call_label' (2750340) panicked at src/x86.rs:4941:17:
+assertion `left == right` failed: branch skipped bpf_jiffies64: named=false base=0 nop=0
+  left: None
+ right: Some([72, 161])
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+FAILED
+
+failures:
+
+failures:
+    x86::tests::branches_enter_direct_loads_and_tail_stubs_at_the_original_call_label
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 59 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--bin native-link`
