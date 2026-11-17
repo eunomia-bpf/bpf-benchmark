@@ -1,5 +1,5 @@
 {
-  "recorded_utc": "2026-11-17T16:01:18.179798+00:00",
+  "recorded_utc": "2026-11-17T16:06:31.850364+00:00",
   "historical_profile": {
     "source": "/workspaces/repository/kprog/results/limits-20261114/bcc.json",
     "raw": "/workspaces/kprog-raw/C/limits/bcc",
@@ -1048,5 +1048,53 @@
         ]
       }
     }
+  },
+  "staged_manifest_audit": {
+    "scope": "Prepared host inputs at analysis time, not an inspection of the shipped image.",
+    "loader_path": "kernel_helper_context controls query_program_helper_targets; absent manifest value defaults false.",
+    "manifests": [
+      {
+        "path": "/workspaces/repository/vendor/build/native-bpf/x86/stage/bcc/manifest.json",
+        "app": "bcc",
+        "entries": 29,
+        "helper_context_true": 0,
+        "helper_context_false_or_absent": 29
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/native-bpf/x86/stage/cilium/manifest.json",
+        "app": "cilium",
+        "entries": 81,
+        "helper_context_true": 0,
+        "helper_context_false_or_absent": 81
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/native-bpf/x86/stage/katran/manifest.json",
+        "app": "katran",
+        "entries": 3,
+        "helper_context_true": 0,
+        "helper_context_false_or_absent": 3
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/native-bpf/x86/stage/otelcol-ebpf-profiler/manifest.json",
+        "app": "otelcol-ebpf-profiler",
+        "entries": 26,
+        "helper_context_true": 0,
+        "helper_context_false_or_absent": 26
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tetragon/manifest.json",
+        "app": "tetragon",
+        "entries": 94,
+        "helper_context_true": 0,
+        "helper_context_false_or_absent": 94
+      },
+      {
+        "path": "/workspaces/repository/vendor/build/native-bpf/x86/stage/tracee/manifest.json",
+        "app": "tracee",
+        "entries": 113,
+        "helper_context_true": 0,
+        "helper_context_false_or_absent": 113
+      }
+    ]
   }
 }

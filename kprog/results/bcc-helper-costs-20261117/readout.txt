@@ -25,3 +25,11 @@ sys_exit/tracepoint: 711289192 145.220 / 881127120 116.559 / 1.238775
 tracepoint__sys/tracepoint: 33785734 1292.005 / 46903926 935.731 / 1.388276
 baseline: 15/25 selected, 153.990 ns/call, 7965 installed bytes
 post_rejit: 15/25 selected, 127.785 ns/call, 13248 installed bytes
+
+Prepared manifest helper-context enablement (not shipped-image evidence)
+bcc: 0/29 entries enable original-prototype query
+cilium: 0/81 entries enable original-prototype query
+katran: 0/3 entries enable original-prototype query
+otelcol-ebpf-profiler: 0/26 entries enable original-prototype query
+tetragon: 0/94 entries enable original-prototype query
+tracee: 0/113 entries enable original-prototype query
