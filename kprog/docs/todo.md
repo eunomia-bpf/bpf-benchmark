@@ -39,6 +39,13 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-17T04:21:19Z（核实 perf 03:37–04:16 审阅后的决定）**：
+1. vendor/bpf/Makefile 补上真实输入：kprog-perf-context-lto 依赖它 include 的 native_loader_lto.hpp、bpf_function_bodies.hpp、runtime_bpf_callee.hpp；Cilium 原生对象依赖 core-compat.h 和 answers/cilium.h；OTel 编译单元依赖 core-compat.h（perf c55f8cdf6）。run2 计时结束后和“零余数判断提前”一起进下一个镜像，依赖本身保持生成的代码原样。
+2. SMAP：按启动时的 CPU 能力在链接时选定 STAC/CLAC，加上常量大小，保存的寄存器从 5 个减到 3 个（perf 9a3a369f8）；排在零余数判断之后，作为“probe_read 按启动事实特化”一项。
+3. memset：x86_memory.rs:31-35 在长度超过 512 字节时改走通用体，丢掉已知长度（OTel 两处 668 字节清零走 98 字节的通用体，190 条指令，perf a0a448a1d）。改成保留已知次数的紧凑循环加固定尾部，排在“查找一次选定”之后。
+4. Cilium 原生一侧有 22 次装载留在 eBPF（11 次 tail_drop_notify、9 次 cil_host_policy、2 次 cil_lxc_policy；perf 68d450221，已对照 native_loader_manifest.hpp:626-630 核实）：manifest 条目带 source_map_prefix，程序数组里的叶子程序自己只做转发，引用里缺 cilium_calls map。归入“Cilium 用 agent 自己的配置头”一项一起解决，对象来源由 agent 生成的配置确定，区分选项由 vendor/bpf/Makefile 传给 manifest。Cilium 在这之前照旧不计。
+5. probe_read 剩余字节 4/2/1（c03737bf4）在 O3 下的 OTel：每次调用 1.098x（O3 组 0.874x），慢程序 native_tracer_entry 两臂调用次数比 0.996，原生每次调用 3726 → 2926 ns；吞吐 1.077x（probe-tails-20261117/summary-o3.txt）。其余五个应用由 run2 继续计时。
+
 **协调者 2026-11-17T03:24:41Z（核实 perf 审阅 02:47、02:56、03:18 后的决定）**：
 1. stage 目录里 1111 个 *.proof.o（7.2 MB，全部是 11-11 的旧构建产物）已删除。核实：默认装载路径每次生成自己的入口证明（native_loader_entry_data.hpp），受信服务按请求把证明生成到自己的目录（trusted_specializer.py），读取 proof 的代码都另有来源。vendor/bpf/Makefile 里每次构建为每个符号跑一遍 native-link --mode proof 的 *.proof.ok 规则，产物同样只留在构建目录里，下一批和 NATIVE_OPT_LEVEL 管道一起删。
 2. probe_read 剩余字节：8 的整倍数（OTel 的 24 处是 8、16、144 B）现在多走两次比较和跳转（perf 03:18，remainder-paths.json）。下一项“常量大小特化”在编译期按已知大小选路径，零余数时剩余部分整段省掉；运行时大小的路径把零余数判断放在最前面。
