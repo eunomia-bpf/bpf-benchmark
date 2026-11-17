@@ -6,6 +6,11 @@ reads on CPUs 16–19. No source was changed, tool built, image published or
 guest started. The coordinator owns implementation. Recommendations below
 introduce no new runtime check or admission gate.
 
+Scope update, 2026-11-17T03:18:29Z: operator decision 31aadd99c requires
+O3 for every P and load-time LTO. Os/O2 investigation records below are
+historical; their follow-up fixes and flag candidates are closed by that
+decision. The active review concerns the O3 pipeline and its LTO work.
+
 The strongest remaining opportunities are the read-helper family and map
 calls whose type is known but whose emitted path still redispatches. Making
 ordinary native arithmetic faster cannot remove those costs. The shared
@@ -1024,3 +1029,50 @@ so neither an omitted PHI load nor a broken tail transition is asserted
 as its cause. The coordinator owns that implementation/diagnostic work.
 No guest, optimizer/code-generation invocation, source change, new check
 or benchmark change was introduced by this review.
+
+### New remainder path: short-read gains and the zero-remainder cost
+
+2026-11-17T03:18:29Z, source c03737bf4/31aadd99c. The new 4/2/1 remainder
+is useful for short reads, but the general multiple-of-eight path now
+also visits the `cmp ecx,4` and `cmp ecx,2` selections before reaching the
+existing zero test (`x86_probe_read.rs:100–117`). The successful copy paths
+below compare the previous real OTel user-read emission with the
+coordinator's already-emitted 03:03 host user-read fixture. No code was
+built or executed for this comparison.
+
+| Size, B | Previous copy instructions | New copy instructions | Previous conditional branches | New conditional branches |
+|---:|---:|---:|---:|---:|
+| 2 | 20 | 15 | 6 | 5 |
+| 4 | 36 | 15 | 10 | 5 |
+| 8 | 13 | 17 | 4 | 6 |
+| 16 | 22 | 26 | 6 | 8 |
+| 144 | 166 | 170 | 38 | 40 |
+
+These counts stop before the success XOR and exclude saves, address
+policy, SMAP, pagefault nesting and cleanup. They assume every source
+load succeeds; they are neither cycle counts nor evidence of a measured
+app regression. At a zero remainder, two extra comparisons and branches
+account for the four-instruction difference. The old user routine is
+326 B; the captured new fixture is 380 B, a local 54-byte increase.
+This is not an installed-image comparison.
+
+The earlier retained OTel emission has 24 nearby literal-size sites:
+16 of 8 B, four of 16 B and four of 144 B. Those observed sizes all take
+the zero-remainder path. Their dynamic frequencies, and whether every
+current O3 P has the same sites, remain unmeasured here. Conversely,
+BCC's current `runqlat` P includes 4-byte kernel-read sites, for which the
+new remainder removes the old byte-loop work. This supports retaining
+the short-read improvement and prioritizing proven constant-size paths,
+especially multiples of eight, rather than undoing it. Compile-time
+specialization can omit a proven empty remainder without adding a
+runtime check. It remains subject to the existing fault recovery and
+code-sharing constraints in section 1.
+
+`remainder_path_inventory.py` records decoded instruction fragments and
+the path arithmetic in `remainder-paths.json`. An explicit `--capture`
+read preserved the existing fixture's instruction bytes, load-site data
+and decoded instructions under
+`/workspaces/kprog-raw/perf/20261117-remainder-review/user-fixture.json`.
+Default replay reads that persistent capture, so the evidence does not
+depend on the fixture remaining under /var/tmp. No second executable
+build, guest, source modification or deletion was made.

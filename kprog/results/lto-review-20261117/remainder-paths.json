@@ -1,0 +1,403 @@
+{
+  "recorded_utc": "2026-11-17T03:19:16Z",
+  "scope": "Static successful copy-region paths only, ending before success XOR. Excludes policy, saves, SMAP, cleanup and cycles. No execution, build or measured regression.",
+  "old_blob": "/workspaces/kprog-raw/perf/20261116-inner-array-lto/libbpf/otel-typed.blob",
+  "old_user_routine_bytes": 326,
+  "current_fixture": "/var/tmp/kprog-tmp/probe-test/user.bin",
+  "fixture_mtime_ns": 1794884611947397605,
+  "fixture_capture": "/workspaces/kprog-raw/perf/20261117-remainder-review/user-fixture.json",
+  "fixture_user_routine_bytes": 380,
+  "observed_historical_literal_sizes": {
+    "144": 4,
+    "16": 4,
+    "8": 16
+  },
+  "old_fragments": {
+    "prefix": [
+      [
+        29880,
+        "cmp",
+        "ecx,0x8"
+      ],
+      [
+        29883,
+        "jb",
+        "0x74e4"
+      ]
+    ],
+    "word": [
+      [
+        29889,
+        "mov",
+        "rax,QWORD PTR [rsi]"
+      ],
+      [
+        29892,
+        "test",
+        "r11d,r11d"
+      ],
+      [
+        29895,
+        "je",
+        "0x750f"
+      ],
+      [
+        29901,
+        "mov",
+        "QWORD PTR [rdi],rax"
+      ],
+      [
+        29904,
+        "add",
+        "rdi,0x8"
+      ],
+      [
+        29908,
+        "add",
+        "rsi,0x8"
+      ],
+      [
+        29912,
+        "sub",
+        "ecx,0x8"
+      ],
+      [
+        29915,
+        "cmp",
+        "ecx,0x8"
+      ],
+      [
+        29918,
+        "jae",
+        "0x74c1"
+      ]
+    ],
+    "zero": [
+      [
+        29924,
+        "test",
+        "ecx,ecx"
+      ],
+      [
+        29926,
+        "je",
+        "0x7508"
+      ]
+    ],
+    "byte": [
+      [
+        29932,
+        "movzx",
+        "eax,BYTE PTR [rsi]"
+      ],
+      [
+        29935,
+        "test",
+        "r11d,r11d"
+      ],
+      [
+        29938,
+        "je",
+        "0x750f"
+      ],
+      [
+        29944,
+        "mov",
+        "BYTE PTR [rdi],al"
+      ],
+      [
+        29946,
+        "inc",
+        "rdi"
+      ],
+      [
+        29949,
+        "inc",
+        "rsi"
+      ],
+      [
+        29952,
+        "dec",
+        "ecx"
+      ],
+      [
+        29954,
+        "jne",
+        "0x74ec"
+      ]
+    ]
+  },
+  "new_fragments": {
+    "prefix": [
+      [
+        126,
+        "cmp",
+        "ecx,0x8"
+      ],
+      [
+        129,
+        "jb",
+        "0xaa"
+      ]
+    ],
+    "word": [
+      [
+        135,
+        "mov",
+        "rax,QWORD PTR [rsi]"
+      ],
+      [
+        138,
+        "test",
+        "r11d,r11d"
+      ],
+      [
+        141,
+        "je",
+        "0x10b"
+      ],
+      [
+        147,
+        "mov",
+        "QWORD PTR [rdi],rax"
+      ],
+      [
+        150,
+        "add",
+        "rdi,0x8"
+      ],
+      [
+        154,
+        "add",
+        "rsi,0x8"
+      ],
+      [
+        158,
+        "sub",
+        "ecx,0x8"
+      ],
+      [
+        161,
+        "cmp",
+        "ecx,0x8"
+      ],
+      [
+        164,
+        "jae",
+        "0x87"
+      ]
+    ],
+    "test4": [
+      [
+        170,
+        "cmp",
+        "ecx,0x4"
+      ],
+      [
+        173,
+        "jb",
+        "0xcb"
+      ]
+    ],
+    "step4": [
+      [
+        179,
+        "mov",
+        "eax,DWORD PTR [rsi]"
+      ],
+      [
+        181,
+        "test",
+        "r11d,r11d"
+      ],
+      [
+        184,
+        "je",
+        "0x10b"
+      ],
+      [
+        190,
+        "mov",
+        "DWORD PTR [rdi],eax"
+      ],
+      [
+        192,
+        "add",
+        "rdi,0x4"
+      ],
+      [
+        196,
+        "add",
+        "rsi,0x4"
+      ],
+      [
+        200,
+        "sub",
+        "ecx,0x4"
+      ]
+    ],
+    "test2": [
+      [
+        203,
+        "cmp",
+        "ecx,0x2"
+      ],
+      [
+        206,
+        "jb",
+        "0xee"
+      ]
+    ],
+    "step2": [
+      [
+        212,
+        "movzx",
+        "eax,WORD PTR [rsi]"
+      ],
+      [
+        215,
+        "test",
+        "r11d,r11d"
+      ],
+      [
+        218,
+        "je",
+        "0x10b"
+      ],
+      [
+        224,
+        "mov",
+        "WORD PTR [rdi],ax"
+      ],
+      [
+        227,
+        "add",
+        "rdi,0x2"
+      ],
+      [
+        231,
+        "add",
+        "rsi,0x2"
+      ],
+      [
+        235,
+        "sub",
+        "ecx,0x2"
+      ]
+    ],
+    "test1": [
+      [
+        238,
+        "test",
+        "ecx,ecx"
+      ],
+      [
+        240,
+        "je",
+        "0x104"
+      ]
+    ],
+    "step1": [
+      [
+        246,
+        "movzx",
+        "eax,BYTE PTR [rsi]"
+      ],
+      [
+        249,
+        "test",
+        "r11d,r11d"
+      ],
+      [
+        252,
+        "je",
+        "0x10b"
+      ],
+      [
+        258,
+        "mov",
+        "BYTE PTR [rdi],al"
+      ]
+    ]
+  },
+  "paths": [
+    {
+      "size": 0,
+      "old_instructions": 4,
+      "new_instructions": 8,
+      "old_conditional_branches": 2,
+      "new_conditional_branches": 4
+    },
+    {
+      "size": 1,
+      "old_instructions": 12,
+      "new_instructions": 12,
+      "old_conditional_branches": 4,
+      "new_conditional_branches": 5
+    },
+    {
+      "size": 2,
+      "old_instructions": 20,
+      "new_instructions": 15,
+      "old_conditional_branches": 6,
+      "new_conditional_branches": 5
+    },
+    {
+      "size": 3,
+      "old_instructions": 28,
+      "new_instructions": 19,
+      "old_conditional_branches": 8,
+      "new_conditional_branches": 6
+    },
+    {
+      "size": 4,
+      "old_instructions": 36,
+      "new_instructions": 15,
+      "old_conditional_branches": 10,
+      "new_conditional_branches": 5
+    },
+    {
+      "size": 5,
+      "old_instructions": 44,
+      "new_instructions": 19,
+      "old_conditional_branches": 12,
+      "new_conditional_branches": 6
+    },
+    {
+      "size": 6,
+      "old_instructions": 52,
+      "new_instructions": 22,
+      "old_conditional_branches": 14,
+      "new_conditional_branches": 6
+    },
+    {
+      "size": 7,
+      "old_instructions": 60,
+      "new_instructions": 26,
+      "old_conditional_branches": 16,
+      "new_conditional_branches": 7
+    },
+    {
+      "size": 8,
+      "old_instructions": 13,
+      "new_instructions": 17,
+      "old_conditional_branches": 4,
+      "new_conditional_branches": 6
+    },
+    {
+      "size": 16,
+      "old_instructions": 22,
+      "new_instructions": 26,
+      "old_conditional_branches": 6,
+      "new_conditional_branches": 8
+    },
+    {
+      "size": 144,
+      "old_instructions": 166,
+      "new_instructions": 170,
+      "old_conditional_branches": 38,
+      "new_conditional_branches": 40
+    }
+  ],
+  "captured_new_copy_instruction_bytes": "83f9080f8223000000488b064585db0f84780000004889074883c7084883c60883e90883f9080f83ddffffff83f9040f82180000008b064585db0f844d00000089074883c7044883c60483e90483f9020f821a0000000fb7064585db0f842b0000006689074883c7024883c60283e90285c90f840e0000000fb6064585db0f84090000008807"
+}
