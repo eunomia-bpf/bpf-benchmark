@@ -62,3 +62,34 @@ entry label and both CALL/JMP source transfers correct. Tests should verify
 that generic callback arguments/count and RSP alignment match the old chain,
 with ARRAY/LPM live-value/bounds semantics unchanged. Actual source work waits
 for the current per-change replay so its attribution remains separate.
+
+## Functional ABI preflight
+
+Recipe `370eea291` executes the actual retained Katran ARRAY/LPM byte
+ranges with their captured kernel layout fields. The old chain's internal
+call is relocated to a contiguous fragment; the candidate removes only its
+14-byte ARRAY fallback frame. Both use the same LPM bytes and final external
+E8 slot, patched to a nearby host test callback. No real kernel helper or
+full application body is executed and no production source is changed.
+
+Host job 2770937 completed successfully at 21:46:07Z: **6,832 cases pass**,
+1,708 each for old/fused fragments through CALL/JMP entries. Cases cover live
+ARRAY bounds/mask/wide products and guard-end u32 keys, LPM prefix/flags/
+matching and invalid-prefix/root behavior, unaligned and guard-end keys,
+and generic type/data-shape delegation before an inaccessible key is read.
+Each form has 50 generic callbacks; their map/key arguments are unchanged,
+the count is exactly one per delegated lookup, and entry RSP alignment is
+8 modulo 16. The fused generic callback is 16 stack bytes shallower, with
+one fewer internal call/return and stack-adjust pair.
+
+The retained chain is 307 bytes; the test fragment is 293 bytes. These are
+extracted functional test artifacts, not a production transformation,
+installed-code reduction or per-call speedup. Raw old/fused bytes, test entry
+bytes, actual input/layout record and output stay at `preflight-location.txt`.
+The running canonical-linker job and checked guest were untouched.
+
+The existing LPM production host test source is
+`kprog/build/test-lpm-lookup.c`, not the guessed fixture path in the earlier
+handoff; this preflight required no change or source copy of that file.
+Production implementation and its Rust/kernel-relocation/whole-app checks
+remain next, after the queued per-change rebuild/replay ends.

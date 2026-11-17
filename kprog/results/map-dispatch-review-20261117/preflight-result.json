@@ -1,0 +1,40 @@
+{
+  "scope": "Host functional ABI preflight on extracted retained fragments and a host test callback. No real kernel helper executes. No production transformation, installed-size or timing result.",
+  "old_bytes": 307,
+  "fused_bytes": 293,
+  "cases": [
+    {
+      "form": "old",
+      "transfer": "call",
+      "cases": 1708,
+      "generic_callbacks": 50,
+      "fragment_bytes": 307,
+      "stack_alignment": 8
+    },
+    {
+      "form": "old",
+      "transfer": "jmp",
+      "cases": 1708,
+      "generic_callbacks": 50,
+      "fragment_bytes": 307,
+      "stack_alignment": 8
+    },
+    {
+      "form": "fused",
+      "transfer": "call",
+      "cases": 1708,
+      "generic_callbacks": 50,
+      "fragment_bytes": 293,
+      "stack_alignment": 8
+    },
+    {
+      "form": "fused",
+      "transfer": "jmp",
+      "cases": 1708,
+      "generic_callbacks": 50,
+      "fragment_bytes": 293,
+      "stack_alignment": 8
+    }
+  ],
+  "total_cases": 6832
+}
