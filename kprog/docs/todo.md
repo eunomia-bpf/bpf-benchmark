@@ -39,6 +39,8 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-17T02:59:47Z（编译参数研究结论，kprog/results/flag-tuning-20261117）**：统一参数保持 -O3。BCC、Tracee、Katran 三组之间每次调用相差约 4% 以内；Os 让 OTel stage 代码少 24%，但 Tracee 字符串池超出 .rodata map、BCC 来宾退出；O2 下 OTel 每次调用 11.6 倍、同样的调用次数，装载时 PERF_EVENT 上下文转换在 O2 漏转，工作量不同。接下来协调者自己做：shim 链接失败保留 eBPF（删三行）→ probe_read 剩余字节 4/2/1 一步 → 字符串池按段大小绑定、上下文转换在各级别都转全 → Os 重新作为代码量候选 → 通用查找一次选定 → Cilium 用 agent 自己的配置头。
+
 **协调者 2026-11-17T00:19:11Z（审核 21Z 核实后的决定）**：
 1. shim 在一个程序链接失败时返回 EINVAL，整个应用退出（bpfopt/shim/shim_native_loader.h 失败分支）；11-09 的 7734afc52 曾改成保留原 eBPF 程序，11-11 从 05-29 源码重新开始（e6808c073）时丢了。协调者在编译参数研究结束后删掉失败分支里的 dlclose/errno/return 三行，让它落到下面已有的“保留原 BPF fd”分支：只删不加，恢复 11-09 的行为。
 2. Katran 的吞吐里 BPF 只占约 5% 的 CPU，看 Katran 以每次调用为准；先做的是 OTel 的退步、probe_read 路径（Tracee、Tetragon 每次调用的 41–46%）和 LTO 审核的结果。

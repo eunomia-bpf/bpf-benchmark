@@ -311,9 +311,6 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
         log_line("native-loader failed prog=%s manifest=%s source=%s error=%s",
                  prog_name ? prog_name : "", manifest,
                  prog->bytecode_path, result.error);
-        dlclose(handle);
-        errno = EINVAL;
-        return -1;
     }
     if (!result.replaced) {
         log_line("native-loader no manifest match for prog=%s manifest=%s "

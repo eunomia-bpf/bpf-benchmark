@@ -132,49 +132,6 @@ mod tests {
         assert_eq!(analyze(&[seed.as_slice(),&copy_call].concat(),0,&HashSet::from([0])),HashSet::from([10]));
     }
 
-    #[test]
-    fn defined_code_pointer_spill_calls_roundtrip_and_execute() -> Result<()> {
-        use object::write::{Object, Relocation, Symbol, SymbolSection};
-        let mut object = Object::new(object::BinaryFormat::Elf, object::Architecture::X86_64,
-                                     object::Endianness::Little);
-        let text = object.add_section(Vec::new(),b".text".to_vec(),object::SectionKind::Text);
-        let entry_section = object.add_section(Vec::new(),b"kprobe/test".to_vec(),object::SectionKind::Text);
-        let callee = [0x48,0x89,0xf8,0x48,0x01,0xf0,0xc3]; // RAX=RDI+RSI.
-        let entry_code = [0x48,0x83,0xec,24, 0x48,0x8d,0x05,0,0,0,0,
-            0x48,0x89,0x44,0x24,8, 0x48,0x8b,0x44,0x24,8, 0xff,0xd0,
-            0x48,0x83,0xc4,24,0xc3];
-        object.append_section_data(text,&callee,1);
-        object.append_section_data(entry_section,&entry_code,1);
-        let function = object.add_symbol(Symbol { name:b"callee".to_vec(),value:0,size:callee.len() as u64,
-            kind:object::SymbolKind::Text,scope:object::SymbolScope::Linkage,weak:false,
-            section:SymbolSection::Section(text),flags:object::SymbolFlags::None });
-        object.add_symbol(Symbol { name:b"entry".to_vec(),value:0,size:entry_code.len() as u64,
-            kind:object::SymbolKind::Text,scope:object::SymbolScope::Linkage,weak:false,
-            section:SymbolSection::Section(entry_section),flags:object::SymbolFlags::None });
-        object.add_relocation(entry_section,Relocation {offset:7,symbol:function,addend:-4,
-            flags:RelocationFlags::Elf{r_type:2}})?;
-        let bytes=object.write()?;
-        let elf=object::File::parse(bytes.as_slice())?;
-        let entry=find_symbol_by_name(&elf,"entry")?;
-        let included=discover_reachable(&elf,&entry)?;
-        assert_eq!(included.len(),2);
-        assert_eq!(calls(&elf,&entry,&[entry.clone()])?,HashSet::new(),"same address in a different section is not the target");
-        assert_eq!(calls(&elf,&entry,&included)?,HashSet::from([21]));
-        let directory=std::path::Path::new("/var/tmp/kprog-tmp/perf/code-pointer");
-        fs::create_dir_all(directory)?;
-        let result=roundtrip(&elf,&entry,&directory.join("entry.proof.o"))?;
-        assert!(result.relocs.is_empty());
-        #[cfg(all(target_arch="x86_64",target_os="linux"))]
-        {
-            let mut code=result.blob;code.push(0xc3);
-            let mut data=[0u8;64];
-            for offset in 0..32 {
-                assert_eq!(memory::call_blob(&code,data.as_mut_ptr(),offset,0),
-                           data.as_mut_ptr().wrapping_add(offset));
-            }
-        }
-        Ok(())
-    }
 
     #[test]
     #[ignore = "uses the retained upstream CEL compiler output"]

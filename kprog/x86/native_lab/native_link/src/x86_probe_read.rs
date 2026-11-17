@@ -96,16 +96,28 @@ fn routine_kind(layout: &RuntimeProbeReadLayout, user: bool, actual: u64, string
     b.extend_from_slice(&[0x48,0x89,0x07,0x48,0x83,0xc7,8,0x48,0x83,0xc6,8,0x83,0xe9,8,0x83,0xf9,8]);
     let again = append_x86_jcc_rel32(&mut b, 0x83);
     patch_x86_rel32(&mut b, again, word_loop)?;
-    let byte_start = b.len(); patch_x86_rel32(&mut b, subword, byte_start)?;
+    // Remainder below 8 bytes: one 4-, one 2- and one 1-byte step, as mm/maccess.c copies.
+    let tail_start = b.len(); patch_x86_rel32(&mut b, subword, tail_start)?;
+    b.extend_from_slice(&[0x83,0xf9,4]); // cmp ecx,4
+    let below4 = append_x86_jcc_rel32(&mut b, 0x82);
+    sites.push(LoadSite { offset: b.len() as u32, insn_len: 2, destination: 11 });
+    b.extend_from_slice(&[0x8b,0x06,0x45,0x85,0xdb]); // mov eax,[rsi]; status
+    faults.push(append_x86_jcc_rel32(&mut b, 0x84));
+    b.extend_from_slice(&[0x89,0x07,0x48,0x83,0xc7,4,0x48,0x83,0xc6,4,0x83,0xe9,4]);
+    let two = b.len(); patch_x86_rel32(&mut b, below4, two)?;
+    b.extend_from_slice(&[0x83,0xf9,2]); // cmp ecx,2
+    let below2 = append_x86_jcc_rel32(&mut b, 0x82);
+    sites.push(LoadSite { offset: b.len() as u32, insn_len: 3, destination: 11 });
+    b.extend_from_slice(&[0x0f,0xb7,0x06,0x45,0x85,0xdb]); // movzx eax,word[rsi]; status
+    faults.push(append_x86_jcc_rel32(&mut b, 0x84));
+    b.extend_from_slice(&[0x66,0x89,0x07,0x48,0x83,0xc7,2,0x48,0x83,0xc6,2,0x83,0xe9,2]);
+    let one = b.len(); patch_x86_rel32(&mut b, below2, one)?;
     b.extend_from_slice(&[0x85,0xc9]);
     let complete = append_x86_jcc_rel32(&mut b, 0x84);
-    let byte_loop = b.len();
     sites.push(LoadSite { offset: b.len() as u32, insn_len: 3, destination: 11 });
     b.extend_from_slice(&[0x0f,0xb6,0x06,0x45,0x85,0xdb]); // movzx eax,byte[rsi]; status
     faults.push(append_x86_jcc_rel32(&mut b, 0x84));
-    b.extend_from_slice(&[0x88,0x07,0x48,0xff,0xc7,0x48,0xff,0xc6,0xff,0xc9]);
-    let again = append_x86_jcc_rel32(&mut b, 0x85);
-    patch_x86_rel32(&mut b, again, byte_loop)?;
+    b.extend_from_slice(&[0x88,0x07]);
     let success = b.len(); patch_x86_rel32(&mut b, complete, success)?;
     b.extend_from_slice(&[0x31,0xc0]);
     }
@@ -208,7 +220,7 @@ mod tests {
             .unwrap_or_else(|| std::env::temp_dir().join(format!("probe-read-{}",std::process::id())));
         fs::create_dir_all(&output)?;
         let source = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("../../../test/probe_read_driver.c");
+            .join("fixtures/probe_read_driver.c");
         let driver = output.join("check");
         let compile = std::process::Command::new("cc")
             .args(["-O2","-Wall","-Wextra","-Werror","-no-pie"])
@@ -225,7 +237,7 @@ mod tests {
             let binary = output.join(format!("{stem}.bin"));
             let metadata = output.join(format!("{stem}.sites"));
             fs::write(&binary,&bytes)?;
-            assert_eq!(sites.len(),if string {1} else {2}); assert_eq!(relocs.len(),1);
+            assert_eq!(sites.len(),if string {1} else {4}); assert_eq!(relocs.len(),1);
             let mut text = sites.len().to_string();text.push(char::from(10));
             for site in sites { text.push_str(&format!("{} {} {}\n",site.offset,site.insn_len,site.destination)); }
             text.push_str(&format!("{}\n",relocs[0].offset));
@@ -259,7 +271,7 @@ mod tests {
             RelocRecord{offset:15,kind:1,target:0x9999}];
         let helpers = HashMap::from([("bpf_probe_read_user".into(),0x1000),("bpf_probe_read_kernel".into(),0x2000)]);
         let (ranges,sites) = share(&mut blob,&mut relocs,&layout,&helpers)?;
-        assert_eq!(ranges.len(),2); assert_eq!(sites.len(),4);
+        assert_eq!(ranges.len(),2); assert_eq!(sites.len(),8);
         for (offset,range) in [(0,ranges[0]),(5,ranges[0]),(10,ranges[1])] {
             let disp = i32::from_le_bytes(blob[offset+1..offset+5].try_into()?);
             assert_eq!(offset as i64+5+i64::from(disp),range.0 as i64);

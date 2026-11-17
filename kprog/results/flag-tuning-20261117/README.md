@@ -9,3 +9,26 @@ Katran through the frozen corpus entry with stats on (SAMPLES=3, WORKLOAD_DURATI
 numbers stay 3 x 180 s). Ratios come from `may29_ratio.py` (the 05-29 parser) and installed bytes from `inst.py`.
 Order: O3 (current), Os, O2. The CMOV-to-branch and no-unrolling candidates were dropped on the operator's word (2026-11-17 ~23:58 UTC: "没必要吧").
 Lanes are stopped, so the host is quiet. Each candidate's summary is committed as `<n>-<name>.txt` when it lands.
+
+## Result (2026-11-17T02:59:47Z, coordinator)
+
+| App | per call O3 / Os / O2 | throughput O3 / Os / O2 | staged exec bytes O3 / Os |
+|---|---|---|---|
+| OTel | 0.874 / 1.068 / 11.565 | 1.119 / 1.027 / 1.849 | 547,799 / 413,855 |
+| BCC | 0.912 / load failed / 1.007 | 0.905 / - / 1.007 | 8,015 / 7,170 |
+| Cilium | 3.243 / 3.361 / 2.864 | 3.012 / 3.036 / 2.785 | 275,918 / 260,932 |
+| Tracee | 1.152 / load failed / 1.109 | 1.074 / - / 1.084 | 1,457,903 / 1,431,924 |
+| Katran | 1.013 / 1.015 / 1.039 | 1.006 / 1.008 / 1.034 | 9,830 / 9,376 |
+
+- BCC, Tracee and Katran move by at most about 4% per call across the three levels: within run-to-run spread.
+- Os: Tracee's native load fails with "native data symbol .L.str.6 exceeds BPF data map value_size for .rodata.str1.1"
+  (clang merges string constants differently, the native string pool outgrows the BPF .rodata map), the shim then
+  returns EINVAL and the app exits; BCC's guest exits 255 after the baseline.
+- O2: OTel per call 11.6x with the same invocation counts and installed size: the load-time PERF_EVENT context
+  conversion most likely misses loads at O2 and the program exits early, the same class as the 05-29 1.849x. Unequal work.
+- Cilium: the native objects are built with the sample config headers and CILIUM_MAX_* while the eBPF arm uses the
+  agent's runtime config; its ratios are left out until the configs match.
+
+Decision (coordinator): the one flag set stays -O3 for every app. Compile flags move per call by a few percent at most;
+the operator's targets need the LTO work (operator 2026-11-17: "LTO 那边反而需要更关注?"). Os comes back as the
+code-size candidate after the string-pool binding and the shim's link-failure path are fixed.
