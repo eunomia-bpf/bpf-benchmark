@@ -1,0 +1,66 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-producer-context",
+  "focused_build": {
+    "exit": 0,
+    "jobs": 154,
+    "log": "focused2.log"
+  },
+  "public_queries": {
+    "exit": 0,
+    "theorems": 7,
+    "log": "query.log",
+    "source_axioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "internal_run_additional_axioms": [
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem"
+    ],
+    "external_or_assembly_boundary": "none executed",
+    "new_semantic_or_native_reflection_axioms": []
+  },
+  "actual_internal_transitions": {
+    "five_context_and_tag_stores": 15,
+    "stack_tags_SP_then_context": 90
+  },
+  "readbacks": [
+    "helper context equals represented ctx",
+    "helper ABI base equals represented ctx",
+    "actual x0 union pointer equals represented ctx",
+    "x30 tag 10",
+    "x0 tag 1",
+    "prior 24 stack tag bytes zero and SP word zero in composed segment"
+  ],
+  "premises": [
+    "actual ctx temp binding",
+    "existing ValueRep of ctx and physical-origin binding",
+    "stage access equals real producer allocation access"
+  ],
+  "preservation": [
+    "all other declared-local typed loads",
+    "caller bytes and Cur/Max permissions",
+    "access",
+    "nextblock"
+  ],
+  "proof_limits": {
+    "heartbeats": 200000,
+    "recursion_depth": 512,
+    "workers": 1,
+    "address_space_GiB": 32,
+    "CPU": 17,
+    "all_compilation_timing_lock": "shared"
+  },
+  "whole_lake_build": {
+    "status": "pending final proof batch confirmation"
+  },
+  "last_complete_make_check": {
+    "exit": 0,
+    "commit": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "rerun": "not needed for Lean-only proof additions"
+  },
+  "complete_ISA_handler_refinements": 0,
+  "M5": "open",
+  "M6": "open"
+}

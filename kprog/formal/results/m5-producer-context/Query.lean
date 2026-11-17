@@ -1,0 +1,15 @@
+import KProgFormal.ClightRefinement.Arm64ProducerContext
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.context_source
+#check KProgFormal.ClightRefinement.Arm64Producer.context_source
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.context_names_distinct
+#check KProgFormal.ClightRefinement.Arm64Producer.context_names_distinct
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.context_pointer_layout
+#check KProgFormal.ClightRefinement.Arm64Producer.context_pointer_layout
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.context_cast
+#check KProgFormal.ClightRefinement.Arm64Producer.context_cast
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.context_local
+#check KProgFormal.ClightRefinement.Arm64Producer.context_local
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.context_initialized
+#check KProgFormal.ClightRefinement.Arm64Producer.context_initialized
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.stack_sp_and_context
+#check KProgFormal.ClightRefinement.Arm64Producer.stack_sp_and_context
