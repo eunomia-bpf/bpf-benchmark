@@ -29,6 +29,9 @@ correspondence remain explicit M5 obligations.
 The [global-memory proof](results/m5-global-memory/README.md) derives successful
 initialization of the linked 186 functions and two data globals, their exact
 permissions and frontier 189, and separation from the actual producer locals.
+The [linked NOP procedure](results/m5-linked-nop/README.md) executes all 19
+transitions in that same environment with actual handler/callee bindings and
+retains the concrete register relation; native admissibility remains open.
 
 | Base | Fork / submodule | Pinned source | Upstream toolchain |
 |---|---|---|---|

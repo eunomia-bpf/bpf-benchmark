@@ -85,15 +85,15 @@ theorem entry_frame (ge : CC.CGenv) (m : CC.Mem) :
 
 /-- Certify all nineteen actual transitions, including function entry,
 the internal width call and local deallocation. -/
-private theorem execute_internal (m m' : CC.Mem) (ignored : IgnoredArguments) (flags : BitVec 8)
+private theorem execute_internal (ge : CC.CGenv) (m m' : CC.Mem)
+    (binding : WidthBinding ge (allocation ge m).1) (ignored : IgnoredArguments) (flags : BitVec 8)
     (k : CC.Cont) (hk : CC.isCallCont k = true)
-    (hfree : CC.Mem.freeList (allocation Arm64Program.prog.globalenv m).2
-      (CC.blocksOfEnv Arm64Program.prog.globalenv.genv_cenv
-        (allocation Arm64Program.prog.globalenv m).1) = some m') :
-    InternalRun Arm64Program.prog.globalenv 19
+    (hfree : CC.Mem.freeList (allocation ge m).2
+      (CC.blocksOfEnv ge.genv_cenv
+        (allocation ge m).1) = some m') :
+    InternalRun ge 19
       (.Callstate (.Internal handler) (arguments ignored flags) k m)
       (.Returnstate .Vundef k m') := by
-  let ge := Arm64Program.prog.globalenv
   let e := (allocation ge m).1
   let m1 := (allocation ge m).2
   let le := initialTemps ignored flags
@@ -102,7 +102,7 @@ private theorem execute_internal (m m' : CC.Mem) (ignored : IgnoredArguments) (f
       (.State handler handler.fn_body k e le m1) :=
     .step trivial (.internal_function _ _ _ _ _ _ _
       (entry_valid ge m ignored flags)) (.refl _)
-  have run := body_internal ge e (programBinding e (entry_unshadowed ge m)) le m1 k flags
+  have run := body_internal ge e binding le m1 k flags
     (flags_temp ignored flags) (op_temp ignored flags)
   have leave : InternalRun ge 1
       (.State handler .Sskip k e (resultEnv le flags) m1)
@@ -118,15 +118,26 @@ theorem return_frame (ge : CC.CGenv) (m : CC.Mem) :
       FrameBelow m.nextblock m m' :=
   deallocate_locals (allocation_valid ge m)
 
-/-- Internal certificate and exact caller frame, for arbitrary call
-continuations. Successful deallocation is supplied internally. -/
+/-- One procedure proof for any environment with the actual internal width
+binding. Allocation, all nineteen internal transitions and freeing are derived. -/
+theorem call_internal_bound (ge : CC.CGenv) (m : CC.Mem)
+    (binding : WidthBinding ge (allocation ge m).1)
+    (ignored : IgnoredArguments) (flags : BitVec 8)
+    (k : CC.Cont) (hk : CC.isCallCont k = true) :
+    ∃ m', InternalRun ge 19
+      (.Callstate (.Internal handler) (arguments ignored flags) k m)
+      (.Returnstate .Vundef k m') ∧ FrameBelow m.nextblock m m' := by
+  obtain ⟨m', free, frame⟩ := return_frame ge m
+  exact ⟨m', execute_internal ge m m' binding ignored flags k hk free, frame⟩
+
+/-- The standalone export is an instance of the same procedure proof. -/
 theorem call_internal (m : CC.Mem) (ignored : IgnoredArguments) (flags : BitVec 8)
     (k : CC.Cont) (hk : CC.isCallCont k = true) :
     ∃ m', InternalRun Arm64Program.prog.globalenv 19
       (.Callstate (.Internal handler) (arguments ignored flags) k m)
-      (.Returnstate .Vundef k m') ∧ FrameBelow m.nextblock m m' := by
-  obtain ⟨m', free, frame⟩ := return_frame Arm64Program.prog.globalenv m
-  exact ⟨m', execute_internal m m' ignored flags k hk free, frame⟩
+      (.Returnstate .Vundef k m') ∧ FrameBelow m.nextblock m m' :=
+  call_internal_bound _ m
+    (programBinding _ (entry_unshadowed Arm64Program.prog.globalenv m)) ignored flags k hk
 
 /-- Complete actual C procedure execution, including successful allocation and
 freeing, for arbitrary caller memory, ignored arguments and flags byte. -/

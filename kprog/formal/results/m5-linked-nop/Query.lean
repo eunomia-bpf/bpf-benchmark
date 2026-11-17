@@ -1,0 +1,15 @@
+import KProgFormal.ClightRefinement.Arm64LinkedNop
+#check KProgFormal.ClightRefinement.Arm64LinkedNop.handler_binding
+#print axioms KProgFormal.ClightRefinement.Arm64LinkedNop.handler_binding
+#check KProgFormal.ClightRefinement.Arm64Nop.call_internal_bound
+#print axioms KProgFormal.ClightRefinement.Arm64Nop.call_internal_bound
+#check KProgFormal.ClightRefinement.Arm64LinkedNop.widthBinding
+#print axioms KProgFormal.ClightRefinement.Arm64LinkedNop.widthBinding
+#check KProgFormal.ClightRefinement.Arm64LinkedNop.call_internal
+#print axioms KProgFormal.ClightRefinement.Arm64LinkedNop.call_internal
+#check KProgFormal.ClightRefinement.Arm64LinkedNop.call_all_behaviors
+#print axioms KProgFormal.ClightRefinement.Arm64LinkedNop.call_all_behaviors
+#check KProgFormal.ClightRefinement.Arm64LinkedNop.initialized_call
+#print axioms KProgFormal.ClightRefinement.Arm64LinkedNop.initialized_call
+#check KProgFormal.ClightRefinement.Arm64LinkedNop.return_registers_correspond
+#print axioms KProgFormal.ClightRefinement.Arm64LinkedNop.return_registers_correspond
