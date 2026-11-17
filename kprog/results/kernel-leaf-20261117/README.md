@@ -1,0 +1,3 @@
+# Kernel probe reads as leaves (2026-11-17)
+
+run.sh waits for the user-leaf batch, rebuilds the one image with ac7116e0d, runs the one-image check and times BCC, Tetragon and Tracee; summary.txt holds the table and hostload.log in raw records host load around each run. Host tests: 40 linker tests pass; kernel reads pass 1152 host vectors (122 exact-site faults: both sides of USER_PTR_MAX + PAGE_SIZE, the vsyscall page and the page below it, a non-canonical address, width zero), kernel strings 193; the user routine stays byte-identical; the kernel routine grows 317 -> 374 bytes with the policy inline and the call and ten push/pop gone. Raw: /workspaces/kprog-raw/kernel-leaf-20261117.
