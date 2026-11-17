@@ -39,6 +39,13 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-17T03:24:41Z（核实 perf 审阅 02:47、02:56、03:18 后的决定）**：
+1. stage 目录里 1111 个 *.proof.o（7.2 MB，全部是 11-11 的旧构建产物）已删除。核实：默认装载路径每次生成自己的入口证明（native_loader_entry_data.hpp），受信服务按请求把证明生成到自己的目录（trusted_specializer.py），读取 proof 的代码都另有来源。vendor/bpf/Makefile 里每次构建为每个符号跑一遍 native-link --mode proof 的 *.proof.ok 规则，产物同样只留在构建目录里，下一批和 NATIVE_OPT_LEVEL 管道一起删。
+2. probe_read 剩余字节：8 的整倍数（OTel 的 24 处是 8、16、144 B）现在多走两次比较和跳转（perf 03:18，remainder-paths.json）。下一项“常量大小特化”在编译期按已知大小选路径，零余数时剩余部分整段省掉；运行时大小的路径把零余数判断放在最前面。
+3. LTO 清单加两项（perf 02:47）：bpf_get_current_task_btf 和 bpf_get_current_task 返回同一个指针（bpf_trace.c:755-768），并入已有的 current-task 内联（Tracee 121 处）；bpf_jiffies64 照内核 verifier 的做法换成对 jiffies 变量的一次读（Cilium 91 处）。
+4. ARRAY→LPM 的内部转发（perf 02:56）归入“通用查找一次选定”。
+5. Tetragon（603cacfb 起全部装上）在 probe_read 这组五个应用之后用同一个镜像计时（probe-tails-20261117/tetragon.sh）。
+
 **协调者 2026-11-17T03:10:41Z（运营者“都用 O3”）**：所有应用的 P 和装载时 LTO 都用 -O3。Os、O2 相关的后续（字符串池按段大小绑定、O2 下上下文转换漏转、Os 作代码量候选）不再做；装载时 LTO 编译器里按级别选择的分支（a541c006d）在下一批改动里删掉，回到固定 O3，NATIVE_OPT_LEVEL 和级别文件一起删。
 
 **协调者 2026-11-17T02:59:47Z（编译参数研究结论，kprog/results/flag-tuning-20261117）**：统一参数保持 -O3。BCC、Tracee、Katran 三组之间每次调用相差约 4% 以内；Os 让 OTel stage 代码少 24%，但 Tracee 字符串池超出 .rodata map、BCC 来宾退出；O2 下 OTel 每次调用 11.6 倍、同样的调用次数，装载时 PERF_EVENT 上下文转换在 O2 漏转，工作量不同。接下来协调者自己做：shim 链接失败保留 eBPF（删三行）→ probe_read 剩余字节 4/2/1 一步 → 字符串池按段大小绑定、上下文转换在各级别都转全 → Os 重新作为代码量候选 → 通用查找一次选定 → Cilium 用 agent 自己的配置头。
