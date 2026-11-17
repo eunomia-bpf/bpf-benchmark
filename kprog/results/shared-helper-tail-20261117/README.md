@@ -49,9 +49,9 @@ An end-to-end compiler sibling-call fixture is useful if actual link
 provenance is unclear; do not change the benchmark to manufacture it.
 
 `edit.py` previews by default and applies only with `--apply`. Host preview
-and validation take timing SH on CPU 19, with persistent raw logs. Apply
-after Omp's batch-2 image snapshot, before the prepared compact-global
-optimization: this is pipeline correctness. The old predicate directly
+and validation take timing SH on CPU 19, with persistent raw logs. Apply under timing SH and image EX, before the prepared compact-global
+optimization: this is pipeline correctness. Publication and the host job
+serialize on the image lock. The old predicate directly
 rejects the mixed test's E9 slot; no separate old-version build or second
 source copy is needed. Commit source and receipts
 after validation and let Omp schedule the next image/check. Successful E8
@@ -60,4 +60,6 @@ native installed bytes/per-call measurements cannot be inferred here.
 
 Preview receipt, 2026-11-17T13:40:17Z: source-anchor preview exited 0 at13:37:21Z, with empty stderr. `preview.json` records its persistent raw patch path. This checks the prepared edit only; runtime source remains unchanged and Rust/host validation is pending.
 
-`run-host.sh` applies this edit and runs the complete canonical linker suite under timing SH on CPU19, with a fresh persistent attempt directory and32GiB address-space bound. Start it after the batch-2 snapshot. It compares every retained batch-2 leaf payload and recovered-load sites file against the new output; successful E8 leaf bodies should stay identical. It does not publish an image or start a guest, and it does not rebuild the unchanged loader. Inspect/reduce the prepared patch before starting it.
+`run-host.sh` applies this edit and runs the complete canonical linker suite under timing SH on CPU19, with a fresh persistent attempt directory and32GiB address-space bound. It takes image EX after timing SH and holds both through test, receipt, explicit-path commit and push. If publication wins the lock first it gets the earlier source; if this host job wins first it leaves tested, committed inputs. It compares every retained batch-2 leaf payload and recovered-load sites file against the new output; successful E8 leaf bodies should stay identical. It does not publish an image or start a guest, and it does not rebuild the unchanged loader. Inspect/reduce the prepared patch before starting it.
+
+The earlier snapshot wait was a lane sequencing choice, not a coordinator requirement. Image-lock ordering replaces it. The runner records only this class's five open source files and its host receipts; unrelated staged or modified paths stay untouched. Failed tests or byte comparisons retain raw logs and exit before committing. No image or guest is started by this job.
