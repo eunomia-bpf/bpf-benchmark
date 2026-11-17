@@ -1,0 +1,5971 @@
+{
+  "scope": "Retained host-neutral dispatch ranges and bytes, all requests retained. Static chain shapes are not executed frequencies or installed-byte/per-call measurements. A missing range does not imply an app has no helper/map work.",
+  "source": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/replay.json",
+  "summary": {
+    "bcc/set": {
+      "requests": 25,
+      "both_ranges": 0
+    },
+    "cilium/agent": {
+      "requests": 47,
+      "both_ranges": 24,
+      "array_calls_lpm": 24,
+      "lpm_external_frames": 24,
+      "array_fallback_bytes": 336
+    },
+    "katran": {
+      "requests": 1,
+      "both_ranges": 1,
+      "array_calls_lpm": 1,
+      "lpm_external_frames": 1,
+      "array_fallback_bytes": 14
+    },
+    "otelcol-ebpf-profiler/profiling": {
+      "requests": 14,
+      "both_ranges": 3,
+      "array_calls_lpm": 3,
+      "lpm_external_frames": 3,
+      "array_fallback_bytes": 42
+    },
+    "tetragon/observer": {
+      "requests": 39,
+      "both_ranges": 18,
+      "array_calls_lpm": 18,
+      "lpm_external_frames": 18,
+      "array_fallback_bytes": 252
+    },
+    "tracee/monitor": {
+      "requests": 169,
+      "both_ranges": 116,
+      "array_calls_lpm": 116,
+      "lpm_external_frames": 116,
+      "array_fallback_bytes": 1624
+    }
+  },
+  "requests": [
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_php",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/otelcol-ebpf-profiler_profiling/link-0t9jewb9",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "native_tracer_entry",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/otelcol-ebpf-profiler_profiling/link-6pt2hgn7",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "tracepoint__sched_process_free",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/otelcol-ebpf-profiler_profiling/link-6xjm60mv",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_perl",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/otelcol-ebpf-profiler_profiling/link-9jgkf4wo",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_ruby",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/otelcol-ebpf-profiler_profiling/link-bp1f6lmn",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_native",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/otelcol-ebpf-profiler_profiling/link-f2sqjzud",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 14488,
+        "piece": "runtime_array",
+        "start": 14433
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 15021,
+        "piece": "lpm_lookup",
+        "start": 14769
+      },
+      "array_fallback_bytes": "4883ec08e81e0100004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 14769,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 15011,
+          "kind": 1,
+          "target": 18446744071734790688
+        }
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "read_task_struct",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/otelcol-ebpf-profiler_profiling/link-gv7scc03",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_v8",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/otelcol-ebpf-profiler_profiling/link-i74g9gvr",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 13871,
+        "piece": "runtime_array",
+        "start": 13816
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 14404,
+        "piece": "lpm_lookup",
+        "start": 14152
+      },
+      "array_fallback_bytes": "4883ec08e81e0100004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 14152,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 14394,
+          "kind": 1,
+          "target": 18446744071734790688
+        }
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_stop",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/otelcol-ebpf-profiler_profiling/link-isjxl4cd",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_dotnet",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/otelcol-ebpf-profiler_profiling/link-jhlatj24",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 18789,
+        "piece": "runtime_array",
+        "start": 18734
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 19322,
+        "piece": "lpm_lookup",
+        "start": 19070
+      },
+      "array_fallback_bytes": "4883ec08e81e0100004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 19070,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 19312,
+          "kind": 1,
+          "target": 18446744071734790688
+        }
+      ]
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_go_labels",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/otelcol-ebpf-profiler_profiling/link-miy7mdp6",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_python",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/otelcol-ebpf-profiler_profiling/link-pzbgnkhi",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_hotspot",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/otelcol-ebpf-profiler_profiling/link-vpdq0hnh",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "custom__generic",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/otelcol-ebpf-profiler_profiling/link-z69ln99l",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tcp_v4_connect",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-1_lto8xz",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_write",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-4jklketw",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tracepoint__syscalls__sys_exit_open",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-6i31gwia",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tcp_v4_connect_ret",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-794zppcb",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "sys_enter",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-7d98s1v6",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "block_rq_issue",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-7halu_ke",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "inet_sock_set_state",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-8e6fl8jk",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "block_rq_complete",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-_1aqp51j",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "blk_account_io_merge_bio",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-a193g4ge",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_open",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-ay6ey69x",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_create",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-bzxjfd4z",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tracepoint__syscalls__sys_enter_openat",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-dxo2lc2q",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_fsync",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-hgq_b00n",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "sched_wakeup_new",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-jb3gko01",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "block_rq_insert",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-jck9lh2k",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "sched_wakeup",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-k46xd0cp",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tracepoint__syscalls__sys_exit_openat",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-ll9iyiuh",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tcp_v6_connect_ret",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-mlacd5gt",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "kprobe__cap_capable_entry",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-o0mz755w",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "kprobe__cap_capable_exit",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-rh0ow6sg",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "sched_switch",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-scqqtjed",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tcp_v6_connect",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-v27kbtfd",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "sys_exit",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-v8lv8ar0",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_read",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-x1s4v62w",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tracepoint__syscalls__sys_enter_open",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/bcc_set/link-ys2epo0_",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_ingress_ipv4",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-13kno4fc",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6843,
+        "piece": "runtime_array",
+        "start": 6788
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 7095,
+        "piece": "lpm_lookup",
+        "start": 6843
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 6843,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 7085,
+          "kind": 1,
+          "target": 18446744072003226144
+        }
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_netdev",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-1cycht3i",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6153,
+        "piece": "runtime_array",
+        "start": 6098
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 6405,
+        "piece": "lpm_lookup",
+        "start": 6153
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 6153,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 6395,
+          "kind": 1,
+          "target": 18446744072003226144
+        }
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_rev_dnat_ipv4",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-2ce8m1_7",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 2839,
+        "piece": "runtime_array",
+        "start": 2784
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 3091,
+        "piece": "lpm_lookup",
+        "start": 2839
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 2839,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 3081,
+          "kind": 1,
+          "target": 18446744072003226144
+        }
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_xdp_entry",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-3cqcl0fp",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_container",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-4d9yymr5",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_no_service_ipv4",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-4uxpf98g",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_host",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-6fga9lbq",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_netdev",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-79btul9d",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6145,
+        "piece": "runtime_array",
+        "start": 6090
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 6397,
+        "piece": "lpm_lookup",
+        "start": 6145
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 6145,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 6387,
+          "kind": 1,
+          "target": 18446744072003226144
+        }
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_policy",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-8cg5bvgp",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 4060,
+        "piece": "runtime_array",
+        "start": 4005
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 4312,
+        "piece": "lpm_lookup",
+        "start": 4060
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 4060,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 4302,
+          "kind": 1,
+          "target": 18446744072003226144
+        }
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_arp",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-91mtb7o3",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_egress",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-9gsgtcv3",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 4798,
+        "piece": "runtime_array",
+        "start": 4743
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 5050,
+        "piece": "lpm_lookup",
+        "start": 4798
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 4798,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 5040,
+          "kind": 1,
+          "target": 18446744072003226144
+        }
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_rev_dnat_ipv4",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-_7ys3jh4",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 2839,
+        "piece": "runtime_array",
+        "start": 2784
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 3091,
+        "piece": "lpm_lookup",
+        "start": 2839
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 2839,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 3081,
+          "kind": 1,
+          "target": 18446744072003226144
+        }
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_lxc_policy",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-_8d03s3p",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 4352,
+        "piece": "runtime_array",
+        "start": 4297
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 4604,
+        "piece": "lpm_lookup",
+        "start": 4352
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 4352,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 4594,
+          "kind": 1,
+          "target": 18446744072003226144
+        }
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_host",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-_p5zmjby",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_snat_fwd_ipv4",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-agezr1oz",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 10909,
+        "piece": "runtime_array",
+        "start": 10854
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 11161,
+        "piece": "lpm_lookup",
+        "start": 10909
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 10909,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 11151,
+          "kind": 1,
+          "target": 18446744072003226144
+        }
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_lxc_policy",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-f5_4shmk",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 4352,
+        "piece": "runtime_array",
+        "start": 4297
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 4604,
+        "piece": "lpm_lookup",
+        "start": 4352
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 4352,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 4594,
+          "kind": 1,
+          "target": 18446744072003226144
+        }
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_host",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-f9ut04aq",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_egress_ipv4",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-fhkkm0eb",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_snat_fwd_ipv4",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-iwl_z0yi",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 10898,
+        "piece": "runtime_array",
+        "start": 10843
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 11150,
+        "piece": "lpm_lookup",
+        "start": 10898
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 10898,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 11140,
+          "kind": 1,
+          "target": 18446744072003226144
+        }
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_no_service_ipv4",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-jo5rwatf",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_arp",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-k027eqh_",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_to_endpoint",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-l7u92oz8",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 4523,
+        "piece": "runtime_array",
+        "start": 4468
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 4775,
+        "piece": "lpm_lookup",
+        "start": 4523
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 4523,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 4765,
+          "kind": 1,
+          "target": 18446744072003226144
+        }
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_egress",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-lf1ld_nc",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 4798,
+        "piece": "runtime_array",
+        "start": 4743
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 5050,
+        "piece": "lpm_lookup",
+        "start": 4798
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 4798,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 5040,
+          "kind": 1,
+          "target": 18446744072003226144
+        }
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_cont",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-lorirdv6",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_host",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-movvchz0",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_snat_fwd_ipv4",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-nxg7aalt",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 10891,
+        "piece": "runtime_array",
+        "start": 10836
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 11143,
+        "piece": "lpm_lookup",
+        "start": 10891
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 10891,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 11133,
+          "kind": 1,
+          "target": 18446744072003226144
+        }
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_policy",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-o3794un8",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 4060,
+        "piece": "runtime_array",
+        "start": 4005
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 4312,
+        "piece": "lpm_lookup",
+        "start": 4060
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 4060,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 4302,
+          "kind": 1,
+          "target": 18446744072003226144
+        }
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_netdev",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-o8ohgar4",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_netdev",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-pkqceosl",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-qw44_dh3",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 4640,
+        "piece": "runtime_array",
+        "start": 4585
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 4892,
+        "piece": "lpm_lookup",
+        "start": 4640
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 4640,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 4882,
+          "kind": 1,
+          "target": 18446744072003226144
+        }
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_host",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-rodhoecx",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_ingress_ipv4",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-rxey2hzy",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6843,
+        "piece": "runtime_array",
+        "start": 6788
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 7095,
+        "piece": "lpm_lookup",
+        "start": 6843
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 6843,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 7085,
+          "kind": 1,
+          "target": 18446744072003226144
+        }
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_container",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-s6hx0gco",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_netdev",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-syczdmnk",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 3647,
+        "piece": "runtime_array",
+        "start": 3592
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 3899,
+        "piece": "lpm_lookup",
+        "start": 3647
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 3647,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 3889,
+          "kind": 1,
+          "target": 18446744072003226144
+        }
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-t15zizyt",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 4640,
+        "piece": "runtime_array",
+        "start": 4585
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 4892,
+        "piece": "lpm_lookup",
+        "start": 4640
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 4640,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 4882,
+          "kind": 1,
+          "target": 18446744072003226144
+        }
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_netdev",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-t_ial4wq",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 3647,
+        "piece": "runtime_array",
+        "start": 3592
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 3899,
+        "piece": "lpm_lookup",
+        "start": 3647
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 3647,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 3889,
+          "kind": 1,
+          "target": 18446744072003226144
+        }
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_to_endpoint",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-uxsybchg",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 4523,
+        "piece": "runtime_array",
+        "start": 4468
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 4775,
+        "piece": "lpm_lookup",
+        "start": 4523
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 4523,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 4765,
+          "kind": 1,
+          "target": 18446744072003226144
+        }
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_container",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-v9h7qeqv",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_netdev",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-v_946gqq",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_cont",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-vc7e_r5k",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_host",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-vl_vqe9q",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_ingress",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-wbdsc394",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 3866,
+        "piece": "runtime_array",
+        "start": 3811
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 4118,
+        "piece": "lpm_lookup",
+        "start": 3866
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 3866,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 4108,
+          "kind": 1,
+          "target": 18446744072003226144
+        }
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_netdev",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-xd5wo9oh",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 3647,
+        "piece": "runtime_array",
+        "start": 3592
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 3899,
+        "piece": "lpm_lookup",
+        "start": 3647
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 3647,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 3889,
+          "kind": 1,
+          "target": 18446744072003226144
+        }
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_container",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-xno7wtkt",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_ingress",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-y6a0390q",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 3866,
+        "piece": "runtime_array",
+        "start": 3811
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 4118,
+        "piece": "lpm_lookup",
+        "start": 3866
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 3866,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 4108,
+          "kind": 1,
+          "target": 18446744072003226144
+        }
+      ]
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_host",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-yaomepl8",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_egress_ipv4",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/cilium_agent/link-zlk3fva1",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "execve_rate",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-04ysigi9",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-0uk6eny3",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 10741,
+        "piece": "runtime_array",
+        "start": 10686
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 11639,
+        "piece": "lpm_lookup",
+        "start": 11387
+      },
+      "array_fallback_bytes": "4883ec08e88b0200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 11387,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 11629,
+          "kind": 1,
+          "target": 18446744072187775520
+        }
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_process_event",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-0v55dkrr",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_output",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-1e1whdkd",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_output",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-20u5h7e0",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_arg",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-31f47_a7",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 10862,
+        "piece": "runtime_array",
+        "start": 10807
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 11760,
+        "piece": "lpm_lookup",
+        "start": 11508
+      },
+      "array_fallback_bytes": "4883ec08e88b0200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 11508,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 11750,
+          "kind": 1,
+          "target": 18446744072187775520
+        }
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_output",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-4vi9ft6v",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "execve_send",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-6vbtwxp5",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_output",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-7xa_4zm5",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-9p7ocgsk",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 10741,
+        "piece": "runtime_array",
+        "start": 10686
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 11639,
+        "piece": "lpm_lookup",
+        "start": 11387
+      },
+      "array_fallback_bytes": "4883ec08e88b0200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 11387,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 11629,
+          "kind": 1,
+          "target": 18446744072187775520
+        }
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_process_filter",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-_gtbajk_",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 9526,
+        "piece": "runtime_array",
+        "start": 9471
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 10424,
+        "piece": "lpm_lookup",
+        "start": 10172
+      },
+      "array_fallback_bytes": "4883ec08e88b0200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 10172,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 10414,
+          "kind": 1,
+          "target": 18446744072187775520
+        }
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-_qtl2kam",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 10741,
+        "piece": "runtime_array",
+        "start": 10686
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 11639,
+        "piece": "lpm_lookup",
+        "start": 11387
+      },
+      "array_fallback_bytes": "4883ec08e88b0200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 11387,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 11629,
+          "kind": 1,
+          "target": 18446744072187775520
+        }
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_actions",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-_vqrdf28",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_setup_event",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-ai2k1te5",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_actions",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-beoa__2d",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "execve_map_update",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-blnybbe9",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 237,
+        "piece": "runtime_array",
+        "start": 182
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 489,
+        "piece": "lpm_lookup",
+        "start": 237
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 237,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 479,
+          "kind": 1,
+          "target": 18446744072187775520
+        }
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_filter_arg",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-c3k1hzvb",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 10774,
+        "piece": "runtime_array",
+        "start": 10719
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 11672,
+        "piece": "lpm_lookup",
+        "start": 11420
+      },
+      "array_fallback_bytes": "4883ec08e88b0200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 11420,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 11662,
+          "kind": 1,
+          "target": 18446744072187775520
+        }
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "tg_kp_bprm_committing_creds",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-c_1wmpw5",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-ddm5z6l1",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 10741,
+        "piece": "runtime_array",
+        "start": 10686
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 11639,
+        "piece": "lpm_lookup",
+        "start": 11387
+      },
+      "array_fallback_bytes": "4883ec08e88b0200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 11387,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 11629,
+          "kind": 1,
+          "target": 18446744072187775520
+        }
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_filter",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-g_0kedgz",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 9529,
+        "piece": "runtime_array",
+        "start": 9474
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 10427,
+        "piece": "lpm_lookup",
+        "start": 10175
+      },
+      "array_fallback_bytes": "4883ec08e88b0200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 10175,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 10417,
+          "kind": 1,
+          "target": 18446744072187775520
+        }
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-il4rhakh",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 10741,
+        "piece": "runtime_array",
+        "start": 10686
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 11639,
+        "piece": "lpm_lookup",
+        "start": 11387
+      },
+      "array_fallback_bytes": "4883ec08e88b0200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 11387,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 11629,
+          "kind": 1,
+          "target": 18446744072187775520
+        }
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-j63keppd",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 10741,
+        "piece": "runtime_array",
+        "start": 10686
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 11639,
+        "piece": "lpm_lookup",
+        "start": 11387
+      },
+      "array_fallback_bytes": "4883ec08e88b0200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 11387,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 11629,
+          "kind": 1,
+          "target": 18446744072187775520
+        }
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_exit_disassociate_ctty",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-jasy1x_7",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_filter_arg",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-juhc192d",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 10862,
+        "piece": "runtime_array",
+        "start": 10807
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 11760,
+        "piece": "lpm_lookup",
+        "start": 11508
+      },
+      "array_fallback_bytes": "4883ec08e88b0200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 11508,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 11750,
+          "kind": 1,
+          "target": 18446744072187775520
+        }
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_actions",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-k6ckpvxv",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_process_event",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-l3wtixm8",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_process_event",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-lrpau888",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_process_filter",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-nqetz_k2",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 9526,
+        "piece": "runtime_array",
+        "start": 9471
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 10424,
+        "piece": "lpm_lookup",
+        "start": 10172
+      },
+      "array_fallback_bytes": "4883ec08e88b0200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 10172,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 10414,
+          "kind": 1,
+          "target": 18446744072187775520
+        }
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-qqafecq5",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 10741,
+        "piece": "runtime_array",
+        "start": 10686
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 11639,
+        "piece": "lpm_lookup",
+        "start": 11387
+      },
+      "array_fallback_bytes": "4883ec08e88b0200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 11387,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 11629,
+          "kind": 1,
+          "target": 18446744072187775520
+        }
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_execve",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-r9kh94rr",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_event",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-rmyx34xm",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 1770,
+        "piece": "runtime_array",
+        "start": 1715
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 2668,
+        "piece": "lpm_lookup",
+        "start": 2416
+      },
+      "array_fallback_bytes": "4883ec08e88b0200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 2416,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 2658,
+          "kind": 1,
+          "target": 18446744072187775520
+        }
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_event",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-wdd42hwy",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 1770,
+        "piece": "runtime_array",
+        "start": 1715
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 2668,
+        "piece": "lpm_lookup",
+        "start": 2416
+      },
+      "array_fallback_bytes": "4883ec08e88b0200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 2416,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 2658,
+          "kind": 1,
+          "target": 18446744072187775520
+        }
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_actions",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-xf313ycz",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-xgsv35ba",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 10741,
+        "piece": "runtime_array",
+        "start": 10686
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 11639,
+        "piece": "lpm_lookup",
+        "start": 11387
+      },
+      "array_fallback_bytes": "4883ec08e88b0200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 11387,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 11629,
+          "kind": 1,
+          "target": 18446744072187775520
+        }
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_event",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-xh90hqo_",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_setup_event",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-xuz7oyzt",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_exit_acct_process",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-ye4mrb_x",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_event",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-yuod933z",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 13403,
+        "piece": "runtime_array",
+        "start": 13348
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 14301,
+        "piece": "lpm_lookup",
+        "start": 14049
+      },
+      "array_fallback_bytes": "4883ec08e88b0200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 14049,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 14291,
+          "kind": 1,
+          "target": 18446744072187775520
+        }
+      ]
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_wake_up_new_task",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tetragon_observer/link-zfitfdx5",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_do_init_module",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-017c9l0e",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 10346,
+        "piece": "runtime_array",
+        "start": 10291
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 11892,
+        "piece": "lpm_lookup",
+        "start": 11640
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 11640,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 11882,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_mkdir_signal",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-05zpqxw5",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_proc_create",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-09yg3syu",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 5996,
+        "piece": "runtime_array",
+        "start": 5941
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 7407,
+        "piece": "lpm_lookup",
+        "start": 7155
+      },
+      "array_fallback_bytes": "4883ec08e88c0400004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 7155,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 7397,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_permission",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-0i4efh97",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6468,
+        "piece": "runtime_array",
+        "start": 6413
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 7913,
+        "piece": "lpm_lookup",
+        "start": 7661
+      },
+      "array_fallback_bytes": "4883ec08e8ae0400004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 7661,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 7903,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sched_process_fork_signal",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-0yeqcsp9",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_dup2",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-0zn8n8nm",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 9450,
+        "piece": "runtime_array",
+        "start": 9395
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 10996,
+        "piece": "lpm_lookup",
+        "start": 10744
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 10744,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 10986,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_sb_mount",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-1al7w7n_",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 12206,
+        "piece": "runtime_array",
+        "start": 12151
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 13617,
+        "piece": "lpm_lookup",
+        "start": 13365
+      },
+      "array_fallback_bytes": "4883ec08e88c0400004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 13365,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 13607,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_register_kprobe",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-1dlp69ce",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6335,
+        "piece": "runtime_array",
+        "start": 6280
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 7746,
+        "piece": "lpm_lookup",
+        "start": 7494
+      },
+      "array_fallback_bytes": "4883ec08e88c0400004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 7494,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 7736,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "security_bpf_kprobe",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-1rsfl2um",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_register_kprobe",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-25r5ey8n",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_fd_install",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-279z4mzn",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 11071,
+        "piece": "runtime_array",
+        "start": 11016
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 11863,
+        "piece": "lpm_lookup",
+        "start": 11611
+      },
+      "array_fallback_bytes": "4883ec08e8210200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 11611,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 11853,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_recvmsg",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-2c20f7iq",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6133,
+        "piece": "runtime_array",
+        "start": 6078
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 6925,
+        "piece": "lpm_lookup",
+        "start": 6673
+      },
+      "array_fallback_bytes": "4883ec08e8210200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 6673,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 6915,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_mem_dump_trigger",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-2euu41id",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 4919,
+        "piece": "runtime_array",
+        "start": 4864
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 6072,
+        "piece": "lpm_lookup",
+        "start": 5820
+      },
+      "array_fallback_bytes": "4883ec08e88a0300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 5820,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 6062,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_truncate",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-2ohy4p0m",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6636,
+        "piece": "runtime_array",
+        "start": 6581
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 8182,
+        "piece": "lpm_lookup",
+        "start": 7930
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 7930,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 8172,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace___debugfs_create_file",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-2wpohzoo",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6632,
+        "piece": "runtime_array",
+        "start": 6577
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 8178,
+        "piece": "lpm_lookup",
+        "start": 7926
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 7926,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 8168,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_bpf_check",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-2xmqw18s",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 5065,
+        "piece": "runtime_array",
+        "start": 5010
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 5857,
+        "piece": "lpm_lookup",
+        "start": 5605
+      },
+      "array_fallback_bytes": "4883ec08e8210200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 5605,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 5847,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "vfs_writev_magic_enter",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-3aidh7c1",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_utimes_common",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-3cfra29r",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 12608,
+        "piece": "runtime_array",
+        "start": 12553
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 14154,
+        "piece": "lpm_lookup",
+        "start": 13902
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 13902,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 14144,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_lkm_seeker",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-3oke79hs",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 3830,
+        "piece": "runtime_array",
+        "start": 3775
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 5015,
+        "piece": "lpm_lookup",
+        "start": 4763
+      },
+      "array_fallback_bytes": "4883ec08e8aa0300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 4763,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 5005,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_chmod_common",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-4hsfozd4",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 11711,
+        "piece": "runtime_array",
+        "start": 11656
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 13122,
+        "piece": "lpm_lookup",
+        "start": 12870
+      },
+      "array_fallback_bytes": "4883ec08e88c0400004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 12870,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 13112,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_execute_finished",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-4vy19taj",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 19950,
+        "piece": "runtime_array",
+        "start": 19895
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 21496,
+        "piece": "lpm_lookup",
+        "start": 21244
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 21244,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 21486,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_process_exec",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-51uw37rf",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 14829,
+        "piece": "runtime_array",
+        "start": 14774
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 16375,
+        "piece": "lpm_lookup",
+        "start": 16123
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 16123,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 16365,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bprm_creds_for_exec",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-56siaau7",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 12111,
+        "piece": "runtime_array",
+        "start": 12056
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 13657,
+        "piece": "lpm_lookup",
+        "start": 13405
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 13405,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 13647,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__cgroup__cgroup_rmdir",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-5gxcl38z",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6184,
+        "piece": "runtime_array",
+        "start": 6129
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 7730,
+        "piece": "lpm_lookup",
+        "start": 7478
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 7478,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 7720,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__accept4",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-5llp5ka0",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 5985,
+        "piece": "runtime_array",
+        "start": 5930
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 7138,
+        "piece": "lpm_lookup",
+        "start": 6886
+      },
+      "array_fallback_bytes": "4883ec08e88a0300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 6886,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 7128,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bpf_map",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-64h9nush",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6017,
+        "piece": "runtime_array",
+        "start": 5962
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 7425,
+        "piece": "lpm_lookup",
+        "start": 7173
+      },
+      "array_fallback_bytes": "4883ec08e8890400004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 7173,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 7415,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_dup",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-6_siljwd",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sched_process_exit_signal",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-6fbt0i5v",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "vfs_writev_magic_return",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-7_enltvb",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 15473,
+        "piece": "runtime_array",
+        "start": 15418
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 17019,
+        "piece": "lpm_lookup",
+        "start": 16767
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 16767,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 17009,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_check_map_func_compatibility",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-89tqz71h",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 5306,
+        "piece": "runtime_array",
+        "start": 5251
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 6098,
+        "piece": "lpm_lookup",
+        "start": 5846
+      },
+      "array_fallback_bytes": "4883ec08e8210200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 5846,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 6088,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__raw_syscalls__sys_enter",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-8cgewgox",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_kallsyms_lookup_name",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-8kgpa20o",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execveat_enter",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-8lb6agqq",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 16799,
+        "piece": "runtime_array",
+        "start": 16744
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 18345,
+        "piece": "lpm_lookup",
+        "start": 18093
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 18093,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 18335,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_settime64",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-932_xsv4",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6220,
+        "piece": "runtime_array",
+        "start": 6165
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 7373,
+        "piece": "lpm_lookup",
+        "start": 7121
+      },
+      "array_fallback_bytes": "4883ec08e88a0300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 7121,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 7363,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_mknod",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-96ffhbif",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6487,
+        "piece": "runtime_array",
+        "start": 6432
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 8033,
+        "piece": "lpm_lookup",
+        "start": 7781
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 7781,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 8023,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_set_fs_pwd",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-99z6y52i",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 12504,
+        "piece": "runtime_array",
+        "start": 12449
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 13689,
+        "piece": "lpm_lookup",
+        "start": 13437
+      },
+      "array_fallback_bytes": "4883ec08e8aa0300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 13437,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 13679,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_setsockopt",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-9ds10gnw",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 7645,
+        "piece": "runtime_array",
+        "start": 7590
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 8798,
+        "piece": "lpm_lookup",
+        "start": 8546
+      },
+      "array_fallback_bytes": "4883ec08e88a0300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 8546,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 8788,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_file_modified",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-9qyfm50x",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__raw_syscalls__sys_exit",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-9y0d_vd4",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__module__module_load",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-9yd5aw5c",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 13260,
+        "piece": "runtime_array",
+        "start": 13205
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 14806,
+        "piece": "lpm_lookup",
+        "start": 14554
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 14554,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 14796,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execve_exit",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-_0s58jbm",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 16706,
+        "piece": "runtime_array",
+        "start": 16651
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 18252,
+        "piece": "lpm_lookup",
+        "start": 18000
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 18000,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 18242,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_file_update_time",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-_2la9k4c",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_path_notify",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-_6a36jlc",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 12036,
+        "piece": "runtime_array",
+        "start": 11981
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 13582,
+        "piece": "lpm_lookup",
+        "start": 13330
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 13330,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 13572,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_dup3",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-_y38j0c7",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_listen",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-a7tuahol",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 7390,
+        "piece": "runtime_array",
+        "start": 7335
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 8543,
+        "piece": "lpm_lookup",
+        "start": 8291
+      },
+      "array_fallback_bytes": "4883ec08e88a0300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 8291,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 8533,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_kallsyms_lookup_name",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-ahj1_4pv",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6131,
+        "piece": "runtime_array",
+        "start": 6076
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 7542,
+        "piece": "lpm_lookup",
+        "start": 7290
+      },
+      "array_fallback_bytes": "4883ec08e88c0400004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 7290,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 7532,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_mmap_file",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-amhjcvnr",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 23685,
+        "piece": "runtime_array",
+        "start": 23630
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 25231,
+        "piece": "lpm_lookup",
+        "start": 24979
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 24979,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 25221,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_vfs_readv",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-aop4ljiv",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_cap_capable",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-b7axm1ie",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 5886,
+        "piece": "runtime_array",
+        "start": 5831
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 6901,
+        "piece": "lpm_lookup",
+        "start": 6649
+      },
+      "array_fallback_bytes": "4883ec08e8000300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 6649,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 6891,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_do_splice",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-bbxy8sr7",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 13772,
+        "piece": "runtime_array",
+        "start": 13717
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 15318,
+        "piece": "lpm_lookup",
+        "start": 15066
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 15066,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 15308,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_task_prctl",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-bdoo7afc",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 29800,
+        "piece": "runtime_array",
+        "start": 29745
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 31346,
+        "piece": "lpm_lookup",
+        "start": 31094
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 31094,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 31336,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_read_tail",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-bin1t79n",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_device_add",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-bwp7_2ms",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6108,
+        "piece": "runtime_array",
+        "start": 6053
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 7293,
+        "piece": "lpm_lookup",
+        "start": 7041
+      },
+      "array_fallback_bytes": "4883ec08e8aa0300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 7041,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 7283,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_sys_enter",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-ci3jf9ph",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 5954,
+        "piece": "runtime_array",
+        "start": 5899
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 6969,
+        "piece": "lpm_lookup",
+        "start": 6717
+      },
+      "array_fallback_bytes": "4883ec08e8000300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 6717,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 6959,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_check_helper_call",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-cquz72yx",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 5301,
+        "piece": "runtime_array",
+        "start": 5246
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 6093,
+        "piece": "lpm_lookup",
+        "start": 5841
+      },
+      "array_fallback_bytes": "4883ec08e8210200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 5841,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 6083,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_mmap_alert",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-cru7pfek",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 14085,
+        "piece": "runtime_array",
+        "start": 14030
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 15631,
+        "piece": "lpm_lookup",
+        "start": 15379
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 15379,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 15621,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_task_setrlimit",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-cw8vbd3l",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6169,
+        "piece": "runtime_array",
+        "start": 6114
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 7322,
+        "piece": "lpm_lookup",
+        "start": 7070
+      },
+      "array_fallback_bytes": "4883ec08e88a0300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 7070,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 7312,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "kernel_write_magic_enter",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-d3zufz99",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_splice",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-d449regs",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_file_modified",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-d50syq4d",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 13153,
+        "piece": "runtime_array",
+        "start": 13098
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 14699,
+        "piece": "lpm_lookup",
+        "start": 14447
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 14447,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 14689,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_lkm_seeker_submitter",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-dhilq03b",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 4502,
+        "piece": "runtime_array",
+        "start": 4447
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 5655,
+        "piece": "lpm_lookup",
+        "start": 5403
+      },
+      "array_fallback_bytes": "4883ec08e88a0300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 5403,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 5645,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_switch",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-dynocs3e",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6390,
+        "piece": "runtime_array",
+        "start": 6335
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 7798,
+        "piece": "lpm_lookup",
+        "start": 7546
+      },
+      "array_fallback_bytes": "4883ec08e8890400004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 7546,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 7788,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_inotify_find_inode",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-dz4c9avv",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 12243,
+        "piece": "runtime_array",
+        "start": 12188
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 13789,
+        "piece": "lpm_lookup",
+        "start": 13537
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 13537,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 13779,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_mprotect",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-eb6tcou5",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 24002,
+        "piece": "runtime_array",
+        "start": 23947
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 25548,
+        "piece": "lpm_lookup",
+        "start": 25296
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 25296,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 25538,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__task__task_rename",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-egsoamtt",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6088,
+        "piece": "runtime_array",
+        "start": 6033
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 7273,
+        "piece": "lpm_lookup",
+        "start": 7021
+      },
+      "array_fallback_bytes": "4883ec08e8aa0300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 7021,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 7263,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "send_bin_tp",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-ekfto0ej",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_ptrace",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-eolnj7vr",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 9450,
+        "piece": "runtime_array",
+        "start": 9395
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 10996,
+        "piece": "lpm_lookup",
+        "start": 10744
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 10744,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 10986,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_sys_exit",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-f06yp4a3",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 5973,
+        "piece": "runtime_array",
+        "start": 5918
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 6988,
+        "piece": "lpm_lookup",
+        "start": 6736
+      },
+      "array_fallback_bytes": "4883ec08e8000300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 6736,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 6978,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_process_free",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-f0fyimi4",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_kernel_post_read_file",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-fgoiyo4w",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 12719,
+        "piece": "runtime_array",
+        "start": 12664
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 14265,
+        "piece": "lpm_lookup",
+        "start": 14013
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 14013,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 14255,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_readv_tail",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-fscgqsh5",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace___register_chrdev",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-ftw94k7c",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lsm_file_open_test",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-fx044r0o",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 5760,
+        "piece": "runtime_array",
+        "start": 5705
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 6552,
+        "piece": "lpm_lookup",
+        "start": 6300
+      },
+      "array_fallback_bytes": "4883ec08e8210200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 6300,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 6542,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bpf",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-gmhuwt57",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 11825,
+        "piece": "runtime_array",
+        "start": 11770
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 13371,
+        "piece": "lpm_lookup",
+        "start": 13119
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 13119,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 13361,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall_checker",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-gs0e2ldt",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 10617,
+        "piece": "runtime_array",
+        "start": 10562
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 11409,
+        "piece": "lpm_lookup",
+        "start": 11157
+      },
+      "array_fallback_bytes": "4883ec08e8210200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 11157,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 11399,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe__features_fallback_minimal_tailcall",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-gwrg59pw",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_exit",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-hb9cetnn",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 5867,
+        "piece": "runtime_array",
+        "start": 5812
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 6885,
+        "piece": "lpm_lookup",
+        "start": 6633
+      },
+      "array_fallback_bytes": "4883ec08e8030300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 6633,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 6875,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_rename",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-hc4ro7xn",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 7427,
+        "piece": "runtime_array",
+        "start": 7372
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 8612,
+        "piece": "lpm_lookup",
+        "start": 8360
+      },
+      "array_fallback_bytes": "4883ec08e8aa0300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 8360,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 8602,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_sb_umount",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-hdvg450z",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6633,
+        "piece": "runtime_array",
+        "start": 6578
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 8041,
+        "piece": "lpm_lookup",
+        "start": 7789
+      },
+      "array_fallback_bytes": "4883ec08e8890400004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 7789,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 8031,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_read",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-hsk75jw2",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 13330,
+        "piece": "runtime_array",
+        "start": 13275
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 14876,
+        "piece": "lpm_lookup",
+        "start": 14624
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 14624,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 14866,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execve_enter",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-hvb0kyoo",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 16618,
+        "piece": "runtime_array",
+        "start": 16563
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 18164,
+        "piece": "lpm_lookup",
+        "start": 17912
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 17912,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 18154,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_create",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-i3p2v7am",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6126,
+        "piece": "runtime_array",
+        "start": 6071
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 7141,
+        "piece": "lpm_lookup",
+        "start": 6889
+      },
+      "array_fallback_bytes": "4883ec08e8000300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 6889,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 7131,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__cgroup__cgroup_attach_task",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-i4_djze4",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6185,
+        "piece": "runtime_array",
+        "start": 6130
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 7593,
+        "piece": "lpm_lookup",
+        "start": 7341
+      },
+      "array_fallback_bytes": "4883ec08e8890400004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 7341,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 7583,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_ioctl",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-ibpjwerv",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 7660,
+        "piece": "runtime_array",
+        "start": 7605
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 9206,
+        "piece": "lpm_lookup",
+        "start": 8954
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 8954,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 9196,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_file_update_time",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-ibrrmkdz",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 13153,
+        "piece": "runtime_array",
+        "start": 13098
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 14699,
+        "piece": "lpm_lookup",
+        "start": 14447
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 14447,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 14689,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_process_exit",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-j3_4yk8e",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6254,
+        "piece": "runtime_array",
+        "start": 6199
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 7407,
+        "piece": "lpm_lookup",
+        "start": 7155
+      },
+      "array_fallback_bytes": "4883ec08e88a0300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 7155,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 7397,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_arch_prctl",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-jv5nd05b",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_sigaction",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-jxmj3ryw",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 7374,
+        "piece": "runtime_array",
+        "start": 7319
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 8527,
+        "piece": "lpm_lookup",
+        "start": 8275
+      },
+      "array_fallback_bytes": "4883ec08e88a0300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 8275,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 8517,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sched_process_exec_event_submit_tail",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-k0ty1s40",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_sendmsg",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-kb8wrxm3",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6133,
+        "piece": "runtime_array",
+        "start": 6078
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 6925,
+        "piece": "lpm_lookup",
+        "start": 6673
+      },
+      "array_fallback_bytes": "4883ec08e8210200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 6673,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 6915,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_dup2",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-kc6m9ob8",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe__features_fallback_helper_tailcall",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-kmzrwgx2",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "empty_kprobe",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-krjq8b_5",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bpf_prog",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-ktazrxzj",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 7192,
+        "piece": "runtime_array",
+        "start": 7137
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 8738,
+        "piece": "lpm_lookup",
+        "start": 8486
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 8486,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 8728,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_process_fork",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-kw8tx6mb",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 13522,
+        "piece": "runtime_array",
+        "start": 13467
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 14675,
+        "piece": "lpm_lookup",
+        "start": 14423
+      },
+      "array_fallback_bytes": "4883ec08e88a0300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 14423,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 14665,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "heartbeat_capture",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-le73inl6",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_write_tail",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-lncel1es",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 21380,
+        "piece": "runtime_array",
+        "start": 21325
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 22926,
+        "piece": "lpm_lookup",
+        "start": 22674
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 22674,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 22916,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_readv",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-lp_oh_df",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 13330,
+        "piece": "runtime_array",
+        "start": 13275
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 14876,
+        "piece": "lpm_lookup",
+        "start": 14624
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 14624,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 14866,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_writev_tail",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-lvmz7ggv",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 21808,
+        "piece": "runtime_array",
+        "start": 21753
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 23354,
+        "piece": "lpm_lookup",
+        "start": 23102
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 23102,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 23344,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_filldir64",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-lw9gjkt3",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 5943,
+        "piece": "runtime_array",
+        "start": 5888
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 7128,
+        "piece": "lpm_lookup",
+        "start": 6876
+      },
+      "array_fallback_bytes": "4883ec08e8aa0300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 6876,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 7118,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_kset_tail",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-m5q7iw98",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_vfs_writev",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-mhw9lgtg",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_kernel_write_tail",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-mwmqejnt",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 21380,
+        "piece": "runtime_array",
+        "start": 21325
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 22926,
+        "piece": "lpm_lookup",
+        "start": 22674
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 22674,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 22916,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__cgroup__cgroup_mkdir",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-mxjcj4ia",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6184,
+        "piece": "runtime_array",
+        "start": 6129
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 7730,
+        "piece": "lpm_lookup",
+        "start": 7478
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 7478,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 7720,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_skb_ingress",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-n3xtt1s_",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6214,
+        "piece": "runtime_array",
+        "start": 6159
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 6466,
+        "piece": "lpm_lookup",
+        "start": 6214
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 6214,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 6456,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_unlink",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-nc6szymi",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6962,
+        "piece": "runtime_array",
+        "start": 6907
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 8508,
+        "piece": "lpm_lookup",
+        "start": 8256
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 8256,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 8498,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_mmap",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-nfj3hqwm",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_symlink",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-np0eklc2",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6458,
+        "piece": "runtime_array",
+        "start": 6403
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 7643,
+        "piece": "lpm_lookup",
+        "start": 7391
+      },
+      "array_fallback_bytes": "4883ec08e8aa0300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 7391,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 7633,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__exec_test",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-nu8vqqcm",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 41153,
+        "piece": "runtime_array",
+        "start": 41098
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 41945,
+        "piece": "lpm_lookup",
+        "start": 41693
+      },
+      "array_fallback_bytes": "4883ec08e8210200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 41693,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 41935,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_commit_creds",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-o1dqggp4",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 7667,
+        "piece": "runtime_array",
+        "start": 7612
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 8719,
+        "piece": "lpm_lookup",
+        "start": 8467
+      },
+      "array_fallback_bytes": "4883ec08e8250300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 8467,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 8709,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_sk_clone",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-o_gjhpap",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bprm_check",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-oelk4uaw",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 25390,
+        "piece": "runtime_array",
+        "start": 25335
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 26936,
+        "piece": "lpm_lookup",
+        "start": 26684
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 26684,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 26926,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_dup_exit_tail",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-ouaht80l",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6653,
+        "piece": "runtime_array",
+        "start": 6598
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 7806,
+        "piece": "lpm_lookup",
+        "start": 7554
+      },
+      "array_fallback_bytes": "4883ec08e88a0300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 7554,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 7796,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "process_execute_failed_tail",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-ovthd3r5",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_kernel_write",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-pcu_ws2q",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 13330,
+        "piece": "runtime_array",
+        "start": 13275
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 14876,
+        "piece": "lpm_lookup",
+        "start": 14624
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 14624,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 14866,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_kernel_write",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-pthqhk7g",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_init_module",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-pwa00tt3",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_tracepoint_probe_register_prio_may_exist",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-q4cs2zd0",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6935,
+        "piece": "runtime_array",
+        "start": 6880
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 8481,
+        "piece": "lpm_lookup",
+        "start": 8229
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 8229,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 8471,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_write",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-qcewwz2g",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 13327,
+        "piece": "runtime_array",
+        "start": 13272
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 14873,
+        "piece": "lpm_lookup",
+        "start": 14621
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 14621,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 14863,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_exit_submit",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-qhcggx4u",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 9442,
+        "piece": "runtime_array",
+        "start": 9387
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 10988,
+        "piece": "lpm_lookup",
+        "start": 10736
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 10736,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 10978,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_vfs_utimes",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-qret7205",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 12608,
+        "piece": "runtime_array",
+        "start": 12553
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 14154,
+        "piece": "lpm_lookup",
+        "start": 13902
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 13902,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 14144,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe__features_fallback_arena_tailcall",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-qv24j4jt",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_seq_ops_trigger",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-qwa20mrp",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 5286,
+        "piece": "runtime_array",
+        "start": 5231
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 6832,
+        "piece": "lpm_lookup",
+        "start": 6580
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 6580,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 6822,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_sock_alloc_file",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-qwfugkfp",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_open",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-r71wb84q",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 14235,
+        "piece": "runtime_array",
+        "start": 14180
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 15781,
+        "piece": "lpm_lookup",
+        "start": 15529
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 15529,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 15771,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_enter_submit",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-rqvx7dtu",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 14441,
+        "piece": "runtime_array",
+        "start": 14386
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 15456,
+        "piece": "lpm_lookup",
+        "start": 15204
+      },
+      "array_fallback_bytes": "4883ec08e8000300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 15204,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 15446,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_writev",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-rsd3e2e7",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 13330,
+        "piece": "runtime_array",
+        "start": 13275
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 14876,
+        "piece": "lpm_lookup",
+        "start": 14624
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 14624,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 14866,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_call_usermodehelper",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-ry8njcaa",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 18924,
+        "piece": "runtime_array",
+        "start": 18869
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 20470,
+        "piece": "lpm_lookup",
+        "start": 20218
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 20218,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 20460,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_bpf_run_filter_skb",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-t6bkygj4",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_dup3",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-t77n255m",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 9450,
+        "piece": "runtime_array",
+        "start": 9395
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 10996,
+        "piece": "lpm_lookup",
+        "start": 10744
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 10744,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 10986,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execveat_exit",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-tdfz29ai",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 16882,
+        "piece": "runtime_array",
+        "start": 16827
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 18428,
+        "piece": "lpm_lookup",
+        "start": 18176
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 18176,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 18418,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_switch_task_namespaces",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-tn1yd512",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 7523,
+        "piece": "runtime_array",
+        "start": 7468
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 8538,
+        "piece": "lpm_lookup",
+        "start": 8286
+      },
+      "array_fallback_bytes": "4883ec08e8000300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 8286,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 8528,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_kernel_read_file",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-tvm8fo7o",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 12498,
+        "piece": "runtime_array",
+        "start": 12443
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 14044,
+        "piece": "lpm_lookup",
+        "start": 13792
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 13792,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 14034,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_filp_close",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-u1t__j3b",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 11002,
+        "piece": "runtime_array",
+        "start": 10947
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 11794,
+        "piece": "lpm_lookup",
+        "start": 11542
+      },
+      "array_fallback_bytes": "4883ec08e8210200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 11542,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 11784,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_vfs_read",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-u9oo0ki2",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_exit_init",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-ubq6rzri",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ptrace",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-uim8ws43",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_do_mmap",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-uj4nfl5d",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 12862,
+        "piece": "runtime_array",
+        "start": 12807
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 14408,
+        "piece": "lpm_lookup",
+        "start": 14156
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 14156,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 14398,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lsm_bpf_check",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-uj6pc61t",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_load_elf_phdrs",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-uot_ns7d",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 12737,
+        "piece": "runtime_array",
+        "start": 12682
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 14283,
+        "piece": "lpm_lookup",
+        "start": 14031
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 14031,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 14273,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__module__module_free",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-uotzoinl",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6641,
+        "piece": "runtime_array",
+        "start": 6586
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 7826,
+        "piece": "lpm_lookup",
+        "start": 7574
+      },
+      "array_fallback_bytes": "4883ec08e8aa0300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 7574,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 7816,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_accept",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-uycf7jdm",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 7802,
+        "piece": "runtime_array",
+        "start": 7747
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 8955,
+        "piece": "lpm_lookup",
+        "start": 8703
+      },
+      "array_fallback_bytes": "4883ec08e88a0300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 8703,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 8945,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sched_process_exec_signal",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-uz28s8pu",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_connect",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-v4xhaj_6",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 7101,
+        "piece": "runtime_array",
+        "start": 7046
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 8254,
+        "piece": "lpm_lookup",
+        "start": 8002
+      },
+      "array_fallback_bytes": "4883ec08e88a0300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 8002,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 8244,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret__register_chrdev",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-vechpryf",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6393,
+        "piece": "runtime_array",
+        "start": 6338
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 7939,
+        "piece": "lpm_lookup",
+        "start": 7687
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 7687,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 7929,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "send_bin",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-vgy6uwav",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_rmdir_signal",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-vr0_pgk0",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_mod_tree_tail",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-vtinq8ac",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__init_module",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-vtx4en2b",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_debugfs_create_dir",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-vx43mxwm",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6458,
+        "piece": "runtime_array",
+        "start": 6403
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 7643,
+        "piece": "lpm_lookup",
+        "start": 7391
+      },
+      "array_fallback_bytes": "4883ec08e8aa0300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 7391,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 7633,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_bind",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-vzs62ho7",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 7257,
+        "piece": "runtime_array",
+        "start": 7202
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 8410,
+        "piece": "lpm_lookup",
+        "start": 8158
+      },
+      "array_fallback_bytes": "4883ec08e88a0300004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 8158,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 8400,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_modtree_loop",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-vzzawsn6",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_process_vm_writev",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-w280lo0g",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_enter_init",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-w6xh1tna",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "vfs_write_magic_return",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-w_o1uyks",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 15434,
+        "piece": "runtime_array",
+        "start": 15379
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 16980,
+        "piece": "lpm_lookup",
+        "start": 16728
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 16728,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 16970,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_exec_binprm",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-wtj_sjgm",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 12097,
+        "piece": "runtime_array",
+        "start": 12042
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 13643,
+        "piece": "lpm_lookup",
+        "start": 13391
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 13391,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 13633,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_new_mod_only_tail",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-x_gw7u2r",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 2632,
+        "piece": "runtime_array",
+        "start": 2577
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 4178,
+        "piece": "lpm_lookup",
+        "start": 3926
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 3926,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 4168,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_skb_egress",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-xdnk7sql",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6214,
+        "piece": "runtime_array",
+        "start": 6159
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 6466,
+        "piece": "lpm_lookup",
+        "start": 6214
+      },
+      "array_fallback_bytes": "4883ec08e8050000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 6214,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 6456,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe__features_fallback_arena",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-xi6xk428",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 3068,
+        "piece": "runtime_array",
+        "start": 3013
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 3860,
+        "piece": "lpm_lookup",
+        "start": 3608
+      },
+      "array_fallback_bytes": "4883ec08e8210200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 3608,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 3850,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_dup",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-xna2ier_",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 9450,
+        "piece": "runtime_array",
+        "start": 9395
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 10996,
+        "piece": "lpm_lookup",
+        "start": 10744
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 10744,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 10986,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_sock_alloc_file",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-xrq1dl1n",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 6039,
+        "piece": "runtime_array",
+        "start": 5984
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 6831,
+        "piece": "lpm_lookup",
+        "start": 6579
+      },
+      "array_fallback_bytes": "4883ec08e8210200004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 6579,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 6821,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_inotify_find_inode",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-xxfpxema",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "vfs_write_magic_enter",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-y1nu4s8o",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_vfs_write",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-y2o04drq",
+      "returncode": 0,
+      "array": null,
+      "lpm": null
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "kernel_write_magic_return",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-ya08zuaa",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 15434,
+        "piece": "runtime_array",
+        "start": 15379
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 16980,
+        "piece": "lpm_lookup",
+        "start": 16728
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 16728,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 16970,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_proc_tail",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-yi6w6qj8",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 61236,
+        "piece": "runtime_array",
+        "start": 61181
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 62782,
+        "piece": "lpm_lookup",
+        "start": 62530
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 62530,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 62772,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_process_vm_writev",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-zahms7i2",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 9450,
+        "piece": "runtime_array",
+        "start": 9395
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 10996,
+        "piece": "lpm_lookup",
+        "start": 10744
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 10744,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 10986,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_arch_prctl",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-zoagqlra",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 9450,
+        "piece": "runtime_array",
+        "start": 9395
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 10996,
+        "piece": "lpm_lookup",
+        "start": 10744
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 10744,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 10986,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_syscall_table_check",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/tracee_monitor/link-zog5yqnb",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 72523,
+        "piece": "runtime_array",
+        "start": 72468
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 74069,
+        "piece": "lpm_lookup",
+        "start": 73817
+      },
+      "array_fallback_bytes": "4883ec08e8130500004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 73817,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 74059,
+          "kind": 1,
+          "target": 18446744072405879328
+        }
+      ]
+    },
+    {
+      "app": "katran",
+      "symbol": "balancer_ingress",
+      "output": "/workspaces/kprog-raw/perf/inline-helper-labels-20261117/host-20261117T204206Z-2750151/replay/katran/link-r1c7nupu",
+      "returncode": 0,
+      "array": {
+        "bytes": 55,
+        "end": 9051,
+        "piece": "runtime_array",
+        "start": 8996
+      },
+      "lpm": {
+        "bytes": 252,
+        "end": 9550,
+        "piece": "lpm_lookup",
+        "start": 9298
+      },
+      "array_fallback_bytes": "4883ec08e8fc0000004883c408c3",
+      "array_nested_call": true,
+      "array_call_target": 9298,
+      "array_calls_lpm": true,
+      "lpm_external_fallback": true,
+      "lpm_final_relocations": [
+        {
+          "offset": 9540,
+          "kind": 1,
+          "target": 18446744071801899552
+        }
+      ]
+    }
+  ]
+}

@@ -30,3 +30,35 @@ production-path tests for ARRAY/LPM/generic results, argument preservation,
 CALL/JMP entry transfers and exact stack alignment at the final helper,
 plus relocated load/branch metadata and per-app measurement with all LTO on.
 Do not mutate Rust while the queued per-change main build is pending.
+
+The actual retained byte inspection finds the full two-frame shape in
+**162 of 295** request images. Every observed ARRAY fallback CALL points to
+the appended LPM entry, and each LPM fallback retains the aligned E8 frame.
+The other requests remain listed without this shape; absence of these ranges
+is not absence of helper or map work.
+
+| App | Captured requests | Both dispatch ranges | ARRAY frame bytes in those requests |
+| --- | ---: | ---: | ---: |
+| OTel | 14 | 3 | 42 |
+| BCC | 25 | 0 | 0 |
+| Cilium | 47 | 24 | 336 |
+| Tetragon | 39 | 18 | 252 |
+| Tracee | 169 | 116 | 1,624 |
+| Katran | 1 | 1 | 14 |
+
+The summed 2,268 bytes are the existing ARRAY fallback frames in this request
+set, not an achieved saving or installed-size result. Per-call importance
+needs dynamic helper-path data and the affected-app timing. All final
+relocation records and raw bytes are retained in `dispatch.json` and the
+referenced original output directories. No source transformation was applied.
+
+The smallest implementation would reuse the ARRAY prefix and existing LPM
+routine in one emitted sequence when both layouts are present. Preserve
+standalone ARRAY-only and LPM-only facts handling; these are existing layout
+availability cases, not a new user switch. Emit one final generic external
+E8 slot and remap all existing load/branch/relocation offsets. Avoid letting
+the later LPM sharing step wrap that same fallback again. Keep the first
+entry label and both CALL/JMP source transfers correct. Tests should verify
+that generic callback arguments/count and RSP alignment match the old chain,
+with ARRAY/LPM live-value/bounds semantics unchanged. Actual source work waits
+for the current per-change replay so its attribution remains separate.

@@ -1,0 +1,7 @@
+app requests both_ranges array_calls_lpm lpm_external_frames array_fallback_bytes
+bcc/set 25 0 0 0 0
+cilium/agent 47 24 24 24 336
+katran 1 1 1 1 14
+otelcol-ebpf-profiler/profiling 14 3 3 3 42
+tetragon/observer 39 18 18 18 252
+tracee/monitor 169 116 116 116 1624
