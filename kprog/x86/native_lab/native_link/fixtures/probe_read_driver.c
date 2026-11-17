@@ -82,6 +82,16 @@ int main(int argc, char **argv)
             value == 0x5555666677778888ULL ? (uintptr_t)cpu : 0;
         if (target) memcpy(code+i,&target,8);
     }
+    if (mode == 6) {
+        assert(!mprotect(code,size,PROT_READ|PROT_EXEC));
+        const uintptr_t ticks[] = {0, 0x123456789abcdef0ULL, UINTPTR_MAX};
+        for (unsigned i=0; i<sizeof(ticks)/sizeof(ticks[0]); ++i) {
+            user_max = ticks[i];
+            assert(((uint64_t (*)(void))code)() == ticks[i]);
+        }
+        puts("jiffies emitted load: fresh full-width values PASS");
+        return 0;
+    }
     if (mode == 3 || mode == 4) {
         struct { uintptr_t current; unsigned cpu, pad; uintptr_t offset; } gs =
             {0x123456789abcdef0ULL, 123, 0, 0};

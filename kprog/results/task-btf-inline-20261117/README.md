@@ -26,7 +26,17 @@ address uses a 10-byte moffs64 load. The executable fixture checks fresh
 values 0, `0x123456789abcdef0` and `UINTPTR_MAX`; a byte-level regression
 checks the sign-extended kernel address encoding and the old-plan case.
 
-Validation and app timing are pending. The coordinator owns the clock and
+Host validation passes at 2026-11-17T11:00:08Z: the focused Rust test has
+one pass and no failures (44 other tests filtered). Its executable
+current-task BTF fixture returns the full-width GS pointer, and jiffies
+returns each changed 64-bit value. Existing scalar/kernel-string/compat
+fault, zeroing, policy and nesting cases also pass. The loader layout
+writer instantiation compiles with C++20, `-Wall -Wextra -Werror`, exit 0
+at 10:59:47Z. `run-header.sh` checks that template without creating a
+second loader build. Small receipts are in `host-summary.json` and
+`host.log`; all emitted bytes and raw logs stay under the raw directory.
+
+App timing is pending. The coordinator owns the clock and
 leaf-batch2 publications; no image or guest is started by this step. Those
 recipes build the working tree, so their recorded source revision must
 include any joined source changes when attributing results. A separate

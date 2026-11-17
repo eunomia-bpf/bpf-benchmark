@@ -15,7 +15,7 @@ namespace native_lto {
 
 inline constexpr const char *kernel_symbols[] = {
     "bpf_probe_read_user", "bpf_probe_read_kernel", "cpu_tlbstate",
-    "const_current_task", "USER_PTR_MAX", "boot_cpu_data",
+    "const_current_task", "jiffies", "USER_PTR_MAX", "boot_cpu_data",
     "ktime_get_mono_fast_ns", "tk_fast_mono", "kvm_clock", "__preempt_count", "hv_clock_per_cpu", "valid_flags",
     "__SCT__preempt_schedule_notrace",
 };
@@ -173,6 +173,7 @@ inline void write_layout(std::ostream &out, const btf *types, Resolver resolve)
         << ",\"task_mm\":" << offset(types, "task_struct", "mm")
         << ",\"task_flags\":" << offset(types, "task_struct", "thread_info") + offset(types, "thread_info", "flags")
         << ",\"task_personality\":" << offset(types, "task_struct", "personality", true);
+    if (uint64_t jiffies = resolve("jiffies")) out << ",\"jiffies\":" << jiffies;
     // Fast-clock facts for bpf_ktime_get_ns (ktime_get_mono_fast_ns with the kvm-clock read inline). A boot
     // that lacks any of them leaves the object out, and the linker keeps the direct call.
     try {

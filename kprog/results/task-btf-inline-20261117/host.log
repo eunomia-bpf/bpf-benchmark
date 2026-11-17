@@ -1,0 +1,18 @@
+    Blocking waiting for file lock on build directory
+    Finished `release` profile [optimized] target(s) in 21.72s
+     Running unittests src/main.rs (kprog/x86/native_lab/native_link/target/release/deps/native_link-62ccb5c6f5eda54e)
+
+running 1 test
+test x86::probe_read::tests::emitted_probe_reads_execute_success_fault_partial_zero_policy_and_nesting ... probe-read host user=0: 1152 vectors, 122 exact-site faults, nesting/zero/error/bounds PASS
+
+probe-read host user=1: 1149 vectors, 121 exact-site faults, nesting/zero/error/bounds PASS
+
+kernel string: NUL/truncation/zero-count/policy/partial-fault/full-zero PASS
+probe-read host user=0: 193 vectors, 121 exact-site faults, nesting/zero/error/bounds PASS
+
+compat probe read: TASK_SIZE_MAX, TIF_ADDR32 and ADDR_LIMIT_3GB dispatch PASS
+probe-read host user=0: 9 vectors, 1 exact-site faults, nesting/zero/error/bounds PASS
+
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 44 filtered out; finished in 0.13s

@@ -189,6 +189,8 @@ struct RuntimeProbeReadLayout {
     user_helper: u64,
     kernel_helper: u64,
     current_task: u64,
+    #[serde(default)]
+    jiffies: Option<u64>,
     user_ptr_max: u64,
     boot_cpu_data: u64,
     pagefault_disabled: u32,

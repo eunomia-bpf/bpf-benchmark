@@ -43,7 +43,7 @@ PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are 
 分工（协调者定）：omp（集群值守 bpf-benchmark-supervisor，每 10 分钟续跑同一会话）统筹：给两个 Codex lane 派活、排镜像和计时批次、自己做其中的项；Codex perf 从只审核改为实现；Codex formal 接着做证明迁移 M5–M6；C lane 保持停止（omp 走集群值守）；协调者（Claude）当顾问并做每小时检查。流程见 /workspaces/.agent-state/bpf-benchmark-supervisor/prompt.md：每项改完先过主机测试、提交，再一个批次（建镜像、检查、计时它针对的应用），批次从建镜像到最后一次计时持有 locks/batch。
 - [ ] 1. helper 的 LTO（perf 实现，omp 排批次）。取时间叶子例程（协调者批次在量）、uid_gid + 字符串循环 + Cilium 开关（协调者下一批）之后：
   a. bpf_get_current_task_btf 并入 current-task 内联（Tracee 121 处）；bpf_jiffies64 换成对 jiffies 的一次读（Cilium 91 处）；
-     PERF 2026-11-17T10:47:47Z：两项源码已在当前树实现，复用现有 helper lowering 和同一内核符号布局；主机执行测试排在 timing SH，PID 2509786、CPU 19，配方 58257acf8，结果 results/task-btf-inline-20261117。源码提交等该测试完成；应用 per-call、body/helper/map 和 installed bytes 等协调者两个已排批次后测量，本项保持未完成。
+     PERF 2026-11-17T11:00:43Z：两项源码和主机验证完成：已有执行 fixture 覆盖 BTF 的完整 GS 指针、jiffies 值变化、紧凑地址编码及旧 facts；一项 Rust 测试通过，另 44 项未运行，C++ loader 模板实例化通过 -Werror。配方 58257acf8/8558d7f50，结果 results/task-btf-inline-20261117。应用 per-call、body/helper/map 和 installed bytes 等协调者两个已排批次后测量，本项保持未完成。
   b. bpf_probe_read_user_str 和 bpf_probe_read_compat_str 进叶子例程（用户字符串叶子加 compat 分派）；
   c. 常量大小的 probe_read（perf b80b2dad0 的计数块模型）；全局量用 32 位绝对地址作操作数（perf 66be0e8f0）；
   d. 已知 ARRAY 步长用 IMUL imm8 加 LEA（9f45f3c6a），LPM 的 XOR 和 disp8（97212ec1c、ed9a7d87e），超过 512 字节的 memset 保留已知长度（a0a448a1d）；

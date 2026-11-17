@@ -317,20 +317,27 @@ pub(super) fn share(blob: &mut Vec<u8>, relocs: &mut Vec<RelocRecord>,
     Ok((ranges,loads))
 }
 
-pub(super) fn percpu(layout: Option<&RuntimeProbeReadLayout>, helpers: &HashMap<String,u64>, name: &str)
+pub(super) fn direct_load(layout: Option<&RuntimeProbeReadLayout>, helpers: &HashMap<String,u64>, name: &str)
     -> Result<Option<Vec<Instruction>>> {
-    let wide=name=="bpf_get_current_task";
-    let target=if wide {
+    let task=matches!(name,"bpf_get_current_task"|"bpf_get_current_task_btf");
+    let ticks=name=="bpf_jiffies64";
+    let target=if task || ticks {
         let Some(layout)=layout else {return Ok(None);};
+        let symbol=if ticks {let Some(symbol)=layout.jiffies else {return Ok(None);};symbol} else {layout.current_task};
         [("bpf_probe_read_kernel",layout.kernel_helper),("bpf_probe_read_user",layout.user_helper)]
-            .into_iter().find_map(|(name,anchor)|helpers.get(name).map(|actual|address(layout.current_task,anchor,*actual)))
+            .into_iter().find_map(|(name,anchor)|helpers.get(name).map(|actual|address(symbol,anchor,*actual)))
             .transpose()?
     } else if name=="bpf_get_smp_processor_id" {helpers.get(X86_CPU_NUMBER_HELPER_KEY).copied()}
     else {None};
     let Some(target)=target else {return Ok(None);};
-    if target as u32 as i32 as i64 as u64!=target {return Ok(None);}
-    let mut bytes=vec![0x65];if wide {bytes.push(0x48);}
-    bytes.extend_from_slice(&[0x8b,0x04,0x25]);bytes.extend_from_slice(&(target as u32).to_le_bytes());
+    let fits=target as u32 as i32 as i64 as u64==target;
+    let mut bytes=Vec::new();
+    if ticks && !fits {absolute(&mut bytes,&[0x48,0xa1],target);} else {
+        if !fits {return Ok(None);}
+        if !ticks {bytes.push(0x65);}
+        if task || ticks {bytes.push(0x48);}
+        bytes.extend_from_slice(&[0x8b,0x04,0x25]);bytes.extend_from_slice(&(target as u32).to_le_bytes());
+    }
     Ok(Some(declared_byte_chunks(&bytes)?))
 }
 
@@ -339,7 +346,7 @@ mod tests {
     use super::*;
     fn fixture() -> RuntimeProbeReadLayout {
         RuntimeProbeReadLayout { user_helper:0x1000,kernel_helper:0x2000,
-            current_task:0,
+            current_task:0,jiffies:Some(0x1111222233334444),
             user_ptr_max:0x1111222233334444,boot_cpu_data:0x5555666677778888,
             pagefault_disabled:4,x86_capability:0,task_flags:0,task_personality:16,ktime:None,
             cpu_tlbstate:8,tlb_loaded_mm:0,task_mm:8,x86_virt_bits:40 }
@@ -396,14 +403,23 @@ mod tests {
         println!("{}",String::from_utf8_lossy(&run.stdout));
         let helpers=HashMap::from([("bpf_probe_read_kernel".into(),layout.kernel_helper),
             (X86_CPU_NUMBER_HELPER_KEY.into(),8)]);
-        for (mode,name,inline) in [(3,"current-task",percpu(Some(&layout),&helpers,"bpf_get_current_task")?.unwrap()),
-            (4,"cpu",percpu(Some(&layout),&helpers,"bpf_get_smp_processor_id")?.unwrap())] {
+        for (mode,name,inline) in [(3,"current-task",direct_load(Some(&layout),&helpers,"bpf_get_current_task")?.unwrap()),
+            (3,"current-task-btf",direct_load(Some(&layout),&helpers,"bpf_get_current_task_btf")?.unwrap()),
+            (4,"cpu",direct_load(Some(&layout),&helpers,"bpf_get_smp_processor_id")?.unwrap()),
+            (6,"jiffies",direct_load(Some(&layout),&helpers,"bpf_jiffies64")?.unwrap())] {
             let mut bytes=BlockEncoder::encode(64,InstructionBlock::new(&inline,0),BlockEncoderOptions::NONE)?.code_buffer;
             bytes.push(0xc3);let path=output.join(format!("{name}.bin"));fs::write(&path,bytes)?;
             let run=std::process::Command::new(&driver).arg(path).arg("unused").arg(mode.to_string()).output()?;
             fs::write(output.join(format!("{name}.stdout")),&run.stdout)?;
             assert!(run.status.success(),"{name}: {}",String::from_utf8_lossy(&run.stderr));
         }
+        let mut layout=fixture();
+        layout.jiffies=Some(0xffff_ffff_8123_4560);
+        let inline=direct_load(Some(&layout),&helpers,"bpf_jiffies64")?.unwrap();
+        let bytes=BlockEncoder::encode(64,InstructionBlock::new(&inline,0),BlockEncoderOptions::NONE)?.code_buffer;
+        assert_eq!(bytes,[0x48,0x8b,0x04,0x25,0x60,0x45,0x23,0x81],"one live qword load, no GS prefix or address-size override");
+        layout.jiffies=None;
+        assert!(direct_load(Some(&layout),&helpers,"bpf_jiffies64")?.is_none(),"older load facts keep the kernel helper");
         Ok(())
     }
 

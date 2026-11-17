@@ -1,0 +1,35 @@
+{
+  "recorded_utc": "2026-11-17T11:02:18Z",
+  "scope": "Focused helper execution and loader template compilation; no app timing or installed app size.",
+  "raw": "/workspaces/kprog-raw/perf/task-btf-inline-20261117",
+  "rust_progress": [
+    "2026-11-17T10:44:24Z waiting for timing SH",
+    "2026-11-17T10:59:46Z test start at 8558d7f50",
+    "2026-11-17T11:00:08Z test exit 0"
+  ],
+  "header_progress": [
+    "2026-11-17T10:59:46Z header start",
+    "2026-11-17T10:59:47Z header exit 0"
+  ],
+  "test_passed": 1,
+  "test_failed": 0,
+  "test_filtered": 44,
+  "fixture_outputs": {
+    "current-task": "percpu emitted load: full-width task and zero-extended CPU PASS",
+    "current-task-btf": "percpu emitted load: full-width task and zero-extended CPU PASS",
+    "cpu": "percpu emitted load: full-width task and zero-extended CPU PASS",
+    "jiffies": "jiffies emitted load: fresh full-width values PASS"
+  },
+  "emitted_instruction_bytes_excluding_fixture_ret": {
+    "current-task": 9,
+    "current-task-btf": 9,
+    "cpu": 8,
+    "jiffies": 10
+  },
+  "compact_jiffies_bytes": "48 8b 04 25 60 45 23 81",
+  "compact_jiffies_validation": "Rust assertion; wide-address form also executed against changing host fixture values.",
+  "production_source_context": "item1a working-tree changes; concurrent peer tail-frame work in x86.rs was present and is not part of this commit.",
+  "app_per_call_ns": null,
+  "app_installed_native_bytes": null,
+  "app_body_helper_map_split": null
+}
