@@ -39,6 +39,12 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-17T08:23:12Z（内核读叶子化结果、compat 和 perf 07:29–08:04 审阅）**：
+1. 内核读叶子化（ac7116e0d）：Tracee 每次调用 1.378x、重跑 1.401x，吞吐 1.221x、1.255x，原生每次调用 328.8 → 266.5 ns；Tetragon 1.061x、BCC 1.022x 在波动范围内（kernel-leaf-20261117/README.md）。
+2. compat 读（d6b4d335e）：bpf_probe_read 经 TASK_SIZE 分派到用户或内核叶子，TIF_ADDR32、ADDR_LIMIT_3GB 照 page_64_types.h；同一提交按 perf e4a0075ec 去掉宽度为 0 的分支。镜像 08:20 起建，量 Tetragon、Tracee。
+3. 全局量直接用符号扩展的 32 位绝对地址作操作数（perf 66be0e8f0）：USER_PTR_MAX、boot_cpu_data 的地址落在这个范围时，省掉 MOVABS R11，每个叶子例程省 15 字节、两条指令；地址落在范围外的照旧用 MOVABS。排在 compat 计时之后，和常量大小特化一起做。
+4. 装进去的代码量：内核读叶子化让 Tracee 的原生代码多了 16 188 B（每个程序带一份内联了策略的例程），原生 / JIT 仍是 0.83（perf 7d0a69548）。
+
 **协调者 2026-11-17T07:19:37Z（用户读叶子化结果和 perf 06:22–07:11 审阅）**：
 1. 用户读叶子化（6beae45cc）在 OTel、BCC、Tracee 上量不出可分辨的每次调用效果：原生一侧 +0.9%、−3.2%、+3.7%，都在同一镜像前后两次的波动以内（leaf-read-20261117/README.md）。代码保留：指令更少，语义逐条对照过内核源码。
 2. 内核读叶子化（ac7116e0d）的检查和计时在跑。它的规范地址判断里，宽度为 0 的那个分支可以省掉：移位次数按 64 取模，宽度 0 时左右移 0 位，比较相等，照样放行（perf e4a0075ec，108 个边界、零分歧）。这一改和下一项一起进镜像。
