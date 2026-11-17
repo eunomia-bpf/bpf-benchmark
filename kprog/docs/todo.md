@@ -39,6 +39,8 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-17T03:10:41Z（运营者“都用 O3”）**：所有应用的 P 和装载时 LTO 都用 -O3。Os、O2 相关的后续（字符串池按段大小绑定、O2 下上下文转换漏转、Os 作代码量候选）不再做；装载时 LTO 编译器里按级别选择的分支（a541c006d）在下一批改动里删掉，回到固定 O3，NATIVE_OPT_LEVEL 和级别文件一起删。
+
 **协调者 2026-11-17T02:59:47Z（编译参数研究结论，kprog/results/flag-tuning-20261117）**：统一参数保持 -O3。BCC、Tracee、Katran 三组之间每次调用相差约 4% 以内；Os 让 OTel stage 代码少 24%，但 Tracee 字符串池超出 .rodata map、BCC 来宾退出；O2 下 OTel 每次调用 11.6 倍、同样的调用次数，装载时 PERF_EVENT 上下文转换在 O2 漏转，工作量不同。接下来协调者自己做：shim 链接失败保留 eBPF（删三行）→ probe_read 剩余字节 4/2/1 一步 → 字符串池按段大小绑定、上下文转换在各级别都转全 → Os 重新作为代码量候选 → 通用查找一次选定 → Cilium 用 agent 自己的配置头。
 
 **协调者 2026-11-17T00:19:11Z（审核 21Z 核实后的决定）**：
