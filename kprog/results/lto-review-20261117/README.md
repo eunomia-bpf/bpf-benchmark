@@ -2378,3 +2378,47 @@ new refusal, hotplug gate, module change or benchmark change. The current
 dynamic test remains the semantic reference while the coordinator develops
 the provider. No additional per-call saving beyond the previously counted
 six instructions/two branches is claimed.
+
+### An existing target-kernel data interface can supply the SMAP value
+
+Follow-up source review, 2026-11-17: the sole kernel build has
+`CONFIG_PROC_KCORE=y` and `CONFIG_ARCH_PROC_KCORE_TEXT=y`. An exact
+load-time provider can use the running guest's existing `/proc/kcore`
+ELF view, rather than add a module query or approximate the value from
+the first CPU flags row. This is a concrete interface candidate, not an
+implemented provider or a successful guest-read claim.
+
+`fs/proc/kcore.c:395–408` emits PT_LOAD records with each range's kernel
+virtual address, file offset and size. For the load segment containing
+the already resolved `boot_cpu_data` field address, the corresponding
+file position is `p_offset + (address - p_vaddr)`. The exact four-byte
+target is `boot_cpu_data + BTF(cpuinfo_x86.x86_capability) + 9*4`;
+bit 20 is `X86_FEATURE_SMAP` (`asm/cpufeatures.h:253`). Source lines
+695–697 register `_text` through `_end`, including the kernel data
+image, in this build's KCORE_TEXT range. Symbol and offset sources are
+already available to the open loader LTO header.
+
+Only the ELF header/program table and the selected four data bytes need
+reading. The enormous sparse core file does not need copying, hashing,
+mapping in full or passing through a whole-file object reader. Using the
+PT_LOAD mapping also avoids guessing the architecture's core-file offset
+bias. Source lines 514–519 can return zeros for holes, so a read from an
+unmapped guessed position must not be interpreted as a disabled feature.
+This is about translating the existing ELF address map correctly, not
+about adding an admission check to native programs.
+
+The existing access conditions remain relevant:
+`open_kcore` at lines 635–643 uses CAP_SYS_RAWIO and LOCKDOWN_KCORE.
+The frozen runtime already launches with `docker run --privileged`
+(`runner/libs/suite_commands.py:104`), and the sole config has
+`CONFIG_LOCK_DOWN_KERNEL_FORCE_NONE=y`. Those source facts make this
+route worth inspecting in the existing guest; they do not prove file
+visibility, privileges or read success in its running container.
+No host `/proc/kcore` read or new guest was attempted by this review.
+
+The result belongs in the existing process-local serialized layout,
+which already feeds the final emission cache. It adds no per-call kernel
+read. This route needs no kernel/module, container-launcher or benchmark
+edit, and no new dependency in P production. No permission changes,
+all-CPU validation loop, provider implementation, runtime refusal,
+extra gate or measured performance claim is proposed here.
