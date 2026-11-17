@@ -1,0 +1,37 @@
+{
+  "recorded_utc": "2026-11-17T15:23:26Z",
+  "attempts": [
+    {
+      "raw": "/workspaces/kprog-raw/perf/constant-probe-size-20261117/host-20261117T143116Z-2601279",
+      "exit": 0,
+      "passed": 46,
+      "failed": 0,
+      "ignored": 3,
+      "source": "58898e6ba"
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/constant-probe-size-20261117/copy-host-20261117T145652Z-2606657",
+      "exit": 101,
+      "passed": 46,
+      "failed": 2,
+      "ignored": 3,
+      "cause": "Fixture mode8 already means compat strings; native conditional PLT32 relocation consumption incomplete."
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/constant-probe-size-20261117/copy-retry-20261117T150359Z-2608701",
+      "exit": 101,
+      "passed": 47,
+      "failed": 1,
+      "ignored": 3,
+      "cause": "Tail field marked consumed in proof ledger but not native relocation ledger."
+    },
+    {
+      "raw": "/workspaces/kprog-raw/perf/constant-probe-size-20261117/copy-retry2-20261117T151059Z-2610649",
+      "exit": 0,
+      "passed": 48,
+      "failed": 0,
+      "ignored": 3,
+      "source": "fc29c0ac9"
+    }
+  ]
+}

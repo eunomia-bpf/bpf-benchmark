@@ -1,0 +1,800 @@
+{
+  "recorded_utc": "2026-11-17T15:13:59Z",
+  "scope": "Local host leaf payload and static recovery-site counts; no installed app bytes or per-call timing.",
+  "raw": "/workspaces/kprog-raw/perf/constant-probe-size-20261117/copy-retry2-20261117T151059Z-2610649",
+  "generic_reference": "/workspaces/kprog-raw/perf/compact-probe-globals-20261117/host-20261117T141057Z-2595751/fixture",
+  "cases": [
+    {
+      "domain": "kernel",
+      "count": 0,
+      "compact": true,
+      "generic_reference_bytes": 351,
+      "fixed_bytes": 206,
+      "protected_source_sites": 0,
+      "execution_stdout": "fixed scalar user=0 size=0: 10 vectors, 0 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 0,
+      "compact": false,
+      "generic_reference_bytes": 362,
+      "fixed_bytes": 217,
+      "protected_source_sites": 0,
+      "execution_stdout": "fixed scalar user=0 size=0: 10 vectors, 0 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 1,
+      "compact": true,
+      "generic_reference_bytes": 351,
+      "fixed_bytes": 220,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=0 size=1: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 1,
+      "compact": false,
+      "generic_reference_bytes": 362,
+      "fixed_bytes": 231,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=0 size=1: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 1024,
+      "compact": true,
+      "generic_reference_bytes": 351,
+      "fixed_bytes": 242,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=0 size=1024: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 1024,
+      "compact": false,
+      "generic_reference_bytes": 362,
+      "fixed_bytes": 253,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=0 size=1024: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 144,
+      "compact": true,
+      "generic_reference_bytes": 351,
+      "fixed_bytes": 242,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=0 size=144: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 144,
+      "compact": false,
+      "generic_reference_bytes": 362,
+      "fixed_bytes": 253,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=0 size=144: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 15,
+      "compact": true,
+      "generic_reference_bytes": 351,
+      "fixed_bytes": 287,
+      "protected_source_sites": 4,
+      "execution_stdout": "fixed scalar user=0 size=15: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 15,
+      "compact": false,
+      "generic_reference_bytes": 362,
+      "fixed_bytes": 298,
+      "protected_source_sites": 4,
+      "execution_stdout": "fixed scalar user=0 size=15: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 16,
+      "compact": true,
+      "generic_reference_bytes": 351,
+      "fixed_bytes": 242,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=0 size=16: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 16,
+      "compact": false,
+      "generic_reference_bytes": 362,
+      "fixed_bytes": 253,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=0 size=16: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 17,
+      "compact": true,
+      "generic_reference_bytes": 351,
+      "fixed_bytes": 256,
+      "protected_source_sites": 2,
+      "execution_stdout": "fixed scalar user=0 size=17: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 17,
+      "compact": false,
+      "generic_reference_bytes": 362,
+      "fixed_bytes": 267,
+      "protected_source_sites": 2,
+      "execution_stdout": "fixed scalar user=0 size=17: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 2,
+      "compact": true,
+      "generic_reference_bytes": 351,
+      "fixed_bytes": 221,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=0 size=2: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 2,
+      "compact": false,
+      "generic_reference_bytes": 362,
+      "fixed_bytes": 232,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=0 size=2: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 257,
+      "compact": true,
+      "generic_reference_bytes": 351,
+      "fixed_bytes": 256,
+      "protected_source_sites": 2,
+      "execution_stdout": "fixed scalar user=0 size=257: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 257,
+      "compact": false,
+      "generic_reference_bytes": 362,
+      "fixed_bytes": 267,
+      "protected_source_sites": 2,
+      "execution_stdout": "fixed scalar user=0 size=257: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 3,
+      "compact": true,
+      "generic_reference_bytes": 351,
+      "fixed_bytes": 243,
+      "protected_source_sites": 2,
+      "execution_stdout": "fixed scalar user=0 size=3: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 3,
+      "compact": false,
+      "generic_reference_bytes": 362,
+      "fixed_bytes": 254,
+      "protected_source_sites": 2,
+      "execution_stdout": "fixed scalar user=0 size=3: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 31,
+      "compact": true,
+      "generic_reference_bytes": 351,
+      "fixed_bytes": 300,
+      "protected_source_sites": 4,
+      "execution_stdout": "fixed scalar user=0 size=31: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 31,
+      "compact": false,
+      "generic_reference_bytes": 362,
+      "fixed_bytes": 311,
+      "protected_source_sites": 4,
+      "execution_stdout": "fixed scalar user=0 size=31: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 32,
+      "compact": true,
+      "generic_reference_bytes": 351,
+      "fixed_bytes": 242,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=0 size=32: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 32,
+      "compact": false,
+      "generic_reference_bytes": 362,
+      "fixed_bytes": 253,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=0 size=32: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 33,
+      "compact": true,
+      "generic_reference_bytes": 351,
+      "fixed_bytes": 256,
+      "protected_source_sites": 2,
+      "execution_stdout": "fixed scalar user=0 size=33: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 33,
+      "compact": false,
+      "generic_reference_bytes": 362,
+      "fixed_bytes": 267,
+      "protected_source_sites": 2,
+      "execution_stdout": "fixed scalar user=0 size=33: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 4,
+      "compact": true,
+      "generic_reference_bytes": 351,
+      "fixed_bytes": 219,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=0 size=4: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 4,
+      "compact": false,
+      "generic_reference_bytes": 362,
+      "fixed_bytes": 230,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=0 size=4: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 512,
+      "compact": true,
+      "generic_reference_bytes": 351,
+      "fixed_bytes": 242,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=0 size=512: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 512,
+      "compact": false,
+      "generic_reference_bytes": 362,
+      "fixed_bytes": 253,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=0 size=512: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 63,
+      "compact": true,
+      "generic_reference_bytes": 351,
+      "fixed_bytes": 300,
+      "protected_source_sites": 4,
+      "execution_stdout": "fixed scalar user=0 size=63: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 63,
+      "compact": false,
+      "generic_reference_bytes": 362,
+      "fixed_bytes": 311,
+      "protected_source_sites": 4,
+      "execution_stdout": "fixed scalar user=0 size=63: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 64,
+      "compact": true,
+      "generic_reference_bytes": 351,
+      "fixed_bytes": 242,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=0 size=64: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 64,
+      "compact": false,
+      "generic_reference_bytes": 362,
+      "fixed_bytes": 253,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=0 size=64: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 65,
+      "compact": true,
+      "generic_reference_bytes": 351,
+      "fixed_bytes": 256,
+      "protected_source_sites": 2,
+      "execution_stdout": "fixed scalar user=0 size=65: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 65,
+      "compact": false,
+      "generic_reference_bytes": 362,
+      "fixed_bytes": 267,
+      "protected_source_sites": 2,
+      "execution_stdout": "fixed scalar user=0 size=65: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 7,
+      "compact": true,
+      "generic_reference_bytes": 351,
+      "fixed_bytes": 264,
+      "protected_source_sites": 3,
+      "execution_stdout": "fixed scalar user=0 size=7: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 7,
+      "compact": false,
+      "generic_reference_bytes": 362,
+      "fixed_bytes": 275,
+      "protected_source_sites": 3,
+      "execution_stdout": "fixed scalar user=0 size=7: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 768,
+      "compact": true,
+      "generic_reference_bytes": 351,
+      "fixed_bytes": 242,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=0 size=768: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 768,
+      "compact": false,
+      "generic_reference_bytes": 362,
+      "fixed_bytes": 253,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=0 size=768: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 8,
+      "compact": true,
+      "generic_reference_bytes": 351,
+      "fixed_bytes": 221,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=0 size=8: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 8,
+      "compact": false,
+      "generic_reference_bytes": 362,
+      "fixed_bytes": 232,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=0 size=8: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 9,
+      "compact": true,
+      "generic_reference_bytes": 351,
+      "fixed_bytes": 243,
+      "protected_source_sites": 2,
+      "execution_stdout": "fixed scalar user=0 size=9: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "kernel",
+      "count": 9,
+      "compact": false,
+      "generic_reference_bytes": 362,
+      "fixed_bytes": 254,
+      "protected_source_sites": 2,
+      "execution_stdout": "fixed scalar user=0 size=9: 13 vectors, 3 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 0,
+      "compact": true,
+      "generic_reference_bytes": 355,
+      "fixed_bytes": 210,
+      "protected_source_sites": 0,
+      "execution_stdout": "fixed scalar user=1 size=0: 12 vectors, 0 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 0,
+      "compact": false,
+      "generic_reference_bytes": 366,
+      "fixed_bytes": 221,
+      "protected_source_sites": 0,
+      "execution_stdout": "fixed scalar user=1 size=0: 12 vectors, 0 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 1,
+      "compact": true,
+      "generic_reference_bytes": 355,
+      "fixed_bytes": 224,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=1 size=1: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 1,
+      "compact": false,
+      "generic_reference_bytes": 366,
+      "fixed_bytes": 235,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=1 size=1: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 1024,
+      "compact": true,
+      "generic_reference_bytes": 355,
+      "fixed_bytes": 246,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=1 size=1024: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 1024,
+      "compact": false,
+      "generic_reference_bytes": 366,
+      "fixed_bytes": 257,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=1 size=1024: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 144,
+      "compact": true,
+      "generic_reference_bytes": 355,
+      "fixed_bytes": 246,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=1 size=144: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 144,
+      "compact": false,
+      "generic_reference_bytes": 366,
+      "fixed_bytes": 257,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=1 size=144: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 15,
+      "compact": true,
+      "generic_reference_bytes": 355,
+      "fixed_bytes": 291,
+      "protected_source_sites": 4,
+      "execution_stdout": "fixed scalar user=1 size=15: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 15,
+      "compact": false,
+      "generic_reference_bytes": 366,
+      "fixed_bytes": 302,
+      "protected_source_sites": 4,
+      "execution_stdout": "fixed scalar user=1 size=15: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 16,
+      "compact": true,
+      "generic_reference_bytes": 355,
+      "fixed_bytes": 246,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=1 size=16: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 16,
+      "compact": false,
+      "generic_reference_bytes": 366,
+      "fixed_bytes": 257,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=1 size=16: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 17,
+      "compact": true,
+      "generic_reference_bytes": 355,
+      "fixed_bytes": 260,
+      "protected_source_sites": 2,
+      "execution_stdout": "fixed scalar user=1 size=17: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 17,
+      "compact": false,
+      "generic_reference_bytes": 366,
+      "fixed_bytes": 271,
+      "protected_source_sites": 2,
+      "execution_stdout": "fixed scalar user=1 size=17: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 2,
+      "compact": true,
+      "generic_reference_bytes": 355,
+      "fixed_bytes": 225,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=1 size=2: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 2,
+      "compact": false,
+      "generic_reference_bytes": 366,
+      "fixed_bytes": 236,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=1 size=2: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 257,
+      "compact": true,
+      "generic_reference_bytes": 355,
+      "fixed_bytes": 260,
+      "protected_source_sites": 2,
+      "execution_stdout": "fixed scalar user=1 size=257: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 257,
+      "compact": false,
+      "generic_reference_bytes": 366,
+      "fixed_bytes": 271,
+      "protected_source_sites": 2,
+      "execution_stdout": "fixed scalar user=1 size=257: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 3,
+      "compact": true,
+      "generic_reference_bytes": 355,
+      "fixed_bytes": 247,
+      "protected_source_sites": 2,
+      "execution_stdout": "fixed scalar user=1 size=3: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 3,
+      "compact": false,
+      "generic_reference_bytes": 366,
+      "fixed_bytes": 258,
+      "protected_source_sites": 2,
+      "execution_stdout": "fixed scalar user=1 size=3: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 31,
+      "compact": true,
+      "generic_reference_bytes": 355,
+      "fixed_bytes": 304,
+      "protected_source_sites": 4,
+      "execution_stdout": "fixed scalar user=1 size=31: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 31,
+      "compact": false,
+      "generic_reference_bytes": 366,
+      "fixed_bytes": 315,
+      "protected_source_sites": 4,
+      "execution_stdout": "fixed scalar user=1 size=31: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 32,
+      "compact": true,
+      "generic_reference_bytes": 355,
+      "fixed_bytes": 246,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=1 size=32: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 32,
+      "compact": false,
+      "generic_reference_bytes": 366,
+      "fixed_bytes": 257,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=1 size=32: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 33,
+      "compact": true,
+      "generic_reference_bytes": 355,
+      "fixed_bytes": 260,
+      "protected_source_sites": 2,
+      "execution_stdout": "fixed scalar user=1 size=33: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 33,
+      "compact": false,
+      "generic_reference_bytes": 366,
+      "fixed_bytes": 271,
+      "protected_source_sites": 2,
+      "execution_stdout": "fixed scalar user=1 size=33: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 4,
+      "compact": true,
+      "generic_reference_bytes": 355,
+      "fixed_bytes": 223,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=1 size=4: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 4,
+      "compact": false,
+      "generic_reference_bytes": 366,
+      "fixed_bytes": 234,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=1 size=4: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 512,
+      "compact": true,
+      "generic_reference_bytes": 355,
+      "fixed_bytes": 246,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=1 size=512: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 512,
+      "compact": false,
+      "generic_reference_bytes": 366,
+      "fixed_bytes": 257,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=1 size=512: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 63,
+      "compact": true,
+      "generic_reference_bytes": 355,
+      "fixed_bytes": 304,
+      "protected_source_sites": 4,
+      "execution_stdout": "fixed scalar user=1 size=63: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 63,
+      "compact": false,
+      "generic_reference_bytes": 366,
+      "fixed_bytes": 315,
+      "protected_source_sites": 4,
+      "execution_stdout": "fixed scalar user=1 size=63: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 64,
+      "compact": true,
+      "generic_reference_bytes": 355,
+      "fixed_bytes": 246,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=1 size=64: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 64,
+      "compact": false,
+      "generic_reference_bytes": 366,
+      "fixed_bytes": 257,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=1 size=64: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 65,
+      "compact": true,
+      "generic_reference_bytes": 355,
+      "fixed_bytes": 260,
+      "protected_source_sites": 2,
+      "execution_stdout": "fixed scalar user=1 size=65: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 65,
+      "compact": false,
+      "generic_reference_bytes": 366,
+      "fixed_bytes": 271,
+      "protected_source_sites": 2,
+      "execution_stdout": "fixed scalar user=1 size=65: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 7,
+      "compact": true,
+      "generic_reference_bytes": 355,
+      "fixed_bytes": 268,
+      "protected_source_sites": 3,
+      "execution_stdout": "fixed scalar user=1 size=7: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 7,
+      "compact": false,
+      "generic_reference_bytes": 366,
+      "fixed_bytes": 279,
+      "protected_source_sites": 3,
+      "execution_stdout": "fixed scalar user=1 size=7: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 768,
+      "compact": true,
+      "generic_reference_bytes": 355,
+      "fixed_bytes": 246,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=1 size=768: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 768,
+      "compact": false,
+      "generic_reference_bytes": 366,
+      "fixed_bytes": 257,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=1 size=768: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 8,
+      "compact": true,
+      "generic_reference_bytes": 355,
+      "fixed_bytes": 225,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=1 size=8: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 8,
+      "compact": false,
+      "generic_reference_bytes": 366,
+      "fixed_bytes": 236,
+      "protected_source_sites": 1,
+      "execution_stdout": "fixed scalar user=1 size=8: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 9,
+      "compact": true,
+      "generic_reference_bytes": 355,
+      "fixed_bytes": 247,
+      "protected_source_sites": 2,
+      "execution_stdout": "fixed scalar user=1 size=9: 16 vectors, 4 exact-site faults PASS"
+    },
+    {
+      "domain": "user",
+      "count": 9,
+      "compact": false,
+      "generic_reference_bytes": 366,
+      "fixed_bytes": 258,
+      "protected_source_sites": 2,
+      "execution_stdout": "fixed scalar user=1 size=9: 16 vectors, 4 exact-site faults PASS"
+    }
+  ]
+}
