@@ -1,0 +1,162 @@
+
+/workspaces/.agent-state/kprog-ck/build-x86/vmlinux:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+ffffffff81464fe0 <bpf_perf_event_output_raw_tp>:
+ffffffff81464fe0:	55                   	push   %rbp
+ffffffff81464fe1:	48 89 f7             	mov    %rsi,%rdi
+ffffffff81464fe4:	48 89 d6             	mov    %rdx,%rsi
+ffffffff81464fe7:	ba 01 00 00 00       	mov    $0x1,%edx
+ffffffff81464fec:	49 89 c9             	mov    %rcx,%r9
+ffffffff81464fef:	48 89 e5             	mov    %rsp,%rbp
+ffffffff81464ff2:	53                   	push   %rbx
+ffffffff81464ff3:	48 83 ec 28          	sub    $0x28,%rsp
+ffffffff81464ff7:	65 48 8b 05 09 b0 e4 	mov    %gs:0x2e4b009(%rip),%rax        # ffffffff842b0008 <__stack_chk_guard>
+ffffffff81464ffe:	02 
+ffffffff81464fff:	48 89 45 f0          	mov    %rax,-0x10(%rbp)
+ffffffff81465003:	31 c0                	xor    %eax,%eax
+ffffffff81465005:	89 d0                	mov    %edx,%eax
+ffffffff81465007:	65 4c 8b 15 19 b0 e4 	mov    %gs:0x2e4b019(%rip),%r10        # ffffffff842b0028 <this_cpu_off>
+ffffffff8146500e:	02 
+ffffffff8146500f:	65 0f c1 05 a9 c1 e5 	xadd   %eax,%gs:0x2e5c1a9(%rip)        # ffffffff842c11c0 <bpf_raw_tp_nest_level>
+ffffffff81465016:	02 
+ffffffff81465017:	8d 48 01             	lea    0x1(%rax),%ecx
+ffffffff8146501a:	83 f9 03             	cmp    $0x3,%ecx
+ffffffff8146501d:	0f 87 bc 01 00 00    	ja     ffffffff814651df <bpf_perf_event_output_raw_tp+0x1ff>
+ffffffff81465023:	48 98                	cltq
+ffffffff81465025:	48 8d 0c 80          	lea    (%rax,%rax,4),%rcx
+ffffffff81465029:	48 8d 04 88          	lea    (%rax,%rcx,4),%rax
+ffffffff8146502d:	4d 8d 94 c2 e0 11 2c 	lea    -0x7bd3ee20(%r10,%rax,8),%r10
+ffffffff81465034:	84 
+ffffffff81465035:	4c 89 d0             	mov    %r10,%rax
+ffffffff81465038:	49 81 fa 00 f0 ff ff 	cmp    $0xfffffffffffff000,%r10
+ffffffff8146503f:	0f 87 82 01 00 00    	ja     ffffffff814651c7 <bpf_perf_event_output_raw_tp+0x1e7>
+ffffffff81465045:	48 8b 4d 08          	mov    0x8(%rbp),%rcx
+ffffffff81465049:	48 c7 45 e8 00 00 00 	movq   $0x0,-0x18(%rbp)
+ffffffff81465050:	00 
+ffffffff81465051:	49 89 aa 98 00 00 00 	mov    %rbp,0x98(%r10)
+ffffffff81465058:	49 89 8a 80 00 00 00 	mov    %rcx,0x80(%r10)
+ffffffff8146505f:	b9 10 00 00 00       	mov    $0x10,%ecx
+ffffffff81465064:	66 41 89 8a 88 00 00 	mov    %cx,0x88(%r10)
+ffffffff8146506b:	00 
+ffffffff8146506c:	49 c7 82 90 00 00 00 	movq   $0x0,0x90(%r10)
+ffffffff81465073:	00 00 00 00 
+ffffffff81465077:	48 c7 45 d0 00 00 00 	movq   $0x0,-0x30(%rbp)
+ffffffff8146507e:	00 
+ffffffff8146507f:	48 c7 45 d8 00 00 00 	movq   $0x0,-0x28(%rbp)
+ffffffff81465086:	00 
+ffffffff81465087:	4c 89 4d e0          	mov    %r9,-0x20(%rbp)
+ffffffff8146508b:	44 89 45 e8          	mov    %r8d,-0x18(%rbp)
+ffffffff8146508f:	65 ff 05 9a af e4 02 	incl   %gs:0x2e4af9a(%rip)        # ffffffff842b0030 <__preempt_count>
+ffffffff81465096:	65 48 8b 05 8a af e4 	mov    %gs:0x2e4af8a(%rip),%rax        # ffffffff842b0028 <this_cpu_off>
+ffffffff8146509d:	02 
+ffffffff8146509e:	4c 8d 88 80 19 2c 84 	lea    -0x7bd3e680(%rax),%r9
+ffffffff814650a5:	89 d0                	mov    %edx,%eax
+ffffffff814650a7:	65 0f c1 05 cd c8 e5 	xadd   %eax,%gs:0x2e5c8cd(%rip)        # ffffffff842c197c <bpf_trace_nest_level>
+ffffffff814650ae:	02 
+ffffffff814650af:	8d 50 01             	lea    0x1(%rax),%edx
+ffffffff814650b2:	83 fa 03             	cmp    $0x3,%edx
+ffffffff814650b5:	0f 87 3d 01 00 00    	ja     ffffffff814651f8 <bpf_perf_event_output_raw_tp+0x218>
+ffffffff814650bb:	b9 ff ff ff ff       	mov    $0xffffffff,%ecx
+ffffffff814650c0:	48 39 f1             	cmp    %rsi,%rcx
+ffffffff814650c3:	0f 82 26 01 00 00    	jb     ffffffff814651ef <bpf_perf_event_output_raw_tp+0x20f>
+ffffffff814650c9:	48 63 d0             	movslq %eax,%rdx
+ffffffff814650cc:	49 89 d0             	mov    %rdx,%r8
+ffffffff814650cf:	49 c1 e0 08          	shl    $0x8,%r8
+ffffffff814650d3:	4d 01 c8             	add    %r9,%r8
+ffffffff814650d6:	48 39 ce             	cmp    %rcx,%rsi
+ffffffff814650d9:	49 c7 00 00 01 00 00 	movq   $0x100,(%r8)
+ffffffff814650e0:	49 c7 40 08 00 00 00 	movq   $0x0,0x8(%r8)
+ffffffff814650e7:	00 
+ffffffff814650e8:	49 c7 40 10 00 00 00 	movq   $0x0,0x10(%r8)
+ffffffff814650ef:	00 
+ffffffff814650f0:	65 44 8b 1d 3c af e4 	mov    %gs:0x2e4af3c(%rip),%r11d        # ffffffff842b0034 <cpu_number>
+ffffffff814650f7:	02 
+ffffffff814650f8:	8b 4f 44             	mov    0x44(%rdi),%ecx
+ffffffff814650fb:	49 0f 44 f3          	cmove  %r11,%rsi
+ffffffff814650ff:	48 39 ce             	cmp    %rcx,%rsi
+ffffffff81465102:	0f 83 02 01 00 00    	jae    ffffffff8146520a <bpf_perf_event_output_raw_tp+0x22a>
+ffffffff81465108:	48 83 c6 26          	add    $0x26,%rsi
+ffffffff8146510c:	48 8b 0c f7          	mov    (%rdi,%rsi,8),%rcx
+ffffffff81465110:	48 85 c9             	test   %rcx,%rcx
+ffffffff81465113:	0f 84 fa 00 00 00    	je     ffffffff81465213 <bpf_perf_event_output_raw_tp+0x233>
+ffffffff81465119:	48 8b 39             	mov    (%rcx),%rdi
+ffffffff8146511c:	83 bf d8 00 00 00 01 	cmpl   $0x1,0xd8(%rdi)
+ffffffff81465123:	0f 85 c6 00 00 00    	jne    ffffffff814651ef <bpf_perf_event_output_raw_tp+0x20f>
+ffffffff81465129:	48 83 bf e0 00 00 00 	cmpq   $0xa,0xe0(%rdi)
+ffffffff81465130:	0a 
+ffffffff81465131:	0f 85 b8 00 00 00    	jne    ffffffff814651ef <bpf_perf_event_output_raw_tp+0x20f>
+ffffffff81465137:	44 3b 9f a0 02 00 00 	cmp    0x2a0(%rdi),%r11d
+ffffffff8146513e:	0f 85 d8 00 00 00    	jne    ffffffff8146521c <bpf_perf_event_output_raw_tp+0x23c>
+ffffffff81465144:	f6 87 f1 00 00 00 04 	testb  $0x4,0xf1(%rdi)
+ffffffff8146514b:	74 56                	je     ffffffff814651a3 <bpf_perf_event_output_raw_tp+0x1c3>
+ffffffff8146514d:	48 8b 45 d0          	mov    -0x30(%rbp),%rax
+ffffffff81465151:	8b 4d e8             	mov    -0x18(%rbp),%ecx
+ffffffff81465154:	48 83 f8 07          	cmp    $0x7,%rax
+ffffffff81465158:	0f 86 c7 00 00 00    	jbe    ffffffff81465225 <bpf_perf_event_output_raw_tp+0x245>
+ffffffff8146515e:	48 89 c6             	mov    %rax,%rsi
+ffffffff81465161:	03 48 18             	add    0x18(%rax),%ecx
+ffffffff81465164:	48 8b 00             	mov    (%rax),%rax
+ffffffff81465167:	48 83 f8 07          	cmp    $0x7,%rax
+ffffffff8146516b:	77 f1                	ja     ffffffff8146515e <bpf_perf_event_output_raw_tp+0x17e>
+ffffffff8146516d:	48 8d 5d d0          	lea    -0x30(%rbp),%rbx
+ffffffff81465171:	44 8d 59 03          	lea    0x3(%rcx),%r11d
+ffffffff81465175:	41 83 cb 07          	or     $0x7,%r11d
+ffffffff81465179:	41 8d 43 fd          	lea    -0x3(%r11),%eax
+ffffffff8146517d:	41 83 c3 01          	add    $0x1,%r11d
+ffffffff81465181:	89 45 ec             	mov    %eax,-0x14(%rbp)
+ffffffff81465184:	29 c8                	sub    %ecx,%eax
+ffffffff81465186:	4d 63 db             	movslq %r11d,%r11
+ffffffff81465189:	48 89 06             	mov    %rax,(%rsi)
+ffffffff8146518c:	48 89 d0             	mov    %rdx,%rax
+ffffffff8146518f:	48 c1 e0 08          	shl    $0x8,%rax
+ffffffff81465193:	49 89 5c 01 50       	mov    %rbx,0x50(%r9,%rax,1)
+ffffffff81465198:	4d 01 58 10          	add    %r11,0x10(%r8)
+ffffffff8146519c:	49 81 08 00 04 00 00 	orq    $0x400,(%r8)
+ffffffff814651a3:	4c 89 d2             	mov    %r10,%rdx
+ffffffff814651a6:	4c 89 c6             	mov    %r8,%rsi
+ffffffff814651a9:	e8 42 d0 0b 00       	call   ffffffff815221f0 <perf_event_output>
+ffffffff814651ae:	48 98                	cltq
+ffffffff814651b0:	65 ff 0d c5 c7 e5 02 	decl   %gs:0x2e5c7c5(%rip)        # ffffffff842c197c <bpf_trace_nest_level>
+ffffffff814651b7:	65 ff 0d 72 ae e4 02 	decl   %gs:0x2e4ae72(%rip)        # ffffffff842b0030 <__preempt_count>
+ffffffff814651be:	74 43                	je     ffffffff81465203 <bpf_perf_event_output_raw_tp+0x223>
+ffffffff814651c0:	65 ff 0d f9 bf e5 02 	decl   %gs:0x2e5bff9(%rip)        # ffffffff842c11c0 <bpf_raw_tp_nest_level>
+ffffffff814651c7:	48 8b 55 f0          	mov    -0x10(%rbp),%rdx
+ffffffff814651cb:	65 48 2b 15 35 ae e4 	sub    %gs:0x2e4ae35(%rip),%rdx        # ffffffff842b0008 <__stack_chk_guard>
+ffffffff814651d2:	02 
+ffffffff814651d3:	75 5c                	jne    ffffffff81465231 <bpf_perf_event_output_raw_tp+0x251>
+ffffffff814651d5:	48 8b 5d f8          	mov    -0x8(%rbp),%rbx
+ffffffff814651d9:	c9                   	leave
+ffffffff814651da:	e9 d1 e6 ba 00       	jmp    ffffffff820138b0 <__pi___x86_return_thunk>
+ffffffff814651df:	65 ff 0d da bf e5 02 	decl   %gs:0x2e5bfda(%rip)        # ffffffff842c11c0 <bpf_raw_tp_nest_level>
+ffffffff814651e6:	48 c7 c0 f0 ff ff ff 	mov    $0xfffffffffffffff0,%rax
+ffffffff814651ed:	eb d8                	jmp    ffffffff814651c7 <bpf_perf_event_output_raw_tp+0x1e7>
+ffffffff814651ef:	48 c7 c0 ea ff ff ff 	mov    $0xffffffffffffffea,%rax
+ffffffff814651f6:	eb b8                	jmp    ffffffff814651b0 <bpf_perf_event_output_raw_tp+0x1d0>
+ffffffff814651f8:	0f 0b                	ud2
+ffffffff814651fa:	48 c7 c0 f0 ff ff ff 	mov    $0xfffffffffffffff0,%rax
+ffffffff81465201:	eb ad                	jmp    ffffffff814651b0 <bpf_perf_event_output_raw_tp+0x1d0>
+ffffffff81465203:	e8 20 ed ba 00       	call   ffffffff82013f28 <__SCT__preempt_schedule>
+ffffffff81465208:	eb b6                	jmp    ffffffff814651c0 <bpf_perf_event_output_raw_tp+0x1e0>
+ffffffff8146520a:	48 c7 c0 f9 ff ff ff 	mov    $0xfffffffffffffff9,%rax
+ffffffff81465211:	eb 9d                	jmp    ffffffff814651b0 <bpf_perf_event_output_raw_tp+0x1d0>
+ffffffff81465213:	48 c7 c0 fe ff ff ff 	mov    $0xfffffffffffffffe,%rax
+ffffffff8146521a:	eb 94                	jmp    ffffffff814651b0 <bpf_perf_event_output_raw_tp+0x1d0>
+ffffffff8146521c:	48 c7 c0 a1 ff ff ff 	mov    $0xffffffffffffffa1,%rax
+ffffffff81465223:	eb 8b                	jmp    ffffffff814651b0 <bpf_perf_event_output_raw_tp+0x1d0>
+ffffffff81465225:	48 8d 5d d0          	lea    -0x30(%rbp),%rbx
+ffffffff81465229:	48 89 de             	mov    %rbx,%rsi
+ffffffff8146522c:	e9 40 ff ff ff       	jmp    ffffffff81465171 <bpf_perf_event_output_raw_tp+0x191>
+ffffffff81465231:	e8 ea ea b9 00       	call   ffffffff82003d20 <__stack_chk_fail>
+
+Disassembly of section .data:
+
+Disassembly of section .init.text:
+
+Disassembly of section .altinstr_aux:
+
+Disassembly of section .altinstr_replacement:
+
+Disassembly of section .exit.text:

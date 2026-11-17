@@ -1,0 +1,27 @@
+Historical BCC sampled ownership (cpu-clock, not cycles or ns/call)
+Category / eBPF samples, % of owned / native samples, % of owned
+ktime_get_ns: 29217 30.144% / 28807 30.091%
+perf_event_output: 26236 27.068% / 25471 26.606%
+map_update: 17210 17.756% / 17340 18.113%
+map_lookup: 11842 12.218% / 11692 12.213%
+program_text: 8927 9.210% / 9030 9.432%
+other_helper: 3093 3.191% / 3084 3.221%
+probe_read: 400 0.413% / 309 0.323%
+
+Newer stats-on counters (do not combine with historical sample shares)
+Name/type / eBPF calls ns/call / native calls ns/call / count ratio
+blk_account_io_/kprobe: 183 328.792 / 218 324.560 / 1.191257
+block_rq_comple/tracing: 734 137066.706 / 790 12864.741 / 1.076294
+block_rq_issue/tracing: 690 1991.797 / 743 2897.307 / 1.076812
+fentry_vfs_open/tracing: 16893324 53.956 / 23452417 48.959 / 1.388265
+fentry_vfs_read/tracing: 351679 84.339 / 459403 83.116 / 1.306313
+fentry_vfs_writ/tracing: 409420 96.880 / 524022 82.714 / 1.279913
+kprobe__cap_cap/kprobe: 66706305 217.866 / 79208544 210.563 / 1.187422
+sched_switch/tracing: 8355297 151.679 / 17407565 157.170 / 2.083417
+sched_wakeup/tracing: 4190935 160.243 / 8723614 102.789 / 2.081544
+sched_wakeup_ne/tracing: 121 392.455 / 118 477.483 / 0.975207
+sys_enter/tracepoint: 711289186 105.004 / 881127115 90.362 / 1.238775
+sys_exit/tracepoint: 711289192 145.220 / 881127120 116.559 / 1.238775
+tracepoint__sys/tracepoint: 33785734 1292.005 / 46903926 935.731 / 1.388276
+baseline: 15/25 selected, 153.990 ns/call, 7965 installed bytes
+post_rejit: 15/25 selected, 127.785 ns/call, 13248 installed bytes

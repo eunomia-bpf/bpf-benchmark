@@ -1,0 +1,134 @@
+
+/workspaces/.agent-state/kprog-ck/build-x86/vmlinux:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+ffffffff814658d0 <bpf_perf_event_output>:
+ffffffff814658d0:	53                   	push   %rbx
+ffffffff814658d1:	48 89 d0             	mov    %rdx,%rax
+ffffffff814658d4:	48 83 ec 28          	sub    $0x28,%rsp
+ffffffff814658d8:	65 48 8b 15 28 a7 e4 	mov    %gs:0x2e4a728(%rip),%rdx        # ffffffff842b0008 <__stack_chk_guard>
+ffffffff814658df:	02 
+ffffffff814658e0:	48 89 54 24 20       	mov    %rdx,0x20(%rsp)
+ffffffff814658e5:	31 d2                	xor    %edx,%edx
+ffffffff814658e7:	48 c7 04 24 00 00 00 	movq   $0x0,(%rsp)
+ffffffff814658ee:	00 
+ffffffff814658ef:	48 c7 44 24 18 00 00 	movq   $0x0,0x18(%rsp)
+ffffffff814658f6:	00 00 
+ffffffff814658f8:	48 c7 44 24 08 00 00 	movq   $0x0,0x8(%rsp)
+ffffffff814658ff:	00 00 
+ffffffff81465901:	48 89 4c 24 10       	mov    %rcx,0x10(%rsp)
+ffffffff81465906:	44 89 44 24 18       	mov    %r8d,0x18(%rsp)
+ffffffff8146590b:	65 ff 05 1e a7 e4 02 	incl   %gs:0x2e4a71e(%rip)        # ffffffff842b0030 <__preempt_count>
+ffffffff81465912:	65 48 8b 1d 0e a7 e4 	mov    %gs:0x2e4a70e(%rip),%rbx        # ffffffff842b0028 <this_cpu_off>
+ffffffff81465919:	02 
+ffffffff8146591a:	ba 01 00 00 00       	mov    $0x1,%edx
+ffffffff8146591f:	65 0f c1 15 55 c0 e5 	xadd   %edx,%gs:0x2e5c055(%rip)        # ffffffff842c197c <bpf_trace_nest_level>
+ffffffff81465926:	02 
+ffffffff81465927:	8d 4a 01             	lea    0x1(%rdx),%ecx
+ffffffff8146592a:	83 f9 03             	cmp    $0x3,%ecx
+ffffffff8146592d:	0f 87 48 01 00 00    	ja     ffffffff81465a7b <bpf_perf_event_output+0x1ab>
+ffffffff81465933:	b9 ff ff ff ff       	mov    $0xffffffff,%ecx
+ffffffff81465938:	48 39 c1             	cmp    %rax,%rcx
+ffffffff8146593b:	0f 82 21 01 00 00    	jb     ffffffff81465a62 <bpf_perf_event_output+0x192>
+ffffffff81465941:	48 63 d2             	movslq %edx,%rdx
+ffffffff81465944:	49 89 f9             	mov    %rdi,%r9
+ffffffff81465947:	4c 8d 83 80 19 2c 84 	lea    -0x7bd3e680(%rbx),%r8
+ffffffff8146594e:	48 89 f7             	mov    %rsi,%rdi
+ffffffff81465951:	48 89 d6             	mov    %rdx,%rsi
+ffffffff81465954:	48 c1 e6 08          	shl    $0x8,%rsi
+ffffffff81465958:	4c 01 c6             	add    %r8,%rsi
+ffffffff8146595b:	48 39 c8             	cmp    %rcx,%rax
+ffffffff8146595e:	48 c7 06 00 01 00 00 	movq   $0x100,(%rsi)
+ffffffff81465965:	48 c7 46 08 00 00 00 	movq   $0x0,0x8(%rsi)
+ffffffff8146596c:	00 
+ffffffff8146596d:	48 c7 46 10 00 00 00 	movq   $0x0,0x10(%rsi)
+ffffffff81465974:	00 
+ffffffff81465975:	65 44 8b 15 b7 a6 e4 	mov    %gs:0x2e4a6b7(%rip),%r10d        # ffffffff842b0034 <cpu_number>
+ffffffff8146597c:	02 
+ffffffff8146597d:	8b 4f 44             	mov    0x44(%rdi),%ecx
+ffffffff81465980:	49 0f 44 c2          	cmove  %r10,%rax
+ffffffff81465984:	4d 89 d3             	mov    %r10,%r11
+ffffffff81465987:	48 39 c8             	cmp    %rcx,%rax
+ffffffff8146598a:	0f 83 f6 00 00 00    	jae    ffffffff81465a86 <bpf_perf_event_output+0x1b6>
+ffffffff81465990:	48 83 c0 26          	add    $0x26,%rax
+ffffffff81465994:	48 8b 04 c7          	mov    (%rdi,%rax,8),%rax
+ffffffff81465998:	48 85 c0             	test   %rax,%rax
+ffffffff8146599b:	0f 84 ee 00 00 00    	je     ffffffff81465a8f <bpf_perf_event_output+0x1bf>
+ffffffff814659a1:	4c 8b 10             	mov    (%rax),%r10
+ffffffff814659a4:	41 83 ba d8 00 00 00 	cmpl   $0x1,0xd8(%r10)
+ffffffff814659ab:	01 
+ffffffff814659ac:	0f 85 b0 00 00 00    	jne    ffffffff81465a62 <bpf_perf_event_output+0x192>
+ffffffff814659b2:	49 83 ba e0 00 00 00 	cmpq   $0xa,0xe0(%r10)
+ffffffff814659b9:	0a 
+ffffffff814659ba:	0f 85 a2 00 00 00    	jne    ffffffff81465a62 <bpf_perf_event_output+0x192>
+ffffffff814659c0:	45 3b 9a a0 02 00 00 	cmp    0x2a0(%r10),%r11d
+ffffffff814659c7:	0f 85 9e 00 00 00    	jne    ffffffff81465a6b <bpf_perf_event_output+0x19b>
+ffffffff814659cd:	41 f6 82 f1 00 00 00 	testb  $0x4,0xf1(%r10)
+ffffffff814659d4:	04 
+ffffffff814659d5:	74 55                	je     ffffffff81465a2c <bpf_perf_event_output+0x15c>
+ffffffff814659d7:	48 8b 04 24          	mov    (%rsp),%rax
+ffffffff814659db:	8b 4c 24 18          	mov    0x18(%rsp),%ecx
+ffffffff814659df:	48 83 f8 07          	cmp    $0x7,%rax
+ffffffff814659e3:	0f 86 af 00 00 00    	jbe    ffffffff81465a98 <bpf_perf_event_output+0x1c8>
+ffffffff814659e9:	48 89 c7             	mov    %rax,%rdi
+ffffffff814659ec:	03 48 18             	add    0x18(%rax),%ecx
+ffffffff814659ef:	48 8b 00             	mov    (%rax),%rax
+ffffffff814659f2:	48 83 f8 07          	cmp    $0x7,%rax
+ffffffff814659f6:	77 f1                	ja     ffffffff814659e9 <bpf_perf_event_output+0x119>
+ffffffff814659f8:	48 89 e3             	mov    %rsp,%rbx
+ffffffff814659fb:	8d 41 03             	lea    0x3(%rcx),%eax
+ffffffff814659fe:	48 c1 e2 08          	shl    $0x8,%rdx
+ffffffff81465a02:	83 c8 07             	or     $0x7,%eax
+ffffffff81465a05:	44 8d 58 fd          	lea    -0x3(%rax),%r11d
+ffffffff81465a09:	83 c0 01             	add    $0x1,%eax
+ffffffff81465a0c:	44 89 5c 24 1c       	mov    %r11d,0x1c(%rsp)
+ffffffff81465a11:	41 29 cb             	sub    %ecx,%r11d
+ffffffff81465a14:	48 98                	cltq
+ffffffff81465a16:	44 89 d9             	mov    %r11d,%ecx
+ffffffff81465a19:	48 89 0f             	mov    %rcx,(%rdi)
+ffffffff81465a1c:	49 89 5c 10 50       	mov    %rbx,0x50(%r8,%rdx,1)
+ffffffff81465a21:	48 01 46 10          	add    %rax,0x10(%rsi)
+ffffffff81465a25:	48 81 0e 00 04 00 00 	orq    $0x400,(%rsi)
+ffffffff81465a2c:	4c 89 ca             	mov    %r9,%rdx
+ffffffff81465a2f:	4c 89 d7             	mov    %r10,%rdi
+ffffffff81465a32:	e8 b9 c7 0b 00       	call   ffffffff815221f0 <perf_event_output>
+ffffffff81465a37:	48 98                	cltq
+ffffffff81465a39:	65 ff 0d 3c bf e5 02 	decl   %gs:0x2e5bf3c(%rip)        # ffffffff842c197c <bpf_trace_nest_level>
+ffffffff81465a40:	65 ff 0d e9 a5 e4 02 	decl   %gs:0x2e4a5e9(%rip)        # ffffffff842b0030 <__preempt_count>
+ffffffff81465a47:	74 2b                	je     ffffffff81465a74 <bpf_perf_event_output+0x1a4>
+ffffffff81465a49:	48 8b 54 24 20       	mov    0x20(%rsp),%rdx
+ffffffff81465a4e:	65 48 2b 15 b2 a5 e4 	sub    %gs:0x2e4a5b2(%rip),%rdx        # ffffffff842b0008 <__stack_chk_guard>
+ffffffff81465a55:	02 
+ffffffff81465a56:	75 4b                	jne    ffffffff81465aa3 <bpf_perf_event_output+0x1d3>
+ffffffff81465a58:	48 83 c4 28          	add    $0x28,%rsp
+ffffffff81465a5c:	5b                   	pop    %rbx
+ffffffff81465a5d:	e9 4e de ba 00       	jmp    ffffffff820138b0 <__pi___x86_return_thunk>
+ffffffff81465a62:	48 c7 c0 ea ff ff ff 	mov    $0xffffffffffffffea,%rax
+ffffffff81465a69:	eb ce                	jmp    ffffffff81465a39 <bpf_perf_event_output+0x169>
+ffffffff81465a6b:	48 c7 c0 a1 ff ff ff 	mov    $0xffffffffffffffa1,%rax
+ffffffff81465a72:	eb c5                	jmp    ffffffff81465a39 <bpf_perf_event_output+0x169>
+ffffffff81465a74:	e8 af e4 ba 00       	call   ffffffff82013f28 <__SCT__preempt_schedule>
+ffffffff81465a79:	eb ce                	jmp    ffffffff81465a49 <bpf_perf_event_output+0x179>
+ffffffff81465a7b:	0f 0b                	ud2
+ffffffff81465a7d:	48 c7 c0 f0 ff ff ff 	mov    $0xfffffffffffffff0,%rax
+ffffffff81465a84:	eb b3                	jmp    ffffffff81465a39 <bpf_perf_event_output+0x169>
+ffffffff81465a86:	48 c7 c0 f9 ff ff ff 	mov    $0xfffffffffffffff9,%rax
+ffffffff81465a8d:	eb aa                	jmp    ffffffff81465a39 <bpf_perf_event_output+0x169>
+ffffffff81465a8f:	48 c7 c0 fe ff ff ff 	mov    $0xfffffffffffffffe,%rax
+ffffffff81465a96:	eb a1                	jmp    ffffffff81465a39 <bpf_perf_event_output+0x169>
+ffffffff81465a98:	48 89 e3             	mov    %rsp,%rbx
+ffffffff81465a9b:	48 89 df             	mov    %rbx,%rdi
+ffffffff81465a9e:	e9 58 ff ff ff       	jmp    ffffffff814659fb <bpf_perf_event_output+0x12b>
+ffffffff81465aa3:	e8 78 e2 b9 00       	call   ffffffff82003d20 <__stack_chk_fail>
+
+Disassembly of section .data:
+
+Disassembly of section .init.text:
+
+Disassembly of section .altinstr_aux:
+
+Disassembly of section .altinstr_replacement:
+
+Disassembly of section .exit.text:

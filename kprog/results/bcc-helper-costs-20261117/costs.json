@@ -1,0 +1,1052 @@
+{
+  "recorded_utc": "2026-11-17T16:01:18.179798+00:00",
+  "historical_profile": {
+    "source": "/workspaces/repository/kprog/results/limits-20261114/bcc.json",
+    "raw": "/workspaces/kprog-raw/C/limits/bcc",
+    "event": "cpu-clock",
+    "vcpus": "4",
+    "phase_requested_seconds": 60,
+    "counter_run": "x86_kvm_corpus_20261114_184517_404427",
+    "scope": "Historical sampled ownership fractions, not current per-invocation helper costs.",
+    "phases": {
+      "baseline": {
+        "all_samples": 494228,
+        "bpf_owned_samples": 96925,
+        "categories": {
+          "ktime_get_ns": {
+            "samples": 29217,
+            "fraction_of_bpf": 0.30143925715759606
+          },
+          "perf_event_output": {
+            "samples": 26236,
+            "fraction_of_bpf": 0.27068351818416303
+          },
+          "map_update": {
+            "samples": 17210,
+            "fraction_of_bpf": 0.17755996904823318
+          },
+          "map_lookup": {
+            "samples": 11842,
+            "fraction_of_bpf": 0.12217694093371163
+          },
+          "program_text": {
+            "samples": 8927,
+            "fraction_of_bpf": 0.09210214083053908
+          },
+          "other_helper": {
+            "samples": 3093,
+            "fraction_of_bpf": 0.031911271601753936
+          },
+          "probe_read": {
+            "samples": 400,
+            "fraction_of_bpf": 0.0041269022440030955
+          }
+        },
+        "symbols": {
+          "program_text": {
+            "samples": 8927,
+            "fraction_of_bpf": 0.09210214083053908
+          },
+          "ktime_get_mono_fast_ns": {
+            "samples": 28891,
+            "fraction_of_bpf": 0.29807583182873354
+          },
+          "bpf_ktime_get_ns": {
+            "samples": 326,
+            "fraction_of_bpf": 0.0033634253288625225
+          },
+          "bpf_perf_event_output_tp": {
+            "samples": 20804,
+            "fraction_of_bpf": 0.21464018571060098
+          },
+          "bpf_perf_event_output": {
+            "samples": 5431,
+            "fraction_of_bpf": 0.05603301521795202
+          },
+          "bpf_perf_event_output_raw_tp": {
+            "samples": 1,
+            "fraction_of_bpf": 1.0317255610007738e-05
+          },
+          "htab_map_update_elem": {
+            "samples": 15623,
+            "fraction_of_bpf": 0.1611864843951509
+          },
+          "bpf_map_update_elem": {
+            "samples": 0,
+            "fraction_of_bpf": 0.0
+          },
+          "htab_map_delete_elem": {
+            "samples": 1587,
+            "fraction_of_bpf": 0.01637348465308228
+          },
+          "bpf_map_delete_elem": {
+            "samples": 0,
+            "fraction_of_bpf": 0.0
+          },
+          "lookup_nulls_elem_raw": {
+            "samples": 6836,
+            "fraction_of_bpf": 0.07052875935001289
+          },
+          "__htab_map_lookup_elem": {
+            "samples": 5006,
+            "fraction_of_bpf": 0.051648181583698737
+          }
+        }
+      },
+      "post_rejit": {
+        "all_samples": 477564,
+        "bpf_owned_samples": 95733,
+        "categories": {
+          "ktime_get_ns": {
+            "samples": 28807,
+            "fraction_of_bpf": 0.3009098221094085
+          },
+          "perf_event_output": {
+            "samples": 25471,
+            "fraction_of_bpf": 0.26606290411874695
+          },
+          "map_update": {
+            "samples": 17340,
+            "fraction_of_bpf": 0.18112876437592054
+          },
+          "map_lookup": {
+            "samples": 11692,
+            "fraction_of_bpf": 0.1221313444684696
+          },
+          "program_text": {
+            "samples": 9030,
+            "fraction_of_bpf": 0.09432484096393093
+          },
+          "other_helper": {
+            "samples": 3084,
+            "fraction_of_bpf": 0.03221459684748206
+          },
+          "probe_read": {
+            "samples": 309,
+            "fraction_of_bpf": 0.0032277271160414903
+          }
+        },
+        "symbols": {
+          "program_text": {
+            "samples": 9030,
+            "fraction_of_bpf": 0.09432484096393093
+          },
+          "ktime_get_mono_fast_ns": {
+            "samples": 28505,
+            "fraction_of_bpf": 0.297755215025122
+          },
+          "bpf_ktime_get_ns": {
+            "samples": 302,
+            "fraction_of_bpf": 0.003154607084286505
+          },
+          "bpf_perf_event_output_tp": {
+            "samples": 0,
+            "fraction_of_bpf": 0.0
+          },
+          "bpf_perf_event_output": {
+            "samples": 25471,
+            "fraction_of_bpf": 0.26606290411874695
+          },
+          "bpf_perf_event_output_raw_tp": {
+            "samples": 0,
+            "fraction_of_bpf": 0.0
+          },
+          "htab_map_update_elem": {
+            "samples": 15575,
+            "fraction_of_bpf": 0.16269207065484212
+          },
+          "bpf_map_update_elem": {
+            "samples": 212,
+            "fraction_of_bpf": 0.0022144923902938382
+          },
+          "htab_map_delete_elem": {
+            "samples": 1534,
+            "fraction_of_bpf": 0.016023732673163905
+          },
+          "bpf_map_delete_elem": {
+            "samples": 19,
+            "fraction_of_bpf": 0.00019846865762067415
+          },
+          "lookup_nulls_elem_raw": {
+            "samples": 7170,
+            "fraction_of_bpf": 0.07489580395474915
+          },
+          "__htab_map_lookup_elem": {
+            "samples": 4522,
+            "fraction_of_bpf": 0.047235540513720455
+          }
+        }
+      }
+    }
+  },
+  "newer_counters": {
+    "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_123339_157340",
+    "scope": "Stats-on joined clock batch. Preserve all records and invocation mix; no PMU split.",
+    "phases": {
+      "baseline": {
+        "all_program_records": 25,
+        "selected_records": 15,
+        "selected_calls": 1553272800,
+        "selected_time_ns": 239187801203,
+        "selected_ns_per_call": 153.9895639729222,
+        "all_installed_bytes": 7965,
+        "all_records": [
+          {
+            "bytes_jited": 143,
+            "bytes_xlated": 232,
+            "id": 33,
+            "name": "kprobe__cap_cap",
+            "run_cnt_delta": 33353154,
+            "run_time_ns_delta": 2560322168,
+            "type": "kprobe",
+            "selected_min100": true,
+            "ns_per_call": 76.76401961865436
+          },
+          {
+            "bytes_jited": 383,
+            "bytes_xlated": 616,
+            "id": 38,
+            "name": "kprobe__cap_cap",
+            "run_cnt_delta": 33353151,
+            "run_time_ns_delta": 11972698591,
+            "type": "kprobe",
+            "selected_min100": true,
+            "ns_per_call": 358.96754075799316
+          },
+          {
+            "bytes_jited": 1501,
+            "bytes_xlated": 2240,
+            "id": 40,
+            "name": "inet_sock_set_s",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint",
+            "selected_min100": false,
+            "ns_per_call": null
+          },
+          {
+            "bytes_jited": 141,
+            "bytes_xlated": 240,
+            "id": 41,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint",
+            "selected_min100": false,
+            "ns_per_call": null
+          },
+          {
+            "bytes_jited": 108,
+            "bytes_xlated": 168,
+            "id": 43,
+            "name": "sys_enter",
+            "run_cnt_delta": 711289186,
+            "run_time_ns_delta": 74687925383,
+            "type": "tracepoint",
+            "selected_min100": true,
+            "ns_per_call": 105.00360029795252
+          },
+          {
+            "bytes_jited": 141,
+            "bytes_xlated": 240,
+            "id": 47,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 16892867,
+            "run_time_ns_delta": 7083335362,
+            "type": "tracepoint",
+            "selected_min100": true,
+            "ns_per_call": 419.3092482170137
+          },
+          {
+            "bytes_jited": 40,
+            "bytes_xlated": 48,
+            "id": 51,
+            "name": "fentry_vfs_read",
+            "run_cnt_delta": 351679,
+            "run_time_ns_delta": 29660353,
+            "type": "tracing",
+            "selected_min100": true,
+            "ns_per_call": 84.33927814853887
+          },
+          {
+            "bytes_jited": 602,
+            "bytes_xlated": 792,
+            "id": 52,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint",
+            "selected_min100": false,
+            "ns_per_call": null
+          },
+          {
+            "bytes_jited": 406,
+            "bytes_xlated": 656,
+            "id": 53,
+            "name": "sys_exit",
+            "run_cnt_delta": 711289192,
+            "run_time_ns_delta": 103293714939,
+            "type": "tracepoint",
+            "selected_min100": true,
+            "ns_per_call": 145.22041962785792
+          },
+          {
+            "bytes_jited": 602,
+            "bytes_xlated": 792,
+            "id": 55,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 16892867,
+            "run_time_ns_delta": 36568003709,
+            "type": "tracepoint",
+            "selected_min100": true,
+            "ns_per_call": 2164.700859185122
+          },
+          {
+            "bytes_jited": 121,
+            "bytes_xlated": 200,
+            "id": 56,
+            "name": "blk_account_io_",
+            "run_cnt_delta": 183,
+            "run_time_ns_delta": 60169,
+            "type": "kprobe",
+            "selected_min100": true,
+            "ns_per_call": 328.79234972677597
+          },
+          {
+            "bytes_jited": 40,
+            "bytes_xlated": 48,
+            "id": 57,
+            "name": "fentry_vfs_writ",
+            "run_cnt_delta": 409420,
+            "run_time_ns_delta": 39664488,
+            "type": "tracing",
+            "selected_min100": true,
+            "ns_per_call": 96.87970299448
+          },
+          {
+            "bytes_jited": 40,
+            "bytes_xlated": 48,
+            "id": 58,
+            "name": "fentry_vfs_fsyn",
+            "run_cnt_delta": 84,
+            "run_time_ns_delta": 11887,
+            "type": "tracing",
+            "selected_min100": false,
+            "ns_per_call": 141.51190476190476
+          },
+          {
+            "bytes_jited": 40,
+            "bytes_xlated": 48,
+            "id": 61,
+            "name": "fentry_vfs_open",
+            "run_cnt_delta": 16893324,
+            "run_time_ns_delta": 911496588,
+            "type": "tracing",
+            "selected_min100": true,
+            "ns_per_call": 53.956023574756514
+          },
+          {
+            "bytes_jited": 354,
+            "bytes_xlated": 648,
+            "id": 62,
+            "name": "block_rq_insert",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracing",
+            "selected_min100": false,
+            "ns_per_call": null
+          },
+          {
+            "bytes_jited": 40,
+            "bytes_xlated": 48,
+            "id": 65,
+            "name": "fentry_vfs_crea",
+            "run_cnt_delta": 44,
+            "run_time_ns_delta": 4521,
+            "type": "tracing",
+            "selected_min100": false,
+            "ns_per_call": 102.75
+          },
+          {
+            "bytes_jited": 110,
+            "bytes_xlated": 184,
+            "id": 66,
+            "name": "tcp_v4_connect",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe",
+            "selected_min100": false,
+            "ns_per_call": null
+          },
+          {
+            "bytes_jited": 440,
+            "bytes_xlated": 824,
+            "id": 67,
+            "name": "block_rq_issue",
+            "run_cnt_delta": 690,
+            "run_time_ns_delta": 1374340,
+            "type": "tracing",
+            "selected_min100": true,
+            "ns_per_call": 1991.7971014492753
+          },
+          {
+            "bytes_jited": 437,
+            "bytes_xlated": 712,
+            "id": 68,
+            "name": "block_rq_comple",
+            "run_cnt_delta": 734,
+            "run_time_ns_delta": 100606962,
+            "type": "tracing",
+            "selected_min100": true,
+            "ns_per_call": 137066.70572207085
+          },
+          {
+            "bytes_jited": 493,
+            "bytes_xlated": 752,
+            "id": 70,
+            "name": "tcp_v4_connect_",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe",
+            "selected_min100": false,
+            "ns_per_call": null
+          },
+          {
+            "bytes_jited": 110,
+            "bytes_xlated": 184,
+            "id": 71,
+            "name": "tcp_v6_connect",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe",
+            "selected_min100": false,
+            "ns_per_call": null
+          },
+          {
+            "bytes_jited": 496,
+            "bytes_xlated": 752,
+            "id": 73,
+            "name": "tcp_v6_connect_",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe",
+            "selected_min100": false,
+            "ns_per_call": null
+          },
+          {
+            "bytes_jited": 121,
+            "bytes_xlated": 184,
+            "id": 74,
+            "name": "sched_wakeup",
+            "run_cnt_delta": 4190935,
+            "run_time_ns_delta": 671567036,
+            "type": "tracing",
+            "selected_min100": true,
+            "ns_per_call": 160.24277064664568
+          },
+          {
+            "bytes_jited": 121,
+            "bytes_xlated": 184,
+            "id": 76,
+            "name": "sched_wakeup_ne",
+            "run_cnt_delta": 121,
+            "run_time_ns_delta": 47487,
+            "type": "tracing",
+            "selected_min100": true,
+            "ns_per_call": 392.45454545454544
+          },
+          {
+            "bytes_jited": 935,
+            "bytes_xlated": 1632,
+            "id": 77,
+            "name": "sched_switch",
+            "run_cnt_delta": 8355297,
+            "run_time_ns_delta": 1267323628,
+            "type": "tracing",
+            "selected_min100": true,
+            "ns_per_call": 151.67906395188587
+          }
+        ],
+        "groups_by_name_and_type": [
+          {
+            "ids": [
+              53
+            ],
+            "calls": 711289192,
+            "time_ns": 103293714939,
+            "installed_bytes": 406,
+            "name": "sys_exit",
+            "type": "tracepoint",
+            "ns_per_call": 145.22041962785792
+          },
+          {
+            "ids": [
+              43
+            ],
+            "calls": 711289186,
+            "time_ns": 74687925383,
+            "installed_bytes": 108,
+            "name": "sys_enter",
+            "type": "tracepoint",
+            "ns_per_call": 105.00360029795252
+          },
+          {
+            "ids": [
+              47,
+              55
+            ],
+            "calls": 33785734,
+            "time_ns": 43651339071,
+            "installed_bytes": 743,
+            "name": "tracepoint__sys",
+            "type": "tracepoint",
+            "ns_per_call": 1292.005053701068
+          },
+          {
+            "ids": [
+              33,
+              38
+            ],
+            "calls": 66706305,
+            "time_ns": 14533020759,
+            "installed_bytes": 526,
+            "name": "kprobe__cap_cap",
+            "type": "kprobe",
+            "ns_per_call": 217.8657738425176
+          },
+          {
+            "ids": [
+              77
+            ],
+            "calls": 8355297,
+            "time_ns": 1267323628,
+            "installed_bytes": 935,
+            "name": "sched_switch",
+            "type": "tracing",
+            "ns_per_call": 151.67906395188587
+          },
+          {
+            "ids": [
+              61
+            ],
+            "calls": 16893324,
+            "time_ns": 911496588,
+            "installed_bytes": 40,
+            "name": "fentry_vfs_open",
+            "type": "tracing",
+            "ns_per_call": 53.956023574756514
+          },
+          {
+            "ids": [
+              74
+            ],
+            "calls": 4190935,
+            "time_ns": 671567036,
+            "installed_bytes": 121,
+            "name": "sched_wakeup",
+            "type": "tracing",
+            "ns_per_call": 160.24277064664568
+          },
+          {
+            "ids": [
+              68
+            ],
+            "calls": 734,
+            "time_ns": 100606962,
+            "installed_bytes": 437,
+            "name": "block_rq_comple",
+            "type": "tracing",
+            "ns_per_call": 137066.70572207085
+          },
+          {
+            "ids": [
+              57
+            ],
+            "calls": 409420,
+            "time_ns": 39664488,
+            "installed_bytes": 40,
+            "name": "fentry_vfs_writ",
+            "type": "tracing",
+            "ns_per_call": 96.87970299448
+          },
+          {
+            "ids": [
+              51
+            ],
+            "calls": 351679,
+            "time_ns": 29660353,
+            "installed_bytes": 40,
+            "name": "fentry_vfs_read",
+            "type": "tracing",
+            "ns_per_call": 84.33927814853887
+          },
+          {
+            "ids": [
+              67
+            ],
+            "calls": 690,
+            "time_ns": 1374340,
+            "installed_bytes": 440,
+            "name": "block_rq_issue",
+            "type": "tracing",
+            "ns_per_call": 1991.7971014492753
+          },
+          {
+            "ids": [
+              56
+            ],
+            "calls": 183,
+            "time_ns": 60169,
+            "installed_bytes": 121,
+            "name": "blk_account_io_",
+            "type": "kprobe",
+            "ns_per_call": 328.79234972677597
+          },
+          {
+            "ids": [
+              76
+            ],
+            "calls": 121,
+            "time_ns": 47487,
+            "installed_bytes": 121,
+            "name": "sched_wakeup_ne",
+            "type": "tracing",
+            "ns_per_call": 392.45454545454544
+          }
+        ]
+      },
+      "post_rejit": {
+        "all_program_records": 25,
+        "selected_records": 15,
+        "selected_calls": 1938935595,
+        "selected_time_ns": 247767076148,
+        "selected_ns_per_call": 127.78509858033732,
+        "all_installed_bytes": 13248,
+        "all_records": [
+          {
+            "bytes_jited": 34,
+            "bytes_xlated": 16,
+            "id": 128,
+            "name": "fentry_vfs_read",
+            "run_cnt_delta": 459403,
+            "run_time_ns_delta": 38183660,
+            "type": "tracing",
+            "selected_min100": true,
+            "ns_per_call": 83.11582640949231
+          },
+          {
+            "bytes_jited": 94,
+            "bytes_xlated": 16,
+            "id": 129,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint",
+            "selected_min100": false,
+            "ns_per_call": null
+          },
+          {
+            "bytes_jited": 99,
+            "bytes_xlated": 16,
+            "id": 130,
+            "name": "kprobe__cap_cap",
+            "run_cnt_delta": 39604274,
+            "run_time_ns_delta": 3065238057,
+            "type": "kprobe",
+            "selected_min100": true,
+            "ns_per_call": 77.39664807389222
+          },
+          {
+            "bytes_jited": 35,
+            "bytes_xlated": 16,
+            "id": 134,
+            "name": "fentry_vfs_writ",
+            "run_cnt_delta": 524022,
+            "run_time_ns_delta": 43343961,
+            "type": "tracing",
+            "selected_min100": true,
+            "ns_per_call": 82.71401009881265
+          },
+          {
+            "bytes_jited": 94,
+            "bytes_xlated": 16,
+            "id": 138,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 23451963,
+            "run_time_ns_delta": 1871221300,
+            "type": "tracepoint",
+            "selected_min100": true,
+            "ns_per_call": 79.78953830005617
+          },
+          {
+            "bytes_jited": 35,
+            "bytes_xlated": 16,
+            "id": 139,
+            "name": "fentry_vfs_fsyn",
+            "run_cnt_delta": 88,
+            "run_time_ns_delta": 12080,
+            "type": "tracing",
+            "selected_min100": false,
+            "ns_per_call": 137.27272727272728
+          },
+          {
+            "bytes_jited": 35,
+            "bytes_xlated": 16,
+            "id": 142,
+            "name": "fentry_vfs_open",
+            "run_cnt_delta": 23452417,
+            "run_time_ns_delta": 1148206952,
+            "type": "tracing",
+            "selected_min100": true,
+            "ns_per_call": 48.95900290362396
+          },
+          {
+            "bytes_jited": 35,
+            "bytes_xlated": 16,
+            "id": 144,
+            "name": "fentry_vfs_crea",
+            "run_cnt_delta": 42,
+            "run_time_ns_delta": 3154,
+            "type": "tracing",
+            "selected_min100": false,
+            "ns_per_call": 75.0952380952381
+          },
+          {
+            "bytes_jited": 420,
+            "bytes_xlated": 16,
+            "id": 145,
+            "name": "sys_enter",
+            "run_cnt_delta": 881127115,
+            "run_time_ns_delta": 79620772097,
+            "type": "tracepoint",
+            "selected_min100": true,
+            "ns_per_call": 90.36241280237982
+          },
+          {
+            "bytes_jited": 919,
+            "bytes_xlated": 16,
+            "id": 146,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint",
+            "selected_min100": false,
+            "ns_per_call": null
+          },
+          {
+            "bytes_jited": 110,
+            "bytes_xlated": 16,
+            "id": 150,
+            "name": "blk_account_io_",
+            "run_cnt_delta": 218,
+            "run_time_ns_delta": 70754,
+            "type": "kprobe",
+            "selected_min100": true,
+            "ns_per_call": 324.5596330275229
+          },
+          {
+            "bytes_jited": 428,
+            "bytes_xlated": 16,
+            "id": 151,
+            "name": "sched_wakeup",
+            "run_cnt_delta": 8723614,
+            "run_time_ns_delta": 896690267,
+            "type": "tracing",
+            "selected_min100": true,
+            "ns_per_call": 102.78885184511832
+          },
+          {
+            "bytes_jited": 281,
+            "bytes_xlated": 16,
+            "id": 156,
+            "name": "kprobe__cap_cap",
+            "run_cnt_delta": 39604270,
+            "run_time_ns_delta": 13613113419,
+            "type": "kprobe",
+            "selected_min100": true,
+            "ns_per_call": 343.72842673277404
+          },
+          {
+            "bytes_jited": 1789,
+            "bytes_xlated": 16,
+            "id": 157,
+            "name": "inet_sock_set_s",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracepoint",
+            "selected_min100": false,
+            "ns_per_call": null
+          },
+          {
+            "bytes_jited": 613,
+            "bytes_xlated": 16,
+            "id": 159,
+            "name": "sys_exit",
+            "run_cnt_delta": 881127120,
+            "run_time_ns_delta": 102703670292,
+            "type": "tracepoint",
+            "selected_min100": true,
+            "ns_per_call": 116.55942481034973
+          },
+          {
+            "bytes_jited": 919,
+            "bytes_xlated": 16,
+            "id": 160,
+            "name": "tracepoint__sys",
+            "run_cnt_delta": 23451963,
+            "run_time_ns_delta": 42018238407,
+            "type": "tracepoint",
+            "selected_min100": true,
+            "ns_per_call": 1791.6725523999846
+          },
+          {
+            "bytes_jited": 78,
+            "bytes_xlated": 16,
+            "id": 161,
+            "name": "tcp_v4_connect",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe",
+            "selected_min100": false,
+            "ns_per_call": null
+          },
+          {
+            "bytes_jited": 1007,
+            "bytes_xlated": 16,
+            "id": 163,
+            "name": "block_rq_insert",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "tracing",
+            "selected_min100": false,
+            "ns_per_call": null
+          },
+          {
+            "bytes_jited": 428,
+            "bytes_xlated": 16,
+            "id": 169,
+            "name": "sched_wakeup_ne",
+            "run_cnt_delta": 118,
+            "run_time_ns_delta": 56343,
+            "type": "tracing",
+            "selected_min100": true,
+            "ns_per_call": 477.4830508474576
+          },
+          {
+            "bytes_jited": 1075,
+            "bytes_xlated": 16,
+            "id": 172,
+            "name": "block_rq_issue",
+            "run_cnt_delta": 743,
+            "run_time_ns_delta": 2152699,
+            "type": "tracing",
+            "selected_min100": true,
+            "ns_per_call": 2897.306864064603
+          },
+          {
+            "bytes_jited": 1122,
+            "bytes_xlated": 16,
+            "id": 174,
+            "name": "tcp_v4_connect_",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe",
+            "selected_min100": false,
+            "ns_per_call": null
+          },
+          {
+            "bytes_jited": 1683,
+            "bytes_xlated": 16,
+            "id": 176,
+            "name": "sched_switch",
+            "run_cnt_delta": 17407565,
+            "run_time_ns_delta": 2735954795,
+            "type": "tracing",
+            "selected_min100": true,
+            "ns_per_call": 157.17044830796266
+          },
+          {
+            "bytes_jited": 711,
+            "bytes_xlated": 16,
+            "id": 177,
+            "name": "block_rq_comple",
+            "run_cnt_delta": 790,
+            "run_time_ns_delta": 10163145,
+            "type": "tracing",
+            "selected_min100": true,
+            "ns_per_call": 12864.740506329113
+          },
+          {
+            "bytes_jited": 78,
+            "bytes_xlated": 16,
+            "id": 178,
+            "name": "tcp_v6_connect",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe",
+            "selected_min100": false,
+            "ns_per_call": null
+          },
+          {
+            "bytes_jited": 1126,
+            "bytes_xlated": 16,
+            "id": 180,
+            "name": "tcp_v6_connect_",
+            "run_cnt_delta": 0,
+            "run_time_ns_delta": 0,
+            "type": "kprobe",
+            "selected_min100": false,
+            "ns_per_call": null
+          }
+        ],
+        "groups_by_name_and_type": [
+          {
+            "ids": [
+              159
+            ],
+            "calls": 881127120,
+            "time_ns": 102703670292,
+            "installed_bytes": 613,
+            "name": "sys_exit",
+            "type": "tracepoint",
+            "ns_per_call": 116.55942481034973
+          },
+          {
+            "ids": [
+              145
+            ],
+            "calls": 881127115,
+            "time_ns": 79620772097,
+            "installed_bytes": 420,
+            "name": "sys_enter",
+            "type": "tracepoint",
+            "ns_per_call": 90.36241280237982
+          },
+          {
+            "ids": [
+              138,
+              160
+            ],
+            "calls": 46903926,
+            "time_ns": 43889459707,
+            "installed_bytes": 1013,
+            "name": "tracepoint__sys",
+            "type": "tracepoint",
+            "ns_per_call": 935.7310453500204
+          },
+          {
+            "ids": [
+              130,
+              156
+            ],
+            "calls": 79208544,
+            "time_ns": 16678351476,
+            "installed_bytes": 380,
+            "name": "kprobe__cap_cap",
+            "type": "kprobe",
+            "ns_per_call": 210.5625306785086
+          },
+          {
+            "ids": [
+              176
+            ],
+            "calls": 17407565,
+            "time_ns": 2735954795,
+            "installed_bytes": 1683,
+            "name": "sched_switch",
+            "type": "tracing",
+            "ns_per_call": 157.17044830796266
+          },
+          {
+            "ids": [
+              142
+            ],
+            "calls": 23452417,
+            "time_ns": 1148206952,
+            "installed_bytes": 35,
+            "name": "fentry_vfs_open",
+            "type": "tracing",
+            "ns_per_call": 48.95900290362396
+          },
+          {
+            "ids": [
+              151
+            ],
+            "calls": 8723614,
+            "time_ns": 896690267,
+            "installed_bytes": 428,
+            "name": "sched_wakeup",
+            "type": "tracing",
+            "ns_per_call": 102.78885184511832
+          },
+          {
+            "ids": [
+              134
+            ],
+            "calls": 524022,
+            "time_ns": 43343961,
+            "installed_bytes": 35,
+            "name": "fentry_vfs_writ",
+            "type": "tracing",
+            "ns_per_call": 82.71401009881265
+          },
+          {
+            "ids": [
+              128
+            ],
+            "calls": 459403,
+            "time_ns": 38183660,
+            "installed_bytes": 34,
+            "name": "fentry_vfs_read",
+            "type": "tracing",
+            "ns_per_call": 83.11582640949231
+          },
+          {
+            "ids": [
+              177
+            ],
+            "calls": 790,
+            "time_ns": 10163145,
+            "installed_bytes": 711,
+            "name": "block_rq_comple",
+            "type": "tracing",
+            "ns_per_call": 12864.740506329113
+          },
+          {
+            "ids": [
+              172
+            ],
+            "calls": 743,
+            "time_ns": 2152699,
+            "installed_bytes": 1075,
+            "name": "block_rq_issue",
+            "type": "tracing",
+            "ns_per_call": 2897.306864064603
+          },
+          {
+            "ids": [
+              150
+            ],
+            "calls": 218,
+            "time_ns": 70754,
+            "installed_bytes": 110,
+            "name": "blk_account_io_",
+            "type": "kprobe",
+            "ns_per_call": 324.5596330275229
+          },
+          {
+            "ids": [
+              169
+            ],
+            "calls": 118,
+            "time_ns": 56343,
+            "installed_bytes": 428,
+            "name": "sched_wakeup_ne",
+            "type": "tracing",
+            "ns_per_call": 477.4830508474576
+          }
+        ]
+      }
+    }
+  }
+}
