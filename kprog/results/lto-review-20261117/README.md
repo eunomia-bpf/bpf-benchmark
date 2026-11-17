@@ -3015,3 +3015,73 @@ The [reader](leaf_read_effect_inventory.py) and
 rows, exact record counters and comparisons, without replacing the
 original user-leaf pairs. PERF ran only the host reader; no new guest,
 build, source change or measurement gate was introduced.
+
+
+### Compat dispatcher source audit: exact task boundary and branch cost
+
+At this review the coordinator is editing scalar compat lowering in
+`x86_probe_read.rs:225–254`; this is a review of that in-progress source,
+not a new installed-code or performance receipt. The selector follows
+`kernel/trace/bpf_trace.c:285–294`: **unsigned source < TASK_SIZE**.
+`arch/x86/include/asm/page_64_types.h:59–67` derives TASK_SIZE from the
+current task's TIF_ADDR32 and ADDR_LIMIT_3GB. The two masks happen to be
+**0x08000000 in different fields**: `thread_info.flags` bit 27
+(`thread_info.h:103`) and `task_struct.personality`
+(`include/uapi/linux/personality.h:24`). TS_COMPAT at
+`thread_info.h:209` instead describes the active 32-bit syscall; neither
+that bit nor `in_compat_syscall()` (`asm/compat.h:98–102`) supplies the
+address-width selector. Current task also need not be the sampled task.
+
+The WIP loads both field offsets from the sole kernel BTF in
+`native_loader_lto.hpp:147–148`, tests those distinct fields, and compares
+the full RDX source with unsigned JB. Its EAX loads zero-extend the
+32-bit limits correctly; RDI/ESI/RDX reach the selected leaf unchanged.
+A low-32-bit pointer comparison would misclassify high kernel pointers.
+
+[compat_selector_inventory.py](compat_selector_inventory.py) records
+144 finite source-boundary illustrations in
+[compat-selector.json](compat-selector.json). These are arithmetic
+examples, not an executed native implementation or a new test gate:
+
+| Current address space | TASK_SIZE | Source exactly at limit |
+| --- | --- | --- |
+| 64-bit, either personality | active TASK_SIZE_MAX | kernel |
+| TIF_ADDR32, normal personality | 0xffffe000 | kernel |
+| TIF_ADDR32, ADDR_LIMIT_3GB | 0xc0000000 | kernel |
+
+The selector uses the **source alone**, even when a size of 8 crosses the
+task limit. The subsequent user-copy range policy uses global
+USER_PTR_MAX; it is a separate decision. At source exactly TASK_SIZE,
+a scalar size of zero still selects kernel, and the kernel's policy
+rejects the address below TASK_SIZE_MAX + PAGE_SIZE with **-ERANGE**
+(`arch/x86/mm/maccess.c:17–18`, `mm/maccess.c:36–37`). Replacing strict
+`<` with `<=`, classifying by the range end, or using only global
+USER_PTR_MAX changes these cases. A zero-size compat **string** is
+different: both string leaves return zero before copying; do not apply
+the scalar error example to it. The current WIP changes scalar compat
+only; compat-string and user-string lowering remain separate work.
+
+For the performance comparison, the retained sole-kernel
+[helper disassembly](compat-kernel-helper.disassembly.txt) shows three
+callee-save pushes/pops, a call to `copy_from_{user,kernel}_nofault`,
+negative-result handling, optional memset and a return thunk.
+The JIT reaches this same helper. The new dispatcher goes directly to
+local caller-saved leaves, removing that extra helper/copy call boundary
+and its frame, while preserving the source selector and each leaf's
+fault/zeroing contract. Existing direct-read leaves are reused; a
+compat-only blob needs both leaves. There is no measured compat gain
+or installed-byte figure yet, and the kernel-leaf Tracee gain is not a
+measurement of this additional transformation.
+
+The literal WIP dispatcher accounts for **84 local bytes** before branch
+and displacement compaction. A 64-bit user choice executes eight
+instructions in it; a 64-bit kernel choice executes nine (excluding the
+call site and leaf). Both execute a jump over the IA32 block at line 240.
+Placing the IA32 case after the domain-transfer block can let the 64-bit
+case fall through to its comparison, saving **one executed direct jump**
+on that path; the cold IA32 case would jump back. This is a source layout
+opportunity with no nanosecond claim, separate from the previously
+recorded rel8/disp8 work. Both leaves currently reload current_task, so
+compat adds a GS load before the selected leaf's GS load. Avoid inventing
+a new multi-entry register protocol merely to remove that load; compare
+installed bytes and per-call effect before expanding the design.

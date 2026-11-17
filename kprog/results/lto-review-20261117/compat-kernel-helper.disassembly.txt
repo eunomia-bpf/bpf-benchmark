@@ -1,0 +1,60 @@
+
+/workspaces/.agent-state/kprog-ck/build-x86/vmlinux:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+ffffffff81465410 <bpf_probe_read_compat>:
+ffffffff81465410:	mov    %gs:0x2e4ac00(%rip),%rax        # ffffffff842b0018 <current_task>
+ffffffff81465418:	push   %r12
+ffffffff8146541a:	mov    %rdi,%r12
+ffffffff8146541d:	push   %rbp
+ffffffff8146541e:	mov    %rsi,%rbp
+ffffffff81465421:	mov    %rdx,%rsi
+ffffffff81465424:	push   %rbx
+ffffffff81465425:	mov    (%rax),%rdx
+ffffffff81465428:	test   $0x8000000,%edx
+ffffffff8146542e:	je     ffffffff8146548f <bpf_probe_read_compat+0x7f>
+ffffffff81465430:	testb  $0x8,0xaa3(%rax)
+ffffffff81465437:	mov    $0xc0000000,%edx
+ffffffff8146543c:	mov    $0xffffe000,%eax
+ffffffff81465441:	cmovne %rdx,%rax
+ffffffff81465445:	mov    %ebp,%ebp
+ffffffff81465447:	mov    %r12,%rdi
+ffffffff8146544a:	mov    %rbp,%rdx
+ffffffff8146544d:	cmp    %rax,%rsi
+ffffffff81465450:	jae    ffffffff8146546a <bpf_probe_read_compat+0x5a>
+ffffffff81465452:	call   ffffffff8153f040 <copy_from_user_nofault>
+ffffffff81465457:	mov    %rax,%rbx
+ffffffff8146545a:	test   %eax,%eax
+ffffffff8146545c:	js     ffffffff81465476 <bpf_probe_read_compat+0x66>
+ffffffff8146545e:	movslq %ebx,%rax
+ffffffff81465461:	pop    %rbx
+ffffffff81465462:	pop    %rbp
+ffffffff81465463:	pop    %r12
+ffffffff81465465:	jmp    ffffffff820138b0 <__pi___x86_return_thunk>
+ffffffff8146546a:	call   ffffffff8153f1b0 <copy_from_kernel_nofault>
+ffffffff8146546f:	mov    %rax,%rbx
+ffffffff81465472:	test   %eax,%eax
+ffffffff81465474:	jns    ffffffff8146545e <bpf_probe_read_compat+0x4e>
+ffffffff81465476:	mov    %rbp,%rdx
+ffffffff81465479:	mov    %r12,%rdi
+ffffffff8146547c:	xor    %esi,%esi
+ffffffff8146547e:	call   ffffffff820052a0 <__memset>
+ffffffff81465483:	movslq %ebx,%rax
+ffffffff81465486:	pop    %rbx
+ffffffff81465487:	pop    %rbp
+ffffffff81465488:	pop    %r12
+ffffffff8146548a:	jmp    ffffffff820138b0 <__pi___x86_return_thunk>
+ffffffff8146548f:	movabs $0x7ffffffff000,%rax
+ffffffff81465499:	jmp    ffffffff81465445 <bpf_probe_read_compat+0x35>
+
+Disassembly of section .data:
+
+Disassembly of section .init.text:
+
+Disassembly of section .altinstr_aux:
+
+Disassembly of section .altinstr_replacement:
+
+Disassembly of section .exit.text:
