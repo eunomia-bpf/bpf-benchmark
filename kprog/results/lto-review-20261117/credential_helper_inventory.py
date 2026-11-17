@@ -36,6 +36,12 @@ result = dict(recorded_utc=subprocess.check_output(['date','-u','+%FT%TZ'],text=
                        'vendor/linux-framework/include/linux/cred.h:289-296,401-406'],
               initial_namespace_extent=dict(first=0,lower_first=0,count=MASK32,nr_extents=1),
               uid_gid_rows=rows,pid_sign_extension_counterexamples=pid_rows)
+# Reuse the native emitter's nine-byte absolute-SIB GS load, not vmlinux's eight-byte RIP form.
+shared_parts = dict(current_task_gs=9,null_test=3,null_near_branch=6,
+                    live_cred_pointer=7,success_ret=1,error_result=7,error_ret=1)
+result['local_leaf_source_byte_estimates'] = dict(common_parts=shared_parts,
+    adjacent_uid_gid_load_bytes=4,separate_uid_gid_pack_bytes=15,
+    adjacent_total=sum(shared_parts.values())+4,separate_total=sum(shared_parts.values())+15)
 (HERE / 'credential-helpers.json').write_text(json.dumps(result,indent=2)+'\n')
 outputs = []
 for helper in ('bpf_get_current_uid_gid','bpf_get_current_pid_tgid','bpf_get_current_comm'):

@@ -1,5 +1,5 @@
 {
-  "recorded_utc": "2026-11-17T08:33:56Z",
+  "recorded_utc": "2026-11-17T09:32:04Z",
   "scope": "Finite arithmetic illustrations of the sole kernel source selector. Not a native implementation test, memory-read outcome, syscall-mode proxy, equal-work assertion or admission check.",
   "sources": {
     "selector": "vendor/linux-framework/kernel/trace/bpf_trace.c:285-313",
@@ -1740,5 +1740,23 @@
       "inclusive_selector": "kernel",
       "end_based_selector": "kernel"
     }
-  ]
+  ],
+  "historical_dispatch_accounting": {
+    "source_commit": "d6b4d335e",
+    "parts": {
+      "current_task_gs": 9,
+      "task_flag_test": 11,
+      "ia32_branch": 6,
+      "limit_address": 10,
+      "limit_load": 3,
+      "jump_to_compare": 5,
+      "ia32_default_limit": 5,
+      "personality_test": 11,
+      "personality_branch": 6,
+      "ia32_3gb_limit": 5,
+      "compare_user_branch": 9,
+      "kernel_jump": 5
+    },
+    "local_bytes": 85
+  }
 }

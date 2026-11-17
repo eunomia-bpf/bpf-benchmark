@@ -31,6 +31,13 @@ result = dict(recorded_utc=subprocess.check_output(['date', '-u', '+%FT%TZ'], te
                        'personality':'vendor/linux-framework/include/uapi/linux/personality.h:24'},
               flag_masks={'thread_info_flags':hex(1 << 27), 'personality':hex(0x08000000)},
               rows=rows)
+# Literal-source accounting for historical d6b4d335e, not any later compacted emitter.
+dispatch_lengths = [('current_task_gs',9),('task_flag_test',11),('ia32_branch',6),
+                    ('limit_address',10),('limit_load',3),('jump_to_compare',5),
+                    ('ia32_default_limit',5),('personality_test',11),('personality_branch',6),
+                    ('ia32_3gb_limit',5),('compare_user_branch',9),('kernel_jump',5)]
+result['historical_dispatch_accounting'] = dict(source_commit='d6b4d335e',
+    parts=dict(dispatch_lengths), local_bytes=sum(length for _,length in dispatch_lengths))
 (HERE / 'compat-selector.json').write_text(json.dumps(result, indent=2) + '\n')
 vmlinux = Path('/workspaces/.agent-state/kprog-ck/build-x86/vmlinux')
 for helper, filename in [('bpf_probe_read_compat', 'compat-kernel-helper.disassembly.txt'),

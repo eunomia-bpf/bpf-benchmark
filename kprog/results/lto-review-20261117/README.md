@@ -3073,7 +3073,7 @@ compat-only blob needs both leaves. There is no measured compat gain
 or installed-byte figure yet, and the kernel-leaf Tracee gain is not a
 measurement of this additional transformation.
 
-The literal WIP dispatcher accounts for **84 local bytes** before branch
+The literal WIP dispatcher accounts for **85 local bytes** before branch
 and displacement compaction. A 64-bit user choice executes eight
 instructions in it; a 64-bit kernel choice executes nine (excluding the
 call site and leaf). Both execute a jump over the IA32 block at line 240.
@@ -3567,8 +3567,8 @@ conversion call/return boundaries**, their map-range work, and the
 helper's associated saved-register/argument moves. A local shared body
 can serve its calls within a blob; blanket per-site expansion would add
 code. A compact caller-saved body retaining the null-current case is
-roughly **37 local bytes** for the adjacent-field form at current near
-branch widths, or **48** for separate fields, before optional encoding
+roughly **38 local bytes** for the adjacent-field form at current near
+branch widths, or **49** for separate fields, before optional encoding
 compaction. Those are source estimates, **additional native code**, not
 installed savings; the old external call reaches kernel text outside
 the native-byte total. Sharing/IR exposure and actual per-call benefit
@@ -3595,3 +3595,15 @@ No native code was emitted/assembled/executed, no field layout was added,
 no helper availability changed and no guest, build, new check or gate
 was introduced. This remains a source proposal for the coordinator,
 with measured per-call/installed-byte results pending.
+
+
+Byte-accounting correction: the native emitter's absolute-SIB GS load is
+**nine bytes** (segment prefix, REX, opcode, ModRM, SIB, disp32). The
+compiled kernel's RIP-relative GS load is eight bytes. The earlier source
+estimate conflated these forms: the historical `d6b4d335e` compat dispatcher
+is **85 B**, not 84; the UID/GID local-body estimates are **38 / 49 B**,
+not 37 / 48. The original estimates above are corrected, and the two
+readers now retain component-length arithmetic in their JSON. This
+changes no retained machine bytes, static calls, installed receipts or
+timing result. Later global/branch compaction can change future emission;
+the 85-byte figure describes the historical dispatcher only.
