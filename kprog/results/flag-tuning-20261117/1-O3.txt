@@ -1,0 +1,29 @@
+flags: -O3 -g -fPIC -c -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -Xclang -fembed-bitcode=all -Wno-unknown-attributes -Wno-compare-distinct-pointer-types
+image: sha256:ce79037d20356e7c41290b782e3eab3b6cc859d12560c0d945f0d0708d4e766f
+bcc exec_bytes 8015
+cilium exec_bytes 275918
+katran exec_bytes 9830
+otelcol-ebpf-profiler exec_bytes 547799
+tetragon exec_bytes 5140692
+tracee exec_bytes 1457903
+all exec_bytes 7440157
+== otelcol-ebpf-profiler/profiling /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_000721_919344
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_000721_919344 throughput native/eBPF 1.119x  eBPF [39479904, 40870525, 39477369] native [44181048, 44863468, 20487897] per-sample [1.119, 1.098, 0.519] errors 0
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_000721_919344 ns/inv eBPF 3255.4 (2/13 progs) native 3726.3 (2/13) speedup 0.874x
+x86_kvm_corpus_20261117_000721_919344 installed programs 14 JIT 167706 B native 134550 B ratio 0.80x
+== bcc/set /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_001820_032183
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_001820_032183 throughput native/eBPF 0.905x  eBPF [518733, 426216, 385345] native [378189, 385649, 397485] per-sample [0.729, 0.905, 1.032] errors 0
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_001820_032183 ns/inv eBPF 116.1 (16/25 progs) native 127.3 (15/25) speedup 0.912x
+x86_kvm_corpus_20261117_001820_032183 installed programs 21 JIT 6938 B native 7156 B ratio 1.03x
+== cilium/agent /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_002923_664397
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_002923_664397 throughput native/eBPF 3.012x  eBPF [1126298, 1131077, 1160413] native [3406551, 3867427, 3176921] per-sample [3.025, 3.419, 2.738] errors 0
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_002923_664397 ns/inv eBPF 829.7 (2/53 progs) native 255.8 (2/62) speedup 3.243x
+x86_kvm_corpus_20261117_002923_664397 installed programs 18 JIT 77967 B native 64586 B ratio 0.83x
+== tracee/monitor /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_004036_104763
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_004036_104763 throughput native/eBPF 1.074x  eBPF [333506, 333725, 345988] native [354340, 358558, 361046] per-sample [1.062, 1.074, 1.044] errors 0
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_004036_104763 ns/inv eBPF 369.9 (41/167 progs) native 321.2 (41/167) speedup 1.152x
+x86_kvm_corpus_20261117_004036_104763 installed programs 110 JIT 1237382 B native 1063414 B ratio 0.86x
+== katran /workspaces/repository/corpus/results/x86_kvm_corpus_20261117_005158_976699
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_005158_976699 throughput native/eBPF 1.006x  eBPF [2423886, 2367483, 2423094] native [2449052, 2437189, 2402918] per-sample [1.01, 1.029, 0.992] errors 998377458
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261117_005158_976699 ns/inv eBPF 180.4 (1/1 progs) native 178.2 (1/1) speedup 1.013x
+x86_kvm_corpus_20261117_005158_976699 installed programs 1 JIT 13641 B native 9442 B ratio 0.69x

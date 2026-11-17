@@ -39,6 +39,12 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-17T09:38:39Z（compat 结果、取时间叶子例程、perf 08:24–09:36 审阅）**：
+1. compat 读（d6b4d335e）：Tetragon 每次调用 1.061x → 1.113x（原生 704.1 → 660.9 ns），Tracee 吞吐 1.281x、每次调用 1.373x；六应用检查替换次数不变、失败 0 次（compat-read-20261117/README.md）。
+2. 取时间：客户机时钟源是 kvm-clock，Katran 原生一侧 pvclock 读占全部客户机采样 8.14%（limits/katran post_rejit.report.txt）。协调者写了 bpf_ktime_get_ns 的叶子例程（x86_ktime.rs）：照 timekeeping.c、kvmclock.c、pvclock.c 内联 tk_fast_mono 的 latch、kvm_clock_read（preempt 计数和 PREEMPT_DYNAMIC 静态调用）、pvclock 版本循环和 TSC 换算；时钟源换掉、TSC 不稳定、周期差超过 max_cycles 时调用内核自己的 ktime_get_mono_fast_ns。布局事实由装载器从 kallsyms 和 BTF 取，缺一项就保留直接调用。正式轮之后建镜像，量 BCC、Katran。
+3. 排进 LTO 清单（perf 审阅）：bpf_get_current_uid_gid 在 init_user_ns 上的换算是恒等映射，可直接读 cred 的 uid/gid（307288825）；内核字符串读的循环少一条指令一次存储（701cbef1c）；读例程共用清零尾部（dbc2f3f98，代码量）；已知 ARRAY 的步长用 IMUL imm8 并把两次加法合成 LEA（9f45f3c6a，Katran）。JRCXZ 的写法 B 生成器表达不了，保持现状（4bd25cdf7）。
+4. flag-tuning-20261117/1-O3.txt 补交。
+
 **协调者 2026-11-17T08:23:12Z（内核读叶子化结果、compat 和 perf 07:29–08:04 审阅）**：
 1. 内核读叶子化（ac7116e0d）：Tracee 每次调用 1.378x、重跑 1.401x，吞吐 1.221x、1.255x，原生每次调用 328.8 → 266.5 ns；Tetragon 1.061x、BCC 1.022x 在波动范围内（kernel-leaf-20261117/README.md）。
 2. compat 读（d6b4d335e）：bpf_probe_read 经 TASK_SIZE 分派到用户或内核叶子，TIF_ADDR32、ADDR_LIMIT_3GB 照 page_64_types.h；同一提交按 perf e4a0075ec 去掉宽度为 0 的分支。镜像 08:20 起建，量 Tetragon、Tracee。
