@@ -2422,3 +2422,27 @@ read. This route needs no kernel/module, container-launcher or benchmark
 edit, and no new dependency in P production. No permission changes,
 all-CPU validation loop, provider implementation, runtime refusal,
 extra gate or measured performance claim is proposed here.
+
+### First leaf-image application checks confirm the new layout loads
+
+The coordinator's existing check log now records OTel and BCC completion
+with rc=0 on the leaf image. Reading their replacement logs with the
+already committed ID-pairing `flag-tuning-20261117/inst.py` gives:
+
+| Check run | Cumulative successful native replacements | Same-load companion JIT bytes | Installed native bytes | Change from zero-remainder image |
+| --- | --- | --- | --- | --- |
+| OTel `060939_178921` | 14 | 167,706 | 135,424 | −180 bytes |
+| BCC `061308_930333` | 25 | 7,965 | 8,334 | 0 bytes |
+
+Both run directories have prefix
+`corpus/results/x86_kvm_corpus_20261117_`; the completion records are
+06:11:22Z and 06:14:38Z in
+`/workspaces/kprog-raw/one-image-runs/check.log`. These are the coordinator's
+one-sample, ten-second functional checks, not the pending three-sample
+per-call timing result. Counts and bytes here include all successful
+replacements in each startup, not only programs alive in the measurement
+snapshot. OTel's −180-byte installed sum is distinct from the reported
+−18-byte host helper payload; neither is a per-call speed measurement.
+BCC's unchanged sums do not independently prove byte identity or equal
+dynamic work. The remaining checks and timing continue in the existing
+coordinator batch; no guest or extra confirmation was run by PERF.
