@@ -3161,3 +3161,23 @@ LTO-only production scope. Keep the scheduled constant-size and global
 address-encoding changes ahead of this idea; no new source refusal,
 check, ISA extension, guest or experimental gate was added. This review
 does not stop the current native-first compat batch.
+
+
+### Compat-image functional footprint: first completed checks
+
+The coordinator's compat image build finished at 08:26:43 UTC. The first
+two functional checks completed with rc=0; the existing
+`flag-tuning-20261117/inst.py` reader reports:
+
+| App | Prior kernel-leaf check | Compat check | Cumulative replacements | Companion JIT B | Native B before → after |
+| --- | --- | --- | ---: | ---: | ---: |
+| OTel | 071102_841349 | 082840_370504 | 14 | 167,706 | 135,823 → 135,767 |
+| BCC | 071441_096459 | 083213_583327 | 25 | 7,965 | 8,733 → 8,677 |
+
+All run IDs have prefix
+`corpus/results/x86_kvm_corpus_20261117_`. Both deltas are **-56 B**;
+this is consistent with seven eight-byte width-zero branch removals,
+not an independently counted routine census. These are cumulative load
+footprints rather than live snapshots, complete-native coverage claims
+or performance measurements. Compat timing on Tetragon/Tracee remains
+pending; PERF started no job and does not add a confirmation gate.
