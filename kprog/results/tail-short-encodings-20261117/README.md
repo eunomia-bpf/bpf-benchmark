@@ -26,3 +26,18 @@ one Cargo worker/AS32GiB, source commit/push and canonical main build/replay.
 No second build tree/product, image or guest. Omp owns later image/check/
 affected-app timing, all LTO on. Installed bytes, body/helper/map/per-call and
 throughput remain pending. Scripts stay stable while live; never reapply.
+
+## Active unit-entry route, 2026-11-17
+
+Waiting host2782317/publisher2782318 ended143 at22:37:29Z before applying source,
+with all raw retained. Recipe now uses timingSH/imageSH and the same production
+link(Args) function in the existing Cargo unit executable (99a3a5e72), preserving
+the checked guest's canonical CLI. It starts after the replacement fusion run
+has actually completed; no old PID waits remain. Before reapplying a recipe,
+inspect actual source and stage because source application is one-shot.
+
+The full subset, byte comparison, source commit/push and295-request replay stay.
+Test/unit source/build receipts are named accurately; canonical CLI is rebuilt
+once later by the frozen image recipe under imageEX. Comparator baseline follows
+the actual preceding fusion unit replay through its current-raw.txt. No new
+benchmark setting, helper catalogue, product or module change. Omp owns timing.
