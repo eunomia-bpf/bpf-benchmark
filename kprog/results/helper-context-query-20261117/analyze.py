@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import re
 import subprocess
+import struct
 import sys
 
 out = Path('kprog/results/helper-context-query-20261117')
@@ -30,13 +31,16 @@ for mode in ('control', 'query'):
                                      capture_output=True, text=True).stdout
         (raw / mode / (Path(row['capture']).name+'-proof.txt')).write_text(disassembly)
         used = sorted(set(re.findall(r'R_X86_64_PLT32\s+(bpf_\w+)', disassembly)))
+        relocs = list(struct.iter_unpack('<IIQ', (Path(row['capture'])/'image.relocs').read_bytes()))
         targets = {}
         for name, address in helpers.items():
             if not name.startswith('bpf_'):
                 continue
             delta = address-helpers[anchor]
             targets[name] = dict(address=address, relative_to_ktime=delta,
-                                 kernel_names=by_delta.get(delta, []))
+                                 kernel_names=by_delta.get(delta, []),
+                                 emitted_external_calls=[dict(offset=o, kind=k) for o,k,t in relocs
+                                                         if k == 1 and t == address])
         records.append(dict(symbol=row['symbol'], capture=row['capture'],
                             linker_returncode=row['linker_returncode'],
                             used_named_helpers=used, targets=targets))
@@ -71,7 +75,10 @@ for row in reports['query']['requests']:
                 differences.append(dict(helper=name, control=a, query=b,
                     used_named_relocation=name in before['used_named_helpers'] or name in row['used_named_helpers']))
         comparisons.append(dict(symbol=row['symbol'], control_capture=before['capture'],
-            query_capture=row['capture'], target_differences=differences))
+            query_capture=row['capture'],
+            proof_bytes_equal=(Path(before['capture'])/'entry.proof.o').read_bytes() ==
+                              (Path(row['capture'])/'entry.proof.o').read_bytes(),
+            target_differences=differences))
 result = dict(anchor=anchor, source_system_map='/workspaces/.agent-state/kprog-ck/build-x86/System.map',
     raw=str(raw), modes=reports, comparisons=comparisons,
     scope='Captured target selection and named PLT32 use only. No native execution, B/stock verification, '
