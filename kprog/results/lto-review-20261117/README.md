@@ -2713,3 +2713,53 @@ The [reader](leaf_read_effect_inventory.py) and
 OTel/BCC before/after pairs, including every record selected by the existing
 reporting convention. PERF started no guest or extra measurement. No gain
 from a particular source operation is inferred from this cross-run pair.
+
+## Compact field displacements in linker-owned map routines
+
+Source/retained-byte review, 2026-11-17. Several field accesses keep a
+four-byte displacement even when the bound BTF offset fits the ordinary
+x86 disp8 form or is zero. This is a **size** opportunity, with no
+instruction-count or measured per-call gain claimed. It follows the
+scheduled read work rather than replacing that priority.
+
+`x86_lpm_lookup.rs:4–5` appends an i32 displacement for every `mem` call.
+The retained OTel 330-byte LPM body in `otel-typed.blob` contains **11
+eligible accesses**, whose displacement fields alone can lose **35
+bytes** with the same addressing registers and immediate widths. That
+would make this local region 295 bytes before any separate branch-width
+change. [displacement_inventory.py](displacement_inventory.py) records
+the original instructions/bytes and byte arithmetic in
+[displacements.json](displacements.json); it emits no replacement bytes.
+The known-LPM direct kernel binding means these historical routine bytes
+must not be multiplied across all current programs as an installed saving.
+
+`x86.rs:4022–4031` also forces disp32 for both the LRU reference-byte CMP
+and MOV. The retained Katran plan gives `fallback_cache` reference offset
+35, so each seven-byte instruction can use four bytes: **six local bytes
+per emitted LRU postprocess**. That plan's presence is a field-value fact,
+not a count of emitted or executed LRU sites; the inspected historical
+Katran payload did not independently establish such a site count.
+The current native code at lines 4045–4050 already tests the reference
+byte and stores 1 only when it is zero, matching
+`kernel/bpf/hashtab.c:823–830`. Keep that work and the null-result check.
+An unconditional-store discrepancy was investigated and is **not** present.
+
+These raw bodies are inserted through declared-byte instructions
+(`x86.rs:3671–3677`), so later branch encoding does not automatically
+compress their ModRM displacement fields. By contrast,
+`append_x86_add_rax_imm` at 4076–4083 already chooses the short immediate
+form when appropriate; there is no missing short-ADD fix to make.
+`x86_memory::Routine::operand` already demonstrates offset-size selection
+for its non-indexed operands and should retain it.
+
+For the LPM indexed loads, the final byte of the opcode prefix can be a
+**SIB**, not the ModRM. A compact emitter must select the ModRM addressing
+mode while preserving the SIB's scale/index/base; copying the memory
+helper's `last_mut()` adjustment blindly would change the address.
+RBP/R13 zero offsets still require an encoded displacement, and RIP/GS
+absolute disp32 forms are different addressing modes. This is normal
+instruction encoding, not a new runtime test or BTF-offset restriction.
+Recompute branches and later load-site positions from final layout as
+usual; no extra validation gate or encoding framework is needed. There
+is no production edit, candidate assembly/execution, image build, guest,
+whole-image saving or app speed claim in this receipt.

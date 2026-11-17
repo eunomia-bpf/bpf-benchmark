@@ -1,0 +1,144 @@
+{
+  "recorded_utc": "2026-11-17T07:04:25Z",
+  "scope": "Retained LPM scalar base/index field accesses and Katran plan facts only. Byte arithmetic assumes the same addressing registers and immediate widths. No replacement bytes assembled/emitted/executed, no runtime check or whole-image/per-call claim. LRU facts do not count actual emitted or executed LRU sites.",
+  "blob": "/workspaces/kprog-raw/perf/20261116-inner-array-lto/libbpf/otel-typed.blob",
+  "original_lpm_bytes": 330,
+  "accesses": [
+    {
+      "offset": 30080,
+      "instruction": "cmp    DWORD PTR [rdi+0x38],0xb",
+      "original_bytes": "81bf380000000b000000",
+      "displacement": 56,
+      "current_displacement_bytes": 4,
+      "possible_displacement_bytes": 1,
+      "local_bytes_saved": 3
+    },
+    {
+      "offset": 30096,
+      "instruction": "cmp    QWORD PTR [rdi+0x188],0xc",
+      "original_bytes": "4883bf880100000c",
+      "displacement": 392,
+      "current_displacement_bytes": 4,
+      "possible_displacement_bytes": 4,
+      "local_bytes_saved": 0
+    },
+    {
+      "offset": 30110,
+      "instruction": "mov    r10d,DWORD PTR [rsi+0x0]",
+      "original_bytes": "448b9600000000",
+      "displacement": 0,
+      "current_displacement_bytes": 4,
+      "possible_displacement_bytes": 0,
+      "local_bytes_saved": 4
+    },
+    {
+      "offset": 30117,
+      "instruction": "cmp    r10,QWORD PTR [rdi+0x180]",
+      "original_bytes": "4c3b9780010000",
+      "displacement": 384,
+      "current_displacement_bytes": 4,
+      "possible_displacement_bytes": 4,
+      "local_bytes_saved": 0
+    },
+    {
+      "offset": 30133,
+      "instruction": "mov    rdx,QWORD PTR [rdi+0x120]",
+      "original_bytes": "488b9720010000",
+      "displacement": 288,
+      "current_displacement_bytes": 4,
+      "possible_displacement_bytes": 4,
+      "local_bytes_saved": 0
+    },
+    {
+      "offset": 30149,
+      "instruction": "mov    r11d,DWORD PTR [rdx+0x10]",
+      "original_bytes": "448b9a10000000",
+      "displacement": 16,
+      "current_displacement_bytes": 4,
+      "possible_displacement_bytes": 1,
+      "local_bytes_saved": 3
+    },
+    {
+      "offset": 30184,
+      "instruction": "movzx  eax,BYTE PTR [rsi+rcx*1+0x4]",
+      "original_bytes": "0fb6840e04000000",
+      "displacement": 4,
+      "current_displacement_bytes": 4,
+      "possible_displacement_bytes": 1,
+      "local_bytes_saved": 3
+    },
+    {
+      "offset": 30213,
+      "instruction": "mov    rdi,QWORD PTR [rdx+rax*1+0x0]",
+      "original_bytes": "488bbc0200000000",
+      "displacement": 0,
+      "current_displacement_bytes": 4,
+      "possible_displacement_bytes": 0,
+      "local_bytes_saved": 4
+    },
+    {
+      "offset": 30221,
+      "instruction": "mov    rax,QWORD PTR [rdx+0x18]",
+      "original_bytes": "488b8218000000",
+      "displacement": 24,
+      "current_displacement_bytes": 4,
+      "possible_displacement_bytes": 1,
+      "local_bytes_saved": 3
+    },
+    {
+      "offset": 30228,
+      "instruction": "xor    rax,QWORD PTR [rsi+0x4]",
+      "original_bytes": "48338604000000",
+      "displacement": 4,
+      "current_displacement_bytes": 4,
+      "possible_displacement_bytes": 1,
+      "local_bytes_saved": 3
+    },
+    {
+      "offset": 30271,
+      "instruction": "mov    eax,DWORD PTR [rdx+0x20]",
+      "original_bytes": "8b8220000000",
+      "displacement": 32,
+      "current_displacement_bytes": 4,
+      "possible_displacement_bytes": 1,
+      "local_bytes_saved": 3
+    },
+    {
+      "offset": 30277,
+      "instruction": "xor    eax,DWORD PTR [rsi+0xc]",
+      "original_bytes": "33860c000000",
+      "displacement": 12,
+      "current_displacement_bytes": 4,
+      "possible_displacement_bytes": 1,
+      "local_bytes_saved": 3
+    },
+    {
+      "offset": 30346,
+      "instruction": "test   DWORD PTR [rdx+0x14],0x1",
+      "original_bytes": "f7821400000001000000",
+      "displacement": 20,
+      "current_displacement_bytes": 4,
+      "possible_displacement_bytes": 1,
+      "local_bytes_saved": 3
+    },
+    {
+      "offset": 30385,
+      "instruction": "lea    rax,[r8+0x24]",
+      "original_bytes": "498d8024000000",
+      "displacement": 36,
+      "current_displacement_bytes": 4,
+      "possible_displacement_bytes": 1,
+      "local_bytes_saved": 3
+    }
+  ],
+  "eligible_accesses": 11,
+  "local_displacement_bytes_saved": 35,
+  "katran_plan": "/workspaces/repository/corpus/results/shared-hash-regression-20261116/captures/link-ie2fmz97/link-plan.json",
+  "retained_lru_map_facts": [
+    {
+      "name": "fallback_cache",
+      "key_offset": 88,
+      "value_offset": 35
+    }
+  ]
+}
