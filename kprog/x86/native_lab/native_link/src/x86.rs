@@ -1830,8 +1830,8 @@ pub(super) fn rewrite_x86(
     // out-of-line implementation serves every program, while caller-side
     // value/inner-map/per-CPU/LRU postprocessing stays in the image.
     if let Some(layout) = runtime_array_layout.filter(|_| !proof_mode) {
-        if let Some(range) = runtime_array::share(&mut blob, &mut relocs, layout, map_lookup_helper_addr)? {
-            show_lto_range(show, "runtime_array", range);
+        if let Some(range) = runtime_array::share(&mut blob, &mut relocs, layout, map_lookup_helper_addr, runtime_lpm_layout)? {
+            show_lto_range(show, if runtime_lpm_layout.is_some() {"runtime_array_lpm"} else {"runtime_array"}, range);
             code_ranges.push(range);
         }
     }
@@ -1863,7 +1863,7 @@ pub(super) fn rewrite_x86(
         }
     }
 
-    if let Some(layout)=runtime_lpm_layout.filter(|_| !proof_mode) {
+    if let Some(layout)=runtime_lpm_layout.filter(|_| !proof_mode && runtime_array_layout.is_none()) {
         if let Some(range)=lpm_lookup::share(&mut blob,&mut relocs,layout,map_lookup_helper_addr)? {
             show_lto_range(show, "lpm_lookup", range);
             code_ranges.push(range);
@@ -5034,6 +5034,71 @@ mod tests {
         let mut tail=tail.blob;tail.push(0xc3);let mut map=[0u8;72];
         assert_eq!(memory::call_blob(&tail,std::ptr::null_mut(),map.as_mut_ptr() as usize,1) as usize,12);
         println!("dead helper IDs: {cases} argument/return/call executions, seven proof shapes and tail miss PASS");
+        Ok(())
+    }
+
+    #[test]
+    #[cfg(all(target_arch="x86_64",target_os="linux"))]
+    fn map_dispatch_fusion_keeps_one_helper_frame_and_original_lookup_results() -> Result<()> {
+        let array=RuntimeArrayLayout{map_type:12,max_entries:24,elem_size:32,
+            index_mask:36,value:64,array_type:2};
+        let lpm=RuntimeLpmLayout{map_type:12,lpm_type:11,root:40,max_prefixlen:56,data_size:64,
+            child:8,child_stride:8,node_prefixlen:32,node_flags:36,node_data:48,key_prefixlen:0,key_data:4};
+        let mut cases=0;
+        for tail in [false,true] {for (a,l) in [(None,None),(Some(&array),None),(None,Some(&lpm)),(Some(&array),Some(&lpm))] {
+            let mut object=WriteObject::new(BinaryFormat::Elf,object::Architecture::X86_64,Endianness::Little);
+            let text=object.add_section(Vec::new(),b".text".to_vec(),SectionKind::Text);
+            let code=if tail {vec![0xb8,1,0,0,0,0xff,0xe0]}else{vec![0x48,0x83,0xec,8,0xb8,1,0,0,0,0xff,0xd0,0x48,0x83,0xc4,8,0xc3]};
+            object.append_section_data(text,&code,1);
+            object.add_symbol(WriteSymbol{name:b"entry".to_vec(),value:0,size:code.len() as u64,
+                kind:SymbolKind::Text,scope:SymbolScope::Linkage,weak:false,
+                section:WriteSymbolSection::Section(text),flags:SymbolFlags::None});
+            let bytes=object.write()?;let elf=object::File::parse(bytes.as_slice())?;
+            let entry=find_symbol_by_name(&elf,"entry")?;
+            let linked=rewrite_x86(&elf,&entry,&[entry.clone()],
+                &HashMap::from([("bpf_map_lookup_elem".into(),0x1234)]),&HashMap::new(),&HashMap::new(),
+                &[],false,false,a,None,l,false)?;
+            assert_eq!(linked.relocs.len(),1,"one final generic helper relocation");
+            let relocation=linked.relocs[0];
+            assert_eq!((relocation.kind,relocation.target),(NATIVE_LAB_RELOC_HELPER_CALL_REL32,0x1234));
+            let site=relocation.offset as usize;
+            // With no runtime wrapper, preserve the pre-existing numeric tail JMP.
+            // Every shared ARRAY/LPM wrapper must still call its external helper via E8.
+            let opcode=if tail && a.is_none() && l.is_none() {0xe9}else{0xe8};
+            assert_eq!(linked.blob[site],opcode,"existing transfer or shared external ABI");
+            assert_eq!(&linked.blob[site+1..site+5],&[0;4]);
+            if a.is_some() && l.is_some() {
+                let calls=decode_x86(&linked.blob)?.iter().filter(|i|i.mnemonic()==Mnemonic::Call).count();
+                assert_eq!(calls,2,"ARRAY must enter LPM without another call frame");
+                if let Some(out)=std::env::var_os("NATIVE_LINK_PROBE_TEST_OUTPUT") {
+                    fs::write(PathBuf::from(out).join(format!("map-dispatch-fused-{tail}.bin")),&linked.blob)?;
+                }
+            }
+            let mut blob=linked.blob;blob.push(0xc3);let target=blob.len();
+            // Count generic calls, check SysV alignment, return original map XOR key.
+            blob.extend_from_slice(&[0x48,0xff,0x02,0x48,0x89,0xe0,0x83,0xe0,15,0x83,0xf8,8,
+                0x74,6,0xb8,0xfe,0xca,0xad,0xde,0xc3,0x48,0x89,0xf8,0x48,0x31,0xf0,0xc3]);
+            blob[site+1..site+5].copy_from_slice(&i32::try_from(target as i64-site as i64-5)?.to_le_bytes());
+            let mut map=[0u8;128];let mut node=[0u8;128];let mut key=[0u8;16];
+            let put32=|b:&mut [u8],o:usize,v:u32|b[o..o+4].copy_from_slice(&v.to_le_bytes());
+            let put64=|b:&mut [u8],o:usize,v:u64|b[o..o+8].copy_from_slice(&v.to_le_bytes());
+            let mp=map.as_mut_ptr();let kp=key.as_ptr() as usize;
+            for kind in [2u32,11,1] {for index in [0u32,1,4,5,u32::MAX] {
+                map.fill(0);key.fill(0);node.fill(0);
+                put32(&mut map,12,kind);put32(&mut map,24,5);put32(&mut map,32,24);put32(&mut map,36,7);
+                put32(&mut key,0,if kind==11 {96}else{index});
+                put64(&mut map,40,node.as_ptr() as u64);put64(&mut map,56,96);put64(&mut map,64,12);
+                put32(&mut node,32,96);
+                let expected=if kind==2 && a.is_some() {if index<5 {mp as usize+64+index as usize*24}else{0}}
+                    else if kind==11 && l.is_some() {node.as_ptr() as usize+60}else{mp as usize^kp};
+                let generic=!(kind==2&&a.is_some() || kind==11&&l.is_some());
+                let mut callbacks=0u64;
+                let result=memory::call_blob(&blob,mp,kp,&mut callbacks as *mut u64 as usize) as usize;
+                assert_eq!(result,expected,"tail={tail} ARRAY={} LPM={} kind={kind} index={index}",a.is_some(),l.is_some());
+                assert_eq!(unsafe{std::ptr::read_volatile(&callbacks)},u64::from(generic));cases+=1;
+            }}
+        }}
+        println!("map dispatch fusion: {cases} actual rewrite CALL/JMP, facts-present/absent, ARRAY/LPM/generic results and helper ABI cases PASS");
         Ok(())
     }
 

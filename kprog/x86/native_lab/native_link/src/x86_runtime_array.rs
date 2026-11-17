@@ -41,18 +41,31 @@ fn routine(layout: &RuntimeArrayLayout) -> Result<(Vec<u8>, usize)> {
 }
 
 pub(super) fn share(blob: &mut Vec<u8>, relocs: &mut Vec<RelocRecord>,
-                    layout: &RuntimeArrayLayout, helper: u64) -> Result<Option<(usize, usize)>> {
+                    layout: &RuntimeArrayLayout, helper: u64,
+                    lpm: Option<&RuntimeLpmLayout>) -> Result<Option<(usize, usize)>> {
     let sites: Vec<usize> = relocs.iter().filter(|r|
         r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32 && r.target == helper)
         .map(|r| r.offset as usize).collect();
     if sites.is_empty() { return Ok(None); }
     let start = blob.len();
-    let (bytes, call) = routine(layout)?;
+    // Non-ARRAY dispatch enters the existing LPM body in the same frame.
+    // Its final generic call retains the external E8 slot required by loaders.
+    let (bytes, nested) = if let Some(lpm) = lpm {
+        let mut bytes = build_prefix(layout)?;
+        let prefix = bytes.len();
+        let (body, mut nested) = lpm_lookup::routine(lpm, helper)?;
+        bytes.extend_from_slice(&body);
+        for r in &mut nested { r.offset = u32::try_from(prefix + r.offset as usize)?; }
+        (bytes, nested)
+    } else {
+        let (bytes, call) = routine(layout)?;
+        (bytes, vec![RelocRecord { offset: u32::try_from(call)?,
+            kind: NATIVE_LAB_RELOC_HELPER_CALL_REL32, target: helper }])
+    };
     probe_read::redirect(blob, &sites, start)?;
     relocs.retain(|r| !(r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32 && r.target == helper));
     blob.extend_from_slice(&bytes);
-    relocs.push(RelocRecord { offset: u32::try_from(start + call)?,
-        kind: NATIVE_LAB_RELOC_HELPER_CALL_REL32, target: helper });
+    for mut r in nested { r.offset = u32::try_from(start + r.offset as usize)?; relocs.push(r); }
     Ok(Some((start, blob.len())))
 }
 
@@ -165,7 +178,7 @@ mod tests {
         let mut relocs = vec![RelocRecord { offset: 0, kind: 1, target: 0x1234 },
             RelocRecord { offset: 5, kind: 1, target: 0x1234 },
             RelocRecord { offset: 10, kind: 1, target: 0x5678 }];
-        let range = share(&mut blob, &mut relocs, &layout, 0x1234)?.expect("two lookups");
+        let range = share(&mut blob, &mut relocs, &layout, 0x1234, None)?.expect("two lookups");
         assert_eq!(range, (16, 65), "one49-byte routine, not one per call");
         assert_eq!((blob[0],blob[5]),(0xe8,0xe9));
         for site in [0usize, 5] {

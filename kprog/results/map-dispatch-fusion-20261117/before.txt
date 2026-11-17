@@ -1,0 +1,33 @@
+   Compiling native-link v0.1.0 (/workspaces/repository/kprog/x86/native_lab/native_link)
+warning: value assigned to `callbacks` is never read
+    --> src/x86.rs:5081:84
+     |
+5081 |             let mp=map.as_mut_ptr();let kp=key.as_ptr() as usize;let mut callbacks=0u64;
+     |                                                                                    ^^^^ this value is reassigned later and never used
+...
+5091 |                 callbacks=0;
+     |                 ----------- `callbacks` is overwritten here before the previous value is read
+     |
+     = note: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+
+warning: `native-link` (bin "native-link" test) generated 1 warning
+    Finished `release` profile [optimized] target(s) in 44.55s
+     Running unittests src/main.rs (kprog/x86/native_lab/native_link/target/release/deps/native_link-62ccb5c6f5eda54e)
+
+running 1 test
+test x86::tests::map_dispatch_fusion_keeps_one_helper_frame_and_original_lookup_results ... 
+thread 'x86::tests::map_dispatch_fusion_keeps_one_helper_frame_and_original_lookup_results' (2792168) panicked at src/x86.rs:5068:17:
+assertion `left == right` failed: ARRAY must enter LPM without another call frame
+  left: 3
+ right: 2
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+FAILED
+
+failures:
+
+failures:
+    x86::tests::map_dispatch_fusion_keeps_one_helper_frame_and_original_lookup_results
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 62 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--bin native-link`

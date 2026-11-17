@@ -62,3 +62,5 @@ production fusion and the regression are already applied once. Failed raw stays
 at host-20261117T223923Z-2791985. The test does not establish that the frozen
 module accepts an external E9; it preserves existing facts-absent linker output.
 Actual shared wrappers and their final relocation still require E8.
+
+2026-11-17T22:43:32Z — Production fusion and full host tests completed; actual logs and source.patch committed. Raw: /workspaces/kprog-raw/perf/map-dispatch-fusion-20261117/host-20261117T224241Z-2793351. Production unit-entry build and captured-request emission follow; canonical CLI stays unchanged; installed/time results remain pending.
