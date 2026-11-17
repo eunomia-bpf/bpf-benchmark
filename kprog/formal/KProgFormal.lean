@@ -23,6 +23,7 @@ import KProgFormal.ClightRefinement.Arm64ProducerVectors
 import KProgFormal.ClightRefinement.Arm64ProducerStack
 import KProgFormal.ClightRefinement.Arm64ProducerContext
 import KProgFormal.ClightRefinement.Arm64ProducerHeader
+import KProgFormal.ClightRefinement.Arm64ProducerHeaderVectors
 import KProgFormal.ClightRefinement.Arm64Registers
 import KProgFormal.ClightRefinement.Arm64Width
 import KProgFormal.ClightRefinement.Deallocation

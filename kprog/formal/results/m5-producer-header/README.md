@@ -20,10 +20,11 @@ The internal run uses the Entry global environment; the memory contracts use
 the Program composite layout, whose actual cache field offsets are checked.
 Executing the linked consumer remains separate. No provider purity, native
 memory/origin/control correspondence or complete ISA refinement is inferred.
-The following 64 null vector-pointer assignments are source-bound by `Next.lean`,
-which also reports the actual entry size of 728 B. Their execution, later
-volatile b/q/payload pointers and callbacks, capacities, bias, remaining ABI
-fields, final vector-pointer loop and consumer continuation are still M5 work.
+The following 64 null vector-pointer assignments now execute in 192 transitions
+in `Arm64ProducerHeaderVectors`; its layout proof binds the entry size of 728 B.
+The source schema moved into that library, and `Next.lean` prints its successor.
+Later volatile b/q/payload pointers and callbacks, capacities, bias, remaining ABI
+fields, final vector-pointer loop and consumer continuation remain M5 work.
 Complete ISA-handler count remains zero; M5 and M6 stay open.
 
 Focused build passes 156 jobs, all eight compiled public type/axiom queries

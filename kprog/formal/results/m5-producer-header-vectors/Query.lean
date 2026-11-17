@@ -1,0 +1,13 @@
+import KProgFormal.ClightRefinement.Arm64ProducerHeaderVectors
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.null_vector_source
+#check KProgFormal.ClightRefinement.Arm64Producer.null_vector_source
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.null_vector_layout
+#check KProgFormal.ClightRefinement.Arm64Producer.null_vector_layout
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.null_vector_offsets
+#check KProgFormal.ClightRefinement.Arm64Producer.null_vector_offsets
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.null_vector_pointers_initialized
+#check KProgFormal.ClightRefinement.Arm64Producer.null_vector_pointers_initialized
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.header_and_null_vector_pointers
+#check KProgFormal.ClightRefinement.Arm64Producer.header_and_null_vector_pointers
+#print axioms KProgFormal.ClightRefinement.Arm64Producer.header_and_null_vector_caches
+#check KProgFormal.ClightRefinement.Arm64Producer.header_and_null_vector_caches
