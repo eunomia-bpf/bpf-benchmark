@@ -84,8 +84,10 @@ original caller frontier and relating all legal MOVZ/MOVN columns to the
 checked native step. The [MOVK source contracts](results/m5-arm64-mov-keep/README.md)
 prove its distinct 27-transition dispatch, actual DST reader edge, 26-transition
 merge and real writer call, relating the source insertion to LNSym's public
-operator. Complete MOVK calls/native composition and program-level obligations
-stay open.
+operator. The [complete MOVK zero-register contract](results/m5-arm64-mov-keep-call/README.md)
+executes the actual 156-transition call through frame free, preserves the original
+register-reader frontier, and composes with the mature checked WZR/XZR step.
+Ordinary MOVK calls and program-level obligations stay open.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 

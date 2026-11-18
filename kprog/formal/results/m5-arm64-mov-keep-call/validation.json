@@ -1,0 +1,153 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-arm64-mov-keep-call",
+  "domain": {
+    "native_instruction": "MOVK (move-wide opcode3)",
+    "source_opcode": 5,
+    "destination": "native Rd31 WZR/XZR, source selector31; SP selector32 is distinct",
+    "immediate": "all BitVec16",
+    "X64_columns": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "W32_columns": [
+      0,
+      1
+    ],
+    "source_merge_columns": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "native_legality": "narrow=true implies column.val<2"
+  },
+  "proved": {
+    "generic_call_transitions": 156,
+    "composition": {
+      "allocated_dispatch": 27,
+      "actual_DST_read_merge_writer_edge": 87,
+      "actual_ZR_writer": 38,
+      "generic_completion": 3,
+      "actual_free_return": 1
+    },
+    "reader": "actual55-transition DST31 read derives zero without changing memory",
+    "writer": "actual38 transitions at its genuine Kcall, including eager SP read from actual carried storage",
+    "frame": "contents and both permission maps below original pre-call nextblock",
+    "deallocation": "actual successful freeList; both permission kinds revoked for all generic locals",
+    "post_memory": "contents and nextblock equal actual allocated memory, not identified with pre-call memory",
+    "final_relation": "full GPR/SP/SIMD/NZCV, original reader frontier, identity cells and explicit pointer/provenance bindings",
+    "all_behaviors": "every finite arbitrary-trace run is a silent prefix of same represented return; stuck endpoint unique; infinite execution excluded",
+    "native": "actual Instruction.valid, fetched encoding, noError and mature checked MOVK step",
+    "native_wrapper": "exact full wrapper, PC+4, preserved histories and other fields, no new event/fault"
+  },
+  "reused_lemmas": {
+    "Arm64MovImmediate.allocated": "visibility only; same actual allocation proof",
+    "Arm64MovImmediate.unshadowed": "visibility only; same real reader/writer environment proof",
+    "Arm64MovImmediate.Suffix.after_writer": "visibility only; same3-transition actual generic completion"
+  },
+  "emitter_binding": {
+    "reused_receipt": "../m5-arm64-mov-keep",
+    "commit": "27ff95ef2bb355b6c03973fb5213d39c69d8261b",
+    "actual_records": 24,
+    "new_run": false,
+    "reason": "same source op5, immediate/AUX binding and live frontend; C/runtime unchanged",
+    "Python_frontend_formally_verified": false
+  },
+  "focused": {
+    "exit": 0,
+    "log": "focused1.log",
+    "jobs": 188,
+    "attempts": 1
+  },
+  "public_queries": {
+    "exit": 0,
+    "log": "Query-1.log",
+    "theorems": 6,
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64MovKeep.call_zr_returns": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.call_zr_represents": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.call_zr_all_behaviors": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.Zr.native_step": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.Zr.reference_step": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.Zr.call_corresponds": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "full_lake_build": {
+    "exit": 0,
+    "log": "lake-build1.log",
+    "jobs": 318,
+    "attempts": 1
+  },
+  "export_parity": {
+    "exit": 0,
+    "log": "export-parity1.log",
+    "reference": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_identical": true
+  },
+  "limits": {
+    "heartbeats": 200000,
+    "recursion": 512,
+    "lean_workers": 1,
+    "address_space_GiB": 32,
+    "build_cpu": 17,
+    "query_edit_git_cpu": 18,
+    "every_host_command_timing_lock": "shared",
+    "raised": false
+  },
+  "native_make_check": {
+    "run_this_step": false,
+    "reason": "Lean-only changes, C/runtime unchanged",
+    "last_complete_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c"
+  },
+  "remaining": [
+    "ordinary MOVK real reader in Numeric.ge and actual Kcall; returned Vlong/materialization/post-memory",
+    "native W32 insertion and upper-word clearing",
+    "frontend/provider/producer/caller admission",
+    "native physical memory/alias/origin binding",
+    "Numeric frontier204 initialization distinct from old189",
+    "source control and all-family O1/O2/O4 migration",
+    "remaining M6 and fresh final Lake/make check"
+  ],
+  "complete_ISA_handler_families": 0,
+  "milestones": {
+    "M1_M4": "done",
+    "M5": "open",
+    "M6": "open"
+  }
+}

@@ -51,12 +51,12 @@ private theorem callees_not_local :
     Arm64Program._kprog_arm64_program_read ∉ CC.varNames Arm64Nop.handler.fn_vars ∧
     Arm64Program._kprog_arm64_program_write ∉ CC.varNames Arm64Nop.handler.fn_vars := by decide +kernel
 
-private theorem allocated (before : CC.Mem) :
+theorem allocated (before : CC.Mem) :
     CC.AllocVariables ge.genv_cenv CC.emptyEnv before Arm64Nop.handler.fn_vars
       (Arm64Nop.allocation ge before).1 (Arm64Nop.allocation ge before).2 :=
   CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (Arm64Nop.allocation ge before)).symm
 
-private theorem unshadowed (before : CC.Mem) :
+theorem unshadowed (before : CC.Mem) :
     (Arm64Nop.allocation ge before).1.get Arm64Program._kprog_arm64_program_read = none ∧
     (Arm64Nop.allocation ge before).1.get Arm64Program._kprog_arm64_program_write = none := by
   constructor

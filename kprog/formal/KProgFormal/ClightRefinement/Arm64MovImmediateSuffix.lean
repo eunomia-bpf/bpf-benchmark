@@ -194,7 +194,7 @@ theorem writer_call (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem)
   exact writer_call_register e le m entry (BitVec.ofNat 64 i.val) value narrow
     readUnshadowed writeUnshadowed hentry hsrc hdst hop himm hwidth
 
-private theorem after_writer (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) :
+theorem after_writer (e : CC.Env) (le : CC.TempEnv) (m : CC.Mem) :
     InternalRun ge 3
       (.Returnstate .Vundef (.Kcall none Arm64Nop.handler e le Dispatch.continuation) m)
       (.State Arm64Nop.handler .Sskip .Kstop e le m) := by
