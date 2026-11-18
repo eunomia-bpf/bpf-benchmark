@@ -170,6 +170,9 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-18（14:54 UTC 之前收到）: "形式化还在继续做吧"
 - 2026-11-18（15:51 UTC 之前收到）: "带不带啥意思"
 - 2026-11-18（15:51 UTC 之前收到）: "带例程（原 Workspace 的镜像 3246e818）：链接器在原生代码里放进我们自己手写的 x86 例程，替代一部分内核 helper，包括 probe_read 叶子例程、带 pvclock 换算的 ktime、UID、LPM trie、runtime ARRAY 和调用融合。原生代码调这些 helper 时，跑的是我们写的版本??? 等等, 不应该内联 helper 的方式是用 C 语言实现并且在 sim 特化之后, 一份留给验证器验证, 一份直接编译进去吗? 干嘛还需要?"
+- 2026-11-18（15:59 UTC 之前收到）: "带例程（原 Workspace 的镜像 3246e818）：... 干嘛还需要手写?"（同一问话第二次发来，末句改为“干嘛还需要手写?”）
+- 2026-11-18（15:59 UTC 之前收到）: "还有没有不符合设计的也要去解决. 直接现在删掉, 不需要考虑太多."
+- 2026-11-18（15:59 UTC 之前收到）: "???? 这和安全有任何关系吗? 就是速度慢了要修啊"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
