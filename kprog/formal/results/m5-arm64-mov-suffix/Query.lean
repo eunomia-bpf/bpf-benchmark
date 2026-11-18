@@ -1,0 +1,17 @@
+import KProgFormal.ClightRefinement.Arm64MovImmediateCall
+#check KProgFormal.ClightRefinement.Arm64MovImmediate.read_none
+#print axioms KProgFormal.ClightRefinement.Arm64MovImmediate.read_none
+#check KProgFormal.ClightRefinement.Arm64RegisterWrite.execute_stores_bound
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterWrite.execute_stores_bound
+#check KProgFormal.ClightRefinement.Arm64RegisterWrite.execute_stores
+#print axioms KProgFormal.ClightRefinement.Arm64RegisterWrite.execute_stores
+#check KProgFormal.ClightRefinement.Arm64ProducerRegisterStorage.Storage.frame
+#print axioms KProgFormal.ClightRefinement.Arm64ProducerRegisterStorage.Storage.frame
+#check KProgFormal.ClightRefinement.Arm64MovImmediate.Suffix.scalar_source
+#print axioms KProgFormal.ClightRefinement.Arm64MovImmediate.Suffix.scalar_source
+#check KProgFormal.ClightRefinement.Arm64MovImmediate.Suffix.writer_call
+#print axioms KProgFormal.ClightRefinement.Arm64MovImmediate.Suffix.writer_call
+#check KProgFormal.ClightRefinement.Arm64MovImmediate.Suffix.scalar_write
+#print axioms KProgFormal.ClightRefinement.Arm64MovImmediate.Suffix.scalar_write
+#check KProgFormal.ClightRefinement.Arm64MovImmediate.call_returns
+#print axioms KProgFormal.ClightRefinement.Arm64MovImmediate.call_returns

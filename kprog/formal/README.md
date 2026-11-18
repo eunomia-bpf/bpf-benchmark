@@ -68,7 +68,10 @@ register-refining return, with no infinite execution.
 The [MOV immediate dispatch proof](results/m5-arm64-mov-immediate/README.md)
 links the complete Numeric unit through the imported linker and proves the
 first 54 generic-handler transitions, including real allocation and both
-width and path-selector calls. The eager SRC read and data-writing suffix remain.
+width and path-selector calls. The [complete MOV scalar procedure](results/m5-arm64-mov-suffix/README.md)
+continues through the eager NONE read, both register stores and real local-frame
+freeing in 203 transitions, retaining the same producer storage and successful
+stores. Native MOV correspondence and final register-view transport remain.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 

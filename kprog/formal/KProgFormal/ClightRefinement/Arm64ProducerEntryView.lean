@@ -7,7 +7,7 @@ namespace KProgFormal.ClightRefinement.Arm64ProducerEntryView
 
 open Arm64Producer
 
-private theorem load_live (chunk : CC.Chunk) (m : CC.Mem) (b : CC.Block)
+theorem load_live (chunk : CC.Chunk) (m : CC.Mem) (b : CC.Block)
     (ofs : Int) (value : CC.Val) (read : CC.Mem.load chunk m b ofs = some value) :
     b.toNat < m.nextblock.toNat := by
   unfold CC.Mem.load at read

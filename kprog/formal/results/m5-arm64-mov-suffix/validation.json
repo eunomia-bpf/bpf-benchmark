@@ -1,0 +1,380 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-arm64-mov-suffix",
+  "source_domain": {
+    "opcode": 1,
+    "widths": [
+      4,
+      8
+    ],
+    "destination": "ordinary Fin31",
+    "source": 255,
+    "immediate": "arbitrary BitVec64",
+    "other_operands": "src2/src3/aux arbitrary Clight values"
+  },
+  "proved_transitions": {
+    "actual_none_reader": 55,
+    "scalar_to_actual_writer_call": 78,
+    "scalar_writer_with_real_continuation": 67,
+    "scalar_branch_to_generic_end": 148,
+    "actual_nine_argument_call_through_free_and_return": 203
+  },
+  "resources": {
+    "allocation": "same source-bound producer Storage carried by actual old-block frame",
+    "stores": "both successful word/tag stores constructed from actual write rights",
+    "free": "actual Freeable ranges derived after unchanged-access stores; all ranges released",
+    "final_frame": "old pre-call frontier; relative to written memory",
+    "free_contents_and_nextblock": "unchanged from written memory"
+  },
+  "focused": {
+    "exit": 0,
+    "log": "focused14.log",
+    "jobs": 184
+  },
+  "public_queries": {
+    "exit": 0,
+    "log": "Query-1.log",
+    "theorems": 8,
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.read_none": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64RegisterWrite.execute_stores_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64RegisterWrite.execute_stores": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProducerRegisterStorage.Storage.frame": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.Suffix.scalar_source": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.Suffix.writer_call": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.Suffix.scalar_write": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.call_returns": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "full_lake_build": {
+    "exit": 0,
+    "log": "lake-build1.log",
+    "jobs": 311
+  },
+  "export_parity": {
+    "exit": 0,
+    "log": "export-parity1.log",
+    "reference": "9c617740f",
+    "result": {
+      "baseline": "9c617740f",
+      "files": [
+        {
+          "path": "kprog/formal/KProgFormal/Clight/Arm64Access.lean",
+          "bytes": 36119,
+          "identical": true
+        },
+        {
+          "path": "kprog/formal/KProgFormal/Clight/Arm64Address.lean",
+          "bytes": 291923,
+          "identical": true
+        },
+        {
+          "path": "kprog/formal/KProgFormal/Clight/Arm64Addressing.lean",
+          "bytes": 22635714,
+          "identical": true
+        },
+        {
+          "path": "kprog/formal/KProgFormal/Clight/Arm64Entry.lean",
+          "bytes": 850142,
+          "identical": true
+        },
+        {
+          "path": "kprog/formal/KProgFormal/Clight/Arm64Numeric.lean",
+          "bytes": 171979,
+          "identical": true
+        },
+        {
+          "path": "kprog/formal/KProgFormal/Clight/Arm64PayloadProfile.lean",
+          "bytes": 3032758,
+          "identical": true
+        },
+        {
+          "path": "kprog/formal/KProgFormal/Clight/Arm64Program.lean",
+          "bytes": 12234925,
+          "identical": true
+        },
+        {
+          "path": "kprog/formal/KProgFormal/Clight/Arm64ProgramContext.lean",
+          "bytes": 1901712,
+          "identical": true
+        },
+        {
+          "path": "kprog/formal/KProgFormal/Clight/Arm64ProgramFixture.lean",
+          "bytes": 688543,
+          "identical": true
+        },
+        {
+          "path": "kprog/formal/KProgFormal/Clight/Arm64Stack.lean",
+          "bytes": 375661,
+          "identical": true
+        },
+        {
+          "path": "kprog/formal/KProgFormal/Clight/X86Context.lean",
+          "bytes": 101977,
+          "identical": true
+        },
+        {
+          "path": "kprog/formal/KProgFormal/Clight/X86ContextSkb.lean",
+          "bytes": 21258154,
+          "identical": true
+        },
+        {
+          "path": "kprog/formal/KProgFormal/Clight/X86ContextXdp.lean",
+          "bytes": 21172430,
+          "identical": true
+        },
+        {
+          "path": "kprog/formal/KProgFormal/Clight/X86Helpers.lean",
+          "bytes": 8077199,
+          "identical": true
+        },
+        {
+          "path": "kprog/formal/KProgFormal/Clight/X86Inline.lean",
+          "bytes": 19707461,
+          "identical": true
+        },
+        {
+          "path": "kprog/formal/KProgFormal/Clight/X86Memory.lean",
+          "bytes": 1820683,
+          "identical": true
+        },
+        {
+          "path": "kprog/formal/KProgFormal/Clight/X86Numeric.lean",
+          "bytes": 54217,
+          "identical": true
+        },
+        {
+          "path": "kprog/formal/KProgFormal/Clight/X86Pointer.lean",
+          "bytes": 1000688,
+          "identical": true
+        },
+        {
+          "path": "kprog/formal/KProgFormal/Clight/X86ProgramProfile.lean",
+          "bytes": 21524184,
+          "identical": true
+        },
+        {
+          "path": "kprog/formal/KProgFormal/Clight/X86ReadonlyProfile.lean",
+          "bytes": 20287920,
+          "identical": true
+        },
+        {
+          "path": "kprog/formal/KProgFormal/Clight/X86StackProfile200.lean",
+          "bytes": 25006502,
+          "identical": true
+        },
+        {
+          "path": "kprog/formal/KProgFormal/Clight/X86StackProfile376.lean",
+          "bytes": 29271597,
+          "identical": true
+        },
+        {
+          "path": "kprog/formal/KProgFormal/Clight/X86TetragonWake.lean",
+          "bytes": 31986244,
+          "identical": true
+        }
+      ]
+    }
+  },
+  "attempts": [
+    {
+      "name": "callees1",
+      "exit": 1,
+      "log": "callees1.log"
+    },
+    {
+      "name": "callees2",
+      "exit": 1,
+      "log": "callees2.log"
+    },
+    {
+      "name": "callees3",
+      "exit": 0,
+      "log": "callees3.log",
+      "jobs": 174
+    },
+    {
+      "name": "focused1",
+      "exit": 1,
+      "log": "focused1.log"
+    },
+    {
+      "name": "focused2",
+      "exit": 1,
+      "log": "focused2.log"
+    },
+    {
+      "name": "focused3",
+      "exit": 1,
+      "log": "focused3.log"
+    },
+    {
+      "name": "focused4",
+      "exit": 1,
+      "log": "focused4.log"
+    },
+    {
+      "name": "focused5",
+      "exit": 1,
+      "log": "focused5.log"
+    },
+    {
+      "name": "focused6",
+      "exit": 1,
+      "log": "focused6.log"
+    },
+    {
+      "name": "focused7",
+      "exit": 1,
+      "log": "focused7.log"
+    },
+    {
+      "name": "focused8",
+      "exit": 1,
+      "log": "focused8.log"
+    },
+    {
+      "name": "focused9",
+      "exit": 1,
+      "log": "focused9.log"
+    },
+    {
+      "name": "focused10",
+      "exit": 1,
+      "log": "focused10.log"
+    },
+    {
+      "name": "focused11",
+      "exit": 1,
+      "log": "focused11.log"
+    },
+    {
+      "name": "focused12",
+      "exit": 1,
+      "log": "focused12.log"
+    },
+    {
+      "name": "focused13",
+      "exit": 0,
+      "log": "focused13.log",
+      "jobs": 184
+    },
+    {
+      "name": "focused14",
+      "exit": 0,
+      "log": "focused14.log",
+      "jobs": 184
+    },
+    {
+      "name": "count1",
+      "exit": 0,
+      "log": "count1.log"
+    },
+    {
+      "name": "count2",
+      "exit": 1,
+      "log": "count2.log"
+    },
+    {
+      "name": "count3",
+      "exit": 1,
+      "log": "count3.log"
+    },
+    {
+      "name": "count4",
+      "exit": 0,
+      "log": "count4.log"
+    },
+    {
+      "name": "count5",
+      "exit": 0,
+      "log": "count5.log"
+    }
+  ],
+  "attempt_notes": {
+    "callees1": "generic continuation cannot reduce final skip by doStep pattern matching; reader55 passed",
+    "callees2": "wrong CC.Step2.skip_call namespace; corrected by relational constructor",
+    "callees3": "both actual callee proofs pass",
+    "count1": "process exit0, actual direct NONE reader55",
+    "count2_count3": "import failed while the writer dependency olean was unavailable; no replay success",
+    "count4": "process exit0, reader55 but scalar metadata Except.error at4 because entryVundef fails actual pointer ABI cast",
+    "count5": "process exit0, actual pointer operand gives reader55 and scalar writer-call boundary78; metadata only",
+    "focused1_to11": "retained proof-reduction/syntax failures; exact source parts, folded function type, pointer-zero alias, 64-bit cast and byte-mask facts replace large reductions; no budget raised",
+    "focused12": "actual scalar suffix passes; top-level record syntax/reserved name and private rangePerm reduction fail",
+    "focused13": "complete203 procedure passes184 jobs using imported rangePerm_congr",
+    "focused14": "final source reduction pass removes unused call-resolution/cast scaffolding from the17-step control segment"
+  },
+  "limits": {
+    "heartbeats": 200000,
+    "recursion": 512,
+    "lean_workers": 1,
+    "address_space_GiB": 32,
+    "build_cpu": 17,
+    "query_cpu": 18,
+    "timing_lock": "shared for every host command",
+    "raised": false
+  },
+  "native_make_check": {
+    "run_this_step": false,
+    "reason": "Lean-only change; C/runtime unchanged",
+    "last_complete_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c"
+  },
+  "remaining": [
+    "native MOV decode/wire/fetch/PC correspondence",
+    "final register relation at old reader frontier after free",
+    "fresh Numeric global initialization frontier204, distinct from old189",
+    "producer continuation binding",
+    "physical memory/alias/events/fault/control",
+    "all-family migration and O1/O2/O4 recount",
+    "remaining M6 and fresh final full checks"
+  ],
+  "complete_ISA_handler_refinements": 0,
+  "milestones": {
+    "M1_M4": "done",
+    "M5": "open",
+    "M6": "open"
+  }
+}

@@ -169,13 +169,15 @@ private theorem ptr_literals :
 
 set_option hygiene false in
 /-- Certify the actual 67 internal transitions for either scalar width. -/
-theorem execute_stores (m before middle after : CC.Mem) (entry : HeaderLocal m)
+theorem execute_stores_bound (world : CC.CGenv)
+    (composites : world.genv_cenv = ge.genv_cenv) (k : CC.Cont)
+    (hk : CC.isCallCont k = true) (m before middle after : CC.Mem) (entry : HeaderLocal m)
     (storage : Storage m before entry) (i : Fin 31) (value : BitVec 64) (narrow : Bool)
     (wordStore : CC.Mem.store .Mint64 before ((storage.tables false).cellBlock i) 0 (.Vlong (written narrow value)) = some middle)
     (tagStore : CC.Mem.store .Mint8unsigned middle ((storage.tables true).cellBlock i) 0 (.Vint 0) = some after) :
-    InternalRun ge 67
-      (.Callstate (.Internal procedure) (arguments entry.block i value narrow) .Kstop before)
-      (.Returnstate .Vundef .Kstop after) := by
+    InternalRun world 67
+      (.Callstate (.Internal procedure) (arguments entry.block i value narrow) k before)
+      (.Returnstate .Vundef k after) := by
   have different : ∀ i : Fin 31, tableCellName false i ≠ Arm64Entry._entry ∧
       tableCellName false i ≠ tableName true := by decide +kernel
   have wordHeaderOther := storage.separate_local false i _ _ _ entry.binding (different i).1
@@ -201,7 +203,7 @@ theorem execute_stores (m before middle after : CC.Mem) (entry : HeaderLocal m)
     run_tac do
       let reduce ← `(tactic|
           simp +decide only [body_eq, body, eager, regSet, masked, spTest, ordinary, releaseTest, arguments, width, written,
-      CC.doStep, CC.doFunctionEntry2, names, vars, params, result_type,
+      CC.doStep, composites, hk, CC.doFunctionEntry2, names, vars, params, result_type,
       CC.doAllocVariables, CC.bindParameterTemps, CC.emptyEnv, CC.PTree.gss, CC.PTree.gso,
       CC.doEvalExpr, CC.doEvalLvalue, CC.doDerefLoc, CC.doAssignLoc, CC.lvalOfField, CC.Mem.loadv, CC.Mem.storev,
       CC.accessMode, CC.typeof, layouts.1, layouts.2.1, layouts.2.2.1,
@@ -223,14 +225,27 @@ theorem execute_stores (m before middle after : CC.Mem) (entry : HeaderLocal m)
       CC.Integers.Int.zero, CC.Integers.MI.zero, CC.Integers.Int64.and, CC.Integers.MI.and,
       CC.E0, CC.Eapp, CC.blocksOfEnv, CC.Mem.freeList, CC.callCont, empty,
       wordStore, tagStore, low_mask, full_mask, slot_unsigned i, List.nil_append, List.append_nil, ite_false, ite_true, eq_self, Bool.false_eq_true, Bool.true_eq_false, Bool.not_true, Bool.not_false, BitVec.zero_add, BitVec.and_allOnes, BitVec.ofInt_natCast, BitVec.ofNat_toNat, cast_index_bits i, tag_zero] <;> try rfl)
-      for _ in [:67] do
+      for _ in [:66] do
         Lean.Elab.Tactic.evalTactic (← `(tactic|
           apply InternalRun.step))
         Lean.Elab.Tactic.evalTactic (← `(tactic| trivial))
         Lean.Elab.Tactic.evalTactic (← `(tactic| apply CC.doStep_sound))
         Lean.Elab.Tactic.evalTactic reduce
 
-      Lean.Elab.Tactic.evalTactic (← `(tactic| exact InternalRun.refl _))
+      Lean.Elab.Tactic.evalTactic (← `(tactic|
+        exact InternalRun.step trivial (.skip_call _ _ _ _ _ _ hk rfl) (InternalRun.refl _)))
+
+/-- The original standalone writer is the same execution at Kstop. -/
+theorem execute_stores (m before middle after : CC.Mem) (entry : HeaderLocal m)
+    (storage : Storage m before entry) (i : Fin 31) (value : BitVec 64) (narrow : Bool)
+    (wordStore : CC.Mem.store .Mint64 before ((storage.tables false).cellBlock i) 0
+      (.Vlong (written narrow value)) = some middle)
+    (tagStore : CC.Mem.store .Mint8unsigned middle ((storage.tables true).cellBlock i) 0
+      (.Vint 0) = some after) :
+    InternalRun ge 67
+      (.Callstate (.Internal procedure) (arguments entry.block i value narrow) .Kstop before)
+      (.Returnstate .Vundef .Kstop after) :=
+  execute_stores_bound ge rfl .Kstop rfl m before middle after entry storage i value narrow wordStore tagStore
 
 /-- The observed effect of the actual scalar writer, with successful stores
 retained for composing subsequent borrowed-entry and native-register proofs. -/
