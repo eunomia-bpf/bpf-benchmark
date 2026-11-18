@@ -119,8 +119,7 @@ inline int map_type(const btf *types, const char *wanted)
     throw std::runtime_error(std::string("LTO BTF: missing map type ") + wanted);
 }
 
-template <typename Resolver>
-inline void write_layout(std::ostream &out, const btf *types, Resolver)
+inline void write_layout(std::ostream &out, const btf *types)
 {
     uint32_t array = offset(types, "bpf_array", "map");
     out << "{\"array\":{\"map_type\":" << offset(types, "bpf_map", "map_type", true)

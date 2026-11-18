@@ -155,9 +155,7 @@ inline const std::string &native_kernel_lto_layout()
         }
         std::unique_ptr<btf, decltype(&btf__free)> types(loaded, btf__free);
         std::ostringstream facts;
-        native_lto::write_layout(facts, types.get(), [](const char *name) {
-            return kallsyms_lookup(name);
-        });
+        native_lto::write_layout(facts, types.get());
         return facts.str();
     }();
     return kernel_layout;
