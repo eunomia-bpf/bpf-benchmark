@@ -9,7 +9,7 @@ trie's maximum prefix at96. These are the same kernel lookup conditions.
 The smallest source change moves the existing query-prefix failure ahead of
 matching, uses the node prefix as the remaining limit and compares the common
 prefix directly. This removes two CMOVs and one MOV per visited node. The
-comparison count drops from five to four. The layout/type guards, child
+prefix-length CMP count drops from five to four. The layout/type guards, child
 selection, fallback ABI, intermediate flags and current source-read policy
 remain. The existing compact/wide exhaustive bit/prefix/flag tests, guarded
 child walk and ancestor test cover the logical transformation.
@@ -55,7 +55,7 @@ bytes remain the next frozen all-LTO batch measurements.
 
 The production edit is one existing file, +8/-7 lines. It replaces the
 query-prefix portion of the existing mismatch condition with an earlier
-exit and removes its now redundant minimum calculations. Comparison count
+exit and removes its now redundant minimum calculations. Prefix-length CMP count
 falls5→4 and each visited node saves two CMOVs and one MOV. Existing input
 layout checks and generic fallback targets remain. The existing exhaustive
 reference and multi-node ancestor tests cover the changed control flow;
@@ -69,3 +69,5 @@ mtime1794948232; peer checked Tracee2754970 keeps its base/image/CLI lease.
 All own workers and leases are terminal/free. Omp owns the image/check/app
 batch once that lease finishes. The phase1 original-FD/context lifetime
 handoff stays with the frozen-core owner.
+
+2026-11-18T01:31:08Z — Source90f2dda0a and recipe146a85fb3 are pushed. The next local size candidate is the node-flag mask: the kernel tests its low byte, while the current native body uses a32-bit immediate mask. Existing exhaustive flags/trie/ABI coverage and actual captures can quantify that candidate in the open emitter. Omp app measurements and the original-context binding remain ahead of hard-target claims.
