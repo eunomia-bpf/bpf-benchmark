@@ -54,9 +54,9 @@ Run `x86_kvm_corpus_20261117_204607_412064`, 1 sample × 10 s, stats on, exit co
 
 Run `x86_kvm_corpus_20261117_205400_990352`, 1 sample × 10 s, stats on, still `"status": "running"` at
 02:53Z (service started 20:52:09Z, corpus 20:54:00Z). Raw
-`/workspaces/kprog-raw/verified/20261117-checked-hot/tracee/`, session `session-l8nw5lav`. 37 requests
+`/workspaces/kprog-raw/verified/20261117-checked-hot/tracee/`, session `session-l8nw5lav`. 38 requests
 submitted so far; this section is written from the requests journal and each request's own archive, not from
-a finished run. Of the 37: **14 verified, 21 direct-native, 2 hard failures**.
+a finished run. Of the 38: **14 verified, 22 direct-native, 2 hard failures**.
 
 - **14 verified and installed** (`execution_path=checked-sim-c`, `b_generated=true`, `b_stock_passed=true`,
   `status=0`): requests 1, 2, 3, 6, 7, 9, 10, 25, 26, 29, 30, 31, 33, 35. 14 distinct native bodies
@@ -113,6 +113,24 @@ emitter produced the wrong form. Both requests are one program: `artifacts.json`
 `syscall__execve_enter` and request 24 `syscall__execve_exit` — the same `syscall__execve` pair the shim
 logged as failed, 94,194 B blob each. So this is one emitter site, not a linker policy gap. Recorded as an
 open cause; the fix belongs to whatever emits that load, not to a linker exemption.
+
+### Open cause: six requests fail generation on a LOCAL `.L` map name
+
+Requests 5, 28, 34, 36, 37 and 38 record only `llc-18` exiting 1. Re-running the packed MIR that each
+archive retains gives the real messages: first `trusted_x86.bpf.c:7335: Looks like the BPF stack limit is
+exceeded`, and with `-bpf-stack-size` raised to 65536, `Undefined temporary symbol .L.str.2`.
+
+That symbol is the defect. `readelf` shows `.L.str.2` is a 15-byte **LOCAL** object in `.rodata.str1.1` —
+a string literal that shares an address with the map at `value_offset 31` (ARRAY, key 4, value 246).
+`normalize()` (`kprog/trusted_service.py:126-139`) takes the shim envelope's `item['name']` verbatim as the
+symbol name, so the generator emits `extern __u8 __x86_trusted_map_8[] __asm__(".L.str.2") __ksym`, and no
+undefined external reference can bind a LOCAL symbol. The name can only have come from the ELF:
+`kernel.facts.json` carries the map's shape and nothing else, and the `.maps` section's GLOBAL names do not
+include it. The fix is in name resolution — skip LOCAL `.L*` symbols, or synthesize a stable name — not in
+`native-link`, which never sees this input.
+
+Confirmed systematic, not a one-off: requests 38 and 5 fail identically on the same symbol. All six fell
+back to `direct-native` with `status 0`, so the app ran; the cost is coverage.
 
 ### Equal work
 
