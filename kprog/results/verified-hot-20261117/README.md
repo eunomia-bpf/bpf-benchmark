@@ -88,9 +88,21 @@ different emitter defect:
 | 8, 27, 32 | `sys_exit_submit`, `sys_dup_exit_tail`, `uprobe_lkm_seeker_submitter` | `math between fp pointer and register with unbounded min value is not allowed` |
 | 44 | `syscall__accept4` | `R2 unbounded memory access, use 'var &= const' or 'if (var < const)'` |
 
-`off=-520` is the concrete one: the verifier's stack is 512 B, and these bodies write 8 bytes at −520, one
-slot below it. `llc-18` is run with `-bpf-stack-size=4096` (`kprog/x86/trusted_specializer.py:30,99`), so a
-frame that overshoots the real 512 B reaches the verifier instead of being caught at emission.
+`off=-520` is a whole-frame overflow, not one slot past the budget. Measured from each archive's own
+`trusted_x86.bpf.o`, those six bodies emit a **1176-byte** frame (147 contiguous 8-byte slots, 8 through
+1176), and the verifier stops at the first write past its 512-byte budget. The frame is 240 B of guest stack
+(`X86_SIM_STACK_BYTES 240U`, 30 words) plus the two scalarized fact arrays (`__x86_stack_value_tag_N` and
+`__x86_stack_value_ptr_N`, 30 slots each, address-taken by `X86_SIM_BIND_INLINE`) plus 8-byte spill slots.
+`llc-18` is run with `-bpf-stack-size=4096` (`kprog/x86/trusted_specializer.py:30,99`), so the overflow
+reaches the verifier instead of being caught at emission; recompiling the same request's `bounds.bc` with
+`-bpf-stack-size=512` makes clang itself stop, at `x86_mem_access.h:152` in the same function.
+
+It is specific to these six bodies. Every other request in the run fits: the largest is 488 B (request 8),
+and a passing 3,364-operation request (47) builds unchanged at `-bpf-stack-size=512`. All six emit exactly
+87,963 instructions for 1,633 guest operations — 53.9 per operation, against 1.8 to 2.4 for every other
+request — so they are one body shape whose code is heavily replicated (58,316 of the 87,963 instructions
+repeat an earlier 12-instruction window). That replication, not the 240-byte guest stack, is what spends the
+extra 664 B.
 
 ### Fixed cause: requests 23 / 24, one absolute-memory instruction
 
