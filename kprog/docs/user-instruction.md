@@ -148,6 +148,9 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-17T10:27 UTC: "你让 codex / omp 也看看在里面能不能干啥. 给他们持续性几天的大任务, 免得你用完了停下来了. 让 omp 统筹 codex 或者自己做. 恢复omp集群定时任务"
 - 2026-11-18 ~06:44 UTC: "完整的数据?"
 - 2026-11-18 ~06:50 UTC: "离投稿还差多少"
+- 2026-11-18 ~07:00 UTC: "所以最好的性能是啥? 为啥还是倒退了?"
+- 2026-11-18 ~07:00 UTC: "我觉得不对吧? 之前不是挺好的嘛?"
+- 2026-11-18 ~07:02 UTC: "一样的工作量 clilum 也有 1.2x 吗"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
