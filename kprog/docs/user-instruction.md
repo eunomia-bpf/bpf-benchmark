@@ -156,6 +156,9 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-18 ~07:08 UTC: "绝对不可能只有这么点改进, kinsn 都更多"
 - 2026-11-18 ~07:08 UTC: "为啥越来越慢了"
 - 2026-11-18 ~07:15 UTC: "Tetragon 的热 tracepoint 程序有 103 个替换落在测量窗口之后 你现在的完整替换是什么样的? 之前的 直接 bypass evrifier 的方式呢? 5/29 到现在的差异?"
+- 2026-11-18 ~07:25 UTC: "先回答我"
+- 2026-11-18 ~07:30 UTC: "什么叫做路径不同?"
+- 2026-11-18 ~07:35 UTC: "不需要按照 binray size 扣了. kinsn 那种收益，来自把热点操作变成内联指令???? kinsn 没有内联啊? 你应该无论如何比 kinsn 好得多"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 

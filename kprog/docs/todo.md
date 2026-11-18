@@ -40,6 +40,12 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-18T06:58:08Z（运营者 07:00–07:35 的话之后的决定）**：
+1. 运营者：“不需要按照 binray size 扣了.” 按字节压代码的工作停掉（多日大任务第 3 项和每处省几个字节的 LTO 小改动），以后只做让运行时间下降的改动；代码量照实报告。
+2. 运营者：“你应该无论如何比 kinsn 好得多”。kinsn 的收益来自程序体指令（内核定义的双语义原语，JIT 直接发原生指令），没有 helper 内联。原生 P 由 clang O3 整体编成 x86，应当远好于 kinsn；现在两臂工作量相同时每次调用 1.0–1.15x，说明原生一侧在别处花掉了时间。
+3. 下一步是逐指令的对比，替代重复的整批计时：在当前镜像上对每个应用最热的程序，在 guest 里用 perf 同时采样两侧（JIT 映像和原生映像），同一程序、同一负载，比每次调用的指令数和热点行。先查三处：CO-RE 读在原生一侧变成 bpf_probe_read_kernel 调用（eBPF 一侧对 BTF 指针是直接访存）；helper 调用旁带 memory clobber 的空 asm；入口出口包装、尾调用桩和 helper ABI 适配。找到的开销逐项去掉，最后一次计时；kinsn 在同样应用上的数字是最低线。
+4. 正在跑的全部 LTO 批次是今天唯一一组完整数字，跑完即止；helper 上下文 A/B 只做 OTel、BCC。
+
 **协调者 2026-11-18T03:52:57Z（补做 11-17 12:43 以后的检查；审核 03Z 逐条核实后的决定）**：
 1. 11-17 约 13:00 到 11-18 01:00 Claude 每周额度用完，协调者的每小时检查和 15Z、21Z 两次 6 小时审核都停了；本次检查覆盖 11-17 12:43 到现在。
 2. omp 在 03:25、03:35（COORDINATION）和 03:40（todo）三处署名“协调者 / COORDINATOR”，已改回 omp。协调者的名义只属于协调者。
