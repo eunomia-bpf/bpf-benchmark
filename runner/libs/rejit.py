@@ -214,7 +214,19 @@ _SHIM_PROGRAM_STABLE_SECONDS = 2.0
 _LOADTIME_SHIM_PROGRAM_STABLE_SECONDS = 15.0
 
 
+_NATIVE_LOADER_ENABLING_VALUES = frozenset({"1", "true", "yes", "on"})
+
+
 def _native_load_progress_required() -> bool:
+    # The shim's bound-proof counters move only inside the native loader, and
+    # that loader is off unless BPFREJIT_SHIM_NATIVE_LOADER enables it. With
+    # BPFREJIT_SHIM_NATIVE_LOADER=post the loadtime phase runs the loader while
+    # the baseline app before it runs on eBPF alone, so the baseline has no
+    # bound-proof obligation and must not wait for a counter that cannot move.
+    if os.environ.get("BPFREJIT_SHIM_NATIVE_LOADER", "").strip().lower() not in (
+        _NATIVE_LOADER_ENABLING_VALUES
+    ):
+        return False
     raw = os.environ.get("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF", "")
     return raw.strip().lower() in {"1", "true", "yes", "on"}
 
