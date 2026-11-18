@@ -18,3 +18,11 @@ at their existing paths. The wrapper uses timing SH/image SH, CPU19 and
 This establishes helper entry cost. Actual named-lpm12 load selection,
 source routing, installed bytes and app per-call/body/helpers/maps/throughput
 remain the production implementation and omp's frozen all-LTO batch.
+
+Forward diagnostic: the first run uses the extra entry JMP and retains its
+raw input and samples. The next run slices the body at the existing query
+load so the driver calls it directly. The remaining internal branches and
+fallback trap lie inside that slice and retain their relative displacements;
+the full pointer-reference checks execute it. The removed prefix is recorded
+as raw bytes. Code alignment changes with this entry, and both series stay
+available when judging the guard-cost effect.

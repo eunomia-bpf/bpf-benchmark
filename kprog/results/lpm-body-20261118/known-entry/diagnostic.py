@@ -4,7 +4,6 @@ import csv
 import json
 from pathlib import Path
 from statistics import median
-import struct
 import subprocess
 import sys
 
@@ -18,16 +17,15 @@ assert facts['layout']['key_prefixlen']==0
 instruction=bytes.fromhex('448b5600')
 entry=original.index(instruction)
 assert original.count(instruction)==1
-code=bytearray(original)
-code[:5]=b'\xe9'+struct.pack('<i',entry-5)
+code=original[entry:]
 (out/'known-host.bin').write_bytes(code)
 metadata=dict(source=str(source),body_bytes=facts['native_range_bytes'],layout=facts['layout'],
-              known_entry=entry,patch=dict(offset=0,original=original[:5].hex(),replacement=code[:5].hex()),
+              known_entry=entry,removed_prefix=original[:entry].hex(),
               invocation=[str(driver),str(source/'native-host.bin'),str(out/'known-host.bin')],
               driver_arm_labels=dict(kernel='guarded-native',native='known-entry'),
-              scope='Host entry-JMP diagnostic on the same existing native body and driver. '
+              scope='Host direct-entry slice of the same existing native body and driver. '
                     'Stable LPM12 fixtures; query bound/child/fallback code remains. '
-                    'The extra entry jump contributes cost; production routing and app effects remain separate.')
+                    'Relative body targets retain their displacements; code alignment and app effects remain separate.')
 (out/'input.json').write_text(json.dumps(metadata,indent=2)+'\n')
 with (out/'samples.csv').open('w') as stdout,(out/'stderr').open('w') as stderr:
     status=subprocess.run(metadata['invocation'],stdout=stdout,stderr=stderr).returncode
