@@ -35,9 +35,12 @@ draft=a.output/'original-fd-query.patch';draft.write_text(''.join(patch))
 check=subprocess.run(['git','apply','--check',str(draft)],text=True,capture_output=True)
 (a.output/'patch-check.json').write_text(json.dumps(dict(command=['git','apply','--check',str(draft)],
     returncode=check.returncode,stdout=check.stdout,stderr=check.stderr),indent=2)+'\n')
-rows=[]
+rows=[];controls=[]
 for line in a.service_log.read_text().splitlines():
     entry=json.loads(line)
+    if 'source_prog_id' not in entry:
+        controls.append({k:entry[k] for k in ['ready','arch','endpoint','request_id','status','error'] if k in entry})
+        continue
     rows.append({k:entry[k] for k in ['request_id','source_prog_id','phase','status',
         'execution_path','b_generated','b_stock_passed','started','finished','artifact_archive'] if k in entry})
 counts=Counter(records=len(rows))
@@ -48,7 +51,7 @@ for r in rows:
 result=dict(scope='Completed rows from one still-running checked Tracee service. '
     'A positive source ID is reopened as an actual program FD by trusted_loader.cpp. '
     'This is partial run coverage, separate from app success, prototype correctness or timing.',
-    service_log=str(a.service_log),counts=dict(counts),records=rows)
+    service_log=str(a.service_log),counts=dict(counts),records=rows,control_records=controls)
 (a.output/'service-fd-coverage.json').write_text(json.dumps(result,indent=2)+'\n')
 module=Path('/workspaces/.agent-state/kprog-ck/verified-module/bpf_x86_native_lab.ko')
 strings=subprocess.check_output(['strings',str(module)],text=True)
