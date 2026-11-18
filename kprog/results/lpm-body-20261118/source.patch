@@ -1,0 +1,20 @@
+diff --git a/kprog/x86/native_lab/native_link/src/x86_lpm_lookup.rs b/kprog/x86/native_lab/native_link/src/x86_lpm_lookup.rs
+index 413130e54..b65846c3a 100644
+--- a/kprog/x86/native_lab/native_link/src/x86_lpm_lookup.rs
++++ b/kprog/x86/native_lab/native_link/src/x86_lpm_lookup.rs
+@@ -33,9 +33,12 @@ pub(super) fn routine(l:&RuntimeLpmLayout,helper:u64)->Result<(Vec<u8>,Vec<Reloc
+     let no_child=append_x86_jcc_rel32(&mut b,0x83);
+     b.extend_from_slice(&[0x44,0x89,0xd9,0xc1,0xe9,3]);
+     mem(&mut b,&[0x0f,0xb6,0x84,0x0e],2,l.key_data)?; // key data[node prefix /8]
+-    b.extend_from_slice(&[0x44,0x89,0xd9,0x83,0xe1,7,0x83,0xf1,7,0xd3,0xe8,0x83,0xe0,1]);
+-    b.extend_from_slice(&[0x48,0x69,0xc0]);b.extend_from_slice(&i32::try_from(l.child_stride)?.to_le_bytes());
+-    mem(&mut b,&[0x48,0x8b,0xbc,0x02],2,l.child)?;
++    b.extend_from_slice(&[0x44,0x89,0xd9,0xf7,0xd1,0x83,0xe1,7,0xd3,0xe8,0x83,0xe0,1]);
++    // Fold constant pointer stride into SIB; retain multiplication for other layouts.
++    let sib=match l.child_stride {1=>0x02,2=>0x42,4=>0x82,8=>0xc2,_=>{
++        b.extend_from_slice(&[0x48,0x69,0xc0]);b.extend_from_slice(&i32::try_from(l.child_stride)?.to_le_bytes());0x02
++    }};
++    mem(&mut b,&[0x48,0x8b,0xbc,sib],2,l.child)?;
+     let child_ready=b.len();patch_x86_rel32(&mut b,no_child,child_ready)?;
+     mem(&mut b,&[0x48,0x8b,0x82],2,l.node_data)?;
+     mem(&mut b,&[0x48,0x33,0x86],2,l.key_data)?;
