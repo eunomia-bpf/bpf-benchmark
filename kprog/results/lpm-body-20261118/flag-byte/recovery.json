@@ -1,0 +1,5763 @@
+{
+  "scope": "Actual captured kernel layout flag offset20; ordered site alignment and exact flag bytes. Other instruction recovery lengths/destinations stay, offsets follow the3B deletion.",
+  "comparison": "kprog/results/lpm-body-20261118/flag-byte/comparison.json",
+  "requests": [
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_php",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0t9jewb9",
+      "before_sites": 598,
+      "after_sites": 598,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "native_tracer_entry",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6pt2hgn7",
+      "before_sites": 148,
+      "after_sites": 148,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "tracepoint__sched_process_free",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6xjm60mv",
+      "before_sites": 36,
+      "after_sites": 36,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_perl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9jgkf4wo",
+      "before_sites": 724,
+      "after_sites": 724,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_ruby",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bp1f6lmn",
+      "before_sites": 1091,
+      "after_sites": 1091,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_native",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f2sqjzud",
+      "before_sites": 752,
+      "after_sites": 752,
+      "changed_flags": [
+        {
+          "before": [
+            14422,
+            7,
+            65535
+          ],
+          "after": [
+            14422,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "read_task_struct",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-gv7scc03",
+      "before_sites": 14,
+      "after_sites": 14,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_v8",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-i74g9gvr",
+      "before_sites": 698,
+      "after_sites": 698,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_stop",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-isjxl4cd",
+      "before_sites": 114,
+      "after_sites": 114,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_dotnet",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jhlatj24",
+      "before_sites": 663,
+      "after_sites": 663,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_go_labels",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-miy7mdp6",
+      "before_sites": 75,
+      "after_sites": 75,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_python",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pzbgnkhi",
+      "before_sites": 703,
+      "after_sites": 703,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_hotspot",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vpdq0hnh",
+      "before_sites": 622,
+      "after_sites": 622,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "custom__generic",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-z69ln99l",
+      "before_sites": 108,
+      "after_sites": 108,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tcp_v4_connect",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1_lto8xz",
+      "before_sites": 6,
+      "after_sites": 6,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_write",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4jklketw",
+      "before_sites": 1,
+      "after_sites": 1,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tracepoint__syscalls__sys_exit_open",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6i31gwia",
+      "before_sites": 19,
+      "after_sites": 19,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tcp_v4_connect_ret",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-794zppcb",
+      "before_sites": 44,
+      "after_sites": 44,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "sys_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7d98s1v6",
+      "before_sites": 24,
+      "after_sites": 24,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "block_rq_issue",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7halu_ke",
+      "before_sites": 41,
+      "after_sites": 41,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "inet_sock_set_state",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8e6fl8jk",
+      "before_sites": 52,
+      "after_sites": 52,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "block_rq_complete",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_1aqp51j",
+      "before_sites": 34,
+      "after_sites": 34,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "blk_account_io_merge_bio",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-a193g4ge",
+      "before_sites": 1,
+      "after_sites": 1,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_open",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ay6ey69x",
+      "before_sites": 1,
+      "after_sites": 1,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_create",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bzxjfd4z",
+      "before_sites": 1,
+      "after_sites": 1,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tracepoint__syscalls__sys_enter_openat",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-dxo2lc2q",
+      "before_sites": 2,
+      "after_sites": 2,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_fsync",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hgq_b00n",
+      "before_sites": 1,
+      "after_sites": 1,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "sched_wakeup_new",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jb3gko01",
+      "before_sites": 26,
+      "after_sites": 26,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "block_rq_insert",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jck9lh2k",
+      "before_sites": 42,
+      "after_sites": 42,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "sched_wakeup",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k46xd0cp",
+      "before_sites": 26,
+      "after_sites": 26,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tracepoint__syscalls__sys_exit_openat",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ll9iyiuh",
+      "before_sites": 19,
+      "after_sites": 19,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tcp_v6_connect_ret",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mlacd5gt",
+      "before_sites": 44,
+      "after_sites": 44,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "kprobe__cap_capable_entry",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o0mz755w",
+      "before_sites": 2,
+      "after_sites": 2,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "kprobe__cap_capable_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rh0ow6sg",
+      "before_sites": 10,
+      "after_sites": 10,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "sched_switch",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-scqqtjed",
+      "before_sites": 50,
+      "after_sites": 50,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tcp_v6_connect",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v27kbtfd",
+      "before_sites": 6,
+      "after_sites": 6,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "sys_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v8lv8ar0",
+      "before_sites": 29,
+      "after_sites": 29,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "fentry_vfs_read",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-x1s4v62w",
+      "before_sites": 1,
+      "after_sites": 1,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "bcc/set",
+      "symbol": "tracepoint__syscalls__sys_enter_open",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ys2epo0_",
+      "before_sites": 2,
+      "after_sites": 2,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_ingress_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-13kno4fc",
+      "before_sites": 278,
+      "after_sites": 278,
+      "changed_flags": [
+        {
+          "before": [
+            6970,
+            7,
+            65535
+          ],
+          "after": [
+            6970,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_netdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1cycht3i",
+      "before_sites": 299,
+      "after_sites": 299,
+      "changed_flags": [
+        {
+          "before": [
+            6263,
+            7,
+            65535
+          ],
+          "after": [
+            6263,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_rev_dnat_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2ce8m1_7",
+      "before_sites": 117,
+      "after_sites": 117,
+      "changed_flags": [
+        {
+          "before": [
+            2991,
+            7,
+            65535
+          ],
+          "after": [
+            2991,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_xdp_entry",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-3cqcl0fp",
+      "before_sites": 16,
+      "after_sites": 16,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_container",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4d9yymr5",
+      "before_sites": 58,
+      "after_sites": 58,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_no_service_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4uxpf98g",
+      "before_sites": 111,
+      "after_sites": 111,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_host",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6fga9lbq",
+      "before_sites": 55,
+      "after_sites": 55,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_netdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-79btul9d",
+      "before_sites": 298,
+      "after_sites": 298,
+      "changed_flags": [
+        {
+          "before": [
+            6255,
+            7,
+            65535
+          ],
+          "after": [
+            6255,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_policy",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8cg5bvgp",
+      "before_sites": 201,
+      "after_sites": 201,
+      "changed_flags": [
+        {
+          "before": [
+            4212,
+            7,
+            65535
+          ],
+          "after": [
+            4212,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_arp",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-91mtb7o3",
+      "before_sites": 30,
+      "after_sites": 30,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_egress",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9gsgtcv3",
+      "before_sites": 223,
+      "after_sites": 223,
+      "changed_flags": [
+        {
+          "before": [
+            4929,
+            7,
+            65535
+          ],
+          "after": [
+            4929,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_rev_dnat_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_7ys3jh4",
+      "before_sites": 117,
+      "after_sites": 117,
+      "changed_flags": [
+        {
+          "before": [
+            2991,
+            7,
+            65535
+          ],
+          "after": [
+            2991,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_lxc_policy",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_8d03s3p",
+      "before_sites": 230,
+      "after_sites": 230,
+      "changed_flags": [
+        {
+          "before": [
+            4462,
+            7,
+            65535
+          ],
+          "after": [
+            4462,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_host",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_p5zmjby",
+      "before_sites": 105,
+      "after_sites": 105,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_snat_fwd_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-agezr1oz",
+      "before_sites": 307,
+      "after_sites": 307,
+      "changed_flags": [
+        {
+          "before": [
+            11061,
+            7,
+            65535
+          ],
+          "after": [
+            11061,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_lxc_policy",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f5_4shmk",
+      "before_sites": 230,
+      "after_sites": 230,
+      "changed_flags": [
+        {
+          "before": [
+            4462,
+            7,
+            65535
+          ],
+          "after": [
+            4462,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_host",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f9ut04aq",
+      "before_sites": 10,
+      "after_sites": 10,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_egress_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fhkkm0eb",
+      "before_sites": 105,
+      "after_sites": 105,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_snat_fwd_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-iwl_z0yi",
+      "before_sites": 292,
+      "after_sites": 292,
+      "changed_flags": [
+        {
+          "before": [
+            11050,
+            7,
+            65535
+          ],
+          "after": [
+            11050,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_no_service_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jo5rwatf",
+      "before_sites": 111,
+      "after_sites": 111,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_arp",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k027eqh_",
+      "before_sites": 30,
+      "after_sites": 30,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_to_endpoint",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-l7u92oz8",
+      "before_sites": 214,
+      "after_sites": 214,
+      "changed_flags": [
+        {
+          "before": [
+            4675,
+            7,
+            65535
+          ],
+          "after": [
+            4675,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_egress",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lf1ld_nc",
+      "before_sites": 223,
+      "after_sites": 223,
+      "changed_flags": [
+        {
+          "before": [
+            4929,
+            7,
+            65535
+          ],
+          "after": [
+            4929,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_cont",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lorirdv6",
+      "before_sites": 218,
+      "after_sites": 218,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_host",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-movvchz0",
+      "before_sites": 105,
+      "after_sites": 105,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_snat_fwd_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nxg7aalt",
+      "before_sites": 292,
+      "after_sites": 292,
+      "changed_flags": [
+        {
+          "before": [
+            11043,
+            7,
+            65535
+          ],
+          "after": [
+            11043,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_policy",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o3794un8",
+      "before_sites": 201,
+      "after_sites": 201,
+      "changed_flags": [
+        {
+          "before": [
+            4212,
+            7,
+            65535
+          ],
+          "after": [
+            4212,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_netdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o8ohgar4",
+      "before_sites": 101,
+      "after_sites": 101,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_netdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pkqceosl",
+      "before_sites": 101,
+      "after_sites": 101,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qw44_dh3",
+      "before_sites": 221,
+      "after_sites": 221,
+      "changed_flags": [
+        {
+          "before": [
+            4750,
+            7,
+            65535
+          ],
+          "after": [
+            4750,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_host",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rodhoecx",
+      "before_sites": 105,
+      "after_sites": 105,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_ingress_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rxey2hzy",
+      "before_sites": 278,
+      "after_sites": 278,
+      "changed_flags": [
+        {
+          "before": [
+            6970,
+            7,
+            65535
+          ],
+          "after": [
+            6970,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_container",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-s6hx0gco",
+      "before_sites": 40,
+      "after_sites": 40,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_netdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-syczdmnk",
+      "before_sites": 158,
+      "after_sites": 158,
+      "changed_flags": [
+        {
+          "before": [
+            3778,
+            7,
+            65535
+          ],
+          "after": [
+            3778,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-t15zizyt",
+      "before_sites": 221,
+      "after_sites": 221,
+      "changed_flags": [
+        {
+          "before": [
+            4750,
+            7,
+            65535
+          ],
+          "after": [
+            4750,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_netdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-t_ial4wq",
+      "before_sites": 158,
+      "after_sites": 158,
+      "changed_flags": [
+        {
+          "before": [
+            3778,
+            7,
+            65535
+          ],
+          "after": [
+            3778,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_to_endpoint",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uxsybchg",
+      "before_sites": 214,
+      "after_sites": 214,
+      "changed_flags": [
+        {
+          "before": [
+            4675,
+            7,
+            65535
+          ],
+          "after": [
+            4675,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_container",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v9h7qeqv",
+      "before_sites": 58,
+      "after_sites": 58,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_netdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v_946gqq",
+      "before_sites": 101,
+      "after_sites": 101,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_cont",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vc7e_r5k",
+      "before_sites": 218,
+      "after_sites": 218,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_host",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vl_vqe9q",
+      "before_sites": 10,
+      "after_sites": 10,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_ingress",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-wbdsc394",
+      "before_sites": 193,
+      "after_sites": 193,
+      "changed_flags": [
+        {
+          "before": [
+            3997,
+            7,
+            65535
+          ],
+          "after": [
+            3997,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_to_netdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xd5wo9oh",
+      "before_sites": 158,
+      "after_sites": 158,
+      "changed_flags": [
+        {
+          "before": [
+            3778,
+            7,
+            65535
+          ],
+          "after": [
+            3778,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "cil_from_container",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xno7wtkt",
+      "before_sites": 40,
+      "after_sites": 40,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_ipv4_ct_ingress",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-y6a0390q",
+      "before_sites": 193,
+      "after_sites": 193,
+      "changed_flags": [
+        {
+          "before": [
+            3997,
+            7,
+            65535
+          ],
+          "after": [
+            3997,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_handle_ipv4_from_host",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-yaomepl8",
+      "before_sites": 55,
+      "after_sites": 55,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "cilium/agent",
+      "symbol": "tail_nodeport_nat_egress_ipv4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zlk3fva1",
+      "before_sites": 105,
+      "after_sites": 105,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "execve_rate",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-04ysigi9",
+      "before_sites": 64,
+      "after_sites": 64,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0uk6eny3",
+      "before_sites": 651,
+      "after_sites": 651,
+      "changed_flags": [
+        {
+          "before": [
+            10688,
+            7,
+            65535
+          ],
+          "after": [
+            10688,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_process_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0v55dkrr",
+      "before_sites": 552,
+      "after_sites": 552,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_output",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1e1whdkd",
+      "before_sites": 71,
+      "after_sites": 71,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_output",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-20u5h7e0",
+      "before_sites": 71,
+      "after_sites": 71,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-31f47_a7",
+      "before_sites": 648,
+      "after_sites": 648,
+      "changed_flags": [
+        {
+          "before": [
+            10809,
+            7,
+            65535
+          ],
+          "after": [
+            10809,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_output",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4vi9ft6v",
+      "before_sites": 23,
+      "after_sites": 23,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "execve_send",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6vbtwxp5",
+      "before_sites": 128,
+      "after_sites": 128,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_output",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7xa_4zm5",
+      "before_sites": 71,
+      "after_sites": 71,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9p7ocgsk",
+      "before_sites": 651,
+      "after_sites": 651,
+      "changed_flags": [
+        {
+          "before": [
+            10688,
+            7,
+            65535
+          ],
+          "after": [
+            10688,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_process_filter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_gtbajk_",
+      "before_sites": 396,
+      "after_sites": 396,
+      "changed_flags": [
+        {
+          "before": [
+            9350,
+            7,
+            65535
+          ],
+          "after": [
+            9350,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_qtl2kam",
+      "before_sites": 651,
+      "after_sites": 651,
+      "changed_flags": [
+        {
+          "before": [
+            10688,
+            7,
+            65535
+          ],
+          "after": [
+            10688,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_actions",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_vqrdf28",
+      "before_sites": 156,
+      "after_sites": 156,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_setup_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ai2k1te5",
+      "before_sites": 42,
+      "after_sites": 42,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_actions",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-beoa__2d",
+      "before_sites": 141,
+      "after_sites": 141,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "execve_map_update",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-blnybbe9",
+      "before_sites": 8,
+      "after_sites": 8,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-c3k1hzvb",
+      "before_sites": 643,
+      "after_sites": 643,
+      "changed_flags": [
+        {
+          "before": [
+            10721,
+            7,
+            65535
+          ],
+          "after": [
+            10721,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "tg_kp_bprm_committing_creds",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-c_1wmpw5",
+      "before_sites": 76,
+      "after_sites": 76,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ddm5z6l1",
+      "before_sites": 651,
+      "after_sites": 651,
+      "changed_flags": [
+        {
+          "before": [
+            10688,
+            7,
+            65535
+          ],
+          "after": [
+            10688,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_filter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-g_0kedgz",
+      "before_sites": 396,
+      "after_sites": 396,
+      "changed_flags": [
+        {
+          "before": [
+            9353,
+            7,
+            65535
+          ],
+          "after": [
+            9353,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-il4rhakh",
+      "before_sites": 651,
+      "after_sites": 651,
+      "changed_flags": [
+        {
+          "before": [
+            10688,
+            7,
+            65535
+          ],
+          "after": [
+            10688,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-j63keppd",
+      "before_sites": 651,
+      "after_sites": 651,
+      "changed_flags": [
+        {
+          "before": [
+            10688,
+            7,
+            65535
+          ],
+          "after": [
+            10688,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_exit_disassociate_ctty",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jasy1x_7",
+      "before_sites": 48,
+      "after_sites": 48,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-juhc192d",
+      "before_sites": 648,
+      "after_sites": 648,
+      "changed_flags": [
+        {
+          "before": [
+            10809,
+            7,
+            65535
+          ],
+          "after": [
+            10809,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_actions",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k6ckpvxv",
+      "before_sites": 141,
+      "after_sites": 141,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_process_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-l3wtixm8",
+      "before_sites": 451,
+      "after_sites": 451,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_process_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lrpau888",
+      "before_sites": 514,
+      "after_sites": 514,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_process_filter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nqetz_k2",
+      "before_sites": 396,
+      "after_sites": 396,
+      "changed_flags": [
+        {
+          "before": [
+            9350,
+            7,
+            65535
+          ],
+          "after": [
+            9350,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qqafecq5",
+      "before_sites": 651,
+      "after_sites": 651,
+      "changed_flags": [
+        {
+          "before": [
+            10688,
+            7,
+            65535
+          ],
+          "after": [
+            10688,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_execve",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r9kh94rr",
+      "before_sites": 319,
+      "after_sites": 319,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rmyx34xm",
+      "before_sites": 107,
+      "after_sites": 107,
+      "changed_flags": [
+        {
+          "before": [
+            1772,
+            7,
+            65535
+          ],
+          "after": [
+            1772,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-wdd42hwy",
+      "before_sites": 107,
+      "after_sites": 107,
+      "changed_flags": [
+        {
+          "before": [
+            1772,
+            7,
+            65535
+          ],
+          "after": [
+            1772,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_actions",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xf313ycz",
+      "before_sites": 158,
+      "after_sites": 158,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_kprobe_filter_arg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xgsv35ba",
+      "before_sites": 651,
+      "after_sites": 651,
+      "changed_flags": [
+        {
+          "before": [
+            10688,
+            7,
+            65535
+          ],
+          "after": [
+            10688,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_retkprobe_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xh90hqo_",
+      "before_sites": 444,
+      "after_sites": 444,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_rawtp_setup_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xuz7oyzt",
+      "before_sites": 41,
+      "after_sites": 41,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_exit_acct_process",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ye4mrb_x",
+      "before_sites": 43,
+      "after_sites": 43,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "generic_tracepoint_event",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-yuod933z",
+      "before_sites": 237,
+      "after_sites": 237,
+      "changed_flags": [
+        {
+          "before": [
+            12645,
+            7,
+            65535
+          ],
+          "after": [
+            12645,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tetragon/observer",
+      "symbol": "event_wake_up_new_task",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zfitfdx5",
+      "before_sites": 175,
+      "after_sites": 175,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_do_init_module",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-017c9l0e",
+      "before_sites": 536,
+      "after_sites": 536,
+      "changed_flags": [
+        {
+          "before": [
+            10519,
+            7,
+            65535
+          ],
+          "after": [
+            10519,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_mkdir_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-05zpqxw5",
+      "before_sites": 74,
+      "after_sites": 74,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_proc_create",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-09yg3syu",
+      "before_sites": 327,
+      "after_sites": 327,
+      "changed_flags": [
+        {
+          "before": [
+            6169,
+            7,
+            65535
+          ],
+          "after": [
+            6169,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_permission",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0i4efh97",
+      "before_sites": 341,
+      "after_sites": 341,
+      "changed_flags": [
+        {
+          "before": [
+            6641,
+            7,
+            65535
+          ],
+          "after": [
+            6641,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sched_process_fork_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0yeqcsp9",
+      "before_sites": 116,
+      "after_sites": 116,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_dup2",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-0zn8n8nm",
+      "before_sites": 432,
+      "after_sites": 432,
+      "changed_flags": [
+        {
+          "before": [
+            9602,
+            7,
+            65535
+          ],
+          "after": [
+            9602,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_sb_mount",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1al7w7n_",
+      "before_sites": 630,
+      "after_sites": 630,
+      "changed_flags": [
+        {
+          "before": [
+            12379,
+            7,
+            65535
+          ],
+          "after": [
+            12379,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_register_kprobe",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1dlp69ce",
+      "before_sites": 338,
+      "after_sites": 338,
+      "changed_flags": [
+        {
+          "before": [
+            6508,
+            7,
+            65535
+          ],
+          "after": [
+            6508,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "security_bpf_kprobe",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1rsfl2um",
+      "before_sites": 1,
+      "after_sites": 1,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_register_kprobe",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-25r5ey8n",
+      "before_sites": 6,
+      "after_sites": 6,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_fd_install",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-279z4mzn",
+      "before_sites": 540,
+      "after_sites": 540,
+      "changed_flags": [
+        {
+          "before": [
+            11244,
+            7,
+            65535
+          ],
+          "after": [
+            11244,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_recvmsg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2c20f7iq",
+      "before_sites": 295,
+      "after_sites": 295,
+      "changed_flags": [
+        {
+          "before": [
+            6306,
+            7,
+            65535
+          ],
+          "after": [
+            6306,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_mem_dump_trigger",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2euu41id",
+      "before_sites": 225,
+      "after_sites": 225,
+      "changed_flags": [
+        {
+          "before": [
+            5092,
+            7,
+            65535
+          ],
+          "after": [
+            5092,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_truncate",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2ohy4p0m",
+      "before_sites": 344,
+      "after_sites": 344,
+      "changed_flags": [
+        {
+          "before": [
+            6809,
+            7,
+            65535
+          ],
+          "after": [
+            6809,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace___debugfs_create_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2wpohzoo",
+      "before_sites": 347,
+      "after_sites": 347,
+      "changed_flags": [
+        {
+          "before": [
+            6805,
+            7,
+            65535
+          ],
+          "after": [
+            6805,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_bpf_check",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-2xmqw18s",
+      "before_sites": 261,
+      "after_sites": 261,
+      "changed_flags": [
+        {
+          "before": [
+            5238,
+            7,
+            65535
+          ],
+          "after": [
+            5238,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "vfs_writev_magic_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-3aidh7c1",
+      "before_sites": 21,
+      "after_sites": 21,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_utimes_common",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-3cfra29r",
+      "before_sites": 660,
+      "after_sites": 660,
+      "changed_flags": [
+        {
+          "before": [
+            12781,
+            7,
+            65535
+          ],
+          "after": [
+            12781,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_lkm_seeker",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-3oke79hs",
+      "before_sites": 186,
+      "after_sites": 186,
+      "changed_flags": [
+        {
+          "before": [
+            3979,
+            7,
+            65535
+          ],
+          "after": [
+            3979,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_chmod_common",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4hsfozd4",
+      "before_sites": 554,
+      "after_sites": 554,
+      "changed_flags": [
+        {
+          "before": [
+            11884,
+            7,
+            65535
+          ],
+          "after": [
+            11884,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_execute_finished",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4vy19taj",
+      "before_sites": 870,
+      "after_sites": 870,
+      "changed_flags": [
+        {
+          "before": [
+            20123,
+            7,
+            65535
+          ],
+          "after": [
+            20123,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_process_exec",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-51uw37rf",
+      "before_sites": 781,
+      "after_sites": 781,
+      "changed_flags": [
+        {
+          "before": [
+            14981,
+            7,
+            65535
+          ],
+          "after": [
+            14981,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bprm_creds_for_exec",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-56siaau7",
+      "before_sites": 654,
+      "after_sites": 654,
+      "changed_flags": [
+        {
+          "before": [
+            12263,
+            7,
+            65535
+          ],
+          "after": [
+            12263,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__cgroup__cgroup_rmdir",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-5gxcl38z",
+      "before_sites": 337,
+      "after_sites": 337,
+      "changed_flags": [
+        {
+          "before": [
+            6357,
+            7,
+            65535
+          ],
+          "after": [
+            6357,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__accept4",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-5llp5ka0",
+      "before_sites": 289,
+      "after_sites": 289,
+      "changed_flags": [
+        {
+          "before": [
+            6158,
+            7,
+            65535
+          ],
+          "after": [
+            6158,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bpf_map",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-64h9nush",
+      "before_sites": 326,
+      "after_sites": 326,
+      "changed_flags": [
+        {
+          "before": [
+            6190,
+            7,
+            65535
+          ],
+          "after": [
+            6190,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_dup",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6_siljwd",
+      "before_sites": 102,
+      "after_sites": 102,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sched_process_exit_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6fbt0i5v",
+      "before_sites": 50,
+      "after_sites": 50,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "vfs_writev_magic_return",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7_enltvb",
+      "before_sites": 697,
+      "after_sites": 697,
+      "changed_flags": [
+        {
+          "before": [
+            15646,
+            7,
+            65535
+          ],
+          "after": [
+            15646,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_check_map_func_compatibility",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-89tqz71h",
+      "before_sites": 266,
+      "after_sites": 266,
+      "changed_flags": [
+        {
+          "before": [
+            5479,
+            7,
+            65535
+          ],
+          "after": [
+            5479,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__raw_syscalls__sys_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8cgewgox",
+      "before_sites": 21,
+      "after_sites": 21,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_kallsyms_lookup_name",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8kgpa20o",
+      "before_sites": 6,
+      "after_sites": 6,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execveat_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8lb6agqq",
+      "before_sites": 664,
+      "after_sites": 664,
+      "changed_flags": [
+        {
+          "before": [
+            16972,
+            7,
+            65535
+          ],
+          "after": [
+            16972,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_settime64",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-932_xsv4",
+      "before_sites": 319,
+      "after_sites": 319,
+      "changed_flags": [
+        {
+          "before": [
+            6393,
+            7,
+            65535
+          ],
+          "after": [
+            6393,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_mknod",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-96ffhbif",
+      "before_sites": 341,
+      "after_sites": 341,
+      "changed_flags": [
+        {
+          "before": [
+            6660,
+            7,
+            65535
+          ],
+          "after": [
+            6660,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_set_fs_pwd",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-99z6y52i",
+      "before_sites": 646,
+      "after_sites": 646,
+      "changed_flags": [
+        {
+          "before": [
+            12677,
+            7,
+            65535
+          ],
+          "after": [
+            12677,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_setsockopt",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9ds10gnw",
+      "before_sites": 348,
+      "after_sites": 348,
+      "changed_flags": [
+        {
+          "before": [
+            7818,
+            7,
+            65535
+          ],
+          "after": [
+            7818,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_file_modified",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9qyfm50x",
+      "before_sites": 17,
+      "after_sites": 17,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__raw_syscalls__sys_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9y0d_vd4",
+      "before_sites": 25,
+      "after_sites": 25,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__module__module_load",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-9yd5aw5c",
+      "before_sites": 655,
+      "after_sites": 655,
+      "changed_flags": [
+        {
+          "before": [
+            13433,
+            7,
+            65535
+          ],
+          "after": [
+            13433,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execve_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_0s58jbm",
+      "before_sites": 662,
+      "after_sites": 662,
+      "changed_flags": [
+        {
+          "before": [
+            16879,
+            7,
+            65535
+          ],
+          "after": [
+            16879,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_file_update_time",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_2la9k4c",
+      "before_sites": 17,
+      "after_sites": 17,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_path_notify",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_6a36jlc",
+      "before_sites": 585,
+      "after_sites": 585,
+      "changed_flags": [
+        {
+          "before": [
+            12209,
+            7,
+            65535
+          ],
+          "after": [
+            12209,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_dup3",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_y38j0c7",
+      "before_sites": 102,
+      "after_sites": 102,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_listen",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-a7tuahol",
+      "before_sites": 338,
+      "after_sites": 338,
+      "changed_flags": [
+        {
+          "before": [
+            7563,
+            7,
+            65535
+          ],
+          "after": [
+            7563,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_kallsyms_lookup_name",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ahj1_4pv",
+      "before_sites": 330,
+      "after_sites": 330,
+      "changed_flags": [
+        {
+          "before": [
+            6304,
+            7,
+            65535
+          ],
+          "after": [
+            6304,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_mmap_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-amhjcvnr",
+      "before_sites": 1117,
+      "after_sites": 1117,
+      "changed_flags": [
+        {
+          "before": [
+            23858,
+            7,
+            65535
+          ],
+          "after": [
+            23858,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_vfs_readv",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-aop4ljiv",
+      "before_sites": 6,
+      "after_sites": 6,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_cap_capable",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-b7axm1ie",
+      "before_sites": 310,
+      "after_sites": 310,
+      "changed_flags": [
+        {
+          "before": [
+            6059,
+            7,
+            65535
+          ],
+          "after": [
+            6059,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_do_splice",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bbxy8sr7",
+      "before_sites": 704,
+      "after_sites": 704,
+      "changed_flags": [
+        {
+          "before": [
+            13945,
+            7,
+            65535
+          ],
+          "after": [
+            13945,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_task_prctl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bdoo7afc",
+      "before_sites": 1447,
+      "after_sites": 1447,
+      "changed_flags": [
+        {
+          "before": [
+            29973,
+            7,
+            65535
+          ],
+          "after": [
+            29973,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_read_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bin1t79n",
+      "before_sites": 612,
+      "after_sites": 612,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_device_add",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bwp7_2ms",
+      "before_sites": 319,
+      "after_sites": 319,
+      "changed_flags": [
+        {
+          "before": [
+            6281,
+            7,
+            65535
+          ],
+          "after": [
+            6281,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_sys_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ci3jf9ph",
+      "before_sites": 314,
+      "after_sites": 314,
+      "changed_flags": [
+        {
+          "before": [
+            6127,
+            7,
+            65535
+          ],
+          "after": [
+            6127,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_check_helper_call",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-cquz72yx",
+      "before_sites": 267,
+      "after_sites": 267,
+      "changed_flags": [
+        {
+          "before": [
+            5474,
+            7,
+            65535
+          ],
+          "after": [
+            5474,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_mmap_alert",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-cru7pfek",
+      "before_sites": 662,
+      "after_sites": 662,
+      "changed_flags": [
+        {
+          "before": [
+            14258,
+            7,
+            65535
+          ],
+          "after": [
+            14258,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_task_setrlimit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-cw8vbd3l",
+      "before_sites": 321,
+      "after_sites": 321,
+      "changed_flags": [
+        {
+          "before": [
+            6342,
+            7,
+            65535
+          ],
+          "after": [
+            6342,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "kernel_write_magic_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-d3zufz99",
+      "before_sites": 21,
+      "after_sites": 21,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_splice",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-d449regs",
+      "before_sites": 6,
+      "after_sites": 6,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_file_modified",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-d50syq4d",
+      "before_sites": 592,
+      "after_sites": 592,
+      "changed_flags": [
+        {
+          "before": [
+            13326,
+            7,
+            65535
+          ],
+          "after": [
+            13326,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_lkm_seeker_submitter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-dhilq03b",
+      "before_sites": 218,
+      "after_sites": 218,
+      "changed_flags": [
+        {
+          "before": [
+            4675,
+            7,
+            65535
+          ],
+          "after": [
+            4675,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_switch",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-dynocs3e",
+      "before_sites": 337,
+      "after_sites": 337,
+      "changed_flags": [
+        {
+          "before": [
+            6563,
+            7,
+            65535
+          ],
+          "after": [
+            6563,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_inotify_find_inode",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-dz4c9avv",
+      "before_sites": 602,
+      "after_sites": 602,
+      "changed_flags": [
+        {
+          "before": [
+            12416,
+            7,
+            65535
+          ],
+          "after": [
+            12416,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_mprotect",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-eb6tcou5",
+      "before_sites": 1083,
+      "after_sites": 1083,
+      "changed_flags": [
+        {
+          "before": [
+            24150,
+            7,
+            65535
+          ],
+          "after": [
+            24150,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__task__task_rename",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-egsoamtt",
+      "before_sites": 317,
+      "after_sites": 317,
+      "changed_flags": [
+        {
+          "before": [
+            6261,
+            7,
+            65535
+          ],
+          "after": [
+            6261,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "send_bin_tp",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ekfto0ej",
+      "before_sites": 76,
+      "after_sites": 76,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_ptrace",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-eolnj7vr",
+      "before_sites": 432,
+      "after_sites": 432,
+      "changed_flags": [
+        {
+          "before": [
+            9602,
+            7,
+            65535
+          ],
+          "after": [
+            9602,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_sys_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f06yp4a3",
+      "before_sites": 315,
+      "after_sites": 315,
+      "changed_flags": [
+        {
+          "before": [
+            6146,
+            7,
+            65535
+          ],
+          "after": [
+            6146,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_process_free",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f0fyimi4",
+      "before_sites": 15,
+      "after_sites": 15,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_kernel_post_read_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fgoiyo4w",
+      "before_sites": 644,
+      "after_sites": 644,
+      "changed_flags": [
+        {
+          "before": [
+            12867,
+            7,
+            65535
+          ],
+          "after": [
+            12867,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_readv_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fscgqsh5",
+      "before_sites": 626,
+      "after_sites": 626,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace___register_chrdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ftw94k7c",
+      "before_sites": 6,
+      "after_sites": 6,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lsm_file_open_test",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-fx044r0o",
+      "before_sites": 293,
+      "after_sites": 293,
+      "changed_flags": [
+        {
+          "before": [
+            5933,
+            7,
+            65535
+          ],
+          "after": [
+            5933,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bpf",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-gmhuwt57",
+      "before_sites": 598,
+      "after_sites": 598,
+      "changed_flags": [
+        {
+          "before": [
+            11973,
+            7,
+            65535
+          ],
+          "after": [
+            11973,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall_checker",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-gs0e2ldt",
+      "before_sites": 490,
+      "after_sites": 490,
+      "changed_flags": [
+        {
+          "before": [
+            10790,
+            7,
+            65535
+          ],
+          "after": [
+            10790,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe__features_fallback_minimal_tailcall",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-gwrg59pw",
+      "before_sites": 88,
+      "after_sites": 88,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hb9cetnn",
+      "before_sites": 309,
+      "after_sites": 309,
+      "changed_flags": [
+        {
+          "before": [
+            6040,
+            7,
+            65535
+          ],
+          "after": [
+            6040,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_rename",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hc4ro7xn",
+      "before_sites": 405,
+      "after_sites": 405,
+      "changed_flags": [
+        {
+          "before": [
+            7600,
+            7,
+            65535
+          ],
+          "after": [
+            7600,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_sb_umount",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hdvg450z",
+      "before_sites": 345,
+      "after_sites": 345,
+      "changed_flags": [
+        {
+          "before": [
+            6806,
+            7,
+            65535
+          ],
+          "after": [
+            6806,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_read",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hsk75jw2",
+      "before_sites": 616,
+      "after_sites": 616,
+      "changed_flags": [
+        {
+          "before": [
+            13482,
+            7,
+            65535
+          ],
+          "after": [
+            13482,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execve_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hvb0kyoo",
+      "before_sites": 659,
+      "after_sites": 659,
+      "changed_flags": [
+        {
+          "before": [
+            16791,
+            7,
+            65535
+          ],
+          "after": [
+            16791,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_create",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-i3p2v7am",
+      "before_sites": 319,
+      "after_sites": 319,
+      "changed_flags": [
+        {
+          "before": [
+            6299,
+            7,
+            65535
+          ],
+          "after": [
+            6299,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__cgroup__cgroup_attach_task",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-i4_djze4",
+      "before_sites": 334,
+      "after_sites": 334,
+      "changed_flags": [
+        {
+          "before": [
+            6358,
+            7,
+            65535
+          ],
+          "after": [
+            6358,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_ioctl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ibpjwerv",
+      "before_sites": 379,
+      "after_sites": 379,
+      "changed_flags": [
+        {
+          "before": [
+            7833,
+            7,
+            65535
+          ],
+          "after": [
+            7833,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_file_update_time",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ibrrmkdz",
+      "before_sites": 592,
+      "after_sites": 592,
+      "changed_flags": [
+        {
+          "before": [
+            13326,
+            7,
+            65535
+          ],
+          "after": [
+            13326,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_process_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-j3_4yk8e",
+      "before_sites": 330,
+      "after_sites": 330,
+      "changed_flags": [
+        {
+          "before": [
+            6427,
+            7,
+            65535
+          ],
+          "after": [
+            6427,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_arch_prctl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jv5nd05b",
+      "before_sites": 102,
+      "after_sites": 102,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_sigaction",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jxmj3ryw",
+      "before_sites": 344,
+      "after_sites": 344,
+      "changed_flags": [
+        {
+          "before": [
+            7547,
+            7,
+            65535
+          ],
+          "after": [
+            7547,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sched_process_exec_event_submit_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k0ty1s40",
+      "before_sites": 701,
+      "after_sites": 701,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_sendmsg",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-kb8wrxm3",
+      "before_sites": 295,
+      "after_sites": 295,
+      "changed_flags": [
+        {
+          "before": [
+            6306,
+            7,
+            65535
+          ],
+          "after": [
+            6306,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_dup2",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-kc6m9ob8",
+      "before_sites": 102,
+      "after_sites": 102,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe__features_fallback_helper_tailcall",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-kmzrwgx2",
+      "before_sites": 88,
+      "after_sites": 88,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "empty_kprobe",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-krjq8b_5",
+      "before_sites": 0,
+      "after_sites": 0,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bpf_prog",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ktazrxzj",
+      "before_sites": 361,
+      "after_sites": 361,
+      "changed_flags": [
+        {
+          "before": [
+            7365,
+            7,
+            65535
+          ],
+          "after": [
+            7365,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__sched__sched_process_fork",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-kw8tx6mb",
+      "before_sites": 606,
+      "after_sites": 606,
+      "changed_flags": [
+        {
+          "before": [
+            13695,
+            7,
+            65535
+          ],
+          "after": [
+            13695,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "heartbeat_capture",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-le73inl6",
+      "before_sites": 5,
+      "after_sites": 5,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_write_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lncel1es",
+      "before_sites": 1049,
+      "after_sites": 1049,
+      "changed_flags": [
+        {
+          "before": [
+            21528,
+            7,
+            65535
+          ],
+          "after": [
+            21528,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_readv",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lp_oh_df",
+      "before_sites": 616,
+      "after_sites": 616,
+      "changed_flags": [
+        {
+          "before": [
+            13482,
+            7,
+            65535
+          ],
+          "after": [
+            13482,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_writev_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lvmz7ggv",
+      "before_sites": 1055,
+      "after_sites": 1055,
+      "changed_flags": [
+        {
+          "before": [
+            21956,
+            7,
+            65535
+          ],
+          "after": [
+            21956,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_filldir64",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-lw9gjkt3",
+      "before_sites": 318,
+      "after_sites": 318,
+      "changed_flags": [
+        {
+          "before": [
+            6116,
+            7,
+            65535
+          ],
+          "after": [
+            6116,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_kset_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-m5q7iw98",
+      "before_sites": 3098,
+      "after_sites": 3098,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_vfs_writev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mhw9lgtg",
+      "before_sites": 6,
+      "after_sites": 6,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_kernel_write_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mwmqejnt",
+      "before_sites": 1049,
+      "after_sites": 1049,
+      "changed_flags": [
+        {
+          "before": [
+            21528,
+            7,
+            65535
+          ],
+          "after": [
+            21528,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__cgroup__cgroup_mkdir",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mxjcj4ia",
+      "before_sites": 337,
+      "after_sites": 337,
+      "changed_flags": [
+        {
+          "before": [
+            6357,
+            7,
+            65535
+          ],
+          "after": [
+            6357,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_skb_ingress",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-n3xtt1s_",
+      "before_sites": 276,
+      "after_sites": 276,
+      "changed_flags": [
+        {
+          "before": [
+            6387,
+            7,
+            65535
+          ],
+          "after": [
+            6387,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_unlink",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nc6szymi",
+      "before_sites": 357,
+      "after_sites": 357,
+      "changed_flags": [
+        {
+          "before": [
+            7135,
+            7,
+            65535
+          ],
+          "after": [
+            7135,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_mmap",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nfj3hqwm",
+      "before_sites": 6,
+      "after_sites": 6,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_inode_symlink",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-np0eklc2",
+      "before_sites": 326,
+      "after_sites": 326,
+      "changed_flags": [
+        {
+          "before": [
+            6631,
+            7,
+            65535
+          ],
+          "after": [
+            6631,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__exec_test",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-nu8vqqcm",
+      "before_sites": 2055,
+      "after_sites": 2055,
+      "changed_flags": [
+        {
+          "before": [
+            41326,
+            7,
+            65535
+          ],
+          "after": [
+            41326,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_commit_creds",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o1dqggp4",
+      "before_sites": 371,
+      "after_sites": 371,
+      "changed_flags": [
+        {
+          "before": [
+            7840,
+            7,
+            65535
+          ],
+          "after": [
+            7840,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_sk_clone",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o_gjhpap",
+      "before_sites": 19,
+      "after_sites": 19,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_bprm_check",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-oelk4uaw",
+      "before_sites": 1114,
+      "after_sites": 1114,
+      "changed_flags": [
+        {
+          "before": [
+            25563,
+            7,
+            65535
+          ],
+          "after": [
+            25563,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_dup_exit_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ouaht80l",
+      "before_sites": 319,
+      "after_sites": 319,
+      "changed_flags": [
+        {
+          "before": [
+            6826,
+            7,
+            65535
+          ],
+          "after": [
+            6826,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "process_execute_failed_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ovthd3r5",
+      "before_sites": 352,
+      "after_sites": 352,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_kernel_write",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pcu_ws2q",
+      "before_sites": 616,
+      "after_sites": 616,
+      "changed_flags": [
+        {
+          "before": [
+            13482,
+            7,
+            65535
+          ],
+          "after": [
+            13482,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_kernel_write",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pthqhk7g",
+      "before_sites": 6,
+      "after_sites": 6,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_do_init_module",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-pwa00tt3",
+      "before_sites": 6,
+      "after_sites": 6,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_tracepoint_probe_register_prio_may_exist",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-q4cs2zd0",
+      "before_sites": 352,
+      "after_sites": 352,
+      "changed_flags": [
+        {
+          "before": [
+            7108,
+            7,
+            65535
+          ],
+          "after": [
+            7108,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_write",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qcewwz2g",
+      "before_sites": 616,
+      "after_sites": 616,
+      "changed_flags": [
+        {
+          "before": [
+            13479,
+            7,
+            65535
+          ],
+          "after": [
+            13479,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_exit_submit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qhcggx4u",
+      "before_sites": 422,
+      "after_sites": 422,
+      "changed_flags": [
+        {
+          "before": [
+            9594,
+            7,
+            65535
+          ],
+          "after": [
+            9594,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_vfs_utimes",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qret7205",
+      "before_sites": 660,
+      "after_sites": 660,
+      "changed_flags": [
+        {
+          "before": [
+            12781,
+            7,
+            65535
+          ],
+          "after": [
+            12781,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe__features_fallback_arena_tailcall",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qv24j4jt",
+      "before_sites": 88,
+      "after_sites": 88,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_seq_ops_trigger",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qwa20mrp",
+      "before_sites": 248,
+      "after_sites": 248,
+      "changed_flags": [
+        {
+          "before": [
+            5459,
+            7,
+            65535
+          ],
+          "after": [
+            5459,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_sock_alloc_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-qwfugkfp",
+      "before_sites": 17,
+      "after_sites": 17,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_file_open",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r71wb84q",
+      "before_sites": 682,
+      "after_sites": 682,
+      "changed_flags": [
+        {
+          "before": [
+            14408,
+            7,
+            65535
+          ],
+          "after": [
+            14408,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_enter_submit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rqvx7dtu",
+      "before_sites": 660,
+      "after_sites": 660,
+      "changed_flags": [
+        {
+          "before": [
+            14593,
+            7,
+            65535
+          ],
+          "after": [
+            14593,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_vfs_writev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rsd3e2e7",
+      "before_sites": 616,
+      "after_sites": 616,
+      "changed_flags": [
+        {
+          "before": [
+            13482,
+            7,
+            65535
+          ],
+          "after": [
+            13482,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_call_usermodehelper",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ry8njcaa",
+      "before_sites": 724,
+      "after_sites": 724,
+      "changed_flags": [
+        {
+          "before": [
+            19097,
+            7,
+            65535
+          ],
+          "after": [
+            19097,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_bpf_run_filter_skb",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-t6bkygj4",
+      "before_sites": 156,
+      "after_sites": 156,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_dup3",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-t77n255m",
+      "before_sites": 432,
+      "after_sites": 432,
+      "changed_flags": [
+        {
+          "before": [
+            9602,
+            7,
+            65535
+          ],
+          "after": [
+            9602,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__execveat_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-tdfz29ai",
+      "before_sites": 666,
+      "after_sites": 666,
+      "changed_flags": [
+        {
+          "before": [
+            17055,
+            7,
+            65535
+          ],
+          "after": [
+            17055,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_switch_task_namespaces",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-tn1yd512",
+      "before_sites": 362,
+      "after_sites": 362,
+      "changed_flags": [
+        {
+          "before": [
+            7696,
+            7,
+            65535
+          ],
+          "after": [
+            7696,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_kernel_read_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-tvm8fo7o",
+      "before_sites": 617,
+      "after_sites": 617,
+      "changed_flags": [
+        {
+          "before": [
+            12671,
+            7,
+            65535
+          ],
+          "after": [
+            12671,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_filp_close",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-u1t__j3b",
+      "before_sites": 537,
+      "after_sites": 537,
+      "changed_flags": [
+        {
+          "before": [
+            11175,
+            7,
+            65535
+          ],
+          "after": [
+            11175,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_vfs_read",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-u9oo0ki2",
+      "before_sites": 6,
+      "after_sites": 6,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_exit_init",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ubq6rzri",
+      "before_sites": 111,
+      "after_sites": 111,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ptrace",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uim8ws43",
+      "before_sites": 102,
+      "after_sites": 102,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_do_mmap",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uj4nfl5d",
+      "before_sites": 614,
+      "after_sites": 614,
+      "changed_flags": [
+        {
+          "before": [
+            13035,
+            7,
+            65535
+          ],
+          "after": [
+            13035,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lsm_bpf_check",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uj6pc61t",
+      "before_sites": 1,
+      "after_sites": 1,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_load_elf_phdrs",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uot_ns7d",
+      "before_sites": 659,
+      "after_sites": 659,
+      "changed_flags": [
+        {
+          "before": [
+            12910,
+            7,
+            65535
+          ],
+          "after": [
+            12910,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "tracepoint__module__module_free",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uotzoinl",
+      "before_sites": 332,
+      "after_sites": 332,
+      "changed_flags": [
+        {
+          "before": [
+            6814,
+            7,
+            65535
+          ],
+          "after": [
+            6814,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_accept",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uycf7jdm",
+      "before_sites": 367,
+      "after_sites": 367,
+      "changed_flags": [
+        {
+          "before": [
+            7975,
+            7,
+            65535
+          ],
+          "after": [
+            7975,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sched_process_exec_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-uz28s8pu",
+      "before_sites": 792,
+      "after_sites": 792,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_connect",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v4xhaj_6",
+      "before_sites": 335,
+      "after_sites": 335,
+      "changed_flags": [
+        {
+          "before": [
+            7274,
+            7,
+            65535
+          ],
+          "after": [
+            7274,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret__register_chrdev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vechpryf",
+      "before_sites": 343,
+      "after_sites": 343,
+      "changed_flags": [
+        {
+          "before": [
+            6566,
+            7,
+            65535
+          ],
+          "after": [
+            6566,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "send_bin",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vgy6uwav",
+      "before_sites": 76,
+      "after_sites": 76,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_rmdir_signal",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vr0_pgk0",
+      "before_sites": 74,
+      "after_sites": 74,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_mod_tree_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vtinq8ac",
+      "before_sites": 63,
+      "after_sites": 63,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "syscall__init_module",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vtx4en2b",
+      "before_sites": 41,
+      "after_sites": 41,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_debugfs_create_dir",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vx43mxwm",
+      "before_sites": 326,
+      "after_sites": 326,
+      "changed_flags": [
+        {
+          "before": [
+            6631,
+            7,
+            65535
+          ],
+          "after": [
+            6631,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_security_socket_bind",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vzs62ho7",
+      "before_sites": 338,
+      "after_sites": 338,
+      "changed_flags": [
+        {
+          "before": [
+            7430,
+            7,
+            65535
+          ],
+          "after": [
+            7430,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_modtree_loop",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-vzzawsn6",
+      "before_sites": 3326,
+      "after_sites": 3326,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_process_vm_writev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-w280lo0g",
+      "before_sites": 102,
+      "after_sites": 102,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "sys_enter_init",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-w6xh1tna",
+      "before_sites": 122,
+      "after_sites": 122,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "vfs_write_magic_return",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-w_o1uyks",
+      "before_sites": 696,
+      "after_sites": 696,
+      "changed_flags": [
+        {
+          "before": [
+            15607,
+            7,
+            65535
+          ],
+          "after": [
+            15607,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_exec_binprm",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-wtj_sjgm",
+      "before_sites": 658,
+      "after_sites": 658,
+      "changed_flags": [
+        {
+          "before": [
+            12249,
+            7,
+            65535
+          ],
+          "after": [
+            12249,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_new_mod_only_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-x_gw7u2r",
+      "before_sites": 133,
+      "after_sites": 133,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "cgroup_skb_egress",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xdnk7sql",
+      "before_sites": 276,
+      "after_sites": 276,
+      "changed_flags": [
+        {
+          "before": [
+            6387,
+            7,
+            65535
+          ],
+          "after": [
+            6387,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe__features_fallback_arena",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xi6xk428",
+      "before_sites": 157,
+      "after_sites": 157,
+      "changed_flags": [
+        {
+          "before": [
+            3220,
+            7,
+            65535
+          ],
+          "after": [
+            3220,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_dup",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xna2ier_",
+      "before_sites": 432,
+      "after_sites": 432,
+      "changed_flags": [
+        {
+          "before": [
+            9602,
+            7,
+            65535
+          ],
+          "after": [
+            9602,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_sock_alloc_file",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xrq1dl1n",
+      "before_sites": 292,
+      "after_sites": 292,
+      "changed_flags": [
+        {
+          "before": [
+            6212,
+            7,
+            65535
+          ],
+          "after": [
+            6212,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_inotify_find_inode",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-xxfpxema",
+      "before_sites": 6,
+      "after_sites": 6,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "vfs_write_magic_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-y1nu4s8o",
+      "before_sites": 21,
+      "after_sites": 21,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_vfs_write",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-y2o04drq",
+      "before_sites": 6,
+      "after_sites": 6,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "kernel_write_magic_return",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ya08zuaa",
+      "before_sites": 696,
+      "after_sites": 696,
+      "changed_flags": [
+        {
+          "before": [
+            15607,
+            7,
+            65535
+          ],
+          "after": [
+            15607,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "lkm_seeker_proc_tail",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-yi6w6qj8",
+      "before_sites": 2748,
+      "after_sites": 2748,
+      "changed_flags": [],
+      "expected_flag_count": 0,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_process_vm_writev",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zahms7i2",
+      "before_sites": 432,
+      "after_sites": 432,
+      "changed_flags": [
+        {
+          "before": [
+            9602,
+            7,
+            65535
+          ],
+          "after": [
+            9602,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "trace_ret_arch_prctl",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zoagqlra",
+      "before_sites": 432,
+      "after_sites": 432,
+      "changed_flags": [
+        {
+          "before": [
+            9602,
+            7,
+            65535
+          ],
+          "after": [
+            9602,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "tracee/monitor",
+      "symbol": "uprobe_syscall_table_check",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-zog5yqnb",
+      "before_sites": 3175,
+      "after_sites": 3175,
+      "changed_flags": [
+        {
+          "before": [
+            72717,
+            7,
+            65535
+          ],
+          "after": [
+            72717,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    },
+    {
+      "app": "katran",
+      "symbol": "balancer_ingress",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-r1c7nupu",
+      "before_sites": 488,
+      "after_sites": 488,
+      "changed_flags": [
+        {
+          "before": [
+            8929,
+            7,
+            65535
+          ],
+          "after": [
+            8929,
+            4,
+            65535
+          ],
+          "before_bytes": "f7421401000000",
+          "after_bytes": "f6421401",
+          "matches_flag": true
+        }
+      ],
+      "expected_flag_count": 1,
+      "flag_count_matches": true,
+      "offsets_lengths_destinations_match": true
+    }
+  ]
+}

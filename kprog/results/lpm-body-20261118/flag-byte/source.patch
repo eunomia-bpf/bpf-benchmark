@@ -1,0 +1,34 @@
+diff --git a/kprog/x86/native_lab/native_link/src/x86_lpm_lookup.rs b/kprog/x86/native_lab/native_link/src/x86_lpm_lookup.rs
+index 991c2da6a..1b2bde8ce 100644
+--- a/kprog/x86/native_lab/native_link/src/x86_lpm_lookup.rs
++++ b/kprog/x86/native_lab/native_link/src/x86_lpm_lookup.rs
+@@ -67,7 +67,7 @@ pub(super) fn routine(l:&RuntimeLpmLayout,helper:u64)->Result<(Vec<u8>,Vec<Reloc
+     let mismatch=append_x86_jcc_rel32(&mut b,0x82);
+     b.extend_from_slice(&[0x41,0x83,0xfb,96]);
+     let full=append_x86_jcc_rel32(&mut b,0x84);
+-    mem(&mut b,&[0xf7,0x82],1,l.node_flags)?;b.extend_from_slice(&1u32.to_le_bytes());
++    mem(&mut b,&[0xf6,0x82],1,l.node_flags)?;b.push(1); // flags bit0, like kernel testb
+     let intermediate=append_x86_jcc_rel32(&mut b,0x85);
+     b.extend_from_slice(&[0x49,0x89,0xd0]); // best=current, unless intermediate
+     let descend=b.len();patch_x86_rel32(&mut b,intermediate,descend)?;
+@@ -111,7 +111,7 @@ mod tests {
+             (&[0x0f,0xb6,0x84,0x0e],2,&[]),(&[0x48,0x8b,0xbc,0x02],2,&[]),
+             (&[0x48,0x8b,0x82],2,&[]),(&[0x48,0x33,0x86],2,&[]),
+             (&[0x8b,0x82],1,&[]),(&[0x33,0x86],1,&[]),
+-            (&[0xf7,0x82],1,&[1,0,0,0]),(&[0x49,0x8d,0x80],2,&[])];
++            (&[0xf6,0x82],1,&[1]),(&[0x49,0x8d,0x80],2,&[])];
+         for &(op,modrm,tail) in forms {
+             for offset in [0,1,127,128,255,256,i32::MAX as u32] {
+                 let mut wide=op.to_vec();wide.extend_from_slice(&offset.to_le_bytes());wide.extend_from_slice(tail);
+@@ -158,9 +158,9 @@ mod tests {
+                     put32(&mut node,l.node_prefixlen,prefix);
+                     for query in [0u32,1,31,32,63,64,65,95,96,97] {
+                         put32(&mut key,l.key_prefixlen,query);
+-                        for flags in [0u32,1] {
++                        for flags in [0u32,1,2,0x100,0x101,u32::MAX] {
+                             put32(&mut node,l.node_flags,flags);
+-                            let expected=if query<=96 && query>=prefix && common>=prefix && (flags==0 || prefix==96) {
++                            let expected=if query<=96 && query>=prefix && common>=prefix && (flags&1==0 || prefix==96) {
+                                 node.as_ptr().wrapping_add(l.node_data as usize+12) as usize
+                             } else {0};
+                             let actual=memory::call_blob(&code,map.as_mut_ptr(),key.as_ptr() as usize,0) as usize;
