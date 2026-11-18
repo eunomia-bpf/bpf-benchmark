@@ -39,8 +39,18 @@ static Value *memoryAsm(CallInst *call, StringRef text, IRBuilder<> &b) {
     return value->second;
   };
   auto bits=[&](Value *v) -> Value * { return v->getType()->isPointerTy()?b.CreatePtrToInt(v,b.getInt64Ty()):b.CreateZExtOrTrunc(v,b.getInt64Ty()); };
+  // Keep the base in a register. A simulator register read that is not
+  // present yields a constant null pointer, and the backend folds
+  // `gep i8, ptr null, i64 112` into the absolute operand `mov 0x70,%rsi`,
+  // which native-link refuses (no base, no index, no RIP): guest displacement
+  // is not a host address. Semantics are unchanged, the load still addresses
+  // base+displacement, and a base already in a register keeps that register.
+  auto stable=[&](Value *v) -> Value * {
+    auto *type=FunctionType::get(b.getInt64Ty(),{b.getInt64Ty()},false);
+    return b.CreateCall(InlineAsm::get(type,"","=r,0",true),{bits(v)});
+  };
   auto address=[&](StringRef base,StringRef sign,StringRef displacement) {
-    auto *pointer=read(base); if (!pointer->getType()->isPointerTy()) pointer=b.CreateIntToPtr(pointer,b.getPtrTy());
+    auto *pointer=b.CreateIntToPtr(stable(read(base)),b.getPtrTy());
     auto *offset=bits(read(displacement)); if (sign=="-") offset=b.CreateNeg(offset);
     return b.CreateGEP(b.getInt8Ty(),pointer,offset);
   };

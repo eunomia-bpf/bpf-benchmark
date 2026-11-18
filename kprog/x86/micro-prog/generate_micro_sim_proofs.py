@@ -1792,7 +1792,7 @@ def render_program(name: str, insns: list[NativeInsn],
     kernel_functions = kernel_functions or {}
     trusted_names = set()
     if trusted_map_bindings:
-        from trusted_generation import elf_symbol, c_symbol_aliases
+        from trusted_generation import elf_symbol, c_symbol_aliases, native_map_label
     for binding in trusted_map_bindings:
         symbol, offset = binding["native_symbol"], binding["value_offset"]
         if elf_symbol(symbol) in trusted_names:
@@ -1948,7 +1948,8 @@ def render_program(name: str, insns: list[NativeInsn],
     lines.extend(kfunc_codegen.declarations(kernel_functions))
     for symbol in sorted(trusted_names & referenced):
         ident = trusted_idents[symbol]
-        alias = '' if ident == symbol else ' __asm__(' + json.dumps(symbol) + ')'
+        label = native_map_label(symbol)
+        alias = '' if ident == label else ' __asm__(' + json.dumps(label) + ')'
         lines.append(f'extern __u8 {ident}[]{alias} __ksym;')
     if source_map_bindings:
         for binding in source_map_bindings:

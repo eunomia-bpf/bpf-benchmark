@@ -50,6 +50,31 @@ inline void write_json_string(std::ostream &out, const std::string &value)
     out << '"';
 }
 
+// A map symbol that starts with ".L" is an assembler temporary to LLVM: the
+// generated C declares it as `extern __u8 x[] __asm__(".L.str.2") __ksym`, and
+// llc-18 rejects the reference with "Undefined temporary symbol .L.str.2". The
+// metadata name is only a label - the kernel addresses maps by id and value
+// offset - so the submission carries an equivalent non-temporary spelling.
+inline std::string native_map_label(const std::string &name)
+{
+    if (name.compare(0, 2, ".L") != 0) {
+        return name;
+    }
+    std::string label = "kprog";
+    for (unsigned char ch : name) {
+        const bool plain = (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') ||
+            (ch >= '0' && ch <= '9') || ch == '_' || ch == '.';
+        if (plain) {
+            label.push_back(static_cast<char>(ch));
+        } else {
+            char buf[8];
+            std::snprintf(buf, sizeof(buf), "_%02x", ch);
+            label += buf;
+        }
+    }
+    return label;
+}
+
 inline void write_json_name_addr(std::ostream &out,
                                  const NativeLinkArgs::NameAddr &item)
 {

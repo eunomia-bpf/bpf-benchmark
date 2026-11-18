@@ -34,6 +34,20 @@ def c_symbol_aliases(names,prefix):
     return result
 
 
+def native_map_label(name):
+    """Spell a native map symbol as a non-temporary assembler label.
+
+    A map symbol that starts with ".L" is an assembler temporary to LLVM, so
+    llc rejects a reference to it. The metadata name stays the ELF identity;
+    only the generated C's asm label takes this spelling.
+    """
+    if not str(name).startswith(".L"):
+        return name
+    label = "".join(ch if re.fullmatch(r"[A-Za-z0-9_.]", ch) else f"_{ord(ch):02x}"
+                    for ch in name)
+    return "kprog" + label
+
+
 def u32(value, field):
     if type(value) is not int or not 0 <= value <= 0xffffffff:
         raise ValueError(f"{field} must be an unsigned 32-bit integer")

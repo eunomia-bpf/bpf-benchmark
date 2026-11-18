@@ -3985,6 +3985,14 @@ native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOpti
     ScopedFd unspecified(bpf_map_create(BPF_MAP_TYPE_ARRAY, "kprog_unspec", 4, 8, 1, nullptr));
     if (unspecified.get() < 0) fail("create unspecified input map: " + std::string(std::strerror(errno)));
     bindings.push_back({"kprog_unspecified_input", load_map_info(unspecified.get()).id, 0});
+    // The simulator's externs carry their asm label, which differs from the
+    // native ELF spelling for a compiler-temporary name like ".L.str.2". Both
+    // spellings resolve to the same kernel map identity.
+    for (const auto &binding : options.trusted_maps) {
+        const std::string label = native_map_label(binding.native_symbol);
+        if (label != binding.native_symbol)
+            bindings.push_back({label, binding.map_id, binding.value_offset});
+    }
     std::vector<std::unique_ptr<ScopedFd>> pins;
     for (const auto &binding : bindings) {
         auto fd = std::make_unique<ScopedFd>(bpf_map_get_fd_by_id(binding.map_id));
