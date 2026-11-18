@@ -1,0 +1,277 @@
+{
+  "raw": "/workspaces/kprog-raw/perf/lpm-body-20261118/host-20261118T011625Z-2846223",
+  "extraction": {
+    "kernel": "/workspaces/.agent-state/kprog-ck/build-x86/vmlinux",
+    "replay": "kprog/results/named-lpm-20261118/replay.json",
+    "request": {
+      "app": "otelcol-ebpf-profiler/profiling",
+      "symbol": "perf_unwind_native",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f2sqjzud",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f2sqjzud/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-f2sqjzud/link-plan.json",
+      "output": "/workspaces/kprog-raw/perf/named-lpm-20261118/host-20261118T001244Z-2827763/replay/otelcol-ebpf-profiler_profiling/link-f2sqjzud",
+      "captured_linker_returncode": 0,
+      "returncode": 0,
+      "payload_bytes": 14768,
+      "lto_ranges": [
+        {
+          "bytes": 31,
+          "end": 13274,
+          "piece": "known_array",
+          "start": 13243
+        },
+        {
+          "bytes": 31,
+          "end": 13305,
+          "piece": "known_array",
+          "start": 13274
+        },
+        {
+          "bytes": 25,
+          "end": 13330,
+          "piece": "known_array",
+          "start": 13305
+        },
+        {
+          "bytes": 293,
+          "end": 14487,
+          "piece": "runtime_array_lpm",
+          "start": 14194
+        },
+        {
+          "bytes": 281,
+          "end": 14768,
+          "piece": "probe_read",
+          "start": 14487
+        }
+      ]
+    },
+    "layout": {
+      "map_type": 56,
+      "lpm_type": 11,
+      "root": 288,
+      "max_prefixlen": 384,
+      "data_size": 392,
+      "child": 0,
+      "child_stride": 8,
+      "node_prefixlen": 16,
+      "node_flags": 20,
+      "node_data": 24,
+      "key_prefixlen": 0,
+      "key_data": 4
+    },
+    "kernel_bytes": 497,
+    "native_range_bytes": 293,
+    "kernel_patches": [
+      {
+        "offset": 325,
+        "original": "e9664ab400",
+        "replacement": "c390909090",
+        "reason": "ordinary host RET replaces kernel return thunk"
+      }
+    ],
+    "native_patches": [
+      {
+        "offset": 283,
+        "original": "e800000000",
+        "replacement": "e805000000",
+        "reason": "generic fallback targets appended UD2; fixture uses the captured LPM shape"
+      }
+    ],
+    "native_host_trap_bytes": 2,
+    "scope": "Compiled trie body host diagnostic; ordinary returns, stable host nodes, captured offsets. Kernel mitigations, RCU concurrency, app frequency and installed app bytes require the image batch."
+  },
+  "checks": [
+    [
+      "check",
+      "empty",
+      "pass"
+    ],
+    [
+      "check",
+      "full-hit",
+      "pass"
+    ],
+    [
+      "check",
+      "short-query",
+      "pass"
+    ],
+    [
+      "check",
+      "over-max",
+      "pass"
+    ],
+    [
+      "check",
+      "first-bit-miss",
+      "pass"
+    ],
+    [
+      "check",
+      "last-bit-miss",
+      "pass"
+    ],
+    [
+      "check",
+      "deep-4096-queries",
+      "pass"
+    ],
+    [
+      "check",
+      "ancestor-value",
+      "pass"
+    ]
+  ],
+  "series": {
+    "full-hit": {
+      "kernel": [
+        {
+          "sample": 0,
+          "calls": 1000000,
+          "elapsed_ns": 4780436,
+          "ns_per_call": 4.780436,
+          "checksum": 11599223628453138688
+        },
+        {
+          "sample": 1,
+          "calls": 1000000,
+          "elapsed_ns": 4645066,
+          "ns_per_call": 4.645066,
+          "checksum": 11599223628453138688
+        },
+        {
+          "sample": 2,
+          "calls": 1000000,
+          "elapsed_ns": 4735742,
+          "ns_per_call": 4.735742,
+          "checksum": 11599223628453138688
+        }
+      ],
+      "native": [
+        {
+          "sample": 0,
+          "calls": 1000000,
+          "elapsed_ns": 4117698,
+          "ns_per_call": 4.117698,
+          "checksum": 11599223628453138688
+        },
+        {
+          "sample": 1,
+          "calls": 1000000,
+          "elapsed_ns": 4090062,
+          "ns_per_call": 4.090062,
+          "checksum": 11599223628453138688
+        },
+        {
+          "sample": 2,
+          "calls": 1000000,
+          "elapsed_ns": 4086085,
+          "ns_per_call": 4.086085,
+          "checksum": 11599223628453138688
+        }
+      ],
+      "median_kernel_over_native": 1.1578655775878215
+    },
+    "first-bit-miss": {
+      "kernel": [
+        {
+          "sample": 0,
+          "calls": 1000000,
+          "elapsed_ns": 4404823,
+          "ns_per_call": 4.404823,
+          "checksum": 0
+        },
+        {
+          "sample": 1,
+          "calls": 1000000,
+          "elapsed_ns": 4406198,
+          "ns_per_call": 4.406198,
+          "checksum": 0
+        },
+        {
+          "sample": 2,
+          "calls": 1000000,
+          "elapsed_ns": 4400355,
+          "ns_per_call": 4.400355,
+          "checksum": 0
+        }
+      ],
+      "native": [
+        {
+          "sample": 0,
+          "calls": 1000000,
+          "elapsed_ns": 3411648,
+          "ns_per_call": 3.411648,
+          "checksum": 0
+        },
+        {
+          "sample": 1,
+          "calls": 1000000,
+          "elapsed_ns": 3406666,
+          "ns_per_call": 3.406666,
+          "checksum": 0
+        },
+        {
+          "sample": 2,
+          "calls": 1000000,
+          "elapsed_ns": 3410043,
+          "ns_per_call": 3.410043,
+          "checksum": 0
+        }
+      ],
+      "median_kernel_over_native": 1.2917206615869654
+    },
+    "deep-trie-hit": {
+      "kernel": [
+        {
+          "sample": 0,
+          "calls": 1000000,
+          "elapsed_ns": 118420679,
+          "ns_per_call": 118.420679,
+          "checksum": 10853127754672177408
+        },
+        {
+          "sample": 1,
+          "calls": 1000000,
+          "elapsed_ns": 104392594,
+          "ns_per_call": 104.392594,
+          "checksum": 10853127754672177408
+        },
+        {
+          "sample": 2,
+          "calls": 1000000,
+          "elapsed_ns": 104663986,
+          "ns_per_call": 104.663986,
+          "checksum": 10853127754672177408
+        }
+      ],
+      "native": [
+        {
+          "sample": 0,
+          "calls": 1000000,
+          "elapsed_ns": 128983563,
+          "ns_per_call": 128.983563,
+          "checksum": 10853127754672177408
+        },
+        {
+          "sample": 1,
+          "calls": 1000000,
+          "elapsed_ns": 128918932,
+          "ns_per_call": 128.918932,
+          "checksum": 10853127754672177408
+        },
+        {
+          "sample": 2,
+          "calls": 1000000,
+          "elapsed_ns": 128039153,
+          "ns_per_call": 128.039153,
+          "checksum": 10853127754672177408
+        }
+      ],
+      "median_kernel_over_native": 0.8118589285241673
+    }
+  },
+  "exit_code": 0,
+  "scope": "Stable-node host helper-body diagnostic, ordinary returns; app and installed-byte effects pending."
+}
