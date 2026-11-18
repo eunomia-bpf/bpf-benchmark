@@ -87,7 +87,11 @@ merge and real writer call, relating the source insertion to LNSym's public
 operator. The [complete MOVK zero-register contract](results/m5-arm64-mov-keep-call/README.md)
 executes the actual 156-transition call through frame free, preserves the original
 register-reader frontier, and composes with the mature checked WZR/XZR step.
-Ordinary MOVK calls and program-level obligations stay open.
+The [ordinary MOVK reader](results/m5-arm64-mov-keep-read/README.md) executes in
+the actual linked world using its five required layout facts, derives scalar
+admission from real loads/stores and composes the 105-transition branch through
+the real writer edge. Complete ordinary MOVK calls and program-level obligations
+stay open.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 

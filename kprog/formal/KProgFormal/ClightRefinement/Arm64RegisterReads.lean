@@ -26,6 +26,19 @@ private theorem layouts :
     CC.unionFieldOffset ge.genv_cenv Arm64Program._x cellComposite.co_members = .OK (0, .Full) := by
   decide +kernel
 
+/-- Only the actual layout lookups used by the ordinary combined reader.
+Other composites, function bodies and symbol tables may differ. -/
+structure GprLayout (world : CC.CGenv) : Prop where
+  entry : world.genv_cenv.get Arm64Program._kprog_arm64_entry = some entryComposite
+  cell : world.genv_cenv.get Arm64Program._arm64_sim_gpr = some cellComposite
+  cells : CC.fieldOffset world.genv_cenv Arm64Program._cells entryComposite.co_members = .OK (0, .Full)
+  tags : CC.fieldOffset world.genv_cenv Arm64Program._tag_cells entryComposite.co_members = .OK (8, .Full)
+  payload : CC.unionFieldOffset world.genv_cenv Arm64Program._x cellComposite.co_members = .OK (0, .Full)
+
+/-- The existing standalone export supplies the same layout contract. -/
+theorem program_layout : GprLayout ge :=
+  ⟨layouts.1, layouts.2.1, layouts.2.2.1, layouts.2.2.2.1, layouts.2.2.2.2⟩
+
 private theorem pointer_offset :
     CC.unionFieldOffset ge.genv_cenv Arm64Program._ptr cellComposite.co_members = .OK (0, .Full) := by
   decide +kernel
@@ -437,20 +450,27 @@ private theorem read_names :
     CC.listDisjoint (CC.varNames readHandler.fn_params) (CC.varNames readHandler.fn_temps) := by
   decide +kernel
 
-private theorem read_entry (m : CC.Mem) (entry : CC.Val) (reg : BitVec 64) :
-    CC.doFunctionEntry2 ge readHandler [entry, .Vlong reg] m =
+private theorem read_entry_bound (world : CC.CGenv) (m : CC.Mem) (entry : CC.Val) (reg : BitVec 64) :
+    CC.doFunctionEntry2 world readHandler [entry, .Vlong reg] m =
       some (CC.emptyEnv, readTemps entry reg, m) := by
   unfold CC.doFunctionEntry2
   rw [ite_eq_left read_names]
+  rfl
+
+private theorem step_read_bound (world : CC.CGenv) (entry : CC.Val) (reg : BitVec 64) (m : CC.Mem) (k : CC.Cont) :
+    CC.doStep world (.Callstate (.Internal readHandler) [entry, .Vlong reg] k m) =
+      some (CC.E0, .State readHandler
+        (.Ssequence (.Sloop readParts.outer .Sbreak) readParts.ret) k CC.emptyEnv
+        (readTemps entry reg) m) := by
+  simp only [CC.doStep, read_entry_bound]
   rfl
 
 private theorem step_read (entry : CC.Val) (reg : BitVec 64) (m : CC.Mem) (k : CC.Cont) :
     CC.doStep ge (.Callstate (.Internal readHandler) [entry, .Vlong reg] k m) =
       some (CC.E0, .State readHandler
         (.Ssequence (.Sloop readParts.outer .Sbreak) readParts.ret) k CC.emptyEnv
-        (readTemps entry reg) m) := by
-  simp only [CC.doStep, read_entry]
-  rfl
+        (readTemps entry reg) m) :=
+  step_read_bound ge entry reg m k
 
 private def readCont (k : CC.Cont) : CC.Cont :=
   .Kloop1 readParts.outer .Sbreak (.Kseq readParts.ret k)
@@ -473,7 +493,7 @@ private theorem read_tag_mask (tag : BitVec 8) :
 /-- The actual combined reader reaches its materialization stage after 55 internal
 transitions, with the raw value and tag loaded from the supplied entry tables.
 This prefix does not claim a complete handler refinement. -/
-theorem gpr_read_prefix (i : Fin 31) (b cb vb tb kb : CC.Block)
+theorem gpr_read_prefix_bound (world : CC.CGenv) (layout : GprLayout world) (i : Fin 31) (b cb vb tb kb : CC.Block)
     (ofs co vo to ko : CC.Integers.Ptrofs) (m : CC.Mem) (k : CC.Cont)
     (value : CC.Val) (tag : BitVec 8)
     (cells : CC.Mem.loadv CC.Mptr m (.Vptr b ofs) = some (.Vptr cb co))
@@ -486,12 +506,12 @@ theorem gpr_read_prefix (i : Fin 31) (b cb vb tb kb : CC.Block)
     (cell : CC.Mem.loadv .Mint64 m (.Vptr vb vo) = some value)
     (kind : CC.Mem.loadv .Mint8unsigned m (.Vptr kb ko) = some (.Vint (tag.setWidth 32)))
     (valueCast : CC.Cop.semCast value CC.tulong CC.tulong m = some value) :
-    steps ge 55 (.Callstate (.Internal readHandler)
+    steps world 55 (.Callstate (.Internal readHandler)
       [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m) =
       some (CC.E0, .State readHandler readParts.materialize (readCont k) CC.emptyEnv
         (gprReadTemps (.Vptr b ofs) (.Vptr cb co) (.Vptr vb vo) (.Vptr tb to) (.Vptr kb ko)
           value (BitVec.ofNat 64 i.val) tag) m) ∧
-    InternalPath ge 55 (.Callstate (.Internal readHandler)
+    InternalPath world 55 (.Callstate (.Internal readHandler)
       [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m) := by
   have bound := i.isLt
   have ne : BitVec.ofNat 64 i.val ≠ (32#64) := by
@@ -513,11 +533,11 @@ theorem gpr_read_prefix (i : Fin 31) (b cb vb tb kb : CC.Block)
   simp only [CC.Cop.semCast, CC.Cop.classifyCast, CC.tulong, CC.Archi.ptr64,
     ↓reduceIte] at valueCast
   simp only [CC.Mptr, CC.Archi.ptr64, ↓reduceIte] at cells cellSlot tags tagSlot
-  simp +decide [steps, InternalPath, InternalState, step_read, readParts, readCont,
+  simp +decide [steps, InternalPath, InternalState, step_read_bound, readParts, readCont,
     step_seq, step_loop, step_skip_seq, step_skip_loop, step_break_loop, step_set, step_if,
     readTemps, gprReadTemps, CC.PTree.gso, CC.doEvalExpr, CC.lvalOfField, CC.doDerefLoc,
     CC.typeof, CC.typeconv, CC.removeAttributes, CC.tattr, CC.accessMode,
-    layouts.1, layouts.2.1, layouts.2.2.1, layouts.2.2.2.1, layouts.2.2.2.2,
+    layout.entry, layout.cell, layout.cells, layout.tags, layout.payload,
     CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp, CC.Cop.semBinarith,
     CC.Cop.classifyBinarith, CC.Cop.binarithType, CC.Cop.semAdd, CC.Cop.classifyAdd,
     CC.Cop.semAddPtrInt, CC.Cop.ptrofsOfInt, index_offset, cast,
@@ -532,17 +552,40 @@ theorem gpr_read_prefix (i : Fin 31) (b cb vb tb kb : CC.Block)
     CC.Mptr, CC.Archi.ptr64, CC.tptr, CC.sizeof, CC.tuchar, CC.tint, CC.tuint, CC.tlong, CC.tulong,
     CC.emptyEnv, CC.E0, CC.Eapp, cells, cellSlot, tags, tagSlot, cell, kind, valueCast]
 
+theorem gpr_read_prefix (i : Fin 31) (b cb vb tb kb : CC.Block)
+    (ofs co vo to ko : CC.Integers.Ptrofs) (m : CC.Mem) (k : CC.Cont)
+    (value : CC.Val) (tag : BitVec 8)
+    (cells : CC.Mem.loadv CC.Mptr m (.Vptr b ofs) = some (.Vptr cb co))
+    (cellSlot : CC.Mem.loadv CC.Mptr m (.Vptr cb (CC.Integers.Ptrofs.add co
+      (CC.Integers.Ptrofs.repr (8 * (i.val : CC.Z))))) = some (.Vptr vb vo))
+    (tags : CC.Mem.loadv CC.Mptr m (.Vptr b (CC.Integers.Ptrofs.add ofs
+      (CC.Integers.Ptrofs.repr 8))) = some (.Vptr tb to))
+    (tagSlot : CC.Mem.loadv CC.Mptr m (.Vptr tb (CC.Integers.Ptrofs.add to
+      (CC.Integers.Ptrofs.repr (8 * (i.val : CC.Z))))) = some (.Vptr kb ko))
+    (cell : CC.Mem.loadv .Mint64 m (.Vptr vb vo) = some value)
+    (kind : CC.Mem.loadv .Mint8unsigned m (.Vptr kb ko) = some (.Vint (tag.setWidth 32)))
+    (valueCast : CC.Cop.semCast value CC.tulong CC.tulong m = some value) :
+    steps ge 55 (.Callstate (.Internal readHandler)
+      [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m) =
+      some (CC.E0, .State readHandler readParts.materialize (readCont k) CC.emptyEnv
+        (gprReadTemps (.Vptr b ofs) (.Vptr cb co) (.Vptr vb vo) (.Vptr tb to) (.Vptr kb ko)
+          value (BitVec.ofNat 64 i.val) tag) m) ∧
+    InternalPath ge 55 (.Callstate (.Internal readHandler)
+      [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m) :=
+  gpr_read_prefix_bound ge program_layout i b cb vb tb kb ofs co vo to ko m k value tag
+    cells cellSlot tags tagSlot cell kind valueCast
+
 private theorem read_return_type : readHandler.fn_return = CC.tulong := rfl
 
-private theorem read_inert_tail (m : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
+private theorem read_inert_tail_bound (world : CC.CGenv) (m : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
     (value : CC.Val) (tag : BitVec 8)
     (valueRead : le.get Arm64Program.___a64_read_value = some value)
     (tagRead : le.get Arm64Program.___a64_read_tag = some (.Vint (tag.setWidth 32)))
     (hs : tag ≠ 4) (hr : tag ≠ 10)
     (valueCast : CC.Cop.semCast value CC.tulong CC.tulong m = some value) :
-    steps ge 18 (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m) =
+    steps world 18 (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m) =
       some (CC.E0, .Returnstate value (CC.callCont k) m) ∧
-    InternalPath ge 18 (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m) := by
+    InternalPath world 18 (.State readHandler readParts.materialize (readCont k) CC.emptyEnv le m) := by
   have notStack : tag.setWidth 32 ≠ (4#32) := by
     intro h; apply hs
     simpa using congrArg (fun x : BitVec 32 => x.setWidth 8) h
@@ -567,17 +610,18 @@ private theorem read_inert_tail (m : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
     CC.blocksOfEnv, CC.Mem.freeList, CC.emptyEnv, CC.E0, CC.Eapp,
     valueRead, tagRead, valueCast, notStack, notReturn, empty]
 
+
 /-- The complete exported combined reader returns the same scalar or bound
 pointer for every non-relative tag. It executes 73 internal transitions and
 preserves all memory, without any cache/provider premise. -/
-theorem gpr_read_nonrelative (addresses : Arm64Registers.PointerOrigins)
+theorem gpr_read_nonrelative_bound (world : CC.CGenv) (layout : GprLayout world) (addresses : Arm64Registers.PointerOrigins)
     (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs) (i : Fin 31)
     (m : CC.Mem) (k : CC.Cont) (value : CC.Val) (raw : BitVec 64) (tag : BitVec 8)
     (observed : Arm64EntryMemory.gpr frontier m (.Vptr b ofs) i.val =
       some (value, .Vint (tag.setWidth 32)))
     (represented : Arm64Registers.ValueRep addresses value raw)
     (notStack : tag ≠ 4) (notReturn : tag ≠ 10) :
-    InternalRun ge 73 (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
+    InternalRun world 73 (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
       [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m)
       (.Returnstate value (CC.callCont k) m) := by
   have valueCast : CC.Cop.semCast value CC.tulong CC.tulong m = some value := by
@@ -587,7 +631,7 @@ theorem gpr_read_nonrelative (addresses : Arm64Registers.PointerOrigins)
     Arm64EntryMemory.gpr_loads observed
   have cellsLoad := field_load frontier b ofs m _ 0 _ layouts.2.2.1 cells
   simp only [offset_zero] at cellsLoad
-  have beforeCall := gpr_read_prefix i b cb vb tb kb ofs co vo to ko m k value tag
+  have beforeCall := gpr_read_prefix_bound world layout i b cb vb tb kb ofs co vo to ko m k value tag
     cellsLoad slot
     (field_load frontier b ofs m _ 8 _ layouts.2.2.2.1 tags) tagSlot cell kind valueCast
   have valueRead : (gprReadTemps (.Vptr b ofs) (.Vptr cb co) (.Vptr vb vo)
@@ -598,9 +642,23 @@ theorem gpr_read_nonrelative (addresses : Arm64Registers.PointerOrigins)
       (.Vptr tb to) (.Vptr kb ko) value (BitVec.ofNat 64 i.val) tag).get
       Arm64Program.___a64_read_tag = some (.Vint (tag.setWidth 32)) := by
     simp +decide [gprReadTemps, CC.PTree.gso]
-  have afterRead := read_inert_tail m k _ value tag valueRead tagRead notStack notReturn valueCast
+  have afterRead := read_inert_tail_bound world m k _ value tag valueRead tagRead notStack notReturn valueCast
   exact (internalRun_of_steps beforeCall.2 beforeCall.1).trans
     (internalRun_of_steps afterRead.2 afterRead.1)
+
+
+theorem gpr_read_nonrelative (addresses : Arm64Registers.PointerOrigins)
+    (frontier b : CC.Block) (ofs : CC.Integers.Ptrofs) (i : Fin 31)
+    (m : CC.Mem) (k : CC.Cont) (value : CC.Val) (raw : BitVec 64) (tag : BitVec 8)
+    (observed : Arm64EntryMemory.gpr frontier m (.Vptr b ofs) i.val =
+      some (value, .Vint (tag.setWidth 32)))
+    (represented : Arm64Registers.ValueRep addresses value raw)
+    (notStack : tag ≠ 4) (notReturn : tag ≠ 10) :
+    InternalRun ge 73 (.Callstate (.Internal Arm64Program.f_kprog_arm64_program_read)
+      [.Vptr b ofs, .Vlong (BitVec.ofNat 64 i.val)] k m)
+      (.Returnstate value (CC.callCont k) m) :=
+  gpr_read_nonrelative_bound ge program_layout addresses frontier b ofs i m k value raw tag
+    observed represented notStack notReturn
 
 /-- Every Kstop return of the actual combined reader has the represented M3
 materialized bits for the 254 non-relative tags. Undefined and unbound values

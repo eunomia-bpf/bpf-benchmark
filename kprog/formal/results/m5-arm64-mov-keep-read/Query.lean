@@ -1,0 +1,22 @@
+import KProgFormal.ClightRefinement.Arm64MovKeepRead
+open KProgFormal.ClightRefinement
+#check Arm64RegisterReads.gpr_read_prefix_bound
+#print axioms Arm64RegisterReads.gpr_read_prefix_bound
+#check Arm64RegisterReads.gpr_read_nonrelative_bound
+#print axioms Arm64RegisterReads.gpr_read_nonrelative_bound
+#check Arm64RegisterReads.gpr_read_nonrelative
+#print axioms Arm64RegisterReads.gpr_read_nonrelative
+#check Arm64MovKeep.reader_layout
+#print axioms Arm64MovKeep.reader_layout
+#check Arm64MovKeep.read_nonrelative
+#print axioms Arm64MovKeep.read_nonrelative
+#check Arm64MovKeep.read_scalar
+#print axioms Arm64MovKeep.read_scalar
+#check Arm64MovKeep.read_after_write
+#print axioms Arm64MovKeep.read_after_write
+#check Arm64MovKeep.scalar_native_bits
+#print axioms Arm64MovKeep.scalar_native_bits
+#check Arm64MovKeep.read_scalar_corresponds
+#print axioms Arm64MovKeep.read_scalar_corresponds
+#check Arm64MovKeep.scalar_writer_call
+#print axioms Arm64MovKeep.scalar_writer_call

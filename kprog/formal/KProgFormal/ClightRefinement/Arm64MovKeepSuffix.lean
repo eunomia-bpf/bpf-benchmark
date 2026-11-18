@@ -43,7 +43,7 @@ def writeCall : CC.Stmt := by run_tac cachePart (← `(pieces.writeCall))
 theorem branch_source : Dispatch.Keep.branch = .Ssequence
     (.Sloop (.Ssequence (.Ssequence readCall dstSet) tail) .Sbreak) writeCall := rfl
 
-private def readCont : CC.Cont := .Kseq dstSet (.Kseq tail
+def readCont : CC.Cont := .Kseq dstSet (.Kseq tail
   (.Kloop1 body .Sbreak (.Kseq writeCall Dispatch.continuation)))
 
 def aux (column : Fin 4) : BitVec 32 := BitVec.ofNat 32 (16 * column.val * 65536)

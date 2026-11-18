@@ -1,0 +1,181 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-arm64-mov-keep-read",
+  "world_binding": {
+    "actual_world": "Arm64NumericProgram.ge",
+    "standalone_world": "Arm64RegisterReads.ge = Arm64Program.prog.globalenv",
+    "required_facts": [
+      "entry composite lookup",
+      "GPR union composite lookup",
+      "cells field offset0",
+      "tag_cells field offset8",
+      "union x payload offset0"
+    ],
+    "facts_proved_in_actual_world": true,
+    "complete_composite_table_equality_assumed": false,
+    "Genv_or_symbol_table_equality_assumed": false,
+    "initialized_memories_identified": false
+  },
+  "proved": {
+    "ordinary_registers": "all Fin31 (0..30)",
+    "read_prefix_transitions": 55,
+    "read_nonrelative_transitions": 73,
+    "inert_tail_transitions": 18,
+    "source_scalar_branch_to_writer_transitions": 105,
+    "continuation": "existing arbitrary k retained; actual MOVK t6 Kcall and writer none Kcall in composition",
+    "memory": "exact supplied read memory, no assumed alternate post-memory",
+    "nonrelative_tags": "all tag8 except4 and10; scalar and bound pointer values retain original source behavior",
+    "scalar_admission": "actual Mint64 load of Vlong bits and actual Mint8unsigned load of tag0 from same producer cells",
+    "store_derived_admission": "actual scalar writer Result.word/Result.tag with Result.storage discharge scalar reads",
+    "native_input": "actual scalar observation plus complete register relation identifies native GPR bits",
+    "pointer_case": "ValueRep and tag0 alone are not used to infer Vlong",
+    "old_public_APIs": "standalone prefix/nonrelative signatures and behavior retained as projections",
+    "complete_ordinary_MOVK_call_or_step_proved": false
+  },
+  "focused": {
+    "exit": 0,
+    "log": "focused3.log",
+    "jobs": 188
+  },
+  "public_queries": {
+    "exit": 0,
+    "log": "Query-1.log",
+    "theorems": 10,
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_read_prefix_bound": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_read_nonrelative_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64RegisterReads.gpr_read_nonrelative": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.reader_layout": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.read_nonrelative": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.read_scalar": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.read_after_write": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.scalar_native_bits": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.read_scalar_corresponds": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.scalar_writer_call": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "full_lake_build": {
+    "exit": 0,
+    "log": "lake-build1.log",
+    "jobs": 319,
+    "attempts": 1
+  },
+  "export_parity": {
+    "exit": 0,
+    "log": "export-parity1.log",
+    "reference": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_identical": true
+  },
+  "attempts": [
+    {
+      "name": "focused1",
+      "exit": 1,
+      "log": "focused1.log",
+      "note": "Initial source-equality probe for complete composite environments rejected by kernel; failed declaration removed and no such equality used."
+    },
+    {
+      "name": "focused2",
+      "exit": 1,
+      "log": "focused2.log",
+      "note": "Generalized reader and actual five Numeric layout facts pass; scalar native-bit equation needs controlled closed-tag alias reduction. Two unused private wrappers removed during reduction pass."
+    },
+    {
+      "name": "focused3",
+      "exit": 0,
+      "log": "focused3.log",
+      "note": "All188 jobs pass, including scalar admission/native bits and actual105-transition ordinary branch. All final source changes included."
+    }
+  ],
+  "limits": {
+    "heartbeats": 200000,
+    "recursion": 512,
+    "lean_workers": 1,
+    "address_space_GiB": 32,
+    "build_cpu": 17,
+    "query_edit_git_cpu": 18,
+    "every_host_command_timing_lock": "shared",
+    "raised": false
+  },
+  "unchanged_emitter_audit": {
+    "receipt": "../m5-arm64-mov-keep",
+    "records": 24,
+    "new_run": false,
+    "reason": "same op5/IMM/AUX binding and C/runtime; no new frontend assertion"
+  },
+  "native_make_check": {
+    "run_this_step": false,
+    "reason": "Lean-only changes; C/runtime unchanged",
+    "last_complete_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c"
+  },
+  "remaining": [
+    "complete ordinary scalar MOVK actual stores, generic free, final register relation and checked native step",
+    "W32 low-word insertion and upper-word clearing",
+    "relative stack/return reader/cache/world transport and actual scalar/materialization admission",
+    "frontend/provider/producer/caller admission",
+    "native physical memory/alias/origin binding",
+    "Numeric initialization204 distinct from old189",
+    "source control and all-family O1/O2/O4 recount",
+    "remaining M6 and fresh final Lake/make check"
+  ],
+  "complete_ISA_handler_families": 0,
+  "milestones": {
+    "M1_M4": "done",
+    "M5": "open",
+    "M6": "open"
+  }
+}
