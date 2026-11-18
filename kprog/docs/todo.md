@@ -40,6 +40,10 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-18T15:51:51Z（运营者：helper 内联应当用 C 实现、在 sim 特化之后一份给验证器、一份直接编译进去）**：
+1. 链接器里手写的 x86 helper 例程（probe_read 叶子例程、ktime、UID、LPM trie、runtime ARRAY、调用融合）在设计之外；bpf-benchmark-lean 六个应用跑完、确认去掉后各应用都没有变慢，就整块删掉代码（“旧的会误导的不要关闭, 要拆掉丢掉”）。链接器只保留设计写的：绑定重定位、array / percpu 查找内联。
+2. helper 内联回到设计的 LTO 配置（checked-sim-c）：helper 用 C 实现，和特化后的 sim C 一起由编译器整体优化；同一份 B 交 stock verifier。协调者接着做这条配置的计时，冻结入口的 NATIVE_MANIFEST 选配置，benchmark 设置保持原样；先从能编过的应用开始，同时解决大程序（OTel .i 1.13 GB、Tracee 部分请求）的编译问题。
+
 **协调者 2026-11-18T12:37:45Z（审核 20261118T09Z 核实后）**：
 1. profile 用已有的（kprog/results/limits-20261114 和逐程序数据），协调者 06:58 块第 3 条“在 guest 里重新采样”取消（运营者：“我们之前也都 profile 过, 不要重复 profiler?”）。
 2. 多日大任务第 3 项（代码量，按字节压）关闭（运营者：“不需要按照 binray size 扣了.”）；perf 的 resume-msg 已写明，额度回来后从第 1 项里能缩短运行时间的部分接着做。
