@@ -4610,6 +4610,26 @@ mod tests {
                 "exact={exact} available={available} typed={typed}");
             let has_native=!raw && available;
             assert_eq!(result.blob.len()>bytes.len()+100,has_native,"one native routine when eligible");
+            #[cfg(all(target_arch="x86_64",target_os="linux"))]
+            if exact && available && typed {
+                let mut map=[0u8;80];let mut node=[0u8;64];let mut key=[0u32;4];
+                node[16..20].copy_from_slice(&96u32.to_le_bytes());
+                map[12..16].copy_from_slice(&11u32.to_le_bytes());
+                map[48..56].copy_from_slice(&96u64.to_le_bytes());
+                map[56..64].copy_from_slice(&12u64.to_le_bytes());
+                let mut code=result.blob;
+                code.push(0xc3); // JmpEnd reaches the kernel-owned epilogue after the blob.
+                for patch in result.map_patches {
+                    code[patch.offset..patch.offset+8].copy_from_slice(&(map.as_ptr() as u64).to_le_bytes());
+                }
+                for (present,prefix,found) in [(true,96,true),(true,95,false),(false,96,false),(true,97,false)] {
+                    let root=if present {node.as_ptr() as u64}else{0};
+                    map[40..48].copy_from_slice(&root.to_le_bytes());key[0]=prefix;
+                    let value=memory::call_blob(&code,map.as_mut_ptr(),key.as_ptr() as usize,0) as usize;
+                    assert_eq!(value,if found {node.as_ptr() as usize+36}else{0},
+                        "named LPM entry: present={present} prefix={prefix}");
+                }
+            }
         }}}
         Ok(())
     }
