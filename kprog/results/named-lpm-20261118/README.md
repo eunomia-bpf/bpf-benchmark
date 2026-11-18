@@ -19,3 +19,5 @@ Host work holds timing SH/image SH, CPU19, one worker and32GiB AS. The live
 checked guest's canonical CLI/base/image remain in use. Omp owns the later
 frozen image/check/OTel timing batch, with all LTO on and installed size
 reported alongside per-call and body/helper/map time.
+
+2026-11-18T00:14:31Z — Named LPM shape source and full host tests completed; actual logs and source.patch committed. Raw: /workspaces/kprog-raw/perf/named-lpm-20261118/host-20261118T001244Z-2827763. Production unit-entry build and captured-request emission follow; canonical CLI stays unchanged; installed/time results remain pending.

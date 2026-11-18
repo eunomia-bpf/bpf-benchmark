@@ -1,0 +1,16 @@
+   Compiling native-link v0.1.0 (/workspaces/repository/kprog/x86/native_lab/native_link)
+    Finished `release` profile [optimized] target(s) in 49.29s
+     Running unittests src/main.rs (kprog/x86/native_lab/native_link/target/release/deps/native_link-62ccb5c6f5eda54e)
+
+running 1 test
+test x86::tests::named_lpm_shape_reaches_existing_native_dispatch ... Error: unknown lookup kind "lpm12"
+FAILED
+
+failures:
+
+failures:
+    x86::tests::named_lpm_shape_reaches_existing_native_dispatch
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 65 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--bin native-link`

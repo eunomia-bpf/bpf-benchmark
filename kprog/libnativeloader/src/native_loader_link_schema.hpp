@@ -35,10 +35,11 @@ const char *lookup_kind_name(CompanionLoad::LookupSite::Kind kind)
 }
 
 NativeLinkArgs::LookupSite make_link_lookup_site(
-    const CompanionLoad::LookupSite &site)
+    const CompanionLoad::LookupSite &site, const MapMeta *meta = nullptr)
 {
     return NativeLinkArgs::LookupSite{
-        lookup_kind_name(site.kind),
+        meta && meta->type == BPF_MAP_TYPE_LPM_TRIE && meta->key_size == 16
+            ? "lpm12" : lookup_kind_name(site.kind),
         site.target_addr,
         site.key_offset,
         site.max_entries,
@@ -165,7 +166,7 @@ NativeLinkArgs build_native_link_args(
         site.map_name = kv.first;
         out.lookup_maps.push_back(NativeLinkArgs::LookupMap{
             kv.first,
-            make_link_lookup_site(site),
+            make_link_lookup_site(site, meta),
         });
         if (const auto ops = companion.map_ops.find(meta->kernel_id);
             ops != companion.map_ops.end()) {
