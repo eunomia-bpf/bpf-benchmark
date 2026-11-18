@@ -19,11 +19,11 @@ cover unchanged output. The canonical CLI stays in use by checked Tracee
 2754970. Source/size optimization follows the observed forms. Omp owns the
 next frozen all-LTO image/check/app batch and the original-context handoff.
 
-2026-11-18T02:32:33Z — Actual retained source has zero single-target, conditional or
+2026-11-18T02:32:33Z — Actual retained proof-input source has zero single-target, conditional or
 finite-join helper-tail records across all295 successful requests. The same
 --show streams contain 41935 ordinary helper sites and 6501 ordinary
-lookup sites. OTel has52 direct trie E8 relocations and Cilium32; their
-157 generic ARRAY/LPM fallback relocations are also E8. The result rules
+lookup sites. OTel has52 direct trie E8 relocations and Cilium32. Across all six apps,157 generic ARRAY/LPM fallback relocations
+are also E8. The result rules
 out a tail-specific LPM opportunity for these captured programs. It covers
 the retained inputs and establishes static form, separate from runtime
 frequency or uncaptured programs.
@@ -71,3 +71,5 @@ outer helper macro applies the returned function pointer to those expressions
 again. Reproduce the actual header expansion before deciding a producer
 change. This is a separate potential correctness/performance class from the
 now-closed tail inventory, and producer/header ownership stays with Omp.
+
+The observation is at the kernel-link proof-input stage. Original-P call forms remain an upstream measurement; existing proof generation and wrapper construction also precede this audit.
