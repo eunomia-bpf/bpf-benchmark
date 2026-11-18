@@ -1,0 +1,161 @@
+{
+  "app": "otelcol-ebpf-profiler",
+  "objects": [
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "custom__generic",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64",
+      "symbol": "custom__generic"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "finish_task_swi",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64",
+      "symbol": "finish_task_switch"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "kprobe__dummy",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64",
+      "symbol": "kprobe__dummy"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "kprobe_go_label",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64",
+      "symbol": "kprobe_go_labels"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "kprobe_unwind_d",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64",
+      "symbol": "kprobe_unwind_dotnet"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "kprobe_unwind_h",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64",
+      "symbol": "kprobe_unwind_hotspot"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "kprobe_unwind_n",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64",
+      "symbol": "kprobe_unwind_native"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "kprobe_unwind_p",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "kprobe_unwind_r",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64",
+      "symbol": "kprobe_unwind_ruby"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "kprobe_unwind_s",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64",
+      "symbol": "kprobe_unwind_stop"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "kprobe_unwind_v",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64",
+      "symbol": "kprobe_unwind_v8"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "native_tracer_e",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64",
+      "symbol": "native_tracer_entry"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "perf_go_labels",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64",
+      "symbol": "perf_go_labels"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "perf_unwind_dot",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64",
+      "symbol": "perf_unwind_dotnet"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "perf_unwind_hot",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64",
+      "symbol": "perf_unwind_hotspot"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "perf_unwind_nat",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64",
+      "symbol": "perf_unwind_native"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "perf_unwind_per",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64",
+      "symbol": "perf_unwind_perl"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "perf_unwind_php",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64",
+      "symbol": "perf_unwind_php"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "perf_unwind_pyt",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64",
+      "symbol": "perf_unwind_python"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "perf_unwind_rub",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64",
+      "symbol": "perf_unwind_ruby"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "perf_unwind_sto",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64",
+      "symbol": "perf_unwind_stop"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "perf_unwind_v8",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64",
+      "symbol": "perf_unwind_v8"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "read_kernel_mem",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64",
+      "symbol": "read_kernel_memory"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "read_task_struc",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64",
+      "symbol": "read_task_struct"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "tracepoint__sch",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64"
+    },
+    {
+      "native_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/otelcol-ebpf-profiler.native.o",
+      "program": "uprobe__generic",
+      "source_bpf_object": "/opt/bpf-benchmark/native-bpf/x86_64/otelcol-ebpf-profiler/tracer.ebpf.amd64",
+      "symbol": "uprobe__generic"
+    }
+  ],
+  "status": "native-objects-proof-linked",
+  "version": 1
+}
