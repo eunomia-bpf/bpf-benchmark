@@ -191,6 +191,46 @@ Not yet asserted: 20 of 47 programs are native and 27 are not (25 recorded fallb
 loaded), so the two arms cannot be compared as equal work until the verifier and emitter classes above are
 fixed. This section reports the verified path, not a timing ratio.
 
-## Not yet run
+## Tetragon (tetragon/observer)
 
-Tetragon, Cilium, Katran and OTel follow in that order; each gets its own section here.
+Run `x86_kvm_corpus_20261118_133241_377898`, 1 sample × 10 s, stats on, `SKIP_REJIT=norejit`. Raw
+`/workspaces/kprog-raw/verified/20261118-checked-hot/tetragon-c/`, session
+`session-4u0ra04z`. **6 verified and installed so far** (requests 1-6, `execution_mode=checked-sim-c`,
+`status=0`); the run is still consuming the application's startup, one program at a time.
+
+### The baseline never opened its gate before this run
+
+The 11:41Z attempt (`corpus/results/x86_kvm_corpus_20261118_114111_107961`) recorded **zero BPF
+requests**: the application sat in the shim gate until its own 1800 s lifecycle timeout. Its baseline
+shim log holds 311 `BPF_PROG_LOAD`, 50 `LINK_CREATE`, every loader thread finished by t=127 s, and
+**8,152** `socket: cmd=list_progs` polls from t=102.5 s to t=1902 s.
+
+The gate holds the program set empty while `native_bound_completed == 0`
+(`runner/libs/rejit.py`, `_list_app_shim_program_ids`). That counter's only increment sits inside
+`shim_maybe_replace_with_native_fd`, past an early return when the loader is disabled, and the loader is
+disabled for every value but `"1"` (`bpfopt/shim/shim_native_loader.h`, `shim_native_loader_enabled`).
+`corpus/driver.py` sets `BPFREJIT_SHIM_NATIVE_LOADER=1` for the loadtime phase alone, so the baseline
+app inherits `"post"` while `BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1` keeps the gate on: a counter
+no baseline process can move, waited on forever.
+
+Measured on the image with the shipped shim and one loaded program, through the runner's own gate
+function: ids `()` under `"post"`, `(37273,)` under `"1"`. The gate now requires the progress fields
+only when the loader can run; a program the loader skips still returns `()` under `"1"`, so the
+obligation stays where it belongs. With that change the baseline of this run measures
+(`measurement_done phase=baseline status=ok`) and the requests follow.
+
+### The frontend compile is superlinear on one program shape
+
+Request 6 (`request-iwtue2bu`, `trusted_x86.bpf.c` 356 KB) spent **74 minutes** in the frontend compile
+`clang -w -g -O3 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -emit-llvm -c`; requests 1-5 took
+about 24 s each, and request 3 was 7.5 MB packed, so the driver is the program's shape rather than its
+size. That program's preprocessed form holds two `always_inline` dispatch functions of 8,909 and 2,208
+lines and 558 `switch` statements.
+
+A gdb backtrace of the stuck process (reproduced on the host with the same input and clang) is
+`GVNPass::findLeader` → `DominatorTreeBase<llvm::BasicBlock, false>::updateDFSNumbers`, so GVN, not
+occupancy, is what costs the time. Measured on that input: `-O1` 123 s, `-O0` 136 s, `-O2` past 400 s,
+`-O3` past 25 min (25m of wall, 36m of user). `COMPILE_FLAGS` carries `-O3`.
+
+Tetragon's verified run therefore completes but can take a long time on a large straight-line program.
+Cilium, Katran and OTel follow in that order; each gets its own section here.
