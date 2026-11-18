@@ -159,6 +159,10 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-18 ~07:25 UTC: "先回答我"
 - 2026-11-18 ~07:30 UTC: "什么叫做路径不同?"
 - 2026-11-18 ~07:35 UTC: "不需要按照 binray size 扣了. kinsn 那种收益，来自把热点操作变成内联指令???? kinsn 没有内联啊? 你应该无论如何比 kinsn 好得多"
+- 2026-11-18 ~07:45 UTC: "stats 开着的时候，内核会给每个程序计调用次数，paths.py 就是把两侧的这些次数逐个程序对比。两侧次数一样，说明做的是同样的事，比值才是原生和 JIT 的速度比；我觉得这个不对吧?性能也不可能只改进这么点??? 我觉得完全不对吧??? 绝对不可能只好 10%? 我们在用户态和别的地方测试也可以好 40%?"
+- 2026-11-18 ~07:45 UTC: "你现在有哪些地方复杂度过于高?"
+- 2026-11-18 ~07:47 UTC: "不应该拿调用次数做对比和 gate? 调用次数很可能不同啊"
+- 2026-11-18 ~07:48 UTC: "先回答我, 然后继续做"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
