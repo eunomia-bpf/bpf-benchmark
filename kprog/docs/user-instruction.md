@@ -167,6 +167,7 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-18（07:05 UTC 之前收到）: "莫名其妙的门槛直接清理掉"
 - 2026-11-18（07:05 UTC 之前收到）: "我们之前也都 profile 过, 不要重复 profiler?新增的大多是用 Rust 手写 x86 字节，重新实现内核 helper：probe_read 叶子例程、带 pvclock 换算的 ktime、LPM trie、ARRAY、UID、调用融合、尾调用编码。每块收益都很小，又难验证。这些写这个有必要吗? manifest 里积了很多按应用的特殊键，比如 source_map_prefix、helper 判别、helper-disambiguate 174、dedupe、source_bpf_object、kernel_helper_context。 这个是不是也不必要? 不是说禁止写任何按照应用的特殊的吗? 一边分析, 一边去一个新的 workspace 去把这些擦掉测试一下."
 - 2026-11-18（07:05 UTC 之前收到）: "你要用历史上最好的数据作为合理的数据. 你看看能不能复现合理的最好数据, 也要对比比如说程序的功能是不是正常, 功能正常就可以"
+- 2026-11-18（14:54 UTC 之前收到）: "形式化还在继续做吧"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
