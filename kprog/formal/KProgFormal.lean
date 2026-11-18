@@ -54,3 +54,4 @@ import KProgFormal.ClightRefinement.Arm64RegisterWriteView
 import KProgFormal.ClightRefinement.Arm64RegisterWriteFrame
 import KProgFormal.ClightRefinement.Arm64MovImmediateDispatch
 import KProgFormal.ClightRefinement.Arm64MovImmediateCall
+import KProgFormal.ClightRefinement.Arm64MovImmediateNative

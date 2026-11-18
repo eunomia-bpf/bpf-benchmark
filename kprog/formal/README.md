@@ -71,7 +71,11 @@ first 54 generic-handler transitions, including real allocation and both
 width and path-selector calls. The [complete MOV scalar procedure](results/m5-arm64-mov-suffix/README.md)
 continues through the eager NONE read, both register stores and real local-frame
 freeing in 203 transitions, retaining the same producer storage and successful
-stores. Native MOV correspondence and final register-view transport remain.
+stores. The [final register/MOVZ contract](results/m5-arm64-mov-view/README.md)
+transports the complete register relation through that free at the original
+frontier, proves unique silent termination, and binds ordinary W/X MOVZ at
+shift zero to the actual fetched/decoded LNSym checked step, PC+4 and empty
+new event/fault delta. Remaining MOV forms and program-level obligations stay open.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 

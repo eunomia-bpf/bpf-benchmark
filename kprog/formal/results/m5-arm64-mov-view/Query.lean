@@ -1,0 +1,11 @@
+import KProgFormal.ClightRefinement.Arm64MovImmediateNative
+#check KProgFormal.ClightRefinement.Arm64MovImmediate.call_represents
+#print axioms KProgFormal.ClightRefinement.Arm64MovImmediate.call_represents
+#check KProgFormal.ClightRefinement.Arm64MovImmediate.call_all_behaviors
+#print axioms KProgFormal.ClightRefinement.Arm64MovImmediate.call_all_behaviors
+#check KProgFormal.ClightRefinement.Arm64MovImmediate.Movz.native_step
+#print axioms KProgFormal.ClightRefinement.Arm64MovImmediate.Movz.native_step
+#check KProgFormal.ClightRefinement.Arm64MovImmediate.Movz.reference_step
+#print axioms KProgFormal.ClightRefinement.Arm64MovImmediate.Movz.reference_step
+#check KProgFormal.ClightRefinement.Arm64MovImmediate.Movz.call_corresponds
+#print axioms KProgFormal.ClightRefinement.Arm64MovImmediate.Movz.call_corresponds

@@ -1,0 +1,155 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-arm64-mov-view",
+  "final_register_view": {
+    "procedure_transitions": 203,
+    "reader_frontier": "original before.nextblock through final deallocation",
+    "relation": "full GPR/SP/SIMD/NZCV, explicit identity cells, provenance origins and pointer relation",
+    "comparison": "actual paired word/tag stores; original result used only for memory/register equations",
+    "execution": "actual Numeric-linked203 procedure, never standalone Kstop splice",
+    "all_behaviors": "arbitrary-trace finite runs silent prefixes; stuck return unique; no infinite execution"
+  },
+  "native_domain": {
+    "instruction": "LNSym decoded Move_wide_imm, MOVZ opc10",
+    "shift": 0,
+    "widths": [
+      32,
+      64
+    ],
+    "destination": "ordinary Fin31",
+    "immediate": "all BitVec16",
+    "source_arguments": "actual generic opcode1, sourceNONE255, zero-extended immediate, widths4/8; unused src2/src3/aux arbitrary",
+    "admission": "real Instruction.valid, matching mature decoded fields, actual fetch and no initial error"
+  },
+  "native_result": {
+    "state": "exact full checked native wrapper state, GPR update and PC+4",
+    "preserved": "SP, SIMD/NZCV/extra flags, memory/profile/program/history/exclusive/thread inputs/error frame",
+    "new_events": [],
+    "fault": null,
+    "source_contract": "final Clight register relation to actual Reference.AArch64.step result"
+  },
+  "focused": {
+    "exit": 0,
+    "log": "focused1.log",
+    "jobs": 185
+  },
+  "native_focused": {
+    "exit": 0,
+    "log": "native4.log",
+    "jobs": 186
+  },
+  "public_queries": {
+    "exit": 0,
+    "log": "Query-1.log",
+    "theorems": 5,
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.call_represents": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.call_all_behaviors": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.Movz.native_step": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.Movz.reference_step": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.Movz.call_corresponds": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "full_lake_build": {
+    "exit": 0,
+    "log": "lake-build1.log",
+    "jobs": 313
+  },
+  "export_parity": {
+    "exit": 0,
+    "log": "export-parity1.log",
+    "reference": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_identical": true
+  },
+  "attempts": [
+    {
+      "name": "focused1",
+      "exit": 0,
+      "log": "focused1.log",
+      "jobs": 185
+    },
+    {
+      "name": "native1",
+      "exit": 1,
+      "log": "native1.log"
+    },
+    {
+      "name": "native2",
+      "exit": 1,
+      "log": "native2.log"
+    },
+    {
+      "name": "native3",
+      "exit": 1,
+      "log": "native3.log"
+    },
+    {
+      "name": "native4",
+      "exit": 0,
+      "log": "native4.log",
+      "jobs": 186
+    }
+  ],
+  "failed_attempt_notes": {
+    "native1": "monolithic mature-body simp leaves width/partInstall equations and kernel recursion; missing base-GPR history projection and final event conjunction shape",
+    "native2": "history and reference wrapper fixed; monolithic mature-body proof still over recursive reduction",
+    "native3": "separate width proofs but direct definitional change cannot discharge closed decoded-field guards",
+    "native4": "guard simp then actual source change, shared partInstall-zero identity and separate W/X proofs pass at unchanged normal limits"
+  },
+  "limits": {
+    "heartbeats": 200000,
+    "recursion": 512,
+    "lean_workers": 1,
+    "address_space_GiB": 32,
+    "build_cpu": 17,
+    "query_edit_git_cpu": 18,
+    "every_host_command_timing_lock": "shared",
+    "raised": false
+  },
+  "native_make_check": {
+    "run_this_step": false,
+    "reason": "Lean-only changes; C/runtime unchanged",
+    "last_complete_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c"
+  },
+  "remaining": [
+    "other MOVZ shifts, MOVN/MOVK and XZR",
+    "actual frontend/provider/producer/caller admission",
+    "Numeric203 global initialization frontier204; old188 world frontier189 remains separate",
+    "native physical memory/alias/origin binding and source program control",
+    "all-family M5 migration and O1/O2/O4 recount",
+    "remaining M6 and fresh final lake build/make check"
+  ],
+  "complete_ISA_handler_refinements": 0,
+  "milestones": {
+    "M1_M4": "done",
+    "M5": "open",
+    "M6": "open"
+  }
+}
