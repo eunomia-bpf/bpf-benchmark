@@ -1,3 +1,9 @@
 == control (helper context dropped) off otelcol-ebpf-profiler/profiling /workspaces/repository/corpus/results/x86_kvm_corpus_20261118_092558_459909
 /workspaces/repository/corpus/results/x86_kvm_corpus_20261118_092558_459909 throughput native/eBPF 0.990x  eBPF [41124229, 40539106, 37405850] native [40135923, 36118691, 40389572] per-sample [0.976, 0.891, 1.08] errors 0
 x86_kvm_corpus_20261118_092558_459909 installed programs 14 JIT 167706 B native 124204 B ratio 0.74x
+== control (helper context dropped) on otelcol-ebpf-profiler/profiling /workspaces/repository/corpus/results/x86_kvm_corpus_20261118_095253_745585
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261118_095253_745585 throughput native/eBPF 1.053x  eBPF [36257708, 38282081, 34512455] native [36238975, 38184948, 40034111] per-sample [0.999, 0.997, 1.16] errors 0
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261118_095253_745585 ns/inv eBPF 3499.8 (1/13 progs) native 3538.9 (1/13) speedup 0.989x
+x86_kvm_corpus_20261118_095253_745585 installed programs 14 JIT 167706 B native 124204 B ratio 0.74x
+== x86_kvm_corpus_20261118_095253_745585 (otelcol-ebpf-profiler__profiling.json): 1 active programs, median native/eBPF run ratio 1.043
+   programs whose counts track the median: 1 of 1
