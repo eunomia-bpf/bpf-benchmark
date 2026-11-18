@@ -7,16 +7,7 @@
 #include "vendor/bpf/core-compat.h"
 
 #ifdef TEST_ID_ONLY
-#undef native_bpf_helper1
-#undef native_bpf_helper2
-#undef native_bpf_helper3
-#undef native_bpf_helper4
-#undef native_bpf_helper5
-#define native_bpf_helper1(type,id,a0) native_bpf_helper0(type,id)
-#define native_bpf_helper2(type,id,a0,a1) native_bpf_helper0(type,id)
-#define native_bpf_helper3(type,id,a0,a1,a2) native_bpf_helper0(type,id)
-#define native_bpf_helper4(type,id,a0,a1,a2,a3) native_bpf_helper0(type,id)
-#define native_bpf_helper5(type,id,a0,a1,a2,a3,a4) native_bpf_helper0(type,id)
+/* Kept so the draft patch's shape still builds; the header is id-only now. */
 #endif
 
 static uint32_t keys[8];
@@ -34,22 +25,23 @@ static void *lookup_callback(void *map,const void *key) {
     callback_calls++;
     return (void *)key;
 }
-#ifdef TEST_ID_ONLY
 static unsigned long observed_selector0(unsigned long id) {
     asm volatile("" : "+r"(id) : : "memory");
     selector_calls++;
     return (unsigned long)lookup_callback;
 }
-#define native_helper_id0 observed_selector0
-#else
 static unsigned long observed_selector2(unsigned long id,unsigned long a0,unsigned long a1) {
-    /* The actual header still evaluates both selector operands before entry. */
     asm volatile("" : "+r"(id) : "r"(a0),"r"(a1) : "memory");
     selector_calls++;
     return (unsigned long)lookup_callback;
 }
+/* The header selects on the helper id alone, so its id selector is the one to
+ * alias: the macro's own call then evaluates the arguments, once. observed_
+ * selector2 covers the older arity-2 selector, so the same fixture also runs
+ * (and fails on the evaluation count) against a header that still ties the
+ * arguments into the selector. */
+#define native_helper_id0 observed_selector0
 #define native_helper_id2 observed_selector2
-#endif
 #endif
 
 __attribute__((noinline)) void *actual_header_lookup(void *map) {
