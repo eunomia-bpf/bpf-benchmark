@@ -7,3 +7,6 @@ x86_kvm_corpus_20261118_092558_459909 installed programs 14 JIT 167706 B native 
 x86_kvm_corpus_20261118_095253_745585 installed programs 14 JIT 167706 B native 124204 B ratio 0.74x
 == x86_kvm_corpus_20261118_095253_745585 (otelcol-ebpf-profiler__profiling.json): 1 active programs, median native/eBPF run ratio 1.043
    programs whose counts track the median: 1 of 1
+== control (helper context dropped) off bcc/set /workspaces/repository/corpus/results/x86_kvm_corpus_20261118_100350_971478
+/workspaces/repository/corpus/results/x86_kvm_corpus_20261118_100350_971478 throughput native/eBPF 0.874x  eBPF [661098, 660330, 657522] native [577388, 638476, 526651] per-sample [0.873, 0.967, 0.801] errors 0
+x86_kvm_corpus_20261118_100350_971478 installed programs 25 JIT 7965 B native 11602 B ratio 1.46x
