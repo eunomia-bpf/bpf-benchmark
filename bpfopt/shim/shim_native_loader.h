@@ -1,12 +1,20 @@
 #ifndef BPFREJIT_SHIM_NATIVE_LOADER_H
 #define BPFREJIT_SHIM_NATIVE_LOADER_H
 
-/* A snapshot must describe a completed load, including native replacement. */
+/* A snapshot must describe a completed load, including native replacement.
+ * The outer syscall scope includes capture and state insertion, so a
+ * verified startup cannot confuse a load in flight with an idle program
+ * set. */
 static pthread_rwlock_t shim_native_load_lock = PTHREAD_RWLOCK_INITIALIZER;
+static unsigned shim_native_loads_inflight;
+/* Counts completed bound attempts, including an eBPF pass-through. */
+static unsigned shim_native_bound_completed;
 struct shim_native_load_scope { int active; };
 static void shim_native_load_scope_end(struct shim_native_load_scope *scope) {
-    if (scope->active)
+    if (scope->active) {
+        __atomic_sub_fetch(&shim_native_loads_inflight, 1, __ATOMIC_SEQ_CST);
         pthread_rwlock_unlock(&shim_native_load_lock);
+    }
 }
 
 struct native_loader_c_result {
@@ -30,6 +38,14 @@ typedef int (*native_loader_load_from_fd_with_manifest_path_and_attach_fn)(
 static int shim_native_loader_enabled(void) {
     const char *e = getenv("BPFREJIT_SHIM_NATIVE_LOADER");
     return e && strcmp(e, "1") == 0;
+}
+
+/* The verified arm requires every native load to finish before the run
+ * measures; an unbound run keeps measuring with the program on eBPF. */
+static int shim_native_loader_requires_bound_proof(void) {
+    const char *value = getenv("BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF");
+    return value && (strcmp(value, "1") == 0 || strcmp(value, "true") == 0 ||
+                     strcmp(value, "yes") == 0 || strcmp(value, "on") == 0);
 }
 
 static int shim_native_loader_is_libbpf_probe(const struct prog_entry *prog) {
@@ -303,15 +319,24 @@ static long shim_maybe_replace_with_native_fd(long original_fd,
     struct native_loader_c_result result;
     memset(&result, 0, sizeof(result));
     result.prog_fd = -1;
-    if (load((int)original_fd, manifest, prog->bytecode_path,
+    const int load_status =
+        load((int)original_fd, manifest, prog->bytecode_path,
              prog->fd_array_snapshot, prog->fd_array_snapshot_n,
              prog->expected_attach_type, prog->attach_btf_id,
              prog->attach_btf_obj_kid, prog->attach_prog_kid,
-             &result) != 0) {
+             &result);
+    if (load_status != 0) {
         log_line("native-loader failed prog=%s manifest=%s source=%s error=%s",
                  prog_name ? prog_name : "", manifest,
                  prog->bytecode_path, result.error);
+        if (shim_native_loader_requires_bound_proof())
+            log_line("native-loader verified program kept on eBPF prog=%s "
+                     "manifest=%s source=%s",
+                     prog_name ? prog_name : "", manifest,
+                     prog->bytecode_path);
     }
+    if (shim_native_loader_requires_bound_proof())
+        __atomic_add_fetch(&shim_native_bound_completed, 1, __ATOMIC_SEQ_CST);
     if (!result.replaced) {
         log_line("native-loader no manifest match for prog=%s manifest=%s "
                  "source=%s; keeping original BPF fd",

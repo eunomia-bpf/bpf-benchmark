@@ -470,6 +470,7 @@ long syscall(long number, ...) {
     if (cmd == BPF_PROG_LOAD && attr && shim_native_loader_enabled()) {
         pthread_rwlock_rdlock(&shim_native_load_lock);
         native_scope.active = 1;
+        __atomic_add_fetch(&shim_native_loads_inflight, 1, __ATOMIC_SEQ_CST);
     }
 
     if (!in_shim && cmd == BPF_OBJ_GET_INFO_BY_FD && attr) {
@@ -1176,7 +1177,13 @@ static void emit_list_progs(int cli) {
         return;
     }
     size_t len = 0;
-    len += snprintf(buf + len, cap - len, "{\"ok\":true,\"progs\":[");
+    len += snprintf(buf + len, cap - len,
+                    "{\"ok\":true,\"native_loads_inflight\":%u,"
+                    "\"native_bound_completed\":%u,\"progs\":[",
+                    __atomic_load_n(&shim_native_loads_inflight,
+                                    __ATOMIC_SEQ_CST),
+                    __atomic_load_n(&shim_native_bound_completed,
+                                    __ATOMIC_SEQ_CST));
     int first = 1;
     for (int b = 0; b < BPF_STATE_BUCKETS; b++) {
         for (struct prog_entry *e = prog_table[b]; e; e = e->next) {
