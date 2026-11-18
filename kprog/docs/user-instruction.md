@@ -151,6 +151,10 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-18 ~07:00 UTC: "所以最好的性能是啥? 为啥还是倒退了?"
 - 2026-11-18 ~07:00 UTC: "我觉得不对吧? 之前不是挺好的嘛?"
 - 2026-11-18 ~07:02 UTC: "一样的工作量 clilum 也有 1.2x 吗"
+- 2026-11-18 ~07:05 UTC: "现在啥情况一直在倒退? LTO 优化目前看起来有意义吗"
+- 2026-11-18 ~07:08 UTC: "你知道现在 kernel 里面跑的是啥吗? 你这样一直重复大量跑测试是不是无意义?"
+- 2026-11-18 ~07:08 UTC: "绝对不可能只有这么点改进, kinsn 都更多"
+- 2026-11-18 ~07:08 UTC: "为啥越来越慢了"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
