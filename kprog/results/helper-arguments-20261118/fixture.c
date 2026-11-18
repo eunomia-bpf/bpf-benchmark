@@ -6,6 +6,11 @@
 #define __KPROG_SCAN_ONLY__
 #include "vendor/bpf/core-compat.h"
 
+#ifdef TEST_ID_ONLY
+#undef native_bpf_helper2
+#define native_bpf_helper2(type,id,a0,a1) native_bpf_helper0(type,id)
+#endif
+
 static uint32_t keys[8];
 volatile unsigned key_evaluations;
 __attribute__((noinline)) const void *next_key(void) {
@@ -21,6 +26,14 @@ static void *lookup_callback(void *map,const void *key) {
     callback_calls++;
     return (void *)key;
 }
+#ifdef TEST_ID_ONLY
+static unsigned long observed_selector0(unsigned long id) {
+    asm volatile("" : "+r"(id) : : "memory");
+    selector_calls++;
+    return (unsigned long)lookup_callback;
+}
+#define native_helper_id0 observed_selector0
+#else
 static unsigned long observed_selector2(unsigned long id,unsigned long a0,unsigned long a1) {
     /* The actual header still evaluates both selector operands before entry. */
     asm volatile("" : "+r"(id) : "r"(a0),"r"(a1) : "memory");
@@ -28,6 +41,7 @@ static unsigned long observed_selector2(unsigned long id,unsigned long a0,unsign
     return (unsigned long)lookup_callback;
 }
 #define native_helper_id2 observed_selector2
+#endif
 #endif
 
 __attribute__((noinline)) void *actual_header_lookup(void *map) {

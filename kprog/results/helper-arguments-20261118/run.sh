@@ -11,7 +11,7 @@ main() {
     flock -s /workspaces/.agent-state/kprog-lanes/locks/timing \
         flock -s /workspaces/.agent-state/kprog-lanes/locks/image \
         taskset -c 19 prlimit --as=4294967296 -- \
-        make -f kprog/results/helper-arguments-20261118/Makefile run OUT="$raw" || status=$?
+        make -f kprog/results/helper-arguments-20261118/Makefile run OUT="$raw" DEFINES="${FIXTURE_DEFINES:-}" || status=$?
     printf '%s\n' "$status" >"$raw/exit-code"
     date -u +%FT%TZ >"$raw/finished"
     exit "$status"
