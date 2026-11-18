@@ -21,3 +21,10 @@ uses CPU19 and4GiB AS. Every compile/error/execution result stays under
 canonical CLI, current guest/base/image and benchmark remain in use.
 An actual-header result establishes the macro contract; app work and
 installed/per-call effects require caller evidence and the Omp all-LTO batch.
+
+The first build exits2 because the unused scan-only CO-RE declaration
+triggers -Wunused-function under the fixture's -Werror. Its raw compile log
+stays in host-20261118T024305Z-2879253. The forward recipe adopts OTel's
+existing -Wno-unused-function/-Wno-unused-variable diagnostics from its
+actual producer command. Helper/source behavior and remaining diagnostics
+retain their current settings.

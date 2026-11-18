@@ -1,6 +1,6 @@
 ROOT := kprog/results/helper-arguments-20261118
 CC := clang
-FLAGS := -O3 -g -fPIC -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -Wall -Wextra -Werror -I.
+FLAGS := -O3 -g -fPIC -fomit-frame-pointer -march=native -mno-red-zone -mgeneral-regs-only -fno-stack-protector -fno-asynchronous-unwind-tables -fno-unwind-tables -Wall -Wextra -Werror -Wno-unused-function -Wno-unused-variable -I.
 .PHONY: run
 run:
 	$(CC) $(FLAGS) -DACTUAL_IR -S -emit-llvm $(ROOT)/fixture.c -o $(OUT)/actual.ll > $(OUT)/ir-build.txt 2>&1
