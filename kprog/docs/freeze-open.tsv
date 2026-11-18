@@ -1,0 +1,3 @@
+# path	open-until (UTC date)	evidence: run path and log line	who
+# Landed 2026-11-17/18 with hooks skipped (recorded here, closed): kprog/libnativeloader/src/native_loader.cpp, native_loader_data_layout.hpp, kprog/fidelity/, bpfopt/shim/, runner/libs/rejit.py by omp in 8dba0e0bd, 9b94b7c61, 23e75dcf7, 47491721e; evidence in each commit body.
+vendor/bpf/write_native_manifest.py	2026-11-21	kprog/results/helper-context-query-20261117: control run 200918_730425 binds bpf_perf_event_output/bpf_get_stack in four BCC entries where the eBPF arm runs the _tp/_raw_tp variants (query run 201313_668398); each entry gets kernel_helper_context true	coordinator 2026-11-18T03:52:57Z
