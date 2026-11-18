@@ -339,6 +339,7 @@ def main() -> None:
             "program": program,
             "native_object": native_object_by_key[key],
         }
+        entry["kernel_helper_context"] = True
         if len(symbols) == 1:
             entry["symbol"] = symbols[0]
         if prog_type is not None:
