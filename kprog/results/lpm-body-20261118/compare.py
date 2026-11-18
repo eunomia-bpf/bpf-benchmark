@@ -9,8 +9,9 @@ import struct
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('raw',type=Path)
 p.add_argument('--output',type=Path,required=True)
+p.add_argument('--before',type=Path,default=Path('kprog/results/named-lpm-20261118/replay.json'))
 a=p.parse_args()
-baseline=Path('kprog/results/named-lpm-20261118/replay.json')
+baseline=a.before
 old={r['capture']:r for r in json.loads(baseline.read_text())['requests']}
 after=json.loads((a.raw/'replay/replay.json').read_text())
 counts=defaultdict(Counter); rows=[]
