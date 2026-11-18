@@ -1,0 +1,311 @@
+   Compiling native-link v0.1.0 (/workspaces/repository/kprog/x86/native_lab/native_link)
+    Finished `release` profile [optimized] target(s) in 46.86s
+     Running unittests src/main.rs (kprog/x86/native_lab/native_link/target/release/deps/native_link-62ccb5c6f5eda54e)
+
+running 66 tests
+test tests::arm64_entry_abi_strip_allows_multiple_epilogues ... ok
+test tests::replay_captured_link_request ... ignored, requires a captured CLI argument file
+test x86::code_provenance::tests::retained_cel_code_pointer_executes ... ignored, uses the retained upstream CEL compiler output
+test x86::code_provenance::tests::stack_code_identity_is_lost_on_aliases_partial_writes_calls_and_joins ... ok
+test x86::effects::tests::effect_masks_preserve_partial_and_conditional_writes_and_flag_dependencies ... ok
+test x86::helper_provenance::tests::finite_numeric_join_dispatches_both_helpers_and_preserves_ids ... ok
+test x86::helper_provenance::tests::joins_backedges_calls_and_partial_writes_do_not_use_lexical_state ... ok
+test x86::helper_provenance::tests::kernel_binding_uses_cfg_identity_and_keeps_observed_numeric_value ... ok
+test x86::helper_provenance::tests::r13_rebinding_distinguishes_compat_and_kernel_read_targets ... ok
+test x86::known_maps::tests::actual_pointer_moves_survive_but_inner_results_do_not ... ok
+test x86::known_maps::tests::joins_partial_writes_and_arithmetic_erase_provenance ... ok
+test x86::known_maps::tests::map_bindings_meet_across_branches_and_loops ... named map CFG: agreeing/disagreeing joins, callee/caller loop clobbers PASS
+ok
+test x86::known_maps::tests::resolved_jump_tables_keep_local_loads_but_erase_joined_map_facts ... ok
+test x86::ktime::tests::clock_fields_preserve_rex_registers_widths_and_displacement_boundaries ... clock fields: 102 REX/register/width/offset encodings PASS
+ok
+test x86::ktime::tests::ktime_leaf_follows_the_kernel_formula_and_calls_the_kernel ... ktime leaf: latch copies, pvclock scaling, preemption bracket and kernel calls, 15 vectors PASS
+
+ok
+test x86::lpm_lookup::tests::emitted_lpm_lookup_matches_bitwise_reference_and_preserves_other_types ... LPM host: 65590 compressed-trie/prefix/IM/guard/live-root/generic-ABI vectors PASS
+
+ok
+test x86::lpm_lookup::tests::lpm_all_differing_bits_and_prefix_clamps_match_bitwise_reference ... LPM exhaustive: 209520 compact/wide bitwise prefix/flag vectors PASS
+ok
+test x86::lpm_lookup::tests::short_displacements_preserve_lpm_registers_sib_and_operand_widths ... ok
+test x86::memory::tests::constant_counts_meet_all_resolved_table_edges_at_nonzero_addresses ... ok
+test x86::memory::tests::execution::known_large_counts_keep_full_width_without_dynamic_dispatch ... Known large memory:36 full-width count/dispatch cases PASS
+ok
+test x86::memory::tests::execution::memory_host_microbenchmark ... ignored, opt-in host timing evidence, not a correctness or workload gate
+test x86::memory::tests::execution::memory_routines_do_not_read_or_write_past_guard_page ... ok
+test x86::memory::tests::execution::memory_routines_execute_unaligned_boundaries_fill_and_return ... ok
+test x86::memory::tests::memory_constants_join_branches_clobbers_and_loops ... ok
+test x86::non_pic::tests::non_pic_maps_preserve_high_pointer_bits_and_existing_proof_abi ... ok
+test x86::non_pic::tests::non_pic_maps_reject_interior_addresses_and_mismatched_relocation_fields ... ok
+test x86::non_pic::tests::pc32_datasec_member_keeps_existing_live_value_lowering ... ok
+test x86::probe_read::tests::compact_global_operands_preserve_full_effective_addresses ... ok
+test x86::probe_read::tests::emitted_probe_reads_execute_success_fault_partial_zero_policy_and_nesting ... probe-read host user=0: 1152 vectors, 122 exact-site faults, nesting/zero/error/bounds PASS
+
+probe-read host user=1: 1149 vectors, 121 exact-site faults, nesting/zero/error/bounds PASS
+
+kernel string: NUL/truncation/zero-count/policy/partial-fault/full-zero PASS
+probe-read host user=0: 193 vectors, 121 exact-site faults, nesting/zero/error/bounds PASS
+
+user string: masked pointer, word-tail zeroing, byte retry, no extra NMI gate, SMAP bracket PASS
+probe-read host user=1: 4693 vectors, 239 exact-site faults, nesting/zero/error/bounds PASS
+
+probe-read host user=0: 1152 vectors, 122 exact-site faults, nesting/zero/error/bounds PASS
+
+probe-read host user=1: 1149 vectors, 121 exact-site faults, nesting/zero/error/bounds PASS
+
+kernel string: NUL/truncation/zero-count/policy/partial-fault/full-zero PASS
+probe-read host user=0: 193 vectors, 121 exact-site faults, nesting/zero/error/bounds PASS
+
+user string: masked pointer, word-tail zeroing, byte retry, no extra NMI gate, SMAP bracket PASS
+probe-read host user=1: 4693 vectors, 239 exact-site faults, nesting/zero/error/bounds PASS
+
+compat probe read: TASK_SIZE_MAX, TIF_ADDR32 and ADDR_LIMIT_3GB dispatch PASS
+probe-read host user=0: 9 vectors, 1 exact-site faults, nesting/zero/error/bounds PASS
+
+compat string: task-sized user/kernel dispatch and distinct NUL padding PASS
+probe-read host user=0: 9 vectors, 7 exact-site faults, nesting/zero/error/bounds PASS
+
+fixed scalar user=0 size=0: 10 vectors, 0 exact-site faults PASS
+
+fixed scalar user=0 size=1: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=2: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=3: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=4: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=7: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=8: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=9: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=15: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=16: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=17: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=31: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=32: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=33: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=63: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=64: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=65: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=144: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=257: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=512: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=768: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=1024: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=1 size=0: 12 vectors, 0 exact-site faults PASS
+
+fixed scalar user=1 size=1: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=2: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=3: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=4: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=7: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=8: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=9: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=15: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=16: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=17: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=31: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=32: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=33: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=63: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=64: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=65: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=144: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=257: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=512: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=768: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=1024: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=0 size=0: 10 vectors, 0 exact-site faults PASS
+
+fixed scalar user=0 size=1: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=2: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=3: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=4: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=7: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=8: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=9: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=15: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=16: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=17: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=31: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=32: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=33: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=63: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=64: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=65: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=144: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=257: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=512: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=768: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=0 size=1024: 13 vectors, 3 exact-site faults PASS
+
+fixed scalar user=1 size=0: 12 vectors, 0 exact-site faults PASS
+
+fixed scalar user=1 size=1: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=2: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=3: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=4: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=7: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=8: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=9: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=15: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=16: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=17: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=31: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=32: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=33: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=63: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=64: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=65: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=144: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=257: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=512: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=768: 16 vectors, 4 exact-site faults PASS
+
+fixed scalar user=1 size=1024: 16 vectors, 4 exact-site faults PASS
+
+ok
+test x86::probe_read::tests::fixed_scalar_counts_join_all_callers_and_bound_copy_code ... ok
+test x86::probe_read::tests::identical_zero_tails_share_after_domain_cleanup ... ok
+test x86::probe_read::tests::local_branch_sizing_preserves_helper_slots_load_sites_and_global_append ... Probe branch layout:24 mixed-edge/relocation/recovery/append cases PASS
+ok
+test x86::probe_read::tests::shared_leaf_redirect_preserves_call_and_tail_opcodes ... ok
+test x86::probe_read::tests::shared_probe_calls_keep_other_helpers_and_source_status_metadata ... ok
+test x86::readonly_relocs::tests::relative_tables_use_rewritten_target_offsets_and_preserve_slot_bias ... ok
+test x86::readonly_relocs::tests::table_shape_does_not_authorize_unbound_code_or_another_jump_register ... ok
+test x86::runtime_array::tests::runtime_array_executes_key_bounds_mask_wide_product_and_other_type_dispatch ... ok
+test x86::runtime_array::tests::runtime_field_encodings_preserve_offsets_full_type_and_branch_targets ... runtime ARRAY: 36 offset/type encodings retain fields and branch targets
+ok
+test x86::runtime_array::tests::shared_calls_target_one_routine_and_keep_unrelated_relocations ... ok
+test x86::task::tests::uid_gid_leaf_reads_current_cred_and_rejects_null_current ... uid_gid leaf: read-only/guard/unaligned/live IDs/NULL current, 533 vectors PASS
+
+uid_gid leaf: read-only/guard/unaligned/live IDs/NULL current, 533 vectors PASS
+
+uid_gid leaf: read-only/guard/unaligned/live IDs/NULL current, 533 vectors PASS
+
+uid_gid leaf: read-only/guard/unaligned/live IDs/NULL current, 533 vectors PASS
+
+uid_gid leaf: read-only/guard/unaligned/live IDs/NULL current, 533 vectors PASS
+
+uid_gid leaf: read-only/guard/unaligned/live IDs/NULL current, 533 vectors PASS
+
+uid_gid leaf: read-only/guard/unaligned/live IDs/NULL current, 533 vectors PASS
+
+uid_gid leaf: read-only/guard/unaligned/live IDs/NULL current, 533 vectors PASS
+
+uid_gid leaf: read-only/guard/unaligned/live IDs/NULL current, 533 vectors PASS
+
+uid_gid leaf: read-only/guard/unaligned/live IDs/NULL current, 533 vectors PASS
+
+ok
+test x86::tests::bound_helpers_drop_only_dead_adjacent_rax_ids_and_keep_proof_and_tail_state ... dead helper IDs: 56 argument/return/call executions, seven proof shapes and tail miss PASS
+ok
+test x86::tests::branches_enter_direct_loads_and_tail_stubs_at_the_original_call_label ... inline helper labels: 96 branch/fallthrough/live-load/tail-miss executions PASS
+ok
+test x86::tests::clock_calls_bind_fast_target_without_changing_observed_helper_identity ... ok
+test x86::tests::compact_lru_operands_preserve_signed_offsets_flags_and_live_reference ... LRU ref:60 operand decodes and32 null/state/idempotence cases PASS
+ok
+test x86::tests::dynamic_map_lookup_requires_the_actual_helper ... ok
+test x86::tests::frame_pointer_tail_cleanup_recovers_original_bpf_frame_and_restores_stack ... ok
+test x86::tests::helper_call_reloc_slot_encodes_only_call_rel32 ... ok
+test x86::tests::kernel_tail_calls_always_relocate_the_counter_frame ... ok
+test x86::tests::known_array_arithmetic_preserves_wide_products_and_displacement_signs ... ok
+test x86::tests::load_sites_exclude_stores_and_literal_pool_bytes ... ok
+test x86::tests::map_dispatch_fusion_keeps_one_helper_frame_and_original_lookup_results ... map dispatch fusion: 120 actual rewrite CALL/JMP, facts-present/absent, ARRAY/LPM/generic results and helper ABI cases PASS
+ok
+test x86::tests::map_operations_follow_native_arguments_across_reordered_calls ... ok
+test x86::tests::memory_relocations_roundtrip_proof_kernel_and_deduplicate_lengths ... ok
+test x86::tests::named_lpm_shape_reaches_existing_native_dispatch ... ok
+test x86::tests::proof_entry_abi_preserves_native_saves_only_when_requested ... ok
+test x86::tests::retained_lto_diagnostics_preserve_payload_bytes ... ignored, uses retained application load plans
+test x86::tests::runtime_known_array_executes_real_keys_and_bounds ... ok
+test x86::tests::runtime_known_maps_use_only_exact_named_map_facts ... ok
+test x86::tests::runtime_map_lookup_rewrites_immediate_got_and_plt_calls ... ok
+test x86::tests::scalar_count_facts_survive_call_layout_conditional_tails_and_numeric_joins ... ok
+test x86::tests::shared_known_arrays_preserve_shapes_keys_bounds_and_call_returns ... ok
+test x86::tests::tail_call_frame_counts_caller_saved_push_allocation ... ok
+test x86::tests::tail_call_frame_keeps_imm8_stack_adjust ... ok
+test x86::tests::tail_count_field_maps_to_its_chunk_in_the_stub ... ok
+test x86::tests::tail_count_patch_preserves_target_entry ... tail encodings: 24 narrow/wide/zero layouts, saved/live frames, masks and short/long cleanup cases PASS
+ok
+test x86::tests::typed_hash_postprocess_preserves_null_value_pointer_and_lru_reference ... ok
+
+test result: ok. 62 passed; 0 failed; 4 ignored; 0 measured; 0 filtered out; finished in 1.91s
+

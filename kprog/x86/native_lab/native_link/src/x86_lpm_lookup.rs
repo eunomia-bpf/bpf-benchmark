@@ -144,12 +144,15 @@ mod tests {
     fn lpm_all_differing_bits_and_prefix_clamps_match_bitwise_reference()->Result<()> {
         // Two layouts exercise actual compact and wide operands in the full walk.
         let mut vectors=0;
-        for pad in [0u32,128] {
+        for pad in [0u32,128] {for guarded in [false,true] {
             let l=RuntimeLpmLayout{map_type:12+pad,lpm_type:11,root:40+pad,
                 max_prefixlen:56+pad,data_size:64+pad,child:8+pad,child_stride:8,
                 node_prefixlen:32+pad,node_flags:36+pad,node_data:48+pad,
                 key_prefixlen:pad,key_data:4+pad};
-            let (code,_,_)=routine(&l,0x1234,true)?;
+            let (code,_,_)=routine(&l,0x1234,guarded)?;
+            if let Some(out)=std::env::var_os("NATIVE_LINK_LPM_TEST_OUTPUT") {
+                fs::write(PathBuf::from(out).join(format!("lpm-pad{pad}-guarded{guarded}.bin")),&code)?;
+            }
             let mut map=[0u8;256];let mut node=[0u8;256];let mut key=[0u8;256];
             let put32=|bytes:&mut [u8],offset:u32,value:u32| bytes[offset as usize..offset as usize+4].copy_from_slice(&value.to_le_bytes());
             let put64=|bytes:&mut [u8],offset:u32,value:u64| bytes[offset as usize..offset as usize+8].copy_from_slice(&value.to_le_bytes());
@@ -172,13 +175,13 @@ mod tests {
                                 node.as_ptr().wrapping_add(l.node_data as usize+12) as usize
                             } else {0};
                             let actual=memory::call_blob(&code,map.as_mut_ptr(),key.as_ptr() as usize,0) as usize;
-                            assert_eq!(actual,expected,"pad={pad} differing={differing} prefix={prefix} query={query} flags={flags}");
+                            assert_eq!(actual,expected,"guarded={guarded} pad={pad} differing={differing} prefix={prefix} query={query} flags={flags}");
                             vectors+=1;
                         }
                     }
                 }
             }
-        }
+        }}
         println!("LPM exhaustive: {vectors} compact/wide bitwise prefix/flag vectors PASS");
         Ok(())
     }

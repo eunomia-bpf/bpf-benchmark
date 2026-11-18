@@ -82,3 +82,24 @@ Omp's next frozen all-LTO image/check/affected-app batch records actual
 loaded selection, native programs/errors, installed native/JIT bytes,
 per-call BPF time, body/helpers/maps and throughput. Phase1 original-FD and
 owned context-only helper binding remains the frozen-core owner handoff.
+
+2026-11-18T02:04:41Z — Source79ece52c1 is pushed. The existing exhaustive matrix now
+covers both guarded and exact emitter forms:209,520 bit/prefix/flag cases,
+compact and wide layouts, six flag values. The complete62-test suite passes
+with four opt-in; the65,590 original trie/guard/ABI cases,16 binding cases,
+eight named-map executions and both mixed-entry cases remain covered.
+The four retained standalone bodies measure compact225→187B and wide267→
+223B between guarded/exact modes. These are fixture sizes, distinct from
+installed app bytes. The guard-free worker retains query bounds, flag
+semantics and current call/return behavior across the complete matrix.
+
+Matrix worker2865866 ended0; raw:/workspaces/kprog-raw/perf/lpm-body-20261118/candidate-20261118T020123Z-2865866.
+All295 original blob/relocation/map/ABI sets are byte-identical to the
+first successful source validation. Its full paired report stays under
+raw/matrix-compatibility; matrix-compatibility-summary.txt and matrix-tests.txt
+are the small committed receipts. This extension changes the existing
+regression test and retains62 test functions. Production remains79ece52c1.
+All own workers and leases are terminal/free; canonical CLI/base/image stay
+with peer checked Tracee2754970. The next Omp batch activates actual loaded
+lpm12 plans and measures installed native/JIT bytes, app per-call,
+body/helpers/maps and throughput with the full LTO cohort.
