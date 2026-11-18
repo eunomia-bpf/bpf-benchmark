@@ -186,7 +186,7 @@ mod tests {
         let helpers = HashMap::from([("bpf_probe_read_compat".to_owned(), 0x1234),
                                     ("bpf_map_lookup_elem".to_owned(), 0x5678)]);
         let linked = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &HashMap::new(),
-            &HashMap::new(), &[], false, false, None, None, None, false)?;
+            &HashMap::new(), &[], false, false, false)?;
         assert_eq!(linked.relocs.len(), 1);
         assert_eq!(linked.relocs[0].target, 0x1234);
         let mut code = linked.blob;
@@ -223,10 +223,10 @@ mod tests {
         assert_eq!(facts.numeric_joins[&23],vec![(23,"bpf_redirect".into()),(155,"bpf_redirect_peer".into())]);
         let helpers=HashMap::from([("bpf_redirect".into(),0x1234),("bpf_redirect_peer".into(),0x5678)]);
         let proof=rewrite_x86(&elf,&entry,&[entry.clone()],&helpers,&HashMap::new(),
-            &HashMap::new(),&[],true,true,None,None,None,false)?;
+            &HashMap::new(),&[],true,true, false)?;
         assert!(!proof.blob.is_empty());
         let linked=rewrite_x86(&elf,&entry,&[entry.clone()],&helpers,&HashMap::new(),
-            &HashMap::new(),&[],false,true,None,None,None,false)?;
+            &HashMap::new(),&[],false,true, false)?;
         assert_eq!(linked.relocs.len(),2);
         let mut image=linked.blob;
         image.push(0xc3); // The installed JIT epilogue follows the entry blob.
@@ -276,7 +276,7 @@ mod tests {
         let helpers = HashMap::from([("bpf_probe_read_compat".into(),0x1234),
             ("bpf_probe_read_kernel".into(),0x5678)]);
         let linked = rewrite_x86(&elf,&entry,&[entry.clone()],&helpers,&HashMap::new(),
-            &HashMap::new(),&[],false,true,None,None,None,false)?;
+            &HashMap::new(),&[],false,true, false)?;
         assert_eq!(linked.relocs.iter().map(|r|r.target).collect::<Vec<_>>(),vec![0x1234,0x5678]);
         Ok(())
     }

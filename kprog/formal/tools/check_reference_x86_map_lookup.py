@@ -27,18 +27,11 @@ def command(argv):
 def layout_fixture():
     """Synthetic ABI data, not a boot-BTF assertion.
 
-    The checked paths below use the exact named ARRAY facts. Unrelated runtime
-    dispatch routines need the complete link-plan schema but are not executed
-    by these instruction-fragment observations.
+    The checked paths below use the exact named ARRAY facts, which are the only
+    kernel-layout facts the linker consumes.
     """
     return dict(
-        array=dict(map_type=12,max_entries=24,elem_size=32,index_mask=36,value=64,array_type=2),
-        lpm=dict(map_type=12,lpm_type=11,root=64,max_prefixlen=72,data_size=80,
-                 child=0,child_stride=8,node_prefixlen=16,node_flags=20,node_data=24,
-                 key_prefixlen=0,key_data=4),
-        probe_read=dict(user_helper=0x2000,kernel_helper=0x3000,nmi_uaccess_okay=0x4000,
-                        kernel_allowed=0x5000,current_task=0,user_ptr_max=0x10000000,
-                        boot_cpu_data=0x6000,pagefault_disabled=4,x86_capability=0))
+        array=dict(map_type=12,max_entries=24,elem_size=32,index_mask=36,value=64,array_type=2))
 
 
 def main():

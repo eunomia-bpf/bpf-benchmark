@@ -50,17 +50,6 @@ mod memory;
 #[path = "x86_known_maps.rs"]
 mod known_maps;
 
-#[path = "x86_runtime_array.rs"]
-mod runtime_array;
-#[path = "x86_probe_read.rs"]
-mod probe_read;
-#[path = "x86_ktime.rs"]
-mod ktime;
-#[path = "x86_task.rs"]
-mod task;
-#[path = "x86_lpm_lookup.rs"]
-mod lpm_lookup;
-
 #[path = "x86_non_pic.rs"]
 mod non_pic;
 
@@ -78,7 +67,6 @@ pub(super) fn proof_effects(bytes: &[u8]) -> Result<serde_json::Value> {
     effects::describe(bytes)
 }
 
-const X86_CPU_NUMBER_HELPER_KEY: &str = "__native_x86_cpu_number";
 const X86_BPF_MAP_MAX_ENTRIES_OFFSET_KEY: &str = "__native_x86_bpf_map_max_entries_offset";
 const X86_BPF_ARRAY_PTRS_OFFSET_KEY: &str = "__native_x86_bpf_array_ptrs_offset";
 const X86_BPF_PROG_BPF_FUNC_OFFSET_KEY: &str = "__native_x86_bpf_prog_bpf_func_offset";
@@ -598,10 +586,9 @@ enum PatchKind {
     /// `call rel32` placeholder for a kernel helper/map target. The module
     /// must patch the rel32 displacement after the blob lands in executable
     /// memory.
-    HelperBranchRel32 { target_addr: u64, opcode: u8, probe_size: Option<u32> },
+    HelperBranchRel32 { target_addr: u64, opcode: u8 },
     LocalMemory { routine: memory::Routine },
     LocalArray { bytes: Vec<u8> },
-    LocalLpm,
     /// Rewritten `mov reg, [rip+GOT]` against a map symbol. The runner
     /// patches the immediate field with the live kernel map pointer.
     MapImmediate { name: String, imm_offset: usize },
@@ -1051,9 +1038,6 @@ pub(super) fn rewrite_x86(
     map_ops: &[MapOps],
     proof_mode: bool,
     preserve_entry_abi: bool,
-    runtime_array_layout: Option<&RuntimeArrayLayout>,
-    runtime_probe_read_layout: Option<&RuntimeProbeReadLayout>,
-    runtime_lpm_layout: Option<&RuntimeLpmLayout>,
     show: bool,
 ) -> Result<RewriteResult> {
     let included_ranges: Vec<(u64, u64)> = included
@@ -1210,7 +1194,7 @@ pub(super) fn rewrite_x86(
                     append_x86_numeric_helper_dispatch(&mut local, &mut kinds,
                         &mut insn_local_ip, &mut next_synthetic_ip, local_ip,
                         insn.next_ip()-sym.address, x86_gpr64_family(insn.op0_register()).unwrap(),
-                        alternatives, helper_addrs, memory_constants.get(&local_ip), true, proof_mode, &mut tail_calls)?;
+                        alternatives, helper_addrs, true, proof_mode, &mut tail_calls)?;
                     resolved_helper_call_sites.insert(site_key);
                     continue;
                 }
@@ -1238,8 +1222,7 @@ pub(super) fn rewrite_x86(
                         None => runtime_call_target(&tail.symbol, helper_addrs,
                             &format!("x86 helper tail branch {}", tail.symbol))?,
                     };
-                    Some(PatchKind::HelperBranchRel32 { target_addr, opcode: 0xe9,
-                        probe_size: probe_read::constant_size(&tail.symbol,memory_constants.get(&local_ip)) })
+                    Some(PatchKind::HelperBranchRel32 { target_addr, opcode: 0xe9 })
                 } else { None };
                 let index = local.len();
                 if conditional {
@@ -1469,7 +1452,7 @@ pub(super) fn rewrite_x86(
                         append_x86_numeric_helper_dispatch(&mut local,&mut kinds,
                             &mut insn_local_ip,&mut next_synthetic_ip,local_ip,
                             insn.next_ip()-sym.address,call_reg.unwrap(),alternatives,helper_addrs,
-                            memory_constants.get(&local_ip), false, false, &mut tail_calls)?;
+                            false, false, &mut tail_calls)?;
                     }
                     resolved_helper_call_sites.insert(site_key);
                     continue;
@@ -1546,17 +1529,6 @@ pub(super) fn rewrite_x86(
                         let keep=local.len()-1;
                         local.truncate(keep);kinds.truncate(keep);insn_local_ip.truncate(keep);
                     }
-                    if let Some(inline)=probe_read::direct_load(runtime_probe_read_layout,helper_addrs,&name)? {
-                        for (index,ib) in inline.into_iter().enumerate() {
-                            if index == 0 {
-                                push_x86_replacement(&mut local,&mut kinds,&mut insn_local_ip,local_ip,ib,None);
-                            } else {
-                                push_x86_synthetic(&mut local,&mut kinds,&mut insn_local_ip,&mut next_synthetic_ip,ib)?;
-                            }
-                        }
-                        resolved_helper_call_sites.insert(site_key);
-                        continue;
-                    }
 
                     if name == "bpf_map_lookup_elem" {
                         let native_call_index = lookup_call_counter;
@@ -1567,13 +1539,6 @@ pub(super) fn rewrite_x86(
                             &sym.name, map_lookup_helper_addr,
                         )?;
                         match spec.kind {
-                            LookupKind::Lpm12 if !proof_mode && runtime_lpm_layout.is_some()
-                                && map_lookup_helper_addr!=0 => {
-                                push_x86_replacement(&mut local,&mut kinds,&mut insn_local_ip,
-                                    local_ip,build_x86_helper_call_rel32_slot()?,Some(PatchKind::LocalLpm));
-                                resolved_helper_call_sites.insert(site_key);
-                                continue;
-                            }
                             LookupKind::Array | LookupKind::PerCpuArray => {
                                 push_x86_replacement(&mut local, &mut kinds, &mut insn_local_ip,
                                     local_ip, build_x86_helper_call_rel32_slot()?,
@@ -1596,7 +1561,7 @@ pub(super) fn rewrite_x86(
                                     &mut kinds,
                                     &mut insn_local_ip,
                                     local_ip,
-                                    helper_addr, None,
+                                    helper_addr,
                                 )?;
                                 for ib in build_x86_lookup_call_postprocess(&spec)? {
                                     push_x86_synthetic(
@@ -1616,7 +1581,7 @@ pub(super) fn rewrite_x86(
                     // Use the actual native RDI provenance, never source call order.
                     if let Some(target) = map_op_target(map_ops, proven_maps.get(&local_ip), &name) {
                         push_x86_helper_call_reloc(&mut local, &mut kinds,
-                            &mut insn_local_ip, local_ip, target, None)?;
+                            &mut insn_local_ip, local_ip, target)?;
                         resolved_helper_call_sites.insert(site_key);
                         continue;
                     }
@@ -1631,7 +1596,7 @@ pub(super) fn rewrite_x86(
                         &mut kinds,
                         &mut insn_local_ip,
                         local_ip,
-                        helper_addr, probe_read::constant_size(&name,memory_constants.get(&local_ip)),
+                        helper_addr,
                     )?;
                     resolved_helper_call_sites.insert(site_key);
                     continue;
@@ -1748,11 +1713,8 @@ pub(super) fn rewrite_x86(
 
     let mut map_patches = Vec::new();
     let mut relocs = Vec::new();
-    let mut probe_sizes=HashMap::new();
-    let mut known_lpm=Vec::new();
     for p in &patches {
         match &p.kind {
-            PatchKind::LocalLpm => known_lpm.push(p.global_offset),
             PatchKind::MapImmediate { name, imm_offset } => {
                 let offset = p
                     .global_offset
@@ -1766,8 +1728,7 @@ pub(super) fn rewrite_x86(
                     offset,
                 });
             }
-            PatchKind::HelperBranchRel32 { target_addr, opcode, probe_size } => {
-                if let Some(size)=probe_size {probe_sizes.insert(p.global_offset,*size);}
+            PatchKind::HelperBranchRel32 { target_addr, opcode } => {
                 let offset = u32::try_from(p.global_offset)
                     .map_err(|_| anyhow!("helper call reloc offset exceeds u32"))?;
                 let end = p
@@ -1834,50 +1795,6 @@ pub(super) fn rewrite_x86(
         )?);
         Vec::new()
     };
-
-    // Typed hash relocations keep their raw kernel lookup target. Its one
-    // out-of-line implementation serves every program, while caller-side
-    // value/inner-map/per-CPU/LRU postprocessing stays in the image.
-    if let Some(layout) = runtime_array_layout.filter(|_| !proof_mode) {
-        if let Some(range) = runtime_array::share(&mut blob, &mut relocs, layout, map_lookup_helper_addr, runtime_lpm_layout, &known_lpm)? {
-            show_lto_range(show, if runtime_lpm_layout.is_some() {"runtime_array_lpm"} else {"runtime_array"}, range);
-            code_ranges.push(range);
-        }
-    }
-
-    let read_sites = if let Some(layout) = runtime_probe_read_layout.filter(|_| !proof_mode) {
-        let (ranges,sites) = probe_read::share(&mut blob, &mut relocs, layout, helper_addrs,&probe_sizes)?;
-        for &range in &ranges { show_lto_range(show, "probe_read", range); }
-        code_ranges.extend(ranges);
-        sites
-    } else { Vec::new() };
-
-    // bpf_ktime_get_ns calls, bound to ktime_get_mono_fast_ns, reach one shared fast-clock leaf.
-    if let Some(layout) = runtime_probe_read_layout.and_then(|l| l.ktime.as_ref()).filter(|_| !proof_mode) {
-        if let Some(&mono_fast) = helper_addrs.get(MONO_FAST_HELPER_KEY) {
-            if let Some(range) = ktime::share(&mut blob, &mut relocs, layout, mono_fast)? {
-                show_lto_range(show, "ktime", range);
-                code_ranges.push(range);
-            }
-        }
-    }
-
-    // bpf_get_current_uid_gid calls reach one shared leaf that reads current->cred.
-    if let Some(layout) = runtime_probe_read_layout.filter(|_| !proof_mode) {
-        if let (Some(cred), Some(&helper)) = (layout.cred.as_ref(), helper_addrs.get("bpf_get_current_uid_gid")) {
-            if let Some(range) = task::share(&mut blob, &mut relocs, layout.current_task, cred, helper)? {
-                show_lto_range(show, "uid_gid", range);
-                code_ranges.push(range);
-            }
-        }
-    }
-
-    if let Some(layout)=runtime_lpm_layout.filter(|_| !proof_mode && runtime_array_layout.is_none()) {
-        if let Some(range)=lpm_lookup::share(&mut blob,&mut relocs,layout,map_lookup_helper_addr,&known_lpm)? {
-            show_lto_range(show, "lpm_lookup", range);
-            code_ranges.push(range);
-        }
-    }
 
     // Patch JmpEnd disps LAST so they target the byte AFTER any
     // trampolines we just appended -- i.e., where the BPF JIT will emit
@@ -1961,15 +1878,7 @@ pub(super) fn rewrite_x86(
     } else {
         Vec::new()
     };
-    let mut load_sites = x86_decoded_load_sites(&blob, &code_ranges);
-    for site in read_sites {
-        let decoded = load_sites.iter_mut().find(|s| s.offset == site.offset)
-            .ok_or_else(|| anyhow!("probe-read source load missing from decoded recovery sites"))?;
-        if decoded.insn_len != site.insn_len { bail!("probe-read recovery instruction length mismatch"); }
-        // The routine explicitly observes R11 after the load; clear status on
-        // fault, then its own failure path performs helper error/zero semantics.
-        decoded.destination = site.destination;
-    }
+    let load_sites = x86_decoded_load_sites(&blob, &code_ranges);
     Ok(RewriteResult {
         blob,
         relocs,
@@ -3758,7 +3667,6 @@ fn push_x86_helper_call_reloc(
     insn_local_ip: &mut Vec<u64>,
     local_ip: u64,
     helper_addr: u64,
-    probe_size: Option<u32>,
 ) -> Result<()> {
     let insn = build_x86_helper_call_rel32_slot()?;
     push_x86_replacement(
@@ -3769,7 +3677,7 @@ fn push_x86_helper_call_reloc(
         insn,
         Some(PatchKind::HelperBranchRel32 {
             target_addr: helper_addr,
-            opcode: 0xe8, probe_size,
+            opcode: 0xe8,
         }),
     );
     Ok(())
@@ -3779,7 +3687,7 @@ fn append_x86_numeric_helper_dispatch(
     local: &mut Vec<Instruction>, kinds: &mut Vec<Option<PatchKind>>,
     source_ips: &mut Vec<u64>, next_ip: &mut u64, source_ip: u64,
     continuation: u64, register: Register, alternatives: &[(u64,String)],
-    helpers: &HashMap<String,u64>, constants: Option<&HashMap<Register,u64>>,
+    helpers: &HashMap<String,u64>,
     tail: bool, proof: bool, proof_tails: &mut Vec<(usize,DirectTailTransfer)>,
 ) -> Result<()> {
     let registers=[Register::RAX,Register::RCX,Register::RDX,Register::RBX,
@@ -3812,8 +3720,8 @@ fn append_x86_numeric_helper_dispatch(
     for (index,mut instruction) in Decoder::with_ip(64,&bytes,base,DecoderOptions::NONE).into_iter().enumerate() {
         let offset=(instruction.ip()-base) as usize;
         if returns.contains(&offset) { instruction.set_near_branch64(continuation); }
-        let kind=calls.get(&offset).filter(|_| !proof).map(|(name,target)| PatchKind::HelperBranchRel32 {
-            target_addr:*target,opcode:if tail {0xe9} else {0xe8},probe_size:probe_read::constant_size(name,constants) });
+        let kind=calls.get(&offset).filter(|_| !proof).map(|(_name,target)| PatchKind::HelperBranchRel32 {
+            target_addr:*target,opcode:if tail {0xe9} else {0xe8} });
         if let Some((name,_)) = calls.get(&offset).filter(|_| tail) {
             instruction.set_near_branch64(X86_JMP_END_PLACEHOLDER_TARGET);
             if proof { proof_tails.push((local.len(),DirectTailTransfer { symbol:(*name).clone(),
@@ -3876,6 +3784,20 @@ fn append_x86_stub_callee_pop(bytes: &mut Vec<u8>, callee_saved_mask: u8) {
     if callee_saved_mask & (1 << 0) != 0 {
         bytes.push(0x5B); // pop rbx
     }
+}
+
+/// Re-encode a raw instruction stream so its branches take the shortest form,
+/// remapping the recorded reloc offsets onto the compacted bytes.
+fn compact_branches(bytes: &[u8], relocs: &mut [&mut RelocRecord]) -> Result<Vec<u8>> {
+    let instructions: Vec<_> = Decoder::new(64, bytes, DecoderOptions::NONE).iter().collect();
+    let indices: HashMap<_,_> = instructions.iter().enumerate()
+        .map(|(i,insn)| (insn.ip() as u32,i)).collect();
+    let encoded = BlockEncoder::encode(64, InstructionBlock::new(&instructions,0),
+        BlockEncoderOptions::RETURN_NEW_INSTRUCTION_OFFSETS)?;
+    for reloc in relocs.iter_mut() {
+        reloc.offset = encoded.new_instruction_offsets[indices[&reloc.offset]];
+    }
+    Ok(encoded.code_buffer)
 }
 
 fn build_x86_tail_call_inline(
@@ -3951,15 +3873,14 @@ fn build_x86_tail_call_inline(
     patch_x86_rel32(&mut bytes, jbe_out, out)?;
     patch_x86_rel32(&mut bytes, jae_out, out)?;
     patch_x86_rel32(&mut bytes, je_out, out)?;
-    // Make the common miss label an instruction for the existing branch compactor.
+    // Make the common miss label an instruction for the branch compactor.
     // The raw counter load keeps disp32: kind10 is a four-byte kernel patch.
     bytes.push(0x90);
-    let marker=RelocRecord {offset:u32::try_from(tail_count_field-3)?,
+    let mut marker=RelocRecord {offset:u32::try_from(tail_count_field-3)?,
         kind:NATIVE_LAB_RELOC_X86_TAIL_COUNT,target:0};
-    let (mut bytes,markers,_)=probe_read::compact((bytes,vec![marker],Vec::new()))?;
+    let mut bytes=compact_branches(&bytes,&mut [&mut marker])?;
     bytes.truncate(bytes.len()-1); // The label remains the byte immediately after the stub.
-    let field=markers[0].offset as usize+3;
-    Ok((declared_byte_chunks(&bytes)?, field))
+    Ok((declared_byte_chunks(&bytes)?, marker.offset as usize+3))
 }
 
 fn x86_gpr64_encoding(reg: Register) -> Result<(u8, bool)> {
@@ -4225,10 +4146,9 @@ mod tests {
             let entry = find_symbol_by_name(&elf, symbol)?;
             let included = discover_reachable(&elf, &entry)?;
             let facts = load_link_plan(&PathBuf::from(argument("--link-plan")))?;
-            let layout = facts.kernel_layout.as_ref().unwrap();
             let rewrite = |show| rewrite_x86(&elf, &entry, &included,
                 &facts.helper_addrs, &facts.map_addrs, &facts.lookup_maps, &facts.map_ops,
-                false, false, Some(&layout.array), Some(&layout.probe_read), Some(&layout.lpm), show);
+                false, false, show);
             let normal = rewrite(false)?;
             let previous = fs::read(argument("--output"))?;
             let old = baseline["programs"].as_array().unwrap().iter().find(|p|
@@ -4257,50 +4177,6 @@ mod tests {
             let relocations = |result: &RewriteResult| result.relocs.iter()
                 .map(|r| (r.offset, r.kind, r.target)).collect::<Vec<_>>();
             assert_eq!(relocations(&normal), relocations(&shown));
-        }
-        Ok(())
-    }
-
-    #[test]
-    fn scalar_count_facts_survive_call_layout_conditional_tails_and_numeric_joins() -> Result<()> {
-        let layout=RuntimeProbeReadLayout{user_helper:0x1000,kernel_helper:0x2000,current_task:0,
-            jiffies:None,user_ptr_max:0x1111222233334444,boot_cpu_data:0x5555666677778888,
-            pagefault_disabled:4,x86_capability:0,task_flags:0,task_personality:16,ktime:None,cred:None,
-            cpu_tlbstate:8,tlb_loaded_mm:0,task_mm:8,x86_virt_bits:40};
-        let helpers=HashMap::from([("bpf_probe_read_user".into(),0x1000),("bpf_probe_read_kernel".into(),0x2000)]);
-        for (form,expected) in [(0,1),(1,1),(2,2),(3,4),(4,8),(5,0),(6,2)] {
-            let mut object=WriteObject::new(BinaryFormat::Elf,object::Architecture::X86_64,Endianness::Little);
-            let text=object.add_section(Vec::new(),b".text".to_vec(),SectionKind::Text);
-            let normal=vec![0xbe,8,0,0,0,0xb8,113,0,0,0,0xff,0xd0,0xc3];
-            let finite=vec![0xbe,8,0,0,0,0x85,0xff,0x74,7,0xb8,112,0,0,0,0xeb,5,
-                            0xb8,113,0,0,0,0xff,0xd0,0xc3];
-            let bytes=match form {
-                0=>normal,
-                1=>vec![0xbe,8,0,0,0,0x85,0xff,0x0f,0x84,0,0,0,0,0xc3],
-                2=>finite,
-                3=>normal[5..].to_vec(),
-                4=>finite[5..].to_vec(),
-                5=>{let mut b=normal;b[1]=0;b},
-                6=>{let mut b=finite;b[22]=0xe0;b.pop();b},
-                _=>unreachable!(),
-            };
-            object.append_section_data(text,&bytes,1);
-            object.add_symbol(WriteSymbol{name:b"entry".to_vec(),value:0,size:bytes.len() as u64,
-                kind:SymbolKind::Text,scope:SymbolScope::Linkage,weak:false,
-                section:WriteSymbolSection::Section(text),flags:SymbolFlags::None});
-            if form==1 {
-                let helper=object.add_symbol(WriteSymbol{name:b"bpf_probe_read_kernel".to_vec(),value:0,size:0,
-                    kind:SymbolKind::Text,scope:SymbolScope::Linkage,weak:false,
-                    section:WriteSymbolSection::Undefined,flags:SymbolFlags::None});
-                object.add_relocation(text,WriteRelocation{offset:9,symbol:helper,addend:-4,
-                    flags:RelocationFlags::Elf{r_type:4}})?;
-            }
-            let encoded=object.write()?;let elf=object::File::parse(encoded.as_slice())?;
-            let entry=find_symbol_by_name(&elf,"entry")?;
-            let result=rewrite_x86(&elf,&entry,&[entry.clone()],&helpers,&HashMap::new(),&HashMap::new(),
-                &[],false,false,None,Some(&layout),None,false)?;
-            assert_eq!(result.load_sites.iter().filter(|site| site.destination==11).count(),expected,
-                       "count fact lost or invented in helper form {form}");
         }
         Ok(())
     }
@@ -4336,7 +4212,7 @@ mod tests {
             let helpers = HashMap::from([("bpf_ktime_get_ns".into(),0x1234),
                 (MONO_FAST_HELPER_KEY.into(),0x5678)]);
             let rewrite = |facts: &HashMap<String,u64>| rewrite_x86(&elf,&entry,&[entry.clone()],facts,&HashMap::new(),
-                &HashMap::new(),&[],false,true,None,None,None,false);
+                &HashMap::new(),&[],false,true,false);
             let missing = HashMap::from([("bpf_ktime_get_ns".into(),0x1234)]);
             assert!(rewrite(&missing).is_err(),
                 "missing clock fact cannot silently use the old wrapper");
@@ -4406,7 +4282,7 @@ mod tests {
                 let entry = find_symbol_by_name(&elf, "entry")?;
                 let empty = HashMap::new();
                 let proof = rewrite_x86(&elf, &entry, &[entry.clone()], &empty, &empty,
-                    &HashMap::new(), &[], true, true, None, None, None, false,)?;
+                    &HashMap::new(), &[], true, true, false,)?;
                 assert!(proof.proof_relocs.is_empty(), "{name}, form={form}");
                 assert_eq!(proof.proof_symbols.len(), 2, "same length shares one routine");
                 assert!(proof.proof_symbols[1].name.starts_with("__native_link_local_"));
@@ -4419,7 +4295,7 @@ mod tests {
                 let included = discover_reachable(&elf, &entry)?;
                 assert_eq!(included.len(), 2);
                 let result = rewrite_x86(&elf, &entry, &included, &empty, &empty,
-                    &HashMap::new(), &[], false, true, None, None, None, false,)?;
+                    &HashMap::new(), &[], false, true, false,)?;
                 assert!(result.relocs.is_empty());
                 #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
                 {
@@ -4491,12 +4367,12 @@ mod tests {
                 let helpers = HashMap::from([("bpf_map_update_elem".into(),0x5000),
                     ("bpf_map_delete_elem".into(),0x6000)]);
                 let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps,
-                    &HashMap::new(), &ops, false, true, None, None, None, false)?;
+                    &HashMap::new(), &ops, false, true, false)?;
                 let targets: Vec<_> = output.relocs.iter().filter(|r|
                     r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32).map(|r| r.target).collect();
                 assert_eq!(targets, vec![0x3000,0x2000], "form={form}, tail={tail}");
                 let unknown = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps,
-                    &HashMap::new(), &[], false, true, None, None, None, false)?;
+                    &HashMap::new(), &[], false, true, false)?;
                 let generic: Vec<_> = unknown.relocs.iter().filter(|r|
                     r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32).map(|r| r.target).collect();
                 assert_eq!(generic, vec![0x5000,0x6000], "missing facts retain generic calls");
@@ -4514,8 +4390,8 @@ mod tests {
             let text = object.add_section(Vec::new(), b".text".to_vec(), SectionKind::Text);
             let bytes = match form {
                 0 => vec![0xb8, 1, 0, 0, 0, 0xff, 0xd0, 0xc3],
-                // A branch enters the rewritten call: it must reach the
-                // type guard, not the helper slot after the inline prefix.
+                // A branch enters the rewritten call: the label must stay on
+                // the helper slot's first byte so the branch keeps calling it.
                 1 => vec![0xeb, 2, 0x90, 0x90, 0xff, 0x15, 0, 0, 0, 0, 0xc3],
                 _ => vec![0xe8, 0, 0, 0, 0, 0xc3],
             };
@@ -4540,30 +4416,11 @@ mod tests {
             let elf = object::File::parse(encoded.as_slice())?;
             let entry = find_symbol_by_name(&elf, "entry")?;
             let helpers = HashMap::from([("bpf_map_lookup_elem".to_owned(), 0x1234)]);
-            let array = RuntimeArrayLayout { map_type: 12, max_entries: 24, elem_size: 32,
-                index_mask: 36, value: 64, array_type: 2 };
-            for layout in [None, Some(&array)] {
-                let result = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers,
-                    &HashMap::new(), &HashMap::new(), &[],
-                    false, false, layout, None, None, false,)?;
-                assert!(result.relocs.iter().any(|r| r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32
-                    && r.target == 0x1234), "form={form}: actual helper target");
-                assert!(!result.relocs.iter().any(|r| r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32
-                    && r.target == 0x5678));
-                #[cfg(all(target_arch = "x86_64", target_os = "linux"))]
-                if layout.is_some() {
-                    let mut map = [0u8; 128];
-                    for (offset, value) in [(12, 2u32), (24, 5), (32, 24), (36, 7)] {
-                        map[offset..offset+4].copy_from_slice(&value.to_ne_bytes());
-                    }
-                    let key = 4u32;
-                    let mut code = result.blob;
-                    code.push(0xc3);
-                    assert_eq!(memory::call_blob(&code, map.as_mut_ptr(), &key as *const _ as usize, 0)
-                        as usize, map.as_ptr() as usize + 64 + 4*24,
-                        "encoded form={form} must reach ARRAY continuation without helper");
-                }
-            }
+            let result = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers,
+                &HashMap::new(), &HashMap::new(), &[], false, false, false)?;
+            let targets: Vec<_> = result.relocs.iter().filter(|r|
+                r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32).map(|r| r.target).collect();
+            assert_eq!(targets, vec![0x1234], "form={form}: actual helper target");
         }
         Ok(())
     }
@@ -4578,65 +4435,6 @@ mod tests {
             assert!(select_lookup_site(&HashMap::new(), 0, name, "entry", 0).is_err(),
                 "a missing helper must not produce a guessed map type");
         }
-        Ok(())
-    }
-
-    #[test]
-    fn named_lpm_shape_reaches_existing_native_dispatch() -> Result<()> {
-        let kind=parse_lookup_kind("lpm12")?;
-        let mut object=WriteObject::new(BinaryFormat::Elf,object::Architecture::X86_64,Endianness::Little);
-        let text=object.add_section(Vec::new(),b".text".to_vec(),SectionKind::Text);
-        let bytes=[0x48,0x8b,0x3d,0,0,0,0,0xb8,1,0,0,0,0xff,0xd0,0xc3];
-        object.append_section_data(text,&bytes,1);
-        object.add_symbol(WriteSymbol{name:b"entry".to_vec(),value:0,size:bytes.len() as u64,
-            kind:SymbolKind::Text,scope:SymbolScope::Linkage,weak:false,
-            section:WriteSymbolSection::Section(text),flags:SymbolFlags::None});
-        let map=object.add_symbol(WriteSymbol{name:b"map".to_vec(),value:0,size:0,
-            kind:SymbolKind::Data,scope:SymbolScope::Linkage,weak:false,
-            section:WriteSymbolSection::Undefined,flags:SymbolFlags::None});
-        object.add_relocation(text,WriteRelocation{offset:3,symbol:map,addend:-4,
-            flags:RelocationFlags::Elf{r_type:9}})?;
-        let data=object.write()?;let elf=object::File::parse(data.as_slice())?;
-        let entry=find_symbol_by_name(&elf,"entry")?;
-        let spec=LookupSiteSpec{kind,target_addr:0x5678,key_offset:0,max_entries:0,
-            elem_size:0,index_mask:0,value_offset:0,percpu_base_addr:0};
-        let layout=RuntimeLpmLayout{map_type:12,lpm_type:11,root:40,max_prefixlen:48,data_size:56,
-            child:0,child_stride:8,node_prefixlen:16,node_flags:20,node_data:24,key_prefixlen:0,key_data:4};
-        let array=RuntimeArrayLayout{map_type:12,array_type:2,max_entries:24,elem_size:32,index_mask:36,value:64};
-        for array in [None,Some(&array)] {for exact in [false,true] {for available in [false,true] {for typed in [false,true] {
-            let mut fact=spec.clone();if !typed {fact.kind=LookupKind::Call;}
-            let facts=HashMap::from([((if exact {"map"}else{"other"}).into(),fact)]);
-            let result=rewrite_x86(&elf,&entry,&[entry.clone()],
-                &HashMap::from([("bpf_map_lookup_elem".into(),0x1234)]),
-                &HashMap::from([("map".into(),0)]),&facts,&[],false,false,array,None,
-                if available {Some(&layout)}else{None},false)?;
-            let targets:Vec<_>=result.relocs.iter().filter(|r|r.kind==1).map(|r|r.target).collect();
-            let raw=exact && (!available || !typed);
-            assert_eq!(targets,if exact&&available&&typed {vec![]} else {vec![if raw {0x5678}else{0x1234}]},
-                "exact={exact} available={available} typed={typed}");
-            let has_native=!raw && available;
-            assert_eq!(result.blob.len()>bytes.len()+100,has_native,"one native routine when eligible");
-            #[cfg(all(target_arch="x86_64",target_os="linux"))]
-            if exact && available && typed {
-                let mut map=[0u8;80];let mut node=[0u8;64];let mut key=[0u32;4];
-                node[16..20].copy_from_slice(&96u32.to_le_bytes());
-                map[12..16].copy_from_slice(&11u32.to_le_bytes());
-                map[48..56].copy_from_slice(&96u64.to_le_bytes());
-                map[56..64].copy_from_slice(&12u64.to_le_bytes());
-                let mut code=result.blob;
-                code.push(0xc3); // JmpEnd reaches the kernel-owned epilogue after the blob.
-                for patch in result.map_patches {
-                    code[patch.offset..patch.offset+8].copy_from_slice(&(map.as_ptr() as u64).to_le_bytes());
-                }
-                for (present,prefix,found) in [(true,96,true),(true,95,false),(false,96,false),(true,97,false)] {
-                    let root=if present {node.as_ptr() as u64}else{0};
-                    map[40..48].copy_from_slice(&root.to_le_bytes());key[0]=prefix;
-                    let value=memory::call_blob(&code,map.as_mut_ptr(),key.as_ptr() as usize,0) as usize;
-                    assert_eq!(value,if found {node.as_ptr() as usize+36}else{0},
-                        "named LPM entry: present={present} prefix={prefix}");
-                }
-            }
-        }}}}
         Ok(())
     }
 
@@ -4913,7 +4711,7 @@ mod tests {
             elem_size: 8, index_mask: 3, value_offset: 32, percpu_base_addr: 0,
         })]);
         {
-            let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps, &facts, &[], false, false, None, None, None, false,)?;
+            let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps, &facts, &[], false, false, false)?;
             assert!(output.relocs.is_empty(), "known array must avoid generic helper");
             assert_eq!(output.map_patches.len(), 1);
             let mut code = output.blob;
@@ -4940,23 +4738,17 @@ mod tests {
                 assert_eq!(munmap(memory, 4096), 0);
             }
         }
-        // A complete map-ops call is also a named binding, not a request to
-        // replace its target with the generic lookup helper. Runtime dispatch
-        // sharing must leave this distinct target alone.
+        // A complete map-ops call is also a named binding: the named
+        // target must replace the generic lookup helper, not the reverse.
         let mut facts = facts;
         let spec = facts.get_mut("known_map").unwrap();
         spec.kind = LookupKind::Call;
         spec.target_addr = 0x5678;
-        let array_layout = RuntimeArrayLayout { map_type: 12, max_entries: 24,
-            elem_size: 32, index_mask: 36, value: 64, array_type: 2 };
         let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps,
-            &facts, &[], false, false, Some(&array_layout), None, None, false)?;
+            &facts, &[], false, false, false)?;
         assert_eq!(output.relocs.len(), 1);
         assert_eq!(output.relocs[0].target, 0x5678,
-                   "named operation must bypass generic ARRAY dispatch");
-        let direct = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers, &maps,
-            &facts, &[], false, false, None, None, None, false)?;
-        assert_eq!(output.blob, direct.blob, "no generic dispatcher is needed");
+                   "named operation must bypass the generic lookup helper");
         Ok(())
     }
 
@@ -5004,12 +4796,7 @@ mod tests {
     #[test]
     #[cfg(all(target_arch="x86_64",target_os="linux"))]
     fn branches_enter_direct_loads_and_tail_stubs_at_the_original_call_label() -> Result<()> {
-        let mut ticks=0u64;
-        let layout=RuntimeProbeReadLayout{user_helper:0x1000,kernel_helper:0x2000,current_task:0,
-            jiffies:Some(&mut ticks as *mut u64 as u64),user_ptr_max:0,boot_cpu_data:0,
-            pagefault_disabled:0,x86_capability:0,task_flags:0,task_personality:0,ktime:None,cred:None,
-            cpu_tlbstate:0,tlb_loaded_mm:0,task_mm:0,x86_virt_bits:0};
-        let helpers=HashMap::from([("bpf_probe_read_kernel".into(),0x2000),
+        let helpers=HashMap::from([("bpf_jiffies64".into(),0x2000),
             (X86_BPF_MAP_MAX_ENTRIES_OFFSET_KEY.into(),68),
             (X86_BPF_ARRAY_PTRS_OFFSET_KEY.into(),304),
             (X86_BPF_PROG_BPF_FUNC_OFFSET_KEY.into(),72),
@@ -5040,28 +4827,29 @@ mod tests {
                 let encoded=object.write()?;let elf=object::File::parse(encoded.as_slice())?;
                 let entry=find_symbol_by_name(&elf,"entry")?;
                 let output=rewrite_x86(&elf,&entry,&[entry.clone()],&helpers,&HashMap::new(),&HashMap::new(),
-                    &[],false,false,None,Some(&layout),None,false)?;
+                    &[],false,false,false)?;
                 let branch=decode_x86(&output.blob)?.into_iter().find(|i|i.is_jcc_short_or_near()).unwrap();
                 let target=branch.near_branch_target() as usize;
-                let marker=if tail {&[0x89,0xd2][..]} else {&[0x48,0xa1][..]};
+                // A miss path keeps the original call label: the rewritten
+                // helper slot, or the inline tail stub's first instruction.
+                let marker=if tail {&[0x89,0xd2][..]} else {&[0xe8,0,0,0,0][..]};
                 assert_eq!(output.blob.get(target..target+marker.len()),Some(marker),
                     "branch skipped {name}: named={named} base={base} nop={skip_nop}");
-                assert_eq!(output.relocs.len(),usize::from(tail));
-                if tail {assert_eq!(output.relocs[0].kind,NATIVE_LAB_RELOC_X86_TAIL_COUNT);}
-                let mut blob=output.blob;blob.push(0xc3);
-                let mut map=[0u8;72];
-                for value in [0u64,0x1122334455667788,u64::MAX] {
-                    unsafe{std::ptr::write_volatile(&mut ticks,value);}
+                assert_eq!(output.relocs.len(),1);
+                assert_eq!(output.relocs[0].kind,if tail {NATIVE_LAB_RELOC_X86_TAIL_COUNT}
+                    else {NATIVE_LAB_RELOC_HELPER_CALL_REL32});
+                if tail {
+                    let mut blob=output.blob;blob.push(0xc3);
+                    let mut map=[0u8;72];
                     for selector in [0usize,1] {
                         let actual=memory::call_blob(&blob,selector as *mut u8,map.as_mut_ptr() as usize,
                             0x100000001) as u64;
-                        assert_eq!(actual,if tail {1}else{value},"{name} selector={selector}");
-                        cases+=1;
+                        assert_eq!(actual,1,"{name} selector={selector}");cases+=1;
                     }
                 }
             } } }
         }
-        println!("inline helper labels: {cases} branch/fallthrough/live-load/tail-miss executions PASS");
+        println!("inline helper labels: {cases} branch/fallthrough/tail-miss executions PASS");
         Ok(())
     }
 
@@ -5082,7 +4870,7 @@ mod tests {
             let bytes=object.write()?;let elf=object::File::parse(bytes.as_slice())?;
             let entry=find_symbol_by_name(&elf,"entry")?;
             rewrite_x86(&elf,&entry,&[entry.clone()],&helpers,&HashMap::new(),&HashMap::new(),
-                &[],proof,false,None,None,None,false)
+                &[],proof,false,false)
         };
         let definitions=|bytes:&[u8],id:u64| -> Result<usize> {Ok(decode_x86(bytes)?.iter()
             .filter(|i|x86_mov_imm_to_gpr64(i).is_some_and(|(_,value)|value==id)).count())};
@@ -5120,71 +4908,6 @@ mod tests {
         let mut tail=tail.blob;tail.push(0xc3);let mut map=[0u8;72];
         assert_eq!(memory::call_blob(&tail,std::ptr::null_mut(),map.as_mut_ptr() as usize,1) as usize,12);
         println!("dead helper IDs: {cases} argument/return/call executions, seven proof shapes and tail miss PASS");
-        Ok(())
-    }
-
-    #[test]
-    #[cfg(all(target_arch="x86_64",target_os="linux"))]
-    fn map_dispatch_fusion_keeps_one_helper_frame_and_original_lookup_results() -> Result<()> {
-        let array=RuntimeArrayLayout{map_type:12,max_entries:24,elem_size:32,
-            index_mask:36,value:64,array_type:2};
-        let lpm=RuntimeLpmLayout{map_type:12,lpm_type:11,root:40,max_prefixlen:56,data_size:64,
-            child:8,child_stride:8,node_prefixlen:32,node_flags:36,node_data:48,key_prefixlen:0,key_data:4};
-        let mut cases=0;
-        for tail in [false,true] {for (a,l) in [(None,None),(Some(&array),None),(None,Some(&lpm)),(Some(&array),Some(&lpm))] {
-            let mut object=WriteObject::new(BinaryFormat::Elf,object::Architecture::X86_64,Endianness::Little);
-            let text=object.add_section(Vec::new(),b".text".to_vec(),SectionKind::Text);
-            let code=if tail {vec![0xb8,1,0,0,0,0xff,0xe0]}else{vec![0x48,0x83,0xec,8,0xb8,1,0,0,0,0xff,0xd0,0x48,0x83,0xc4,8,0xc3]};
-            object.append_section_data(text,&code,1);
-            object.add_symbol(WriteSymbol{name:b"entry".to_vec(),value:0,size:code.len() as u64,
-                kind:SymbolKind::Text,scope:SymbolScope::Linkage,weak:false,
-                section:WriteSymbolSection::Section(text),flags:SymbolFlags::None});
-            let bytes=object.write()?;let elf=object::File::parse(bytes.as_slice())?;
-            let entry=find_symbol_by_name(&elf,"entry")?;
-            let linked=rewrite_x86(&elf,&entry,&[entry.clone()],
-                &HashMap::from([("bpf_map_lookup_elem".into(),0x1234)]),&HashMap::new(),&HashMap::new(),
-                &[],false,false,a,None,l,false)?;
-            assert_eq!(linked.relocs.len(),1,"one final generic helper relocation");
-            let relocation=linked.relocs[0];
-            assert_eq!((relocation.kind,relocation.target),(NATIVE_LAB_RELOC_HELPER_CALL_REL32,0x1234));
-            let site=relocation.offset as usize;
-            // With no runtime wrapper, preserve the pre-existing numeric tail JMP.
-            // Every shared ARRAY/LPM wrapper must still call its external helper via E8.
-            let opcode=if tail && a.is_none() && l.is_none() {0xe9}else{0xe8};
-            assert_eq!(linked.blob[site],opcode,"existing transfer or shared external ABI");
-            assert_eq!(&linked.blob[site+1..site+5],&[0;4]);
-            if a.is_some() && l.is_some() {
-                let calls=decode_x86(&linked.blob)?.iter().filter(|i|i.mnemonic()==Mnemonic::Call).count();
-                assert_eq!(calls,2,"ARRAY must enter LPM without another call frame");
-                if let Some(out)=std::env::var_os("NATIVE_LINK_PROBE_TEST_OUTPUT") {
-                    fs::write(PathBuf::from(out).join(format!("map-dispatch-fused-{tail}.bin")),&linked.blob)?;
-                }
-            }
-            let mut blob=linked.blob;blob.push(0xc3);let target=blob.len();
-            // Count generic calls, check SysV alignment, return original map XOR key.
-            blob.extend_from_slice(&[0x48,0xff,0x02,0x48,0x89,0xe0,0x83,0xe0,15,0x83,0xf8,8,
-                0x74,6,0xb8,0xfe,0xca,0xad,0xde,0xc3,0x48,0x89,0xf8,0x48,0x31,0xf0,0xc3]);
-            blob[site+1..site+5].copy_from_slice(&i32::try_from(target as i64-site as i64-5)?.to_le_bytes());
-            let mut map=[0u8;128];let mut node=[0u8;128];let mut key=[0u8;16];
-            let put32=|b:&mut [u8],o:usize,v:u32|b[o..o+4].copy_from_slice(&v.to_le_bytes());
-            let put64=|b:&mut [u8],o:usize,v:u64|b[o..o+8].copy_from_slice(&v.to_le_bytes());
-            let mp=map.as_mut_ptr();let kp=key.as_ptr() as usize;
-            for kind in [2u32,11,1] {for index in [0u32,1,4,5,u32::MAX] {
-                map.fill(0);key.fill(0);node.fill(0);
-                put32(&mut map,12,kind);put32(&mut map,24,5);put32(&mut map,32,24);put32(&mut map,36,7);
-                put32(&mut key,0,if kind==11 {96}else{index});
-                put64(&mut map,40,node.as_ptr() as u64);put64(&mut map,56,96);put64(&mut map,64,12);
-                put32(&mut node,32,96);
-                let expected=if kind==2 && a.is_some() {if index<5 {mp as usize+64+index as usize*24}else{0}}
-                    else if kind==11 && l.is_some() {node.as_ptr() as usize+60}else{mp as usize^kp};
-                let generic=!(kind==2&&a.is_some() || kind==11&&l.is_some());
-                let mut callbacks=0u64;
-                let result=memory::call_blob(&blob,mp,kp,&mut callbacks as *mut u64 as usize) as usize;
-                assert_eq!(result,expected,"tail={tail} ARRAY={} LPM={} kind={kind} index={index}",a.is_some(),l.is_some());
-                assert_eq!(unsafe{std::ptr::read_volatile(&callbacks)},u64::from(generic));cases+=1;
-            }}
-        }}
-        println!("map dispatch fusion: {cases} actual rewrite CALL/JMP, facts-present/absent, ARRAY/LPM/generic results and helper ABI cases PASS");
         Ok(())
     }
 
@@ -5229,7 +4952,7 @@ mod tests {
                 (X86_TAIL_CALL_OFFSET_KEY.to_owned(), 12),
             ]);
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &helpers,
-                &HashMap::new(), &HashMap::new(), &[], false, false, None, None, None, false,)?;
+                &HashMap::new(), &HashMap::new(), &[], false, false, false,)?;
             assert_eq!(output.relocs.len(), 1, "immediate={immediate}");
             assert_eq!(output.callee_saved_mask, 0);
             let relocation = output.relocs[0];
@@ -5299,7 +5022,7 @@ mod tests {
         let entry = find_symbol_by_name(&elf, "entry")?;
         for preserve in [false, true] {
             let output = rewrite_x86(&elf, &entry, &[entry.clone()], &HashMap::new(),
-                &HashMap::new(), &HashMap::new(), &[], true, preserve, None, None, None, false,)?;
+                &HashMap::new(), &HashMap::new(), &[], true, preserve, false,)?;
             let mut expected = if preserve { vec![0x53, 0x31, 0xc0, 0x5b] } else { vec![0x31, 0xc0] };
             expected.extend_from_slice(&[0xe9, 0, 0, 0, 0]); // Canonical entry exit in proof mode.
             assert_eq!(output.blob, expected);

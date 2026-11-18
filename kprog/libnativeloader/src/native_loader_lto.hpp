@@ -14,10 +14,7 @@
 namespace native_lto {
 
 inline constexpr const char *kernel_symbols[] = {
-    "bpf_probe_read_user", "bpf_probe_read_kernel", "cpu_tlbstate",
-    "const_current_task", "jiffies", "USER_PTR_MAX", "boot_cpu_data",
-    "ktime_get_mono_fast_ns", "tk_fast_mono", "kvm_clock", "__preempt_count", "hv_clock_per_cpu", "valid_flags",
-    "__SCT__preempt_schedule_notrace",
+    "ktime_get_mono_fast_ns",
 };
 
 inline const btf_type *type(const btf *types, uint32_t id)
@@ -108,14 +105,6 @@ inline uint32_t path_offset(const btf *types, const char *parent, std::initializ
     return total;
 }
 
-inline uint32_t struct_size(const btf *types, const char *name)
-{
-    int id = btf__find_by_name_kind(types, name, BTF_KIND_STRUCT);
-    long size = id < 0 ? -1 : btf__resolve_size(types, id);
-    if (size <= 0) throw std::runtime_error(std::string("LTO BTF: missing struct ") + name);
-    return static_cast<uint32_t>(size);
-}
-
 inline int map_type(const btf *types, const char *wanted)
 {
     int id = btf__find_by_name_kind(types, "bpf_map_type", BTF_KIND_ENUM);
@@ -131,13 +120,8 @@ inline int map_type(const btf *types, const char *wanted)
 }
 
 template <typename Resolver>
-inline void write_layout(std::ostream &out, const btf *types, Resolver resolve)
+inline void write_layout(std::ostream &out, const btf *types, Resolver)
 {
-    auto symbol = [&](const char *name) {
-        uint64_t value = resolve(name);
-        if (!value) throw std::runtime_error(std::string("LTO: missing kernel symbol ") + name);
-        return value;
-    };
     uint32_t array = offset(types, "bpf_array", "map");
     out << "{\"array\":{\"map_type\":" << offset(types, "bpf_map", "map_type", true)
         << ",\"max_entries\":" << offset(types, "bpf_map", "max_entries", true)
@@ -146,76 +130,7 @@ inline void write_layout(std::ostream &out, const btf *types, Resolver resolve)
         << ",\"value\":" << relative(types, "bpf_array", "value", array)
         << ",\"array_type\":" << map_type(types, "BPF_MAP_TYPE_ARRAY") << "}";
 
-    uint32_t lpm = offset(types, "lpm_trie", "map");
-    out << ",\"lpm\":{\"map_type\":" << offset(types, "bpf_map", "map_type", true)
-        << ",\"lpm_type\":" << map_type(types, "BPF_MAP_TYPE_LPM_TRIE")
-        << ",\"root\":" << relative(types, "lpm_trie", "root", lpm)
-        << ",\"max_prefixlen\":" << relative(types, "lpm_trie", "max_prefixlen", lpm)
-        << ",\"data_size\":" << relative(types, "lpm_trie", "data_size", lpm)
-        << ",\"child\":" << offset(types, "lpm_trie_node", "child")
-        << ",\"child_stride\":" << btf__pointer_size(types)
-        << ",\"node_prefixlen\":" << offset(types, "lpm_trie_node", "prefixlen", true)
-        << ",\"node_flags\":" << offset(types, "lpm_trie_node", "flags", true)
-        << ",\"node_data\":" << offset(types, "lpm_trie_node", "data")
-        << ",\"key_prefixlen\":" << offset(types, "bpf_lpm_trie_key_u8", "prefixlen", true)
-        << ",\"key_data\":" << offset(types, "bpf_lpm_trie_key_u8", "data") << "}";
-
-    out << ",\"probe_read\":{\"user_helper\":" << symbol("bpf_probe_read_user")
-        << ",\"kernel_helper\":" << symbol("bpf_probe_read_kernel")
-        << ",\"current_task\":" << symbol("const_current_task")
-        << ",\"user_ptr_max\":" << symbol("USER_PTR_MAX")
-        << ",\"boot_cpu_data\":" << symbol("boot_cpu_data")
-        << ",\"pagefault_disabled\":" << offset(types, "task_struct", "pagefault_disabled", true)
-        << ",\"x86_capability\":" << offset(types, "cpuinfo_x86", "x86_capability")
-        << ",\"x86_virt_bits\":" << offset(types, "cpuinfo_x86", "x86_virt_bits")
-        << ",\"cpu_tlbstate\":" << symbol("cpu_tlbstate")
-        << ",\"tlb_loaded_mm\":" << offset(types, "tlb_state", "loaded_mm")
-        << ",\"task_mm\":" << offset(types, "task_struct", "mm")
-        << ",\"task_flags\":" << offset(types, "task_struct", "thread_info") + offset(types, "thread_info", "flags")
-        << ",\"task_personality\":" << offset(types, "task_struct", "personality", true);
-    if (uint64_t jiffies = resolve("jiffies")) out << ",\"jiffies\":" << jiffies;
-    // Fast-clock facts for bpf_ktime_get_ns (ktime_get_mono_fast_ns with the kvm-clock read inline). A boot
-    // that lacks any of them leaves the object out, and the linker keeps the direct call.
-    try {
-        uint64_t tk = resolve("tk_fast_mono"), kvm = resolve("kvm_clock"), preempt = resolve("__preempt_count"),
-                 hv = resolve("hv_clock_per_cpu"), valid = resolve("valid_flags"),
-                 resched = resolve("__SCT__preempt_schedule_notrace");
-        if (tk && kvm && preempt && hv && valid && resched) {
-            std::ostringstream k;
-            k << ",\"ktime\":{\"tk_fast_mono\":" << tk
-              << ",\"seq\":" << path_offset(types, "tk_fast", {"seq", "seqcount", "sequence"})
-              << ",\"base\":" << offset(types, "tk_fast", "base")
-              << ",\"tkr_size\":" << struct_size(types, "tk_read_base")
-              << ",\"tkr_clock\":" << offset(types, "tk_read_base", "clock")
-              << ",\"tkr_mask\":" << offset(types, "tk_read_base", "mask")
-              << ",\"tkr_cycle_last\":" << offset(types, "tk_read_base", "cycle_last")
-              << ",\"tkr_mult\":" << offset(types, "tk_read_base", "mult", true)
-              << ",\"tkr_shift\":" << offset(types, "tk_read_base", "shift", true)
-              << ",\"tkr_xtime_nsec\":" << offset(types, "tk_read_base", "xtime_nsec")
-              << ",\"tkr_base\":" << offset(types, "tk_read_base", "base")
-              << ",\"max_cycles\":" << offset(types, "clocksource", "max_cycles")
-              << ",\"kvm_clock\":" << kvm
-              << ",\"preempt_count\":" << preempt
-              << ",\"hv_clock_per_cpu\":" << hv
-              << ",\"pvti\":" << offset(types, "pvclock_vsyscall_time_info", "pvti")
-              << ",\"pv_version\":" << offset(types, "pvclock_vcpu_time_info", "version", true)
-              << ",\"pv_tsc_timestamp\":" << offset(types, "pvclock_vcpu_time_info", "tsc_timestamp")
-              << ",\"pv_system_time\":" << offset(types, "pvclock_vcpu_time_info", "system_time")
-              << ",\"pv_mul\":" << offset(types, "pvclock_vcpu_time_info", "tsc_to_system_mul", true)
-              << ",\"pv_tsc_shift\":" << offset(types, "pvclock_vcpu_time_info", "tsc_shift")
-              << ",\"pv_flags\":" << offset(types, "pvclock_vcpu_time_info", "flags")
-              << ",\"valid_flags\":" << valid
-              << ",\"preempt_schedule_notrace\":" << resched
-              << "}";
-            out << k.str();
-        }
-    } catch (const std::runtime_error &) {
-    }
-    // Credential facts for bpf_get_current_uid_gid: current->cred and its uid/gid.
-    out << ",\"cred\":{\"task_cred\":" << offset(types, "task_struct", "cred")
-        << ",\"cred_uid\":" << offset(types, "cred", "uid", true)
-        << ",\"cred_gid\":" << offset(types, "cred", "gid", true) << "}";
-    out << "}}";
+    out << "}";
     if (!out) throw std::runtime_error("write kernel LTO layout");
 }
 

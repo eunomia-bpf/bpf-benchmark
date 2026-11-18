@@ -96,16 +96,14 @@ mod tests {
     fn roundtrip(elf: &object::File, entry: &SymInfo, path: &PathBuf) -> Result<RewriteResult> {
         let included=discover_reachable(elf,entry)?;
         let empty=HashMap::new();
-        let proof=rewrite_x86(elf,entry,&included,&empty,&empty,&HashMap::new(),&[],true,true,
-                              None,None,None,false)?;
+        let proof=rewrite_x86(elf,entry,&included,&empty,&empty,&HashMap::new(),&[],true,true, false)?;
         write_proof_object(path,object::Architecture::X86_64,&entry.name,&proof.blob,&proof.proof_symbols,
             &proof.proof_relocs,&proof.proof_data_relocs,proof.callee_saved_mask)?;
         let bytes=fs::read(path)?;
         let elf=object::File::parse(bytes.as_slice())?;
         let entry=find_symbol_by_name(&elf,&entry.name)?;
         let included=discover_reachable(&elf,&entry)?;
-        rewrite_x86(&elf,&entry,&included,&empty,&empty,&HashMap::new(),&[],false,true,
-                    None,None,None,false)
+        rewrite_x86(&elf,&entry,&included,&empty,&empty,&HashMap::new(),&[],false,true, false)
     }
 
     #[test]

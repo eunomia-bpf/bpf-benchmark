@@ -79,10 +79,8 @@ NativeLinkArgs build_native_link_args(
         // A program whose calls stay inside its own blob needs no kernel
         // address at all; scanning kallsyms for them only costs startup.
         if (companion.needs_kernel_symbols) {
-            uint64_t cpu_number_addr = kallsyms_lookup("cpu_number");
             this_cpu_off_addr = kallsyms_lookup("this_cpu_off");
-            if (cpu_number_addr != 0 && this_cpu_off_addr != 0) {
-                add_name_addr(out.helpers, kX86CpuNumberHelperKey, cpu_number_addr);
+            if (this_cpu_off_addr != 0) {
                 add_name_addr(out.helpers, kX86ThisCpuOffHelperKey, this_cpu_off_addr);
             }
             uint64_t mono_fast = kallsyms_lookup("ktime_get_mono_fast_ns");

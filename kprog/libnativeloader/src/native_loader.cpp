@@ -385,7 +385,6 @@ constexpr const char *kTypedHelperSymbols[] = {
     "bpf_sk_lookup_udp",
 };
 
-constexpr const char *kX86CpuNumberHelperKey = "__native_x86_cpu_number";
 constexpr const char *kX86ThisCpuOffHelperKey = "__native_x86_this_cpu_off";
 constexpr const char *kX86MonoFastHelperKey = "__native_x86_ktime_get_mono_fast_ns";
 constexpr const char *kX86BpfMapMaxEntriesOffsetKey =
@@ -1437,7 +1436,6 @@ const std::unordered_map<std::string, uint64_t> &kallsyms_table()
 
     std::unordered_set<std::string_view> wanted;
 #if defined(__x86_64__)
-    wanted.insert("cpu_number");
     wanted.insert("this_cpu_off");
 #endif
     for (const auto &helper : kSupportedHelpers) {

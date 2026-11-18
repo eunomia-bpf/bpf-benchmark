@@ -8,7 +8,7 @@ open Arm64NumericProgram
 
 /-- Compare two actual stores of the same value. This uses the imported raw
 memory representation, including undefined bytes and both permission maps. -/
-private theorem stores_frame {frontier : CC.Block} {left right leftAfter rightAfter : CC.Mem}
+theorem stores_frame {frontier : CC.Block} {left right leftAfter rightAfter : CC.Mem}
     {chunk : CC.Chunk} {block : CC.Block} {offset : Int} {value : CC.Val}
     (frame : FrameBelow frontier left right)
     (leftStore : CC.Mem.store chunk left block offset value = some leftAfter)

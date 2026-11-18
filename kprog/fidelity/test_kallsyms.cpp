@@ -24,7 +24,6 @@ int main(int argc, char **argv)
     const NativeLinkArgs full = build_native_link_args(argv[1], {}, bound);
     for (const auto &entry : full.helpers) {
         if (entry.name.rfind("__native_", 0) == 0 &&
-            entry.name != kX86CpuNumberHelperKey &&
             entry.name != kX86ThisCpuOffHelperKey &&
             entry.name != kX86MonoFastHelperKey &&
             entry.name != kX86BpfMapMaxEntriesOffsetKey &&
@@ -52,7 +51,6 @@ int main(int argc, char **argv)
     }
     std::unordered_set<std::string> wanted;
 #if defined(__x86_64__)
-    wanted.insert("cpu_number");
     wanted.insert("this_cpu_off");
 #endif
     for (const auto &helper : kSupportedHelpers) wanted.insert(helper.symbol);

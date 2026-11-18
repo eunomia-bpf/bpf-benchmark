@@ -89,7 +89,7 @@ theorem call_zr_represents {m before : CC.Mem} {entry : Arm64Producer.HeaderLoca
   obtain ⟨after, run, _, frame, _, _, _⟩ := call_zr_returns storage unused imm column narrow
   exact ⟨after, run, (Arm64Registers.frame frame (.Vptr entry.block 0) s).mpr represented⟩
 
-private theorem return_stuck (value : CC.Val) (memory : CC.Mem) :
+theorem return_stuck (value : CC.Val) (memory : CC.Mem) :
     ∀ t next, ¬ CC.Step2 ge (.Returnstate value .Kstop memory) t next := by
   intro t next step
   cases step
