@@ -1,0 +1,53 @@
+--- a/kprog/libnativeloader/src/native_loader.cpp
++++ b/kprog/libnativeloader/src/native_loader.cpp
+@@ -3038,6 +3038,7 @@
+ {
+     CompanionLoad out{};
+     out.prog_type = prog_info.type;
++    out.context_helpers = query_program_helper_targets(program_fd, prog_info.type);
+     out.source_bytecode_bytes = source_insn_cnt * sizeof(bpf_insn);
+     out.map_rules = std::move(map_rules);
+ 
+@@ -4156,7 +4157,6 @@
+     std::filesystem::path native_object_path = options.native_object_path;
+     std::string symbol_name = options.symbol_name;
+     std::vector<NativeMapRule> map_rules;
+-    bool kernel_helper_context = false;
+     bool kernel_kfunc_context = false;
+     std::filesystem::path kernel_kfunc_btf;
+     std::filesystem::path source_bpf_object;
+@@ -4180,7 +4180,6 @@
+             options.diagnostics->log_path = resolution->loader_timing_log;
+         native_object_path = resolution->native_object_path;
+         symbol_name = resolution->symbol_name;
+-        kernel_helper_context = resolution->kernel_helper_context;
+         kernel_kfunc_context = resolution->kernel_kfunc_context;
+         kernel_kfunc_btf = resolution->kernel_kfunc_btf;
+         source_bpf_object = resolution->source_bpf_object;
+@@ -4197,8 +4196,6 @@
+             source_insns.empty() ? nullptr : source_insns.data(),
+             source_insns.size(),
+             std::move(map_rules));
+-    if (kernel_helper_context)
+-        companion.context_helpers = query_program_helper_targets(options.original_prog_fd, prog_info.type);
+     if (kernel_kfunc_context) {
+         // libbpf rewrites .ksyms/linkage before BTF_LOAD. Use the unchanged
+         // object's declarations, not the sanitized loaded-program BTF.
+--- a/kprog/libnativeloader/src/native_loader_manifest.hpp
++++ b/kprog/libnativeloader/src/native_loader_manifest.hpp
+@@ -42,7 +42,6 @@
+     std::string symbol_name;
+     std::vector<NativeMapRule> map_rules;
+     std::string loader_timing_log;
+-    bool kernel_helper_context = false;
+     bool kernel_kfunc_context = false;
+     std::filesystem::path kernel_kfunc_btf;
+     std::filesystem::path source_bpf_object;
+@@ -649,7 +648,6 @@
+         candidate.symbol_name = json_object_string(entry, "symbol").value_or("");
+         if (auto timing_log = json_object_string(entry, "loader_timing_log"))
+             candidate.loader_timing_log = *timing_log;
+-        candidate.kernel_helper_context = json_object_bool(entry, "kernel_helper_context").value_or(false);
+         candidate.kernel_kfunc_context = json_object_bool(entry, "kernel_kfunc_context").value_or(false);
+         if (auto object_btf = json_object_string(entry, "kernel_kfunc_btf"))
+             candidate.kernel_kfunc_btf = manifest_relative_path(manifest_path, *object_btf);

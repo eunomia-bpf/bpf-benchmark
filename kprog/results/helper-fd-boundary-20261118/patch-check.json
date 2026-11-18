@@ -1,0 +1,11 @@
+{
+  "command": [
+    "git",
+    "apply",
+    "--check",
+    "/workspaces/kprog-raw/perf/helper-fd-boundary-20261118/host-20261118T002900Z-2835341/original-fd-query.patch"
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": ""
+}
