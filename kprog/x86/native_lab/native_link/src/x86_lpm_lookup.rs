@@ -25,7 +25,9 @@ pub(super) fn routine(l:&RuntimeLpmLayout,helper:u64)->Result<(Vec<u8>,Vec<Reloc
     let walk=b.len();b.extend_from_slice(&[0x48,0x85,0xd2]);
     let empty=append_x86_jcc_rel32(&mut b,0x84);
     mem(&mut b,&[0x44,0x8b,0x9a],2,l.node_prefixlen)?; // r11d=node prefix
-    b.extend_from_slice(&[0x45,0x89,0xd9,0x45,0x39,0xd1,0x45,0x0f,0x47,0xca]); // r9d=min(node,query)
+    // A query shorter than this node ends the walk; otherwise its limit is node.
+    b.extend_from_slice(&[0x45,0x39,0xda]); // cmp query,node
+    let short_query=append_x86_jcc_rel32(&mut b,0x82);
     // LPM allocation fixes max_prefixlen=data_size*8, hence96 for this shape.
     // Read the next child early, overlapping its latency with prefix matching.
     // A full-depth node has no key bit at96 and must skip this read.
@@ -47,7 +49,7 @@ pub(super) fn routine(l:&RuntimeLpmLayout,helper:u64)->Result<(Vec<u8>,Vec<Reloc
     b.extend_from_slice(&[0x48,0x0f,0xbd,0xc8,0x83,0xf1,63]); // ecx=63-bsr(diff)
     let first_done=jmp(&mut b);
     let second=b.len();patch_x86_rel32(&mut b,first_equal,second)?;
-    b.extend_from_slice(&[0x41,0x83,0xf9,64]); // first chunk satisfies short prefix
+    b.extend_from_slice(&[0x41,0x83,0xfb,64]); // first chunk satisfies node prefix
     let short_prefix=append_x86_jcc_rel32(&mut b,0x86);
     mem(&mut b,&[0x8b,0x82],1,l.node_data+8)?;
     mem(&mut b,&[0x33,0x86],1,l.key_data+8)?;
@@ -60,12 +62,11 @@ pub(super) fn routine(l:&RuntimeLpmLayout,helper:u64)->Result<(Vec<u8>,Vec<Reloc
     let exact_done=jmp(&mut b);
     let prefix64=b.len();patch_x86_rel32(&mut b,short_prefix,prefix64)?;
     b.push(0xb9);b.extend_from_slice(&64u32.to_le_bytes());
-    let clamp=b.len();patch_x86_rel32(&mut b,exact_done,clamp)?;patch_x86_rel32(&mut b,first_done,clamp)?;patch_x86_rel32(&mut b,second_done,clamp)?;
-    b.extend_from_slice(&[0x44,0x39,0xc9,0x41,0x0f,0x47,0xc9]); // min(common prefix,limit)
-    b.extend_from_slice(&[0x83,0xf9,96]);
-    let full=append_x86_jcc_rel32(&mut b,0x84);
+    let matched=b.len();patch_x86_rel32(&mut b,exact_done,matched)?;patch_x86_rel32(&mut b,first_done,matched)?;patch_x86_rel32(&mut b,second_done,matched)?;
     b.extend_from_slice(&[0x44,0x39,0xd9]);
     let mismatch=append_x86_jcc_rel32(&mut b,0x82);
+    b.extend_from_slice(&[0x41,0x83,0xfb,96]);
+    let full=append_x86_jcc_rel32(&mut b,0x84);
     mem(&mut b,&[0xf7,0x82],1,l.node_flags)?;b.extend_from_slice(&1u32.to_le_bytes());
     let intermediate=append_x86_jcc_rel32(&mut b,0x85);
     b.extend_from_slice(&[0x49,0x89,0xd0]); // best=current, unless intermediate
@@ -74,7 +75,7 @@ pub(super) fn routine(l:&RuntimeLpmLayout,helper:u64)->Result<(Vec<u8>,Vec<Reloc
     let back=jmp(&mut b);patch_x86_rel32(&mut b,back,walk)?;
     let found=b.len();patch_x86_rel32(&mut b,full,found)?;
     b.extend_from_slice(&[0x49,0x89,0xd0]); // exact max-prefix wins even before flags
-    let finish=b.len();patch_x86_rel32(&mut b,empty,finish)?;patch_x86_rel32(&mut b,mismatch,finish)?;
+    let finish=b.len();patch_x86_rel32(&mut b,empty,finish)?;patch_x86_rel32(&mut b,mismatch,finish)?;patch_x86_rel32(&mut b,short_query,finish)?;
     b.extend_from_slice(&[0x4d,0x85,0xc0]);let absent=append_x86_jcc_rel32(&mut b,0x84);
     mem(&mut b,&[0x49,0x8d,0x80],2,l.node_data+12)?;b.push(0xc3);
     let zero=b.len();patch_x86_rel32(&mut b,invalid,zero)?;patch_x86_rel32(&mut b,absent,zero)?;
