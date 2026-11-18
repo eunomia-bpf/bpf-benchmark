@@ -1,0 +1,32 @@
+diff --git a/kprog/x86/native_lab/native_link/src/x86.rs b/kprog/x86/native_lab/native_link/src/x86.rs
+index 1f5bafca3..73415ffa2 100644
+--- a/kprog/x86/native_lab/native_link/src/x86.rs
++++ b/kprog/x86/native_lab/native_link/src/x86.rs
+@@ -1207,6 +1207,13 @@ pub(super) fn rewrite_x86(
+ 
+             if helper_calls.tails.contains(&local_ip) {
+                 if let Some(alternatives) = helper_calls.numeric_joins.get(&local_ip) {
++                    if show {
++                        eprintln!("native-link-helper-tail-site {}",serde_json::json!({
++                            "symbol":sym.name,"input_offset":sym.address+local_ip,
++                            "helpers":alternatives.iter().map(|(_,name)|name.as_str()).collect::<Vec<_>>(),
++                            "map":proven_maps.get(&local_ip),"form":"numeric-join","proof_mode":proof_mode,
++                        }));
++                    }
+                     append_x86_numeric_helper_dispatch(&mut local, &mut kinds,
+                         &mut insn_local_ip, &mut next_synthetic_ip, local_ip,
+                         insn.next_ip()-sym.address, x86_gpr64_family(insn.op0_register()).unwrap(),
+@@ -1217,6 +1224,13 @@ pub(super) fn rewrite_x86(
+             }
+             if let Some(tail) = tail_transfers.remove(&local_ip) {
+                 let conditional = insn.is_jcc_short_or_near();
++                if show && tail.defined.is_none() {
++                    eprintln!("native-link-helper-tail-site {}",serde_json::json!({
++                        "symbol":sym.name,"input_offset":sym.address+local_ip,"helpers":[tail.symbol.as_str()],
++                        "map":proven_maps.get(&local_ip),"form":if conditional {"conditional"} else {"single-target"},
++                        "proof_mode":proof_mode,
++                    }));
++                }
+                 if conditional {
+                     // Preserve the original decision around the existing tail rewrite.
+                     let mut guard = insn;

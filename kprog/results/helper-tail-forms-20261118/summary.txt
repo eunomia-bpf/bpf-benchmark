@@ -1,0 +1,6 @@
+bcc/set {"emitted": 25, "lookup_tail_named": 0, "lookup_tail_sites": 0, "lookup_tail_trie_operation": 0, "ordinary_helper_sites": 140, "ordinary_lookup_sites": 17, "requests": 25, "tail_sites": 0}
+cilium/agent {"emitted": 47, "generic_0xe8": 24, "lookup_tail_named": 0, "lookup_tail_sites": 0, "lookup_tail_trie_operation": 0, "ordinary_helper_sites": 1567, "ordinary_lookup_sites": 447, "requests": 47, "tail_sites": 0, "trie_0xe8": 32}
+katran {"emitted": 1, "generic_0xe8": 1, "lookup_tail_named": 0, "lookup_tail_sites": 0, "lookup_tail_trie_operation": 0, "ordinary_helper_sites": 84, "ordinary_lookup_sites": 66, "requests": 1, "tail_sites": 0}
+otelcol-ebpf-profiler/profiling {"emitted": 14, "generic_0xe8": 1, "lookup_tail_named": 0, "lookup_tail_sites": 0, "lookup_tail_trie_operation": 0, "ordinary_helper_sites": 1242, "ordinary_lookup_sites": 491, "requests": 14, "tail_sites": 0, "trie_0xe8": 52}
+tetragon/observer {"emitted": 39, "generic_0xe8": 17, "lookup_tail_named": 0, "lookup_tail_sites": 0, "lookup_tail_trie_operation": 0, "ordinary_helper_sites": 2755, "ordinary_lookup_sites": 926, "requests": 39, "tail_sites": 0}
+tracee/monitor {"emitted": 169, "generic_0xe8": 114, "lookup_tail_named": 0, "lookup_tail_sites": 0, "lookup_tail_trie_operation": 0, "ordinary_helper_sites": 36147, "ordinary_lookup_sites": 4554, "requests": 169, "tail_sites": 0}

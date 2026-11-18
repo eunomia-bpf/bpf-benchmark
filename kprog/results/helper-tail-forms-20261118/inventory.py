@@ -17,6 +17,7 @@ symbols={fields[2]:int(fields[0],16) for line in a.system_map.read_text().splitl
 replay=json.loads(a.replay.read_text());counts=defaultdict(Counter);rows=[]
 for request in replay['requests']:
     c=counts[request['app']];c['requests']+=1
+    c.update(tail_sites=0,lookup_tail_sites=0,lookup_tail_named=0,lookup_tail_trie_operation=0)
     row=dict(app=request['app'],symbol=request['symbol'],capture=request['capture'],
              proof=request['proof'],plan=request['plan'],output=request['output'],returncode=request['returncode'])
     if request['returncode']:
@@ -28,6 +29,8 @@ for request in replay['requests']:
     for line in (folder/'stderr').read_text().splitlines():
         if line.startswith('native-link-helper-tail-site '):tails.append(json.loads(line.split(' ',1)[1]))
         elif line.startswith('native-link-helper-site '):ordinary.append(json.loads(line.split(' ',1)[1]))
+    c['ordinary_helper_sites']+=len(ordinary)
+    c['ordinary_lookup_sites']+=sum(s['helper']=='bpf_map_lookup_elem' for s in ordinary)
     if tails:
         with Path(request['proof']).open('rb') as f:
             elf=ELFFile(f);table=elf.get_section_by_name('.symtab')
