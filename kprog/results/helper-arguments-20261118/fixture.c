@@ -7,8 +7,16 @@
 #include "vendor/bpf/core-compat.h"
 
 #ifdef TEST_ID_ONLY
+#undef native_bpf_helper1
 #undef native_bpf_helper2
+#undef native_bpf_helper3
+#undef native_bpf_helper4
+#undef native_bpf_helper5
+#define native_bpf_helper1(type,id,a0) native_bpf_helper0(type,id)
 #define native_bpf_helper2(type,id,a0,a1) native_bpf_helper0(type,id)
+#define native_bpf_helper3(type,id,a0,a1,a2) native_bpf_helper0(type,id)
+#define native_bpf_helper4(type,id,a0,a1,a2,a3) native_bpf_helper0(type,id)
+#define native_bpf_helper5(type,id,a0,a1,a2,a3,a4) native_bpf_helper0(type,id)
 #endif
 
 static uint32_t keys[8];
@@ -47,6 +55,17 @@ static unsigned long observed_selector2(unsigned long id,unsigned long a0,unsign
 __attribute__((noinline)) void *actual_header_lookup(void *map) {
     return bpf_map_lookup_elem(map,next_key());
 }
+
+#ifdef ACTUAL_IR
+/* tracemgmt.h:312 passes the same mutable state->fp source expression. */
+struct sample_state { unsigned long fp; };
+long actual_header_probe(void *destination,struct sample_state *state) {
+    return bpf_probe_read_user(destination,8,(void *)state->fp);
+}
+long actual_header_trace(void) {
+    return __kprog_trace_printk("x",1,0,0,0);
+}
+#endif
 
 #ifndef ACTUAL_IR
 int main(void) {

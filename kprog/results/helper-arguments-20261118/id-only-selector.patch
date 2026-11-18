@@ -1,0 +1,74 @@
+--- a/vendor/bpf/core-compat.h
++++ b/vendor/bpf/core-compat.h
+@@ -436,41 +436,6 @@
+     return id;
+ }
+ 
+-static __always_inline unsigned long native_helper_id1(unsigned long id,
+-                                                       unsigned long a0)
+-{
+-    asm volatile("" : "+r"(id) : "r"(a0) : "memory");
+-    return id;
+-}
+-
+-static __always_inline unsigned long native_helper_id2(unsigned long id,
+-                                                       unsigned long a0,
+-                                                       unsigned long a1)
+-{
+-    asm volatile("" : "+r"(id) : "r"(a0), "r"(a1) : "memory");
+-    return id;
+-}
+-
+-static __always_inline unsigned long native_helper_id3(unsigned long id,
+-                                                       unsigned long a0,
+-                                                       unsigned long a1,
+-                                                       unsigned long a2)
+-{
+-    asm volatile("" : "+r"(id) : "r"(a0), "r"(a1), "r"(a2) : "memory");
+-    return id;
+-}
+-
+-static __always_inline unsigned long native_helper_id4(unsigned long id,
+-                                                       unsigned long a0,
+-                                                       unsigned long a1,
+-                                                       unsigned long a2,
+-                                                       unsigned long a3)
+-{
+-    asm volatile("" : "+r"(id) : "r"(a0), "r"(a1), "r"(a2), "r"(a3)
+-                 : "memory");
+-    return id;
+-}
+-
+ static __always_inline unsigned long native_helper_id5(unsigned long id,
+                                                        unsigned long a0,
+                                                        unsigned long a1,
+@@ -485,23 +450,13 @@
+ }
+ 
+ #define native_bpf_helper0(type, id) ((type)native_helper_id0((unsigned long)(id)))
+-#define native_bpf_helper1(type, id, a0) \
+-    ((type)native_helper_id1((unsigned long)(id), (unsigned long)(a0)))
++/* The final C call evaluates arguments; the selector preserves its helper ID. */
++#define native_bpf_helper1(type, id, a0) native_bpf_helper0(type, id)
+ #define __kprog_va1(a, ...) a
+-
+-#define native_bpf_helper2(type, id, a0, a1) \
+-    ((type)native_helper_id2((unsigned long)(id), (unsigned long)(a0), (unsigned long)(a1)))
+-#define native_bpf_helper3(type, id, a0, a1, a2) \
+-    ((type)native_helper_id3((unsigned long)(id), (unsigned long)(a0), \
+-                             (unsigned long)(a1), (unsigned long)(a2)))
+-#define native_bpf_helper4(type, id, a0, a1, a2, a3) \
+-    ((type)native_helper_id4((unsigned long)(id), (unsigned long)(a0), \
+-                             (unsigned long)(a1), (unsigned long)(a2), \
+-                             (unsigned long)(a3)))
+-#define native_bpf_helper5(type, id, a0, a1, a2, a3, a4) \
+-    ((type)native_helper_id5((unsigned long)(id), (unsigned long)(a0), \
+-                             (unsigned long)(a1), (unsigned long)(a2), \
+-                             (unsigned long)(a3), (unsigned long)(a4)))
++#define native_bpf_helper2(type, id, a0, a1) native_bpf_helper0(type, id)
++#define native_bpf_helper3(type, id, a0, a1, a2) native_bpf_helper0(type, id)
++#define native_bpf_helper4(type, id, a0, a1, a2, a3) native_bpf_helper0(type, id)
++#define native_bpf_helper5(type, id, a0, a1, a2, a3, a4) native_bpf_helper0(type, id)
+ 
+ #define NATIVE_BPF_FUNC_map_lookup_elem 1
+ #define NATIVE_BPF_FUNC_map_update_elem 2
