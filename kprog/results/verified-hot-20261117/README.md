@@ -52,43 +52,47 @@ Run `x86_kvm_corpus_20261117_204607_412064`, 1 sample × 10 s, stats on, exit co
 
 ## Tracee (tracee/monitor)
 
-Run `x86_kvm_corpus_20261117_205400_990352`, 1 sample × 10 s, stats on, still `"status": "running"` at
-02:53Z (service started 20:52:09Z, corpus 20:54:00Z). Raw
-`/workspaces/kprog-raw/verified/20261117-checked-hot/tracee/`, session `session-l8nw5lav`. 38 requests
-submitted so far; this section is written from the requests journal and each request's own archive, not from
-a finished run. Of the 38: **14 verified, 22 direct-native, 2 hard failures**.
+Run `x86_kvm_corpus_20261117_205400_990352`, 1 sample × 10 s, stats on. The guest finished at
+`2026-11-18T05:07:47Z` with exit 255 (the launcher reports the guest's own non-zero exit, not an app
+crash), first request 20:55:00Z, last 05:07:40Z. Raw
+`/workspaces/kprog-raw/verified/20261117-checked-hot/tracee/`, session `session-l8nw5lav`. **47
+requests: 20 verified, 25 direct-native, 2 hard failures.** Every request records
+`execution_mode=checked-sim-c`; the 25 fallbacks are the ones whose simulator failed a stage.
 
-- **14 verified and installed** (`execution_path=checked-sim-c`, `b_generated=true`, `b_stock_passed=true`,
-  `status=0`): requests 1, 2, 3, 6, 7, 9, 10, 25, 26, 29, 30, 31, 33, 35. 14 distinct native bodies
-  (`checked-simulator.native.o` sha256), 20,888 B to 2,082,296 B. The two largest are the whole syscall
-  path: request 30 at 2.08 MB and requests 25/26 at 1.27 MB.
-- **21 direct-native** (`execution_path=direct-native`, `b_stock_passed=false`): 16 stopped by the stock
-  verifier, 5 by `llc-18`. These are recorded fallbacks, not silent ones: each archive carries
-  `simulator-failure.json` and a `load-direct.*` pair.
+
+- **20 verified and installed** (`execution_path=checked-sim-c`, `b_generated=true`,
+  `b_stock_passed=true`, `status=0`): requests 1, 2, 3, 6, 7, 9, 10, 25, 26, 29, 30, 31, 33, 35, 41,
+  42, 43, 45, 46, 47. 20 distinct native bodies (`checked-simulator.native.o` sha256), 20,888 B to
+  2,082,296 B. The largest are the whole syscall path: request 30 at 2.08 MB and requests 25/26 at
+  1.27 MB.
+- **25 direct-native** (`execution_path=direct-native`, `b_stock_passed=false`): 17 stopped by the stock
+  verifier, 8 by `llc-18` at the generation stage. These are recorded fallbacks, not silent ones: each
+  archive carries `simulator-failure.json` and a `load-direct.*` pair.
 - **2 hard failures**: requests 23 and 24, `status=-5`, no `phase`, no `execution_path` — the loader's link
   step refused the object before B could be checked (cause below).
-- The application itself keeps running on eBPF where a native body is missing: the shim's post-rejit log
-  records **35 `native-loader replaced`** and **2 `native-loader failed`**, both `syscall__execve` — and
-  those two are exactly requests 23/24's program, so the two failures below are visible on both sides. With
-  `BPFREJIT_NATIVE_LOADER_REQUIRE_BOUND_PROOF=1` a program that fails to load silently stays on eBPF; as of
-  `47491721e` the shim reports `native_loads_inflight` / `native_bound_completed` and logs
-  `verified program kept on eBPF`, so the next run *names* it instead of leaving it to be inferred.
+- The application itself keeps running on eBPF where a native body is missing, and the shim side agrees with
+  the journal: `tracee__monitor.post_rejit.log` records **45 `native-loader replaced`** (20 verified + 25
+  direct-native), **2 `native-loader failed`** (both `syscall__execve`, i.e. requests 23/24), 2 `no manifest
+  match`, 12 skipped feature probes and 90 `native-loader jit`. The shim never kept a program silently on
+  eBPF in this run: `verified program kept on eBPF` appears zero times, so all 45 installs landed.
 
-The 16 verifier rejections are three classes, taken from each archive's `verify.stderr` last line — the
-subject under test is the native body, and each class is a different emitter defect:
+The 17 verifier rejections are five classes, taken from each archive's `verify.stderr` last line and the
+program name in its own failure record — the subject under test is the native body, and each class is a
+different emitter defect:
 
 | requests | programs | verifier's last line |
 |---|---|---|
-| 4 | `sys_enter_init` | `68: (79) r3 = *(u64 *)(r1 +112)` → `R1 invalid mem access 'scalar'` |
+| 4 | `sys_enter_init` | `R1 invalid mem access 'scalar'` |
 | 11, 13, 15, 17, 19, 21 | `trace_ptrace`, `trace_process_vm_writev`, `trace_arch_prctl`, `trace_dup`, `trace_dup2`, `trace_dup3` | `R9 invalid mem access 'scalar'` |
 | 12, 14, 16, 18, 20, 22 | the six matching `trace_ret_*` | `invalid write to stack R10 off=-520 size=8` |
 | 8, 27, 32 | `sys_exit_submit`, `sys_dup_exit_tail`, `uprobe_lkm_seeker_submitter` | `math between fp pointer and register with unbounded min value is not allowed` |
+| 44 | `syscall__accept4` | `R2 unbounded memory access, use 'var &= const' or 'if (var < const)'` |
 
 `off=-520` is the concrete one: the verifier's stack is 512 B, and these bodies write 8 bytes at −520, one
 slot below it. `llc-18` is run with `-bpf-stack-size=4096` (`kprog/x86/trusted_specializer.py:30,99`), so a
 frame that overshoots the real 512 B reaches the verifier instead of being caught at emission.
 
-### Open cause: requests 23 / 24, one absolute-memory instruction
+### Fixed cause: requests 23 / 24, one absolute-memory instruction
 
 `tracee__monitor.post_rejit.log` is not involved; the rejection is the loader's `native-link` call
 (`load.stderr` in `23.failure.tar.gz`):
@@ -111,41 +115,69 @@ non-zero displacement, not IP-relative). Disassembling the exact input the linke
 segment (fs/gs) base; the decoder reports no base register, so the linker's judgement is right and the
 emitter produced the wrong form. Both requests are one program: `artifacts.json` names request 23
 `syscall__execve_enter` and request 24 `syscall__execve_exit` — the same `syscall__execve` pair the shim
-logged as failed, 94,194 B blob each. So this is one emitter site, not a linker policy gap. Recorded as an
-open cause; the fix belongs to whatever emits that load, not to a linker exemption.
+logged as failed, 94,194 B blob each. So this is one emitter site, not a linker policy gap, and the app's
+native bytes are not implicated: `request.native.o` carries no such instruction.
 
-### Open cause: six requests fail generation on a LOCAL `.L` map name
+The site is `compile_sim_ir.cpp`'s `address()`, which lowers the simulator's BPF asm load to
+`getelementptr i8, ptr %base, i64 112`. The archived `checked-simulator.native.bc` shows the base arriving
+as `%5306 = phi ptr [%5289, ..], [%5297, ..], [null, ..]` — a simulator register that is not present reads
+as a constant null pointer (`X86_SIM_L_REG_VALUE` returns `(void *)0`) — so the backend folds the `gep` and
+the guest displacement 112 becomes a host absolute address. Minimal reproduction: the same fold needs a
+provably null base, and a base loaded from a pointer keeps `0x70(%rax)`.
 
-Requests 5, 28, 34, 36, 37 and 38 record only `llc-18` exiting 1. Re-running the packed MIR that each
-archive retains gives the real messages: first `trusted_x86.bpf.c:7335: Looks like the BPF stack limit is
-exceeded`, and with `-bpf-stack-size` raised to 65536, `Undefined temporary symbol .L.str.2`.
+The fix barriers the base bits into a register before the `gep`, so the load stays relative and the address
+is still base + displacement. Replaying request 23's archived link plan against the rebuilt proof object:
+
+```
+native-link: wrote 96431 bytes -> fixed.blob (17 relocs)
+```
+
+where the original proof was refused at IP 0x3b96; the object now has zero absolute memory operands, the
+non-null path still emits `mov 0x70(%rdx),%rdx`, and the simulator's own frame is unchanged at `0x138`.
+
+### Fixed cause: eight requests fail generation on a LOCAL `.L` map name
+
+Requests 5, 28, 34, 36, 37, 38, 39 and 40 record only `llc-18` exiting 1. Re-running the packed MIR that
+each archive retains gives the real messages: first `trusted_x86.bpf.c:7335: Looks like the BPF stack limit
+is exceeded`, and with `-bpf-stack-size` raised to 65536, `Undefined temporary symbol .L.str.2`.
 
 That symbol is the defect. `readelf` shows `.L.str.2` is a 15-byte **LOCAL** object in `.rodata.str1.1` —
 a string literal that shares an address with the map at `value_offset 31` (ARRAY, key 4, value 246).
-`normalize()` (`kprog/trusted_service.py:126-139`) takes the shim envelope's `item['name']` verbatim as the
-symbol name, so the generator emits `extern __u8 __x86_trusted_map_8[] __asm__(".L.str.2") __ksym`, and no
-undefined external reference can bind a LOCAL symbol. The name can only have come from the ELF:
-`kernel.facts.json` carries the map's shape and nothing else, and the `.maps` section's GLOBAL names do not
-include it. The fix is in name resolution — skip LOCAL `.L*` symbols, or synthesize a stable name — not in
-`native-link`, which never sees this input.
-
-Confirmed systematic, not a one-off: requests 38 and 5 fail identically on the same symbol.
+`normalize()` (`kprog/trusted_service.py:126-139`) takes the shim envelope's `item['name']` verbatim, so
+the generator emitted `extern __u8 __x86_trusted_map_8[] __asm__(".L.str.2") __ksym`, and no undefined
+external reference can bind a LOCAL symbol. The name can only have come from the ELF: `kernel.facts.json`
+carries the map's shape and nothing else, and the `.maps` section's GLOBAL names do not include it.
 
 Validated as the whole defect: rewriting only `.L.str.2` to a plain identifier in the retained
 `trusted_x86.bpf.packed.mir` and re-running the same `llc-18` line produces a 547,600-byte object with
 `__trusted_map_8` left `GLOBAL UND`, exactly like the `event_data_map`/`config_map` externs that already
 resolve. Nothing else about the request changes, so the name alone is what `llc` rejects.
 
+The fix sanitizes the **assembler spelling** and leaves the ELF name alone. `native_map_label()`
+(`kprog/trusted_generation.py:37-46`) returns the name unchanged unless it starts with `.L`, in which case
+it prefixes `kprog` and hex-escapes every byte outside `[A-Za-z0-9_.]` (mirroring the C++ helper at
+`native_loader_link_plan.hpp:53-76`); `.L.str.2` becomes `kprog.L.str.2`. The generator
+(`generate_micro_sim_proofs.py:1949-1953`) emits that spelling in the `__asm__` label, and the loader adds
+a matching alias binding (`native_loader.cpp:3988-3995`) so `relocate_trusted_proof` resolves the extern to
+the same kernel map identity. Both ELF-keyed tables (`map_addrs`, `map_addr_ids`, `source_pointers`) stay on
+the raw symbol, so nothing else moves.
+
+Verified on request 38's archived inputs. The regenerated `generated/trusted_x86.bpf.c:16` now reads
+`extern __u8 __x86_trusted_map_8[] __asm__("kprog.L.str.2") __ksym;`, and that line is the only difference
+from the archived C (4 diff lines, 5 bytes). The rename alone is sufficient: rewriting `.L.str.2` to
+`kprog.L.str.2` in the archived `trusted_x86.bpf.packed.mir` and re-running the same `llc-18` line builds at
+`-bpf-stack-size` 4096, 8192 and 65536 (547,592 B each), while the unmodified MIR fails at both 4096 and
+65536 with `Undefined temporary symbol .L.str.2` — so the stack-limit message those messages showed first is
+a separate, later-building condition, not part of this defect.
+
 Pre-existing, not introduced by item 5(d): this run uses the base loader `430a337f2c316c4e` from 11-17
-20:27Z, and 5(d) landed at 22:58Z, so the loader producing these eight failures had none of today's
-readonly-offset change. All six fell
-back to `direct-native` with `status 0`, so the app ran; the cost is coverage.
+20:27Z, and 5(d) landed at 22:58Z.
 
 ### Equal work
 
-Not yet asserted: 14 of 37 programs are native and 21+2 are not, so the two arms cannot be compared as
-equal work until the verifier and emitter classes above are fixed. This section reports the verified path,
-not a timing ratio.
+Not yet asserted: 20 of 47 programs are native and 27 are not (25 recorded fallbacks plus the 2 that never
+loaded), so the two arms cannot be compared as equal work until the verifier and emitter classes above are
+fixed. This section reports the verified path, not a timing ratio.
 
 ## Not yet run
 
