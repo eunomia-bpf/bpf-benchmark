@@ -129,7 +129,12 @@ undefined external reference can bind a LOCAL symbol. The name can only have com
 include it. The fix is in name resolution — skip LOCAL `.L*` symbols, or synthesize a stable name — not in
 `native-link`, which never sees this input.
 
-Confirmed systematic, not a one-off: requests 38 and 5 fail identically on the same symbol. All six fell
+Confirmed systematic, not a one-off: requests 38 and 5 fail identically on the same symbol.
+
+Validated as the whole defect: rewriting only `.L.str.2` to a plain identifier in the retained
+`trusted_x86.bpf.packed.mir` and re-running the same `llc-18` line produces a 547,600-byte object with
+`__trusted_map_8` left `GLOBAL UND`, exactly like the `event_data_map`/`config_map` externs that already
+resolve. Nothing else about the request changes, so the name alone is what `llc` rejects. All six fell
 back to `direct-native` with `status 0`, so the app ran; the cost is coverage.
 
 ### Equal work
