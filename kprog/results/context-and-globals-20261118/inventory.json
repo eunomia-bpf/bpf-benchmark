@@ -1,0 +1,784 @@
+{
+  "scope": "Executable-section relocations in 25 actual BCC selected-entry proof inputs, matched to names bound in their actual kernel plans. Debug/BTF references stay outside this code-reference inventory. Presence describes remaining map/data accesses; absence alone proves neither a frozen value nor complete load-time folding.",
+  "replay": "/workspaces/kprog-raw/perf/named-lpm-20261118/host-20261118T001244Z-2827763/replay/replay.json",
+  "requests": [
+    {
+      "symbol": "tcp_v4_connect",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1_lto8xz",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1_lto8xz/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-1_lto8xz/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 30,
+          "relocation_type": 42,
+          "symbol": "sockets",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    },
+    {
+      "symbol": "fentry_vfs_write",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4jklketw",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4jklketw/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-4jklketw/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 3,
+          "relocation_type": 42,
+          "symbol": "stats",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    },
+    {
+      "symbol": "tracepoint__syscalls__sys_exit_open",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6i31gwia",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6i31gwia/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-6i31gwia/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 39,
+          "relocation_type": 42,
+          "symbol": "start",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 183,
+          "relocation_type": 42,
+          "symbol": "events",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 214,
+          "relocation_type": 42,
+          "symbol": "start",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    },
+    {
+      "symbol": "tcp_v4_connect_ret",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-794zppcb",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-794zppcb/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-794zppcb/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 30,
+          "relocation_type": 42,
+          "symbol": "sockets",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 308,
+          "relocation_type": 42,
+          "symbol": "events",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 337,
+          "relocation_type": 42,
+          "symbol": "sockets",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    },
+    {
+      "symbol": "sys_enter",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7d98s1v6",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7d98s1v6/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7d98s1v6/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 26,
+          "relocation_type": 42,
+          "symbol": "start",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    },
+    {
+      "symbol": "block_rq_issue",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7halu_ke",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7halu_ke/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-7halu_ke/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 7,
+          "relocation_type": 42,
+          "symbol": "LINUX_KERNEL_VERSION",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 82,
+          "relocation_type": 42,
+          "symbol": "infobyreq",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 145,
+          "relocation_type": 42,
+          "symbol": "start",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 287,
+          "relocation_type": 42,
+          "symbol": "start",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    },
+    {
+      "symbol": "inet_sock_set_state",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8e6fl8jk",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8e6fl8jk/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-8e6fl8jk/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 310,
+          "relocation_type": 42,
+          "symbol": "birth",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 406,
+          "relocation_type": 42,
+          "symbol": "idents",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 456,
+          "relocation_type": 42,
+          "symbol": "birth",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 530,
+          "relocation_type": 42,
+          "symbol": "idents",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 932,
+          "relocation_type": 42,
+          "symbol": "events",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 963,
+          "relocation_type": 42,
+          "symbol": "birth",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 980,
+          "relocation_type": 42,
+          "symbol": "idents",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    },
+    {
+      "symbol": "block_rq_complete",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_1aqp51j",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_1aqp51j/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-_1aqp51j/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 97,
+          "relocation_type": 42,
+          "symbol": "start",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 137,
+          "relocation_type": 42,
+          "symbol": "infobyreq",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 233,
+          "relocation_type": 42,
+          "symbol": "events",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 264,
+          "relocation_type": 42,
+          "symbol": "start",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 282,
+          "relocation_type": 42,
+          "symbol": "infobyreq",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    },
+    {
+      "symbol": "blk_account_io_merge_bio",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-a193g4ge",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-a193g4ge/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-a193g4ge/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 64,
+          "relocation_type": 42,
+          "symbol": "infobyreq",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    },
+    {
+      "symbol": "fentry_vfs_open",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ay6ey69x",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ay6ey69x/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ay6ey69x/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 3,
+          "relocation_type": 42,
+          "symbol": "stats",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    },
+    {
+      "symbol": "fentry_vfs_create",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bzxjfd4z",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bzxjfd4z/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-bzxjfd4z/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 3,
+          "relocation_type": 42,
+          "symbol": "stats",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    },
+    {
+      "symbol": "tracepoint__syscalls__sys_enter_openat",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-dxo2lc2q",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-dxo2lc2q/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-dxo2lc2q/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 44,
+          "relocation_type": 42,
+          "symbol": "start",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    },
+    {
+      "symbol": "fentry_vfs_fsync",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hgq_b00n",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hgq_b00n/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-hgq_b00n/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 3,
+          "relocation_type": 42,
+          "symbol": "stats",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    },
+    {
+      "symbol": "sched_wakeup_new",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jb3gko01",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jb3gko01/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jb3gko01/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 34,
+          "relocation_type": 42,
+          "symbol": "start",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    },
+    {
+      "symbol": "block_rq_insert",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jck9lh2k",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jck9lh2k/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-jck9lh2k/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 7,
+          "relocation_type": 42,
+          "symbol": "LINUX_KERNEL_VERSION",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 71,
+          "relocation_type": 42,
+          "symbol": "start",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 222,
+          "relocation_type": 42,
+          "symbol": "start",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    },
+    {
+      "symbol": "sched_wakeup",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k46xd0cp",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k46xd0cp/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-k46xd0cp/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 34,
+          "relocation_type": 42,
+          "symbol": "start",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    },
+    {
+      "symbol": "tracepoint__syscalls__sys_exit_openat",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ll9iyiuh",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ll9iyiuh/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ll9iyiuh/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 39,
+          "relocation_type": 42,
+          "symbol": "start",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 183,
+          "relocation_type": 42,
+          "symbol": "events",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 214,
+          "relocation_type": 42,
+          "symbol": "start",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    },
+    {
+      "symbol": "tcp_v6_connect_ret",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mlacd5gt",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mlacd5gt/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-mlacd5gt/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 30,
+          "relocation_type": 42,
+          "symbol": "sockets",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 312,
+          "relocation_type": 42,
+          "symbol": "events",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 341,
+          "relocation_type": 42,
+          "symbol": "sockets",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    },
+    {
+      "symbol": "kprobe__cap_capable_entry",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o0mz755w",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o0mz755w/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-o0mz755w/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 45,
+          "relocation_type": 42,
+          "symbol": "start",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    },
+    {
+      "symbol": "kprobe__cap_capable_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rh0ow6sg",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rh0ow6sg/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-rh0ow6sg/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 19,
+          "relocation_type": 42,
+          "symbol": "start",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 46,
+          "relocation_type": 42,
+          "symbol": "start",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 153,
+          "relocation_type": 42,
+          "symbol": "LINUX_KERNEL_VERSION",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 202,
+          "relocation_type": 42,
+          "symbol": "events",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    },
+    {
+      "symbol": "sched_switch",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-scqqtjed",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-scqqtjed/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-scqqtjed/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 137,
+          "relocation_type": 42,
+          "symbol": "start",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 186,
+          "relocation_type": 42,
+          "symbol": "start",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 238,
+          "relocation_type": 42,
+          "symbol": "hists",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 427,
+          "relocation_type": 42,
+          "symbol": "hists",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 434,
+          "relocation_type": 2,
+          "symbol": "zero",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 471,
+          "relocation_type": 42,
+          "symbol": "hists",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 602,
+          "relocation_type": 42,
+          "symbol": "start",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    },
+    {
+      "symbol": "tcp_v6_connect",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v27kbtfd",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v27kbtfd/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v27kbtfd/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 30,
+          "relocation_type": 42,
+          "symbol": "sockets",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    },
+    {
+      "symbol": "sys_exit",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v8lv8ar0",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v8lv8ar0/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-v8lv8ar0/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 26,
+          "relocation_type": 42,
+          "symbol": "start",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 70,
+          "relocation_type": 42,
+          "symbol": "data",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 112,
+          "relocation_type": 42,
+          "symbol": "data",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        },
+        {
+          "section": ".text",
+          "offset": 152,
+          "relocation_type": 42,
+          "symbol": "data",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    },
+    {
+      "symbol": "fentry_vfs_read",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-x1s4v62w",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-x1s4v62w/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-x1s4v62w/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 3,
+          "relocation_type": 42,
+          "symbol": "stats",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    },
+    {
+      "symbol": "tracepoint__syscalls__sys_enter_open",
+      "capture": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ys2epo0_",
+      "proof": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ys2epo0_/entry.proof.o",
+      "plan": "/workspaces/repository/corpus/results/current-link-capture-20261117/captures/link-ys2epo0_/link-plan.json",
+      "returncode": 0,
+      "references": [
+        {
+          "section": ".text",
+          "offset": 44,
+          "relocation_type": 42,
+          "symbol": "start",
+          "symbol_type": "STT_NOTYPE",
+          "symbol_size": 0,
+          "definition": "SHN_UNDEF"
+        }
+      ]
+    }
+  ],
+  "bound_symbol_relocations": {
+    "LINUX_KERNEL_VERSION": 3,
+    "birth": 3,
+    "data": 3,
+    "events": 7,
+    "hists": 3,
+    "idents": 3,
+    "infobyreq": 4,
+    "sockets": 6,
+    "start": 22,
+    "stats": 5,
+    "zero": 1
+  }
+}

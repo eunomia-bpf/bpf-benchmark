@@ -1,0 +1,18 @@
+--- a/kprog/libnativeloader/src/native_loader.cpp
++++ b/kprog/libnativeloader/src/native_loader.cpp
+@@ -2564,6 +2564,15 @@
+     load.map_addrs["LINUX_KERNEL_VERSION"] =
+         map->value_addr;
+     load.map_addr_ids["LINUX_KERNEL_VERSION"] = map->kernel_id;
++    if (!map->immutable_value.empty()) {
++        constexpr char hex[] = "0123456789abcdef";
++        std::string value;
++        for (size_t i = 0; i < sizeof(uint32_t); ++i) {
++            const auto byte = map->immutable_value[i];
++            value += hex[byte >> 4]; value += hex[byte & 15];
++        }
++        load.immutable_globals["LINUX_KERNEL_VERSION"] = std::move(value);
++    }
+ }
+ 
+ bool native_data_section_supported(const std::string &section_name)

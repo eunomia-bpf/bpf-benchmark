@@ -1,0 +1,25 @@
+tcp_v4_connect: sockets=1
+fentry_vfs_write: stats=1
+tracepoint__syscalls__sys_exit_open: events=1, start=2
+tcp_v4_connect_ret: events=1, sockets=2
+sys_enter: start=1
+block_rq_issue: LINUX_KERNEL_VERSION=1, infobyreq=1, start=2
+inet_sock_set_state: birth=3, events=1, idents=3
+block_rq_complete: events=1, infobyreq=2, start=2
+blk_account_io_merge_bio: infobyreq=1
+fentry_vfs_open: stats=1
+fentry_vfs_create: stats=1
+tracepoint__syscalls__sys_enter_openat: start=1
+fentry_vfs_fsync: stats=1
+sched_wakeup_new: start=1
+block_rq_insert: LINUX_KERNEL_VERSION=1, start=2
+sched_wakeup: start=1
+tracepoint__syscalls__sys_exit_openat: events=1, start=2
+tcp_v6_connect_ret: events=1, sockets=2
+kprobe__cap_capable_entry: start=1
+kprobe__cap_capable_exit: LINUX_KERNEL_VERSION=1, events=1, start=2
+sched_switch: hists=3, start=3, zero=1
+tcp_v6_connect: sockets=1
+sys_exit: data=3, start=1
+fentry_vfs_read: stats=1
+tracepoint__syscalls__sys_enter_open: start=1
