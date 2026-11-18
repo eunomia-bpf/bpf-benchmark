@@ -1,0 +1,229 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-arm64-mov-keep",
+  "proved": {
+    "MOVK_opcode": 5,
+    "dispatch_body_transitions": 26,
+    "call_dispatch_transitions": 27,
+    "actual_DST_reader_edge_transitions": 5,
+    "allocated_call_to_DST_reader_transitions": 32,
+    "merge_from_reader_return_transitions": 26,
+    "reader_return_to_real_writer_call_transitions": 27,
+    "actual_ZR_read_transitions": 55,
+    "ZR_branch_to_writer_call_transitions": 87,
+    "old_value": "arbitrary BitVec64 returned as Vlong by an actual reader execution; ordinary read completion remains explicit",
+    "immediate": "all BitVec16",
+    "source_columns": [
+      0,
+      16,
+      32,
+      48
+    ],
+    "memory": "merge suffix and real ZR read preserve exact supplied memory; allocation prefix preserves original caller frontier",
+    "expression_equivalence": "source mask/shift/OR equals imported LNSym BitVec.partInstall",
+    "callee_contexts": "actual internal reader and writer Kcall contexts, no Kstop splice",
+    "ordinary_READ_valueRep_warning": "ValueRep admits Vptr; it does not derive the Vlong required by this scalar merge",
+    "native_step_composed": false,
+    "complete_generic_MOVK_return_proved": false
+  },
+  "emission_audit": {
+    "exit": 0,
+    "data": "emission1.json",
+    "log": "emission1.log",
+    "records": 24,
+    "operation": [
+      "ARM64_OP_MOVK"
+    ],
+    "source": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "functions": [
+      "normalize_alias",
+      "encode"
+    ],
+    "destinations": [
+      "w30",
+      "x30",
+      "wzr",
+      "xzr"
+    ],
+    "immediates": [
+      0,
+      65535
+    ],
+    "widths": "W32 native columns0..1 and X64 columns0..3",
+    "aux": "ARM64_AUX_MOVK(16*column), source shift extraction at byte2",
+    "kind": "actual emitted metadata only, no sampled ISA oracle",
+    "Python_frontend_formally_verified": false
+  },
+  "focused": {
+    "exit": 0,
+    "log": "focused10.log",
+    "jobs": 183
+  },
+  "public_queries": {
+    "exit": 0,
+    "log": "Query-1.log",
+    "theorems": 8,
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.Dispatch.Keep.call_dispatch": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.read_call": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.call_read": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.read_zr": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.after_read": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.writer_call": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.merge_eq_partInstall": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.zr_writer_call": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "full_lake_build": {
+    "exit": 0,
+    "log": "lake-build1.log",
+    "jobs": 316
+  },
+  "export_parity": {
+    "exit": 0,
+    "log": "export-parity1.log",
+    "reference": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_identical": true
+  },
+  "attempts": [
+    {
+      "name": "focused1",
+      "exit": 1,
+      "log": "focused1.log",
+      "note": "Exploration derives actual branch after16 width-return transitions; no successful full run claimed."
+    },
+    {
+      "name": "focused2",
+      "exit": 1,
+      "log": "focused2.log",
+      "note": "Duplicated opcode temp update exceeds recursion during FunctionEntry; explicit actual temp bindings replace it."
+    },
+    {
+      "name": "focused3",
+      "exit": 1,
+      "log": "focused3.log",
+      "note": "Direct gss at non-last op getter exceeds recursion; explicit gso/gss getter proof replaces it."
+    },
+    {
+      "name": "focused4",
+      "exit": 1,
+      "log": "focused4.log",
+      "note": "Dispatch27 and source read compile; new writerTemps parenthesis and nested merge reduction fail."
+    },
+    {
+      "name": "focused5",
+      "exit": 1,
+      "log": "focused5.log",
+      "note": "Nested merge evaluation reaches recursion512 at actual result assignment; insertion equation has redundant trailing rfl."
+    },
+    {
+      "name": "focused6",
+      "exit": 1,
+      "log": "focused6.log",
+      "note": "Controlled simp alone still reaches recursion512 at result assignment."
+    },
+    {
+      "name": "focused7",
+      "exit": 1,
+      "log": "focused7.log",
+      "note": "Diagnostic locates exact statement and five actual temp bindings before result; raw state retained."
+    },
+    {
+      "name": "focused8",
+      "exit": 1,
+      "log": "focused8.log",
+      "note": "Staged operand proof needs cached typeof facts; ready-temp getter matching needs explicit gso; redundant rfl removed; all four paths reach writer after26."
+    },
+    {
+      "name": "focused9",
+      "exit": 0,
+      "log": "focused9.log",
+      "note": "All183 jobs pass: source dispatch/read/merge and imported insertion equation at unchanged limits."
+    },
+    {
+      "name": "focused10",
+      "exit": 0,
+      "log": "focused10.log",
+      "note": "All183 jobs pass including actual writer edge and concrete DST31 read/merge/writer path."
+    }
+  ],
+  "limits": {
+    "heartbeats": 200000,
+    "recursion": 512,
+    "lean_workers": 1,
+    "address_space_GiB": 32,
+    "build_cpu": 17,
+    "query_edit_git_cpu": 18,
+    "every_host_command_timing_lock": "shared",
+    "raised": false
+  },
+  "native_make_check": {
+    "run_this_step": false,
+    "reason": "Lean-only changes, C/runtime unchanged",
+    "last_complete_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c"
+  },
+  "remaining": [
+    "compose actual MOVK writer and generic free/return, beginning with ZR",
+    "ordinary reader execution in actual linked world/Kcall, real returned Vlong/materialization/post-memory",
+    "checked native MOVK step with legal width/column and actual fetch/decode",
+    "frontend/provider/producer/caller admission",
+    "native physical memory/alias/origin binding",
+    "Numeric frontier204 initialization distinct from old189",
+    "source control and all-family O1/O2/O4 migration",
+    "remaining M6 and fresh final Lake/make check"
+  ],
+  "complete_ISA_handler_families": 0,
+  "milestones": {
+    "M1_M4": "done",
+    "M5": "open",
+    "M6": "open"
+  },
+  "final_formatting": "Removed trailing spaces on one empty line in Keep.after_width after validation; proof tokens unchanged."
+}

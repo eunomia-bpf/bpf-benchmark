@@ -81,7 +81,11 @@ alias normalizer's shift/complement/width-mask literal binding. The
 [XZR contract](results/m5-arm64-mov-zr/README.md) proves the actual 38-transition
 no-cell writer and 174-transition generic call for WZR/XZR, preserving the
 original caller frontier and relating all legal MOVZ/MOVN columns to the
-checked native step. MOVK and program-level obligations stay open.
+checked native step. The [MOVK source contracts](results/m5-arm64-mov-keep/README.md)
+prove its distinct 27-transition dispatch, actual DST reader edge, 26-transition
+merge and real writer call, relating the source insertion to LNSym's public
+operator. Complete MOVK calls/native composition and program-level obligations
+stay open.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 
