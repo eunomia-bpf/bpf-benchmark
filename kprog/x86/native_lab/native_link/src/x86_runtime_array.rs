@@ -42,27 +42,30 @@ fn routine(layout: &RuntimeArrayLayout) -> Result<(Vec<u8>, usize)> {
 
 pub(super) fn share(blob: &mut Vec<u8>, relocs: &mut Vec<RelocRecord>,
                     layout: &RuntimeArrayLayout, helper: u64,
-                    lpm: Option<&RuntimeLpmLayout>) -> Result<Option<(usize, usize)>> {
+                    lpm: Option<&RuntimeLpmLayout>, known_lpm: &[usize]) -> Result<Option<(usize, usize)>> {
     let sites: Vec<usize> = relocs.iter().filter(|r|
         r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32 && r.target == helper)
         .map(|r| r.offset as usize).collect();
-    if sites.is_empty() { return Ok(None); }
+    if sites.is_empty() { return if let Some(lpm)=lpm {
+        lpm_lookup::share(blob,relocs,lpm,helper,known_lpm)
+    } else {Ok(None)}; }
     let start = blob.len();
     // Non-ARRAY dispatch enters the existing LPM body in the same frame.
     // Its final generic call retains the external E8 slot required by loaders.
-    let (bytes, nested) = if let Some(lpm) = lpm {
+    let (bytes, nested, known_entry) = if let Some(lpm) = lpm {
         let mut bytes = build_prefix(layout)?;
         let prefix = bytes.len();
-        let (body, mut nested) = lpm_lookup::routine(lpm, helper)?;
+        let (body, mut nested, entry) = lpm_lookup::routine(lpm, helper, true)?;
         bytes.extend_from_slice(&body);
         for r in &mut nested { r.offset = u32::try_from(prefix + r.offset as usize)?; }
-        (bytes, nested)
+        (bytes, nested, prefix+entry)
     } else {
         let (bytes, call) = routine(layout)?;
         (bytes, vec![RelocRecord { offset: u32::try_from(call)?,
-            kind: NATIVE_LAB_RELOC_HELPER_CALL_REL32, target: helper }])
+            kind: NATIVE_LAB_RELOC_HELPER_CALL_REL32, target: helper }], 0)
     };
     probe_read::redirect(blob, &sites, start)?;
+    probe_read::redirect(blob, known_lpm, start+known_entry)?;
     relocs.retain(|r| !(r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32 && r.target == helper));
     blob.extend_from_slice(&bytes);
     for mut r in nested { r.offset = u32::try_from(start + r.offset as usize)?; relocs.push(r); }
@@ -178,7 +181,7 @@ mod tests {
         let mut relocs = vec![RelocRecord { offset: 0, kind: 1, target: 0x1234 },
             RelocRecord { offset: 5, kind: 1, target: 0x1234 },
             RelocRecord { offset: 10, kind: 1, target: 0x5678 }];
-        let range = share(&mut blob, &mut relocs, &layout, 0x1234, None)?.expect("two lookups");
+        let range = share(&mut blob, &mut relocs, &layout, 0x1234, None, &[])?.expect("two lookups");
         assert_eq!(range, (16, 65), "one49-byte routine, not one per call");
         assert_eq!((blob[0],blob[5]),(0xe8,0xe9));
         for site in [0usize, 5] {
@@ -192,6 +195,17 @@ mod tests {
         assert_eq!(external.offset, 16+39);
         assert_eq!(&blob[external.offset as usize..external.offset as usize+5],
             X86_HELPER_CALL_REL32_SLOT.as_slice(), "sameE8 slot accepted by both loaders");
+        let lpm=RuntimeLpmLayout{map_type:12,lpm_type:11,root:40,max_prefixlen:48,data_size:56,
+            child:0,child_stride:8,node_prefixlen:16,node_flags:20,node_data:24,key_prefixlen:0,key_data:4};
+        let (_,_,entry)=lpm_lookup::routine(&lpm,0x1234,true)?;
+        let mut mixed=X86_HELPER_CALL_REL32_SLOT.repeat(2);
+        let mut reloc=vec![RelocRecord{offset:0,kind:1,target:0x1234}];
+        let range=share(&mut mixed,&mut reloc,&layout,0x1234,Some(&lpm),&[5])?.expect("mixed ARRAY/LPM");
+        for (site,target) in [(0,range.0),(5,range.0+build_prefix(&layout)?.len()+entry)] {
+            let disp=i32::from_le_bytes(mixed[site+1..site+5].try_into()?);
+            assert_eq!((site+5) as i64+i64::from(disp),target as i64);
+        }
+        assert_eq!(reloc.len(),1,"one generic fallback across ARRAY and both LPM entries");
         Ok(())
     }
 }

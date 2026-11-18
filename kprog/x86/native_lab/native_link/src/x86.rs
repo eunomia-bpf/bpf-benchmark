@@ -601,6 +601,7 @@ enum PatchKind {
     HelperBranchRel32 { target_addr: u64, opcode: u8, probe_size: Option<u32> },
     LocalMemory { routine: memory::Routine },
     LocalArray { bytes: Vec<u8> },
+    LocalLpm,
     /// Rewritten `mov reg, [rip+GOT]` against a map symbol. The runner
     /// patches the immediate field with the live kernel map pointer.
     MapImmediate { name: String, imm_offset: usize },
@@ -1566,6 +1567,13 @@ pub(super) fn rewrite_x86(
                             &sym.name, map_lookup_helper_addr,
                         )?;
                         match spec.kind {
+                            LookupKind::Lpm12 if !proof_mode && runtime_lpm_layout.is_some()
+                                && map_lookup_helper_addr!=0 => {
+                                push_x86_replacement(&mut local,&mut kinds,&mut insn_local_ip,
+                                    local_ip,build_x86_helper_call_rel32_slot()?,Some(PatchKind::LocalLpm));
+                                resolved_helper_call_sites.insert(site_key);
+                                continue;
+                            }
                             LookupKind::Array | LookupKind::PerCpuArray => {
                                 push_x86_replacement(&mut local, &mut kinds, &mut insn_local_ip,
                                     local_ip, build_x86_helper_call_rel32_slot()?,
@@ -1581,13 +1589,8 @@ pub(super) fn rewrite_x86(
                             | LookupKind::LruHash
                             | LookupKind::PerCpuHash
                             | LookupKind::HashOfMaps => {
-                                // The loaded LPM key has the existing native routine's 12 data bytes.
-                                // Reuse its shared dispatch/body; other shapes keep the kernel target.
-                                let helper_addr = if spec.kind==LookupKind::Lpm12 && !proof_mode
-                                    && runtime_lpm_layout.is_some() && map_lookup_helper_addr!=0 {
-                                    map_lookup_helper_addr
-                                } else { resolve_lookup_site_target(&spec,
-                                    &format!("x86 lookup-site {site_label} ({:?})",spec.kind))? };
+                                let helper_addr = resolve_lookup_site_target(&spec,
+                                    &format!("x86 lookup-site {site_label} ({:?})",spec.kind))?;
                                 push_x86_helper_call_reloc(
                                     &mut local,
                                     &mut kinds,
@@ -1746,8 +1749,10 @@ pub(super) fn rewrite_x86(
     let mut map_patches = Vec::new();
     let mut relocs = Vec::new();
     let mut probe_sizes=HashMap::new();
+    let mut known_lpm=Vec::new();
     for p in &patches {
         match &p.kind {
+            PatchKind::LocalLpm => known_lpm.push(p.global_offset),
             PatchKind::MapImmediate { name, imm_offset } => {
                 let offset = p
                     .global_offset
@@ -1834,7 +1839,7 @@ pub(super) fn rewrite_x86(
     // out-of-line implementation serves every program, while caller-side
     // value/inner-map/per-CPU/LRU postprocessing stays in the image.
     if let Some(layout) = runtime_array_layout.filter(|_| !proof_mode) {
-        if let Some(range) = runtime_array::share(&mut blob, &mut relocs, layout, map_lookup_helper_addr, runtime_lpm_layout)? {
+        if let Some(range) = runtime_array::share(&mut blob, &mut relocs, layout, map_lookup_helper_addr, runtime_lpm_layout, &known_lpm)? {
             show_lto_range(show, if runtime_lpm_layout.is_some() {"runtime_array_lpm"} else {"runtime_array"}, range);
             code_ranges.push(range);
         }
@@ -1868,7 +1873,7 @@ pub(super) fn rewrite_x86(
     }
 
     if let Some(layout)=runtime_lpm_layout.filter(|_| !proof_mode && runtime_array_layout.is_none()) {
-        if let Some(range)=lpm_lookup::share(&mut blob,&mut relocs,layout,map_lookup_helper_addr)? {
+        if let Some(range)=lpm_lookup::share(&mut blob,&mut relocs,layout,map_lookup_helper_addr,&known_lpm)? {
             show_lto_range(show, "lpm_lookup", range);
             code_ranges.push(range);
         }
@@ -4597,16 +4602,17 @@ mod tests {
             elem_size:0,index_mask:0,value_offset:0,percpu_base_addr:0};
         let layout=RuntimeLpmLayout{map_type:12,lpm_type:11,root:40,max_prefixlen:48,data_size:56,
             child:0,child_stride:8,node_prefixlen:16,node_flags:20,node_data:24,key_prefixlen:0,key_data:4};
-        for exact in [false,true] {for available in [false,true] {for typed in [false,true] {
+        let array=RuntimeArrayLayout{map_type:12,array_type:2,max_entries:24,elem_size:32,index_mask:36,value:64};
+        for array in [None,Some(&array)] {for exact in [false,true] {for available in [false,true] {for typed in [false,true] {
             let mut fact=spec.clone();if !typed {fact.kind=LookupKind::Call;}
             let facts=HashMap::from([((if exact {"map"}else{"other"}).into(),fact)]);
             let result=rewrite_x86(&elf,&entry,&[entry.clone()],
                 &HashMap::from([("bpf_map_lookup_elem".into(),0x1234)]),
-                &HashMap::from([("map".into(),0)]),&facts,&[],false,false,None,None,
+                &HashMap::from([("map".into(),0)]),&facts,&[],false,false,array,None,
                 if available {Some(&layout)}else{None},false)?;
             let targets:Vec<_>=result.relocs.iter().filter(|r|r.kind==1).map(|r|r.target).collect();
             let raw=exact && (!available || !typed);
-            assert_eq!(targets,vec![if raw {0x5678}else{0x1234}],
+            assert_eq!(targets,if exact&&available&&typed {vec![]} else {vec![if raw {0x5678}else{0x1234}]},
                 "exact={exact} available={available} typed={typed}");
             let has_native=!raw && available;
             assert_eq!(result.blob.len()>bytes.len()+100,has_native,"one native routine when eligible");
@@ -4630,7 +4636,7 @@ mod tests {
                         "named LPM entry: present={present} prefix={prefix}");
                 }
             }
-        }}}
+        }}}}
         Ok(())
     }
 

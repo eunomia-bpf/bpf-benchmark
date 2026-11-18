@@ -11,12 +11,16 @@ fn mem(b:&mut Vec<u8>,op:&[u8],modrm:usize,offset:u32)->Result<()> {
     Ok(())
 }
 fn jmp(b:&mut Vec<u8>)->usize {b.push(0xe9);let at=b.len();b.extend_from_slice(&[0;4]);at}
-pub(super) fn routine(l:&RuntimeLpmLayout,helper:u64)->Result<(Vec<u8>,Vec<RelocRecord>)> {
+pub(super) fn routine(l:&RuntimeLpmLayout,helper:u64,guarded:bool)->Result<(Vec<u8>,Vec<RelocRecord>,usize)> {
     let mut b=Vec::new();
-    mem(&mut b,&[0x81,0xbf],1,l.map_type)?;b.extend_from_slice(&l.lpm_type.to_le_bytes());
-    let other_type=append_x86_jcc_rel32(&mut b,0x85);
-    mem(&mut b,&[0x48,0x83,0xbf],2,l.data_size)?;b.push(12);
-    let other_size=append_x86_jcc_rel32(&mut b,0x85);
+    let mut fallbacks=Vec::new();
+    if guarded {
+        mem(&mut b,&[0x81,0xbf],1,l.map_type)?;b.extend_from_slice(&l.lpm_type.to_le_bytes());
+        fallbacks.push(append_x86_jcc_rel32(&mut b,0x85));
+        mem(&mut b,&[0x48,0x83,0xbf],2,l.data_size)?;b.push(12);
+        fallbacks.push(append_x86_jcc_rel32(&mut b,0x85));
+    }
+    let mut entry=[b.len()];
     mem(&mut b,&[0x44,0x8b,0x96],2,l.key_prefixlen)?; // r10d=query prefix
     mem(&mut b,&[0x4c,0x3b,0x97],2,l.max_prefixlen)?;
     let invalid=append_x86_jcc_rel32(&mut b,0x87);
@@ -80,19 +84,23 @@ pub(super) fn routine(l:&RuntimeLpmLayout,helper:u64)->Result<(Vec<u8>,Vec<Reloc
     mem(&mut b,&[0x49,0x8d,0x80],2,l.node_data+12)?;b.push(0xc3);
     let zero=b.len();patch_x86_rel32(&mut b,invalid,zero)?;patch_x86_rel32(&mut b,absent,zero)?;
     b.extend_from_slice(&[0x31,0xc0,0xc3]);
-    let fallback=b.len();patch_x86_rel32(&mut b,other_type,fallback)?;patch_x86_rel32(&mut b,other_size,fallback)?;
-    b.extend_from_slice(&[0x48,0x83,0xec,8]);let call=b.len();b.extend_from_slice(&X86_HELPER_CALL_REL32_SLOT);
-    b.extend_from_slice(&[0x48,0x83,0xc4,8,0xc3]);
-    let nested=vec![RelocRecord{offset:call as u32,kind:1,target:helper}];
-    let (bytes,relocs,_)=probe_read::compact((b,nested,Vec::new()))?;
-    Ok((bytes,relocs))
+    let mut nested=Vec::new();
+    if guarded {
+        let fallback=b.len();for at in fallbacks {patch_x86_rel32(&mut b,at,fallback)?;}
+        b.extend_from_slice(&[0x48,0x83,0xec,8]);let call=b.len();b.extend_from_slice(&X86_HELPER_CALL_REL32_SLOT);
+        b.extend_from_slice(&[0x48,0x83,0xc4,8,0xc3]);
+        nested.push(RelocRecord{offset:call as u32,kind:1,target:helper});
+    }
+    let (bytes,relocs,_)=probe_read::compact_at((b,nested,Vec::new()),&mut entry)?;
+    Ok((bytes,relocs,entry[0]))
 }
 pub(super) fn share(blob:&mut Vec<u8>,relocs:&mut Vec<RelocRecord>,layout:&RuntimeLpmLayout,
-                    helper:u64)->Result<Option<(usize,usize)>> {
+                    helper:u64,known:&[usize])->Result<Option<(usize,usize)>> {
     let calls:Vec<_>=relocs.iter().filter(|r|r.kind==1&&r.target==helper).map(|r|r.offset as usize).collect();
-    if calls.is_empty(){return Ok(None);}
-    let start=blob.len();let (bytes,nested)=routine(layout,helper)?;
+    if calls.is_empty()&&known.is_empty(){return Ok(None);}
+    let start=blob.len();let (bytes,nested,entry)=routine(layout,helper,!calls.is_empty())?;
     probe_read::redirect(blob,&calls,start)?;
+    probe_read::redirect(blob,known,start+entry)?;
     relocs.retain(|r|!(r.kind==1&&r.target==helper));blob.extend_from_slice(&bytes);
     for mut r in nested {r.offset=u32::try_from(start+r.offset as usize)?;relocs.push(r);}
     Ok(Some((start,blob.len())))
@@ -141,7 +149,7 @@ mod tests {
                 max_prefixlen:56+pad,data_size:64+pad,child:8+pad,child_stride:8,
                 node_prefixlen:32+pad,node_flags:36+pad,node_data:48+pad,
                 key_prefixlen:pad,key_data:4+pad};
-            let (code,_)=routine(&l,0x1234)?;
+            let (code,_,_)=routine(&l,0x1234,true)?;
             let mut map=[0u8;256];let mut node=[0u8;256];let mut key=[0u8;256];
             let put32=|bytes:&mut [u8],offset:u32,value:u32| bytes[offset as usize..offset as usize+4].copy_from_slice(&value.to_le_bytes());
             let put64=|bytes:&mut [u8],offset:u32,value:u64| bytes[offset as usize..offset as usize+8].copy_from_slice(&value.to_le_bytes());
@@ -188,7 +196,7 @@ mod tests {
             .arg(root.join("kprog/build/test-lpm-lookup.c")).arg("-o").arg(&driver).output()?;
         fs::write(out.join("compile.stdout"),&cc.stdout)?;fs::write(out.join("compile.stderr"),&cc.stderr)?;
         if !cc.status.success(){bail!("LPM fixture compile: {}",String::from_utf8_lossy(&cc.stderr));}
-        let (bytes,nested)=routine(&layout,0x1234)?;
+        let (bytes,nested,entry)=routine(&layout,0x1234,true)?;
         assert_eq!(nested.len(),1);assert_eq!((nested[0].kind,nested[0].target),(1,0x1234));
         let call=nested[0].offset as usize;
         assert_eq!(&bytes[call..call+5],X86_HELPER_CALL_REL32_SLOT.as_slice());
@@ -200,7 +208,7 @@ mod tests {
         let mut blob=vec![0xe8,0,0,0,0,0xe9,0,0,0,0,0xc3];
         let mut relocs=vec![RelocRecord{offset:0,kind:1,target:0x1234},
                             RelocRecord{offset:5,kind:1,target:0x1234}];
-        let range=share(&mut blob,&mut relocs,&layout,0x1234)?.expect("shared LPM");
+        let range=share(&mut blob,&mut relocs,&layout,0x1234,&[])?.expect("shared LPM");
         assert_eq!((blob[0],blob[5]),(0xe8,0xe9));
         for site in [0usize,5] {
             let rel=i32::from_le_bytes(blob[site+1..site+5].try_into()?);
@@ -211,6 +219,16 @@ mod tests {
             "sized helper slot must receive the shared leaf shift exactly once");
         assert_eq!(&blob[relocs[0].offset as usize..relocs[0].offset as usize+5],
                    X86_HELPER_CALL_REL32_SLOT.as_slice());
+        // A dynamic call and a proven call share one worker with two entries.
+        let mut mixed=X86_HELPER_CALL_REL32_SLOT.repeat(2);
+        let mut reloc=vec![RelocRecord{offset:0,kind:1,target:0x1234}];
+        let range=share(&mut mixed,&mut reloc,&layout,0x1234,&[5])?.expect("mixed LPM");
+        assert_eq!(&mixed[range.0..],bytes.as_slice());
+        for (site,target) in [(0,range.0),(5,range.0+entry)] {
+            let disp=i32::from_le_bytes(mixed[site+1..site+5].try_into()?);
+            assert_eq!((site+5) as i64+i64::from(disp),target as i64);
+        }
+        assert_eq!(reloc.len(),1,"one generic fallback for both entries");
         Ok(())
     }
 }

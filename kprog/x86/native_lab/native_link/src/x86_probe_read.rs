@@ -393,7 +393,7 @@ pub(super) fn compact(routine: (Vec<u8>, Vec<RelocRecord>, Vec<LoadSite>))
     compact_at(routine,&mut [])
 }
 
-fn compact_at(routine: (Vec<u8>,Vec<RelocRecord>,Vec<LoadSite>), marks: &mut [usize])
+pub(super) fn compact_at(routine: (Vec<u8>,Vec<RelocRecord>,Vec<LoadSite>), marks: &mut [usize])
     -> Result<(Vec<u8>,Vec<RelocRecord>,Vec<LoadSite>)> {
     let (bytes, mut relocs, mut sites) = routine;
     let mut decoder = Decoder::new(64, &bytes, DecoderOptions::NONE);

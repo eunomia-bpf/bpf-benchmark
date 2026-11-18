@@ -1,0 +1,285 @@
+diff --git a/kprog/x86/native_lab/native_link/src/x86.rs b/kprog/x86/native_lab/native_link/src/x86.rs
+index 19a92c22c..1f5bafca3 100644
+--- a/kprog/x86/native_lab/native_link/src/x86.rs
++++ b/kprog/x86/native_lab/native_link/src/x86.rs
+@@ -601,6 +601,7 @@ enum PatchKind {
+     HelperBranchRel32 { target_addr: u64, opcode: u8, probe_size: Option<u32> },
+     LocalMemory { routine: memory::Routine },
+     LocalArray { bytes: Vec<u8> },
++    LocalLpm,
+     /// Rewritten `mov reg, [rip+GOT]` against a map symbol. The runner
+     /// patches the immediate field with the live kernel map pointer.
+     MapImmediate { name: String, imm_offset: usize },
+@@ -1566,6 +1567,13 @@ pub(super) fn rewrite_x86(
+                             &sym.name, map_lookup_helper_addr,
+                         )?;
+                         match spec.kind {
++                            LookupKind::Lpm12 if !proof_mode && runtime_lpm_layout.is_some()
++                                && map_lookup_helper_addr!=0 => {
++                                push_x86_replacement(&mut local,&mut kinds,&mut insn_local_ip,
++                                    local_ip,build_x86_helper_call_rel32_slot()?,Some(PatchKind::LocalLpm));
++                                resolved_helper_call_sites.insert(site_key);
++                                continue;
++                            }
+                             LookupKind::Array | LookupKind::PerCpuArray => {
+                                 push_x86_replacement(&mut local, &mut kinds, &mut insn_local_ip,
+                                     local_ip, build_x86_helper_call_rel32_slot()?,
+@@ -1581,13 +1589,8 @@ pub(super) fn rewrite_x86(
+                             | LookupKind::LruHash
+                             | LookupKind::PerCpuHash
+                             | LookupKind::HashOfMaps => {
+-                                // The loaded LPM key has the existing native routine's 12 data bytes.
+-                                // Reuse its shared dispatch/body; other shapes keep the kernel target.
+-                                let helper_addr = if spec.kind==LookupKind::Lpm12 && !proof_mode
+-                                    && runtime_lpm_layout.is_some() && map_lookup_helper_addr!=0 {
+-                                    map_lookup_helper_addr
+-                                } else { resolve_lookup_site_target(&spec,
+-                                    &format!("x86 lookup-site {site_label} ({:?})",spec.kind))? };
++                                let helper_addr = resolve_lookup_site_target(&spec,
++                                    &format!("x86 lookup-site {site_label} ({:?})",spec.kind))?;
+                                 push_x86_helper_call_reloc(
+                                     &mut local,
+                                     &mut kinds,
+@@ -1746,8 +1749,10 @@ pub(super) fn rewrite_x86(
+     let mut map_patches = Vec::new();
+     let mut relocs = Vec::new();
+     let mut probe_sizes=HashMap::new();
++    let mut known_lpm=Vec::new();
+     for p in &patches {
+         match &p.kind {
++            PatchKind::LocalLpm => known_lpm.push(p.global_offset),
+             PatchKind::MapImmediate { name, imm_offset } => {
+                 let offset = p
+                     .global_offset
+@@ -1834,7 +1839,7 @@ pub(super) fn rewrite_x86(
+     // out-of-line implementation serves every program, while caller-side
+     // value/inner-map/per-CPU/LRU postprocessing stays in the image.
+     if let Some(layout) = runtime_array_layout.filter(|_| !proof_mode) {
+-        if let Some(range) = runtime_array::share(&mut blob, &mut relocs, layout, map_lookup_helper_addr, runtime_lpm_layout)? {
++        if let Some(range) = runtime_array::share(&mut blob, &mut relocs, layout, map_lookup_helper_addr, runtime_lpm_layout, &known_lpm)? {
+             show_lto_range(show, if runtime_lpm_layout.is_some() {"runtime_array_lpm"} else {"runtime_array"}, range);
+             code_ranges.push(range);
+         }
+@@ -1868,7 +1873,7 @@ pub(super) fn rewrite_x86(
+     }
+ 
+     if let Some(layout)=runtime_lpm_layout.filter(|_| !proof_mode && runtime_array_layout.is_none()) {
+-        if let Some(range)=lpm_lookup::share(&mut blob,&mut relocs,layout,map_lookup_helper_addr)? {
++        if let Some(range)=lpm_lookup::share(&mut blob,&mut relocs,layout,map_lookup_helper_addr,&known_lpm)? {
+             show_lto_range(show, "lpm_lookup", range);
+             code_ranges.push(range);
+         }
+@@ -4597,16 +4602,17 @@ mod tests {
+             elem_size:0,index_mask:0,value_offset:0,percpu_base_addr:0};
+         let layout=RuntimeLpmLayout{map_type:12,lpm_type:11,root:40,max_prefixlen:48,data_size:56,
+             child:0,child_stride:8,node_prefixlen:16,node_flags:20,node_data:24,key_prefixlen:0,key_data:4};
+-        for exact in [false,true] {for available in [false,true] {for typed in [false,true] {
++        let array=RuntimeArrayLayout{map_type:12,array_type:2,max_entries:24,elem_size:32,index_mask:36,value:64};
++        for array in [None,Some(&array)] {for exact in [false,true] {for available in [false,true] {for typed in [false,true] {
+             let mut fact=spec.clone();if !typed {fact.kind=LookupKind::Call;}
+             let facts=HashMap::from([((if exact {"map"}else{"other"}).into(),fact)]);
+             let result=rewrite_x86(&elf,&entry,&[entry.clone()],
+                 &HashMap::from([("bpf_map_lookup_elem".into(),0x1234)]),
+-                &HashMap::from([("map".into(),0)]),&facts,&[],false,false,None,None,
++                &HashMap::from([("map".into(),0)]),&facts,&[],false,false,array,None,
+                 if available {Some(&layout)}else{None},false)?;
+             let targets:Vec<_>=result.relocs.iter().filter(|r|r.kind==1).map(|r|r.target).collect();
+             let raw=exact && (!available || !typed);
+-            assert_eq!(targets,vec![if raw {0x5678}else{0x1234}],
++            assert_eq!(targets,if exact&&available&&typed {vec![]} else {vec![if raw {0x5678}else{0x1234}]},
+                 "exact={exact} available={available} typed={typed}");
+             let has_native=!raw && available;
+             assert_eq!(result.blob.len()>bytes.len()+100,has_native,"one native routine when eligible");
+@@ -4630,7 +4636,7 @@ mod tests {
+                         "named LPM entry: present={present} prefix={prefix}");
+                 }
+             }
+-        }}}
++        }}}}
+         Ok(())
+     }
+ 
+diff --git a/kprog/x86/native_lab/native_link/src/x86_lpm_lookup.rs b/kprog/x86/native_lab/native_link/src/x86_lpm_lookup.rs
+index 1b2bde8ce..dd51b600e 100644
+--- a/kprog/x86/native_lab/native_link/src/x86_lpm_lookup.rs
++++ b/kprog/x86/native_lab/native_link/src/x86_lpm_lookup.rs
+@@ -11,12 +11,16 @@ fn mem(b:&mut Vec<u8>,op:&[u8],modrm:usize,offset:u32)->Result<()> {
+     Ok(())
+ }
+ fn jmp(b:&mut Vec<u8>)->usize {b.push(0xe9);let at=b.len();b.extend_from_slice(&[0;4]);at}
+-pub(super) fn routine(l:&RuntimeLpmLayout,helper:u64)->Result<(Vec<u8>,Vec<RelocRecord>)> {
++pub(super) fn routine(l:&RuntimeLpmLayout,helper:u64,guarded:bool)->Result<(Vec<u8>,Vec<RelocRecord>,usize)> {
+     let mut b=Vec::new();
+-    mem(&mut b,&[0x81,0xbf],1,l.map_type)?;b.extend_from_slice(&l.lpm_type.to_le_bytes());
+-    let other_type=append_x86_jcc_rel32(&mut b,0x85);
+-    mem(&mut b,&[0x48,0x83,0xbf],2,l.data_size)?;b.push(12);
+-    let other_size=append_x86_jcc_rel32(&mut b,0x85);
++    let mut fallbacks=Vec::new();
++    if guarded {
++        mem(&mut b,&[0x81,0xbf],1,l.map_type)?;b.extend_from_slice(&l.lpm_type.to_le_bytes());
++        fallbacks.push(append_x86_jcc_rel32(&mut b,0x85));
++        mem(&mut b,&[0x48,0x83,0xbf],2,l.data_size)?;b.push(12);
++        fallbacks.push(append_x86_jcc_rel32(&mut b,0x85));
++    }
++    let mut entry=[b.len()];
+     mem(&mut b,&[0x44,0x8b,0x96],2,l.key_prefixlen)?; // r10d=query prefix
+     mem(&mut b,&[0x4c,0x3b,0x97],2,l.max_prefixlen)?;
+     let invalid=append_x86_jcc_rel32(&mut b,0x87);
+@@ -80,19 +84,23 @@ pub(super) fn routine(l:&RuntimeLpmLayout,helper:u64)->Result<(Vec<u8>,Vec<Reloc
+     mem(&mut b,&[0x49,0x8d,0x80],2,l.node_data+12)?;b.push(0xc3);
+     let zero=b.len();patch_x86_rel32(&mut b,invalid,zero)?;patch_x86_rel32(&mut b,absent,zero)?;
+     b.extend_from_slice(&[0x31,0xc0,0xc3]);
+-    let fallback=b.len();patch_x86_rel32(&mut b,other_type,fallback)?;patch_x86_rel32(&mut b,other_size,fallback)?;
+-    b.extend_from_slice(&[0x48,0x83,0xec,8]);let call=b.len();b.extend_from_slice(&X86_HELPER_CALL_REL32_SLOT);
+-    b.extend_from_slice(&[0x48,0x83,0xc4,8,0xc3]);
+-    let nested=vec![RelocRecord{offset:call as u32,kind:1,target:helper}];
+-    let (bytes,relocs,_)=probe_read::compact((b,nested,Vec::new()))?;
+-    Ok((bytes,relocs))
++    let mut nested=Vec::new();
++    if guarded {
++        let fallback=b.len();for at in fallbacks {patch_x86_rel32(&mut b,at,fallback)?;}
++        b.extend_from_slice(&[0x48,0x83,0xec,8]);let call=b.len();b.extend_from_slice(&X86_HELPER_CALL_REL32_SLOT);
++        b.extend_from_slice(&[0x48,0x83,0xc4,8,0xc3]);
++        nested.push(RelocRecord{offset:call as u32,kind:1,target:helper});
++    }
++    let (bytes,relocs,_)=probe_read::compact_at((b,nested,Vec::new()),&mut entry)?;
++    Ok((bytes,relocs,entry[0]))
+ }
+ pub(super) fn share(blob:&mut Vec<u8>,relocs:&mut Vec<RelocRecord>,layout:&RuntimeLpmLayout,
+-                    helper:u64)->Result<Option<(usize,usize)>> {
++                    helper:u64,known:&[usize])->Result<Option<(usize,usize)>> {
+     let calls:Vec<_>=relocs.iter().filter(|r|r.kind==1&&r.target==helper).map(|r|r.offset as usize).collect();
+-    if calls.is_empty(){return Ok(None);}
+-    let start=blob.len();let (bytes,nested)=routine(layout,helper)?;
++    if calls.is_empty()&&known.is_empty(){return Ok(None);}
++    let start=blob.len();let (bytes,nested,entry)=routine(layout,helper,!calls.is_empty())?;
+     probe_read::redirect(blob,&calls,start)?;
++    probe_read::redirect(blob,known,start+entry)?;
+     relocs.retain(|r|!(r.kind==1&&r.target==helper));blob.extend_from_slice(&bytes);
+     for mut r in nested {r.offset=u32::try_from(start+r.offset as usize)?;relocs.push(r);}
+     Ok(Some((start,blob.len())))
+@@ -141,7 +149,7 @@ mod tests {
+                 max_prefixlen:56+pad,data_size:64+pad,child:8+pad,child_stride:8,
+                 node_prefixlen:32+pad,node_flags:36+pad,node_data:48+pad,
+                 key_prefixlen:pad,key_data:4+pad};
+-            let (code,_)=routine(&l,0x1234)?;
++            let (code,_,_)=routine(&l,0x1234,true)?;
+             let mut map=[0u8;256];let mut node=[0u8;256];let mut key=[0u8;256];
+             let put32=|bytes:&mut [u8],offset:u32,value:u32| bytes[offset as usize..offset as usize+4].copy_from_slice(&value.to_le_bytes());
+             let put64=|bytes:&mut [u8],offset:u32,value:u64| bytes[offset as usize..offset as usize+8].copy_from_slice(&value.to_le_bytes());
+@@ -188,7 +196,7 @@ mod tests {
+             .arg(root.join("kprog/build/test-lpm-lookup.c")).arg("-o").arg(&driver).output()?;
+         fs::write(out.join("compile.stdout"),&cc.stdout)?;fs::write(out.join("compile.stderr"),&cc.stderr)?;
+         if !cc.status.success(){bail!("LPM fixture compile: {}",String::from_utf8_lossy(&cc.stderr));}
+-        let (bytes,nested)=routine(&layout,0x1234)?;
++        let (bytes,nested,entry)=routine(&layout,0x1234,true)?;
+         assert_eq!(nested.len(),1);assert_eq!((nested[0].kind,nested[0].target),(1,0x1234));
+         let call=nested[0].offset as usize;
+         assert_eq!(&bytes[call..call+5],X86_HELPER_CALL_REL32_SLOT.as_slice());
+@@ -200,7 +208,7 @@ mod tests {
+         let mut blob=vec![0xe8,0,0,0,0,0xe9,0,0,0,0,0xc3];
+         let mut relocs=vec![RelocRecord{offset:0,kind:1,target:0x1234},
+                             RelocRecord{offset:5,kind:1,target:0x1234}];
+-        let range=share(&mut blob,&mut relocs,&layout,0x1234)?.expect("shared LPM");
++        let range=share(&mut blob,&mut relocs,&layout,0x1234,&[])?.expect("shared LPM");
+         assert_eq!((blob[0],blob[5]),(0xe8,0xe9));
+         for site in [0usize,5] {
+             let rel=i32::from_le_bytes(blob[site+1..site+5].try_into()?);
+@@ -211,6 +219,16 @@ mod tests {
+             "sized helper slot must receive the shared leaf shift exactly once");
+         assert_eq!(&blob[relocs[0].offset as usize..relocs[0].offset as usize+5],
+                    X86_HELPER_CALL_REL32_SLOT.as_slice());
++        // A dynamic call and a proven call share one worker with two entries.
++        let mut mixed=X86_HELPER_CALL_REL32_SLOT.repeat(2);
++        let mut reloc=vec![RelocRecord{offset:0,kind:1,target:0x1234}];
++        let range=share(&mut mixed,&mut reloc,&layout,0x1234,&[5])?.expect("mixed LPM");
++        assert_eq!(&mixed[range.0..],bytes.as_slice());
++        for (site,target) in [(0,range.0),(5,range.0+entry)] {
++            let disp=i32::from_le_bytes(mixed[site+1..site+5].try_into()?);
++            assert_eq!((site+5) as i64+i64::from(disp),target as i64);
++        }
++        assert_eq!(reloc.len(),1,"one generic fallback for both entries");
+         Ok(())
+     }
+ }
+diff --git a/kprog/x86/native_lab/native_link/src/x86_probe_read.rs b/kprog/x86/native_lab/native_link/src/x86_probe_read.rs
+index e28ff25f4..6a24f91c8 100644
+--- a/kprog/x86/native_lab/native_link/src/x86_probe_read.rs
++++ b/kprog/x86/native_lab/native_link/src/x86_probe_read.rs
+@@ -393,7 +393,7 @@ pub(super) fn compact(routine: (Vec<u8>, Vec<RelocRecord>, Vec<LoadSite>))
+     compact_at(routine,&mut [])
+ }
+ 
+-fn compact_at(routine: (Vec<u8>,Vec<RelocRecord>,Vec<LoadSite>), marks: &mut [usize])
++pub(super) fn compact_at(routine: (Vec<u8>,Vec<RelocRecord>,Vec<LoadSite>), marks: &mut [usize])
+     -> Result<(Vec<u8>,Vec<RelocRecord>,Vec<LoadSite>)> {
+     let (bytes, mut relocs, mut sites) = routine;
+     let mut decoder = Decoder::new(64, &bytes, DecoderOptions::NONE);
+diff --git a/kprog/x86/native_lab/native_link/src/x86_runtime_array.rs b/kprog/x86/native_lab/native_link/src/x86_runtime_array.rs
+index ed4d9a7f7..9780423e0 100644
+--- a/kprog/x86/native_lab/native_link/src/x86_runtime_array.rs
++++ b/kprog/x86/native_lab/native_link/src/x86_runtime_array.rs
+@@ -42,27 +42,30 @@ fn routine(layout: &RuntimeArrayLayout) -> Result<(Vec<u8>, usize)> {
+ 
+ pub(super) fn share(blob: &mut Vec<u8>, relocs: &mut Vec<RelocRecord>,
+                     layout: &RuntimeArrayLayout, helper: u64,
+-                    lpm: Option<&RuntimeLpmLayout>) -> Result<Option<(usize, usize)>> {
++                    lpm: Option<&RuntimeLpmLayout>, known_lpm: &[usize]) -> Result<Option<(usize, usize)>> {
+     let sites: Vec<usize> = relocs.iter().filter(|r|
+         r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32 && r.target == helper)
+         .map(|r| r.offset as usize).collect();
+-    if sites.is_empty() { return Ok(None); }
++    if sites.is_empty() { return if let Some(lpm)=lpm {
++        lpm_lookup::share(blob,relocs,lpm,helper,known_lpm)
++    } else {Ok(None)}; }
+     let start = blob.len();
+     // Non-ARRAY dispatch enters the existing LPM body in the same frame.
+     // Its final generic call retains the external E8 slot required by loaders.
+-    let (bytes, nested) = if let Some(lpm) = lpm {
++    let (bytes, nested, known_entry) = if let Some(lpm) = lpm {
+         let mut bytes = build_prefix(layout)?;
+         let prefix = bytes.len();
+-        let (body, mut nested) = lpm_lookup::routine(lpm, helper)?;
++        let (body, mut nested, entry) = lpm_lookup::routine(lpm, helper, true)?;
+         bytes.extend_from_slice(&body);
+         for r in &mut nested { r.offset = u32::try_from(prefix + r.offset as usize)?; }
+-        (bytes, nested)
++        (bytes, nested, prefix+entry)
+     } else {
+         let (bytes, call) = routine(layout)?;
+         (bytes, vec![RelocRecord { offset: u32::try_from(call)?,
+-            kind: NATIVE_LAB_RELOC_HELPER_CALL_REL32, target: helper }])
++            kind: NATIVE_LAB_RELOC_HELPER_CALL_REL32, target: helper }], 0)
+     };
+     probe_read::redirect(blob, &sites, start)?;
++    probe_read::redirect(blob, known_lpm, start+known_entry)?;
+     relocs.retain(|r| !(r.kind == NATIVE_LAB_RELOC_HELPER_CALL_REL32 && r.target == helper));
+     blob.extend_from_slice(&bytes);
+     for mut r in nested { r.offset = u32::try_from(start + r.offset as usize)?; relocs.push(r); }
+@@ -178,7 +181,7 @@ mod tests {
+         let mut relocs = vec![RelocRecord { offset: 0, kind: 1, target: 0x1234 },
+             RelocRecord { offset: 5, kind: 1, target: 0x1234 },
+             RelocRecord { offset: 10, kind: 1, target: 0x5678 }];
+-        let range = share(&mut blob, &mut relocs, &layout, 0x1234, None)?.expect("two lookups");
++        let range = share(&mut blob, &mut relocs, &layout, 0x1234, None, &[])?.expect("two lookups");
+         assert_eq!(range, (16, 65), "one49-byte routine, not one per call");
+         assert_eq!((blob[0],blob[5]),(0xe8,0xe9));
+         for site in [0usize, 5] {
+@@ -192,6 +195,17 @@ mod tests {
+         assert_eq!(external.offset, 16+39);
+         assert_eq!(&blob[external.offset as usize..external.offset as usize+5],
+             X86_HELPER_CALL_REL32_SLOT.as_slice(), "sameE8 slot accepted by both loaders");
++        let lpm=RuntimeLpmLayout{map_type:12,lpm_type:11,root:40,max_prefixlen:48,data_size:56,
++            child:0,child_stride:8,node_prefixlen:16,node_flags:20,node_data:24,key_prefixlen:0,key_data:4};
++        let (_,_,entry)=lpm_lookup::routine(&lpm,0x1234,true)?;
++        let mut mixed=X86_HELPER_CALL_REL32_SLOT.repeat(2);
++        let mut reloc=vec![RelocRecord{offset:0,kind:1,target:0x1234}];
++        let range=share(&mut mixed,&mut reloc,&layout,0x1234,Some(&lpm),&[5])?.expect("mixed ARRAY/LPM");
++        for (site,target) in [(0,range.0),(5,range.0+build_prefix(&layout)?.len()+entry)] {
++            let disp=i32::from_le_bytes(mixed[site+1..site+5].try_into()?);
++            assert_eq!((site+5) as i64+i64::from(disp),target as i64);
++        }
++        assert_eq!(reloc.len(),1,"one generic fallback across ARRAY and both LPM entries");
+         Ok(())
+     }
+ }
