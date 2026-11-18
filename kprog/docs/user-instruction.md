@@ -155,6 +155,7 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-18 ~07:08 UTC: "你知道现在 kernel 里面跑的是啥吗? 你这样一直重复大量跑测试是不是无意义?"
 - 2026-11-18 ~07:08 UTC: "绝对不可能只有这么点改进, kinsn 都更多"
 - 2026-11-18 ~07:08 UTC: "为啥越来越慢了"
+- 2026-11-18 ~07:15 UTC: "Tetragon 的热 tracepoint 程序有 103 个替换落在测量窗口之后 你现在的完整替换是什么样的? 之前的 直接 bypass evrifier 的方式呢? 5/29 到现在的差异?"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 
