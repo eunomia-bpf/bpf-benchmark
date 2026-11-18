@@ -10,10 +10,11 @@ from elftools.elf.elffile import ELFFile
 
 p = argparse.ArgumentParser(description=__doc__)
 p.add_argument('--output', type=Path, required=True)
+p.add_argument('--replay', type=Path, default=Path('kprog/results/named-lpm-20261118/replay.json'))
 a = p.parse_args()
 a.output.mkdir(parents=True, exist_ok=True)
 kernel = Path('/workspaces/.agent-state/kprog-ck/build-x86/vmlinux')
-replay = Path('kprog/results/named-lpm-20261118/replay.json')
+replay = a.replay
 request, = [r for r in json.loads(replay.read_text())['requests']
             if r['app'] == 'otelcol-ebpf-profiler/profiling' and r['symbol'] == 'perf_unwind_native']
 plan = json.loads(Path(request['plan']).read_text())
