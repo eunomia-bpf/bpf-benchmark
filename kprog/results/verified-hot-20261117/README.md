@@ -195,8 +195,8 @@ fixed. This section reports the verified path, not a timing ratio.
 
 Run `x86_kvm_corpus_20261118_133241_377898`, 1 sample × 10 s, stats on, `SKIP_REJIT=norejit`. Raw
 `/workspaces/kprog-raw/verified/20261118-checked-hot/tetragon-c/`, session
-`session-4u0ra04z`. **6 verified and installed so far** (requests 1-6, `execution_mode=checked-sim-c`,
-`status=0`); the run is still consuming the application's startup, one program at a time.
+`session-4u0ra04z`. **8 verified and installed** (requests 1-8, `execution_mode=checked-sim-c`,
+`status=0`, zero failures); the run is still consuming the application's startup, one program at a time.
 
 ### The baseline never opened its gate before this run
 
