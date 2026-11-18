@@ -77,8 +77,11 @@ frontier, proves unique silent termination, and binds ordinary W/X MOVZ at
 shift zero to the actual fetched/decoded LNSym checked step, PC+4 and empty
 new event/fault delta. The [wide-immediate contract](results/m5-arm64-mov-wide/README.md)
 extends ordinary MOVZ/MOVN to every valid W/X halfword column, using the live
-alias normalizer's shift/complement/width-mask literal binding. XZR, MOVK and
-program-level obligations stay open.
+alias normalizer's shift/complement/width-mask literal binding. The
+[XZR contract](results/m5-arm64-mov-zr/README.md) proves the actual 38-transition
+no-cell writer and 174-transition generic call for WZR/XZR, preserving the
+original caller frontier and relating all legal MOVZ/MOVN columns to the
+checked native step. MOVK and program-level obligations stay open.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 

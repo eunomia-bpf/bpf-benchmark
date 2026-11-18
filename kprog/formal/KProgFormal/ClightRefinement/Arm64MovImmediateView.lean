@@ -54,6 +54,24 @@ theorem call_represents {m before : CC.Mem} {entry : Arm64Producer.HeaderLocal m
     (Arm64RegisterWrite.nativeUpdate s i value narrow)).mpr
       (comparisonResult.represents addresses origins s represented)⟩
 
+/-- XZR preserves the complete register relation at the original frontier,
+even after the actual generic local frame has been allocated and freed. -/
+theorem call_zr_represents {m before : CC.Mem} {entry : Arm64Producer.HeaderLocal m}
+    (storage : Arm64ProducerRegisterStorage.Storage m before entry)
+    (unused : Arm64Nop.IgnoredArguments) (value : BitVec 64) (narrow : Bool)
+    (addresses : Arm64Registers.PointerOrigins) (origins : Reference.Provenance.AArch64.Origins)
+    (s : Reference.AArch64.State)
+    (represented : Arm64Registers.Represents addresses origins (fun r => r.val)
+      before.nextblock before (.Vptr entry.block 0) s) :
+    ∃ after, InternalRun ge 174
+      (.Callstate (.Internal Arm64Nop.handler)
+        (Dispatch.arguments (zrOperands unused entry.block value) narrow) .Kstop before)
+      (.Returnstate .Vundef .Kstop after) ∧
+      Arm64Registers.Represents addresses origins (fun r => r.val)
+        before.nextblock after (.Vptr entry.block 0) s := by
+  obtain ⟨after, run, _, frame, _⟩ := call_zr_returns storage unused value narrow
+  exact ⟨after, run, (Arm64Registers.frame frame (.Vptr entry.block 0) s).mpr represented⟩
+
 private theorem return_stuck (value : CC.Val) (memory : CC.Mem) :
     ∀ t next, ¬ CC.Step2 ge (.Returnstate value .Kstop memory) t next := by
   intro t next step

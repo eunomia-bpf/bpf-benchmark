@@ -1,0 +1,207 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-arm64-mov-zr",
+  "domain": {
+    "native": [
+      "MOVZ",
+      "MOVN"
+    ],
+    "destination": "native Rd31 = WZR/XZR, source selector31; SP is selector32",
+    "immediate": "all BitVec16",
+    "X64_columns": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "W32_columns": [
+      0,
+      1
+    ]
+  },
+  "proved": {
+    "writer_transitions": 38,
+    "writer_memory": "exact input memory, including eager SP read and unchanged permissions",
+    "callee_context": "actual caller Kcall, no Kstop substitution",
+    "caller_edge_transitions": 78,
+    "scalar_suffix_transitions": 119,
+    "generic_call_transitions": 174,
+    "generic_call": "actual allocation, width/path selectors, eager NONE read, switch, no-cell write, free and return",
+    "generic_frame": "contents and both permission maps preserved below original pre-call nextblock; fresh allocation retained in complete memory",
+    "final_relation": "GPR/SP/SIMD/NZCV unchanged, original reader frontier, identity cells and actual pointer/provenance bindings",
+    "native": "real Instruction.valid/decode/fetch/noError and mature checked step",
+    "native_wrapper": "exact full state with PC+4, retained histories, no new event or fault"
+  },
+  "ordinary_API": {
+    "writer_call": "same Fin31 signature and 78 transitions, projection of raw-selector edge",
+    "ordinary_MOV_IMM_call": 203,
+    "ordinary_native_contracts": "recompiled successfully"
+  },
+  "emission_audit": {
+    "exit": 0,
+    "log": "emission1.log",
+    "data": "emission1.json",
+    "records": 12,
+    "source": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "functions": [
+      "normalize_alias",
+      "encode"
+    ],
+    "operation": "ARM64_OP_MOV_IMM",
+    "destination": "ARM64_XZR",
+    "source_selector": "ARM64_REG_NONE",
+    "aux": "0",
+    "kind": "actual emitted metadata only; no sampled ISA oracle",
+    "Python_frontend_formally_verified": false
+  },
+  "focused": {
+    "exit": 0,
+    "log": "focused8.log",
+    "jobs": 188
+  },
+  "public_queries": {
+    "exit": 0,
+    "log": "Query-1.log",
+    "theorems": 7,
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64RegisterWrite.execute_zr_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.Suffix.writer_call_register": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.call_zr_returns": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.call_zr_represents": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.Zr.native_step": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.Zr.reference_step": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.Zr.call_corresponds": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "full_lake_build": {
+    "exit": 0,
+    "log": "lake-build1.log",
+    "jobs": 315
+  },
+  "export_parity": {
+    "exit": 0,
+    "log": "export-parity1.log",
+    "reference": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_identical": true
+  },
+  "attempts": [
+    {
+      "name": "focused1",
+      "exit": 1,
+      "log": "focused1.log"
+    },
+    {
+      "name": "focused2",
+      "exit": 1,
+      "log": "focused2.log"
+    },
+    {
+      "name": "focused3",
+      "exit": 1,
+      "log": "focused3.log"
+    },
+    {
+      "name": "focused4",
+      "exit": 1,
+      "log": "focused4.log"
+    },
+    {
+      "name": "focused5",
+      "exit": 1,
+      "log": "focused5.log"
+    },
+    {
+      "name": "focused6",
+      "exit": 0,
+      "log": "focused6.log"
+    },
+    {
+      "name": "focused7",
+      "exit": 1,
+      "log": "focused7.log"
+    },
+    {
+      "name": "focused8",
+      "exit": 0,
+      "log": "focused8.log"
+    }
+  ],
+  "attempt_notes": {
+    "focused1": "existential placeholder count synthesis fails before stepping",
+    "focused2": "swap tactic unavailable",
+    "focused3": "step count metavariable depends on width cases, apply cannot assign it",
+    "focused4": "opaque existential count remains unassignable through apply",
+    "focused5": "fixed oversized exploration reaches final Sskip at transition37; symbolic continuation requires relational skip_call; no successful run claimed",
+    "focused6": "actual 38-transition theorem passes173 jobs with final imported skip_call",
+    "focused7": "actual caller119/full174/final frame and ordinary contracts pass; native X64 proof needs explicit false_and simplification",
+    "focused8": "all188 jobs pass after simplifying that actual native guard"
+  },
+  "limits": {
+    "heartbeats": 200000,
+    "recursion": 512,
+    "lean_workers": 1,
+    "address_space_GiB": 32,
+    "build_cpu": 17,
+    "query_edit_git_cpu": 18,
+    "every_host_command_timing_lock": "shared",
+    "raised": false
+  },
+  "native_make_check": {
+    "run_this_step": false,
+    "reason": "Lean-only changes, C/runtime unchanged",
+    "last_complete_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c"
+  },
+  "remaining": [
+    "MOVK actual op5 destination-read/IMM/AUX merge/write path",
+    "frontend/provider/producer/caller admission",
+    "native physical memory/alias/origin binding",
+    "Numeric frontier204 initialization distinct from old189",
+    "source control and all-family O1/O2/O4 migration",
+    "remaining M6 and fresh final Lake/make check"
+  ],
+  "complete_ISA_handler_families": 0,
+  "milestones": {
+    "M1_M4": "done",
+    "M5": "open",
+    "M6": "open"
+  }
+}

@@ -28,6 +28,25 @@ private theorem temp_data (unused : Arm64Nop.IgnoredArguments) (entry : CC.Block
     operands, Arm64Nop.resultEnv, Dispatch.flags, Arm64Width.result, Arm64Width.argument,
     Arm64RegisterWrite.width, CC.PTree.gss, CC.PTree.gso]
 
+/-- The actual no-cell destination selector; SP is the separate selector 32. -/
+def zrOperands (unused : Arm64Nop.IgnoredArguments) (entry : CC.Block)
+    (value : BitVec 64) : Arm64Nop.IgnoredArguments :=
+  ⟨.Vptr entry 0, .Vlong 31, .Vlong 255,
+    unused.src2, unused.src3, unused.aux, .Vlong value⟩
+
+private theorem zr_temp_data (unused : Arm64Nop.IgnoredArguments) (entry : CC.Block)
+    (value : BitVec 64) (narrow : Bool) :
+    let le := Dispatch.scalarEnv (Dispatch.initialTemps (zrOperands unused entry value) narrow) narrow
+    le.get Arm64Program._entry = some (.Vptr entry 0) ∧
+    le.get Arm64Program._src = some (.Vlong 255) ∧
+    le.get Arm64Program._dst = some (.Vlong 31) ∧
+    le.get Arm64Program._op = some (.Vint 1) ∧
+    le.get Arm64Program._imm = some (.Vlong value) ∧
+    le.get Arm64Program.___a64_l_width = some (Arm64RegisterWrite.width narrow) := by
+  cases narrow <;> simp +decide [Dispatch.scalarEnv, Dispatch.dispatchEnv, Dispatch.initialTemps,
+    zrOperands, Arm64Nop.resultEnv, Dispatch.flags, Arm64Width.result, Arm64Width.argument,
+    Arm64RegisterWrite.width, CC.PTree.gss, CC.PTree.gso]
+
 private theorem callees_not_local :
     Arm64Program._kprog_arm64_program_read ∉ CC.varNames Arm64Nop.handler.fn_vars ∧
     Arm64Program._kprog_arm64_program_write ∉ CC.varNames Arm64Nop.handler.fn_vars := by decide +kernel
@@ -85,5 +104,42 @@ theorem call_returns {m before : CC.Mem} {entry : Arm64Producer.HeaderLocal m}
         (Suffix.writerTemps le value) written) (.Returnstate .Vundef .Kstop after) :=
     .step trivial (.skip_call _ _ _ _ _ _ rfl freed) (.refl _)
   exact ⟨written, after, result, (dispatch.trans body).trans leave, freed, frame, contents, next, released⟩
+
+/-- All 174 actual generic-handler transitions for XZR, including real
+allocation, NONE read, the no-cell writer, and freeing every generic local.
+Only fresh allocation blocks change; the original caller frontier is framed. -/
+theorem call_zr_returns {m before : CC.Mem} {entry : Arm64Producer.HeaderLocal m}
+    (storage : Arm64ProducerRegisterStorage.Storage m before entry)
+    (unused : Arm64Nop.IgnoredArguments) (value : BitVec 64) (narrow : Bool) :
+    ∃ after, InternalRun ge 174
+      (.Callstate (.Internal Arm64Nop.handler)
+        (Dispatch.arguments (zrOperands unused entry.block value) narrow) .Kstop before)
+      (.Returnstate .Vundef .Kstop after) ∧
+      CC.Mem.freeList (Arm64Nop.allocation ge before).2
+        (CC.blocksOfEnv ge.genv_cenv (Arm64Nop.allocation ge before).1) = some after ∧
+      FrameBelow before.nextblock before after ∧
+      (∀ row ∈ CC.blocksOfEnv ge.genv_cenv (Arm64Nop.allocation ge before).1,
+        ∀ ofs, row.2.1 ≤ ofs → ofs < row.2.2 →
+          ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) := by
+  let carried := storage.frame (Arm64Nop.entry_frame ge before)
+  let le := Dispatch.scalarEnv (Dispatch.initialTemps (zrOperands unused entry.block value) narrow) narrow
+  have inputs := zr_temp_data unused entry.block value narrow
+  have names := unshadowed before
+  have body := Suffix.scalar_zr carried (Arm64Nop.allocation ge before).1 le
+    value narrow names.1 names.2 inputs.1 inputs.2.1 inputs.2.2.1 inputs.2.2.2.1
+    inputs.2.2.2.2.1 inputs.2.2.2.2.2
+  have owned : ∀ id v, (Arm64Nop.allocation ge before).1.get id = some v →
+      CC.Mem.rangePerm (Arm64Nop.allocation ge before).2 v.1 0 (CC.sizeof ge.genv_cenv v.2) .Cur .Freeable = true := by
+    intro id v binding
+    exact ((allocated_local_storage (allocated before)).1 id v binding).2.2
+  obtain ⟨after, freed, frame, _, _, released⟩ := deallocate_live_locals (allocated before) owned
+  have dispatch := (Dispatch.call_dispatch before (zrOperands unused entry.block value) narrow).1
+  have leave : InternalRun ge 1
+      (.State Arm64Nop.handler .Sskip .Kstop (Arm64Nop.allocation ge before).1
+        (Suffix.writerTemps le value) (Arm64Nop.allocation ge before).2)
+      (.Returnstate .Vundef .Kstop after) :=
+    .step trivial (.skip_call _ _ _ _ _ _ rfl freed) (.refl _)
+  exact ⟨after, (dispatch.trans body).trans leave, freed,
+    (Arm64Nop.entry_frame ge before).trans frame, released⟩
 
 end KProgFormal.ClightRefinement.Arm64MovImmediate

@@ -56,3 +56,4 @@ import KProgFormal.ClightRefinement.Arm64MovImmediateDispatch
 import KProgFormal.ClightRefinement.Arm64MovImmediateCall
 import KProgFormal.ClightRefinement.Arm64MovImmediateNative
 import KProgFormal.ClightRefinement.Arm64MovImmediateWide
+import KProgFormal.ClightRefinement.Arm64MovImmediateZr

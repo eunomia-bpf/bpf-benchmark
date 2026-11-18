@@ -235,6 +235,51 @@ theorem execute_stores_bound (world : CC.CGenv)
       Lean.Elab.Tactic.evalTactic (← `(tactic|
         exact InternalRun.step trivial (.skip_call _ _ _ _ _ _ hk rfl) (InternalRun.refl _)))
 
+set_option hygiene false in
+/-- Register 31 is XZR, distinct from the SP selector 32. Its actual writer
+still eagerly reads SP, but returns without touching any cell or permission. -/
+theorem execute_zr_bound (world : CC.CGenv)
+    (composites : world.genv_cenv = ge.genv_cenv) (k : CC.Cont)
+    (hk : CC.isCallCont k = true) (m before : CC.Mem) (entry : HeaderLocal m)
+    (storage : Storage m before entry) (value : BitVec 64) (narrow : Bool) :
+    InternalRun world 38
+      (.Callstate (.Internal procedure) [.Vptr entry.block 0, .Vlong 31, .Vlong value, width narrow] k before)
+      (.Returnstate .Vundef k before) := by
+  have empty : (CC.PTree.empty : CC.Env).elements = [] := rfl
+  cases narrow
+  all_goals
+    run_tac do
+      let reduce ← `(tactic|
+          simp +decide only [body_eq, body, eager, regSet, masked, spTest, ordinary, releaseTest, width, written,
+      CC.doStep, composites, hk, CC.doFunctionEntry2, names, vars, params, result_type,
+      CC.doAllocVariables, CC.bindParameterTemps, CC.emptyEnv, CC.PTree.gss, CC.PTree.gso,
+      CC.doEvalExpr, CC.doEvalLvalue, CC.doDerefLoc, CC.doAssignLoc, CC.lvalOfField, CC.Mem.loadv, CC.Mem.storev,
+      CC.accessMode, CC.typeof, layouts.1, layouts.2.1, layouts.2.2.1,
+      layouts.2.2.2.1, layouts.2.2.2.2.1, layouts.2.2.2.2.2.1,
+      layouts.2.2.2.2.2.2.1, layouts.2.2.2.2.2.2.2,
+      storage.spPointer, storage.spRead,
+
+      eq_byte_uint, and_words,
+      CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
+      CC.Cop.castIntLong, CC.Cop.boolVal, CC.Cop.classifyBool, CC.typeconv, CC.removeAttributes, CC.tattr,
+      CC.tuchar, CC.tuint, CC.tint, CC.tulong, CC.tlong, CC.tptr, ptr_add_zero, ptr_literals.1, ptr_literals.2.1, ptr_literals.2.2.1, ptr_literals.2.2.2.1, ptr_literals.2.2.2.2,
+      CC.Val.ofBool, CC.Val.Vtrue, CC.Val.Vfalse,
+      CC.Integers.Int.eq, CC.Integers.Int64.eq, CC.Integers.MI.eq,
+      CC.Integers.Int.cmpu, CC.Integers.Int64.cmpu, CC.Integers.MI.cmpu,
+      CC.Integers.Int.repr, CC.Integers.Int64.repr, CC.Integers.MI.repr,
+      CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext, CC.Integers.Int.signed, CC.Integers.MI.signed,
+      CC.Integers.Int64.unsigned, CC.Integers.Int.unsigned, CC.Integers.MI.unsigned,
+      CC.Integers.Int.zero, CC.Integers.MI.zero, CC.Integers.Int64.and, CC.Integers.MI.and,
+      CC.E0, CC.Eapp, CC.blocksOfEnv, CC.Mem.freeList, CC.callCont, empty,
+      low_mask, full_mask, List.nil_append, List.append_nil, ite_false, ite_true, eq_self, Bool.false_eq_true, Bool.true_eq_false, Bool.not_true, Bool.not_false, BitVec.zero_add, BitVec.and_allOnes, BitVec.ofInt_natCast, BitVec.ofNat_toNat, tag_zero] <;> try rfl)
+      for _ in [:37] do
+        Lean.Elab.Tactic.evalTactic (← `(tactic| apply InternalRun.step))
+        Lean.Elab.Tactic.evalTactic (← `(tactic| trivial))
+        Lean.Elab.Tactic.evalTactic (← `(tactic| apply CC.doStep_sound))
+        Lean.Elab.Tactic.evalTactic reduce
+      Lean.Elab.Tactic.evalTactic (← `(tactic|
+        exact InternalRun.step trivial (.skip_call _ _ _ _ _ _ hk rfl) (InternalRun.refl _)))
+
 /-- The original standalone writer is the same execution at Kstop. -/
 theorem execute_stores (m before middle after : CC.Mem) (entry : HeaderLocal m)
     (storage : Storage m before entry) (i : Fin 31) (value : BitVec 64) (narrow : Bool)
