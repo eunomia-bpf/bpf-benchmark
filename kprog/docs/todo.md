@@ -40,6 +40,22 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-18T12:31:56Z（运营者 07:55–08:05 的话：清理门槛、新 Workspace 擦掉手写 helper 和按应用的键、以历史最好数据为目标）**：
+1. 门槛清掉：调用次数一致才算速度比、“工作量不同，不计”、样本波动超过 5% 重跑、“两臂路径”和“工作量相同时的最好每次调用”两列，已从每小时检查的 skill 和 omp 的 prompt 删掉。一个数能不能用只看两点：应用功能正常，数据完整。调用次数只作诊断。
+2. 新 Workspace yunwei356/bpf-benchmark-lean（12:17 UTC 建，模板 systems-dev，large-benchmark）：擦掉 native_link 里手写的 helper 重实现（probe_read 叶子例程、ktime、LPM trie、runtime ARRAY、UID、调用融合、尾调用编码），原生代码像 JIT 一样直接 call 内核 helper；manifest 里按应用的键改成对所有应用一样的默认（source_map_prefix、helper 判别、helper-disambiguate 174、dedupe、source_bpf_object、kernel_helper_context）。建镜像，先查六个应用功能，再计时，和本 Workspace 的 3246e818、和下表对比。
+3. 历史上最好的数（复现目标；每个都要查功能是否正常）：
+
+| 应用 | 最好的 stats 关吞吐 | 最好的每次调用（stats 开） | 05-29 |
+|---|---|---|---|
+| OTel | 1.866x（20261116_032555_782265） | 14.4x / 吞吐 2.020x（20261116_053859_493069）；1.174x（zero-remainder-20261117） | 1.849x |
+| BCC | 1.002x（20261116_035145_077678） | 1.205x（20261117_123339_157340）；吞吐 1.268x（20261116_060435_731340） | 0.985x |
+| Cilium | 1.262x（20261116_041809_047167） | 3.243x / 吞吐 3.012x（20261117_002923_664397） | 1.319x |
+| Tetragon | 1.042x（20261117_103459_412261） | 1.113x（compat-read-20261117） | 1.009x |
+| Tracee | 1.466x（20261117_131128_369581） | 1.822x（20261117_125801_473832） | 0.948x |
+| Katran | 1.086x（20261117_113013_185030） | 1.049x（20261118_091457_564524） | 1.113x |
+
+4. 全部 LTO 镜像 3246e818 的结果（kprog/results/lto-all-20261118）：stats 关 OTel 0.950x、BCC 0.954x、Cilium 1.051x、Tetragon 1.013x、Tracee 1.332x、Katran 1.065x；每次调用 OTel 0.986x、BCC 1.019x、Cilium 1.118x、Tetragon 1.110x、Tracee 1.369x、Katran 1.049x。helper 上下文 A/B：去掉后 OTel 0.989x、BCC 0.994x，和带着时一样。OTel 原生每次调用从 2873.8 ns（leaf-read）升到 3278.1 ns，同期 eBPF 一侧 3203–3231 ns：后加的叶子例程和 LTO 让 OTel 变慢。
+
 **协调者 2026-11-18T06:58:08Z（运营者 07:00–07:35 的话之后的决定）**：
 1. 运营者：“不需要按照 binray size 扣了.” 按字节压代码的工作停掉（多日大任务第 3 项和每处省几个字节的 LTO 小改动），以后只做让运行时间下降的改动；代码量照实报告。
 2. 运营者：“你应该无论如何比 kinsn 好得多”。kinsn 的收益来自程序体指令（内核定义的双语义原语，JIT 直接发原生指令），没有 helper 内联。原生 P 由 clang O3 整体编成 x86，应当远好于 kinsn；现在两臂工作量相同时每次调用 1.0–1.15x，说明原生一侧在别处花掉了时间。
