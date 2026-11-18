@@ -21,3 +21,5 @@ frozen image/check/OTel timing batch, with all LTO on and installed size
 reported alongside per-call and body/helper/map time.
 
 2026-11-18T00:14:31Z — Named LPM shape source and full host tests completed; actual logs and source.patch committed. Raw: /workspaces/kprog-raw/perf/named-lpm-20261118/host-20261118T001244Z-2827763. Production unit-entry build and captured-request emission follow; canonical CLI stays unchanged; installed/time results remain pending.
+
+Execution integration 2830609 ended101/SIGSEGV at00:16:37Z. The new fixture invoked an entry whose JmpEnd targets the kernel-owned epilogue after the blob; it omitted the RET that existing executable rewrite fixtures append at that boundary. A test-only forward correction appends that epilogue. The completed62-test static binding/18-shape loader/295legacy emission results remain recorded; real hit/miss execution is pending the corrected test. All failed raw output stays under integration-20261118T001550Z-2830609.
