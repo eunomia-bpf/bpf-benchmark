@@ -1,0 +1,193 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-arm64-mov-wide",
+  "native_domain": {
+    "instructions": [
+      "MOVZ",
+      "MOVN"
+    ],
+    "ordinary_destinations": "Fin31 (0..30)",
+    "immediate": "all BitVec16",
+    "X64_columns": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "W32_columns": [
+      0,
+      1
+    ],
+    "width_domain": "narrow=true implies column<2; decode certificate alone does not guarantee semantic legality"
+  },
+  "source_binding": {
+    "live_module": "kprog/arm64/micro-prog/generate_micro_sim_proofs.py",
+    "functions": [
+      "normalize_alias",
+      "encode"
+    ],
+    "live_callers": [
+      "kprog/arm64/trusted_specializer.py",
+      "kprog/trusted_service.py",
+      "kprog/formal/tools/check_reference_arm64.py"
+    ],
+    "normalization": "shift, optional complement, width mask, MOV alias, u64 literal",
+    "literal_theorem": "literal_toNat proves modular integer equation for all symbolic values",
+    "Python_parser_formally_verified": false
+  },
+  "emission_audit": {
+    "exit": 0,
+    "records": 48,
+    "data": "emission2.json",
+    "stderr": "emission2.log",
+    "kind": "metadata only, not sampled ISA acceptance",
+    "actual_operations": [
+      "ARM64_OP_MOV_IMM"
+    ],
+    "actual_sources": [
+      "ARM64_REG_NONE"
+    ],
+    "actual_width_tokens": [
+      "ARM64_WIDTH_32",
+      "ARM64_WIDTH_64"
+    ],
+    "actual_aux": [
+      "0"
+    ]
+  },
+  "proved": {
+    "Clight_transitions": 203,
+    "Clight_execution": "actual existing generic procedure through allocation, eager NONE reader, actual writer context, final free and return",
+    "final_reader_frontier": "original pre-call nextblock",
+    "relation": "full GPR/SP/SIMD/NZCV, identity cells and explicit provenance/pointer origins",
+    "native_execution": "mature decoded fields, real Instruction.valid/fetch/noError, actual checked step; no assumed outcome",
+    "native_state": "exact full wrapper, PC+4, preserved input histories and other machine fields",
+    "new_events": [],
+    "fault": null
+  },
+  "focused": {
+    "exit": 0,
+    "log": "focused7.log",
+    "jobs": 187
+  },
+  "public_queries": {
+    "exit": 0,
+    "log": "Query-1.log",
+    "theorems": 4,
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.Wide.literal_toNat": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.Wide.native_step": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.Wide.reference_step": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovImmediate.Wide.call_corresponds": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "full_lake_build": {
+    "exit": 0,
+    "log": "lake-build1.log",
+    "jobs": 314
+  },
+  "export_parity": {
+    "exit": 0,
+    "log": "export-parity1.log",
+    "reference": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_identical": true
+  },
+  "attempts": [
+    {
+      "name": "focused1",
+      "exit": 1,
+      "log": "focused1.log"
+    },
+    {
+      "name": "focused2",
+      "exit": 1,
+      "log": "focused2.log"
+    },
+    {
+      "name": "focused3",
+      "exit": 1,
+      "log": "focused3.log"
+    },
+    {
+      "name": "focused4",
+      "exit": 0,
+      "log": "focused4.log",
+      "jobs": 187
+    },
+    {
+      "name": "focused5",
+      "exit": 1,
+      "log": "focused5.log"
+    },
+    {
+      "name": "focused6",
+      "exit": 0,
+      "log": "focused6.log",
+      "jobs": 187
+    },
+    {
+      "name": "focused7",
+      "exit": 0,
+      "log": "focused7.log",
+      "jobs": 187
+    }
+  ],
+  "attempt_notes": {
+    "focused1": "dependent field/complement instance and unreduced guards prevent source partInstall rewrite",
+    "focused2": "metadata fields made reducible, but Bool.true_eq_true name invalid; raw failure retained",
+    "focused3": "correct exact BitVec.zero alias and guard reductions; width-normalized literal rewrites need staging before unfolding",
+    "focused4": "all native/source correspondence contracts pass187 jobs",
+    "focused5": "new modular literal equation fails because broad simp expands width extensions to unwanted modulus expressions",
+    "focused6": "controlled imported width/shift/complement rewrites prove literal_toNat at default limits",
+    "focused7": "final reduction removes unused simp argument; all187 jobs pass"
+  },
+  "limits": {
+    "heartbeats": 200000,
+    "recursion": 512,
+    "lean_workers": 1,
+    "address_space_GiB": 32,
+    "build_cpu": 17,
+    "query_edit_git_cpu": 18,
+    "every_host_command_timing_lock": "shared",
+    "raised": false
+  },
+  "native_make_check": {
+    "run_this_step": false,
+    "reason": "Lean-only changes; C/runtime unchanged",
+    "last_complete_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c"
+  },
+  "remaining": [
+    "XZR source no-cell writer path",
+    "MOVK actual op5 read/merge/write path",
+    "frontend/provider/producer/caller admission",
+    "native physical memory/alias/origin binding",
+    "Numeric203/frontier204 initialization distinct from old188/frontier189",
+    "source control and all-family O1/O2/O4 migration",
+    "remaining M6 and fresh final lake build/make check"
+  ],
+  "complete_ISA_handler_families": 0,
+  "milestones": {
+    "M1_M4": "done",
+    "M5": "open",
+    "M6": "open"
+  }
+}

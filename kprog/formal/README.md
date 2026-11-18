@@ -75,7 +75,10 @@ stores. The [final register/MOVZ contract](results/m5-arm64-mov-view/README.md)
 transports the complete register relation through that free at the original
 frontier, proves unique silent termination, and binds ordinary W/X MOVZ at
 shift zero to the actual fetched/decoded LNSym checked step, PC+4 and empty
-new event/fault delta. Remaining MOV forms and program-level obligations stay open.
+new event/fault delta. The [wide-immediate contract](results/m5-arm64-mov-wide/README.md)
+extends ordinary MOVZ/MOVN to every valid W/X halfword column, using the live
+alias normalizer's shift/complement/width-mask literal binding. XZR, MOVK and
+program-level obligations stay open.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 
