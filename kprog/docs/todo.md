@@ -80,6 +80,12 @@
   read28 nowusesboundedr1; retainedreload27writesr2. FreshCilium started
   22:33:12Z; application stock acceptance remains open. See subset-result.json.
   PERF 2026-11-19T22:34Z: ff8f0e4b3 shares dominating packet-data SSA values
+  OMP 2026-11-20T00:22Z: the placement gap is closed (ff8f0e4b3 unified 188 reloads; bound and read now
+  name one SSA value, failures moved from r=0 to r=16). What remains is a fall-through: req 4's +16 read
+  is reached when the bound at 113 fails and headlen==16, and the verifier derives no packet range from
+  that scalar equality. Verified on the host: same shape rejects r=0; re-emitting the bound on the path
+  that falls through is ACCEPT. So: emit per path that reaches the read, not once per predicate. The
+  admitted packet set is unchanged. Separate defects stay separate: 6 store requests, request 64 arming.
   across context-preserving intervals; original reads retain ordering effects.
   8ec55e8b7 covers read freshness and exact TC stores. Combined validator366677
   queued22:28:23Z for canonical imageEX rebuild, then controls, stock fixtures,
