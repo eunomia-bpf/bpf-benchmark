@@ -27,3 +27,22 @@ stopped (143), with no guest using the base. Its log stays at
 Normal batch254724 then started the frozen build under image EX at08:22:12Z,
 raw batch-20261119T082212Z-254724. No source/kernel version or benchmark
 setting changed during this correction.
+
+PERF 2026-11-19T08:41:44Z: The frozen image build completed at08:30:25Z, publishing
+5c974db3050f (full runtime identity and actual kernel revision/release in
+image-publication.txt). Kernel83e0fabe355d and release7.0.0-rc2+ match the
+single checkout/base; this build replaces the sole image in place.
+
+The check is still running. Completed rows: OTel083228_600676 rc0,14 native
+replacements/0 failures; BCC083553_975462 rc0,25 native/0 failures. Other apps
+and the combined checked-native timing remain pending; no speed ratio is
+claimed from these functional checks. Their small raw metadata/results are
+committed next to the corpus run directories.
+
+BTF regeneration changed two enum entries in each tracked generated header:
+PT_TOP_PHYS_MASK___2 and ___3 exchange4503599627366400ULL and
+18446744073709547520ULL in vendor/bpf/bcc/libbpf-tools/x86/vmlinux.h and
+vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h. This is the same
+kind of BTF dedup-order change previously recorded on11-16. The frozen
+paths remain uncommitted build output; no source edit or native-byte
+identity claim is made here.

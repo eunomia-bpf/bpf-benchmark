@@ -26,3 +26,12 @@ Raw inspection /workspaces/kprog-raw/perf/native-base-roots-20261119/inspect-202
 inspection build lacked the Module definition include and failed;4e8cbe43a
 fixes that include, and both later inspections pass. No source frontend,
 image, guest, benchmark or native production code changed in this audit.
+
+PERF 2026-11-19T08:41:44Z:9a8696938/246b13c19 add a read-only third phase using LLVM
+simplifyInstruction on pure arithmetic/casts/GEP/freeze. The analysis also
+handles integer base operands after pointer round trips simplify. Actual
+results are pending because timing EX is held by the image-check/timing
+batch. Detached recipe c1ded558b waits on timing SH; no production source,
+compiler base or guest is changed. The initial foreground waiting flock
+305980 was ended before work began and retained as exit143 at
+arithmetic-20261119T083043Z; the detached worker uses a fresh raw directory.
