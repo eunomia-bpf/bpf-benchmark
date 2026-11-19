@@ -1337,3 +1337,15 @@ records actual commands, not a runtime gain. Existing read-only store
 inventory now also observes current source constants/unknown contexts, to
 determine whether further cache narrowing has any evidence. No pruning
 from constants is implemented; aliasFalse is still not a scalar proof.
+
+PERF 2026-11-19T20:13:24Z: New metadata defect reproduced by7b0d75e5b: MOV EAX,0xff;
+MOVSX RCX,AL; STORE[RSP+RCX+0x29] should create slot5 but generated no cache
+cell. Baseline selector test exits2 before compiler; signed-index-before.json
+retains actual expected5/observedempty. Existing constant propagation did
+not sign-extend source bits, and known-index address effects did not wrap
+at64bits. Candidate sign-extends MOVSX/MOVSXD constants before existing lane
+write and applies signed64 modular addition to existing pointer offsets,
+including joined alternatives. No instruction/tag/value handler, P input,
+flags or limit change. Regression boundaries cover8/16/32source widths,
+32bit destination zero extension, positive/negative/scaled/overflow indices
+and actual B emission. Prepared only; component validation/parity next.

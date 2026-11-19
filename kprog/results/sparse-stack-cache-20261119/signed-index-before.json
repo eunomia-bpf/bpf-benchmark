@@ -1,0 +1,13 @@
+{
+  "recorded": "2026-11-19T20:13:24Z",
+  "raw": "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/signed-before-20261119T201218Z",
+  "wrapper_exit": 2,
+  "failure": {
+    "case": "signed_index8",
+    "expected": [
+      5
+    ],
+    "observed": []
+  },
+  "scope": "Actual prior-generator signed-index cache omission; no compiler/guest/stock/runtime result."
+}

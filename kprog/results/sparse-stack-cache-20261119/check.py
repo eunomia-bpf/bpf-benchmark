@@ -73,6 +73,8 @@ cases={
                    'mov QWORD PTR [rsp+rcx*8+0x28],rdi'],[5]),
  'positive_signed_index':(['sub rsp,0x40','mov eax,0x7f','movsx rcx,al',
                            'mov QWORD PTR [rsp+rcx-0x57],rdi'],[5]),
+ 'zero_extended_destination32':(['sub rsp,0x40','mov eax,0xff','movsx ecx,al',
+                                 'mov QWORD PTR [rsp+rcx+0x29],rdi'],[]),
 }
 rows=[]
 b_sources={}
@@ -88,7 +90,7 @@ for name,(assembly,expected) in cases.items():
     rows.append(dict(case=name,expected=expected,observed=words))
     (out/'selection.json').write_text(json.dumps(rows,indent=2)+'\n')
     assert words==expected,(name,expected,words)
-    if name in {'direct','join','narrow','immediate'}:
+    if name in {'direct','join','narrow','immediate','signed_index8','wrapped_index'}:
         b_sources[name]=source
 
 observations={}
@@ -123,7 +125,7 @@ with open('/workspaces/.agent-state/kprog-lanes/locks/image','a') as lock:
             program.argtypes=[ctypes.c_void_p];program.restype=ctypes.c_int
             observed=program(None)
             assert observed==0x12345678,observed
-(out/'result.json').write_text(json.dumps(dict(selection_cases=len(rows),b_emission_cases=4,
+(out/'result.json').write_text(json.dumps(dict(selection_cases=len(rows),b_emission_cases=6,
     immediate_native_result=observed,
     shared_c=observations,scope='Generator selection, actual B emission and shared-C tag/alias/partial-write/replant checks; no stock/app/timing claim.'),indent=2)+'\n')
 print(json.dumps(observations),flush=True)

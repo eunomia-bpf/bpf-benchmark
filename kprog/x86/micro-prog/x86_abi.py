@@ -85,10 +85,12 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None, stac
         return None
 
     def offset_pointer(value, displacement):
+        def shifted(offset):
+            return ((offset + displacement + (1 << 63)) & FULL) - (1 << 63)
         if type(value) is int:
-            return value + displacement
+            return shifted(value)
         if isinstance(value, PointerAlternatives):
-            return PointerAlternatives(frozenset((offset + displacement for offset in value.offsets)), value.external)
+            return PointerAlternatives(frozenset(shifted(offset) for offset in value.offsets), value.external)
         return value
 
     def joined(a, b, widen=False):
@@ -280,6 +282,8 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None, stac
                 constant = None
                 if src and incoming.constants[src[0]] is not None:
                     constant = incoming.constants[src[0]] >> src[2] & (1 << src[1]) - 1
+                    if op in {'movsx', 'movsxd'} and constant & 1 << (src[1] - 1):
+                        constant -= 1 << src[1]
                 elif decode.is_int(args[1]) and insn.reloc_symbol is None:
                     constant = decode.parse_int(args[1])
                 write(args[0], value, pointer, constant)
