@@ -1,0 +1,715 @@
+{
+  "source_archive": "/workspaces/kprog-raw/verified/20261119-checked-cilium/service.tar.gz",
+  "requests": [
+    {
+      "request": 22,
+      "error": "relative table computation has live register or flag results",
+      "failures": [
+        {
+          "line": 131,
+          "scratch": [
+            "X86_RCX",
+            "X86_RAX"
+          ],
+          "live": [
+            18446744073709551615,
+            18446744073709551360,
+            63
+          ],
+          "native_pc": 3735,
+          "instruction": "mov    DWORD PTR [rsp+0x20],eax",
+          "reads": {
+            "X86_RAX": 4294967295,
+            "X86_RSP": 18446744073709551615
+          },
+          "writes": {},
+          "flags_read": 0,
+          "flags_written": 0,
+          "visited": 15,
+          "visited_instructions": [
+            {
+              "pc": 1405,
+              "instruction": "mov    r13d,0xffffff53",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2432,
+              "instruction": "mov    r13d,0xffffff58",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2443,
+              "instruction": "mov    r13d,0xffffff71",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2465,
+              "instruction": "mov    WORD PTR [rsp+0x18],0x0",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2743,
+              "instruction": "mov    r13d,0xffffff71",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 1411,
+              "instruction": "jmp    e95 <tail_handle_snat_fwd_ipv4+0xe95>",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2438,
+              "instruction": "jmp    e95 <tail_handle_snat_fwd_ipv4+0xe95>",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2449,
+              "instruction": "cmp    BYTE PTR [rsp+0x31],0xf",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2472,
+              "instruction": "movzx  eax,WORD PTR [rsp+0x34]",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2749,
+              "instruction": "cmp    BYTE PTR [rsp+0x31],0x1",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 3733,
+              "instruction": "mov    al,0x5",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2454,
+              "instruction": "jbe    ac8 <tail_handle_snat_fwd_ipv4+0xac8>",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                0
+              ]
+            },
+            {
+              "pc": 2477,
+              "instruction": "mov    WORD PTR [rsp+0x1a],ax",
+              "live": [
+                18446744073709551615,
+                0,
+                63
+              ]
+            },
+            {
+              "pc": 2754,
+              "instruction": "ja     e95 <tail_handle_snat_fwd_ipv4+0xe95>",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                0
+              ]
+            },
+            {
+              "pc": 3735,
+              "instruction": "mov    DWORD PTR [rsp+0x20],eax",
+              "live": [
+                18446744073709551615,
+                18446744073709551360,
+                63
+              ]
+            }
+          ],
+          "table": [
+            {
+              "pc": 1389,
+              "instruction": "lea    rcx,[rip+0x13c0]"
+            },
+            {
+              "pc": 1396,
+              "instruction": "movsxd rax,DWORD PTR [rcx+rax*4]"
+            },
+            {
+              "pc": 1400,
+              "instruction": "add    rax,rcx"
+            },
+            {
+              "pc": 1403,
+              "instruction": "jmp    rax"
+            }
+          ],
+          "scheduled": [],
+          "choices": [
+            [
+              0,
+              1405
+            ],
+            [
+              4,
+              2432
+            ],
+            [
+              8,
+              2432
+            ],
+            [
+              12,
+              2443
+            ],
+            [
+              16,
+              2432
+            ],
+            [
+              20,
+              1405
+            ],
+            [
+              24,
+              2432
+            ],
+            [
+              28,
+              2432
+            ],
+            [
+              32,
+              2465
+            ],
+            [
+              36,
+              2432
+            ],
+            [
+              40,
+              2432
+            ],
+            [
+              44,
+              2743
+            ]
+          ],
+          "rax_bits_read_before_overwrite": 4294967040
+        }
+      ]
+    },
+    {
+      "request": 40,
+      "error": "relative table computation has live register or flag results",
+      "failures": [
+        {
+          "line": 131,
+          "scratch": [
+            "X86_RCX",
+            "X86_RAX"
+          ],
+          "live": [
+            18446744073709551615,
+            18446744073709551360,
+            63
+          ],
+          "native_pc": 3693,
+          "instruction": "mov    DWORD PTR [rsp+0x1c],eax",
+          "reads": {
+            "X86_RAX": 4294967295,
+            "X86_RSP": 18446744073709551615
+          },
+          "writes": {},
+          "flags_read": 0,
+          "flags_written": 0,
+          "visited": 15,
+          "visited_instructions": [
+            {
+              "pc": 1397,
+              "instruction": "mov    r13d,0xffffff53",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2333,
+              "instruction": "mov    r13d,0xffffff58",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2344,
+              "instruction": "mov    r13d,0xffffff71",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2366,
+              "instruction": "mov    WORD PTR [rsp+0x28],0x0",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2643,
+              "instruction": "mov    r13d,0xffffff71",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 1403,
+              "instruction": "jmp    e6b <tail_handle_snat_fwd_ipv4+0xe6b>",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2339,
+              "instruction": "jmp    e6b <tail_handle_snat_fwd_ipv4+0xe6b>",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2350,
+              "instruction": "cmp    BYTE PTR [rsp+0x31],0xf",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2373,
+              "instruction": "movzx  eax,WORD PTR [rsp+0x34]",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2649,
+              "instruction": "cmp    BYTE PTR [rsp+0x31],0x1",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 3691,
+              "instruction": "mov    al,0x5",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2355,
+              "instruction": "jbe    a64 <tail_handle_snat_fwd_ipv4+0xa64>",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                0
+              ]
+            },
+            {
+              "pc": 2378,
+              "instruction": "mov    WORD PTR [rsp+0x2a],ax",
+              "live": [
+                18446744073709551615,
+                0,
+                63
+              ]
+            },
+            {
+              "pc": 2654,
+              "instruction": "ja     e6b <tail_handle_snat_fwd_ipv4+0xe6b>",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                0
+              ]
+            },
+            {
+              "pc": 3693,
+              "instruction": "mov    DWORD PTR [rsp+0x1c],eax",
+              "live": [
+                18446744073709551615,
+                18446744073709551360,
+                63
+              ]
+            }
+          ],
+          "table": [
+            {
+              "pc": 1381,
+              "instruction": "lea    rcx,[rip+0x13c0]"
+            },
+            {
+              "pc": 1388,
+              "instruction": "movsxd rax,DWORD PTR [rcx+rax*4]"
+            },
+            {
+              "pc": 1392,
+              "instruction": "add    rax,rcx"
+            },
+            {
+              "pc": 1395,
+              "instruction": "jmp    rax"
+            }
+          ],
+          "scheduled": [],
+          "choices": [
+            [
+              0,
+              1397
+            ],
+            [
+              4,
+              2333
+            ],
+            [
+              8,
+              2333
+            ],
+            [
+              12,
+              2344
+            ],
+            [
+              16,
+              2333
+            ],
+            [
+              20,
+              1397
+            ],
+            [
+              24,
+              2333
+            ],
+            [
+              28,
+              2333
+            ],
+            [
+              32,
+              2366
+            ],
+            [
+              36,
+              2333
+            ],
+            [
+              40,
+              2333
+            ],
+            [
+              44,
+              2643
+            ]
+          ],
+          "rax_bits_read_before_overwrite": 4294967040
+        }
+      ]
+    },
+    {
+      "request": 58,
+      "error": "relative table computation has live register or flag results",
+      "failures": [
+        {
+          "line": 131,
+          "scratch": [
+            "X86_RCX",
+            "X86_RAX"
+          ],
+          "live": [
+            18446744073709551615,
+            18446744073709551360,
+            63
+          ],
+          "native_pc": 3697,
+          "instruction": "mov    DWORD PTR [rsp+0x1c],eax",
+          "reads": {
+            "X86_RAX": 4294967295,
+            "X86_RSP": 18446744073709551615
+          },
+          "writes": {},
+          "flags_read": 0,
+          "flags_written": 0,
+          "visited": 15,
+          "visited_instructions": [
+            {
+              "pc": 1661,
+              "instruction": "mov    r13d,0xffffff53",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2337,
+              "instruction": "mov    r13d,0xffffff58",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2348,
+              "instruction": "mov    r13d,0xffffff71",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2370,
+              "instruction": "mov    WORD PTR [rsp+0x28],0x0",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2647,
+              "instruction": "mov    r13d,0xffffff71",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 1667,
+              "instruction": "jmp    e6f <tail_handle_snat_fwd_ipv4+0xe6f>",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2343,
+              "instruction": "jmp    e6f <tail_handle_snat_fwd_ipv4+0xe6f>",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2354,
+              "instruction": "cmp    BYTE PTR [rsp+0x31],0xf",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2377,
+              "instruction": "movzx  eax,WORD PTR [rsp+0x34]",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2653,
+              "instruction": "cmp    BYTE PTR [rsp+0x31],0x1",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 3695,
+              "instruction": "mov    al,0x5",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                63
+              ]
+            },
+            {
+              "pc": 2359,
+              "instruction": "jbe    a68 <tail_handle_snat_fwd_ipv4+0xa68>",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                0
+              ]
+            },
+            {
+              "pc": 2382,
+              "instruction": "mov    WORD PTR [rsp+0x2a],ax",
+              "live": [
+                18446744073709551615,
+                0,
+                63
+              ]
+            },
+            {
+              "pc": 2658,
+              "instruction": "ja     e6f <tail_handle_snat_fwd_ipv4+0xe6f>",
+              "live": [
+                18446744073709551615,
+                18446744073709551615,
+                0
+              ]
+            },
+            {
+              "pc": 3697,
+              "instruction": "mov    DWORD PTR [rsp+0x1c],eax",
+              "live": [
+                18446744073709551615,
+                18446744073709551360,
+                63
+              ]
+            }
+          ],
+          "table": [
+            {
+              "pc": 1645,
+              "instruction": "lea    rcx,[rip+0x13c0]"
+            },
+            {
+              "pc": 1652,
+              "instruction": "movsxd rax,DWORD PTR [rcx+rax*4]"
+            },
+            {
+              "pc": 1656,
+              "instruction": "add    rax,rcx"
+            },
+            {
+              "pc": 1659,
+              "instruction": "jmp    rax"
+            }
+          ],
+          "scheduled": [],
+          "choices": [
+            [
+              0,
+              1661
+            ],
+            [
+              4,
+              2337
+            ],
+            [
+              8,
+              2337
+            ],
+            [
+              12,
+              2348
+            ],
+            [
+              16,
+              2337
+            ],
+            [
+              20,
+              1661
+            ],
+            [
+              24,
+              2337
+            ],
+            [
+              28,
+              2337
+            ],
+            [
+              32,
+              2370
+            ],
+            [
+              36,
+              2337
+            ],
+            [
+              40,
+              2337
+            ],
+            [
+              44,
+              2647
+            ]
+          ],
+          "rax_bits_read_before_overwrite": 4294967040
+        }
+      ]
+    }
+  ],
+  "scope": "Read-only observation of existing production analysis on actual captured proof objects; no lowering, compiler, guest, stock or performance change.",
+  "raw": "/workspaces/kprog-raw/perf/cilium-table-liveness-20261119/path-20261119T195401Z",
+  "source_commit": "8654dcc064bfa8c63941e71c3bd35e65605c0aff",
+  "diagnostic_exit": 0,
+  "finished": "2026-11-19T19:54:02Z"
+}

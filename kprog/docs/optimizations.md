@@ -1294,3 +1294,18 @@ C fixture regrouping canonicalizes to the original direct pair and already
 tests tag13 before sub17; that C pass is not evidence for this extension.
 Actual captured Katran frontend and the new IR controls are the regression
 inputs for5033bed62;269752 still waits imageEX before rebuild.
+
+PERF 2026-11-19T19:57:44Z: Independent phase1 diagnostic while Katran bounds rebuild
+269752 waits imageEX. Existing production private_results_dead is observed
+without replacement on actual Cilium requests22/40/58. All reproduce their
+original rejection. The first consumed result is RAX bits8..31: MOV AL,5
+then MOV DWORD [RSP+offset],EAX reads0xffffff00 of the retained table target;
+no arithmetic flag is read at that stop. Native PCs are3733/3735,3691/3693,
+3695/3697, with stack offsets0x20/0x1c/0x1c. Exact table windows,12choices
+and15visited instructions per request are in cilium-table-liveness-20261119/
+result.json, raw /workspaces/kprog-raw/perf/cilium-table-liveness-20261119/path-20261119T195401Z.
+This is a real partial-register observation at a store, not permission to
+discard table state. No liveness rule/handler/source P/flag/limit changed,
+no B emitted or new stock/app/performance pass. Main compiler work must
+retain the observed bits. Producer-side facts sent through COORDINATION;
+no cross-owner edits or app-specific flags.

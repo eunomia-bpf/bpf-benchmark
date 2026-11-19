@@ -58,6 +58,17 @@
   retain the active run. Snapshot/source dimensions are in the same README;
   this is no new rejection or causal attribution. Diagnostics still wait.
 
+- [ ] P-B-relative-table-live-partials (PERF 2026-11-19T19:57:44Z): actual Cilium
+  checked requests22/40/58 fail relative table lowering. Diagnostic8654dcc06
+  reproduces all3 using the existing bound instruction-effect analysis.
+  First observed live bits are RAX8..31: MOV AL,5 followed by DWORD store
+  EAX at native3735/3693/3697 (stack offsets0x20/0x1c/0x1c), mask0xffffff00.
+  No flags are read at that stop. Preserve these bits and original memory
+  observations; do not weaken the dead-result guard or clear upper bits.
+  Exact12target tables/15visited instructions in results/cilium-table-liveness-20261119.
+  No compiler/guest/B/stock/current-app or speed result yet. Katran5033bed62
+  actual rebuild/replay269752 remains the leading item once imageEX is free.
+
 - [x] P-native-skb-numeric-integration (29d406c69; host164404_21511):
   shared SKB field roots now survive native memory lowering and context
   conversion. Recovered host baseline fails18/40cases; all12direct-C
