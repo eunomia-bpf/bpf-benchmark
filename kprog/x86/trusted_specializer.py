@@ -27,7 +27,10 @@ _SPEC.loader.exec_module(gen)
 # Generated functions can exhaust memory in Clang's warning CFG analysis
 # before code generation. -w skips that diagnostic-only analysis; syntax
 # errors and the optimization/code-generation flags remain unchanged.
-COMPILE_FLAGS = ["-w", "-g", "-O3", "-mcpu=v4", "-target", "bpf",
+# B is analyzed, never executed. O1 avoids the superlinear O3/GVN compile on
+# large dispatchers. Keep -g: g0/line-tables omit the BTF map extern types that
+# libbpf needs to open B. Final native LTO has its independent O3 below.
+COMPILE_FLAGS = ["-w", "-g", "-O1", "-mcpu=v4", "-target", "bpf",
                  "-mllvm", "-bpf-stack-size=4096", "-D__TARGET_ARCH_x86",
                  "-I", ROOT / "vendor/libbpf/include/uapi", "-I", ROOT / "vendor/libbpf/src",
                  "-I", "/usr/include/x86_64-linux-gnu"]
@@ -97,7 +100,7 @@ def _compile_simulator_backend(clang, source: Path, obj: Path, run, *, compiled_
     run([clang, *COMPILE_FLAGS, '-c', compiled_input, '-mllvm',
          '-stop-before=prologepilog', '-o', before])
     run([sys.executable, ROOT / 'kprog/x86/whole_word_spills.py', before, packed])
-    run(['llc-18', '-O3', '-march=bpf', '-mcpu=v4', '-bpf-stack-size=4096',
+    run(['llc-18', '-O1', '-march=bpf', '-mcpu=v4', '-bpf-stack-size=4096',
          '-start-before=prologepilog', '-filetype=obj', packed, '-o', obj])
 
 
