@@ -58,7 +58,12 @@
   retain the active run. Snapshot/source dimensions are in the same README;
   this is no new rejection or causal attribution. Diagnostics still wait.
 
-- [x] P-B-cilium-headlen (PERF handoff 2026-11-19T20:22:55Z, OMP639663a85):
+- [ ] P-B-cilium-headlen (PERF handoff 2026-11-19T20:22:55Z, OMP639663a85):
+  PERF 2026-11-19T23:39:07Z: CBcandidate529337 terminal2. All16positive/
+  8exclusion/10freshness controls and41Bemit pass. Detachedstock16/41;
+  17/37 advance frompacket toscalaraccess, 12/36/48 remainpacket+18/r0
+  after34bytebound andfreshdatareload. Archivedpacketclass staysopen.
+  cb-result.json retains allverdicts; nextmap three reload freshness paths.
   Detachedsole-kernel41stockreplay524242/make2:16load,5packet remain
   (12/17/36/37/48);20reachothererrors:2trustedskb+124stores,6unknownhelper-1,
   7scalaraccess,5unboundedinnermap. All41reachBPF_PROG_LOAD usingfresh

@@ -1,5 +1,16 @@
 # Cilium head-length bounds
 
+Worker529337 finished at2026-11-19T23:39:07Z after rebuilding the sole
+compiler with CB-store repair6b0204beb. All16 positive/eight exclusion
+selectors, ten freshness controls and41 B emissions pass. Detached stock
+loads still accept16/41. Requests17/37 advance from packet rejection to
+scalar-memory rejection; requests12/36/48 still reject packet+18 after a
+fresh data reload following the34-byte bound. The other failure classes
+remain. `cb-result.json` records the exact population and raw directory.
+The archived packet class stays open; the current live14/14 confirmation
+is a different population. Next trace why those three reloads remain
+distinct despite the immediately dominating packet bound.
+
 The five remaining packet failures include a freshness false negative:
 request17 reads len112, writes public cb48..51 with the simulator's exact
 four-byte template, then reads data_len116. The compiler reports one stale

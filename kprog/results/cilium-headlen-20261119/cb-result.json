@@ -1,0 +1,19 @@
+{
+  "raw": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/cb-candidate-20261119T233142Z-529337",
+  "source_commit": "11e24a34ef0d7311b25e3755f2dc81f52770b6e5",
+  "compiler_change": "6b0204beb",
+  "finished": "2026-11-19T23:39:07Z",
+  "make_exit": 2,
+  "positive_selectors": 16,
+  "exclusion_selectors": 8,
+  "packet_data_freshness_cases": 10,
+  "b_emitted": 41,
+  "stock_loaded": [7, 10, 15, 16, 19, 23, 24, 26, 31, 41, 42, 49, 50, 53, 63, 64],
+  "remaining_packet_access": [12, 36, 48],
+  "packet_failure_advanced_to_scalar_access": [17, 37],
+  "trusted_skb_store_124": [9, 35],
+  "invalid_helper_unknown_minus_one": [3, 27, 29, 33, 43, 55],
+  "scalar_memory_access": [11, 17, 20, 21, 37, 38, 45, 57, 60],
+  "unbounded_inner_map_access": [18, 25, 28, 47, 59],
+  "scope": "Sole-kernel detached stock loads with fresh captured map shapes. The CB-store repair removes two of five packet rejections; three packet reload failures remain. No new live binding, native execution or performance measurement."
+}
