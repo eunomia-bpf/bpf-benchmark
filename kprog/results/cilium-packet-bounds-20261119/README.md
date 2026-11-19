@@ -383,3 +383,24 @@ small:  if w2 == 0x10 goto out
 So the last gap is **per-path emission**: a bound proves a read only on the paths where it was tested, and a
 scalar equality does not replace it. That is a statement about where to emit, not about what to prove, and
 it keeps the admitted set identical (`headlen >= K` still admits exactly the same packets).
+
+## PERF's `852c2bfe3` emits the missing per-path bound (omp 2026-11-20T00:35Z)
+
+`852c2bfe3` ("Lower packet boundary equalities through dominating ranges") adds `ordered_boundary()`: at a
+dominating interval guard, `x == K` is emitted as the ordered `x <= K` / `x >= K` its edge already implies,
+after which the ordinary bound lowering describes the fall-through too. Measured over the archived inputs:
+
+| pass | predicates over the 41 | requests with none |
+|---|---|---|
+| `80dbcfc51` (freshness guard) | 201 | 11 |
+| `ff8f0e4b3` (reload unification) | 201 | 11 |
+| `852c2bfe3` (equality through dominating ranges) | **333** | 11 |
+
+The 11 unchanged zeros are requests whose archived capsule holds a body with no head-length comparison at
+all, so there is nothing to lower (same 11 set under all three passes; not a regression).
+
+On request 4, the body that still failed after `ff8f0e4b3`, the emitted `classifier` now carries a bound on
+every path into each `+0x10` read — `128–133` bounds `data+0x12 <= data_end`, then the fall-through
+`134–139` bounds `data+0x11` for the `headlen == 17` case, right before `140: r1 = *(u8 *)(r1 + 0x10)`.
+That is exactly the shape verified `ACCEPT` on the host; it is per-path emission, which is what the
+mechanism needs, and it keeps the admitted packet set identical.
