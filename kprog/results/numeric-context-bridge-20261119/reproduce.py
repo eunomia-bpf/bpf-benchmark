@@ -20,6 +20,9 @@ def run(arguments):
 
 run([root/'kprog/stock-path/bin/clang', '-target', 'bpf', '-O1', '-g',
      '-emit-llvm', '-c', Path(__file__).with_name('fixture.c'), '-o', out/'input.bc'])
+(out/'input.ll').write_text(run(['llvm-dis-18', out/'input.bc', '-o', '-']))
+run(['llc-18', '-march=bpf', '-filetype=obj', out/'input.bc', '-o', out/'stock.bpf.o'])
+(out/'stock-disassembly.txt').write_text(run(['llvm-objdump-18', '-dr', out/'stock.bpf.o']))
 run(['/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir',
      out/'input.bc', '-o', out/'native.bc'])
 (out/'native.ll').write_text(run(['llvm-dis-18', out/'native.bc', '-o', '-']))
@@ -29,7 +32,8 @@ run(['clang-18', '-O3', '-shared', '-fPIC', '-mno-red-zone', '-mgeneral-regs-onl
 library = ctypes.CDLL(str(out/'execute.so'))
 library.plain_value.argtypes = library.numeric_value.argtypes = [ctypes.c_ulong]
 library.numeric_lane.argtypes = [ctypes.c_ulong, ctypes.c_uint]
-for name in ['plain_value', 'numeric_value', 'numeric_lane']:
+library.numeric_once.argtypes = [ctypes.POINTER(ctypes.c_ulong)]
+for name in ['plain_value', 'numeric_value', 'numeric_lane', 'numeric_once']:
     getattr(library, name).restype = ctypes.c_ulong
 values = [0, 1, 0xffffffff, 0x100000000, 0x123456789abcdef0, 0xffff888012345678]
 rows = []
@@ -42,7 +46,12 @@ for value in values:
         rows.append(dict(function='numeric_lane', value=value, lane=lane,
             expected=(value >> (lane*8)) & 0xffffffff,
             observed=library.numeric_lane(value, lane)))
-mismatches = [row for row in rows if row['observed'] != row['expected']]
+    counter = ctypes.c_ulong(value)
+    rows.append(dict(function='numeric_once', value=value, expected=value,
+        observed=library.numeric_once(ctypes.byref(counter)),
+        expected_counter=value+1, observed_counter=counter.value))
+mismatches = [row for row in rows if row['observed'] != row['expected'] or
+              ('observed_counter' in row and row['observed_counter'] != row['expected_counter'])]
 (out/'result.json').write_text(json.dumps(dict(
     cases=len(rows), plain_control_cases=len(values), mismatches=mismatches,
     mismatch_count=len(mismatches), rows=rows,

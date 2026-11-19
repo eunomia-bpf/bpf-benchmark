@@ -1,0 +1,25 @@
+diff --git a/kprog/stock-path/include/stock_native_input.h b/kprog/stock-path/include/stock_native_input.h
+--- a/kprog/stock-path/include/stock_native_input.h
++++ b/kprog/stock-path/include/stock_native_input.h
+@@ -20,4 +20,9 @@
+ #define KPROG_UNSPECIFIED_WORD() (*(volatile unsigned long long *)&kprog_unspecified_input[0])
+ #define NATIVE_LAB_ENTRY_INPUT(kind) ({ (void)(kind); (unsigned long)KPROG_UNSPECIFIED_WORD(); })
+-#define NATIVE_LAB_NUMERIC(value) ({ (void)(value); (unsigned long)KPROG_UNSPECIFIED_WORD(); })
++#define NATIVE_LAB_NUMERIC(value) ({ \
++  unsigned long __kprog_numeric_bits = (unsigned long)(value); \
++  unsigned long __kprog_numeric_scalar = (unsigned long)KPROG_UNSPECIFIED_WORD(); \
++  asm volatile("# kprog_numeric" : "+r"(__kprog_numeric_scalar) : "r"(__kprog_numeric_bits)); \
++  __kprog_numeric_scalar; \
++})
+ #define NATIVE_LAB_EXCLUSIVE_FAILURE(site) ({ (void)(site); (unsigned long)(KPROG_UNSPECIFIED_WORD() & 1); })
+diff --git a/kprog/x86/compile_sim_ir.cpp b/kprog/x86/compile_sim_ir.cpp
+--- a/kprog/x86/compile_sim_ir.cpp
++++ b/kprog/x86/compile_sim_ir.cpp
+@@ -187,4 +187,6 @@
+     StringRef text=assembly->getAsmString(); IRBuilder<> b(call);
+     b.SetCurrentDebugLocation(call->getDebugLoc()); Value *result=nullptr;
+-    if (text.empty()) {
++    if (text=="# kprog_numeric") {
++      result=call->getArgOperand(1);
++    } else if (text.empty()) {
+       if (!call->getType()->isIntegerTy() || call->arg_size()!=1 ||

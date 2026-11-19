@@ -11,3 +11,8 @@ unsigned long numeric_lane(unsigned long value, unsigned int lane)
 {
     return (NATIVE_LAB_NUMERIC(value) >> ((lane & 7) * 8)) & 0xffffffffUL;
 }
+
+unsigned long numeric_once(unsigned long *value)
+{
+    return NATIVE_LAB_NUMERIC((*value)++);
+}

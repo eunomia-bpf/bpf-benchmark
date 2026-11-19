@@ -52,3 +52,17 @@ The phase-1 fix must preserve the concrete operand until native lowering
 while keeping B's conservative scalar abstraction. Truly unspecified inputs
 remain a separate case. No production compiler/header/loader change is made
 during batch369379. Its immutable image/check/timing inputs stay in place.
+
+PERF 2026-11-19T13:13:49Z: Prepared the small forward repair in fix-forward.patch.
+The stock macro carries a tied abstract scalar plus a concrete operand in an
+assembly comment; B emits its ordinary unknown scalar and native lowering
+selects the concrete operand. It adds no kernel operation, helper body,
+mode or runtime check. The existing regression now also emits B and records
+its disassembly, and six side-effect cases detect evaluating the operand
+more than once. This B emission is not a stock-verifier acceptance claim.
+
+run_fix.sh waits for batch EX, then timing SH and image EX before applying
+the repair and rebuilding the sole checked tools through checked-sim-stage.
+It retains the exact applied diff, build log and native/B component outputs.
+It starts no image or guest. Production source is unchanged until those
+leases are acquired; host results and the production commit remain pending.
