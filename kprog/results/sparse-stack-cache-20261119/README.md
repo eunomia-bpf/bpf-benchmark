@@ -53,3 +53,22 @@ this input's sizes, not a speedup against an unmatched old compile. The
 normal pre-PEI backend started18:53:07Z and remains pending.
 tetragon-partial.json records actual commands/statuses; no final B,
 physical frame, stock/current-app or speed result is claimed.
+
+PERF 2026-11-19T19:23:32Z: Backend completes0 in344.452s. Inspector260831 completes0:
+292,754blocks,1,213referenced spills (983four-byte/230eight-byte),432local
+bytes,6,204declared bytes. Conservative live-spill peak5,292bytes at
+bb113470 is a CFG union, not feasible-path or coloring proof. Even giving
+every spill4bytes leaves5,284bytes of declared payload; current packing
+merges scalar pairs, not lifetimes, and cannot fit the4,096compiler bound.
+I stopped only own packer255788 after exact command/parent verification at
+19:18:12Z. Stage-15 after1160.549s/wrapper2 is deliberate cancellation,
+not llc or stock rejection. All MIR/raw stays. No new production threshold,
+flag or limit. See tetragon-storage.json; sparse cells alone are insufficient.
+
+Read-only return inventory finds7internal RET sites,17actual targets and
+no unknown internal return sets. The current global dispatcher exposes
+119site-to-target edges; exact per-site unions total17. Entry RET stays
+separate. This admits a targeted per-site dispatcher experiment using the
+existing saved-ReturnAddress analysis while retaining raw pop/release and
+unsupported-target behavior. No such transformation or gain is yet claimed;
+return-inventory.json retains exact PCs/targets and raw provenance.

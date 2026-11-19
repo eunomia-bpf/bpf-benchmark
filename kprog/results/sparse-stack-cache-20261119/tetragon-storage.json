@@ -1,0 +1,37 @@
+{
+  "raw": "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T185126Z-251817",
+  "inspection": "/workspaces/kprog-raw/perf/tetragon-stack-liveness-20261119/inspect-20261119T191214Z-260831",
+  "backend_seconds": 344.4517242889997,
+  "inspection_exit": 0,
+  "machine_blocks": 292754,
+  "slots": 1215,
+  "referenced_slots": 1215,
+  "shapes": {
+    "default:8:8": 1,
+    "default:424:8": 1,
+    "spill-slot:8:8": 230,
+    "spill-slot:4:8": 983
+  },
+  "declared_bytes": 6204,
+  "conservative_live_spill_peak_bytes": 5292,
+  "peak_block": 113470,
+  "minimum_storage_bytes": 5284,
+  "packer_returncode": -15,
+  "packer_seconds": 1160.5493522999896,
+  "wrapper_exit": 2,
+  "cancelled": {
+    "recorded": "2026-11-19T19:18:12Z",
+    "pid": 255788,
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T185126Z-251817/trusted_x86.bpf.before.mir",
+      "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T185126Z-251817/trusted_x86.bpf.packed.mir"
+    ],
+    "reason": "All declared objects are referenced. Even narrowing every spill to four bytes leaves 5284 bytes including locals; current packer cannot reduce below the unchanged compiler limit.",
+    "inspection": "/workspaces/kprog-raw/perf/tetragon-stack-liveness-20261119/inspect-20261119T191214Z-260831/before.json",
+    "minimum_declared_storage_bytes": 5284,
+    "scope": "Intentional cancellation of this owned offline packing experiment; not llc/stock rejection or a production admission gate."
+  },
+  "scope": "Intentional cancellation after storage inspection, not compiler or stock-verifier rejection. Sparse cache is insufficient for this Tetragon B under the unchanged packer."
+}

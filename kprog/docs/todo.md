@@ -84,9 +84,12 @@
   Sparse-cache component7087690ee passes18selectors/3B emissions/72C
   tag+alias+lifetime cases per layout with UBSan, worker247988. Retained6
   renders16cells versus53 with unchanged424B arena. Full retained B worker
-  251817 passes O1 frontend94.592s/bounds3.521s; normal backend is active,
-  CPU20/32GiBAS, raw sparse-stack-
-  cache-20261119/tetragon-20261119T185126Z-251817; no image/base rebuild.
+  251817 backend passes344.452s; inspection260831 finds1,213spills and a
+  5,284B minimum under current packing. Owned packer255788 cancelled19:18,
+  stage-15/wrapper2, not compiler/stock rejection. Raw and actual storage
+  receipts remain in sparse-stack-cache-20261119; sparse cells insufficient.
+  Next: existing per-RET analysis gives17edges instead of global119 across
+  seven internal sites, all exact. Preserve raw pop/release/default behavior.
   Actual emitted frame/stock/current-app coverage and speed remain open.
   Read-only inventory195833/e9d43500b completed0:2,538ABI states/18contexts,
   original424B arena/53cells,91full-width stores (39known stack/52external),

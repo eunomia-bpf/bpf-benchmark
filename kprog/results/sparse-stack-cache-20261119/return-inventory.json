@@ -1,0 +1,82 @@
+{
+  "raw": "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/return-inventory-20261119T192047Z",
+  "native_return_sites": [
+    {
+      "native_pc": 6565,
+      "targets": [],
+      "unknown": false,
+      "outer": true
+    },
+    {
+      "native_pc": 6757,
+      "targets": [
+        1390
+      ],
+      "unknown": false,
+      "outer": false
+    },
+    {
+      "native_pc": 6971,
+      "targets": [
+        2186
+      ],
+      "unknown": false,
+      "outer": false
+    },
+    {
+      "native_pc": 7560,
+      "targets": [
+        6903
+      ],
+      "unknown": false,
+      "outer": false
+    },
+    {
+      "native_pc": 7734,
+      "targets": [
+        7000,
+        7041,
+        7088,
+        7135,
+        7182,
+        7229,
+        7276,
+        7323,
+        7366,
+        7411
+      ],
+      "unknown": false,
+      "outer": false
+    },
+    {
+      "native_pc": 7829,
+      "targets": [
+        6708
+      ],
+      "unknown": false,
+      "outer": false
+    },
+    {
+      "native_pc": 8242,
+      "targets": [
+        7768,
+        7805
+      ],
+      "unknown": false,
+      "outer": false
+    },
+    {
+      "native_pc": 8326,
+      "targets": [
+        5966
+      ],
+      "unknown": false,
+      "outer": false
+    }
+  ],
+  "global_target_count": 17,
+  "old_dispatch_edges": 119,
+  "per_site_edges": 17,
+  "all_internal_sites_exact": true,
+  "scope": "Read-only existing ABI-analysis return sets. A per-site dispatch compiler change is not yet implemented or validated."
+}
