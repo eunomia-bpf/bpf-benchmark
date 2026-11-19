@@ -1,7 +1,7 @@
 """Inventory stack observations after the actual rejected table definitions.
 
-The provisional CFG supplies dispatch edges for the existing ABI analysis;
-it is never emitted, accepted as a lowering, or used as execution evidence.
+The provisional CFG supplies dispatch edges only. ABI facts come from the
+original instructions, never from the rejected provisional replacement.
 """
 import json
 from pathlib import Path
@@ -47,7 +47,7 @@ for request in previous['requests']:
             raise AssertionError('original table rejection no longer reproduces')
         provisional = captured['provisional']
         targets = adapter.gen.indirect_targets(provisional, exit_addr, starts)
-        extent = adapter.gen.check_definedness(provisional, targets, exit_addr, adapter.gen)
+        extent = adapter.gen.check_definedness(all_insns, targets, exit_addr, adapter.gen)
     finally:
         sys.setprofile(None)
 
@@ -180,6 +180,6 @@ for request in previous['requests']:
     rows.append(row)
     (out/'result.json').write_text(json.dumps(dict(requests=rows,
         source_capture=previous['raw'],
-        scope='Diagnostic ABI pointer inventory over provisional CFG; no dead-memory proof, lowering, B emission, stock acceptance, or runtime result.'), indent=2)+'\n')
+        scope='Diagnostic ABI inventory of original instructions with provisional dispatch edges only; no dead-memory proof, lowering, B emission, stock acceptance, or runtime result.'), indent=2)+'\n')
     print(json.dumps(dict(request=row['request'], cells=row['stack_cells'],
                          overlaps=len(accesses), calls=len(calls), unknown_aliases=len(unknown))), flush=True)
