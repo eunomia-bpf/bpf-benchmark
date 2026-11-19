@@ -186,7 +186,9 @@ def parse_asm_text(text: str) -> list[NativeInsn]:
             asm = asm.removeprefix("lock ").strip()
         match = re.match(r"(?P<mnemonic>[a-z][a-z0-9]*)\s*(?P<operands>.*)$", asm)
         if match is None:
-            continue
+            # Every instruction of P is translated; a line this parser cannot read (objdump "(bad)" and the like)
+            # ends this generation, so the program runs direct native and every B keeps all instructions of P.
+            raise ValueError(f"x86 instruction the generator cannot translate at 0x{addr:x}: {asm}")
         mnemonic = match.group("mnemonic")
         stack_width = 16 if mnemonic in {"pushw", "popw"} else None
         if stack_width: mnemonic = mnemonic[:-1]
