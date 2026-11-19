@@ -85,3 +85,4 @@ import KProgFormal.ClightRefinement.Arm64ProgramEntryAssignments
 import KProgFormal.ClightRefinement.Arm64ProgramEntryVectors
 import KProgFormal.ClightRefinement.Arm64ProgramEntryTail
 import KProgFormal.ClightRefinement.Arm64ProgramEntryLoop
+import KProgFormal.ClightRefinement.Arm64ProgramEntryResources

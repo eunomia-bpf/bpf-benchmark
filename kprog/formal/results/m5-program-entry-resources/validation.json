@@ -1,0 +1,129 @@
+{
+  "scope": "Actual reached-body local Freeable and borrowed cache-storage resources with explicit allocation frontier",
+  "raw": "/workspaces/kprog-raw/formal/m5-program-entry-resources",
+  "validated_at": "2026-11-19T19:54:13.334614+00:00",
+  "proved": [
+    "Every actual Env local has its complete Freeable range using actual declared type/sizeof world",
+    "STACK and RETURN BorrowedCacheStorage use the reached actual header block and actual allocation frontier",
+    "Resources bundles only derived permissions/cache-address evidence",
+    "The existing638-step actual-body result retains all92 readbacks, original ctx temp, other temps/local loads/caller frame/access/nextblock and adds resources without extra C steps"
+  ],
+  "boundary": {
+    "steps": 638,
+    "header_readbacks": 92,
+    "statement": "Arm64ProgramEntrySource.body",
+    "cache_frontier": "(Arm64ProgramEntryAllocation.allocation initial).2.nextblock",
+    "nextblock_fact": "after.nextblock = before.nextblock",
+    "no_added_steps": true,
+    "assumptions": [
+      "Arbitrary original memory and subsequent contents",
+      "Subsequent memory access equals source allocation access",
+      "Arbitrary initial temps and continuation"
+    ],
+    "not_derived": [
+      "Initialized GPR table slots or SP value",
+      "Cold cache contents",
+      "Equality of arbitrary starting memory frontier to allocation frontier",
+      "Full Storage/architectural views or native admission"
+    ]
+  },
+  "focused": {
+    "exit": 0,
+    "seconds": 2.0438413049996598,
+    "jobs": 171,
+    "log": "focused1.log"
+  },
+  "full": {
+    "exit": 0,
+    "start": "2026-11-19T19:52:08.743216+00:00",
+    "seconds": 3.3199165019905195,
+    "command": [
+      "lake",
+      "build"
+    ],
+    "jobs": 346,
+    "log": "lake-build1.log"
+  },
+  "queries": {
+    "exit": 0,
+    "start": "2026-11-19T19:52:07.271897+00:00",
+    "seconds": 1.471051216009073,
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-program-entry-resources/Query.lean"
+    ],
+    "count": 6,
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryResources.locals_freeable": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryResources.cache_storage": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryResources.resources": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryResources.reached_body": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryResources.Resources.freeable": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryResources.Resources.caches": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    "log": "Query1.log"
+  },
+  "axiom_note": "Permission/cache/resource laws use standard logical axioms. The reached InternalRun retains inherited CC.externalFunctionsSem and CC.inlineAssemblySem through CC.Step2; no new axiom or external transition.",
+  "resources": {
+    "cpu": 17,
+    "control_cpu": 16,
+    "workers": 1,
+    "memory_as_bytes": 34359738368,
+    "heartbeats": 200000,
+    "recursion": 512,
+    "async": false,
+    "timing_lock": "Host work per coordinator2026-11-19T18:18:59Z, CPUs8-23 without timing lock"
+  },
+  "source_sha256": "ddb9ea46cf26e34e4028a7cf2a1f576ed92aa0f13689be9cf1f72bcff8a72348",
+  "export_comparison": {
+    "fresh": false,
+    "reason": "Lean-only change with no C source changes",
+    "historical_receipt": "../m5-program-entry-fields/validation.json",
+    "arm64_identical": 10,
+    "historical_x86_differences": 12
+  },
+  "make_check": {
+    "fresh": false,
+    "last_whole_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "fresh_required_at": "M1-M6 closure"
+  },
+  "next": [
+    "Actual one-argument call entry and initial-temp/source-prefix correspondence",
+    "Actual pre-header table/input/scalar execution, initialized values and allocation frontier",
+    "Actual global/provider/consumer/native/context admission and body/ISA/callback refinements",
+    "Relative caches/physical-memory/alias/origin/control and O1/O2/O4 recount",
+    "M6 retirement and fresh full Lake plus make check"
+  ],
+  "m5_complete": false,
+  "m6_complete": false,
+  "completed_isa_families": 0
+}
