@@ -22,7 +22,7 @@ with tarfile.open(capsule) as archive:
 instructions, functions, exit_addr, rodata = adapter.gen.parse_native_linked_program(
     'trusted_x86', retained)
 
-stores, summary = {}, {}
+stores, returns, summary = {}, {}, {}
 abi_file = str(root/'kprog/x86/micro-prog/x86_abi.py')
 
 def observe(frame, event, result):
@@ -47,6 +47,15 @@ def observe(frame, event, result):
         row['offsets'].update(offsets)
         row['unknown'] |= unknown
         row['external'] |= external
+    elif frame.f_code.co_name == 'return_from':
+        pc=frame.f_back.f_locals['addr']
+        row=returns.setdefault(pc,dict(native_pc=pc,targets=set(),unknown=False,outer=False))
+        destinations=values['destinations']
+        if isinstance(destinations,frozenset):
+            row['targets'].update(d.target for d in destinations if d.target is not None)
+            row['outer'] |= any(d.target is None for d in destinations)
+        else:
+            row['unknown']=True
     elif frame.f_code.co_name == 'check_definedness':
         states = values['states']
         summary.update(stack_bytes=result, analysis_states=len(states),
@@ -72,6 +81,8 @@ summary['generated_cache_words'] = [int(word) for word in re.findall(r'M\((\d+)\
     line for line in generated.splitlines() if line.startswith('#define X86_SIM_STACK_VALUE_WORDS')))]
 summary['full_width_store_sites'] = [dict(row, offsets=sorted(row['offsets']))
                                     for row in sorted(stores.values(), key=lambda r:r['native_pc'])]
+summary['return_sites'] = [dict(row,targets=sorted(row['targets']))
+                           for row in sorted(returns.values(),key=lambda r:r['native_pc'])]
 summary.update(retained_proof=str(retained/'trusted_x86.proof.o'),
     metadata_capsule=str(capsule), pruning_proven=False,
     scope='Read-only observation of the existing ABI CFG analysis. The alias '
