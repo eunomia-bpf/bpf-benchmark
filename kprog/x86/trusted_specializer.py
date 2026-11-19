@@ -12,9 +12,10 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "kprog"))
-from trusted_generation import context_kind, declarations, validate_native
+from trusted_generation import context_kind, declarations, validate_native, native_map_label
 from kernel_function_abi import describe as kernel_functions
 sys.path.insert(0, str(ROOT / "kprog/x86/micro-prog"))
+from inline_array import lookup_source
 
 _SPEC = importlib.util.spec_from_file_location("kprog_x86_trusted_generator",
     ROOT / "kprog/x86/micro-prog/generate_micro_sim_proofs.py")
@@ -148,7 +149,8 @@ def specialize(native_bytes: bytes, entry_symbol: str, metadata: dict,
     result = dict(native_object=str(native), native_proof_object=str(proof),
         simulator_object=str(obj), simulator_program=name + "_x86_sim_xdp",
         simulator_source=str(source), simulator_preprocessed=str(source.with_suffix('.i')),
-        context_kind=kind, symbol=entry_symbol, native_sha256=hashlib.sha256(native_bytes).hexdigest())
+        context_kind=kind, symbol=entry_symbol, native_sha256=hashlib.sha256(native_bytes).hexdigest(),
+        maps=metadata['maps'], kernel_btf=str(kernel_btf))
     if bounds_compiler:
         # This is the same frontend IR that produced B, before B-only bounds
         # lowering. Retain its binding so native LTO need not recompile the C.
@@ -191,7 +193,18 @@ def compile_checked_simulator(artifacts: dict, native_link: Path, compiler: Path
         (directory/'frontend-ir-reuse.json').write_text(json.dumps(frontend, indent=2)+chr(10))
     else:
         run([clang, *COMPILE_FLAGS, '-emit-llvm', '-c', copied, '-o', ir])
-    run([compiler, ir, '-o', lowered])
+    arrays = [native_map_label(m['name']) for m in artifacts['maps']
+              if m['map_type'] == 2 and m.get('value_offset') is None]
+    run([compiler, ir, '-o', lowered, *[arg for name in arrays for arg in ('--array-map', name)]])
+    if arrays:
+        helper = directory/'checked-simulator.helpers.c'
+        helper.write_text(lookup_source(artifacts['kernel_btf']))
+        helper_ir = directory/'checked-simulator.helpers.bc'
+        run([clang, '-target', 'x86_64-linux-gnu', '-O3', '-mgeneral-regs-only',
+             '-fno-stack-protector', '-emit-llvm', '-c', helper, '-o', helper_ir])
+        linked = directory/'checked-simulator.linked.bc'
+        run(['llvm-link-18', lowered, helper_ir, '-o', linked])
+        lowered = linked
     if artifacts['context_kind'] != 'raw':
         if not context_compiler or not public_layout or not physical_layout:
             raise ValueError('packet simulator native compilation requires target context compiler/layouts')

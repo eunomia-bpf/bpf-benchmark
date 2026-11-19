@@ -20,6 +20,7 @@ using namespace llvm;
 [[noreturn]] static void fail(const Twine &s) { errs()<<s<<'\n'; std::exit(1); }
 static cl::opt<std::string> Input(cl::Positional,cl::Required);
 static cl::opt<std::string> Output("o",cl::Required);
+static cl::list<std::string> ArrayMaps("array-map");
 #define HELPER_NAME(name) "bpf_" #name
 static const char *HelperNames[] = {__BPF_FUNC_MAPPER(HELPER_NAME)};
 #undef HELPER_NAME
@@ -107,7 +108,12 @@ int main(int argc,char **argv) {
     if (auto *expr=dyn_cast<ConstantExpr>(call->getCalledOperand())) {
       auto *id=expr->getOpcode()==Instruction::IntToPtr?dyn_cast<ConstantInt>(expr->getOperand(0)):nullptr;
       if (!id || id->getZExtValue()>=std::size(HelperNames)) fail("unknown simulator helper target");
-      call->setCalledFunction(m->getOrInsertFunction(HelperNames[id->getZExtValue()],call->getFunctionType()));
+      StringRef name = HelperNames[id->getZExtValue()];
+      if (id->equalsInt(BPF_FUNC_map_lookup_elem))
+        if (auto *map=dyn_cast<GlobalVariable>(call->getArgOperand(0)->stripPointerCasts()))
+          for (const auto &array:ArrayMaps)
+            if (map->getName()==array) name="__kprog_array_lookup";
+      call->setCalledFunction(m->getOrInsertFunction(name,call->getFunctionType()));
       ++lowered; continue;
     }
     if (auto *callee=call->getCalledFunction()) {

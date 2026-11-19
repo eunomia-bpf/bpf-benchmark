@@ -1,0 +1,7 @@
+{
+  "result": "1008 ARRAY boundary cases and two generic calls passed\n",
+  "selected_calls": 1,
+  "generic_calls": 2,
+  "selected_assembly": "\n       0: 8b 07                        \tmovl\t(%rdi), %eax\n       2: 48 8b 0d 00 00 00 00         \tmovq\t(%rip), %rcx            # 0x9 <selected+0x9>\n\t\t0000000000000005:  R_X86_64_REX_GOTPCRELX\tcounts-0x4\n       9: 3b 41 44                     \tcmpl\t0x44(%rcx), %eax\n       c: 73 1a                        \tjae\t0x28 <selected+0x28>\n       e: 8b 91 20 01 00 00            \tmovl\t0x120(%rcx), %edx\n      14: 23 81 24 01 00 00            \tandl\t0x124(%rcx), %eax\n      1a: 48 0f af c2                  \timulq\t%rdx, %rax\n      1e: 48 01 c8                     \taddq\t%rcx, %rax\n      21: 48 05 30 01 00 00            \taddq\t$0x130, %rax            # imm = 0x130\n      27: c3                           \tretq\n      28: 31 c0                        \txorl\t%eax, %eax\n      2a: c3                           \tretq\n      2b: 0f 1f 44 00 00               \tnopl\t(%rax,%rax)",
+  "scope": "Host ABI/selection/kernel ARRAY semantics; no app timing claim"
+}
