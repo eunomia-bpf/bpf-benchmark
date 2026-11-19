@@ -1,11 +1,18 @@
-# Cilium's 41 verifier rejections are one missing packet-bounds predicate (omp 2026-11-19)
+# Cilium's 41 verifier rejections: the class, and why the first fix is not enough (omp 2026-11-19)
 
 Run `x86_kvm_corpus_20261119_170933_095060`, raw
 `/workspaces/kprog-raw/verified/20261119-checked-cilium/`. Of 64 requests, **41 are rejected for one and
-the same reason** (`invalid access to packet`, counted request by request in the last section), 6 for a
-second reason, 14 install, and 3 stop in the emitter. Requests and their measured shapes are in
+the same reason** (`invalid access to packet`, counted request by request under "Complete accounting"),
+6 for a second reason, 14 install, and 3 stop in the emitter. Requests and their measured shapes are in
 `requests.json` (fields: `class`, `section`, `ctx_data_end_reads`, `ctx_data_reads`, `kern_len_reads`,
 `kern_data_len_reads`, `ctx_loadinst`).
+
+**Status, stated up front.** The class is diagnosed correctly, and PERF's matcher fix (`cdd26e9cd` …
+`80dbcfc51`) lowers the predicate in all 41 programs — independently verified here at IR and bytecode
+level. It does **not yet install**: Cilium re-run end to end with the fixed compiler still gives 14
+installs and 41 rejections, because the emitted bound sits on a different load of `skb->data` than the one
+the read uses, and 33 of the 41 reload `data` up to 38 times. The last two sections establish that with a
+kernel-side reproduction. That is the current, open blocker.
 
 ```
 124: (71) r1 = *(u8 *)(r5 +23)
