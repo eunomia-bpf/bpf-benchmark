@@ -28,3 +28,6 @@ stock:
 		--exec 'make -f kprog/results/b-pointer-difference-20261119/Makefile stock-guest OUT=$(OUT) FIXTURE=$(FIXTURE)'
 stock-guest:
 	$(OUT)/probe-inputs/stock-probe $(FIXTURE) $(OUT)/verifier.log > $(OUT)/stock-result.json
+.PHONY: katran-inspect
+katran-inspect:
+	python3 kprog/results/b-pointer-difference-20261119/inspect_katran.py $(OUT)
