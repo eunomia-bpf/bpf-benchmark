@@ -1,0 +1,160 @@
+{
+  "scope": "Actual production null vector-pointer stores and ordered composition with the twelve scalar header stores",
+  "raw": "/workspaces/kprog-raw/formal/m5-program-entry-vectors",
+  "validated_at": "2026-11-19T19:07:43.735973+00:00",
+  "proved": [
+    "Imported semAddPtrInt preserves every result/failure under equal element size",
+    "Imported binary evaluation transports matching operand evaluations and operations",
+    "Actual allocated vector-field address/index/dereference correspondence without whole-composite-world equality",
+    "Real null-cast assignment transport with exact source post-memory",
+    "One actual vector store preserves all other vector/header/local loads and caller resources",
+    "All 64 actual production statements and the genuine successor tail are kernel-checked",
+    "192-step actual vector run; 228-step ordered header plus vector run; all 76 observations at one reached memory"
+  ],
+  "production_region": {
+    "before": "Arm64ProgramEntryAssignments.afterHeader",
+    "after": "afterNullVectors",
+    "stores": 64,
+    "vector_steps": 192,
+    "preceding_header_stores": 12,
+    "combined_steps": 228,
+    "assumptions": [
+      "Arbitrary original caller memory and subsequent memory contents",
+      "Subsequent memory permissions equal the imported allocation permissions",
+      "Arbitrary temporary environment and continuation"
+    ],
+    "combined_derives": [
+      "Actual header/local allocation resources",
+      "All twelve scalar header pointer readbacks",
+      "All 64 null vector-pointer readbacks",
+      "Other-local loads unchanged",
+      "Original caller FrameBelow",
+      "Permissions unchanged",
+      "Allocation frontier unchanged"
+    ]
+  },
+  "focused": [
+    {
+      "exit": 1,
+      "start": "2026-11-19T19:03:04.370002+00:00",
+      "seconds": 23.30173184799787,
+      "log": "focused1.log"
+    },
+    {
+      "exit": 0,
+      "seconds": 2.6325824960076716,
+      "log": "focused2.log"
+    },
+    {
+      "exit": 0,
+      "seconds": 10.730451616007485,
+      "log": "focused3.log"
+    }
+  ],
+  "full": {
+    "exit": 0,
+    "start": "2026-11-19T19:06:08.678973+00:00",
+    "seconds": 3.3242966889956733,
+    "command": [
+      "lake",
+      "build"
+    ],
+    "jobs": 343,
+    "log": "lake-build1.log"
+  },
+  "queries": {
+    "exit": 0,
+    "start": "2026-11-19T19:06:07.166517+00:00",
+    "seconds": 1.5121832529985113,
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-program-entry-vectors/Query.lean"
+    ],
+    "count": 8,
+    "log": "Query1.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryVectors.pointer_add": [
+        "propext"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryVectors.binary_evaluation": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryVectors.vector_lvalue": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryVectors.vector_assignment": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryVectors.vector_write": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryVectors.production_vector_source": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryVectors.vectors_initialized": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryVectors.header_and_vectors": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "axiom_note": "Scalar/expression/source laws have standard logical axioms only; InternalRun execution laws retain the inherited CC.externalFunctionsSem and CC.inlineAssemblySem through CC.Step2. No new axiom or external transition. The prior assignment receipt documents their origin.",
+  "resources": {
+    "cpu": 17,
+    "control_cpu": 16,
+    "workers": 1,
+    "memory_as_bytes": 34359738368,
+    "heartbeats": 200000,
+    "recursion": 512,
+    "async": false,
+    "timing_lock": "Host work follows coordinator 2026-11-19T18:18:59Z: CPUs 8-23 without timing lock"
+  },
+  "failed_attempt": "focused1 hit recursion limit from premature large-world unification. Generic imported-evaluator congruence and explicit element-size proof fix it without raising limits.",
+  "source_sha256": "dfa183e60a884ef1baaf4a873a5c9518a2b3f00e22f07fd5aa0900a6ff17c07b",
+  "export_comparison": {
+    "fresh": false,
+    "reason": "Lean-only change, no C source changes",
+    "historical_receipt": "../m5-program-entry-fields/validation.json",
+    "arm64_identical": 10,
+    "historical_x86_differences": 12
+  },
+  "make_check": {
+    "fresh": false,
+    "historical_last_whole_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "fresh_required_at": "M1-M6 closure"
+  },
+  "next": [
+    "Sixteen actual remaining header fields and actual callback symbols",
+    "Vector-pointer loop, preceding input/scalar prefix and complete composition",
+    "Actual global/provider/consumer/native/context binding, physical memory/alias/origin/control and relative caches",
+    "All ISA families and O1/O2/O4 recount",
+    "M6 retirement followed by fresh full Lake and make check"
+  ],
+  "m5_complete": false,
+  "m6_complete": false,
+  "completed_isa_families": 0
+}
