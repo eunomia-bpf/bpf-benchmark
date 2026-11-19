@@ -425,3 +425,6 @@ KEPT incremental kprog_stock.o and source; raw run archives and logs retained.
 2026-11-17T20:11:46Z — BCC helper-context control functional diagnostic: frozen successful-run cleanup removes only the rebuildable /var/tmp/kprog-tmp/one-image/var-tmp/bpf-benchmark-docker.img. All raw captures, console and corpus results remain under /workspaces.
 
 2026-11-17T20:14:40Z — BCC helper-context query functional diagnostic: frozen successful-run cleanup removes only the rebuildable /var/tmp/kprog-tmp/one-image/var-tmp/bpf-benchmark-docker.img. All raw captures, console and corpus results remain under /workspaces.
+
+- 2026-11-19 FORMAL: removed the stale reference executable and its 87 native .c.o.export dependencies listed in its actual response file, with their rebuildable trace/hash sidecars, to force in-place recompilation against current Lean-generated C. Exact removed paths: /workspaces/kprog-raw/formal/m5-arm64-mov-keep-ordinary/stale-native-products-removed.txt. Sources and raw evidence retained; no extra build product created.
+- 2026-11-19 FORMAL: removed obsolete kprog/x86/native_lab/native_link/target/debug after switching the ARRAY reference harness to the existing canonical target/release/native-link. No process used the debug executable; release output, source, raw runs and linked fixture evidence retained.

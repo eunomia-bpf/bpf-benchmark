@@ -38,9 +38,9 @@ def main():
     out=ROOT/'build/map-reference'
     out.mkdir(parents=True,exist_ok=True)
     env=dict(os.environ,CARGO_TARGET_DIR=str(ROOT.parent/'x86/native_lab/native_link/target'))
-    subprocess.run(['cargo','build','--locked','--quiet','--jobs','1','--manifest-path',
+    subprocess.run(['cargo','build','--release','--locked','--quiet','--jobs','1','--manifest-path',
         str(ROOT.parent/'x86/native_lab/native_link/Cargo.toml'),'--bin','native-link'],env=env,check=True)
-    linker=ROOT.parent/'x86/native_lab/native_link/target/debug/native-link'
+    linker=ROOT.parent/'x86/native_lab/native_link/target/release/native-link'
     source=out/'lookup.c'
     source.write_text('typedef void *(*lookup_fn)(void*,const void*);\nextern char fixture_map[];\n'
         'void *map_lookup(void *m,const void *k){return ((lookup_fn)1)(fixture_map,k); }\n'
@@ -55,10 +55,13 @@ def main():
     flags_source.write_text('''#include <stdint.h>
 uint64_t cmp32(uint32_t a,uint32_t b){uint64_t f;__asm__ volatile("cmpl %k2,%k1;pushfq;popq %0":"=r"(f):"r"(a),"r"(b):"cc","memory");return f;}
 uint64_t add64(uint64_t a,uint64_t b){uint64_t f;__asm__ volatile("addq %2,%1;pushfq;popq %0":"=r"(f),"+r"(a):"r"(b):"cc","memory");return f;}
+uint64_t shl5(uint64_t a){uint64_t f;__asm__ volatile("shlq $5,%1;pushfq;popq %0":"=r"(f),"+r"(a)::"cc","memory");return f;}
+uint64_t imul12(uint64_t a){uint64_t f;__asm__ volatile("imulq $12,%1,%1;pushfq;popq %0":"=r"(f),"+r"(a)::"cc","memory");return f;}
 ''')
     command(['cc','-O2','-shared','-fPIC',flags_source,'-o',out/'flags.so'])
     flags=ctypes.CDLL(str(out/'flags.so'))
-    for name,args in [('cmp32',[ctypes.c_uint32,ctypes.c_uint32]),('add64',[ctypes.c_uint64,ctypes.c_uint64])]:
+    for name,args in [('cmp32',[ctypes.c_uint32,ctypes.c_uint32]),('add64',[ctypes.c_uint64,ctypes.c_uint64]),
+                      ('shl5',[ctypes.c_uint64]),('imul12',[ctypes.c_uint64])]:
         fn=getattr(flags,name);fn.argtypes=args;fn.restype=ctypes.c_uint64
     cases=[]
     for kind,elem_size in [(k,8) for k in ('array','percpu_array','hash','lru_hash','percpu_hash','call')]+[('array',32),('percpu_array',32),('array',12),('percpu_array',12)]:
@@ -115,7 +118,9 @@ uint64_t add64(uint64_t a,uint64_t b){uint64_t f;__asm__ volatile("addq %2,%1;pu
             assert target is not None and int(target[1],16)==start,(kind,assembly)
 
         zero=next(pc for pc,(_,text) in insns.items() if text=='xor eax,eax')
-        end=zero+insns[zero][0]
+        null_end=zero+insns[zero][0]
+        value_end=next(pc for pc,(_,text) in insns.items() if start<pc<zero and text=='ret')
+        assert insns[null_end][1]=='ret',(name,assembly)
         first_pp=next((pc for pc,(_,text) in insns.items() if text=='mov rax,QWORD PTR [rax]'),None)
         gs_read=next((pc for pc,(_,text) in insns.items() if text.startswith('add rax,QWORD PTR gs:')),None)
         for key in (0,1,15,16,17,0xFFFFFFFF):
@@ -135,7 +140,7 @@ uint64_t add64(uint64_t a,uint64_t b){uint64_t f;__asm__ volatile("addq %2,%1;pu
                     memory(slot,pointer,8,mode!='slot_fault',True)
                     memory(0x9020,cpu_offset,8,mode!='cpu_fault',True)
                 state['memory']=cells
-                expected=copy.deepcopy(state);expected.update(pc=end,events=[],fault=None,defined_flags=MASK)
+                expected=copy.deepcopy(state);expected.update(pc=value_end if key<16 else null_end,events=[],fault=None,defined_flags=MASK)
                 events=expected['events']
                 def read(address,value,width,initialized=False):
                     events.append(dict(kind='read',address=address,value=list(value.to_bytes(width,'little')),initialized=initialized))
@@ -152,10 +157,11 @@ uint64_t add64(uint64_t a,uint64_t b){uint64_t f;__asm__ volatile("addq %2,%1;pu
                         expected['flags']=(expected['flags']&~(STATUS^0x10))|0x44
                         expected['defined_flags']=MASK^0x10
                     elif elem_size>8:
-                        # SHL/IMUL is followed by real ADDs of map base and
-                        # value offset. Path masks conservatively retain
-                        # earlier undefined flags even after later writes.
-                        expected['flags']=(expected['flags']&~STATUS)|(flags.add64((key*elem_size+state['registers'][7])&MASK,128)&STATUS)
+                        # The shared routine scales with SHL/IMUL, then LEA
+                        # retains those flags. Compare hardware's defined bits;
+                        # path masks retain earlier undefined bits after writes.
+                        scale_flags={32:flags.shl5,12:flags.imul12}[elem_size]
+                        expected['flags']=(expected['flags']&~STATUS)|(scale_flags(key)&STATUS)
                         expected['defined_flags']=MASK^(0x810 if elem_size&(elem_size-1)==0 else 0xD4)
                     if key<16 and kind=='percpu_array':
                         if mode=='slot_fault':fault(slot,8,first_pp)
@@ -171,13 +177,18 @@ uint64_t add64(uint64_t a,uint64_t b){uint64_t f;__asm__ volatile("addq %2,%1;pu
                     length,text=insns[pc];path.append(dict(offset=pc,length=length))
                     if expected['fault'] is not None and pc==expected['pc']:break
                     if text.startswith('jae '):pc=zero if key>=16 else pc+length
-                    elif text.startswith('jmp '):pc=end
+                    elif text.startswith('jmp '):
+                        target=re.fullmatch(r'jmp (0x[0-9a-f]+)',text)
+                        assert target is not None,(name,pc,text)
+                        pc=int(target[1],16)
                     else:pc+=length
                 if expected['fault'] is not None and path[-1]['offset']!=expected['pc']:
                     path.append(dict(offset=expected['pc'],length=insns[expected['pc']][0]))
                 cases.append((dict(isa='x86_64',native_bytes=list(blob),native_base=0,native_path=path,state=state),expected))
     run=subprocess.run([str(ROOT/'.lake/build/bin/reference')],input=''.join(json.dumps(r)+'\n' for r,_ in cases),
-        text=True,capture_output=True,check=True)
+        text=True,capture_output=True)
+    if run.returncode:
+        raise RuntimeError(run.stderr or run.stdout)
     results=[json.loads(line) for line in run.stdout.splitlines()];assert len(results)==len(cases)
     for (request,expected),actual in zip(cases,results):
         mask=expected['defined_flags'];actual['flags']&=mask;expected['flags']&=mask
