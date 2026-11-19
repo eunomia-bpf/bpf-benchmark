@@ -1,0 +1,35 @@
+import KProgFormal.ClightRefinement.Arm64MovKeepContext
+import KProgFormal.ClightRefinement.Arm64NumericProducerRegisterStorage
+open KProgFormal.ClightRefinement
+#check Continuation.callCont_extend
+#print axioms Continuation.callCont_extend
+#check Continuation.isCallCont_extend
+#print axioms Continuation.isCallCont_extend
+#check Continuation.findLabel_extend
+#print axioms Continuation.findLabel_extend
+#check Continuation.findLabelLs_extend
+#print axioms Continuation.findLabelLs_extend
+#check Continuation.step_extend
+#print axioms Continuation.step_extend
+#check Continuation.internal_state
+#print axioms Continuation.internal_state
+#check Continuation.star_extend
+#print axioms Continuation.star_extend
+#check Continuation.run_extend
+#print axioms Continuation.run_extend
+#check Arm64MovKeep.call_scalar_in_context
+#print axioms Arm64MovKeep.call_scalar_in_context
+#check Arm64MovKeep.producer_ownership_of_permissions
+#print axioms Arm64MovKeep.producer_ownership_of_permissions
+#check Arm64MovKeep.call_scalar_owns_locals
+#print axioms Arm64MovKeep.call_scalar_owns_locals
+#check Arm64MovKeep.Native.call_corresponds_in_context
+#print axioms Arm64MovKeep.Native.call_corresponds_in_context
+#check Arm64MovKeep.call_scalar_returns
+#print axioms Arm64MovKeep.call_scalar_returns
+#check Arm64MovKeep.Native.call_corresponds
+#print axioms Arm64MovKeep.Native.call_corresponds
+#check Arm64NumericProducerConsumer.Boundary.call_return
+#print axioms Arm64NumericProducerConsumer.Boundary.call_return
+#check Arm64NumericProducerRegisterStorage.initialized_storage
+#print axioms Arm64NumericProducerRegisterStorage.initialized_storage
