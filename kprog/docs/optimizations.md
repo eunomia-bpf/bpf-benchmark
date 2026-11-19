@@ -1264,3 +1264,11 @@ worker269752 is still an unstarted imageEX rebuild waiter while coordinator
 263766 uses the shared image. This is resource ordering, no correctness
 pass inferred. Tetragon267684 frontend83.366s/bounds3.175s pass; backend
 pending since19:31:03Z, all raw retained. No speed claim from compile times.
+
+PERF 2026-11-19T19:36:13Z: Tetragon return-dispatch compile267684 completes normal O1
+frontend83.366s/bounds3.175s/backend225.411s, all0. Pre-PEI MIR150497402B
+is retained; packing starts19:34:49Z. Read-only inspector271036 runs
+CPU18/8GiBAS on this immutable MIR, no timinglock. Partial commands in
+return-dispatch-20261119/tetragon-partial.json. Katran mapping/syntax-only
+receipt is b-pointer-difference-20261119/katran-mapped.json;269752 remains
+unstarted imageEX waiter. No stock or execution-performance claim.

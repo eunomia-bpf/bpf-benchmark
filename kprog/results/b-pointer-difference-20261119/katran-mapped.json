@@ -1,0 +1,20 @@
+{
+  "recorded": "2026-11-19T19:36:13Z",
+  "source_archive": "/workspaces/kprog-raw/coordinator/lto-katran-20261119T185858Z/timing/service.tar.gz",
+  "capsule": "service/requests/1.success.tar.gz",
+  "mapped_raw": "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/katran-20261119T193054Z",
+  "native_pc": "0x1261",
+  "operation": "MOV_STORE_REG RSP,R13,width64,disp8",
+  "generated_line": 3119,
+  "original_subtraction_pc": 4145,
+  "original_tag4_test_pc": 4149,
+  "original_frontend_subtraction": "%21892 = sub i64 %21891, %21890; %21891 = add i64 ptrtoint(value), -240",
+  "original_bounds_subtraction": "%18706 = sub i64 %18705, %18704; %18705 = add i64 ptrtoint(value), -240",
+  "original_anchored_pairs": 2,
+  "candidate": "5033bed62",
+  "syntax_raw": "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/syntax-20261119T193414Z",
+  "syntax_exit": 0,
+  "worker": 269752,
+  "worker_state": "unstarted imageEX rebuild waiter",
+  "scope": "Actual captured rejection mapped to constant-offset pointer pair. Candidate syntax only; corrected B and stock/app confirmation pending."
+}

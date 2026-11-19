@@ -1,0 +1,149 @@
+{
+  "raw": "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T192934Z-267684",
+  "source_commit": "fd221eac384a880d55132219e17cf6293f4ef915",
+  "recorded": "2026-11-19T19:36:13Z",
+  "commands": [
+    {
+      "command": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-w",
+        "-g",
+        "-O1",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-E",
+        "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T192934Z-267684/trusted_x86.bpf.piece0.c",
+        "-o",
+        "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T192934Z-267684/trusted_x86.bpf.piece0.i"
+      ],
+      "started": "2026-11-19T19:29:36.613589+00:00",
+      "seconds": 0.3135250469931634,
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-w",
+        "-g",
+        "-O1",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-E",
+        "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T192934Z-267684/trusted_x86.bpf.piece1.c",
+        "-o",
+        "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T192934Z-267684/trusted_x86.bpf.piece1.i"
+      ],
+      "started": "2026-11-19T19:29:36.935085+00:00",
+      "seconds": 0.29051630999310873,
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-w",
+        "-g",
+        "-O1",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-emit-llvm",
+        "-c",
+        "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T192934Z-267684/trusted_x86.bpf.i",
+        "-o",
+        "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T192934Z-267684/trusted_x86.bpf.bounds-input.bc"
+      ],
+      "started": "2026-11-19T19:29:37.230690+00:00",
+      "seconds": 83.36585442299838,
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+        "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T192934Z-267684/trusted_x86.bpf.bounds-input.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T192934Z-267684/trusted_x86.bpf.bounds.bc"
+      ],
+      "started": "2026-11-19T19:31:00.597090+00:00",
+      "seconds": 3.175044944000547,
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "packet length predicates lowered=0\nmap extern debug declarations restored=0\nunused private inputs removed=2707\nconstant context loads canonicalized=0\ndebug variable intrinsics removed=61471\nequality-edge PHI expressions folded=5\ntied integer constant identities folded=925\nlive integer identities normalized=281\nempty memory barriers removed=165\nhelper memory contracts described=145\nprivate stack accesses normalized=93977\npointer differences anchored=1\n"
+    },
+    {
+      "command": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-w",
+        "-g",
+        "-O1",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-c",
+        "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T192934Z-267684/trusted_x86.bpf.bounds.bc",
+        "-mllvm",
+        "-stop-before=prologepilog",
+        "-o",
+        "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T192934Z-267684/trusted_x86.bpf.before.mir"
+      ],
+      "started": "2026-11-19T19:31:03.772549+00:00",
+      "seconds": 225.41098766599316,
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "current": {
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T192934Z-267684/trusted_x86.bpf.before.mir",
+      "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T192934Z-267684/trusted_x86.bpf.packed.mir"
+    ],
+    "started": "2026-11-19T19:34:49.194874+00:00"
+  },
+  "scope": "Completed normal-O1 frontend, bounds and backend stages for changed return dispatch. Packing/final B/stock/runtime gains remain pending."
+}
