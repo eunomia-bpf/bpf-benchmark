@@ -69,7 +69,7 @@ must rise from 14.
 6 requests (6, 14, 32, 44, 56, 61) are rejected with `only read is supported` — a write through a packet
 pointer the verifier has not proved writable. Same file, different matcher question; counted here so the
 two are not confused.
-## Post-fix check against the same archive inputs (omp 2026-11-19T20:55Z)
+## Post-fix check against the same archive inputs (omp 2026-11-19T21:02Z)
 
 PERF's `cdd26e9cd` ("Recognize classifier head-length predicates through simulator memory
 templates") closes all three gaps above. Rebuilt the pass from that commit
@@ -102,9 +102,11 @@ compiles all four sampled requests (3, 7, 9, 15, 21) to objects without error.
 `data + K <= data_end` accept exactly the same packets; no condition was added and P is unchanged — as
 required for this pass.
 
-**No regression on the other apps.** The same binary lowers 0 predicates on all 14 OTel and the one
-Katran archived inputs (`/workspaces/kprog-raw/verified/20261119-checked-otel2`,
-`-katran2`), so the 17 currently installing Cilium requests and the other five apps keep their bytecode.
+**No regression on anything that already works.** The same binary lowers 0 predicates on all 14 OTel and
+the one Katran archived inputs (`/workspaces/kprog-raw/verified/20261119-checked-otel2`, `-katran2`), and
+on all 14 Cilium requests that already install and whose B input is archived (1, 2, 4, 5, 8, 13, 30, 34,
+39, 46, 51, 52, 54, 62; the other three installing requests kept no `bounds-input.bc`). So the fix
+changes bytecode only for the 40 that the verifier rejects, and the other five apps keep theirs.
 
 Not yet proven here: that the 40 patched B programs are *accepted* by the stock verifier. The host BTF
 lacks the apps' extern symbols (`__config_endpoint_ipv4` etc.), so the load must happen in the guest;
