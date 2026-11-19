@@ -203,8 +203,8 @@ try {
         f.close(); require(static_cast<bool>(f), "write manifest");
     }
     const auto resolve = [&](const std::vector<bpf_insn> &loaded) {
-        return resolve_native_manifest(manifest, info, [&](const std::filesystem::path &object, const std::string &entry) {
-            return SourceBpfMaps(object).agreement(entry, loaded);
+        return resolve_native_manifest(manifest, info, [&](const std::filesystem::path &object, const std::string &symbol) {
+            return SourceBpfMaps(object).agreement(symbol.empty() ? "entry" : symbol, loaded);
         }, loaded.size());
     };
     const auto selected = resolve(root);

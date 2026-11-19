@@ -4189,8 +4189,11 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         std::optional<ManifestResolution> resolution =
             resolve_native_manifest(options.manifest_path,
                                     prog_info,
-                                    [&](const std::filesystem::path &object, const std::string &entry) {
-                                        return SourceBpfMaps(object).agreement(entry, source_insns);
+                                    [&](const std::filesystem::path &object, const std::string &symbol) {
+                                        if (symbol.empty() && symbol_name.empty())
+                                            symbol_name = load_prog_btf_symbol_name(options.original_prog_fd, prog_info);
+                                        return SourceBpfMaps(object).agreement(symbol.empty() ? symbol_name : symbol,
+                                                                               source_insns);
                                     },
                                     source_insns.size());
         if (!resolution) {
@@ -4203,7 +4206,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         if (options.diagnostics && options.diagnostics->log_path.empty())
             options.diagnostics->log_path = resolution->loader_timing_log;
         native_object_path = resolution->native_object_path;
-        symbol_name = resolution->symbol_name;
+        if (!resolution->symbol_name.empty()) symbol_name = resolution->symbol_name;
         kernel_kfunc_context = resolution->kernel_kfunc_context;
         kernel_kfunc_btf = resolution->kernel_kfunc_btf;
         source_bpf_object = resolution->source_bpf_object;

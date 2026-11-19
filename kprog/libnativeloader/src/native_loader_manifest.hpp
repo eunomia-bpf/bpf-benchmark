@@ -606,9 +606,9 @@ std::optional<ManifestResolution> resolve_native_manifest(
         long score = 0;
         if (auto source = json_object_string(entry, "source_bpf_object")) {
             candidate.source_bpf_object = manifest_relative_path(manifest_path, *source);
-            const auto agree = source_agreement(
-                candidate.source_bpf_object,
-                candidate.symbol_name.empty() ? prog_name : candidate.symbol_name);
+            // An entry without a symbol carries the kernel's truncated name; the caller names the
+            // whole function from the loaded program's BTF.
+            const auto agree = source_agreement(candidate.source_bpf_object, candidate.symbol_name);
             candidate.source_matches = agree.length > 0 && agree.leading == agree.length;
             candidate.source_difference = agree.difference;
             // Leading agreement first, then agreement at aligned positions, then the closer length.
