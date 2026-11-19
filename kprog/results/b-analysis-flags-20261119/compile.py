@@ -17,7 +17,7 @@ assert '-O1' in COMPILE_FLAGS and '-O3' not in COMPILE_FLAGS
 cases=sys.argv[2:] or ['bcc1','bcc7','tetragon6']
 rows=[]
 for name in cases:
-    directory=out/name;directory.mkdir(exist_ok=True)
+    directory=out/name  # specialize owns creation of each fresh request directory
     (out/'progress.txt').write_text(name+' generation '+time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())+'\n')
     if name.startswith('bcc'):
         with tarfile.open('/workspaces/kprog-raw/verified/20261118-deletion-check/bcc/service.tar.gz') as outer:
@@ -51,7 +51,7 @@ for name in cases:
     row['native_compile_seconds']=time.perf_counter()-begin
     row['native_status']='host compiled, not installed'
     commands=[json.loads(line) for line in (directory/'native-commands.jsonl').read_text().splitlines()]
-    native_command=next(item['command'] for item in commands if item['command'][0].endswith('clang') and '-target' in item['command'] and 'x86_64-linux-gnu' in item['command'] and '-emit-llvm' not in item['command'])
+    native_command=next(item['command'] for item in commands if '-target' in item['command'] and 'x86_64-linux-gnu' in item['command'] and '-emit-llvm' not in item['command'])
     assert '-O3' in native_command
     row['native_flags']=native_command[1:-4]
     (out/'summary.json').write_text(json.dumps(rows,indent=2)+'\n');print(name,'native O3 compiled',flush=True)
