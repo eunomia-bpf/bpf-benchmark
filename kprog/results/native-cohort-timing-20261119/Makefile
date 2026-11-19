@@ -21,3 +21,4 @@ analyze:
 	$(MAKE) -f $(ROOT)/kprog/results/native-cohort-check-20261119/Makefile summarize RAW=$(BATCH)/timing OUT=$(OUT)/coverage.json SOURCE_COMMIT=$(BATCH)/source-commit EXIT_FILE=$(BATCH)/exit-code RUN_LOG=$(BATCH)/timing.log
 	python3 $(ROOT)/kprog/results/flag-tuning-20261117/may29_ratio.py off=$(RUN) on=$(RUN) > $(OUT)/timing-summary.txt
 	python3 $(ROOT)/kprog/results/flag-tuning-20261117/inst.py $(RUN) > $(OUT)/installed.txt
+	python3 $(ROOT)/kprog/results/checked-hash-ops-20261119/per_program.py $(RUN)/details/apps/bcc__set.json $(OUT)/per-program.json
