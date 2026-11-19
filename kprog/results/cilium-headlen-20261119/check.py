@@ -97,12 +97,13 @@ for name in data_controls:
         middle = f'''  %stored = call i64 asm sideeffect "$0 = $2\\0A*(u8 *)($1 + $3) = $0\\0A$0 >>= 8\\0A*(u8 *)($1 + $4) = $0\\0A$0 >>= 8\\0A*(u8 *)($1 + $5) = $0\\0A$0 >>= 8\\0A*(u8 *)($1 + $6) = $0", "=&r,r,r,i,i,i,i,~{{memory}}"(ptr {pointer}, i64 7, i64 {offset}, i64 {offset+1}, i64 {offset+2}, i64 {offset+3})\n'''
     left = '%carried' if name == 'identity_stale' else '%first'
     section = 'xdp' if name == 'xdp_cb_store' else 'classifier'
+    result = '  %answer = xor i64 %value, %choice\n  ret i64 %answer' if name in {'private_choice','foreign_choice','class_choice'} else '  ret i64 %value'
     controls+=f'''\ndefine i64 @ir_data_{name}(ptr %ctx) section "{section}" {{
   %local = alloca [4 x i8]
   %first = call i64 asm sideeffect "$0 = *(u32 *)($1 + $2)", "=r,r,i,~{{memory}}"(ptr %ctx, i64 76)
 {middle}  %second = call i64 asm sideeffect "$0 = *(u32 *)($1 + $2)", "=r,r,i,~{{memory}}"(ptr %ctx, i64 76)
   %value = add i64 {left}, %second
-  ret i64 %value
+{result}
 }}
 '''
 for name,callee in [('ir_readonly_loop','read_context'),('ir_mutating_loop','mutate_context')]:
