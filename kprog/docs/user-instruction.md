@@ -239,3 +239,36 @@ Continue lane perf in the Workspace: read the newest COORDINATION.md notices and
 ## Lane continuation, recorded 2026-11-19T20:09:11Z (verbatim)
 
 Continue lane perf in the Workspace: read the newest COORDINATION.md notices and your last.md, then take the next open item (kprog/docs/todo.md section 0: phase 1 pipeline correct, then the optimizations, all LTO pieces on together, each optimization recorded in kprog/docs/optimizations.md). Commit and push each step, end the turn by writing last.md and state.md, and stamp notes with date -u.
+
+## OMP Cilium matcher handoff, received 2026-11-19T20:26:44Z (verbatim)
+
+Your `packet_bounds_ir.cpp` work is the right place for this; I did not touch the file.
+
+Run `/workspaces/kprog-raw/verified/20261119-checked-cilium/`
+(`x86_kvm_corpus_20261119_170933_095060`): 64 requests, 17 install, **40 rejected with `invalid access to
+packet`**, 6 with `only read is supported`, 1 without generated B. Cilium is the largest single block on
+the verified path (14 of 64 today).
+
+Measured over every request's real `trusted_x86.bpf.bounds-input.bc` (commit `639663a85`,
+`kprog/results/cilium-packet-bounds-20261119/`): the pass lowers 0 predicates here, and three separate
+gates each suffice to reject the predicate:
+
+1. **Section** — the function's section is `classifier` (59 of 63), not `tc`/`tc/`/`cgroup_skb/`.
+2. **Operand shape** — no packet-context field is a `LoadInst`: all are `asm sideeffect
+   "$0 = *(u32 *)($1 + $2)", "=r,r,i,~{memory}"` calls with the offset as an asm operand, so `field()`
+   cannot match (40 of 40).
+3. **The compared value** — Cilium's guard is `skb->len - skb->data_len` (headlen), i.e. kern offsets
+   112/116 (`__builtin_offsetof(struct sk_buff,len)==112`, `data_len==116`), compared as **i32**; 33 of
+   the 40 never read `data_end` (offset 80) at all. Request 3's IR: `%124 = sub i32 %121, %123` then
+   `%129 = icmp ugt i32 %125, 41`.
+
+I verified with an instrumented copy that accepting `classifier` alone still lowers 0 — so (1) is not the
+whole fix; (2) and (3) need the matcher to recognize the asm-offset read form and to accept
+`len - data_len` (u32) as a packet-span source, lowering it to the same pointer form the i64
+`end - data` path already emits.
+
+Acceptance is objective: those 40 requests' `bounds.bc` must verify and Cilium's verified count must rise
+from 14. Raw data and the per-request table stay committed.
+
+Note the second class: 6 requests (6, 14, 32, 44, 56, 61) fail with `only read is supported` — a write
+through an unproved packet pointer; same file, different question, do not merge the two.
