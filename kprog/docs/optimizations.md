@@ -993,3 +993,12 @@ from3,996 to8,076 conservative live bytes. Even four bytes per spill leaves
 SIGTERM after that static result; no llc/stock rejection is claimed and no
 production check/limit was added. Raw MIR/logs and cancellation receipts stay.
 The BCC-tested folding remains; Tetragon needs a different live-state reduction.
+
+PERF 2026-11-19T13:00:39Z: Phase-1 numeric fidelity regression is reproduced through
+the actual stock frontend and native O3 compiler: six ABI controls pass,
+16 of 24 NUMERIC/lane cases lose their concrete input bits. Both optimized
+numeric functions return zero after the proof header discards the operand
+and native lowering freezes the resulting unspecified read. This is a
+component correctness result, with no corpus path or performance inference.
+No production input changes during the active combined timing batch. See
+results/numeric-context-bridge-20261119; the native/B boundary fix remains open.

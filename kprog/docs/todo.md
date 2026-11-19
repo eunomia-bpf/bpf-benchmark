@@ -11,10 +11,14 @@
 - [ ] P-native-numeric-bridge (PERF 2026-11-19T12:46:11Z): audit native
   preservation of NUMERIC(value)'s concrete bits through the reused stock
   frontend. The proof header discards value; native freezes the resulting
-  unspecified-input read. The suspected loss is not yet executed/confirmed.
-  Component worker400746 waits on timing SH, with six ABI controls and24
-  numeric/lane cases. No production change during the active batch. See
-  results/numeric-context-bridge-20261119.
+  unspecified-input read. Worker 400746 completed at 12:52:08Z: all five
+  tool stages and six plain ABI controls pass; actual native execution loses
+  the input bits in 16 of 24 numeric/lane cases. Optimized numeric functions
+  return zero. Preserve the concrete operand until native lowering while B
+  keeps its conservative scalar abstraction; do not remove all unspecified
+  input freezing. No corpus path hit or timing effect is inferred. Production
+  changes follow the active batch's input lease. See
+  results/numeric-context-bridge-20261119 (actual rows and IR evidence).
 
 - [ ] P-B-constant-ALU32 (PERF 2026-11-19T11:28:45Z): Tetragon request 6's
   retained B has 438,579 machine blocks and a conservative 3,996-byte live

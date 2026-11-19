@@ -30,3 +30,25 @@ Launcher: `/workspaces/kprog-raw/perf/numeric-context-bridge-launch-20261119.log
 It is waiting for timing SH; no compilation/execution result yet. A setup or
 compiler failure must be distinguished from the final bit-preservation
 assertion, whose `result.json` records actual executed rows.
+
+PERF 2026-11-19T13:00:39Z: The component worker completed at 12:52:08Z. All five
+compiler/disassembly steps succeeded and all six plain ABI controls passed.
+Actual native execution produced 16 mismatches among 24 numeric cases; the
+Make exit is 2 from the final bit-preservation assertion, not a setup or
+compiler failure. `result.json` contains every executed row. For example,
+NUMERIC(0x123456789abcdef0) returned zero rather than its argument, and lane 4
+returned zero rather than 0x12345678.
+
+The retained optimized.ll:7-22 returns the input in plain_value and constant
+zero in both numeric functions. The causal boundary is
+`kprog/stock-path/include/stock_native_input.h:22`, which discards the input,
+followed by `kprog/x86/compile_sim_ir.cpp:125-142`, which freezes the
+unspecified-input read. This confirms the native concrete-bit loss in this
+component; it does not establish a corpus path hit, B verification failure,
+or effect on a measured speed ratio. The shared SKB reader's narrow packet
+pointer conversion at x86_sim_local_bpf.h:1396 is the identified caller.
+
+The phase-1 fix must preserve the concrete operand until native lowering
+while keeping B's conservative scalar abstraction. Truly unspecified inputs
+remain a separate case. No production compiler/header/loader change is made
+during batch369379. Its immutable image/check/timing inputs stay in place.
