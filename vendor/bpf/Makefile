@@ -125,7 +125,7 @@ TRACEE_CORE_CFLAGS := -D__TARGET_ARCH_x86 -D__BPF_TRACING__ -DCORE -DCOMMON_BUIL
 # Tetragon compiles each object under several variant defines; a query can exist
 # in one variant only, so the scan carries every variant the compile uses.
 TETRAGON_CORE_CFLAGS := -D__TARGET_ARCH_x86 -fms-extensions \
-	-DMICRO_NATIVE_HELPER_MACROS -DMICRO_NATIVE_TETRAGON \
+	-DMICRO_NATIVE_TETRAGON \
 	-D__LARGE_BPF_PROG -D__V511_BPF_PROG -D__V61_BPF_PROG \
 	-D__MULTI_KPROBE -D__RHEL7_BPF_PROG -D__BPF_OVERRIDE_RETURN -I. \
 	-Itetragon/bpf -Itetragon/bpf/include -Itetragon/bpf/lib -Itetragon/bpf/libbpf \
@@ -294,7 +294,6 @@ $(OTEL_EBPF_DIR)/errors.h: otel/tools/errors-codegen/errors.json otel/tools/erro
 $(NATIVE_OUT)/otel/%.native.o: $(OTEL_EBPF_DIR)/%.ebpf.c $(OTEL_EBPF_DIR)/errors.h core-compat.h $(CORE_ANSWERS)/otel.h Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) $(call core_flags,$(CORE_ANSWERS)/otel.h) \
-		-DMICRO_NATIVE_HELPER_MACROS -D__KPROG_HELPERS_ARE_POINTERS \
 		-Wno-unused-function -Wno-unused-variable \
 		-I"$(CURDIR)/$(OTEL_EBPF_DIR)" \
 		-o "$@" "$<"
@@ -437,7 +436,7 @@ native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h core-compat.h $(CO
 	rm -f "$(TETRAGON_NATIVE_STAGE_OUT)"/*.native.o
 	native_out="$(NATIVE_OUT)/tetragon"; \
 	stage_out="$(TETRAGON_NATIVE_STAGE_OUT)"; \
-	common_flags=($(NATIVE_CFLAGS) -fms-extensions -DMICRO_NATIVE_HELPER_MACROS -DMICRO_NATIVE_TETRAGON \
+	common_flags=($(NATIVE_CFLAGS) -fms-extensions -DMICRO_NATIVE_TETRAGON \
 		$(call core_flags,$(CORE_ANSWERS)/tetragon.h) \
 		-D__TARGET_ARCH_x86 \
 		-I"$(CURDIR)/tetragon/bpf" \

@@ -379,354 +379,214 @@ static void __kprog_core_unanswered(void)
 })
 #endif
 
-/* An app that declares its helpers as function-pointer variables (the libbpf
- * style OTel uses) reaches them through __kprog_extern_helper, which names the
- * object the same way with the declaration folded into a typedef. */
-#ifndef __KPROG_HELPERS_ARE_POINTERS
-extern void *bpf_map_lookup_elem(void *map, const void *key);
-extern long bpf_map_update_elem(void *map, const void *key, const void *value,
-                                unsigned long long flags);
-extern long bpf_map_delete_elem(void *map, const void *key);
-extern long bpf_map_push_elem(void *map, const void *value,
-                              unsigned long long flags);
-extern long bpf_map_pop_elem(void *map, void *value);
-extern long bpf_probe_read_kernel(void *dst, unsigned int size,
-                                  const void *unsafe_ptr);
-extern long bpf_probe_read_user(void *dst, unsigned int size,
-                                const void *unsafe_ptr);
-extern long bpf_probe_read(void *dst, unsigned int size,
-                           const void *unsafe_ptr);
-extern long bpf_probe_read_kernel_str(void *dst, unsigned int size,
-                                      const void *unsafe_ptr);
-extern long bpf_probe_read_user_str(void *dst, unsigned int size,
-                                    const void *unsafe_ptr);
-extern long bpf_probe_read_str(void *dst, unsigned int size,
-                               const void *unsafe_ptr);
-extern unsigned long long bpf_get_current_pid_tgid(void);
-extern unsigned long long bpf_get_current_uid_gid(void);
-extern unsigned long long bpf_ktime_get_ns(void);
-extern unsigned long long bpf_ktime_get_boot_ns(void);
-extern unsigned int bpf_get_smp_processor_id(void);
-extern unsigned int bpf_get_prandom_u32(void);
-extern long bpf_get_current_comm(void *buf, unsigned int size);
-extern unsigned long long bpf_get_current_cgroup_id(void);
-extern unsigned long long bpf_get_current_task(void);
-extern void *bpf_get_current_task_btf(void);
-extern void *bpf_task_pt_regs(void *task);
-extern long bpf_perf_event_output(void *ctx, void *map,
-                                  unsigned long long flags,
-                                  void *data, unsigned long long size);
-extern long bpf_tail_call(void *ctx, void *map, unsigned int index);
-extern long bpf_current_task_under_cgroup(void *map, unsigned int index);
-extern long bpf_get_stackid(void *ctx, void *map, unsigned long long flags);
-extern long bpf_get_stack(void *ctx, void *buf, unsigned int size,
-                          unsigned long long flags);
-extern void *bpf_sk_fullsock(void *sk);
-extern long bpf_skb_load_bytes(void *skb, unsigned int offset, void *to,
-                               unsigned int len);
-extern long bpf_skb_load_bytes_relative(void *skb, unsigned int offset,
-                                        void *to, unsigned int len,
-                                        unsigned int start_header);
-#endif /* __KPROG_HELPERS_ARE_POINTERS */
+/* Helpers, one form for every app. Each helper is an ordinary extern function
+ * that carries the kernel helper's name, which native-link binds; a call
+ * reaches it through a function-like macro of the same name, so an app's own
+ * helper declarations (libbpf's static pointers, OTel's pointer variables,
+ * Tetragon's BPF_FUNC) stay unused. */
+#define __KPROG_HELPER(ret, name, ...) extern ret __kprog_##name(__VA_ARGS__) __asm__(#name)
+#define __KPROG_CALL(name, ...) __kprog_##name(__VA_ARGS__)
+__KPROG_HELPER(void *, bpf_map_lookup_elem, void *, const void *);
+__KPROG_HELPER(long, bpf_map_update_elem, void *, const void *, const void *, unsigned long long);
+__KPROG_HELPER(long, bpf_map_delete_elem, void *, const void *);
+__KPROG_HELPER(long, bpf_map_push_elem, void *, const void *, unsigned long long);
+__KPROG_HELPER(long, bpf_map_pop_elem, void *, void *);
+__KPROG_HELPER(long, bpf_probe_read, void *, unsigned int, const void *);
+__KPROG_HELPER(long, bpf_probe_read_str, void *, unsigned int, const void *);
+__KPROG_HELPER(long, bpf_probe_read_user, void *, unsigned int, const void *);
+__KPROG_HELPER(long, bpf_probe_read_user_str, void *, unsigned int, const void *);
+__KPROG_HELPER(long, bpf_probe_write_user, void *, const void *, unsigned int);
+__KPROG_HELPER(long, bpf_copy_from_user, void *, unsigned int, const void *);
+__KPROG_HELPER(unsigned long long, bpf_get_current_pid_tgid, void);
+__KPROG_HELPER(unsigned long long, bpf_get_current_uid_gid, void);
+__KPROG_HELPER(unsigned long long, bpf_ktime_get_ns, void);
+__KPROG_HELPER(unsigned long long, bpf_ktime_get_boot_ns, void);
+__KPROG_HELPER(unsigned int, bpf_get_smp_processor_id, void);
+__KPROG_HELPER(unsigned int, bpf_get_prandom_u32, void);
+__KPROG_HELPER(long, bpf_get_current_comm, void *, unsigned int);
+__KPROG_HELPER(unsigned long long, bpf_get_current_cgroup_id, void);
+__KPROG_HELPER(unsigned long long, bpf_get_current_task, void);
+__KPROG_HELPER(void *, bpf_get_current_task_btf, void);
+__KPROG_HELPER(unsigned long long, bpf_get_attach_cookie, void *);
+__KPROG_HELPER(unsigned long long, bpf_get_func_ip, void *);
+__KPROG_HELPER(long, bpf_get_func_arg, void *, unsigned int, unsigned long long *);
+__KPROG_HELPER(long, bpf_get_func_ret, void *, unsigned long long *);
+__KPROG_HELPER(long, bpf_get_func_arg_cnt, void *);
+__KPROG_HELPER(long, bpf_ima_inode_hash, void *, void *, unsigned int);
+__KPROG_HELPER(long, bpf_ima_file_hash, void *, void *, unsigned int);
+__KPROG_HELPER(void *, bpf_task_pt_regs, void *);
+__KPROG_HELPER(long, bpf_send_signal, unsigned int);
+__KPROG_HELPER(long, bpf_override_return, void *, unsigned long long);
+__KPROG_HELPER(long, bpf_perf_event_output, void *, void *, unsigned long long, void *, unsigned long long);
+__KPROG_HELPER(long, bpf_trace_printk, const char *, unsigned int, unsigned long long, unsigned long long, unsigned long long);
+__KPROG_HELPER(long, bpf_ringbuf_output, void *, void *, unsigned long long, unsigned long long);
+__KPROG_HELPER(void *, bpf_ringbuf_reserve, void *, unsigned long long, unsigned long long);
+__KPROG_HELPER(void, bpf_ringbuf_submit, void *, unsigned long long);
+__KPROG_HELPER(void, bpf_ringbuf_discard, void *, unsigned long long);
+__KPROG_HELPER(long, bpf_ringbuf_query, void *, unsigned long long);
+__KPROG_HELPER(long, bpf_seq_write, void *, const void *, unsigned int);
+__KPROG_HELPER(long, bpf_loop, unsigned int, void *, void *, unsigned long long);
+__KPROG_HELPER(long, bpf_tail_call, void *, void *, unsigned int);
+__KPROG_HELPER(long, bpf_current_task_under_cgroup, void *, unsigned int);
+__KPROG_HELPER(long, bpf_get_stackid, void *, void *, unsigned long long);
+__KPROG_HELPER(long, bpf_get_stack, void *, void *, unsigned int, unsigned long long);
+__KPROG_HELPER(void *, bpf_sk_fullsock, void *);
+__KPROG_HELPER(long, bpf_skb_load_bytes, void *, unsigned int, void *, unsigned int);
+__KPROG_HELPER(long, bpf_skb_load_bytes_relative, void *, unsigned int, void *, unsigned int, unsigned int);
 
-#ifdef MICRO_NATIVE_HELPER_MACROS
-static __always_inline unsigned long native_helper_id0(unsigned long id)
+/* Kernel memory reads are plain loads. native-link records every load as a
+ * load site, so a fault zeroes the loaded register and execution continues,
+ * the JIT's PROBE_MEM behaviour. The empty asm keeps each loaded value in a
+ * general register, the load site's recovery destination. */
+typedef unsigned long long __attribute__((may_alias, aligned(1))) __kprog_u64;
+typedef unsigned int __attribute__((may_alias, aligned(1))) __kprog_u32;
+typedef unsigned short __attribute__((may_alias, aligned(1))) __kprog_u16;
+#define __KPROG_LOAD(type, p) ({ type __v = *(const volatile type *)(p); asm volatile("" : "+r"(__v)); __v; })
+static __always_inline long __kprog_read_kernel(void *dst, unsigned int size, const void *src)
 {
-    asm volatile("" : "+r"(id) : : "memory");
-    return id;
+    char *d = dst;
+    const char *s = src;
+    unsigned int i = 0;
+    for (; i + 8 <= size; i += 8)
+        *(__kprog_u64 *)(d + i) = __KPROG_LOAD(__kprog_u64, s + i);
+    if (size & 4) { *(__kprog_u32 *)(d + i) = __KPROG_LOAD(__kprog_u32, s + i); i += 4; }
+    if (size & 2) { *(__kprog_u16 *)(d + i) = __KPROG_LOAD(__kprog_u16, s + i); i += 2; }
+    if (size & 1) d[i] = __KPROG_LOAD(char, s + i);
+    return 0;
 }
-
-#define native_bpf_helper0(type, id) ((type)native_helper_id0((unsigned long)(id)))
-/* trace_printk has no outer call to evaluate its arguments: the selector is the
- * whole body, so it ties fmt/size/a1..a3 in registers itself. Its arguments
- * reach it through an ordinary C call and are evaluated once there. */
-static __always_inline unsigned long native_helper_id5(unsigned long id,
-                                                       unsigned long a0,
-                                                       unsigned long a1,
-                                                       unsigned long a2,
-                                                       unsigned long a3,
-                                                       unsigned long a4)
+static __always_inline long __kprog_read_kernel_str(void *dst, unsigned int size, const void *src)
 {
-    asm volatile("" : "+r"(id)
-                 : "r"(a0), "r"(a1), "r"(a2), "r"(a3), "r"(a4)
-                 : "memory");
-    return id;
+    char *d = dst;
+    const char *s = src;
+    unsigned int i = 0;
+    if (!size)
+        return 0;
+    for (; i + 1 < size; i++) {
+        char c = __KPROG_LOAD(char, s + i);
+        d[i] = c;
+        if (!c)
+            return i + 1;
+    }
+    d[i] = 0;
+    return size;
 }
-/* The call below each macro evaluates its arguments once. Feeding them to the
- * selector as well evaluated every argument twice: with a call in an argument
- * (bpf_map_lookup_elem(map, next_key())) the callee ran twice and the helper
- * saw the second result. The selector therefore carries only the helper id,
- * which keeps the id in a register the linker can bind. */
-#define native_bpf_helper1(type, id, a0) native_bpf_helper0(type, id)
-#define __kprog_va1(a, ...) a
-#define native_bpf_helper2(type, id, a0, a1) native_bpf_helper0(type, id)
-#define native_bpf_helper3(type, id, a0, a1, a2) native_bpf_helper0(type, id)
-#define native_bpf_helper4(type, id, a0, a1, a2, a3) native_bpf_helper0(type, id)
-#define native_bpf_helper5(type, id, a0, a1, a2, a3, a4) native_bpf_helper0(type, id)
-
-#define NATIVE_BPF_FUNC_map_lookup_elem 1
-#define NATIVE_BPF_FUNC_map_update_elem 2
-#define NATIVE_BPF_FUNC_map_delete_elem 3
-#define NATIVE_BPF_FUNC_probe_read 4
-#define NATIVE_BPF_FUNC_ktime_get_ns 5
-#define NATIVE_BPF_FUNC_get_prandom_u32 7
-#define NATIVE_BPF_FUNC_get_smp_processor_id 8
-#define NATIVE_BPF_FUNC_tail_call 12
-#define NATIVE_BPF_FUNC_get_current_pid_tgid 14
-#define NATIVE_BPF_FUNC_get_current_uid_gid 15
-#define NATIVE_BPF_FUNC_get_current_comm 16
-#define NATIVE_BPF_FUNC_perf_event_output 25
-#define NATIVE_BPF_FUNC_trace_printk 6
-#define NATIVE_BPF_FUNC_skb_load_bytes 26
-#define NATIVE_BPF_FUNC_get_stackid 27
-#define NATIVE_BPF_FUNC_get_current_task 35
-#define NATIVE_BPF_FUNC_probe_write_user 36
-#define NATIVE_BPF_FUNC_current_task_under_cgroup 37
-#define NATIVE_BPF_FUNC_probe_read_str 45
-#define NATIVE_BPF_FUNC_get_stack 67
-#define NATIVE_BPF_FUNC_skb_load_bytes_relative 68
-#define NATIVE_BPF_FUNC_get_current_cgroup_id 80
-#define NATIVE_BPF_FUNC_map_push_elem 87
-#define NATIVE_BPF_FUNC_map_pop_elem 88
-#define NATIVE_BPF_FUNC_sk_fullsock 95
-#define NATIVE_BPF_FUNC_send_signal 109
-#define NATIVE_BPF_FUNC_probe_read_user 112
-#define NATIVE_BPF_FUNC_probe_read_kernel 113
-#define NATIVE_BPF_FUNC_probe_read_user_str 114
-#define NATIVE_BPF_FUNC_probe_read_kernel_str 115
-#define NATIVE_BPF_FUNC_ktime_get_boot_ns 125
-#define NATIVE_BPF_FUNC_seq_write 127
-#define NATIVE_BPF_FUNC_ringbuf_output 130
-#define NATIVE_BPF_FUNC_ringbuf_reserve 131
-#define NATIVE_BPF_FUNC_ringbuf_submit 132
-#define NATIVE_BPF_FUNC_ringbuf_discard 133
-#define NATIVE_BPF_FUNC_ringbuf_query 134
-#define NATIVE_BPF_FUNC_copy_from_user 148
-#define NATIVE_BPF_FUNC_get_current_task_btf 158
-#define NATIVE_BPF_FUNC_ima_inode_hash 161
-#define NATIVE_BPF_FUNC_get_func_ip 173
-#define NATIVE_BPF_FUNC_get_attach_cookie 174
-#define NATIVE_BPF_FUNC_task_pt_regs 175
-#define NATIVE_BPF_FUNC_loop 181
-#define NATIVE_BPF_FUNC_get_func_arg 183
-#define NATIVE_BPF_FUNC_get_func_ret 184
-#define NATIVE_BPF_FUNC_get_func_arg_cnt 185
-#define NATIVE_BPF_FUNC_ima_file_hash 193
-#define NATIVE_BPF_FUNC_override_return 58
+/* bpf_probe_read and bpf_probe_read_str pick kernel or user memory by address,
+ * as the kernel's compat helpers do: upper-half addresses are read directly. */
+#define __KPROG_KERNEL_ADDRESS(p) ((long)(unsigned long)(p) < 0)
+static __always_inline long __kprog_probe_read(void *dst, unsigned int size, const void *src)
+{
+    return __KPROG_KERNEL_ADDRESS(src) ? __kprog_read_kernel(dst, size, src)
+                                       : __kprog_bpf_probe_read(dst, size, src);
+}
+static __always_inline long __kprog_probe_read_str(void *dst, unsigned int size, const void *src)
+{
+    return __KPROG_KERNEL_ADDRESS(src) ? __kprog_read_kernel_str(dst, size, src)
+                                       : __kprog_bpf_probe_read_str(dst, size, src);
+}
 
 #undef bpf_map_lookup_elem
-#define bpf_map_lookup_elem(map, key) \
-    native_bpf_helper2(void *(*)(void *, const void *), NATIVE_BPF_FUNC_map_lookup_elem, \
-                       (map), (key))((map), (key))
+#define bpf_map_lookup_elem(...) __KPROG_CALL(bpf_map_lookup_elem, __VA_ARGS__)
 #undef bpf_map_update_elem
-#define bpf_map_update_elem(map, key, value, flags) \
-    native_bpf_helper4(long (*)(void *, const void *, const void *, unsigned long long), \
-                       NATIVE_BPF_FUNC_map_update_elem, (map), (key), (value), (flags))( \
-        (map), (key), (value), (flags))
+#define bpf_map_update_elem(...) __KPROG_CALL(bpf_map_update_elem, __VA_ARGS__)
 #undef bpf_map_delete_elem
-#define bpf_map_delete_elem(map, key) \
-    native_bpf_helper2(long (*)(void *, const void *), NATIVE_BPF_FUNC_map_delete_elem, \
-                       (map), (key))((map), (key))
+#define bpf_map_delete_elem(...) __KPROG_CALL(bpf_map_delete_elem, __VA_ARGS__)
 #undef bpf_map_push_elem
-#define bpf_map_push_elem(map, value, flags) \
-    native_bpf_helper3(long (*)(void *, const void *, unsigned long long), \
-                       NATIVE_BPF_FUNC_map_push_elem, (map), (value), (flags))( \
-        (map), (value), (flags))
+#define bpf_map_push_elem(...) __KPROG_CALL(bpf_map_push_elem, __VA_ARGS__)
 #undef bpf_map_pop_elem
-#define bpf_map_pop_elem(map, value) \
-    native_bpf_helper2(long (*)(void *, void *), NATIVE_BPF_FUNC_map_pop_elem, \
-                       (map), (value))((map), (value))
-#undef bpf_probe_read
-#define bpf_probe_read(dst, size, unsafe_ptr) \
-    native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
-                       NATIVE_BPF_FUNC_probe_read, (dst), (size), (unsafe_ptr))( \
-        (dst), (size), (unsafe_ptr))
+#define bpf_map_pop_elem(...) __KPROG_CALL(bpf_map_pop_elem, __VA_ARGS__)
 #undef bpf_probe_read_kernel
-#define bpf_probe_read_kernel(dst, size, unsafe_ptr) \
-    native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
-                       NATIVE_BPF_FUNC_probe_read_kernel, (dst), (size), (unsafe_ptr))( \
-        (dst), (size), (unsafe_ptr))
-#undef bpf_probe_read_user
-#define bpf_probe_read_user(dst, size, unsafe_ptr) \
-    native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
-                       NATIVE_BPF_FUNC_probe_read_user, (dst), (size), (unsafe_ptr))( \
-        (dst), (size), (unsafe_ptr))
-#undef bpf_probe_write_user
-#define bpf_probe_write_user(dst, src, len) \
-    native_bpf_helper3(long (*)(void *, const void *, unsigned int), \
-                       NATIVE_BPF_FUNC_probe_write_user, (dst), (src), (len))( \
-        (dst), (src), (len))
-#undef bpf_copy_from_user
-#define bpf_copy_from_user(dst, size, unsafe_ptr) \
-    native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
-                       NATIVE_BPF_FUNC_copy_from_user, (dst), (size), (unsafe_ptr))( \
-        (dst), (size), (unsafe_ptr))
+#define bpf_probe_read_kernel(...) __kprog_read_kernel(__VA_ARGS__)
 #undef bpf_probe_read_kernel_str
-#define bpf_probe_read_kernel_str(dst, size, unsafe_ptr) \
-    native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
-                       NATIVE_BPF_FUNC_probe_read_kernel_str, (dst), (size), (unsafe_ptr))( \
-        (dst), (size), (unsafe_ptr))
-#undef bpf_probe_read_user_str
-#define bpf_probe_read_user_str(dst, size, unsafe_ptr) \
-    native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
-                       NATIVE_BPF_FUNC_probe_read_user_str, (dst), (size), (unsafe_ptr))( \
-        (dst), (size), (unsafe_ptr))
+#define bpf_probe_read_kernel_str(...) __kprog_read_kernel_str(__VA_ARGS__)
+#undef bpf_probe_read
+#define bpf_probe_read(...) __kprog_probe_read(__VA_ARGS__)
 #undef bpf_probe_read_str
-#define bpf_probe_read_str(dst, size, unsafe_ptr) \
-    native_bpf_helper3(long (*)(void *, unsigned int, const void *), \
-                       NATIVE_BPF_FUNC_probe_read_str, (dst), (size), (unsafe_ptr))( \
-        (dst), (size), (unsafe_ptr))
+#define bpf_probe_read_str(...) __kprog_probe_read_str(__VA_ARGS__)
+#undef bpf_probe_read_user
+#define bpf_probe_read_user(...) __KPROG_CALL(bpf_probe_read_user, __VA_ARGS__)
+#undef bpf_probe_read_user_str
+#define bpf_probe_read_user_str(...) __KPROG_CALL(bpf_probe_read_user_str, __VA_ARGS__)
+#undef bpf_probe_write_user
+#define bpf_probe_write_user(...) __KPROG_CALL(bpf_probe_write_user, __VA_ARGS__)
+#undef bpf_copy_from_user
+#define bpf_copy_from_user(...) __KPROG_CALL(bpf_copy_from_user, __VA_ARGS__)
 #undef bpf_get_current_pid_tgid
-#define bpf_get_current_pid_tgid() \
-    native_bpf_helper0(unsigned long long (*)(void), NATIVE_BPF_FUNC_get_current_pid_tgid)()
+#define bpf_get_current_pid_tgid() __kprog_bpf_get_current_pid_tgid()
 #undef bpf_get_current_uid_gid
-#define bpf_get_current_uid_gid() \
-    native_bpf_helper0(unsigned long long (*)(void), NATIVE_BPF_FUNC_get_current_uid_gid)()
+#define bpf_get_current_uid_gid() __kprog_bpf_get_current_uid_gid()
 #undef bpf_ktime_get_ns
-#define bpf_ktime_get_ns() \
-    native_bpf_helper0(unsigned long long (*)(void), NATIVE_BPF_FUNC_ktime_get_ns)()
+#define bpf_ktime_get_ns() __kprog_bpf_ktime_get_ns()
 #undef bpf_ktime_get_boot_ns
-#define bpf_ktime_get_boot_ns() \
-    native_bpf_helper0(unsigned long long (*)(void), NATIVE_BPF_FUNC_ktime_get_boot_ns)()
+#define bpf_ktime_get_boot_ns() __kprog_bpf_ktime_get_boot_ns()
 #undef bpf_get_smp_processor_id
-#define bpf_get_smp_processor_id() \
-    native_bpf_helper0(unsigned int (*)(void), NATIVE_BPF_FUNC_get_smp_processor_id)()
+#define bpf_get_smp_processor_id() __kprog_bpf_get_smp_processor_id()
 #undef bpf_get_prandom_u32
-#define bpf_get_prandom_u32() \
-    native_bpf_helper0(unsigned int (*)(void), NATIVE_BPF_FUNC_get_prandom_u32)()
+#define bpf_get_prandom_u32() __kprog_bpf_get_prandom_u32()
 #undef bpf_get_current_comm
-#define bpf_get_current_comm(buf, size) \
-    native_bpf_helper2(long (*)(void *, unsigned int), NATIVE_BPF_FUNC_get_current_comm, \
-                       (buf), (size))((buf), (size))
+#define bpf_get_current_comm(...) __KPROG_CALL(bpf_get_current_comm, __VA_ARGS__)
 #undef bpf_get_current_cgroup_id
-#define bpf_get_current_cgroup_id() \
-    native_bpf_helper0(unsigned long long (*)(void), NATIVE_BPF_FUNC_get_current_cgroup_id)()
+#define bpf_get_current_cgroup_id() __kprog_bpf_get_current_cgroup_id()
 #undef bpf_get_current_task
-#define bpf_get_current_task() \
-    native_bpf_helper0(unsigned long long (*)(void), NATIVE_BPF_FUNC_get_current_task)()
+#define bpf_get_current_task() __kprog_bpf_get_current_task()
 #undef bpf_get_current_task_btf
-#define bpf_get_current_task_btf() \
-    native_bpf_helper0(void *(*)(void), NATIVE_BPF_FUNC_get_current_task_btf)()
+#define bpf_get_current_task_btf() __kprog_bpf_get_current_task_btf()
 #undef bpf_get_attach_cookie
-#define bpf_get_attach_cookie(ctx) \
-    native_bpf_helper1(unsigned long long (*)(void *), NATIVE_BPF_FUNC_get_attach_cookie, (ctx))( \
-        (ctx))
+#define bpf_get_attach_cookie(...) __KPROG_CALL(bpf_get_attach_cookie, __VA_ARGS__)
 #undef bpf_get_func_ip
-#define bpf_get_func_ip(ctx) \
-    native_bpf_helper1(unsigned long long (*)(void *), NATIVE_BPF_FUNC_get_func_ip, (ctx))((ctx))
+#define bpf_get_func_ip(...) __KPROG_CALL(bpf_get_func_ip, __VA_ARGS__)
 #undef bpf_get_func_arg
-#define bpf_get_func_arg(ctx, n, value) \
-    native_bpf_helper3(long (*)(void *, unsigned int, unsigned long long *), \
-                       NATIVE_BPF_FUNC_get_func_arg, (ctx), (n), (value))((ctx), (n), (value))
+#define bpf_get_func_arg(...) __KPROG_CALL(bpf_get_func_arg, __VA_ARGS__)
 #undef bpf_get_func_ret
-#define bpf_get_func_ret(ctx, value) \
-    native_bpf_helper2(long (*)(void *, unsigned long long *), \
-                       NATIVE_BPF_FUNC_get_func_ret, (ctx), (value))((ctx), (value))
+#define bpf_get_func_ret(...) __KPROG_CALL(bpf_get_func_ret, __VA_ARGS__)
 #undef bpf_get_func_arg_cnt
-#define bpf_get_func_arg_cnt(ctx) \
-    native_bpf_helper1(long (*)(void *), NATIVE_BPF_FUNC_get_func_arg_cnt, (ctx))((ctx))
+#define bpf_get_func_arg_cnt(...) __KPROG_CALL(bpf_get_func_arg_cnt, __VA_ARGS__)
 #undef bpf_ima_inode_hash
-#define bpf_ima_inode_hash(inode, dst, size) \
-    native_bpf_helper3(long (*)(void *, void *, unsigned int), NATIVE_BPF_FUNC_ima_inode_hash, \
-                       (inode), (dst), (size))((inode), (dst), (size))
+#define bpf_ima_inode_hash(...) __KPROG_CALL(bpf_ima_inode_hash, __VA_ARGS__)
 #undef bpf_ima_file_hash
-#define bpf_ima_file_hash(file, dst, size) \
-    native_bpf_helper3(long (*)(void *, void *, unsigned int), NATIVE_BPF_FUNC_ima_file_hash, \
-                       (file), (dst), (size))((file), (dst), (size))
+#define bpf_ima_file_hash(...) __KPROG_CALL(bpf_ima_file_hash, __VA_ARGS__)
 #undef bpf_task_pt_regs
-#define bpf_task_pt_regs(task) \
-    native_bpf_helper1(void *(*)(void *), NATIVE_BPF_FUNC_task_pt_regs, (task))((task))
+#define bpf_task_pt_regs(...) __KPROG_CALL(bpf_task_pt_regs, __VA_ARGS__)
 #undef bpf_send_signal
-#define bpf_send_signal(sig) \
-    native_bpf_helper1(long (*)(unsigned int), NATIVE_BPF_FUNC_send_signal, (sig))((sig))
+#define bpf_send_signal(...) __KPROG_CALL(bpf_send_signal, __VA_ARGS__)
 #undef bpf_override_return
-#define bpf_override_return(ctx, rc) \
-    native_bpf_helper2(long (*)(void *, unsigned long long), NATIVE_BPF_FUNC_override_return, \
-                       (ctx), (rc))((ctx), (rc))
+#define bpf_override_return(...) __KPROG_CALL(bpf_override_return, __VA_ARGS__)
 #undef bpf_perf_event_output
-#define bpf_perf_event_output(ctx, map, flags, data, size) \
-    native_bpf_helper5(long (*)(void *, void *, unsigned long long, void *, unsigned long long), \
-                       NATIVE_BPF_FUNC_perf_event_output, (ctx), (map), (flags), (data), (size))( \
-        (ctx), (map), (flags), (data), (size))
-/* trace_printk takes three format arguments in registers and the kernel reads
- * only the ones the format names, so a short call pads with zeros. */
-static __always_inline long __kprog_trace_printk(const char *fmt, unsigned int size,
-                                                 unsigned long long a1,
-                                                 unsigned long long a2,
-                                                 unsigned long long a3)
-{
-    return (long)native_helper_id5(NATIVE_BPF_FUNC_trace_printk,
-                                   (unsigned long)fmt, (unsigned long)size,
-                                   a1, a2, a3);
-}
+#define bpf_perf_event_output(...) __KPROG_CALL(bpf_perf_event_output, __VA_ARGS__)
+/* trace_printk takes three format arguments and the kernel reads only the ones
+ * the format names, so a short call pads with zeros. */
 #define __kprog_trace_printk_pad(fmt, size, a1, a2, a3, ...) \
-    __kprog_trace_printk((fmt), (size), (unsigned long long)(a1), \
-                         (unsigned long long)(a2), (unsigned long long)(a3))
+    __kprog_bpf_trace_printk((fmt), (size), (unsigned long long)(a1), \
+                             (unsigned long long)(a2), (unsigned long long)(a3))
 #undef bpf_trace_printk
 #define bpf_trace_printk(...) __kprog_trace_printk_pad(__VA_ARGS__, 0, 0, 0)
 #undef bpf_ringbuf_output
-#define bpf_ringbuf_output(ringbuf, data, size, flags) \
-    native_bpf_helper4(long (*)(void *, void *, unsigned long long, unsigned long long), \
-                       NATIVE_BPF_FUNC_ringbuf_output, (ringbuf), (data), (size), (flags))( \
-        (ringbuf), (data), (size), (flags))
+#define bpf_ringbuf_output(...) __KPROG_CALL(bpf_ringbuf_output, __VA_ARGS__)
 #undef bpf_ringbuf_reserve
-#define bpf_ringbuf_reserve(ringbuf, size, flags) \
-    native_bpf_helper3(void *(*)(void *, unsigned long long, unsigned long long), \
-                       NATIVE_BPF_FUNC_ringbuf_reserve, (ringbuf), (size), (flags))( \
-        (ringbuf), (size), (flags))
+#define bpf_ringbuf_reserve(...) __KPROG_CALL(bpf_ringbuf_reserve, __VA_ARGS__)
 #undef bpf_ringbuf_submit
-#define bpf_ringbuf_submit(data, flags) \
-    native_bpf_helper2(void (*)(void *, unsigned long long), \
-                       NATIVE_BPF_FUNC_ringbuf_submit, (data), (flags))((data), (flags))
+#define bpf_ringbuf_submit(...) __KPROG_CALL(bpf_ringbuf_submit, __VA_ARGS__)
 #undef bpf_ringbuf_discard
-#define bpf_ringbuf_discard(data, flags) \
-    native_bpf_helper2(void (*)(void *, unsigned long long), \
-                       NATIVE_BPF_FUNC_ringbuf_discard, (data), (flags))((data), (flags))
+#define bpf_ringbuf_discard(...) __KPROG_CALL(bpf_ringbuf_discard, __VA_ARGS__)
 #undef bpf_ringbuf_query
-#define bpf_ringbuf_query(ringbuf, flags) \
-    native_bpf_helper2(long (*)(void *, unsigned long long), \
-                       NATIVE_BPF_FUNC_ringbuf_query, (ringbuf), (flags))((ringbuf), (flags))
+#define bpf_ringbuf_query(...) __KPROG_CALL(bpf_ringbuf_query, __VA_ARGS__)
 #undef bpf_seq_write
-#define bpf_seq_write(seq, data, len) \
-    native_bpf_helper3(long (*)(void *, const void *, unsigned int), NATIVE_BPF_FUNC_seq_write, \
-                       (seq), (data), (len))((seq), (data), (len))
+#define bpf_seq_write(...) __KPROG_CALL(bpf_seq_write, __VA_ARGS__)
 #undef bpf_loop
-#define bpf_loop(nr_loops, callback_fn, callback_ctx, flags) \
-    native_bpf_helper4(long (*)(unsigned int, void *, void *, unsigned long long), \
-                       NATIVE_BPF_FUNC_loop, (nr_loops), (callback_fn), (callback_ctx), (flags))( \
-        (nr_loops), (callback_fn), (callback_ctx), (flags))
+#define bpf_loop(...) __KPROG_CALL(bpf_loop, __VA_ARGS__)
 #undef bpf_tail_call
-#define bpf_tail_call(ctx, map, index) \
-    native_bpf_helper3(long (*)(void *, void *, unsigned int), NATIVE_BPF_FUNC_tail_call, \
-                       (ctx), (map), (index))((ctx), (map), (index))
+#define bpf_tail_call(...) __KPROG_CALL(bpf_tail_call, __VA_ARGS__)
 #undef bpf_current_task_under_cgroup
-#define bpf_current_task_under_cgroup(map, index) \
-    native_bpf_helper2(long (*)(void *, unsigned int), NATIVE_BPF_FUNC_current_task_under_cgroup, \
-                       (map), (index))((map), (index))
+#define bpf_current_task_under_cgroup(...) __KPROG_CALL(bpf_current_task_under_cgroup, __VA_ARGS__)
 #undef bpf_get_stackid
-#define bpf_get_stackid(ctx, map, flags) \
-    native_bpf_helper3(long (*)(void *, void *, unsigned long long), NATIVE_BPF_FUNC_get_stackid, \
-                       (ctx), (map), (flags))((ctx), (map), (flags))
+#define bpf_get_stackid(...) __KPROG_CALL(bpf_get_stackid, __VA_ARGS__)
 #undef bpf_get_stack
-#define bpf_get_stack(ctx, buf, size, flags) \
-    native_bpf_helper4(long (*)(void *, void *, unsigned int, unsigned long long), \
-                       NATIVE_BPF_FUNC_get_stack, (ctx), (buf), (size), (flags))( \
-        (ctx), (buf), (size), (flags))
+#define bpf_get_stack(...) __KPROG_CALL(bpf_get_stack, __VA_ARGS__)
 #undef bpf_sk_fullsock
-#define bpf_sk_fullsock(sk) \
-    native_bpf_helper1(void *(*)(void *), NATIVE_BPF_FUNC_sk_fullsock, (sk))((sk))
+#define bpf_sk_fullsock(...) __KPROG_CALL(bpf_sk_fullsock, __VA_ARGS__)
 #undef bpf_skb_load_bytes
-#define bpf_skb_load_bytes(skb, offset, to, len) \
-    native_bpf_helper4(long (*)(void *, unsigned int, void *, unsigned int), \
-                       NATIVE_BPF_FUNC_skb_load_bytes, (skb), (offset), (to), (len))( \
-        (skb), (offset), (to), (len))
+#define bpf_skb_load_bytes(...) __KPROG_CALL(bpf_skb_load_bytes, __VA_ARGS__)
 #undef bpf_skb_load_bytes_relative
-#define bpf_skb_load_bytes_relative(skb, offset, to, len, start_header) \
-    native_bpf_helper5(long (*)(void *, unsigned int, void *, unsigned int, unsigned int), \
-                       NATIVE_BPF_FUNC_skb_load_bytes_relative, (skb), (offset), (to), \
-                       (len), (start_header))( \
-        (skb), (offset), (to), (len), (start_header))
-#endif
+#define bpf_skb_load_bytes_relative(...) __KPROG_CALL(bpf_skb_load_bytes_relative, __VA_ARGS__)
 
 #endif
 
@@ -746,138 +606,63 @@ extern int bpf_iter_num_new(struct bpf_iter_num *it, int start, int end) __attri
 extern int *bpf_iter_num_next(struct bpf_iter_num *it) __attribute__((weak)) __attribute__((section(".ksyms")));
 extern void bpf_iter_num_destroy(struct bpf_iter_num *it) __attribute__((weak)) __attribute__((section(".ksyms")));
 
-/* Explicit helper call sites use the SysV argument registers as read-write
- * operands. A helper may destroy every caller-saved register, including its
- * argument registers and RAX even when the caller ignores the return value. */
-#define __KPROG_TG_HELPER0(rettype, id) \
-    (__extension__({ unsigned long __r = (unsigned long)(id); \
-       asm volatile("call *%%rax" : "+a"(__r) \
-                    : : "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10", "r11", "memory", "cc"); (rettype)__r; }))
-#define __KPROG_TG_HELPER1(rettype, id, a0) \
-    (__extension__({ unsigned long __r = (unsigned long)(id); \
-       register unsigned long __a0 __asm__("rdi") = (unsigned long)(a0); \
-       asm volatile("call *%%rax" : "+a"(__r), "+D"(__a0) \
-                    : : "rcx", "rdx", "rsi", "r8", "r9", "r10", "r11", "memory", "cc"); (rettype)__r; }))
-#define __KPROG_TG_HELPER2(rettype, id, a0, a1) \
-    (__extension__({ unsigned long __r = (unsigned long)(id); \
-       register unsigned long __a0 __asm__("rdi") = (unsigned long)(a0); \
-       register unsigned long __a1 __asm__("rsi") = (unsigned long)(a1); \
-       asm volatile("call *%%rax" : "+a"(__r), "+D"(__a0), "+S"(__a1) \
-                    : : "rcx", "rdx", "r8", "r9", "r10", "r11", "memory", "cc"); (rettype)__r; }))
-#define __KPROG_TG_HELPER3(rettype, id, a0, a1, a2) \
-    (__extension__({ unsigned long __r = (unsigned long)(id); \
-       register unsigned long __a0 __asm__("rdi") = (unsigned long)(a0); \
-       register unsigned long __a1 __asm__("rsi") = (unsigned long)(a1); \
-       register unsigned long __a2 __asm__("rdx") = (unsigned long)(a2); \
-       asm volatile("call *%%rax" : "+a"(__r), "+D"(__a0), "+S"(__a1), "+d"(__a2) \
-                    : : "rcx", "r8", "r9", "r10", "r11", "memory", "cc"); (rettype)__r; }))
-#define __KPROG_TG_HELPER4(rettype, id, a0, a1, a2, a3) \
-    (__extension__({ unsigned long __r = (unsigned long)(id); \
-       register unsigned long __a0 __asm__("rdi") = (unsigned long)(a0); \
-       register unsigned long __a1 __asm__("rsi") = (unsigned long)(a1); \
-       register unsigned long __a2 __asm__("rdx") = (unsigned long)(a2); \
-       register unsigned long __a3 __asm__("rcx") = (unsigned long)(a3); \
-       asm volatile("call *%%rax" : "+a"(__r), "+D"(__a0), "+S"(__a1), "+d"(__a2), "+r"(__a3) \
-                    : : "r8", "r9", "r10", "r11", "memory", "cc"); (rettype)__r; }))
-#define __KPROG_TG_HELPER5(rettype, id, a0, a1, a2, a3, a4) \
-    (__extension__({ unsigned long __r = (unsigned long)(id); \
-       register unsigned long __a0 __asm__("rdi") = (unsigned long)(a0); \
-       register unsigned long __a1 __asm__("rsi") = (unsigned long)(a1); \
-       register unsigned long __a2 __asm__("rdx") = (unsigned long)(a2); \
-       register unsigned long __a3 __asm__("rcx") = (unsigned long)(a3); \
-       register unsigned long __a4 __asm__("r8") = (unsigned long)(a4); \
-       asm volatile("call *%%rax" : "+a"(__r), "+D"(__a0), "+S"(__a1), "+d"(__a2), "+r"(__a3), "+r"(__a4) \
-                    : : "r9", "r10", "r11", "memory", "cc"); (rettype)__r; }))
-
+/* Tetragon's own helper names reach the common helpers above. */
 #undef map_lookup_elem
-#define map_lookup_elem(map, key) \
-    __KPROG_TG_HELPER2(void *, NATIVE_BPF_FUNC_map_lookup_elem, (map), (key))
+#define map_lookup_elem(...) bpf_map_lookup_elem(__VA_ARGS__)
 #undef map_update_elem
-#define map_update_elem(map, key, value, flags) \
-    __KPROG_TG_HELPER4(int, NATIVE_BPF_FUNC_map_update_elem, (map), (key), (value), (flags))
+#define map_update_elem(...) bpf_map_update_elem(__VA_ARGS__)
 #undef map_delete_elem
-#define map_delete_elem(map, key) \
-    __KPROG_TG_HELPER2(int, NATIVE_BPF_FUNC_map_delete_elem, (map), (key))
+#define map_delete_elem(...) bpf_map_delete_elem(__VA_ARGS__)
 #undef probe_read
-#define probe_read(dst, size, src) \
-    __KPROG_TG_HELPER3(int, NATIVE_BPF_FUNC_probe_read, (dst), (size), (src))
+#define probe_read(...) bpf_probe_read(__VA_ARGS__)
 #undef probe_read_str
-#define probe_read_str(dst, size, src) \
-    __KPROG_TG_HELPER3(int, NATIVE_BPF_FUNC_probe_read_str, (dst), (size), (src))
+#define probe_read_str(...) bpf_probe_read_str(__VA_ARGS__)
 #undef probe_read_kernel
-#define probe_read_kernel(dst, size, src) \
-    __KPROG_TG_HELPER3(int, NATIVE_BPF_FUNC_probe_read_kernel, (dst), (size), (src))
+#define probe_read_kernel(...) bpf_probe_read_kernel(__VA_ARGS__)
 #undef probe_read_user
-#define probe_read_user(dst, size, src) \
-    __KPROG_TG_HELPER3(int, NATIVE_BPF_FUNC_probe_read_user, (dst), (size), (src))
+#define probe_read_user(...) bpf_probe_read_user(__VA_ARGS__)
 #undef probe_write_user
-#define probe_write_user(dst, src, len) \
-    __KPROG_TG_HELPER3(int, NATIVE_BPF_FUNC_probe_write_user, (dst), (src), (len))
+#define probe_write_user(...) bpf_probe_write_user(__VA_ARGS__)
 #undef copy_from_user
-#define copy_from_user(dst, size, src) \
-    __KPROG_TG_HELPER3(int, NATIVE_BPF_FUNC_copy_from_user, (dst), (size), (src))
+#define copy_from_user(...) bpf_copy_from_user(__VA_ARGS__)
 #undef ktime_get_ns
-#define ktime_get_ns() \
-    __KPROG_TG_HELPER0(unsigned long long, NATIVE_BPF_FUNC_ktime_get_ns)
+#define ktime_get_ns() bpf_ktime_get_ns()
 #undef ktime_get_boot_ns
-#define ktime_get_boot_ns() \
-    __KPROG_TG_HELPER0(unsigned long long, NATIVE_BPF_FUNC_ktime_get_boot_ns)
+#define ktime_get_boot_ns() bpf_ktime_get_boot_ns()
 #undef get_smp_processor_id
-#define get_smp_processor_id() \
-    __KPROG_TG_HELPER0(unsigned int, NATIVE_BPF_FUNC_get_smp_processor_id)
+#define get_smp_processor_id() bpf_get_smp_processor_id()
 #undef get_current_pid_tgid
-#define get_current_pid_tgid() \
-    __KPROG_TG_HELPER0(unsigned long long, NATIVE_BPF_FUNC_get_current_pid_tgid)
+#define get_current_pid_tgid() bpf_get_current_pid_tgid()
 #undef get_current_cgroup_id
-#define get_current_cgroup_id() \
-    __KPROG_TG_HELPER0(unsigned long long, NATIVE_BPF_FUNC_get_current_cgroup_id)
+#define get_current_cgroup_id() bpf_get_current_cgroup_id()
 #undef get_current_task
-#define get_current_task() \
-    __KPROG_TG_HELPER0(unsigned long long, NATIVE_BPF_FUNC_get_current_task)
+#define get_current_task() bpf_get_current_task()
 #undef get_stackid
-#define get_stackid(ctx, map, flags) \
-    __KPROG_TG_HELPER3(long, NATIVE_BPF_FUNC_get_stackid, (ctx), (map), (flags))
+#define get_stackid(...) bpf_get_stackid(__VA_ARGS__)
 #undef perf_event_output
-#define perf_event_output(ctx, map, flags, data, size) \
-    __KPROG_TG_HELPER5(int, NATIVE_BPF_FUNC_perf_event_output, \
-                       (ctx), (map), (flags), (data), (size))
-#define __KPROG_TG_HELPER3V(id, a0, a1, a2) \
-    ((void)__KPROG_TG_HELPER3(unsigned long, (id), (a0), (a1), (a2)))
+#define perf_event_output(...) bpf_perf_event_output(__VA_ARGS__)
 #undef tail_call
-#define tail_call(ctx, map, index) \
-    (__KPROG_TG_HELPER3V(NATIVE_BPF_FUNC_tail_call, (ctx), (map), (index)), (void)0)
+#define tail_call(...) ((void)bpf_tail_call(__VA_ARGS__))
 #undef send_signal
-#define send_signal(sig) \
-    __KPROG_TG_HELPER1(int, NATIVE_BPF_FUNC_send_signal, (sig))
+#define send_signal(...) bpf_send_signal(__VA_ARGS__)
 #undef seq_write
-#define seq_write(seq, data, len) \
-    __KPROG_TG_HELPER3(int, NATIVE_BPF_FUNC_seq_write, (seq), (data), (len))
+#define seq_write(...) bpf_seq_write(__VA_ARGS__)
 #undef ringbuf_output
-#define ringbuf_output(ringbuf, data, size, flags) \
-    __KPROG_TG_HELPER4(long, NATIVE_BPF_FUNC_ringbuf_output, \
-                       (ringbuf), (data), (size), (flags))
+#define ringbuf_output(...) bpf_ringbuf_output(__VA_ARGS__)
 #undef loop
-#define loop(nr_loops, callback_fn, ctx, flags) \
-    __KPROG_TG_HELPER4(long, NATIVE_BPF_FUNC_loop, \
-                       (nr_loops), (callback_fn), (ctx), (flags))
+#define loop(...) bpf_loop(__VA_ARGS__)
 #undef get_func_ret
-#define get_func_ret(ctx, value) \
-    __KPROG_TG_HELPER2(int, NATIVE_BPF_FUNC_get_func_ret, (ctx), (value))
+#define get_func_ret(...) bpf_get_func_ret(__VA_ARGS__)
 #undef get_func_arg
-#define get_func_arg(ctx, n, value) \
-    __KPROG_TG_HELPER3(int, NATIVE_BPF_FUNC_get_func_arg, (ctx), (n), (value))
+#define get_func_arg(...) bpf_get_func_arg(__VA_ARGS__)
 #undef get_attach_cookie
-#define get_attach_cookie(ctx) \
-    __KPROG_TG_HELPER1(unsigned long long, NATIVE_BPF_FUNC_get_attach_cookie, (ctx))
+#define get_attach_cookie(...) bpf_get_attach_cookie(__VA_ARGS__)
 #undef ima_inode_hash
-#define ima_inode_hash(inode, dst, size) \
-    __KPROG_TG_HELPER3(long, NATIVE_BPF_FUNC_ima_inode_hash, (inode), (dst), (size))
+#define ima_inode_hash(...) bpf_ima_inode_hash(__VA_ARGS__)
 #undef ima_file_hash
-#define ima_file_hash(file, dst, size) \
-    __KPROG_TG_HELPER3(long, NATIVE_BPF_FUNC_ima_file_hash, (file), (dst), (size))
+#define ima_file_hash(...) bpf_ima_file_hash(__VA_ARGS__)
 #undef override_return
-#define override_return(ctx, rc) \
-    __KPROG_TG_HELPER2(int, NATIVE_BPF_FUNC_override_return, (ctx), (rc))
+#define override_return(...) bpf_override_return(__VA_ARGS__)
 #endif
 
 /* access.h keeps a BPF-register asm arm under `__bpf__` and a plain C arm
