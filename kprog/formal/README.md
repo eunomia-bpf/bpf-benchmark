@@ -143,6 +143,11 @@ executes the next 64 null pointer stores in 192 transitions, preserving all 12
 scalar pointers, input vector words and earlier initialized data. Both cache
 resources and cold values are derived again at that reached memory. The 98
 provider traces remain unchanged; the header tail and live vector loop follow.
+The [Numeric header-tail composition](results/m5-numeric-producer-header-tail/README.md)
+adds the last 16 header stores in 48 transitions. Both callback symbols and
+function bodies are derived in the actual Numeric environment; stack-tag and
+helper-context pointers connect to the earlier locals. All 92 header readbacks,
+initialized data, cache resources and 98 traces survive up to the live vector loop.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 

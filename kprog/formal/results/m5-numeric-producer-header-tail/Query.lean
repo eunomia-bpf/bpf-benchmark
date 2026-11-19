@@ -1,0 +1,18 @@
+import KProgFormal.ClightRefinement.Arm64NumericProducerHeaderTail
+open KProgFormal.ClightRefinement
+#check Arm64Producer.tail_initialized_bound
+#print axioms Arm64Producer.tail_initialized_bound
+#check Arm64Producer.header_initialized_before_loop_bound
+#print axioms Arm64Producer.header_initialized_before_loop_bound
+#check Arm64Producer.header_caches_before_loop_bound
+#print axioms Arm64Producer.header_caches_before_loop_bound
+#check Arm64Producer.tail_initialized
+#print axioms Arm64Producer.tail_initialized
+#check Arm64Producer.header_initialized_before_loop
+#print axioms Arm64Producer.header_initialized_before_loop
+#check Arm64Producer.header_caches_before_loop
+#print axioms Arm64Producer.header_caches_before_loop
+#check Arm64NumericProducerHeaderTail.payload_callbacks
+#print axioms Arm64NumericProducerHeaderTail.payload_callbacks
+#check Arm64NumericProducerHeaderTail.initialized_tail
+#print axioms Arm64NumericProducerHeaderTail.initialized_tail
