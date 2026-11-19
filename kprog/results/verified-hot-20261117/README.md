@@ -338,3 +338,34 @@ after the load phase, which spent 12 minutes generating and checking B. The one 
 in both arms is `cil_from_container`: 7.63 M runs at 988.0 ns/run baseline against 20.37 M at 157.2 ns/run
 native — a different measurement window over a different program set, so not a ratio either. This section
 reports the verified path, not a speedup.
+
+## Katran (katran)
+
+Run `x86_kvm_corpus_20261119_174534_794158`, 1 sample × 10 s, stats on. Raw
+`/workspaces/kprog-raw/verified/20261119-checked-katran2/` (started 17:46:04Z, finished 17:49:18Z, exit
+code 0). **1 request: verified and installed**, `execution_path=checked-sim-c`, `b_generated=true`,
+`b_stock_passed=true`, `status=0`; zero fallbacks, zero failures. Katran loads exactly one program,
+`balancer_ingress` (XDP), so this is the whole application.
+
+- The shim agrees: `katran.post_rejit.log` holds **1 `native-loader replaced`**, **0 `native-loader
+  failed`**, against 1 `jit` in the baseline arm.
+- The native body for it is 459,944 B (`checked-simulator.native.o`); its frontend text is 4,936,546 B.
+- **This run is equal work.** Both arms hold the same one program and the same four pktgen components
+  (thread ids 0-3, 64-byte UDP, `clone_skb 0`), with durations of 10.15 s and 10.14 s. Baseline
+  10,400,282 runs / 5.335 s of BPF; native 10,822,535 runs / 4.951 s — 512.96 against 457.49 ns per
+  invocation across the arm, i.e. the native arm is 0.892x. That is one 10-second sample, so it is the
+  verified path's own record, not a timed result for the ratio table.
+
+### The first attempt never ran the workload
+
+Run `x86_kvm_corpus_20261119_174125_871203` recorded **zero requests** and `status=error`:
+
+```
+command failed (2): ip netns exec katran-router sh -c 'printf "%s\n" rem_device_all > /proc/net/pktgen/kpktgend_2'
+sh: 1: cannot create /proc/net/pktgen/kpktgend_2: Directory nonexistent
+```
+
+`checked-corpus` gave the checked guest `--cpus 2`, and Katran's pktgen workload drives pktgen threads
+0-3 (`KATRAN_PKTGEN_THREAD_IDS` at `runner/libs/app_runners/katran.py:618`), so threads 2 and 3 had no
+`kpktgend_N` interface. The Makefile now takes `CHECKED_VM_CPUS` (default 2, so every earlier run is
+unchanged) and this run passes 4; the workload then started and the request follows.
