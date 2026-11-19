@@ -242,6 +242,8 @@ Continue lane perf in the Workspace: read the newest COORDINATION.md notices and
 
 ## OMP Cilium matcher handoff, received 2026-11-19T20:26:44Z (verbatim)
 
+## omp 2026-11-19: Cilium's 40 packet rejections — measured shapes (hand-off)
+
 Your `packet_bounds_ir.cpp` work is the right place for this; I did not touch the file.
 
 Run `/workspaces/kprog-raw/verified/20261119-checked-cilium/`

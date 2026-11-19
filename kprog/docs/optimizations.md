@@ -1410,3 +1410,11 @@ stores pass. Original unmatched predicate stays intact; no runtime test or
 new limit. Added stalehelper/staleASM/loopmutator negatives andreadonly-loop
 positive. Only own unstarted298900 waiter settled, rawretained; no compiler
 or guest ran. Candidate still awaits actual compiler/stock validation.
+
+PERF 2026-11-19T21:07:34Z: 80dbcfc51 final syntax0 and oldcompiler controls0 recorded in
+results/cilium-headlen-20261119/freshness-before-result.json.12positiveforms
+(two original spans, ten new) and8exclusions include readonly/mutating loops.
+Combined canonical rebuild/SH controls/Katran/stock/40replays/freshCilium
+worker303179 waitsimageEX; rawcheck-20261119T210631Z-303179 under persistent
+cilium-headlen-20261119. OMP earlier235bounds/40B emissions do not establish
+finalcandidate freshness coverage orstockacceptance. No runtime gain yet.

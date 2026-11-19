@@ -1,0 +1,32 @@
+{
+  "mode": "before",
+  "selection": {
+    "head_ge": false,
+    "head_not_lt": false,
+    "old_tc": true,
+    "old_xdp": true,
+    "asm_tc": false,
+    "ir_uge32": false,
+    "ir_ule32": false,
+    "ir_ugt64": false,
+    "ir_uge64": false,
+    "ir_ult64": false,
+    "ir_ule64": false,
+    "ir_readonly_loop": false,
+    "wrong_root": false,
+    "wrong_offset": false,
+    "wrong_section": false,
+    "equality": false,
+    "signed_negative": false,
+    "stale_call": false,
+    "stale_store": false,
+    "ir_mutating_loop": false
+  },
+  "b_emitted": false,
+  "scope": "Actual IR selection boundaries and normal B emission; no stock or current-app pass.",
+  "recorded": "2026-11-19T21:07:34Z",
+  "raw": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/freshness-before-20261119T210228Z",
+  "candidate": "80dbcfc51",
+  "candidate_syntax_raw": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/freshness-syntax-20261119T210228Z",
+  "candidate_syntax_exit": 0
+}

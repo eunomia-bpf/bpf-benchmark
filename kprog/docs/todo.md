@@ -59,6 +59,14 @@
   this is no new rejection or causal attribution. Diagnostics still wait.
 
 - [ ] P-B-cilium-headlen (PERF handoff 2026-11-19T20:22:55Z, OMP639663a85):
+  PERF 2026-11-19T21:07:34Z: final80dbcfc51 preserves captured headlen across possible
+  skb mutations, including loop backedges.12positive/8negative controls;
+  oldcompiler expected baseline passes, candidate syntax/layout0.
+  Final combined worker303179 parent1 waitsimageEX, raw
+  /workspaces/kprog-raw/perf/cilium-headlen-20261119/check-20261119T210631Z-303179.
+  Earlier269752/296915/298900 unstarted waiters ended143/rawkept.
+  OMP's earlier40/40B emissions/235bounds are pre-freshness evidence only;
+  actual40stock/freshCilium coverage and Katran confirmation remain open.
   PERF 2026-11-19T20:43:12Z: cdd26e9cd candidate/syntax0 prepared, exact asm loads,
   ALU32 identities and i32 headlen kernelroot recognized; original scalar
   predicate retained. Old compiler misses6of8positive fixture forms,
