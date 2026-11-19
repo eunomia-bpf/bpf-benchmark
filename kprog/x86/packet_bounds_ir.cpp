@@ -193,13 +193,24 @@ static unsigned normalize_live_integer_identities(Module &module) {
 // Keep the arithmetic there: pure SUB can otherwise be speculated before a
 // tag test, exposing scalar-minus-pointer on an infeasible stack-pointer path.
 static unsigned anchor_pointer_differences(Module &module) {
+  auto pointer_bits=[](Value *value) {
+    while (auto *operation=dyn_cast<Operator>(value)) {
+      auto opcode=operation->getOpcode();
+      if ((opcode==Instruction::Add || opcode==Instruction::Sub) &&
+          isa<ConstantInt>(operation->getOperand(1))) value=operation->getOperand(0);
+      else if (opcode==Instruction::Add && isa<ConstantInt>(operation->getOperand(0)))
+        value=operation->getOperand(1);
+      else break;
+    }
+    return isa<PtrToIntOperator>(value);
+  };
   SmallVector<BinaryOperator *,16> differences;
   for (auto &function:module) for (auto &instruction:instructions(function)) {
     auto *difference=dyn_cast<BinaryOperator>(&instruction);
     if (difference && difference->getOpcode()==Instruction::Sub &&
         difference->getType()->isIntegerTy(64) &&
-        isa<PtrToIntOperator>(difference->getOperand(0)) &&
-        isa<PtrToIntOperator>(difference->getOperand(1)))
+        pointer_bits(difference->getOperand(0)) &&
+        pointer_bits(difference->getOperand(1)))
       differences.push_back(difference);
   }
   for (auto *difference:differences) {

@@ -21,7 +21,7 @@ int guarded_difference(struct xdp_md *ctx)
     unsigned long native_base = ctx->ingress_ifindex;
     unsigned long result = (unsigned long)value;
     if (tag == 4) {
-        unsigned long delta = (unsigned long)value - (unsigned long)&arena[0] - sizeof(arena);
+        unsigned long delta = (unsigned long)value - sizeof(arena) - (unsigned long)&arena[0];
         asm volatile("" : "+r"(delta));
         result = delta + native_base;
     }

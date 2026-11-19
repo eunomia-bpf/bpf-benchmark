@@ -5,9 +5,14 @@ import subprocess
 import sys
 
 root = Path('/workspaces/repository')
-request = int(sys.argv[2]) if len(sys.argv) > 2 else 27
-retained = Path('/workspaces/kprog-raw/perf/tracee-live-failures-20261119/'
-                f'recovery-20261119T163803Z-17194/source-mapping/{request}/frontend.ll')
+request = sys.argv[2] if len(sys.argv) > 2 else '27'
+if request == 'katran':
+    captured = Path('/workspaces/kprog-raw/perf/b-pointer-difference-20261119/'
+                    'katran-20261119T193054Z')
+    retained = captured/'trusted_x86.bpf.bounds-input.bc'
+else:
+    retained = Path('/workspaces/kprog-raw/perf/tracee-live-failures-20261119/'
+                    f'recovery-20261119T163803Z-17194/source-mapping/{int(request)}/frontend.ll')
 out = Path(sys.argv[1])
 out.mkdir(parents=True, exist_ok=True)
 sys.path.insert(0, str(root/'kprog/x86'))

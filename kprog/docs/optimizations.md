@@ -1244,3 +1244,13 @@ sets:17edges total (previous global dispatcher119), same2538ABI states,
 18contexts,424B arena and16cache cells. See return-dispatch-20261119/
 tetragon-inventory.json. This is generated-C structure, not a compiled-frame
 or performance result. Next one changed-source normal-O1 Tetragon compile.
+
+PERF 2026-11-19T19:32:34Z: Coordinator Katran B4145 maps to native0x1261
+MOV_STORE_REG/source3119. Captured frontend21892/bounds18706 subtract
+ptrtoint(%7) from ptrtoint(value)-240 inside tag4; backend moves it before
+tag4 at4149. Existing exact pair selector anchored2 other sites and missed
+this constant-offset pair. Candidate follows constant ADD/SUB chains on each
+operand, preserves arithmetic operands unchanged and anchors only pointer
+pairs. Fixture uses the same reassociation; three offset selection controls
+retain scalar/narrow/one-pointer exclusions. No P/native/flags/limits change.
+Prepared only; sole compiler rebuild and focused captured-frontend replay next.

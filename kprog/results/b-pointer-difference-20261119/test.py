@@ -72,11 +72,32 @@ if mode == 'fixed':
       %d = sub i64 %x, %b
       ret i64 %d
     }
+    define i64 @pair_left_offset(ptr %a, ptr %b) {
+      %x = ptrtoint ptr %a to i64
+      %y = ptrtoint ptr %b to i64
+      %p = add i64 %x, -240
+      %d = sub i64 %p, %y
+      ret i64 %d
+    }
+    define i64 @pair_right_offset(ptr %a, ptr %b) {
+      %x = ptrtoint ptr %a to i64
+      %y = ptrtoint ptr %b to i64
+      %p = sub i64 %y, 16
+      %d = sub i64 %x, %p
+      ret i64 %d
+    }
+    define i64 @pair_commuted_offset(ptr %a, ptr %b) {
+      %x = ptrtoint ptr %a to i64
+      %y = ptrtoint ptr %b to i64
+      %p = add i64 8, %x
+      %d = sub i64 %p, %y
+      ret i64 %d
+    }
     '''
     (out/'controls.ll').write_text(controls)
     run([tools/'packet-bounds', out/'controls.ll', '-o', out/'controls.bc'])
     lowered = run(['llvm-dis-18', out/'controls.bc', '-o', '-'])
     (out/'controls-lowered.ll').write_text(lowered)
-    assert lowered.count('asm sideeffect "$0 -= $2", "=r,0,r"') == 1
-    assert lowered.count('sub i64') == 2 and lowered.count('sub i32') == 1
+    assert lowered.count('asm sideeffect "$0 -= $2", "=r,0,r"') == 4
+    assert lowered.count('sub i64') == 3 and lowered.count('sub i32') == 1
 print(f'{len(rows)} native pointer/tag cases pass; inspect emitted B separately.', flush=True)
