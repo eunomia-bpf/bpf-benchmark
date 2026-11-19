@@ -5,8 +5,9 @@ import subprocess
 import sys
 
 root = Path('/workspaces/repository')
+request = int(sys.argv[2]) if len(sys.argv) > 2 else 27
 retained = Path('/workspaces/kprog-raw/perf/tracee-live-failures-20261119/'
-                'recovery-20261119T163803Z-17194/source-mapping/27/frontend.ll')
+                f'recovery-20261119T163803Z-17194/source-mapping/{request}/frontend.ll')
 out = Path(sys.argv[1])
 out.mkdir(parents=True, exist_ok=True)
 sys.path.insert(0, str(root/'kprog/x86'))
@@ -29,5 +30,5 @@ adapter._compile_simulator_backend(root/'kprog/stock-path/bin/clang',
     out/'replay.bpf.c', out/'replay.bpf.o', run, compiled_input=out/'bounds.bc')
 (out/'b-disassembly.txt').write_text(run(['llvm-objdump-18', '-dl', out/'replay.bpf.o']))
 (out/'result.json').write_text(json.dumps(dict(retained_frontend=str(retained),
-    b_emitted=True, scope='Retained request27 B compiler replay; '
+    b_emitted=True, scope=f'Retained request{request} B compiler replay; '
     'not stock acceptance, new app coverage or timing.'), indent=2)+'\n')
