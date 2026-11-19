@@ -1060,3 +1060,12 @@ coarsens external pointers and scalars and cannot justify tag deletion.
 No code, compiler flags, runtime check or limit changed. The completed
 constant-ALU32 negative result remains recorded; next evidence is actual
 cache save/reload positions. See tetragon-stack-liveness-20261119.
+
+PERF 2026-11-19T14:25:28Z: Live Tracee prefix33 records two remaining B classes:
+requests27/30 reject scalar-minus-pointer arithmetic, and request28 writes
+R10-536 beyond stock512B. All retain direct-native installation;29/31-33
+pass checked-sim-c. This is partial coverage and no timing result. Stack
+alias integer differences at shared header950/1645 are source candidates,
+not exact debug mapping yet. B-only numeric abstraction is unimplemented
+and its preservation/precision need study; no source, check or limit change.
+Raw full logs remain; see tracee-live-failures-20261119 (c5159c5d7).
