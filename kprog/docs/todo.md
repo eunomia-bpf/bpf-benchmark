@@ -8,6 +8,9 @@
 
 ## 0. Lane 目标与待办
 
+- [x] P-native-integer-identities（PERF 2026-11-19T07:55:23Z，本提交）：native reused frontend 的原始 empty =r,0 integer asm 按 B 合约成为 freeze；pointer/clobber/新生成 address-base barrier 保留。1024执行、3072既有路径、25 BCC compile/proof 与probe/ARRAY/OTel通过。BCC proof .text47597→19263B，不是 installed 或runtime数。组合批次和完整sim折叠仍开；results/native-integer-identities-20261119。
+
+
 PERF 2026-11-19T07:46:41Z: Native verifier-invalid-path elimination implemented and host-tested;25 BCC and ARRAY/OTel compile regressions pass. C helpers remain enabled. Source/receipt in results/native-verified-paths-20261119; app per-call/body/helpers/maps/installed results remain pending the combined checked-sim-c batch.
 
 

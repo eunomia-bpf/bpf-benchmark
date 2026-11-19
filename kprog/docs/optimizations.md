@@ -853,3 +853,13 @@ PERF 2026-11-19T07:10:39Z: Native private-arena normalization in compile_sim_ir.
 PERF 2026-11-19T07:26:12Z: Native private-arena normalization landed as5be6df084; scope controls and1344 executions,25 BCC proof/compile APIs and ARRAY/OTel regressions pass. Tetragon B O1 result is incomplete: final emission hits4096B, retained-MIR diagnostic shows max direct R10 offset5776. Production limits unchanged; O3-after-common-contracts experiment af6ef8d95 reuses existing IR and is pending. No new app runtime or stock acceptance is claimed.
 
 PERF 2026-11-19T07:46:41Z: After stock B acceptance, compile_sim_ir.cpp replaces only the exact invalid call-minus-one and null-store fault forms with llvm.assume(false). B, ordinary program checks, recoverable probe errors and direct-native fallback retain their behavior. Host verified-domain/ordinary-check execution tests, recoverable probe tests,25 BCC compile/proof replays and ARRAY/OTel regressions pass; all C helper pieces stay on. Runtime/body/helpers/maps/installed bytes await the combined batch. Results native-verified-paths-20261119.
+
+PERF 2026-11-19T07:55:23Z: Native original integer identity normalization in compile_sim_ir.cpp
+now mirrors the existing B freeze contract for exact empty =r,0 integer
+asm. This exposes constants/live register values to O3; pointer, clobber and
+newly generated address-base barriers remain.1024 execution cases,3072 prior
+verified-path cases,25 BCC production compile/proof links and probe/ARRAY/OTel
+regressions pass. BCC host proof .text47,597 ->19,263B against ba366fcb3;
+installed bytes and per-call/body/helpers/maps/throughput await the combined
+checked-sim-c batch. All C helper pieces stay on; no B/runtime check added.
+Receipts results/native-integer-identities-20261119.
