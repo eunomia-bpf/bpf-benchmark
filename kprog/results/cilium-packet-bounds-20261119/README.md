@@ -200,15 +200,20 @@ pipeline's flags: **41 / 41 carry at least one emitted pointer bound in the `cla
 The one hard failure in this run is not a separate defect — it is the same packet class with a second
 mishap behind it. Request 64 (`tail_nodeport_nat_egress_ipv4`, `source_prog_id=622`) failed B's
 verification with `invalid access to packet, off=18 size=2, R6(id=0,off=18,r=0)` / "R6 offset is outside
-of the packet" — the identical shape as the 40 — and then its direct-native fallback could not find its
-own arm image (`arm kernel native image: No such file or directory`), which is why it is a hard failure
+of the packet" — the identical shape as the 40 — and then its direct-native fallback failed to arm its
+own native image (`arm kernel native image: No such file or directory`), which is why it is a hard failure
 rather than a fallback. Two independent problems, and only the first is this defect.
 
-It was not counted in the 40 because its capsule is a `.failure.tar.gz`; its `bounds-input.bc` is there
+It was not counted with the 40 because its capsule is a `.failure.tar.gz`; its `bounds-input.bc` is there
 all the same. Through `HEAD` the pass lowers **2** predicates and `clang` emits **3** pointer bounds, so
-the fix covers this program too. The run's own README entry (`verified-hot-20261117/README.md:300`)
-records it as a hard failure from the missing arm image; the packet rejection behind it is the same class
-documented here, and the arm-image miss is still open and unrelated to this fix.
+the fix covers this program too.
+
+That "No such file or directory" is not a missing file: it is the `errno` of
+`ioctl(options.trusted_service_fd, NATIVE_LAB_TRUSTED_CHUNK, &image)` at
+`kprog/libnativeloader/src/native_loader.cpp:4126-4127`, so the kernel-side arming refused the chunk. That
+agrees with PERF's own reading of this capsule (`kprog/results/cilium-headlen-20261119/request64.json`,
+`capsule-coverage.json`): the lookup of the active capsule is what failed, not an image path. The arming
+failure is still open and unrelated to this fix.
 
 So the class is **41 programs**, not 40: 40 archived as successes with a verifier rejection, 1 archived as
 the hard failure above.
@@ -228,7 +233,7 @@ whether the direct-native fallback actually loaded:
 
 So of the 49 requests that end on direct-native, **47 are stopped by a verifier rejection** — 41 by this
 defect, 6 by the store class — and 3 by the emitter's relative-table refusal. Request 64 is the only hard
-failure, and its hard part is the missing arm image, not the rejection.
+failure, and its hard part is the failed native-image arming, not the rejection.
 
 This differs from the earlier reading in two ways, both corrected here: request 64 belongs to the packet
 class (it is the 41st), and requests 22/40/58 are fallbacks of their own class, not installs.
