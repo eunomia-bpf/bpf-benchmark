@@ -1,0 +1,31 @@
+{
+  "compiler_change": "b1399d137",
+  "regressions": ["38d6f6e03", "1a34629c1"],
+  "baseline_raw": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/freshness-before-20261119T234555Z",
+  "baseline_make_exit": 2,
+  "baseline_failure": "private_choice retains distinct packet data values",
+  "candidate_raw": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/cb-candidate-20261119T234657Z-539157",
+  "finished": "2026-11-19T23:47:22Z",
+  "candidate_make_exit": 2,
+  "positive_selectors": 16,
+  "exclusion_selectors": 8,
+  "packet_data_freshness_cases": 15,
+  "archived_b_emitted": 41,
+  "archived_stock_loaded": 19,
+  "previous_archived_stock_loaded": 16,
+  "new_stock_loads": [12, 36, 48],
+  "remaining_rejections": {
+    "trusted_skb_store_124": [9, 35],
+    "invalid_helper_unknown_minus_one": [3, 27, 29, 33, 43, 55],
+    "scalar_memory_access": [11, 17, 20, 21, 37, 38, 45, 57, 60],
+    "unbounded_inner_map_access": [18, 25, 28, 47, 59]
+  },
+  "independent_capture_source": "/workspaces/kprog-raw/verified/omp-cilium-20261119/fixed-20261119T233010Z/service.tar.gz",
+  "independent_capture_inputs": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/omp-new-inputs-20261119T234744Z/inputs.json",
+  "independent_capture_replay": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/omp-new-replay-20261119T234918Z",
+  "independent_capture_requests": [1, 9, 10],
+  "independent_capture_b_emitted": 3,
+  "independent_capture_stock_loaded": 3,
+  "independent_capture_stock_make_exit": 0,
+  "scope": "Sole-kernel detached stock loads with captured map shapes. Current rejection logs report the four remaining classes. Earlier failures can hide later verifier defects. Live binding, execution and performance have separate receipts."
+}

@@ -59,6 +59,16 @@
   this is no new rejection or causal attribution. Diagnostics still wait.
 
 - [ ] P-B-cilium-headlen (PERF handoff 2026-11-19T20:22:55Z, OMP639663a85):
+  PERF b1399d137/worker539157:16positive/8exclusion/15freshness controls
+  and41Bemit pass; detachedstock19/41, upfrom16. Requests12/36/48 nowload
+  after exactprivate-choice/TCclass-store freshness repair. Remaining22
+  firsterrors:2skb124stores/6unknownhelpers/9scalaraccess/5innermapbounds;
+  they canhide laterdefects. IndependentOMP newprogram34af4b3a requests1/9/10
+  alsoemit/stockload3/3 onsolekernel; originalheadlenpredicate ispresent.
+  freshness-result.json andtwostock-evidencearchives retainreceipts.
+  FreshliveCilium540836 started23:50:04Z CPU18-19, rawlive-freshness-
+  20261119T235004Z; livebinding/execution remainsseparate.64armingcapsule
+  saysENOENT; relative-table3 refusals remainopen. Benchmarksettings unchanged.
   PERF 2026-11-19T23:39:07Z: CBcandidate529337 terminal2. All16positive/
   8exclusion/10freshness controls and41Bemit pass. Detachedstock16/41;
   17/37 advance frompacket toscalaraccess, 12/36/48 remainpacket+18/r0

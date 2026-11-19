@@ -1,5 +1,31 @@
 # Cilium head-length bounds
 
+Compiler repair `b1399d137` passes16 positive/eight exclusion selectors and
+15 freshness cases. Worker539157 finished at2026-11-19T23:47:22Z:
+all41 archived B objects emit, and detached stock acceptance rises16→19.
+Requests12/36/48 now load. The22 remaining first errors comprise two trusted
+skb stores, six unknown helpers, nine scalar accesses and five unbounded
+inner-map accesses. Those earlier errors can hide later verifier defects.
+The worker exits2 because those22 loads still fail; the subset gains have
+individual stock receipts in `freshness-stock-evidence.tar.gz`.
+
+The precise freshness barriers were live volatile reads of the simulator's
+private choice marker and a canonical TC class-id store. The repair retains
+both operations and their ordering, recognizes their preservation of packet
+state, and canonicalizes physical TC class stores before freshness analysis.
+Foreign reads, packet-field stores, helper writes, cross-end CB writes and
+foreign-root writes retain their barriers. The installed-compiler baseline
+fails the live-choice regression. `freshness-result.json` records the paths.
+
+The independent OMP capture's three packet rejects (requests1/9/10,
+`tail_handle_ipv4_from_host`, reported program34af4b3a) now emit and
+stock-load3/3 on the sole kernel using the same compiler. Raw results are
+`omp-new-replay-20261119T234918Z`, archived in
+`omp-new-stock-evidence.tar.gz`. This supersedes the earlier account that
+the program had only an unspecified-marker guard: the captured frontend
+contains the length predicate, and the current compiler accepts its B.
+Detached verification and live application execution retain separate receipts.
+
 Worker529337 finished at2026-11-19T23:39:07Z after rebuilding the sole
 compiler with CB-store repair6b0204beb. All16 positive/eight exclusion
 selectors, ten freshness controls and41 B emissions pass. Detached stock
