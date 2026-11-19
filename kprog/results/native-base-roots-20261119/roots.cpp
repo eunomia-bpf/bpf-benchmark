@@ -1,5 +1,6 @@
 // Inspect the roots hidden by generated native memory-base barriers.
 #include "llvm/Analysis/ValueTracking.h"
+#include "llvm/Analysis/InstructionSimplify.h"
 #include "llvm/IR/InlineAsm.h"
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/Module.h"
@@ -17,10 +18,18 @@ static void inspect(Module &module, StringRef phase) {
     auto *assembly = dyn_cast<InlineAsm>(call->getCalledOperand());
     if (!assembly || !assembly->getAsmString().empty() ||
         assembly->getConstraintString() != "=r,0") continue;
-    auto *cast = dyn_cast<PtrToIntInst>(call->getArgOperand(0));
-    if (!cast) { ++counts["non-pointer operand"]; continue; }
+    Value *address = nullptr;
+    IntToPtrInst *temporary = nullptr;
+    if (auto *cast = dyn_cast<PtrToIntInst>(call->getArgOperand(0)))
+      address = cast->getPointerOperand();
+    else if (call->getArgOperand(0)->getType()->isIntegerTy(64)) {
+      temporary = new IntToPtrInst(call->getArgOperand(0),
+          PointerType::getUnqual(module.getContext()), "", call);
+      address = temporary;
+    } else { ++counts["non-pointer operand"]; continue; }
     SmallVector<Value *, 4> roots;
-    bool known = getUnderlyingObjectsForCodeGen(cast->getPointerOperand(), roots);
+    bool known = getUnderlyingObjectsForCodeGen(address, roots);
+    if (temporary) temporary->eraseFromParent();
     bool privateStack = known && !roots.empty();
     for (auto *root : roots) {
       auto *local = dyn_cast<AllocaInst>(root);
@@ -51,4 +60,15 @@ int main(int argc, char **argv) {
     freeze->eraseFromParent();
   }
   inspect(*module, "constant-freezes-folded");
+  SmallVector<Instruction *, 64> pure;
+  for (auto &function : *module) for (auto &instruction : instructions(function))
+    if (isa<BinaryOperator, CastInst, GetElementPtrInst, FreezeInst>(instruction))
+      pure.push_back(&instruction);
+  SimplifyQuery query(module->getDataLayout());
+  for (auto *instruction : pure)
+    if (auto *value = simplifyInstruction(instruction, query)) {
+      instruction->replaceAllUsesWith(value);
+      instruction->eraseFromParent();
+    }
+  inspect(*module, "pure-arithmetic-simplified");
 }
