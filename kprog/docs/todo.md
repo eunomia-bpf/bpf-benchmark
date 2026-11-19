@@ -19,6 +19,21 @@
   pass. Retained Tetragon worker 353863 folds 375 additional constants;
   backend/packing/emission, actual stock and fresh app confirmation remain
   open. Evidence and pending raw path: results/constant-alu32-20261119.
+  PERF 2026-11-19T11:43:27Z: BCC functional run113739_128860 passes
+  25/25/25/25, zero fallback/failures; retained Tetragon backend passes in
+  396.616 s and is packing. Tetragon emission/stock remains open.
+
+- [ ] P-checked-helper-context (PERF 2026-11-19T11:43:27Z): current checked
+  BCC plans still bind five TP output/stack sites to generic helpers; the
+  original-FD query is called only by the normal manifest route. Move the
+  existing query to the common FD loader and delete the obsolete flag path.
+  Actual retained evidence: results/checked-helper-binding-20261119/current.json.
+- [ ] P-checked-map-ops (PERF 2026-11-19T11:43:27Z): all 25 current BCC
+  checked plans lack map_ops; 17 update/10 delete static sites use generic
+  wrappers. The trusted route's translated-insn scanner has no process-FD
+  metadata. Recover actual map/helper identities before link-time binding;
+  do not reinterpret kernel map IDs as FDs or query unsupported operations.
+  See results/checked-helper-binding-20261119/README.md.
 
 PERF 2026-11-19T10:48:19Z: Freeze/LOCK batch 327120 completed, host 0/app ok, BCC programs/native/
 B-generated/B-stock 25/25/25/25, all checked, no fallback/failures. Per call

@@ -1,0 +1,1887 @@
+{
+  "archive": "/workspaces/kprog-raw/perf/native-cohort-check-20261119/bcc-20261119T113557Z-354948/service.tar.gz",
+  "system_map": "/workspaces/.agent-state/kprog-ck/build-x86/System.map",
+  "requests": 25,
+  "context_calls": 5,
+  "expected_context_bound": 0,
+  "generic_write_calls": {
+    "bpf_map_update_elem": 17,
+    "bpf_map_delete_elem": 10
+  },
+  "plans_with_map_ops": 0,
+  "rows": [
+    {
+      "request": 1,
+      "entry": "fentry_vfs_read",
+      "prog_type": 26,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/c49a41a1e70a7845.tmp.2160.link-plan.json",
+          "kernel_slide": null,
+          "map_ops": [],
+          "calls": [],
+          "contextual": []
+        }
+      ]
+    },
+    {
+      "request": 2,
+      "entry": "tracepoint__syscalls__sys_enter_open",
+      "prog_type": 5,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/68675797351fbb2a.tmp.2182.link-plan.json",
+          "kernel_slide": 738197504,
+          "map_ops": [],
+          "calls": [
+            {
+              "offset": 17,
+              "target": 18446744072321994080,
+              "helper_names": [
+                "bpf_get_current_pid_tgid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_pid_tgid"
+              ]
+            },
+            {
+              "offset": 76,
+              "target": 18446744072321993296,
+              "helper_names": [
+                "bpf_map_update_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_update_elem"
+              ]
+            }
+          ],
+          "contextual": []
+        }
+      ]
+    },
+    {
+      "request": 3,
+      "entry": "kprobe__cap_capable_entry",
+      "prog_type": 2,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/1d13da82a0bacafc.tmp.2206.link-plan.json",
+          "kernel_slide": 738197504,
+          "map_ops": [],
+          "calls": [
+            {
+              "offset": 36,
+              "target": 18446744072321994080,
+              "helper_names": [
+                "bpf_get_current_pid_tgid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_pid_tgid"
+              ]
+            },
+            {
+              "offset": 88,
+              "target": 18446744072321993296,
+              "helper_names": [
+                "bpf_map_update_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_update_elem"
+              ]
+            }
+          ],
+          "contextual": []
+        }
+      ]
+    },
+    {
+      "request": 4,
+      "entry": "inet_sock_set_state",
+      "prog_type": 5,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/5d697bd02ecdf7c2.tmp.2233.link-plan.json",
+          "kernel_slide": 738197504,
+          "map_ops": [],
+          "calls": [
+            {
+              "offset": 258,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 297,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 346,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 387,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 429,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 464,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 490,
+              "target": 18446744072320947120,
+              "helper_names": [
+                "__native_x86_ktime_get_mono_fast_ns",
+                "ktime_get_mono_fast_ns"
+              ],
+              "kernel_symbols": [
+                "ktime_get_mono_fast_ns"
+              ]
+            },
+            {
+              "offset": 520,
+              "target": 18446744072321993296,
+              "helper_names": [
+                "bpf_map_update_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_update_elem"
+              ]
+            },
+            {
+              "offset": 538,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 577,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 593,
+              "target": 18446744072321994080,
+              "helper_names": [
+                "bpf_get_current_pid_tgid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_pid_tgid"
+              ]
+            },
+            {
+              "offset": 621,
+              "target": 18446744072321994656,
+              "helper_names": [
+                "bpf_get_current_comm"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_comm"
+              ]
+            },
+            {
+              "offset": 644,
+              "target": 18446744072321993296,
+              "helper_names": [
+                "bpf_map_update_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_update_elem"
+              ]
+            },
+            {
+              "offset": 672,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 709,
+              "target": 18446744072322050544,
+              "helper_names": [],
+              "kernel_symbols": [
+                "__htab_map_lookup_elem"
+              ]
+            },
+            {
+              "offset": 747,
+              "target": 18446744072320947120,
+              "helper_names": [
+                "__native_x86_ktime_get_mono_fast_ns",
+                "ktime_get_mono_fast_ns"
+              ],
+              "kernel_symbols": [
+                "ktime_get_mono_fast_ns"
+              ]
+            },
+            {
+              "offset": 844,
+              "target": 18446744072322050544,
+              "helper_names": [],
+              "kernel_symbols": [
+                "__htab_map_lookup_elem"
+              ]
+            },
+            {
+              "offset": 887,
+              "target": 18446744072321994080,
+              "helper_names": [
+                "bpf_get_current_pid_tgid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_pid_tgid"
+              ]
+            },
+            {
+              "offset": 924,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 979,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 1166,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 1215,
+              "target": 18446744072321994656,
+              "helper_names": [
+                "bpf_get_current_comm"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_comm"
+              ]
+            },
+            {
+              "offset": 1249,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 1284,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 1315,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 1345,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 1385,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 1430,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 1469,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 1509,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 1569,
+              "target": 18446744072321652944,
+              "helper_names": [
+                "bpf_perf_event_output"
+              ],
+              "kernel_symbols": [
+                "bpf_perf_event_output"
+              ]
+            },
+            {
+              "offset": 1592,
+              "target": 18446744072321993344,
+              "helper_names": [
+                "bpf_map_delete_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_delete_elem"
+              ]
+            },
+            {
+              "offset": 1610,
+              "target": 18446744072321993344,
+              "helper_names": [
+                "bpf_map_delete_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_delete_elem"
+              ]
+            }
+          ],
+          "contextual": [
+            {
+              "offset": 1569,
+              "helper": "bpf_perf_event_output",
+              "actual": [
+                "bpf_perf_event_output"
+              ],
+              "expected": "bpf_perf_event_output_tp",
+              "expected_bound": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "request": 5,
+      "entry": "sys_enter",
+      "prog_type": 5,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/ddb4a164b28bef87.tmp.2254.link-plan.json",
+          "kernel_slide": 738197504,
+          "map_ops": [],
+          "calls": [
+            {
+              "offset": 5,
+              "target": 18446744072321994080,
+              "helper_names": [
+                "bpf_get_current_pid_tgid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_pid_tgid"
+              ]
+            },
+            {
+              "offset": 19,
+              "target": 18446744072320947120,
+              "helper_names": [
+                "__native_x86_ktime_get_mono_fast_ns",
+                "ktime_get_mono_fast_ns"
+              ],
+              "kernel_symbols": [
+                "ktime_get_mono_fast_ns"
+              ]
+            },
+            {
+              "offset": 49,
+              "target": 18446744072321993296,
+              "helper_names": [
+                "bpf_map_update_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_update_elem"
+              ]
+            }
+          ],
+          "contextual": []
+        }
+      ]
+    },
+    {
+      "request": 6,
+      "entry": "blk_account_io_merge_bio",
+      "prog_type": 2,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/933351047c0afad0.tmp.2278.link-plan.json",
+          "kernel_slide": 738197504,
+          "map_ops": [],
+          "calls": [
+            {
+              "offset": 23,
+              "target": 18446744072321994080,
+              "helper_names": [
+                "bpf_get_current_pid_tgid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_pid_tgid"
+              ]
+            },
+            {
+              "offset": 67,
+              "target": 18446744072321994656,
+              "helper_names": [
+                "bpf_get_current_comm"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_comm"
+              ]
+            },
+            {
+              "offset": 92,
+              "target": 18446744072321993296,
+              "helper_names": [
+                "bpf_map_update_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_update_elem"
+              ]
+            }
+          ],
+          "contextual": []
+        }
+      ]
+    },
+    {
+      "request": 7,
+      "entry": "tcp_v4_connect",
+      "prog_type": 2,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/a1e45daa73685a7e.tmp.2302.link-plan.json",
+          "kernel_slide": 738197504,
+          "map_ops": [],
+          "calls": [
+            {
+              "offset": 21,
+              "target": 18446744072321994080,
+              "helper_names": [
+                "bpf_get_current_pid_tgid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_pid_tgid"
+              ]
+            },
+            {
+              "offset": 35,
+              "target": 18446744072321994544,
+              "helper_names": [
+                "bpf_get_current_uid_gid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_uid_gid"
+              ]
+            },
+            {
+              "offset": 58,
+              "target": 18446744072321993296,
+              "helper_names": [
+                "bpf_map_update_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_update_elem"
+              ]
+            }
+          ],
+          "contextual": []
+        }
+      ]
+    },
+    {
+      "request": 8,
+      "entry": "sched_wakeup",
+      "prog_type": 26,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/dd046375fcd10398.tmp.2326.link-plan.json",
+          "kernel_slide": 738197504,
+          "map_ops": [],
+          "calls": [
+            {
+              "offset": 37,
+              "target": 18446744072320947120,
+              "helper_names": [
+                "__native_x86_ktime_get_mono_fast_ns",
+                "ktime_get_mono_fast_ns"
+              ],
+              "kernel_symbols": [
+                "ktime_get_mono_fast_ns"
+              ]
+            },
+            {
+              "offset": 69,
+              "target": 18446744072321993296,
+              "helper_names": [
+                "bpf_map_update_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_update_elem"
+              ]
+            }
+          ],
+          "contextual": []
+        }
+      ]
+    },
+    {
+      "request": 9,
+      "entry": "fentry_vfs_write",
+      "prog_type": 26,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/9f306b1438853a8c.tmp.2350.link-plan.json",
+          "kernel_slide": null,
+          "map_ops": [],
+          "calls": [],
+          "contextual": []
+        }
+      ]
+    },
+    {
+      "request": 10,
+      "entry": "tracepoint__syscalls__sys_enter_openat",
+      "prog_type": 5,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/3de46f2a9edcbfd2.tmp.2372.link-plan.json",
+          "kernel_slide": 738197504,
+          "map_ops": [],
+          "calls": [
+            {
+              "offset": 17,
+              "target": 18446744072321994080,
+              "helper_names": [
+                "bpf_get_current_pid_tgid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_pid_tgid"
+              ]
+            },
+            {
+              "offset": 76,
+              "target": 18446744072321993296,
+              "helper_names": [
+                "bpf_map_update_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_update_elem"
+              ]
+            }
+          ],
+          "contextual": []
+        }
+      ]
+    },
+    {
+      "request": 11,
+      "entry": "kprobe__cap_capable_exit",
+      "prog_type": 2,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/437872223ddb5055.tmp.2396.link-plan.json",
+          "kernel_slide": 738197504,
+          "map_ops": [],
+          "calls": [
+            {
+              "offset": 28,
+              "target": 18446744072321994080,
+              "helper_names": [
+                "bpf_get_current_pid_tgid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_pid_tgid"
+              ]
+            },
+            {
+              "offset": 50,
+              "target": 18446744072322050544,
+              "helper_names": [],
+              "kernel_symbols": [
+                "__htab_map_lookup_elem"
+              ]
+            },
+            {
+              "offset": 89,
+              "target": 18446744072321993344,
+              "helper_names": [
+                "bpf_map_delete_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_delete_elem"
+              ]
+            },
+            {
+              "offset": 157,
+              "target": 18446744072321994544,
+              "helper_names": [
+                "bpf_get_current_uid_gid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_uid_gid"
+              ]
+            },
+            {
+              "offset": 176,
+              "target": 18446744072321994656,
+              "helper_names": [
+                "bpf_get_current_comm"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_comm"
+              ]
+            },
+            {
+              "offset": 275,
+              "target": 18446744072321652944,
+              "helper_names": [
+                "bpf_perf_event_output"
+              ],
+              "kernel_symbols": [
+                "bpf_perf_event_output"
+              ]
+            }
+          ],
+          "contextual": [
+            {
+              "offset": 275,
+              "helper": "bpf_perf_event_output",
+              "actual": [
+                "bpf_perf_event_output"
+              ],
+              "expected": null,
+              "expected_bound": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "request": 12,
+      "entry": "sys_exit",
+      "prog_type": 5,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/04393ad02a0a0fc4.tmp.2418.link-plan.json",
+          "kernel_slide": 738197504,
+          "map_ops": [],
+          "calls": [
+            {
+              "offset": 39,
+              "target": 18446744072321994080,
+              "helper_names": [
+                "bpf_get_current_pid_tgid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_pid_tgid"
+              ]
+            },
+            {
+              "offset": 80,
+              "target": 18446744072322050544,
+              "helper_names": [],
+              "kernel_symbols": [
+                "__htab_map_lookup_elem"
+              ]
+            },
+            {
+              "offset": 106,
+              "target": 18446744072320947120,
+              "helper_names": [
+                "__native_x86_ktime_get_mono_fast_ns",
+                "ktime_get_mono_fast_ns"
+              ],
+              "kernel_symbols": [
+                "ktime_get_mono_fast_ns"
+              ]
+            },
+            {
+              "offset": 143,
+              "target": 18446744072322050544,
+              "helper_names": [],
+              "kernel_symbols": [
+                "__htab_map_lookup_elem"
+              ]
+            },
+            {
+              "offset": 189,
+              "target": 18446744072321993296,
+              "helper_names": [
+                "bpf_map_update_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_update_elem"
+              ]
+            },
+            {
+              "offset": 218,
+              "target": 18446744072322050544,
+              "helper_names": [],
+              "kernel_symbols": [
+                "__htab_map_lookup_elem"
+              ]
+            }
+          ],
+          "contextual": []
+        }
+      ]
+    },
+    {
+      "request": 13,
+      "entry": "block_rq_insert",
+      "prog_type": 26,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/582acaff1c02b389.tmp.2442.link-plan.json",
+          "kernel_slide": 738197504,
+          "map_ops": [],
+          "calls": [
+            {
+              "offset": 102,
+              "target": 18446744072320947120,
+              "helper_names": [
+                "__native_x86_ktime_get_mono_fast_ns",
+                "ktime_get_mono_fast_ns"
+              ],
+              "kernel_symbols": [
+                "ktime_get_mono_fast_ns"
+              ]
+            },
+            {
+              "offset": 123,
+              "target": 18446744072322050544,
+              "helper_names": [],
+              "kernel_symbols": [
+                "__htab_map_lookup_elem"
+              ]
+            },
+            {
+              "offset": 178,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 209,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 238,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 291,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 345,
+              "target": 18446744072321993296,
+              "helper_names": [
+                "bpf_map_update_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_update_elem"
+              ]
+            }
+          ],
+          "contextual": []
+        }
+      ]
+    },
+    {
+      "request": 14,
+      "entry": "tcp_v4_connect_ret",
+      "prog_type": 2,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/7e25345cc50b93a5.tmp.2469.link-plan.json",
+          "kernel_slide": 738197504,
+          "map_ops": [],
+          "calls": [
+            {
+              "offset": 84,
+              "target": 18446744072321994080,
+              "helper_names": [
+                "bpf_get_current_pid_tgid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_pid_tgid"
+              ]
+            },
+            {
+              "offset": 114,
+              "target": 18446744072322050544,
+              "helper_names": [],
+              "kernel_symbols": [
+                "__htab_map_lookup_elem"
+              ]
+            },
+            {
+              "offset": 167,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 288,
+              "target": 18446744072321994544,
+              "helper_names": [
+                "bpf_get_current_uid_gid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_uid_gid"
+              ]
+            },
+            {
+              "offset": 297,
+              "target": 18446744072320947120,
+              "helper_names": [
+                "__native_x86_ktime_get_mono_fast_ns",
+                "ktime_get_mono_fast_ns"
+              ],
+              "kernel_symbols": [
+                "ktime_get_mono_fast_ns"
+              ]
+            },
+            {
+              "offset": 395,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 430,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 468,
+              "target": 18446744072321994656,
+              "helper_names": [
+                "bpf_get_current_comm"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_comm"
+              ]
+            },
+            {
+              "offset": 507,
+              "target": 18446744072321652944,
+              "helper_names": [
+                "bpf_perf_event_output"
+              ],
+              "kernel_symbols": [
+                "bpf_perf_event_output"
+              ]
+            },
+            {
+              "offset": 525,
+              "target": 18446744072321993344,
+              "helper_names": [
+                "bpf_map_delete_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_delete_elem"
+              ]
+            }
+          ],
+          "contextual": [
+            {
+              "offset": 507,
+              "helper": "bpf_perf_event_output",
+              "actual": [
+                "bpf_perf_event_output"
+              ],
+              "expected": null,
+              "expected_bound": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "request": 15,
+      "entry": "sched_wakeup_new",
+      "prog_type": 26,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/03c6ba54e5eaa1b8.tmp.2493.link-plan.json",
+          "kernel_slide": 738197504,
+          "map_ops": [],
+          "calls": [
+            {
+              "offset": 37,
+              "target": 18446744072320947120,
+              "helper_names": [
+                "__native_x86_ktime_get_mono_fast_ns",
+                "ktime_get_mono_fast_ns"
+              ],
+              "kernel_symbols": [
+                "ktime_get_mono_fast_ns"
+              ]
+            },
+            {
+              "offset": 69,
+              "target": 18446744072321993296,
+              "helper_names": [
+                "bpf_map_update_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_update_elem"
+              ]
+            }
+          ],
+          "contextual": []
+        }
+      ]
+    },
+    {
+      "request": 16,
+      "entry": "fentry_vfs_fsync",
+      "prog_type": 26,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/6f35704d85c01694.tmp.2517.link-plan.json",
+          "kernel_slide": null,
+          "map_ops": [],
+          "calls": [],
+          "contextual": []
+        }
+      ]
+    },
+    {
+      "request": 17,
+      "entry": "tracepoint__syscalls__sys_exit_open",
+      "prog_type": 5,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/2c386f03b913bcde.tmp.2539.link-plan.json",
+          "kernel_slide": 738197504,
+          "map_ops": [],
+          "calls": [
+            {
+              "offset": 638,
+              "target": 18446744072321994080,
+              "helper_names": [
+                "bpf_get_current_pid_tgid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_pid_tgid"
+              ]
+            },
+            {
+              "offset": 674,
+              "target": 18446744072322050544,
+              "helper_names": [],
+              "kernel_symbols": [
+                "__htab_map_lookup_elem"
+              ]
+            },
+            {
+              "offset": 716,
+              "target": 18446744072321994080,
+              "helper_names": [
+                "bpf_get_current_pid_tgid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_pid_tgid"
+              ]
+            },
+            {
+              "offset": 738,
+              "target": 18446744072321994544,
+              "helper_names": [
+                "bpf_get_current_uid_gid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_uid_gid"
+              ]
+            },
+            {
+              "offset": 764,
+              "target": 18446744072321994656,
+              "helper_names": [
+                "bpf_get_current_comm"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_comm"
+              ]
+            },
+            {
+              "offset": 792,
+              "target": 18446744072321644880,
+              "helper_names": [
+                "bpf_probe_read_user_str"
+              ],
+              "kernel_symbols": [
+                "bpf_probe_read_user_str"
+              ]
+            },
+            {
+              "offset": 836,
+              "target": 18446744072322264896,
+              "helper_names": [
+                "bpf_get_stack"
+              ],
+              "kernel_symbols": [
+                "bpf_get_stack"
+              ]
+            },
+            {
+              "offset": 899,
+              "target": 18446744072321652944,
+              "helper_names": [
+                "bpf_perf_event_output"
+              ],
+              "kernel_symbols": [
+                "bpf_perf_event_output"
+              ]
+            },
+            {
+              "offset": 926,
+              "target": 18446744072321993344,
+              "helper_names": [
+                "bpf_map_delete_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_delete_elem"
+              ]
+            }
+          ],
+          "contextual": [
+            {
+              "offset": 836,
+              "helper": "bpf_get_stack",
+              "actual": [
+                "bpf_get_stack"
+              ],
+              "expected": "bpf_get_stack_tp",
+              "expected_bound": false
+            },
+            {
+              "offset": 899,
+              "helper": "bpf_perf_event_output",
+              "actual": [
+                "bpf_perf_event_output"
+              ],
+              "expected": "bpf_perf_event_output_tp",
+              "expected_bound": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "request": 18,
+      "entry": "block_rq_issue",
+      "prog_type": 26,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/29e49863bf3aa6dc.tmp.2566.link-plan.json",
+          "kernel_slide": 738197504,
+          "map_ops": [],
+          "calls": [
+            {
+              "offset": 70,
+              "target": 18446744072321994080,
+              "helper_names": [
+                "bpf_get_current_pid_tgid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_pid_tgid"
+              ]
+            },
+            {
+              "offset": 114,
+              "target": 18446744072321994656,
+              "helper_names": [
+                "bpf_get_current_comm"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_comm"
+              ]
+            },
+            {
+              "offset": 139,
+              "target": 18446744072321993296,
+              "helper_names": [
+                "bpf_map_update_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_update_elem"
+              ]
+            },
+            {
+              "offset": 181,
+              "target": 18446744072320947120,
+              "helper_names": [
+                "__native_x86_ktime_get_mono_fast_ns",
+                "ktime_get_mono_fast_ns"
+              ],
+              "kernel_symbols": [
+                "ktime_get_mono_fast_ns"
+              ]
+            },
+            {
+              "offset": 202,
+              "target": 18446744072322050544,
+              "helper_names": [],
+              "kernel_symbols": [
+                "__htab_map_lookup_elem"
+              ]
+            },
+            {
+              "offset": 258,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 291,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 323,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 381,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 435,
+              "target": 18446744072321993296,
+              "helper_names": [
+                "bpf_map_update_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_update_elem"
+              ]
+            }
+          ],
+          "contextual": []
+        }
+      ]
+    },
+    {
+      "request": 19,
+      "entry": "tcp_v6_connect",
+      "prog_type": 2,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/41f69587a1dbc08e.tmp.2590.link-plan.json",
+          "kernel_slide": 738197504,
+          "map_ops": [],
+          "calls": [
+            {
+              "offset": 21,
+              "target": 18446744072321994080,
+              "helper_names": [
+                "bpf_get_current_pid_tgid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_pid_tgid"
+              ]
+            },
+            {
+              "offset": 35,
+              "target": 18446744072321994544,
+              "helper_names": [
+                "bpf_get_current_uid_gid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_uid_gid"
+              ]
+            },
+            {
+              "offset": 58,
+              "target": 18446744072321993296,
+              "helper_names": [
+                "bpf_map_update_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_update_elem"
+              ]
+            }
+          ],
+          "contextual": []
+        }
+      ]
+    },
+    {
+      "request": 20,
+      "entry": "sched_switch",
+      "prog_type": 26,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/d97747ba7e557de2.tmp.2617.link-plan.json",
+          "kernel_slide": 738197504,
+          "map_ops": [],
+          "calls": [
+            {
+              "offset": 83,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 122,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 157,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 186,
+              "target": 18446744072320947120,
+              "helper_names": [
+                "__native_x86_ktime_get_mono_fast_ns",
+                "ktime_get_mono_fast_ns"
+              ],
+              "kernel_symbols": [
+                "ktime_get_mono_fast_ns"
+              ]
+            },
+            {
+              "offset": 216,
+              "target": 18446744072321993296,
+              "helper_names": [
+                "bpf_map_update_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_update_elem"
+              ]
+            },
+            {
+              "offset": 236,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 266,
+              "target": 18446744072322050544,
+              "helper_names": [],
+              "kernel_symbols": [
+                "__htab_map_lookup_elem"
+              ]
+            },
+            {
+              "offset": 292,
+              "target": 18446744072320947120,
+              "helper_names": [
+                "__native_x86_ktime_get_mono_fast_ns",
+                "ktime_get_mono_fast_ns"
+              ],
+              "kernel_symbols": [
+                "ktime_get_mono_fast_ns"
+              ]
+            },
+            {
+              "offset": 336,
+              "target": 18446744072322050544,
+              "helper_names": [],
+              "kernel_symbols": [
+                "__htab_map_lookup_elem"
+              ]
+            },
+            {
+              "offset": 385,
+              "target": 18446744072321993296,
+              "helper_names": [
+                "bpf_map_update_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_update_elem"
+              ]
+            },
+            {
+              "offset": 418,
+              "target": 18446744072322050544,
+              "helper_names": [],
+              "kernel_symbols": [
+                "__htab_map_lookup_elem"
+              ]
+            },
+            {
+              "offset": 472,
+              "target": 18446744072321645072,
+              "helper_names": [
+                "bpf_probe_read_kernel_str"
+              ],
+              "kernel_symbols": [
+                "bpf_probe_read_kernel_str"
+              ]
+            },
+            {
+              "offset": 772,
+              "target": 18446744072321993344,
+              "helper_names": [
+                "bpf_map_delete_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_delete_elem"
+              ]
+            }
+          ],
+          "contextual": []
+        }
+      ]
+    },
+    {
+      "request": 21,
+      "entry": "fentry_vfs_open",
+      "prog_type": 26,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/38d47cb8587bb420.tmp.2638.link-plan.json",
+          "kernel_slide": null,
+          "map_ops": [],
+          "calls": [],
+          "contextual": []
+        }
+      ]
+    },
+    {
+      "request": 22,
+      "entry": "tracepoint__syscalls__sys_exit_openat",
+      "prog_type": 5,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/b85b5a2c4975d21e.tmp.2660.link-plan.json",
+          "kernel_slide": 738197504,
+          "map_ops": [],
+          "calls": [
+            {
+              "offset": 638,
+              "target": 18446744072321994080,
+              "helper_names": [
+                "bpf_get_current_pid_tgid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_pid_tgid"
+              ]
+            },
+            {
+              "offset": 674,
+              "target": 18446744072322050544,
+              "helper_names": [],
+              "kernel_symbols": [
+                "__htab_map_lookup_elem"
+              ]
+            },
+            {
+              "offset": 716,
+              "target": 18446744072321994080,
+              "helper_names": [
+                "bpf_get_current_pid_tgid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_pid_tgid"
+              ]
+            },
+            {
+              "offset": 738,
+              "target": 18446744072321994544,
+              "helper_names": [
+                "bpf_get_current_uid_gid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_uid_gid"
+              ]
+            },
+            {
+              "offset": 764,
+              "target": 18446744072321994656,
+              "helper_names": [
+                "bpf_get_current_comm"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_comm"
+              ]
+            },
+            {
+              "offset": 792,
+              "target": 18446744072321644880,
+              "helper_names": [
+                "bpf_probe_read_user_str"
+              ],
+              "kernel_symbols": [
+                "bpf_probe_read_user_str"
+              ]
+            },
+            {
+              "offset": 836,
+              "target": 18446744072322264896,
+              "helper_names": [
+                "bpf_get_stack"
+              ],
+              "kernel_symbols": [
+                "bpf_get_stack"
+              ]
+            },
+            {
+              "offset": 899,
+              "target": 18446744072321652944,
+              "helper_names": [
+                "bpf_perf_event_output"
+              ],
+              "kernel_symbols": [
+                "bpf_perf_event_output"
+              ]
+            },
+            {
+              "offset": 926,
+              "target": 18446744072321993344,
+              "helper_names": [
+                "bpf_map_delete_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_delete_elem"
+              ]
+            }
+          ],
+          "contextual": [
+            {
+              "offset": 836,
+              "helper": "bpf_get_stack",
+              "actual": [
+                "bpf_get_stack"
+              ],
+              "expected": "bpf_get_stack_tp",
+              "expected_bound": false
+            },
+            {
+              "offset": 899,
+              "helper": "bpf_perf_event_output",
+              "actual": [
+                "bpf_perf_event_output"
+              ],
+              "expected": "bpf_perf_event_output_tp",
+              "expected_bound": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "request": 23,
+      "entry": "block_rq_complete",
+      "prog_type": 26,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/337769c4a551642d.tmp.2682.link-plan.json",
+          "kernel_slide": 738197504,
+          "map_ops": [],
+          "calls": [
+            {
+              "offset": 60,
+              "target": 18446744072320947120,
+              "helper_names": [
+                "__native_x86_ktime_get_mono_fast_ns",
+                "ktime_get_mono_fast_ns"
+              ],
+              "kernel_symbols": [
+                "ktime_get_mono_fast_ns"
+              ]
+            },
+            {
+              "offset": 153,
+              "target": 18446744072322050544,
+              "helper_names": [],
+              "kernel_symbols": [
+                "__htab_map_lookup_elem"
+              ]
+            },
+            {
+              "offset": 205,
+              "target": 18446744072322050544,
+              "helper_names": [],
+              "kernel_symbols": [
+                "__htab_map_lookup_elem"
+              ]
+            },
+            {
+              "offset": 418,
+              "target": 18446744072321652944,
+              "helper_names": [
+                "bpf_perf_event_output"
+              ],
+              "kernel_symbols": [
+                "bpf_perf_event_output"
+              ]
+            },
+            {
+              "offset": 439,
+              "target": 18446744072321993344,
+              "helper_names": [
+                "bpf_map_delete_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_delete_elem"
+              ]
+            },
+            {
+              "offset": 457,
+              "target": 18446744072321993344,
+              "helper_names": [
+                "bpf_map_delete_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_delete_elem"
+              ]
+            }
+          ],
+          "contextual": [
+            {
+              "offset": 418,
+              "helper": "bpf_perf_event_output",
+              "actual": [
+                "bpf_perf_event_output"
+              ],
+              "expected": null,
+              "expected_bound": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "request": 24,
+      "entry": "tcp_v6_connect_ret",
+      "prog_type": 2,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/03a2f88b4d82598a.tmp.2706.link-plan.json",
+          "kernel_slide": 738197504,
+          "map_ops": [],
+          "calls": [
+            {
+              "offset": 90,
+              "target": 18446744072321994080,
+              "helper_names": [
+                "bpf_get_current_pid_tgid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_pid_tgid"
+              ]
+            },
+            {
+              "offset": 120,
+              "target": 18446744072322050544,
+              "helper_names": [],
+              "kernel_symbols": [
+                "__htab_map_lookup_elem"
+              ]
+            },
+            {
+              "offset": 173,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 303,
+              "target": 18446744072321994544,
+              "helper_names": [
+                "bpf_get_current_uid_gid"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_uid_gid"
+              ]
+            },
+            {
+              "offset": 312,
+              "target": 18446744072320947120,
+              "helper_names": [
+                "__native_x86_ktime_get_mono_fast_ns",
+                "ktime_get_mono_fast_ns"
+              ],
+              "kernel_symbols": [
+                "ktime_get_mono_fast_ns"
+              ]
+            },
+            {
+              "offset": 410,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 459,
+              "target": 18446744072322544048,
+              "helper_names": [
+                "copy_from_kernel_nofault"
+              ],
+              "kernel_symbols": [
+                "copy_from_kernel_nofault"
+              ]
+            },
+            {
+              "offset": 510,
+              "target": 18446744072321994656,
+              "helper_names": [
+                "bpf_get_current_comm"
+              ],
+              "kernel_symbols": [
+                "bpf_get_current_comm"
+              ]
+            },
+            {
+              "offset": 549,
+              "target": 18446744072321652944,
+              "helper_names": [
+                "bpf_perf_event_output"
+              ],
+              "kernel_symbols": [
+                "bpf_perf_event_output"
+              ]
+            },
+            {
+              "offset": 567,
+              "target": 18446744072321993344,
+              "helper_names": [
+                "bpf_map_delete_elem"
+              ],
+              "kernel_symbols": [
+                "bpf_map_delete_elem"
+              ]
+            }
+          ],
+          "contextual": [
+            {
+              "offset": 549,
+              "helper": "bpf_perf_event_output",
+              "actual": [
+                "bpf_perf_event_output"
+              ],
+              "expected": null,
+              "expected_bound": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "request": 25,
+      "entry": "fentry_vfs_create",
+      "prog_type": 26,
+      "status": 0,
+      "plans": [
+        {
+          "path": "request/generated/kernel-link/c43804e418b1f5a4.tmp.2727.link-plan.json",
+          "kernel_slide": null,
+          "map_ops": [],
+          "calls": [],
+          "contextual": []
+        }
+      ]
+    }
+  ],
+  "scope": "Retained installed call relocations, not invocation weights or current helper time shares."
+}

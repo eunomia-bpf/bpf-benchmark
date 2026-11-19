@@ -44,3 +44,12 @@ Detached Tetragon worker 353863 started at 11:32:35Z, raw
 The 375 additional folds come from this exact constant ALU32 class. The
 unchanged backend, packing and emission stages are pending. No new stock,
 whole-app or timing result is claimed.
+
+PERF 2026-11-19T11:43:27Z: Canonical BCC functional worker 354948 completed
+with host 0/app ok, run `x86_kvm_corpus_20261119_113739_128860`, source
+3cb5c5356. Programs/native/B-generated/B-stock are 25/25/25/25, all checked,
+zero direct fallback/failures. Installed bytes are 8,628 native versus 7,965
+JIT. This confirms the changed B pass against stock for BCC. The existing
+1 x 10 s functional run supplies no new speed ratio. Tetragon's retained
+backend also passes (396.616 s); packing/emission and fresh Tetragon stock
+confirmation remain open. Shared I and current image are unchanged.

@@ -1,0 +1,300 @@
+{
+  "raw": "/workspaces/kprog-raw/perf/native-cohort-check-20261119/bcc-20261119T113557Z-354948",
+  "source_commit": "3cb5c5356753dc8a467761353c66639af1b4d545",
+  "host_exit": 0,
+  "requests": 25,
+  "programs": 25,
+  "native_installed": 25,
+  "b_generated": 25,
+  "b_stock_passed": 25,
+  "checked_native": 25,
+  "direct_native": 0,
+  "failed": 0,
+  "requests_detail": [
+    {
+      "request_id": 1,
+      "source_prog_id": 123,
+      "prog_id": 133,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "fentry_vfs_read",
+      "prog_type": 26
+    },
+    {
+      "request_id": 2,
+      "source_prog_id": 119,
+      "prog_id": 140,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "tracepoint__syscalls__sys_enter_open",
+      "prog_type": 5
+    },
+    {
+      "request_id": 3,
+      "source_prog_id": 114,
+      "prog_id": 148,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "kprobe__cap_capable_entry",
+      "prog_type": 2
+    },
+    {
+      "request_id": 4,
+      "source_prog_id": 115,
+      "prog_id": 156,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "inet_sock_set_state",
+      "prog_type": 5
+    },
+    {
+      "request_id": 5,
+      "source_prog_id": 127,
+      "prog_id": 164,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "sys_enter",
+      "prog_type": 5
+    },
+    {
+      "request_id": 6,
+      "source_prog_id": 118,
+      "prog_id": 172,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "blk_account_io_merge_bio",
+      "prog_type": 2
+    },
+    {
+      "request_id": 7,
+      "source_prog_id": 126,
+      "prog_id": 180,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "tcp_v4_connect",
+      "prog_type": 2
+    },
+    {
+      "request_id": 8,
+      "source_prog_id": 120,
+      "prog_id": 188,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "sched_wakeup",
+      "prog_type": 26
+    },
+    {
+      "request_id": 9,
+      "source_prog_id": 134,
+      "prog_id": 196,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "fentry_vfs_write",
+      "prog_type": 26
+    },
+    {
+      "request_id": 10,
+      "source_prog_id": 142,
+      "prog_id": 203,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "tracepoint__syscalls__sys_enter_openat",
+      "prog_type": 5
+    },
+    {
+      "request_id": 11,
+      "source_prog_id": 150,
+      "prog_id": 210,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "kprobe__cap_capable_exit",
+      "prog_type": 2
+    },
+    {
+      "request_id": 12,
+      "source_prog_id": 166,
+      "prog_id": 217,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "sys_exit",
+      "prog_type": 5
+    },
+    {
+      "request_id": 13,
+      "source_prog_id": 174,
+      "prog_id": 224,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "block_rq_insert",
+      "prog_type": 26
+    },
+    {
+      "request_id": 14,
+      "source_prog_id": 182,
+      "prog_id": 231,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "tcp_v4_connect_ret",
+      "prog_type": 2
+    },
+    {
+      "request_id": 15,
+      "source_prog_id": 190,
+      "prog_id": 238,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "sched_wakeup_new",
+      "prog_type": 26
+    },
+    {
+      "request_id": 16,
+      "source_prog_id": 197,
+      "prog_id": 245,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "fentry_vfs_fsync",
+      "prog_type": 26
+    },
+    {
+      "request_id": 17,
+      "source_prog_id": 204,
+      "prog_id": 252,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "tracepoint__syscalls__sys_exit_open",
+      "prog_type": 5
+    },
+    {
+      "request_id": 18,
+      "source_prog_id": 225,
+      "prog_id": 259,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "block_rq_issue",
+      "prog_type": 26
+    },
+    {
+      "request_id": 19,
+      "source_prog_id": 232,
+      "prog_id": 266,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "tcp_v6_connect",
+      "prog_type": 2
+    },
+    {
+      "request_id": 20,
+      "source_prog_id": 239,
+      "prog_id": 273,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "sched_switch",
+      "prog_type": 26
+    },
+    {
+      "request_id": 21,
+      "source_prog_id": 246,
+      "prog_id": 279,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "fentry_vfs_open",
+      "prog_type": 26
+    },
+    {
+      "request_id": 22,
+      "source_prog_id": 253,
+      "prog_id": 286,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "tracepoint__syscalls__sys_exit_openat",
+      "prog_type": 5
+    },
+    {
+      "request_id": 23,
+      "source_prog_id": 260,
+      "prog_id": 293,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "block_rq_complete",
+      "prog_type": 26
+    },
+    {
+      "request_id": 24,
+      "source_prog_id": 267,
+      "prog_id": 300,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "tcp_v6_connect_ret",
+      "prog_type": 2
+    },
+    {
+      "request_id": 25,
+      "source_prog_id": 280,
+      "prog_id": 307,
+      "status": 0,
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "symbol": "fentry_vfs_create",
+      "prog_type": 26
+    }
+  ],
+  "corpus": [
+    {
+      "path": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261119_113739_128860/details/result.json",
+      "status": "ok",
+      "suite_name": "macro_apps",
+      "samples": 1,
+      "workload_seconds": 10.0
+    }
+  ],
+  "scope": "Registered-service coverage and corpus status; workload parameters are recorded per corpus run."
+}

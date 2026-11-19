@@ -946,3 +946,12 @@ pass through the rebuilt sole tools and real BPF emission. Shared I and
 native conversion remain unchanged; no runtime improvement is claimed.
 The retained Tetragon frontend replay, stock acceptance and fresh app
 confirmation remain open. See results/constant-alu32-20261119.
+
+PERF 2026-11-19T11:43:27Z: Constant-ALU32 B pass 0cb83f15d passes the
+canonical BCC stock/native functional check (113739_128860): 25/25/25/25,
+all checked, zero fallback/failures; installed 8,628 native/7,965 JIT bytes.
+No speed ratio comes from this 1 x 10 s check. Tetragon backend passes;
+packing/emission/stock remain open. A retained installed-binding audit
+also finds the checked path still uses generic TP output/stack helpers
+and generic map writes; these are separate phase-1/1e work, with no
+performance gain claimed yet. See results/checked-helper-binding-20261119.
