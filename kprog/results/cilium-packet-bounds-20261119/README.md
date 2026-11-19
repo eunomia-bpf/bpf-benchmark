@@ -145,7 +145,7 @@ So this class needs a decision the packet-bounds pass cannot make: either lower 
 write through a kernel-side `btf_struct_access` that admits it. It is **not** the same fix as the 40, and
 should not be counted as part of it.
 
-## The freshness guard costs 2 of 235 predicates (omp 2026-11-19T21:24Z)
+## What the freshness guard declines (omp 2026-11-19T21:24Z)
 
 PERF's follow-ups `650994842` and `80dbcfc51` make the rewrite conditional on the captured `skb` fields
 still being current: the matcher now walks every path from the comparison to each field read, backedges
@@ -153,9 +153,9 @@ included, and declines when a possible write to the `skb` intervenes (private al
 That is the right direction — without it, a rewrite across an `skb` mutation would compare a *re-read*
 `data_end` against a *stale* predicate.
 
-Re-ran the rebuilt pass (`HEAD` = `80dbcfc51`) over the same 40 archived inputs: **233 predicates, still
-40 / 40 requests with at least one** (down from 235, so 2 predicates sit across a possible mutation and
-are correctly declined).
+Re-ran the rebuilt pass (`HEAD` = `80dbcfc51`) over the same archived inputs: **235 predicates across all
+41 packet-class requests, every one with at least one** (233 on the 40 success-capsule requests plus
+request 64's 2).
 
 Why that guard is exactly the condition the rewrite needs, stated plainly: the emitted bound re-reads
 `skb->data` and `skb->data_end` at the comparison site, which are *later* reads than the `len`/`data_len`
@@ -189,11 +189,11 @@ Caveat, stated because it bounds the claim: this is the host kernel
 (`check_ptr_to_btf_access`/`check_mem_access` packet bounds) is stable across them, and the guest run is
 the one that counts for the recorded numbers.
 
-## Bytecode-level coverage of all forty (omp 2026-11-19T22:03Z)
+## Bytecode-level coverage of all forty-one (omp 2026-11-19T22:03Z)
 
-Recompiled all 40 patched programs from `HEAD` (`80dbcfc51`, the freshness-guarded matcher) with the
-pipeline's flags: **40 / 40 carry at least one emitted pointer bound in the `classifier` section**, so the
-233 lowerings recorded above survive into bytecode for every request rather than being folded away.
+Recompiled all 41 patched programs from `HEAD` (`80dbcfc51`, the freshness-guarded matcher) with the
+pipeline's flags: **41 / 41 carry at least one emitted pointer bound in the `classifier` section**, so the
+235 lowerings recorded above survive into bytecode for every request rather than being folded away.
 
 ## The forty-first program: request 64 (omp 2026-11-19T22:12Z)
 
