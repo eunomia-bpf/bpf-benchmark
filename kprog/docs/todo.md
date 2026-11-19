@@ -8,7 +8,7 @@
 
 ## 0. Lane 目标与待办
 
-- [x] P-native-numeric-bridge (this commit; run133702_416559): audit native
+- [x] P-native-numeric-bridge (0dfa23814; run133702_416559): audit native
   preservation of NUMERIC(value)'s concrete bits through the reused stock
   frontend. The proof header discards value; native freezes the resulting
   unspecified-input read. Worker 400746 completed at 12:52:08Z: all five

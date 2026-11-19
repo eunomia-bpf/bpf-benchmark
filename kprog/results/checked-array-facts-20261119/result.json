@@ -1,0 +1,622 @@
+{
+  "archive": "/workspaces/kprog-raw/perf/native-cohort-check-20261119/bcc-20261119T120407Z-365394/service.tar.gz",
+  "requests": [
+    {
+      "request": 1,
+      "status": 0,
+      "entry": "fentry_vfs_read",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [],
+      "actual_map_shapes": [
+        {
+          "map_type": 2,
+          "map_flags": 1024,
+          "value_size": 40,
+          "key_size": 4,
+          "max_entries": 1,
+          "id": 107
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": null
+    },
+    {
+      "request": 2,
+      "status": 0,
+      "entry": "tracepoint__syscalls__sys_enter_open",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [],
+      "actual_map_shapes": [
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 16,
+          "key_size": 4,
+          "max_entries": 10240,
+          "id": 77
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": null
+    },
+    {
+      "request": 3,
+      "status": 0,
+      "entry": "sys_enter",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [],
+      "actual_map_shapes": [
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 8,
+          "key_size": 4,
+          "max_entries": 8192,
+          "id": 97
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": null
+    },
+    {
+      "request": 4,
+      "status": 0,
+      "entry": "kprobe__cap_capable_entry",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [],
+      "actual_map_shapes": [
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 8,
+          "key_size": 8,
+          "max_entries": 10240,
+          "id": 69
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": null
+    },
+    {
+      "request": 5,
+      "status": 0,
+      "entry": "sched_wakeup",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [],
+      "actual_map_shapes": [
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 8,
+          "key_size": 4,
+          "max_entries": 10240,
+          "id": 100
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": null
+    },
+    {
+      "request": 6,
+      "status": 0,
+      "entry": "inet_sock_set_state",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [
+        "__kprog_probe_read_kernel"
+      ],
+      "actual_map_shapes": [
+        {
+          "map_type": 4,
+          "map_flags": 0,
+          "value_size": 4,
+          "key_size": 4,
+          "max_entries": 2,
+          "id": 70
+        },
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 20,
+          "key_size": 8,
+          "max_entries": 10240,
+          "id": 67
+        },
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 8,
+          "key_size": 8,
+          "max_entries": 10240,
+          "id": 65
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": "request/generated/checked-simulator.helpers.c"
+    },
+    {
+      "request": 7,
+      "status": 0,
+      "entry": "blk_account_io_merge_bio",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [],
+      "actual_map_shapes": [
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 20,
+          "key_size": 8,
+          "max_entries": 10240,
+          "id": 89
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": null
+    },
+    {
+      "request": 8,
+      "status": 0,
+      "entry": "tcp_v4_connect",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [],
+      "actual_map_shapes": [
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 8,
+          "key_size": 4,
+          "max_entries": 8192,
+          "id": 66
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": null
+    },
+    {
+      "request": 9,
+      "status": 0,
+      "entry": "fentry_vfs_write",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [],
+      "actual_map_shapes": [
+        {
+          "map_type": 2,
+          "map_flags": 1024,
+          "value_size": 40,
+          "key_size": 4,
+          "max_entries": 1,
+          "id": 107
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": null
+    },
+    {
+      "request": 10,
+      "status": 0,
+      "entry": "tracepoint__syscalls__sys_enter_openat",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [],
+      "actual_map_shapes": [
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 16,
+          "key_size": 4,
+          "max_entries": 10240,
+          "id": 77
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": null
+    },
+    {
+      "request": 11,
+      "status": 0,
+      "entry": "sys_exit",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [],
+      "actual_map_shapes": [
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 32,
+          "key_size": 4,
+          "max_entries": 8192,
+          "id": 99
+        },
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 8,
+          "key_size": 4,
+          "max_entries": 8192,
+          "id": 97
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": null
+    },
+    {
+      "request": 12,
+      "status": 0,
+      "entry": "kprobe__cap_capable_exit",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [],
+      "actual_map_shapes": [
+        {
+          "map_type": 4,
+          "map_flags": 0,
+          "value_size": 4,
+          "key_size": 4,
+          "max_entries": 2,
+          "id": 75
+        },
+        {
+          "map_type": 2,
+          "map_flags": 1152,
+          "value_size": 4,
+          "key_size": 4,
+          "max_entries": 1,
+          "id": 109
+        },
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 8,
+          "key_size": 8,
+          "max_entries": 10240,
+          "id": 69
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": null
+    },
+    {
+      "request": 13,
+      "status": 0,
+      "entry": "sched_wakeup_new",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [],
+      "actual_map_shapes": [
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 8,
+          "key_size": 4,
+          "max_entries": 10240,
+          "id": 100
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": null
+    },
+    {
+      "request": 14,
+      "status": 0,
+      "entry": "block_rq_insert",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [
+        "__kprog_probe_read_kernel"
+      ],
+      "actual_map_shapes": [
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 24,
+          "key_size": 8,
+          "max_entries": 10240,
+          "id": 90
+        },
+        {
+          "map_type": 2,
+          "map_flags": 1152,
+          "value_size": 4,
+          "key_size": 4,
+          "max_entries": 1,
+          "id": 111
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": "request/generated/checked-simulator.helpers.c"
+    },
+    {
+      "request": 15,
+      "status": 0,
+      "entry": "tcp_v4_connect_ret",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [
+        "__kprog_probe_read_kernel"
+      ],
+      "actual_map_shapes": [
+        {
+          "map_type": 4,
+          "map_flags": 0,
+          "value_size": 4,
+          "key_size": 4,
+          "max_entries": 2,
+          "id": 76
+        },
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 8,
+          "key_size": 4,
+          "max_entries": 8192,
+          "id": 66
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": "request/generated/checked-simulator.helpers.c"
+    },
+    {
+      "request": 16,
+      "status": 0,
+      "entry": "fentry_vfs_fsync",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [],
+      "actual_map_shapes": [
+        {
+          "map_type": 2,
+          "map_flags": 1024,
+          "value_size": 40,
+          "key_size": 4,
+          "max_entries": 1,
+          "id": 107
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": null
+    },
+    {
+      "request": 17,
+      "status": 0,
+      "entry": "tracepoint__syscalls__sys_exit_open",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [],
+      "actual_map_shapes": [
+        {
+          "map_type": 4,
+          "map_flags": 0,
+          "value_size": 4,
+          "key_size": 4,
+          "max_entries": 2,
+          "id": 80
+        },
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 16,
+          "key_size": 4,
+          "max_entries": 10240,
+          "id": 77
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": null
+    },
+    {
+      "request": 18,
+      "status": 0,
+      "entry": "sched_switch",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [
+        "__kprog_probe_read_kernel"
+      ],
+      "actual_map_shapes": [
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 120,
+          "key_size": 4,
+          "max_entries": 10240,
+          "id": 102
+        },
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 8,
+          "key_size": 4,
+          "max_entries": 10240,
+          "id": 100
+        },
+        {
+          "map_type": 2,
+          "map_flags": 0,
+          "value_size": 120,
+          "key_size": 4,
+          "max_entries": 1,
+          "id": 114
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": "request/generated/checked-simulator.helpers.c"
+    },
+    {
+      "request": 19,
+      "status": 0,
+      "entry": "block_rq_issue",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [
+        "__kprog_probe_read_kernel"
+      ],
+      "actual_map_shapes": [
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 24,
+          "key_size": 8,
+          "max_entries": 10240,
+          "id": 90
+        },
+        {
+          "map_type": 2,
+          "map_flags": 1152,
+          "value_size": 4,
+          "key_size": 4,
+          "max_entries": 1,
+          "id": 111
+        },
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 20,
+          "key_size": 8,
+          "max_entries": 10240,
+          "id": 89
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": "request/generated/checked-simulator.helpers.c"
+    },
+    {
+      "request": 20,
+      "status": 0,
+      "entry": "tcp_v6_connect",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [],
+      "actual_map_shapes": [
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 8,
+          "key_size": 4,
+          "max_entries": 8192,
+          "id": 66
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": null
+    },
+    {
+      "request": 21,
+      "status": 0,
+      "entry": "fentry_vfs_open",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [],
+      "actual_map_shapes": [
+        {
+          "map_type": 2,
+          "map_flags": 1024,
+          "value_size": 40,
+          "key_size": 4,
+          "max_entries": 1,
+          "id": 107
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": null
+    },
+    {
+      "request": 22,
+      "status": 0,
+      "entry": "tracepoint__syscalls__sys_exit_openat",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [],
+      "actual_map_shapes": [
+        {
+          "map_type": 4,
+          "map_flags": 0,
+          "value_size": 4,
+          "key_size": 4,
+          "max_entries": 2,
+          "id": 80
+        },
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 16,
+          "key_size": 4,
+          "max_entries": 10240,
+          "id": 77
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": null
+    },
+    {
+      "request": 23,
+      "status": 0,
+      "entry": "block_rq_complete",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [],
+      "actual_map_shapes": [
+        {
+          "map_type": 4,
+          "map_flags": 0,
+          "value_size": 4,
+          "key_size": 4,
+          "max_entries": 2,
+          "id": 92
+        },
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 24,
+          "key_size": 8,
+          "max_entries": 10240,
+          "id": 90
+        },
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 20,
+          "key_size": 8,
+          "max_entries": 10240,
+          "id": 89
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": null
+    },
+    {
+      "request": 24,
+      "status": 0,
+      "entry": "tcp_v6_connect_ret",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [
+        "__kprog_probe_read_kernel"
+      ],
+      "actual_map_shapes": [
+        {
+          "map_type": 4,
+          "map_flags": 0,
+          "value_size": 4,
+          "key_size": 4,
+          "max_entries": 2,
+          "id": 76
+        },
+        {
+          "map_type": 1,
+          "map_flags": 0,
+          "value_size": 8,
+          "key_size": 4,
+          "max_entries": 8192,
+          "id": 66
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": "request/generated/checked-simulator.helpers.c"
+    },
+    {
+      "request": 25,
+      "status": 0,
+      "entry": "fentry_vfs_create",
+      "execution_path": "checked-sim-c",
+      "imported_helpers": [],
+      "actual_map_shapes": [
+        {
+          "map_type": 2,
+          "map_flags": 1024,
+          "value_size": 40,
+          "key_size": 4,
+          "max_entries": 1,
+          "id": 107
+        }
+      ],
+      "concrete_arrays": [],
+      "helper_source_member": null
+    }
+  ],
+  "selected_array_requests": [],
+  "scope": "Retained source selection and map metadata. A missing helper-list artifact is reported as null, not inferred to mean no helper. No call-frequency or final-instruction claim."
+}

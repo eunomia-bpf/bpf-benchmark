@@ -34,3 +34,13 @@ Expected effect, if the reads survive in a hot path: remove three immutable
 field loads and expose constant stride arithmetic. No measured ns/call,
 throughput, helper share or installed-byte change is available. No new
 runtime dispatch, check, map exclusion or Rust helper routine is proposed.
+
+PERF 2026-11-19T13:44:32Z: Retained checked BCC365394 audit completed successfully.
+All25 request capsules have their helper lists
+(0 missing); zero select __kprog_array_lookup. BCC therefore has no
+confirmed instance of this C ARRAY candidate in that cohort. The source
+comparison remains relevant only when another checked app actually selects
+this helper; no ARRAY code or BCC performance change follows from it.
+Normalized generation.metadata.json supplies symbol/value-offset bindings;
+kernel.facts.json retains the actual map shapes. All rows and raw references
+are committed in result.json/receipt.json. No new profile was collected.

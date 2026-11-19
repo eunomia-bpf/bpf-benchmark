@@ -1,0 +1,68 @@
+{
+  "cases": [
+    {
+      "case": "bad",
+      "error": "x86 instruction the generator cannot translate at 0x1: (bad)",
+      "passed": true
+    },
+    {
+      "case": "zeros",
+      "blob_bytes": 18,
+      "parsed_bytes": 18,
+      "instructions": [
+        {
+          "address": 0,
+          "end": 1,
+          "asm": "nop"
+        },
+        {
+          "address": 1,
+          "end": 3,
+          "asm": "add    BYTE PTR [rax],al"
+        },
+        {
+          "address": 3,
+          "end": 5,
+          "asm": "add    BYTE PTR [rax],al"
+        },
+        {
+          "address": 5,
+          "end": 7,
+          "asm": "add    BYTE PTR [rax],al"
+        },
+        {
+          "address": 7,
+          "end": 9,
+          "asm": "add    BYTE PTR [rax],al"
+        },
+        {
+          "address": 9,
+          "end": 11,
+          "asm": "add    BYTE PTR [rax],al"
+        },
+        {
+          "address": 11,
+          "end": 13,
+          "asm": "add    BYTE PTR [rax],al"
+        },
+        {
+          "address": 13,
+          "end": 15,
+          "asm": "add    BYTE PTR [rax],al"
+        },
+        {
+          "address": 15,
+          "end": 17,
+          "asm": "add    BYTE PTR [rax],al"
+        },
+        {
+          "address": 17,
+          "end": 18,
+          "asm": "ret"
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "scope": "Real host object parser regression only; no guest, native execution or runtime gate."
+}
