@@ -1,5 +1,14 @@
 # Cilium head-length bounds
 
+`archive_validate.sh` tests the remaining historical acceptance question.
+It reuses the41 emitted B objects and the production`relocate_trusted_proof`
+function, creates fresh maps with captured shapes (including inner maps and
+direct-value offsets), and stock-loads each object on the sole guest kernel.
+Each request retains its command, verifier log and completion before the next.
+These detached, empty maps test verifier acceptance; they do not reproduce
+live map contents, native binding, application execution or performance.
+No compiler, runtime image or benchmark configuration changes are required.
+
 Worker487083 completed0 at2026-11-19T23:11:02Z. The boundary-equality
 repair852c2bfe3 passes16 positive/eight exclusion selectors, five freshness
 cases, six sole-kernel fixture loads and18 packet TEST_RUN cases. Fresh

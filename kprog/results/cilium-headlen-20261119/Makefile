@@ -26,3 +26,27 @@ stock:
 		--exec 'make -f kprog/results/cilium-headlen-20261119/Makefile stock-guest OUT=$(OUT) FIXTURE=$(FIXTURE)'
 stock-guest:
 	$(OUT)/probe-inputs/stock-probe $(FIXTURE) $(OUT)/verifier.log > $(OUT)/stock-result.jsonl
+
+ARCHIVE_PROBE := /var/tmp/kprog-tmp/perf/cilium-headlen/archive-stock
+REPLAY ?= /workspaces/kprog-raw/perf/cilium-headlen-20261119/edge-candidate-20261119T225223Z-487083/replay
+.PHONY: archive-probe archive-prepare archive-stock archive-guest
+archive-probe:
+	install -d $(dir $(ARCHIVE_PROBE))
+	$(CXX) -std=gnu++20 -O1 -g -ffunction-sections -fdata-sections \
+		-Ikprog/libnativeloader/include -Imicro/programs/build-x86 \
+		-Irunner/build-llvmbpf/vendor/libbpf/prefix/include -Ivendor/libbpf/include -Ivendor/libbpf/include/uapi \
+		kprog/results/cilium-headlen-20261119/archive_stock.cpp -Wl,--gc-sections \
+		runner/build-llvmbpf/vendor/libbpf/pic-obj/libbpf.a -lelf -lz -ldl -pthread -o $(ARCHIVE_PROBE)
+archive-prepare:
+	python3 kprog/results/cilium-headlen-20261119/archive_stock.py prepare $(INPUTS) $(REPLAY) $(OUT)
+archive-stock:
+	install -d $(OUT)/probe-inputs
+	taskset -c 18-19 prlimit --as=8589934592 -- vng \
+		--run /workspaces/.agent-state/kprog-ck/build-x86/arch/x86/boot/bzImage \
+		--cwd /workspaces/repository --rwdir /workspaces/repository --rwdir $(OUT) \
+		--rodir $(OUT)/probe-inputs=$(dir $(ARCHIVE_PROBE)) \
+		--disable-monitor --cpus 2 --memory 2G --overlay-rwdir /tmp \
+		--append 'loglevel=4 panic=30 oops=panic' \
+		--exec 'make -f kprog/results/cilium-headlen-20261119/Makefile archive-guest OUT=$(OUT) INPUTS=$(INPUTS) REPLAY=$(REPLAY)'
+archive-guest:
+	python3 kprog/results/cilium-headlen-20261119/archive_stock.py load $(INPUTS) $(REPLAY) $(OUT)
