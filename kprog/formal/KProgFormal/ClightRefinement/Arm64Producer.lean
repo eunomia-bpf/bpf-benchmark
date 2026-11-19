@@ -27,18 +27,33 @@ private theorem allocation_valid (m : CC.Mem) :
       (allocation m).1 (allocation m).2 :=
   CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (allocation m)).symm
 
+/-- Function entry depends on the real local layout, not an equality of
+whole linked worlds. Keep the actual producer allocation and parameters. -/
+theorem entry_valid_bound (world : CC.CGenv) (layout : world.genv_cenv = ge.genv_cenv)
+    (m : CC.Mem) (ctx continuation : CC.Val) :
+    CC.FunctionEntry2 world producer [ctx, continuation] m
+      (allocation m).1 (initialTemps ctx continuation) (allocation m).2 :=
+  .intro names.1 names.2.1 names.2.2 (by simpa only [layout] using allocation_valid m) rfl
+
 /-- The actual raw producer enters with all its real local declarations,
 for arbitrary caller memory, context and continuation values. -/
 theorem entry_valid (m : CC.Mem) (ctx continuation : CC.Val) :
     CC.FunctionEntry2 ge producer [ctx, continuation] m
       (allocation m).1 (initialTemps ctx continuation) (allocation m).2 :=
-  .intro names.1 names.2.1 names.2.2 (allocation_valid m) rfl
+  entry_valid_bound ge rfl m ctx continuation
+
+theorem entry_internal_bound (world : CC.CGenv) (layout : world.genv_cenv = ge.genv_cenv)
+    (m : CC.Mem) (ctx continuation : CC.Val) (k : CC.Cont) :
+    InternalRun world 1 (.Callstate (.Internal producer) [ctx, continuation] k m)
+      (.State producer producer.fn_body k (allocation m).1
+        (initialTemps ctx continuation) (allocation m).2) :=
+  .step trivial (.internal_function _ _ _ _ _ _ _ (entry_valid_bound world layout m ctx continuation)) (.refl _)
 
 theorem entry_internal (m : CC.Mem) (ctx continuation : CC.Val) (k : CC.Cont) :
     InternalRun ge 1 (.Callstate (.Internal producer) [ctx, continuation] k m)
       (.State producer producer.fn_body k (allocation m).1
         (initialTemps ctx continuation) (allocation m).2) :=
-  .step trivial (.internal_function _ _ _ _ _ _ _ (entry_valid m ctx continuation)) (.refl _)
+  entry_internal_bound ge rfl m ctx continuation k
 
 /-- Allocation retains every caller byte and both permission maps. -/
 theorem entry_frame (m : CC.Mem) : FrameBelow m.nextblock m (allocation m).2 :=
@@ -136,7 +151,7 @@ theorem cache_stage_exported :
     sequenceTail 3 Arm64Entry.s_kprog_arm64_entry_raw_66 = some cacheStage ∧
     sequenceTail 4 cacheStage = some afterCacheStage := by constructor <;> rfl
 
-private theorem initialize_exec (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+private theorem initialize_exec (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
     (sb rb sv rv : CC.Block) (before m1 m2 m3 after : CC.Mem)
     (stackBase : e.get Arm64Entry.___a64_numeric_sp = some (sb, CC.tulong))
     (returnBase : e.get Arm64Entry.___a64_numeric_return = some (rb, CC.tulong))
@@ -146,9 +161,9 @@ private theorem initialize_exec (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
     (s1 : CC.Mem.storev .Mint64 m1 (.Vptr rb 0) (.Vlong 0) = some m2)
     (s2 : CC.Mem.storev .Mint8unsigned m2 (.Vptr sv 0) (.Vint 0) = some m3)
     (s3 : CC.Mem.storev .Mint8unsigned m3 (.Vptr rv 0) (.Vint 0) = some after) :
-    steps ge 12 (.State producer cacheStage k e le before) =
+    steps world 12 (.State producer cacheStage k e le before) =
       some (CC.E0, .State producer afterCacheStage k e le after) ∧
-    InternalPath ge 12 (.State producer cacheStage k e le before) := by
+    InternalPath world 12 (.State producer cacheStage k e le before) := by
   change CC.Mem.storev .Mint64 before (.Vptr sb (0#64)) (.Vlong (0#64)) = some m1 at s0
   change CC.Mem.storev .Mint64 m1 (.Vptr rb (0#64)) (.Vlong (0#64)) = some m2 at s1
   change CC.Mem.storev .Mint8unsigned m2 (.Vptr sv (0#64)) (.Vint (0#32)) = some m3 at s2
@@ -167,9 +182,9 @@ private theorem initialize_exec (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
 permissions. Any preceding stores may change contents while preserving access.
 The result initializes both cache words and validity bytes to zero, preserves
 all caller blocks, and changes no permissions or allocation identity. -/
-theorem initialize_caches (m before : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
+theorem initialize_caches_bound (world : CC.CGenv) (m before : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
     (access : before.access = (allocation m).2.access) :
-    ∃ after, InternalRun ge 12
+    ∃ after, InternalRun world 12
         (.State producer cacheStage k (allocation m).1 le before)
         (.State producer afterCacheStage k (allocation m).1 le after) ∧
       (∀ returns, ∃ locals : CacheLocals returns m,
@@ -207,7 +222,7 @@ theorem initialize_caches (m before : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
   obtain ⟨m2, s1, a2⟩ := create m1 .Mint64 ret.baseBlock (.Vlong 0) a1 ret.baseWritable
   obtain ⟨m3, s2, a3⟩ := create m2 .Mint8unsigned stack.validBlock (.Vint 0) a2 stack.validWritable
   obtain ⟨after, s3, a4⟩ := create m3 .Mint8unsigned ret.validBlock (.Vint 0) a3 ret.validWritable
-  have exec := initialize_exec (allocation m).1 le k _ _ _ _ before m1 m2 m3 after
+  have exec := initialize_exec world (allocation m).1 le k _ _ _ _ before m1 m2 m3 after
     stack.baseBinding ret.baseBinding stack.validBinding ret.validBinding s0 s1 s2 s3
   have baseStack : CC.Mem.loadv .Mint64 after (.Vptr stack.baseBlock 0) = some (.Vlong 0) := by
     have h3 := CC.Mem.load_store_other s3 .Mint64 stack.baseBlock 0 (.inl sbRv)
@@ -236,5 +251,17 @@ theorem initialize_caches (m before : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
       ((FrameBelow.store stack.validFresh s2).trans (FrameBelow.store ret.validFresh s3))
   · exact (CC.Mem.store_nextblock s3).trans ((CC.Mem.store_nextblock s2).trans
       ((CC.Mem.store_nextblock s1).trans (CC.Mem.store_nextblock s0)))
+
+theorem initialize_caches (m before : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
+    (access : before.access = (allocation m).2.access) :
+    ∃ after, InternalRun ge 12
+        (.State producer cacheStage k (allocation m).1 le before)
+        (.State producer afterCacheStage k (allocation m).1 le after) ∧
+      (∀ returns, ∃ locals : CacheLocals returns m,
+        CC.Mem.loadv .Mint64 after (.Vptr locals.baseBlock 0) = some (.Vlong 0) ∧
+        CC.Mem.loadv .Mint8unsigned after (.Vptr locals.validBlock 0) = some (.Vint 0)) ∧
+      FrameBelow m.nextblock before after ∧
+      after.access = before.access ∧ after.nextblock = before.nextblock :=
+  initialize_caches_bound ge m before k le access
 
 end KProgFormal.ClightRefinement.Arm64Producer

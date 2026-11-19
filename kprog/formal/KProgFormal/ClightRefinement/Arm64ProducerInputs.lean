@@ -38,7 +38,7 @@ private def inputParts : InputParts := by
 /-- Actual producer stage after the x0 declaration initializer and tag write. -/
 def nextRegisterStage : CC.Stmt := inputParts.nextRegister
 
-private def inputContinuation (m : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) : CC.Cont :=
+def inputContinuation (m : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) : CC.Cont :=
   .Kcall (some Arm64Entry._t'2) producer (allocation m).1 le
     (.Kseq inputParts.setValue (.Kseq inputParts.storeValue (.Kseq inputParts.tags k)))
 
@@ -74,7 +74,7 @@ theorem create_store (m memory : CC.Mem) (chunk : CC.Chunk) (block : CC.Block)
   obtain ⟨after, store⟩ := stored
   exact ⟨after, store, (CC.Mem.store_access store).trans access⟩
 
-private theorem setup_exec (m : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+private theorem setup_exec (world : CC.CGenv) (m : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (fb cb ab : CC.Block) (before m1 m2 after : CC.Mem)
     (flag : (allocation m).1.get Arm64Entry.___a64_sim_is_xdp = some (fb, CC.tuchar))
     (ctx : (allocation m).1.get Arm64Entry.___a64_sim_helper_ctx = some (cb, CC.tptr CC.tvoid))
@@ -82,9 +82,9 @@ private theorem setup_exec (m : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (s0 : CC.Mem.store .Mint8unsigned before fb 0 (.Vint (0#32)) = some m1)
     (s1 : CC.Mem.store CC.Mptr m1 cb 0 (.Vlong (0#64)) = some m2)
     (s2 : CC.Mem.store CC.Mptr m2 ab 0 (.Vlong (0#64)) = some after) :
-    steps ge 9 (.State producer afterCacheStage k (allocation m).1 le before) =
+    steps world 9 (.State producer afterCacheStage k (allocation m).1 le before) =
       some (CC.E0, .State producer inputParts.registerStage k (allocation m).1 le after) ∧
-    InternalPath ge 9 (.State producer afterCacheStage k (allocation m).1 le before) := by
+    InternalPath world 9 (.State producer afterCacheStage k (allocation m).1 le before) := by
   change CC.Mem.storev .Mint8unsigned before (.Vptr fb (0#64)) (.Vint (0#32)) = some m1 at s0
   change CC.Mem.storev CC.Mptr m1 (.Vptr cb (0#64)) (.Vlong (0#64)) = some m2 at s1
   change CC.Mem.storev CC.Mptr m2 (.Vptr ab (0#64)) (.Vlong (0#64)) = some after at s2
@@ -98,9 +98,9 @@ private theorem setup_exec (m : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     CC.E0, CC.Eapp, flag, ctx, abi, s0, s1, s2]
 
 /-- Actual post-cache setup; all other declared local loads are preserved. -/
-theorem setup_register_input (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+theorem setup_register_input_bound (world : CC.CGenv) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (access : before.access = (allocation m).2.access) :
-    ∃ after, InternalRun ge 9
+    ∃ after, InternalRun world 9
         (.State producer afterCacheStage k (allocation m).1 le before)
         (.State producer inputParts.registerStage k (allocation m).1 le after) ∧
       (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ∉ setupNames →
@@ -116,7 +116,7 @@ theorem setup_register_input (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
   obtain ⟨m1, s0, a1⟩ := create_store m before .Mint8unsigned fb (.Vint (0#32)) access flagWritable
   obtain ⟨m2, s1, a2⟩ := create_store m m1 CC.Mptr cb (.Vlong (0#64)) a1 ctxWritable
   obtain ⟨after, s2, a3⟩ := create_store m m2 CC.Mptr ab (.Vlong (0#64)) a2 abiWritable
-  have exec := setup_exec m le k fb cb ab before m1 m2 after flag ctx abi s0 s1 s2
+  have exec := setup_exec world m le k fb cb ab before m1 m2 after flag ctx abi s0 s1 s2
   refine ⟨after, internalRun_of_steps exec.2 exec.1, ?_, ?_, a3.trans access.symm, ?_⟩
   · intro id ty block bound other chunk ofs
     have separate := (allocated_local_storage
@@ -131,11 +131,26 @@ theorem setup_register_input (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
       (FrameBelow.store abiFresh s2)
   · exact (CC.Mem.store_nextblock s2).trans ((CC.Mem.store_nextblock s1).trans (CC.Mem.store_nextblock s0))
 
-private theorem first_call_exec (m : CC.Mem) (memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) :
-    steps ge 5 (.State producer inputParts.registerStage k (allocation m).1 le memory) =
+theorem setup_register_input (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (access : before.access = (allocation m).2.access) :
+    ∃ after, InternalRun ge 9
+        (.State producer afterCacheStage k (allocation m).1 le before)
+        (.State producer inputParts.registerStage k (allocation m).1 le after) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ∉ setupNames →
+        ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock :=
+  setup_register_input_bound ge m before le k access
+
+theorem first_call_exec_bound (world : CC.CGenv)
+    (binding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input =
+        some (CC.Positive.ofNat 64) ∧
+      CC.Genv.findFunctPtr world.genv_genv (CC.Positive.ofNat 64) = some Arm64OriginCache.inputFunction)
+    (m : CC.Mem) (memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) :
+    steps world 5 (.State producer inputParts.registerStage k (allocation m).1 le memory) =
       some (CC.E0, .Callstate Arm64OriginCache.inputFunction [.Vint (6#32)]
         (inputContinuation m le k) memory) ∧
-    InternalPath ge 5 (.State producer inputParts.registerStage k (allocation m).1 le memory) := by
+    InternalPath world 5 (.State producer inputParts.registerStage k (allocation m).1 le memory) := by
   have unshadowed : (allocation m).1.get Arm64Entry._native_lab_entry_input = none := by
     have notLocal : Arm64Entry._native_lab_entry_input ∉ CC.varNames producer.fn_vars := by decide +kernel
     simpa only [CC.emptyEnv, CC.PTree.gempty] using CC.allocVariables_env_other
@@ -143,7 +158,7 @@ private theorem first_call_exec (m : CC.Mem) (memory : CC.Mem) (le : CC.TempEnv)
   simp +decide [steps, InternalPath, InternalState, inputParts, inputContinuation,
     CC.doStep, CC.doEvalExpr, CC.doEvalExprlist, CC.lvalOfVar, CC.doDerefLoc, CC.accessMode, CC.typeof, unshadowed,
     CC.typeconv, CC.removeAttributes, CC.tattr,
-    producer_input_binding.1, producer_input_binding.2, CC.Genv.findFunct,
+    binding.1, binding.2, CC.Genv.findFunct,
     CC.Integers.Ptrofs.zero, CC.Integers.Ptrofs.eq, CC.typeOfFundef,
     Arm64OriginCache.inputFunction, Arm64OriginCache.inputEF, CC.Cop.classifyFun,
     CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp, CC.Cop.semBinarith,
@@ -167,7 +182,7 @@ theorem first_input_ready (m : CC.Mem) (ctx continuation : CC.Val) (k : CC.Cont)
   obtain ⟨initialized, prefixRun, caches, frame, access, next⟩ := entry_caches_initialized m ctx continuation k
   obtain ⟨before, setupRun, otherLocals, setupFrame, setupAccess, setupNext⟩ :=
     setup_register_input m initialized (initialTemps ctx continuation) k access
-  have call := first_call_exec m before (initialTemps ctx continuation) k
+  have call := first_call_exec_bound ge producer_input_binding m before (initialTemps ctx continuation) k
   refine ⟨before, prefixRun.trans (setupRun.trans (internalRun_of_steps call.2 call.1)), ?_,
     frame.trans setupFrame, setupAccess.trans access, setupNext.trans next⟩
   intro returns

@@ -1,0 +1,30 @@
+import KProgFormal.ClightRefinement.Arm64NumericProducerPrefix
+open KProgFormal.ClightRefinement
+#check Arm64Producer.entry_valid_bound
+#print axioms Arm64Producer.entry_valid_bound
+#check Arm64Producer.entry_internal_bound
+#print axioms Arm64Producer.entry_internal_bound
+#check Arm64Producer.initialize_caches_bound
+#print axioms Arm64Producer.initialize_caches_bound
+#check Arm64Producer.prefix_internal_bound
+#print axioms Arm64Producer.prefix_internal_bound
+#check Arm64Producer.entry_caches_initialized_bound
+#print axioms Arm64Producer.entry_caches_initialized_bound
+#check Arm64Producer.prefix_internal
+#print axioms Arm64Producer.prefix_internal
+#check Arm64Producer.entry_caches_initialized
+#print axioms Arm64Producer.entry_caches_initialized
+#check Arm64Producer.setup_register_input_bound
+#print axioms Arm64Producer.setup_register_input_bound
+#check Arm64Producer.first_call_exec_bound
+#print axioms Arm64Producer.first_call_exec_bound
+#check Arm64Producer.first_input_ready
+#print axioms Arm64Producer.first_input_ready
+#check Arm64NumericMemory.producer_entry
+#print axioms Arm64NumericMemory.producer_entry
+#check Arm64NumericProducerPrefix.initialized_prefix
+#print axioms Arm64NumericProducerPrefix.initialized_prefix
+#check Arm64NumericProducerPrefix.input_binding
+#print axioms Arm64NumericProducerPrefix.input_binding
+#check Arm64NumericProducerPrefix.initialized_first_input
+#print axioms Arm64NumericProducerPrefix.initialized_first_input

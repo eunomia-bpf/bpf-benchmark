@@ -1,0 +1,204 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-numeric-producer-prefix",
+  "proved": {
+    "world": "Arm64NumericProgram.ge, initialized by Arm64NumericMemory.init_mem with frontier204",
+    "prefix_transitions": 580,
+    "prefix_decomposition": {
+      "allocation": 1,
+      "source_assignments": 189,
+      "assignment_transitions": 567,
+      "cache_stores": 4,
+      "cache_transitions": 12
+    },
+    "first_provider_boundary_transitions": 594,
+    "boundary_decomposition": {
+      "prefix": 580,
+      "RAW_setup": 9,
+      "actual_call_setup": 5
+    },
+    "cache_readbacks": "both actual selected base words and validity bytes are zero at prefix and reached call boundary",
+    "frame": "complete global raw contents and both permission maps below original frontier204; actual allocation access/nextblock retained",
+    "lookup": "actual Numeric findSymbol and typed findFunctPtr for native_lab_entry_input at block64, kernel-checked separately from layout equality",
+    "continuation": "actual source Kcall t2 with actual frame/temporary env/rest; arbitrary outer k retained",
+    "provider_outcome": "not assumed; execution stops at actual kind6 external-call boundary",
+    "reused": "existing source189 assignments/chunks/ready-list induction, genuine cache/RAW stores and input-call extraction",
+    "old_public_APIs": "entry_valid/internal, initialize_caches, prefix_internal, entry_caches_initialized, setup_register_input and first_input_ready preserved as projections or same existing contract",
+    "reduction": "NumericMemory entry constructor replaced by projection; existing exact-source equality tactic made reusable; layout normalized once per source chunk",
+    "C_runtime_benchmark_changes": false
+  },
+  "focused": {
+    "exit": 0,
+    "log": "focused4.log",
+    "jobs": 179
+  },
+  "public_queries": {
+    "exit": 0,
+    "log": "Query-1.log",
+    "theorems": 14,
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64Producer.entry_valid_bound": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.entry_internal_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.initialize_caches_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.prefix_internal_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.entry_caches_initialized_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.prefix_internal": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.entry_caches_initialized": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.setup_register_input_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.first_call_exec_bound": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.first_input_ready": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericMemory.producer_entry": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericProducerPrefix.initialized_prefix": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericProducerPrefix.input_binding": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericProducerPrefix.initialized_first_input": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "full_lake_build": {
+    "exit": 0,
+    "log": "lake-build1.log",
+    "jobs": 323,
+    "attempts": 1
+  },
+  "export_parity": {
+    "exit": 0,
+    "log": "export-parity1.log",
+    "reference": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_identical": true
+  },
+  "attempts": [
+    {
+      "name": "focused1",
+      "exit": 1,
+      "note": "General entry/cache proofs pass; assignment macro requires explicit known layout rather than unresolved CompositeEnv placeholder."
+    },
+    {
+      "name": "focused2",
+      "exit": 143,
+      "note": "Own buffered build stopped while dependency/source batch extended; no success claimed; focused2-stop.txt retained."
+    },
+    {
+      "name": "diagnostic1",
+      "exit": 1,
+      "note": "Direct first-error check validates assignment chunks, then exposes doc-comment placement before include scope. Error-report limit lowered to1 for this diagnostic only; proof limits unchanged."
+    },
+    {
+      "name": "focused3",
+      "exit": 1,
+      "note": "Generalized prefix515s, setup/call17s and all foundations pass; final composition fails only on reserved local identifier prefix."
+    },
+    {
+      "name": "focused4",
+      "exit": 0,
+      "note": "Renamed local prefixRun; final complete594 contract passes179 jobs, new module15s."
+    }
+  ],
+  "limits": {
+    "heartbeats": 200000,
+    "recursion": 512,
+    "lean_workers": 1,
+    "address_space_GiB": 32,
+    "build_cpu": 17,
+    "query_edit_git_cpu": 18,
+    "every_host_command_timing_lock": "shared",
+    "raised": false
+  },
+  "source_changes_after_final_validation": false,
+  "native_make_check": {
+    "run_this_step": false,
+    "reason": "Lean proof/refactor only; no C/runtime/tool changes",
+    "last_complete_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "fresh_final_check_required": true
+  },
+  "remaining": [
+    "actual Numeric-world provider externalCall and first-return9/store/tag continuation",
+    "all98 provider visits, trace/post-memory/native ABI admission",
+    "remaining producer/header/register construction and genuine caller continuation in actual world",
+    "relative cache/materialization world transport",
+    "native physical memory/alias/origin/control",
+    "all-family O1/O2/O4 recount",
+    "remaining M6 and fresh final Lake/make check"
+  ],
+  "complete_ISA_handler_families": 0,
+  "milestones": {
+    "M1_M4": "done",
+    "M5": "open",
+    "M6": "open"
+  }
+}

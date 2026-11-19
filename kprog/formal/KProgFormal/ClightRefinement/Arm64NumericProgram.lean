@@ -31,7 +31,7 @@ def ge : CC.CGenv := program.globalenv
 
 /-- Closed source equalities are checked by the kernel, without repeatedly
 normalizing the large existing handler in tactic unification. -/
-private def sourceEquality : Lean.Elab.Tactic.TacticM Unit := do
+def sourceEquality : Lean.Elab.Tactic.TacticM Unit := do
   let goal ← Lean.Elab.Tactic.getMainGoal
   let target ← Lean.Meta.whnfR (← Lean.instantiateMVars (← goal.getType))
   unless target.isAppOfArity ``Eq 3 do throwError "expected source equality"

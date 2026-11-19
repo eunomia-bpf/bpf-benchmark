@@ -100,6 +100,11 @@ permissions for all 203 definitions, including the real data globals. Its
 actual producer allocation preserves those globals and places every local
 beyond them. The older 189-frontier witness remains distinct; provider traversal
 and caller admission still need transport into this environment.
+The [Numeric producer prefix](results/m5-numeric-producer-prefix/README.md)
+now executes the actual 580-transition initialization in that world and reaches
+the genuine first input call after 594 transitions, using its actual symbol
+binding and Kcall continuation. Both caches remain cold and the original
+204-frontier global frame is retained; provider outcomes remain separate.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 

@@ -91,10 +91,8 @@ layout, with this world's initialized memory and its real producer frame. -/
 theorem producer_entry (ctx continuation : CC.Val) :
     CC.FunctionEntry2 ge Arm64Producer.producer [ctx, continuation] initialMemory
       (Arm64Producer.allocation initialMemory).1 (Arm64Producer.initialTemps ctx continuation)
-      (Arm64Producer.allocation initialMemory).2 := by
-  cases Arm64Producer.entry_valid initialMemory ctx continuation with
-  | intro locals params disjoint allocated bound =>
-    exact .intro locals params disjoint (by simpa only [composites_same] using allocated) bound
+      (Arm64Producer.allocation initialMemory).2 :=
+  Arm64Producer.entry_valid_bound ge composites_same initialMemory ctx continuation
 
 /-- One genuine allocation transition from an already entered producer call.
 Its external input calls and continuation remain later execution obligations. -/
