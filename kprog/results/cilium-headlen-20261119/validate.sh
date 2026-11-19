@@ -9,20 +9,18 @@ exec > "$out/run.log" 2>&1
 finish(){ printf '%s\n' "$?" > "$out/exit-code"; date -u +%FT%TZ > "$out/finished"; }
 trap finish EXIT
 date -u +%FT%TZ > "$out/queued"
-make -n -f kprog/results/b-pointer-difference-20261119/Makefile rebuild > "$out/rebuild-dry-run.log"
 make -n -f kprog/results/cilium-headlen-20261119/Makefile check OUT="$out/fixture" MODE=after > "$out/check-dry-run.log"
 exec 9>/workspaces/.agent-state/kprog-lanes/locks/image
-flock -x 9
+flock -s 9
 git rev-parse HEAD > "$out/source-commit"
 date -u +%FT%TZ > "$out/started"
-taskset -c 19 prlimit --as=4294967296 -- make -f kprog/results/b-pointer-difference-20261119/Makefile rebuild
-flock -s 9
+stat /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds > "$out/compiler-stat"
 taskset -c 19 prlimit --as=4294967296 -- make -f kprog/results/cilium-headlen-20261119/Makefile check OUT="$out/fixture" MODE=after
 taskset -c 19 prlimit --as=4294967296 -- make -f kprog/results/b-pointer-difference-20261119/Makefile test OUT="$out/pointer-fixture" MODE=fixed
 taskset -c 19 prlimit --as=4294967296 -- make -f kprog/results/constant-alu32-20261119/Makefile test OUT="$out/alu32" MODE=fixed
 taskset -c 19 prlimit --as=8589934592 -- make -f kprog/results/b-pointer-difference-20261119/Makefile replay OUT="$out/katran" REQUEST=katran
 date -u +%FT%TZ > "$out/compiler-ready"
-printf -- '- LANE PERF %s: Combined canonical bounds compiler rebuilt; headlen/offset/ALU32 controls and captured Katran B replay pass, raw %s. Stock fixtures/40captured replay/current Cilium follow; no stock/app gain inferred.\n' "$(date -u +%FT%TZ)" "$out" >> /workspaces/.agent-state/kprog-lanes/COORDINATION.md
+printf -- '- LANE PERF %s: Canonical bounds compiler headlen/offset/ALU32 controls and captured Katran B replay pass, raw %s. Stock fixtures/41captured replay/current Cilium follow; no stock/app gain inferred.\n' "$(date -u +%FT%TZ)" "$out" >> /workspaces/.agent-state/kprog-lanes/COORDINATION.md
 make -n -f kprog/results/cilium-headlen-20261119/Makefile stock-probe > "$out/stock-probe-dry-run.log"
 taskset -c 19 make -f kprog/results/cilium-headlen-20261119/Makefile stock-probe
 make -n -f kprog/results/cilium-headlen-20261119/Makefile stock OUT="$out/stock" FIXTURE="$out/fixture/fixture.bpf.o" > "$out/stock-dry-run.log"

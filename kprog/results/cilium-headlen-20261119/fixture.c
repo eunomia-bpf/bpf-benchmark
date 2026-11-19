@@ -63,4 +63,4 @@ SEC("classifier") int stale_store(struct __sk_buff *ctx)
     return n>=42;
 }
 #endif
-char license[] SEC("license") = "GPL";
+char fixture_license[] SEC("license") = "GPL";
