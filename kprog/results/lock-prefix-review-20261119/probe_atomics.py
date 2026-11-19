@@ -15,9 +15,13 @@ for target in ['x86_64-unknown-linux-gnu', 'bpfel']:
     for width in [8, 16, 32, 64]:
         for operation in ['fetch-add', 'compare-exchange']:
             name = f'{target}-{width}-{operation}'
-            command = ['clang-18', '-target', target, '-O3', '-ffreestanding',
+            command = ['clang-18', '-target', target,
+                       '-O1' if target == 'bpfel' else '-O3',
+                       '-ffreestanding', '-fno-crash-diagnostics',
                        '-S', '-DWIDTH=' + str(width), str(source),
                        '-o', str(build / 'atomic.s')]
+            if target == 'bpfel':
+                command.append('-mcpu=v4')
             if operation == 'fetch-add':
                 command.append('-DFETCH_ADD')
             compiled = subprocess.run(command, text=True, capture_output=True)
