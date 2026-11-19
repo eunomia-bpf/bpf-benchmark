@@ -78,13 +78,13 @@ The 6 requests 6, 14, 32, 44, 56, 61 are a separate class, analysed at the end o
 
 PERF's `cdd26e9cd` ("Recognize classifier head-length predicates through simulator memory
 templates") closes all three gaps above. Rebuilt the pass from that commit
-(`clang++-18 … ../x86/packet_bounds_ir.cpp -o /tmp/pbt/pb-new`) and ran it over the same 40 archived
-`trusted_x86.bpf.bounds-input.bc` files:
+(`clang++-18 … ../x86/packet_bounds_ir.cpp -o /tmp/pbt/pb-new`) and ran it over the 40 archived
+`trusted_x86.bpf.bounds-input.bc` files extracted from the success capsules:
 
 | | before | after |
 |---|---|---|
 | requests with `predicates lowered > 0` | 0 / 40 | **40 / 40** |
-| predicates lowered, total | 0 | **235** |
+| predicates lowered, total (these 40 inputs) | 0 | **235** |
 | per-request range | — | 1 (req 3, 7) … 35 (req 15) |
 
 Request 7's emitted B, `classifier` section, before → after:
@@ -160,9 +160,8 @@ included, and declines when a possible write to the `skb` intervenes (private al
 That is the right direction — without it, a rewrite across an `skb` mutation would compare a *re-read*
 `data_end` against a *stale* predicate.
 
-Re-ran the rebuilt pass (`HEAD` = `80dbcfc51`) over the same archived inputs: **235 predicates across all
-41 packet-class requests, every one with at least one** (233 on the 40 success-capsule requests plus
-request 64's 2).
+Re-ran the rebuilt pass (`HEAD` = `80dbcfc51`) over the archived inputs: **in every one of the 41
+packet-class requests at least one predicate is lowered**.
 
 Why that guard is exactly the condition the rewrite needs, stated plainly: the emitted bound re-reads
 `skb->data` and `skb->data_end` at the comparison site, which are *later* reads than the `len`/`data_len`
@@ -200,7 +199,7 @@ the one that counts for the recorded numbers.
 
 Recompiled all 41 patched programs from `HEAD` (`80dbcfc51`, the freshness-guarded matcher) with the
 pipeline's flags: **41 / 41 carry at least one emitted pointer bound in the `classifier` section**, so the
-235 lowerings recorded above survive into bytecode for every request rather than being folded away.
+lowerings recorded above survive into bytecode rather than being folded away.
 
 ## The forty-first program: request 64 (omp 2026-11-19T22:12Z)
 
