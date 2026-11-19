@@ -49,3 +49,21 @@ the earlier LOCK exception is not a substitute. FORMAL's primitive and
 memory observation obligations remain explicit. No source patch or guest
 was started during coordinator batch 327120, whose request-time inputs
 remain those of 3f80b472e.
+
+PERF 2026-11-19T10:22:12Z: e490f5065 extends this regression with eight
+ordinary non-stack reads and four protected-page fault-order cases. Ordinary
+reads must retain the physical value and their existing input visits;
+MOV_LOAD's scalar recovery observation remains distinct from the tagged
+released-byte observation. Protected fixed/indexed STACK-tagged reads must
+fault before invoking the released-value provider. The signal test checks
+user-mode physical access order, not kernel exception delivery or a formal
+fault refinement theorem. The original 48-case/eight-group result stays as
+recorded above; no extended-test pass is claimed yet.
+
+Detached worker 337201 was queued at 10:16:25Z, raw
+/workspaces/kprog-raw/perf/released-alias-20261119/
+reproduce-20261119T101625Z-337201, launcher
+/workspaces/kprog-raw/perf/released-alias-fault-launch-20261119.log. It waits
+on timing SH behind the coordinator's BCC guest; started/exit-code/result
+are pending. Preserve that worker and its committed scripts/fixture until
+it finishes. No request-time input, image, base or benchmark setting changed.
