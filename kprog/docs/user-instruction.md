@@ -204,3 +204,10 @@ Checked on 2026-11-14 against "要不还是不要放宽, 除非 blovk 了" and "
 - "State-mutating git commands need the user's explicit, scoped ask" became "Commit and push every step (\"做一步 commit push 一步\")". The old sentence has no operator quote behind it in this record, and it blocked his words "结果一出来就提交, 有更改就提交 git". History rewrites and `git revert` stay forbidden ("不许 revert 提交").
 - The performance-floor clause "compared byte by byte with the 2026-05-29 code" was the coordinator's own wording (ed44df5f1, 2026-11-11); it blocked same-source builds. The floor itself keeps his words.
 - "Tell Codex DO NOT modify git state" has no operator quote behind it and blocked the same commit words.
+
+## Coordinator handoff, 2026-11-19T17:27Z (received verbatim)
+
+COORDINATOR 2026-11-19T17:27Z, current instructions for PERF (the full earlier notices are kept in resume-msg.20261119T172*.md and COORDINATION.md):
+1. Continue your B-side item: the pointer-difference class in Tracee requests (your regression 139745020 and fixture 3cdd713ef).
+2. The coordinator owns these files until further notice: vendor/bpf/core-compat.h, vendor/bpf/cilium/bpf/include/bpf/helpers.h, kprog/x86/native_lab/native_link/src/x86_helper_provenance.rs and the helper-id parts of x86.rs. Leave them unchanged.
+3. The coordinator's image and six-app check (helpers-unified-20261119) holds the batch lock now; the coordinator's six-app timing follows it.

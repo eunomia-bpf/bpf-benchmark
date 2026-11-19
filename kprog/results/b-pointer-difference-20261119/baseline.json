@@ -1,0 +1,108 @@
+{
+  "cases": [
+    {
+      "scalar": 0,
+      "queue": 0,
+      "expected": 0,
+      "observed": 0
+    },
+    {
+      "scalar": 0,
+      "queue": 1,
+      "expected": 115,
+      "observed": 115
+    },
+    {
+      "scalar": 0,
+      "queue": 2,
+      "expected": 0,
+      "observed": 0
+    },
+    {
+      "scalar": 0,
+      "queue": 3,
+      "expected": 115,
+      "observed": 115
+    },
+    {
+      "scalar": 1,
+      "queue": 0,
+      "expected": 1,
+      "observed": 1
+    },
+    {
+      "scalar": 1,
+      "queue": 1,
+      "expected": 115,
+      "observed": 115
+    },
+    {
+      "scalar": 1,
+      "queue": 2,
+      "expected": 1,
+      "observed": 1
+    },
+    {
+      "scalar": 1,
+      "queue": 3,
+      "expected": 115,
+      "observed": 115
+    },
+    {
+      "scalar": 305419896,
+      "queue": 0,
+      "expected": 305419896,
+      "observed": 305419896
+    },
+    {
+      "scalar": 305419896,
+      "queue": 1,
+      "expected": 115,
+      "observed": 115
+    },
+    {
+      "scalar": 305419896,
+      "queue": 2,
+      "expected": 305419896,
+      "observed": 305419896
+    },
+    {
+      "scalar": 305419896,
+      "queue": 3,
+      "expected": 115,
+      "observed": 115
+    },
+    {
+      "scalar": 4294967295,
+      "queue": 0,
+      "expected": -1,
+      "observed": -1
+    },
+    {
+      "scalar": 4294967295,
+      "queue": 1,
+      "expected": 115,
+      "observed": 115
+    },
+    {
+      "scalar": 4294967295,
+      "queue": 2,
+      "expected": -1,
+      "observed": -1
+    },
+    {
+      "scalar": 4294967295,
+      "queue": 3,
+      "expected": 115,
+      "observed": 115
+    }
+  ],
+  "scope": "Actual B compile/disassembly and native execution of the source fixture; no stock verifier, app coverage or timing result.",
+  "raw": "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/test-20261119T173540Z-151259",
+  "source_commit": "4efe79d40ca7a325e73a120c1361fb0f9c2b9b6a",
+  "exit_code": 0,
+  "b_tag_test_pc": 13,
+  "b_pointer_subtraction_pc": 16,
+  "reproduces_tracee_hoisting": false,
+  "interpretation": "All16 native cases pass. Small B keeps subtraction after tag guard; retained Tracee27/30 remain the actual hoisting reproduction."
+}
