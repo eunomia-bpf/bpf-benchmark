@@ -26,4 +26,4 @@ int guarded_difference(struct xdp_md *ctx)
     return XDP_DROP;
 }
 
-char license[] __attribute__((section("license"), used)) = "GPL";
+char fixture_license[] __attribute__((section("license"), used)) = "GPL";
