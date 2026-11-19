@@ -15,6 +15,7 @@ with tarfile.open(archive) as service:
                       else completion['failure_archive']).name
         with tarfile.open(fileobj=io.BytesIO(service.extractfile('service/requests/'+member).read())) as request:
             facts = json.load(request.extractfile('request/kernel.facts.json'))
+            metadata = json.load(request.extractfile('request/generation.metadata.json'))
             names = request.getnames()
             helper_member = 'request/generated/checked-simulator.helpers.txt'
             helpers = (request.extractfile(helper_member).read().decode().splitlines()
@@ -24,7 +25,8 @@ with tarfile.open(archive) as service:
                 entry=request.extractfile('request/kernel.entry').read().decode().strip(),
                 execution_path=completion.get('execution_path'),
                 imported_helpers=helpers,
-                concrete_arrays=[dict(map) for map in facts['maps']
+                actual_map_shapes=facts['maps'],
+                concrete_arrays=[dict(map) for map in metadata['maps']
                                  if map['map_type'] == 2 and map.get('value_offset') is None],
                 helper_source_member='request/generated/checked-simulator.helpers.c'
                     if 'request/generated/checked-simulator.helpers.c' in names else None))
