@@ -174,7 +174,9 @@ for request in previous['requests']:
                stack_cells=sorted(cells), bytes=width, stack_extent=extent,
                overlapping_accesses=accesses, calls_with_possible_stack_arguments=calls,
                unresolved_memory_aliases=unknown, first_direct_cell_accesses=frontiers,
-               calls_before_first_direct_access=prefix_calls)
+               calls_before_first_direct_access=prefix_calls,
+               unresolved_prefix_aliases=[access for access in unknown if access['pc'] in visited],
+               prefix_stack_arguments=[call for call in calls if call['pc'] in visited])
     rows.append(row)
     (out/'result.json').write_text(json.dumps(dict(requests=rows,
         source_capture=previous['raw'],
