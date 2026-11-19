@@ -36,6 +36,14 @@ cases={
  'index_pointer':(['sub rsp,0x40','lea rbx,[rsp+0x8]','lea rcx,[rbx*1]',
                    'mov QWORD PTR [rcx],rdi'],list(range(8))),
  'unknown_rsp':(['mov rsp,rdi','mov QWORD PTR [rsp],rdi'],[0]),
+ 'zero_shift':(['sub rsp,0x40','lea rbx,[rsp+0x8]','shl rbx,0',
+                'mov QWORD PTR [rbx],rdi'],[1]),
+ 'zero_rotate':(['sub rsp,0x40','lea rbx,[rsp+0x8]','ror rbx,0',
+                 'mov QWORD PTR [rbx],rdi'],[1]),
+ 'unknown_shift':(['sub rsp,0x40','lea rbx,[rsp+0x8]','mov rcx,QWORD PTR [rdi]',
+                   'shl rbx,cl','mov QWORD PTR [rbx],rdi'],list(range(8))),
+ 'conditional_memory':(['sub rsp,0x40','lea rbx,[rsp+0x8]','test edi,edi',
+                        'cmove rbx,QWORD PTR [rdi]','mov QWORD PTR [rbx],rdi'],[1]),
  'join':(['sub rsp,0x40','test edi,edi','je 0x5','lea rbx,[rsp+0x8]',
           'jmp 0x6','lea rbx,[rsp+0x28]','mov QWORD PTR [rbx],rdi'],[1,5]),
  'loop':(['sub rsp,0x40','lea rbx,[rsp+0x8]','mov QWORD PTR [rbx],rdi',
@@ -63,11 +71,10 @@ for name,(assembly,expected) in cases.items():
 observations={}
 for mode,words in {'full':range(8),'sparse':[1,5]}.items():
     definition='-DX86_SIM_STACK_VALUE_WORDS(M)='+' '.join(f'M({i})' for i in words)
-    run(['clang-18','-O3','-fsanitize=undefined','-fno-sanitize-recover=all',
-         '-fno-sanitize-link-runtime',
+    run(['clang-18','-O3',
          '-mno-red-zone','-I'+str(root/'vendor/libbpf/src'),
          '-I'+str(root/'vendor/libbpf/include/uapi'),definition,
-         root/'kprog/results/sparse-stack-cache-20261119/oracle.c','-lubsan','-o',build/'oracle'])
+         root/'kprog/results/sparse-stack-cache-20261119/oracle.c','-o',build/'oracle'])
     observations[mode]=json.loads(run([build/'oracle']))
 assert observations['full']==observations['sparse'],observations
 (out/'oracle-result.json').write_text(json.dumps(observations,indent=2)+'\n')

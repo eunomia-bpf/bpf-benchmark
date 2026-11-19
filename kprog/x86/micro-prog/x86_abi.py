@@ -315,7 +315,8 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None, stac
                 write(args[0], FULL, pointer)
             else:
                 value, pointer = read_memory(args[1], decode.operand_width(args[1], ri(args[0])[1]))
-                write(args[0], value, pointer)
+                pointer = joined_pointer(incoming.aliases[ri(args[0])[0]], pointer)
+                write(args[0], value & mask(incoming, args[0]), pointer)
         elif op.startswith('set') and op in decode.CC_AUX:
             if ri(args[0]):
                 write(args[0])
@@ -427,6 +428,8 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None, stac
                 write(args[0], result, constant=constant)
                 if width == 64 and type(incoming.aliases[reg]) is int and (op in {'inc', 'dec'}):
                     alias[reg] = incoming.aliases[reg] + (1 if op == 'inc' else -1)
+                elif width == 64 and incoming.aliases[reg] is None and op in {'inc', 'dec'}:
+                    alias[reg] = None
             else:
                 store(args[0], width, result)
         elif op in {'add', 'sub', 'adc', 'sbb', 'cmp'}:
@@ -524,6 +527,15 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None, stac
                     else:
                         new |= flags & (ZF | SF | PF | AF)
                     flags = flags & new if count is None else new
+        if op in {'shl','shr','sar','shld','shrd','rol','ror'}:
+            width = ri(args[0])[1] if ri(args[0]) else decode.operand_width(args[0])
+            count = 1 if len(args) == 1 else shift_count(args[-1], width)
+            if width == 64 and (count is None or count == 0):
+                if ri(args[0]):
+                    reg = ri(args[0])[0]
+                    alias[reg] = incoming.aliases[reg] if count == 0 else None
+                elif stack_value_offsets is not None:
+                    stack_value_offsets.add(None)
         # RSP is a private-stack offset even when its concrete value is
         # unknown; it must never justify dropping cache destinations.
         if stack_value_offsets is not None and type(alias[rsp]) is not int:

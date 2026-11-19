@@ -26,14 +26,19 @@ int main(int argc, char **argv)
     struct bpf_program *program = bpf_object__find_program_by_name(object, "guarded_difference");
     if (!program) { fprintf(stderr, "missing fixture program\n"); bpf_object__close(object); return 1; }
     unsigned char packet[64] = {};
+    struct xdp_md context = {};
     struct bpf_test_run_opts run = {};
     run.sz = sizeof(run); run.data_in = packet;
     run.data_size_in = sizeof(packet); run.repeat = 1;
+    run.ctx_out = &context; run.ctx_size_out = sizeof(context);
     result = bpf_prog_test_run_opts(bpf_program__fd(program), &run);
     bpf_object__close(object);
-    if (result || run.retval != 0) {
+    unsigned expected = context.ingress_ifindex - (context.rx_queue_index & 1 ? 8 : 0);
+    if (result || run.retval != expected) {
         fprintf(stderr, "scalar-path TEST_RUN failed: %d, retval %u\n", result, run.retval); return 1;
     }
-    puts("{\"stock_accepted\":true,\"scalar_test_run_retval\":0,\"scope\":\"Focused B fixture only; no application coverage or timing\"}");
+    printf("{\"stock_accepted\":true,\"test_run_retval\":%u,\"ingress_ifindex\":%u,"
+           "\"rx_queue_index\":%u,\"scope\":\"Focused B fixture only; no application coverage or timing\"}\n",
+           run.retval,context.ingress_ifindex,context.rx_queue_index);
     return 0;
 }
