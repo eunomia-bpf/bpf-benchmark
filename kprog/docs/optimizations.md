@@ -1129,3 +1129,10 @@ subtraction precedes the tag test. This supersedes earlier alias-offset
 guesses for these PCs. Request28's536Bframe is confirmed at entry. No
 B source fix, fresh compiler pass, new guest or gain claimed. Raw and
 compact windows: tracee-live-failures-20261119.
+
+PERF 2026-11-19T17:08:12Z: B-only pointer-difference regression139745020 is queued
+as117270 under timing SH/image SH, preserving the value/tag path correlation
+and using the actual production backend. It will record16native controls
+and emitted B before any lowering change. No stock-B pass, actual
+reproduction from this small case, production change or speed claim yet.
+See b-pointer-difference-20261119; retained Tracee is the rejection evidence.
