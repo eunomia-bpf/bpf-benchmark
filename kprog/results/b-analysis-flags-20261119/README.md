@@ -92,3 +92,19 @@ alone does not solve this request. The production O1/g policy and limits
 stay unchanged; no further relaxed-limit replay was run. Stock verification
 and checked-native installation were not reached. See post-contract-result.json;
 all raw remains at /workspaces/kprog-raw/perf/b-analysis-flags-20261119/resume-20261119T074139Z-227467. Worker227467 and its leases are terminal.
+
+OMP 2026-11-19T19:05Z: The full-size stock verification the O1 decision owed is
+now recorded, from the checked corpus runs rather than from a synthetic object.
+18 verified requests were installed with `b_stock_passed=true` after
+`be3946f6d`: 14 Cilium (`/workspaces/kprog-raw/verified/20261119-checked-cilium/`,
+each B's preprocessed `.i` 3.58-3.89 MiB), 3 OTel
+(`/workspaces/kprog-raw/verified/20261119-checked-otel2/`, 3.72-4.53 MiB) and 1
+Katran (`/workspaces/kprog-raw/verified/20261119-checked-katran2/`, 4.71 MiB).
+Each of the 18 has `request/checked-simulator-verification.json` with
+`phase=verify, status=0`, i.e. the stock verifier accepted the whole B and
+`BPF_PROG_LOAD` returned a program id, so B opens in libbpf and verifies at
+sizes two orders of magnitude past the minimal object that established the g
+requirement. The compiler command line inside those archives is
+`clang -w -g -O1` (B) and `llc-18 -O1` (native), so the level under test is the
+production one. The limit that O1 still does not close is the separate one above:
+Tetragon's 5,776-byte direct R10 displacement against the stock 512-byte bound.
