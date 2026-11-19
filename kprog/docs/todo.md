@@ -9,6 +9,13 @@
 ## 0. Lane 目标与待办
 
 - [ ] P-B-pointer-integer-difference (PERF live Tracee 2026-11-19):
+  Latest: 4efe79d40 anchors exact i64 ptrtoint-pair subtraction in B only.
+  Validation155130 completed0: all16native cases, four selection/exclusion
+  controls and existing ALU32 controls pass. Retained27 now tests tag4 at
+  PC966 before subtraction970 (old959sub before962test);15sites anchored.
+  Receipt f969fb46e, results/b-pointer-difference-20261119/fixed-result.json.
+  Stock fixture and retained30 replay worker186985 are queued behind the
+  coordinator batch, not yet run; no stock/app coverage or timing claim.
   request27 sys_dup_exit_tail and request30 generate B but stock rejects
   scalar-minus-stack-pointer arithmetic (insns959/27607). Request28 also
   has a separate536-byte frame. Operator instruction restored direct-native

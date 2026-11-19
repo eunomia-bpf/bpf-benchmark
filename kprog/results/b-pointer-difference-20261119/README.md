@@ -51,3 +51,12 @@ fixture still is not the original hoist reproduction. These are B
 control-flow and host semantic results; stock acceptance remains to be
 measured. fixed-result.json records commands and raw paths, and
 fixed-tracee27-excerpt.txt contains the mapped disassembly.
+
+PERF 2026-11-19T17:57:15Z: Confirmation worker186985 is detached and queued
+on batch EX, then timing SH/image SH, behind the coordinator image/check.
+Raw: /workspaces/kprog-raw/perf/b-pointer-difference-20261119/confirm-20261119T175715Z-186985.
+c805cb4ec adds the stock fixture load/scalar TEST_RUN and retained30 backend
+replay; abd9bea3e exposes the sole probe read-only inside virtme's fresh
+temporary directory. No production input is changed. No guest or stock
+result has run at this checkpoint. The fixture's scalar TEST_RUN uses the
+kernel's default XDP context; the16native controls are separate evidence.
