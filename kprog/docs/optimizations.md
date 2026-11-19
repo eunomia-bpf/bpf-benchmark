@@ -969,3 +969,12 @@ by canonical BCC run115036_062366:25/25/25/25 checked, zero fallback/failures,
 all five TP call sites corrected, and raw_tp selected for block_rq_complete
 from its original aux. Installed8,628native/7,965JITB. Positive-FD class
 closed; source-ID-zero and map operations remain open. No new speed ratio.
+
+PERF 2026-11-19T12:02:02Z: Hash-family update/delete binding is implemented
+in the loader: existing real map FDs supply actual callback targets to the
+existing map_ops plan. Four hash families are supported by the sole kernel's
+non-null callbacks; aliases share one query per map ID. Other map types are
+unchanged. Canonical loader build and two existing linker provenance tests
+pass. Installed callbacks, app coverage and per-call/throughput remain pending;
+no runtime gain or body/helper/map share is inferred. No new runtime check,
+module API, flag or helper body. See results/checked-hash-ops-20261119.

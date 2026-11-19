@@ -2277,6 +2277,20 @@ struct CompanionLoad {
     std::unordered_map<uint32_t, NativeLinkArgs::MapOps> map_ops;
 };
 
+void add_hash_map_ops(CompanionLoad &load, const MapMeta &meta, int map_fd)
+{
+    if (meta.type != BPF_MAP_TYPE_HASH && meta.type != BPF_MAP_TYPE_PERCPU_HASH &&
+        meta.type != BPF_MAP_TYPE_LRU_HASH && meta.type != BPF_MAP_TYPE_LRU_PERCPU_HASH)
+        return;
+    auto [entry, inserted] = load.map_ops.try_emplace(meta.kernel_id);
+    if (!inserted) return;
+    const std::string root = kNativeLabTarget.debugfs_dir;
+    entry->second.update = lookup_native_lab_ptr_by_fd(map_fd,
+        (root + "/map_update_elem").c_str(), "map_update_elem");
+    entry->second.remove = lookup_native_lab_ptr_by_fd(map_fd,
+        (root + "/map_delete_elem").c_str(), "map_delete_elem");
+}
+
 void add_exact_map_meta(CompanionLoad &load, const MapMeta &meta)
 {
     const std::string truncated = bpf_obj_name_truncation(meta.name);
@@ -3052,6 +3066,7 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
         MapMeta meta = load_map_meta_from_fd(map_fd);
         add_map_meta(out, meta);
         add_exact_map_meta(out, meta);
+        add_hash_map_ops(out, meta, map_fd);
         close(map_fd);
     }
     const auto map_ptr_end = std::chrono::steady_clock::now();
@@ -3999,6 +4014,7 @@ native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOpti
         const auto map = load_map_meta_from_fd(fd->get());
         add_map_meta(companion, map);
         add_map_symbol_alias_meta(companion, binding.native_symbol, map);
+        add_hash_map_ops(companion, map, fd->get());
         if (binding.value_offset) {
             if (!map.value_addr || *binding.value_offset >= map.value_size)
                 fail("trusted direct map value exceeds the original map");
