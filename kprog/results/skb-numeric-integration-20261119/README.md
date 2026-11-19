@@ -29,3 +29,17 @@ PERF 2026-11-19T14:00:51Z: Committed827e0c601/07df70aea; worker422533 queued at
 Launcher: /workspaces/kprog-raw/perf/skb-numeric-integration-launch-20261119.log.
 No compilation or execution result yet. The existing Tracee batch owns the
 image and timing window; its production inputs remain unchanged.
+
+PERF 2026-11-19T15:42:36Z: While worker422533 is still unstarted (only queued/run.log
+exist), the fixture now adds direct C loads for data, data_end and mark.
+The same classifier section, sole physical buffers and compiler stages
+exercise12 control cases alongside the original28 shared-macro cases,
+40 total. The existing context pass explicitly widens complete packet
+pointer loads, including their integer zero extensions, so data/end controls
+expect physical64-bit values rather than truncated public32-bit fields.
+These controls leave the context root visible without memoryAsm's opaque
+base barrier. If controls pass but shared cases fail, inspect the retained
+IR root chains before choosing a repair. If both fail, the experiment has
+not isolated that barrier. No production source, queued launcher, compiler
+flag, layout or active Tracee input changed. Actual host execution remains
+pending on timing SH; this is a regression improvement, not a test pass.

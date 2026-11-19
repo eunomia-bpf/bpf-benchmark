@@ -20,3 +20,11 @@ unsigned long mark_value(struct __sk_buff *ctx)
 {
     return X86_SIM_L_SKB_FIELD(ctx, mark);
 }
+
+/* Keep a public-context root visible without the shared field asm. */
+#define DIRECT_FIELD(NAME, FIELD) \
+__attribute__((section("classifier"))) \
+unsigned long NAME(struct __sk_buff *ctx) { return ctx->FIELD; }
+DIRECT_FIELD(data_direct, data)
+DIRECT_FIELD(end_direct, data_end)
+DIRECT_FIELD(mark_direct, mark)

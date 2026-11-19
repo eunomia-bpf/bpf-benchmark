@@ -1093,3 +1093,10 @@ declares288B arena/36 ghost cells. This is a stage-location observation,
 not a new rejection, hang verdict or cache-fanout causality claim. All three
 diagnostics remain queued, preserving the active batch. See
 tracee-live-failures-20261119. No runtime/source/flag change or gain.
+
+PERF 2026-11-19T15:42:36Z: Pending SKB phase-1 integration now includes12 direct-C
+field controls alongside28 real shared-macro cases. This distinguishes
+layout/root conversion from generic memoryAsm's opaque barrier using the
+same physical buffers and compiler stages. Worker422533 is still unstarted;
+no duplicate job or production source change, host pass or runtime gain.
+See skb-numeric-integration-20261119.

@@ -33,7 +33,8 @@ run([tools/'context-lower', out/'native.bc', '--public-layout', public,
 run(['clang-18', '-O3', '-mno-red-zone', '-mgeneral-regs-only', '-shared', '-fPIC',
      out/'context.bc', '-o', out/'execute.so'])
 library = ctypes.CDLL(str(out/'execute.so'))
-for name in ['data_value', 'end_value', 'mark_value', 'data_lane', 'end_lane']:
+for name in ['data_value', 'end_value', 'mark_value', 'data_lane', 'end_lane',
+             'data_direct', 'end_direct', 'mark_direct']:
     function = getattr(library, name)
     function.restype = ctypes.c_ulong
     function.argtypes = [ctypes.c_void_p] + ([ctypes.c_uint] if name.endswith('_lane') else [])
@@ -45,7 +46,8 @@ for value in [0, 1, 0x123456789abcdef0, 0xffff888012345678]:
         rule = rules[field]
         ctypes.memmove(ctypes.addressof(context)+rule['offset'],
                        bits.to_bytes(rule['width'], 'little'), rule['width'])
-    for name, expected in [('data_value', value), ('end_value', end), ('mark_value', 0x12345678)]:
+    for name, expected in [('data_value', value), ('end_value', end), ('mark_value', 0x12345678),
+                           ('data_direct', value), ('end_direct', end), ('mark_direct', 0x12345678)]:
         rows.append(dict(function=name, value=value, expected=expected,
                          observed=getattr(library, name)(context)))
     for name, bits in [('data_lane', value), ('end_lane', end)]:
