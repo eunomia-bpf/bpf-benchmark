@@ -161,3 +161,29 @@ Why that guard is exactly the condition the rewrite needs, stated plainly: the e
 captures the original guard used. The two forms agree only while the `skb` is unchanged between them, so
 the freshness walk is not extra caution — it is the proof that "no intervening write" makes
 `len - data_len` and `data_end - data` the same value at both sites.
+
+## The added bound is sufficient on a real kernel (omp 2026-11-19T21:56Z)
+
+The host runs `7.3.0-070300rc3-generic` with `CAP_BPF`, so the verifier can be asked directly. Two
+`classifier` programs, differing in exactly one thing — whether the pointer bound is present:
+
+```
+           # with bound                          # without bound (control)
+ 6: if w3 < 0x2a goto …                6: if w3 < 0x2a goto …
+ 7: r3 = r1                            7: r1 = *(s8 *)(r1 + 0x28)
+ 8: r3 += 0x2a                         8: r0 = *(s8 *)(r1 + 0x17)
+ 9: if r3 > r2 goto …                     → REJECT:
+10: r2 = *(s8 *)(r1 + 0x28)                invalid access to packet, off=40 size=1,
+11: r0 = *(s8 *)(r1 + 0x17)                R1(id=0,off=40,r=0)
+    → ACCEPT                                R1 min value is outside of the allowed memory range
+```
+
+The control reproduces the exact failure the 40 Cilium requests hit (`off=<N> … r=0`, "outside of the
+allowed memory range"), and the bound-only difference makes the same reads verify. That establishes the
+emitted form is *sufficient*; the per-program case is still settled only by the guest, because each
+program's paths decide whether the freshness guard lets a given predicate be lowered.
+
+Caveat, stated because it bounds the claim: this is the host kernel
+(`7.3.0-070300rc3-generic`), not the image's `7.0.0-rc2+`. The rule used
+(`check_ptr_to_btf_access`/`check_mem_access` packet bounds) is stable across them, and the guest run is
+the one that counts for the recorded numbers.
