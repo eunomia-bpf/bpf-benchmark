@@ -21,37 +21,5 @@ int main(int argc,char **argv) {
         errs()<<" fresh="<<current_headlen(source,read)<<'\n';
       }
     }
-    // Show the first blocking instruction on each reverse predecessor path.
-    for (unsigned index=1;index<reads.size();++index) {
-      auto *read=reads[index];auto *source=reads[index-1];
-      SmallVector<std::pair<BasicBlock *,Instruction *>,16> pending{{read->getParent(),read}};
-      SmallPtrSet<BasicBlock *,32> visited;
-      while (!pending.empty()) {
-        auto [block,limit]=pending.pop_back_val();
-        if (!limit && !visited.insert(block).second) continue;
-        auto it=limit?limit->getIterator():block->end();bool stopped=false;
-        while (it!=block->begin()) {
-          auto &instruction=*--it;
-          if (&instruction==source) { stopped=true;break; }
-          if (!instruction.mayWriteToMemory()) continue;
-          if (auto *store=dyn_cast<StoreInst>(&instruction))
-            if (isa<AllocaInst>(getUnderlyingObject(store->getPointerOperand()))) continue;
-          if (auto *call=dyn_cast<CallBase>(&instruction)) {
-            if (call->onlyReadsMemory() || kernel_context_cast(call)) continue;
-            if (auto *assembly=dyn_cast<InlineAsm>(call->getCalledOperand())) {
-              auto text=assembly->getAsmString();
-              if (tied_identity(call,assembly) || skb_cb_store(call,assembly) ||
-                  (text=="$0 = $0" && assembly->getConstraintString()=="=w,0") ||
-                  (assembly->getConstraintString()=="=r,r,i,~{memory}" &&
-                   (text=="$0 = *(u8 *)($1 + $2)" || text=="$0 = *(u16 *)($1 + $2)" ||
-                    text=="$0 = *(u32 *)($1 + $2)" || text=="$0 = *(u64 *)($1 + $2)"))) continue;
-            }
-          }
-          errs()<<"BLOCKING "<<*read<<" BY "<<instruction<<'\n';
-          stopped=true;break;
-        }
-        if (!stopped) for (auto *parent:predecessors(block)) pending.emplace_back(parent,nullptr);
-      }
-    }
   }
 }
