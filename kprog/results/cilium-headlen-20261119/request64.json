@@ -18,7 +18,7 @@
   "terminal_stderr": "trusted-native-loader: arm kernel native image: No such file or directory\n",
   "source_trace": {
     "loader": "kprog/libnativeloader/src/native_loader.cpp:4126",
-    "module": "kprog/stock-path/module/kprog_stock.c:96",
+    "module": "kprog/stock-path/module/kprog_stock.c:91",
     "lookup": "kprog/stock-path/module/native_lab_trusted.h:333",
     "meaning": "Image-arming ioctl returned ENOENT from active capsule lookup; active absent, abandoned, or request ID mismatch. This does not report a missing image file. The actual branch is not distinguished by this archive."
   },
