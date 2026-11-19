@@ -283,3 +283,58 @@ That level change is not neutral for the artifact. B is analyzed and never execu
 28 larger at `-O1`, 6 smaller — 15,253 instructions at `-O1` against 13,624 at `-O3`, **+12.0%**, worst
 `packet_record_bounds_window` 453 vs 325 (**+39.4%**). The extra size lands on the B the verifier analyzes;
 it is not a claim about the timed native code.
+
+## Cilium (cilium/agent)
+
+Run `x86_kvm_corpus_20261119_170933_095060`, 1 sample × 10 s, stats on, `SKIP_REJIT=norejit`. Raw
+`/workspaces/kprog-raw/verified/20261119-checked-cilium/` (started 17:07:42Z, finished 17:20:00Z, exit
+code 0), session `session-i6twz_f2`. **64 requests: 14 verified and installed, 49 direct-native, 1 hard
+failure.** Every request carries `execution_mode=checked-sim-c`; the 49 fallbacks each hold their own
+`simulator-failure.json` plus a `load-direct.*` pair, so none is silent.
+
+The shim side agrees with the journal: `cilium__agent.post_rejit.log` records **63 `native-loader
+replaced`** (14 verified + 49 direct-native) and **0 `native-loader failed`**, against 100 `jit` in the
+baseline arm and 159 in the post arm. The one request that failed never reached an install, which is why
+63 replaces match 63 `status=0` journal lines.
+
+- **14 verified and installed** (`execution_path=checked-sim-c`, `b_generated=true`,
+  `b_stock_passed=true`, `status=0`): requests 1, 2, 4, 5, 8, 13, 30, 34, 39, 46, 51, 52, 54, 62.
+  **14 distinct native bodies**, 352,024 B total, 13,656 B to 34,208 B each. Twelve resolve to a name in
+  the run's own result file: `cil_xdp_entry`, `cil_to_host` (3), `cil_host_policy` (2), `cil_lxc_policy`
+  (two spelling lengths), `tail_drop_notif` (4). Two (requests 30, 62) report a `prog_id` the arm's
+  snapshot does not carry, and their archives record only ids, so their names are not claimed here.
+- **49 direct-native**: 46 stopped by the stock verifier, 3 by the emitter before B existed. Ten of the
+  49 also have no name in the result file, for the same snapshot reason.
+- **1 hard failure**: request 64 (`tail_nodeport_nat_egress_ipv4`, `source_prog_id=622`), `status=-5`.
+  Its generation failed verification first (`invalid access to packet, off=18 size=2, R6(id=0,off=18,r=0)`)
+  and the fallback `load-direct` then could not find its arm image
+  (`trusted-native-loader: arm kernel native image: No such file or directory`), so neither path completed.
+
+The 46 verifier rejections are one class, in two forms — the subject is the native body, not the app:
+
+| requests | verifier's last line |
+|---|---|
+| 40 | `invalid access to packet, off=<N> size=<S>, R<r>(id=0,off=<N>,r=0)` then `R<r> offset is outside of the packet` |
+| 6 | `only read is supported` (a store through a `trusted_ptr_sk_buff` + offset) |
+
+Both forms say the same thing about the emitter: the native body reads or writes the packet at a fixed
+offset without the bounds check the verifier wants. Request 7 is the smallest instance — 22 instructions in,
+`22: (61) r1 = *(u32 *)(r1 +76)` makes `R1=pkt(r=0)`, then `23: (69) r2 = *(u16 *)(r1 +20)` is rejected at
+`off=20`. Request 6 is the store form: `65: (bf) r2 = r0` / `66: (07) r2 += 46` / `67: (6b) *(u16 *)(r2 +0) = r1`
+over `R0=trusted_ptr_sk_buff()`. The offsets recur in families (`off=12`, `18`, `20`, `23`, `26`, `4`),
+i.e. structural fields of the packet parsers, not one bad constant.
+
+The 3 generation failures (requests 22, 40, 58, all `tail_handle_snat*`) stop in the same place:
+`relative table computation has live register or flag results`
+(`generate_micro_sim_proofs.py:1852`, `lower_relative_tables`) — the emitter will not lower a relative
+table while a register or the flags still hold a live value across it.
+
+### Equal work
+
+The two arms do not hold the same program set (baseline 55 programs, post 51; `cil_from_netdev` appears
+only in the baseline), so this run is not a timing comparison. Totals: baseline 7,633,169 runs /
+7.542 s of BPF, post 40,748,428 runs / 4.128 s. The run counts differ because the post arm's window opens
+after the load phase, which spent 12 minutes generating and checking B. The one program with large counts
+in both arms is `cil_from_container`: 7.63 M runs at 988.0 ns/run baseline against 20.37 M at 157.2 ns/run
+native — a different measurement window over a different program set, so not a ratio either. This section
+reports the verified path, not a speedup.
