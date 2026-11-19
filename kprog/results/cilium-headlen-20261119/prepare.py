@@ -5,7 +5,6 @@ import subprocess
 import sys
 import tarfile
 
-root = Path('/workspaces/repository')
 out = Path(sys.argv[1]); out.mkdir(parents=True, exist_ok=True)
 source = Path('/workspaces/kprog-raw/verified/20261119-checked-cilium/service.tar.gz')
 previous = json.loads(Path(sys.argv[2]).read_text()) if len(sys.argv) == 3 else None

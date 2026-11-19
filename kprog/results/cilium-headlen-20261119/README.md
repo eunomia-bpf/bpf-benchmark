@@ -1,6 +1,6 @@
 # Cilium head-length bounds
 
-PERF 2026-11-19T21:07:34Z. This is the phase-1 compiler repair for the 40 archived
+PERF 2026-11-19T21:07:34Z. This is the phase-1 compiler repair for the 41 archived
 Cilium `invalid access to packet` requests identified in
 [the measured handoff](../cilium-packet-bounds-20261119/README.md).
 The six trusted-sk_buff store failures and three live-table generation failures
@@ -32,7 +32,7 @@ these are not candidate B or stock-verifier results.
 
 The committed `validate.sh` runs under image EX only for the one canonical
 compiler replacement, then image SH for controls, captured Katran replay,
-five stock fixture loads/four TEST_RUN cases, all 40 captured frontend-to-B
+five stock fixture loads/four TEST_RUN cases, all 41 captured frontend-to-B
 replays, and the existing fresh Cilium checked-corpus entry. Functional guests
 use CPUs18-19, without the timing lock. Host replays use CPUs8-11 with four
 workers, each inheriting an 8GiB address-space limit. All LTO pieces and the
@@ -70,3 +70,36 @@ OMP's later independent replay, recorded in `f660709bb`, covers final
 predicates left unchanged. This supersedes235 as the reported final-source
 lowering count; canonical worker303179 and actual stock acceptance remain
 pending at 2026-11-19T21:27:36Z. The independent count is compiler evidence only.
+
+PERF 2026-11-19T21:41:43Z: request64 extends the packet class to41. Its failure capsule
+retains generated B and the rejected two-byte packet read at offset18.
+`prepare.py` now reads the service journal's success **and failure** capsules;
+selection comes from their inner verifier errors, not the outer completion
+status. Retained index `/workspaces/kprog-raw/perf/cilium-headlen-20261119/inputs-41/inputs.json` has41requests,
+reuses every original40frontend path, and adds request64 only. The original
+40-input index and raw data remain unchanged. The queued `replay` make target
+now takes this explicit index; validator303179 and its shell recipe remain
+in place, with no cancellation, new compiler, or new guest.
+
+`capsule-coverage.json` corrects the journal-only reading in the historical
+receipt:14stock passes +41packet rejects +6store rejects +3generation
+failures =64. Packet requests comprise40working direct-native fallbacks and
+one hard failure (64); the49working direct-native paths also include the
+six store and three generation failures. Outer journal fields remain as
+recorded, including request64's missing B fields; the capsule proves its B
+exists. This adds failure detail without inventing a stock pass.
+
+The second request64 failure needs precise interpretation. Its log says
+`arm kernel native image: No such file or directory`; this is the **arming
+ioctl**, not a file-open error. `native_lab_store_chunk` calls
+`native_lab_active_capsule` before allocating the image. That lookup returns
+ENOENT when the active job is absent, abandoned, or has another request ID.
+The archive does not distinguish those branches, so it does not establish a
+missing image file. The binding failure remains open independently of packet
+verification. `request64.json` records the original errors and source trace.
+No loader/module/kernel change was made.
+
+OMP reports2lowerings/3emitted bounds for request64 in addition to233lowerings
+across the earlier40. Canonical41-request B/stock acceptance still awaits the
+queued worker. The host7.3control is supporting evidence; it is not the
+workspace7.0guest verdict. AllLTO/appflags/settings remain unchanged.

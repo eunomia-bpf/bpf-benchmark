@@ -59,6 +59,13 @@
   this is no new rejection or causal attribution. Diagnostics still wait.
 
 - [ ] P-B-cilium-headlen (PERF handoff 2026-11-19T20:22:55Z, OMP639663a85):
+  PERF 2026-11-19T21:41:43Z: scope correctedto41 frominnercapsules: request64generatedB
+  rejectspacketoff18 thennativearmingioctlENOENT. ef975f9b2 retains64and
+  reusesold40paths; queuedreplaytargettakesinputs-41/inputs.json without
+  cancelling303179. Capsuleaccounting14stock/41packet/6store/3generation.
+  ENOENTcomesfromactivecapsulelookup(absent/abandoned/idmismatch), NOTa
+  demonstratedmissingimagefile. Actualbranch/nativebindingremainsopen;
+  current41B/stockconfirmationstillpending. See request64.json/capsule-coverage.json.
   PERF 2026-11-19T21:12:20Z: historicaljournal reconciled:14stockpasses with14verify0
   receipts,40packet/6store/3generation/1other.22/40/58 aredirect-native,
   generatedfalse/stockfalse despitepeerverifiedclass. Historicalcoverage.json

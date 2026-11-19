@@ -1,0 +1,27 @@
+{
+  "recorded": "2026-11-19T21:41:43Z",
+  "source_archive": "/workspaces/kprog-raw/verified/20261119-checked-cilium/service.tar.gz",
+  "request": {
+    "request": 64,
+    "source_prog_id": 622,
+    "capsule": "64.failure.tar.gz",
+    "journal_status": -5,
+    "error": "Command '['/workspaces/kprog-raw/verified/20261119-checked-cilium/loader-inputs/trusted-native-loader', 'verify', '4', '64', '622', '/workspaces/kprog-raw/verified/20261119-checked-cilium/state/session-i6twz_f2/requests/request-5unb179y/generated/request.native.o', 'tail_nodeport_nat_egress_ipv4', '/workspaces/kprog-raw/verified/20261119-checked-cilium/state/session-i6twz_f2/requests/request-5unb179y/generated/trusted_x86.proof.o', '/workspaces/kprog-raw/verified/20261119-checked-cilium/state/session-i6twz_f2/requests/request-5unb179y/generated/trusted_x86.bpf.o', 'trusted_x86_x86_sim_xdp', '/workspaces/repository/kprog/x86/native_lab/native_link/target/release/native-link', '0', '0', '0', '0', '0', '0', 'cilium_devices', '165', 'null', 'cilium_signals', '139', 'null', 'cilium_snat_v4_alloc_retries', '140', 'null', 'cilium_ipv4_frag_datagrams', '138', 'null', 'cilium_snat_v4_external', '135', 'null', 'cilium_calls', '299', 'null', 'cilium_metrics', '109', 'null']' returned non-zero exit status 2.",
+    "frontend": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/inputs-41/64/trusted_x86.bpf.bounds-input.bc"
+  },
+  "original_packet_rejection": [
+    "invalid access to packet, off=18 size=2, R6(id=0,off=18,r=0)",
+    "R6 offset is outside of the packet"
+  ],
+  "capsule_b_generated": true,
+  "journal_status": -5,
+  "terminal_stderr": "trusted-native-loader: arm kernel native image: No such file or directory\n",
+  "source_trace": {
+    "loader": "kprog/libnativeloader/src/native_loader.cpp:4126",
+    "module": "kprog/stock-path/module/kprog_stock.c:96",
+    "lookup": "kprog/stock-path/module/native_lab_trusted.h:333",
+    "meaning": "Image-arming ioctl returned ENOENT from active capsule lookup; active absent, abandoned, or request ID mismatch. This does not report a missing image file. The actual branch is not distinguished by this archive."
+  },
+  "replay_index": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/inputs-41/inputs.json",
+  "scope": "Archived failures and source trace; no new compiler, stock, native load or performance result."
+}

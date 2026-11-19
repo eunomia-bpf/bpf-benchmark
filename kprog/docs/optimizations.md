@@ -1436,3 +1436,12 @@ instructions, using provisional graph onlyfordispatch edges. Actualsame
 three readbacks/upper24dead results/no unresolvedprefixaliases persist;
 final memory-result.json/raworiginal-20261119T212852Z. Fivehelper memory
 boundaries remain explicit; productionguardunchanged/no B orstockgain.
+
+PERF 2026-11-19T21:41:43Z: ef975f9b2 correctsheadlen subsetto41 byreadinginnerfailure
+capsules, including64'sgeneratedB packetoff18reject. Existing40frontend
+pathsreused, only64added; queued303179replaytargettakesexplicit41index,
+no cancellation/rebuild/guest. Capsulecoverage14stock/41packet/6store/3gen.
+Secondary64armioctlENOENT tracesactivecapsulelookup, notmissingimagefile;
+actualabsence/abandon/idmismatch branchunresolved. No productionchange or
+runtimegain; allLTO/flags/settings unchanged. Evidence request64.json and
+capsule-coverage.json; originalraw/historyretained.
