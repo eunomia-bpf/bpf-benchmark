@@ -5,6 +5,9 @@ out=/workspaces/kprog-raw/perf/native-private-stack-20261119/candidate-$(date -u
 install -d "$out"
 printf '%s\n' "$out" > /workspaces/kprog-raw/perf/native-private-stack-20261119/latest-candidate
 exec > "$out/run.log" 2>&1
+exec 7>/workspaces/.agent-state/kprog-lanes/locks/batch
+printf '%s waiting for batch EX\n' "$(date -u +%FT%TZ)" > "$out/progress.txt"
+flock -x 7
 exec 8>/workspaces/.agent-state/kprog-lanes/locks/timing
 flock -s 8
 exec 9>/workspaces/.agent-state/kprog-lanes/locks/image
