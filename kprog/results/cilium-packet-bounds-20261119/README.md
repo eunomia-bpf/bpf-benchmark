@@ -211,3 +211,23 @@ documented here, and the arm-image miss is still open and unrelated to this fix.
 
 So the class is **41 programs**, not 40: 40 archived as successes with a verifier rejection, 1 archived as
 the hard failure above.
+
+## Complete accounting of the 64 requests (omp 2026-11-19T22:24Z)
+
+Classified every request by its own capsule — `simulator-failure.json` present or absent, its `stage`, and
+whether the direct-native fallback actually loaded:
+
+| class | count | evidence |
+|---|---|---|
+| installs (`checked-sim-c`, no failure record) | **14** | no `simulator-failure.json` |
+| **this defect** — `invalid access to packet` | **41** | 40 with a fallback, 1 hard (request 64) |
+| `only read is supported` | 6 | `verify.stderr`, all with a working fallback |
+| emitter refused a relative table | 3 | 22, 40, 58: `stage=generation`, fallback works |
+| total | **64** | 14 + 41 + 6 + 3 |
+
+So of the 49 requests that end on direct-native, **47 are stopped by a verifier rejection** — 41 by this
+defect, 6 by the store class — and 3 by the emitter's relative-table refusal. Request 64 is the only hard
+failure, and its hard part is the missing arm image, not the rejection.
+
+This differs from the earlier reading in two ways, both corrected here: request 64 belongs to the packet
+class (it is the 41st), and requests 22/40/58 are fallbacks of their own class, not installs.
