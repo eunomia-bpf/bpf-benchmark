@@ -432,7 +432,7 @@ Both classes are the emitter's: the first adds an unbounded register to a frame 
 through a register the verifier still treats as a plain scalar. Neither is a missing capability of the
 checked path — the same requests are recorded as fallbacks with their own `simulator-failure.json`, exactly
 as the other apps' do.
-### Cilium re-run with the head-length matcher fix (omp 2026-11-19T23:05Z)
+### Cilium re-run with the head-length matcher fix (omp 2026-11-19T22:22Z, commit cd904f5a8)
 
 After PERF landed the `classifier` head-length matcher (`cdd26e9cd` … `80dbcfc51`), Cilium was run again
 through the same checked path with that compiler installed into the service base: raw

@@ -72,7 +72,7 @@
   Earlier303179 ended2 at duplicate license-symbol emission;351151 passed
   IR/B controls then ended2 at stock head_ge reload/read14/15 packetoff23.
   See results/cilium-headlen-20261119/validation-history.json and retained raw.
-  OMP 2026-11-19T23:08Z: ran Cilium end to end with the fixed compiler installed
+  OMP 2026-11-19T22:22Z (commit 1b91b12d6): ran Cilium end to end with the fixed compiler installed
   (/workspaces/kprog-raw/verified/omp-cilium-20261119/postfix-20261119T214810Z, exit 0,
   64 requests): still 14 install / 41 packet / 6 store / 3 emitter. The matcher lowers
   all 41 (235 predicates) but the emitted bound sits on a different skb->data load than

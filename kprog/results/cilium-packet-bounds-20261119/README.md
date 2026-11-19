@@ -297,7 +297,7 @@ base register. So the bound that matters is the one on the load the *read* uses,
 happened to match: bounding the matched load once can never be enough for this class. That is exactly why a
 correct predicate lowering left the install count at 14.
 
-### Both candidate fixes are verifier-accepted (omp 2026-11-19T23:28Z)
+### Both candidate fixes are verifier-accepted (omp 2026-11-19T22:31Z, commit 238c643fc)
 
 Measured on the host kernel, so the choice between them is PERF's on cost, not on correctness:
 
