@@ -23,3 +23,9 @@ open KProgFormal.ClightRefinement.Arm64ProgramEntryExpressions
 #print axioms bound_address
 #check allocated_local
 #print axioms allocated_local
+
+#check temporary_types
+#print axioms temporary_types
+#check temporary_names_distinct
+#print axioms temporary_names_distinct
+#eval initialization.map List.length

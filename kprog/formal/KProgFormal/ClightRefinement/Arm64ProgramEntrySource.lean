@@ -18,6 +18,26 @@ def sourceType : CC.Ty → CC.Ty
       .Tunion (if id = Arm64Entry.__2856 then Arm64ProgramFixture.__5185 else id) attr
   | ty => ty
 
+/-- Initialization omits the consumer-only return temporary. -/
+def initializationTemps : List (CC.Ident × CC.Ty) :=
+  Arm64Producer.producer.fn_temps.filter (fun row => row.1 != Arm64Entry._t'131)
+
+/-- Generated identifier ordinals are relative to each export unit's atom
+frontier. All real mapped declaration types and distinctness are checked below. -/
+def temporaryName (id : CC.Ident) : CC.Ident :=
+  if Arm64Entry._t'1.toNat ≤ id.toNat ∧ id.toNat ≤ Arm64Entry._t'130.toNat then
+    CC.Positive.ofNat (Arm64ProgramFixture._t'1.toNat + (id.toNat - Arm64Entry._t'1.toNat))
+  else id
+
+/-- Every mapped initialization temporary has its real declared target type. -/
+theorem temporary_types : ∀ i : Fin initializationTemps.length,
+    (temporaryName initializationTemps[i].1, sourceType initializationTemps[i].2) ∈
+      Arm64ProgramFixture.f_arm64_execute_compile.fn_temps := by decide +kernel
+
+/-- The actual target declarations introduce no alias between source temporaries. -/
+theorem temporary_names_distinct :
+    CC.listNorepet (initializationTemps.map (fun row => temporaryName row.1)) := by decide +kernel
+
 /-- The producer accepts void*, while the actual socket program declares a
 __sk_buff* parameter. Both expressions refer to the same supplied value. -/
 def expression : CC.Expr → CC.Expr
@@ -26,7 +46,7 @@ def expression : CC.Expr → CC.Expr
   | .Econst_single n ty => .Econst_single n (sourceType ty)
   | .Econst_long n ty => .Econst_long n (sourceType ty)
   | .Evar id ty => .Evar (localName id) (sourceType ty)
-  | .Etempvar id ty => .Etempvar id
+  | .Etempvar id ty => .Etempvar (temporaryName id)
       (if id = Arm64Entry._ctx then CC.tptr (.Tstruct Arm64ProgramFixture.___sk_buff CC.noattr)
        else sourceType ty)
   | .Ederef a ty => .Ederef (expression a) (sourceType ty)
@@ -42,9 +62,9 @@ mutual
 def statement : CC.Stmt → CC.Stmt
   | .Sskip => .Sskip
   | .Sassign a b => .Sassign (expression a) (expression b)
-  | .Sset id a => .Sset id (expression a)
-  | .Scall id a args => .Scall id (expression a) (args.map expression)
-  | .Sbuiltin id ef tys args => .Sbuiltin id ef (tys.map sourceType) (args.map expression)
+  | .Sset id a => .Sset (temporaryName id) (expression a)
+  | .Scall id a args => .Scall (id.map temporaryName) (expression a) (args.map expression)
+  | .Sbuiltin id ef tys args => .Sbuiltin (id.map temporaryName) ef (tys.map sourceType) (args.map expression)
   | .Ssequence a b => .Ssequence (statement a) (statement b)
   | .Sifthenelse a b c => .Sifthenelse (expression a) (statement b) (statement c)
   | .Sloop a b => .Sloop (statement a) (statement b)
@@ -171,13 +191,14 @@ private def parts : { rows : List (List CC.Stmt) × (List (List CC.Stmt) × CC.S
       let actualValues ← unpack ys
       unless sourceValues.size == actualValues.size && sourceValues.size == heads.size do
         throwError "source segment lengths differ"
-      let mut as ← Lean.Meta.mkListLit (← Lean.Meta.inferType sourceValues[0]!) []
-      let mut bs ← Lean.Meta.mkListLit (← Lean.Meta.inferType actualValues[0]!) []
-      let mut proof ← Lean.Meta.mkAppOptM ``Mapped.nil #[none, none, some f]
+      let sourceTy ← Lean.Meta.inferType sourceValues[0]!
+      let actualTy ← Lean.Meta.inferType actualValues[0]!
+      let mut as ← Lean.Meta.mkListLit sourceTy []
+      let mut bs ← Lean.Meta.mkListLit actualTy []
+      let mut proof := Lean.mkAppN (Lean.mkConst ``Mapped.nil) #[sourceTy, actualTy, f]
       for i in (List.range sourceValues.size).reverse do
-        proof ← Lean.Meta.mkAppOptM ``Mapped.cons #[none, none, some f,
-          some sourceValues[i]!, some actualValues[i]!, some as, some bs,
-          some heads[i]!, some proof]
+        proof := Lean.mkAppN (Lean.mkConst ``Mapped.cons)
+          #[sourceTy, actualTy, f, sourceValues[i]!, actualValues[i]!, as, bs, heads[i]!, proof]
         as ← Lean.Meta.mkAppM ``List.cons #[sourceValues[i]!, as]
         bs ← Lean.Meta.mkAppM ``List.cons #[actualValues[i]!, bs]
       return proof
@@ -186,12 +207,9 @@ private def parts : { rows : List (List CC.Stmt) × (List (List CC.Stmt) × CC.S
     let mut equations : Array Lean.Expr := #[]
     for i in [:sourceSegments.size] do
       let sources ← unpack sourceSegments[i]!
-      let actuals ← unpack actualSegments[i]!
       let mut headProofs : Array Lean.Expr := #[]
       for j in [:sources.size] do
         let image ← Lean.Meta.mkAppM ``statement #[sources[j]!]
-        unless ← Lean.Meta.isDefEq actuals[j]! image do
-          throwError "actual source differs at segment {i}, statement {j}: {actuals[j]!} versus {image}"
         headProofs := headProofs.push (← Lean.Meta.mkEqRefl image)
       let proof ← prove (Lean.mkConst ``statement) sourceSegments[i]! actualSegments[i]! headProofs
       equations := equations.push (← Lean.Meta.mkAppM ``Mapped.sound #[proof])

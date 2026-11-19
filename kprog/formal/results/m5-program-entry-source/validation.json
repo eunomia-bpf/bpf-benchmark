@@ -1,0 +1,112 @@
+{
+  "phase": "focused kernel validation passed; full confirmation pending timing SH",
+  "raw": "/workspaces/kprog-raw/formal/m5-program-entry-source",
+  "source_checkpoints": [
+    "38894465d",
+    "029982100"
+  ],
+  "source": {
+    "exit": 0,
+    "jobs": 164,
+    "log": "focused19.log",
+    "source_segments": 16,
+    "spine_statements": 512,
+    "generated_temporary_count": 130,
+    "all_actual_temporary_types_and_distinctness": "kernel checked"
+  },
+  "local_expressions": {
+    "exit": 0,
+    "jobs": 165,
+    "log": "expression-focused1.log",
+    "scope": "Actual allocated local lvalue/read/address-of, arbitrary subsequent memory, failed reads retained"
+  },
+  "public_queries": {
+    "exit": 0,
+    "theorems": 11,
+    "log": "Query-focused.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64ProgramEntrySource.producer_source": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntrySource.production_source": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntrySource.prefix_corresponds": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryExpressions.declaration_type": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryExpressions.bound_lvalue": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryExpressions.bound_read": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryExpressions.bound_address": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryExpressions.allocated_local": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntrySource.temporary_types": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntrySource.temporary_names_distinct": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntrySource.Spine.reconstruct": []
+    }
+  },
+  "full_lake_build": {
+    "status": "pending timing SH"
+  },
+  "export_comparison": {
+    "status": "pending full confirmation",
+    "reference": "9c617740f",
+    "historical_previous_step": "e8502f0d8 records ten unchanged Arm64 and twelve changed x86; no new parity result claimed yet"
+  },
+  "resource": {
+    "focused_exception": "AGENTS.md20 blocking discretion for coordinator-derived blanket CPU rule; source timing and actual exits in raw focused-exits.json",
+    "CPU": 17,
+    "workers": 1,
+    "address_space_GiB": 32,
+    "heartbeats": 200000,
+    "recursion": 512,
+    "async": false,
+    "full_confirmation": "timing SH"
+  },
+  "remaining": [
+    "Field/cast/arithmetic and complete prefix execution transport",
+    "Actual global callback/provider and original native/context bindings",
+    "Genuine one-pointer/uint32 continuation binding",
+    "Remaining handler families and O1/O2/O4",
+    "M6 archive and final fresh lake build plus make check"
+  ],
+  "milestones": {
+    "M1_M4": "done",
+    "M5": "open",
+    "M6": "open",
+    "complete_ISA_handler_families": 0
+  }
+}

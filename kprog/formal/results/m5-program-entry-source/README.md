@@ -1,32 +1,41 @@
-# Production entry source correspondence — prepared checkpoint
+# Actual production entry source and local expressions
 
-Kernel validation is pending. The last validated formal step is e8502f0d8
-(allocation correspondence, full Lake 338 jobs and six public queries).
-This checkpoint makes no new proof-pass, execution or coverage claim.
+Focused kernel validation passes: Source 164 jobs, Expressions 165 jobs and
+11 public type/axiom queries. Every closure contains only standard logical
+axioms. Whole-Lake and historical export confirmation wait for timing SH;
+validation.json distinguishes those pending results from the actual passes.
 
-Arm64ProgramEntrySource maps the actual entry-view name, anonymous local
-types and the socket context parameter annotation. Its proposed source
-certificates retain every original initialization statement and the actual
-program-body tail, including its labels and call/return tables. Segmented
-source equations and pointwise statement equalities avoid a single flattened
-comparison; the proof limits remain unchanged. No C source is added or changed.
+The actual exported producer and production function have corresponding
+initialization syntax: 512 spine statements in 16 linked source segments,
+including every input call and the live vector-pointer loop. The original
+program-body tail and its labels/call/return tables are retained. Generated
+temporary spellings have different encoded IDs across units: the explicit
+ordinal translation preserves every actual declared input temporary type and
+distinctness. The consumer-only return temporary is excluded from this map.
 
-The first four focused attempts are retained. The initial flat comparison
-exceeded the normal recursion limit; the prepared pointwise repair now waits
-for the shared timing lock in a durable host worker. Its actual result will
-be written under /workspaces/kprog-raw/formal/m5-program-entry-source.
-Query.lean is prepared and has not run. The root import is unchanged.
+Small source and pointwise statement certificates are checked directly by the
+kernel. Constructing those certificates avoids repeated meta-level unification
+of the same large syntax. Ordinary recursion/heartbeat limits are unchanged.
+No axiom, reflected native decision, omitted source statement or C body is added.
 
-Actual expression evaluation, prefix execution, real callee binding and the
-one-entry-pointer/uint32 continuation ABI remain separate obligations. Local
-allocation equality does not establish callback values in different global
-environments. Provider/native/context admission and all handler-family counts
-remain open; completed ISA-family count is zero. M5 precedes M6.
+Local-expression laws use the actual allocation environment correspondence.
+Mapped local lvalues, reads and address-of expressions agree in arbitrary
+subsequent memory. Read failures remain none; readable or initialized contents
+are not assumed. This proves local expression transport, not global callback
+values, provider outcomes or complete prefix/body execution.
 
-A separate successor, Arm64ProgramEntryExpressions.lean, is now prepared but
-unvalidated. Its proposed local lookup/read/address-of equalities use the
-checked allocation environment map and preserve failed reads in arbitrary
-subsequent memory. It adds no global callback or provider equivalence premise
-and claims none. The Source worker and its inputs are unchanged. After its
-actual pass, focus the Expressions target, then run this prepared set of nine
-public queries and one full validation before a validated publication.
+The first prepared checkpoints were unvalidated. Actual recovery exposed the
+scoped temporary identifiers, then simplified the final map to ordinary ordinal
+arithmetic after kernel-checked certificate construction removed the redundant
+unification bottleneck. All failed attempts remain in the raw directory.
+Focused recovery ran on CPU 17 at the established one-worker/32 GiB limits
+under the recorded AGENTS.md20 blocking exception; actual overlap times are
+recorded. Full confirmation remains under shared timing flock.
+
+Genuine one-entry-pointer/uint32 continuation binding and native/provider/
+context admission remain open. The generic void/nine-argument handler has a
+different ABI. Completed ISA-family count stays zero; M5 precedes M6. Final
+fresh lake build and make check remain due at goal closure.
+
+Raw: /workspaces/kprog-raw/formal/m5-program-entry-source
+Public queries: Query.lean. Actual results: validation.json.

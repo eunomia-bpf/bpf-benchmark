@@ -1,18 +1,12 @@
 {
-  "phase": "prepared source checkpoint",
-  "kernel_validation": "pending",
-  "last_validated_commit": "e8502f0d8",
-  "last_full_lake_jobs": 338,
-  "public_queries": "prepared, not run",
-  "actual_passes": 0,
-  "raw": "/workspaces/kprog-raw/formal/m5-program-entry-source",
-  "root_import": "unchanged",
+  "phase": "focused kernel validation passed",
+  "full_confirmation": "pending timing SH",
+  "public_queries_passed": 11,
+  "source_jobs": 164,
+  "expression_jobs": 165,
+  "old_source_worker": 133600,
+  "old_worker_status": "ended while unstarted; no check ran there",
   "M5": "open",
   "M6": "open",
-  "complete_ISA_handler_families": 0,
-  "local_expression_phase": "prepared, unvalidated",
-  "prepared_query_count": 9,
-  "live_source_worker": 133600,
-  "next_focused_target": "KProgFormal.ClightRefinement.Arm64ProgramEntryExpressions",
-  "source_worker_inputs": "unchanged"
+  "complete_ISA_handler_families": 0
 }
