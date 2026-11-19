@@ -18,3 +18,21 @@ runs even with the JIT. The design's gains in this configuration come from helpe
 specialized sim C (todo section 0, coordinator blocks of 2026-11-19); code size of this configuration is the other item.
 run.sh first missed the run directory (the guest console breaks the JSON line); both runs were read from their
 directories and run.sh now takes the corpus run name from the log.
+
+## Native code size of the BCC requests, rebuilt offline (2026-11-19 08:45)
+
+The 25 BCC requests of the stats-on run (service archive) were disassembled: the specialized interpreter is fully
+folded, and the size came from the simulator's private unknown inputs (`kprog_unspecified_input`), kept on the
+native side as volatile map reads (25-833 per program; B drops the unused ones in packet_bounds_ir.cpp).
+compile_sim_ir.cpp now gives each such read a frozen undefined value on the native side (any value, the same set the
+verifier checks in B). Each request's native side was rebuilt with the request's own commands
+(native-size-bcc.tsv, function bytes from nm):
+
+| Native side | Total bytes | x P (5 447 B) | x JIT (7 965 B) |
+|---|---|---|---|
+| run of 05:21 | 53 616 | 9.84 | 6.73 |
+| HEAD 8d89ede8c (perf's native LTO changes of 07:10-07:55) | 18 418 | 3.38 | 2.31 |
+| HEAD + frozen unspecified inputs | 7 282 | 1.34 | 0.91 |
+
+Open item found in the same disassembly: the x86 text parser (generate_micro_sim_proofs.py) drops the `lock` prefix,
+so P's `lock incq` runs as a plain read-modify-write in B and on the native side.

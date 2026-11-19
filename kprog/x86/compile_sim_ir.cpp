@@ -118,6 +118,30 @@ static unsigned normalizePrivateStack(Module &module) {
   return count;
 }
 
+// A private unknown choice of the simulator (kprog_unspecified_input) is any
+// value: B reads it from a map, so the verifier checks every value. The native
+// code may take any one of them, so each read becomes a frozen undefined value:
+// an unused read leaves no code and a used one leaves no memory access.
+static unsigned freezeUnspecifiedInputs(Module &module) {
+  SmallVector<LoadInst *,64> loads;
+  for (auto &function:module) for (auto &instruction:instructions(function)) {
+    auto *load=dyn_cast<LoadInst>(&instruction);
+    if (!load || !load->isVolatile() || load->isAtomic() || !load->getType()->isIntegerTy(64)) continue;
+    int64_t offset=0;
+    auto *base=GetPointerBaseWithConstantOffset(load->getPointerOperand(),offset,module.getDataLayout());
+    auto *global=dyn_cast<GlobalVariable>(base);
+    if (offset==0 && global && global->isDeclaration() &&
+        global->getName()=="kprog_unspecified_input" && global->getSection()==".ksyms")
+      loads.push_back(load);
+  }
+  for (auto *load:loads) {
+    IRBuilder<> b(load);
+    load->replaceAllUsesWith(b.CreateFreeze(PoisonValue::get(load->getType()),"unspecified"));
+    load->eraseFromParent();
+  }
+  return loads.size();
+}
+
 int main(int argc,char **argv) {
   cl::ParseCommandLineOptions(argc,argv);
   LLVMContext c; SMDiagnostic error; auto m=parseIRFile(Input,error,c);
@@ -191,6 +215,7 @@ int main(int argc,char **argv) {
   m->setTargetTriple("x86_64-unknown-linux-gnu");
   m->setDataLayout("e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128");
   errs()<<"native private stack accesses normalized="<<normalizePrivateStack(*m)<<'\n';
+  errs()<<"native unspecified inputs frozen="<<freezeUnspecifiedInputs(*m)<<'\n';
   if (verifyModule(*m,&errs())) return 1;
   std::error_code ec; ToolOutputFile out(Output,ec,sys::fs::OF_None);
   if (ec) fail(ec.message());
