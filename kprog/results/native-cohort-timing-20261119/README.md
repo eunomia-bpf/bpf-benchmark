@@ -53,3 +53,9 @@ still in progress. The installed compile-sim-ir remains the07:53:18 build
 of the measured cohort. New unrelated source work in compile_sim_ir.cpp
 (freezeUnspecifiedInputs) appeared at08:40:58; it has not replaced that base
 binary. This run must not be attributed to that new source work.
+
+PERF 2026-11-19T08:49:54Z: Further check rows complete: Tetragon084248_939825 rc0 with
+288 native replacements/0 failures; Tracee084614_204635 rc0 with169 native/0
+failures. Katran and the main checked-native BCC timing are still pending.
+The small per-run raw metadata/results are committed; bulky shim details
+remain in their original run directories.
