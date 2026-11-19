@@ -433,6 +433,20 @@ __KPROG_HELPER(long, bpf_get_stack, void *, void *, unsigned int, unsigned long 
 __KPROG_HELPER(void *, bpf_sk_fullsock, void *);
 __KPROG_HELPER(long, bpf_skb_load_bytes, void *, unsigned int, void *, unsigned int);
 __KPROG_HELPER(long, bpf_skb_load_bytes_relative, void *, unsigned int, void *, unsigned int, unsigned int);
+__KPROG_HELPER(long, bpf_csum_diff, const void *, unsigned int, const void *, unsigned int, unsigned int);
+__KPROG_HELPER(long, bpf_getsockopt, void *, int, int, void *, int);
+__KPROG_HELPER(long, bpf_setsockopt, void *, int, int, void *, int);
+/* An app's own helper declarations (Cilium's and Tetragon's BPF_FUNC) name the
+ * kernel helper, so they are the same extern functions. */
+#define BPF_FUNC(NAME, ...) (NAME)(__VA_ARGS__) __asm__("bpf_" #NAME)
+/* Helpers an app declares under another name (Cilium's BPF_FUNC_REMAP,
+ * Tetragon's BPF_FUNC2). */
+#define csum_diff_external(...) __KPROG_CALL(bpf_csum_diff, __VA_ARGS__)
+#define get_socket_opt(...) __KPROG_CALL(bpf_getsockopt, __VA_ARGS__)
+#define set_socket_opt(...) __KPROG_CALL(bpf_setsockopt, __VA_ARGS__)
+#define skb_event_output(...) __KPROG_CALL(bpf_perf_event_output, __VA_ARGS__)
+#define xdp_event_output(...) __KPROG_CALL(bpf_perf_event_output, __VA_ARGS__)
+#define sock_event_output(...) __KPROG_CALL(bpf_perf_event_output, __VA_ARGS__)
 
 /* Kernel memory reads are plain loads. native-link records every load as a
  * load site, so a fault zeroes the loaded register and execution continues,
@@ -606,63 +620,14 @@ extern int bpf_iter_num_new(struct bpf_iter_num *it, int start, int end) __attri
 extern int *bpf_iter_num_next(struct bpf_iter_num *it) __attribute__((weak)) __attribute__((section(".ksyms")));
 extern void bpf_iter_num_destroy(struct bpf_iter_num *it) __attribute__((weak)) __attribute__((section(".ksyms")));
 
-/* Tetragon's own helper names reach the common helpers above. */
-#undef map_lookup_elem
-#define map_lookup_elem(...) bpf_map_lookup_elem(__VA_ARGS__)
-#undef map_update_elem
-#define map_update_elem(...) bpf_map_update_elem(__VA_ARGS__)
-#undef map_delete_elem
-#define map_delete_elem(...) bpf_map_delete_elem(__VA_ARGS__)
+/* Tetragon's BPF_FUNC declarations are the extern helpers; its probe reads go
+ * to the inline reads above. */
 #undef probe_read
 #define probe_read(...) bpf_probe_read(__VA_ARGS__)
 #undef probe_read_str
 #define probe_read_str(...) bpf_probe_read_str(__VA_ARGS__)
 #undef probe_read_kernel
 #define probe_read_kernel(...) bpf_probe_read_kernel(__VA_ARGS__)
-#undef probe_read_user
-#define probe_read_user(...) bpf_probe_read_user(__VA_ARGS__)
-#undef probe_write_user
-#define probe_write_user(...) bpf_probe_write_user(__VA_ARGS__)
-#undef copy_from_user
-#define copy_from_user(...) bpf_copy_from_user(__VA_ARGS__)
-#undef ktime_get_ns
-#define ktime_get_ns() bpf_ktime_get_ns()
-#undef ktime_get_boot_ns
-#define ktime_get_boot_ns() bpf_ktime_get_boot_ns()
-#undef get_smp_processor_id
-#define get_smp_processor_id() bpf_get_smp_processor_id()
-#undef get_current_pid_tgid
-#define get_current_pid_tgid() bpf_get_current_pid_tgid()
-#undef get_current_cgroup_id
-#define get_current_cgroup_id() bpf_get_current_cgroup_id()
-#undef get_current_task
-#define get_current_task() bpf_get_current_task()
-#undef get_stackid
-#define get_stackid(...) bpf_get_stackid(__VA_ARGS__)
-#undef perf_event_output
-#define perf_event_output(...) bpf_perf_event_output(__VA_ARGS__)
-#undef tail_call
-#define tail_call(...) ((void)bpf_tail_call(__VA_ARGS__))
-#undef send_signal
-#define send_signal(...) bpf_send_signal(__VA_ARGS__)
-#undef seq_write
-#define seq_write(...) bpf_seq_write(__VA_ARGS__)
-#undef ringbuf_output
-#define ringbuf_output(...) bpf_ringbuf_output(__VA_ARGS__)
-#undef loop
-#define loop(...) bpf_loop(__VA_ARGS__)
-#undef get_func_ret
-#define get_func_ret(...) bpf_get_func_ret(__VA_ARGS__)
-#undef get_func_arg
-#define get_func_arg(...) bpf_get_func_arg(__VA_ARGS__)
-#undef get_attach_cookie
-#define get_attach_cookie(...) bpf_get_attach_cookie(__VA_ARGS__)
-#undef ima_inode_hash
-#define ima_inode_hash(...) bpf_ima_inode_hash(__VA_ARGS__)
-#undef ima_file_hash
-#define ima_file_hash(...) bpf_ima_file_hash(__VA_ARGS__)
-#undef override_return
-#define override_return(...) bpf_override_return(__VA_ARGS__)
 #endif
 
 /* access.h keeps a BPF-register asm arm under `__bpf__` and a plain C arm
