@@ -94,6 +94,12 @@ the real writer edge. The [ordinary scalar MOVK contract](results/m5-arm64-mov-k
 composes all 203 actual call transitions, both stores and frame free, retains
 the original register-reader frontier, and binds legal W32/X64 insertions to
 the mature checked step. Program-level obligations stay open.
+The [Numeric global initialization](results/m5-numeric-global-memory/README.md)
+derives the complete linked program's initialized memory, 204 frontier and
+permissions for all 203 definitions, including the real data globals. Its
+actual producer allocation preserves those globals and places every local
+beyond them. The older 189-frontier witness remains distinct; provider traversal
+and caller admission still need transport into this environment.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 

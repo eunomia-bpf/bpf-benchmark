@@ -93,9 +93,9 @@ private theorem bytes_size (values : List CC.Integers.Int) :
     change (1 : Int) + (rest.length : Int) = ((rest.length + 1 : Nat) : Int)
     omega
 
-private theorem byte_global (m : CC.Mem) (id : CC.Ident) (var : CC.GlobVar CC.Ty)
+private theorem byte_global (world : CC.Genv CC.FunDef CC.Ty) (m : CC.Mem) (id : CC.Ident) (var : CC.GlobVar CC.Ty)
     (values : List CC.Integers.Int) (source : var.gvar_init = values.map CC.InitData.Init_int8) :
-    ∃ after, CC.Genv.allocGlobal Binding.ge.genv_genv m (id, .Gvar var) = some after ∧
+    ∃ after, CC.Genv.allocGlobal world m (id, .Gvar var) = some after ∧
       after.nextblock = m.nextblock.succ ∧ FrameBelow m.nextblock m after ∧
       CC.PMap.get m.nextblock after.access = globalAccess (.Gvar var) := by
   let size := CC.InitData.listSize var.gvar_init
@@ -108,7 +108,7 @@ private theorem byte_global (m : CC.Mem) (id : CC.Ident) (var : CC.GlobVar CC.Ty
     (CC.Mem.alloc m 0 size).1 m.nextblock size 0 values.length free (by decide) (by rw [sizeEq]; simp)
   have zeroFree : CC.Mem.rangePerm zeroed m.nextblock 0 size .Cur .Freeable = true := by
     exact (CC.Mem.rangePerm_congr (fun ofs => by simp only [CC.Mem.perm, zeroAccess])).trans free
-  obtain ⟨filled, fills, fillAccess, fillNext, fillFrame⟩ := store_bytes Binding.ge.genv_genv values
+  obtain ⟨filled, fills, fillAccess, fillNext, fillFrame⟩ := store_bytes world values
     zeroed m.nextblock size 0 zeroFree (by decide) (by rw [sizeEq]; simp)
   have fillFree : CC.Mem.rangePerm filled m.nextblock 0 size .Cur .Freeable = true := by
     exact (CC.Mem.rangePerm_congr (fun ofs => by simp only [CC.Mem.perm, fillAccess])).trans zeroFree
@@ -146,8 +146,8 @@ private theorem byte_global (m : CC.Mem) (id : CC.Ident) (var : CC.GlobVar CC.Ty
       all_goals simp only [size] at inside
       all_goals simp [size, inside]
 
-private theorem function_global (m : CC.Mem) (id : CC.Ident) (fd : CC.FunDef) :
-    ∃ after, CC.Genv.allocGlobal Binding.ge.genv_genv m (id, .Gfun fd) = some after ∧
+private theorem function_global (world : CC.Genv CC.FunDef CC.Ty) (m : CC.Mem) (id : CC.Ident) (fd : CC.FunDef) :
+    ∃ after, CC.Genv.allocGlobal world m (id, .Gfun fd) = some after ∧
       after.nextblock = m.nextblock.succ ∧ FrameBelow m.nextblock m after ∧
       CC.PMap.get m.nextblock after.access = globalAccess (.Gfun fd) := by
   have free : CC.Mem.rangePerm (CC.Mem.alloc m 0 1).1 m.nextblock 0 1 .Cur .Freeable = true := by
@@ -169,7 +169,7 @@ private def stringBytes : List CC.Integers.Int :=
     | .Init_int8 n => some n
     | _ => none
 
-private def hasByteInitializer : CC.GlobDef CC.FunDef CC.Ty → Prop
+def hasByteInitializer : CC.GlobDef CC.FunDef CC.Ty → Prop
   | .Gfun _ => True
   | .Gvar var => var.gvar_init = Arm64Program.v___stringlit_1.gvar_init ∨ var.gvar_init = []
 
@@ -182,23 +182,22 @@ private theorem variable_sources : ∀ row ∈ Binding.program.prog_defs, hasByt
   rw [Binding.linked_definitions]
   decide +kernel
 
-private theorem global_allocation (row : CC.Ident × CC.GlobDef CC.FunDef CC.Ty)
-    (member : row ∈ Binding.program.prog_defs) (m : CC.Mem) :
-    ∃ after, CC.Genv.allocGlobal Binding.ge.genv_genv m row = some after ∧
+private theorem global_allocation (world : CC.Genv CC.FunDef CC.Ty) (row : CC.Ident × CC.GlobDef CC.FunDef CC.Ty)
+    (source : hasByteInitializer row.2) (m : CC.Mem) :
+    ∃ after, CC.Genv.allocGlobal world m row = some after ∧
       after.nextblock = m.nextblock.succ ∧ FrameBelow m.nextblock m after ∧
       CC.PMap.get m.nextblock after.access = globalAccess row.2 := by
-  have source := variable_sources row member
   rcases row with ⟨id, fd | var⟩
-  · exact function_global m id fd
+  · exact function_global world m id fd
   · rcases source with source | source
-    · exact byte_global m id var stringBytes (source.trans (by rfl))
-    · exact byte_global m id var [] source
+    · exact byte_global world m id var stringBytes (source.trans (by rfl))
+    · exact byte_global world m id var [] source
 
 /-- Fold the actual allocator. The indexed access result also retains data
 initializers; a function-only census would miss the two real data globals. -/
-private theorem globals_allocation (defs : List (CC.Ident × CC.GlobDef CC.FunDef CC.Ty))
-    (members : ∀ row ∈ defs, row ∈ Binding.program.prog_defs) (m : CC.Mem) :
-    ∃ after, CC.Genv.allocGlobals Binding.ge.genv_genv m defs = some after ∧
+theorem globals_allocation_bound (world : CC.Genv CC.FunDef CC.Ty) (defs : List (CC.Ident × CC.GlobDef CC.FunDef CC.Ty))
+    (sources : ∀ row ∈ defs, hasByteInitializer row.2) (m : CC.Mem) :
+    ∃ after, CC.Genv.allocGlobals world m defs = some after ∧
       after.nextblock.toNat = m.nextblock.toNat + defs.length ∧
       FrameBelow m.nextblock m after ∧
       ∀ (i : Nat) (row : CC.Ident × CC.GlobDef CC.FunDef CC.Ty), defs[i]? = some row →
@@ -210,10 +209,10 @@ private theorem globals_allocation (defs : List (CC.Ident × CC.GlobDef CC.FunDe
     intro i row found
     simp at found
   | cons head rest ih =>
-    obtain ⟨mid, allocated, next, frame, access⟩ := global_allocation head
-      (members head List.mem_cons_self) m
+    obtain ⟨mid, allocated, next, frame, access⟩ := global_allocation world head
+      (sources head List.mem_cons_self) m
     obtain ⟨after, tail, tailNext, tailFrame, tailStorage⟩ :=
-      ih (fun row mem => members row (List.mem_cons_of_mem _ mem)) mid
+      ih (fun row mem => sources row (List.mem_cons_of_mem _ mem)) mid
     have nextNat : mid.nextblock.toNat = m.nextblock.toNat + 1 := by
       rw [next, CC.Positive.toNat_succ]
     refine ⟨after, ?_, ?_, ?_, ?_⟩
@@ -242,7 +241,7 @@ private theorem initialized :
         Binding.program.prog_defs[i]? = some row → ∀ b, b.toNat = 1+i →
           CC.PMap.get b m.access = globalAccess row.2 := by
   obtain ⟨m, allocated, next, _, storage⟩ :=
-    globals_allocation Binding.program.prog_defs (fun _ member => member) CC.Mem.empty
+    globals_allocation_bound Binding.ge.genv_genv Binding.program.prog_defs variable_sources CC.Mem.empty
   rw [definitions_count] at next
   exact ⟨m, allocated, next, storage⟩
 

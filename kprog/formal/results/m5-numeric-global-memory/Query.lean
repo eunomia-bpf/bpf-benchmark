@@ -1,0 +1,30 @@
+import KProgFormal.ClightRefinement.Arm64NumericMemory
+open KProgFormal.ClightRefinement
+#check Arm64GlobalMemory.globals_allocation_bound
+#print axioms Arm64GlobalMemory.globals_allocation_bound
+#check Arm64GlobalMemory.init_mem
+#print axioms Arm64GlobalMemory.init_mem
+#check Arm64GlobalMemory.initial_next
+#print axioms Arm64GlobalMemory.initial_next
+#check Arm64NumericMemory.init_mem
+#print axioms Arm64NumericMemory.init_mem
+#check Arm64NumericMemory.initial_next
+#print axioms Arm64NumericMemory.initial_next
+#check Arm64NumericMemory.initial_access
+#print axioms Arm64NumericMemory.initial_access
+#check Arm64NumericMemory.function_permissions
+#print axioms Arm64NumericMemory.function_permissions
+#check Arm64NumericMemory.string_access
+#print axioms Arm64NumericMemory.string_access
+#check Arm64NumericMemory.stderr_access
+#print axioms Arm64NumericMemory.stderr_access
+#check Arm64NumericMemory.distinct_initial_memory
+#print axioms Arm64NumericMemory.distinct_initial_memory
+#check Arm64NumericMemory.producer_entry_internal
+#print axioms Arm64NumericMemory.producer_entry_internal
+#check Arm64NumericMemory.producer_preserves_globals
+#print axioms Arm64NumericMemory.producer_preserves_globals
+#check Arm64NumericMemory.local_after_globals
+#print axioms Arm64NumericMemory.local_after_globals
+#check Arm64NumericMemory.local_global_disjoint
+#print axioms Arm64NumericMemory.local_global_disjoint

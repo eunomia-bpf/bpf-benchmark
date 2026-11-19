@@ -1,0 +1,150 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-numeric-global-memory",
+  "scope": {
+    "old_producer_definitions": 188,
+    "old_producer_frontier": 189,
+    "actual_numeric_definitions": 203,
+    "actual_numeric_frontier": 204,
+    "allocation_refactor": "existing proof generalized over the actual Genv and explicit permitted byte-initializer facts; no proof copied",
+    "old_public_APIs": "init_mem/initial_next/initial_access and old allocation/global-permission contracts preserved",
+    "actual_initialization": "complete program.initMem success derived from actual source initializer classification and imported allocator",
+    "access": "every definition indexed, both permission kinds; function Nonempty only; actual string block20 range[0,48) Readable; stderr block61 no access",
+    "memory_distinction": "proved initialMemory differs from older 189-frontier witness",
+    "producer_entry": "one actual allocation transition in Numeric.ge from already-entered producer Callstate; real parameters and arbitrary k",
+    "frame": "all203 initial global blocks retain complete contents and both permission maps through actual frame allocation",
+    "locals": "every actual declared local owns its full Freeable range at block>=204, with no alias to any initial global",
+    "world_transport": "only proved composite-layout equality; no equality of Genv/symbol tables/initialized memories",
+    "not_proved_here": "98 provider calls, their world/trace/post-memory transport, real producer continuation and program admission"
+  },
+  "focused": {
+    "exit": 0,
+    "log": "focused1.log",
+    "jobs": 178,
+    "attempts": 1,
+    "note": "All final source additions, including actual entry/frame/local laws, included before this module compiled."
+  },
+  "public_queries": {
+    "exit": 0,
+    "log": "Query-1.log",
+    "theorems": 14,
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64GlobalMemory.globals_allocation_bound": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64GlobalMemory.init_mem": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64GlobalMemory.initial_next": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericMemory.init_mem": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericMemory.initial_next": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericMemory.initial_access": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericMemory.function_permissions": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericMemory.string_access": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericMemory.stderr_access": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericMemory.distinct_initial_memory": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericMemory.producer_entry_internal": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericMemory.producer_preserves_globals": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericMemory.local_after_globals": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericMemory.local_global_disjoint": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "full_lake_build": {
+    "exit": 0,
+    "log": "lake-build1.log",
+    "jobs": 322,
+    "attempts": 1
+  },
+  "export_parity": {
+    "exit": 0,
+    "log": "export-parity1.log",
+    "reference": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_identical": true
+  },
+  "limits": {
+    "heartbeats": 200000,
+    "recursion": 512,
+    "lean_workers": 1,
+    "address_space_GiB": 32,
+    "build_cpu": 17,
+    "query_edit_git_cpu": 18,
+    "every_host_command_timing_lock": "shared",
+    "raised": false
+  },
+  "source_changes_after_final_validation": false,
+  "native_make_check": {
+    "run_this_step": false,
+    "reason": "Lean proof/refactor only; no C/runtime/tool change",
+    "last_complete_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "fresh_final_check_required": true
+  },
+  "remaining": [
+    "actual producer prefix580 and98 input visits in Numeric.ge",
+    "actual provider/caller/continuation admission and trace/post-memory transport",
+    "relative cache/materialization reader world transport",
+    "native physical memory/alias/origin",
+    "source control and all-family O1/O2/O4 recount",
+    "remaining M6 and fresh final Lake/make check"
+  ],
+  "complete_ISA_handler_families": 0,
+  "milestones": {
+    "M1_M4": "done",
+    "M5": "open",
+    "M6": "open"
+  }
+}
