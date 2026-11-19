@@ -1,0 +1,38 @@
+{
+  "raw": "/workspaces/kprog-raw/perf/b-analysis-flags-20261119/resume-20261119T074139Z-227467",
+  "original_raw": "/workspaces/kprog-raw/perf/b-analysis-flags-20261119/post-contracts-20261119T072515Z-223517",
+  "backend_returncode": 0,
+  "backend_seconds": 756.375733644003,
+  "worker_exit": 2,
+  "stages": [
+    {
+      "command": [
+        "/opt/virtme-ng/bin/python3",
+        "/workspaces/repository/kprog/x86/whole_word_spills.py",
+        "/workspaces/kprog-raw/perf/b-analysis-flags-20261119/post-contracts-20261119T072515Z-223517/post-contracts.bpf.before.mir",
+        "/workspaces/kprog-raw/perf/b-analysis-flags-20261119/resume-20261119T074139Z-227467/packed.mir"
+      ],
+      "returncode": 0,
+      "seconds": 1322.1710007099973,
+      "diagnostic": ""
+    },
+    {
+      "command": [
+        "llc-18",
+        "-O1",
+        "-march=bpf",
+        "-mcpu=v4",
+        "-bpf-stack-size=4096",
+        "-start-before=prologepilog",
+        "-filetype=obj",
+        "/workspaces/kprog-raw/perf/b-analysis-flags-20261119/resume-20261119T074139Z-227467/packed.mir",
+        "-o",
+        "/workspaces/kprog-raw/perf/b-analysis-flags-20261119/resume-20261119T074139Z-227467/B.o"
+      ],
+      "returncode": 1,
+      "seconds": 16.462722796997696,
+      "diagnostic": "error: kprog-raw/perf/b-analysis-flags-20261119/production-20261119T063707Z-211523/tetragon6/trusted_x86.bpf.c:67:4117: in function trusted_x86_x86_sim_xdp i32 (ptr): Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size."
+    }
+  ],
+  "scope": "O3 after the existing IR contracts still fails final B emission at the existing 4096-byte compiler limit. No production flag or stack-limit change, no new stock acceptance or app runtime result."
+}

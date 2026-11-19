@@ -8,6 +8,9 @@
 
 ## 0. Lane 目标与待办
 
+PERF 2026-11-19T08:05:59Z：227467 已结束：保留IR的 O3 backend通过，packing1322.171s通过，最终llc16.463s仍触发既有4096B编译栈限；不改变生产O1/g或stock512B。该pass-order假设单独不足，完整B覆盖仍开。BCC request17的42个generated base用LLVM root分析全部unknown，只折叠常数freeze也不改变；不添加无依据的private-base fastpath。全部PERF进程/镜像lease已释放，ff02957cc组合批次可按原锁次序继续。见results/b-analysis-flags-20261119与native-base-roots-20261119。
+
+
 - [x] P-native-integer-identities（PERF 2026-11-19T07:55:23Z，本提交）：native reused frontend 的原始 empty =r,0 integer asm 按 B 合约成为 freeze；pointer/clobber/新生成 address-base barrier 保留。1024执行、3072既有路径、25 BCC compile/proof 与probe/ARRAY/OTel通过。BCC proof .text47597→19263B，不是 installed 或runtime数。组合批次和完整sim折叠仍开；results/native-integer-identities-20261119。
 
 

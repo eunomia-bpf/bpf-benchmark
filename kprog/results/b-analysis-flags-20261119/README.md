@@ -80,3 +80,15 @@ It reuses the completed O1 frontend's .bounds.bc, so it does not repeat the
 original slow C frontend or alter production flags. Worker223517 runs on
 CPU18, timing SH/image SH,32GiB AS; results will distinguish pass ordering
 from simply restoring the original expensive O3 frontend.
+
+PERF 2026-11-19T08:05:59Z: The post-contracts O3 experiment is complete. Its clang backend
+succeeded in 756.376s and saved235MiB MIR. The initial packing
+child was interrupted solely to release an unnecessary image lease; that
+interruption is retained separately. Resuming the immutable MIR with only
+timing SH took1322.171s in packing (return0), then
+16.463s in final llc (return1): the existing4096-byte
+compiler stack limit is still exceeded. O3 after the current IR contracts
+alone does not solve this request. The production O1/g policy and limits
+stay unchanged; no further relaxed-limit replay was run. Stock verification
+and checked-native installation were not reached. See post-contract-result.json;
+all raw remains at /workspaces/kprog-raw/perf/b-analysis-flags-20261119/resume-20261119T074139Z-227467. Worker227467 and its leases are terminal.

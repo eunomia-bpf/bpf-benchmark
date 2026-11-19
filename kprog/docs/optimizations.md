@@ -863,3 +863,12 @@ regressions pass. BCC host proof .text47,597 ->19,263B against ba366fcb3;
 installed bytes and per-call/body/helpers/maps/throughput await the combined
 checked-sim-c batch. All C helper pieces stay on; no B/runtime check added.
 Receipts results/native-integer-identities-20261119.
+
+PERF 2026-11-19T08:05:59Z: The phase1 post-contracts O3 experiment does not remove
+the Tetragon B stack failure: packing1322.171s succeeds, final llc16.463s
+fails the unchanged4096B compiler bound. Production flags/limits stay.
+Native base-root audit finds42/42 unknown generated bases in BCC request17,
+even after constant-freeze folding; no speculative private-base fast path
+was added. Evidence results/b-analysis-flags-20261119/post-contract-result.json
+and results/native-base-roots-20261119. Native C pieces remain enabled;
+no new runtime gain or stock acceptance is claimed.
