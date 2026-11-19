@@ -213,7 +213,10 @@ try {
     auto constant = root;
     size_t changed = 0;
     for (auto &insn : constant) if (!changed && insn.code == (BPF_ALU64 | BPF_ADD | BPF_K)) { insn.imm -= 8; ++changed; }
-    require(changed == 1 && !resolve(constant), "program built with another constant took the native entry");
+    failed = false;
+    try { resolve(constant); }
+    catch (const std::runtime_error &error) { failed = std::string(error.what()).find("keeps its eBPF") != std::string::npos; }
+    require(changed == 1 && failed, "program built with another constant took the native entry");
     std::cout << "original ELF/final FD binding, subprogram layout, resource-ID lookup, conflicts, source agreement: PASS\n";
     return 0;
 } catch (const std::exception &error) { std::cerr << error.what() << '\n'; return 1; }

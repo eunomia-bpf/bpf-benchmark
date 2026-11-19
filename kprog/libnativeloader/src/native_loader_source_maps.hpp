@@ -147,13 +147,23 @@ public:
         return bytes;
     }
 
-    // Leading instructions of entry that agree with the loaded program, and the entry length. libbpf
-    // rewrites the immediates and offsets of relocated instructions (ELF and CO-RE relocations, calls)
-    // and the source register of ld_imm64 and call; every other immediate and offset is the program's
-    // own constant and must agree too, so a program built with other constants keeps its eBPF.
-    struct Agreement { size_t leading = 0, aligned = 0, length = 0; };
+    // Leading instructions of entry that agree with the loaded program, the entry length, and the first
+    // difference. A loader rewrites a CO-RE relocated instruction whole (offset, immediate, load size,
+    // or the whole instruction when the relocation fails and is poisoned), the immediates and offsets
+    // of ELF relocated instructions and calls, and the source register of ld_imm64 and call; every
+    // other immediate and offset is the program's own constant and must agree too, so a program built
+    // with other constants keeps its eBPF.
+    struct Agreement { size_t leading = 0, aligned = 0, length = 0; std::string difference; };
+    static std::string insn_text(const bpf_insn &x) {
+        char text[80];
+        std::snprintf(text, sizeof(text), "code 0x%02x dst %u src %u off %d imm %d",
+                      x.code, x.dst_reg, x.src_reg, x.off, x.imm);
+        return text;
+    }
     bool same_insn(const Code &code, size_t slot, const bpf_insn &b) const {
         const auto &a = code.insns.at(slot);
+        const size_t owner = a.code == 0 && slot ? slot - 1 : slot;  // second half of an ld_imm64
+        if (code.core.contains(owner)) return true;
         if (a.code != b.code || a.dst_reg != b.dst_reg) return false;
         if (a.code != (BPF_LD | BPF_DW | BPF_IMM) && a.code != (BPF_JMP | BPF_CALL) && a.src_reg != b.src_reg) return false;
         if (a.code == (BPF_LD | BPF_DW | BPF_IMM)) {
@@ -164,8 +174,7 @@ public:
                 b.src_reg == BPF_PSEUDO_MAP_IDX || b.src_reg == BPF_PSEUDO_MAP_IDX_VALUE;
             if (source_data != loaded_data) return false;
         }
-        const size_t owner = a.code == 0 && slot ? slot - 1 : slot;  // second half of an ld_imm64
-        if (a.code == (BPF_JMP | BPF_CALL) || code.relocs.contains(owner) || code.core.contains(owner)) return true;
+        if (a.code == (BPF_JMP | BPF_CALL) || code.relocs.contains(owner)) return true;
         return a.imm == b.imm && a.off == b.off;
     }
     Agreement agreement(const std::string &entry, const std::vector<bpf_insn> &loaded) const {
@@ -180,8 +189,15 @@ public:
         for (size_t i = 0; i < result.length && i < loaded.size(); ++i) {
             const bool same = same_insn(code, base + i, loaded[i]);
             if (same) result.aligned++;
-            if (leading && same) result.leading++; else leading = false;
+            if (leading && same) result.leading++;
+            else if (leading) {
+                leading = false;
+                result.difference = "instruction " + std::to_string(i) + ": source " +
+                    insn_text(code.insns.at(base + i)) + ", loaded " + insn_text(loaded[i]);
+            }
         }
+        if (leading && result.leading < result.length)
+            result.difference = "instruction " + std::to_string(result.leading) + ": the loaded program ends";
         return result;
     }
     std::vector<SourceMapRelocation> bind(const std::string &entry,

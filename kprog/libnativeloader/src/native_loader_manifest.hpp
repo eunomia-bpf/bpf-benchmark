@@ -48,6 +48,7 @@ struct ManifestResolution {
     std::filesystem::path kernel_kfunc_btf;
     std::filesystem::path source_bpf_object;
     bool source_matches = false;
+    std::string source_difference;
 };
 
 [[noreturn]] inline void manifest_fail(const std::string &message)
@@ -609,6 +610,7 @@ std::optional<ManifestResolution> resolve_native_manifest(
                 candidate.source_bpf_object,
                 candidate.symbol_name.empty() ? prog_name : candidate.symbol_name);
             candidate.source_matches = agree.length > 0 && agree.leading == agree.length;
+            candidate.source_difference = agree.difference;
             // Leading agreement first, then agreement at aligned positions, then the closer length.
             const long gap = std::min<long>(99, std::labs(static_cast<long>(agree.length) -
                                                           static_cast<long>(source_insns_count)));
@@ -620,9 +622,16 @@ std::optional<ManifestResolution> resolve_native_manifest(
         }
     }
 
-    // A program whose source differs from every entry (other constants, other build) keeps its eBPF.
-    if (!selected || !selected->source_matches) {
+    if (!selected) {
         return std::nullopt;
+    }
+    // A program whose source differs from every entry (other constants, other build) keeps its eBPF;
+    // the error names where the closest entry differs.
+    if (!selected->source_matches) {
+        manifest_fail("native_loader: " + prog_name + " keeps its eBPF; its closest source " +
+                      selected->source_bpf_object.filename().string() + " differs at " +
+                      (selected->source_difference.empty() ? std::string("its length")
+                                                           : selected->source_difference));
     }
     std::error_code ec;
     if (!std::filesystem::exists(selected->native_object_path, ec) || ec) {
