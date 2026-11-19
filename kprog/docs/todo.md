@@ -8,6 +8,16 @@
 
 ## 0. Lane 目标与待办
 
+- [ ] P-B-pointer-integer-difference (PERF live Tracee 2026-11-19):
+  request27 sys_dup_exit_tail and request30 generate B but stock rejects
+  scalar-minus-stack-pointer arithmetic (insns959/27607). Request28 also
+  has a separate536-byte frame. All install direct native, not skipped.
+  Map exact retained IR/source locations after the active Tracee timing
+  lease, then fix the compiler class without erasing observations, fixing
+  the virtual stack base, adding checks or changing limits. B-only numeric
+  abstraction is a candidate, not an implemented/proven transformation.
+  Current prefix33 is not final coverage. See tracee-live-failures-20261119.
+
 - [ ] P-native-skb-numeric-integration (PERF 2026-11-19T13:58:47Z):
   validate shared SKB field macros through compile-sim-ir and context-lower,
   beyond the completed standalone NUMERIC repair0dfa23814. Native lowering
