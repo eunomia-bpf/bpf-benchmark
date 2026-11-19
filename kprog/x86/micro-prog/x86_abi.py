@@ -220,7 +220,8 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None, stac
             location = address(operand)
             # Only full-width stores can create ghost-cache facts. Track
             # destinations regardless of the source's coarse alias class.
-            if stack_value_offsets is not None and width == 64:
+            immediate_store = op in {'mov', 'movabs'} and decode.is_int(args[1])
+            if stack_value_offsets is not None and width == 64 and not immediate_store:
                 if type(location) is int:
                     stack_value_offsets.add(location)
                 elif isinstance(location, PointerAlternatives):

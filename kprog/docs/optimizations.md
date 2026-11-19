@@ -1309,3 +1309,14 @@ discard table state. No liveness rule/handler/source P/flag/limit changed,
 no B emitted or new stock/app/performance pass. Main compiler work must
 retain the observed bits. Producer-side facts sent through COORDINATION;
 no cross-owner edits or app-specific flags.
+
+PERF 2026-11-19T20:02:53Z: Smallest next Tetragon generator change excludes immediate
+MOV/MOVABS stores from ghost-cache creation enumeration. Shared handler
+MOV_STORE_IMM only erases facts/writes raw bytes; its two SAVE sites require
+MOV_STORE_REG. Other unknown/full-width writers remain conservative, and
+unknown RSP still retains the complete layout. Existing inventory identifies
+three cells written only by immediate stores (-224,-208,-144);13candidate
+cells versus16, same424B arena. One-line production condition; no handler,
+raw write, invalidation, source P, flag, limit or runtime check change.
+Regressions add immediate-only/unknown-destination/erase-after-pointer cases,
+normal B with no cache cells and native byte readback. Prepared, unvalidated.

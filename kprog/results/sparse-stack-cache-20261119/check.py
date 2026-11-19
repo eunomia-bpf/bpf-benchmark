@@ -1,5 +1,6 @@
 """Catch lost ghost tags from omitted alias destinations or sparse bindings."""
 import fcntl
+import ctypes
 import json
 from pathlib import Path
 import re
@@ -52,11 +53,17 @@ cases={
           'add rbx,0x8','test edi,edi','jne 0x2'],list(range(8))),
  'partial':(['sub rsp,0x40','mov QWORD PTR [rsp+0x8],rdi',
              'mov BYTE PTR [rsp+0x9],0'],[1]),
+ 'immediate':(['sub rsp,0x40','mov QWORD PTR [rsp+0x28],0x12345678',
+               'mov rax,QWORD PTR [rsp+0x28]'],[]),
+ 'immediate_unknown':(['sub rsp,0x40','mov rcx,QWORD PTR [rdi]',
+                       'mov QWORD PTR [rsp+rcx],0'],[]),
+ 'immediate_erases':(['sub rsp,0x40','mov QWORD PTR [rsp+0x8],rdi',
+                      'mov QWORD PTR [rsp+0x8],0'],[1]),
 }
 rows=[]
 b_sources={}
 for name,(assembly,expected) in cases.items():
-    assembly=assembly+['add rsp,0x40','xor eax,eax','ret']
+    assembly=assembly+['add rsp,0x40']+([] if name=='immediate' else ['xor eax,eax'])+['ret']
     instructions=[]
     for pc,text in enumerate(assembly):
         op,operands=text.split(' ',1) if ' ' in text else (text,'')
@@ -67,7 +74,7 @@ for name,(assembly,expected) in cases.items():
     rows.append(dict(case=name,expected=expected,observed=words))
     (out/'selection.json').write_text(json.dumps(rows,indent=2)+'\n')
     assert words==expected,(name,expected,words)
-    if name in {'direct','join','narrow'}:
+    if name in {'direct','join','narrow','immediate'}:
         b_sources[name]=source
 
 observations={}
@@ -93,6 +100,16 @@ with open('/workspaces/.agent-state/kprog-lanes/locks/image','a') as lock:
         adapter.compile_simulator(root/'kprog/stock-path/bin/clang',fixture,
             build/'fixture.bpf.o',run,
             bounds_compiler=Path('/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds'))
-(out/'result.json').write_text(json.dumps(dict(selection_cases=len(rows),b_emission_cases=3,
+        if name=='immediate':
+            run(['/workspaces/.agent-state/kprog-ck/verified-compiler/compile-sim-ir',
+                 fixture.with_suffix('.bounds-input.bc'),'-o',build/'native.bc'])
+            run(['clang-18','-O3','-shared','-fPIC','-mno-red-zone','-mgeneral-regs-only',
+                 build/'native.bc','-o',build/'execute.so'])
+            program=ctypes.CDLL(str(build/'execute.so')).immediate_x86_sim_xdp
+            program.argtypes=[ctypes.c_void_p];program.restype=ctypes.c_int
+            observed=program(None)
+            assert observed==0x12345678,observed
+(out/'result.json').write_text(json.dumps(dict(selection_cases=len(rows),b_emission_cases=4,
+    immediate_native_result=observed,
     shared_c=observations,scope='Generator selection, actual B emission and shared-C tag/alias/partial-write/replant checks; no stock/app/timing claim.'),indent=2)+'\n')
 print(json.dumps(observations),flush=True)
