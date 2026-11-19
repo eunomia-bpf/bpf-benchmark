@@ -1084,3 +1084,12 @@ This addresses the new failure branch's omitted completion flags; failed
 requests stay on eBPF, and explicit historical flags remain intact. No
 runtime optimization, new check or timing claim. Reader replay433910 waits
 timing SH. See native-cohort-check-20261119.
+
+PERF 2026-11-19T15:27:20Z: Phase-1 Tracee loading snapshot identifies the unresolved
+request49 as uprobe_syscall_table_check. At15:26:58Z preprocessing had
+completed (7,111,263B joined C), but its LLVM frontend temporary stayed0B
+since14:52:04Z; no bounds/MIR completion is recorded. Generated source
+declares288B arena/36 ghost cells. This is a stage-location observation,
+not a new rejection, hang verdict or cache-fanout causality claim. All three
+diagnostics remain queued, preserving the active batch. See
+tracee-live-failures-20261119. No runtime/source/flag change or gain.

@@ -83,3 +83,24 @@ the actual failing stage. An early failed request without kernel.facts.json
 retains its source ID/error and a null program type; a successful request
 still requires its facts. These are archive-analysis changes only. The
 completed-BCC reader worker433910 remains queued; no host pass yet.
+
+PERF 2026-11-19T15:27:20Z: Live loading-stage snapshot (metadata only): request49 is
+uprobe_syscall_table_check, temporary request-6fb7926d. At15:26:58Z its
+generated/trusted_x86.bpf.c was2,287,234B (mtime14:51:56Z), preprocessed
+trusted_x86.bpf.i was7,111,263B (mtime14:52:04Z), and the frontend temporary
+trusted_x86.bpf.bounds-input-84c2f86b.bc.tmp was0B (mtime14:52:04Z).
+commands.jsonl's last completed command is successful preprocessing of
+piece8. No completed frontend/bounds/MIR or stock result exists for this
+request in this observation. Its source preamble declares288 arena bytes
+and36 named ghost-cache cells (M0 through M35). Full live path is the
+coordinator run from provenance.json, timing/state/session-x9mp5xyg/requests.
+
+trusted_specializer.py:79-95 runs preprocessing, then the O1 LLVM frontend
+before the bounds pass and MIR backend. Source metadata therefore locates
+the unresolved completion before bounds/MIR; it does not establish which
+LLVM pass is expensive, a process-level hang, or a new B rejection. The
+preprocessor splits source-location expansion into pieces (:39-76), but
+the joined token stream is compiled as one translation unit. Dense cache
+fanout is a review candidate already seen in Tetragon, not a measured cause
+for this program. Preserve the run and inspect its eventual stage logs; no
+repeat frontend, flag change, timeout, cancellation or limit change.

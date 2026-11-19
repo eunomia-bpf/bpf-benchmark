@@ -24,6 +24,10 @@
   or guest. Live temporary session paths are removed after archiving.
   Coverage reader now counts failed requests as kept_on_ebpf and preserves
   explicit historical direct-native records. Validation is queued separately.
+  PERF 2026-11-19T15:27:20Z: Tracee request49 uprobe_syscall_table_check has
+  completed preprocessing but no completed LLVM frontend at15:26:58Z;
+  retain the active run. Snapshot/source dimensions are in the same README;
+  this is no new rejection or causal attribution. Diagnostics still wait.
 
 - [ ] P-native-skb-numeric-integration (PERF 2026-11-19T13:58:47Z):
   validate shared SKB field macros through compile-sim-ir and context-lower,
