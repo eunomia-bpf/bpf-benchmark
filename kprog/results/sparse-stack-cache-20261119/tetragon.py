@@ -20,7 +20,7 @@ capsule=Path('/workspaces/kprog-raw/verified/20261118-checked-hot/'
              'tetragon-c/state/session-4u0ra04z/requests/6.success.tar.gz')
 commands=[]
 def run(command):
-    command=list(map(str,command));number=len(commands)
+    command=list(map(str,command))
     lease=None
     if command[0]=='/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds':
         lease=open('/workspaces/.agent-state/kprog-lanes/locks/image','a')
@@ -29,8 +29,7 @@ def run(command):
     (out/'progress.json').write_text(json.dumps(dict(command=command,started=started))+'\n')
     begin=time.monotonic()
     try:
-        p=subprocess.run(['/usr/bin/time','-v','-o',str(out/f'command-{number}.resources'),
-                          *command],text=True,capture_output=True)
+        p=subprocess.run(command,text=True,capture_output=True)
     finally:
         if lease is not None:lease.close()
     commands.append(dict(command=command,started=started,seconds=time.monotonic()-begin,
