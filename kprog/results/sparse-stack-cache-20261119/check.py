@@ -34,6 +34,7 @@ cases={
                         'mov QWORD PTR [rbx],rdi'],list(range(8))),
  'index_pointer':(['sub rsp,0x40','lea rbx,[rsp+0x8]','lea rcx,[rbx*1]',
                    'mov QWORD PTR [rcx],rdi'],list(range(8))),
+ 'unknown_rsp':(['mov rsp,rdi','mov QWORD PTR [rsp],rdi'],[0]),
  'join':(['sub rsp,0x40','test edi,edi','je 0x5','lea rbx,[rsp+0x8]',
           'jmp 0x6','lea rbx,[rsp+0x28]','mov QWORD PTR [rbx],rdi'],[1,5]),
  'loop':(['sub rsp,0x40','lea rbx,[rsp+0x8]','mov QWORD PTR [rbx],rdi',

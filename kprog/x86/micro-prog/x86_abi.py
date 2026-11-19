@@ -524,6 +524,10 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None, stac
                     else:
                         new |= flags & (ZF | SF | PF | AF)
                     flags = flags & new if count is None else new
+        # RSP is a private-stack offset even when its concrete value is
+        # unknown; it must never justify dropping cache destinations.
+        if stack_value_offsets is not None and type(alias[rsp]) is not int:
+            stack_value_offsets.add(None)
         state = State(tuple(bits), tuple(alias), flags, opaque, pointers, tuple(constants))
         next_pc = following.get(addr)
         direct = insn.reloc_target if insn.reloc_target is not None else decode.branch_target(args[0]) if args else None
