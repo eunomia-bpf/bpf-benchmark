@@ -39,3 +39,18 @@ IR. For request28 inspect actual packed frame objects and lifetimes before
 choosing a change. No full frontend replay, relaxed compiler/kernel limit,
 new refusal or runtime check is implied. Preserve the current run and report
 all final checked/direct paths and samples when it finishes.
+
+PERF 2026-11-19T14:40:08Z: Committed capsule inspector ed1a2a43e is corrected to
+consume the final timing/service.tar.gz. trusted_service.py:305 uses a
+temporary session and removes that directory after archiving it, so its
+live request paths are not stable post-run inputs. I ended only my queued
+flock429804 (parent429797) before execution and retained its cancellation
+record/raw directory. No coordinator or peer process was stopped.
+
+The replacement streams the final service archive once, selects the three
+already known capsules27/28/30, and saves B disassembly/PC windows plus
+retained frontend/bounds LLVM text. It runs after timing SH is available,
+without a new compiler build, frontend run, stock reload, image or guest.
+An unresolved PC or missing capsule is an inspection failure, never an app
+coverage conclusion. Full artifacts remain raw; only compact evidence will
+be committed after the tool runs.

@@ -8,14 +8,16 @@ import sys
 import tarfile
 from elftools.elf.elffile import ELFFile
 
-requests, out = map(Path, sys.argv[1:])
+service_archive, out = map(Path, sys.argv[1:])
 out.mkdir(parents=True, exist_ok=True)
 rows, commands = [], []
-for request_id, pc in [(27, 959), (28, 1), (30, 27607)]:
+targets = {f'service/requests/{number}.success.tar.gz': (number, pc)
+           for number, pc in [(27, 959), (28, 1), (30, 27607)]}
+
+def inspect(capsule_bytes, archive, request_id, pc):
     directory = out/str(request_id)
     directory.mkdir()
-    archive = requests/f'{request_id}.success.tar.gz'
-    with tarfile.open(archive) as capsule:
+    with tarfile.open(fileobj=io.BytesIO(capsule_bytes)) as capsule:
         entry = capsule.extractfile('request/kernel.entry').read().decode().strip()
         artifacts = json.load(capsule.extractfile('request/generated/artifacts.json'))
         symbol = artifacts['simulator_program']
@@ -53,6 +55,16 @@ for request_id, pc in [(27, 959), (28, 1), (30, 27607)]:
             section_bytes=section['sh_size'], symbol_byte_offset=function['st_value'],
             disassembly_index=target, mapped=bool(windows), windows=windows))
         print(json.dumps({key: value for key, value in rows[-1].items() if key != 'windows'}), flush=True)
+
+with tarfile.open(service_archive, mode='r|gz') as service:
+    for member in service:
+        if member.name in targets:
+            request_id, pc = targets[member.name]
+            inspect(service.extractfile(member).read(),
+                    str(service_archive)+'::'+member.name, request_id, pc)
+            if len(rows) == len(targets):
+                break
 (out/'result.json').write_text(json.dumps(dict(rows=rows,
     scope='Retained-object/debug mapping only; no compilation, stock reload, app census or timing.'), indent=2)+'\n')
+assert len(rows) == len(targets), 'Requested completed capsules are missing from the service archive'
 assert all(row['mapped'] for row in rows), 'Verifier PC not mapped in its primary B section; inspect subprogram layout'
