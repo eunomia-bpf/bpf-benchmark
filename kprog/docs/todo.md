@@ -17,6 +17,10 @@
   Worker269752 waits imageEX for the sole bounds compiler rebuild, then
   focused16native/IR/ALU32 controls and captured Katran frontend-to-B replay.
   No corrected Katran B/stock/performance result yet.
+  PERF 2026-11-19T19:46:08Z: installed compiler fails new offset selector regression
+  as expected:1anchor versus4required, three offset forms remain pureSUB,
+  whole test2 after16native passes. Small C fixture canonicalizes to direct
+  pair and cannot establish offset-class coverage. See offset-controls-before.json.
 
   Confirmation247989/7087690ee completed0:16native fixture cases, stock B
   acceptance and TEST_RUN retval1/default loopbackifindex1 pass. Retained30

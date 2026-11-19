@@ -1284,3 +1284,13 @@ in return-dispatch-20261119/tetragon-storage.json. No repeat of this same
 frontend/packing run. Parent Tetragon B/stock/performance remains open; next
 work is MIR/source live-state analysis while Katran offset-pair269752 waits
 imageEX for actual compiler/control/captured-B validation.
+
+PERF 2026-11-19T19:46:08Z: Offset selector regression catches installed pre-extension
+compiler: expected4 anchored pointer pairs, observed1; three constant-offset
+forms remain pure SUB. Whole test exits2 at the selector assertion after
+16native cases pass. Raw /workspaces/kprog-raw/perf/b-pointer-difference-20261119/offset-controls-before-20261119T194537Z;
+offset-controls-before.json preserves actual per-function results. The small
+C fixture regrouping canonicalizes to the original direct pair and already
+tests tag13 before sub17; that C pass is not evidence for this extension.
+Actual captured Katran frontend and the new IR controls are the regression
+inputs for5033bed62;269752 still waits imageEX before rebuild.

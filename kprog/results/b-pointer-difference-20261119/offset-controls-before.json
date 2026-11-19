@@ -1,0 +1,53 @@
+{
+  "recorded": "2026-11-19T19:46:08Z",
+  "raw": "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/offset-controls-before-20261119T194537Z",
+  "wrapper_exit": 2,
+  "stage": "post-native IR selector assertion",
+  "observed_anchors": 1,
+  "expected_anchors": 4,
+  "controls": [
+    {
+      "function": "pair",
+      "anchored": 1,
+      "raw_i64_subtractions": 0
+    },
+    {
+      "function": "scalar",
+      "anchored": 0,
+      "raw_i64_subtractions": 1
+    },
+    {
+      "function": "narrow",
+      "anchored": 0,
+      "raw_i64_subtractions": 0
+    },
+    {
+      "function": "offset",
+      "anchored": 0,
+      "raw_i64_subtractions": 1
+    },
+    {
+      "function": "pair_left_offset",
+      "anchored": 0,
+      "raw_i64_subtractions": 1
+    },
+    {
+      "function": "pair_right_offset",
+      "anchored": 0,
+      "raw_i64_subtractions": 2
+    },
+    {
+      "function": "pair_commuted_offset",
+      "anchored": 0,
+      "raw_i64_subtractions": 1
+    }
+  ],
+  "native_cases_passed": 16,
+  "c_fixture_baseline_raw": "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/test-20261119T194249Z-273982",
+  "c_fixture_baseline_exit": 0,
+  "c_fixture_tag_test_pc": 13,
+  "c_fixture_subtraction_pc": 17,
+  "c_fixture_limitation": "C frontend canonicalizes reassociated subtraction to a direct pointer pair; this C fixture is not a regression for constant-offset selector coverage.",
+  "candidate": "5033bed62",
+  "scope": "Expected failure against the still-installed pre-extension compiler. No candidate B or stock/app success claimed."
+}
