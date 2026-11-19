@@ -28,6 +28,6 @@ void memory_barrier(void) {
 
 u64 memory_load(const u64 *pointer) {
     u64 value;
-    asm volatile("$0 = *(u64 *)($1 + 0)" : "=r"(value) : "r"(pointer));
+    asm volatile("%0 = *(u64 *)(%1 + 0)" : "=r"(value) : "r"(pointer));
     return value;
 }
