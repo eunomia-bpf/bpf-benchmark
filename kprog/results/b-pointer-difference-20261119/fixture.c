@@ -18,11 +18,12 @@ int guarded_difference(struct xdp_md *ctx)
     void *value = saved;
     unsigned char tag = saved_tag;
     asm volatile("" : "+r"(value));
+    unsigned long native_base = ctx->egress_ifindex;
     unsigned long result = (unsigned long)value;
     if (tag == 4) {
-        unsigned long delta = (unsigned long)value - (unsigned long)&arena[16];
+        unsigned long delta = (unsigned long)value - (unsigned long)&arena[0] - sizeof(arena);
         asm volatile("" : "+r"(delta));
-        result = delta + ctx->egress_ifindex;
+        result = delta + native_base;
     }
     return result;
 }
