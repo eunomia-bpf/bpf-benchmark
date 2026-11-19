@@ -1,0 +1,42 @@
+{
+  "source": "/workspaces/kprog-raw/perf/constant-alu32-20261119/replay-20261119T113235Z-353863/replay.bpf.before.mir",
+  "slots": 1806,
+  "declared_bytes": 9756,
+  "shapes": {
+    "default:8:8": 1,
+    "default:424:8": 1,
+    "spill-slot:8:8": 527,
+    "spill-slot:4:8": 1277
+  },
+  "eligible_spill_slots": 1804,
+  "excluded_slots": [
+    2
+  ],
+  "blocks": 387404,
+  "dataflow_visits": 925068,
+  "scope": "Conservative CFG byte liveness, not path feasibility, stock acceptance or a runtime measurement.",
+  "referenced_slots": 1806,
+  "peaks": [
+    {
+      "block": 151748,
+      "live_bytes": 8076,
+      "livein_bytes": 7452,
+      "objects": 1798
+    },
+    {
+      "block": 155325,
+      "live_bytes": 8052,
+      "livein_bytes": 7436,
+      "objects": 1794
+    },
+    {
+      "block": 155116,
+      "live_bytes": 7888,
+      "livein_bytes": 7876,
+      "objects": 1800
+    }
+  ],
+  "full_observations": "/workspaces/kprog-raw/perf/tetragon-stack-liveness-20261119/inspect-20261119T122559Z-394832/before.json",
+  "minimum_spill_payload_if_all_narrowed_to_four_bytes": 7216,
+  "minimum_declared_storage_including_nonspills": 7648
+}

@@ -22,6 +22,12 @@
   PERF 2026-11-19T11:43:27Z: BCC functional run113739_128860 passes
   25/25/25/25, zero fallback/failures; retained Tetragon backend passes in
   396.616 s and is packing. Tetragon emission/stock remains open.
+  PERF 2026-11-19T12:30:54Z: Post-fold MIR has1,804 spills and8,076
+  conservative live bytes, up from719/3,996. Current packing cannot reduce
+  its object payload below7,648B including locals. Owned offline packer
+  was ended with SIGTERM after this static result; wrapper2 is cancellation,
+  not llc/stock rejection. Raw MIR/logs retained. No repeat or limit change;
+  a different live-state reduction is required. See constant-alu32-20261119.
 
 - [x] P-checked-helper-context (220dbc191; run115036_062366; positive original FD): current checked
   BCC plans still bind five TP output/stack sites to generic helpers; the

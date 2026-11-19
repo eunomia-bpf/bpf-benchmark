@@ -1,0 +1,65 @@
+{
+  "recorded_utc": "2026-11-19T12:30:54Z",
+  "owned_packer_pid": 356045,
+  "reason": "Completed MIR has 1804 referenced spill objects; current packer only narrows 8 to 4 bytes and pairs two4 into one8, without lifetime reuse. Even all-four-byte spill payload is7216 B before the424-byte arena, above the unchanged4096 B compiler limit.",
+  "spill_objects": 1804,
+  "minimum_spill_payload_bytes": 7216,
+  "declared_bytes": 9756,
+  "conservative_live_bytes": 8076,
+  "scope": "Stop an owned offline experiment after static storage analysis. Not an llc or stock-verifier result; completed frontend/bounds/MIR and all logs retained. No production check or limit change.",
+  "host_exit": 2,
+  "finished": "2026-11-19T12:30:54Z",
+  "stages": [
+    {
+      "command": [
+        "flock",
+        "-s",
+        "/workspaces/.agent-state/kprog-lanes/locks/image",
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+        "/workspaces/kprog-raw/perf/b-analysis-flags-20261119/production-20261119T063707Z-211523/tetragon6/trusted_x86.bpf.bounds-input.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/constant-alu32-20261119/replay-20261119T113235Z-353863/replay.bpf.bounds.bc"
+      ],
+      "returncode": 0,
+      "seconds": 5.079865557003359
+    },
+    {
+      "command": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-w",
+        "-g",
+        "-O1",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-c",
+        "/workspaces/kprog-raw/perf/constant-alu32-20261119/replay-20261119T113235Z-353863/replay.bpf.bounds.bc",
+        "-mllvm",
+        "-stop-before=prologepilog",
+        "-o",
+        "/workspaces/kprog-raw/perf/constant-alu32-20261119/replay-20261119T113235Z-353863/replay.bpf.before.mir"
+      ],
+      "returncode": 0,
+      "seconds": 396.6158925109994
+    },
+    {
+      "command": [
+        "/opt/virtme-ng/bin/python3",
+        "/workspaces/repository/kprog/x86/whole_word_spills.py",
+        "/workspaces/kprog-raw/perf/constant-alu32-20261119/replay-20261119T113235Z-353863/replay.bpf.before.mir",
+        "/workspaces/kprog-raw/perf/constant-alu32-20261119/replay-20261119T113235Z-353863/replay.bpf.packed.mir"
+      ],
+      "returncode": -15,
+      "seconds": 3096.8921694469973
+    }
+  ]
+}

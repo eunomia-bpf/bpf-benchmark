@@ -53,3 +53,36 @@ JIT. This confirms the changed B pass against stock for BCC. The existing
 1 x 10 s functional run supplies no new speed ratio. Tetragon's retained
 backend also passes (396.616 s); packing/emission and fresh Tetragon stock
 confirmation remain open. Shared I and current image are unchanged.
+
+PERF 2026-11-19T12:30:54Z: The completed post-fold MIR scan shows this
+constant-folding hypothesis worsens Tetragon's register allocation:
+
+| Before packing | Original O1 | Constant ALU32 folded |
+| --- | ---: | ---: |
+| Machine blocks | 438,579 | 387,404 |
+| Referenced spill objects | 719 | 1,804 |
+| Four-byte spills | 105 | 1,277 |
+| Eight-byte spills | 614 | 527 |
+| Declared bytes, including locals | 5,764 | 9,756 |
+| Conservative live-byte peak | 3,996 | 8,076 |
+
+The current packer only narrows eight-byte scalars to four and merges two
+four-byte objects into one eight-byte object. It does not overlay lifetimes.
+Even granting every spill four bytes leaves 7,216 spill bytes, plus 432
+non-spill bytes, above the unchanged 4,096-byte compiler limit. All 1,806
+objects have references. CFG liveness is still not a feasible-path proof;
+the separate object-storage calculation describes this packer's operations.
+
+I ended only owned offline packer356045 with SIGTERM after that analysis.
+The stage records return -15 after3,096.892s and the wrapper finishes2 at
+12:30:54Z. This is a deliberately cancelled experiment, **not** an llc stack
+rejection or stock-verifier result. No B object/emission claim. Completed
+frontend/bounds/MIR and all logs remain in the original raw directory;
+`cancelled-replay.json` and `post-fold-liveness.json` record the evidence.
+The new scan (worker394832) finished0 at12:27:09Z; full observations remain
+under perf/tetragon-stack-liveness-20261119/inspect-20261119T122559Z-394832.
+
+Constant ALU32 folding remains implemented and BCC-stock-tested; it is
+insufficient for Tetragon's stack problem. No production refusal, limit,
+program skip or benchmark setting was added. The cancelled host worker
+released timing SH so the already queued combined batch could proceed.

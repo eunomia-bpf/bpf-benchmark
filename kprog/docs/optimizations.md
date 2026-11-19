@@ -985,3 +985,11 @@ BCC check120552_198858:25/25/25/25 checked, zero fallback/failures. Actual
 writes remain. TP helper fixes persist. Installed8,628native/7,965JITB.
 This is functional/relocation evidence, not a per-call gain; all C/LTO pieces
 stay on for the next combined timing batch. Other map kinds are unchanged.
+
+PERF 2026-11-19T12:30:54Z: The retained Tetragon constant-ALU32 experiment
+is insufficient: its completed MIR grows from719 to1,804 spill objects and
+from3,996 to8,076 conservative live bytes. Even four bytes per spill leaves
+7,216B before the local arena. The owned offline packer was cancelled with
+SIGTERM after that static result; no llc/stock rejection is claimed and no
+production check/limit was added. Raw MIR/logs and cancellation receipts stay.
+The BCC-tested folding remains; Tetragon needs a different live-state reduction.

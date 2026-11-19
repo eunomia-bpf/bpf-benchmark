@@ -154,4 +154,4 @@ if __name__ == '__main__':
             result = inspect(stream)
         result['source'] = str(args.mir)
         args.output.write_text(json.dumps(result, indent=2) + '\n')
-        print(json.dumps({k: v for k, v in result.items() if k != 'peaks'}))
+        print(json.dumps({k: v for k, v in result.items() if k not in ['peaks', 'accesses']}))
