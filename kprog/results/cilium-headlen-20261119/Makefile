@@ -50,3 +50,7 @@ archive-stock:
 		--exec 'make -f kprog/results/cilium-headlen-20261119/Makefile archive-guest OUT=$(OUT) INPUTS=$(INPUTS) REPLAY=$(REPLAY)'
 archive-guest:
 	python3 kprog/results/cilium-headlen-20261119/archive_stock.py load $(INPUTS) $(REPLAY) $(OUT)
+.PHONY: archive-ir
+archive-ir:
+	llvm-dis-18 $(REPLAY)/$(REQUEST)/bounds.bc -o $(OUT)/$(REQUEST)/bounds.ll
+	llvm-objdump-18 -dr $(REPLAY)/$(REQUEST)/replay.bpf.o > $(OUT)/$(REQUEST)/b-disassembly.txt
