@@ -296,3 +296,17 @@ rejected programs, read from each request's own capsule:
 base register. So the bound that matters is the one on the load the *read* uses, not the load the matcher
 happened to match: bounding the matched load once can never be enough for this class. That is exactly why a
 correct predicate lowering left the install count at 14.
+
+### Both candidate fixes are verifier-accepted (omp 2026-11-19T23:28Z)
+
+Measured on the host kernel, so the choice between them is PERF's on cost, not on correctness:
+
+- **Re-emit the bound after each reload.** A program that bounds one `data` load, reads through it,
+  reloads `data` into a new register, bounds *that*, and reads again is `ACCEPT`.
+- **Canonicalize `data` to one bounded SSA value.** A single bounded base used for every read is `ACCEPT`
+  (the first A/B above).
+
+Neither is weaker than the other: bounding each load and bounding one reused load prove the same per-read
+fact. With all 41 programs reloading `data` 2–40 times, re-emission adds a compare per read; canonicalizing
+needs the reloads folded to one value, which the `~{memory}` asm form currently prevents. Both keep the
+admitted set unchanged.
