@@ -1,0 +1,191 @@
+{
+  "scope": "Actual production entry scalar header initialization; generic imported assignment/cast/store transport",
+  "raw": "/workspaces/kprog-raw/formal/m5-program-entry-assignments",
+  "validated_at": "2026-11-19T18:58:52.442975+00:00",
+  "header": {
+    "preceding_actual_spine_statements": 419,
+    "stores": 12,
+    "internal_transitions": 36,
+    "entry": "beforeHeader",
+    "successor": "afterHeader",
+    "actual_source_certificate": "production_header and production_header_source",
+    "assumptions": [
+      "Original caller memory and subsequent memory are arbitrary",
+      "Subsequent permissions equal the imported source allocation permissions",
+      "Temporary environment and actual continuation are arbitrary"
+    ],
+    "derived": [
+      "Actual allocation environment and field/RHS correspondence",
+      "All twelve pointer readbacks",
+      "Other allocated locals retain all loads",
+      "Frame below original caller frontier",
+      "Permissions and nextblock unchanged"
+    ]
+  },
+  "focused": [
+    {
+      "log": "focused1.log",
+      "exit": 1,
+      "jobs": null
+    },
+    {
+      "log": "focused2.log",
+      "exit": 0,
+      "jobs": 167
+    },
+    {
+      "log": "focused3.log",
+      "exit": 1,
+      "jobs": null
+    },
+    {
+      "log": "focused4.log",
+      "exit": 0,
+      "jobs": 167
+    },
+    {
+      "log": "focused5.log",
+      "exit": 0,
+      "jobs": 167
+    },
+    {
+      "log": "focused6.log",
+      "exit": 1,
+      "jobs": null
+    },
+    {
+      "log": "focused7.log",
+      "exit": 0,
+      "jobs": 167
+    }
+  ],
+  "full": {
+    "exit": 0,
+    "start": "2026-11-19T18:56:46.652340+00:00",
+    "seconds": 4.0531580109964125,
+    "command": [
+      "taskset",
+      "-c",
+      "17",
+      "lake",
+      "build"
+    ],
+    "workers": 1,
+    "memory_as_bytes": 34359738368,
+    "jobs": 342,
+    "log": "lake-build2.log"
+  },
+  "queries": {
+    "exit": 0,
+    "count": 9,
+    "log": "Query2.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAssignments.scalar_store": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAssignments.assignment": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAssignments.assignment_sound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAssignments.header_rhs": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAssignments.header_assignment": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAssignments.header_write": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAssignments.production_header": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAssignments.production_header_source": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAssignments.header_initialized": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "axiom_note": "Step-based laws retain CC.externalFunctionsSem and CC.inlineAssemblySem from imported CC.Step2 alias. No new axiom, sorry, or external transition is introduced. Scalar/expression/source laws retain only standard logical axioms. See AxiomOrigin.lean and raw AxiomOrigin2.log.",
+  "resources": {
+    "cpu": 17,
+    "control_cpu": 16,
+    "workers": 1,
+    "memory_as_bytes": 34359738368,
+    "heartbeat_limit": 200000,
+    "recursion_limit": 512,
+    "async": false,
+    "timing_lock": "Not held for host work, coordinator 2026-11-19T18:18:59Z"
+  },
+  "export_comparison": {
+    "fresh": false,
+    "reason": "Lean-only change; no C source changes. Last 23-export comparison retained in prior receipt.",
+    "receipt": "../m5-program-entry-fields/validation.json",
+    "arm64_identical": 10,
+    "historical_x86_differences": 12
+  },
+  "make_check": {
+    "fresh": false,
+    "last_whole_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "next_required": "Final M1-M6 closure after M5 and M6"
+  },
+  "open": [
+    "Actual vector and tail initializer execution transport",
+    "Remaining pre-header scalar/input/global/provider binding",
+    "Full prefix composition and genuine one-pointer/uint32 consumer/native/context admission",
+    "Relative caches and physical-memory/alias/origin/control obligations",
+    "ISA families and O1/O2/O4 recount",
+    "M6 archival and fresh full Lake plus make check"
+  ],
+  "completed_isa_families": 0,
+  "m5_complete": false,
+  "m6_complete": false,
+  "axiom_origin": {
+    "exit": 0,
+    "log": "AxiomOrigin2.log",
+    "source": "AxiomOrigin.lean",
+    "observations": {
+      "CC.Step.assign": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "CC.Step2": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "CC.Step.seq": [],
+      "InternalRun.refl": []
+    }
+  }
+}
