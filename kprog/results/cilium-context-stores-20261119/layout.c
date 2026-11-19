@@ -1,3 +1,4 @@
+#define BPF_NO_PRESERVE_ACCESS_INDEX
 #include "vmlinux.h"
 #define OFFSET(T,F) __builtin_offsetof(struct T,F)
 _Static_assert(OFFSET(sk_buff, cb) == 40, "kernel skb control buffer");

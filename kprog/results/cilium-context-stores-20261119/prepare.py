@@ -25,9 +25,11 @@ with tarfile.open(source) as archive:
         process.check_returncode()
         (directory/'frontend.ll').write_text(process.stdout)
         lines = [line.strip() for line in process.stdout.splitlines()
-                 if 'asm sideeffect' in line and '*(u16 *)' in line and 'i64 46,' in line]
+                 if 'asm sideeffect "*(u16 *)' in line]
+        pointers = [line.strip() for line in process.stdout.splitlines()
+                    if 'getelementptr inbounds i8' in line and 'i64 46,' in line]
         row = dict(request=record['request_id'], source_prog_id=record['source_prog_id'],
-                   capsule=name, store_ir=lines, frontend=str(bc))
+                   capsule=name, store_ir=lines, pointer_ir=pointers, frontend=str(bc))
         rows.append(row)
         (directory/'failure.json').write_text(json.dumps(failure, indent=2)+'\n')
 (out/'result.json').write_text(json.dumps(dict(source_archive=str(source),requests=rows,

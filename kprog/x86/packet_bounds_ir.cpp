@@ -318,6 +318,80 @@ static bool current_headlen(Instruction *read,Instruction *compare) {
   }
   return true;
 }
+// Context data reloads produce fresh verifier packet registers. Keep every
+// original read (including its ordering effect), but share the proven equal
+// SSA value while no context write can intervene. Bounds then describe the
+// value used by the access instead of a discarded earlier packet register.
+static unsigned reuse_packet_data_values(Module &module) {
+  unsigned count=0;
+  for (auto &function:module) {
+    if (function.isDeclaration() || function.arg_empty() ||
+        !function.getArg(0)->getType()->isPointerTy()) continue;
+    auto section=function.getSection();int64_t data;
+    if (section=="xdp" || section.starts_with("xdp/")) data=offsetof(xdp_md,data);
+    else if (section=="classifier" || section=="tc" || section.starts_with("tc/") ||
+             section.starts_with("cgroup_skb/")) data=offsetof(__sk_buff,data);
+    else continue;
+    SmallVector<CallInst *,16> reads,representatives;
+    for (auto &instruction:instructions(function)) {
+      auto *call=dyn_cast<CallInst>(&instruction);
+      auto *assembly=call?dyn_cast<InlineAsm>(call->getCalledOperand()):nullptr;
+      // A tied identity may carry a value captured before a context write;
+      // only an actual field read can start a fresh interval.
+      if (assembly && assembly->getAsmString()=="$0 = *(u32 *)($1 + $2)" &&
+          assembly->getConstraintString()=="=r,r,i,~{memory}" &&
+          call->getType()->isIntegerTy(64) && field(call,function,data)) reads.push_back(call);
+    }
+    for (auto *read:reads) {
+      bool reused=false;
+      for (auto *source:representatives) if (current_headlen(source,read)) {
+        if (!read->use_empty()) { read->replaceAllUsesWith(source);++count; }
+        reused=true;break;
+      }
+      if (!reused) representatives.push_back(read);
+    }
+  }
+  return count;
+}
+// The frozen TC converter maps public tc_classid/u32 to the same qdisc
+// overlay field (sk_buff.cb40 + qdisc_skb_cb.tc_classid6), with a u16 store.
+// Use that public accessor for B; P's original physical store is untouched.
+static unsigned canonical_tc_class_stores(Module &module) {
+  unsigned count=0;
+  for (auto &function:module) {
+    if (function.isDeclaration() || function.arg_empty() ||
+        !function.getArg(0)->getType()->isPointerTy()) continue;
+    auto section=function.getSection();
+    if (section!="classifier" && section!="tc" && !section.starts_with("tc/")) continue;
+    SmallVector<CallInst *,4> stores;
+    for (auto &instruction:instructions(function)) {
+      auto *call=dyn_cast<CallInst>(&instruction);
+      if (!call || !call->getType()->isVoidTy() || call->arg_size()!=2 ||
+          !call->getArgOperand(0)->getType()->isPointerTy() ||
+          !call->getArgOperand(1)->getType()->isIntegerTy(64)) continue;
+      auto *assembly=dyn_cast<InlineAsm>(call->getCalledOperand());
+      if (!assembly || assembly->getAsmString()!="*(u16 *)($0 + 0) = $1" ||
+          assembly->getConstraintString()!="r,r,~{memory}" ||
+          !assembly->hasSideEffects() || assembly->isAlignStack() || assembly->canThrow()) continue;
+      int64_t offset=0;
+      auto *base=origin(GetPointerBaseWithConstantOffset(origin(call->getArgOperand(0)),
+          offset,module.getDataLayout()));
+      auto *cast=dyn_cast<CallInst>(base);
+      if (offset==46 && cast && kernel_context_cast(cast) &&
+          origin(cast->getArgOperand(0))==function.getArg(0)) stores.push_back(call);
+    }
+    for (auto *store:stores) {
+      auto *signature=FunctionType::get(store->getType(),
+          {function.getArg(0)->getType(),store->getArgOperand(1)->getType()},false);
+      auto *operation=InlineAsm::get(signature,"*(u32 *)($0 + "+
+          std::to_string(offsetof(__sk_buff,tc_classid))+") = $1","r,r,~{memory}",true);
+      IRBuilder<> builder(store);builder.SetCurrentDebugLocation(store->getDebugLoc());
+      builder.CreateCall(operation,{function.getArg(0),store->getArgOperand(1)});
+      store->eraseFromParent();++count;
+    }
+  }
+  return count;
+}
 static Value *context_origin(Value *value) {
   while (auto *call=dyn_cast<CallInst>(value)) {
     auto *assembly=dyn_cast<InlineAsm>(call->getCalledOperand());
@@ -495,6 +569,8 @@ int main(int argc,char **argv) {
       compare->eraseFromParent();++count;
     }
   }
+  unsigned packet_values=reuse_packet_data_values(*module);
+  unsigned class_stores=canonical_tc_class_stores(*module);
   unsigned pointer_differences=anchor_pointer_differences(*module);
   if (verifyModule(*module,&errs())) return 1;
   std::error_code ec;ToolOutputFile output(Output,ec,sys::fs::OF_None);
@@ -503,6 +579,8 @@ int main(int argc,char **argv) {
   if (output.os().has_error()) { errs()<<"write packet bounds IR failed\n";return 1; }
   errs()<<"packet length predicates lowered="<<count<<'\n';
   errs()<<"head length predicates with intervening writes="<<stale_headlen<<'\n';
+  errs()<<"packet data reload values unified="<<packet_values<<'\n';
+  errs()<<"TC class stores canonicalized="<<class_stores<<'\n';
   errs()<<"map extern debug declarations restored="<<externs<<'\n';
   errs()<<"unused private inputs removed="<<unused<<'\n';
   errs()<<"constant context loads canonicalized="<<contexts<<'\n';
