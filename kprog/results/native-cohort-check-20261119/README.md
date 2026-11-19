@@ -36,3 +36,13 @@ that no object was generated. Counts are service requests except the distinct
 source-program total. A completed BCC archive replay is queued on timing SH
 to confirm the existing 25 checked records are preserved. This reader changes
 analysis only; the base trusted loader rebuild follows the current batch.
+
+PERF 2026-11-19T15:12:40Z: The service's new failure branch raises before returning
+B flags to the completion record (trusted_service.py:194-199). The reader
+therefore supplements absent flags only from an actual retained simulator
+object named by artifacts.json or a checked-simulator-verification.json
+receipt. Explicit flags are preserved. simulator-failure.json supplies
+the actual failing stage. An early failed request without kernel.facts.json
+retains its source ID/error and a null program type; a successful request
+still requires its facts. These are archive-analysis changes only. The
+completed-BCC reader worker433910 remains queued; no host pass yet.

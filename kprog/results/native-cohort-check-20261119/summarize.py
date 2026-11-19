@@ -23,8 +23,20 @@ with tarfile.open(raw / 'service.tar.gz') as service:
         archive = Path(row['artifact_archive'] if row['status'] == 0 else row['failure_archive'])
         capsule = service.extractfile('service/requests/' + archive.name).read()
         with tarfile.open(fileobj=io.BytesIO(capsule)) as request:
+            members = set(request.getnames())
             item['symbol'] = request.extractfile('request/kernel.entry').read().decode('ascii')
-            item['prog_type'] = json.load(request.extractfile('request/kernel.facts.json'))['prog_type']
+            facts = 'request/kernel.facts.json'
+            item['prog_type'] = (json.load(request.extractfile(facts))['prog_type']
+                                if facts in members or row['status'] == 0 else None)
+            if 'request/generated/artifacts.json' in members:
+                artifacts = json.load(request.extractfile('request/generated/artifacts.json'))
+                obj = artifacts.get('simulator_object')
+                if obj and 'request/generated/' + Path(obj).name in members:
+                    item.setdefault('b_generated', True)
+            if 'request/checked-simulator-verification.json' in members:
+                item.setdefault('b_stock_passed', True)
+            if 'request/simulator-failure.json' in members:
+                item.setdefault('simulator_failure', json.load(request.extractfile('request/simulator-failure.json')))
         records.append(item)
 corpus = []
 for name in sorted(set(re.findall(r'x86_kvm_corpus_\d+_\d+_\d+', run_log.read_text()))):
@@ -45,7 +57,7 @@ summary = dict(
     kept_on_ebpf=sum(r['status'] != 0 for r in records),
     failed=sum(r['status'] != 0 for r in records),
     requests_detail=records, corpus=corpus,
-    scope='Registered-service completions and corpus status. Failed requests keep the original eBPF program; direct_native counts only explicit historical/control records. B counts include recorded true values, not inferred acceptance. Counts are requests except programs; workload parameters are recorded per corpus run.'
+    scope='Registered-service completions and corpus status. Failed requests keep the original eBPF program; direct_native counts only explicit historical/control records. B counts use explicit flags or retained object/verification receipts; missing evidence is not inferred acceptance. Counts are requests except programs; workload parameters are recorded per corpus run.'
 )
 output.write_text(json.dumps(summary, indent=2) + '\n')
 print(json.dumps({k: v for k, v in summary.items() if k not in ['requests_detail', 'corpus']}))

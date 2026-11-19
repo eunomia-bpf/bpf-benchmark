@@ -1077,3 +1077,10 @@ profile, guest, runtime optimization or speed claim. Coverage reporting now
 counts failed requests as kept on eBPF per c3960d089, keeping historical
 direct-native successes explicit. Base rebuild and actual checked coverage
 remain pending after the current lease. See tracee-live-failures-20261119.
+
+PERF 2026-11-19T15:12:40Z: Checked-coverage analysis now recovers missing B-generation
+and stock-acceptance flags from actual retained object/verification receipts.
+This addresses the new failure branch's omitted completion flags; failed
+requests stay on eBPF, and explicit historical flags remain intact. No
+runtime optimization, new check or timing claim. Reader replay433910 waits
+timing SH. See native-cohort-check-20261119.

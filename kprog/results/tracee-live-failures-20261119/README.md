@@ -73,3 +73,13 @@ Future Cilium measurement uses the existing lto-apps-20261119/Makefile
 checked-timing APP=cilium/agent entry with 3 x 180 s and stats on, after
 reading OMP's result and respecting its queue. The canonical checked-corpus
 1 x 10 s functional check is not a complete timing measurement.
+
+PERF 2026-11-19T15:12:40Z: The service's new failure branch raises before returning
+B flags to the completion record (trusted_service.py:194-199). The reader
+therefore supplements absent flags only from an actual retained simulator
+object named by artifacts.json or a checked-simulator-verification.json
+receipt. Explicit flags are preserved. simulator-failure.json supplies
+the actual failing stage. An early failed request without kernel.facts.json
+retains its source ID/error and a null program type; a successful request
+still requires its facts. These are archive-analysis changes only. The
+completed-BCC reader worker433910 remains queued; no host pass yet.
