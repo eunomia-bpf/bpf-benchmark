@@ -1,0 +1,614 @@
+[
+ {
+  "request_id": 1,
+  "class": "verified",
+  "section": "xdp",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 0,
+  "kern_len_reads": 0,
+  "kern_data_len_reads": 0,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 2,
+  "class": "verified",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 0,
+  "kern_len_reads": 2,
+  "kern_data_len_reads": 0,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 3,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 1,
+  "kern_len_reads": 9,
+  "kern_data_len_reads": 1,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 4,
+  "class": "verified",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 0,
+  "kern_len_reads": 0,
+  "kern_data_len_reads": 0,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 5,
+  "class": "verified",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 0,
+  "kern_len_reads": 1,
+  "kern_data_len_reads": 0,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 6,
+  "class": "only_read",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 2,
+  "kern_len_reads": 9,
+  "kern_data_len_reads": 3,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 7,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 1,
+  "kern_len_reads": 2,
+  "kern_data_len_reads": 1,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 8,
+  "class": "verified",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 0,
+  "kern_len_reads": 1,
+  "kern_data_len_reads": 0,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 9,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 1,
+  "kern_len_reads": 5,
+  "kern_data_len_reads": 3,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 10,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 1,
+  "ctx_data_reads": 4,
+  "kern_len_reads": 12,
+  "kern_data_len_reads": 3,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 11,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 6,
+  "ctx_data_reads": 7,
+  "kern_len_reads": 12,
+  "kern_data_len_reads": 1,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 12,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 2,
+  "kern_len_reads": 11,
+  "kern_data_len_reads": 3,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 13,
+  "class": "verified",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 0,
+  "kern_len_reads": 0,
+  "kern_data_len_reads": 0,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 14,
+  "class": "only_read",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 2,
+  "kern_len_reads": 10,
+  "kern_data_len_reads": 3,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 15,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 3,
+  "kern_len_reads": 5,
+  "kern_data_len_reads": 3,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 16,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 2,
+  "kern_len_reads": 7,
+  "kern_data_len_reads": 2,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 17,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 6,
+  "ctx_data_reads": 8,
+  "kern_len_reads": 14,
+  "kern_data_len_reads": 2,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 18,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 3,
+  "kern_len_reads": 17,
+  "kern_data_len_reads": 3,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 19,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 2,
+  "kern_len_reads": 8,
+  "kern_data_len_reads": 2,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 20,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 5,
+  "kern_len_reads": 22,
+  "kern_data_len_reads": 5,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 21,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 5,
+  "kern_len_reads": 22,
+  "kern_data_len_reads": 14,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 22,
+  "class": "verified"
+ },
+ {
+  "request_id": 23,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 1,
+  "kern_len_reads": 6,
+  "kern_data_len_reads": 3,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 24,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 1,
+  "ctx_data_reads": 4,
+  "kern_len_reads": 12,
+  "kern_data_len_reads": 3,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 25,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 3,
+  "kern_len_reads": 18,
+  "kern_data_len_reads": 9,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 26,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 3,
+  "kern_len_reads": 5,
+  "kern_data_len_reads": 3,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 27,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 1,
+  "kern_len_reads": 11,
+  "kern_data_len_reads": 1,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 28,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 3,
+  "kern_len_reads": 18,
+  "kern_data_len_reads": 9,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 29,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 2,
+  "kern_len_reads": 13,
+  "kern_data_len_reads": 4,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 30,
+  "class": "verified",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 0,
+  "kern_len_reads": 0,
+  "kern_data_len_reads": 0,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 31,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 3,
+  "kern_len_reads": 5,
+  "kern_data_len_reads": 3,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 32,
+  "class": "only_read",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 2,
+  "kern_len_reads": 9,
+  "kern_data_len_reads": 3,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 33,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 1,
+  "kern_len_reads": 9,
+  "kern_data_len_reads": 1,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 34,
+  "class": "verified",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 0,
+  "kern_len_reads": 2,
+  "kern_data_len_reads": 0,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 35,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 1,
+  "kern_len_reads": 5,
+  "kern_data_len_reads": 3,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 36,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 2,
+  "kern_len_reads": 11,
+  "kern_data_len_reads": 3,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 37,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 6,
+  "ctx_data_reads": 8,
+  "kern_len_reads": 14,
+  "kern_data_len_reads": 2,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 38,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 5,
+  "kern_len_reads": 22,
+  "kern_data_len_reads": 14,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 39,
+  "class": "verified",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 0,
+  "kern_len_reads": 1,
+  "kern_data_len_reads": 0,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 40,
+  "class": "verified"
+ },
+ {
+  "request_id": 41,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 1,
+  "kern_len_reads": 6,
+  "kern_data_len_reads": 3,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 42,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 2,
+  "kern_len_reads": 7,
+  "kern_data_len_reads": 2,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 43,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 2,
+  "kern_len_reads": 13,
+  "kern_data_len_reads": 4,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 44,
+  "class": "only_read",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 2,
+  "kern_len_reads": 10,
+  "kern_data_len_reads": 3,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 45,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 6,
+  "ctx_data_reads": 7,
+  "kern_len_reads": 12,
+  "kern_data_len_reads": 1,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 46,
+  "class": "verified",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 0,
+  "kern_len_reads": 1,
+  "kern_data_len_reads": 0,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 47,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 3,
+  "kern_len_reads": 18,
+  "kern_data_len_reads": 9,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 48,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 2,
+  "kern_len_reads": 11,
+  "kern_data_len_reads": 3,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 49,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 1,
+  "kern_len_reads": 2,
+  "kern_data_len_reads": 1,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 50,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 3,
+  "kern_len_reads": 5,
+  "kern_data_len_reads": 3,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 51,
+  "class": "verified",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 0,
+  "kern_len_reads": 0,
+  "kern_data_len_reads": 0,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 52,
+  "class": "verified",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 0,
+  "kern_len_reads": 2,
+  "kern_data_len_reads": 0,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 53,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 2,
+  "kern_len_reads": 8,
+  "kern_data_len_reads": 2,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 54,
+  "class": "verified",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 0,
+  "kern_len_reads": 0,
+  "kern_data_len_reads": 0,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 55,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 1,
+  "kern_len_reads": 11,
+  "kern_data_len_reads": 1,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 56,
+  "class": "only_read",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 2,
+  "kern_len_reads": 9,
+  "kern_data_len_reads": 3,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 57,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 5,
+  "kern_len_reads": 22,
+  "kern_data_len_reads": 14,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 58,
+  "class": "verified"
+ },
+ {
+  "request_id": 59,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 3,
+  "kern_len_reads": 18,
+  "kern_data_len_reads": 9,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 60,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 5,
+  "kern_len_reads": 22,
+  "kern_data_len_reads": 14,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 61,
+  "class": "only_read",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 2,
+  "kern_len_reads": 10,
+  "kern_data_len_reads": 3,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 62,
+  "class": "verified",
+  "section": "classifier",
+  "ctx_data_end_reads": 0,
+  "ctx_data_reads": 0,
+  "kern_len_reads": 1,
+  "kern_data_len_reads": 0,
+  "ctx_loadinst": 0
+ },
+ {
+  "request_id": 63,
+  "class": "packet",
+  "section": "classifier",
+  "ctx_data_end_reads": 1,
+  "ctx_data_reads": 4,
+  "kern_len_reads": 12,
+  "kern_data_len_reads": 3,
+  "ctx_loadinst": 0
+ }
+]
