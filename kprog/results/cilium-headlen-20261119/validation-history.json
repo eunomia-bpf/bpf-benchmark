@@ -1,0 +1,33 @@
+{
+  "recorded_at": "2026-11-19T22:34:00Z",
+  "runs": [
+    {
+      "pid": 303179,
+      "raw": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/check-20261119T210631Z-303179",
+      "make_exit": 2,
+      "failed_stage": "fixture llc object emission",
+      "command_exit": 1,
+      "diagnostic": "symbol 'license' is already defined",
+      "repair": "fixture_license symbol in the current fixture"
+    },
+    {
+      "pid": 351151,
+      "raw": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/check-20261119T220725Z-351151",
+      "make_exit": 2,
+      "passed": ["12 positive and 8 exclusion controls", "fixture B emission", "pointer difference controls", "ALU32 controls", "captured Katran B replay"],
+      "failed_stage": "stock head_ge fixture load",
+      "verifier_instruction": 15,
+      "packet_offset": 23,
+      "reload_instruction": 14,
+      "repair_candidate": "ff8f0e4b3"
+    },
+    {
+      "pid": 366677,
+      "raw": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/check-20261119T222823Z-366677",
+      "state": "queued for canonical compiler replacement under image EX",
+      "compiler_candidate": "ff8f0e4b3",
+      "recipe": "5d0151328",
+      "stock_confirmation": "pending"
+    }
+  ]
+}

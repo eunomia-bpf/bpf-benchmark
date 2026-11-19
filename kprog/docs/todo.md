@@ -59,6 +59,14 @@
   this is no new rejection or causal attribution. Diagnostics still wait.
 
 - [ ] P-B-cilium-headlen (PERF handoff 2026-11-19T20:22:55Z, OMP639663a85):
+  PERF 2026-11-19T22:34Z: ff8f0e4b3 shares dominating packet-data SSA values
+  across context-preserving intervals; original reads retain ordering effects.
+  8ec55e8b7 covers read freshness and exact TC stores. Combined validator366677
+  queued22:28:23Z for canonical imageEX rebuild, then controls, stock fixtures,
+  41packet/sixstore replays and fresh Cilium. Acceptance remains open.
+  Earlier303179 ended2 at duplicate license-symbol emission;351151 passed
+  IR/B controls then ended2 at stock head_ge reload/read14/15 packetoff23.
+  See results/cilium-headlen-20261119/validation-history.json and retained raw.
   OMP 2026-11-19T23:08Z: ran Cilium end to end with the fixed compiler installed
   (/workspaces/kprog-raw/verified/omp-cilium-20261119/postfix-20261119T214810Z, exit 0,
   64 requests): still 14 install / 41 packet / 6 store / 3 emitter. The matcher lowers

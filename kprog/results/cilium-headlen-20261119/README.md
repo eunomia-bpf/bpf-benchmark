@@ -1,5 +1,27 @@
 # Cilium head-length bounds
 
+PERF 2026-11-19T22:34Z recovery: `ff8f0e4b3` shares the SSA value of
+dominating public packet-data reads across intervals with preserved context.
+Original reads retain their ordering effects; `8ec55e8b7` checks plain,
+readonly, private-store, mutating and stale-identity cases. The same compiler
+batch canonicalizes the six TC class stores through the frozen public accessor.
+The minimal repair covers these two B compiler defects and their focused
+regressions; native P, producer flags and workloads retain their definitions.
+
+Validator366677 queued at22:28:23Z under imageEX, followed by imageSH for
+the existing controls, stock fixtures, 41 packet replays, six store replays
+and a fresh Cilium checked-corpus run. Raw:
+`/workspaces/kprog-raw/perf/cilium-headlen-20261119/check-20261119T222823Z-366677`.
+The canonical compiler rebuild precedes these tests. Its guest verdict is pending.
+
+Two earlier runs are terminal. Worker303179 ended2 at fixture emission:
+llc reported `symbol 'license' is already defined`; the fixture now uses
+`fixture_license`. Worker351151 ended2 after all12 positive/eight exclusion
+controls and normal B emission passed: stock rejected `head_ge` at instruction15,
+packet byte23 through the reload at14. Its source predates the SSA repair.
+Raw directories retain both command histories and the verifier log; see
+`validation-history.json`. These outcomes supersede their queued status below.
+
 PERF 2026-11-19T21:07:34Z. This is the phase-1 compiler repair for the 41 archived
 Cilium `invalid access to packet` requests identified in
 [the measured handoff](../cilium-packet-bounds-20261119/README.md).
