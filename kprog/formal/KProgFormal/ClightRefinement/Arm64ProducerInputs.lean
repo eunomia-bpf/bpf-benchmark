@@ -42,7 +42,7 @@ def inputContinuation (m : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) : CC.Cont :=
   .Kcall (some Arm64Entry._t'2) producer (allocation m).1 le
     (.Kseq inputParts.setValue (.Kseq inputParts.storeValue (.Kseq inputParts.tags k)))
 
-private def setupNames : List CC.Ident :=
+def setupNames : List CC.Ident :=
   [Arm64Entry.___a64_sim_is_xdp, Arm64Entry.___a64_sim_helper_ctx,
    Arm64Entry.___a64_sim_helper_abi_base]
 
@@ -74,21 +74,40 @@ theorem create_store (m memory : CC.Mem) (chunk : CC.Chunk) (block : CC.Block)
   obtain ⟨after, store⟩ := stored
   exact ⟨after, store, (CC.Mem.store_access store).trans access⟩
 
-private theorem setup_exec (world : CC.CGenv) (m : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+/-- The three exported setup stores and their real source successor. -/
+def setupAssignments : List CC.Stmt := by
+  run_tac do
+    let mut body ← Lean.Elab.Term.elabTerm (← `(afterCacheStage)) none
+    let mut rows : Array Lean.Expr := #[]
+    for _ in [:3] do
+      body ← Lean.Meta.withTransparency .all (Lean.Meta.whnf body)
+      unless body.isAppOfArity ``CC.Stmt.Ssequence 2 do
+        throwError "producer setup no longer has three assignments"
+      rows := rows.push body.getAppArgs[0]!
+      body := body.getAppArgs[1]!
+    Lean.Elab.Tactic.closeMainGoal `setup_assignments
+      (← Lean.Meta.mkListLit (Lean.mkConst ``CC.Stmt) rows.toList)
+
+def registerStage : CC.Stmt := inputParts.registerStage
+
+theorem setup_source : afterCacheStage =
+    setupAssignments.foldr CC.Stmt.Ssequence registerStage := by rfl
+
+private theorem setup_exec (world : CC.CGenv) (f : CC.Function) (rest : CC.Stmt) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
     (fb cb ab : CC.Block) (before m1 m2 after : CC.Mem)
-    (flag : (allocation m).1.get Arm64Entry.___a64_sim_is_xdp = some (fb, CC.tuchar))
-    (ctx : (allocation m).1.get Arm64Entry.___a64_sim_helper_ctx = some (cb, CC.tptr CC.tvoid))
-    (abi : (allocation m).1.get Arm64Entry.___a64_sim_helper_abi_base = some (ab, CC.tptr CC.tvoid))
+    (flag : e.get Arm64Entry.___a64_sim_is_xdp = some (fb, CC.tuchar))
+    (ctx : e.get Arm64Entry.___a64_sim_helper_ctx = some (cb, CC.tptr CC.tvoid))
+    (abi : e.get Arm64Entry.___a64_sim_helper_abi_base = some (ab, CC.tptr CC.tvoid))
     (s0 : CC.Mem.store .Mint8unsigned before fb 0 (.Vint (0#32)) = some m1)
     (s1 : CC.Mem.store CC.Mptr m1 cb 0 (.Vlong (0#64)) = some m2)
     (s2 : CC.Mem.store CC.Mptr m2 ab 0 (.Vlong (0#64)) = some after) :
-    steps world 9 (.State producer afterCacheStage k (allocation m).1 le before) =
-      some (CC.E0, .State producer inputParts.registerStage k (allocation m).1 le after) ∧
-    InternalPath world 9 (.State producer afterCacheStage k (allocation m).1 le before) := by
+    steps world 9 (.State f (setupAssignments.foldr CC.Stmt.Ssequence rest) k e le before) =
+      some (CC.E0, .State f rest k e le after) ∧
+    InternalPath world 9 (.State f (setupAssignments.foldr CC.Stmt.Ssequence rest) k e le before) := by
   change CC.Mem.storev .Mint8unsigned before (.Vptr fb (0#64)) (.Vint (0#32)) = some m1 at s0
   change CC.Mem.storev CC.Mptr m1 (.Vptr cb (0#64)) (.Vlong (0#64)) = some m2 at s1
   change CC.Mem.storev CC.Mptr m2 (.Vptr ab (0#64)) (.Vlong (0#64)) = some after at s2
-  simp +decide [steps, InternalPath, InternalState, afterCacheStage, inputParts,
+  simp +decide [steps, InternalPath, InternalState, setupAssignments, List.foldr,
     CC.doStep, CC.doEvalLvalue, CC.lvalOfVar, CC.doEvalExpr, CC.typeof,
     CC.doAssignLoc, CC.accessMode, CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
     CC.Cop.castIntLong, CC.Integers.Int.signed, CC.Integers.MI.signed,
@@ -98,11 +117,13 @@ private theorem setup_exec (world : CC.CGenv) (m : CC.Mem) (le : CC.TempEnv) (k 
     CC.E0, CC.Eapp, flag, ctx, abi, s0, s1, s2]
 
 /-- Actual post-cache setup; all other declared local loads are preserved. -/
-theorem setup_register_input_bound (world : CC.CGenv) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+theorem setup_register_input_body (world : CC.CGenv) (f : CC.Function)
+    (e : CC.Env) (rest : CC.Stmt) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (bound : ∀ id ∈ setupNames, e.get id = (allocation m).1.get id)
     (access : before.access = (allocation m).2.access) :
     ∃ after, InternalRun world 9
-        (.State producer afterCacheStage k (allocation m).1 le before)
-        (.State producer inputParts.registerStage k (allocation m).1 le after) ∧
+        (.State f (setupAssignments.foldr CC.Stmt.Ssequence rest) k e le before)
+        (.State f rest k e le after) ∧
       (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ∉ setupNames →
         ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
       FrameBelow m.nextblock before after ∧ after.access = before.access ∧
@@ -116,7 +137,10 @@ theorem setup_register_input_bound (world : CC.CGenv) (m before : CC.Mem) (le : 
   obtain ⟨m1, s0, a1⟩ := create_store m before .Mint8unsigned fb (.Vint (0#32)) access flagWritable
   obtain ⟨m2, s1, a2⟩ := create_store m m1 CC.Mptr cb (.Vlong (0#64)) a1 ctxWritable
   obtain ⟨after, s2, a3⟩ := create_store m m2 CC.Mptr ab (.Vlong (0#64)) a2 abiWritable
-  have exec := setup_exec world m le k fb cb ab before m1 m2 after flag ctx abi s0 s1 s2
+  have exec := setup_exec world f rest e le k fb cb ab before m1 m2 after
+    ((bound _ (by decide +kernel)).trans flag)
+    ((bound _ (by decide +kernel)).trans ctx)
+    ((bound _ (by decide +kernel)).trans abi) s0 s1 s2
   refine ⟨after, internalRun_of_steps exec.2 exec.1, ?_, ?_, a3.trans access.symm, ?_⟩
   · intro id ty block bound other chunk ofs
     have separate := (allocated_local_storage
@@ -130,6 +154,20 @@ theorem setup_register_input_bound (world : CC.CGenv) (m before : CC.Mem) (le : 
   · exact ((FrameBelow.store flagFresh s0).trans (FrameBelow.store ctxFresh s1)).trans
       (FrameBelow.store abiFresh s2)
   · exact (CC.Mem.store_nextblock s2).trans ((CC.Mem.store_nextblock s1).trans (CC.Mem.store_nextblock s0))
+
+/-- Source specialization keeps the original setup interface. -/
+theorem setup_register_input_bound (world : CC.CGenv) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (access : before.access = (allocation m).2.access) :
+    ∃ after, InternalRun world 9
+        (.State producer afterCacheStage k (allocation m).1 le before)
+        (.State producer inputParts.registerStage k (allocation m).1 le after) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ∉ setupNames →
+        ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock := by
+  rw [setup_source]
+  exact setup_register_input_body world producer (allocation m).1 registerStage m before le k
+    (fun _ _ => rfl) access
 
 theorem setup_register_input (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (access : before.access = (allocation m).2.access) :

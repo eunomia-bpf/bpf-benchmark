@@ -1,0 +1,199 @@
+{
+  "step": "M5 actual production setup and first input boundary",
+  "status": "pass",
+  "recorded_utc": "2026-11-19T21:48:26.125461+00:00",
+  "before_commit_head": "f03c0ccfaff30df28507c8c7c1033d82dddeea94",
+  "raw_directory": "/workspaces/kprog-raw/formal/m5-program-entry-inputs",
+  "execution": {
+    "setup_stores": 3,
+    "setup_steps": 9,
+    "entry_through_setup_steps": 589,
+    "first_call_steps": 5,
+    "entry_to_first_input_steps": 594,
+    "actual_input_block": 59,
+    "source_input_block": 64,
+    "complete_pre_header_statements": 196,
+    "pre_header_statements_total": 419,
+    "provider_external_transition": "not executed or assumed by this theorem",
+    "complete_isa_families": 0
+  },
+  "checks": {
+    "focused1": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProducerRegisters"
+      ],
+      "exit": 0,
+      "seconds": 92.50496435165405,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 149
+    },
+    "focused2": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryInputs"
+      ],
+      "exit": 1,
+      "seconds": 344.3728153705597,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "focused3": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryInputs"
+      ],
+      "exit": 0,
+      "seconds": 4.280221462249756,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 174
+    },
+    "query1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "results/m5-program-entry-inputs/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.9692342281341553,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "lake-build1": {
+      "command": [
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 559.8529760837555,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 349
+    }
+  },
+  "public_query_counts": {
+    "types": 11,
+    "axiom_reports": 11
+  },
+  "axiom_reports": {
+    "KProgFormal.ClightRefinement.Arm64Producer.setup_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.setup_register_input_body": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.setup_register_input_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.declaration_call_body": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.register_input_ready_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryInputs.setup_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryInputs.setup_internal": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryInputs.entry_setup": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryInputs.first_declaration_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryInputs.first_call_ready": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryInputs.first_input_ready": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "prior_attempt": {
+    "focused2": "Only the closed first_declaration_source rfl exceeded Meta recursion512. Direct Eq.refl term avoids Meta comparison; kernel still checks actual statement equality. No cap increase or kernel-check bypass."
+  },
+  "limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false,
+    "unchanged": true
+  },
+  "resources": {
+    "lean_cpu": 17,
+    "control_cpu": 16,
+    "workers": 1,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "none for host work under 2026-11-19T18:18:59 coordination rule"
+  },
+  "lean_source_sha256": {
+    "kprog/formal/KProgFormal.lean": "61f8cd0c1fa05b5ea91bad134d7d3e8df94b2b01ef01a34895b90c08dfdc61ee",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerInputs.lean": "2f6dbf5b77ddfdc681060cda43d0df5d81c76a9ae6d44ee8a3d0da12093fc828",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerRegisters.lean": "7025c4a216cb78fd690e8a243a34e5915bf315c2af1f580bb343ca65e91db09e",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryInputs.lean": "a485a783266e40d1dbe96da990eb327dbe0afc5aff3e135362439a9ffd3e5894",
+    "kprog/formal/results/m5-program-entry-inputs/Query.lean": "cd260a2538e1e87fc9668fd10f054855dff2e17edfad62c44d7d787c7878e978"
+  },
+  "scope": {
+    "changed": "formal proofs/receipts and own todo line",
+    "source_setup_store_construction": "shared with production function, Env and successor",
+    "call_proof": "generic actual input block plus full binding and local non-shadowing",
+    "source_apis": "old setup and register-input-ready signatures retained",
+    "runtime_c_compiler_kernel_base_image_benchmark_paper_design_changes": false,
+    "code_growth": "157-line actual boundary proof and 56 net shared proof lines; no new C fixture, store replay, flags or interpreter"
+  },
+  "goal_closure": {
+    "M5": "open: actual provider return/writeback and complete pre-header/body/native composition, ISA refinements and O1/O2/O4 recount",
+    "M6": "open, after M5",
+    "whole_make_check_this_step": "not repeated for Lean-only change; fresh final Lake/make check remain due",
+    "last_whole_make_check_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "clight_byte_comparison_this_step": "not repeated; no C/export source changed",
+    "last_export_comparison": "results/m5-program-entry-fields/validation.json; ten Arm64 baseline-identical and twelve historical x86 differences recorded"
+  }
+}

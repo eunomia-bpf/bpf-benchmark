@@ -13,6 +13,34 @@ def RegisterDeclaration.temps (d : RegisterDeclaration) (le : CC.TempEnv)
     (value : BitVec 64) : CC.TempEnv :=
   (le.set d.inputTemp (.Vlong value)).set d.resultTemp (.Vlong value)
 
+/-- The exported declaration schema reaches the real input callee in any
+function/environment whose local and global bindings resolve that callee. -/
+theorem declaration_call_body (world : CC.CGenv) (f : CC.Function) (e : CC.Env)
+    (inputBlock : CC.Block)
+    (binding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input =
+        some inputBlock ∧
+      CC.Genv.findFunctPtr world.genv_genv inputBlock = some Arm64OriginCache.inputFunction) (d : RegisterDeclaration) (memory : CC.Mem)
+    (le : CC.TempEnv) (k : CC.Cont)
+    (unshadowed : e.get Arm64Entry._native_lab_entry_input = none) (different : CC.Integers.Int.eq d.index (30#32) = false) :
+    steps world 5 (.State f d.body k e le memory) =
+      some (CC.E0, .Callstate Arm64OriginCache.inputFunction [.Vint (6#32)]
+        (.Kcall (some d.inputTemp) f e le
+          (.Kseq d.setValue (.Kseq d.storeValue (.Kseq (.Ssequence d.storeTag d.rest) k)))) memory) ∧
+    InternalPath world 5 (.State f d.body k e le memory) := by
+  have indexDifferent : d.index ≠ (30#32) := by
+    simpa only [CC.Integers.Int.eq, CC.Integers.MI.eq, beq_eq_false_iff_ne] using different
+  simp +decide [steps, InternalPath, InternalState, RegisterDeclaration.body,
+    CC.doStep, CC.doEvalExpr, CC.doEvalExprlist, CC.lvalOfVar, CC.doDerefLoc, CC.accessMode, CC.typeof,
+    CC.typeconv, CC.removeAttributes, CC.tattr, unshadowed, binding.1,
+    binding.2, CC.Genv.findFunct, CC.Integers.Ptrofs.zero, CC.Integers.Ptrofs.eq,
+    CC.typeOfFundef, Arm64OriginCache.inputFunction, Arm64OriginCache.inputEF, CC.Cop.classifyFun,
+    CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp, CC.Cop.semBinarith,
+    CC.Cop.classifyBinarith, CC.Cop.binarithType, CC.Cop.semCast, CC.Cop.classifyCast,
+    CC.Cop.castIntInt, CC.Cop.boolVal, CC.Cop.classifyBool, CC.Val.ofBool, CC.Val.Vtrue,
+    CC.Val.Vfalse, CC.Integers.Int.eq, CC.Integers.MI.eq, CC.Integers.Int.cmpu, CC.Integers.MI.cmpu, indexDifferent,
+    CC.Integers.Int.zero, CC.Integers.Int.one, CC.Integers.MI.zero, CC.Integers.MI.one,
+    CC.Integers.Int.repr, CC.Integers.MI.repr, CC.tuint, CC.tint, CC.tulong, CC.E0, CC.Eapp]
+
 private theorem declaration_call_exec (world : CC.CGenv)
     (binding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input =
         some (CC.Positive.ofNat 64) ∧
@@ -26,19 +54,8 @@ private theorem declaration_call_exec (world : CC.CGenv)
     have notLocal : Arm64Entry._native_lab_entry_input ∉ CC.varNames producer.fn_vars := by decide +kernel
     simpa only [CC.emptyEnv, CC.PTree.gempty] using CC.allocVariables_env_other
       (CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (allocation m)).symm) notLocal
-  have indexDifferent : d.index ≠ (30#32) := by
-    simpa only [CC.Integers.Int.eq, CC.Integers.MI.eq, beq_eq_false_iff_ne] using different
-  simp +decide [steps, InternalPath, InternalState, RegisterDeclaration.body, RegisterDeclaration.continuation,
-    CC.doStep, CC.doEvalExpr, CC.doEvalExprlist, CC.lvalOfVar, CC.doDerefLoc, CC.accessMode, CC.typeof,
-    CC.typeconv, CC.removeAttributes, CC.tattr, unshadowed, binding.1,
-    binding.2, CC.Genv.findFunct, CC.Integers.Ptrofs.zero, CC.Integers.Ptrofs.eq,
-    CC.typeOfFundef, Arm64OriginCache.inputFunction, Arm64OriginCache.inputEF, CC.Cop.classifyFun,
-    CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp, CC.Cop.semBinarith,
-    CC.Cop.classifyBinarith, CC.Cop.binarithType, CC.Cop.semCast, CC.Cop.classifyCast,
-    CC.Cop.castIntInt, CC.Cop.boolVal, CC.Cop.classifyBool, CC.Val.ofBool, CC.Val.Vtrue,
-    CC.Val.Vfalse, CC.Integers.Int.eq, CC.Integers.MI.eq, CC.Integers.Int.cmpu, CC.Integers.MI.cmpu, indexDifferent,
-    CC.Integers.Int.zero, CC.Integers.Int.one, CC.Integers.MI.zero, CC.Integers.MI.one,
-    CC.Integers.Int.repr, CC.Integers.MI.repr, CC.tuint, CC.tint, CC.tulong, CC.E0, CC.Eapp]
+  exact declaration_call_body world producer (allocation m).1 (CC.Positive.ofNat 64)
+    binding d memory le k unshadowed different
 
 /-- Every actual x0--x29 initializer reaches its real kind-6 call. -/
 theorem register_input_ready_bound (world : CC.CGenv)
