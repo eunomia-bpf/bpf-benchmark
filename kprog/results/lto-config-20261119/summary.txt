@@ -1,2 +1,6 @@
 == LTO configuration (checked-sim-c) bcc_set-off bcc/set 
 == LTO configuration (checked-sim-c) bcc_set-on bcc/set 
+== LTO configuration (checked-sim-c) bcc_set-off x86_kvm_corpus_20261119_045219_454072
+throughput 1.023x (1.020 / 1.071 / 1.023); installed native 54511 B / JIT 7965 B (6.84x); replaced 25 failed 0
+== LTO configuration (checked-sim-c) bcc_set-on x86_kvm_corpus_20261119_052151_233344
+per call 1.004x (106.9 -> 106.5 ns); throughput 1.004x

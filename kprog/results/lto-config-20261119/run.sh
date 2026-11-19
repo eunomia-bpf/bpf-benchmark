@@ -28,7 +28,7 @@ one() {  # app samples duration stats label
       --exec "bash /workspaces/repository/$R/run_lto.sh $out $app $out/loader-inputs/$(basename $LOADER) $out/bounds-inputs/packet-bounds $samples $dur $stats"
   ) > "$out.log" 2>&1
   rm -f "$GB/bpf-benchmark-docker.img"
-  local run; run=$(grep -o '"artifact_run_dir": "[^"]*"' "$out.log" | tail -1 | cut -d'"' -f4)
+  local run; run=$(grep -a -o 'x86_kvm_corpus_2026[0-9_]*' "$out.log" | sort -u | tail -1); [ -n "$run" ] && run=/workspaces/repository/corpus/results/$run
   log "$5 $app run=$run"
   { echo "== LTO configuration (checked-sim-c) $5 $app $run"
     if [ -n "$run" ]; then
