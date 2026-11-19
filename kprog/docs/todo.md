@@ -40,6 +40,12 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-19T04:56:36Z（按应用的 manifest 键换成通用规则，协调者自己做，先在 bpf-benchmark-lean 上测）**：
+1. 写 manifest 的脚本对每个应用都一样：每个原生对象配上同名的 BPF 对象（Katran、BCC、Tracee、Tetragon、OTel 在构建里都有），并记下它所在的 ELF 段名和引用的 map 名；按应用的 prog_type、source_map_prefix、helper 判别、dedupe、源对象目录选项去掉。
+2. loader：同名候选项有多个时打分挑一项；有源对象的按源程序和加载程序开头连续一致的指令数（比操作码和寄存器，ld_imm64 / call 的 src_reg 除外），没有源对象的按引用 map 名的重合；程序类型按段名（libbpf 的通用对应）。只有源程序和加载程序整段一致时才按源对象绑定 map。source_has_helper、source_has_map_prefix 删掉。
+3. Cilium 由 agent 运行时编译，构建里没有它的 BPF 对象，靠 map 名挑对象。
+4. 做到：vendor/bpf/Makefile 不再有按应用的选项，一镜像检查 14 / 25 / 113 / 288 / 169 / 1 个替换、0 失败。perf 的 resume-msg 里同一件事改为协调者做。
+
 **协调者 2026-11-19T04:48:00Z（lean 第二项：擦掉按应用的 manifest 键）**：擦掉后 Cilium 70 个、Tetragon 287 个、OTel 1 个原生装载失败（kprog/results/lean-20261118/README.md 第二节）。这些键在现在的 loader 里管“装载的程序对应哪个原生对象 / 哪个内核版本变体”和尾调用 map 的绑定。换成对所有应用一样的做法：每个原生对象配上和它一起编出来的 BPF 对象，loader 选源程序和装载的程序一致的那一项，并按源对象的重定位绑定 map（设计里已有 source_bpf_object）。perf 的 Codex 额度 05:36 UTC 回来后实现，协调者在 bpf-benchmark-lean 上测功能。
 
 **协调者 2026-11-19T01:27:01Z（运营者：“1.214x（要重跑）??? 不要随便重跑”）**：不再重跑。量出来的数照实用，旁边写明当时的主机负载；lean 的 Cilium 重跑 01:26 停掉，Tracee 重跑取消，只跑六个应用 stats 开那一轮。
