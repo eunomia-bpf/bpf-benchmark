@@ -49,3 +49,12 @@ map types keep their previous binding; the next combined checked-sim-c
 timing batch measures current per-call and throughput behavior with every
 C/LTO piece enabled. Full raw:
 `/workspaces/kprog-raw/perf/native-cohort-check-20261119/bcc-20261119T120407Z-365394`.
+
+PERF 2026-11-19T12:27:32Z: Combined batch369379 published the sole image
+`94484bec285d02aafbb43213081e1da9a4689224d99ab3eda09294bf9d735f12`
+through the frozen recipe. Its six-app functional check is running; current
+completed app statuses and raw paths are in `batch-progress.json`. This
+snapshot is not a per-program native census or the BCC timing result.
+The queued main checked-sim-c timing keeps all C/LTO pieces on and uses
+3x180s/stats1 on CPUs0-7. Raw batch:
+`/workspaces/kprog-raw/perf/native-cohort-timing-20261119/batch-20261119T122058Z-369379`.

@@ -22,3 +22,11 @@ compiler, header, module or image. No effect on any corpus app is inferred.
 The detached recipe holds timing SH/image SH, CPU18 and a 4 GiB address-space
 bound. It waits behind the active image/check/timing batch. At preparation
 time the suspected mismatch has not been executed or confirmed.
+
+Worker400746 was queued at2026-11-19T12:46:11Z from committed recipe
+2a716ab6d. Raw:
+`/workspaces/kprog-raw/perf/numeric-context-bridge-20261119/reproduce-20261119T124611Z-400746`.
+Launcher: `/workspaces/kprog-raw/perf/numeric-context-bridge-launch-20261119.log`.
+It is waiting for timing SH; no compilation/execution result yet. A setup or
+compiler failure must be distinguished from the final bit-preservation
+assertion, whose `result.json` records actual executed rows.

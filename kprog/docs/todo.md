@@ -8,6 +8,14 @@
 
 ## 0. Lane 目标与待办
 
+- [ ] P-native-numeric-bridge (PERF 2026-11-19T12:46:11Z): audit native
+  preservation of NUMERIC(value)'s concrete bits through the reused stock
+  frontend. The proof header discards value; native freezes the resulting
+  unspecified-input read. The suspected loss is not yet executed/confirmed.
+  Component worker400746 waits on timing SH, with six ABI controls and24
+  numeric/lane cases. No production change during the active batch. See
+  results/numeric-context-bridge-20261119.
+
 - [ ] P-B-constant-ALU32 (PERF 2026-11-19T11:28:45Z): Tetragon request 6's
   retained B has 438,579 machine blocks and a conservative 3,996-byte live
   spill frontier before and after packing. At the first peak, constant i32

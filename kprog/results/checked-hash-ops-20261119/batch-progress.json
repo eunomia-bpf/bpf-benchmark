@@ -1,0 +1,51 @@
+{
+  "recorded_utc": "2026-11-19T12:57:37Z",
+  "batch": "/workspaces/kprog-raw/perf/native-cohort-timing-20261119/batch-20261119T122058Z-369379",
+  "source_commit": "e3398e115f7ffe48a9dc5111f49578aa400f707a",
+  "image_id": "sha256:94484bec285d02aafbb43213081e1da9a4689224d99ab3eda09294bf9d735f12",
+  "image_stage_finished_utc": "2026-11-19T12:27:32Z",
+  "check_completed_apps": [
+    {
+      "finished_utc": "2026-11-19T12:34:38Z",
+      "app": "otelcol-ebpf-profiler/profiling",
+      "exit_code": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261119_123254_109655"
+    },
+    {
+      "finished_utc": "2026-11-19T12:37:48Z",
+      "app": "bcc/set",
+      "exit_code": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261119_123619_886135"
+    },
+    {
+      "finished_utc": "2026-11-19T12:41:19Z",
+      "app": "cilium/agent",
+      "exit_code": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261119_123927_233867"
+    },
+    {
+      "finished_utc": "2026-11-19T12:44:44Z",
+      "app": "tetragon/observer",
+      "exit_code": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261119_124324_218948"
+    },
+    {
+      "finished_utc": "2026-11-19T12:48:57Z",
+      "app": "tracee/monitor",
+      "exit_code": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261119_124651_509831"
+    },
+    {
+      "finished_utc": "2026-11-19T12:52:08Z",
+      "app": "katran",
+      "exit_code": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261119_125104_438079"
+    }
+  ],
+  "progress": [
+    "2026-11-19T12:20:58Z image start",
+    "2026-11-19T12:27:32Z image done; check start",
+    "2026-11-19T12:52:08Z check done; BCC checked timing start"
+  ],
+  "scope": "Publication and completed functional-check status snapshot; per-program native counts and timing outcome remain to be read from their raw artifacts."
+}
