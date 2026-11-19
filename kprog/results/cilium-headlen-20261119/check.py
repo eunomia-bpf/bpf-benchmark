@@ -48,6 +48,7 @@ for width,predicates in [(32,['uge','ule']),(64,['ugt','uge','ult','ule'])]:
 }}
 '''
 controls+='\ndeclare void @read_context(ptr) readonly\n'
+controls+='\n@kprog_unspecified_input = external global i64, section ".ksyms"\n@foreign_input = external global i64\n'
 boundary=['ir_edge_eq_lower','ir_edge_ne_lower','ir_edge_eq_upper','ir_edge_ne_upper']
 for name in [*boundary,'ir_edge_nondominating']:
     guard='ule' if name.endswith('upper') else 'uge'
@@ -74,12 +75,22 @@ exit:
 data_controls = {'plain': True, 'readonly': True, 'private_store': True,
                  'mutating': False, 'identity_stale': False, 'cb_store': True,
                  'packet_data_store': False, 'cb_cross_end': False, 'foreign_cb_store': False,
-                 'xdp_cb_store': False}
+                 'xdp_cb_store': False, 'private_choice': True, 'foreign_choice': False,
+                 'class_store': True, 'class_choice': True, 'class_packet_store': False}
 for name in data_controls:
     middle = {'plain': '', 'readonly': '  call void @read_context(ptr %ctx)\n',
               'private_store': '  store i8 7, ptr %local\n',
               'mutating': '  call void @mutate_context(ptr %ctx)\n',
               'identity_stale': '  call void @mutate_context(ptr %ctx)\n  %carried = call i64 asm sideeffect "", "=r,0"(i64 %first)\n'}.get(name, '')
+    if name in {'private_choice','foreign_choice','class_choice'}:
+        symbol = 'foreign_input' if name == 'foreign_choice' else 'kprog_unspecified_input'
+        middle = f'  %choice = load volatile i64, ptr @{symbol}\n'
+    if name in {'class_store','class_choice','class_packet_store'}:
+        offset = 76 if name == 'class_packet_store' else 46
+        middle += f'''  %kernel = call ptr @bpf_cast_to_kern_ctx(ptr %ctx)
+  %class = getelementptr i8, ptr %kernel, i64 {offset}
+  call void asm sideeffect "*(u16 *)($0 + 0) = $1", "r,r,~{{memory}}"(ptr %class, i64 0)
+'''
     if name in {'cb_store','packet_data_store','cb_cross_end','foreign_cb_store','xdp_cb_store'}:
         offset = 76 if name == 'packet_data_store' else 66 if name == 'cb_cross_end' else 48
         pointer = '%local' if name == 'foreign_cb_store' else '%ctx'
