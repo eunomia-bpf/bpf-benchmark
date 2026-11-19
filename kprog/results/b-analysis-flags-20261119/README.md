@@ -48,3 +48,22 @@ no complete Tetragon B/native/stock claim is made. The already-committed BCC
 subset passed with generation 1.052/3.246 s and native O3 compilation
 0.046/0.408 s. g is retained for BTF; existing bounds lowering removes the
 non-executing scalar debug intrinsics before the B machine backend.
+
+PERF 2026-11-19T07:20:02Z: Worker211523 ended with Make exit2. Frontend, bounds,
+pre-PEI backend and spill packing completed; final llc object emission fails
+with the existing 4096-byte B compiler stack limit. New stock acceptance and
+native O3 compilation were not reached for this request. See tetragon-result.json;
+all full logs/MIR remain raw. The production limit and service native-first
+fallback are unchanged.
+
+Correction to the 07:10 coordination note: the last directly observed packing
+process at 07:00:20 had elapsed16m18s; the lowering report file was written
+around07:03, and the job had advanced to llc before that note. It was no longer
+in packing at07:10. The repeated whole-function/pair scans remain a source
+performance finding, but no greater-than20-minute measured duration is claimed.
+
+Diagnostic worker221549 reuses that completed packed MIR with a diagnostic
+65536-byte compiler bound solely to reveal actual frame/code size. It does not
+repeat frontend or packing and does not change production flags, the kernel's
+512-byte stock limit, benchmark settings, or installation policy. Results will
+be committed after completion.

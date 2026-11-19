@@ -1,0 +1,24 @@
+{
+  "raw": "/workspaces/kprog-raw/perf/b-analysis-flags-20261119/production-20261119T063707Z-211523",
+  "worker_exit": 2,
+  "completed_commands": 7,
+  "failure_stage": "B object emission after completed frontend, bounds, pre-PEI backend and packing",
+  "failed_command": [
+    "llc-18",
+    "-O1",
+    "-march=bpf",
+    "-mcpu=v4",
+    "-bpf-stack-size=4096",
+    "-start-before=prologepilog",
+    "-filetype=obj",
+    "/workspaces/kprog-raw/perf/b-analysis-flags-20261119/production-20261119T063707Z-211523/tetragon6/trusted_x86.bpf.packed.mir",
+    "-o",
+    "/workspaces/kprog-raw/perf/b-analysis-flags-20261119/production-20261119T063707Z-211523/tetragon6/trusted_x86.bpf.o"
+  ],
+  "failed_returncode": 1,
+  "diagnostic": "error: kprog-raw/perf/b-analysis-flags-20261119/production-20261119T063707Z-211523/tetragon6/trusted_x86.bpf.c:67:4117: in function trusted_x86_x86_sim_xdp i32 (ptr): Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.\n\n\nerror: kprog-raw/perf/b-analysis-flags-20261119/production-20261119T063707Z-211523/tetragon6/trusted_x86.bpf.c:67:4117: in function trusted_x86_x86_sim_xdp i32 (ptr): Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.\n\n\nerror: kprog-raw/perf/b-analysis-flags-20261119/production-20261119T063707Z-211523/tetragon6/trusted_x86.bpf.c:67:4117: in function trusted_x86_x86_sim_xdp i32 (ptr): Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.\n\n\nerror: kprog-raw/perf/b-analysis-flags-20261119/production-20261119T063707Z-211523/tetragon6/trusted_x86.bpf.c:67:4117: in function trusted_x86_x86_sim_xdp i32 (ptr): Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.\n\n\nerror: kprog-raw/perf/b-analysis-flags-20261119/production-20261119T063707Z-211523/tetragon6/trusted_x86.bpf.c:67:4117: in function trusted_x86_x86_sim_xdp i32 (ptr): Looks like the BPF stack limit is exceeded. Please move large on stack variables into BPF per-cpu array map. For non-kernel uses, the stack can be increased using -mllvm -bpf-stack-size.\n\n\nerror: kprog-raw/per",
+  "packing_pair_records": 52,
+  "stock_status": "not run",
+  "native_compile_status": "not reached",
+  "scope": "Real production O1 B failure; native-first service fallback remains unchanged. No production limit increase."
+}
