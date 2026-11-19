@@ -134,6 +134,10 @@ adds 90 pure transitions: 24 tag clears, SP zero and five context stores. It
 derives helper context/ABI values, x0 context with RAW tag 1 and x30 RETURN
 tag 10, retaining the tables, other registers, flags, vectors, caches and
 98 traces. A represented-context premise keeps the pointer cast defined.
+The [Numeric header-pointer composition](results/m5-numeric-producer-header/README.md)
+constructs all 12 scalar header pointers in 36 transitions, preserving the
+reached register data and 98 traces. Both borrowed cache-storage resources
+and their cold values are derived at that same memory; the stores execute once.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 

@@ -109,21 +109,22 @@ theorem header_source_local (m : CC.Mem) (i : Fin 12) : Nonempty (HeaderSourceLo
     local_storage m (headerSourceName i) (headerSourceType i) (present i)
   exact ⟨⟨block, binding, owned⟩⟩
 
-private theorem header_lvalue (m before : CC.Mem) (le : CC.TempEnv) (i : Fin 12)
+private theorem header_lvalue (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (m before : CC.Mem) (le : CC.TempEnv) (i : Fin 12)
     (entry : HeaderLocal m) :
-    CC.doEvalLvalue ge (allocation m).1 le before (headerTarget i) =
+    CC.doEvalLvalue world (allocation m).1 le before (headerTarget i) =
       some (entry.block, CC.Integers.Ptrofs.repr (8 * (i.val : Int)), .Full) := by
   simp [headerTarget, headerType, CC.doEvalLvalue, CC.lvalOfVar, CC.doEvalExpr,
     CC.doDerefLoc, CC.accessMode, CC.lvalOfField, CC.typeof, entry.binding,
-    header_layout.1, header_layout.2.1, CC.Integers.Ptrofs.add,
+    layout, header_layout.1, header_layout.2.1, CC.Integers.Ptrofs.add,
     CC.Integers.Ptrofs.zero, CC.Integers.MI.zero, CC.Integers.MI.add]
   all_goals
     apply congrArg (fun ofs => (ofs, CC.Bitfield.Full))
     exact BitVec.zero_add _
 
-private theorem header_rhs (m before : CC.Mem) (le : CC.TempEnv) (i : Fin 12)
+private theorem header_rhs (world : CC.CGenv) (m before : CC.Mem) (le : CC.TempEnv) (i : Fin 12)
     (cell : HeaderSourceLocal m i) :
-    CC.doEvalExpr ge (allocation m).1 le before (headerRhs i) = some (.Vptr cell.block 0) ∧
+    CC.doEvalExpr world (allocation m).1 le before (headerRhs i) = some (.Vptr cell.block 0) ∧
     CC.Cop.semCast (.Vptr cell.block 0) (CC.typeof (headerRhs i))
       (CC.typeof (headerTarget i)) before = some (.Vptr cell.block 0) := by
   constructor
@@ -140,10 +141,11 @@ private theorem header_rhs (m before : CC.Mem) (le : CC.TempEnv) (i : Fin 12)
         cell.binding, CC.Integers.Ptrofs.zero, CC.Integers.MI.zero]
   · simp [CC.Cop.semCast, header_layout.2.2.1]
 
-private theorem header_write (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+private theorem header_write (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (i : Fin 12) (entry : HeaderLocal m) (cell : HeaderSourceLocal m i) (rest : CC.Stmt)
     (access : before.access = (allocation m).2.access) :
-    ∃ after, InternalRun ge 3
+    ∃ after, InternalRun world 3
         (.State producer (.Ssequence (headerAssignment i) rest) k (allocation m).1 le before)
         (.State producer rest k (allocation m).1 le after) ∧
       CC.Mem.load CC.Mptr after entry.block (8 * (i.val : Int)) = some (.Vptr cell.block 0) ∧
@@ -178,9 +180,9 @@ private theorem header_write (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
   have storev : CC.Mem.storev CC.Mptr before
       (.Vptr entry.block (CC.Integers.Ptrofs.repr (8 * (i.val : Int)))) (.Vptr cell.block 0) = some after := by
     simpa only [CC.Mem.storev, header_offsets] using stored
-  have target := header_lvalue m before le i entry
-  have rhs := header_rhs m before le i cell
-  have assigned : CC.doStep ge
+  have target := header_lvalue world layout m before le i entry
+  have rhs := header_rhs world m before le i cell
+  have assigned : CC.doStep world
       (.State producer (headerAssignment i) (.Kseq rest k) (allocation m).1 le before) =
       some (CC.E0, .State producer .Sskip (.Kseq rest k) (allocation m).1 le after) := by
     simp only [headerAssignment, CC.doStep, target, rhs.1, rhs.2, CC.doAssignLoc, header_layout.2.2.2.1]
@@ -189,12 +191,12 @@ private theorem header_write (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
       | some memory => some (CC.E0, CC.State.State producer .Sskip (.Kseq rest k) (allocation m).1 le memory)
       | none => none) = _
     rw [storev]
-  have run : InternalRun ge 3
+  have run : InternalRun world 3
       (.State producer (.Ssequence (headerAssignment i) rest) k (allocation m).1 le before)
       (.State producer rest k (allocation m).1 le after) :=
-    .step trivial (CC.doStep_sound ge _ _ _ rfl)
-      (.step trivial (CC.doStep_sound ge _ _ _ assigned)
-        (.step trivial (CC.doStep_sound ge _ _ _ rfl) (.refl _)))
+    .step trivial (CC.doStep_sound world _ _ _ rfl)
+      (.step trivial (CC.doStep_sound world _ _ _ assigned)
+        (.step trivial (CC.doStep_sound world _ _ _ rfl) (.refl _)))
   refine ⟨after, run, ?_, ?_, ?_, FrameBelow.store entry.fresh stored,
     CC.Mem.store_access stored, CC.Mem.store_nextblock stored⟩
   · simpa [CC.Val.loadResult, CC.Mptr, CC.Archi.ptr64] using CC.Mem.load_store_same stored
@@ -209,11 +211,12 @@ private theorem header_write (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     exact CC.Mem.load_store_other stored chunk block ofs
       (.inl (distinct _ _ _ _ bound entry.binding different))
 
-private theorem run_header (m : CC.Mem) (entry : HeaderLocal m)
+private theorem run_header (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (m : CC.Mem) (entry : HeaderLocal m)
     (cells : (i : Fin 12) → HeaderSourceLocal m i) (rows : List (Fin 12)) (rest : CC.Stmt)
     (le : CC.TempEnv) (k : CC.Cont) (before : CC.Mem)
     (access : before.access = (allocation m).2.access) :
-    ∃ after, InternalRun ge (3 * rows.length)
+    ∃ after, InternalRun world (3 * rows.length)
         (.State producer (rows.foldr (fun i next => .Ssequence (headerAssignment i) next) rest)
           k (allocation m).1 le before)
         (.State producer rest k (allocation m).1 le after) ∧
@@ -232,7 +235,7 @@ private theorem run_header (m : CC.Mem) (entry : HeaderLocal m)
     · intro id ty block bound different chunk ofs; rfl
   | cons head tail ih =>
     obtain ⟨middle, headRun, headRead, headOther, headLocals, headFrame, headAccess, headNext⟩ :=
-      header_write m before le k head entry (cells head)
+      header_write world layout m before le k head entry (cells head)
         (tail.foldr (fun i next => .Ssequence (headerAssignment i) next) rest) access
     obtain ⟨after, tailRun, tailRead, tailOther, tailLocals, tailFrame, tailAccess, tailNext⟩ :=
       ih middle (headAccess.trans access)
@@ -257,10 +260,11 @@ private theorem run_header (m : CC.Mem) (entry : HeaderLocal m)
 /-- All twelve actual scalar header pointers are constructed from the real
 allocated locals in thirty-six internal transitions. The vector-pointer arrays
 and final borrowed continuation remain in the actual successor stage. -/
-theorem header_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+theorem header_initialized_bound (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (access : before.access = (allocation m).2.access) :
     ∃ entry : HeaderLocal m, ∃ cells : (i : Fin 12) → HeaderSourceLocal m i, ∃ after,
-      InternalRun ge 36 (.State producer afterContext k (allocation m).1 le before)
+      InternalRun world 36 (.State producer afterContext k (allocation m).1 le before)
         (.State producer afterHeaderPointers k (allocation m).1 le after) ∧
       (∀ i, CC.Mem.load CC.Mptr after entry.block (8 * (i.val : Int)) = some (.Vptr (cells i).block 0)) ∧
       (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ≠ Arm64Entry._entry →
@@ -271,12 +275,24 @@ theorem header_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
   obtain ⟨entry⟩ := header_local m
   let cells : (i : Fin 12) → HeaderSourceLocal m i := fun i => Classical.choice (header_source_local m i)
   obtain ⟨after, run, read, _, other, frame, finalAccess, next⟩ :=
-    run_header m entry cells (List.finRange 12) afterHeaderPointers le k before access
+    run_header world layout m entry cells (List.finRange 12) afterHeaderPointers le k before access
   refine ⟨entry, cells, after, ?_, (fun i => read i (List.mem_finRange i)), other, frame, finalAccess, next⟩
   have mapped : List.ofFn headerAssignment = (List.finRange 12).map headerAssignment := by
     simp only [List.finRange, List.map_ofFn, Function.comp_def]
   rw [header_source]
   simpa only [List.length_finRange, mapped, List.foldr_map] using run
+
+theorem header_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (access : before.access = (allocation m).2.access) :
+    ∃ entry : HeaderLocal m, ∃ cells : (i : Fin 12) → HeaderSourceLocal m i, ∃ after,
+      InternalRun ge 36 (.State producer afterContext k (allocation m).1 le before)
+        (.State producer afterHeaderPointers k (allocation m).1 le after) ∧
+      (∀ i, CC.Mem.load CC.Mptr after entry.block (8 * (i.val : Int)) = some (.Vptr (cells i).block 0)) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ≠ Arm64Entry._entry →
+        ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock :=
+  header_initialized_bound ge rfl m before le k access
 
 private def borrowedHeader : CC.Composite :=
   (Arm64EntryMemory.composites.get Arm64Program._kprog_arm64_entry).get (by decide +kernel)
@@ -366,6 +382,22 @@ theorem header_cache_storage (returns : Bool) (m after : CC.Mem) (entry : Header
 
 /-- Both actual producer caches satisfy the existing consumer storage contract
 at this reached stage. The later vector setup and consumer call still follow. -/
+theorem header_initializes_caches_bound (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (access : before.access = (allocation m).2.access) :
+    ∃ stack : CacheLocals false m, ∃ returns : CacheLocals true m, ∃ after,
+      InternalRun world 36 (.State producer afterContext k (allocation m).1 le before)
+        (.State producer afterHeaderPointers k (allocation m).1 le after) ∧
+      Nonempty (Arm64RegisterReads.BorrowedCacheStorage false (allocation m).2.nextblock stack.entryBlock 0 after) ∧
+      Nonempty (Arm64RegisterReads.BorrowedCacheStorage true (allocation m).2.nextblock returns.entryBlock 0 after) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock := by
+  obtain ⟨entry, cells, after, run, reads, _, frame, afterAccess, next⟩ :=
+    header_initialized_bound world layout m before le k access
+  obtain ⟨stack, stackStorage⟩ := header_cache_storage false m after entry cells (afterAccess.trans access) reads
+  obtain ⟨returns, returnStorage⟩ := header_cache_storage true m after entry cells (afterAccess.trans access) reads
+  exact ⟨stack, returns, after, run, stackStorage, returnStorage, frame, afterAccess, next⟩
+
 theorem header_initializes_caches (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (access : before.access = (allocation m).2.access) :
     ∃ stack : CacheLocals false m, ∃ returns : CacheLocals true m, ∃ after,
@@ -374,11 +406,7 @@ theorem header_initializes_caches (m before : CC.Mem) (le : CC.TempEnv) (k : CC.
       Nonempty (Arm64RegisterReads.BorrowedCacheStorage false (allocation m).2.nextblock stack.entryBlock 0 after) ∧
       Nonempty (Arm64RegisterReads.BorrowedCacheStorage true (allocation m).2.nextblock returns.entryBlock 0 after) ∧
       FrameBelow m.nextblock before after ∧ after.access = before.access ∧
-      after.nextblock = before.nextblock := by
-  obtain ⟨entry, cells, after, run, reads, _, frame, afterAccess, next⟩ :=
-    header_initialized m before le k access
-  obtain ⟨stack, stackStorage⟩ := header_cache_storage false m after entry cells (afterAccess.trans access) reads
-  obtain ⟨returns, returnStorage⟩ := header_cache_storage true m after entry cells (afterAccess.trans access) reads
-  exact ⟨stack, returns, after, run, stackStorage, returnStorage, frame, afterAccess, next⟩
+      after.nextblock = before.nextblock :=
+  header_initializes_caches_bound ge rfl m before le k access
 
 end KProgFormal.ClightRefinement.Arm64Producer

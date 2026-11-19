@@ -1,0 +1,144 @@
+import KProgFormal.ClightRefinement.Arm64NumericProducerContext
+import KProgFormal.ClightRefinement.Arm64ProducerHeader
+
+set_option Elab.async false
+
+namespace KProgFormal.ClightRefinement.Arm64NumericProducerHeader
+
+open Arm64NumericProgram
+open Arm64NumericMemory (initialMemory)
+open Arm64Producer
+
+/-- The actual 12 header stores follow initialization once. Cache storage and
+cold values are derived from the same reached memory and real local bindings. -/
+theorem initialized_header (addresses : Arm64Registers.PointerOrigins)
+    (ctx continuation : CC.Val) (ctxWord : BitVec 64)
+    (represented : Arm64Registers.ValueRep addresses ctx ctxWord) (k : CC.Cont)
+    (values : Fin 31 → BitVec 64) (flagValues : Fin 4 → BitVec 64)
+    (vectorValues : Fin 64 → BitVec 64)
+    (gprProvider : Arm64ProducerGprInputs.ProviderAt Arm64NumericProgram.ge initialMemory values)
+    (flagProvider : Arm64ProducerFlagInputs.ProviderAt Arm64NumericProgram.ge initialMemory flagValues)
+    (vectorProvider : Arm64ProducerVectorInputs.ProviderAt Arm64NumericProgram.ge initialMemory vectorValues) :
+    program.initMem = some initialMemory ∧
+    ∃ words : TableLocals false initialMemory, ∃ tags : TableLocals true initialMemory,
+    ∃ flagBlocks : Fin 4 → CC.Block, ∃ lrBlock, ∃ vector : VectorLocal initialMemory,
+    ∃ stackTags : StackTagLocal initialMemory, ∃ spBlock,
+    ∃ cells : (i : Fin 5) → ContextLocal initialMemory i,
+    ∃ entry : HeaderLocal initialMemory,
+    ∃ sources : (i : Fin 12) → HeaderSourceLocal initialMemory i,
+    ∃ after finalLe, ∃ traces : List CC.Trace,
+      traces.length = 98 ∧
+      (∀ i, (allocation initialMemory).1.get (flagDeclaration i).name = some (flagBlocks i, CC.tuchar)) ∧
+      (allocation initialMemory).1.get Arm64Entry.___a64_lr = some (lrBlock, CC.tulong) ∧
+      (allocation initialMemory).1.get Arm64Entry.___a64_sp = some (spBlock, CC.tlong) ∧
+      CC.Star (CC.Step2 Arm64NumericProgram.ge)
+        (.Callstate (.Internal producer) [ctx, continuation] k initialMemory)
+        traces.flatten (.State producer afterHeaderPointers k (allocation initialMemory).1 finalLe after) ∧
+      (∀ i, CC.Mem.load CC.Mptr after entry.block (8 * (i.val : Int)) =
+        some (.Vptr (sources i).block 0)) ∧
+      (sources 0).block = words.tableBlock ∧ (sources 1).block = tags.tableBlock ∧
+      (sources 4).block = lrBlock ∧ (sources 5).block = spBlock ∧
+      (∀ i, CC.Mem.load CC.Mptr after words.tableBlock (8 * (i.val : Int)) =
+        some (.Vptr (words.cellBlock i) 0)) ∧
+      (∀ i, CC.Mem.load CC.Mptr after tags.tableBlock (8 * (i.val : Int)) =
+        some (.Vptr (tags.cellBlock i) 0)) ∧
+      (∀ i, CC.Mem.load .Mint64 after (words.cellBlock i) 0 =
+        some (if i = 0 then ctx else .Vlong (if i = 30 then 0 else values i)) ∧
+        CC.Mem.load .Mint8unsigned after (tags.cellBlock i) 0 =
+          some (.Vint (if i = 0 then 1 else if i = 30 then 10 else 0))) ∧
+      (∀ i, CC.Mem.load .Mint8unsigned after (flagBlocks i) 0 = some (.Vint (flagWord (flagValues i))) ∧
+        (flagWord (flagValues i) = (0#32) ∨ flagWord (flagValues i) = (1#32))) ∧
+      CC.Mem.load .Mint64 after lrBlock 0 = some (.Vlong 0) ∧
+      (∀ i : Fin 64, CC.Mem.load .Mint64 after vector.block (8 * (i.val : Int)) =
+        some (.Vlong (vectorValues i))) ∧
+      (∀ i : Fin 24, CC.Mem.load .Mint8unsigned after stackTags.block (i.val : Int) = some (.Vint 0)) ∧
+      CC.Mem.load .Mint64 after spBlock 0 = some (.Vlong 0) ∧
+      (∀ i, CC.Mem.load (contextChunk i) after (cells i).block 0 = some (contextValue ctx i)) ∧
+      (∀ returns, ∃ cache : CacheLocals returns initialMemory,
+        cache.entryBlock = entry.block ∧
+        Nonempty (Arm64RegisterReads.BorrowedCacheStorage returns
+          (allocation initialMemory).2.nextblock entry.block 0 after) ∧
+        CC.Mem.loadv .Mint64 after (.Vptr cache.baseBlock 0) = some (.Vlong 0) ∧
+        CC.Mem.loadv .Mint8unsigned after (.Vptr cache.validBlock 0) = some (.Vint 0)) ∧
+      FrameBelow (CC.Positive.ofNat 204) initialMemory after ∧
+      after.access = (allocation initialMemory).2.access ∧
+      after.nextblock = (allocation initialMemory).2.nextblock ∧
+      finalLe.get Arm64Entry._ctx = some ctx := by
+  obtain ⟨init, words, tags, flagBlocks, lrBlock, vector, stackTags, spBlock, cells,
+      before, le, traces, length, flagBindings, lrBinding, spBinding, prefixRun,
+      wordPointers, tagPointers, reads, flagReads, lrRead, vectorReads, stackReads,
+      spRead, contextReads, caches, frame, access, next, ctxRead⟩ :=
+    Arm64NumericProducerContext.initialized_context addresses ctx continuation ctxWord represented
+      k values flagValues vectorValues gprProvider flagProvider vectorProvider
+  obtain ⟨entry, sources, after, suffix, headerReads, other, suffixFrame, suffixAccess, suffixNext⟩ :=
+    header_initialized_bound Arm64NumericProgram.ge composites_same initialMemory before le k access
+  have wordsBinding : (allocation initialMemory).1.get (headerSourceName 0) =
+      some (words.tableBlock, headerSourceType 0) := words.binding
+  have tagsBinding : (allocation initialMemory).1.get (headerSourceName 1) =
+      some (tags.tableBlock, headerSourceType 1) := tags.binding
+  have lrHeaderBinding : (allocation initialMemory).1.get (headerSourceName 4) =
+      some (lrBlock, headerSourceType 4) := lrBinding
+  have spHeaderBinding : (allocation initialMemory).1.get (headerSourceName 5) =
+      some (spBlock, headerSourceType 5) := spBinding
+  have wordsEqual : (sources 0).block = words.tableBlock :=
+    congrArg Prod.fst (Option.some.inj ((sources 0).binding.symm.trans wordsBinding))
+  have tagsEqual : (sources 1).block = tags.tableBlock :=
+    congrArg Prod.fst (Option.some.inj ((sources 1).binding.symm.trans tagsBinding))
+  have lrEqual : (sources 4).block = lrBlock :=
+    congrArg Prod.fst (Option.some.inj ((sources 4).binding.symm.trans lrHeaderBinding))
+  have spEqual : (sources 5).block = spBlock :=
+    congrArg Prod.fst (Option.some.inj ((sources 5).binding.symm.trans spHeaderBinding))
+  have tableSeparate : ∀ selected, tableName selected ≠ Arm64Entry._entry := by
+    intro selected; cases selected <;> decide +kernel
+  have cellSeparate : ∀ selected (i : Fin 31), tableCellName selected i ≠ Arm64Entry._entry := by
+    intro selected; cases selected <;> decide +kernel
+  have flagSeparate : ∀ i : Fin 4, (flagDeclaration i).name ≠ Arm64Entry._entry := by decide +kernel
+  have contextSeparate : ∀ i : Fin 5, contextName i ≠ Arm64Entry._entry := by decide +kernel
+  have finalFrame : FrameBelow (CC.Positive.ofNat 204) before after := by
+    intro b below
+    apply suffixFrame b
+    rw [CC.Positive.toNat_ofNat _ (by decide)] at below
+    simpa only [Arm64NumericMemory.initial_next] using below
+  refine ⟨init, words, tags, flagBlocks, lrBlock, vector, stackTags, spBlock, cells, entry, sources,
+    after, le, traces, length, flagBindings, lrBinding, spBinding, ?_, headerReads,
+    wordsEqual, tagsEqual, lrEqual, spEqual, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_,
+    frame.trans finalFrame, suffixAccess.trans access, suffixNext.trans next, ctxRead⟩
+  · simpa only [CC.E0, CC.Eapp, List.append_nil] using star_trans prefixRun suffix.sound
+  · intro i
+    exact (other _ _ _ words.binding (tableSeparate false) CC.Mptr (8 * (i.val : Int))).trans (wordPointers i)
+  · intro i
+    exact (other _ _ _ tags.binding (tableSeparate true) CC.Mptr (8 * (i.val : Int))).trans (tagPointers i)
+  · intro i
+    exact ⟨(other _ _ _ (words.cellBinding i) (cellSeparate false i) .Mint64 0).trans (reads i).1,
+      (other _ _ _ (tags.cellBinding i) (cellSeparate true i) .Mint8unsigned 0).trans (reads i).2⟩
+  · intro i
+    exact ⟨(other _ _ _ (flagBindings i) (flagSeparate i) .Mint8unsigned 0).trans (flagReads i).1,
+      (flagReads i).2⟩
+  · exact (other _ _ _ lrBinding (by decide +kernel) .Mint64 0).trans lrRead
+  · intro i
+    exact (other _ _ _ vector.binding (by decide +kernel) .Mint64 (8 * (i.val : Int))).trans (vectorReads i)
+  · intro i
+    exact (other _ _ _ stackTags.binding (by decide +kernel) .Mint8unsigned (i.val : Int)).trans (stackReads i)
+  · exact (other _ _ _ spBinding (by decide +kernel) .Mint64 0).trans spRead
+  · intro i
+    exact (other _ _ _ (cells i).binding (contextSeparate i) (contextChunk i) 0).trans (contextReads i)
+  · intro returns
+    obtain ⟨old, base, valid⟩ := caches returns
+    obtain ⟨cache, storage⟩ := header_cache_storage returns initialMemory after entry sources
+      (suffixAccess.trans access) headerReads
+    have entryEqual : cache.entryBlock = entry.block :=
+      congrArg Prod.fst (Option.some.inj (cache.entryBinding.symm.trans entry.binding))
+    have baseEqual : cache.baseBlock = old.baseBlock :=
+      congrArg Prod.fst (Option.some.inj (cache.baseBinding.symm.trans old.baseBinding))
+    have validEqual : cache.validBlock = old.validBlock :=
+      congrArg Prod.fst (Option.some.inj (cache.validBinding.symm.trans old.validBinding))
+    rw [entryEqual] at storage
+    have baseBefore : CC.Mem.loadv .Mint64 before (.Vptr cache.baseBlock 0) = some (.Vlong 0) := by
+      rw [baseEqual]; exact base
+    have validBefore : CC.Mem.loadv .Mint8unsigned before (.Vptr cache.validBlock 0) = some (.Vint 0) := by
+      rw [validEqual]; exact valid
+    exact ⟨cache, entryEqual, storage,
+      (other _ _ _ cache.baseBinding (by cases returns <;> decide +kernel) .Mint64 0).trans baseBefore,
+      (other _ _ _ cache.validBinding (by cases returns <;> decide +kernel) .Mint8unsigned 0).trans validBefore⟩
+
+end KProgFormal.ClightRefinement.Arm64NumericProducerHeader
