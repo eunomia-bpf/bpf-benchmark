@@ -40,6 +40,8 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-19T01:25:56Z（运营者：“手写的 helper 例程 是不是应替换成 c 实现的直接编译进去的”）**：是。helper 用 C 实现，放在 LTO 编译器的输入里（kprog/x86/link_embedded_ir.cpp、perf_context_lto.cpp 一侧，开放路径），sim 特化之后：一份 B 交 stock verifier（helper 照常是调用），同一份 sim C 连同 helper 的 C 一起编译，编译器跨 helper 边界内联和优化，编成原生代码。先做占时间最多的几类：ktime（BCC、Katran）、probe_read 一类（Tracee、Tetragon、OTel）、perf_event_output（BCC）、map 更新和删除。每类做完在 LTO 配置上量一次。
+
 **协调者 2026-11-19T01:15:36Z（审核 20261118T21Z 核实后；lab 节点 11-18 约 17:34 UTC 重启后）**：
 1. 手写 helper 例程已由 omp 删掉（07d9c4c96：删 2816 行、加 85 行，native_link 11 785 → 9 730 行、15 → 10 个文件；749c60fa4）。协调者 15:51 加的“等 lean 确认没有变慢再删”是自己加的条件，和运营者“直接现在删掉, 不需要考虑太多”不符，删除晚了约 4.5 小时；以后运营者说现在做就现在做。
 2. lean 的计时被节点重启打断，01:13 UTC 续上：Cilium、Tracee 在安静主机上重跑 stats 关，然后六个应用 stats 开。BCC 1.142x 那次三个样本 1.080 / 1.258 / 0.978，波动大；结论等重跑和 stats 开的数。
