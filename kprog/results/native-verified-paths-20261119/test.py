@@ -19,10 +19,15 @@ optimized=(out/'optimized.ll').read_text()
 for name in ['verified_dispatch','verified_memory']:
     body=optimized.split('@'+name+'(',1)[1].split('\n}',1)[0]
     assert ('llvm.trap' not in body)==(mode=='verified'),body
-    if mode=='verified':assert 'icmp' not in body,body
+    if mode=='verified':assert 'br i1' not in body,body
 ordinary=optimized.split('@program_check(',1)[1].split('\n}',1)[0]
 assert 'icmp' in ordinary and '99' in ordinary
 run(['clang-18','-O3','-mno-red-zone','-mgeneral-regs-only','-c',out/'native.bc','-o',out/'native.o'])
+assembly=run(['llvm-objdump-18','-d',out/'native.o'])
+if mode=='verified':
+    for name in ['verified_dispatch','verified_memory']:
+        body=assembly.split('<'+name+'>:',1)[1].split('\n\n',1)[0]
+        assert not any(op in body for op in ['\tcmp','\ttest','\tj','\tud2']),body
 run(['gcc','-O3','-fsanitize=undefined','-fno-sanitize-recover=all',ROOT/'kprog/results/native-verified-paths-20261119/driver.c',out/'native.o','-o',out/'execute'])
 result=run([out/'execute'])
 (out/'summary.json').write_text(json.dumps(dict(mode=mode,assumes=assumes,traps=traps,ordinary_check_retained=True,result=result,
