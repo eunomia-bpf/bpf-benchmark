@@ -444,3 +444,36 @@ split as the baseline above. So the fix is real but not sufficient, and the veri
 yet. The diagnosis is in `kprog/results/cilium-packet-bounds-20261119/README.md`: each `skb->data` re-read
 is a new packet pointer, and 33 of the 41 programs reload `data` up to 38 times, so the emitted bound must
 sit on the load the read uses rather than on the one the matcher happened to match.
+
+### Cilium: the packet-bounds class is closed (omp 2026-11-20T01:30Z)
+
+The 41 `invalid access to packet` rejections fell to a chain of two compiler changes in
+`kprog/x86/packet_bounds_ir.cpp` (PERF's file, open under `freeze-open.tsv`):
+
+1. `80dbcfc51` / `650994842` — match the head-length guard Cilium actually emits
+   (`skb->len - skb->data_len`, read through asm with the offset as an operand, section `classifier`,
+   often without any `data_end` read) and lower it to a pointer bound.
+2. `ff8f0e4b3` — unify the `skb->data` reloads so the bound and the read name one SSA value
+   (188 reloads over the archived inputs), and rewrite the physical `cb+46` u16 store through the
+   public `__sk_buff.tc_classid` accessor.
+3. `852c2bfe3` — at a dominating interval guard, emit `x == K` as the ordered predicate its edge
+   implies, so the bound also covers the fall-through path into the read.
+
+Measured outcome:
+
+| | before | after |
+|---|---|---|
+| live Cilium capture, requests installing | 8 / 14 | **14 / 14**, no rejections |
+| replay over the archived 41 packet-class inputs | — | **41 / 41** `status=0` |
+| predicates lowered over those 41 | 201 | **333** |
+| store-class inputs canonicalized | 0 / 6 | **6 / 6** |
+
+My own independent capture on the rebuilt base (`fixed-20261119T233010Z`, exit 0) installs every
+instance of the two programs that failed before the change (`9effc137` 4/4, `874d0fb3` 2/2,
+`8680a229` 3/3). Its three rejects are one program new in that capture (`34af4b3a`) that reads
+neither `data_end` nor `len`/`data_len` — a separate question, not a survivor of this class.
+
+Baseline for this app was 14 verified / 49 direct-native / 1 hard failure out of 64 requests. Capture
+size is not fixed (12, 14, or 64 from the same command), so counts compare program by program.
+Still open and separate: request 64's `NATIVE_LAB_TRUSTED_CHUNK` arming `EINVAL`, and the emitter's
+three relative-table refusals. Full account in `kprog/results/cilium-packet-bounds-20261119/README.md`.
