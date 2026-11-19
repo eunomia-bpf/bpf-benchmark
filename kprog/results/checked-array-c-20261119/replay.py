@@ -27,6 +27,8 @@ def requests():
                     yield Path(member.name).name,request
 
 for name,request in requests():
+        if len(sys.argv)>3 and name.split('.')[0] not in sys.argv[3:]:
+            continue  # Explicit host subset, never an application load filter.
         directory=out/name.split('.')[0];directory.mkdir(exist_ok=True)
         metadata=json.load(request.extractfile('request/generation.metadata.json'))
         arrays=[native_map_label(m['name']) for m in metadata['maps']
