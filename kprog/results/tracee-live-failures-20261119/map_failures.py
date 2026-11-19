@@ -43,6 +43,12 @@ def inspect(capsule_bytes, archive, request_id, pc):
             if current == section.name and instruction and int(instruction[1]) == target:
                 windows.append(lines[max(0, index-16):index+9])
         (directory/'pc-window.txt').write_text('\n\n'.join('\n'.join(window) for window in windows)+'\n')
+        source = capsule.extractfile('request/generated/trusted_x86.bpf.c').read().decode().splitlines()
+        locations = sorted({int(match) for window in windows for line in window
+                            for match in re.findall(r'trusted_x86\.bpf\.c:(\d+)', line)})
+        (directory/'source-window.txt').write_text('\n\n'.join(
+            '\n'.join(f'{index+1}: {source[index]}' for index in range(max(0, line-3), min(len(source), line+2)))
+            for line in locations)+'\n')
         for member, filename in [('request/generated/trusted_x86.bpf.bounds-input.bc', 'frontend.ll'),
                                  ('request/generated/trusted_x86.bpf.bounds.bc', 'bounds.ll')]:
             command = ['llvm-dis-18', '-', '-o', str(directory/filename)]
