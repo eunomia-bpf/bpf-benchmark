@@ -43,6 +43,7 @@ SEC("tc") int asm_tc(struct __sk_buff *ctx)
 }
 
 #ifdef SELECTOR_CONTROLS
+extern void mutate_context(void *);
 SEC("classifier") int wrong_root(struct __sk_buff *ctx)
 { unsigned n=word(read32(ctx,112)-read32(ctx,116)); return n>=42; }
 SEC("classifier") int wrong_offset(struct __sk_buff *ctx)
@@ -53,5 +54,13 @@ SEC("classifier") int equality(struct __sk_buff *ctx)
 { void *k=bpf_cast_to_kern_ctx(ctx); unsigned n=word(read32(k,112)-read32(k,116)); return n==42; }
 SEC("classifier") int signed_negative(struct __sk_buff *ctx)
 { void *k=bpf_cast_to_kern_ctx(ctx); unsigned n=word(read32(k,112)-read32(k,116)); return (int)n>=-1; }
+SEC("classifier") int stale_call(struct __sk_buff *ctx)
+{ void *k=bpf_cast_to_kern_ctx(ctx); unsigned n=word(read32(k,112)-read32(k,116)); mutate_context(ctx); return n>=42; }
+SEC("classifier") int stale_store(struct __sk_buff *ctx)
+{
+    void *k=bpf_cast_to_kern_ctx(ctx); unsigned n=word(read32(k,112)-read32(k,116));
+    asm volatile("*(u32 *)(%0 + %1) = %2" :: "r"(k),"i"(112),"r"(0UL) : "memory");
+    return n>=42;
+}
 #endif
 char license[] SEC("license") = "GPL";

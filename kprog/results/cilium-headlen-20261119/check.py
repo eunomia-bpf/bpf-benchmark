@@ -47,13 +47,39 @@ for width,predicates in [(32,['uge','ule']),(64,['ugt','uge','ult','ule'])]:
   ret i32 %result
 }}
 '''
+controls+='\ndeclare void @read_context(ptr) readonly\n'
+for name,callee in [('ir_readonly_loop','read_context'),('ir_mutating_loop','mutate_context')]:
+    controls+=f'''\ndefine i32 @{name}(ptr %ctx) section "classifier" {{
+entry:
+  %kernel = call ptr @bpf_cast_to_kern_ctx(ptr %ctx)
+  %len = call i64 asm sideeffect "$0 = *(u32 *)($1 + $2)", "=r,r,i,~{{memory}}"(ptr %kernel, i64 112)
+  %data_len = call i64 asm sideeffect "$0 = *(u32 *)($1 + $2)", "=r,r,i,~{{memory}}"(ptr %kernel, i64 116)
+  %left = trunc i64 %len to i32
+  %right = trunc i64 %data_len to i32
+  %span = sub i32 %left, %right
+  br label %loop
+loop:
+  %iteration = phi i32 [0, %entry], [%next, %body]
+  %again = icmp ult i32 %iteration, 3
+  br i1 %again, label %body, label %check
+body:
+  call void @{callee}(ptr %ctx)
+  %next = add i32 %iteration, 1
+  br label %loop
+check:
+  %compare = icmp uge i32 %span, 42
+  %result = zext i1 %compare to i32
+  ret i32 %result
+}}
+'''
 (out/'controls.explicit.ll').write_text(controls)
 run([compiler,out/'controls.explicit.ll','-o',out/'controls.lowered.bc'])
 lowered=run(['llvm-dis-18',out/'controls.lowered.bc','-o','-'])
 (out/'controls.lowered.ll').write_text(lowered)
 bodies={name:body for name,body in re.findall(r'define [^@]+@(\w+)\([^\n]*\).*?\{(.*?)^}',lowered,re.S|re.M)}
-positive=['head_ge','head_not_lt','old_tc','old_xdp','asm_tc',*explicit]
-negative=['wrong_root','wrong_offset','wrong_section','equality','signed_negative']
+positive=['head_ge','head_not_lt','old_tc','old_xdp','asm_tc',*explicit,'ir_readonly_loop']
+negative=['wrong_root','wrong_offset','wrong_section','equality','signed_negative',
+          'stale_call','stale_store','ir_mutating_loop']
 observed={name:'packet_bound' in bodies[name] for name in positive+negative}
 (out/'selection.json').write_text(json.dumps(observed,indent=2)+'\n')
 if mode=='before':

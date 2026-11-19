@@ -4,6 +4,8 @@
 #include "llvm/Analysis/InstructionSimplify.h"
 #include "llvm/Analysis/ConstantFolding.h"
 #include "llvm/ADT/SetVector.h"
+#include "llvm/ADT/SmallPtrSet.h"
+#include "llvm/IR/CFG.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/DIBuilder.h"
 #include "llvm/IR/InstIterator.h"
@@ -48,7 +50,7 @@ static unsigned restore_map_extern_debug_info(Module &module) {
   builder.finalize();
   return count;
 }
-static bool tied_identity(CallInst *call,InlineAsm *assembly) {
+static bool tied_identity(CallBase *call,InlineAsm *assembly) {
   return assembly->getAsmString().empty() && assembly->getConstraintString()=="=r,0" &&
       call->arg_size()==1 && call->getType()==call->getArgOperand(0)->getType();
 }
@@ -243,7 +245,12 @@ static Value *origin(Value *value) {
     return value;
   }
 }
-static bool field(Value *value,Function &function,int64_t offset,bool kernel=false) {
+static bool kernel_context_cast(CallBase *call) {
+  auto *function=call->getCalledFunction();
+  return function && function->getName()=="bpf_cast_to_kern_ctx" &&
+      function->isDeclaration() && function->getSection()==".ksyms" && call->arg_size()==1;
+}
+static bool field(Value *value,Function &function,int64_t offset,bool kernel=false,Instruction **read=nullptr) {
   value=origin(value);
   // The simulator's u32 memory template returns a wide register, truncated
   // at its original native instruction. Other truncations stay opaque.
@@ -267,15 +274,49 @@ static bool field(Value *value,Function &function,int64_t offset,bool kernel=fal
   auto *base=origin(GetPointerBaseWithConstantOffset(origin(address),actual,function.getParent()->getDataLayout()));
   if (kernel) {
     auto *cast=dyn_cast<CallInst>(base);
-    if (!cast || !cast->getCalledFunction() ||
-        cast->getCalledFunction()->getName()!="bpf_cast_to_kern_ctx" ||
-        !cast->getCalledFunction()->isDeclaration() ||
-        cast->getCalledFunction()->getSection()!=".ksyms" || cast->arg_size()!=1) return false;
+    if (!cast || !kernel_context_cast(cast)) return false;
     base=origin(cast->getArgOperand(0));
   }
   APInt total(64,actual);
   if (displacement) total+=displacement->getValue().sextOrTrunc(64);
-  return base==function.getArg(0) && total==APInt(64,offset);
+  bool matches=base==function.getArg(0) && total==APInt(64,offset);
+  if (matches && read) *read=cast<Instruction>(value);
+  return matches;
+}
+// A fresh public packet span equals the captured head length only while no
+// intervening operation can mutate the skb. Walk every predecessor path back
+// to each field read, including loop backedges; private stores are irrelevant.
+static bool current_headlen(Instruction *read,Instruction *compare) {
+  SmallVector<std::pair<BasicBlock *,Instruction *>,16> pending{{compare->getParent(),compare}};
+  SmallPtrSet<BasicBlock *,32> visited;
+  while (!pending.empty()) {
+    auto [block,limit]=pending.pop_back_val();
+    if (!limit && !visited.insert(block).second) continue;
+    auto it=limit?limit->getIterator():block->end();bool reached=false;
+    while (it!=block->begin()) {
+      auto &instruction=*--it;
+      if (&instruction==read) { reached=true;break; }
+      if (!instruction.mayWriteToMemory()) continue;
+      if (auto *store=dyn_cast<StoreInst>(&instruction))
+        if (isa<AllocaInst>(getUnderlyingObject(store->getPointerOperand()))) continue;
+      if (auto *call=dyn_cast<CallBase>(&instruction)) {
+        if (call->onlyReadsMemory() || kernel_context_cast(call)) continue;
+        if (auto *assembly=dyn_cast<InlineAsm>(call->getCalledOperand())) {
+          auto text=assembly->getAsmString();
+          if (tied_identity(call,assembly) ||
+              (text=="$0 = $0" && assembly->getConstraintString()=="=w,0") ||
+              (assembly->getConstraintString()=="=r,r,i,~{memory}" &&
+               (text=="$0 = *(u8 *)($1 + $2)" || text=="$0 = *(u16 *)($1 + $2)" ||
+                text=="$0 = *(u32 *)($1 + $2)" || text=="$0 = *(u64 *)($1 + $2)"))) continue;
+        }
+      }
+      return false;
+    }
+    if (reached) continue;
+    if (pred_empty(block)) return false;
+    for (auto *parent:predecessors(block)) pending.emplace_back(parent,nullptr);
+  }
+  return true;
 }
 static Value *context_origin(Value *value) {
   while (auto *call=dyn_cast<CallInst>(value)) {
@@ -397,7 +438,7 @@ int main(int argc,char **argv) {
   unsigned contexts=canonical_context_loads(*module);
   unsigned debug_variables=remove_debug_variable_intrinsics(*module);
   unsigned equality_edges=fold_equality_edges(*module);
-  unsigned count=0;
+  unsigned count=0,stale_headlen=0;
   for (auto &function:*module) {
     if (function.isDeclaration() || function.arg_empty()) continue;
     auto section=function.getSection();int64_t data,end;
@@ -415,11 +456,15 @@ int main(int argc,char **argv) {
       if (!difference || difference->getOpcode()!=Instruction::Sub || !constant) continue;
       // The one frozen kernel's sk_buff u32 len/data_len fields are112/116
       // (the target vmlinux.h layout is checked by the regression recipe).
+      Instruction *length_read=nullptr,*nonlinear_read=nullptr;
       bool headlen=data==offsetof(__sk_buff,data) &&
           (constant->getType()->isIntegerTy(32) || constant->getType()->isIntegerTy(64)) &&
           difference->getType()->isIntegerTy(32) &&
-          field(difference->getOperand(0),function,112,true) &&
-          field(difference->getOperand(1),function,116,true);
+          field(difference->getOperand(0),function,112,true,&length_read) &&
+          field(difference->getOperand(1),function,116,true,&nonlinear_read);
+      if (headlen && (!current_headlen(length_read,compare) || !current_headlen(nonlinear_read,compare))) {
+        ++stale_headlen;continue;
+      }
       if (!headlen && (!constant->getType()->isIntegerTy(64) || !difference->getType()->isIntegerTy(64) ||
           !field(difference->getOperand(0),function,end) || !field(difference->getOperand(1),function,data))) continue;
       auto predicate=compare->getPredicate();auto size=constant->getValue();
@@ -457,6 +502,7 @@ int main(int argc,char **argv) {
   WriteBitcodeToFile(*module,output.os());output.keep();output.os().flush();
   if (output.os().has_error()) { errs()<<"write packet bounds IR failed\n";return 1; }
   errs()<<"packet length predicates lowered="<<count<<'\n';
+  errs()<<"head length predicates with intervening writes="<<stale_headlen<<'\n';
   errs()<<"map extern debug declarations restored="<<externs<<'\n';
   errs()<<"unused private inputs removed="<<unused<<'\n';
   errs()<<"constant context loads canonicalized="<<contexts<<'\n';

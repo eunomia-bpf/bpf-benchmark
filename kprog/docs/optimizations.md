@@ -1399,3 +1399,14 @@ covering inclusive/strict arithmetic. Stock file now5positive programs and
 4test-run cases. Settled only unstarted296915 child296922 viaPIDfd before
 fixture edits; oldraw/exit143 retained. Requeue same combined source650994842
 with refined tests, no sourcecompiler changes or actualcandidate passyet.
+
+PERF 2026-11-19T21:02:24Z: Freshness correction before rebuilding: kernel filter.h903
+sets data_end=data+skb_headlen; skbuff.h2533 defines headlen=len-data_len.
+New pointer loads may express that fact only if captured headlen fields
+remain current. Candidate walks all predecessor paths from comparison to
+each field read, including backedges, and declines a rewrite across possible
+skb writes. Only proven reads/register identities/kernelcast/privatealloca
+stores pass. Original unmatched predicate stays intact; no runtime test or
+new limit. Added stalehelper/staleASM/loopmutator negatives andreadonly-loop
+positive. Only own unstarted298900 waiter settled, rawretained; no compiler
+or guest ran. Candidate still awaits actual compiler/stock validation.
