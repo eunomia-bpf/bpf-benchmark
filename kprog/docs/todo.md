@@ -40,6 +40,14 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-19T06:20:21Z（审核 20261119T03Z 核实后）**：
+1. lane-loop.sh 回合开始就清空 resume-msg，回合因额度失败时消息丢了（perf、formal 都是 0 字节）。改成回合失败时写回去（新文件替换，正在跑的循环下次重启时用上）；早上给 perf 的消息它从 COORDINATION 读到了：06:03 的回合已在 checked-sim-c LTO 里把已证明的 ARRAY 查找内联成 C helper（d98c4aeda）。
+2. perf 的 prompt 在 11-15 的“代码量少一半”旁补上运营者 11-18 的“不需要按照 binray size 扣了”。
+3. 主配置 B 一侧的编译：trusted_specializer.py 用 -g -O3，一个 Tetragon 请求 74 分钟，-O1 是 123 秒。B 只交 verifier 检查、执行的是 LTO 编出的原生代码，所以 B 一侧改用 -O1 -g0，在 LTO 配置计时里先量 Tetragon、Tracee 能否全部装上。
+4. 每个比值旁写出各样本的范围（不加门槛、不加重跑）；每小时盘点表加一列历史最好（运营者：“你要用历史上最好的数据作为合理的数据”）。
+5. bpf-benchmark-lean 的代码改动目前在那个 Workspace 本地；manifest 通用规则第五项测试通过后推到 master。CLAUDE.md 与 AGENTS.md 同步提交。
+6. 审核第 1 条“每次调用已到编译器的上限”部分成立：BCC、Katran 的 ktime 占 30–34%、Tracee、Tetragon 的 probe_read 占 41–46%，接下来的提升来自这些 helper 的 C 实现（perf 已开始）；Tracee 逐程序 1.6x 说明程序体本身的提升比估算的大。
+
 **协调者 2026-11-19T04:56:36Z（按应用的 manifest 键换成通用规则，协调者自己做，先在 bpf-benchmark-lean 上测）**：
 1. 写 manifest 的脚本对每个应用都一样：每个原生对象配上同名的 BPF 对象（Katran、BCC、Tracee、Tetragon、OTel 在构建里都有），并记下它所在的 ELF 段名和引用的 map 名；按应用的 prog_type、source_map_prefix、helper 判别、dedupe、源对象目录选项去掉。
 2. loader：同名候选项有多个时打分挑一项；有源对象的按源程序和加载程序开头连续一致的指令数（比操作码和寄存器，ld_imm64 / call 的 src_reg 除外），没有源对象的按引用 map 名的重合；程序类型按段名（libbpf 的通用对应）。只有源程序和加载程序整段一致时才按源对象绑定 map。source_has_helper、source_has_map_prefix 删掉。
@@ -417,7 +425,7 @@ PERF 2026-11-19T06:19:32Z：C probe-read user/kernel common wrappers 主机完�
 - 6 小时审核每次都对照运营者原话（kprog/docs/user-instruction.md）查不符合的地方，审核提示词已加这一节（两份 md5 430c34531927b54074fe6703e5423a58）。
 - 继续：(1) 六个应用的原生对象按现在的路线建完，镜像只放新对象（C）；(2) 生成 B 的工具里 packet_bounds_ir 的 --canonical-ctx-loads、--strict-identities 两个选项和整字溢出的 ALL 选项收成唯一做法，和 trusted_specializer 的调用、已发布的 packet-bounds 二进制一起换（PERF）；(3) 时钟 helper 的 LTO 和 LTO 配置跑完整应用（PERF）。
 
-**协调者 2026-11-15T14:03:43Z，减要求（运营者：“干嘛这么久? 你是不是要求太多了”）**：协调者在运营者原话之外加的要求撤掉：(1) -fPIC 回到 C 的做法（运营者原话是问句“是不是都得想办法关掉”，目的在性能，-fPIC 对代码零影响）；(2) 测量回到运营者原话“A/A 一次”：每个应用 A/A 一次、A/B 一次（各 3×180 秒），每次调用为主，撤掉 08:48 定的“各 3 次”；(3) lane 只做三件事：用头文件路线把应用建出来、两侧输出对上、计时；其余记录、表格、交接从简。先 Katran，今天出第一个数。
+**协调者 2026-11-15T14:03:43Z，减要求（运营者：“干嘛这么久? 你是不是要求太多了”）**：协调者在运营者原话之外加的要求撤掉：(1) -fPIC 回到 C 的做法（运营者原话是问句“是不是都得想办法关掉”，目的在性能，-fPIC 对代码零影响）；(2) 测量回到“A/A 一次”（这半句是协调者 11-15 的提法，运营者引用后问“我说过吗”，见 user-instruction 2026-11-15 ~14:10；审核 20261119T03Z 指出后改正）：每个应用 A/A 一次、A/B 一次（各 3×180 秒），每次调用为主，撤掉 08:48 定的“各 3 次”；(3) lane 只做三件事：用头文件路线把应用建出来、两侧输出对上、计时；其余记录、表格、交接从简。先 Katran，今天出第一个数。
 
 **协调者 2026-11-15T08:48:57Z（依据 PERF 54cb04925 的每次调用 A/A）**：同一份对象两臂，前一臂 155.09 ns/次，后一臂 193.53 ns/次（后一臂慢 24.8%），吞吐在这次反而后一臂低（均值 0.849x、中位 0.909x），和 06:47 那次吞吐 A/A 的 1.17x 方向相反。两臂之间的漂移在每次调用和吞吐上都远大于要测的效果，单次 A/A 定不出校正系数。决定测量方法：每个应用按“同位置比较”，A/A（两臂都是 eBPF）和 A/B（前一臂 eBPF、后一臂原生）各跑 3 次，原生的效果 = A/B 后一臂 ÷ A/A 后一臂，每次调用和吞吐都这样算，报均值和三次的范围；冻结的 driver 和 benchmark 设置保持原样。先在 Katran 上做（新路线的 Katran 对象出来后），再推到其他应用。
 
