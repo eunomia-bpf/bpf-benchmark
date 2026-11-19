@@ -69,3 +69,4 @@ import KProgFormal.ClightRefinement.Arm64NumericProducerInput
 import KProgFormal.ClightRefinement.Arm64NumericProducerGprInputs
 import KProgFormal.ClightRefinement.Arm64NumericProducerTables
 import KProgFormal.ClightRefinement.Arm64NumericProducerFlags
+import KProgFormal.ClightRefinement.Arm64NumericProducerVectors

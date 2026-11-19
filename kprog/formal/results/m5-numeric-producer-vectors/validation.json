@@ -1,0 +1,157 @@
+{
+  "controller_launch_attempts": [
+    {
+      "exit": 2,
+      "log": "controller-launch1.log",
+      "note": "queued invocation preceded file preparation; no checks ran"
+    },
+    {
+      "exit": 127,
+      "log": "controller-launch2.log",
+      "note": "nested shell quoting failed before Python execution; replaced with direct Python heredoc"
+    }
+  ],
+  "raw": "/workspaces/kprog-raw/formal/m5-numeric-producer-vectors",
+  "proved": {
+    "world": "actual Arm64NumericProgram.ge; initialized203-global program/frontier204",
+    "phases": {
+      "prior_GPR_flag_visits": 34,
+      "new_vector_visits": 64,
+      "all_provider_visits": 98,
+      "per_vector_internal_call_setup": 3,
+      "per_vector_internal_return_store": 4,
+      "vector_array_bytes": 512,
+      "word_offset": "8*i, actual alternating low/high order across32 slots"
+    },
+    "start": "real initialized producer Callstate, through prior scalar/table/flag/LR path",
+    "end": "actual afterVectorInputs, before RAW/header processing",
+    "data": "derived actual VectorLocal and all64 Mint64 word readbacks from real external outcomes and source stores",
+    "preserved": "both actual31-slot typed tables/62 pointer loads, all31 GPR word/tag values, four masked flag bytes, LRzero, cold caches, ctx temp, original204 global contents/both permissions, allocation access/nextblock",
+    "trace": "actual34 prior traces followed by64 actual vector traces, ordered and flattened into real CC.Star",
+    "reuse": "existing source metadata/layout/offsets/continuations and memory-only store constructor; real vector3/4 laws and suffix induction generalized over actual world/layout/input binding",
+    "old_public_APIs": [
+      "vector_input_ready",
+      "vector_input_returns",
+      "vector_inputs_initialized",
+      "Provider (old-world alias)"
+    ],
+    "provider": "three explicit availability/ABI premises in actual Senv, full supplied memory/traces/frame/local read/access/frontier; implementation/native admission remains open",
+    "not_assumed": [
+      "post-memory equals pre-memory",
+      "empty traces",
+      "old and Numeric Genv/Senv equal",
+      "final register relation supplied",
+      "native/provider protocol admitted"
+    ],
+    "C_runtime_benchmark_changes": false
+  },
+  "focused": [
+    {
+      "exit": 0,
+      "jobs": 169,
+      "log": "focused1.log",
+      "note": "shared laws and old clients, first attempt"
+    },
+    {
+      "exit": 0,
+      "jobs": 183,
+      "log": "focused2.log",
+      "note": "actual initialized98 composition, first attempt"
+    }
+  ],
+  "public_queries": {
+    "exit": 0,
+    "theorems": 7,
+    "log": "Query-1.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64Producer.vector_input_ready_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.vector_input_returns_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProducerVectorInputs.vector_inputs_initialized_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.vector_input_ready": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.vector_input_returns": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProducerVectorInputs.vector_inputs_initialized": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericProducerVectors.initialized_vectors": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "full_lake_build": {
+    "exit": 0,
+    "jobs": 328,
+    "attempts": 1,
+    "log": "lake-build1.log"
+  },
+  "export_parity": {
+    "exit": 0,
+    "files": 23,
+    "bytes": 243488732,
+    "reference": "9c617740f",
+    "all_identical": true,
+    "log": "export-parity1.log"
+  },
+  "limits": {
+    "heartbeats": 200000,
+    "recursion": 512,
+    "workers": 1,
+    "address_space_GiB": 32,
+    "build_CPU": 17,
+    "read_query_git_CPU": 16,
+    "timing_lock": "shared",
+    "async": false
+  },
+  "remaining": [
+    "actual stack tags/SP/context/header/RAW/register Storage/caller transport",
+    "native/provider/original-context admission",
+    "relative caches/materialization",
+    "physical MemoryRep/alias/origin/control",
+    "all-family O1/O2/O4 recount",
+    "remaining M6 and fresh final Lake/make check"
+  ],
+  "native_make_check": "Lean-only step; last whole PASS5236c0e9677f635526fdd515cde5195b2ba0810c. Fresh final check remains due at full goal closure.",
+  "complete_ISA_handler_families": 0,
+  "milestones": {
+    "M1_M4": "done",
+    "M5": "open",
+    "M6": "open"
+  }
+}

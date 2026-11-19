@@ -1,0 +1,16 @@
+import KProgFormal.ClightRefinement.Arm64NumericProducerVectors
+open KProgFormal.ClightRefinement
+#check Arm64Producer.vector_input_ready_bound
+#print axioms Arm64Producer.vector_input_ready_bound
+#check Arm64Producer.vector_input_returns_bound
+#print axioms Arm64Producer.vector_input_returns_bound
+#check Arm64ProducerVectorInputs.vector_inputs_initialized_bound
+#print axioms Arm64ProducerVectorInputs.vector_inputs_initialized_bound
+#check Arm64Producer.vector_input_ready
+#print axioms Arm64Producer.vector_input_ready
+#check Arm64Producer.vector_input_returns
+#print axioms Arm64Producer.vector_input_returns
+#check Arm64ProducerVectorInputs.vector_inputs_initialized
+#print axioms Arm64ProducerVectorInputs.vector_inputs_initialized
+#check Arm64NumericProducerVectors.initialized_vectors
+#print axioms Arm64NumericProducerVectors.initialized_vectors

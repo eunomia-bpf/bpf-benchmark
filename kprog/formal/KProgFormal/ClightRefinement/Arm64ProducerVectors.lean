@@ -135,11 +135,14 @@ def vectorContinuation (i : Fin 64) (m : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
   .Kcall (some (vectorInputTemp i)) producer (allocation m).1 le
     (.Kseq (vectorStore i) (.Kseq (vectorStage (i.val + 1)) k))
 
-private theorem vector_call_exec (i : Fin 64) (m memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) :
-    steps ge 3 (.State producer (vectorStage i.val) k (allocation m).1 le memory) =
+private theorem vector_call_exec (world : CC.CGenv)
+    (inputBinding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input =
+        some (CC.Positive.ofNat 64) ∧
+      CC.Genv.findFunctPtr world.genv_genv (CC.Positive.ofNat 64) = some Arm64OriginCache.inputFunction) (i : Fin 64) (m memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) :
+    steps world 3 (.State producer (vectorStage i.val) k (allocation m).1 le memory) =
       some (CC.E0, .Callstate Arm64OriginCache.inputFunction [.Vint (6#32)]
         (vectorContinuation i m le k) memory) ∧
-    InternalPath ge 3 (.State producer (vectorStage i.val) k (allocation m).1 le memory) := by
+    InternalPath world 3 (.State producer (vectorStage i.val) k (allocation m).1 le memory) := by
   rw [vector_stage_next i]
   have unshadowed : (allocation m).1.get Arm64Entry._native_lab_entry_input = none := by
     have notLocal : Arm64Entry._native_lab_entry_input ∉ CC.varNames producer.fn_vars := by decide +kernel
@@ -150,15 +153,18 @@ private theorem vector_call_exec (i : Fin 64) (m memory : CC.Mem) (le : CC.TempE
     CC.tptr, CC.tint, CC.tuint, CC.tulong, CC.Cop.classifyFun, CC.Cop.semCast, CC.Cop.classifyCast,
     CC.Cop.castIntInt, CC.Genv.findFunct, CC.Integers.Ptrofs.eq, CC.Integers.Ptrofs.zero,
     CC.Integers.MI.zero, CC.typeOfFundef, Arm64OriginCache.inputFunction,
-    Arm64OriginCache.inputEF, unshadowed, producer_input_binding.1, producer_input_binding.2,
+    Arm64OriginCache.inputEF, unshadowed, inputBinding.1, inputBinding.2,
     CC.Integers.Int.repr, CC.Integers.MI.repr, CC.E0, CC.Eapp]
 
 /-- All 64 actual vector word declarations reach their real kind-6 call. -/
-theorem vector_input_ready (i : Fin 64) (m memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) :
-    InternalRun ge 3 (.State producer (vectorStage i.val) k (allocation m).1 le memory)
+theorem vector_input_ready_bound (world : CC.CGenv)
+    (inputBinding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input =
+        some (CC.Positive.ofNat 64) ∧
+      CC.Genv.findFunctPtr world.genv_genv (CC.Positive.ofNat 64) = some Arm64OriginCache.inputFunction) (i : Fin 64) (m memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) :
+    InternalRun world 3 (.State producer (vectorStage i.val) k (allocation m).1 le memory)
       (.Callstate Arm64OriginCache.inputFunction [.Vint (6#32)]
         (vectorContinuation i m le k) memory) := by
-  have run := vector_call_exec i m memory le k
+  have run := vector_call_exec world inputBinding i m memory le k
   exact internalRun_of_steps run.2 run.1
 
 private theorem vector_store_exists (m supplied : CC.Mem) (localVector : VectorLocal m)
@@ -184,25 +190,26 @@ private theorem vector_store_exists (m supplied : CC.Mem) (localVector : VectorL
   rw [writable]
   exact ⟨_, rfl⟩
 
-private theorem vector_return_exec (i : Fin 64) (m supplied after : CC.Mem)
+private theorem vector_return_exec (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (i : Fin 64) (m supplied after : CC.Mem)
     (localVector : VectorLocal m) (le : CC.TempEnv) (k : CC.Cont) (value : BitVec 64)
     (stored : CC.Mem.storev .Mint64 supplied (.Vptr localVector.block (vectorPointerOffset i))
       (.Vlong value) = some after) :
-    InternalRun ge 4 (.Returnstate (.Vlong value) (vectorContinuation i m le k) supplied)
+    InternalRun world 4 (.Returnstate (.Vlong value) (vectorContinuation i m le k) supplied)
       (.State producer (vectorStage (i.val + 1)) k (allocation m).1
         (le.set (vectorInputTemp i) (.Vlong value)) after) := by
   have size : vectorComposite.co_sizeof = 16 := by
     simpa only [vectorType, CC.sizeof, vector_layout.1] using vector_layout.2.1
-  have address : CC.doEvalLvalue ge (allocation m).1
+  have address : CC.doEvalLvalue world (allocation m).1
       (le.set (vectorInputTemp i) (.Vlong value)) supplied (vectorTarget i) =
       some (localVector.block, vectorPointerOffset i, .Full) := by
     simp [vectorTarget, CC.doEvalLvalue, CC.doEvalExpr, CC.lvalOfVar, CC.doDerefLoc,
       CC.lvalOfField, CC.typeof, CC.accessMode, vectorType, vectorArrayType,
-      vector_layout.1, size, vector_field_offsets i, localVector.binding,
+      layout, vector_layout.1, size, vector_field_offsets i, localVector.binding,
       CC.Cop.semBinaryOperation, CC.Cop.semAdd, CC.Cop.classifyAdd, CC.Cop.semAddPtrInt,
       CC.Cop.ptrofsOfInt, CC.typeconv, CC.removeAttributes, CC.tattr, CC.sizeof,
       CC.tptr, CC.tarray, CC.tint, vectorPointerOffset]
-  have assignment : CC.doStep ge
+  have assignment : CC.doStep world
       (.State producer (vectorStore i) (.Kseq (vectorStage (i.val + 1)) k)
         (allocation m).1 (le.set (vectorInputTemp i) (.Vlong value)) supplied) =
       some (CC.E0, .State producer .Sskip (.Kseq (vectorStage (i.val + 1)) k)
@@ -210,26 +217,81 @@ private theorem vector_return_exec (i : Fin 64) (m supplied after : CC.Mem)
     simp only [vectorStore, CC.doStep, address, CC.doEvalExpr, CC.PTree.gss, CC.typeof]
     simp [vectorTarget, CC.Cop.semCast, CC.Cop.classifyCast, CC.tulong, CC.Archi.ptr64,
       CC.doAssignLoc, CC.accessMode, stored]
-  have r0 : CC.doStep ge (.Returnstate (.Vlong value) (vectorContinuation i m le k) supplied) =
+  have r0 : CC.doStep world (.Returnstate (.Vlong value) (vectorContinuation i m le k) supplied) =
       some (CC.E0, .State producer .Sskip
         (.Kseq (vectorStore i) (.Kseq (vectorStage (i.val + 1)) k)) (allocation m).1
         (le.set (vectorInputTemp i) (.Vlong value)) supplied) := rfl
-  have r1 : CC.doStep ge (.State producer .Sskip
+  have r1 : CC.doStep world (.State producer .Sskip
         (.Kseq (vectorStore i) (.Kseq (vectorStage (i.val + 1)) k)) (allocation m).1
         (le.set (vectorInputTemp i) (.Vlong value)) supplied) =
       some (CC.E0, .State producer (vectorStore i) (.Kseq (vectorStage (i.val + 1)) k)
         (allocation m).1 (le.set (vectorInputTemp i) (.Vlong value)) supplied) := rfl
-  have r3 : CC.doStep ge (.State producer .Sskip (.Kseq (vectorStage (i.val + 1)) k)
+  have r3 : CC.doStep world (.State producer .Sskip (.Kseq (vectorStage (i.val + 1)) k)
         (allocation m).1 (le.set (vectorInputTemp i) (.Vlong value)) after) =
       some (CC.E0, .State producer (vectorStage (i.val + 1)) k (allocation m).1
         (le.set (vectorInputTemp i) (.Vlong value)) after) := rfl
-  exact .step trivial (CC.doStep_sound ge _ _ _ r0)
-    (.step trivial (CC.doStep_sound ge _ _ _ r1)
-      (.step trivial (CC.doStep_sound ge _ _ _ assignment)
-        (.step trivial (CC.doStep_sound ge _ _ _ r3) (.refl _))))
+  exact .step trivial (CC.doStep_sound world _ _ _ r0)
+    (.step trivial (CC.doStep_sound world _ _ _ r1)
+      (.step trivial (CC.doStep_sound world _ _ _ assignment)
+        (.step trivial (CC.doStep_sound world _ _ _ r3) (.refl _))))
 
 /-- Each stated scalar vector-input outcome writes the actual low/high word.
 Other lanes and other local loads are framed relative to provider post-memory. -/
+theorem vector_input_returns_bound (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv)
+    (inputBinding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input =
+        some (CC.Positive.ofNat 64) ∧
+      CC.Genv.findFunctPtr world.genv_genv (CC.Positive.ofNat 64) = some Arm64OriginCache.inputFunction) (i : Fin 64) (m before supplied : CC.Mem)
+    (le : CC.TempEnv) (k : CC.Cont) (value : BitVec 64) (trace : CC.Trace)
+    (provider : CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv world.genv_genv)
+      [.Vint (6#32)] before trace (.Vlong value) supplied)
+    (access : supplied.access = (allocation m).2.access) :
+    ∃ localVector : VectorLocal m, ∃ after,
+      CC.Star (CC.Step2 world)
+        (.State producer (vectorStage i.val) k (allocation m).1 le before)
+        trace (.State producer (vectorStage (i.val + 1)) k (allocation m).1
+          (le.set (vectorInputTemp i) (.Vlong value)) after) ∧
+      CC.Mem.load .Mint64 after localVector.block (8 * (i.val : Int)) = some (.Vlong value) ∧
+      (∀ j : Fin 64, j ≠ i → CC.Mem.load .Mint64 after localVector.block (8 * (j.val : Int)) =
+        CC.Mem.load .Mint64 supplied localVector.block (8 * (j.val : Int))) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ≠ Arm64Entry.___a64_vectors →
+        ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk supplied block ofs) ∧
+      FrameBelow m.nextblock supplied after ∧ after.access = supplied.access ∧
+      after.nextblock = supplied.nextblock := by
+  obtain ⟨localVector⟩ := vector_local m
+  obtain ⟨after, stored⟩ := vector_store_exists m supplied localVector i value access
+  have storev : CC.Mem.storev .Mint64 supplied (.Vptr localVector.block (vectorPointerOffset i))
+      (.Vlong value) = some after := by
+    simpa only [CC.Mem.storev, vector_offsets] using stored
+  have suffix := vector_return_exec world layout i m supplied after localVector le k value storev
+  have call : CC.Star (CC.Step2 world)
+      (.Callstate Arm64OriginCache.inputFunction [.Vint (6#32)] (vectorContinuation i m le k) before)
+      trace (.Returnstate (.Vlong value) (vectorContinuation i m le k) supplied) :=
+    .step _ _ _ _ _ _ (.external_function _ _ _ _ _ _ _ _ _ _ provider) (.refl _)
+      (by simp [CC.E0, CC.Eapp])
+  refine ⟨localVector, after, ?_, CC.Mem.load_store_same stored, ?_, ?_,
+    FrameBelow.store localVector.fresh stored, CC.Mem.store_access stored, CC.Mem.store_nextblock stored⟩
+  · simpa only [CC.E0, CC.Eapp, List.nil_append, List.append_nil] using
+      star_trans (vector_input_ready_bound world inputBinding i m before le k).sound
+        (star_trans call suffix.sound)
+  · intro j different
+    have ne : j.val ≠ i.val := fun h => different (Fin.ext h)
+    have separate : 8 * (j.val : Int) + 8 ≤ 8 * (i.val : Int) ∨
+        8 * (i.val : Int) + 8 ≤ 8 * (j.val : Int) := by omega
+    apply CC.Mem.load_store_other stored
+    exact Or.inr separate
+  · intro id ty block bound different chunk ofs
+    have distinct := (allocated_local_storage
+      (CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (allocation m)).symm)).2
+    exact CC.Mem.load_store_other stored chunk block ofs
+      (.inl (distinct _ _ _ _ bound localVector.binding different))
+
+theorem vector_input_ready (i : Fin 64) (m memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) :
+    InternalRun ge 3 (.State producer (vectorStage i.val) k (allocation m).1 le memory)
+      (.Callstate Arm64OriginCache.inputFunction [.Vint (6#32)]
+        (vectorContinuation i m le k) memory) :=
+  vector_input_ready_bound ge producer_input_binding i m memory le k
+
 theorem vector_input_returns (i : Fin 64) (m before supplied : CC.Mem)
     (le : CC.TempEnv) (k : CC.Cont) (value : BitVec 64) (trace : CC.Trace)
     (provider : CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv ge.genv_genv)
@@ -246,34 +308,8 @@ theorem vector_input_returns (i : Fin 64) (m before supplied : CC.Mem)
       (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ≠ Arm64Entry.___a64_vectors →
         ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk supplied block ofs) ∧
       FrameBelow m.nextblock supplied after ∧ after.access = supplied.access ∧
-      after.nextblock = supplied.nextblock := by
-  obtain ⟨localVector⟩ := vector_local m
-  obtain ⟨after, stored⟩ := vector_store_exists m supplied localVector i value access
-  have storev : CC.Mem.storev .Mint64 supplied (.Vptr localVector.block (vectorPointerOffset i))
-      (.Vlong value) = some after := by
-    simpa only [CC.Mem.storev, vector_offsets] using stored
-  have suffix := vector_return_exec i m supplied after localVector le k value storev
-  have call : CC.Star (CC.Step2 ge)
-      (.Callstate Arm64OriginCache.inputFunction [.Vint (6#32)] (vectorContinuation i m le k) before)
-      trace (.Returnstate (.Vlong value) (vectorContinuation i m le k) supplied) :=
-    .step _ _ _ _ _ _ (.external_function _ _ _ _ _ _ _ _ _ _ provider) (.refl _)
-      (by simp [CC.E0, CC.Eapp])
-  refine ⟨localVector, after, ?_, CC.Mem.load_store_same stored, ?_, ?_,
-    FrameBelow.store localVector.fresh stored, CC.Mem.store_access stored, CC.Mem.store_nextblock stored⟩
-  · simpa only [CC.E0, CC.Eapp, List.nil_append, List.append_nil] using
-      star_trans (vector_input_ready i m before le k).sound
-        (star_trans call suffix.sound)
-  · intro j different
-    have ne : j.val ≠ i.val := fun h => different (Fin.ext h)
-    have separate : 8 * (j.val : Int) + 8 ≤ 8 * (i.val : Int) ∨
-        8 * (i.val : Int) + 8 ≤ 8 * (j.val : Int) := by omega
-    apply CC.Mem.load_store_other stored
-    exact Or.inr separate
-  · intro id ty block bound different chunk ofs
-    have distinct := (allocated_local_storage
-      (CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (allocation m)).symm)).2
-    exact CC.Mem.load_store_other stored chunk block ofs
-      (.inl (distinct _ _ _ _ bound localVector.binding different))
+      after.nextblock = supplied.nextblock :=
+  vector_input_returns_bound ge rfl producer_input_binding i m before supplied le k value trace provider access
 
 /-- The actual LR declaration immediately before vector inputs writes zero,
 framing all other declared local loads and old caller memory. -/

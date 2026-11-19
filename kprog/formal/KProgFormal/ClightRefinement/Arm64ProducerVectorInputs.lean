@@ -10,22 +10,29 @@ open Arm64Producer
 The post-memory is retained, not equated to its input. Caller bytes, local
 readbacks and permissions needed by this source segment are explicit frame
 obligations. This does not establish availability of a runtime provider. -/
-def Provider (m : CC.Mem) (values : Fin 64 → BitVec 64) : Prop :=
+def ProviderAt (world : CC.CGenv) (m : CC.Mem) (values : Fin 64 → BitVec 64) : Prop :=
   ∀ (i : Fin 64) (before : CC.Mem), before.access = (allocation m).2.access →
     ∃ trace supplied,
-      CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv ge.genv_genv)
+      CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv world.genv_genv)
         [.Vint (6#32)] before trace (.Vlong (values i)) supplied ∧
       supplied.access = before.access ∧ supplied.nextblock = before.nextblock ∧
       FrameBelow m.nextblock before supplied ∧
       ∀ id ty block, (allocation m).1.get id = some (block, ty) →
         ∀ chunk ofs, CC.Mem.load chunk supplied block ofs = CC.Mem.load chunk before block ofs
 
-private theorem run_suffix (m : CC.Mem) (localVector : VectorLocal m)
-    (values : Fin 64 → BitVec 64) (provider : Provider m values) (count : Nat) :
+def Provider (m : CC.Mem) (values : Fin 64 → BitVec 64) : Prop :=
+  ProviderAt ge m values
+
+private theorem run_suffix (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv)
+    (inputBinding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input =
+        some (CC.Positive.ofNat 64) ∧
+      CC.Genv.findFunctPtr world.genv_genv (CC.Positive.ofNat 64) = some Arm64OriginCache.inputFunction) (m : CC.Mem) (localVector : VectorLocal m)
+    (values : Fin 64 → BitVec 64) (provider : ProviderAt world m values) (count : Nat) :
     ∀ start, start + count = 64 → ∀ (before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont),
     before.access = (allocation m).2.access →
     ∃ after finalLe, ∃ traces : List CC.Trace, traces.length = count ∧
-      CC.Star (CC.Step2 ge)
+      CC.Star (CC.Step2 world)
         (.State producer (vectorStage start) k (allocation m).1 le before)
         traces.flatten (.State producer (vectorStage 64) k (allocation m).1 finalLe after) ∧
       (∀ j : Fin 64, start ≤ j.val →
@@ -54,7 +61,7 @@ private theorem run_suffix (m : CC.Mem) (localVector : VectorLocal m)
     obtain ⟨trace, supplied, call, providerAccess, providerNext, providerFrame, providerLocals⟩ :=
       provider i before access
     obtain ⟨chosen, middle, headRun, headRead, headWords, headLocals, headFrame, headAccess, headNext⟩ :=
-      vector_input_returns i m before supplied le k (values i) trace call (providerAccess.trans access)
+      vector_input_returns_bound world layout inputBinding i m before supplied le k (values i) trace call (providerAccess.trans access)
     have sameBlock : chosen.block = localVector.block :=
       congrArg Prod.fst (Option.some.inj (chosen.binding.symm.trans localVector.binding))
     rw [sameBlock] at headRead headWords
@@ -88,6 +95,31 @@ private theorem run_suffix (m : CC.Mem) (localVector : VectorLocal m)
 /-- All 64 real source visits, with one trace per call in source order.
 Earlier local reads and caller memory survive each explicitly framed provider
 outcome; all vector words are derived from the corresponding returned values. -/
+theorem vector_inputs_initialized_bound (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv)
+    (inputBinding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input =
+        some (CC.Positive.ofNat 64) ∧
+      CC.Genv.findFunctPtr world.genv_genv (CC.Positive.ofNat 64) = some Arm64OriginCache.inputFunction) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (values : Fin 64 → BitVec 64) (provider : ProviderAt world m values)
+    (access : before.access = (allocation m).2.access) :
+    ∃ localVector : VectorLocal m, ∃ after finalLe, ∃ traces : List CC.Trace, traces.length = 64 ∧
+      CC.Star (CC.Step2 world)
+        (.State producer vectorStart k (allocation m).1 le before)
+        traces.flatten (.State producer afterVectorInputs k (allocation m).1 finalLe after) ∧
+      (∀ i : Fin 64, CC.Mem.load .Mint64 after localVector.block (8 * (i.val : Int)) =
+        some (.Vlong (values i))) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ≠ Arm64Entry.___a64_vectors →
+        ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
+      (∀ id, (∀ i : Fin 64, id ≠ vectorInputTemp i) → finalLe.get id = le.get id) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock := by
+  obtain ⟨localVector⟩ := vector_local m
+  obtain ⟨after, finalLe, traces, length, run, reads, _, locals, temps, frame, finalAccess, next⟩ :=
+    run_suffix world layout inputBinding m localVector values provider 64 0 rfl before le k access
+  refine ⟨localVector, after, finalLe, traces, length, ?_, (fun i => reads i (Nat.zero_le _)),
+    locals, temps, frame, finalAccess, next⟩
+  simpa only [first_vector_stage, final_vector_stage] using run
+
 theorem vector_inputs_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (values : Fin 64 → BitVec 64) (provider : Provider m values)
     (access : before.access = (allocation m).2.access) :
@@ -101,13 +133,8 @@ theorem vector_inputs_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.
         ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
       (∀ id, (∀ i : Fin 64, id ≠ vectorInputTemp i) → finalLe.get id = le.get id) ∧
       FrameBelow m.nextblock before after ∧ after.access = before.access ∧
-      after.nextblock = before.nextblock := by
-  obtain ⟨localVector⟩ := vector_local m
-  obtain ⟨after, finalLe, traces, length, run, reads, _, locals, temps, frame, finalAccess, next⟩ :=
-    run_suffix m localVector values provider 64 0 rfl before le k access
-  refine ⟨localVector, after, finalLe, traces, length, ?_, (fun i => reads i (Nat.zero_le _)),
-    locals, temps, frame, finalAccess, next⟩
-  simpa only [first_vector_stage, final_vector_stage] using run
+      after.nextblock = before.nextblock :=
+  vector_inputs_initialized_bound ge rfl producer_input_binding m before le k values provider access
 
 /-- Native vector halves in the actual alternating low/high input order. -/
 def nativeVectorWord (s : Reference.AArch64.State) (i : Fin 64) : BitVec 64 :=

@@ -124,6 +124,11 @@ continues through all four flag input visits and the separate LR-zero store.
 It derives the masked flag bytes and LR zero while preserving both tables,
 all GPR data, caches, context and global framing. The 34 actual provider traces
 remain ordered; the result stops before the 64 vector input visits.
+The [Numeric vector composition](results/m5-numeric-producer-vectors/README.md)
+then executes all 64 vector input visits, deriving each low/high word in its
+actual allocated array. All 98 provider traces remain ordered, and the tables,
+GPRs, flags, LR, caches, context and global framing survive. The result reaches
+`afterVectorInputs`, before RAW/header processing.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 
