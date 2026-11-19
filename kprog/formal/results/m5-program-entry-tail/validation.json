@@ -1,0 +1,234 @@
+{
+  "scope": "Actual sixteen remaining production header fields, real callback symbol/function bindings and full pre-loop header composition",
+  "raw": "/workspaces/kprog-raw/formal/m5-program-entry-tail",
+  "validated_at": "2026-11-19T19:30:08.082111+00:00",
+  "callbacks": {
+    "actual_load_block": 60,
+    "actual_store_block": 61,
+    "extracted_load_block": 184,
+    "extracted_store_block": 185,
+    "proved": [
+      "Actual Genv.findSymbol and findFunctPtr bindings to actual exported function bodies",
+      "Both callback blocks differ from extracted producer blocks",
+      "Allocated production locals do not shadow callbacks"
+    ],
+    "evaluation_log": "Inspect.log"
+  },
+  "proved": [
+    "Actual nine tail-local bindings derive from imported allocation correspondence",
+    "Sixteen actual RHS evaluations and casts, including volatile storage, actual callbacks and three narrowing size fields",
+    "All target lvalues derive from actual allocated-header transport and source offsets",
+    "One imported Mem.store per actual step gives typed load/readback and frame facts",
+    "Kernel-checked actual sixteen-statement region with real beforeLoop successor",
+    "48 actual tail transitions preserve all preceding 76 header/vector observations",
+    "276-step composition derives all 92 readbacks and local/caller framing at one reached memory"
+  ],
+  "production_region": {
+    "start": "Arm64ProgramEntryVectors.afterNullVectors",
+    "end": "beforeLoop",
+    "tail_stores": 16,
+    "tail_steps": 48,
+    "combined_steps": 276,
+    "combined_observations": 92,
+    "assumptions": [
+      "Arbitrary original caller memory and subsequent memory contents",
+      "Subsequent memory permissions equal imported allocation permissions",
+      "Arbitrary temporary environment and continuation"
+    ],
+    "derived": [
+      "Actual local blocks and storage",
+      "Actual callback symbols/function bodies",
+      "All 92 typed header readbacks",
+      "Other-local loads unchanged",
+      "Caller FrameBelow",
+      "Permissions and allocation frontier unchanged"
+    ]
+  },
+  "focused": [
+    {
+      "exit": 0,
+      "seconds": 17.328136915995856,
+      "log": "focused1.log"
+    },
+    {
+      "exit": 1,
+      "seconds": 34.213553828012664,
+      "log": "focused2.log"
+    },
+    {
+      "exit": 1,
+      "seconds": 24.972486206999747,
+      "log": "focused3.log"
+    },
+    {
+      "exit": 1,
+      "seconds": 23.54202123300638,
+      "log": "focused4.log"
+    },
+    {
+      "exit": 1,
+      "seconds": 20.858301293003024,
+      "log": "focused5.log"
+    },
+    {
+      "exit": 1,
+      "seconds": 20.531411716001458,
+      "log": "focused6.log"
+    },
+    {
+      "exit": 1,
+      "seconds": 59.7129108710069,
+      "log": "focused7.log"
+    },
+    {
+      "exit": 1,
+      "seconds": 49.596124326999416,
+      "log": "focused8.log"
+    },
+    {
+      "exit": 0,
+      "seconds": 48.67452846901142,
+      "log": "focused9.log"
+    },
+    {
+      "exit": 1,
+      "seconds": 56.082684135006275,
+      "log": "focused10.log"
+    },
+    {
+      "exit": 0,
+      "seconds": 57.80811867400189,
+      "log": "focused11.log"
+    }
+  ],
+  "full": {
+    "exit": 0,
+    "start": "2026-11-19T19:28:25.534974+00:00",
+    "seconds": 3.5225169449986424,
+    "command": [
+      "lake",
+      "build"
+    ],
+    "jobs": 344,
+    "log": "lake-build1.log"
+  },
+  "queries": {
+    "exit": 0,
+    "start": "2026-11-19T19:28:23.793795+00:00",
+    "seconds": 1.7408949020027649,
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-program-entry-tail/Query.lean"
+    ],
+    "count": 11,
+    "log": "Query1.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryTail.callback_binding": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryTail.local_binding": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryTail.callback_unshadowed": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryTail.tail_rhs": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryTail.tail_cast": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryTail.tail_lvalue": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryTail.tail_write": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryTail.production_tail_source": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryTail.tail_initialized": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryTail.header_initialized_before_loop": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryTail.callback_blocks_differ": []
+    }
+  },
+  "inspection": {
+    "exit": 0,
+    "seconds": 1.7118522389937425,
+    "source": "Inspect.lean",
+    "output": [
+      "some 60",
+      "some 61"
+    ],
+    "log": "Inspect.log"
+  },
+  "proof_construction": "Only constructor metadata is normalized, retaining shared identifier/type constants; explicit typed lookup witnesses and narrow address-of rewrites avoid full-world reduction. All transformations are kernel checked at original caps; no alternate evaluator, C fixture, source-post-memory equality for distinct callbacks, native_decide or new axiom.",
+  "axiom_note": "Binding/evaluation/cast/source laws have standard logical axioms only. InternalRun laws retain inherited CC.externalFunctionsSem and CC.inlineAssemblySem through CC.Step2; no new external transition or axiom.",
+  "resources": {
+    "cpu": 17,
+    "control_cpu": 16,
+    "workers": 1,
+    "memory_as_bytes": 34359738368,
+    "heartbeats": 200000,
+    "recursion": 512,
+    "async": false,
+    "timing_lock": "Host work follows coordinator 2026-11-19T18:18:59Z: CPUs 8-23 without timing lock"
+  },
+  "source_sha256": "91c9aaecc24f0245591b76d20f40ed989ab8d475025376b302c17532bcdc51f9",
+  "export_comparison": {
+    "fresh": false,
+    "reason": "Lean-only batch with no C source changes",
+    "historical_receipt": "../m5-program-entry-fields/validation.json",
+    "arm64_identical": 10,
+    "historical_x86_differences": 12
+  },
+  "make_check": {
+    "fresh": false,
+    "last_whole_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "fresh_required_at": "M1-M6 closure"
+  },
+  "open": [
+    "Actual live vector-pointer loop and header resource composition",
+    "Pre-header scalar/input prefix execution and full production caller/global/provider/native/context admission",
+    "Payload callback execution/refinement in actual world",
+    "Relative caches, physical-memory/alias/origin/control obligations",
+    "All ISA families and O1/O2/O4 recount",
+    "M6 retirement then fresh full Lake plus make check"
+  ],
+  "m5_complete": false,
+  "m6_complete": false,
+  "completed_isa_families": 0
+}
