@@ -1,0 +1,18 @@
+
+<stdin>:	file format elf64-bpf
+
+Disassembly of section raw_tracepoint/trusted:
+
+0000000000000000 <trusted_x86_x86_sim_xdp>:
+; trusted_x86_x86_sim_xdp():
+; /workspaces/kprog-raw/coordinator/lto-apps-20261119/tracee_monitor-20261119T133821Z/timing/state/session-x9mp5xyg/requests/request-ln225fo2/generated/trusted_x86.bpf.c:70
+       0:	b7 00 00 00 00 00 00 00	r0 = 0x0
+       1:	7b 0a e8 fd 00 00 00 00	*(u64 *)(r10 - 0x218) = r0
+       2:	bf 18 00 00 00 00 00 00	r8 = r1
+; /workspaces/kprog-raw/coordinator/lto-apps-20261119/tracee_monitor-20261119T133821Z/timing/state/session-x9mp5xyg/requests/request-ln225fo2/generated/trusted_x86.bpf.c:71
+       3:	18 06 00 00 00 00 00 00 00 00 00 00 00 00 00 00	r6 = 0x0 ll
+       5:	79 61 00 00 00 00 00 00	r1 = *(u64 *)(r6 + 0x0)
+       6:	79 65 00 00 00 00 00 00	r5 = *(u64 *)(r6 + 0x0)
+       7:	79 62 00 00 00 00 00 00	r2 = *(u64 *)(r6 + 0x0)
+       8:	79 63 00 00 00 00 00 00	r3 = *(u64 *)(r6 + 0x0)
+       9:	79 64 00 00 00 00 00 00	r4 = *(u64 *)(r6 + 0x0)

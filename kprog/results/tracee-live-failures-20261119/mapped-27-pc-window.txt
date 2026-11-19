@@ -1,0 +1,25 @@
+     953:	b7 03 00 00 00 00 00 00	r3 = 0x0
+
+0000000000001dd0 <LBB0_168>:
+; LBB0_168():
+; /workspaces/kprog-raw/coordinator/lto-apps-20261119/tracee_monitor-20261119T133821Z/timing/state/session-x9mp5xyg/requests/request-9lf7h3bo/generated/trusted_x86.bpf.c:1720
+     954:	16 04 01 00 00 00 00 00	if w4 == 0x0 goto +0x1 <LBB0_170>
+; /workspaces/repository/kprog/x86/../formal/generated/x86_mem_access.h:105
+     955:	79 13 a8 00 00 00 00 00	r3 = *(u64 *)(r1 + 0xa8)
+
+0000000000001de0 <LBB0_170>:
+; LBB0_170():
+     956:	bf a1 00 00 00 00 00 00	r1 = r10
+; /workspaces/kprog-raw/coordinator/lto-apps-20261119/tracee_monitor-20261119T133821Z/timing/state/session-x9mp5xyg/requests/request-9lf7h3bo/generated/trusted_x86.bpf.c:1721
+     957:	07 01 00 00 e8 fe ff ff	r1 += -0x118
+; /workspaces/kprog-raw/coordinator/lto-apps-20261119/tracee_monitor-20261119T133821Z/timing/state/session-x9mp5xyg/requests/request-9lf7h3bo/generated/trusted_x86.bpf.c:1723
+     958:	79 a7 d0 fe 00 00 00 00	r7 = *(u64 *)(r10 - 0x130)
+     959:	1f 17 00 00 00 00 00 00	r7 -= r1
+     960:	07 07 00 00 e8 fe ff ff	r7 += -0x118
+     961:	bc 58 00 00 00 00 00 00	w8 = w5
+     962:	16 05 01 00 04 00 00 00	if w5 == 0x4 goto +0x1 <LBB0_172>
+     963:	b7 07 00 00 00 00 00 00	r7 = 0x0
+
+0000000000001e20 <LBB0_172>:
+; LBB0_172():
+; /workspaces/kprog-raw/coordinator/lto-apps-20261119/tracee_monitor-20261119T133821Z/timing/state/session-x9mp5xyg/requests/request-9lf7h3bo/generated/trusted_x86.bpf.c:1726

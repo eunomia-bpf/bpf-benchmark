@@ -1120,3 +1120,12 @@ NUMERIC30+6ABI/Bemission pass. Sole tools rebuilt with checked-sim-stage
 under timing SH/image EX; no image, guest, runtime check or flag change.
 App per-call/body/helper/map/bytes effect remains unmeasured. See
 skb-numeric-integration-20261119, run164404_21511.
+
+PERF 2026-11-19T16:48:10Z: Actual retained Tracee B PC/source mapping completes:
+27/sys_dup_exit_tail959 is MOV_STORE_REG [rsp+0xa8],rbx;
+30/lkm_seeker_modtree_loop27607 is CMP_IMM rbx,0x7d00. Both use numeric
+register reads through STACK_NUMERIC_BITS_INTO (:588-594), and emitted
+subtraction precedes the tag test. This supersedes earlier alias-offset
+guesses for these PCs. Request28's536Bframe is confirmed at entry. No
+B source fix, fresh compiler pass, new guest or gain claimed. Raw and
+compact windows: tracee-live-failures-20261119.

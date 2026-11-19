@@ -19,6 +19,10 @@
   the virtual stack base, adding checks or changing limits. B-only numeric
   abstraction is a candidate, not an implemented/proven transformation.
   Current prefix33 is not final coverage. See tracee-live-failures-20261119.
+  Mapping now identifies numeric register conversion (:588-594), not
+  the earlier alias-offset guess:27 is MOV_STORE_REG at native0xa04;
+  30 is lkm_seeker_modtree_loop CMP_IMM at0x11cc6. B subtraction
+  precedes its tag test. Retained frontend/bounds IR is the next evidence.
   PERF 2026-11-19T14:59:03Z: Inspector119540e55, worker430344, waits timing SH
   to map capsules27/28/30 from the final service archive; no new frontend
   or guest. Live temporary session paths are removed after archiving.
@@ -29,17 +33,16 @@
   retain the active run. Snapshot/source dimensions are in the same README;
   this is no new rejection or causal attribution. Diagnostics still wait.
 
-- [ ] P-native-skb-numeric-integration (PERF 2026-11-19T13:58:47Z):
-  validate shared SKB field macros through compile-sim-ir and context-lower,
-  beyond the completed standalone NUMERIC repair0dfa23814. Native lowering
-  inserts an opaque base barrier while the context pass recognizes pointer
-  roots; their interaction is a hypothesis, not a confirmed defect. Committed
-  real-macro host regression827e0c601/07df70aea has28 data/data_end full/lane
-  and mark-control cases using the sole physical/public layouts. Worker
-  422533 waits timing SH behind Tracee; no production change or extra guest.
-  Read actual stage errors versus executed mismatches, then preserve existing
-  absolute-base/fault guards in any repair. Actual app coverage is separate.
-  See results/skb-numeric-integration-20261119.
+- [x] P-native-skb-numeric-integration (29d406c69; host164404_21511):
+  shared SKB field roots now survive native memory lowering and context
+  conversion. Recovered host baseline fails18/40cases; all12direct-C
+  controls pass. Production repair keeps external entry pointers directly,
+  preserving the noncontext/null-base barrier. All40fields, absolute0x70
+  register-base control, NUMERIC30cases/six ABI controls and B emission
+  pass after the canonical sole-tool rebuild. No new runtime check, flag,
+  image or guest. Actual checked-app coverage/timing remains separate.
+  See results/skb-numeric-integration-20261119. Coordinator owns memoryAsm
+  cleanup from16:43 onward; PERF makes no further edits there.
 
 - [x] P-native-numeric-bridge (0dfa23814; run133702_416559): audit native
   preservation of NUMERIC(value)'s concrete bits through the reused stock

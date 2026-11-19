@@ -1,0 +1,11 @@
+68: SEC("raw_tracepoint/trusted")
+69: int trusted_x86_x86_sim_xdp(void *ctx)
+70: {
+71: 	X86_SIM_ENTRY_RAW(ctx);
+72: 	X86_SIM_BIND_INLINE();
+
+69: int trusted_x86_x86_sim_xdp(void *ctx)
+70: {
+71: 	X86_SIM_ENTRY_RAW(ctx);
+72: 	X86_SIM_BIND_INLINE();
+73: x86_l_0:

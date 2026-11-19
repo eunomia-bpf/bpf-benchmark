@@ -1,0 +1,115 @@
+{
+  "rows": [
+    {
+      "request": 27,
+      "entry": "sys_dup_exit_tail",
+      "verifier_pc": 959,
+      "section": "kprobe/trusted",
+      "section_bytes": 16552,
+      "symbol_byte_offset": 0,
+      "disassembly_index": 959,
+      "mapped": true,
+      "windows": [
+        [
+          "     953:\tb7 03 00 00 00 00 00 00\tr3 = 0x0",
+          "",
+          "0000000000001dd0 <LBB0_168>:",
+          "; LBB0_168():",
+          "; /workspaces/kprog-raw/coordinator/lto-apps-20261119/tracee_monitor-20261119T133821Z/timing/state/session-x9mp5xyg/requests/request-9lf7h3bo/generated/trusted_x86.bpf.c:1720",
+          "     954:\t16 04 01 00 00 00 00 00\tif w4 == 0x0 goto +0x1 <LBB0_170>",
+          "; /workspaces/repository/kprog/x86/../formal/generated/x86_mem_access.h:105",
+          "     955:\t79 13 a8 00 00 00 00 00\tr3 = *(u64 *)(r1 + 0xa8)",
+          "",
+          "0000000000001de0 <LBB0_170>:",
+          "; LBB0_170():",
+          "     956:\tbf a1 00 00 00 00 00 00\tr1 = r10",
+          "; /workspaces/kprog-raw/coordinator/lto-apps-20261119/tracee_monitor-20261119T133821Z/timing/state/session-x9mp5xyg/requests/request-9lf7h3bo/generated/trusted_x86.bpf.c:1721",
+          "     957:\t07 01 00 00 e8 fe ff ff\tr1 += -0x118",
+          "; /workspaces/kprog-raw/coordinator/lto-apps-20261119/tracee_monitor-20261119T133821Z/timing/state/session-x9mp5xyg/requests/request-9lf7h3bo/generated/trusted_x86.bpf.c:1723",
+          "     958:\t79 a7 d0 fe 00 00 00 00\tr7 = *(u64 *)(r10 - 0x130)",
+          "     959:\t1f 17 00 00 00 00 00 00\tr7 -= r1",
+          "     960:\t07 07 00 00 e8 fe ff ff\tr7 += -0x118",
+          "     961:\tbc 58 00 00 00 00 00 00\tw8 = w5",
+          "     962:\t16 05 01 00 04 00 00 00\tif w5 == 0x4 goto +0x1 <LBB0_172>",
+          "     963:\tb7 07 00 00 00 00 00 00\tr7 = 0x0",
+          "",
+          "0000000000001e20 <LBB0_172>:",
+          "; LBB0_172():",
+          "; /workspaces/kprog-raw/coordinator/lto-apps-20261119/tracee_monitor-20261119T133821Z/timing/state/session-x9mp5xyg/requests/request-9lf7h3bo/generated/trusted_x86.bpf.c:1726"
+        ]
+      ]
+    },
+    {
+      "request": 28,
+      "entry": "tracepoint__sched__sched_process_fork",
+      "verifier_pc": 1,
+      "section": "raw_tracepoint/trusted",
+      "section_bytes": 66232,
+      "symbol_byte_offset": 0,
+      "disassembly_index": 1,
+      "mapped": true,
+      "windows": [
+        [
+          "",
+          "<stdin>:\tfile format elf64-bpf",
+          "",
+          "Disassembly of section raw_tracepoint/trusted:",
+          "",
+          "0000000000000000 <trusted_x86_x86_sim_xdp>:",
+          "; trusted_x86_x86_sim_xdp():",
+          "; /workspaces/kprog-raw/coordinator/lto-apps-20261119/tracee_monitor-20261119T133821Z/timing/state/session-x9mp5xyg/requests/request-ln225fo2/generated/trusted_x86.bpf.c:70",
+          "       0:\tb7 00 00 00 00 00 00 00\tr0 = 0x0",
+          "       1:\t7b 0a e8 fd 00 00 00 00\t*(u64 *)(r10 - 0x218) = r0",
+          "       2:\tbf 18 00 00 00 00 00 00\tr8 = r1",
+          "; /workspaces/kprog-raw/coordinator/lto-apps-20261119/tracee_monitor-20261119T133821Z/timing/state/session-x9mp5xyg/requests/request-ln225fo2/generated/trusted_x86.bpf.c:71",
+          "       3:\t18 06 00 00 00 00 00 00 00 00 00 00 00 00 00 00\tr6 = 0x0 ll",
+          "       5:\t79 61 00 00 00 00 00 00\tr1 = *(u64 *)(r6 + 0x0)",
+          "       6:\t79 65 00 00 00 00 00 00\tr5 = *(u64 *)(r6 + 0x0)",
+          "       7:\t79 62 00 00 00 00 00 00\tr2 = *(u64 *)(r6 + 0x0)",
+          "       8:\t79 63 00 00 00 00 00 00\tr3 = *(u64 *)(r6 + 0x0)",
+          "       9:\t79 64 00 00 00 00 00 00\tr4 = *(u64 *)(r6 + 0x0)"
+        ]
+      ]
+    },
+    {
+      "request": 30,
+      "entry": "lkm_seeker_modtree_loop",
+      "verifier_pc": 27607,
+      "section": "kprobe/trusted",
+      "section_bytes": 226528,
+      "symbol_byte_offset": 0,
+      "disassembly_index": 27607,
+      "mapped": true,
+      "windows": [
+        [
+          "; /workspaces/kprog-raw/coordinator/lto-apps-20261119/tracee_monitor-20261119T133821Z/timing/state/session-x9mp5xyg/requests/request-clfuln96/generated/trusted_x86.bpf.c:49142",
+          "   27599:\t16 01 04 00 00 00 00 00\tif w1 == 0x0 goto +0x4 <LBB0_3430>",
+          "; /workspaces/repository/kprog/x86/../formal/generated/x86_mem_access.h:93",
+          "   27600:\t69 68 00 00 00 00 00 00\tr8 = *(u16 *)(r6 + 0x0)",
+          "; /workspaces/kprog-raw/coordinator/lto-apps-20261119/tracee_monitor-20261119T133821Z/timing/state/session-x9mp5xyg/requests/request-clfuln96/generated/trusted_x86.bpf.c:49142",
+          "   27601:\t54 08 00 00 ff ff 00 00\tw8 &= 0xffff",
+          "   27602:\tbc 88 00 00 00 00 00 00\tw8 = w8",
+          "   27603:\tb4 07 00 00 00 00 00 00\tw7 = 0x0",
+          "",
+          "0000000000035ea0 <LBB0_3430>:",
+          "; LBB0_3430():",
+          "   27604:\tbf a1 00 00 00 00 00 00\tr1 = r10",
+          "; /workspaces/kprog-raw/coordinator/lto-apps-20261119/tracee_monitor-20261119T133821Z/timing/state/session-x9mp5xyg/requests/request-clfuln96/generated/trusted_x86.bpf.c:49143",
+          "   27605:\t07 01 00 00 e8 fe ff ff\tr1 += -0x118",
+          "; /workspaces/kprog-raw/coordinator/lto-apps-20261119/tracee_monitor-20261119T133821Z/timing/state/session-x9mp5xyg/requests/request-clfuln96/generated/trusted_x86.bpf.c:49145",
+          "   27606:\tbf 82 00 00 00 00 00 00\tr2 = r8",
+          "   27607:\t1f 12 00 00 00 00 00 00\tr2 -= r1",
+          "   27608:\t07 02 00 00 e8 fe ff ff\tr2 += -0x118",
+          "   27609:\tbf 21 00 00 00 00 00 00\tr1 = r2",
+          "   27610:\t79 a3 b8 fe 00 00 00 00\tr3 = *(u64 *)(r10 - 0x148)",
+          "   27611:\t0f 31 00 00 00 00 00 00\tr1 += r3",
+          "   27612:\tbf 19 00 00 00 00 00 00\tr9 = r1",
+          "   27613:\t16 07 01 00 04 00 00 00\tif w7 == 0x4 goto +0x1 <LBB0_3432>",
+          "   27614:\tbf 89 00 00 00 00 00 00\tr9 = r8",
+          ""
+        ]
+      ]
+    }
+  ],
+  "scope": "Retained-object/debug mapping only; no compilation, stock reload, app census or timing."
+}

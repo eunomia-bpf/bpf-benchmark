@@ -115,3 +115,27 @@ The current Tracee batch's direct-native results therefore agree with the
 restored policy, and are still never called stock-verified. No rebuild
 targeting the superseded c3960d089 policy is queued. Future base/image
 batches use current HEAD normally. Reader replay433910 remains pending.
+
+PERF 2026-11-19T16:48:10Z: Completed capsule recovery7a67a8cfa packages only the three
+existing completed capsules, explicitly not a final service archive or
+app census. Initial recovery17194 failed before inspection because
+inspect.py shadowed Python's standard module;167f1540b renames the reader.
+The successful mapped result and PC/generated-C windows are committed.
+Raw /workspaces/kprog-raw/perf/tracee-live-failures-20261119/recovery-20261119T163803Z-17194/source-mapping; no frontend replay, stock load or guest.
+
+-27sys_dup_exit_tail: BPC959 maps to generated C1723, native0xa04
+ MOV_STORE_REG [rsp+0xa8],rbx.
+-30lkm_seeker_modtree_loop: BPC27607 maps to C49145, native0x11cc6
+ CMP_IMM rbx,0x7d00, following a16-bit load into RBX.
+-28tracepoint__sched__sched_process_fork: BPC1 is a536-byte frame
+ write at function entry (C70), not a native source memory access.
+
+Both arithmetic sites consume numeric register values. Store-value and
+comparison macros call X86_SIM_L_READ_REG, whose conditional STACK case
+uses STACK_NUMERIC_BITS_INTO (:588-594), subtracting arena top before
+adding native stack base. The rejecting B subtraction precedes its emitted
+tag test (27insn962;30insn27613). Thus the earlier alias-offset/cache-restore
+source guesses are superseded for these two PCs. Inspect retained frontend
+and bounds IR to identify which optimization speculates this numeric
+conversion and how to preserve its branch/provenance. No B-only numeric
+abstraction, changed shared header or extra check is implemented here.
