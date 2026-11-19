@@ -5,6 +5,8 @@
 #define X86_SIM_STACK_BYTES 64U
 #include "../../x86/x86_sim_local_bpf.h"
 #include "../../x86/x86_sim_inline.h"
+X86_SIM_DECLARE_INSTRUCTION(__x86_instruction_X86_OP_MOV_STORE_REG,X86_OP_MOV_STORE_REG)
+X86_SIM_DECLARE_INSTRUCTION(__x86_instruction_X86_OP_MOV_LOAD,X86_OP_MOV_LOAD)
 
 unsigned long native_lab_entry_input(unsigned kind)
 { assert(kind == NATIVE_LAB_INPUT_UNSPECIFIED); return 0x1020304050607080UL; }

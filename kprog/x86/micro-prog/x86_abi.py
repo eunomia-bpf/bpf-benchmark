@@ -179,6 +179,8 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None, stac
                 iv = incoming.constants[index[ix]]
                 if base != 'X86_REG_NONE' and (type(alias[index[base]]) is int or isinstance(alias[index[base]], PointerAlternatives)):
                     return offset_pointer(alias[index[base]], (iv << scale) + disp) if iv is not None else None
+                if incoming.aliases[index[ix]] is not False:
+                    return None
                 return False if base == 'X86_REG_NONE' or alias[index[base]] is False else None
             if base == 'X86_REG_NONE':
                 return False
@@ -452,8 +454,10 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None, stac
                         delta -= 1 << 64
                     if op in {'add', 'sub'}:
                         alias[ri(args[0])[0]] = offset_pointer(old, delta if op == 'add' else -delta)
-                elif width == 64 and isinstance(old, PointerAlternatives) and (op in {'add', 'sub'}):
-                    alias[ri(args[0])[0]] = None
+                elif width == 64 and ri(args[0]) and op in {'add', 'sub'} and not zero:
+                    source = incoming.aliases[ri(args[1])[0]] if ri(args[1]) else False
+                    if old is not False or (op == 'add' and source is not False):
+                        alias[ri(args[0])[0]] = None
         elif op not in {'call', 'ret', 'jmp', 'nop', 'data16', 'cs'} and (not op.startswith('j')):
             zero = op in {'pxor', 'xorps'} and len(args) == 2 and (args[0] == args[1]) and ri(args[0])
             pure = op in {'andn', 'bzhi', 'mulx', 'popcnt', 'movbe', 'shlx', 'shrx', 'sarx', 'rorx'} or (op == 'imul' and len(args) == 3)
