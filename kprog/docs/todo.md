@@ -58,6 +58,20 @@
   retain the active run. Snapshot/source dimensions are in the same README;
   this is no new rejection or causal attribution. Diagnostics still wait.
 
+- [ ] P-B-cilium-headlen (PERF handoff 2026-11-19T20:22:55Z, OMP639663a85):
+  forty actual Cilium packet rejections have the existing length guard, but
+  packet_bounds_ir misses classifier sections, asm-offset field reads and
+  i32 kernel len-data_len head length (frozen layout112/116), rather than
+  only i64 context data_end-data. Take the archived IR directly; express
+  the same predicate as packet-pointer bounds without adding a condition
+  or changing P. Keep the six trusted-sk_buff store failures separate.
+  Batch the defect-class compiler repair with Katran5033bed62 before the
+  sole rebuild; settle only own unstarted269752 waiter before editing its
+  source inputs. Existing raw/queued results stay. Actual predicate and
+  stock checks still pending; no new Cilium coverage claim. See
+  results/cilium-packet-bounds-20261119 (peer diagnostic, counts require
+  actual journal reconciliation; prior verified receipt remains14).
+
 - [ ] P-B-relative-table-live-partials (PERF 2026-11-19T19:57:44Z): actual Cilium
   checked requests22/40/58 fail relative table lowering. Diagnostic8654dcc06
   reproduces all3 using the existing bound instruction-effect analysis.
