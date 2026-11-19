@@ -8,6 +8,9 @@ import tarfile
 
 raw = Path(sys.argv[1])
 output = Path(sys.argv[2])
+source_commit = Path(sys.argv[3])
+exit_code = Path(sys.argv[4])
+run_log = Path(sys.argv[5])
 records = []
 with tarfile.open(raw / 'service.tar.gz') as service:
     lines = service.extractfile('service/requests/requests.jsonl').read().decode().splitlines()
@@ -24,15 +27,15 @@ with tarfile.open(raw / 'service.tar.gz') as service:
             item['prog_type'] = json.load(request.extractfile('request/kernel.facts.json'))['prog_type']
         records.append(item)
 corpus = []
-for name in sorted(set(re.findall(r'x86_kvm_corpus_\d+_\d+_\d+', (raw / 'run.log').read_text()))):
+for name in sorted(set(re.findall(r'x86_kvm_corpus_\d+_\d+_\d+', run_log.read_text()))):
     path = Path('/workspaces/repository/corpus/results') / name / 'details/result.json'
     result = json.loads(path.read_text())
     corpus.append(dict(path=str(path), **{key: result[key] for key in [
         'status', 'suite_name', 'samples', 'workload_seconds'
     ]}))
 summary = dict(
-    raw=str(raw), source_commit=(raw / 'source-commit').read_text().strip(),
-    host_exit=int((raw / 'host-exit-code').read_text()),
+    raw=str(raw), source_commit=source_commit.read_text().strip(),
+    host_exit=int(exit_code.read_text()),
     requests=len(records), programs=len({r['source_prog_id'] for r in records}),
     native_installed=sum(r['status'] == 0 for r in records),
     b_generated=sum(r.get('b_generated') is True for r in records),
@@ -41,7 +44,7 @@ summary = dict(
     direct_native=sum(r.get('execution_path') == 'direct-native' for r in records),
     failed=sum(r['status'] != 0 for r in records),
     requests_detail=records, corpus=corpus,
-    scope='Canonical checked-corpus functional coverage (1 x 10 s); no official timing gain.'
+    scope='Registered-service coverage and corpus status; workload parameters are recorded per corpus run.'
 )
 output.write_text(json.dumps(summary, indent=2) + '\n')
 print(json.dumps({k: v for k, v in summary.items() if k not in ['requests_detail', 'corpus']}))
