@@ -209,6 +209,8 @@ PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are 
 
 PERF 2026-11-19T06:35:06Z：06:20 的 B 编译项已实现 O1（frontend/B backend），P 与最终 native LTO 仍 O3。g0 和 line-tables 的真实 .ksyms map 对象都在 libbpf open 返回 -3，完整 g 才保留 BTF extern 类型并成功，所以保留 g。新鲜生成 BCC fentry_vfs_read/inet_sock_set_state 的 B/libbpf open、原 frontend 复用、native O3/proof 均通过；Tetragon request6 的 retry 211523 在 CPU19/timing SH/image SH/32GiB AS 下运行；O1 frontend 与 bounds 阶段已通过，B machine backend 仍在进行（初始 210433 因旧失败存档无 artifacts.json 在进入 Tetragon 前停止，d71b7f19b 改读 kernel.entry）。结果 results/b-analysis-flags-20261119；不声称新 stock 接受或应用速度，OMP 组合批次继续量 Tetragon/Tracee 覆盖。
 
+**协调者 2026-11-19T14:49:21Z（运营者：“按记录回落到直接原生 是是什么鬼???”）——最高优先**：主配置里 B 某一步失败时，服务原来把 P 的机器码配一个桩程序装进内核（b2793af35，11-16），这些程序跑的是未经 verify(B) 的原生代码，违背 design.md 编译流水线。c3960d089 删掉这条路：B 失败的请求报失败，shim 保留原来的 eBPF 程序（JIT）；loader 的 load-direct 阶段和 trusted_direct_native 一起删掉。之后主配置每次运行报两类：走 checked-sim-c 的程序、留在 eBPF 的程序；直接原生只在对照配置里出现。协调者 13:38 那批 Tracee 是在改之前启动的，它的整体数字是混合的，按程序单独报 checked-sim-c 的那部分。perf 的 B 失败分析（帧指针减法、栈帧超 512 B 等）照旧，每修好一类，留在 eBPF 的程序就少一类。基座里的 trusted-native-loader 在下一次基座重建时换成新源码。
+
 **协调者 2026-11-19T13:33:21Z（决定，运营者 11-08：“这种之后你自己决定, 不要问我”）**：每小时审核把 10c42d6cf 的 `raise ValueError` 列为设计之外新增的拒绝。决定保留：安全靠 verify(B) 加 faithful(I,P)，B 必须覆盖 P 的每一条指令；原来认不出的行被跳过，B 就少了这条指令，verifier 接受的是另一个程序。现在这次生成失败，程序走直接原生（已有的记录回落）。同一件事的另一半由 perf 的回归 parser-completeness-20261119 发现：objdump 默认省掉全零字节段，生成器用 -z 补上（本提交之后）。两项在六个应用今天的 P 上都是 0 处，覆盖率不变。
 
 **协调者 2026-11-19T13:20:25Z（审核 20261119T09Z 逐条核实后）**：
