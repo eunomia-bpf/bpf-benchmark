@@ -1,6 +1,6 @@
 .PHONY: inspect recover
 inspect:
-	python3 kprog/results/tracee-live-failures-20261119/inspect.py $(SERVICE) $(OUT)
+	python3 kprog/results/tracee-live-failures-20261119/map_failures.py $(SERVICE) $(OUT)
 
 recover:
 	install -d $(OUT)

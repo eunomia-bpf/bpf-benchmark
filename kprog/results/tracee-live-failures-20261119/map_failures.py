@@ -1,4 +1,4 @@
-"""Map actual failed B instructions using their completed native-success capsules."""
+"""Map failed B instructions without shadowing Python's inspect module."""
 import io
 import json
 from pathlib import Path
