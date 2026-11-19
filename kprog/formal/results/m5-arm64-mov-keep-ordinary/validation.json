@@ -1,0 +1,154 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-arm64-mov-keep-ordinary",
+  "proved": {
+    "ordinary_registers": "Fin31 (0..30)",
+    "immediates": "all BitVec16",
+    "source_columns": "Fin4",
+    "native_legal_columns": "W32: 0/16; X64: 0/16/32/48",
+    "call_transitions": 203,
+    "decomposition": {
+      "dispatch": 27,
+      "read_merge_writer_edge": 105,
+      "writer": 67,
+      "completion": 3,
+      "free_return": 1
+    },
+    "input": "actual pre-call Mint64 Vlong bits and Mint8unsigned tag0 loads from same producer Storage",
+    "stores": "both real stores derived from carried write permissions; no successful-store premise",
+    "final_relation": "full GPR/SP/SIMD/NZCV at original before.nextblock, across allocation, paired stores and actual free",
+    "local_release": "every generic local loses both Cur/Max permission kinds; exact contents/nextblock retained from written memory",
+    "all_behaviors": "every finite arbitrary-trace run is a silent prefix; unique stuck endpoint; no infinite execution",
+    "native": "actual decoded/fetched checked LNSym MOVK, exact wrapper/PC+4/history, no new events/fault",
+    "W32": "64-bit source merge narrowed equals 32-bit partInstall, then zero-extension clears upper32"
+  },
+  "focused": {
+    "exit": 0,
+    "log": "focused3-reference.log",
+    "jobs": 285
+  },
+  "public_queries": {
+    "exit": 0,
+    "log": "Query-1.log",
+    "theorems": 7,
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64MovKeep.call_scalar_returns": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.call_scalar_represents": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.call_scalar_all_behaviors": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.Native.merge_low_word": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.Native.native_step": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.Native.reference_step": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.Native.call_corresponds": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "full_lake_build": {
+    "exit": 0,
+    "log": "lake-build1.log",
+    "jobs": 321,
+    "attempts": 1
+  },
+  "export_parity": {
+    "exit": 0,
+    "log": "export-parity1.log",
+    "reference": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_identical": true
+  },
+  "attempts": [
+    {
+      "name": "focused1",
+      "exit": 1,
+      "note": "Full ordinary call, W32 merge/native execution pass; X64 needs staged column-offset simplification."
+    },
+    {
+      "name": "focused2",
+      "exit": 1,
+      "note": "Clight regeneration stops at coqdep absent after Workspace restart; restored documented system dependencies."
+    },
+    {
+      "name": "focused3-reference",
+      "exit": 0,
+      "note": "All actual call/native proofs pass; reference native objects still replayed stale, repaired separately."
+    }
+  ],
+  "shared_visibility": "Existing stores_frame and return_stuck visibility changes already committed by coordinator in 07d9c4c96; reused unchanged.",
+  "limits": {
+    "heartbeats": 200000,
+    "recursion": 512,
+    "lean_workers": 1,
+    "address_space_GiB": 32,
+    "build_cpu": 17,
+    "query_edit_git_cpu": 18,
+    "every_host_command_timing_lock": "shared",
+    "raised": false
+  },
+  "unchanged_emitter_audit": {
+    "receipt": "../m5-arm64-mov-keep",
+    "records": 24,
+    "new_run": false
+  },
+  "reference_rebuild": {
+    "receipt": "../reference-rebuild-20261119",
+    "exit": 0,
+    "native_objects_recompiled": 87,
+    "jobs": 184,
+    "map_reference_exit": 0,
+    "map_paths": 90,
+    "map_log": "map-reference4.log"
+  },
+  "native_make_check": {
+    "run_this_step": false,
+    "reason": "Lean-only runtime changes; existing affected map reference subset rerun in full",
+    "last_complete_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c"
+  },
+  "remaining": [
+    "relative STACK/RETURN reader cache/materialization in actual Numeric world",
+    "frontend/provider/producer/caller admission",
+    "native physical memory/alias/origin",
+    "Numeric initialization204 distinct from old189",
+    "source control and all-family O1/O2/O4 recount",
+    "remaining M6 and fresh final Lake/make check"
+  ],
+  "complete_ISA_handler_families": 0,
+  "milestones": {
+    "M1_M4": "done",
+    "M5": "open",
+    "M6": "open"
+  }
+}

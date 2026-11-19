@@ -61,3 +61,5 @@ import KProgFormal.ClightRefinement.Arm64MovKeepSuffix
 import KProgFormal.ClightRefinement.Arm64MovKeepCall
 import KProgFormal.ClightRefinement.Arm64MovKeepZr
 import KProgFormal.ClightRefinement.Arm64MovKeepRead
+import KProgFormal.ClightRefinement.Arm64MovKeepOrdinary
+import KProgFormal.ClightRefinement.Arm64MovKeepNative

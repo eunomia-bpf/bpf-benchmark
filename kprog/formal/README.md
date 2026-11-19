@@ -90,8 +90,10 @@ register-reader frontier, and composes with the mature checked WZR/XZR step.
 The [ordinary MOVK reader](results/m5-arm64-mov-keep-read/README.md) executes in
 the actual linked world using its five required layout facts, derives scalar
 admission from real loads/stores and composes the 105-transition branch through
-the real writer edge. Complete ordinary MOVK calls and program-level obligations
-stay open.
+the real writer edge. The [ordinary scalar MOVK contract](results/m5-arm64-mov-keep-ordinary/README.md)
+composes all 203 actual call transitions, both stores and frame free, retains
+the original register-reader frontier, and binds legal W32/X64 insertions to
+the mature checked step. Program-level obligations stay open.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 
