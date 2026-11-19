@@ -978,3 +978,10 @@ unchanged. Canonical loader build and two existing linker provenance tests
 pass. Installed callbacks, app coverage and per-call/throughput remain pending;
 no runtime gain or body/helper/map share is inferred. No new runtime check,
 module API, flag or helper body. See results/checked-hash-ops-20261119.
+
+PERF 2026-11-19T12:12:14Z: Hash write binding e95fc7765 passes canonical
+BCC check120552_198858:25/25/25/25 checked, zero fallback/failures. Actual
+17 update and10 delete sites now call htab callbacks directly; zero generic
+writes remain. TP helper fixes persist. Installed8,628native/7,965JITB.
+This is functional/relocation evidence, not a per-call gain; all C/LTO pieces
+stay on for the next combined timing batch. Other map kinds are unchanged.

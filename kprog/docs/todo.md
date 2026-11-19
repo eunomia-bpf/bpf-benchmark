@@ -37,12 +37,18 @@
   25/25/25/25 checked, zero fallback/failures. All five TP sites now bind
   their expected functions, and block_rq_complete selects raw_tp via original
   aux. Installed8,628/JIT7,965B; no functional-run speed claim.
-- [ ] P-checked-map-ops (PERF 2026-11-19T11:43:27Z): all 25 current BCC
+- [x] P-checked-map-ops (e95fc7765; run120552_198858; hash families): all 25 current BCC
   checked plans lack map_ops; 17 update/10 delete static sites use generic
   wrappers. The trusted route's translated-insn scanner has no process-FD
   metadata. Recover actual map/helper identities before link-time binding;
   do not reinterpret kernel map IDs as FDs or query unsupported operations.
   See results/checked-helper-binding-20261119/README.md.
+  PERF 2026-11-19T12:12:14Z: Actual loaded hash-map FDs now populate existing
+  callback facts without decoding translated calls. BCC25/25/25/25 checked,
+  all17update/10delete sites bind htab callbacks, zero generic writes, and
+  all five TP bindings stay correct. Installed8,628/JIT7,965B. Other map
+  kinds remain unchanged; per-call/throughput effect awaits the combined
+  batch. Results: checked-hash-ops-20261119.
 
 PERF 2026-11-19T10:48:19Z: Freeze/LOCK batch 327120 completed, host 0/app ok, BCC programs/native/
 B-generated/B-stock 25/25/25/25, all checked, no fallback/failures. Per call

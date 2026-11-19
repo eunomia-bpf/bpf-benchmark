@@ -33,3 +33,19 @@ The implementation adds 16 source lines. It queries real per-map callbacks
 once per kernel ID and feeds the existing plan; it does not copy helper
 implementations or add a per-call dispatch. BCC functional coverage and actual
 direct callback relocations are pending; no per-call gain is claimed.
+
+PERF 2026-11-19T12:12:14Z: Canonical BCC worker365394 completed0/appok,
+run `x86_kvm_corpus_20261119_120552_198858`, sourcee95fc7765. Actual
+programs/native/B-generated/B-stock are25/25/25/25, all checked, zero
+fallback/failures. Installed bytes stay8,628native/7,965JIT. The archived
+relocations now call htab_map_update_elem at all17 update sites and
+htab_map_delete_elem at all10 delete sites; zero generic write calls remain.
+Twenty plans carry map_ops facts; the other five have no hash-map operation
+facts to export. All five TP output/stack sites still resolve correctly.
+
+This confirms the hash-family binding class and BCC integration, not a
+speed gain. The existing1x10s functional run has no official ratio. Other
+map types keep their previous binding; the next combined checked-sim-c
+timing batch measures current per-call and throughput behavior with every
+C/LTO piece enabled. Full raw:
+`/workspaces/kprog-raw/perf/native-cohort-check-20261119/bcc-20261119T120407Z-365394`.
