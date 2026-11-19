@@ -1165,3 +1165,11 @@ cells are dead. No cache pruning or measured gain; call/frame/helper-copy
 and source tag coverage remain required reasoning. CPU20 read-only overlap
 18:09:13Z..18:09:17Z with BCC check is recorded. See
 results/tetragon-stack-liveness-20261119/cache-inventory-result.json.
+
+PERF 2026-11-19T18:14:09Z: Cache source review finds only two SAVE callers, both full-width
+MOV_STORE_REG; PUSH/POP/native CALL/helper writes erase or filter facts.
+Retained Tetragon direct stores cover16aligned arena cells, while the ABI
+pointer dictionary covers43. Next is conservative generator enumeration
+with unknown aliases retaining all cells, after preservation regressions;
+no production pruning or speed claim yet. Source evidence is appended to
+results/tetragon-stack-liveness-20261119/cache-inventory-result.json.

@@ -120,3 +120,18 @@ blocked); old unstarted193484/193489 ends143, raw preserved. The stock
 confirmation186985 remains queued on its original locks. Compact actual
 counts: cache-inventory-result.json; full raw inventory/logs at
 /workspaces/kprog-raw/perf/tetragon-cache-inventory-20261119/inventory-20261119T180913Z-195833.
+
+PERF 2026-11-19T18:14:09Z: Follow-up source coverage narrows the next compiler item. In
+the current shared header, only MOV_STORE_REG's direct-stack and tagged
+stack arms call STACK_VALUES_SAVE (:1709/:1722), for full-width unshifted
+register stores. PUSH/POP and native CALL use raw bytes through STACK_WRITE,
+which erases facts (:824), while helper wrappers (:3937-3954) only
+clear/erase/filter cache facts. They do not create copied pointer tags.
+The inventory's17direct-store offsets therefore include16aligned arena
+cells and one unaligned start(-212); its43dictionary offsets are a looser
+ABI-analysis set, including return/copy bookkeeping. Sparse cache
+enumeration from conservative destination aliases is the next compiler
+item, with unknown aliases retaining the complete current enumeration.
+No production pruning or preservation result is claimed. Source/destination
+tag coverage, finite alias joins, loop widening, released-stack behavior
+and the inline bindings must be covered before using a sparse list.

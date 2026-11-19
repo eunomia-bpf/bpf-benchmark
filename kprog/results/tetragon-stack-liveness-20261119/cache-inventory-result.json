@@ -83,5 +83,34 @@
   "observed_negative_aligned_cells": 43,
   "pruning_proven": false,
   "overlap": "2026-11-19T18:09:13Z..18:09:17Z on CPU20 during coordinator six-app BCC check; no frozen setting/input changed.",
-  "scope": "Read-only observation of the existing ABI CFG analysis. The alias False includes both scalar and external pointers. Unknown stores, push/pop/call frames and helper copies need conservative treatment; this inventory does not establish dead ghost cells, B acceptance or speed."
+  "scope": "Read-only observation of the existing ABI CFG analysis. The alias False includes both scalar and external pointers. Unknown stores, push/pop/call frames and helper copies need conservative treatment; this inventory does not establish dead ghost cells, B acceptance or speed.",
+  "source_coverage_review": {
+    "cache_save_callers": [
+      "kprog/x86/x86_sim_local_bpf.h:1709",
+      "kprog/x86/x86_sim_local_bpf.h:1722"
+    ],
+    "cache_save_operation": "full-width unshifted MOV_STORE_REG",
+    "other_paths": "PUSH/POP and native CALL use raw bytes via STACK_WRITE, which erases facts; helpers only clear/erase/call-frame-filter facts.",
+    "direct_store_aligned_offsets": [
+      -240,
+      -224,
+      -216,
+      -208,
+      -200,
+      -192,
+      -184,
+      -176,
+      -168,
+      -144,
+      -128,
+      -120,
+      -112,
+      -104,
+      -80,
+      -72
+    ],
+    "direct_store_aligned_cells": 16,
+    "candidate_only": true,
+    "next": "Establish destination-alias/save coverage and regression-test sparse cache enumeration through the existing generator. No production pruning yet."
+  }
 }
