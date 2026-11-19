@@ -59,6 +59,15 @@
   this is no new rejection or causal attribution. Diagnostics still wait.
 
 - [ ] P-B-cilium-headlen (PERF handoff 2026-11-19T20:22:55Z, OMP639663a85):
+  OMP 2026-11-19T23:08Z: ran Cilium end to end with the fixed compiler installed
+  (/workspaces/kprog-raw/verified/omp-cilium-20261119/postfix-20261119T214810Z, exit 0,
+  64 requests): still 14 install / 41 packet / 6 store / 3 emitter. The matcher lowers
+  all 41 (235 predicates) but the emitted bound sits on a different skb->data load than
+  the read uses; 33 of the 41 reload data 2-38 times, 8 load it once. Open blocker is
+  bound placement, PERF's call: canonicalize data to one SSA value at the read, or
+  re-emit the bound after each reload that feeds a read. Proved on the host kernel:
+  reload-then-read rejects with off=12 size=2 r=0 and accepts once the reloaded base is
+  bounded. Details in kprog/results/cilium-packet-bounds-20261119/README.md.
   PERF 2026-11-19T21:41:43Z: scope correctedto41 frominnercapsules: request64generatedB
   rejectspacketoff18 thennativearmingioctlENOENT. ef975f9b2 retains64and
   reusesold40paths; queuedreplaytargettakesinputs-41/inputs.json without
