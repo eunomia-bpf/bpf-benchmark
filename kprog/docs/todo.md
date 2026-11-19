@@ -58,7 +58,7 @@
   retain the active run. Snapshot/source dimensions are in the same README;
   this is no new rejection or causal attribution. Diagnostics still wait.
 
-- [ ] P-B-cilium-headlen (PERF handoff 2026-11-19T20:22:55Z, OMP639663a85):
+- [x] P-B-cilium-headlen (PERF handoff 2026-11-19T20:22:55Z, OMP639663a85):
   Detachedsole-kernel41stockreplay524242/make2:16load,5packet remain
   (12/17/36/37/48);20reachothererrors:2trustedskb+124stores,6unknownhelper-1,
   7scalaraccess,5unboundedinnermap. All41reachBPF_PROG_LOAD usingfresh
