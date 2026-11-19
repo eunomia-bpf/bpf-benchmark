@@ -1,0 +1,28 @@
+{
+  "mode": "before",
+  "selection": {
+    "head_ge": false,
+    "head_gt": false,
+    "head_not_lt": false,
+    "head_not_le": false,
+    "head_wide": false,
+    "old_tc": true,
+    "old_xdp": true,
+    "asm_tc": false,
+    "wrong_root": false,
+    "wrong_offset": false,
+    "wrong_section": false,
+    "equality": false,
+    "signed_negative": false
+  },
+  "b_emitted": false,
+  "scope": "Installed pre-candidate compiler misses six new fixture forms; two original load spans and five exclusions retained. Frozen layout and candidate syntax pass; stock probe compiled only. No candidate B or stock/app acceptance yet.",
+  "recorded": "2026-11-19T20:43:12Z",
+  "raw": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/before-20261119T203518Z",
+  "wrapper_exit": 0,
+  "syntax_raw": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/syntax-20261119T203315Z",
+  "syntax_exit": 0,
+  "stock_probe_build_raw": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/probe-build-20261119T204103Z",
+  "stock_probe_build_exit": 0,
+  "candidate": "cdd26e9cd"
+}

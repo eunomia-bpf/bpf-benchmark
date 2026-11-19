@@ -59,6 +59,13 @@
   this is no new rejection or causal attribution. Diagnostics still wait.
 
 - [ ] P-B-cilium-headlen (PERF handoff 2026-11-19T20:22:55Z, OMP639663a85):
+  PERF 2026-11-19T20:43:12Z: cdd26e9cd candidate/syntax0 prepared, exact asm loads,
+  ALU32 identities and i32 headlen kernelroot recognized; original scalar
+  predicate retained. Old compiler misses6of8positive fixture forms,
+  retains5negative controls. Frozen112/116/u32layout andprobecompile pass.
+  Combined one-rebuild validator3c07974dc coversKatran controls,stock
+  fixtures,40captured replays andfreshCilium functional entry. No candidate
+  B/stock ornewCilium verified count yet. Oldunstarted269752 ended143.
   forty actual Cilium packet rejections have the existing length guard, but
   packet_bounds_ir misses classifier sections, asm-offset field reads and
   i32 kernel len-data_len head length (frozen layout112/116), rather than

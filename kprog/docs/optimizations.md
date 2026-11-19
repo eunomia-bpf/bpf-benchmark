@@ -1376,3 +1376,15 @@ only. Forty archived actual packet failures extracted without new frontend
 or copied compiler under cilium-headlen-20261119/inputs-20261119T202649Z.
 Own unstarted waiter269752 settled child269757, rawretained; combined sole
 compiler rebuild follows fixtures/syntax preparation, imageEX unchanged.
+
+PERF 2026-11-19T20:43:12Z: Candidatecdd26e9cd syntax0. Actual old-compiler fixture baseline
+misses5classifier headlen forms and1asm TC span;2original load spans match
+and5negative root/offset/section/equality/signed-negative controls do not.
+The target vmlinux.h independently confirmslen112/data_len116 andbothu32.
+Stock probe compiles withWall/Wextra/Werror; no stock run yet. Require actual
+.ksyms declaration for the kernel-context cast. Combined validation recipe
+3c07974dc replaces solecompiler underimageEX, then SH hostcontrols/captured
+Katran replay/stock8positive fixtures/40captured frontends andfreshCilium
+checked-corpus (1x10functional, notofficialtiming). Replays4workers on8-11
+with8GiBAS perchild; appusesexisting48GVM/80GAS on18-19. AllLTO stayson;
+no frontendrepeat forcaptured40 and no newtimingwrapper. Acceptance pending.

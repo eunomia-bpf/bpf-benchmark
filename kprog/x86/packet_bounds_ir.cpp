@@ -268,7 +268,9 @@ static bool field(Value *value,Function &function,int64_t offset,bool kernel=fal
   if (kernel) {
     auto *cast=dyn_cast<CallInst>(base);
     if (!cast || !cast->getCalledFunction() ||
-        cast->getCalledFunction()->getName()!="bpf_cast_to_kern_ctx" || cast->arg_size()!=1) return false;
+        cast->getCalledFunction()->getName()!="bpf_cast_to_kern_ctx" ||
+        !cast->getCalledFunction()->isDeclaration() ||
+        cast->getCalledFunction()->getSection()!=".ksyms" || cast->arg_size()!=1) return false;
     base=origin(cast->getArgOperand(0));
   }
   APInt total(64,actual);
