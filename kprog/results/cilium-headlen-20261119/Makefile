@@ -1,4 +1,6 @@
-.PHONY: prepare check replay stock-probe stock stock-guest
+.PHONY: prepare check replay stock-probe stock stock-guest coverage
+coverage:
+	python3 kprog/results/cilium-headlen-20261119/coverage.py $(ARCHIVE) $(OUT)
 prepare:
 	python3 kprog/results/cilium-headlen-20261119/prepare.py $(OUT)
 check:
