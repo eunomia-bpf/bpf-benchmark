@@ -35,3 +35,16 @@ is changed to accommodate those test mistakes.
 
 Per-call/native installed bytes/stock coverage remain for OMP's combined
 checked-sim-c batch, which the audit now targets at Tetragon and Tracee.
+
+PERF 2026-11-19T06:42:34Z, status correction: worker 210433 completed the BCC subset
+but stopped before Tetragon because its prior generation-failure archive has
+no generated/artifacts.json. d71b7f19b reads the canonical capsule kernel.entry
+instead. The Tetragon-only retry is worker 211523, raw
+`/workspaces/kprog-raw/perf/b-analysis-flags-20261119/production-20261119T063707Z-211523`.
+Its O1 frontend has completed successfully (34 MiB frontend IR), and the
+bounds stage completes (22 MiB IR), removing 2,667 unused private inputs and
+230,724 debug-variable intrinsics. The B machine backend is still running;
+no complete Tetragon B/native/stock claim is made. The already-committed BCC
+subset passed with generation 1.052/3.246 s and native O3 compilation
+0.046/0.408 s. g is retained for BTF; existing bounds lowering removes the
+non-executing scalar debug intrinsics before the B machine backend.
