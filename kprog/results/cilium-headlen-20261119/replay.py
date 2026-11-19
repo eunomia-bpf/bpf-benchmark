@@ -11,8 +11,8 @@ root=Path('/workspaces/repository')
 sys.path[0]=str(root/'kprog/x86')
 import trusted_specializer as adapter
 out=Path(sys.argv[1]);out.mkdir(parents=True,exist_ok=True)
-inputs=Path('/workspaces/kprog-raw/perf/cilium-headlen-20261119/inputs-20261119T202649Z')
-requests=json.loads((inputs/'inputs.json').read_text())['requests']
+inputs=Path(sys.argv[2])
+requests=json.loads(inputs.read_text())['requests']
 compiler='/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds'
 
 def replay(row):
