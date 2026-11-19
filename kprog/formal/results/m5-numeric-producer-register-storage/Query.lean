@@ -1,0 +1,22 @@
+import KProgFormal.ClightRefinement.Arm64NumericProducerRegisterStorage
+open KProgFormal.ClightRefinement
+#check Arm64NumericProducerRegisterStorage.initialized_storage
+#print axioms Arm64NumericProducerRegisterStorage.initialized_storage
+#check Arm64ProducerRegisterStorage.of_header
+#print axioms Arm64ProducerRegisterStorage.of_header
+#check Arm64ProducerRegisterStorage.Storage.separate_local
+#print axioms Arm64ProducerRegisterStorage.Storage.separate_local
+#check Arm64ProducerRegisterStorage.Storage.cells_distinct
+#print axioms Arm64ProducerRegisterStorage.Storage.cells_distinct
+#check Arm64ProducerRegisterStorage.Storage.cell_fresh
+#print axioms Arm64ProducerRegisterStorage.Storage.cell_fresh
+#check Arm64ProducerGprView.table_gpr_readbacks
+#print axioms Arm64ProducerGprView.table_gpr_readbacks
+#check Arm64ProducerEntryView.header_borrowed_readback
+#print axioms Arm64ProducerEntryView.header_borrowed_readback
+#check Arm64ProducerEntryView.flags_readback
+#print axioms Arm64ProducerEntryView.flags_readback
+#check Arm64ProducerVectorView.vector_readbacks
+#print axioms Arm64ProducerVectorView.vector_readbacks
+#check Arm64Registers.unique
+#print axioms Arm64Registers.unique

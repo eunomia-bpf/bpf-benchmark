@@ -153,6 +153,11 @@ executes all 32 iterations in 362 transitions, deriving 64 live pointers to
 the existing input words and all 32 borrowed-reader pairs. Scalar/tail fields,
 other initialized data, cache resources and 98 traces survive. The loop ends
 with `_i = 32` and preserves other temporaries, including the retained `_ctx`.
+The [Numeric register-storage proof](results/m5-numeric-producer-register-storage/README.md)
+derives all 62 writable word/tag cells and the complete GPR/SP/NZCV/vector
+reader results at that same reached memory. The joint architectural relation
+follows under explicit native register-state bindings; those bindings and
+consumer-continuation retention remain caller-admission work.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 
