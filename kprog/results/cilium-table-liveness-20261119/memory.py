@@ -32,9 +32,6 @@ for request in previous['requests']:
         if frame.f_code.co_name == 'lower_relative_tables':
             captured['provisional'] = frame.f_locals['provisional_insns']
             captured['table_targets'] = frame.f_locals['table_targets']
-        elif frame.f_code.co_name == 'check_definedness':
-            captured['states'] = frame.f_locals['states']
-            captured['registers'] = frame.f_locals['index']
 
     sys.setprofile(observe)
     try:
@@ -47,11 +44,14 @@ for request in previous['requests']:
             raise AssertionError('original table rejection no longer reproduces')
         provisional = captured['provisional']
         targets = adapter.gen.indirect_targets(provisional, exit_addr, starts)
-        extent = adapter.gen.check_definedness(all_insns, targets, exit_addr, adapter.gen)
+        captured['states'] = {}
+        extent = adapter.gen.check_definedness(all_insns, targets, exit_addr, adapter.gen,
+                                              incoming_states=captured['states'])
     finally:
         sys.setprofile(None)
 
-    registers = captured['registers']
+    registers = {reg: index for index, reg in enumerate(
+        (*dict.fromkeys(info[0] for info in adapter.gen.REGS.values()), 'X86_XMM0'))}
     rsp = registers['X86_RSP']
     original = {i.addr: i for i in all_insns}
     failure = request['failures'][0]
@@ -61,7 +61,7 @@ for request in previous['requests']:
              for (_, pc), state in captured['states'].items()
              if pc == store.addr and type(state.aliases[rsp]) is int}
     width = adapter.gen.operand_width(store.operands[0])//8
-    accesses, calls, unknown = [], [], []
+    accesses, calls, unknown, pointer_stores = [], [], [], []
 
     def alias_record(value):
         if type(value) is int:
@@ -72,6 +72,14 @@ for request in previous['requests']:
 
     for (context, pc), state in sorted(captured['states'].items()):
         instruction = original[pc]
+        if (instruction.mnemonic in {'mov', 'movabs'} and len(instruction.operands) == 2
+                and adapter.gen.is_mem(instruction.operands[0])):
+            source = adapter.gen.reg_info(instruction.operands[1])
+            if source and source[1] == 64:
+                alias = state.aliases[registers[source[0]]]
+                if alias is not False:
+                    pointer_stores.append(dict(pc=pc, instruction=instruction.raw,
+                                               context=list(context), **alias_record(alias)))
         for operand in instruction.operands:
             if not adapter.gen.is_mem(operand):
                 continue
@@ -176,7 +184,8 @@ for request in previous['requests']:
                unresolved_memory_aliases=unknown, first_direct_cell_accesses=frontiers,
                calls_before_first_direct_access=prefix_calls,
                unresolved_prefix_aliases=[access for access in unknown if access['pc'] in visited],
-               prefix_stack_arguments=[call for call in calls if call['pc'] in visited])
+               prefix_stack_arguments=[call for call in calls if call['pc'] in visited],
+               whole_function_pointer_stores=pointer_stores)
     rows.append(row)
     (out/'result.json').write_text(json.dumps(dict(requests=rows,
         source_capture=previous['raw'],

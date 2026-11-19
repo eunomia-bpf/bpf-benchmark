@@ -32,7 +32,7 @@ class State:
     constants: tuple[int | None, ...]
 
 def check_definedness(insns, targets, exit_addr, decode, return_sites=None, stack_value_offsets=None,
-                      return_sites_by_pc=None):
+                      return_sites_by_pc=None, incoming_states=None):
     regs = (*dict.fromkeys((r[0] for r in decode.REGS.values())), 'X86_XMM0')
     index = {reg: i for i, reg in enumerate(regs)}
 
@@ -664,4 +664,6 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None, stac
                 push(context, direct, state, backedge=direct <= addr)
             if next_pc is not None:
                 push(context, next_pc, state)
+    if incoming_states is not None:
+        incoming_states.update(states)
     return -lowest_stack
