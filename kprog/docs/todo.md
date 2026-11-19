@@ -11,9 +11,9 @@
 - [ ] P-B-pointer-integer-difference (PERF live Tracee 2026-11-19):
   request27 sys_dup_exit_tail and request30 generate B but stock rejects
   scalar-minus-stack-pointer arithmetic (insns959/27607). Request28 also
-  has a separate536-byte frame. The retained pre-c3960d089 run installs
-  these direct native. Current checked-sim-c keeps failed requests on eBPF;
-  report those separately from checked native installations.
+  has a separate536-byte frame. Operator instruction restored direct-native
+  execution when B fails (0a993eb37); verification and execution are reported
+  separately. Only an actually failed native request stays on eBPF.
   Map exact retained IR/source locations after the active Tracee timing
   lease, then fix the compiler class without erasing observations, fixing
   the virtual stack base, adding checks or changing limits. B-only numeric

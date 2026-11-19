@@ -1100,3 +1100,11 @@ layout/root conversion from generic memoryAsm's opaque barrier using the
 same physical buffers and compiler stages. Worker422533 is still unstarted;
 no duplicate job or production source change, host pass or runtime gain.
 See skb-numeric-integration-20261119.
+
+PERF 2026-11-19T15:44:16Z: Operator restored native execution independent of B failure
+(0a993eb37). This supersedes the c3960d089 reporting policy above: explicit
+direct-native successes stay native, B acceptance is a separate count, and
+kept_on_ebpf includes only failed requests. The reader's count logic already
+uses these actual status/path fields; its scope text now reflects the new
+instruction. No production code change, rebuilt base, host pass or speed
+claim. Current Tracee and its raw data stay intact.

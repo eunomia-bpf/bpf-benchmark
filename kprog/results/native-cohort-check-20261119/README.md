@@ -46,3 +46,14 @@ the actual failing stage. An early failed request without kernel.facts.json
 retains its source ID/error and a null program type; a successful request
 still requires its facts. These are archive-analysis changes only. The
 completed-BCC reader worker433910 remains queued; no host pass yet.
+
+PERF 2026-11-19T15:44:16Z: Operator's newer instruction, recorded in user-instruction.md
+and implemented by0a993eb37, restores direct-native execution when B fails:
+"恢复这个, 吧 verify 和运行分开看". This supersedes the earlier c3960d089
+policy above. Coverage counts actual execution_path/status independently of
+B-generation/stock acceptance: a successful direct-native request remains
+native even if B fails; only a failed request contributes to kept_on_ebpf.
+The current Tracee batch's direct-native results therefore agree with the
+restored policy, and are still never called stock-verified. No rebuild
+targeting the superseded c3960d089 policy is queued. Future base/image
+batches use current HEAD normally. Reader replay433910 remains pending.

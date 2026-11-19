@@ -57,7 +57,7 @@ summary = dict(
     kept_on_ebpf=sum(r['status'] != 0 for r in records),
     failed=sum(r['status'] != 0 for r in records),
     requests_detail=records, corpus=corpus,
-    scope='Registered-service completions and corpus status. Failed requests keep the original eBPF program; direct_native counts only explicit historical/control records. B counts use explicit flags or retained object/verification receipts; missing evidence is not inferred acceptance. Counts are requests except programs; workload parameters are recorded per corpus run.'
+    scope='Registered-service completions and corpus status. Execution and B verification are separate: direct_native counts explicit execution_path records, including B failures that still run native. Only failed requests keep the original eBPF program. B counts use explicit flags or retained object/verification receipts; missing evidence is not inferred acceptance. Counts are requests except programs; workload parameters are recorded per corpus run.'
 )
 output.write_text(json.dumps(summary, indent=2) + '\n')
 print(json.dumps({k: v for k, v in summary.items() if k not in ['requests_detail', 'corpus']}))

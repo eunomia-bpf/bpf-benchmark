@@ -104,3 +104,14 @@ the joined token stream is compiled as one translation unit. Dense cache
 fanout is a review candidate already seen in Tetragon, not a measured cause
 for this program. Preserve the run and inspect its eventual stage logs; no
 repeat frontend, flag change, timeout, cancellation or limit change.
+
+PERF 2026-11-19T15:44:16Z: Operator's newer instruction, recorded in user-instruction.md
+and implemented by0a993eb37, restores direct-native execution when B fails:
+"恢复这个, 吧 verify 和运行分开看". This supersedes the earlier c3960d089
+policy above. Coverage counts actual execution_path/status independently of
+B-generation/stock acceptance: a successful direct-native request remains
+native even if B fails; only a failed request contributes to kept_on_ebpf.
+The current Tracee batch's direct-native results therefore agree with the
+restored policy, and are still never called stock-verified. No rebuild
+targeting the superseded c3960d089 policy is queued. Future base/image
+batches use current HEAD normally. Reader replay433910 remains pending.
