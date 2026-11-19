@@ -28,3 +28,12 @@ unsigned long NAME(struct __sk_buff *ctx) { return ctx->FIELD; }
 DIRECT_FIELD(data_direct, data)
 DIRECT_FIELD(end_direct, data_end)
 DIRECT_FIELD(mark_direct, mark)
+
+/* Compile and inspect this faulting address; never execute it on the host. */
+unsigned long absolute_address_control(void)
+{
+    unsigned long value;
+    void *base = 0;
+    asm volatile("$0 = *(u64 *)($1 + 112)" : "=r"(value) : "r"(base));
+    return value;
+}

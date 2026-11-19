@@ -2,6 +2,7 @@
 import ctypes
 import json
 from pathlib import Path
+import re
 import subprocess
 import sys
 
@@ -32,6 +33,10 @@ run([tools/'context-lower', out/'native.bc', '--public-layout', public,
 (out/'context.ll').write_text(run(['llvm-dis-18', out/'context.bc', '-o', '-']))
 run(['clang-18', '-O3', '-mno-red-zone', '-mgeneral-regs-only', '-shared', '-fPIC',
      out/'context.bc', '-o', out/'execute.so'])
+assembly = run(['llvm-objdump-18', '-d', out/'execute.so'])
+(out/'native-disassembly.txt').write_text(assembly)
+absolute = assembly.split('<absolute_address_control>:', 1)[1].split('\n\n', 1)[0]
+assert re.search(r'0x70\(%[a-z0-9]+\)', absolute), absolute
 library = ctypes.CDLL(str(out/'execute.so'))
 for name in ['data_value', 'end_value', 'mark_value', 'data_lane', 'end_lane',
              'data_direct', 'end_direct', 'mark_direct']:
@@ -57,6 +62,7 @@ for value in [0, 1, 0x123456789abcdef0, 0xffff888012345678]:
                 observed=getattr(library, name)(context, lane)))
 mismatches = [row for row in rows if row['observed'] != row['expected']]
 (out/'result.json').write_text(json.dumps(dict(cases=rows, mismatches=mismatches,
+    absolute_address_uses_register_base=True,
     scope='Actual shared macros and compiler stages on host buffers using the sole kernel layouts; '
           'no stock B load, guest, corpus path or timing claim.'), indent=2)+'\n')
 print(f'{len(rows)} context cases, {len(mismatches)} mismatches', flush=True)
