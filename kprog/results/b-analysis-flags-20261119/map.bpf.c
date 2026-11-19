@@ -1,5 +1,5 @@
 #include <linux/bpf.h>
-#include <bpf/bpf_helpers.h>
+#include <bpf_helpers.h>
 extern unsigned char counts[] __ksym;
 SEC("socket") int entry(void *ctx) {
     unsigned key=0;
