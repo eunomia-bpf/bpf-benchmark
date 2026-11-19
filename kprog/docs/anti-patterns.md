@@ -33,3 +33,10 @@
 - 链接器里追踪 helper 编号的代码（x86_helper_provenance.rs、finite helper call）：所有应用改成符号调用之后删掉。
 - native-link 把入口函数的 RET 改写成跳到代码末尾：查清用途后删掉，入口直接 ret。
 - sim 原生一侧的地址屏障（compile_sim_ir.cpp memoryAsm 的 stable()）、读内核指针前的地址范围检查、私有栈带来的多余 mov：原生一侧按 P 的正常代码生成。
+
+## 统一 helper 时踩到的坑（2026-11-19 六应用检查发现，已修，3e99eaa1e）
+
+- 应用自己把 helper 声明成同名指针变量（OTel 的 bpfdefs.h）：汇编名相同的 extern 和这个变量被编译器合成一个符号，调用落到数据上（OTel 14 个程序链接失败）。这类声明在原生编译里用 `#ifndef __KPROG_NATIVE_HELPERS` 留在外面。
+- 应用把 helper 名字当数值用（Tetragon 的错误统计记录 `(u32)(long)probe_read`，BPF 里是 helper 编号）：把它的声明改成函数会改变语义，链接器也读不了 32 位 GOT 值（Tetragon 81 个失败）。Tetragon 保留自己的指针声明，调用用同名宏转到公共 helper。
+- 内联读取的源地址被常量折叠（空指针加偏移）会成为绝对内存操作数，链接器拒绝（Tracee 2 个失败）。读取开头用空 asm 让源地址留在寄存器里。
+- 每次改 helper 写法之后，在提交前扫描所有应用的对象：32 位 GOT 读取、绝对操作数（Intel 语法的 `ds:0x`）、间接调用、和 helper 同名的本地数据符号，四项都要为 0。
