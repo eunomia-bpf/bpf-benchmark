@@ -369,3 +369,66 @@ sh: 1: cannot create /proc/net/pktgen/kpktgend_2: Directory nonexistent
 0-3 (`KATRAN_PKTGEN_THREAD_IDS` at `runner/libs/app_runners/katran.py:618`), so threads 2 and 3 had no
 `kpktgend_N` interface. The Makefile now takes `CHECKED_VM_CPUS` (default 2, so every earlier run is
 unchanged) and this run passes 4; the workload then started and the request follows.
+
+## OTel (otelcol-ebpf-profiler/profiling)
+
+Run `x86_kvm_corpus_20261119_183202_247645`, 1 sample × 10 s, stats on. Raw
+`/workspaces/kprog-raw/verified/20261119-checked-otel2/` (started 18:29:37Z, finished 18:32:02Z, exit
+code 0). **14 requests: 3 verified and installed, 11 direct-native, 0 hard failures.** All 14 install:
+`otelcol-ebpf-profiler__profiling.post_rejit.log` records **14 `native-loader replaced`** and **0
+`native-loader failed`**, against 0 replaced in the baseline arm. Both arms hold all 13 programs, so this
+is equal work.
+
+- **3 verified** (`execution_path=checked-sim-c`, `b_generated=true`, `b_stock_passed=true`, `status=0`):
+  requests 4 `perf_unwind_hotspot` (596,720 B), 6 `perf_unwind_php` (521,544 B), 12
+  `tracepoint__sched_process_free` (32,144 B). The result file truncates program names to 15 characters
+  (`perf_unwind_hot`, `native_tracer_e`); the names here and below are the untruncated ones from each
+  request's `generation.metadata.json`.
+- **11 direct-native**: 8 stopped by the stock verifier, 3 by it in a second form.
+- The run's own timing is not a speedup: `native_tracer_entry` (the one program with real traffic) takes
+  4,201 ns per invocation in the baseline arm and 5,744 ns in the native arm over 10 s windows (3,270,614
+  against 3,247,507 runs), and the python workers' `ops` counters also differ (1.54 M + 1.34 M baseline
+  against 0.86 M + 1.01 M native), so the two arms did not see the same machine load. Both are 10-second
+  samples, and 11 of 13 programs are not native bodies anyway.
+
+### The first attempt recorded zero requests, and the cause was in the linker
+
+Run `x86_kvm_corpus_20261119_175017_970933` finished with the app `status=ok` and **no requests at all**;
+its shim log held 14 `native-loader failed`, every one the same:
+
+```
+native-loader failed prog=read_task_struct ... error=native-link proof failed (rc=1)
+stderr:
+Error: iced bailed decoding bpf_get_current_pid_tgid at IP 0x280
+```
+
+The service never saw a request because the loader's own entry-proof step failed first, and that step runs
+before the specializer endpoint is consulted.
+
+The cause is a shape only OTel's native object has. Every other app references a helper as one undefined
+symbol; OTel's object carries **both** the undefined reference and an 8-byte `OBJECT` in `.rodata.cst8`
+naming the same helper and holding its id (`objdump -s -j .rodata.cst8` starts `0e000000…`, helper 14 =
+`bpf_get_current_pid_tgid`). `resolve_x86_plt32_defined_target_addr` resolved the `R_X86_64_PLT32` call
+relocation to that defined object at `0xf8`+`0x188`, the reachability walk queued it as a function, and the
+decoder then read the id bytes as instructions. All 14 helper names in that object have this second
+definition, so all five probed programs failed, in every mode.
+
+The linker now takes a PLT32 defined target to be code — `SymbolKind::Text`, or a symbol in a code section
+(`kprog/x86/native_lab/native_link/src/x86.rs`, `resolve_x86_plt32_defined_target_addr`). Checked directly
+on the image's own object, all five previously failing programs link (`read_task_struct` 247 B,
+`perf_unwind_stop` 5,757 B, `perf_unwind_native` 27,047 B, `kprobe_unwind_v8` 32,580 B,
+`tracepoint__sched_process_free` 1,163 B), Katran's and Cilium's still link, and `cargo test --release`
+passes 38. One earlier fix on this path was already in the tree from another lane (`21b4f3012`), so the
+record above is the state of the whole file, not a separate patch.
+
+### The 11 fallbacks
+
+| requests | programs | verifier's last line |
+|---|---|---|
+| 8 (3, 5, 7, 9, 10, 11, 13, 14) | `perf_unwind_native`, `perf_unwind_perl`, `perf_unwind_python`, `perf_unwind_v8`, `perf_unwind_dotnet`, `perf_go_labels`, `native_tracer_entry`, `custom__generic` | `math between fp pointer and register with unbounded min value is not allowed` |
+| 3 (1, 2, 8) | `read_task_struct`, `perf_unwind_stop`, `perf_unwind_ruby` | `R1`/`R0 invalid mem access 'scalar'` after `(79) r1 = *(u64 *)(r1 +120)` |
+
+Both classes are the emitter's: the first adds an unbounded register to a frame pointer, the second loads
+through a register the verifier still treats as a plain scalar. Neither is a missing capability of the
+checked path — the same requests are recorded as fallbacks with their own `simulator-failure.json`, exactly
+as the other apps' do.
