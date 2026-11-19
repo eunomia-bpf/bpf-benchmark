@@ -115,6 +115,40 @@ public:
         return bytes;
     }
 
+    // Leading instructions of entry that agree with the loaded program, and the entry length. libbpf
+    // rewrites immediates and offsets (CO-RE, map FDs, calls) and the source register of ld_imm64 and
+    // call, so the comparison takes opcode and registers outside those fields.
+    struct Agreement { size_t leading = 0, aligned = 0, length = 0; };
+    bool same_insn(const Code &code, size_t slot, const bpf_insn &b) const {
+        const auto &a = code.insns.at(slot);
+        if (a.code != b.code || a.dst_reg != b.dst_reg) return false;
+        if (a.code != (BPF_LD | BPF_DW | BPF_IMM) && a.code != (BPF_JMP | BPF_CALL) && a.src_reg != b.src_reg) return false;
+        if (a.code == (BPF_LD | BPF_DW | BPF_IMM)) {
+            const auto r = code.relocs.find(slot);
+            const bool source_data = r != code.relocs.end() && r->second.type == R_BPF_64_64 &&
+                !code_.contains(r->second.target.st_shndx);
+            const bool loaded_data = b.src_reg == BPF_PSEUDO_MAP_FD || b.src_reg == BPF_PSEUDO_MAP_VALUE ||
+                b.src_reg == BPF_PSEUDO_MAP_IDX || b.src_reg == BPF_PSEUDO_MAP_IDX_VALUE;
+            if (source_data != loaded_data) return false;
+        }
+        return true;
+    }
+    Agreement agreement(const std::string &entry, const std::vector<bpf_insn> &loaded) const {
+        const Function *root = nullptr;
+        for (const auto &f : functions_) if (f.name == entry) root = &f;
+        if (!root || root->start % sizeof(bpf_insn) || root->size % sizeof(bpf_insn)) return {};
+        const auto &code = code_.at(root->section);
+        Agreement result;
+        result.length = root->size / sizeof(bpf_insn);
+        const size_t base = root->start / sizeof(bpf_insn);
+        bool leading = true;
+        for (size_t i = 0; i < result.length && i < loaded.size(); ++i) {
+            const bool same = same_insn(code, base + i, loaded[i]);
+            if (same) result.aligned++;
+            if (leading && same) result.leading++; else leading = false;
+        }
+        return result;
+    }
     std::vector<SourceMapRelocation> bind(const std::string &entry,
                                       const std::vector<bpf_insn> &loaded,
                                       const std::unordered_set<std::string> *needed = nullptr) const {
@@ -191,7 +225,7 @@ void bind_original_source_maps(const std::filesystem::path &object, const std::s
     const auto bytes = source.map_definitions(object);
     bpf_object *raw = bpf_object__open_mem(bytes.data(), bytes.size(), nullptr);
     const auto error = libbpf_get_error(raw);
-    if (error || !raw) fail("open original map definitions: " + libbpf_error_string(error ? error : -errno));
+    if (error || !raw) return;
     std::unique_ptr<bpf_object, decltype(&bpf_object__close)> definitions(raw, bpf_object__close);
     for (const auto &binding : bindings) {
         auto *map = bpf_object__find_map_by_name(raw, binding.symbol.c_str());

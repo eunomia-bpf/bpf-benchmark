@@ -262,6 +262,20 @@ $(NATIVE_OUT)/cilium/bpf_host.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_AGENT_
 $(NATIVE_OUT)/cilium/bpf_wireguard.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_WIREGUARD_OPTIONS)
 $(NATIVE_OUT)/cilium/bpf_xdp.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_AGENT_XDP_OPTIONS)
 $(NATIVE_OUT)/cilium/bpf_alignchecker.native.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_SIMPLE_OPTIONS)
+$(NATIVE_OUT)/cilium/bpf_lxc.bpf.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_AGENT_LXC_OPTIONS)
+$(NATIVE_OUT)/cilium/bpf_overlay.bpf.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_OVERLAY_OPTIONS)
+$(NATIVE_OUT)/cilium/bpf_sock.bpf.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_LB_OPTIONS)
+$(NATIVE_OUT)/cilium/bpf_host.bpf.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_AGENT_HOST_OPTIONS)
+$(NATIVE_OUT)/cilium/bpf_wireguard.bpf.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_MAX_WIREGUARD_OPTIONS)
+$(NATIVE_OUT)/cilium/bpf_xdp.bpf.o: CILIUM_NATIVE_OPTIONS := $(CILIUM_AGENT_XDP_OPTIONS)
+
+# The BPF object each Cilium native object is paired with in the manifest (the agent compiles the loaded one
+# at run time; this one has the same source and switches).
+$(NATIVE_OUT)/cilium/%.bpf.o: cilium/bpf/%.c Makefile
+	install -d "$(dir $@)"
+	"$(CLANG)" $(CILIUM_NATIVE_OPTIONS) -O2 --target=bpf -mcpu=v3 -g -std=gnu99 -nostdinc -D__NR_CPUS__=128 \
+		-Wno-address-of-packed-member -Wno-unknown-warning-option \
+		-I"$(CURDIR)/cilium/bpf" -I"$(CURDIR)/cilium/bpf/include" -c -o "$@" "$<"
 
 $(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c core-compat.h $(CORE_ANSWERS)/cilium.h Makefile
 	install -d "$(dir $@)"
@@ -341,6 +355,7 @@ native-katran: $(KATRAN_NATIVE_OBJS)
 	install -d "$(NATIVE_OUT)/katran"
 	install -d "$(KATRAN_NATIVE_STAGE_OUT)"
 	install -m 0644 $(KATRAN_NATIVE_OBJS) "$(KATRAN_NATIVE_STAGE_OUT)"
+	install -m 0644 $(foreach obj,balancer healthchecking_ipip xdp_root,$(VENDOR)/build/x86/katran/bpf/$(obj).bpf.o) "$(KATRAN_NATIVE_STAGE_OUT)"
 	python3 "$(CURDIR)/write_native_manifest.py" --app katran --llvm-nm "$(LLVM_NM)" --skip-prefix jhash \
 		--output "$(NATIVE_OUT)/katran/manifest.json" \
 		--object "$(NATIVE_OUT)/katran/balancer.native.o" \
@@ -348,41 +363,44 @@ native-katran: $(KATRAN_NATIVE_OBJS)
 		--object "$(NATIVE_OUT)/katran/xdp_root.native.o"
 	python3 "$(CURDIR)/write_native_manifest.py" --app katran --llvm-nm "$(LLVM_NM)" --skip-prefix jhash \
 		--output "$(KATRAN_NATIVE_STAGE_OUT)/manifest.json" \
-		--object "$(KATRAN_NATIVE_STAGE_OUT)/balancer.native.o" \
-		--object "$(KATRAN_NATIVE_STAGE_OUT)/healthchecking_ipip.native.o" \
-		--object "$(KATRAN_NATIVE_STAGE_OUT)/xdp_root.native.o"
+		--object "$(KATRAN_NATIVE_STAGE_OUT)/balancer.native.o,source=$(KATRAN_NATIVE_STAGE_OUT)/balancer.bpf.o" \
+		--object "$(KATRAN_NATIVE_STAGE_OUT)/healthchecking_ipip.native.o,source=$(KATRAN_NATIVE_STAGE_OUT)/healthchecking_ipip.bpf.o" \
+		--object "$(KATRAN_NATIVE_STAGE_OUT)/xdp_root.native.o,source=$(KATRAN_NATIVE_STAGE_OUT)/xdp_root.bpf.o"
 
 native-bcc: bcc/libbpf-tools/x86/vmlinux.h $(BCC_NATIVE_OBJS)
 	install -d "$(NATIVE_OUT)/bcc"
 	install -d "$(BCC_NATIVE_STAGE_OUT)"
 	install -m 0644 $(BCC_NATIVE_OBJS) "$(BCC_NATIVE_STAGE_OUT)"
+	install -m 0644 $(foreach tool,$(BCC_TOOLS),$(VENDOR)/build/.bcc-libbpf/x86/output/$(tool).bpf.o) "$(BCC_NATIVE_STAGE_OUT)"
 	python3 "$(CURDIR)/write_native_manifest.py" --app bcc --llvm-nm "$(LLVM_NM)" \
 		--output "$(NATIVE_OUT)/bcc/manifest.json" \
 		$(foreach obj,$(BCC_NATIVE_OBJS),--object "$(obj)")
 	python3 "$(CURDIR)/write_native_manifest.py" --app bcc --llvm-nm "$(LLVM_NM)" \
 		--output "$(BCC_NATIVE_STAGE_OUT)/manifest.json" \
-		$(foreach tool,$(BCC_TOOLS),--object "$(BCC_NATIVE_STAGE_OUT)/$(tool).native.o")
+		$(foreach tool,$(BCC_TOOLS),--object "$(BCC_NATIVE_STAGE_OUT)/$(tool).native.o,source=$(BCC_NATIVE_STAGE_OUT)/$(tool).bpf.o")
 
-native-cilium: $(CILIUM_NATIVE_OBJS)
+CILIUM_SOURCE_OBJS := $(foreach obj,bpf_lxc bpf_overlay bpf_sock bpf_host bpf_wireguard bpf_xdp,$(NATIVE_OUT)/cilium/$(obj).bpf.o)
+native-cilium: $(CILIUM_NATIVE_OBJS) $(CILIUM_SOURCE_OBJS)
 	install -d "$(CILIUM_NATIVE_STAGE_OUT)"
 	rm -f "$(CILIUM_NATIVE_STAGE_OUT)"/*.native.o
 	install -m 0644 $(CILIUM_NATIVE_OBJS) "$(CILIUM_NATIVE_STAGE_OUT)"
+	install -m 0644 $(CILIUM_SOURCE_OBJS) "$(CILIUM_NATIVE_STAGE_OUT)"
 	python3 "$(CURDIR)/write_native_manifest.py" --app cilium --llvm-nm "$(LLVM_NM)" \
 		--output "$(NATIVE_OUT)/cilium/manifest.json" \
-		--object "$(NATIVE_OUT)/cilium/bpf_lxc.native.o,source_map_prefix=cilium_calls_0" \
-		--object "$(NATIVE_OUT)/cilium/bpf_overlay.native.o,source_map_prefix=cilium_calls_ov" \
+		--object "$(NATIVE_OUT)/cilium/bpf_lxc.native.o" \
+		--object "$(NATIVE_OUT)/cilium/bpf_overlay.native.o" \
 		--object "$(NATIVE_OUT)/cilium/bpf_sock.native.o" \
-		--object "$(NATIVE_OUT)/cilium/bpf_host.native.o,source_map_prefix=cilium_calls_ho,source_map_prefix=cilium_calls_ne" \
-		--object "$(NATIVE_OUT)/cilium/bpf_wireguard.native.o,source_map_prefix=cilium_calls_wi" \
-		--object "$(NATIVE_OUT)/cilium/bpf_xdp.native.o,prog_type=6"
+		--object "$(NATIVE_OUT)/cilium/bpf_host.native.o" \
+		--object "$(NATIVE_OUT)/cilium/bpf_wireguard.native.o" \
+		--object "$(NATIVE_OUT)/cilium/bpf_xdp.native.o"
 	python3 "$(CURDIR)/write_native_manifest.py" --app cilium --llvm-nm "$(LLVM_NM)" \
 		--output "$(CILIUM_NATIVE_STAGE_OUT)/manifest.json" \
-		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_lxc.native.o,source_map_prefix=cilium_calls_0" \
-		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_overlay.native.o,source_map_prefix=cilium_calls_ov" \
-		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_sock.native.o" \
-		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_host.native.o,source_map_prefix=cilium_calls_ho,source_map_prefix=cilium_calls_ne" \
-		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_wireguard.native.o,source_map_prefix=cilium_calls_wi" \
-		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_xdp.native.o,prog_type=6"
+		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_lxc.native.o,source=$(CILIUM_NATIVE_STAGE_OUT)/bpf_lxc.bpf.o" \
+		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_overlay.native.o,source=$(CILIUM_NATIVE_STAGE_OUT)/bpf_overlay.bpf.o" \
+		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_sock.native.o,source=$(CILIUM_NATIVE_STAGE_OUT)/bpf_sock.bpf.o" \
+		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_host.native.o,source=$(CILIUM_NATIVE_STAGE_OUT)/bpf_host.bpf.o" \
+		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_wireguard.native.o,source=$(CILIUM_NATIVE_STAGE_OUT)/bpf_wireguard.bpf.o" \
+		--object "$(CILIUM_NATIVE_STAGE_OUT)/bpf_xdp.native.o,source=$(CILIUM_NATIVE_STAGE_OUT)/bpf_xdp.bpf.o"
 
 native-otel: $(OTEL_NATIVE_OBJECT) $(OTEL_SOURCE_BPF_OBJECT)
 	install -d "$(OTEL_NATIVE_STAGE_OUT)"
@@ -393,8 +411,7 @@ native-otel: $(OTEL_NATIVE_OBJECT) $(OTEL_SOURCE_BPF_OBJECT)
 		--object "$(OTEL_NATIVE_OBJECT)"
 	python3 "$(CURDIR)/write_native_manifest.py" --app otelcol-ebpf-profiler --llvm-nm "$(LLVM_NM)" \
 		--output "$(OTEL_NATIVE_STAGE_OUT)/manifest.json" \
-		--object "$(OTEL_NATIVE_STAGE_OUT)/otelcol-ebpf-profiler.native.o" \
-		--source-bpf-object "$(OTEL_NATIVE_STAGE_OUT)/$(notdir $(OTEL_SOURCE_BPF_OBJECT))"
+		--object "$(OTEL_NATIVE_STAGE_OUT)/otelcol-ebpf-profiler.native.o,source=$(OTEL_NATIVE_STAGE_OUT)/$(notdir $(OTEL_SOURCE_BPF_OBJECT))"
 
 native-tracee: $(TRACEE_NATIVE_OBJS)
 	install -d "$(TRACEE_NATIVE_STAGE_OUT)"
@@ -406,10 +423,12 @@ native-tracee: $(TRACEE_NATIVE_OBJS)
 		--output "$(NATIVE_OUT)/tracee/manifest.json" \
 		--object "$(TRACEE_NATIVE_OBJECT)" \
 		$(foreach src,$(TRACEE_LSM_SUPPORT_SRCS),--object "$(NATIVE_OUT)/tracee/lsm_support/$(src).native.o")
+	install -m 0644 "$(VENDOR)/build/.tracee-build/x86/dist/tracee.bpf.o" "$(TRACEE_NATIVE_STAGE_OUT)/tracee.bpf.o"
+	for src in $(TRACEE_LSM_SUPPORT_SRCS); do install -m 0644 "$(VENDOR)/build/.tracee-build/x86/dist/lsm_support/$${src}.bpf.o" "$(TRACEE_NATIVE_STAGE_OUT)/$${src}.bpf.o"; done
 	python3 "$(CURDIR)/write_native_manifest.py" --app tracee --llvm-nm "$(LLVM_NM)" \
 		--output "$(TRACEE_NATIVE_STAGE_OUT)/manifest.json" \
-		--object "$(TRACEE_NATIVE_STAGE_OUT)/tracee.native.o" \
-		$(foreach src,$(TRACEE_LSM_SUPPORT_SRCS),--object "$(TRACEE_NATIVE_STAGE_OUT)/$(src).native.o")
+		--object "$(TRACEE_NATIVE_STAGE_OUT)/tracee.native.o,source=$(TRACEE_NATIVE_STAGE_OUT)/tracee.bpf.o" \
+		$(foreach src,$(TRACEE_LSM_SUPPORT_SRCS),--object "$(TRACEE_NATIVE_STAGE_OUT)/$(src).native.o,source=$(TRACEE_NATIVE_STAGE_OUT)/$(src).bpf.o")
 
 native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h core-compat.h $(CORE_ANSWERS)/tetragon.h $(NATIVE_LINK)
 	install -d "$(NATIVE_OUT)/tetragon"
@@ -515,12 +534,10 @@ native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h core-compat.h $(CO
 		native_args=(); \
 		stage_args=(); \
 		for obj in "$${native_out}"/*.native.o; do native_args+=(--object "$${obj}"); done; \
-		for obj in "$${stage_out}"/*.native.o; do stage_args+=(--object "$${obj}"); done; \
-		python3 "$(CURDIR)/write_native_manifest.py" --app tetragon --llvm-nm "$(LLVM_NM)" --dedupe-program last \
-			--source-object-root "$(VENDOR)/build/x86/tetragon" --helper-disambiguate 174 \
+		for obj in "$${stage_out}"/*.native.o; do b="$$(basename "$${obj}" .native.o)"; src="$(VENDOR)/build/x86/tetragon/$${b}.o"; if [ -f "$${src}" ]; then install -m 0644 "$${src}" "$${stage_out}/$${b}.o"; stage_args+=(--object "$${obj},source=$${stage_out}/$${b}.o"); fi; done; \
+		python3 "$(CURDIR)/write_native_manifest.py" --app tetragon --llvm-nm "$(LLVM_NM)" \
 			--output "$${native_out}/manifest.json" "$${native_args[@]}"; \
-		python3 "$(CURDIR)/write_native_manifest.py" --app tetragon --llvm-nm "$(LLVM_NM)" --dedupe-program last \
-			--source-object-root "$(VENDOR)/build/x86/tetragon" --helper-disambiguate 174 \
+		python3 "$(CURDIR)/write_native_manifest.py" --app tetragon --llvm-nm "$(LLVM_NM)" \
 			--output "$${stage_out}/manifest.json" "$${stage_args[@]}"
 
 native-artifacts: native-katran native-bcc native-otel native-cilium native-tracee native-tetragon $(PERF_CONTEXT_LTO)

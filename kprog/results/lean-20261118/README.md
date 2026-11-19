@@ -46,3 +46,25 @@ tail-call maps. Decision (coordinator): replace them with one mechanism for ever
 paired with the BPF object it was compiled beside, and the loader picks the entry whose source program matches
 the loaded program and binds maps through that source object's relocations (the design already names
 source_bpf_object for map binding). BCC, Tracee and Katran need no option today and keep working.
+
+## Tests 3-7: one manifest rule for every app (2026-11-19, local 51bf3ecd2 .. 6f47d2958)
+
+Rule: every native object is listed as `native.o,source=src.o`, paired with the BPF object compiled beside it
+(Katran X.bpf.o, BCC .bcc-libbpf X.bpf.o, Tracee tracee.bpf.o and lsm_support, Tetragon X.o, OTel tracer.ebpf,
+Cilium siblings built with the same switches and `--target=bpf -mcpu=v3`). The writer records each entry's
+section; the loader keeps entries of the loaded program's type (libbpf section mapping) and picks the one whose
+source program agrees most with the loaded program: leading agreeing instructions (opcode, dst, src except
+ld_imm64/call, ld_imm64 data reference or code), then agreement at aligned positions, then the closer length.
+Maps bind through the source object's relocations when the whole function agrees. No per-app option remains.
+
+| Test | Change | OTel | BCC | Cilium | Tetragon | Tracee | Katran |
+|---|---|---|---|---|---|---|---|
+| target (before test 2) | | 14 / 0 | 25 / 0 | 113 / 0 | 288 / 0 | 169 / 0 | 1 / 0 |
+| 6 (a30ddfb33) | ld_imm64 data references agree | 14 / 0 | 25 / 0 | 93 / 6 | 288 / 0 | 169 / 0 | 1 / 0 |
+| 7 (6f47d2958) | ties by aligned positions, then length | 14 / 0 | 25 / 0 | 64 / 0 | 288 / 0 | 169 / 0 | 1 / 0 |
+
+Cells are native replaced / native-loader failed, one-image check, all rc=0 (raw in the bpf-benchmark-lean
+Workspace, /workspaces/kprog-raw/lean/test7-check.txt and corpus run x86_kvm_corpus_20261119_070637_097806).
+In test 7 the Cilium agent rebuilt the host endpoint 3 times in its window (6 times in test 6), so it loaded 64
+non-probe programs; all 64 were replaced, tail_drop_notify included (5 of 5; test 6 failed 6 of 8 on a tie).
+Decision (coordinator): the rule moves to master; the next image and six-app check run with it.
