@@ -310,3 +310,37 @@ Neither is weaker than the other: bounding each load and bounding one reused loa
 fact. With all 41 programs reloading `data` 2–40 times, re-emission adds a compare per read; canonicalizing
 needs the reloads folded to one value, which the `~{memory}` asm form currently prevents. Both keep the
 admitted set unchanged.
+
+## The canonicalization landed, and what still blocks it (omp 2026-11-19T23:58Z)
+
+PERF's `ff8f0e4b3` adds exactly the canonicalization candidate: `reuse_packet_data_values()` hands every
+later `data` read the first proven-equal SSA value (`packet data reload values unified=188` over the 41
+inputs), and `canonical_tc_class_stores()` handles the class-id store. Its Cilium re-run
+(`kprog-raw/perf/cilium-headlen-20261119/check-...222823Z-366677/cilium`, exit 0) is a 14-request capture:
+**8 install, 6 still `invalid access to packet`, and the failures are now `off=16 size=1 r=16`, not `r=0`.**
+
+That shift is informative. The remaining three programs (small bodies) fail like this, in PERF's own
+generated IR:
+
+```
+219:  %220 = asm "…*(u32 *)($1 + $2)"(ptr %0, 76)     ; skb->data          (feeds %221)
+      %221 = inttoptr i64 %220 to ptr                  ; the pointer used by every read below
+245:  %packet_data6 = asm "…"(ptr %0, 76)              ; a reload — but its value is never used
+      %packet_end7  = asm "…"(ptr %0, 80)
+      %packet_bound8 = add i64 %220, 18                 ; bound is on %220 …
+      %246 = icmp ult i32 %228, 18                      ; … with the head-length, correct shape
+      br i1 %248, label %249, label %258
+251:  %252 = asm "…*(u8 *)($1 + $2)"(ptr %221, i64 16)  ; … but the read goes through %221
+```
+
+so the bound *does* use the same value the read uses — and the verifier still reports `r=16` at `off=16`.
+The gap is therefore not another placement miss but the **source of `%220`**: `inttoptr(%220)` loses the
+`PTR_TO_PACKET` id that the direct `%221`-style inttoptr from a freshly loaded `data` would carry, so the
+register's packet provenance is stale rather than unbounded. `$228` (the head length) also reads that same
+`%221` (`i64 112`) — i.e. Cilium re-loads `skb` and reads the kernel fields *through the packet pointer*,
+which is why these three bodies behave differently from the 38 that now install.
+
+Next measurement needed, and it is PERF's file: whether re-deriving the pointer from the *reload* rather
+than from the unified SSA value (or unifying only after the `inttoptr`) yields the accepted `r=0` shape.
+Both fixes were verified acceptable **as semantics** earlier; this is about which SSA value carries the
+verifier's packet id.
