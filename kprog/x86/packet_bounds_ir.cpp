@@ -286,13 +286,19 @@ static bool field(Value *value,Function &function,int64_t offset,bool kernel=fal
   if (matches && read) *read=cast<Instruction>(value);
   return matches;
 }
-// The TC context converter maps cb stores into sk_buff.cb. This exact
-// four-byte template cannot change data, len or data_len; other stores keep
-// their existing freshness barrier, including a word that crosses cb's end.
+// The TC converter maps cb and tc_classid stores into sk_buff.cb. These
+// exact templates preserve data, len and data_len; crossing stores keep
+// their freshness barrier.
 static bool skb_cb_store(CallBase *call,InlineAsm *assembly) {
   auto *function=call->getFunction();auto section=function->getSection();
   if (section!="classifier" && section!="tc" && !section.starts_with("tc/") &&
       !section.starts_with("cgroup_skb/")) return false;
+  if (call->arg_size()==2 && call->getType()->isVoidTy() &&
+      assembly->getConstraintString()=="r,r,~{memory}" &&
+      assembly->getAsmString()=="*(u32 *)($0 + "+std::to_string(offsetof(__sk_buff,tc_classid))+") = $1" &&
+      origin(call->getArgOperand(0))==function->getArg(0) &&
+      call->getArgOperand(1)->getType()->isIntegerTy(64) &&
+      !assembly->isAlignStack() && !assembly->canThrow()) return true;
   if (call->arg_size()!=6 || !call->getType()->isIntegerTy(64) ||
       assembly->getConstraintString()!="=&r,r,r,i,i,i,i,~{memory}" ||
       assembly->getAsmString()!="$0 = $2\n*(u8 *)($1 + $3) = $0\n$0 >>= 8\n*(u8 *)($1 + $4) = $0\n$0 >>= 8\n*(u8 *)($1 + $5) = $0\n$0 >>= 8\n*(u8 *)($1 + $6) = $0" ||
@@ -320,6 +326,13 @@ static bool current_headlen(Instruction *read,Instruction *compare) {
       auto &instruction=*--it;
       if (&instruction==read) { reached=true;break; }
       if (!instruction.mayWriteToMemory()) continue;
+      // The private input marker supplies a choice and preserves skb state.
+      if (auto *load=dyn_cast<LoadInst>(&instruction)) {
+        auto *global=dyn_cast<GlobalVariable>(load->getPointerOperand());
+        if (load->isVolatile() && !load->isAtomic() && load->getType()->isIntegerTy(64) &&
+            global && global->isDeclaration() && global->getName()=="kprog_unspecified_input" &&
+            global->getSection()==".ksyms") continue;
+      }
       if (auto *store=dyn_cast<StoreInst>(&instruction))
         if (isa<AllocaInst>(getUnderlyingObject(store->getPointerOperand()))) continue;
       if (auto *call=dyn_cast<CallBase>(&instruction)) {
@@ -567,6 +580,7 @@ int main(int argc,char **argv) {
   unsigned contexts=canonical_context_loads(*module);
   unsigned debug_variables=remove_debug_variable_intrinsics(*module);
   unsigned equality_edges=fold_equality_edges(*module);
+  unsigned class_stores=canonical_tc_class_stores(*module);
   unsigned count=0,stale_headlen=0;
   for (auto &function:*module) {
     if (function.isDeclaration() || function.arg_empty()) continue;
@@ -629,7 +643,6 @@ int main(int argc,char **argv) {
     }
   }
   unsigned packet_values=reuse_packet_data_values(*module);
-  unsigned class_stores=canonical_tc_class_stores(*module);
   unsigned pointer_differences=anchor_pointer_differences(*module);
   if (verifyModule(*module,&errs())) return 1;
   std::error_code ec;ToolOutputFile output(Output,ec,sys::fs::OF_None);
