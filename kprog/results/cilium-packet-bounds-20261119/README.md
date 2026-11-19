@@ -446,3 +446,30 @@ So the packet-bounds class is closed at both levels:
 
 Remaining known gaps, both separate defects and both unchanged by this: request 64's
 `NATIVE_LAB_TRUSTED_CHUNK` arming `EINVAL`, and the emitter's three relative-table refusals.
+
+## Independent run from `c4b8fb2d1` after the fixes (omp 2026-11-20T01:25Z)
+
+Ran `checked-corpus` myself on the rebuilt base (`packet-bounds` 473,784 B built 23:06 from `852c2bfe3`;
+`fixed-20261119T233010Z`, exit 0). The capture is 12 requests: **9 install, 3 rejected**, composition
+
+| program | instances | path |
+|---|---|---|
+| `9effc137…` | 4 | installed (every one) |
+| `874d0fb3…` | 2 | installed (every one) |
+| `8680a229…` | 3 | installed |
+| `34af4b3a…` | 3 | rejected, `off=30 size=4, r=0` |
+
+**Every program that failed before the fix now installs, every instance.** `9effc137` and `874d0fb3` are the
+two bodies that produced `off=16 size=1 r=16` in the previous capture; here they install 6 of 6.
+
+The three rejects are one program that is **new in this capture** — `34af4b3a`, absent from both 64-request
+captures. It is a different shape, not a survivor of the packet class: its `bounds-input.bc` reads only
+`ctx+8`, `ctx+44` and `ctx+76` and then `data+22` and `data+30`, with **no `ctx+80` (`data_end`) read and no
+`len`/`data_len` read anywhere**, so there is no head-length predicate to lower (`predicates lowered=0`,
+`unified=0`). Its reads are bounded only by the simulator's unspecified-value marker
+`%x > 0x8000000000000017`. Whether the emitter should bound such a read at all (and against which value) is a
+new question, and belongs with the emitter's remaining refusals rather than with this class.
+
+Capture size is not fixed: this guest catches 12 requests, the two baselines 64, PERF's capture 14, all from
+the same `verified_corpus.py <app> 1 10 1`. So counts are only comparable program by program, which is what
+the table above does.
