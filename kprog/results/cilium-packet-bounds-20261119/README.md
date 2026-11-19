@@ -117,3 +117,32 @@ a guest. The host BTF
 lacks the apps' extern symbols (`__config_endpoint_ipv4` etc.), so the load must happen in the guest;
 PERF's `kprog/results/cilium-headlen-20261119/validate.sh` does exactly that (stock fixtures, captured
 40-request replay, then a full `checked-corpus` Cilium run) and is the run to read for the verdict.
+
+## The six `only read is supported` requests are a different defect (omp 2026-11-19T21:14Z)
+
+Requests 6, 14, 32, 44, 56, 61 fail at the same instruction shape, and it has nothing to do with packet
+bounds. Request 6's trace:
+
+```
+13: (85) call bpf_cast_to_kern_ctx#70422   ; R0=trusted_ptr_sk_buff()
+65: (bf) r2 = r0                            ; R2=trusted_ptr_sk_buff()
+66: (07) r2 += 46                           ; R2=trusted_ptr_sk_buff(off=46)
+67: (6b) *(u16 *)(r2 +0) = r1
+only read is supported
+```
+
+The kernel rejects it in `check_ptr_to_btf_access` (`kernel/bpf/verifier.c:7424-7429`): when the program
+type provides `btf_struct_access` — and `tc_cls_act_verifier_ops` does, `net/core/filter.c:11218-11224` —
+a `BPF_WRITE` through `PTR_TO_BTF_ID` goes to that hook, but `bpf_cast_to_kern_ctx` hands back
+`PTR_TO_BTF_ID | PTR_TRUSTED` with **no `MEM_ALLOC`** (`verifier.c:14018-14021`), so the else-branch's
+`atype != BPF_READ && !type_is_ptr_alloc_obj(...)` fires. `tc_cls_act_btf_struct_access`
+(`filter.c:9201-9212`) only consults `nfct_btf_struct_access`, which the conntrack module publishes for
+the four conntrack fields, so an arbitrary `sk_buff` offset is refused either way.
+
+Separately, offset 46 does not name a field: in the target `vmlinux.h`, 40 is `struct llist_node
+ll_node` in `sk_buff`'s opening union, so 46 is six bytes into that member.
+
+So this class needs a decision the packet-bounds pass cannot make: either lower the store to the public
+`__sk_buff` accessor that `convert_ctx_access` knows (the way the ctx reads already work), or route the
+write through a kernel-side `btf_struct_access` that admits it. It is **not** the same fix as the 40, and
+should not be counted as part of it.
