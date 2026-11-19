@@ -2,7 +2,6 @@
 import ctypes
 import json
 from pathlib import Path
-import struct
 import subprocess
 import sys
 
@@ -23,6 +22,7 @@ public, physical = tools/'public-layout.json', tools/'physical-layout.json'
 (out/'physical-layout.json').write_bytes(physical.read_bytes())
 rules = {row['field']: row for row in json.loads(physical.read_text()) if row['kind'] == 'skb'}
 run([root/'kprog/stock-path/bin/clang', '-target', 'bpf', '-O1', '-g',
+     '-D__TARGET_ARCH_x86', '-I', '/usr/include/x86_64-linux-gnu',
      '-I', root/'vendor/libbpf/include/uapi', '-I', root/'vendor/libbpf/src',
      '-emit-llvm', '-c', Path(__file__).with_name('fixture.c'), '-o', out/'input.bc'])
 run([tools/'compile-sim-ir', out/'input.bc', '-o', out/'native.bc'])
