@@ -22,3 +22,11 @@ one-entry-pointer/uint32 continuation ABI remain separate obligations. Local
 allocation equality does not establish callback values in different global
 environments. Provider/native/context admission and all handler-family counts
 remain open; completed ISA-family count is zero. M5 precedes M6.
+
+A separate successor, Arm64ProgramEntryExpressions.lean, is now prepared but
+unvalidated. Its proposed local lookup/read/address-of equalities use the
+checked allocation environment map and preserve failed reads in arbitrary
+subsequent memory. It adds no global callback or provider equivalence premise
+and claims none. The Source worker and its inputs are unchanged. After its
+actual pass, focus the Expressions target, then run this prepared set of nine
+public queries and one full validation before a validated publication.

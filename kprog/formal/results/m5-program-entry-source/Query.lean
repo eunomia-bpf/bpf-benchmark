@@ -1,4 +1,4 @@
-import KProgFormal.ClightRefinement.Arm64ProgramEntrySource
+import KProgFormal.ClightRefinement.Arm64ProgramEntryExpressions
 
 open KProgFormal.ClightRefinement.Arm64ProgramEntrySource
 
@@ -10,3 +10,16 @@ open KProgFormal.ClightRefinement.Arm64ProgramEntrySource
 #print axioms production_source
 #check prefix_corresponds
 #print axioms prefix_corresponds
+
+open KProgFormal.ClightRefinement.Arm64ProgramEntryExpressions
+
+#check declaration_type
+#print axioms declaration_type
+#check bound_lvalue
+#print axioms bound_lvalue
+#check bound_read
+#print axioms bound_read
+#check bound_address
+#print axioms bound_address
+#check allocated_local
+#print axioms allocated_local
