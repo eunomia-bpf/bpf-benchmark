@@ -7,8 +7,6 @@ import tarfile
 
 archive_path = Path(sys.argv[1])
 output = Path(sys.argv[2])
-reported = {row['request_id']: row['class'] for row in json.loads(
-    Path('kprog/results/cilium-packet-bounds-20261119/requests.json').read_text())}
 with tarfile.open(archive_path) as archive:
     journal = [json.loads(line) for line in archive.extractfile('service/requests/requests.jsonl')]
     rows = []
@@ -37,15 +35,17 @@ with tarfile.open(archive_path) as archive:
         else:
             category = 'other_failure'
         row = dict(request_id=request_id, category=category,
+                   source_prog_id=request['source_prog_id'],
+                   native_sha256=request['native_sha256'],
                    journal_status=request['status'], phase=request.get('phase'),
                    execution_path=request.get('execution_path'),
                    b_generated=request.get('b_generated'),
                    b_stock_passed=request.get('b_stock_passed'),
                    capsule=capsule_path, capsule_b_generated=generated,
-                   failure_stage=failure.get('stage'),
-                   reported_class=reported.get(request_id))
-        if category == 'generation_failed':
+                   failure_stage=failure.get('stage'))
+        if failure:
             row['error'] = failure['error']
+            row['stderr_tail'] = stderr.splitlines()[-20:]
         if category == 'stock_passed':
             row['verification_record'] = verification
         if terminal_stderr is not None:
@@ -57,7 +57,7 @@ result = dict(source_archive=str(archive_path),
               counts=dict(Counter(row['category'] for row in rows)),
               execution_paths=dict(Counter(row['execution_path'] or 'unreported' for row in rows)),
               requests=rows,
-              scope='Historical journal, inner capsule failures and stock-verification receipts; no new execution or acceptance.')
+              scope='Actual archive journal, inner capsule failures and stock-verification receipts; execution is recorded by the named source run.')
 output.parent.mkdir(parents=True, exist_ok=True)
 output.write_text(json.dumps(result, indent=2) + '\n')
 print(json.dumps(dict(counts=result['counts'], execution_paths=result['execution_paths'])))
