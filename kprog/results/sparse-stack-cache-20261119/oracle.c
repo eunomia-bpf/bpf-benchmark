@@ -33,12 +33,12 @@ int main(void)
         for (unsigned replant=0; replant<2; ++replant) {
             state.rsp.ptr=(void *)(intptr_t)-64;
             X86_SIM_RUN_OP(X86_OP_MOV_STORE_REG,alias?X86_RDI:X86_RSP,
-                X86_RBX,X86_WIDTH_64,aux,alias?0:(__u64)offset);
+                X86_RBX,X86_WIDTH_64,aux,alias?0:(__u64)(offset-(intptr_t)state.rsp.ptr));
             struct x86_sim_stack_value cached=X86_SIM_L_STACK_VALUES_READ(index,X86_WIDTH_64);
             assert(cached.tag==tag);
             if (tag==X86_SIM_TAG_STACK) assert(cached.pointer==state.rbx.ptr);
             X86_SIM_RUN_OP(X86_OP_MOV_LOAD,X86_RAX,alias?X86_RDI:X86_RSP,
-                X86_WIDTH_64,aux,alias?0:(__u64)offset);
+                X86_WIDTH_64,aux,alias?0:(__u64)(offset-(intptr_t)state.rsp.ptr));
             if (state.rax_tag!=tag || state.rax.ptr!=state.rbx.ptr)
                 fprintf(stderr,"reload tag=%u word=%u alias=%u replant=%u observed_tag=%u same_pointer=%d\n",
                     tag,word,alias,replant,state.rax_tag,state.rax.ptr==state.rbx.ptr);
@@ -53,7 +53,7 @@ int main(void)
             cached=X86_SIM_L_STACK_VALUES_READ(index,X86_WIDTH_64);
             assert(cached.tag==X86_SIM_TAG_SCALAR);
             X86_SIM_RUN_OP(X86_OP_MOV_LOAD,X86_RAX,alias?X86_RDI:X86_RSP,
-                X86_WIDTH_64,aux,alias?0:(__u64)offset);
+                X86_WIDTH_64,aux,alias?0:(__u64)(offset-(intptr_t)state.rsp.ptr));
             assert(state.rax_tag==X86_SIM_TAG_SCALAR &&
                    (uintptr_t)state.rax.ptr==0x1020304050607080UL);
             ++cases;
