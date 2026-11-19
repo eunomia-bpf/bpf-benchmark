@@ -1,0 +1,24 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryTables
+
+open KProgFormal.ClightRefinement
+
+#check Arm64Producer.table_locals
+#print axioms Arm64Producer.table_locals
+#check Arm64Producer.initialize_pointer_table_body
+#print axioms Arm64Producer.initialize_pointer_table_body
+#check Arm64Producer.initialize_pointer_table_bound
+#print axioms Arm64Producer.initialize_pointer_table_bound
+#check Arm64Producer.pointer_tables_initialized_bound
+#print axioms Arm64Producer.pointer_tables_initialized_bound
+#check Arm64ProgramEntryTables.source
+#print axioms Arm64ProgramEntryTables.source
+#check Arm64ProgramEntryTables.table_binding
+#print axioms Arm64ProgramEntryTables.table_binding
+#check Arm64ProgramEntryTables.cell_binding
+#print axioms Arm64ProgramEntryTables.cell_binding
+#check Arm64ProgramEntryTables.table_initialized
+#print axioms Arm64ProgramEntryTables.table_initialized
+#check Arm64ProgramEntryTables.initialized
+#print axioms Arm64ProgramEntryTables.initialized
+#check Arm64ProgramEntryTables.entry_initialized
+#print axioms Arm64ProgramEntryTables.entry_initialized

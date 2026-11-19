@@ -28,13 +28,15 @@ theorem table_locals (tags : Bool) (m : CC.Mem) : Nonempty (TableLocals tags m) 
     CC.Mem.rangePerm_implies range (by decide : CC.permOrder .Freeable .Writable = true),
     fun i => Classical.choose (cells i), fun i => Classical.choose_spec (cells i)⟩⟩
 
-private theorem table_assignment_exec (world : CC.CGenv) (tags : Bool) (m before after : CC.Mem)
+private theorem table_assignment_exec (world : CC.CGenv) (f : CC.Function) (e : CC.Env) (tags : Bool) (m before after : CC.Mem)
     (locals : TableLocals tags m) (i : Fin 31) (le : CC.TempEnv) (k : CC.Cont) (rest : CC.Stmt)
+    (tableBinding : e.get (tableName tags) = some (locals.tableBlock, tableType tags))
+    (cellBinding : ∀ j, e.get (tableCellName tags j) = some (locals.cellBlock j, tableCellType tags))
     (stored : CC.Mem.storev CC.Mptr before (.Vptr locals.tableBlock (tableOffset i))
       (.Vptr (locals.cellBlock i) 0) = some after) :
-    steps world 3 (.State producer (.Ssequence (tableAssignment tags i) rest) k (allocation m).1 le before) =
-      some (CC.E0, .State producer rest k (allocation m).1 le after) ∧
-    InternalPath world 3 (.State producer (.Ssequence (tableAssignment tags i) rest) k (allocation m).1 le before) := by
+    steps world 3 (.State f (.Ssequence (tableAssignment tags i) rest) k e le before) =
+      some (CC.E0, .State f rest k e le after) ∧
+    InternalPath world 3 (.State f (.Ssequence (tableAssignment tags i) rest) k e le before) := by
   simp [steps, InternalPath, InternalState, tableAssignment, tableType,
     CC.doStep, CC.doEvalLvalue, CC.doEvalExpr, CC.lvalOfVar, CC.doDerefLoc,
     CC.doAssignLoc, CC.accessMode, CC.typeof, CC.Cop.semBinaryOperation,
@@ -42,15 +44,17 @@ private theorem table_assignment_exec (world : CC.CGenv) (tags : Bool) (m before
     CC.Cop.semCast, CC.Cop.classifyCast, CC.typeconv, CC.removeAttributes, CC.tattr,
     CC.sizeof, CC.tarray, CC.tptr, CC.tint, CC.Archi.ptr64, tableOffset,
     CC.Integers.Ptrofs.zero, CC.Integers.MI.zero,
-    locals.binding, locals.cellBinding, CC.E0, CC.Eapp] at stored ⊢
+    tableBinding, cellBinding, CC.E0, CC.Eapp] at stored ⊢
   simp [stored, CC.doStep, CC.E0, CC.Eapp, InternalState, InternalPath, steps]
 
-private theorem table_write (world : CC.CGenv) (tags : Bool) (m before : CC.Mem) (locals : TableLocals tags m)
+private theorem table_write (world : CC.CGenv) (f : CC.Function) (e : CC.Env) (tags : Bool) (m before : CC.Mem) (locals : TableLocals tags m)
     (i : Fin 31) (le : CC.TempEnv) (k : CC.Cont) (rest : CC.Stmt)
+    (tableBinding : e.get (tableName tags) = some (locals.tableBlock, tableType tags))
+    (cellBinding : ∀ j, e.get (tableCellName tags j) = some (locals.cellBlock j, tableCellType tags))
     (access : before.access = (allocation m).2.access) :
     ∃ after, InternalRun world 3
-        (.State producer (.Ssequence (tableAssignment tags i) rest) k (allocation m).1 le before)
-        (.State producer rest k (allocation m).1 le after) ∧
+        (.State f (.Ssequence (tableAssignment tags i) rest) k e le before)
+        (.State f rest k e le after) ∧
       CC.Mem.load CC.Mptr after locals.tableBlock (8 * (i.val : Int)) =
         some (.Vptr (locals.cellBlock i) 0) ∧
       (∀ j : Fin 31, j ≠ i → CC.Mem.load CC.Mptr after locals.tableBlock (8 * (j.val : Int)) =
@@ -82,7 +86,7 @@ private theorem table_write (world : CC.CGenv) (tags : Bool) (m before : CC.Mem)
   have storev : CC.Mem.storev CC.Mptr before (.Vptr locals.tableBlock (tableOffset i))
       (.Vptr (locals.cellBlock i) 0) = some after := by
     simpa only [CC.Mem.storev, table_offsets] using stored
-  have exec := table_assignment_exec world tags m before after locals i le k rest storev
+  have exec := table_assignment_exec world f e tags m before after locals i le k rest tableBinding cellBinding storev
   refine ⟨after, internalRun_of_steps exec.2 exec.1, ?_, ?_, ?_,
     FrameBelow.store locals.fresh stored, CC.Mem.store_access stored, CC.Mem.store_nextblock stored⟩
   · simpa [CC.Mptr, CC.Archi.ptr64, CC.Val.loadResult] using CC.Mem.load_store_same stored
@@ -98,13 +102,16 @@ private theorem table_write (world : CC.CGenv) (tags : Bool) (m before : CC.Mem)
     exact CC.Mem.load_store_other stored chunk block ofs
       (.inl (distinct _ _ _ _ bound locals.binding different))
 
-private theorem run_table_list (world : CC.CGenv) (tags : Bool) (m : CC.Mem) (locals : TableLocals tags m)
+private theorem run_table_list (world : CC.CGenv) (f : CC.Function) (e : CC.Env) (tags : Bool) (m : CC.Mem) (locals : TableLocals tags m)
     (rows : List (Fin 31)) (rest : CC.Stmt) (le : CC.TempEnv) (k : CC.Cont)
-    (before : CC.Mem) (access : before.access = (allocation m).2.access) :
+    (before : CC.Mem)
+    (tableBinding : e.get (tableName tags) = some (locals.tableBlock, tableType tags))
+    (cellBinding : ∀ j, e.get (tableCellName tags j) = some (locals.cellBlock j, tableCellType tags))
+    (access : before.access = (allocation m).2.access) :
     ∃ after, InternalRun world (3 * rows.length)
-        (.State producer (rows.foldr (fun i next => .Ssequence (tableAssignment tags i) next) rest)
-          k (allocation m).1 le before)
-        (.State producer rest k (allocation m).1 le after) ∧
+        (.State f (rows.foldr (fun i next => .Ssequence (tableAssignment tags i) next) rest)
+          k e le before)
+        (.State f rest k e le after) ∧
       (∀ i ∈ rows, CC.Mem.load CC.Mptr after locals.tableBlock (8 * (i.val : Int)) =
         some (.Vptr (locals.cellBlock i) 0)) ∧
       (∀ i ∉ rows, CC.Mem.load CC.Mptr after locals.tableBlock (8 * (i.val : Int)) =
@@ -121,8 +128,8 @@ private theorem run_table_list (world : CC.CGenv) (tags : Bool) (m : CC.Mem) (lo
     · intro id ty block bound different chunk ofs; rfl
   | cons head tail ih =>
     obtain ⟨middle, headRun, headRead, headOther, headLocals, headFrame, headAccess, headNext⟩ :=
-      table_write world tags m before locals head le k
-        (tail.foldr (fun i next => .Ssequence (tableAssignment tags i) next) rest) access
+      table_write world f e tags m before locals head le k
+        (tail.foldr (fun i next => .Ssequence (tableAssignment tags i) next) rest) tableBinding cellBinding access
     obtain ⟨after, tailRun, tailRead, tailOther, tailLocals, tailFrame, tailAccess, tailNext⟩ :=
       ih middle (headAccess.trans access)
     refine ⟨after, ?_, ?_, ?_, ?_, headFrame.trans tailFrame,
@@ -145,6 +152,28 @@ private theorem run_table_list (world : CC.CGenv) (tags : Bool) (m : CC.Mem) (lo
 
 /-- All 31 actual slots of either selected table are initialized from the
 real local addresses, preserving every other declared local load. -/
+theorem initialize_pointer_table_body (world : CC.CGenv) (f : CC.Function) (e : CC.Env) (tags : Bool) (m before : CC.Mem) (le : CC.TempEnv)
+    (k : CC.Cont) (rest : CC.Stmt) (locals : TableLocals tags m)
+    (tableBinding : e.get (tableName tags) = some (locals.tableBlock, tableType tags))
+    (cellBinding : ∀ j, e.get (tableCellName tags j) = some (locals.cellBlock j, tableCellType tags))
+    (access : before.access = (allocation m).2.access) :
+    ∃ after, InternalRun world 93
+        (.State f ((tableAssignments tags).foldr CC.Stmt.Ssequence rest)
+          k e le before)
+        (.State f rest k e le after) ∧
+      (∀ i, CC.Mem.load CC.Mptr after locals.tableBlock (8 * (i.val : Int)) =
+        some (.Vptr (locals.cellBlock i) 0)) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ≠ tableName tags →
+        ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock := by
+  obtain ⟨after, run, read, _, other, frame, finalAccess, next⟩ :=
+    run_table_list world f e tags m locals (List.finRange 31) rest le k before tableBinding cellBinding access
+  refine ⟨after, ?_, (fun i => read i (List.mem_finRange i)), other, frame, finalAccess, next⟩
+  have mapped : tableAssignments tags = (List.finRange 31).map (tableAssignment tags) := by
+    simp only [tableAssignments, List.finRange, List.map_ofFn, Function.comp_def]
+  simpa only [List.length_finRange, mapped, List.foldr_map] using run
+
 theorem initialize_pointer_table_bound (world : CC.CGenv) (tags : Bool) (m before : CC.Mem) (le : CC.TempEnv)
     (k : CC.Cont) (rest : CC.Stmt) (access : before.access = (allocation m).2.access) :
     ∃ locals : TableLocals tags m, ∃ after, InternalRun world 93
@@ -158,12 +187,10 @@ theorem initialize_pointer_table_bound (world : CC.CGenv) (tags : Bool) (m befor
       FrameBelow m.nextblock before after ∧ after.access = before.access ∧
       after.nextblock = before.nextblock := by
   obtain ⟨locals⟩ := table_locals tags m
-  obtain ⟨after, run, read, _, other, frame, finalAccess, next⟩ :=
-    run_table_list world tags m locals (List.finRange 31) rest le k before access
-  refine ⟨locals, after, ?_, (fun i => read i (List.mem_finRange i)), other, frame, finalAccess, next⟩
-  have mapped : tableAssignments tags = (List.finRange 31).map (tableAssignment tags) := by
-    simp only [tableAssignments, List.finRange, List.map_ofFn, Function.comp_def]
-  simpa only [List.length_finRange, mapped, List.foldr_map] using run
+  obtain ⟨after, run, reads, other, frame, finalAccess, next⟩ :=
+    initialize_pointer_table_body world producer (allocation m).1 tags m before le k rest
+      locals locals.binding locals.cellBinding access
+  exact ⟨locals, after, run, reads, other, frame, finalAccess, next⟩
 
 /-- The actual 62-table-store producer segment completes with both complete
 typed pointer tables and exact framing of other local loads and caller blocks. -/

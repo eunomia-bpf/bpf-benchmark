@@ -92,3 +92,4 @@ import KProgFormal.ClightRefinement.Arm64ProgramEntryInputs
 import KProgFormal.ClightRefinement.Arm64ProgramEntryRegisters
 import KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterSource
 import KProgFormal.ClightRefinement.Arm64ProgramEntryGprInputs
+import KProgFormal.ClightRefinement.Arm64ProgramEntryTables

@@ -1,0 +1,184 @@
+{
+  "step": "M5 actual production pointer-table stores and register-prefix composition",
+  "status": "pass",
+  "recorded_utc": "2026-11-19T23:06:30Z",
+  "before_commit_head": "7ca1aaec6a32475e4425b64bfaa1876cfed0bba5",
+  "raw_directory": "/workspaces/kprog-raw/formal/m5-program-entry-tables",
+  "execution": {
+    "checked_actual_assignments": 62,
+    "slots_per_table": 31,
+    "slot_stride_bytes": 8,
+    "table_allocation_bytes": 248,
+    "internal_steps_per_table": 93,
+    "table_phase_internal_steps": 186,
+    "endpoint": "actual afterPointerTables",
+    "actual_bindings": "both table blocks and all 62 cell targets derived from source allocation correspondence",
+    "typed_table_readbacks": 62,
+    "register_words_and_tags_retained": 31,
+    "ordered_provider_traces_retained": 30,
+    "table_pointer_cell_identity": "allocation-binding uniqueness ties each table pointer to the actual preceding register-readback block",
+    "preserved": "cache words/validity bytes, original context, other local loads, temporaries, caller frame, permissions and allocation frontier",
+    "provider_contract": "existing ProviderAt remains an explicit invocation contract; no native/all-outcome/original-context admission claimed",
+    "complete_isa_families": 0
+  },
+  "checks": {
+    "focused1": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProducerTables"
+      ],
+      "exit": 1,
+      "seconds": 7.128199815750122,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "focused2": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryTables"
+      ],
+      "exit": 0,
+      "seconds": 454.6709520816803,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 190
+    },
+    "query1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "results/m5-program-entry-tables/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.715235710144043,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "lake-build1": {
+      "command": [
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 494.31443786621094,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 353
+    }
+  },
+  "repaired_attempts": {
+    "focused1": "generic table helper result-state retained the source function; changed it to the parameterized function consistently"
+  },
+  "public_query_counts": {
+    "types": 10,
+    "axiom_reports": 10
+  },
+  "axiom_reports": {
+    "KProgFormal.ClightRefinement.Arm64Producer.table_locals": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.initialize_pointer_table_body": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.initialize_pointer_table_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.pointer_tables_initialized_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryTables.source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryTables.table_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryTables.cell_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryTables.table_initialized": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryTables.initialized": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryTables.entry_initialized": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false,
+    "unchanged": true
+  },
+  "resources": {
+    "lean_cpu": 17,
+    "control_cpu": 16,
+    "workers": 1,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "none for host work under 2026-11-19T18:18:59 coordination rule"
+  },
+  "lean_source_sha256": {
+    "kprog/formal/KProgFormal.lean": "e76d93770e6c93a516c8db8a7eb5f8a8bf208ef500f49dbb53abae82cf69aa19",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerTables.lean": "3ea94f501a613423b62ec89400ef1f3350886ae015d36263708c24b2747c53b7",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryTables.lean": "fde11e8402573326b6514175fa7ee7a7f0ca053aa38ca2104176319e9d01a3c8",
+    "kprog/formal/results/m5-program-entry-tables/Query.lean": "c507d7c9b2bd66fa7d119477771e22acf95b8c72bb21027c31ce8ce14e19f348"
+  },
+  "scope": {
+    "changed": "formal proofs, receipts and own todo line",
+    "memory_store_and_readback_construction": "original table_write writable range, alignment, Mem.store, typed loads, separation and frame proof, shared through generic function/Env bindings",
+    "traversal": "original list induction shared between source and production functions",
+    "source_interfaces": "initialize_pointer_table_bound and all existing consumers retain their signatures",
+    "actual_ast_certificate": "62 production assignment heads and real successor extracted; checked word/tag table families match source schema",
+    "composite_requirement": "pointer size8 and actual named-cell/table local bindings; no full composite-environment equality",
+    "code_growth": "188-line actual module, 27 net supporting source-table lines and one root import",
+    "c_runtime_compiler_kernel_image_base_benchmark_paper_design_changes": false
+  },
+  "goal_closure": {
+    "M5": "open: actual flags/vector/stack/context prefix, complete body/native/provider/original-context/all-outcome admission, ISA refinement and O1/O2/O4 recount",
+    "M6": "open, after M5",
+    "whole_make_check_this_step": "not repeated for Lean-only change; fresh final Lake/make check remain due",
+    "last_whole_make_check_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "clight_byte_comparison_this_step": "not repeated; no C/export source changed",
+    "last_export_comparison": "results/m5-program-entry-fields/validation.json; ten Arm64 baseline-identical and twelve historical x86 differences recorded"
+  }
+}
