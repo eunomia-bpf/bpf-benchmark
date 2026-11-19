@@ -48,6 +48,22 @@ for width,predicates in [(32,['uge','ule']),(64,['ugt','uge','ult','ule'])]:
 }}
 '''
 controls+='\ndeclare void @read_context(ptr) readonly\n'
+data_controls = {'plain': True, 'readonly': True, 'private_store': True,
+                 'mutating': False, 'identity_stale': False}
+for name in data_controls:
+    middle = {'plain': '', 'readonly': '  call void @read_context(ptr %ctx)\n',
+              'private_store': '  store i8 7, ptr %local\n',
+              'mutating': '  call void @mutate_context(ptr %ctx)\n',
+              'identity_stale': '  call void @mutate_context(ptr %ctx)\n  %carried = call i64 asm sideeffect "", "=r,0"(i64 %first)\n'}[name]
+    left = '%carried' if name == 'identity_stale' else '%first'
+    controls+=f'''\ndefine i64 @ir_data_{name}(ptr %ctx) section "classifier" {{
+  %local = alloca i8
+  %first = call i64 asm sideeffect "$0 = *(u32 *)($1 + $2)", "=r,r,i,~{{memory}}"(ptr %ctx, i64 76)
+{middle}  %second = call i64 asm sideeffect "$0 = *(u32 *)($1 + $2)", "=r,r,i,~{{memory}}"(ptr %ctx, i64 76)
+  %value = add i64 {left}, %second
+  ret i64 %value
+}}
+'''
 for name,callee in [('ir_readonly_loop','read_context'),('ir_mutating_loop','mutate_context')]:
     controls+=f'''\ndefine i32 @{name}(ptr %ctx) section "classifier" {{
 entry:
@@ -82,6 +98,14 @@ negative=['wrong_root','wrong_offset','wrong_section','equality','signed_negativ
           'stale_call','stale_store','ir_mutating_loop']
 observed={name:'packet_bound' in bodies[name] for name in positive+negative}
 (out/'selection.json').write_text(json.dumps(observed,indent=2)+'\n')
+data_observed = {}
+for name, expected in data_controls.items():
+    body = bodies['ir_data_'+name]
+    arguments = re.search(r'%value = add i64 (%[\w.]+), (%[\w.]+)', body).groups()
+    data_observed[name] = arguments[0] == arguments[1]
+    assert data_observed[name] == (expected if mode == 'after' else False), (name, body)
+    assert body.count('asm sideeffect "$0 = *(u32 *)($1 + $2)"') == 2, (name, body)
+(out/'data-values.json').write_text(json.dumps(data_observed,indent=2)+'\n')
 if mode=='before':
     assert not any(observed[name] for name in positive if name not in {'old_tc','old_xdp'}),observed
 else:
@@ -98,6 +122,6 @@ if mode=='after':
     adapter._compile_simulator_backend(root/'kprog/stock-path/bin/clang',out/'fixture.bpf.c',
         out/'fixture.bpf.o',run,compiled_input=out/'fixture.bounds.bc')
     (out/'b-disassembly.txt').write_text(run(['llvm-objdump-18','-dl',out/'fixture.bpf.o']))
-(out/'result.json').write_text(json.dumps(dict(mode=mode,selection=observed,
+(out/'result.json').write_text(json.dumps(dict(mode=mode,selection=observed,data_values=data_observed,
     b_emitted=mode=='after',scope='Actual IR selection boundaries and normal B emission; no stock or current-app pass.'),indent=2)+'\n')
 print(json.dumps(observed),flush=True)
