@@ -54,3 +54,12 @@ archive-guest:
 archive-ir:
 	llvm-dis-18 $(REPLAY)/$(REQUEST)/bounds.bc -o $(OUT)/$(REQUEST)/bounds.ll
 	llvm-objdump-18 -dr $(REPLAY)/$(REQUEST)/replay.bpf.o > $(OUT)/$(REQUEST)/b-disassembly.txt
+
+FRESHNESS_PROBE := /var/tmp/kprog-tmp/perf/cilium-headlen/inspect-freshness
+.PHONY: freshness-probe freshness-inspect
+freshness-probe:
+	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -Ivendor/libbpf/include/uapi \
+		kprog/results/cilium-headlen-20261119/inspect_freshness.cpp -o $(FRESHNESS_PROBE) \
+		$$(llvm-config-18 --ldflags --libs core irreader bitwriter analysis support --system-libs)
+freshness-inspect:
+	$(FRESHNESS_PROBE) $(REPLAY)/$(REQUEST)/bounds.bc > $(OUT)/$(REQUEST)/freshness.stdout 2> $(OUT)/$(REQUEST)/freshness.log
