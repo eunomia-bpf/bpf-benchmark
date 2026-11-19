@@ -1,0 +1,290 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-arm64-mov-keep-context",
+  "world": "Universal imported CC.Step2; actual Arm64NumericProgram.ge for MOVK",
+  "proved": {
+    "continuation": "Terminal Kstop replacement preserves nested calls/loops/switches and actual mutual label lookup",
+    "transition": "Every imported Step2 rule transports with same memory, arguments, expressions and arbitrary trace",
+    "certificate": "Same internal count/post-memory plus arbitrary finite Star trace, including provider/helper events; no silence/external determinism premise",
+    "MOVK": "Same203 transitions with original typed Vlong/tag0 loads and actual stores/frame free",
+    "permissions": "Both old-block Cur/Max maps preserved through allocation, stores and actual free",
+    "ownership": "Producer allocation upper bound and pre-call Freeable ranges derive post-call Freeable ranges",
+    "native": "Same post-memory identified by internal determinism, existing fetched/decoded mature checked step and original-frontier full register relation",
+    "scope": "Certified segment resumes caller; no contextual stuck-endpoint or completed body-admission claim",
+    "new_C_transitions": 0,
+    "new_provider_visits": 0,
+    "complete_ISA_handler_families": 0
+  },
+  "focused": [
+    {
+      "exit": 1,
+      "log": "focused1.log"
+    },
+    {
+      "exit": 1,
+      "log": "focused2.log"
+    },
+    {
+      "exit": 0,
+      "log": "focused3.log",
+      "jobs": 192
+    }
+  ],
+  "full_lake_build": {
+    "exit": 0,
+    "jobs": 337,
+    "attempts": 1,
+    "log": "lake-build1.log"
+  },
+  "public_queries": {
+    "exit": 0,
+    "theorems": 16,
+    "log": "Query-1.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Continuation.callCont_extend": [
+        "propext"
+      ],
+      "KProgFormal.ClightRefinement.Continuation.isCallCont_extend": [
+        "propext"
+      ],
+      "KProgFormal.ClightRefinement.Continuation.findLabel_extend": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Continuation.findLabelLs_extend": [
+        "propext",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Continuation.step_extend": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Continuation.internal_state": [
+        "propext"
+      ],
+      "KProgFormal.ClightRefinement.Continuation.star_extend": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Continuation.run_extend": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.call_scalar_in_context": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.producer_ownership_of_permissions": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.call_scalar_owns_locals": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.Native.call_corresponds_in_context": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.call_scalar_returns": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64MovKeep.Native.call_corresponds": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericProducerConsumer.Boundary.call_return": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericProducerRegisterStorage.initialized_storage": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "export_comparison": {
+    "exit": 1,
+    "reference": "9c617740f",
+    "files": 23,
+    "Arm64_unchanged": 10,
+    "baseline_bytes": 243488732,
+    "current_bytes": 248620630,
+    "per_file_bytes": "Historical baseline; current total independently measured by stat",
+    "unchanged_files": [
+      {
+        "path": "kprog/formal/KProgFormal/Clight/Arm64Access.lean",
+        "bytes": 36119,
+        "identical": true
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/Arm64Address.lean",
+        "bytes": 291923,
+        "identical": true
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/Arm64Addressing.lean",
+        "bytes": 22635714,
+        "identical": true
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/Arm64Entry.lean",
+        "bytes": 850142,
+        "identical": true
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/Arm64Numeric.lean",
+        "bytes": 171979,
+        "identical": true
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/Arm64PayloadProfile.lean",
+        "bytes": 3032758,
+        "identical": true
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/Arm64Program.lean",
+        "bytes": 12234925,
+        "identical": true
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/Arm64ProgramContext.lean",
+        "bytes": 1901712,
+        "identical": true
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/Arm64ProgramFixture.lean",
+        "bytes": 688543,
+        "identical": true
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/Arm64Stack.lean",
+        "bytes": 375661,
+        "identical": true
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Numeric.lean",
+        "bytes": 54217,
+        "identical": true
+      }
+    ],
+    "changed_files": [
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Context.lean",
+        "bytes": 101977,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86ContextSkb.lean",
+        "bytes": 21258154,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86ContextXdp.lean",
+        "bytes": 21172430,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Helpers.lean",
+        "bytes": 8077199,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Inline.lean",
+        "bytes": 19707461,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Memory.lean",
+        "bytes": 1820683,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Pointer.lean",
+        "bytes": 1000688,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86ProgramProfile.lean",
+        "bytes": 21524184,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86ReadonlyProfile.lean",
+        "bytes": 20287920,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86StackProfile200.lean",
+        "bytes": 25006502,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86StackProfile376.lean",
+        "bytes": 29271597,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86TetragonWake.lean",
+        "bytes": 31986244,
+        "identical": false
+      }
+    ]
+  },
+  "limits": {
+    "workers": 1,
+    "build_CPU": 17,
+    "other_CPU": 16,
+    "address_space_GiB": 32,
+    "heartbeats": 200000,
+    "recursion": 512,
+    "async": false,
+    "validation_publication": "timingSH inherited"
+  },
+  "resource_exception": "After long timing wait, bounded CPU16 lock bookkeeping/light source preparation outsideSH, following current PERF light-review practice and AGENTS blocking discretion for coordinator policy. No build or Lean outsideSH.",
+  "remaining": [
+    "Universal actual source-body factoring and genuine1-pointer/uint32 callee binding",
+    "Original context/provider/native admission",
+    "Relative STACK/RETURN caches/materialization",
+    "Physical memory/alias/origin/control",
+    "Other families and O1/O2/O4 recount",
+    "M6 then fresh final lake build plus make check"
+  ],
+  "native_make_check": "Not repeated for Lean-only step; last whole PASS5236c0e9677f635526fdd515cde5195b2ba0810c; final check due at goal closure",
+  "milestones": {
+    "M1_M4": "done",
+    "M5": "open",
+    "M6": "open"
+  }
+}

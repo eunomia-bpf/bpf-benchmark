@@ -26,7 +26,8 @@ theorem callCont_extend (tail : CC.Cont) (valid : CC.isCallCont tail = true) (k 
 
 theorem isCallCont_extend (tail : CC.Cont) (valid : CC.isCallCont tail = true) (k : CC.Cont) :
     CC.isCallCont (extend tail k) = CC.isCallCont k := by
-  cases k <;> simp [extend, CC.isCallCont, valid]
+  cases k <;> try rfl
+  exact valid
 
 private def found (tail : CC.Cont) (sk : CC.Stmt × CC.Cont) : CC.Stmt × CC.Cont :=
   (sk.1, extend tail sk.2)

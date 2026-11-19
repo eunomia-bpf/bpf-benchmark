@@ -1,4 +1,4 @@
-Pending kernel validation: these modules are drafts; last full passing step is c6d9e5e39.
+Validation complete; actual results follow below.
 
 M5: contextual ordinary MOVK and producer ownership
 
@@ -32,3 +32,7 @@ bounded lock bookkeeping usedCPU16 outsideSH after the long timing wait, as
 recorded in state.md under AGENTS blocking discretion and current light-review
 practice. No Lean/build ran outsideSH. No C/runtime, kernel/base/image,
 benchmark, paper or design change.
+
+Final validation: focused[{'exit': 1, 'log': 'focused1.log'}, {'exit': 1, 'log': 'focused2.log'}, {'exit': 0, 'log': 'focused3.log', 'jobs': 192}]; full Lake337 jobs0;16 public queries0.
+Arm64ten byte-identical; historical comparison exit1 records12 changed x86 exports.
+Current export bytes248620630; baseline243488732. Native make check due at goal closure.

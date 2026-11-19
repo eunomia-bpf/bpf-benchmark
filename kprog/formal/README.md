@@ -2224,3 +2224,11 @@ void/nine-argument handler has a different ABI from the one-pointer/uint32
 continuation. Its source body wrapper and binding remain open; this is partial
 composition, with complete ISA-family count zero. See
 [the receipt](results/m5-numeric-producer-consumer/README.md).
+
+M5 MOVK caller composition: universal Continuation laws transport every imported
+Clight transition, including actual label lookup, to a valid enclosing call.
+Arm64MovKeepContext reuses the same203-step ordinary call, derives old-block
+permission preservation and producer-local Freeable ranges, and retains the
+mature checked native step at the same post-memory. This segment resumes its
+caller; source-body factoring and native admission remain open, with completed
+ISA-family count zero. See [the receipt](results/m5-arm64-mov-keep-context/README.md).
