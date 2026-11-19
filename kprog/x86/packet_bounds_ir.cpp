@@ -189,6 +189,30 @@ static unsigned normalize_live_integer_identities(Module &module) {
   }
   return calls.size();
 }
+// A pointer difference may only be verifier-legal on its original CFG path.
+// Keep the arithmetic there: pure SUB can otherwise be speculated before a
+// tag test, exposing scalar-minus-pointer on an infeasible stack-pointer path.
+static unsigned anchor_pointer_differences(Module &module) {
+  SmallVector<BinaryOperator *,16> differences;
+  for (auto &function:module) for (auto &instruction:instructions(function)) {
+    auto *difference=dyn_cast<BinaryOperator>(&instruction);
+    if (difference && difference->getOpcode()==Instruction::Sub &&
+        difference->getType()->isIntegerTy(64) &&
+        isa<PtrToIntOperator>(difference->getOperand(0)) &&
+        isa<PtrToIntOperator>(difference->getOperand(1)))
+      differences.push_back(difference);
+  }
+  for (auto *difference:differences) {
+    auto *type=difference->getType();
+    auto *signature=FunctionType::get(type,{type,type},false);
+    auto *operation=InlineAsm::get(signature,"$0 -= $2","=r,0,r",true);
+    IRBuilder<> builder(difference);builder.SetCurrentDebugLocation(difference->getDebugLoc());
+    auto *result=builder.CreateCall(operation,
+        {difference->getOperand(0),difference->getOperand(1)},"pointer_difference");
+    difference->replaceAllUsesWith(result);difference->eraseFromParent();
+  }
+  return differences.size();
+}
 static Value *origin(Value *value) {
   while (true) {
     if (auto *extension=dyn_cast<ZExtInst>(value)) { value=extension->getOperand(0); continue; }
@@ -367,6 +391,7 @@ int main(int argc,char **argv) {
       compare->eraseFromParent();++count;
     }
   }
+  unsigned pointer_differences=anchor_pointer_differences(*module);
   if (verifyModule(*module,&errs())) return 1;
   std::error_code ec;ToolOutputFile output(Output,ec,sys::fs::OF_None);
   if (ec) { errs()<<ec.message()<<'\n';return 1; }
@@ -383,4 +408,5 @@ int main(int argc,char **argv) {
   errs()<<"empty memory barriers removed="<<memory_barriers<<'\n';
   errs()<<"helper memory contracts described="<<helper_memory<<'\n';
   errs()<<"private stack accesses normalized="<<private_stack<<'\n';
+  errs()<<"pointer differences anchored="<<pointer_differences<<'\n';
 }

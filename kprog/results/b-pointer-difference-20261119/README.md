@@ -34,3 +34,5 @@ and all limits remain. Before changing frozen packet_bounds_ir.cpp, record
 this separate defect class with exact evidence in freeze-open.tsv; its
 previous constant-ALU32 scope is not this class. Coordinator owns memoryAsm
 and helper cleanup, so those paths stay untouched.
+
+- LANE PERF 2026-11-19T17:37:53Z: B pointer-difference candidate is limited to packet_bounds_ir.cpp: exact i64 subtraction of two ptrtoint operands becomes equivalent side-effect BPF subtraction in its original block. Native pre-B frontend and coordinator-owned files are untouched. Prepared only, not yet compiled or validated. Freeze exception6738e5efd cites actual Tracee27/30 mapping; evidence filename corrected forward. Regression bd6587ebe moves the native-base read before the branch and matches arena-start subtraction; baseline151259 waits timing SH then image SH on CPU19/4GiB, raw /workspaces/kprog-raw/perf/b-pointer-difference-20261119/test-20261119T173540Z-151259. The previous small fixture passed16native cases but did not reproduce hoisting. I restored timing SH after reading the later all-host-work instruction. No image, guest or current check input is changed.
