@@ -1,0 +1,225 @@
+{
+  "scope": "Actual single-context function entry, real global wrapper/input bindings and initialization-temp correspondence",
+  "raw": "/workspaces/kprog-raw/formal/m5-program-entry-call",
+  "validated_at": "2026-11-19T20:13:37.962536+00:00",
+  "abi": {
+    "params": [
+      "__sk_buff* ctx"
+    ],
+    "result": "signed32 tint",
+    "callconv": "cc_default",
+    "borrowed_consumer_signature_equal": false
+  },
+  "bindings": {
+    "wrapper_block": 88,
+    "input_block": 59,
+    "old_producer_input_block": 64,
+    "input_function": "Arm64OriginCache.inputFunction, complete imported external signature",
+    "allocation_shadows_input": false
+  },
+  "proved": [
+    "Actual function signature and distinction from borrowed consumer",
+    "Required local/parameter-name uniqueness and parameter/temporary disjointness",
+    "FunctionEntry2 with actual allocation and initialTemps from one context argument",
+    "One real internal entry step with global symbol/function resolution",
+    "Caller-memory frame and complete actual local Freeable ranges",
+    "Actual context lookup and source context lookup correspondence",
+    "All131 initialization temporaries agree at their real mapped identifiers, initially undefined",
+    "Input function symbol/function binding and local non-shadowing"
+  ],
+  "entry_steps": 1,
+  "initialization_temp_domain": 131,
+  "domain_exclusions": [
+    "Source consumer-only t131",
+    "Source continuation parameter"
+  ],
+  "focused": [
+    {
+      "exit": 1,
+      "seconds": 16.55913268600125,
+      "log": "focused1.log"
+    },
+    {
+      "exit": 1,
+      "seconds": 16.54370514600305,
+      "log": "focused2.log"
+    },
+    {
+      "exit": 0,
+      "seconds": 16.849236765992828,
+      "log": "focused3.log"
+    },
+    {
+      "exit": 1,
+      "start": "2026-11-19T20:07:57.106541+00:00",
+      "seconds": 34.8937428729987,
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryCall"
+      ],
+      "log": "focused4.log"
+    },
+    {
+      "exit": 0,
+      "start": "2026-11-19T20:09:03.693479+00:00",
+      "seconds": 33.48897785600275,
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryCall"
+      ],
+      "log": "focused5.log"
+    }
+  ],
+  "full": {
+    "exit": 0,
+    "start": "2026-11-19T20:09:38.686602+00:00",
+    "seconds": 3.472035964994575,
+    "command": [
+      "lake",
+      "build"
+    ],
+    "jobs": 347,
+    "log": "lake-build1.log"
+  },
+  "queries": {
+    "exit": 0,
+    "start": "2026-11-19T20:09:37.182776+00:00",
+    "seconds": 1.5035327980003785,
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-program-entry-call/Query.lean"
+    ],
+    "count": 14,
+    "log": "Query1.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryCall.signature": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryCall.not_consumer": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryCall.entry_valid": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryCall.entry_internal": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryCall.entry_frame": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryCall.entry_freeable": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryCall.initial_context": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryCall.undefined_temp": [
+        "propext"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryCall.context_corresponds": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryCall.temporaries_correspond": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryCall.function_binding": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryCall.input_binding": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryCall.input_unshadowed": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryCall.entry_at_symbol": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "inspection": {
+    "exit": 0,
+    "seconds": 1.8601014400046552,
+    "source": "Inspect.lean",
+    "log": "Inspect.log",
+    "outputs": [
+      "some 88",
+      "some 59",
+      "131"
+    ]
+  },
+  "proof_construction": "Generic declared-name/context-set lookup laws avoid elaborator reduction of large concrete undefined-temp trees; zero-offset function lookup is exposed explicitly. Original proof caps unchanged; no new evaluator or axiom.",
+  "axiom_note": "Entry/binding/frame/temporary laws have standard logical axioms; InternalRun laws retain inherited CC.externalFunctionsSem and CC.inlineAssemblySem through Step2.",
+  "resources": {
+    "cpu": 17,
+    "control_cpu": 16,
+    "workers": 1,
+    "memory_as_bytes": 34359738368,
+    "heartbeats": 200000,
+    "recursion": 512,
+    "async": false,
+    "timing_lock": "Host work per coordinator2026-11-19T18:18:59Z: CPUs8-23 without timing lock"
+  },
+  "source_sha256": "9da5172b954c2e9c9f2dd0ea077e56a1f8da3874866a014977239da0faea0f6d",
+  "export_comparison": {
+    "fresh": false,
+    "reason": "Lean-only change, C sources unchanged",
+    "historical_receipt": "../m5-program-entry-fields/validation.json",
+    "arm64_identical": 10,
+    "historical_x86_differences": 12
+  },
+  "make_check": {
+    "fresh": false,
+    "last_whole_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "fresh_required_at": "M1-M6 closure"
+  },
+  "open": [
+    "Actual pre-header prefix execution between function entry and beforeHeader",
+    "Initial189 ABI/local assignments, four cache stores and following input setup/calls",
+    "Actual provider/native/context semantics and initialized table/SP/register values",
+    "Actual body/callback/ISA refinements, relative caches/physical-memory/alias/origin/control and O1/O2/O4 recount",
+    "M6 retirement and fresh full Lake plus make check"
+  ],
+  "not_claimed": [
+    "Composition of entry1 with header/loop638 without the intervening prefix",
+    "Equality of signed wrapper ABI and borrowed uint32 consumer ABI",
+    "Native call admission or original-context representation"
+  ],
+  "m5_complete": false,
+  "m6_complete": false,
+  "completed_isa_families": 0
+}
