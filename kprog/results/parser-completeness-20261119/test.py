@@ -29,7 +29,7 @@ for name, body in [('bad', 'nop\n.byte 0x06\nret'),
     else:
         covered = sum(insn.end_addr-insn.addr for insn in instructions)
         rows.append(dict(case=name, blob_bytes=length, parsed_bytes=covered,
-                         instructions=[dict(address=i.addr, end=i.end_addr, asm=i.asm)
+                         instructions=[dict(address=i.addr, end=i.end_addr, asm=i.raw)
                                        for i in instructions],
                          passed=name == 'zeros' and covered == length == 18))
 (out/'result.json').write_text(json.dumps(dict(cases=rows,
