@@ -22,7 +22,7 @@ for name in ['user8','kernel8','user_dynamic','kernel_dynamic']:
     body=asm.split('<'+name+'>:')[1].split('\n\n')[0]
     assert '__kprog_probe_read' not in body and 'bpf_probe_read' not in body,body
     assert 'copy_from_' in body,body
-run(['clang-18','-O3','-fsanitize=undefined',ROOT/'kprog/results/checked-probe-c-20261119/driver.c',out/'native.o','-o',out/'execute'])
+run(['gcc','-O3','-fsanitize=undefined','-fno-sanitize-recover=all',ROOT/'kprog/results/checked-probe-c-20261119/driver.c',out/'native.o','-o',out/'execute'])
 result=run([out/'execute'])
 symbols={}
 for line in (Path('/workspaces/.agent-state/kprog-ck/build-x86/System.map')).read_text().splitlines():
@@ -31,7 +31,7 @@ plan=dict(version=1,helpers=[dict(name=name,addr=symbols[name]) for name in ['co
 (out/'plan.json').write_text(json.dumps(plan,indent=2)+'\n')
 for name in ['user8','kernel8','user_dynamic','kernel_dynamic']:
     run([link,'--input',out/'native.o','--symbol',name,'--mode','proof','--preserve-entry-abi','--output',out/(name+'.proof.o')])
-    run([link,'--input',out/'native.o','--symbol',name,'--mode','kernel','--link-plan',out/'plan.json','--output',out/(name+'.bin'),
+    run([link,'--input',out/(name+'.proof.o'),'--symbol',name,'--mode','kernel','--link-plan',out/'plan.json','--output',out/(name+'.bin'),
          '--output-relocs',out/(name+'.relocs'),'--output-abi',out/(name+'.abi')])
 (out/'summary.json').write_text(json.dumps(dict(result=result,kernel_bindings=list(v['name'] for v in plan['helpers']),
     proof_and_kernel_entries=4,scope='Host wrapper ABI/zeroing and static current-kernel bindings; no kernel copy execution or app timing'),indent=2)+'\n')
