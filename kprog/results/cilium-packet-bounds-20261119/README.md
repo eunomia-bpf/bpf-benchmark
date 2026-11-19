@@ -1,10 +1,11 @@
-# Cilium's 40 verifier rejections are one missing packet-bounds predicate (omp 2026-11-19)
+# Cilium's 41 verifier rejections are one missing packet-bounds predicate (omp 2026-11-19)
 
 Run `x86_kvm_corpus_20261119_170933_095060`, raw
-`/workspaces/kprog-raw/verified/20261119-checked-cilium/`. Of 64 requests, 17 reach the stock verifier
-and install, 40 are rejected for one and the same reason, 6 for a second reason, and one has no
-generated B. Requests and their measured shapes are in `requests.json` (fields: `class`, `section`,
-`ctx_data_end_reads`, `ctx_data_reads`, `kern_len_reads`, `kern_data_len_reads`, `ctx_loadinst`).
+`/workspaces/kprog-raw/verified/20261119-checked-cilium/`. Of 64 requests, **41 are rejected for one and
+the same reason** (`invalid access to packet`, counted request by request in the last section), 6 for a
+second reason, 14 install, and 3 stop in the emitter. Requests and their measured shapes are in
+`requests.json` (fields: `class`, `section`, `ctx_data_end_reads`, `ctx_data_reads`, `kern_len_reads`,
+`kern_data_len_reads`, `ctx_loadinst`).
 
 ```
 124: (71) r1 = *(u8 *)(r5 +23)
