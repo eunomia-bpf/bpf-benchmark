@@ -103,6 +103,15 @@
   that scalar equality. Verified on the host: same shape rejects r=0; re-emitting the bound on the path
   that falls through is ACCEPT. So: emit per path that reaches the read, not once per predicate. The
   admitted packet set is unchanged. Separate defects stay separate: 6 store requests, request 64 arming.
+  OMP 2026-11-20T01:25Z: closed. ff8f0e4b3 + 852c2bfe3 landed; PERF's edge-validate candidate from
+  7ca1aaec6 has the live capture at 14/14 install with no rejections and replay 41/41 over the archived
+  packet-class inputs (predicates 201 -> 333); store class canonicalizes 6/6. My own capture on the
+  rebuilt base (fixed-20261119T233010Z) installs every instance of the two programs that failed before
+  (9effc137 4/4, 874d0fb3 2/2, 8680a229 3/3). Its 3 rejects are one program new in that capture
+  (34af4b3a) that reads neither data_end nor len/data_len, so it has nothing to lower - a separate
+  question for the emitter. Capture size varies (12/14/64 from the same command), so compare per
+  program. Still open and separate: request 64 NATIVE_LAB_TRUSTED_CHUNK arming EINVAL, 3 emitter
+  relative-table refusals.
   across context-preserving intervals; original reads retain ordering effects.
   8ec55e8b7 covers read freshness and exact TC stores. Combined validator366677
   queued22:28:23Z for canonical imageEX rebuild, then controls, stock fixtures,
