@@ -187,3 +187,9 @@ Caveat, stated because it bounds the claim: this is the host kernel
 (`7.3.0-070300rc3-generic`), not the image's `7.0.0-rc2+`. The rule used
 (`check_ptr_to_btf_access`/`check_mem_access` packet bounds) is stable across them, and the guest run is
 the one that counts for the recorded numbers.
+
+## Bytecode-level coverage of all forty (omp 2026-11-19T22:03Z)
+
+Recompiled all 40 patched programs from `HEAD` (`80dbcfc51`, the freshness-guarded matcher) with the
+pipeline's flags: **40 / 40 carry at least one emitted pointer bound in the `classifier` section**, so the
+233 lowerings recorded above survive into bytecode for every request rather than being folded away.
