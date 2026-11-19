@@ -181,6 +181,8 @@ PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are 
 
 PERF 2026-11-19T06:35:06Z：06:20 的 B 编译项已实现 O1（frontend/B backend），P 与最终 native LTO 仍 O3。g0 和 line-tables 的真实 .ksyms map 对象都在 libbpf open 返回 -3，完整 g 才保留 BTF extern 类型并成功，所以保留 g。新鲜生成 BCC fentry_vfs_read/inet_sock_set_state 的 B/libbpf open、原 frontend 复用、native O3/proof 均通过；Tetragon request6 的 retry 211523 在 CPU19/timing SH/image SH/32GiB AS 下运行；O1 frontend 与 bounds 阶段已通过，B machine backend 仍在进行（初始 210433 因旧失败存档无 artifacts.json 在进入 Tetragon 前停止，d71b7f19b 改读 kernel.entry）。结果 results/b-analysis-flags-20261119；不声称新 stock 接受或应用速度，OMP 组合批次继续量 Tetragon/Tracee 覆盖。
 
+**协调者 2026-11-19T13:33:21Z（决定，运营者 11-08：“这种之后你自己决定, 不要问我”）**：每小时审核把 10c42d6cf 的 `raise ValueError` 列为设计之外新增的拒绝。决定保留：安全靠 verify(B) 加 faithful(I,P)，B 必须覆盖 P 的每一条指令；原来认不出的行被跳过，B 就少了这条指令，verifier 接受的是另一个程序。现在这次生成失败，程序走直接原生（已有的记录回落）。同一件事的另一半由 perf 的回归 parser-completeness-20261119 发现：objdump 默认省掉全零字节段，生成器用 -z 补上（本提交之后）。两项在六个应用今天的 P 上都是 0 处，覆盖率不变。
+
 **协调者 2026-11-19T13:20:25Z（审核 20261119T09Z 逐条核实后）**：
 1. 主配置（checked-sim-c）目前在 BCC 上 25/25，其余五个应用还在 B 一侧卡住（成立）。审核给的修法“每个位置只生成选中的分支”omp 在 12:05 实测过：前端 IR 929 MB 降到 50 MB，-O1 却从 356 s 变成 847 s（InstCombine 占 494 s），编译时间来自优化器处理留下的代码。所以继续按现有分工：perf 做 Tetragon B 的栈帧（5776 B 对 512 B）和 numeric 修复，omp 做第 4 项（Cilium、Katran、OTel 的已验证路径各一节）。omp 的计时按冻结入口的样本数（3 x 180 s），每个应用三次再换下一个（运营者 11-11）。
 2. BCC 程序体约占每次调用 10 ns / 104 ns（成立）。freeze 加 LOCK 之后 BCC 主配置：每次调用 1.007x、吞吐 1.006x、装进内核 8 628 B 对 JIT 7 965 B（lto-freeze-20261119）。主配置的计时从这里起放在程序体占比大的应用上（Tracee、Tetragon、Cilium、Katran），随它们的 B 通过一个个加上；BCC 只做功能检查。
