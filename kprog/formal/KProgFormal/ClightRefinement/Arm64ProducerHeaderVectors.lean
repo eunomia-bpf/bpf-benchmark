@@ -56,23 +56,25 @@ def nullVectorOffset (i : Fin 64) : CC.Integers.Ptrofs :=
 theorem null_vector_offsets : ∀ i : Fin 64,
     CC.Integers.Ptrofs.unsigned (nullVectorOffset i) = 96 + 8 * (i.val : Int) := by decide +kernel
 
-private theorem null_vector_lvalue (m before : CC.Mem) (le : CC.TempEnv)
+private theorem null_vector_lvalue (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (m before : CC.Mem) (le : CC.TempEnv)
     (entry : HeaderLocal m) (i : Fin 64) :
-    CC.doEvalLvalue ge (allocation m).1 le before (nullVectorTarget i) =
+    CC.doEvalLvalue world (allocation m).1 le before (nullVectorTarget i) =
       some (entry.block, nullVectorOffset i, .Full) := by
   by_cases low : i.val < 32
   all_goals simp [nullVectorTarget, low, headerType, CC.doEvalLvalue, CC.doEvalExpr,
-    CC.lvalOfVar, CC.doDerefLoc, CC.lvalOfField, CC.typeof, CC.accessMode, entry.binding,
+    CC.lvalOfVar, CC.doDerefLoc, CC.lvalOfField, CC.typeof, CC.accessMode, entry.binding, layout,
     null_vector_layout.1, null_vector_layout.2.1, null_vector_layout.2.2.1,
     CC.Cop.semBinaryOperation, CC.Cop.semAdd, CC.Cop.classifyAdd, CC.Cop.semAddPtrInt,
     CC.Cop.ptrofsOfInt, CC.typeconv, CC.removeAttributes, CC.tattr, CC.sizeof,
     CC.tptr, CC.tarray, CC.tint, nullVectorOffset]
   all_goals rfl
 
-private theorem null_vector_write (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+private theorem null_vector_write (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (entry : HeaderLocal m) (i : Fin 64) (rest : CC.Stmt)
     (access : before.access = (allocation m).2.access) :
-    ∃ after, InternalRun ge 3
+    ∃ after, InternalRun world 3
         (.State producer (.Ssequence (nullVectorStore i) rest) k (allocation m).1 le before)
         (.State producer rest k (allocation m).1 le after) ∧
       CC.Mem.load CC.Mptr after entry.block (96 + 8 * (i.val : Int)) = some (.Vlong 0) ∧
@@ -109,8 +111,8 @@ private theorem null_vector_write (m before : CC.Mem) (le : CC.TempEnv) (k : CC.
   obtain ⟨after, stored⟩ := existsStore
   have storev : CC.Mem.storev CC.Mptr before (.Vptr entry.block (nullVectorOffset i)) (.Vlong 0) = some after := by
     simpa only [CC.Mem.storev, null_vector_offsets] using stored
-  have target := null_vector_lvalue m before le entry i
-  have assigned : CC.doStep ge
+  have target := null_vector_lvalue world layout m before le entry i
+  have assigned : CC.doStep world
       (.State producer (nullVectorStore i) (.Kseq rest k) (allocation m).1 le before) =
       some (CC.E0, .State producer .Sskip (.Kseq rest k) (allocation m).1 le after) := by
     simp only [nullVectorStore, CC.doStep, target]
@@ -119,12 +121,12 @@ private theorem null_vector_write (m before : CC.Mem) (le : CC.TempEnv) (k : CC.
       | some memory => some (CC.E0, CC.State.State producer .Sskip (.Kseq rest k) (allocation m).1 le memory)
       | none => none) = _
     rw [storev]
-  have run : InternalRun ge 3
+  have run : InternalRun world 3
       (.State producer (.Ssequence (nullVectorStore i) rest) k (allocation m).1 le before)
       (.State producer rest k (allocation m).1 le after) :=
-    .step trivial (CC.doStep_sound ge _ _ _ rfl)
-      (.step trivial (CC.doStep_sound ge _ _ _ assigned)
-        (.step trivial (CC.doStep_sound ge _ _ _ rfl) (.refl _)))
+    .step trivial (CC.doStep_sound world _ _ _ rfl)
+      (.step trivial (CC.doStep_sound world _ _ _ assigned)
+        (.step trivial (CC.doStep_sound world _ _ _ rfl) (.refl _)))
   refine ⟨after, run, CC.Mem.load_store_same stored, ?_, ?_, ?_,
     FrameBelow.store entry.fresh stored, CC.Mem.store_access stored, CC.Mem.store_nextblock stored⟩
   · intro j different
@@ -144,10 +146,11 @@ private theorem null_vector_write (m before : CC.Mem) (le : CC.TempEnv) (k : CC.
     exact CC.Mem.load_store_other stored chunk block ofs
       (.inl (distinct _ _ _ _ bound entry.binding different))
 
-private theorem run_null_vectors (m : CC.Mem) (entry : HeaderLocal m) (rows : List (Fin 64))
+private theorem run_null_vectors (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (m : CC.Mem) (entry : HeaderLocal m) (rows : List (Fin 64))
     (rest : CC.Stmt) (le : CC.TempEnv) (k : CC.Cont) (before : CC.Mem)
     (access : before.access = (allocation m).2.access) :
-    ∃ after, InternalRun ge (3 * rows.length)
+    ∃ after, InternalRun world (3 * rows.length)
         (.State producer (rows.foldr (fun i next => .Ssequence (nullVectorStore i) next) rest)
           k (allocation m).1 le before)
         (.State producer rest k (allocation m).1 le after) ∧
@@ -169,7 +172,7 @@ private theorem run_null_vectors (m : CC.Mem) (entry : HeaderLocal m) (rows : Li
     · intro id ty block bound different chunk ofs; rfl
   | cons head tail ih =>
     obtain ⟨middle, headRun, headRead, headOther, headScalars, headLocals, headFrame, headAccess, headNext⟩ :=
-      null_vector_write m before le k entry head
+      null_vector_write world layout m before le k entry head
         (tail.foldr (fun i next => .Ssequence (nullVectorStore i) next) rest) access
     obtain ⟨after, tailRun, tailRead, tailOther, tailScalars, tailLocals, tailFrame, tailAccess, tailNext⟩ :=
       ih middle (headAccess.trans access)
@@ -195,6 +198,27 @@ private theorem run_null_vectors (m : CC.Mem) (entry : HeaderLocal m) (rows : Li
 
 /-- All 64 actual null pointer initializers execute, retaining the twelve scalar
 header pointers and every other declared local. -/
+theorem null_vector_pointers_initialized_bound (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (m before : CC.Mem) (entry : HeaderLocal m)
+    (le : CC.TempEnv) (k : CC.Cont) (access : before.access = (allocation m).2.access) :
+    ∃ after, InternalRun world 192
+        (.State producer afterHeaderPointers k (allocation m).1 le before)
+        (.State producer afterNullVectorPointers k (allocation m).1 le after) ∧
+      (∀ i : Fin 64, CC.Mem.load CC.Mptr after entry.block (96 + 8 * (i.val : Int)) = some (.Vlong 0)) ∧
+      (∀ j : Fin 12, CC.Mem.load CC.Mptr after entry.block (8 * (j.val : Int)) =
+        CC.Mem.load CC.Mptr before entry.block (8 * (j.val : Int))) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ≠ Arm64Entry._entry →
+        ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock := by
+  obtain ⟨after, run, read, _, scalars, other, frame, finalAccess, next⟩ :=
+    run_null_vectors world layout m entry (List.finRange 64) afterNullVectorPointers le k before access
+  refine ⟨after, ?_, (fun i => read i (List.mem_finRange i)), scalars, other, frame, finalAccess, next⟩
+  have mapped : List.ofFn nullVectorStore = (List.finRange 64).map nullVectorStore := by
+    simp only [List.finRange, List.map_ofFn, Function.comp_def]
+  rw [null_vector_source]
+  simpa only [List.length_finRange, mapped, List.foldr_map] using run
+
 theorem null_vector_pointers_initialized (m before : CC.Mem) (entry : HeaderLocal m)
     (le : CC.TempEnv) (k : CC.Cont) (access : before.access = (allocation m).2.access) :
     ∃ after, InternalRun ge 192
@@ -206,17 +230,35 @@ theorem null_vector_pointers_initialized (m before : CC.Mem) (entry : HeaderLoca
       (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ≠ Arm64Entry._entry →
         ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
       FrameBelow m.nextblock before after ∧ after.access = before.access ∧
-      after.nextblock = before.nextblock := by
-  obtain ⟨after, run, read, _, scalars, other, frame, finalAccess, next⟩ :=
-    run_null_vectors m entry (List.finRange 64) afterNullVectorPointers le k before access
-  refine ⟨after, ?_, (fun i => read i (List.mem_finRange i)), scalars, other, frame, finalAccess, next⟩
-  have mapped : List.ofFn nullVectorStore = (List.finRange 64).map nullVectorStore := by
-    simp only [List.finRange, List.map_ofFn, Function.comp_def]
-  rw [null_vector_source]
-  simpa only [List.length_finRange, mapped, List.foldr_map] using run
+      after.nextblock = before.nextblock :=
+  null_vector_pointers_initialized_bound ge rfl m before entry le k access
 
 /-- The twelve scalar pointers and 64 null vector pointers execute in their
 actual source order, retaining all observations at the same allocated entry. -/
+theorem header_and_null_vector_pointers_bound (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (access : before.access = (allocation m).2.access) :
+    ∃ entry : HeaderLocal m, ∃ cells : (i : Fin 12) → HeaderSourceLocal m i, ∃ after,
+      InternalRun world 228 (.State producer afterContext k (allocation m).1 le before)
+        (.State producer afterNullVectorPointers k (allocation m).1 le after) ∧
+      (∀ i, CC.Mem.load CC.Mptr after entry.block (8 * (i.val : Int)) = some (.Vptr (cells i).block 0)) ∧
+      (∀ i : Fin 64, CC.Mem.load CC.Mptr after entry.block (96 + 8 * (i.val : Int)) = some (.Vlong 0)) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ≠ Arm64Entry._entry →
+        ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock := by
+  obtain ⟨entry, cells, middle, headRun, headReads, headLocals, headFrame, headAccess, headNext⟩ :=
+    header_initialized_bound world layout m before le k access
+  obtain ⟨after, tailRun, nullReads, scalars, tailLocals, tailFrame, tailAccess, tailNext⟩ :=
+    null_vector_pointers_initialized_bound world layout m middle entry le k (headAccess.trans access)
+  refine ⟨entry, cells, after, headRun.trans tailRun, ?_, nullReads, ?_, headFrame.trans tailFrame,
+    tailAccess.trans headAccess, tailNext.trans headNext⟩
+  · intro i
+    exact (scalars i).trans (headReads i)
+  · intro id ty block bound different chunk ofs
+    exact (tailLocals id ty block bound different chunk ofs).trans
+      (headLocals id ty block bound different chunk ofs)
+
 theorem header_and_null_vector_pointers (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (access : before.access = (allocation m).2.access) :
     ∃ entry : HeaderLocal m, ∃ cells : (i : Fin 12) → HeaderSourceLocal m i, ∃ after,
@@ -227,21 +269,27 @@ theorem header_and_null_vector_pointers (m before : CC.Mem) (le : CC.TempEnv) (k
       (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ≠ Arm64Entry._entry →
         ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
       FrameBelow m.nextblock before after ∧ after.access = before.access ∧
-      after.nextblock = before.nextblock := by
-  obtain ⟨entry, cells, middle, headRun, headReads, headLocals, headFrame, headAccess, headNext⟩ :=
-    header_initialized m before le k access
-  obtain ⟨after, tailRun, nullReads, scalars, tailLocals, tailFrame, tailAccess, tailNext⟩ :=
-    null_vector_pointers_initialized m middle entry le k (headAccess.trans access)
-  refine ⟨entry, cells, after, headRun.trans tailRun, ?_, nullReads, ?_, headFrame.trans tailFrame,
-    tailAccess.trans headAccess, tailNext.trans headNext⟩
-  · intro i
-    exact (scalars i).trans (headReads i)
-  · intro id ty block bound different chunk ofs
-    exact (tailLocals id ty block bound different chunk ofs).trans
-      (headLocals id ty block bound different chunk ofs)
+      after.nextblock = before.nextblock :=
+  header_and_null_vector_pointers_bound ge rfl m before le k access
 
 /-- The reached post-null-initialization memory satisfies both existing cache
 contracts, constructed from the preserved actual scalar header pointers. -/
+theorem header_and_null_vector_caches_bound (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (access : before.access = (allocation m).2.access) :
+    ∃ stack : CacheLocals false m, ∃ returns : CacheLocals true m, ∃ after,
+      InternalRun world 228 (.State producer afterContext k (allocation m).1 le before)
+        (.State producer afterNullVectorPointers k (allocation m).1 le after) ∧
+      Nonempty (Arm64RegisterReads.BorrowedCacheStorage false (allocation m).2.nextblock stack.entryBlock 0 after) ∧
+      Nonempty (Arm64RegisterReads.BorrowedCacheStorage true (allocation m).2.nextblock returns.entryBlock 0 after) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock := by
+  obtain ⟨entry, cells, after, run, reads, _, _, frame, afterAccess, next⟩ :=
+    header_and_null_vector_pointers_bound world layout m before le k access
+  obtain ⟨stack, stackStorage⟩ := header_cache_storage false m after entry cells (afterAccess.trans access) reads
+  obtain ⟨returns, returnStorage⟩ := header_cache_storage true m after entry cells (afterAccess.trans access) reads
+  exact ⟨stack, returns, after, run, stackStorage, returnStorage, frame, afterAccess, next⟩
+
 theorem header_and_null_vector_caches (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (access : before.access = (allocation m).2.access) :
     ∃ stack : CacheLocals false m, ∃ returns : CacheLocals true m, ∃ after,
@@ -250,11 +298,7 @@ theorem header_and_null_vector_caches (m before : CC.Mem) (le : CC.TempEnv) (k :
       Nonempty (Arm64RegisterReads.BorrowedCacheStorage false (allocation m).2.nextblock stack.entryBlock 0 after) ∧
       Nonempty (Arm64RegisterReads.BorrowedCacheStorage true (allocation m).2.nextblock returns.entryBlock 0 after) ∧
       FrameBelow m.nextblock before after ∧ after.access = before.access ∧
-      after.nextblock = before.nextblock := by
-  obtain ⟨entry, cells, after, run, reads, _, _, frame, afterAccess, next⟩ :=
-    header_and_null_vector_pointers m before le k access
-  obtain ⟨stack, stackStorage⟩ := header_cache_storage false m after entry cells (afterAccess.trans access) reads
-  obtain ⟨returns, returnStorage⟩ := header_cache_storage true m after entry cells (afterAccess.trans access) reads
-  exact ⟨stack, returns, after, run, stackStorage, returnStorage, frame, afterAccess, next⟩
+      after.nextblock = before.nextblock :=
+  header_and_null_vector_caches_bound ge rfl m before le k access
 
 end KProgFormal.ClightRefinement.Arm64Producer

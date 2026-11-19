@@ -72,3 +72,4 @@ import KProgFormal.ClightRefinement.Arm64NumericProducerFlags
 import KProgFormal.ClightRefinement.Arm64NumericProducerVectors
 import KProgFormal.ClightRefinement.Arm64NumericProducerContext
 import KProgFormal.ClightRefinement.Arm64NumericProducerHeader
+import KProgFormal.ClightRefinement.Arm64NumericProducerHeaderVectors

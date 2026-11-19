@@ -138,6 +138,11 @@ The [Numeric header-pointer composition](results/m5-numeric-producer-header/READ
 constructs all 12 scalar header pointers in 36 transitions, preserving the
 reached register data and 98 traces. Both borrowed cache-storage resources
 and their cold values are derived at that same memory; the stores execute once.
+The [Numeric null-vector header composition](results/m5-numeric-producer-header-vectors/README.md)
+executes the next 64 null pointer stores in 192 transitions, preserving all 12
+scalar pointers, input vector words and earlier initialized data. Both cache
+resources and cold values are derived again at that reached memory. The 98
+provider traces remain unchanged; the header tail and live vector loop follow.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 
