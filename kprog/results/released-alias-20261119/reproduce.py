@@ -39,4 +39,5 @@ summary = dict(**observations, differences=differences,
                scope='Shared C value/input-visit regression. No stock, app or runtime claim.')
 (out / 'result.json').write_text(json.dumps(summary, indent=2) + '\n')
 print(f"{len(observations['cases'])} observations; {len(differences)} unequal address-form groups", flush=True)
+print(f"{len(observations['nonstack'])} ordinary reads and {len(observations['faults'])} physical-fault ordering cases passed", flush=True)
 assert not differences, 'Equivalent released-stack address forms differ in value or input observations'
