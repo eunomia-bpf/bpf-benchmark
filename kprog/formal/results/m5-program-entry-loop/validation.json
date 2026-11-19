@@ -1,0 +1,222 @@
+{
+  "scope": "Actual production live vector-pointer loop, anonymous-type expression transport and 638-step header/body composition",
+  "raw": "/workspaces/kprog-raw/formal/m5-program-entry-loop",
+  "validated_at": "2026-11-19T19:45:39.828513+00:00",
+  "proved": [
+    "Imported semAddPtrInt transports distinct element types under equal sizeof, retaining all results and failures",
+    "Named loop counter mapping/type and actual header/vector expression correspondence",
+    "Actual vector array has stride16 despite source/actual anonymous tags; header array stride8",
+    "Actual store reuses the existing source memory/readback/frame witness without rebuilding memory",
+    "Unsigned comparison/increment arithmetic is reused with environment independence",
+    "Actual loop initialization, 32 iterations and exit, with final counter32 and all other temps preserved",
+    "Actual continuation tail equals Arm64ProgramEntrySource.body",
+    "362-step loop and 638-step composition preserve all92 typed header observations and local/caller/allocation resources"
+  ],
+  "production_region": {
+    "before": "Arm64ProgramEntryTail.beforeLoop",
+    "after": "afterLoop = Arm64ProgramEntrySource.body",
+    "iterations": 32,
+    "stores_per_iteration": 2,
+    "steps_per_iteration": 11,
+    "initialization_steps": 4,
+    "exit_steps": 6,
+    "loop_steps": 362,
+    "combined_header_steps": 638,
+    "header_readbacks": 92,
+    "final_index": 32,
+    "assumptions": [
+      "Arbitrary original caller memory and subsequent contents",
+      "Subsequent memory permissions equal imported allocation permissions",
+      "Arbitrary initial temporaries and continuation"
+    ],
+    "derived": [
+      "Actual header and vector storage",
+      "All12 scalar pointer readbacks",
+      "All64 actual vector half addresses",
+      "All16 tail readbacks, retaining actual callback blocks60/61",
+      "Other-local loads unchanged",
+      "All other temporaries unchanged",
+      "Caller FrameBelow",
+      "Permissions and allocation frontier unchanged"
+    ]
+  },
+  "focused": [
+    {
+      "exit": 1,
+      "seconds": 7.761632276989985,
+      "log": "focused1.log"
+    },
+    {
+      "exit": 0,
+      "seconds": 8.024838338998961,
+      "log": "focused2.log"
+    },
+    {
+      "exit": 1,
+      "seconds": 11.472998732002452,
+      "log": "focused3.log"
+    },
+    {
+      "exit": 0,
+      "seconds": 9.136200724999071,
+      "log": "focused4.log"
+    },
+    {
+      "exit": 0,
+      "start": "2026-11-19T19:43:34.803011+00:00",
+      "seconds": 8.340037238987861,
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryLoop"
+      ],
+      "log": "focused5.log",
+      "jobs": 170
+    }
+  ],
+  "full": {
+    "exit": 0,
+    "start": "2026-11-19T19:43:44.699613+00:00",
+    "seconds": 3.3410477120050928,
+    "command": [
+      "lake",
+      "build"
+    ],
+    "jobs": 345,
+    "log": "lake-build1.log"
+  },
+  "queries": {
+    "exit": 0,
+    "start": "2026-11-19T19:43:43.143297+00:00",
+    "seconds": 1.5559954199998174,
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "-j1",
+      "results/m5-program-entry-loop/Query.lean"
+    ],
+    "count": 15,
+    "log": "Query1.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryLoop.pointer_add_types": [
+        "propext"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryLoop.index_name": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryLoop.index_same": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryLoop.target_eval": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryLoop.value_eval": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryLoop.store_step": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryLoop.test_eval": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryLoop.increment_eval": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryLoop.production_loop_source": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryLoop.actual_body": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryLoop.iteration": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryLoop.initialized": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryLoop.exit": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryLoop.vectors_initialized": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryLoop.header_initialized_before_body": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "proof_construction": "Original caps retained. Closed counter facts avoid broad equality reduction; raw source-equation constructors defer only definitional checking to the kernel, which checks the complete actual statement and continuation. Initial control-state source-function references were corrected before final validation. No new axiom, duplicate interpreter, new C fixture or provider replay.",
+  "axiom_note": "Expression/source/store transport uses standard logical axioms. InternalRun execution laws inherit CC.externalFunctionsSem and CC.inlineAssemblySem through CC.Step2; no new axiom/external transition.",
+  "resources": {
+    "cpu": 17,
+    "control_cpu": 16,
+    "workers": 1,
+    "memory_as_bytes": 34359738368,
+    "heartbeats": 200000,
+    "recursion": 512,
+    "async": false,
+    "timing_lock": "Host work per coordinator2026-11-19T18:18:59Z, CPUs8-23 without timing lock"
+  },
+  "source_sha256": "e81cdb3de00079fef906673378abcb76d7b8b07fbc44b9e959c659da3ecb226a",
+  "export_comparison": {
+    "fresh": false,
+    "reason": "Lean-only change; C sources unchanged",
+    "historical_receipt": "../m5-program-entry-fields/validation.json",
+    "arm64_identical": 10,
+    "historical_x86_differences": 12
+  },
+  "make_check": {
+    "fresh": false,
+    "last_whole_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "fresh_required_at": "M1-M6 closure"
+  },
+  "open": [
+    "Reached-body storage/view/caches/freeable resource interface",
+    "Pre-header input/scalar prefix and full production call-entry/global/provider/native/context admission",
+    "Actual body/callback/ISA-handler execution refinement",
+    "Relative caches, physical-memory/alias/origin/control and O1/O2/O4 recount",
+    "M6 retirement then fresh full Lake and make check"
+  ],
+  "m5_complete": false,
+  "m6_complete": false,
+  "completed_isa_families": 0
+}
