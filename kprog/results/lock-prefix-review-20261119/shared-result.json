@@ -1,0 +1,26 @@
+[
+  {
+    "command": [
+      "clang-18",
+      "-O3",
+      "-mno-red-zone",
+      "-pthread",
+      "-I/workspaces/repository/vendor/libbpf/src",
+      "-I/workspaces/repository/vendor/libbpf/include/uapi",
+      "/workspaces/repository/kprog/results/lock-prefix-review-20261119/shared.c",
+      "-o",
+      "/var/tmp/kprog-tmp/perf/lock-prefix-review/shared"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/var/tmp/kprog-tmp/perf/lock-prefix-review/shared"
+    ],
+    "returncode": 0,
+    "stdout": "17424 hardware flag/memory vectors; 2 live and 2 released stack aliases; 3 negative displacements; recovery; 80000 concurrent increments passed\n",
+    "stderr": ""
+  }
+]

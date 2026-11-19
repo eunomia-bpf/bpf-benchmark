@@ -108,6 +108,8 @@
 #define X86_WIDTH_16 2U
 #define X86_WIDTH_32 4U
 #define X86_WIDTH_64 8U
+/* Memory ALU forms retain the native LOCK prefix independently of width. */
+#define X86_MEM_LOCK 0x80U
 #include "../formal/generated/x86_width.h"
 #include "../formal/generated/x86_immediate.h"
 #include "../formal/generated/x86_adc.h"

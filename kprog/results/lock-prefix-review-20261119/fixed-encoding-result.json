@@ -1,0 +1,125 @@
+{
+  "cases": [
+    {
+      "operation": "inc64",
+      "variants": {
+        "locked": {
+          "native_length": 4,
+          "decoded_raw": "lock inc QWORD PTR [rdi]",
+          "encoded": {
+            "op": "X86_OP_ALU_MEM_UNARY",
+            "dst": "X86_RDI",
+            "src": "X86_REG_NONE",
+            "flags": "(X86_WIDTH_64 | X86_MEM_LOCK)",
+            "aux": "(X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_64) | X86_MEM_AUX_ALU_OP(X86_ALU_INC))",
+            "imm": "0ULL"
+          }
+        },
+        "plain": {
+          "native_length": 3,
+          "decoded_raw": "inc    QWORD PTR [rdi]",
+          "encoded": {
+            "op": "X86_OP_ALU_MEM_UNARY",
+            "dst": "X86_RDI",
+            "src": "X86_REG_NONE",
+            "flags": "X86_WIDTH_64",
+            "aux": "(X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_64) | X86_MEM_AUX_ALU_OP(X86_ALU_INC))",
+            "imm": "0ULL"
+          }
+        }
+      },
+      "encodings_equal": false
+    },
+    {
+      "operation": "inc32",
+      "variants": {
+        "locked": {
+          "native_length": 3,
+          "decoded_raw": "lock inc DWORD PTR [rdi]",
+          "encoded": {
+            "op": "X86_OP_ALU_MEM_UNARY",
+            "dst": "X86_RDI",
+            "src": "X86_REG_NONE",
+            "flags": "(X86_WIDTH_32 | X86_MEM_LOCK)",
+            "aux": "(X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_32) | X86_MEM_AUX_ALU_OP(X86_ALU_INC))",
+            "imm": "0ULL"
+          }
+        },
+        "plain": {
+          "native_length": 2,
+          "decoded_raw": "inc    DWORD PTR [rdi]",
+          "encoded": {
+            "op": "X86_OP_ALU_MEM_UNARY",
+            "dst": "X86_RDI",
+            "src": "X86_REG_NONE",
+            "flags": "X86_WIDTH_32",
+            "aux": "(X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_32) | X86_MEM_AUX_ALU_OP(X86_ALU_INC))",
+            "imm": "0ULL"
+          }
+        }
+      },
+      "encodings_equal": false
+    },
+    {
+      "operation": "add64",
+      "variants": {
+        "locked": {
+          "native_length": 4,
+          "decoded_raw": "lock add QWORD PTR [rdi],rsi",
+          "encoded": {
+            "op": "X86_OP_ALU_MEM_REG",
+            "dst": "X86_RDI",
+            "src": "X86_RSI",
+            "flags": "(X86_WIDTH_64 | X86_MEM_LOCK)",
+            "aux": "(X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_64) | X86_MEM_AUX_ALU_OP(X86_ALU_ADD))",
+            "imm": "0ULL"
+          }
+        },
+        "plain": {
+          "native_length": 3,
+          "decoded_raw": "add    QWORD PTR [rdi],rsi",
+          "encoded": {
+            "op": "X86_OP_ALU_MEM_REG",
+            "dst": "X86_RDI",
+            "src": "X86_RSI",
+            "flags": "X86_WIDTH_64",
+            "aux": "(X86_MEM_AUX_FULL(X86_REG_NONE, 0, X86_WIDTH_64) | X86_MEM_AUX_ALU_OP(X86_ALU_ADD))",
+            "imm": "0ULL"
+          }
+        }
+      },
+      "encodings_equal": false
+    },
+    {
+      "operation": "addimm64",
+      "variants": {
+        "locked": {
+          "native_length": 5,
+          "decoded_raw": "lock add QWORD PTR [rdi],0x7",
+          "encoded": {
+            "op": "X86_OP_ALU_MEM_IMM",
+            "dst": "X86_RDI",
+            "src": "X86_REG_NONE",
+            "flags": "(X86_WIDTH_64 | X86_MEM_LOCK)",
+            "aux": "(X86_MEM_AUX(X86_REG_NONE, 0) | X86_MEM_AUX_ALU_OP(X86_ALU_ADD))",
+            "imm": "7ULL"
+          }
+        },
+        "plain": {
+          "native_length": 4,
+          "decoded_raw": "add    QWORD PTR [rdi],0x7",
+          "encoded": {
+            "op": "X86_OP_ALU_MEM_IMM",
+            "dst": "X86_RDI",
+            "src": "X86_REG_NONE",
+            "flags": "X86_WIDTH_64",
+            "aux": "(X86_MEM_AUX(X86_REG_NONE, 0) | X86_MEM_AUX_ALU_OP(X86_ALU_ADD))",
+            "imm": "7ULL"
+          }
+        }
+      },
+      "encodings_equal": false
+    }
+  ],
+  "scope": "Actual assembly/object/parser regression. Not a concurrency, B-stock or app timing result."
+}

@@ -4,6 +4,16 @@ Operator, 2026-11-14: "然后你要想办法优化一下, LTO + native 我觉得
 
 Every optimization of the native path is recorded here: where it lives, how it works, which pipeline step it belongs to (design.md 编译流水线: step 1 compiler flags when P is produced, step 3 link-time optimization), how its correctness is checked, and its effect in the combined configuration (all pieces on together; the operator: "不需要这样细粒度区分. 只需要都做就好."). The lane that lands an optimization adds or updates its row in the same commit. Effects are per-call native/eBPF on the combined configuration, with the run directory.
 
+PERF 2026-11-19T09:46:49Z: Phase-1 LOCK correction in the generator and shared
+x86 I retains atomic memory effects in both B and native. It is a pipeline
+correctness change, with no runtime gain claimed. All C/LTO pieces remain
+on. Host checks pass 17,424 hardware flag/memory cases, 80,000 concurrent
+increments, private-stack/recovery cases and 22 B/native compilations.
+Coordinator batch 327120 measures this together with 2eb36bad9; previous
+BCC 1.016x predates the fix. Source and exact scope are recorded in
+results/lock-prefix-review-20261119; actual stock/app coverage and timing
+are pending. Native O3 and the frozen benchmark remain unchanged.
+
 | Optimization | Step | Where (code, switch) | How | Commit | Correctness check | Status |
 |---|---|---|---|---|---|---|
 | Immutable scalar map configuration in IR LTO | Trusted load-time LTO | native_loader.cpp, native_loader_context_lto.hpp, perf_context_lto.cpp and existing module direct-value query | Use the kernel's RDONLY_PROG/frozen/no-writer condition; snapshot loaded singleton ARRAY data, bind scalar globals through map IDs and BTF offsets, and fold complete integer loads before O3. Volatile scalar reads can fold; atomic and aggregate accesses stay intact. | this commit | Contrary scalar snapshots and mutable/aggregate/atomic boundaries pass; real BCC sys_exit proof text 418→305 B with the source-derived workload setting count_by_process=0. Four raw entry extractions, compiler/loader builds and active x86 module syntax checks pass; immutable-config-lto-20261116. | Source integrated with context/function/helper/map LTO. Host BCC value is not a guest capture. Kernel eligibility, actual loaded values, installed bytes, body/helper/map profiles and per-call effects pending coherent publication after C's round. |

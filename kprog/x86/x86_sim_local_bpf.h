@@ -49,6 +49,65 @@
 #include "../formal/generated/x86_dispatch_family.h"
 #include "../formal/generated/x86_dispatch_singleton.h"
 
+/* One indivisible memory effect returns the old value used by x86 flags.
+ * CompCert exposes the same width/operation/carry boundary to its platform
+ * interpretation. Native and BPF compile the ordinary C atomic operations. */
+#if defined(__COMPCERT__)
+extern __u64 kprog_c_x86_locked_rmw(void *address, __u64 value, __u32 width,
+                                   __u32 operation, __u32 carry);
+#endif
+
+static __always_inline __u64 x86_sim_locked_rmw(void *address, __u64 value,
+                                               __u8 width, __u8 operation,
+                                               __u8 carry)
+{
+#if defined(__COMPCERT__)
+    return kprog_c_x86_locked_rmw(address, value, width, operation, carry);
+#else
+#define X86_SIM_ATOMIC_CASE(WIDTH, TYPE)                                   \
+    case WIDTH: {                                                         \
+        TYPE *word = address;                                             \
+        TYPE operand = (TYPE)value;                                       \
+        if (operation == X86_ALU_ADD || operation == X86_ALU_INC)           \
+            return __atomic_fetch_add(word, operand, __ATOMIC_SEQ_CST);    \
+        if (operation == X86_ALU_SUB || operation == X86_ALU_DEC)           \
+            return __atomic_fetch_sub(word, operand, __ATOMIC_SEQ_CST);    \
+        if (operation == X86_ALU_ADC)                                      \
+            return __atomic_fetch_add(word, (TYPE)(operand + carry),       \
+                                      __ATOMIC_SEQ_CST);                  \
+        if (operation == X86_ALU_SBB)                                      \
+            return __atomic_fetch_sub(word, (TYPE)(operand + carry),       \
+                                      __ATOMIC_SEQ_CST);                  \
+        if (operation == X86_ALU_XOR || operation == X86_ALU_NOT)           \
+            return __atomic_fetch_xor(word, operation == X86_ALU_NOT ?    \
+                                      (TYPE)~(TYPE)0 : operand,           \
+                                      __ATOMIC_SEQ_CST);                  \
+        if (operation == X86_ALU_OR)                                       \
+            return __atomic_fetch_or(word, operand, __ATOMIC_SEQ_CST);     \
+        if (operation == X86_ALU_AND)                                      \
+            return __atomic_fetch_and(word, operand, __ATOMIC_SEQ_CST);    \
+        /* NEG needs compare-exchange. Start at zero rather than introducing \
+         * a separate non-atomic read; failure supplies the next old value. */ \
+        TYPE old = 0;                                                     \
+        for (;;) {                                                        \
+            TYPE next = (TYPE)x86_alu_result(old, value, operation, WIDTH); \
+            if (__atomic_compare_exchange_n(word, &old, next, 0,           \
+                                            __ATOMIC_SEQ_CST,             \
+                                            __ATOMIC_SEQ_CST))            \
+                return old;                                               \
+        }                                                                 \
+    }
+    switch (width) {
+    X86_SIM_ATOMIC_CASE(X86_WIDTH_8, __u8)
+    X86_SIM_ATOMIC_CASE(X86_WIDTH_16, __u16)
+    X86_SIM_ATOMIC_CASE(X86_WIDTH_32, __u32)
+    default:
+    X86_SIM_ATOMIC_CASE(X86_WIDTH_64, __u64)
+    }
+#undef X86_SIM_ATOMIC_CASE
+#endif
+}
+
 #define X86_SIM_CONCAT2(A, B) A##B
 #define X86_SIM_CONCAT(A, B) X86_SIM_CONCAT2(A, B)
 
@@ -2049,9 +2108,58 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 					  __x86_l_width);                    \
 	} while (0)
 
+/* The caller has already performed the existing recovery observation.
+ * Private released bytes keep the existing environment-value materialization;
+ * shared memory receives only the atomic write, followed by ghost tag erasure. */
+#define X86_SIM_L_EXEC_LOCKED_MEM(DST, FLAGS, AUX, IMM, RHS, STORE_DISP) \
+    do { \
+        const __u8 __x86_at_width=X86_SIM_L_EFFECTIVE_WIDTH((FLAGS) & ~X86_MEM_LOCK); \
+        const __u8 __x86_at_alu=X86_MEM_AUX_GET_ALU_OP(AUX); \
+        const __u8 __x86_at_carry=__x86_cf; \
+        const __u64 __x86_at_rhs=(RHS); \
+        __s64 __x86_at_disp=X86_SIM_L_MEM_OFFSET((AUX), (STORE_DISP) ? \
+                              x86_store_imm_disp(IMM) : x86_simm(IMM)); \
+        void *__x86_at_base=KPROG_X86_REG_PRESENT(DST) ? \
+                            X86_SIM_L_READ_REG_PTR(DST) : (void *)0; \
+        void *__x86_at_address=(DST)==X86_RSP ? \
+            X86_SIM_L_STACK_PTR((__s64)(long)__x86_at_base+__x86_at_disp) : \
+            KPROG_PTR_ADD64_BITS(__x86_at_base,__x86_at_disp); \
+        const __u8 __x86_at_private=(DST)==X86_RSP || X86_SIM_L_REG_TAG(DST)==X86_SIM_TAG_STACK; \
+        __s64 __x86_at_off=(__s64)((__u64)(long)__x86_at_address-(__u64)(long)&__x86_stack_mem.b[0])-X86_SIM_STACK_BYTES; \
+        if (__x86_at_private && __x86_at_off<X86_SIM_L_STACK_SP()) { \
+            __u64 __x86_at_initial=X86_SIM_L_READ_MEM_VALUE(DST,AUX,IMM,__x86_at_width,STORE_DISP); \
+            KPROG_X86_MEM_STORE(__x86_at_address,__x86_at_width,__x86_at_initial); \
+        } \
+        __u64 __x86_at_old=x86_sim_locked_rmw(__x86_at_address,__x86_at_rhs, \
+                                    __x86_at_width,__x86_at_alu,__x86_at_carry); \
+        __u64 __x86_at_new; \
+        if (__x86_at_alu==X86_ALU_ADC) { \
+            __x86_at_new=KPROG_X86_ADC_RESULT(__x86_at_old,__x86_at_rhs,__x86_at_carry); \
+            X86_SIM_L_SET_ADC_FLAGS(__x86_at_old,__x86_at_rhs,__x86_at_carry,__x86_at_new,__x86_at_width); \
+        } else if (__x86_at_alu==X86_ALU_SBB) { \
+            __x86_at_new=KPROG_X86_SBB_RESULT(__x86_at_old,__x86_at_rhs,__x86_at_carry); \
+            X86_SIM_L_SET_SBB_FLAGS(__x86_at_old,__x86_at_rhs,__x86_at_carry,__x86_at_new,__x86_at_width); \
+        } else { \
+            __x86_at_new=x86_alu_result(__x86_at_old,__x86_at_rhs,__x86_at_alu,__x86_at_width); \
+            X86_SIM_L_SET_ALU_FLAGS(__x86_at_old,__x86_at_rhs,__x86_at_new,__x86_at_alu,__x86_at_width); \
+        } \
+        if (__x86_at_private) { \
+            X86_SIM_L_STACK_VALUES_ERASE((__u64)(long)__x86_at_address- \
+                                  (__u64)(long)&__x86_stack_mem.b[0],__x86_at_width); \
+            if (__x86_at_off<X86_SIM_L_STACK_SP()) { _Pragma("unroll") \
+                for (__u32 __x86_at_i=0; __x86_at_i<8U; ++__x86_at_i) \
+                    if (__x86_at_i<__x86_at_width && __x86_at_off+__x86_at_i<X86_SIM_L_STACK_SP()) \
+                        ((volatile __u8 *)__x86_at_address)[__x86_at_i]=(__u8)X86_SIM_L_UNSPECIFIED(); \
+            } \
+        } \
+        else if (X86_SIM_L_REG_TAG(DST)==X86_SIM_TAG_SCALAR) \
+            X86_SIM_L_STACK_VALUES_CLEAR(); \
+    } while (0)
+
 #define X86_SIM_L_EXEC_ALU_MEM_UNARY(DST, FLAGS, AUX, IMM)                  \
 	do { \
         if (X86_SIM_L_READ_RECOVERY_MEM(DST, X86_REG_NONE, (AUX), x86_simm(IMM))) break; \
+        if ((FLAGS) & X86_MEM_LOCK) { X86_SIM_L_EXEC_LOCKED_MEM(DST,FLAGS,AUX,IMM,1,0); break; } \
 		const __u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		__u8 __x86_l_alu = X86_MEM_AUX_GET_ALU_OP(AUX);           \
 		__u64 __x86_l_lhs = X86_SIM_L_READ_MEM_VALUE((DST), (AUX),\
@@ -2080,6 +2188,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 #define X86_SIM_L_EXEC_ALU_MEM_IMM(DST, FLAGS, AUX, IMM)                    \
 	do { \
         if (X86_SIM_L_READ_RECOVERY_MEM(DST, X86_REG_NONE, (AUX), x86_store_imm_disp(IMM))) break; \
+        if ((FLAGS) & X86_MEM_LOCK) { X86_SIM_L_EXEC_LOCKED_MEM(DST,FLAGS,AUX,IMM,x86_store_imm_value(IMM,X86_SIM_L_EFFECTIVE_WIDTH((FLAGS) & ~X86_MEM_LOCK)),1); break; } \
 		const __u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		__u8 __x86_l_alu = X86_MEM_AUX_GET_ALU_OP(AUX);           \
 		__u64 __x86_l_lhs = X86_SIM_L_READ_MEM_VALUE((DST), (AUX),\
@@ -2125,6 +2234,7 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 #define X86_SIM_L_EXEC_ALU_MEM_REG(DST, SRC, FLAGS, AUX, IMM)               \
 	do { \
         if (X86_SIM_L_READ_RECOVERY_MEM(DST, X86_REG_NONE, (AUX), x86_simm(IMM))) break; \
+        if ((FLAGS) & X86_MEM_LOCK) { X86_SIM_L_EXEC_LOCKED_MEM(DST,FLAGS,AUX,IMM,X86_SIM_L_READ_REG(SRC),0); break; } \
 		const __u8 __x86_l_width = X86_SIM_L_EFFECTIVE_WIDTH(FLAGS);    \
 		__u8 __x86_l_alu = X86_MEM_AUX_GET_ALU_OP(AUX);           \
 		__u64 __x86_l_lhs = X86_SIM_L_READ_MEM_VALUE((DST), (AUX),\

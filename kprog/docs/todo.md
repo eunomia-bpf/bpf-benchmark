@@ -8,6 +8,23 @@
 
 ## 0. Lane 目标与待办
 
+PERF 2026-11-19T09:46:49Z: P-x86-lock-rmw implementation and host checks are
+complete locally: retained prefix, shared seq_cst RMW and successful-old
+flags for unary/register/immediate memory ALU. 17,424 hardware vectors,
+80,000 concurrent increments, private/released stack observations, recovery,
+negative displacements and 22 B/native compilations pass. BPF narrow forms
+remain an explicit backend limitation. Actual app stock/native coverage and
+runtime follow in coordinator batch 327120 with 2eb36bad9; PERF queues no
+duplicate timing. Keep this item open through that result. Exact formal
+boundary and retained failed attempts: results/lock-prefix-review-20261119.
+
+- [ ] P-x86-released-alias: shared I's no-index fixed-load default bypasses
+  the tagged private/released-byte observation, while RSP and indexed stack
+  aliases use it. The LOCK fix preserves both existing contracts and input
+  visits. Separate source/model review is needed; this is no new app gate.
+  Evidence: shared-released-debug-20261119T0945Z, alias=1 raw=0 zf=1 pf=1,
+  and READ_MEM_VALUE_DECL's fixed-load branch; see lock-prefix-review README.
+
 PERF 2026-11-19T09:23:54Z: Combined cohort batch 254724 completed with host
 exit 0. BCC, 3 x 180 s with stats on: programs/native/B-generated/B-stock
 25/25/25/25, no fallback or failures; per-call speedup 1.016x, throughput

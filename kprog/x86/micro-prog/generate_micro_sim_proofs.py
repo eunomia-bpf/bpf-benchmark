@@ -107,6 +107,7 @@ class NativeInsn:
     effects: NativeEffects | None = None
     code_table: tuple[tuple[int, int], ...] | None = None
     map_table: tuple[tuple[int, tuple[bool, str] | int], ...] | None = None
+    locked: bool = False
 
 
 @dataclass(frozen=True)
@@ -179,7 +180,9 @@ def parse_asm_text(text: str) -> list[NativeInsn]:
             pending_prefix = (addr, octets)
             continue
         asm = re.sub(r"^(?:(?:data16|rex(?:\.[WRXB]+)?)\s+)+", "", asm)
-        if asm.startswith("lock "):
+        raw = asm
+        locked = asm.startswith("lock ")
+        if locked:
             asm = asm.removeprefix("lock ").strip()
         match = re.match(r"(?P<mnemonic>[a-z][a-z0-9]*)\s*(?P<operands>.*)$", asm)
         if match is None:
@@ -198,10 +201,10 @@ def parse_asm_text(text: str) -> list[NativeInsn]:
                 else:
                     break
             stack_width = 64 if rex & 8 or not operand16 else 16
-        insns.append(NativeInsn(addr, asm, mnemonic,
+        insns.append(NativeInsn(addr, raw, mnemonic,
                                 split_operands(match.group("operands")),
                                 end_addr=end_addr,
-                                stack_width=stack_width))
+                                stack_width=stack_width, locked=locked))
     if pending_prefix is not None:
         raise ValueError(f"incomplete x86 prefix at 0x{pending_prefix[0]:x}")
     return insns
@@ -825,7 +828,7 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
                 width = operand_width(ops[0], 64)
                 return enc("X86_OP_ALU_MEM_UNARY",
                            dst=mem_base_reg(ops[0]),
-                           flags=WIDTH_CONST[width],
+                           flags=f"({WIDTH_CONST[width]} | X86_MEM_LOCK)" if insn.locked else WIDTH_CONST[width],
                            aux=f"({mem_aux(ops[0], width)} | X86_MEM_AUX_ALU_OP({ALU_AUX[op]}))",
                            imm=c_u64(mem_disp(ops[0])))
             if dst_reg is None:
@@ -876,13 +879,13 @@ def encode(insn: NativeInsn, rodata_idents: dict[str, str]) -> EncodedInsn:
             width = operand_width(ops[0], src_reg[1])
             return enc("X86_OP_ALU_MEM_REG",
                        dst=mem_base_reg(ops[0]), src=src_reg[0],
-                       flags=WIDTH_CONST[width],
+                       flags=f"({WIDTH_CONST[width]} | X86_MEM_LOCK)" if insn.locked else WIDTH_CONST[width],
                        aux=f"({mem_aux(ops[0], width)} | X86_MEM_AUX_ALU_OP({ALU_AUX[op]}))",
                        imm=c_u64(mem_disp(ops[0])))
         if is_mem(ops[0]) and is_int(ops[1]):
             return enc("X86_OP_ALU_MEM_IMM",
                        dst=mem_base_reg(ops[0]),
-                       flags=WIDTH_CONST[operand_width(ops[0], 64)],
+                       flags=f"({WIDTH_CONST[operand_width(ops[0], 64)]} | X86_MEM_LOCK)" if insn.locked else WIDTH_CONST[operand_width(ops[0], 64)],
                        aux=f"({mem_aux(ops[0])} | X86_MEM_AUX_ALU_OP({ALU_AUX[op]}))",
                        imm=c_u64((parse_int(ops[1]) & 0xffffffff) | ((mem_disp(ops[0]) & 0xffffffff) << 32)))
         if is_mem(ops[0]) or is_mem(ops[1]):

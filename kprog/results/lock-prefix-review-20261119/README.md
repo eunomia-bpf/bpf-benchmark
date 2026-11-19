@@ -58,3 +58,56 @@ No atomic shared-I implementation, stock execution or concurrency claim is
 made by this feasibility matrix. The next change must preserve the prefix
 and implement the shared memory effect; replacing a narrow failed atomic
 with separate reads/writes would reproduce the bug.
+
+PERF 2026-11-19T09:46:49Z: The implementation retains `NativeInsn.locked`
+and the original LOCK spelling. Unary, register-source and immediate-source
+memory ALU encodings carry `X86_MEM_LOCK` separately from their width. Their
+shared C handler resolves that bit before entering the existing plain body.
+It performs seq_cst C atomic fetch operations, with a compare-exchange loop
+for NEG, then derives flags from the successful old value. ADC/SBB capture
+incoming carry once; INC/DEC and NOT retain their existing flag contracts.
+There is no kernel/helper/benchmark/producer-flag change or added refusal.
+
+Shared map memory receives one atomic write and ghost-tag invalidation.
+Private RSP offsets resolve to the simulator arena; stack aliases retain
+their overlapping tag erasure. Released private bytes retain the existing
+read/materialization/release observations in that arena. Those private
+representation stores are separate from shared memory and preserve the
+ordinary private path's input visits. They do not follow a shared-map RMW.
+
+Host results (timing SH, CPUs 18/19):
+
+- All four real locked/plain encoding pairs now differ; plain encodings keep
+  their width and operation fields. See fixed-encoding-result.json.
+- 17,424 actual hardware memory/flag comparisons pass across 8/16/32/64-bit
+  widths, all eleven legal ALU operations, carry and boundary values, and
+  both binary operand forms. Four concurrent threads complete 80,000 shared
+  increments. Live/released stack aliases, three negative displacements and
+  the existing recovery branch pass. See shared-result.json.
+- All 22 shared 32/64-bit operations compile through BPF-v4/O1 and the
+  existing native compiler/O3. B has no unresolved symbol; every resulting
+  native body retains LOCK. See shared-bpf-result.json. This is compilation
+  and disassembly, not stock verifier acceptance.
+
+Raw outputs remain under shared-20261119T0939Z,
+fixed-encoding-20261119T0939Z, shared-bpf-20261119T0944Z and
+shared-release-contract-20261119T0947Z in the persistent parent. The two
+failed released-byte test attempts also remain (shared-released-20261119T0947Z
+and shared-released-debug-20261119T0945Z). That test initially assumed a
+fixed stack-alias load consumed the same released-byte input as RSP. Source
+and the diagnostic show the existing no-index fixed-load path bypasses the
+tagged-read observation. The regression now checks preservation of each
+existing path's complete flags, arena state and input visits; it does not
+claim hardware agreement for that separate released-alias model issue.
+
+CompCert exposes the exact typed boundary
+`kprog_c_x86_locked_rmw(void *, __u64 value, __u32 width, __u32 operation,
+__u32 carry) -> __u64 old`. Width is bytes, operation is `X86_ALU_*`, carry is
+the captured input, and ordering is fixed seq_cst. Its indivisibility,
+faults, private representation and old/new correspondence remain FORMAL
+obligations; the declaration is not a proof.
+
+The coordinator's queued batch 327120 installs the HEAD compiler and times
+this fix together with 2eb36bad9. No separate BCC timing is queued. Actual
+app B/stock/native coverage and the combined runtime effect remain pending;
+the previous 1.016x result precedes this implementation.

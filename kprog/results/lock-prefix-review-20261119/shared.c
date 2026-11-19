@@ -8,9 +8,11 @@
 #include "../../x86/x86_sim_local_bpf.h"
 
 static _Thread_local unsigned recovery;
+static _Thread_local unsigned input_visits;
 unsigned long native_lab_entry_input(unsigned kind)
 {
     assert(kind == NATIVE_LAB_INPUT_UNSPECIFIED);
+    ++input_visits;
     return recovery;
 }
 
@@ -38,6 +40,14 @@ static unsigned simulate(struct x86_sim_state *state, unsigned form,
         else assert(X86_SIM_L_SV_PTR(i) == NULL);
     }
     return tags;
+}
+
+static void plain_unary(struct x86_sim_state *state, unsigned base,
+                        uint64_t displacement)
+{
+    X86_SIM_L_BIND_COMMON_STATE(state);
+    X86_SIM_L_EXEC_ALU_MEM_UNARY(base,X86_WIDTH_64,
+        X86_MEM_AUX(X86_REG_NONE,0) | X86_MEM_AUX_ALU_OP(X86_ALU_INC),displacement);
 }
 
 #define HW_BINARY(NAME, SUFFIX, TYPE, MOD) \
@@ -166,6 +176,35 @@ int main(void)
                         X86_MEM_AUX(X86_REG_NONE,0),0)==(255U ^ 16U));
         assert(s.stack_mem.q[4]==18);
     }
+    for (unsigned form=0; form<3; ++form) {
+        struct x86_sim_state s={0}; uint64_t words[3]={11,17,23};
+        s.abi_kind=X86_SIM_ABI_KIND_RAW;
+        s.rdi.ptr=&words[2]; s.rdi_tag=X86_SIM_TAG_MAP_VALUE;
+        s.rsi.ptr=(void *)5;
+        uint64_t imm=form==2?((uint64_t)(uint32_t)-8<<32)|5:(uint64_t)-8;
+        assert(simulate(&s,form,X86_RDI,8,form?X86_ALU_ADD:X86_ALU_INC,
+                        X86_MEM_AUX(X86_REG_NONE,0),imm)==255);
+        assert(words[0]==11 && words[1]==(form?22:18) && words[2]==23);
+    }
+    /* Released private bytes use the same independent input visits as the
+     * ordinary private read/write: their physical arena is not shared data. */
+    for (unsigned alias=0; alias<2; ++alias) {
+        struct x86_sim_state s={0};
+        s.abi_kind=X86_SIM_ABI_KIND_RAW;
+        s.rsp.ptr=(void *)(intptr_t)-16;
+        s.rdi.ptr=&s.stack_mem.b[40]; s.rdi_tag=X86_SIM_TAG_STACK;
+        s.stack_mem.q[5]=UINT64_MAX;
+        struct x86_sim_state prior=s;
+        prior.rdi.ptr=&prior.stack_mem.b[40];
+        input_visits=0;
+        plain_unary(&prior,alias?X86_RDI:X86_RSP,alias?0:(uint64_t)-8);
+        unsigned prior_visits=input_visits;
+        input_visits=0;
+        assert(simulate(&s,0,alias?X86_RDI:X86_RSP,8,X86_ALU_INC,
+                        X86_MEM_AUX(X86_REG_NONE,0),alias?0:(uint64_t)-8)==(255U^32U));
+        assert(s.stack_mem.q[5]==prior.stack_mem.q[5]);
+        assert(get_flags(&s)==get_flags(&prior) && input_visits==prior_visits);
+    }
     /* Existing recovery observes failure before the atomic and changes no flags. */
     struct x86_sim_state fault={0}; uint64_t memory=91;
     fault.rdi.ptr=&memory; fault.rdi_tag=X86_SIM_TAG_SCALAR;
@@ -177,6 +216,6 @@ int main(void)
     for (unsigned i=0; i<4; ++i) assert(pthread_create(&threads[i],NULL,increment,NULL)==0);
     for (unsigned i=0; i<4; ++i) assert(pthread_join(threads[i],NULL)==0);
     assert(counter==80000);
-    printf("%u hardware flag/memory vectors; 2 stack aliases; recovery; 80000 concurrent increments passed\n",vectors);
+    printf("%u hardware flag/memory vectors; 2 live and 2 released stack aliases; 3 negative displacements; recovery; 80000 concurrent increments passed\n",vectors);
     return 0;
 }
