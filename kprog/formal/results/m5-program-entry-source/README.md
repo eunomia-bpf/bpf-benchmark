@@ -2,8 +2,9 @@
 
 Focused kernel validation passes: Source 164 jobs, Expressions 165 jobs and
 11 public type/axiom queries. Every closure contains only standard logical
-axioms. Whole-Lake and historical export confirmation wait for timing SH;
-validation.json distinguishes those pending results from the actual passes.
+axioms. One shared full Lake build passes 341 jobs. Ten Arm64 exports retain the
+byte baseline; 12 historical x86 differences are recorded. The shared
+field batch also checks seven new queries, 18 total across both receipts.
 
 The actual exported producer and production function have corresponding
 initialization syntax: 512 spine statements in 16 linked source segments,
@@ -30,7 +31,8 @@ arithmetic after kernel-checked certificate construction removed the redundant
 unification bottleneck. All failed attempts remain in the raw directory.
 Focused recovery ran on CPU 17 at the established one-worker/32 GiB limits
 under the recorded AGENTS.md20 blocking exception; actual overlap times are
-recorded. Full confirmation remains under shared timing flock.
+recorded. Full confirmation ran on CPU 17 under the coordinator's 18:18 host-work rule;
+the timing lock now applies to guests on CPUs 0-7 only.
 
 Genuine one-entry-pointer/uint32 continuation binding and native/provider/
 context admission remain open. The generic void/nine-argument handler has a

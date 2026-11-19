@@ -80,3 +80,4 @@ import KProgFormal.ClightRefinement.Arm64NumericProducerRegisterStorage
 import KProgFormal.ClightRefinement.Arm64ProgramEntryAllocation
 import KProgFormal.ClightRefinement.Arm64ProgramEntrySource
 import KProgFormal.ClightRefinement.Arm64ProgramEntryExpressions
+import KProgFormal.ClightRefinement.Arm64ProgramEntryFields

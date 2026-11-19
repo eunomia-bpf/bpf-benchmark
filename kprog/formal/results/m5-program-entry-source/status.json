@@ -1,6 +1,6 @@
 {
-  "phase": "focused kernel validation passed",
-  "full_confirmation": "pending timing SH",
+  "phase": "full confirmation passed in shared field batch",
+  "full_confirmation": "completed",
   "public_queries_passed": 11,
   "source_jobs": 164,
   "expression_jobs": 165,
@@ -8,5 +8,7 @@
   "old_worker_status": "ended while unstarted; no check ran there",
   "M5": "open",
   "M6": "open",
-  "complete_ISA_handler_families": 0
+  "complete_ISA_handler_families": 0,
+  "full_lake_jobs": 341,
+  "confirmation_raw": "/workspaces/kprog-raw/formal/m5-program-entry-fields"
 }

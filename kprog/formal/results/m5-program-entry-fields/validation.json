@@ -1,0 +1,255 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-program-entry-fields",
+  "scope": "Imported field-offset semantics across distinct actual composite environments; existing allocated header discharges base-expression correspondence",
+  "proved": [
+    "Member sizeof/alignof agreement preserves struct offsets at every bit position and union offsets",
+    "All five complete actual composite records and member sizes/alignments are checked",
+    "All field names and values retain exact offsets/bitfields or failure",
+    "Field lvalue and read operations transport a base-expression correspondence with separate temporary environments",
+    "The actual allocated header derives both field-address and field-read correspondence for arbitrary subsequent memory"
+  ],
+  "composites": [
+    "entry header",
+    "vector lane",
+    "volatile stack union",
+    "GPR union",
+    "RAW ABI"
+  ],
+  "focused": [
+    {
+      "exit": 1,
+      "log": "focused1.log",
+      "start": "2026-11-19T18:19:37.235262+00:00",
+      "end": "2026-11-19T18:19:48.594346+00:00",
+      "resource_mode": "focused CPU17 exception under AGENTS.md20, full confirmation deferred under SH"
+    },
+    {
+      "exit": 1,
+      "log": "focused2.log",
+      "start": "2026-11-19T18:21:26.980842+00:00",
+      "end": "2026-11-19T18:21:36.305218+00:00",
+      "resource_mode": "CPU17 host check per coordinator2026-11-19T18:18:59Z; timing lock for0-7guests only"
+    },
+    {
+      "exit": 1,
+      "log": "focused3.log",
+      "start": "2026-11-19T18:22:56.713108+00:00",
+      "end": "2026-11-19T18:23:06.586304+00:00",
+      "resource_mode": "CPU17 host check per coordinator2026-11-19T18:18:59Z"
+    },
+    {
+      "exit": 0,
+      "log": "focused4.log",
+      "start": "2026-11-19T18:24:03.663150+00:00",
+      "end": "2026-11-19T18:24:13.188797+00:00",
+      "resource_mode": "CPU17 host check per coordinator2026-11-19T18:18:59Z"
+    },
+    {
+      "exit": 0,
+      "log": "focused5.log",
+      "start": "2026-11-19T18:24:55.704698+00:00",
+      "end": "2026-11-19T18:25:09.288328+00:00",
+      "resource_mode": "CPU17 host check per coordinator2026-11-19T18:18:59Z"
+    }
+  ],
+  "full_lake_build": {
+    "exit": 0,
+    "jobs": 341,
+    "log": "lake-build1.log"
+  },
+  "public_queries": {
+    "fields": {
+      "exit": 0,
+      "theorems": 7,
+      "axioms": {
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryFields.struct_offsets": [
+          "propext"
+        ],
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryFields.union_offsets": [
+          "propext"
+        ],
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryFields.layouts": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryFields.field_address": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryFields.field_lvalue": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryFields.field_read": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryFields.allocated_header": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      "log": "Query-fields1.log"
+    },
+    "source_and_locals": {
+      "exit": 0,
+      "theorems": 11,
+      "axioms": {
+        "KProgFormal.ClightRefinement.Arm64ProgramEntrySource.producer_source": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "KProgFormal.ClightRefinement.Arm64ProgramEntrySource.production_source": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "KProgFormal.ClightRefinement.Arm64ProgramEntrySource.prefix_corresponds": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryExpressions.declaration_type": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryExpressions.bound_lvalue": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryExpressions.bound_read": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryExpressions.bound_address": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryExpressions.allocated_local": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "KProgFormal.ClightRefinement.Arm64ProgramEntrySource.temporary_types": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "KProgFormal.ClightRefinement.Arm64ProgramEntrySource.temporary_names_distinct": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "KProgFormal.ClightRefinement.Arm64ProgramEntrySource.Spine.reconstruct": []
+      },
+      "log": "Query-source1.log"
+    },
+    "total": 18
+  },
+  "export_comparison": {
+    "reference": "9c617740f",
+    "exit": 1,
+    "files": 23,
+    "Arm64_unchanged": 10,
+    "baseline_bytes": 243488732,
+    "current_bytes": 248620630,
+    "changed_files": [
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Context.lean",
+        "bytes": 101977,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86ContextSkb.lean",
+        "bytes": 21258154,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86ContextXdp.lean",
+        "bytes": 21172430,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Helpers.lean",
+        "bytes": 8077199,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Inline.lean",
+        "bytes": 19707461,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Memory.lean",
+        "bytes": 1820683,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Pointer.lean",
+        "bytes": 1000688,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86ProgramProfile.lean",
+        "bytes": 21524184,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86ReadonlyProfile.lean",
+        "bytes": 20287920,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86StackProfile200.lean",
+        "bytes": 25006502,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86StackProfile376.lean",
+        "bytes": 29271597,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86TetragonWake.lean",
+        "bytes": 31986244,
+        "identical": false
+      }
+    ],
+    "log": "/workspaces/kprog-raw/formal/m5-program-entry-fields/export-parity1.log"
+  },
+  "resources": {
+    "CPU_build": 17,
+    "CPU_control": 16,
+    "workers": 1,
+    "address_space_GiB": 32,
+    "heartbeats": 200000,
+    "recursion": 512,
+    "async": false,
+    "policy": "Coordinator2026-11-19T18:18:59Z: host builds/tests/Lake8-23 use no timing lock; timing lock for guests0-7 only",
+    "previous_full_waiter195346": "Ended unstarted before field batch; this actual shared full confirmation supersedes it"
+  },
+  "remaining": [
+    "Actual field stores/casts/arithmetic and complete prefix execution transport",
+    "Real global callback/provider and native/context binding",
+    "Genuine continuation ABI/body binding",
+    "Other families and O1/O2/O4 recount",
+    "M6 archive plus final fresh lake and make check"
+  ],
+  "milestones": {
+    "M1_M4": "done",
+    "M5": "open",
+    "M6": "open",
+    "complete_ISA_handler_families": 0
+  },
+  "make_check": "Not repeated for this Lean-only batch; final check remains due at goal closure"
+}

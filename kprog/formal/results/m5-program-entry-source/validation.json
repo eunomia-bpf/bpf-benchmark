@@ -1,5 +1,5 @@
 {
-  "phase": "focused kernel validation passed; full confirmation pending timing SH",
+  "phase": "full confirmation passed in shared field batch",
   "raw": "/workspaces/kprog-raw/formal/m5-program-entry-source",
   "source_checkpoints": [
     "38894465d",
@@ -76,15 +76,84 @@
         "Quot.sound"
       ],
       "KProgFormal.ClightRefinement.Arm64ProgramEntrySource.Spine.reconstruct": []
-    }
+    },
+    "full_log": "/workspaces/kprog-raw/formal/m5-program-entry-fields/Query-source1.log"
   },
   "full_lake_build": {
-    "status": "pending timing SH"
+    "exit": 0,
+    "jobs": 341,
+    "log": "/workspaces/kprog-raw/formal/m5-program-entry-fields/lake-build1.log"
   },
   "export_comparison": {
-    "status": "pending full confirmation",
     "reference": "9c617740f",
-    "historical_previous_step": "e8502f0d8 records ten unchanged Arm64 and twelve changed x86; no new parity result claimed yet"
+    "exit": 1,
+    "files": 23,
+    "Arm64_unchanged": 10,
+    "baseline_bytes": 243488732,
+    "current_bytes": 248620630,
+    "changed_files": [
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Context.lean",
+        "bytes": 101977,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86ContextSkb.lean",
+        "bytes": 21258154,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86ContextXdp.lean",
+        "bytes": 21172430,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Helpers.lean",
+        "bytes": 8077199,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Inline.lean",
+        "bytes": 19707461,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Memory.lean",
+        "bytes": 1820683,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Pointer.lean",
+        "bytes": 1000688,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86ProgramProfile.lean",
+        "bytes": 21524184,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86ReadonlyProfile.lean",
+        "bytes": 20287920,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86StackProfile200.lean",
+        "bytes": 25006502,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86StackProfile376.lean",
+        "bytes": 29271597,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86TetragonWake.lean",
+        "bytes": 31986244,
+        "identical": false
+      }
+    ],
+    "log": "/workspaces/kprog-raw/formal/m5-program-entry-fields/export-parity1.log"
   },
   "resource": {
     "focused_exception": "AGENTS.md20 blocking discretion for coordinator-derived blanket CPU rule; source timing and actual exits in raw focused-exits.json",
@@ -94,7 +163,7 @@
     "heartbeats": 200000,
     "recursion": 512,
     "async": false,
-    "full_confirmation": "timing SH"
+    "full_confirmation": "CPU17 without timing lock per coordinator2026-11-19T18:18:59Z"
   },
   "remaining": [
     "Field/cast/arithmetic and complete prefix execution transport",
@@ -108,5 +177,6 @@
     "M5": "open",
     "M6": "open",
     "complete_ISA_handler_families": 0
-  }
+  },
+  "full_confirmation_raw": "/workspaces/kprog-raw/formal/m5-program-entry-fields"
 }
