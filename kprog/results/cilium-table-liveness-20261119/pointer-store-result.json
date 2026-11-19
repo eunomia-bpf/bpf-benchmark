@@ -1,0 +1,27 @@
+{
+  "recorded": "2026-11-19T22:00:21Z",
+  "source_commit": "94c995e19",
+  "raw": "/workspaces/kprog-raw/perf/cilium-table-liveness-20261119/escapes-20261119T215304Z",
+  "requests": [
+    {
+      "request": 22,
+      "pointer_stores": [
+        {
+          "pc": 8918,
+          "instruction": "mov    QWORD PTR [rsp+0xb8],r14",
+          "context": [],
+          "alias": "unknown"
+        }
+      ]
+    },
+    {
+      "request": 40,
+      "pointer_stores": []
+    },
+    {
+      "request": 58,
+      "pointer_stores": []
+    }
+  ],
+  "scope": "Full-width MOV pointer-store inventory only; implicit spills, helper memory effects and prior escapes still require proof. No production lowering change."
+}

@@ -99,6 +99,12 @@
   actual journal reconciliation; prior verified receipt remains14).
 
 - [ ] P-B-relative-table-live-partials (PERF 2026-11-19T19:57:44Z): actual Cilium
+  PERF 2026-11-19T22:00:21Z: 66f54a68e actualnative escape regressionpasses8cases:
+  bothlocalupper24readbacksdead, butpriorpointerescape makesupperbits
+  observable(5vs0x12345605etc). Currentguardstillrejectsescapedspill.
+  Needwhole-functionescape/helperproof, notpostspill-onlyliveness.
+  94c995e19 exposesoriginalABIstates toactualdiagnostic; storeinventory
+  40/58empty,22oneunknownR14at8918. No productionelision/sharedIchange.
   PERF 2026-11-19T21:27:36Z: bb45dea26 diagnostic follows private DWORD spills:
   firstreadbacks22:8953/40:9152/58:9156 intoESI/EDI, existingregister
   liveness provesbits8..31deadafterreadback. PrefixABIaliasinventory has

@@ -1445,3 +1445,12 @@ Secondary64armioctlENOENT tracesactivecapsulelookup, notmissingimagefile;
 actualabsence/abandon/idmismatch branchunresolved. No productionchange or
 runtimegain; allLTO/flags/settings unchanged. Evidence request64.json and
 capsule-coverage.json; originalraw/historyretained.
+
+PERF 2026-11-19T22:00:21Z: Beforeprivate-spillelision, native66f54a68e provesprior
+pointerescape matters:8actualmachinecases, bothreadbackupper24maskchecks
+true, butescapedspillreturnsupperbits throughanearlieralias; productionguard
+stillrejects. 94c995e19 exposesexistingincomingABIstates fororiginal-code
+analysis, withunchangedtransferfunctions/lowering. Scope ofnextcompiler
+proofincludeswhole-functionescapes/helpereffects/implicitspills, notjust
+firstreadback. No candidateelisionlanded orruntimegain. Evidence
+results/cilium-table-liveness-20261119/escape-result.json andpointer-store-result.json.

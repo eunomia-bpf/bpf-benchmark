@@ -1,0 +1,62 @@
+{
+  "cases": [
+    {
+      "name": "escaped_before",
+      "local_readback_upper_bits_dead": true,
+      "original_store_dead": false,
+      "pointer_escaped_before_spill": true,
+      "native": [
+        {
+          "input": 0,
+          "result": 5
+        },
+        {
+          "input": 305419776,
+          "result": 305419781
+        },
+        {
+          "input": 3735928320,
+          "result": 3735928325
+        },
+        {
+          "input": 4294967040,
+          "result": 4294967045
+        }
+      ]
+    },
+    {
+      "name": "private_only",
+      "local_readback_upper_bits_dead": true,
+      "original_store_dead": false,
+      "pointer_escaped_before_spill": false,
+      "native": [
+        {
+          "input": 0,
+          "result": 5
+        },
+        {
+          "input": 305419776,
+          "result": 5
+        },
+        {
+          "input": 3735928320,
+          "result": 5
+        },
+        {
+          "input": 4294967040,
+          "result": 5
+        }
+      ]
+    }
+  ],
+  "scope": "Actual native execution and bound proof-effect liveness; the escaped case proves local readback liveness alone cannot justify spill elision. No production lowering or stock acceptance.",
+  "recorded": "2026-11-19T22:00:21Z",
+  "source_commit": "66f54a68e",
+  "raw": "/workspaces/kprog-raw/perf/cilium-table-liveness-20261119/escape-guard-20261119T215743Z",
+  "commands_returncodes": [
+    0,
+    0,
+    0,
+    0
+  ]
+}

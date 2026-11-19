@@ -50,3 +50,38 @@ readbacks, all three upper-bit dead results, no unresolved prefix aliases,
 and the same helper pointer roots. Final raw `/workspaces/kprog-raw/perf/cilium-table-liveness-20261119/original-20261119T212852Z`, log `/workspaces/kprog-raw/perf/cilium-table-liveness-20261119/original-20261119T212852Z.log`;
 worker315898 is terminal. `memory-result.json` now records this stronger
 input provenance. The helper memory proof and production repair stay open.
+
+## A prior escape defeats local readback liveness
+
+PERF 2026-11-19T22:00:21Z. `94c995e19` exposes the existing ABI's final incoming states
+to the diagnostic, replacing its frame inspection of ABI internals. The
+analysis transfer functions and production lowering remain unchanged.
+The full-width MOV inventory finds no proven private pointer stores in these
+three functions; request22 has one unresolved source at PC8918,
+`mov QWORD PTR [rsp+0xb8],r14`. Requests40/58 have no such records.
+This inventory alone does not discharge helper effects, implicit spills,
+or a pointer escaping before the particular store under consideration.
+
+`escape.S`/`escape.py` provide an actual native regression for that last
+obligation. Both functions spill a value after MOV AL,5, load it into ESI,
+and use only SIL locally. The same existing bound native-effect analysis
+finds bits8..31 dead after that local readback in both. One function also
+saves the spill address through an external pointer **before** the spill;
+it later reads the word through that alias and returns it.
+
+Four native inputs execute in each function. The private-only case always
+returns5; the escaped case returns5,0x12345605,0xdeadbe05,0xffffff05.
+Thus the locally dead readback does not make the original spill unobservable.
+The current production guard still rejects the escaped definition, as the
+regression requires. A future spill-liveness extension must preserve that
+negative case while proving the private-only case. No memory-elision
+implementation was landed, and shared I is unchanged.
+
+The fixture compiles real assembly, executes it through a shared object, and
+gets instruction effects from the canonical native-link proof output.
+All four recorded compiler/link commands return0; all eight native results
+and both readback-mask checks pass. It uses hostCPU20 and imageSH only while
+reading the linker; no guest, image build or timing lock.
+`escape-result.json` records final raw `/workspaces/kprog-raw/perf/cilium-table-liveness-20261119/escape-guard-20261119T215743Z`. Earlier native fixture raw
+`/workspaces/kprog-raw/perf/cilium-table-liveness-20261119/escape-fixture-20261119T215605Z` remains. Workers326802,328070,
+328762 are terminal. No B/stock/current-app/runtime gain is claimed.
