@@ -57,3 +57,5 @@ The current Tracee batch's direct-native results therefore agree with the
 restored policy, and are still never called stock-verified. No rebuild
 targeting the superseded c3960d089 policy is queued. Future base/image
 batches use current HEAD normally. Reader replay433910 remains pending.
+
+PERF 2026-11-19T16:39:41Z: Recovered host reader16653 completes the actual completed-BCC archive replay. All25 source programs/native/B-generated/B-stock/checked records remain, with0direct/failed/kept requests. Full recovery-coverage.json is committed. This is the earlier1x10functional archive, not a new guest or timing. Raw /workspaces/kprog-raw/perf/coverage-reader-20261119/recovery.

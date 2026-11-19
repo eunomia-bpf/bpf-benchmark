@@ -43,3 +43,17 @@ IR root chains before choosing a repair. If both fail, the experiment has
 not isolated that barrier. No production source, queued launcher, compiler
 flag, layout or active Tracee input changed. Actual host execution remains
 pending on timing SH; this is a regression improvement, not a test pass.
+
+PERF 2026-11-19T16:39:41Z: The former guest and all three queued readers were absent
+at16:36, without terminal files; Tracee's final service.tar.gz is absent
+but its completed request capsules remain. Cause of interruption is unknown.
+No guest was restarted and no old raw output was removed. This host test
+was restarted under timing SH/image SH as16647 and completed with make2
+at raw /workspaces/kprog-raw/perf/skb-numeric-integration-20261119/test-20261119T163739Z-16647. All compiler stages succeed; actual execution has18 mismatches
+in40cases. All12direct-C controls pass. Shared data/mark read the0xa5 canary
+from public positions, and shared data_end loses high bits. The retained
+IR shows data_value reading public76/i32 behind an opaque =r,0 barrier,
+while data_direct reads physical208/i64. This confirms context-root
+recognition is lost at native memory lowering, rather than a wrong layout
+or a standalone NUMERIC bit-loss recurrence. Baseline rows and IR excerpt
+are committed; full commands/IR/layouts remain raw. No app/path/timing claim.

@@ -1108,3 +1108,5 @@ kept_on_ebpf includes only failed requests. The reader's count logic already
 uses these actual status/path fields; its scope text now reflects the new
 instruction. No production code change, rebuilt base, host pass or speed
 claim. Current Tracee and its raw data stay intact.
+
+PERF 2026-11-19T16:39:41Z: Actual SKB integration confirms18/40mismatches, all12direct-C controls pass. Shared asm loads retain public offsets/widths behind the native base barrier, while direct loads convert correctly (data208/i64). Repair is the native lowering context-root class, not a flag or layout change. Actual BCC coverage-reader replay preserves25allchecked/0failed. No app speed claim. See skb-numeric-integration-20261119 and native-cohort-check-20261119.

@@ -1,0 +1,24 @@
+define i64 @data_value(ptr noundef %0) local_unnamed_addr #0 section "classifier" !dbg !20 {
+  call void @llvm.dbg.value(metadata ptr %0, metadata !133, metadata !DIExpression()), !dbg !139
+  %2 = ptrtoint ptr %0 to i64, !dbg !140
+  %3 = call i64 asm sideeffect "", "=r,0"(i64 %2), !dbg !140
+  %4 = inttoptr i64 %3 to ptr, !dbg !140
+  %5 = getelementptr i8, ptr %4, i64 76, !dbg !140
+  %6 = load volatile i32, ptr %5, align 1, !dbg !140
+  %7 = zext i32 %6 to i64, !dbg !140
+  call void @llvm.dbg.value(metadata i64 %7, metadata !136, metadata !DIExpression()), !dbg !141
+  call void @llvm.dbg.value(metadata i64 %7, metadata !134, metadata !DIExpression()), !dbg !142
+  %unspecified = freeze i64 poison, !dbg !143
+  call void @llvm.dbg.value(metadata i64 %unspecified, metadata !138, metadata !DIExpression()), !dbg !142
+  call void @llvm.dbg.value(metadata i64 %7, metadata !138, metadata !DIExpression()), !dbg !142
+  ret i64 %7, !dbg !144
+}
+
+define i64 @data_direct(ptr nocapture noundef %0) local_unnamed_addr #1 section "classifier" !dbg !200 {
+  call void @llvm.dbg.value(metadata ptr %0, metadata !202, metadata !DIExpression()), !dbg !203
+  %2 = getelementptr inbounds %struct.__sk_buff, ptr %0, i64 0, i32 15, !dbg !204
+  %3 = getelementptr i8, ptr %0, i64 208, !dbg !204
+  %4 = load i64, ptr %3, align 1, !dbg !204
+  %5 = trunc i64 %4 to i32, !dbg !204
+  ret i64 %4, !dbg !204
+}
