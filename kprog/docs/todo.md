@@ -42,6 +42,8 @@ PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are 
 
 PERF 2026-11-19T06:35:06Z：06:20 的 B 编译项已实现 O1（frontend/B backend），P 与最终 native LTO 仍 O3。g0 和 line-tables 的真实 .ksyms map 对象都在 libbpf open 返回 -3，完整 g 才保留 BTF extern 类型并成功，所以保留 g。新鲜生成 BCC fentry_vfs_read/inet_sock_set_state 的 B/libbpf open、原 frontend 复用、native O3/proof 均通过；Tetragon request6 的 retry 211523 在 CPU19/timing SH/image SH/32GiB AS 下运行；O1 frontend 与 bounds 阶段已通过，B machine backend 仍在进行（初始 210433 因旧失败存档无 artifacts.json 在进入 Tetragon 前停止，d71b7f19b 改读 kernel.entry）。结果 results/b-analysis-flags-20261119；不声称新 stock 接受或应用速度，OMP 组合批次继续量 Tetragon/Tracee 覆盖。
 
+**协调者 2026-11-19T07:01:52Z（运营者：“不应该好很多吗? ... 是不是有啥还没做到”）——最高优先**：LTO 配置里模拟器没有在运行时消失。BCC 第 1 个请求：sim C 预处理后 3.6 MB（36 个 switch、183 个 case 的 x86 解释器），clang -O3 -march=native 编出的 checked-simulator.native.o 16.7 KB，同一程序直接原生的链接块 113 B；25 个程序合计 54 KB，是 JIT 的 6.84 倍、直接原生的约 5 倍。设计（design.md“为什么 simulator 在运行时根本不存在”）要求特化后解释器被编译器整个折叠，剩下和 P 一样的直线代码。还差三件：(1) 特化把解释器完全折叠掉（以原生代码大小接近直接原生、每次调用不低于直接原生为准）；(2) helper 的 C 实现内联（perf 已开始）；(3) 只为 verifier 准备的边界检查留在 B，不进原生一侧。协调者先查 (1) 为什么没折叠。
+
 **协调者 2026-11-19T06:20:21Z（审核 20261119T03Z 核实后）**：
 1. lane-loop.sh 回合开始就清空 resume-msg，回合因额度失败时消息丢了（perf、formal 都是 0 字节）。改成回合失败时写回去（新文件替换，正在跑的循环下次重启时用上）；早上给 perf 的消息它从 COORDINATION 读到了：06:03 的回合已在 checked-sim-c LTO 里把已证明的 ARRAY 查找内联成 C helper（d98c4aeda）。
 2. perf 的 prompt 在 11-15 的“代码量少一半”旁补上运营者 11-18 的“不需要按照 binray size 扣了”。
