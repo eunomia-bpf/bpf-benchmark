@@ -338,9 +338,10 @@ $(TRACEE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinu
 		-I/usr/include -I/usr/include/x86_64-linux-gnu \
 		-o "$@" "$<"
 
-$(NATIVE_OUT)/tracee/lsm_support/%.native.o: tracee/pkg/ebpf/c/lsmsupport/%.bpf.c tracee/pkg/ebpf/c/vmlinux.h Makefile
+$(NATIVE_OUT)/tracee/lsm_support/%.native.o: tracee/pkg/ebpf/c/lsmsupport/%.bpf.c tracee/pkg/ebpf/c/vmlinux.h \
+		core-compat.h $(CORE_ANSWERS)/tracee.h Makefile
 	install -d "$(dir $@)"
-	"$(CLANG)" $(NATIVE_CFLAGS) \
+	"$(CLANG)" $(NATIVE_CFLAGS) $(call core_flags,$(CORE_ANSWERS)/tracee.h) \
 		-D__TARGET_ARCH_x86 -D__BPF_TRACING__ \
 		-I"$(CURDIR)/tracee/pkg/ebpf/c/lsmsupport" \
 		-I"$(CURDIR)/tracee/pkg/ebpf/c" \

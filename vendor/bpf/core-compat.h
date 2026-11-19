@@ -385,6 +385,10 @@ static void __kprog_core_unanswered(void)
  * helper declarations (libbpf's static pointers, OTel's pointer variables,
  * Tetragon's BPF_FUNC) stay unused. */
 #define __KPROG_HELPER(ret, name, ...) extern ret __kprog_##name(__VA_ARGS__) __asm__(#name)
+/* An app header that declares helpers as same-name pointer variables (OTel's
+ * bpfdefs.h) leaves them out here: a variable named like the helper would take
+ * the helper's symbol. */
+#define __KPROG_NATIVE_HELPERS 1
 #define __KPROG_CALL(name, ...) __kprog_##name(__VA_ARGS__)
 __KPROG_HELPER(void *, bpf_map_lookup_elem, void *, const void *);
 __KPROG_HELPER(long, bpf_map_update_elem, void *, const void *, const void *, unsigned long long);
@@ -451,7 +455,9 @@ __KPROG_HELPER(long, bpf_setsockopt, void *, int, int, void *, int);
 /* Kernel memory reads are plain loads. native-link records every load as a
  * load site, so a fault zeroes the loaded register and execution continues,
  * the JIT's PROBE_MEM behaviour. The empty asm keeps each loaded value in a
- * general register, the load site's recovery destination. */
+ * general register, the load site's recovery destination, and keeps the source
+ * address in a register: a source folded to a constant (a null pointer plus an
+ * offset) would otherwise become an absolute operand, which native-link rejects. */
 typedef unsigned long long __attribute__((may_alias, aligned(1))) __kprog_u64;
 typedef unsigned int __attribute__((may_alias, aligned(1))) __kprog_u32;
 typedef unsigned short __attribute__((may_alias, aligned(1))) __kprog_u16;
@@ -460,6 +466,7 @@ static __always_inline long __kprog_read_kernel(void *dst, unsigned int size, co
 {
     char *d = dst;
     const char *s = src;
+    asm volatile("" : "+r"(s));
     unsigned int i = 0;
     for (; i + 8 <= size; i += 8)
         *(__kprog_u64 *)(d + i) = __KPROG_LOAD(__kprog_u64, s + i);
@@ -472,6 +479,7 @@ static __always_inline long __kprog_read_kernel_str(void *dst, unsigned int size
 {
     char *d = dst;
     const char *s = src;
+    asm volatile("" : "+r"(s));
     unsigned int i = 0;
     if (!size)
         return 0;
@@ -620,14 +628,67 @@ extern int bpf_iter_num_new(struct bpf_iter_num *it, int start, int end) __attri
 extern int *bpf_iter_num_next(struct bpf_iter_num *it) __attribute__((weak)) __attribute__((section(".ksyms")));
 extern void bpf_iter_num_destroy(struct bpf_iter_num *it) __attribute__((weak)) __attribute__((section(".ksyms")));
 
-/* Tetragon's BPF_FUNC declarations are the extern helpers; its probe reads go
- * to the inline reads above. */
+/* Tetragon declares its helpers with its own BPF_FUNC, as pointer variables
+ * that hold the helper id, and its error metrics record that id through the
+ * helper's name; its declarations stay as they are and its calls reach the
+ * common helpers above. */
+#undef BPF_FUNC
+#undef map_lookup_elem
+#define map_lookup_elem(...) bpf_map_lookup_elem(__VA_ARGS__)
+#undef map_update_elem
+#define map_update_elem(...) bpf_map_update_elem(__VA_ARGS__)
+#undef map_delete_elem
+#define map_delete_elem(...) bpf_map_delete_elem(__VA_ARGS__)
 #undef probe_read
 #define probe_read(...) bpf_probe_read(__VA_ARGS__)
 #undef probe_read_str
 #define probe_read_str(...) bpf_probe_read_str(__VA_ARGS__)
 #undef probe_read_kernel
 #define probe_read_kernel(...) bpf_probe_read_kernel(__VA_ARGS__)
+#undef probe_read_user
+#define probe_read_user(...) bpf_probe_read_user(__VA_ARGS__)
+#undef probe_write_user
+#define probe_write_user(...) bpf_probe_write_user(__VA_ARGS__)
+#undef copy_from_user
+#define copy_from_user(...) bpf_copy_from_user(__VA_ARGS__)
+#undef ktime_get_ns
+#define ktime_get_ns() bpf_ktime_get_ns()
+#undef ktime_get_boot_ns
+#define ktime_get_boot_ns() bpf_ktime_get_boot_ns()
+#undef get_smp_processor_id
+#define get_smp_processor_id() bpf_get_smp_processor_id()
+#undef get_current_pid_tgid
+#define get_current_pid_tgid() bpf_get_current_pid_tgid()
+#undef get_current_cgroup_id
+#define get_current_cgroup_id() bpf_get_current_cgroup_id()
+#undef get_current_task
+#define get_current_task() bpf_get_current_task()
+#undef get_stackid
+#define get_stackid(...) bpf_get_stackid(__VA_ARGS__)
+#undef perf_event_output
+#define perf_event_output(...) bpf_perf_event_output(__VA_ARGS__)
+#undef tail_call
+#define tail_call(...) ((void)bpf_tail_call(__VA_ARGS__))
+#undef send_signal
+#define send_signal(...) bpf_send_signal(__VA_ARGS__)
+#undef seq_write
+#define seq_write(...) bpf_seq_write(__VA_ARGS__)
+#undef ringbuf_output
+#define ringbuf_output(...) bpf_ringbuf_output(__VA_ARGS__)
+#undef loop
+#define loop(...) bpf_loop(__VA_ARGS__)
+#undef get_func_ret
+#define get_func_ret(...) bpf_get_func_ret(__VA_ARGS__)
+#undef get_func_arg
+#define get_func_arg(...) bpf_get_func_arg(__VA_ARGS__)
+#undef get_attach_cookie
+#define get_attach_cookie(...) bpf_get_attach_cookie(__VA_ARGS__)
+#undef ima_inode_hash
+#define ima_inode_hash(...) bpf_ima_inode_hash(__VA_ARGS__)
+#undef ima_file_hash
+#define ima_file_hash(...) bpf_ima_file_hash(__VA_ARGS__)
+#undef override_return
+#define override_return(...) bpf_override_return(__VA_ARGS__)
 #endif
 
 /* access.h keeps a BPF-register asm arm under `__bpf__` and a plain C arm

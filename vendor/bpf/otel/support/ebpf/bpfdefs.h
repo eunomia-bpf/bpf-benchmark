@@ -108,6 +108,7 @@ static inline int bpf_get_stackid(UNUSED void *ctx, UNUSED void *map, UNUSED u64
 // definitions of bpf helper functions we need, as found in
 // https://elixir.bootlin.com/linux/v4.11/source/samples/bpf/bpf_helpers.h
 
+#ifndef __KPROG_NATIVE_HELPERS
 static void *(*bpf_map_lookup_elem)(void *map, void *key) = (void *)BPF_FUNC_map_lookup_elem;
 static int (*bpf_map_update_elem)(void *map, void *key, void *value, u64 flags) = (void *)
   BPF_FUNC_map_update_elem;
@@ -132,6 +133,7 @@ static long (*bpf_probe_read_user)(void *dst, int size, const void *unsafe_ptr) 
   BPF_FUNC_probe_read_user;
 static long (*bpf_probe_read_kernel)(void *dst, int size, const void *unsafe_ptr) = (void *)
   BPF_FUNC_probe_read_kernel;
+#endif
 
   // The sizeof in bpf_trace_printk() must include \0, else no output
   // is generated. The \n is not needed on 5.8+ kernels, but definitely on
