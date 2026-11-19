@@ -8,6 +8,18 @@
 
 ## 0. Lane 目标与待办
 
+- [ ] P-native-skb-numeric-integration (PERF 2026-11-19T13:58:47Z):
+  validate shared SKB field macros through compile-sim-ir and context-lower,
+  beyond the completed standalone NUMERIC repair0dfa23814. Native lowering
+  inserts an opaque base barrier while the context pass recognizes pointer
+  roots; their interaction is a hypothesis, not a confirmed defect. Committed
+  real-macro host regression827e0c601/07df70aea has28 data/data_end full/lane
+  and mark-control cases using the sole physical/public layouts. Worker
+  422533 waits timing SH behind Tracee; no production change or extra guest.
+  Read actual stage errors versus executed mismatches, then preserve existing
+  absolute-base/fault guards in any repair. Actual app coverage is separate.
+  See results/skb-numeric-integration-20261119.
+
 - [x] P-native-numeric-bridge (0dfa23814; run133702_416559): audit native
   preservation of NUMERIC(value)'s concrete bits through the reused stock
   frontend. The proof header discards value; native freezes the resulting

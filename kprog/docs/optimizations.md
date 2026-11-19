@@ -1044,3 +1044,10 @@ hash-op result; no cause is inferred from sample spread. Subsequent BCC LTO
 runs are functional per coordinator, with timing directed to larger-body
 apps. All raw/25-program counters stay; no new profile or validity gate.
 The NUMERIC repair0dfa23814 followed this cohort. See checked-hash-ops-20261119.
+
+PERF 2026-11-19T14:00:51Z: Follow-up to NUMERIC0dfa23814 is a28-case shared-SKB
+compiler integration test, queued as422533 behind Tracee. Real field macros
+run through both native and context lowering with the sole kernel layouts.
+Opaque base-barrier versus context-root recognition is the hypothesis; no
+actual mismatch, corpus path hit or runtime gain is claimed. No production
+input, image or guest changes. See skb-numeric-integration-20261119.

@@ -22,3 +22,10 @@ The test establishes no corpus path hit, stock-B load or performance result.
 The detached recipe waits timing SH/image SH, on CPU18 with4GiB AS. It
 changes no production input and starts no image or guest. Heavy work waits
 for the coordinator's active Tracee timing to release the lock.
+
+PERF 2026-11-19T14:00:51Z: Committed827e0c601/07df70aea; worker422533 queued at
+13:58:47Z, waiting timing SH. Raw:
+/workspaces/kprog-raw/perf/skb-numeric-integration-20261119/test-20261119T135847Z-422533.
+Launcher: /workspaces/kprog-raw/perf/skb-numeric-integration-launch-20261119.log.
+No compilation or execution result yet. The existing Tracee batch owns the
+image and timing window; its production inputs remain unchanged.
