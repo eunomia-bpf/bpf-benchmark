@@ -342,6 +342,8 @@ PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are 
 
 PERF 2026-11-19T06:35:06Z：06:20 的 B 编译项已实现 O1（frontend/B backend），P 与最终 native LTO 仍 O3。g0 和 line-tables 的真实 .ksyms map 对象都在 libbpf open 返回 -3，完整 g 才保留 BTF extern 类型并成功，所以保留 g。新鲜生成 BCC fentry_vfs_read/inet_sock_set_state 的 B/libbpf open、原 frontend 复用、native O3/proof 均通过；Tetragon request6 的 retry 211523 在 CPU19/timing SH/image SH/32GiB AS 下运行；O1 frontend 与 bounds 阶段已通过，B machine backend 仍在进行（初始 210433 因旧失败存档无 artifacts.json 在进入 Tetragon 前停止，d71b7f19b 改读 kernel.entry）。结果 results/b-analysis-flags-20261119；不声称新 stock 接受或应用速度，OMP 组合批次继续量 Tetragon/Tracee 覆盖。
 
+**协调者 2026-11-19T21:30:54Z（六应用计时中途核查功能）——最高优先**：Cilium 在 17:26 之后的镜像上原生一侧的包走了另一条路：每个包在 cil_from_container 之后还经过 cil_to_host（基线 0 次），发送端 pps 因此是基线的约 3 倍（stats 关 3.564x）。08:39 的旧镜像（Cilium 还按编号调用 helper）原生 pps 和基线相当、cil_to_host 0 次。所以 Cilium 的这个数作废，原因在协调者 5319f359d 把 Cilium 改成按名字调用 helper 之后的某处行为变化（目的端点查找、尾调用或某个 helper 的结果），协调者自己定位并修，修好后单独重测 Cilium。Tetragon（stats 关 2.009x）：原生阶段各程序调用次数约为基线 2 倍、三类程序的比例接近，和吞吐 2 倍对应，每个操作的 BPF 调用数对等；等 stats 开那一轮的每次调用数确认。
+
 **协调者 2026-11-19T18:18:59Z（审核 20261119T15Z 逐条核实后）**：
 1. 回落：成立，已在 15:41 恢复（0a993eb37）；上面 14:49 的块已就地改正。
 2. 各应用实测比值和“程序体 1.57 倍乘以程序体占比”的预测一致（Tracee 预测 1.046、实测 1.046），协调者 11-14 说 Katran 程序体 1.57 倍对应每次调用约 1.45 倍是算错了。剩下最大的一块是时钟 helper（BCC、Katran 的 BPF 时间里 ktime 占 30–34%）：原生一侧已经由链接器直接绑到 ktime_get_mono_fast_ns（少一层 helper 包装），剩下的是读时钟本身，两臂一样（guest 的时钟源是 kvm-clock），内联它要手写时钟源的读取，按运营者“不要在链接器里面手写太多”不做成手写版本。决定：主配置的计时先放 Katran（一个程序、已经走通已验证路径、程序体占比最大），再到 Tracee。
