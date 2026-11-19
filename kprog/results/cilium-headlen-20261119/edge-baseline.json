@@ -11,5 +11,10 @@
   "current_inputs": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/current-six-inputs/inputs.json",
   "request4_scalar": "%357",
   "request4_predicates": {"1051": "ult 16", "1127": "ult 18", "1134": "eq 16", "7507": "eq 18"},
+  "request4_kernel_root": "%27 = bpf_cast_to_kern_ctx(%0), frontend line 102",
+  "request4_kernel_field_reads": {"1004": "len112 through %27", "1019": "data_len116 through %27"},
+  "selector_before_raw": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/edge-selector-before-20261119T225209Z",
+  "selector_before_make_exit": 2,
+  "selector_before_failed_case": "ir_edge_eq_lower retains eq instead of the expected ordered ule predicate",
   "scope": "Actual focused sole-kernel failure and retained current-app inputs; candidate confirmation follows separately."
 }

@@ -159,3 +159,28 @@ OMP reports2lowerings/3emitted bounds for request64 in addition to233lowerings
 across the earlier40. Canonical41-request B/stock acceptance still awaits the
 queued worker. The host7.3control is supporting evidence; it is not the
 workspace7.0guest verdict. AllLTO/appflags/settings remain unchanged.
+
+PERF 2026-11-19T22:53:57Z: canonicalization ff8f0e4b3 remains the selected
+placement. Worker366677 completed the focused stock fixtures and41packet/six
+store B emissions. Its fresh capture has14requests,8stock passes and6packet
+rejects; `fresh-coverage.json` retains that separate population. The six
+current inputs are retained in `current-six-inputs/inputs.json` under the raw
+result root through the existing `make prepare` entry, extended by bc0a32641.
+
+The focused head_edge baseline481274 reproduces the current rejection on the
+sole kernel: `off=16 size=1, R2(id=0,off=16,r=16)`, verifier.log112. A16byte
+range covers offsets0..15; byte16 needs17bytes. Actual request4 B pc129 skips
+the read on EQ16, and pc130 reads byte16 on the other edge. Its original
+frontend uses one i32 span%357 for ULT16/ULT18/EQ16, while len112/data_len116
+read through kernelcast%27=bpf_cast_to_kern_ctx(%0). Those field reads and
+packet reads have separate roots. `edge-baseline.json` preserves exact paths.
+
+Candidate852c2bfe3 expresses boundary equality as an equivalent ordered
+scalar predicate under its dominating interval, then applies the existing
+packet-bound lowering. Under x>=K, EQK becomes ULEK and NEK becomes UGTK;
+upper-bound cases are symmetric. Four new selectors detect that translation;
+a bypass-edge case retains EQ. The installed compiler fails the lower-bound
+selector as expected. Syntax passes. Worker487083 queues the sole compiler
+rebuild under imageEX, followed by focused stock execution, historical41 and
+current6 B replays, then fresh Cilium through checked-corpus. Actual candidate
+stock acceptance, app coverage and performance remain pending.

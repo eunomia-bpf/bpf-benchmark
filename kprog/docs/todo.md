@@ -67,6 +67,11 @@
   Syntax passes; sole-compiler rebuild/stock/current-app confirmation follow
   the active coordinator image reader. Current six inputs retained through
   bc0a32641; historical41 remains a separate population.
+  Candidate852c2bfe3 and launcher cbe65a6ac are pushed. Worker487083 queues
+  imageEX at22:52:23Z, raw edge-candidate-20261119T225223Z-487083.
+  Expanded selector fails installed compiler at ir_edge_eq_lower, as expected;
+  its passing guard alone provides insufficient regression coverage. Actual
+  request4 len112/data_len116 use kernelcast%27, with a separate packet base.
   PERF 2026-11-19T22:39Z:366677 terminal0/appok, current service14requests:
   eightstock/sixpacket, allnativeinstalled. Shim85manifestmisses/14replacements;
   current population differs fromhistorical64, so41packet acceptance staysopen.
