@@ -1,4 +1,5 @@
 """Read actual service completions and corpus status from a finished functional run."""
+import io
 import json
 from pathlib import Path
 import re
@@ -8,15 +9,17 @@ import tarfile
 raw = Path(sys.argv[1])
 output = Path(sys.argv[2])
 records = []
-for log in sorted(raw.glob('state/*/requests/requests.jsonl')):
-    for line in log.read_text().splitlines():
+with tarfile.open(raw / 'service.tar.gz') as service:
+    lines = service.extractfile('service/requests/requests.jsonl').read().decode().splitlines()
+    for line in lines:
         row = json.loads(line)
         item = {key: row[key] for key in [
             'request_id', 'source_prog_id', 'prog_id', 'status', 'execution_path',
             'b_generated', 'b_stock_passed', 'simulator_failure', 'error'
         ] if key in row}
         archive = Path(row['artifact_archive'] if row['status'] == 0 else row['failure_archive'])
-        with tarfile.open(archive) as request:
+        capsule = service.extractfile('service/requests/' + archive.name).read()
+        with tarfile.open(fileobj=io.BytesIO(capsule)) as request:
             item['symbol'] = request.extractfile('request/kernel.entry').read().decode('ascii')
             item['prog_type'] = json.load(request.extractfile('request/kernel.facts.json'))['prog_type']
         records.append(item)
