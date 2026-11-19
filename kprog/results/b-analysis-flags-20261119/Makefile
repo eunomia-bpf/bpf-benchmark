@@ -8,3 +8,6 @@ compile:
 .PHONY: diagnose-stack
 diagnose-stack:
 	python3 $(ROOT)/kprog/results/b-analysis-flags-20261119/stack.py $(OUT)
+.PHONY: post-contracts
+post-contracts:
+	python3 $(ROOT)/kprog/results/b-analysis-flags-20261119/post-contracts.py $(OUT)
