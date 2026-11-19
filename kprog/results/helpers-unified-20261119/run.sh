@@ -3,6 +3,8 @@
 # (ded33d751, 5319f359d). Holds batch EX from the image build to the last check.
 set -euo pipefail
 cd /workspaces/repository
+# The Workspace pod since 16:25 UTC has Go here; the cilium-agent rebuild needs it.
+export PATH=/usr/local/go/bin:/usr/local/cargo/bin:$PATH
 base=/workspaces/kprog-raw/coordinator/helpers-unified-20261119
 out=$base/batch-$(date -u +%Y%m%dT%H%M%SZ)-$$
 install -d "$out"; printf '%s\n' "$out" > "$base/latest"
