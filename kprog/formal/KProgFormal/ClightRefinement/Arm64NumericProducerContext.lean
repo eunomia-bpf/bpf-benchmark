@@ -54,7 +54,8 @@ theorem initialized_context (addresses : Arm64Registers.PointerOrigins)
       FrameBelow (CC.Positive.ofNat 204) initialMemory after ∧
       after.access = (allocation initialMemory).2.access ∧
       after.nextblock = (allocation initialMemory).2.nextblock ∧
-      finalLe.get Arm64Entry._ctx = some ctx := by
+      finalLe.get Arm64Entry._ctx = some ctx ∧
+      finalLe.get Arm64Entry._continuation = some continuation := by
   obtain ⟨init, words, tags, flagBlocks, lrBlock, vector, before, le, traces, length,
       flagBindings, lrBinding, prefixRun, wordPointers, tagPointers, reads, flagReads,
       lrRead, vectorReads, caches, frame, access, next, ctxRead⟩ :=
@@ -63,7 +64,7 @@ theorem initialized_context (addresses : Arm64Registers.PointerOrigins)
   obtain ⟨stackTags, spBlock, cells, after, spBinding, suffix, stackReads, spRead,
       contextReads, other, suffixFrame, suffixAccess, suffixNext⟩ :=
     stack_sp_and_context_bound Arm64NumericProgram.ge composites_same represented
-      initialMemory before le ctxRead k access
+      initialMemory before le ctxRead.1 k access
   have tableSeparate : ∀ selected,
       tableName selected ≠ Arm64Entry.___a64_stack_tag ∧ tableName selected ≠ Arm64Entry.___a64_sp ∧
       (∀ j, tableName selected ≠ contextName j) := by

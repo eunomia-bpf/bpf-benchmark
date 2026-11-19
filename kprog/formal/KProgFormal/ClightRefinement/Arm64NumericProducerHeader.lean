@@ -63,7 +63,8 @@ theorem initialized_header (addresses : Arm64Registers.PointerOrigins)
       FrameBelow (CC.Positive.ofNat 204) initialMemory after ∧
       after.access = (allocation initialMemory).2.access ∧
       after.nextblock = (allocation initialMemory).2.nextblock ∧
-      finalLe.get Arm64Entry._ctx = some ctx := by
+      finalLe.get Arm64Entry._ctx = some ctx ∧
+      finalLe.get Arm64Entry._continuation = some continuation := by
   obtain ⟨init, words, tags, flagBlocks, lrBlock, vector, stackTags, spBlock, cells,
       before, le, traces, length, flagBindings, lrBinding, spBinding, prefixRun,
       wordPointers, tagPointers, reads, flagReads, lrRead, vectorReads, stackReads,

@@ -32,7 +32,8 @@ theorem initialized_gpr_inputs (ctx continuation : CC.Val) (k : CC.Cont)
       FrameBelow (CC.Positive.ofNat 204) initialMemory after ∧
       after.access = (allocation initialMemory).2.access ∧
       after.nextblock = (allocation initialMemory).2.nextblock ∧
-      finalLe.get Arm64Entry._ctx = some ctx := by
+      finalLe.get Arm64Entry._ctx = some ctx ∧
+      finalLe.get Arm64Entry._continuation = some continuation := by
   obtain ⟨init, cached, prefixRun, caches, prefixFrame, cachedAccess, cachedNext⟩ :=
     Arm64NumericProducerPrefix.initialized_prefix ctx continuation k
   obtain ⟨ready, setup, setupOther, setupFrame, setupAccess, setupNext⟩ :=
@@ -72,10 +73,16 @@ theorem initialized_gpr_inputs (ctx continuation : CC.Val) (k : CC.Cont)
         (setupOther _ _ _ cache.baseBinding (by cases returns <;> decide +kernel) .Mint64 0)).trans base
     · exact ((other _ _ _ cache.validBinding validSeparate .Mint8unsigned 0).trans
         (setupOther _ _ _ cache.validBinding (by cases returns <;> decide +kernel) .Mint8unsigned 0)).trans valid
-  · have ctxSeparate : ∀ i : Fin 30,
-        Arm64Entry._ctx ≠ (registerDeclaration (inputRegister i)).inputTemp ∧
-        Arm64Entry._ctx ≠ (registerDeclaration (inputRegister i)).resultTemp := by decide +kernel
-    rw [temps Arm64Entry._ctx ctxSeparate]
-    simp +decide [initialTemps, CC.PTree.gso]
+  · constructor
+    · have ctxSeparate : ∀ i : Fin 30,
+          Arm64Entry._ctx ≠ (registerDeclaration (inputRegister i)).inputTemp ∧
+          Arm64Entry._ctx ≠ (registerDeclaration (inputRegister i)).resultTemp := by decide +kernel
+      rw [temps Arm64Entry._ctx ctxSeparate]
+      simp +decide [initialTemps, CC.PTree.gso]
+    · have continuationSeparate : ∀ i : Fin 30,
+          Arm64Entry._continuation ≠ (registerDeclaration (inputRegister i)).inputTemp ∧
+          Arm64Entry._continuation ≠ (registerDeclaration (inputRegister i)).resultTemp := by decide +kernel
+      rw [temps Arm64Entry._continuation continuationSeparate]
+      simp +decide [initialTemps, CC.PTree.gso]
 
 end KProgFormal.ClightRefinement.Arm64NumericProducerGprInputs

@@ -156,8 +156,13 @@ with `_i = 32` and preserves other temporaries, including the retained `_ctx`.
 The [Numeric register-storage proof](results/m5-numeric-producer-register-storage/README.md)
 derives all 62 writable word/tag cells and the complete GPR/SP/NZCV/vector
 reader results at that same reached memory. The joint architectural relation
-follows under explicit native register-state bindings; those bindings and
-consumer-continuation retention remain caller-admission work.
+follows under explicit native register-state bindings; those bindings remain
+caller-admission work.
+The [Numeric continuation proof](results/m5-numeric-producer-continuation/README.md)
+retains the actual continuation parameter through all 98 input visits and
+the setup suffix to the same reached storage/view state. Context, data,
+resources and traces are preserved; actual callee validity and native bindings
+remain the next caller-admission obligations.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 

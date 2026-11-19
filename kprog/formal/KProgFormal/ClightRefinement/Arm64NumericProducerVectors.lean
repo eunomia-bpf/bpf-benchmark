@@ -45,7 +45,8 @@ theorem initialized_vectors (ctx continuation : CC.Val) (k : CC.Cont)
       FrameBelow (CC.Positive.ofNat 204) initialMemory after ∧
       after.access = (allocation initialMemory).2.access ∧
       after.nextblock = (allocation initialMemory).2.nextblock ∧
-      finalLe.get Arm64Entry._ctx = some ctx := by
+      finalLe.get Arm64Entry._ctx = some ctx ∧
+      finalLe.get Arm64Entry._continuation = some continuation := by
   obtain ⟨init, words, tags, flagBlocks, lrBlock, before, le, traces, length, flagBindings,
       lrBinding, prefixRun, wordPointers, tagPointers, reads, flagReads, lrRead,
       caches, frame, access, next, ctxRead⟩ :=
@@ -86,7 +87,10 @@ theorem initialized_vectors (ctx continuation : CC.Val) (k : CC.Cont)
     exact ⟨cache,
       (other _ _ _ cache.baseBinding (by cases returns <;> decide +kernel) .Mint64 0).trans base,
       (other _ _ _ cache.validBinding (by cases returns <;> decide +kernel) .Mint8unsigned 0).trans valid⟩
-  · rw [temps Arm64Entry._ctx (by decide +kernel)]
-    exact ctxRead
+  · constructor
+    · rw [temps Arm64Entry._ctx (by decide +kernel)]
+      exact ctxRead.1
+    · rw [temps Arm64Entry._continuation (by decide +kernel)]
+      exact ctxRead.2
 
 end KProgFormal.ClightRefinement.Arm64NumericProducerVectors

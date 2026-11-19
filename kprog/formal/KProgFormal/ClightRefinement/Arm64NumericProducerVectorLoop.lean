@@ -84,7 +84,8 @@ theorem initialized_vectors (addresses : Arm64Registers.PointerOrigins)
       after.access = (allocation initialMemory).2.access ∧
       after.nextblock = (allocation initialMemory).2.nextblock ∧
       finalLe.get Arm64Entry._i = some (.Vint 32) ∧
-      finalLe.get Arm64Entry._ctx = some ctx := by
+      finalLe.get Arm64Entry._ctx = some ctx ∧
+      finalLe.get Arm64Entry._continuation = some continuation := by
   obtain ⟨init, words, tags, flagBlocks, lrBlock, vector, stackTags, spBlock, cells, entry, sources,
       tailSources, before, le, traces, length, flagBindings, lrBinding, spBinding, prefixRun,
       headerReads, _, tailReads, stackEqual, contextEqual, abiEqual, wordsEqual, tagsEqual,
@@ -177,6 +178,7 @@ theorem initialized_vectors (addresses : Arm64Registers.PointerOrigins)
     exact ⟨cache, entryEqual, storage,
       (other _ _ _ cache.baseBinding (by cases returns <;> decide +kernel) .Mint64 0).trans baseBefore,
       (other _ _ _ cache.validBinding (by cases returns <;> decide +kernel) .Mint8unsigned 0).trans validBefore⟩
-  · exact (temps Arm64Entry._ctx (by decide +kernel)).trans ctxRead
+  · exact ⟨(temps Arm64Entry._ctx (by decide +kernel)).trans ctxRead.1,
+      (temps Arm64Entry._continuation (by decide +kernel)).trans ctxRead.2⟩
 
 end KProgFormal.ClightRefinement.Arm64NumericProducerVectorLoop

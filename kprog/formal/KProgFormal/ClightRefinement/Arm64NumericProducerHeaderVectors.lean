@@ -65,7 +65,8 @@ theorem initialized_null_vectors (addresses : Arm64Registers.PointerOrigins)
       FrameBelow (CC.Positive.ofNat 204) initialMemory after ∧
       after.access = (allocation initialMemory).2.access ∧
       after.nextblock = (allocation initialMemory).2.nextblock ∧
-      finalLe.get Arm64Entry._ctx = some ctx := by
+      finalLe.get Arm64Entry._ctx = some ctx ∧
+      finalLe.get Arm64Entry._continuation = some continuation := by
   obtain ⟨init, words, tags, flagBlocks, lrBlock, vector, stackTags, spBlock, cells, entry, sources,
       before, le, traces, length, flagBindings, lrBinding, spBinding, prefixRun, headerReads,
       wordsEqual, tagsEqual, lrEqual, spEqual, wordPointers, tagPointers, reads, flagReads,

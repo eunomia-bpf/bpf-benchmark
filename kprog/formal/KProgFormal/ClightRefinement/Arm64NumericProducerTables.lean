@@ -36,7 +36,8 @@ theorem initialized_pointer_tables (ctx continuation : CC.Val) (k : CC.Cont)
       FrameBelow (CC.Positive.ofNat 204) initialMemory after ∧
       after.access = (allocation initialMemory).2.access ∧
       after.nextblock = (allocation initialMemory).2.nextblock ∧
-      finalLe.get Arm64Entry._ctx = some ctx := by
+      finalLe.get Arm64Entry._ctx = some ctx ∧
+      finalLe.get Arm64Entry._continuation = some continuation := by
   obtain ⟨init, blocks, before, le, traces, length, bindings, visits, reads, caches,
       frame, access, next, ctxRead⟩ :=
     Arm64NumericProducerGprInputs.initialized_gpr_inputs ctx continuation k values provider
@@ -112,7 +113,10 @@ theorem initialized_pointer_tables (ctx continuation : CC.Val) (k : CC.Cont)
         baseSeparate.2.2.1 baseSeparate.2.2.2 .Mint64 0).trans base,
       (other _ _ _ cache.validBinding validSeparate.1 validSeparate.2.1
         validSeparate.2.2.1 validSeparate.2.2.2 .Mint8unsigned 0).trans valid⟩
-  · rw [CC.PTree.gso _ _ _ _ (by decide +kernel : (registerDeclaration 30).resultTemp ≠ Arm64Entry._ctx)]
-    exact ctxRead
+  · constructor
+    · rw [CC.PTree.gso _ _ _ _ (by decide +kernel : (registerDeclaration 30).resultTemp ≠ Arm64Entry._ctx)]
+      exact ctxRead.1
+    · rw [CC.PTree.gso _ _ _ _ (by decide +kernel : (registerDeclaration 30).resultTemp ≠ Arm64Entry._continuation)]
+      exact ctxRead.2
 
 end KProgFormal.ClightRefinement.Arm64NumericProducerTables
