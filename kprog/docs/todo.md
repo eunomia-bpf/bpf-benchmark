@@ -104,7 +104,23 @@
   concrete input before the tied scalar, now selected correctly. Component
   fidelity class closed; actual checked-app coverage remains separate.
 
+- [x] P-B-cache-signed-indices (b098c091f; PERF 2026-11-19T20:19:39Z):
+  actual signed_index8 baseline omits expected cell5. Existing MOVSX/MOVSXD
+  constant tracking now sign-extends before destination lane handling;
+  known pointer offsets use signed64 modular addition, including joins.
+  29selectors/6B/native immediate readback/144shared-C UBSan cases pass0.
+  Source P/I/flags/limits unchanged; current13cell Tetra C exactly matches
+  pre-repair generated C, so no compiler repeat. Parent app/stock goals
+  remain open. See sparse-stack-cache-20261119/signed-index-result.json.
+
 - [ ] P-B-constant-ALU32 (PERF 2026-11-19T11:28:45Z): Tetragon request 6's
+  PERF 2026-11-19T20:19:39Z:13cell backend0/272.861s; inspector2853830 finds
+  1130referenced spills/5756declared bytes/4952Bminimum. Owned packer285102
+  cancelled20:17:45Z, rc-15/wrapper2 intentional, not llc/stock rejection.
+  Source-constant audit gives no further removable aligned cells: all13
+  have unknown-constant register writers. See immediate-storage.json and
+  source-constants-result.json; actual live-state reduction remains open.
+
   PERF 2026-11-19T20:04:37Z: immediate-store creation exclusion0a96f6eaa passes
   21selectors/4B emissions/native0x12345678/72full+72sparse UBSan cases.
   Actual retained Tetra13cache cells versus16, same424arena/17RETedges.

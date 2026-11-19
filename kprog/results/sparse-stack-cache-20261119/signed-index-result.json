@@ -1,0 +1,26 @@
+{
+  "selection_cases": 29,
+  "b_emission_cases": 6,
+  "immediate_native_result": 305419896,
+  "shared_c": {
+    "full": {
+      "tag_alias_partial_release_cases": 72
+    },
+    "sparse": {
+      "tag_alias_partial_release_cases": 72
+    }
+  },
+  "scope": "Generator selection, actual B emission and shared-C tag/alias/partial-write/replant checks; no stock/app/timing claim.",
+  "recorded": "2026-11-19T20:19:39Z",
+  "raw": "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/signed-after-20261119T201328Z",
+  "source_commit": "b098c091ffc4baad3f7a7212cb9ab86a022982f3",
+  "wrapper_exit": 0,
+  "finished": "2026-11-19T20:13:37Z",
+  "tetragon_generated_source_parity": {
+    "old_source": "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T200441Z-283144/trusted_x86.bpf.c",
+    "new_source": "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/signed-parity-20261119T201745Z/generated.bpf.c",
+    "equal_after_identical_include_spelling": true,
+    "scope": "Exact generated-C equality, no hashes, compiler repeat or runtime claim.",
+    "raw": "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/signed-parity-20261119T201745Z"
+  }
+}

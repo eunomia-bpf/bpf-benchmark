@@ -1349,3 +1349,19 @@ including joined alternatives. No instruction/tag/value handler, P input,
 flags or limit change. Regression boundaries cover8/16/32source widths,
 32bit destination zero extension, positive/negative/scaled/overflow indices
 and actual B emission. Prepared only; component validation/parity next.
+
+PERF 2026-11-19T20:19:39Z: b098c091f signed/wrapped index repair passes whole component0:
+29selectors,6B emissions,native immediate bytes and72full+72sparse UBSan
+cases. Current Tetra generated C equals the13cell source already compiled,
+after spelling the same include path; no hash or repeat compile. See
+signed-index-result.json. Source-constant audit finds every remaining13cell
+has a register writer with an unknown constant in at least one context;
+no further constant-only pruning follows (source-constants-result.json).
+
+13cell Tetra283144 backend0/272.861s, inspector2853830:272685blocks,
+1130referenced spills (929four-byte/201eight-byte),432B locals,5756declared
+bytes, conservative live-spill peak4868B. Even all4byte spills need4952B
+under current non-lifetime packer. Ended only exact owned packer285102
+(ancestor283144) at20:17:45Z; rc-15/464.271s, wrapper2 deliberate
+cancellation, not llc/stock rejection. Raw retained; immediate-storage.json
+records actual result. No limit/flag/runtime-gate or performance claim.

@@ -1,0 +1,96 @@
+{
+  "recorded": "2026-11-19T20:19:39Z",
+  "raw": "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/constants-20261119T200915Z",
+  "remaining_cells": [
+    {
+      "offset": -240,
+      "unknown_source_stores": [
+        1942
+      ]
+    },
+    {
+      "offset": -216,
+      "unknown_source_stores": [
+        97,
+        1141,
+        1203,
+        6126
+      ]
+    },
+    {
+      "offset": -200,
+      "unknown_source_stores": [
+        4183
+      ]
+    },
+    {
+      "offset": -192,
+      "unknown_source_stores": [
+        4629
+      ]
+    },
+    {
+      "offset": -184,
+      "unknown_source_stores": [
+        4716
+      ]
+    },
+    {
+      "offset": -176,
+      "unknown_source_stores": [
+        4346,
+        4707
+      ]
+    },
+    {
+      "offset": -168,
+      "unknown_source_stores": [
+        4233,
+        4619,
+        4861
+      ]
+    },
+    {
+      "offset": -128,
+      "unknown_source_stores": [
+        640,
+        2300
+      ]
+    },
+    {
+      "offset": -120,
+      "unknown_source_stores": [
+        645,
+        4075,
+        4225
+      ]
+    },
+    {
+      "offset": -112,
+      "unknown_source_stores": [
+        632,
+        3925
+      ]
+    },
+    {
+      "offset": -104,
+      "unknown_source_stores": [
+        624,
+        3937
+      ]
+    },
+    {
+      "offset": -80,
+      "unknown_source_stores": [
+        134
+      ]
+    },
+    {
+      "offset": -72,
+      "unknown_source_stores": [
+        4054
+      ]
+    }
+  ],
+  "scope": "Every remaining aligned13cell has a full-width register writer with unknown constant in at least one context; no further constant-only exclusion established. False alias is not a scalar proof."
+}

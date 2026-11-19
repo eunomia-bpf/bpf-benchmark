@@ -1,0 +1,48 @@
+{
+  "recorded": "2026-11-19T20:19:39Z",
+  "raw": "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T200441Z-283144",
+  "source_commit": "7f367a5a25fd3aae44009265ade24f3b3fcf62f3",
+  "inspection": "/workspaces/kprog-raw/perf/tetragon-stack-liveness-20261119/inspect-20261119T201213Z-285383",
+  "inspection_exit": 0,
+  "frontend_seconds": 40.965155796991894,
+  "bounds_seconds": 2.912831621011719,
+  "backend_seconds": 272.86118898700806,
+  "cache_cells": 13,
+  "machine_blocks": 272685,
+  "slots": 1132,
+  "referenced_slots": 1132,
+  "eligible_spill_slots": 1130,
+  "shapes": {
+    "default:8:8": 1,
+    "default:424:8": 1,
+    "spill-slot:8:8": 201,
+    "spill-slot:4:8": 929
+  },
+  "declared_bytes": 5756,
+  "conservative_live_spill_peak_bytes": 4868,
+  "peak_block": 104560,
+  "minimum_storage_bytes": 4952,
+  "packer_returncode": -15,
+  "packer_seconds": 464.27107716900355,
+  "wrapper_exit": 2,
+  "cancelled": {
+    "recorded": "2026-11-19T20:17:45Z",
+    "pid": 285102,
+    "ancestor_chain": [
+      283152,
+      283151,
+      283144
+    ],
+    "command": [
+      "/opt/virtme-ng/bin/python3",
+      "/workspaces/repository/kprog/x86/whole_word_spills.py",
+      "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T200441Z-283144/trusted_x86.bpf.before.mir",
+      "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T200441Z-283144/trusted_x86.bpf.packed.mir"
+    ],
+    "inspection": "/workspaces/kprog-raw/perf/tetragon-stack-liveness-20261119/inspect-20261119T201213Z-285383/before.json",
+    "minimum_declared_storage_bytes": 4952,
+    "reason": "All1130 spill slots remain referenced. Even all4byte spills plus432B locals need4952B; unchanged non-lifetime packer cannot fit4096B.",
+    "scope": "Intentional cancellation of owned offline packing experiment, not llc/stock rejection or a production gate."
+  },
+  "scope": "Changed13cell retained Tetragon compile intentionally cancelled after storage inspection; not llc/stock rejection, final B or runtime gain. All raw retained, no limit change."
+}
