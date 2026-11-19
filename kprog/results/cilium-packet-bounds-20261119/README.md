@@ -419,3 +419,30 @@ fix of its own and is independent of the packet work.
 That also means the two Cilium defect classes now both have their fix in the tree, and the remaining open
 item is the packet-class end-to-end count: `852c2bfe3` emits the per-path bound (`333` predicates over the
 archived inputs, up from `201`), which is the shape verified `ACCEPT` on the host.
+
+## End to end: all 14 install, all 41 replay, no rejections left (omp 2026-11-20T01:05Z)
+
+PERF's `edge-validate.sh candidate` ran from `HEAD` = `7ca1aaec6` (which contains `852c2bfe3` plus my
+result commits) and finished `exit-code=0` at 23:11:02Z, rebuilding the compiler base first. Two independent
+readings:
+
+**Live Cilium application** (`<that dir>/cilium/service.tar.gz`): **14 requests, 14 `checked-sim-c` all
+installing, 0 rejections.** Every instance of the two programs that failed throughout
+(`9effc137…`, `874d0fb3…`) installs now; the capture's composition is unchanged from the previous failing
+run, so this is the same population measured before and after the fix, not a smaller window.
+
+**Replay over the archived inputs** (`<that dir>/replay/`, 41 requests — the exact 41-request packet-class
+set): **41/41 `status=0, b_emitted=true`.** Every input that produces a checked program now also passes the
+lowering, including the ones whose live runs are `direct-native`.
+
+So the packet-bounds class is closed at both levels:
+
+| measurement | before | with `852c2bfe3` |
+|---|---|---|
+| live Cilium capture, requests installing | 8 / 14 (and 6 `only read`-free packet rejects) | **14 / 14** |
+| replay over the 41 archived packet-class inputs | — | **41 / 41** |
+| predicates lowered over the 41 | 201 | **333** |
+| store-class inputs canonicalized | 0 / 6 | **6 / 6** |
+
+Remaining known gaps, both separate defects and both unchanged by this: request 64's
+`NATIVE_LAB_TRUSTED_CHUNK` arming `EINVAL`, and the emitter's three relative-table refusals.
