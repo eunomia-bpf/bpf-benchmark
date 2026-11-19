@@ -275,3 +275,17 @@ canonicalizing `data` to one SSA value at the read, or by emitting the bound aga
 The admitted set is still identical (`len - data_len >= K` ⇔ `data + K <= data_end`), so this is a
 placement problem, not a semantic one. Which of the two fixes is used is PERF's call, since it owns the
 file.
+
+### How general the placement problem is (omp 2026-11-19T22:52Z)
+
+Counted `skb->data` loads (`*(u32 *)(r<ctx> + 0x4c)`) in the generated `classifier` section of all 41
+rejected programs:
+
+| loads of `skb->data` | 1 | 2 | 3 | 4 | 5 | 6 | 10 | 38 |
+|---|---|---|---|---|---|---|---|---|
+| programs | 8 | 7 | 2 | 8 | 4 | 5 | 3 | 4 |
+
+**33 of the 41 load `skb->data` more than once**, up to 38 times, so for most of the class the bound
+that matters is the one on the load the *read* uses, not the load the matcher happened to match. That is
+why a correct predicate lowering left the install count unchanged: it is one bound per entry, on a body
+that re-reads `data` throughout.
