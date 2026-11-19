@@ -11,3 +11,6 @@ diagnose-stack:
 .PHONY: post-contracts
 post-contracts:
 	python3 $(ROOT)/kprog/results/b-analysis-flags-20261119/post-contracts.py $(OUT)
+.PHONY: resume-post-contracts
+resume-post-contracts:
+	python3 $(ROOT)/kprog/results/b-analysis-flags-20261119/resume-post-contracts.py $(OUT)
