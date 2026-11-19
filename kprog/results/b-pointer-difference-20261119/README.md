@@ -60,3 +60,16 @@ replay; abd9bea3e exposes the sole probe read-only inside virtme's fresh
 temporary directory. No production input is changed. No guest or stock
 result has run at this checkpoint. The fixture's scalar TEST_RUN uses the
 kernel's default XDP context; the16native controls are separate evidence.
+
+PERF 2026-11-19T18:45:59Z: Confirmation247989 completed0 at18:42:21Z. The revised
+fixture uses permitted ingress_ifindex and full-width tag spills; all16
+native cases pass. Stock accepts B and TEST_RUN returns1, matching the
+queried default loopback ifindex1. Kernel test_run.c uses loopback queue0
+when ctx_in is absent; ctx_out does not synthesize that ingress field.
+Previous off20 rejection and default-return expectations stay in raw.
+Retained Tracee30 backend replay passes without repeating its C frontend:
+new tag4 test27618 precedes subtraction27622, skipping to27626 on the
+nonstack path; old sub27607 preceded tag27613. Eleven differences are
+anchored. This is not actual Tracee B stock acceptance or app coverage.
+confirmation-result.json and fixed-tracee30-excerpt.txt contain compact
+evidence; full raw /workspaces/kprog-raw/perf/b-pointer-difference-20261119/confirm-20261119T184205Z-247989.

@@ -1,0 +1,40 @@
+{
+  "selection_cases": 18,
+  "b_emission_cases": 3,
+  "shared_c": {
+    "full": {
+      "tag_alias_partial_release_cases": 72
+    },
+    "sparse": {
+      "tag_alias_partial_release_cases": 72
+    }
+  },
+  "scope": "Generator selection, actual B emission and shared-C tag/alias/partial-write/replant checks; no stock/app/timing claim.",
+  "source_commit": "7087690eef48d3cd67555edb41033d832d4620aa",
+  "raw": "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/check-20261119T184205Z-247988",
+  "finished": "2026-11-19T18:42:15Z",
+  "exit_code": 0,
+  "sanitizer": "Clang18 undefined-behavior instrumentation, linked to installed libubsan; both full and sparse pass",
+  "tetragon_arena_bytes": 424,
+  "tetragon_previous_cache_cells": 53,
+  "tetragon_cache_words": [
+    23,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    35,
+    37,
+    38,
+    39,
+    40,
+    43,
+    44
+  ],
+  "tetragon_cache_cells": 16,
+  "retained_tetragon_b_compiled": false
+}

@@ -9,6 +9,10 @@
 ## 0. Lane 目标与待办
 
 - [ ] P-B-pointer-integer-difference (PERF live Tracee 2026-11-19):
+  Confirmation247989/7087690ee completed0:16native fixture cases, stock B
+  acceptance and TEST_RUN retval1/default loopbackifindex1 pass. Retained30
+  B now tests tag4 at27618 before subtraction27622;11sites anchored.
+  Actual Tracee B stock acceptance/current-app confirmation remains open.
   Latest: 4efe79d40 anchors exact i64 ptrtoint-pair subtraction in B only.
   Validation155130 completed0: all16native cases, four selection/exclusion
   controls and existing ALU32 controls pass. Retained27 now tests tag4 at
@@ -76,6 +80,10 @@
   fidelity class closed; actual checked-app coverage remains separate.
 
 - [ ] P-B-constant-ALU32 (PERF 2026-11-19T11:28:45Z): Tetragon request 6's
+  Sparse-cache component7087690ee passes18selectors/3B emissions/72C
+  tag+alias+lifetime cases per layout with UBSan, worker247988. Retained6
+  renders16cells versus53 with unchanged424B arena; full B compile next.
+  Actual emitted frame/stock/current-app coverage and speed remain open.
   Read-only inventory195833/e9d43500b completed0:2,538ABI states/18contexts,
   original424B arena/53cells,91full-width stores (39known stack/52external),
   zero unknown destinations/RSP states. Pointer dictionaries contain43

@@ -1173,3 +1173,15 @@ pointer dictionary covers43. Next is conservative generator enumeration
 with unknown aliases retaining all cells, after preservation regressions;
 no production pruning or speed claim yet. Source evidence is appended to
 results/tetragon-stack-liveness-20261119/cache-inventory-result.json.
+
+PERF 2026-11-19T18:45:59Z: Conservative sparse-cache generator is implemented and
+component-tested through7087690ee. Worker247988 passes18alias/selection
+cases,3B emissions,72C tag/lifetime cases per full/sparse layout with UBSan.
+Retained Tetragon6 renders16cache cells instead of53, arena unchanged424B.
+No native-byte trimming, flag/limit/runtime-check change or speed claim.
+Complete retained B compilation is the next validation. The prior UBSan
+attribution was premature: invalid test AUX/RSP displacement caused it;
+corrected operands now pass the sanitizer. See sparse-stack-cache-20261119.
+Pointer subtraction247989 also passes focused stock load/TEST_RUN and
+retained30 emission, with test27618 before sub27622. Whole Tracee stock
+coverage remains open; see b-pointer-difference-20261119.

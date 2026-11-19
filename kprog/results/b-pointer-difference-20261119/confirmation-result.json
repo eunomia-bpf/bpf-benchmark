@@ -1,0 +1,104 @@
+{
+  "source_commit": "7087690eef48d3cd67555edb41033d832d4620aa",
+  "raw": "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/confirm-20261119T184205Z-247989",
+  "exit_code": 0,
+  "finished": "2026-11-19T18:42:21Z",
+  "stock_fixture": {
+    "stock_accepted": true,
+    "test_run_retval": 1,
+    "default_ingress_ifindex": 1,
+    "scope": "Focused B fixture only; no application coverage or timing"
+  },
+  "native_fixture_cases": 16,
+  "retained_request": 30,
+  "b_commands": [
+    {
+      "command": [
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+        "/workspaces/kprog-raw/perf/tracee-live-failures-20261119/recovery-20261119T163803Z-17194/source-mapping/30/frontend.ll",
+        "-o",
+        "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/confirm-20261119T184205Z-247989/tracee30/bounds.bc"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "llvm-dis-18",
+        "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/confirm-20261119T184205Z-247989/tracee30/bounds.bc",
+        "-o",
+        "-"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-w",
+        "-g",
+        "-O1",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-c",
+        "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/confirm-20261119T184205Z-247989/tracee30/bounds.bc",
+        "-mllvm",
+        "-stop-before=prologepilog",
+        "-o",
+        "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/confirm-20261119T184205Z-247989/tracee30/replay.bpf.before.mir"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/opt/virtme-ng/bin/python3",
+        "/workspaces/repository/kprog/x86/whole_word_spills.py",
+        "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/confirm-20261119T184205Z-247989/tracee30/replay.bpf.before.mir",
+        "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/confirm-20261119T184205Z-247989/tracee30/replay.bpf.packed.mir"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "llc-18",
+        "-O1",
+        "-march=bpf",
+        "-mcpu=v4",
+        "-bpf-stack-size=4096",
+        "-start-before=prologepilog",
+        "-filetype=obj",
+        "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/confirm-20261119T184205Z-247989/tracee30/replay.bpf.packed.mir",
+        "-o",
+        "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/confirm-20261119T184205Z-247989/tracee30/replay.bpf.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "llvm-objdump-18",
+        "-dl",
+        "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/confirm-20261119T184205Z-247989/tracee30/replay.bpf.o"
+      ],
+      "returncode": 0
+    }
+  ],
+  "old_b": {
+    "subtraction_pc": 27607,
+    "tag_test_pc": 27613
+  },
+  "new_b": {
+    "tag_test_pc": 27618,
+    "subtraction_pc": 27622,
+    "non_stack_target_pc": 27626
+  },
+  "anchored_differences": 11,
+  "scope": "Focused stock fixture acceptance/execution and retained request30 B emission/control-flow only. Actual Tracee B stock acceptance, whole-app coverage and timing remain separate."
+}
