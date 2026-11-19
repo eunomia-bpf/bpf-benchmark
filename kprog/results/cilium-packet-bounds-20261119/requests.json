@@ -11,7 +11,7 @@
  },
  {
   "request_id": 2,
-  "class": "install",
+  "class": "packet",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 0,
@@ -71,7 +71,7 @@
  },
  {
   "request_id": 8,
-  "class": "install",
+  "class": "packet",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 0,
@@ -81,7 +81,7 @@
  },
  {
   "request_id": 9,
-  "class": "packet",
+  "class": "install",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 1,
@@ -91,7 +91,7 @@
  },
  {
   "request_id": 10,
-  "class": "packet",
+  "class": "install",
   "section": "classifier",
   "ctx_data_end_reads": 1,
   "ctx_data_reads": 4,
@@ -121,7 +121,7 @@
  },
  {
   "request_id": 13,
-  "class": "install",
+  "class": "packet",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 0,
@@ -131,7 +131,7 @@
  },
  {
   "request_id": 14,
-  "class": "only_read",
+  "class": "emitter_relative_table",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 2,
@@ -171,7 +171,7 @@
  },
  {
   "request_id": 18,
-  "class": "packet",
+  "class": "install",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 3,
@@ -191,7 +191,7 @@
  },
  {
   "request_id": 20,
-  "class": "packet",
+  "class": "only_read",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 5,
@@ -211,7 +211,7 @@
  },
  {
   "request_id": 22,
-  "class": "emitter_relative_table"
+  "class": "packet"
  },
  {
   "request_id": 23,
@@ -265,7 +265,7 @@
  },
  {
   "request_id": 28,
-  "class": "packet",
+  "class": "install",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 3,
@@ -285,7 +285,7 @@
  },
  {
   "request_id": 30,
-  "class": "install",
+  "class": "packet",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 0,
@@ -305,7 +305,7 @@
  },
  {
   "request_id": 32,
-  "class": "only_read",
+  "class": "emitter_relative_table",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 2,
@@ -325,7 +325,7 @@
  },
  {
   "request_id": 34,
-  "class": "install",
+  "class": "packet",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 0,
@@ -355,7 +355,7 @@
  },
  {
   "request_id": 37,
-  "class": "packet",
+  "class": "install",
   "section": "classifier",
   "ctx_data_end_reads": 6,
   "ctx_data_reads": 8,
@@ -365,7 +365,7 @@
  },
  {
   "request_id": 38,
-  "class": "packet",
+  "class": "only_read",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 5,
@@ -375,7 +375,7 @@
  },
  {
   "request_id": 39,
-  "class": "install",
+  "class": "packet",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 0,
@@ -385,7 +385,7 @@
  },
  {
   "request_id": 40,
-  "class": "emitter_relative_table"
+  "class": "only_read"
  },
  {
   "request_id": 41,
@@ -399,7 +399,7 @@
  },
  {
   "request_id": 42,
-  "class": "packet",
+  "class": "install",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 2,
@@ -419,7 +419,7 @@
  },
  {
   "request_id": 44,
-  "class": "only_read",
+  "class": "install",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 2,
@@ -439,7 +439,7 @@
  },
  {
   "request_id": 46,
-  "class": "install",
+  "class": "packet",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 0,
@@ -449,7 +449,7 @@
  },
  {
   "request_id": 47,
-  "class": "packet",
+  "class": "install",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 3,
@@ -489,7 +489,7 @@
  },
  {
   "request_id": 51,
-  "class": "install",
+  "class": "packet",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 0,
@@ -519,7 +519,7 @@
  },
  {
   "request_id": 54,
-  "class": "install",
+  "class": "packet",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 0,
@@ -539,7 +539,7 @@
  },
  {
   "request_id": 56,
-  "class": "only_read",
+  "class": "emitter_relative_table",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 2,
@@ -559,11 +559,11 @@
  },
  {
   "request_id": 58,
-  "class": "emitter_relative_table"
+  "class": "only_read"
  },
  {
   "request_id": 59,
-  "class": "packet",
+  "class": "install",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 3,
@@ -583,7 +583,7 @@
  },
  {
   "request_id": 61,
-  "class": "only_read",
+  "class": "packet",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 2,
@@ -593,7 +593,7 @@
  },
  {
   "request_id": 62,
-  "class": "install",
+  "class": "packet",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 0,
@@ -603,7 +603,7 @@
  },
  {
   "request_id": 63,
-  "class": "packet",
+  "class": "install",
   "section": "classifier",
   "ctx_data_end_reads": 1,
   "ctx_data_reads": 4,
@@ -613,7 +613,7 @@
  },
  {
   "request_id": 64,
-  "class": "packet",
+  "class": "only_read",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 2,

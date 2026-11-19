@@ -11,7 +11,7 @@ the same reason** (`invalid access to packet`, counted request by request under 
 `80dbcfc51`) lowers the predicate in all 41 programs — independently verified here at IR and bytecode
 level. It does **not yet install**: Cilium re-run end to end with the fixed compiler still gives 14
 installs and 41 rejections, because the emitted bound sits on a different load of `skb->data` than the one
-the read uses, and 33 of the 41 reload `data` up to 38 times. The last two sections establish that with a
+the read uses: all 41 reload `data`, from 2 to 40 times. The last two sections establish that with a
 kernel-side reproduction. That is the current, open blocker.
 
 ```
@@ -286,13 +286,13 @@ file.
 ### How general the placement problem is (omp 2026-11-19T22:52Z)
 
 Counted `skb->data` loads (`*(u32 *)(r<ctx> + 0x4c)`) in the generated `classifier` section of all 41
-rejected programs:
+rejected programs, read from each request's own capsule:
 
-| loads of `skb->data` | 1 | 2 | 3 | 4 | 5 | 6 | 10 | 38 |
-|---|---|---|---|---|---|---|---|---|
-| programs | 8 | 7 | 2 | 8 | 4 | 5 | 3 | 4 |
+| loads of `skb->data` | 2 | 3 | 4 | 6 | 10 | 40 |
+|---|---|---|---|---|---|---|
+| programs | 8 | 2 | 12 | 10 | 5 | 4 |
 
-**33 of the 41 load `skb->data` more than once**, up to 38 times, so for most of the class the bound
-that matters is the one on the load the *read* uses, not the load the matcher happened to match. That is
-why a correct predicate lowering left the install count unchanged: it is one bound per entry, on a body
-that re-reads `data` throughout.
+**Every one of the 41 loads `skb->data` more than once**, from 2 up to 40 times, and 13 use more than one
+base register. So the bound that matters is the one on the load the *read* uses, not the load the matcher
+happened to match: bounding the matched load once can never be enough for this class. That is exactly why a
+correct predicate lowering left the install count at 14.
