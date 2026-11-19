@@ -277,10 +277,10 @@ theorem vector_input_returns (i : Fin 64) (m before supplied : CC.Mem)
 
 /-- The actual LR declaration immediately before vector inputs writes zero,
 framing all other declared local loads and old caller memory. -/
-theorem lr_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+theorem lr_initialized_bound (world : CC.CGenv) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (access : before.access = (allocation m).2.access) :
     ∃ block after, (allocation m).1.get Arm64Entry.___a64_lr = some (block, CC.tulong) ∧
-      InternalRun ge 3 (.State producer (flagDeclaration 3).rest k (allocation m).1 le before)
+      InternalRun world 3 (.State producer (flagDeclaration 3).rest k (allocation m).1 le before)
         (.State producer vectorStart k (allocation m).1 le after) ∧
       CC.Mem.loadv .Mint64 after (.Vptr block 0) = some (.Vlong 0) ∧
       (∀ id ty other, (allocation m).1.get id = some (other, ty) → id ≠ Arm64Entry.___a64_lr →
@@ -290,9 +290,9 @@ theorem lr_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
   obtain ⟨block, binding, fresh, writable⟩ := scalar_local m Arm64Entry.___a64_lr CC.tulong .Mint64
     (by decide +kernel) rfl (by decide)
   obtain ⟨after, stored, afterAccess⟩ := create_store m before .Mint64 block (.Vlong (0#64)) access writable
-  have exec : steps ge 3 (.State producer (flagDeclaration 3).rest k (allocation m).1 le before) =
+  have exec : steps world 3 (.State producer (flagDeclaration 3).rest k (allocation m).1 le before) =
       some (CC.E0, .State producer vectorStart k (allocation m).1 le after) ∧
-      InternalPath ge 3 (.State producer (flagDeclaration 3).rest k (allocation m).1 le before) := by
+      InternalPath world 3 (.State producer (flagDeclaration 3).rest k (allocation m).1 le before) := by
     rw [lr_zero_source]
     change CC.Mem.storev .Mint64 before (.Vptr block (0#64)) (.Vlong (0#64)) = some after at stored
     simp +decide [steps, InternalPath, InternalState, CC.doStep, CC.doEvalLvalue, CC.doEvalExpr,
@@ -309,6 +309,18 @@ theorem lr_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (allocation m)).symm)).2
   exact CC.Mem.load_store_other stored chunk other ofs
     (.inl (distinct _ _ _ _ bound binding different))
+
+theorem lr_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (access : before.access = (allocation m).2.access) :
+    ∃ block after, (allocation m).1.get Arm64Entry.___a64_lr = some (block, CC.tulong) ∧
+      InternalRun ge 3 (.State producer (flagDeclaration 3).rest k (allocation m).1 le before)
+        (.State producer vectorStart k (allocation m).1 le after) ∧
+      CC.Mem.loadv .Mint64 after (.Vptr block 0) = some (.Vlong 0) ∧
+      (∀ id ty other, (allocation m).1.get id = some (other, ty) → id ≠ Arm64Entry.___a64_lr →
+        ∀ chunk ofs, CC.Mem.load chunk after other ofs = CC.Mem.load chunk before other ofs) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock :=
+  lr_initialized_bound ge m before le k access
 
 /-- The real LR initializer reaches the first vector-input boundary in six
 internal transitions, retaining its zero word and complete local framing. -/

@@ -119,6 +119,11 @@ then executes the 10-transition x30 zero branch and 186 table transitions.
 Both real 31-slot tables point to the allocated cells, with all 31 word/tag
 readbacks derived, the 30 provider traces retained, and caches/context/global
 framing preserved. It reaches the source boundary before the four flags.
+The [Numeric flag composition](results/m5-numeric-producer-flags/README.md)
+continues through all four flag input visits and the separate LR-zero store.
+It derives the masked flag bytes and LR zero while preserving both tables,
+all GPR data, caches, context and global framing. The 34 actual provider traces
+remain ordered; the result stops before the 64 vector input visits.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 

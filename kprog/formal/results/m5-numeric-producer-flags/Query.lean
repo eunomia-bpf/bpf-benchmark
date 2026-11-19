@@ -1,0 +1,20 @@
+import KProgFormal.ClightRefinement.Arm64NumericProducerFlags
+open KProgFormal.ClightRefinement
+#check Arm64Producer.flag_input_ready_bound
+#print axioms Arm64Producer.flag_input_ready_bound
+#check Arm64Producer.flag_input_returns_bound
+#print axioms Arm64Producer.flag_input_returns_bound
+#check Arm64Producer.lr_initialized_bound
+#print axioms Arm64Producer.lr_initialized_bound
+#check Arm64ProducerFlagInputs.flag_inputs_initialized_bound
+#print axioms Arm64ProducerFlagInputs.flag_inputs_initialized_bound
+#check Arm64Producer.flag_input_ready
+#print axioms Arm64Producer.flag_input_ready
+#check Arm64Producer.flag_input_returns
+#print axioms Arm64Producer.flag_input_returns
+#check Arm64Producer.lr_initialized
+#print axioms Arm64Producer.lr_initialized
+#check Arm64ProducerFlagInputs.flag_inputs_initialized
+#print axioms Arm64ProducerFlagInputs.flag_inputs_initialized
+#check Arm64NumericProducerFlags.initialized_flags
+#print axioms Arm64NumericProducerFlags.initialized_flags

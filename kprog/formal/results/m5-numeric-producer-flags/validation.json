@@ -1,0 +1,169 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-numeric-producer-flags",
+  "proved": {
+    "world": "actual Arm64NumericProgram.ge and NumericMemory.initialMemory/program.initMem, original frontier204",
+    "phases": {
+      "prior_GPR_provider_visits": 30,
+      "new_flag_provider_visits": 4,
+      "per_flag_call_setup_internal_transitions": 3,
+      "per_flag_return_store_internal_transitions": 4,
+      "pure_LR_zero_internal_transitions": 3,
+      "total_provider_trace_entries": 34,
+      "vector_visits_consumed": 0
+    },
+    "start": "actual initialized producer Callstate, through already proved GPR inputs/x30zero/tables",
+    "final_stage": "actual vectorStart, before vector call0",
+    "data": "actual4 flagBlocks/bindings, masked flagWord byte readbacks and0-or-1 facts; real LR binding/zero word readback",
+    "preserved": "both actual31-slot tables/62 pointers, all31 GPR word/tag loads, both cold caches, ctx temp, original204 global contents/both permissions, allocation access/nextblock",
+    "trace": "actual30 GPR traces followed by4 flag traces; flattened real CC.Star in source order, no vector visit or additional LR provider/event",
+    "provider": "two explicit ProviderAt availability/ABI premises in actual Senv, retaining full supplied memory, actual traces, access/frontier/local reads and global frame; native implementation/admission remains open",
+    "reuse": "existing source flag declarations/Kcall/temp keys, byte mask/cast law, store construction and four-visit induction; only LR law changed in ProducerVectors",
+    "old_public_APIs": [
+      "flag_input_ready",
+      "flag_input_returns",
+      "lr_initialized",
+      "flag_inputs_initialized",
+      "Provider (old-world alias)"
+    ],
+    "layout": "scalar flag/LR operations need no new Cenv premise; actual input symbol/fundef64 binding supplied to calls",
+    "not_assumed": [
+      "provider post-memory equals pre-memory",
+      "provider traces empty",
+      "old and Numeric Senv equal",
+      "final register relation supplied",
+      "native NZCV/provider protocol admission proved"
+    ],
+    "C_runtime_benchmark_changes": false
+  },
+  "focused": [
+    {
+      "name": "focused1",
+      "exit": 0,
+      "jobs": 170,
+      "log": "focused1.log",
+      "note": "Shared generic flags/LR/sequence and old clients pass first attempt."
+    },
+    {
+      "name": "focused2",
+      "exit": 1,
+      "log": "focused2.log",
+      "note": "Only reserved Lean local identifier prefix in rcases pattern; renamed prefixRun without statement/semantic/domain/limit changes. Attempt retained."
+    },
+    {
+      "name": "focused3",
+      "exit": 0,
+      "jobs": 182,
+      "log": "focused3.log",
+      "note": "Actual initialized flag/LR composition passes; new module3.6s."
+    }
+  ],
+  "public_queries": {
+    "exit": 0,
+    "theorems": 9,
+    "log": "Query-1.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64Producer.flag_input_ready_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.flag_input_returns_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.lr_initialized_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProducerFlagInputs.flag_inputs_initialized_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.flag_input_ready": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.flag_input_returns": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.lr_initialized": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProducerFlagInputs.flag_inputs_initialized": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericProducerFlags.initialized_flags": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "full_lake_build": {
+    "exit": 0,
+    "jobs": 327,
+    "attempts": 1,
+    "log": "lake-build1.log"
+  },
+  "export_parity": {
+    "exit": 0,
+    "files": 23,
+    "bytes": 243488732,
+    "reference": "9c617740f",
+    "all_identical": true,
+    "log": "export-parity1.log"
+  },
+  "limits": {
+    "heartbeats": 200000,
+    "recursion": 512,
+    "address_space_GiB": 32,
+    "workers": 1,
+    "build_CPU": 17,
+    "read_query_git_CPU": 16,
+    "timing_lock": "shared",
+    "async": false
+  },
+  "remaining": [
+    "actual64 vector visits/world transport, completing98 provider visits",
+    "actual header/RAW/register Storage/caller and native/provider admission",
+    "relative caches/materialization",
+    "physical MemoryRep/alias/origin/control",
+    "all-family O1/O2/O4 recount",
+    "remaining M6 and fresh final Lake/make check"
+  ],
+  "native_make_check": "Not repeated for Lean-only step; last whole PASS5236c0e9677f635526fdd515cde5195b2ba0810c. Fresh final confirmation remains due at goal closure.",
+  "complete_ISA_handler_families": 0,
+  "milestones": {
+    "M1_M4": "done",
+    "M5": "open",
+    "M6": "open"
+  }
+}

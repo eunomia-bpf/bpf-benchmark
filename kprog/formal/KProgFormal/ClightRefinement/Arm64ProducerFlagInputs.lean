@@ -9,15 +9,18 @@ open Arm64Producer
 /-- Required kind-6 outcomes at each actual flag visit, retaining the complete
 returned word and supplied memory. Availability and frame obligations belong
 to the invocation environment; no fixed full-word outcome is selected here. -/
-def Provider (m : CC.Mem) (values : Fin 4 → BitVec 64) : Prop :=
+def ProviderAt (world : CC.CGenv) (m : CC.Mem) (values : Fin 4 → BitVec 64) : Prop :=
   ∀ (i : Fin 4) (before : CC.Mem), before.access = (allocation m).2.access →
     ∃ trace supplied,
-      CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv ge.genv_genv)
+      CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv world.genv_genv)
         [.Vint (6#32)] before trace (.Vlong (values i)) supplied ∧
       supplied.access = before.access ∧ supplied.nextblock = before.nextblock ∧
       FrameBelow m.nextblock before supplied ∧
       ∀ id ty block, (allocation m).1.get id = some (block, ty) →
         ∀ chunk ofs, CC.Mem.load chunk supplied block ofs = CC.Mem.load chunk before block ofs
+
+def Provider (m : CC.Mem) (values : Fin 4 → BitVec 64) : Prop :=
+  ProviderAt ge m values
 
 private def stage (n : Nat) : CC.Stmt :=
   if h : n < 4 then flagDeclarationStage ⟨n, h⟩ else (flagDeclaration 3).rest
@@ -30,13 +33,16 @@ private theorem next_stage : ∀ i : Fin 4, (flagDeclaration i).rest = stage (i.
 private theorem names_distinct : ∀ i j : Fin 4, i ≠ j →
     (flagDeclaration i).name ≠ (flagDeclaration j).name := by decide +kernel
 
-private theorem run_suffix (m : CC.Mem) (blocks : Fin 4 → CC.Block)
+private theorem run_suffix (world : CC.CGenv)
+    (inputBinding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input =
+        some (CC.Positive.ofNat 64) ∧
+      CC.Genv.findFunctPtr world.genv_genv (CC.Positive.ofNat 64) = some Arm64OriginCache.inputFunction) (m : CC.Mem) (blocks : Fin 4 → CC.Block)
     (bindings : ∀ i, (allocation m).1.get (flagDeclaration i).name = some (blocks i, CC.tuchar))
-    (values : Fin 4 → BitVec 64) (provider : Provider m values) (count : Nat) :
+    (values : Fin 4 → BitVec 64) (provider : ProviderAt world m values) (count : Nat) :
     ∀ start, start + count = 4 → ∀ (before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont),
     before.access = (allocation m).2.access →
     ∃ after finalLe, ∃ traces : List CC.Trace, traces.length = count ∧
-      CC.Star (CC.Step2 ge) (.State producer (stage start) k (allocation m).1 le before)
+      CC.Star (CC.Step2 world) (.State producer (stage start) k (allocation m).1 le before)
         traces.flatten (.State producer (stage 4) k (allocation m).1 finalLe after) ∧
       (∀ j : Fin 4, start ≤ j.val → CC.Mem.load .Mint8unsigned after (blocks j) 0 =
         some (.Vint (flagWord (values j)))) ∧
@@ -64,11 +70,11 @@ private theorem run_suffix (m : CC.Mem) (blocks : Fin 4 → CC.Block)
     obtain ⟨trace, supplied, call, providerAccess, providerNext, providerFrame, providerLocals⟩ :=
       provider i before access
     obtain ⟨block, middle, binding, headRun, headRead, _, headLocals, headFrame, headAccess, headNext⟩ :=
-      flag_input_returns i m before supplied le k (values i) trace call (providerAccess.trans access)
+      flag_input_returns_bound world inputBinding i m before supplied le k (values i) trace call (providerAccess.trans access)
     have sameBlock : block = blocks i := congrArg Prod.fst (Option.some.inj (binding.symm.trans (bindings i)))
     subst block
     change CC.Mem.load .Mint8unsigned middle (blocks i) 0 = some (.Vint (flagWord (values i))) at headRead
-    have head : CC.Star (CC.Step2 ge) (.State producer (stage start) k (allocation m).1 le before)
+    have head : CC.Star (CC.Step2 world) (.State producer (stage start) k (allocation m).1 le before)
         trace (.State producer (stage (start + 1)) k (allocation m).1
           (le.set (flagDeclaration i).inputTemp (.Vlong (values i))) middle) := by
       have startStage : stage start = flagDeclarationStage i := by
@@ -106,14 +112,17 @@ private theorem run_suffix (m : CC.Mem) (blocks : Fin 4 → CC.Block)
 /-- Four actual flag calls followed by the actual three-transition LR-zero
 assignment. All masked flag bytes are derived, and the next state is exactly
 vectorStart, before any of its64 calls have been consumed. -/
-theorem flag_inputs_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
-    (values : Fin 4 → BitVec 64) (provider : Provider m values)
+theorem flag_inputs_initialized_bound (world : CC.CGenv)
+    (inputBinding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input =
+        some (CC.Positive.ofNat 64) ∧
+      CC.Genv.findFunctPtr world.genv_genv (CC.Positive.ofNat 64) = some Arm64OriginCache.inputFunction) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (values : Fin 4 → BitVec 64) (provider : ProviderAt world m values)
     (access : before.access = (allocation m).2.access) :
     ∃ blocks : Fin 4 → CC.Block, ∃ lrBlock after finalLe, ∃ traces : List CC.Trace,
       traces.length = 4 ∧
       (∀ i, (allocation m).1.get (flagDeclaration i).name = some (blocks i, CC.tuchar)) ∧
       (allocation m).1.get Arm64Entry.___a64_lr = some (lrBlock, CC.tulong) ∧
-      CC.Star (CC.Step2 ge) (.State producer afterPointerTables k (allocation m).1 le before)
+      CC.Star (CC.Step2 world) (.State producer afterPointerTables k (allocation m).1 le before)
         traces.flatten (.State producer vectorStart k (allocation m).1 finalLe after) ∧
       (∀ i, CC.Mem.load .Mint8unsigned after (blocks i) 0 = some (.Vint (flagWord (values i)))) ∧
       CC.Mem.load .Mint64 after lrBlock 0 = some (.Vlong 0) ∧
@@ -134,9 +143,9 @@ theorem flag_inputs_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Co
   have bindings : ∀ i, (allocation m).1.get (flagDeclaration i).name = some (blocks i, CC.tuchar) :=
     fun i => Classical.choose_spec (storage i)
   obtain ⟨middle, finalLe, traces, length, run, reads, _, locals, temps, frame, finalAccess, next⟩ :=
-    run_suffix m blocks bindings values provider 4 0 rfl before le k access
+    run_suffix world inputBinding m blocks bindings values provider 4 0 rfl before le k access
   obtain ⟨lrBlock, after, lrBinding, lrRun, lrRead, lrLocals, lrFrame, lrAccess, lrNext⟩ :=
-    lr_initialized m middle finalLe k (finalAccess.trans access)
+    lr_initialized_bound world m middle finalLe k (finalAccess.trans access)
   have source : stage 0 = afterPointerTables := first_flag_stage
   have target : stage 4 = (flagDeclaration 3).rest := rfl
   refine ⟨blocks, lrBlock, after, finalLe, traces, length, bindings, lrBinding, ?_, ?_, lrRead,
@@ -149,6 +158,25 @@ theorem flag_inputs_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Co
   · intro id ty block bound notFlags notLr chunk ofs
     exact (lrLocals id ty block bound notLr chunk ofs).trans
       (locals id ty block bound notFlags chunk ofs)
+
+theorem flag_inputs_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (values : Fin 4 → BitVec 64) (provider : Provider m values)
+    (access : before.access = (allocation m).2.access) :
+    ∃ blocks : Fin 4 → CC.Block, ∃ lrBlock after finalLe, ∃ traces : List CC.Trace,
+      traces.length = 4 ∧
+      (∀ i, (allocation m).1.get (flagDeclaration i).name = some (blocks i, CC.tuchar)) ∧
+      (allocation m).1.get Arm64Entry.___a64_lr = some (lrBlock, CC.tulong) ∧
+      CC.Star (CC.Step2 ge) (.State producer afterPointerTables k (allocation m).1 le before)
+        traces.flatten (.State producer vectorStart k (allocation m).1 finalLe after) ∧
+      (∀ i, CC.Mem.load .Mint8unsigned after (blocks i) 0 = some (.Vint (flagWord (values i)))) ∧
+      CC.Mem.load .Mint64 after lrBlock 0 = some (.Vlong 0) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) →
+        (∀ i : Fin 4, id ≠ (flagDeclaration i).name) → id ≠ Arm64Entry.___a64_lr → ∀ chunk ofs,
+        CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
+      (∀ id, (∀ i : Fin 4, id ≠ (flagDeclaration i).inputTemp) → finalLe.get id = le.get id) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock :=
+  flag_inputs_initialized_bound ge producer_input_binding m before le k values provider access
 
 /-- Four flag outcomes, LR zero, all64 vector outcomes and the RAW suffix
 establish the existing register relation. Only masked flag bits are bound to
