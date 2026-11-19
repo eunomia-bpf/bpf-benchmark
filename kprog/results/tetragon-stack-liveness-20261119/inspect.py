@@ -9,9 +9,9 @@ import re
 SLOT = re.compile(r'%stack\.(\d+)')
 DECL = re.compile(r'  - \{ id: (\d+),.*type: ([\w-]+),.*size: (\d+), alignment: (\d+),')
 BLOCK = re.compile(r'  bb\.(\d+)[^:]*:')
-LOAD = re.compile(r'\s*(?:dead )?\$[rw]\d+ = (LDD|LDW32|LDH|LDB) %stack\.(\d+), 0(?:,|\s*$)')
-STORE = re.compile(r'\s*(STD|STW32|STH|STB) (?:killed )?\$[rw]\d+, %stack\.(\d+), 0(?:,|\s*$)')
-WIDTH = dict(LDD=8, LDW32=4, LDH=2, LDB=1, STD=8, STW32=4, STH=2, STB=1)
+LOAD = re.compile(r'\s*(?:dead )?\$[rw]\d+ = (LDD|LDW32|LDH|LDB) %stack\.(\d+), (-?\d+)(?:,|\s*$)')
+STORE = re.compile(r'\s*(STD|STW32|STH32|STB32) (?:killed )?\$[rw]\d+, %stack\.(\d+), (-?\d+)(?:,|\s*$)')
+WIDTH = dict(LDD=8, LDW32=4, LDH=2, LDB=1, STD=8, STW32=4, STH32=2, STB32=1)
 
 
 def inspect(lines):
@@ -45,18 +45,24 @@ def inspect(lines):
         if load or store:
             match = load or store
             number = int(match[2])
-            if referenced == {number} and slots[number]['size'] == WIDTH[match[1]]:
-                current['effects'].append((number, bool(store)))
+            width, offset = WIDTH[match[1]], int(match[3])
+            if referenced == {number} and 0 <= offset and offset + width <= slots[number]['size']:
+                current['effects'].append((number, width, offset, bool(store)))
                 continue
-        # Address-taking, partial writes and unfamiliar instructions cannot
-        # support a whole-slot lifetime claim. Keep them out of this analysis.
+        # Address-taking and unfamiliar instructions cannot support a direct
+        # byte-lifetime claim. Keep them out of this analysis.
         escaped.update(referenced)
     eligible = sorted(n for n, s in slots.items() if s['kind'] == 'spill-slot' and n not in escaped)
-    bits = {number: 1 << index for index, number in enumerate(eligible)}
+    bits, bases, next_bit = {}, {}, 0
+    for number in eligible:
+        bases[number] = next_bit
+        bits[number] = ((1 << slots[number]['size']) - 1) << next_bit
+        next_bit += slots[number]['size']
     predecessors = {number: [] for number in blocks}
     for number, block in blocks.items():
         used = defined = 0
-        block['effects'] = [(bits[n], store) for n, store in block['effects'] if n in bits]
+        block['effects'] = [(((1 << width) - 1) << (bases[n] + offset), store)
+                            for n, width, offset, store in block['effects'] if n in bits]
         for bit, store in block['effects']:
             if store:
                 defined |= bit
@@ -84,12 +90,8 @@ def inspect(lines):
                 if predecessor not in pending:
                     pending.add(predecessor)
                     queue.append(predecessor)
-    size_masks = {}
-    for number, bit in bits.items():
-        size = slots[number]['size']
-        size_masks[size] = size_masks.get(size, 0) | bit
     def byte_count(live):
-        return sum(size * (live & mask).bit_count() for size, mask in size_masks.items())
+        return live.bit_count()
     peaks = []
     for number, block in blocks.items():
         live = block['liveout']
@@ -100,7 +102,7 @@ def inspect(lines):
             size = byte_count(live)
             if size > peak_size:
                 peak, peak_size = live, size
-        peaks.append(dict(block=number, live_bytes=peak_size,
+        peaks.append(dict(block=number, live_bytes=peak_size, livein_bytes=byte_count(block['livein']),
                           slots=[n for n, bit in bits.items() if peak & bit]))
     return dict(slots=len(slots), declared_bytes=sum(s['size'] for s in slots.values()),
                 shapes=dict(Counter(f"{s['kind']}:{s['size']}:{s['alignment']}" for s in slots.values())),
@@ -108,13 +110,13 @@ def inspect(lines):
                 accesses=accesses,
                 blocks=len(blocks), dataflow_visits=visits,
                 peaks=sorted(peaks, key=lambda p: p['live_bytes'], reverse=True)[:10],
-                scope='Conservative CFG whole-slot liveness, not path feasibility, stock acceptance or a runtime measurement.')
+                scope='Conservative CFG byte liveness, not path feasibility, stock acceptance or a runtime measurement.')
 
 
 def selftest():
     head = ''.join(f"  - {{ id: {n}, type: spill-slot, size: 8, alignment: 8,\n" for n in range(3))
     # A branch joins a loop. Slot 0 must stay live through the loop, while
-    # the partial store to slot 2 excludes that slot from whole-slot claims.
+    # the partial store to slot 2 does not kill its upper four bytes.
     body = '''body:             |
   bb.0:
     successors: %bb.1, %bb.2
@@ -131,11 +133,13 @@ def selftest():
     STW32 $w1, %stack.2, 0
   bb.4:
     $r1 = LDD %stack.0, 0
+    $r2 = LDD %stack.2, 0
 '''
     result = inspect((head + body).splitlines())
-    assert result['eligible_spill_slots'] == 2 and result['excluded_slots'] == [2], result
-    assert max(p['live_bytes'] for p in result['peaks']) == 16, result
-    assert next(p for p in result['peaks'] if p['block'] == 3)['slots'] == [0, 1], result
+    assert result['eligible_spill_slots'] == 3 and result['excluded_slots'] == [], result
+    assert max(p['live_bytes'] for p in result['peaks']) == 24, result
+    loop = next(p for p in result['peaks'] if p['block'] == 3)
+    assert loop['slots'] == [0, 1, 2] and loop['livein_bytes'] == 20, result
     print('CFG join/loop/partial-store regression passed')
 
 
