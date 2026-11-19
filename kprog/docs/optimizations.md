@@ -1011,3 +1011,11 @@ commands and suite statuses succeed. Counts are observations, not a gate;
 Cilium is not constrained to an earlier endpoint count. This is not B stock
 verification or a speed result. The checked BCC timing guest is active.
 Receipts: results/checked-hash-ops-20261119/check-census.json (5035abdf5).
+
+PERF 2026-11-19T13:15:01Z: Numeric-boundary repair recipe 8abf716a5 is queued as
+worker407693 after the active timing batch. It carries the concrete operand
+alongside B's abstract scalar and lowers the boundary to actual bits on
+native compilation. The sole checked tools are rebuilt only after batch EX,
+timing SH and image EX are acquired. Native regression, B emission and six
+single-evaluation controls are pending; no fixed coverage or speed claim.
+Raw: /workspaces/kprog-raw/perf/numeric-context-bridge-20261119/fix-20261119T131416Z-407693.

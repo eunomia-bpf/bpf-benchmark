@@ -19,6 +19,12 @@
   input freezing. No corpus path hit or timing effect is inferred. Production
   changes follow the active batch's input lease. See
   results/numeric-context-bridge-20261119 (actual rows and IR evidence).
+  PERF 2026-11-19T13:14:16Z: Committed deferred repair recipe 8abf716a5.
+  Worker 407693 waits for the current batch EX lease, then applies the small
+  concrete/abstract operand boundary and rebuilds the sole checked tools.
+  Host regression also emits B and tests single evaluation. Production
+  sources remain unchanged while queued; host pass and source commit remain
+  pending. Do not start a duplicate repair worker.
 
 - [ ] P-B-constant-ALU32 (PERF 2026-11-19T11:28:45Z): Tetragon request 6's
   retained B has 438,579 machine blocks and a conservative 3,996-byte live
