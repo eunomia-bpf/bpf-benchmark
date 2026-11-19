@@ -1,5 +1,24 @@
 # Cilium head-length bounds
 
+PERF 2026-11-19T22:39Z: worker366677 completed0, fresh app status`ok`,
+run `x86_kvm_corpus_20261119_223501_349942`. Its service journal contains
+14requests: eight stock passes and six packet rejects, all successful native
+installs. The shim records85 manifest misses plus14 replacements. This is
+a different service population from the historical64; coverage of the
+historical41packet/sixstore set remains a separate objective.
+`fresh-coverage.json` reads each request's own capsule and records native
+hashes, verifier receipts and error tails. The reader now derives identity
+from the supplied archive; request ordinals from other runs carry separate
+meaning. Its historical regression still yields14/41/6/3.
+
+Allsix current rejects are `tail_no_service_ipv4`: requests4,5,8,9,11,14.
+Their byte16 read at130 uses the same packet base that has range16, so the
+SSA placement works there. The remaining path is a different branch:
+the 18byte guard at125-128 can fall through via its pointer comparison,
+then the scalar equality at129 leaves the byte16 access reachable with
+range16. Bounds/equality branch correspondence is the next compiler defect
+to reproduce. The full raw run and both replay sets remain preserved.
+
 PERF 2026-11-19T22:35Z: validator366677 rebuilt the canonical compiler from
 238c643fc at22:32:52Z and completed the focused compiler/stock checks.
 All12 positive/eight exclusion controls and five data-freshness cases pass.

@@ -59,6 +59,13 @@
   this is no new rejection or causal attribution. Diagnostics still wait.
 
 - [ ] P-B-cilium-headlen (PERF handoff 2026-11-19T20:22:55Z, OMP639663a85):
+  PERF 2026-11-19T22:39Z:366677 terminal0/appok, current service14requests:
+  eightstock/sixpacket, allnativeinstalled. Shim85manifestmisses/14replacements;
+  current population differs fromhistorical64, so41packet acceptance staysopen.
+  Allsixcurrent tail_no_service_ipv4 failuresreadbyte16 at130 withrange16;
+  18bytebound125-128 andscalar equality129 leave thisalternatebranchreachable.
+  Next reproducebounds/equality branchcorrespondence. fresh-coverage.json
+  retains actualnativehashes/receipts/errortails; readerhistorical14/41/6/3 passes.
   PERF 2026-11-19T22:35Z:366677 canonical rebuild/controls pass;5packet stock
   loads/4execution cases and1TC store stock load/4execution cases pass.
   All41packet/sixstore captures emit B, both Make targets0. Actualrequest7

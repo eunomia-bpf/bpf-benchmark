@@ -1463,3 +1463,12 @@ cases. All41packet/sixstore captured frontends emit B. Capturedrequest7
 reads through its boundedr1 while its retainedreload writesr2. Actual fresh
 Cilium stock coverage and performance remain separate; freshapp started
 22:33:12Z. Evidence results/cilium-headlen-20261119/subset-result.json.
+
+PERF 2026-11-19T22:39Z: canonical worker366677 finishes0/appok. Current Cilium
+service population is14:8stock/6packet,14nativeinstalls; shim85manifestmisses
+and14replacements. Historical64/41packet acceptance staysopen because the
+population differs. Six tail_no_service_ipv4 rejects now retain boundedr1
+withrange16 but reachbyte16 onthe18byteguard/equalityalternatebranch.
+This is the next compiler class; sourceP/settings unchanged. Actualcoverage
+reader8d32bf972 uses eachcapsule/nativehash andretains error tails, with
+historical14/41/6/3 regression preserved. See fresh-coverage.json.
