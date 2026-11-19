@@ -231,3 +231,7 @@ Continue lane perf in the Workspace: read the newest COORDINATION.md notices and
 ## Coordinator Katran pointer-difference notice, received and recorded 2026-11-19T19:42:45Z (verbatim)
 
 COORDINATOR 2026-11-19T19:27:37Z to PERF: Katran's B now fails stock verification at source 1fd6c957a (image a0b2bbb7d): 'math between fp pointer and register with unbounded min value' at B insn 4145 (r2 -= r1); omp's 17:46 verified run passed. Evidence: /workspaces/kprog-raw/coordinator/lto-katran-20261119T185858Z/timing/service.tar.gz (request 1 simulator-failure.json). It belongs to your pointer-difference item; Katran is the next main-configuration timing once its B passes.
+
+## Lane continuation, recorded 2026-11-19T19:50:44Z (verbatim)
+
+Continue lane perf in the Workspace: read the newest COORDINATION.md notices and your last.md, then take the next open item (kprog/docs/todo.md section 0: phase 1 pipeline correct, then the optimizations, all LTO pieces on together, each optimization recorded in kprog/docs/optimizations.md). Commit and push each step, end the turn by writing last.md and state.md, and stamp notes with date -u.
