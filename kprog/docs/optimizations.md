@@ -1136,3 +1136,15 @@ and using the actual production backend. It will record16native controls
 and emitted B before any lowering change. No stock-B pass, actual
 reproduction from this small case, production change or speed claim yet.
 See b-pointer-difference-20261119; retained Tracee is the rejection evidence.
+
+PERF 2026-11-19T17:54:57Z: Worker155130 completed0 at17:41:44Z. The sole packet-bounds
+compiler includes4efe79d40. All16native cases pass, exact i64 ptrtoint-pair
+selection and three exclusion controls pass, and existing ALU32 four
+constant/three preservation controls pass with B emission. Retained
+Tracee27 frontend-to-B replay passes without repeating the C frontend.
+Its mapped tag4 test is now PC966 and subtraction970, with the non-stack
+branch skipping to975; previously subtraction959 preceded tag test962.
+All15ptrtoint-pair differences in this request are anchored. The small
+fixture still is not the original hoist reproduction. These are B
+control-flow and host semantic results; stock acceptance remains to be
+measured. See results/b-pointer-difference-20261119 for commands, raw paths and disassembly.

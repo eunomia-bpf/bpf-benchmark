@@ -1,0 +1,23 @@
+     962:	b7 09 00 00 00 00 00 00	r9 = 0x0
+     963:	79 a4 90 fe 00 00 00 00	r4 = *(u64 *)(r10 - 0x170)
+     964:	bf 41 00 00 00 00 00 00	r1 = r4
+     965:	bc 57 00 00 00 00 00 00	w7 = w5
+; /workspaces/kprog-raw/coordinator/lto-apps-20261119/tracee_monitor-20261119T133821Z/timing/state/session-x9mp5xyg/requests/request-9lf7h3bo/generated/trusted_x86.bpf.c:1723
+     966:	56 05 08 00 04 00 00 00	if w5 != 0x4 goto +0x8 <LBB0_172>
+     967:	bf a1 00 00 00 00 00 00	r1 = r10
+; /workspaces/kprog-raw/coordinator/lto-apps-20261119/tracee_monitor-20261119T133821Z/timing/state/session-x9mp5xyg/requests/request-9lf7h3bo/generated/trusted_x86.bpf.c:1723
+     968:	07 01 00 00 e8 fe ff ff	r1 += -0x118
+     969:	bf 42 00 00 00 00 00 00	r2 = r4
+     970:	1f 12 00 00 00 00 00 00	r2 -= r1
+     971:	79 a1 d0 fe 00 00 00 00	r1 = *(u64 *)(r10 - 0x130)
+     972:	0f 21 00 00 00 00 00 00	r1 += r2
+     973:	07 01 00 00 e8 fe ff ff	r1 += -0x118
+     974:	bf 49 00 00 00 00 00 00	r9 = r4
+
+0000000000001e78 <LBB0_172>:
+; LBB0_172():
+; /workspaces/kprog-raw/coordinator/lto-apps-20261119/tracee_monitor-20261119T133821Z/timing/state/session-x9mp5xyg/requests/request-9lf7h3bo/generated/trusted_x86.bpf.c:1726
+     975:	7b 3a b0 ff 00 00 00 00	*(u64 *)(r10 - 0x50) = r3
+; /workspaces/kprog-raw/coordinator/lto-apps-20261119/tracee_monitor-20261119T133821Z/timing/state/session-x9mp5xyg/requests/request-9lf7h3bo/generated/trusted_x86.bpf.c:1723
+     976:	7b 1a 90 ff 00 00 00 00	*(u64 *)(r10 - 0x70) = r1
+; /workspaces/kprog-raw/coordinator/lto-apps-20261119/tracee_monitor-20261119T133821Z/timing/state/session-x9mp5xyg/requests/request-9lf7h3bo/generated/trusted_x86.bpf.c:1729

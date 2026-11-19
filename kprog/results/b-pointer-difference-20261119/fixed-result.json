@@ -1,0 +1,102 @@
+{
+  "source_commit": "2ace8ad4f117a7775a65e97664f7e601aea51613",
+  "candidate_commit": "4efe79d40",
+  "raw": "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/fix-20261119T174026Z-155130",
+  "exit_code": 0,
+  "finished": "2026-11-19T17:41:44Z",
+  "native_cases": 16,
+  "native_mismatches": 0,
+  "scope_controls": "one ptrtoint-pair i64 SUB selected; scalar/narrow/one-pointer SUB retained",
+  "constant_alu32": "four constant cases and three preservation cases pass; B emitted",
+  "retained_request": 27,
+  "retained_commands": [
+    {
+      "command": [
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+        "/workspaces/kprog-raw/perf/tracee-live-failures-20261119/recovery-20261119T163803Z-17194/source-mapping/27/frontend.ll",
+        "-o",
+        "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/fix-20261119T174026Z-155130/tracee27/bounds.bc"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "llvm-dis-18",
+        "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/fix-20261119T174026Z-155130/tracee27/bounds.bc",
+        "-o",
+        "-"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-w",
+        "-g",
+        "-O1",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-c",
+        "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/fix-20261119T174026Z-155130/tracee27/bounds.bc",
+        "-mllvm",
+        "-stop-before=prologepilog",
+        "-o",
+        "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/fix-20261119T174026Z-155130/tracee27/replay.bpf.before.mir"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "/opt/virtme-ng/bin/python3",
+        "/workspaces/repository/kprog/x86/whole_word_spills.py",
+        "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/fix-20261119T174026Z-155130/tracee27/replay.bpf.before.mir",
+        "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/fix-20261119T174026Z-155130/tracee27/replay.bpf.packed.mir"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "llc-18",
+        "-O1",
+        "-march=bpf",
+        "-mcpu=v4",
+        "-bpf-stack-size=4096",
+        "-start-before=prologepilog",
+        "-filetype=obj",
+        "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/fix-20261119T174026Z-155130/tracee27/replay.bpf.packed.mir",
+        "-o",
+        "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/fix-20261119T174026Z-155130/tracee27/replay.bpf.o"
+      ],
+      "returncode": 0
+    },
+    {
+      "command": [
+        "llvm-objdump-18",
+        "-dl",
+        "/workspaces/kprog-raw/perf/b-pointer-difference-20261119/fix-20261119T174026Z-155130/tracee27/replay.bpf.o"
+      ],
+      "returncode": 0
+    }
+  ],
+  "old_b": {
+    "subtraction_pc": 959,
+    "tag_test_pc": 962
+  },
+  "new_b": {
+    "tag_test_pc": 966,
+    "subtraction_pc": 970,
+    "non_stack_branch_target": 975
+  },
+  "anchored_differences": 15,
+  "scope": "B emission/control-flow repair and host native controls. No stock verifier acceptance, new app coverage or timing claim."
+}

@@ -38,3 +38,16 @@ and helper cleanup, so those paths stay untouched.
 - LANE PERF 2026-11-19T17:37:53Z: B pointer-difference candidate is limited to packet_bounds_ir.cpp: exact i64 subtraction of two ptrtoint operands becomes equivalent side-effect BPF subtraction in its original block. Native pre-B frontend and coordinator-owned files are untouched. Prepared only, not yet compiled or validated. Freeze exception6738e5efd cites actual Tracee27/30 mapping; evidence filename corrected forward. Regression bd6587ebe moves the native-base read before the branch and matches arena-start subtraction; baseline151259 waits timing SH then image SH on CPU19/4GiB, raw /workspaces/kprog-raw/perf/b-pointer-difference-20261119/test-20261119T173540Z-151259. The previous small fixture passed16native cases but did not reproduce hoisting. I restored timing SH after reading the later all-host-work instruction. No image, guest or current check input is changed.
 
 PERF 2026-11-19T17:41:16Z: bd6587ebe baseline151259 completed0: all16native cases pass. Small B tag test13 precedes subtraction16; this fixture still does not reproduce the application hoist. Candidate4efe79d40 (+26production lines) is unvalidated. Committed validator7bd0ffea5, worker155130, raw /workspaces/kprog-raw/perf/b-pointer-difference-20261119/fix-20261119T174026Z-155130, holds batchEX and waits timingSH behind OMP checked Katran136061; next imageEX, sole packet-bounds rebuild, exact fixture/four IR boundaries, prior ALU32 controls and retained Tracee27 frontend-to-B replay. No repeated C frontend or guest. Current image/check results belong to the coordinator. I leave its files and staged producer changes intact.
+
+PERF 2026-11-19T17:54:57Z: Worker155130 completed0 at17:41:44Z. The sole packet-bounds
+compiler includes4efe79d40. All16native cases pass, exact i64 ptrtoint-pair
+selection and three exclusion controls pass, and existing ALU32 four
+constant/three preservation controls pass with B emission. Retained
+Tracee27 frontend-to-B replay passes without repeating the C frontend.
+Its mapped tag4 test is now PC966 and subtraction970, with the non-stack
+branch skipping to975; previously subtraction959 preceded tag test962.
+All15ptrtoint-pair differences in this request are anchored. The small
+fixture still is not the original hoist reproduction. These are B
+control-flow and host semantic results; stock acceptance remains to be
+measured. fixed-result.json records commands and raw paths, and
+fixed-tracee27-excerpt.txt contains the mapped disassembly.
