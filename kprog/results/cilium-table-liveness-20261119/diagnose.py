@@ -34,6 +34,9 @@ with tarfile.open(archive) as service:
                 instruction=insn.raw if insn else None, reads=values.get('reads'),
                 writes=values.get('writes'), flags_read=values.get('flags_read'),
                 flags_written=values.get('flags_written'), visited=len(values['visited']),
+                visited_instructions=[dict(pc=pc, instruction=values['by_addr'][pc].raw,
+                    live=mask) for pc, mask in values['visited'].items()
+                    if pc in values['by_addr']],
                 table=[dict(pc=i.addr, instruction=i.raw) for i in candidate['window']],
                 scheduled=[dict(pc=i.addr, instruction=i.raw) for i in candidate['scheduled']],
                 choices=candidate['choices']))
