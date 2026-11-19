@@ -1,0 +1,53 @@
+--- a/kprog/x86/compile_sim_ir.cpp
++++ b/kprog/x86/compile_sim_ir.cpp
+@@ -1,5 +1,6 @@
+ // Translate the checked simulator's BPF-target IR to the native compiler IR.
+ // The source and its map/helper identities remain service-owned throughout.
++#include "llvm/Analysis/ValueTracking.h"
+ #include "llvm/IR/IRBuilder.h"
+ #include "llvm/IR/InstIterator.h"
+ #include "llvm/IR/InlineAsm.h"
+@@ -88,6 +89,35 @@
+   return result;
+ }
+ 
++// The same private arena has ordinary Mem semantics in the checked B pass
++// (packet_bounds_ir.cpp). Context/global/atomic accesses retain volatility.
++static unsigned normalizePrivateStack(Module &module) {
++  unsigned count=0;
++  for (auto &function:module) for (auto &instruction:instructions(function)) {
++    auto *load=dyn_cast<LoadInst>(&instruction);
++    auto *store=dyn_cast<StoreInst>(&instruction);
++    Value *pointer=nullptr;
++    if (load && load->isVolatile() && !load->isAtomic()) pointer=load->getPointerOperand();
++    if (store && store->isVolatile() && !store->isAtomic()) pointer=store->getPointerOperand();
++    if (!pointer) continue;
++    SmallVector<const Value *,4> objects;
++    getUnderlyingObjects(pointer,objects);
++    if (objects.empty()) continue;
++    bool privateStack=true;
++    for (auto *object:objects) {
++      auto *local=dyn_cast<AllocaInst>(object);
++      auto *type=local?dyn_cast<StructType>(local->getAllocatedType()):nullptr;
++      if (!type || type->getName()!="union.x86_sim_stack_mem") {
++        privateStack=false;break;
++      }
++    }
++    if (!privateStack) continue;
++    if (load) load->setVolatile(false);else store->setVolatile(false);
++    ++count;
++  }
++  return count;
++}
++
+ int main(int argc,char **argv) {
+   cl::ParseCommandLineOptions(argc,argv);
+   LLVMContext c; SMDiagnostic error; auto m=parseIRFile(Input,error,c);
+@@ -152,6 +182,7 @@
+   }
+   m->setTargetTriple("x86_64-unknown-linux-gnu");
+   m->setDataLayout("e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128");
++  errs()<<"native private stack accesses normalized="<<normalizePrivateStack(*m)<<'\n';
+   if (verifyModule(*m,&errs())) return 1;
+   std::error_code ec; ToolOutputFile out(Output,ec,sys::fs::OF_None);
+   if (ec) fail(ec.message());
