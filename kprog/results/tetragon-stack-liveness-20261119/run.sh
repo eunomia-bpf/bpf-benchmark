@@ -6,8 +6,6 @@ install -d "$out"
 printf '%s\n' "$out" > /workspaces/kprog-raw/perf/tetragon-stack-liveness-20261119/latest
 exec > "$out/run.log" 2>&1
 date -u +%FT%TZ > "$out/queued"
-exec 8>/workspaces/.agent-state/kprog-lanes/locks/timing
-flock -s 8
 git rev-parse HEAD > "$out/source-commit"
 date -u +%FT%TZ > "$out/started"
 input_prefix=${1:-/workspaces/kprog-raw/perf/b-analysis-flags-20261119/production-20261119T063707Z-211523/tetragon6/trusted_x86.bpf}
