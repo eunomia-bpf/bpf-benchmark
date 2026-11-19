@@ -1,6 +1,6 @@
 ROOT := /workspaces/repository
 BUILD := /var/tmp/kprog-tmp/perf/lock-prefix-review
-.PHONY: reproduce probe-atomics shared
+.PHONY: reproduce probe-atomics shared shared-bpf
 reproduce:
 	install -d $(BUILD)
 	clang-18 -c $(ROOT)/kprog/results/lock-prefix-review-20261119/fixture.S -o $(BUILD)/fixture.o
@@ -11,3 +11,6 @@ probe-atomics:
 
 shared:
 	python3 $(ROOT)/kprog/results/lock-prefix-review-20261119/test_shared.py $(OUT) $(BUILD)
+
+shared-bpf:
+	python3 $(ROOT)/kprog/results/lock-prefix-review-20261119/test_shared_bpf.py $(OUT) $(BUILD)
