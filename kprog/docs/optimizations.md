@@ -1237,3 +1237,10 @@ B emission completes and three native executions return20/22/22 as expected.
 Raw /workspaces/kprog-raw/perf/return-dispatch-20261119/check-20261119T192803Z. No stock/app/timing result.
 The existing retained inventory now checks generated per-PC dispatches against
 its independent observation of existing ABI states before the Tetragon compile.
+
+PERF 2026-11-19T19:29:29Z: Retained Tetragon inventory passes0 and independently checks
+all seven generated internal return dispatches against observed saved-address
+sets:17edges total (previous global dispatcher119), same2538ABI states,
+18contexts,424B arena and16cache cells. See return-dispatch-20261119/
+tetragon-inventory.json. This is generated-C structure, not a compiled-frame
+or performance result. Next one changed-source normal-O1 Tetragon compile.

@@ -1,0 +1,90 @@
+{
+  "retained_proof": "/workspaces/kprog-raw/perf/b-analysis-flags-20261119/production-20261119T063707Z-211523/tetragon6/trusted_x86.proof.o",
+  "metadata_capsule": "/workspaces/kprog-raw/verified/20261118-checked-hot/tetragon-c/state/session-4u0ra04z/requests/6.success.tar.gz",
+  "generated_return_dispatch_sites": [
+    {
+      "native_pc": 6757,
+      "label": "x86_sim_ret_dispatch_1a65",
+      "targets": [
+        1390
+      ]
+    },
+    {
+      "native_pc": 6971,
+      "label": "x86_sim_ret_dispatch_1b3b",
+      "targets": [
+        2186
+      ]
+    },
+    {
+      "native_pc": 7560,
+      "label": "x86_sim_ret_dispatch_1d88",
+      "targets": [
+        6903
+      ]
+    },
+    {
+      "native_pc": 7734,
+      "label": "x86_sim_ret_dispatch_1e36",
+      "targets": [
+        7000,
+        7041,
+        7088,
+        7135,
+        7182,
+        7229,
+        7276,
+        7323,
+        7366,
+        7411
+      ]
+    },
+    {
+      "native_pc": 7829,
+      "label": "x86_sim_ret_dispatch_1e95",
+      "targets": [
+        6708
+      ]
+    },
+    {
+      "native_pc": 8242,
+      "label": "x86_sim_ret_dispatch_2032",
+      "targets": [
+        7768,
+        7805
+      ]
+    },
+    {
+      "native_pc": 8326,
+      "label": "x86_sim_ret_dispatch_2086",
+      "targets": [
+        5966
+      ]
+    }
+  ],
+  "generated_return_dispatch_edges": 17,
+  "analysis_states": 2538,
+  "call_contexts": 18,
+  "generated_arena_bytes": 424,
+  "generated_cache_words": [
+    23,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    35,
+    37,
+    38,
+    39,
+    40,
+    43,
+    44
+  ],
+  "raw": "/workspaces/kprog-raw/perf/return-dispatch-20261119/inventory-20261119T192853Z",
+  "source_commit": "44938e17be486a428f2f5abd11fa11df24b665e0",
+  "scope": "Actual generated retained Tetragon C dispatch versus separately profiled ABI states; no final B, stock or timing claim."
+}

@@ -88,8 +88,10 @@
   5,284B minimum under current packing. Owned packer255788 cancelled19:18,
   stage-15/wrapper2, not compiler/stock rejection. Raw and actual storage
   receipts remain in sparse-stack-cache-20261119; sparse cells insufficient.
-  Next: existing per-RET analysis gives17edges instead of global119 across
-  seven internal sites, all exact. Preserve raw pop/release/default behavior.
+  Per-RET candidate d0849dd27 passes focused B/native regressions and actual
+  retained generated inventory:17edges instead of global119 across seven
+  sites, all exact. Raw pop/release/default preserved. One changed-source
+  normal-O1 Tetragon compile is next; no emitted-frame result yet.
   Actual emitted frame/stock/current-app coverage and speed remain open.
   Read-only inventory195833/e9d43500b completed0:2,538ABI states/18contexts,
   original424B arena/53cells,91full-width stores (39known stack/52external),
