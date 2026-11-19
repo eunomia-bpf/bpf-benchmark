@@ -92,3 +92,25 @@ same eight released groups remain unequal. baseline-with-guards.json
 retains all observations; complete raw output remains in its original run.
 The batch and reader are terminal, so the prepared source repair can now
 be applied without changing either completed cohort.
+
+PERF 2026-11-19T10:52:22Z: The delta is now applied to the single header, with a
+new defect-specific freeze row. Minimal source diff is +17/-16 lines; there
+is no active kernel, module, loader, compiler binary or benchmark change.
+The new post-load observation preserves the fixed physical access and its
+base barrier, and is shared with the pre-existing indexed/address routes.
+
+Focused checks under timing SH pass: all 48 address-form observations now
+agree, all eight ordinary reads and four physical-fault ordering cases pass;
+17,424 LOCK hardware vectors, 80,000 concurrent increments, live/released
+aliases, recovery and negative displacement cases pass; all 22 B/native
+atomic compilations retain LOCK; 1,024 integer/pointer/clobber/address-boundary
+executions pass, including the generated base barrier. fixed-result.json
+and the regression receipts retain these results. Raw fixed-alias/lock/bpf/
+barrier-20261119T1050Z directories preserve commands and the tested source
+diff, including earlier failed baselines in their original directories.
+
+Actual BCC checked-corpus functional confirmation is next; installed bytes,
+app stock acceptance and any runtime effect of this alias change are not
+yet measured. The completed 1.007x freeze/LOCK timing predates this repair.
+No duplicate timing or new benchmark gate is introduced. FORMAL's memory
+observation and atomic refinement obligations remain explicit.

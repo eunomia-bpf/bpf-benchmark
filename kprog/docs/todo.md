@@ -8,7 +8,7 @@
 
 ## 0. Lane 目标与待办
 
-Freeze/LOCK batch 327120 completed, host 0/app ok, BCC programs/native/
+PERF 2026-11-19T10:48:19Z: Freeze/LOCK batch 327120 completed, host 0/app ok, BCC programs/native/
 B-generated/B-stock 25/25/25/25, all checked, no fallback/failures. Per call
 1.007x, throughput 1.006x (1.015/0.995/1.006), installed 8,628 B vs JIT
 7,965 B. This completes the implementation's BCC confirmation; runtime goals
@@ -43,6 +43,11 @@ boundary and retained failed attempts: results/lock-prefix-review-20261119.
   read-only git apply --check; it is not applied or tested. It shares the
   post-load observation and retains fixed physical loads/displacements/base
   barriers. Expanded ordinary/fault tests are queued as worker 337201.
+  The reader is now terminal at the expected assertion, with all eight
+  ordinary/four fault cases passing. The source repair is applied and its
+  48-case matrix plus LOCK/B/native/barrier regressions pass; canonical BCC
+  functional confirmation is next. Dated source receipts and full raw paths
+  are in results/released-alias-20261119.
 
 PERF 2026-11-19T09:23:54Z: Combined cohort batch 254724 completed with host
 exit 0. BCC, 3 x 180 s with stats on: programs/native/B-generated/B-stock

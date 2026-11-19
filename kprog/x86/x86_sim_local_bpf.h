@@ -959,14 +959,16 @@ do { \
 /* Keep the physical access before tag/alias observations and free input.
  * In particular, neither a nonstack tag nor a failed access reads the arena.
  * Call sites use statement outputs rather than eagerly evaluated tag args. */
+#define X86_SIM_L_OBSERVE_STACK_LOAD(OUTPUT, ADDR, WIDTH, TAG) \
+    do { if ((TAG)==X86_SIM_TAG_STACK) { \
+             __s64 __x86_observe_offset; \
+             X86_SIM_L_STACK_ALIAS_OFFSET_INTO(__x86_observe_offset, ADDR); \
+             if (__x86_observe_offset<X86_SIM_L_STACK_SP()) \
+                 (OUTPUT)=x86_apply_width(X86_SIM_L_UNSPECIFIED(),X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)); \
+         } } while(0)
 #define X86_SIM_L_LOAD_ADDR_TAGGED_INTO(OUTPUT, ADDR, WIDTH, TAG) \
     do { __u64 __x86_alias_observed=X86_SIM_L_LOAD_ADDR((ADDR),(WIDTH)); \
-         if ((TAG)==X86_SIM_TAG_STACK) { \
-             __s64 __x86_alias_offset; \
-             X86_SIM_L_STACK_ALIAS_OFFSET_INTO(__x86_alias_offset, ADDR); \
-             if (__x86_alias_offset<X86_SIM_L_STACK_SP()) \
-                 __x86_alias_observed=x86_apply_width(X86_SIM_L_UNSPECIFIED(),X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)); \
-         } \
+         X86_SIM_L_OBSERVE_STACK_LOAD(__x86_alias_observed,ADDR,WIDTH,TAG); \
          (OUTPUT)=__x86_alias_observed; } while(0)
 #define X86_SIM_L_LOAD_ADDR_TAGGED(ADDR, WIDTH, TAG) \
     ({ __u64 __x86_alias_result; \
@@ -974,13 +976,12 @@ do { \
        __x86_alias_result; })
 #define X86_SIM_L_NATIVE_DATA_LOAD_TAGGED_INTO(OUTPUT, BASE, OFF, WIDTH, TAG) \
     do { __u64 __x86_data_observed=X86_SIM_L_NATIVE_DATA_LOAD((BASE),(OFF),(WIDTH)); \
-         if ((TAG)==X86_SIM_TAG_STACK) { \
-             __s64 __x86_data_offset; \
-             X86_SIM_L_STACK_ALIAS_OFFSET_INTO(__x86_data_offset,KPROG_PTR_ADD64_BITS((BASE),(OFF))); \
-             if (__x86_data_offset<X86_SIM_L_STACK_SP()) \
-                 __x86_data_observed=x86_apply_width(X86_SIM_L_UNSPECIFIED(),X86_SIM_L_EFFECTIVE_WIDTH(WIDTH)); \
-         } \
+         X86_SIM_L_OBSERVE_STACK_LOAD(__x86_data_observed,KPROG_PTR_ADD64_BITS((BASE),(OFF)),WIDTH,TAG); \
          (OUTPUT)=__x86_data_observed; } while(0)
+#define X86_SIM_L_FIXED_LOAD_TAGGED_INTO(OUTPUT, BASE, OFF, WIDTH, TAG) \
+    do { __u64 __x86_fixed_observed=KPROG_X86_MEM_LOAD_FIXED((BASE),(OFF),(WIDTH)); \
+         X86_SIM_L_OBSERVE_STACK_LOAD(__x86_fixed_observed,KPROG_PTR_ADD64_BITS((BASE),(OFF)),WIDTH,TAG); \
+         (OUTPUT)=__x86_fixed_observed; } while(0)
 #define X86_SIM_L_NATIVE_DATA_LOAD_TAGGED(BASE, OFF, WIDTH, TAG) \
     ({ __u64 __x86_data_result; \
        X86_SIM_L_NATIVE_DATA_LOAD_TAGGED_INTO(__x86_data_result, BASE, OFF, WIDTH, TAG); \
@@ -1458,10 +1459,10 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			break;                                           \
 		default:                                                 \
 			if (X86_MEM_AUX_INDEX(AUX) == X86_REG_NONE)       \
-				__x86_l_value = KPROG_X86_MEM_LOAD_FIXED( \
+				X86_SIM_L_FIXED_LOAD_TAGGED_INTO(__x86_l_value, \
 					__x86_l_base_ptr, (STORE_DISP) ?   \
 					x86_store_imm_disp(IMM) : x86_simm(IMM), \
-					__x86_l_read_mem_width);         \
+					__x86_l_read_mem_width,X86_SIM_L_REG_TAG(BASE_REG)); \
 			else                                             \
 				X86_SIM_L_NATIVE_DATA_LOAD_TAGGED_INTO(__x86_l_value,  \
 					__x86_l_base_ptr, __x86_l_disp,       \
@@ -1630,8 +1631,8 @@ static inline void *bpf_cast_to_kern_ctx(void *ctx) { return ctx; }
 			break;                                           \
 		default:                                                 \
 			if (X86_MEM_AUX_INDEX(AUX) == X86_REG_NONE)       \
-				__x86_l_value = KPROG_X86_MEM_LOAD_FIXED( \
-					__x86_l_base_ptr, x86_simm(IMM), __x86_l_mem_width); \
+				X86_SIM_L_FIXED_LOAD_TAGGED_INTO(__x86_l_value, \
+					__x86_l_base_ptr,x86_simm(IMM),__x86_l_mem_width,X86_SIM_L_REG_TAG(SRC)); \
 			else                                             \
 				X86_SIM_L_NATIVE_DATA_LOAD_TAGGED_INTO(__x86_l_value,  \
 					__x86_l_base_ptr, __x86_l_disp, __x86_l_mem_width, X86_SIM_L_REG_TAG(SRC)); \

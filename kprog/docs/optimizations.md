@@ -920,3 +920,12 @@ Per call 103.8→103.1 ns (1.007x), throughput 1.006x; sample ratios
 arms changed between runs, and this combined result isolates neither
 freeze nor LOCK. Runtime goals remain open; no new body/helper/map shares
 are inferred. Evidence: results/lock-prefix-review-20261119/combined.
+
+PERF 2026-11-19T10:52:22Z: Phase-1 released-alias repair is applied in shared x86 I:
+fixed loads now receive the same post-load released-stack observation as
+RSP/indexed reads, while keeping fixed offsets and base barriers. All 48
+address cases, eight ordinary/four fault cases, LOCK regressions, 22 B/native
+compilations and 1,024 barrier executions pass. This is correctness work;
+no runtime gain is claimed. BCC functional coverage and installed bytes are
+pending, all C/LTO pieces on. The completed 1.007x measurement precedes this
+change. See results/released-alias-20261119.
