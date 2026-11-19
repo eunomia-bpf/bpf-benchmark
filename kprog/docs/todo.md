@@ -236,6 +236,13 @@ PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are 
 
 PERF 2026-11-19T06:35:06Z：06:20 的 B 编译项已实现 O1（frontend/B backend），P 与最终 native LTO 仍 O3。g0 和 line-tables 的真实 .ksyms map 对象都在 libbpf open 返回 -3，完整 g 才保留 BTF extern 类型并成功，所以保留 g。新鲜生成 BCC fentry_vfs_read/inet_sock_set_state 的 B/libbpf open、原 frontend 复用、native O3/proof 均通过；Tetragon request6 的 retry 211523 在 CPU19/timing SH/image SH/32GiB AS 下运行；O1 frontend 与 bounds 阶段已通过，B machine backend 仍在进行（初始 210433 因旧失败存档无 artifacts.json 在进入 Tetragon 前停止，d71b7f19b 改读 kernel.entry）。结果 results/b-analysis-flags-20261119；不声称新 stock 接受或应用速度，OMP 组合批次继续量 Tetragon/Tracee 覆盖。
 
+**协调者 2026-11-19T18:18:59Z（审核 20261119T15Z 逐条核实后）**：
+1. 回落：成立，已在 15:41 恢复（0a993eb37）；上面 14:49 的块已就地改正。
+2. 各应用实测比值和“程序体 1.57 倍乘以程序体占比”的预测一致（Tracee 预测 1.046、实测 1.046），协调者 11-14 说 Katran 程序体 1.57 倍对应每次调用约 1.45 倍是算错了。剩下最大的一块是时钟 helper（BCC、Katran 的 BPF 时间里 ktime 占 30–34%）。决定：时钟 helper 按运营者“helper 能用宏或者 function inline 都可以”写进 native-helpers.h（协调者做）；主配置的计时先放 Katran（一个程序、已经走通已验证路径、程序体占比最大），再到 Tracee。
+3. 等锁：成立（运营者 11-14：“不要互相等等”）。决定：计时锁只给 CPU 0-7 上的 guest 用（计时 EX），主机上的编译、测试、证明构建（CPU 8-23）不再取计时锁；镜像锁照旧（镜像构建 EX，用镜像的 guest SH）。
+4. 包装脚本：成立（运营者 11-15：“你去删掉. 立刻删掉.”，51 个 run.sh，其中协调者 8 个）。决定：从现在起计时直接用 flock 加冻结入口的 make 目标运行，不再新增 run.sh；主配置没有冻结入口的模式，只用一个配方（kprog/results/lto-apps-20261119/Makefile）。已完成批次的 run.sh 作为结果的记录留着，协调者的 six-app-master、lto-freeze 两个在批次结束后删掉。
+5. make micro：成立，运营者问过“我们在用户态和别的地方测试也可以好 40%?”。六应用计时之后跑一次冻结的 micro 入口，报程序体本身的比值。
+
 **协调者 2026-11-19T18:15:53Z（接 16:59 的块）**：
 1. 六个应用的 helper 全部按名字调用（21b4f3012）：helper 段移到 vendor/bpf/native-helpers.h，core-compat.h 和 katran-compat.h 共用；Katran 自己头文件里的同名指针变量在引入时改成私有名。native-link 的 helper 编号路径删掉（-432 行，38 个测试通过）；段符号加偏移的 PLT32 调用解析到对应函数（静态函数在另一个段时编译器用这种形式）。新旧 native-link 在六个应用的 719 个程序上：643 个逐字节一致，76 个以前链接不了、现在能链接。
 2. 第一轮检查发现并修好的三处（3e99eaa1e）：OTel 同名指针变量占了 helper 符号；Tetragon 的错误统计按名字记录 helper 编号，所以它保留自己的声明；内联读取的常量源地址成了绝对操作数。都记在 anti-patterns.md 的“坑”一节。
@@ -247,7 +254,7 @@ PERF 2026-11-19T06:35:06Z：06:20 的 B 编译项已实现 O1（frontend/B backe
 3. 进行中（协调者）：镜像加六应用检查（helpers-unified-20261119），通过后冻结入口六应用计时（原生代码变了，算新测量）。计时期间在单独的 cargo 目录里删掉 native-link 的 helper 编号路径（x86_helper_provenance.rs 的 Id、numeric_joins、finite helper dispatch、bpf_helper_name_from_id 表），cargo test 加逐程序链接输出逐字节对比，计时结束后换上。
 4. 保留并写明原因：入口函数的 RET 改写成跳到框架末尾（原生代码嵌在 JIT 程序框架里，框架末尾恢复寄存器和尾调用计数；拿掉要改内核，内核按冻结只删死代码）。主配置 sim 原生一侧（volatile 访存、地址屏障）属于设计的主配置，按设计保留；perf 继续它在这里的工作。
 
-**协调者 2026-11-19T14:49:21Z（运营者：“按记录回落到直接原生 是是什么鬼???”）——最高优先**：主配置里 B 某一步失败时，服务原来把 P 的机器码配一个桩程序装进内核（b2793af35，11-16），这些程序跑的是未经 verify(B) 的原生代码，违背 design.md 编译流水线。c3960d089 删掉这条路：B 失败的请求报失败，shim 保留原来的 eBPF 程序（JIT）；loader 的 load-direct 阶段和 trusted_direct_native 一起删掉。之后主配置每次运行报两类：走 checked-sim-c 的程序、留在 eBPF 的程序；直接原生只在对照配置里出现。协调者 13:38 那批 Tracee 是在改之前启动的，它的整体数字是混合的，按程序单独报 checked-sim-c 的那部分。perf 的 B 失败分析（帧指针减法、栈帧超 512 B 等）照旧，每修好一类，留在 eBPF 的程序就少一类。基座里的 trusted-native-loader 在下一次基座重建时换成新源码。
+**协调者 2026-11-19T14:49:21Z，已更正（审核 20261119T15Z 指出后）**：这一块原来写“删掉 direct-native 回落”，是协调者把运营者的问句“是什么鬼???”当成了规定，和运营者 11-16 的原话“verify 不了的也需要跑 native 先”相反；提交 d7f7728fc 的标题也把它记成运营者的。运营者 11-19 随后说“恢复这个, 吧 verify 和运行分开看”，0a993eb37 已按删除前逐字节恢复。现行规则见第 0 节 11-16 02:59 的块：验证不过的程序走直接原生，验证和运行分开报告。
 
 **协调者 2026-11-19T13:33:21Z（决定，运营者 11-08：“这种之后你自己决定, 不要问我”）**：每小时审核把 10c42d6cf 的 `raise ValueError` 列为设计之外新增的拒绝。决定保留：安全靠 verify(B) 加 faithful(I,P)，B 必须覆盖 P 的每一条指令；原来认不出的行被跳过，B 就少了这条指令，verifier 接受的是另一个程序。现在这次生成失败，程序走直接原生（已有的记录回落）。同一件事的另一半由 perf 的回归 parser-completeness-20261119 发现：objdump 默认省掉全零字节段，生成器用 -z 补上（本提交之后）。两项在六个应用今天的 P 上都是 0 处，覆盖率不变。
 
