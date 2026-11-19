@@ -84,9 +84,12 @@ __KPROG_HELPER(long, bpf_xdp_adjust_tail, void *, int);
 #define xdp_event_output(...) __KPROG_CALL(bpf_perf_event_output, __VA_ARGS__)
 #define sock_event_output(...) __KPROG_CALL(bpf_perf_event_output, __VA_ARGS__)
 
-/* Kernel memory reads are plain loads. native-link records every load as a
- * load site, so a fault zeroes the loaded register and execution continues,
- * the JIT's PROBE_MEM behaviour. The empty asm keeps each loaded value in a
+/* Kernel memory reads are plain loads under the kernel helper's own address
+ * rule (copy_from_kernel_nofault): a source below the kernel half, a null or
+ * user pointer, is not read; the destination is zeroed and the read returns
+ * -ERANGE without a fault. native-link records every load as a load site, so
+ * a fault at another address zeroes the loaded register and execution
+ * continues, the JIT's PROBE_MEM behaviour. The empty asm keeps each loaded value in a
  * general register, the load site's recovery destination, and keeps the source
  * address in a register: a source folded to a constant (a null pointer plus an
  * offset) would otherwise become an absolute operand, which native-link rejects. */
@@ -94,11 +97,17 @@ typedef unsigned long long __attribute__((may_alias, aligned(1))) __kprog_u64;
 typedef unsigned int __attribute__((may_alias, aligned(1))) __kprog_u32;
 typedef unsigned short __attribute__((may_alias, aligned(1))) __kprog_u16;
 #define __KPROG_LOAD(type, p) ({ type __v = *(const volatile type *)(p); asm volatile("" : "+r"(__v)); __v; })
+#define __KPROG_KERNEL_ADDRESS(p) ((long)(unsigned long)(p) < 0)
+#define __KPROG_ERANGE 34
 static __always_inline long __kprog_read_kernel(void *dst, unsigned int size, const void *src)
 {
     char *d = dst;
     const char *s = src;
     asm volatile("" : "+r"(s));
+    if (!__KPROG_KERNEL_ADDRESS(s)) {
+        __builtin_memset(d, 0, size);
+        return -__KPROG_ERANGE;
+    }
     unsigned int i = 0;
     for (; i + 8 <= size; i += 8)
         *(__kprog_u64 *)(d + i) = __KPROG_LOAD(__kprog_u64, s + i);
@@ -115,6 +124,10 @@ static __always_inline long __kprog_read_kernel_str(void *dst, unsigned int size
     unsigned int i = 0;
     if (!size)
         return 0;
+    if (!__KPROG_KERNEL_ADDRESS(s)) {
+        __builtin_memset(d, 0, size);
+        return -__KPROG_ERANGE;
+    }
     for (; i + 1 < size; i++) {
         char c = __KPROG_LOAD(char, s + i);
         d[i] = c;
@@ -126,7 +139,6 @@ static __always_inline long __kprog_read_kernel_str(void *dst, unsigned int size
 }
 /* bpf_probe_read and bpf_probe_read_str pick kernel or user memory by address,
  * as the kernel's compat helpers do: upper-half addresses are read directly. */
-#define __KPROG_KERNEL_ADDRESS(p) ((long)(unsigned long)(p) < 0)
 static __always_inline long __kprog_probe_read(void *dst, unsigned int size, const void *src)
 {
     return __KPROG_KERNEL_ADDRESS(src) ? __kprog_read_kernel(dst, size, src)

@@ -40,3 +40,4 @@
 - 应用把 helper 名字当数值用（Tetragon 的错误统计记录 `(u32)(long)probe_read`，BPF 里是 helper 编号）：把它的声明改成函数会改变语义，链接器也读不了 32 位 GOT 值（Tetragon 81 个失败）。Tetragon 保留自己的指针声明，调用用同名宏转到公共 helper。
 - 内联读取的源地址被常量折叠（空指针加偏移）会成为绝对内存操作数，链接器拒绝（Tracee 2 个失败）。读取开头用空 asm 让源地址留在寄存器里。
 - 每次改 helper 写法之后，在提交前扫描所有应用的对象：32 位 GOT 读取、绝对操作数（Intel 语法的 `ds:0x`）、间接调用、和 helper 同名的本地数据符号，四项都要为 0。
+- 内联读取丢掉了 helper 自己的地址规则（copy_from_kernel_nofault 不读内核半区以下的地址，空指针或用户指针直接清零、返回 -ERANGE，不缺页）：Tracee 里空指针很常见（写管道、socket 时 vfs_write 的 pos 是 NULL），每次都真的缺页、靠 load site 恢复。Tracee 原生每次调用从 425 ns 变成 9273 ns，吞吐 0.047x（17:33 之后的三次运行）；12:46 那次还是按编号调 helper，原生和 eBPF 持平。内联读保留 helper 自己的这条规则：源地址不在内核半区就清零目标、返回 -ERANGE，每次读多两条指令（test、jns）。换 helper 写法之后，除了上面四项扫描，还要看每个应用的每次调用耗时，不能只看有没有失败。
