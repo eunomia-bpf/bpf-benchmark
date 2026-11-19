@@ -43,10 +43,19 @@ def observe(frame, event, result):
         else:
             offsets, unknown, external = set(), True, True
         row = stores.setdefault(instruction.addr, dict(native_pc=instruction.addr,
-            instruction=instruction.raw, offsets=set(), unknown=False, external=False))
+            instruction=instruction.raw, offsets=set(), unknown=False, external=False,
+            source_constants=set(), source_unknown=False))
         row['offsets'].update(offsets)
         row['unknown'] |= unknown
         row['external'] |= external
+        operands = instruction.operands
+        source = caller['ri'](operands[1]) if len(operands) > 1 else None
+        constant = caller['incoming'].constants[source[0]] if source else (
+            adapter.gen.parse_int(operands[1]) if len(operands) > 1 and adapter.gen.is_int(operands[1]) else None)
+        if constant is None:
+            row['source_unknown'] = True
+        else:
+            row['source_constants'].add(constant)
     elif frame.f_code.co_name == 'return_from':
         pc=frame.f_back.f_locals['addr']
         row=returns.setdefault(pc,dict(native_pc=pc,targets=set(),unknown=False,outer=False))
@@ -79,7 +88,8 @@ summary['generated_arena_bytes'] = int(re.search(
     r'#define X86_SIM_STACK_BYTES (\d+)U', generated)[1])
 summary['generated_cache_words'] = [int(word) for word in re.findall(r'M\((\d+)\)', next(
     line for line in generated.splitlines() if line.startswith('#define X86_SIM_STACK_VALUE_WORDS')))]
-summary['full_width_store_sites'] = [dict(row, offsets=sorted(row['offsets']))
+summary['full_width_store_sites'] = [dict(row, offsets=sorted(row['offsets']),
+                                        source_constants=sorted(row['source_constants']))
                                     for row in sorted(stores.values(), key=lambda r:r['native_pc'])]
 summary['return_sites'] = [dict(row,targets=sorted(row['targets']))
                            for row in sorted(returns.values(),key=lambda r:r['native_pc'])]

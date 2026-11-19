@@ -1330,3 +1330,10 @@ Receipt sparse-stack-cache-20261119/immediate-result.json; raw /workspaces/kprog
 One genuinely changed-source normal-O1 retained Tetragon compile follows,
 using the currently installed bounds compiler (5033bed62 rebuild still
 waits imageEX). No full B/frame/stock/runtime performance claim.
+
+PERF 2026-11-19T20:09:11Z:13cell Tetra283144 frontend40.965s and bounds2.913s
+complete0; normal backend pending since20:05:28Z. Receipt immediate-partial.json
+records actual commands, not a runtime gain. Existing read-only store
+inventory now also observes current source constants/unknown contexts, to
+determine whether further cache narrowing has any evidence. No pruning
+from constants is implemented; aliasFalse is still not a scalar proof.
