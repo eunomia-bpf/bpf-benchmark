@@ -1051,3 +1051,12 @@ run through both native and context lowering with the sole kernel layouts.
 Opaque base-barrier versus context-root recognition is the hypothesis; no
 actual mismatch, corpus path hit or runtime gain is claimed. No production
 input, image or guest changes. See skb-numeric-integration-20261119.
+
+PERF 2026-11-19T14:15:12Z: Tetragon B live-state review traces the helper-write
+fanout to53 dense pointer/tag cache cells emitted for its424B arena. This
+is a source-level explanation for a candidate inventory, not proof that
+cells are dead or that stack allocation will shrink. Existing alias False
+coarsens external pointers and scalars and cannot justify tag deletion.
+No code, compiler flags, runtime check or limit changed. The completed
+constant-ALU32 negative result remains recorded; next evidence is actual
+cache save/reload positions. See tetragon-stack-liveness-20261119.

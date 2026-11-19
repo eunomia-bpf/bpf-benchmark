@@ -45,3 +45,42 @@ scalar bounds for live inputs. `packet_bounds_ir.cpp:139` only folds empty
 of a constant can fold without changing live-input ALU32 materialization.
 This is the next targeted hypothesis; no production compiler fix, new B
 acceptance, guest, image or runtime result is claimed here.
+
+PERF 2026-11-19T14:15:12Z: The constant-ALU32 hypothesis above has already been
+implemented and tested (0cb83f15d); its retained Tetragon replay worsened
+allocation to1,804 spills and8,076 conservative live bytes. Current packing
+cannot reduce its declared payload below7,648B including locals. The owned
+packer was cancelled after that result, with no llc/stock rejection claimed.
+See results/constant-alu32-20261119 for the exact negative result; repeating
+that frontend or O3 experiment would not resolve the remaining class.
+
+Source review identifies a narrower next inventory: render_program at
+generate_micro_sim_proofs.py:1926-1928 emits one ghost-cache entry for every
+eight-byte arena word. The retained tetragon6/trusted_x86.bpf.c preamble in
+b-analysis-flags-20261119/production-20261119T063707Z-211523 declares424B
+and M(0) through M(52):53 cache cells. Shared x86_sim_local_bpf.h:325-332
+materializes each as a named tag and pointer, and :350-357 invalidates these
+cells for helper-written byte ranges. That is the fanout seen after the
+probe-read call in peak-source.txt. The ordinary byte arena already uses
+indexed accesses; the separate ghost cache retains provenance.
+
+Only STACK tags carry a pointer representative, but ABI, packet and map
+value tags also affect restoration (:359-373). Consequently dropping
+pointer cells by numeric address or by unused byte storage is not a valid
+pruning argument. In x86_abi.py:48-51 the incoming context is represented by
+alias False, and the same coarse alias class also represents scalar values;
+False is not evidence of a SCALAR interpreter tag. Unknown aliases likewise
+provide no dead-cache proof. Merely replacing the named cells by a variable
+pointer array has no demonstrated stock-verifier or semantic benefit.
+
+The useful next evidence is a conservative inventory of possible full-width
+cache save/reload positions, including aliases, push/pop and call frames,
+using the existing finite CFG information. The shared save sites at
+x86_sim_local_bpf.h:1709 and :1722 distinguish register stores from scalar
+byte writes, which only invalidate metadata. Such an inventory is diagnostic
+first: this review does not establish that any of the53 cells can be removed.
+Unknown positions retain their current representation rather than causing a
+new generation refusal. No shared-I change, selector, check, limit, build,
+profile or guest was introduced by this review. Any later transformation
+uses the existing specialization interface and preserves pointer tags and
+released-stack behavior; native byte trimming is not the objective here.
