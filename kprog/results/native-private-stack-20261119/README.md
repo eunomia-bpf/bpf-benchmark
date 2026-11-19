@@ -16,3 +16,5 @@ native execution. Baseline mode checks the current missed normalization. Source
 application/build waits for the running Tetragon job's image SH lease to end.
 
 Baseline actual compiler confirms five private volatile accesses, with two accesses preserved for each global/pointer/mixed/other-local/atomic control. All1344 host executions pass. Raw /workspaces/kprog-raw/perf/native-private-stack-20261119/baseline-20261119T070506Z. The forward patch is queued under image EX after the running B compilation; no production source is changed before that lease is available.
+
+PERF 2026-11-19T07:10:39Z: Actual native compiler build and scope/execution regression pass. All25 retained BCC production compile APIs/proof links pass with C helpers enabled, as do the ARRAY and retained OTel regressions. Raw /workspaces/kprog-raw/perf/native-private-stack-20261119/candidate-20261119T071020Z-219249. This is host normalization/code generation, not new stock acceptance, installed code or app performance.

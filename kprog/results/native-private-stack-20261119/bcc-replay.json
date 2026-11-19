@@ -1,0 +1,289 @@
+[
+  {
+    "request": "1.success.tar.gz",
+    "symbol": "fentry_vfs_read",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 0
+    },
+    "helpers": [],
+    "before_text_bytes": 112,
+    "after_text_bytes": 112
+  },
+  {
+    "request": "2.success.tar.gz",
+    "symbol": "tracepoint__syscalls__sys_enter_open",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 0
+    },
+    "helpers": [],
+    "before_text_bytes": 830,
+    "after_text_bytes": 730
+  },
+  {
+    "request": "3.success.tar.gz",
+    "symbol": "kprobe__cap_capable_entry",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 0
+    },
+    "helpers": [],
+    "before_text_bytes": 733,
+    "after_text_bytes": 626
+  },
+  {
+    "request": "4.success.tar.gz",
+    "symbol": "tcp_v4_connect",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 0
+    },
+    "helpers": [],
+    "before_text_bytes": 602,
+    "after_text_bytes": 536
+  },
+  {
+    "request": "5.success.tar.gz",
+    "symbol": "sched_wakeup",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 0
+    },
+    "helpers": [],
+    "before_text_bytes": 624,
+    "after_text_bytes": 534
+  },
+  {
+    "request": "6.success.tar.gz",
+    "symbol": "sys_enter",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 0
+    },
+    "helpers": [],
+    "before_text_bytes": 599,
+    "after_text_bytes": 533
+  },
+  {
+    "request": "7.success.tar.gz",
+    "symbol": "inet_sock_set_state",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 19
+    },
+    "helpers": [
+      "__kprog_probe_read_kernel"
+    ],
+    "before_text_bytes": 8829,
+    "after_text_bytes": 7911
+  },
+  {
+    "request": "8.success.tar.gz",
+    "symbol": "blk_account_io_merge_bio",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 0
+    },
+    "helpers": [],
+    "before_text_bytes": 1002,
+    "after_text_bytes": 920
+  },
+  {
+    "request": "9.success.tar.gz",
+    "symbol": "fentry_vfs_write",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 0
+    },
+    "helpers": [],
+    "before_text_bytes": 119,
+    "after_text_bytes": 119
+  },
+  {
+    "request": "10.success.tar.gz",
+    "symbol": "tracepoint__syscalls__sys_enter_openat",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 0
+    },
+    "helpers": [],
+    "before_text_bytes": 830,
+    "after_text_bytes": 730
+  },
+  {
+    "request": "11.success.tar.gz",
+    "symbol": "kprobe__cap_capable_exit",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 0
+    },
+    "helpers": [],
+    "before_text_bytes": 2449,
+    "after_text_bytes": 2159
+  },
+  {
+    "request": "12.success.tar.gz",
+    "symbol": "tcp_v4_connect_ret",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 3
+    },
+    "helpers": [
+      "__kprog_probe_read_kernel"
+    ],
+    "before_text_bytes": 3417,
+    "after_text_bytes": 3088
+  },
+  {
+    "request": "13.success.tar.gz",
+    "symbol": "sched_wakeup_new",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 0
+    },
+    "helpers": [],
+    "before_text_bytes": 624,
+    "after_text_bytes": 534
+  },
+  {
+    "request": "14.success.tar.gz",
+    "symbol": "sys_exit",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 0
+    },
+    "helpers": [],
+    "before_text_bytes": 1027,
+    "after_text_bytes": 967
+  },
+  {
+    "request": "15.success.tar.gz",
+    "symbol": "block_rq_insert",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 4
+    },
+    "helpers": [
+      "__kprog_probe_read_kernel"
+    ],
+    "before_text_bytes": 2447,
+    "after_text_bytes": 1886
+  },
+  {
+    "request": "16.success.tar.gz",
+    "symbol": "fentry_vfs_fsync",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 0
+    },
+    "helpers": [],
+    "before_text_bytes": 119,
+    "after_text_bytes": 119
+  },
+  {
+    "request": "17.success.tar.gz",
+    "symbol": "tracepoint__syscalls__sys_exit_open",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 0
+    },
+    "helpers": [],
+    "before_text_bytes": 7602,
+    "after_text_bytes": 6928
+  },
+  {
+    "request": "18.success.tar.gz",
+    "symbol": "tcp_v6_connect",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 0
+    },
+    "helpers": [],
+    "before_text_bytes": 602,
+    "after_text_bytes": 536
+  },
+  {
+    "request": "19.success.tar.gz",
+    "symbol": "sched_switch",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 4
+    },
+    "helpers": [
+      "__kprog_probe_read_kernel"
+    ],
+    "before_text_bytes": 2360,
+    "after_text_bytes": 2174
+  },
+  {
+    "request": "20.success.tar.gz",
+    "symbol": "block_rq_issue",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 4
+    },
+    "helpers": [
+      "__kprog_probe_read_kernel"
+    ],
+    "before_text_bytes": 3369,
+    "after_text_bytes": 2719
+  },
+  {
+    "request": "21.success.tar.gz",
+    "symbol": "fentry_vfs_open",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 0
+    },
+    "helpers": [],
+    "before_text_bytes": 119,
+    "after_text_bytes": 119
+  },
+  {
+    "request": "22.success.tar.gz",
+    "symbol": "tracepoint__syscalls__sys_exit_openat",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 0
+    },
+    "helpers": [],
+    "before_text_bytes": 7602,
+    "after_text_bytes": 6928
+  },
+  {
+    "request": "23.success.tar.gz",
+    "symbol": "tcp_v6_connect_ret",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 3
+    },
+    "helpers": [
+      "__kprog_probe_read_kernel"
+    ],
+    "before_text_bytes": 3421,
+    "after_text_bytes": 3109
+  },
+  {
+    "request": "24.success.tar.gz",
+    "symbol": "block_rq_complete",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 0
+    },
+    "helpers": [],
+    "before_text_bytes": 4159,
+    "after_text_bytes": 3509
+  },
+  {
+    "request": "25.success.tar.gz",
+    "symbol": "fentry_vfs_create",
+    "selected_calls": {
+      "user": 0,
+      "kernel": 0
+    },
+    "helpers": [],
+    "before_text_bytes": 119,
+    "after_text_bytes": 119
+  }
+]
