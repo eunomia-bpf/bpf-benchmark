@@ -121,3 +121,20 @@ the point-in-time counts and exact raw log. This is actual guest stock and
 native-install evidence for the combined freeze/LOCK cohort, while final
 app status and runtime remain pending. The final archive reader will
 replace this provisional accounting with complete run coverage.
+
+PERF 2026-11-19T10:48:19Z: Coordinator batch 327120 finished at 10:45:48Z,
+host 0, app ok. Run x86_kvm_corpus_20261119_101802_025374 completed three
+180 s samples per arm, stats on. The final archive confirms programs/native/
+B-generated/B-stock 25/25/25/25, all checked, no fallback or failed request.
+The existing analysis reports 103.8→103.1 ns/inv, 1.007x; throughput 1.006x,
+sample ratios 1.015/0.995/1.006, zero workload errors. Installed native is
+8,628 B versus JIT 7,965 B across 25 programs. See combined/ for the original
+reader outputs and complete coverage; small corpus raw files are committed.
+
+The earlier cohort reported 107.7→106.0 ns and 1.018x throughput, installed
+20,043 B. Both JIT and native times changed between runs. This run combines
+2eb36bad9 with LOCK and provides no isolated speed effect for either piece.
+It meets neither runtime target. Body/helper/map shares were not profiled.
+The lost-LOCK implementation item now has host and real BCC stock/native/app
+confirmation; full application stock coverage and FORMAL's atomic refinement
+remain separate open obligations. No extra BCC timing is queued.

@@ -84,3 +84,11 @@ reader finish, add the defect-specific freeze row and apply the delta in
 the single checkout. Run the expanded alias test, shared LOCK checks and
 fixed-load/base-barrier regressions before committing the source fix. The
 item and its runtime/proof obligations remain open.
+
+PERF 2026-11-19T10:48:19Z: Worker 337201 ran after timing released and
+finished Make 2 at the intended final address-form assertion. All eight
+ordinary reads and four physical-fault ordering cases passed first. The
+same eight released groups remain unequal. baseline-with-guards.json
+retains all observations; complete raw output remains in its original run.
+The batch and reader are terminal, so the prepared source repair can now
+be applied without changing either completed cohort.

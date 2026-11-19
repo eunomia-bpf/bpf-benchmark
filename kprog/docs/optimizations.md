@@ -910,3 +910,13 @@ than separate piece effects; body/helpers/maps were not profiled. Runtime
 targets remain open. Lost LOCK semantics in shared I is a confirmed phase1
 defect affecting B and native, recorded without discarding the measurement.
 Evidence results/native-cohort-timing-20261119 and lock-prefix-review-20261119.
+
+PERF 2026-11-19T10:48:19Z: Combined freeze/LOCK cohort 3f80b472e now has
+actual BCC confirmation: run 101802_025374, 3 x 180 s, stats on, app ok,
+programs/native/B-generated/B-stock 25/25/25/25 with no fallback/failures.
+Per call 103.8→103.1 ns (1.007x), throughput 1.006x; sample ratios
+1.015/0.995/1.006, zero workload errors. Installed 8,628 B versus JIT
+7,965 B. The old cohort was 107.7→106.0 ns and 20,043 native bytes; both
+arms changed between runs, and this combined result isolates neither
+freeze nor LOCK. Runtime goals remain open; no new body/helper/map shares
+are inferred. Evidence: results/lock-prefix-review-20261119/combined.

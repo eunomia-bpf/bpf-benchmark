@@ -8,6 +8,15 @@
 
 ## 0. Lane 目标与待办
 
+Freeze/LOCK batch 327120 completed, host 0/app ok, BCC programs/native/
+B-generated/B-stock 25/25/25/25, all checked, no fallback/failures. Per call
+1.007x, throughput 1.006x (1.015/0.995/1.006), installed 8,628 B vs JIT
+7,965 B. This completes the implementation's BCC confirmation; runtime goals
+and full-app stock/formal obligations remain open. The alias reader also
+completed: eight ordinary/four fault cases pass, then the eight known groups
+fail. Apply the prepared alias fix next. Dated receipts are in
+results/lock-prefix-review-20261119 and released-alias-20261119.
+
 PERF 2026-11-19T09:46:49Z: P-x86-lock-rmw implementation and host checks are
 complete locally: retained prefix, shared seq_cst RMW and successful-old
 flags for unary/register/immediate memory ALU. 17,424 hardware vectors,
@@ -47,7 +56,7 @@ old value, flags/carry, width, recovery and stack metadata effects in shared
 I. Workers 254724/314899/318982 are terminal; source and feasibility evidence
 is in results/lock-prefix-review-20261119.
 
-- [ ] P-x86-lock-rmw（PERF 2026-11-19T08:48:26Z；source trace953453b7f）：coordinator2eb36bad9发现lock前缀丢失。parser182擦掉lock，encode820把memory inc降成普通ALU_MEM_UNARY，shared I:2052分开read/modify/write，B与native一起丢原子语义。当前batch后先复现并修整类prefix/atomic RMW/flags-width-fault，与FORMAL协作；不仅改native，不加refusal/skip/check/switch。共享I冻结路径未改；当前数据保留并说明缺陷，不重跑门槛。见results/lock-prefix-review-20261119。
+- [x] P-x86-lock-rmw（3f80b472e；run101802_025374；PERF 2026-11-19T08:48:26Z；source trace953453b7f）：coordinator2eb36bad9发现lock前缀丢失。parser182擦掉lock，encode820把memory inc降成普通ALU_MEM_UNARY，shared I:2052分开read/modify/write，B与native一起丢原子语义。当前batch后先复现并修整类prefix/atomic RMW/flags-width-fault，与FORMAL协作；不仅改native，不加refusal/skip/check/switch。共享I冻结路径未改；当前数据保留并说明缺陷，不重跑门槛。见results/lock-prefix-review-20261119。
 
 - [x] P-combined-BCC-stock（bf076deed；PERF 2026-11-19T08:17:44Z，本提交）：ff02957cc组合cohort实际checked-corpus通过，programs/native/B-generated/B-stock25/25/25/25，0fallback/0failure，app ok；installed20043B vsJIT7965B。1x10s仅功能检查，速度目标仍开；results/native-cohort-check-20261119/coverage.json，run081018_746542。
 
