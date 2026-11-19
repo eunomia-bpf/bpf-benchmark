@@ -264,7 +264,6 @@ def main() -> None:
             entry: dict[str, object] = {
                 "program": program,
                 "native_object": rel,
-                "kernel_helper_context": True,
             }
             if len(symbols) == 1:
                 entry["symbol"] = symbols[0]

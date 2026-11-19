@@ -46,3 +46,19 @@ are already fixed up. These translated values are not process FDs or
 original helper IDs. Reusing the pre-verifier scanner without recovering
 those identities cannot populate the map-operation plan. This audit does
 not change that path or infer that every map supports both operations.
+
+PERF 2026-11-19T11:47:45Z: Applied the common-query fix: one assignment in
+load_from_loaded_program_fd now obtains the original program's actual helper
+prototypes for both callers. Removed the duplicate normal-route query,
+temporary flag, manifest parser field and producer field (+1/-7 source lines).
+The existing wire format/provider and original FD lifetime are unchanged.
+Source-ID-zero/context-only remains an explicit separate obligation.
+
+Canonical `make -C kprog/libnativeloader trusted-service` builds the loader
+libraries, worker and client successfully into the sole verified-loader base,
+under timing SH/image EX on CPU18 with a 16 GiB address-space bound. Full log:
+`/workspaces/kprog-raw/perf/constant-alu32-20261119/helper-loader-build-20261119T1147Z.log`.
+This is compilation, not yet evidence of new installed helper targets or
+per-call gains. The next canonical BCC functional run will supply actual
+stock/native coverage and archived relocation targets. No image or module
+change is needed for that functional entry.

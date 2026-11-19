@@ -955,3 +955,11 @@ packing/emission/stock remain open. A retained installed-binding audit
 also finds the checked path still uses generic TP output/stack helpers
 and generic map writes; these are separate phase-1/1e work, with no
 performance gain claimed yet. See results/checked-helper-binding-20261119.
+
+PERF 2026-11-19T11:47:45Z: Phase-1 helper-context binding now reuses the
+existing original-FD prototype query in the common loader. The checked and
+normal FD paths share it; the obsolete manifest opt-in path is deleted
+(+1/-7 source lines). Canonical loader build passes. Actual new target
+bindings, stock/native coverage and runtime effects remain pending. The
+query runs at load time, not per call; no new runtime check or helper body
+is introduced. Source-ID-zero and map-operation identities remain open.

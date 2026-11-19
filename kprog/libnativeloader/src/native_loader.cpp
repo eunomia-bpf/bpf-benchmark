@@ -3036,6 +3036,7 @@ CompanionLoad load_from_loaded_program_fd(int program_fd,
 {
     CompanionLoad out{};
     out.prog_type = prog_info.type;
+    out.context_helpers = query_program_helper_targets(program_fd, prog_info.type);
     out.source_bytecode_bytes = source_insn_cnt * sizeof(bpf_insn);
     out.map_rules = std::move(map_rules);
 
@@ -4162,7 +4163,6 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
     std::filesystem::path native_object_path = options.native_object_path;
     std::string symbol_name = options.symbol_name;
     std::vector<NativeMapRule> map_rules;
-    bool kernel_helper_context = false;
     bool kernel_kfunc_context = false;
     std::filesystem::path kernel_kfunc_btf;
     std::filesystem::path source_bpf_object;
@@ -4188,7 +4188,6 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
             options.diagnostics->log_path = resolution->loader_timing_log;
         native_object_path = resolution->native_object_path;
         symbol_name = resolution->symbol_name;
-        kernel_helper_context = resolution->kernel_helper_context;
         kernel_kfunc_context = resolution->kernel_kfunc_context;
         kernel_kfunc_btf = resolution->kernel_kfunc_btf;
         if (resolution->source_matches) source_bpf_object = resolution->source_bpf_object;
@@ -4205,8 +4204,6 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
             source_insns.empty() ? nullptr : source_insns.data(),
             source_insns.size(),
             std::move(map_rules));
-    if (kernel_helper_context)
-        companion.context_helpers = query_program_helper_targets(options.original_prog_fd, prog_info.type);
     if (kernel_kfunc_context) {
         // libbpf rewrites .ksyms/linkage before BTF_LOAD. Use the unchanged
         // object's declarations, not the sanitized loaded-program BTF.

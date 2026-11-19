@@ -44,7 +44,6 @@ struct ManifestResolution {
     std::string symbol_name;
     std::vector<NativeMapRule> map_rules;
     std::string loader_timing_log;
-    bool kernel_helper_context = false;
     bool kernel_kfunc_context = false;
     std::filesystem::path kernel_kfunc_btf;
     std::filesystem::path source_bpf_object;
@@ -600,7 +599,6 @@ std::optional<ManifestResolution> resolve_native_manifest(
         candidate.symbol_name = json_object_string(entry, "symbol").value_or("");
         if (auto timing_log = json_object_string(entry, "loader_timing_log"))
             candidate.loader_timing_log = *timing_log;
-        candidate.kernel_helper_context = json_object_bool(entry, "kernel_helper_context").value_or(false);
         candidate.kernel_kfunc_context = json_object_bool(entry, "kernel_kfunc_context").value_or(false);
         if (auto object_btf = json_object_string(entry, "kernel_kfunc_btf"))
             candidate.kernel_kfunc_btf = manifest_relative_path(manifest_path, *object_btf);
