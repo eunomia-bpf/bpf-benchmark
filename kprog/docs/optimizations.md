@@ -1365,3 +1365,14 @@ under current non-lifetime packer. Ended only exact owned packer285102
 (ancestor283144) at20:17:45Z; rc-15/464.271s, wrapper2 deliberate
 cancellation, not llc/stock rejection. Raw retained; immediate-storage.json
 records actual result. No limit/flag/runtime-gate or performance claim.
+
+PERF 2026-11-19T20:32:09Z: Cilium headlen matcher candidate extends classifier section,
+exact u32 memory asm loads and ALU32 identity recognition, and i32 len-data_len
+from bpf_cast_to_kern_ctx(entry). Original scalar comparison and its live
+identities remain; pointer data/end fact expresses the same linear span.
+Target kernel112/116 layout will be checked against its generated vmlinux.h.
+No P/frontend/native changes, new predicate, runtimegate or limit. Prepared
+only. Forty archived actual packet failures extracted without new frontend
+or copied compiler under cilium-headlen-20261119/inputs-20261119T202649Z.
+Own unstarted waiter269752 settled child269757, rawretained; combined sole
+compiler rebuild follows fixtures/syntax preparation, imageEX unchanged.

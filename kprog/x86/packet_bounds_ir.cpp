@@ -232,18 +232,48 @@ static Value *origin(Value *value) {
     if (auto *freeze=dyn_cast<FreezeInst>(value)) { value=freeze->getOperand(0); continue; }
     if (auto *call=dyn_cast<CallInst>(value))
       if (auto *assembly=dyn_cast<InlineAsm>(call->getCalledOperand()))
-        if (tied_identity(call,assembly)) {
+        if (tied_identity(call,assembly) ||
+            (assembly->getAsmString()=="$0 = $0" &&
+             assembly->getConstraintString()=="=w,0" && call->arg_size()==1 &&
+             call->getType()->isIntegerTy(32) &&
+             call->getArgOperand(0)->getType()==call->getType() &&
+             !assembly->isAlignStack() && !assembly->canThrow())) {
           value=call->getArgOperand(0); continue;
         }
     return value;
   }
 }
-static bool field(Value *value,Function &function,int64_t offset) {
-  auto *load=dyn_cast<LoadInst>(origin(value));
-  if (!load || !load->getType()->isIntegerTy(32)) return false;
+static bool field(Value *value,Function &function,int64_t offset,bool kernel=false) {
+  value=origin(value);
+  // The simulator's u32 memory template returns a wide register, truncated
+  // at its original native instruction. Other truncations stay opaque.
+  if (auto *truncate=dyn_cast<TruncInst>(value))
+    if (truncate->getType()->isIntegerTy(32)) value=origin(truncate->getOperand(0));
+  Value *address=nullptr;ConstantInt *displacement=nullptr;
+  if (auto *load=dyn_cast<LoadInst>(value)) {
+    if (!load->getType()->isIntegerTy(32)) return false;
+    address=load->getPointerOperand();
+  } else if (auto *call=dyn_cast<CallInst>(value)) {
+    auto *assembly=dyn_cast<InlineAsm>(call->getCalledOperand());
+    if (!assembly || call->arg_size()!=2 || !call->getType()->isIntegerTy(64) ||
+        assembly->getAsmString()!="$0 = *(u32 *)($1 + $2)" ||
+        assembly->getConstraintString()!="=r,r,i,~{memory}") return false;
+    address=call->getArgOperand(0);
+    displacement=dyn_cast<ConstantInt>(call->getArgOperand(1));
+    if (!displacement) return false;
+  } else return false;
+  if (!address->getType()->isPointerTy()) return false;
   int64_t actual=0;
-  auto *base=GetPointerBaseWithConstantOffset(load->getPointerOperand(),actual,function.getParent()->getDataLayout());
-  return base==function.getArg(0) && actual==offset;
+  auto *base=origin(GetPointerBaseWithConstantOffset(origin(address),actual,function.getParent()->getDataLayout()));
+  if (kernel) {
+    auto *cast=dyn_cast<CallInst>(base);
+    if (!cast || !cast->getCalledFunction() ||
+        cast->getCalledFunction()->getName()!="bpf_cast_to_kern_ctx" || cast->arg_size()!=1) return false;
+    base=origin(cast->getArgOperand(0));
+  }
+  APInt total(64,actual);
+  if (displacement) total+=displacement->getValue().sextOrTrunc(64);
+  return base==function.getArg(0) && total==APInt(64,offset);
 }
 static Value *context_origin(Value *value) {
   while (auto *call=dyn_cast<CallInst>(value)) {
@@ -371,16 +401,25 @@ int main(int argc,char **argv) {
     auto section=function.getSection();int64_t data,end;
     if (section=="xdp" || section.starts_with("xdp/")) {
       data=offsetof(xdp_md,data);end=offsetof(xdp_md,data_end);
-    } else if (section=="tc" || section.starts_with("tc/") || section.starts_with("cgroup_skb/")) {
+    } else if (section=="tc" || section=="classifier" || section.starts_with("tc/") || section.starts_with("cgroup_skb/")) {
       data=offsetof(__sk_buff,data);end=offsetof(__sk_buff,data_end);
     } else continue;
     SmallVector<ICmpInst *,8> comparisons;
     for (auto &instruction:instructions(function)) if (auto *compare=dyn_cast<ICmpInst>(&instruction)) comparisons.push_back(compare);
     for (auto *compare:comparisons) {
-      auto *difference=dyn_cast<BinaryOperator>(compare->getOperand(0));
+      auto *span=compare->getOperand(0);
+      auto *difference=dyn_cast<BinaryOperator>(origin(span));
       auto *constant=dyn_cast<ConstantInt>(compare->getOperand(1));
-      if (!difference || difference->getOpcode()!=Instruction::Sub || !constant || !constant->getType()->isIntegerTy(64) ||
-          !field(difference->getOperand(0),function,end) || !field(difference->getOperand(1),function,data)) continue;
+      if (!difference || difference->getOpcode()!=Instruction::Sub || !constant) continue;
+      // The one frozen kernel's sk_buff u32 len/data_len fields are112/116
+      // (the target vmlinux.h layout is checked by the regression recipe).
+      bool headlen=data==offsetof(__sk_buff,data) &&
+          (constant->getType()->isIntegerTy(32) || constant->getType()->isIntegerTy(64)) &&
+          difference->getType()->isIntegerTy(32) &&
+          field(difference->getOperand(0),function,112,true) &&
+          field(difference->getOperand(1),function,116,true);
+      if (!headlen && (!constant->getType()->isIntegerTy(64) || !difference->getType()->isIntegerTy(64) ||
+          !field(difference->getOperand(0),function,end) || !field(difference->getOperand(1),function,data))) continue;
       auto predicate=compare->getPredicate();auto size=constant->getValue();
       bool signed_compare=ICmpInst::isSigned(predicate);
       if (signed_compare && size.isNegative()) continue;
@@ -390,12 +429,19 @@ int main(int argc,char **argv) {
       if (inclusive) { if (size.isMaxValue()) continue; ++size; }
       IRBuilder<> builder(compare);builder.SetCurrentDebugLocation(compare->getDebugLoc());
       auto *start=difference->getOperand(1),*finish=difference->getOperand(0);
-      auto *bound=builder.CreateAdd(start,ConstantInt::get(context,size),"packet_bound");
+      if (headlen) {
+        auto *wide=Type::getInt64Ty(context);
+        auto *signature=FunctionType::get(wide,{function.getArg(0)->getType(),wide},false);
+        auto *operation=InlineAsm::get(signature,"$0 = *(u32 *)($1 + $2)","=r,r,i,~{memory}",true);
+        start=builder.CreateCall(operation,{function.getArg(0),ConstantInt::get(wide,data)},"packet_data");
+        finish=builder.CreateCall(operation,{function.getArg(0),ConstantInt::get(wide,end)},"packet_end");
+      }
+      auto *bound=builder.CreateAdd(start,ConstantInt::get(context,size.zextOrTrunc(64)),"packet_bound");
       // The original scalar predicate retains wrap/overflow behavior. On an
       // ordered packet span <=PTRDIFF_MAX, accepting it already implies
       // start+K<=end. Express that same fact in the verifier's pointer form;
       // no numeric comparison of a packet pointer against ULONG_MAX is needed.
-      auto *original=builder.CreateICmp(predicate,difference,constant);
+      auto *original=builder.CreateICmp(predicate,span,constant);
       auto *original_reject=inverse?builder.CreateNot(original):original;
       auto *reject=builder.CreateOr(original_reject,builder.CreateICmpUGT(bound,finish));
       compare->replaceAllUsesWith(inverse?builder.CreateNot(reject):reject);
