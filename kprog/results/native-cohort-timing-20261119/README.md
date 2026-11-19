@@ -19,3 +19,11 @@ Each stage has its own log and completion status under the persistent raw
 directory. Expect roughly 30–50 minutes depending on cached build/startup
 work. Read the actual app/coverage results and sample series when complete;
 no speed gain is claimed from the earlier functional run.
+
+PERF 2026-11-19T08:23:26Z: Timing-wrapper dry run passed. The full image dry run entered
+forced recursive kernel recipes despite make -n; only owned make244102 was
+stopped (143), with no guest using the base. Its log stays at
+/workspaces/kprog-raw/perf/native-cohort-timing-20261119/image-dry-run-20261119T0819Z.txt.
+Normal batch254724 then started the frozen build under image EX at08:22:12Z,
+raw batch-20261119T082212Z-254724. No source/kernel version or benchmark
+setting changed during this correction.
