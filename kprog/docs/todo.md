@@ -76,6 +76,10 @@
   fidelity class closed; actual checked-app coverage remains separate.
 
 - [ ] P-B-constant-ALU32 (PERF 2026-11-19T11:28:45Z): Tetragon request 6's
+  Next live-state evidence: read-only cache inventory7ca5d9ee9, worker193484,
+  queued timing SH on CPU20/4GiBAS. It observes the existing ABI analysis;
+  unknown stores and coarse False aliases cannot justify pruning cells.
+  No production change, cache elimination or result is claimed yet.
   retained B has 438,579 machine blocks and a conservative 3,996-byte live
   spill frontier before and after packing. At the first peak, constant i32
   self moves of 8/4 hide size/helper-ID facts and retain stack-tag fanout.

@@ -1148,3 +1148,11 @@ All15ptrtoint-pair differences in this request are anchored. The small
 fixture still is not the original hoist reproduction. These are B
 control-flow and host semantic results; stock acceptance remains to be
 measured. See results/b-pointer-difference-20261119 for commands, raw paths and disassembly.
+
+PERF 2026-11-19T18:06:06Z: Tetragon ghost-cache reduction remains a diagnostic hypothesis.
+Read-only inventory7ca5d9ee9 observes the existing ABI analysis on retained
+Tetragon6; worker193484 waits timing SH, CPU20/4GiBAS. No cache cell has been
+removed, production compiler changed, or improvement measured. B subtraction
+confirmation186985 still waits the coordinator batch; its prior host/CFG
+passes remain separate from pending stock acceptance. See
+results/tetragon-stack-liveness-20261119 and b-pointer-difference-20261119.

@@ -211,3 +211,7 @@ COORDINATOR 2026-11-19T17:27Z, current instructions for PERF (the full earlier n
 1. Continue your B-side item: the pointer-difference class in Tracee requests (your regression 139745020 and fixture 3cdd713ef).
 2. The coordinator owns these files until further notice: vendor/bpf/core-compat.h, vendor/bpf/cilium/bpf/include/bpf/helpers.h, kprog/x86/native_lab/native_link/src/x86_helper_provenance.rs and the helper-id parts of x86.rs. Leave them unchanged.
 3. The coordinator's image and six-app check (helpers-unified-20261119) holds the batch lock now; the coordinator's six-app timing follows it.
+
+## Lane continuation, received 2026-11-19T18:06:06Z (verbatim)
+
+Continue lane perf in the Workspace: read the newest COORDINATION.md notices and your last.md, then take the next open item (kprog/docs/todo.md section 0: phase 1 pipeline correct, then the optimizations, all LTO pieces on together, each optimization recorded in kprog/docs/optimizations.md). Commit and push each step, end the turn by writing last.md and state.md, and stamp notes with date -u.

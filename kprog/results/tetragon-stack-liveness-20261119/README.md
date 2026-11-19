@@ -84,3 +84,18 @@ new generation refusal. No shared-I change, selector, check, limit, build,
 profile or guest was introduced by this review. Any later transformation
 uses the existing specialization interface and preserves pointer tags and
 released-stack behavior; native byte trimming is not the objective here.
+
+PERF 2026-11-19T18:06:06Z: Read-only cache inventory7ca5d9ee9 uses Python's call/return
+profiling to observe the unchanged ABI analysis during generation from the
+retained Tetragon6 proof and its original request metadata. It records
+full-width store locations, unknown destinations, pointer-dictionary
+offsets and unknown-RSP states. False aliases still combine scalar and
+external pointer cases; push/pop/call frames and helper copies need
+conservative treatment. No cache elimination or production change follows
+from this inventory alone. No C frontend, backend or image is built.
+
+Worker193484 is detached under timing SH, CPU20/4GiB AS, with persistent raw
+/workspaces/kprog-raw/perf/tetragon-cache-inventory-20261119/inventory-20261119T180509Z-193484.
+Only queued/run.log exist at18:05:34Z; no analysis pass is claimed. The
+existing pointer-difference stock confirmation186985 remains separately
+queued on batch EX behind the coordinator's six-app check.
