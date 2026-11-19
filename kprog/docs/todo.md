@@ -28,6 +28,11 @@
   original-FD query is called only by the normal manifest route. Move the
   existing query to the common FD loader and delete the obsolete flag path.
   Actual retained evidence: results/checked-helper-binding-20261119/current.json.
+  PERF 2026-11-19T11:52:26Z: Source220dbc191 implements the shared query
+  and deletes the old flag (+1/-7); canonical loader build passes. Functional
+  worker360208 is checking actual stock/native coverage and installed targets
+  on CPUs20-21. Keep this item open through those receipts; context-only
+  source-ID-zero and map-operation identity recovery remain separate work.
 - [ ] P-checked-map-ops (PERF 2026-11-19T11:43:27Z): all 25 current BCC
   checked plans lack map_ops; 17 update/10 delete static sites use generic
   wrappers. The trusted route's translated-insn scanner has no process-FD

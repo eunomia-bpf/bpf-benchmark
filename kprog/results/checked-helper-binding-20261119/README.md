@@ -62,3 +62,12 @@ This is compilation, not yet evidence of new installed helper targets or
 per-call gains. The next canonical BCC functional run will supply actual
 stock/native coverage and archived relocation targets. No image or module
 change is needed for that functional entry.
+
+Source fix is 220dbc191. Canonical BCC worker 360208 started at
+2026-11-19T11:48:56Z after the Make dry run, using the existing
+native-cohort-check recipe, all C/LTO on and unchanged image. Raw:
+`/workspaces/kprog-raw/perf/native-cohort-check-20261119/bcc-20261119T114856Z-360208`.
+It holds batch EX/timing SH/image SH and runs the existing 1 x 10 s
+functional protocol on CPUs20-21. At 11:52:26Z it has not completed;
+actual coverage and the post-fix relocation audit remain pending. Retain
+the worker and inputs; this is no speed measurement.
