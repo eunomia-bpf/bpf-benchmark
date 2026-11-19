@@ -28,13 +28,13 @@ theorem table_locals (tags : Bool) (m : CC.Mem) : Nonempty (TableLocals tags m) 
     CC.Mem.rangePerm_implies range (by decide : CC.permOrder .Freeable .Writable = true),
     fun i => Classical.choose (cells i), fun i => Classical.choose_spec (cells i)⟩⟩
 
-private theorem table_assignment_exec (tags : Bool) (m before after : CC.Mem)
+private theorem table_assignment_exec (world : CC.CGenv) (tags : Bool) (m before after : CC.Mem)
     (locals : TableLocals tags m) (i : Fin 31) (le : CC.TempEnv) (k : CC.Cont) (rest : CC.Stmt)
     (stored : CC.Mem.storev CC.Mptr before (.Vptr locals.tableBlock (tableOffset i))
       (.Vptr (locals.cellBlock i) 0) = some after) :
-    steps ge 3 (.State producer (.Ssequence (tableAssignment tags i) rest) k (allocation m).1 le before) =
+    steps world 3 (.State producer (.Ssequence (tableAssignment tags i) rest) k (allocation m).1 le before) =
       some (CC.E0, .State producer rest k (allocation m).1 le after) ∧
-    InternalPath ge 3 (.State producer (.Ssequence (tableAssignment tags i) rest) k (allocation m).1 le before) := by
+    InternalPath world 3 (.State producer (.Ssequence (tableAssignment tags i) rest) k (allocation m).1 le before) := by
   simp [steps, InternalPath, InternalState, tableAssignment, tableType,
     CC.doStep, CC.doEvalLvalue, CC.doEvalExpr, CC.lvalOfVar, CC.doDerefLoc,
     CC.doAssignLoc, CC.accessMode, CC.typeof, CC.Cop.semBinaryOperation,
@@ -45,10 +45,10 @@ private theorem table_assignment_exec (tags : Bool) (m before after : CC.Mem)
     locals.binding, locals.cellBinding, CC.E0, CC.Eapp] at stored ⊢
   simp [stored, CC.doStep, CC.E0, CC.Eapp, InternalState, InternalPath, steps]
 
-private theorem table_write (tags : Bool) (m before : CC.Mem) (locals : TableLocals tags m)
+private theorem table_write (world : CC.CGenv) (tags : Bool) (m before : CC.Mem) (locals : TableLocals tags m)
     (i : Fin 31) (le : CC.TempEnv) (k : CC.Cont) (rest : CC.Stmt)
     (access : before.access = (allocation m).2.access) :
-    ∃ after, InternalRun ge 3
+    ∃ after, InternalRun world 3
         (.State producer (.Ssequence (tableAssignment tags i) rest) k (allocation m).1 le before)
         (.State producer rest k (allocation m).1 le after) ∧
       CC.Mem.load CC.Mptr after locals.tableBlock (8 * (i.val : Int)) =
@@ -82,7 +82,7 @@ private theorem table_write (tags : Bool) (m before : CC.Mem) (locals : TableLoc
   have storev : CC.Mem.storev CC.Mptr before (.Vptr locals.tableBlock (tableOffset i))
       (.Vptr (locals.cellBlock i) 0) = some after := by
     simpa only [CC.Mem.storev, table_offsets] using stored
-  have exec := table_assignment_exec tags m before after locals i le k rest storev
+  have exec := table_assignment_exec world tags m before after locals i le k rest storev
   refine ⟨after, internalRun_of_steps exec.2 exec.1, ?_, ?_, ?_,
     FrameBelow.store locals.fresh stored, CC.Mem.store_access stored, CC.Mem.store_nextblock stored⟩
   · simpa [CC.Mptr, CC.Archi.ptr64, CC.Val.loadResult] using CC.Mem.load_store_same stored
@@ -98,10 +98,10 @@ private theorem table_write (tags : Bool) (m before : CC.Mem) (locals : TableLoc
     exact CC.Mem.load_store_other stored chunk block ofs
       (.inl (distinct _ _ _ _ bound locals.binding different))
 
-private theorem run_table_list (tags : Bool) (m : CC.Mem) (locals : TableLocals tags m)
+private theorem run_table_list (world : CC.CGenv) (tags : Bool) (m : CC.Mem) (locals : TableLocals tags m)
     (rows : List (Fin 31)) (rest : CC.Stmt) (le : CC.TempEnv) (k : CC.Cont)
     (before : CC.Mem) (access : before.access = (allocation m).2.access) :
-    ∃ after, InternalRun ge (3 * rows.length)
+    ∃ after, InternalRun world (3 * rows.length)
         (.State producer (rows.foldr (fun i next => .Ssequence (tableAssignment tags i) next) rest)
           k (allocation m).1 le before)
         (.State producer rest k (allocation m).1 le after) ∧
@@ -121,7 +121,7 @@ private theorem run_table_list (tags : Bool) (m : CC.Mem) (locals : TableLocals 
     · intro id ty block bound different chunk ofs; rfl
   | cons head tail ih =>
     obtain ⟨middle, headRun, headRead, headOther, headLocals, headFrame, headAccess, headNext⟩ :=
-      table_write tags m before locals head le k
+      table_write world tags m before locals head le k
         (tail.foldr (fun i next => .Ssequence (tableAssignment tags i) next) rest) access
     obtain ⟨after, tailRun, tailRead, tailOther, tailLocals, tailFrame, tailAccess, tailNext⟩ :=
       ih middle (headAccess.trans access)
@@ -145,9 +145,9 @@ private theorem run_table_list (tags : Bool) (m : CC.Mem) (locals : TableLocals 
 
 /-- All 31 actual slots of either selected table are initialized from the
 real local addresses, preserving every other declared local load. -/
-theorem initialize_pointer_table (tags : Bool) (m before : CC.Mem) (le : CC.TempEnv)
+theorem initialize_pointer_table_bound (world : CC.CGenv) (tags : Bool) (m before : CC.Mem) (le : CC.TempEnv)
     (k : CC.Cont) (rest : CC.Stmt) (access : before.access = (allocation m).2.access) :
-    ∃ locals : TableLocals tags m, ∃ after, InternalRun ge 93
+    ∃ locals : TableLocals tags m, ∃ after, InternalRun world 93
         (.State producer ((tableAssignments tags).foldr CC.Stmt.Ssequence rest)
           k (allocation m).1 le before)
         (.State producer rest k (allocation m).1 le after) ∧
@@ -159,7 +159,7 @@ theorem initialize_pointer_table (tags : Bool) (m before : CC.Mem) (le : CC.Temp
       after.nextblock = before.nextblock := by
   obtain ⟨locals⟩ := table_locals tags m
   obtain ⟨after, run, read, _, other, frame, finalAccess, next⟩ :=
-    run_table_list tags m locals (List.finRange 31) rest le k before access
+    run_table_list world tags m locals (List.finRange 31) rest le k before access
   refine ⟨locals, after, ?_, (fun i => read i (List.mem_finRange i)), other, frame, finalAccess, next⟩
   have mapped : tableAssignments tags = (List.finRange 31).map (tableAssignment tags) := by
     simp only [tableAssignments, List.finRange, List.map_ofFn, Function.comp_def]
@@ -167,9 +167,9 @@ theorem initialize_pointer_table (tags : Bool) (m before : CC.Mem) (le : CC.Temp
 
 /-- The actual 62-table-store producer segment completes with both complete
 typed pointer tables and exact framing of other local loads and caller blocks. -/
-theorem pointer_tables_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+theorem pointer_tables_initialized_bound (world : CC.CGenv) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (access : before.access = (allocation m).2.access) :
-    ∃ after, InternalRun ge 186
+    ∃ after, InternalRun world 186
         (.State producer (registerDeclaration 30).rest k (allocation m).1 le before)
         (.State producer afterPointerTables k (allocation m).1 le after) ∧
       (∀ tags, ∃ locals : TableLocals tags m, ∀ i,
@@ -181,10 +181,10 @@ theorem pointer_tables_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC
       FrameBelow m.nextblock before after ∧ after.access = before.access ∧
       after.nextblock = before.nextblock := by
   obtain ⟨words, middle, wordRun, wordRead, wordOther, wordFrame, wordAccess, wordNext⟩ :=
-    initialize_pointer_table false m before le k
+    initialize_pointer_table_bound world false m before le k
       ((tableAssignments true).foldr CC.Stmt.Ssequence afterPointerTables) access
   obtain ⟨tags, after, tagRun, tagRead, tagOther, tagFrame, tagAccess, tagNext⟩ :=
-    initialize_pointer_table true m middle le k afterPointerTables (wordAccess.trans access)
+    initialize_pointer_table_bound world true m middle le k afterPointerTables (wordAccess.trans access)
   refine ⟨after, ?_, ?_, ?_, wordFrame.trans tagFrame,
     tagAccess.trans wordAccess, tagNext.trans wordNext⟩
   · rw [pointer_tables_source]
@@ -202,6 +202,71 @@ theorem pointer_tables_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC
 
 /-- The real x30 zero branch followed immediately by both pointer tables.
 The zero register/tag observations survive the table writes. -/
+theorem register30_and_pointer_tables_bound (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (access : before.access = (allocation m).2.access) :
+    let d := registerDeclaration 30
+    ∃ xb tb after,
+      (allocation m).1.get d.word = some (xb, .Tunion Arm64Entry._arm64_sim_gpr CC.noattr) ∧
+      (allocation m).1.get d.tag = some (tb, CC.tuchar) ∧
+      InternalRun world 196 (.State producer (registerDeclarationStage 30) k (allocation m).1 le before)
+        (.State producer afterPointerTables k (allocation m).1
+          (le.set d.resultTemp (.Vlong (0#64))) after) ∧
+      CC.Mem.loadv .Mint64 after (.Vptr xb 0) = some (.Vlong 0) ∧
+      CC.Mem.loadv .Mint8unsigned after (.Vptr tb 0) = some (.Vint 0) ∧
+      (∀ tags, ∃ locals : TableLocals tags m, ∀ i,
+        CC.Mem.load CC.Mptr after locals.tableBlock (8 * (i.val : Int)) =
+          some (.Vptr (locals.cellBlock i) 0)) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) →
+        id ≠ (registerDeclaration 30).word → id ≠ (registerDeclaration 30).tag →
+        id ≠ tableName false → id ≠ tableName true →
+        ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock := by
+  dsimp only
+  obtain ⟨xb, tb, middle, wordBinding, tagBinding, zeroRun, zeroWord, zeroTag, zeroOther, zeroFrame, zeroAccess, zeroNext⟩ :=
+    register30_initialized_bound world layout m before le k access
+  obtain ⟨after, tableRun, tables, other, tableFrame, tableAccess, tableNext⟩ :=
+    pointer_tables_initialized_bound world m middle
+      (le.set (registerDeclaration 30).resultTemp (.Vlong (0#64))) k (zeroAccess.trans access)
+  refine ⟨xb, tb, after, wordBinding, tagBinding, zeroRun.trans tableRun, ?_, ?_, tables, ?_,
+    zeroFrame.trans tableFrame, tableAccess.trans zeroAccess, tableNext.trans zeroNext⟩
+  · exact (other _ _ _ wordBinding (by decide +kernel) (by decide +kernel) .Mint64 0).trans zeroWord
+  · exact (other _ _ _ tagBinding (by decide +kernel) (by decide +kernel) .Mint8unsigned 0).trans zeroTag
+
+  · intro id ty block bound notWord notTag notWords notTags chunk ofs
+    exact (other id ty block bound notWords notTags chunk ofs).trans
+      (zeroOther id ty block bound notWord notTag chunk ofs)
+
+theorem initialize_pointer_table (tags : Bool) (m before : CC.Mem) (le : CC.TempEnv)
+    (k : CC.Cont) (rest : CC.Stmt) (access : before.access = (allocation m).2.access) :
+    ∃ locals : TableLocals tags m, ∃ after, InternalRun ge 93
+        (.State producer ((tableAssignments tags).foldr CC.Stmt.Ssequence rest)
+          k (allocation m).1 le before)
+        (.State producer rest k (allocation m).1 le after) ∧
+      (∀ i, CC.Mem.load CC.Mptr after locals.tableBlock (8 * (i.val : Int)) =
+        some (.Vptr (locals.cellBlock i) 0)) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ≠ tableName tags →
+        ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock :=
+  initialize_pointer_table_bound ge tags m before le k rest access
+
+theorem pointer_tables_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (access : before.access = (allocation m).2.access) :
+    ∃ after, InternalRun ge 186
+        (.State producer (registerDeclaration 30).rest k (allocation m).1 le before)
+        (.State producer afterPointerTables k (allocation m).1 le after) ∧
+      (∀ tags, ∃ locals : TableLocals tags m, ∀ i,
+        CC.Mem.load CC.Mptr after locals.tableBlock (8 * (i.val : Int)) =
+          some (.Vptr (locals.cellBlock i) 0)) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) →
+        id ≠ tableName false → id ≠ tableName true →
+        ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock :=
+  pointer_tables_initialized_bound ge m before le k access
+
 theorem register30_and_pointer_tables (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (access : before.access = (allocation m).2.access) :
     let d := registerDeclaration 30
@@ -218,15 +283,8 @@ theorem register30_and_pointer_tables (m before : CC.Mem) (le : CC.TempEnv) (k :
           some (.Vptr (locals.cellBlock i) 0)) ∧
       FrameBelow m.nextblock before after ∧ after.access = before.access ∧
       after.nextblock = before.nextblock := by
-  dsimp only
-  obtain ⟨xb, tb, middle, wordBinding, tagBinding, zeroRun, zeroWord, zeroTag, _, zeroFrame, zeroAccess, zeroNext⟩ :=
-    register30_initialized m before le k access
-  obtain ⟨after, tableRun, tables, other, tableFrame, tableAccess, tableNext⟩ :=
-    pointer_tables_initialized m middle
-      (le.set (registerDeclaration 30).resultTemp (.Vlong (0#64))) k (zeroAccess.trans access)
-  refine ⟨xb, tb, after, wordBinding, tagBinding, zeroRun.trans tableRun, ?_, ?_, tables,
-    zeroFrame.trans tableFrame, tableAccess.trans zeroAccess, tableNext.trans zeroNext⟩
-  · exact (other _ _ _ wordBinding (by decide +kernel) (by decide +kernel) .Mint64 0).trans zeroWord
-  · exact (other _ _ _ tagBinding (by decide +kernel) (by decide +kernel) .Mint8unsigned 0).trans zeroTag
+  obtain ⟨xb, tb, after, wordBinding, tagBinding, run, word, tag, tables, _, frame, finalAccess, next⟩ :=
+    register30_and_pointer_tables_bound ge rfl m before le k access
+  exact ⟨xb, tb, after, wordBinding, tagBinding, run, word, tag, tables, frame, finalAccess, next⟩
 
 end KProgFormal.ClightRefinement.Arm64Producer

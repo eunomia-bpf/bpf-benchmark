@@ -1,0 +1,153 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-numeric-producer-tables",
+  "proved": {
+    "world": "actual Arm64NumericProgram.ge; initialized203-global program with original frontier204",
+    "phases": {
+      "preceding_provider_visits": 30,
+      "x30_zero_internal_transitions": 10,
+      "pointer_table_internal_transitions": 186,
+      "combined_pure_transitions": 196,
+      "real_pointer_stores": 62,
+      "table_slots_each": 31
+    },
+    "start": "actual initialized producer Callstate, through prior589 prefix/setup and all30 GPR visits",
+    "final_stage": "actual afterPointerTables, before four flags",
+    "pointer_tables": "both actual allocated TableLocals, all62 slot readbacks with exact pointer cell bindings and8*i offsets",
+    "cell_data": "all31 Mint64 word/Mint8unsigned tag readbacks derived from prior actual outcomes and x30zero; no final register relation assumed",
+    "trace": "same ordered30 actual provider traces, flattened; pure196 suffix appends no events or visits",
+    "preserved": "both cold caches, actual ctx temporary, global contents/both permission maps below204, real allocation access and nextblock",
+    "reuse": "existing table metadata, storage construction and execution induction, plus previously proved world-bound x30zero10",
+    "strengthening": "combined bound law retains all unchanged-local loads previously discarded by old combined API",
+    "old_public_APIs": [
+      "initialize_pointer_table",
+      "pointer_tables_initialized",
+      "register30_and_pointer_tables"
+    ],
+    "assumptions": "ProviderAt actual Senv/full post-memory/frame/local-read/access/frontier availability remains explicit; source composite equality supplied for x30zero; pure table evaluation needs no world layout or symbol premise",
+    "not_assumed": [
+      "post-memory equals pre-memory",
+      "provider traces empty",
+      "old and Numeric Genv/Senv equal",
+      "native ABI/provider implementation proved",
+      "table contents or final register relation supplied"
+    ],
+    "C_runtime_benchmark_changes": false
+  },
+  "focused": [
+    {
+      "name": "focused1",
+      "exit": 0,
+      "jobs": 151,
+      "log": "focused1.log",
+      "note": "Shared generic table laws and standalone projections pass first attempt."
+    },
+    {
+      "name": "focused2",
+      "exit": 1,
+      "log": "focused2.log",
+      "note": "Only x30 readback proof-expression mismatch: unsigned pointer offset0 versus integer0. Preserved in raw; resolved by definitional change, no semantics/premise/limit change."
+    },
+    {
+      "name": "focused3",
+      "exit": 0,
+      "jobs": 181,
+      "log": "focused3.log",
+      "note": "Complete actual composition passes; new module3.1s."
+    }
+  ],
+  "public_queries": {
+    "exit": 0,
+    "theorems": 7,
+    "log": "Query-1.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64Producer.initialize_pointer_table_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.pointer_tables_initialized_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.register30_and_pointer_tables_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.initialize_pointer_table": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.pointer_tables_initialized": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.register30_and_pointer_tables": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericProducerTables.initialized_pointer_tables": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "full_lake_build": {
+    "exit": 0,
+    "jobs": 326,
+    "attempts": 1,
+    "log": "lake-build1.log"
+  },
+  "export_parity": {
+    "exit": 0,
+    "log": "export-parity1.log",
+    "reference": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_identical": true
+  },
+  "limits": {
+    "heartbeats": 200000,
+    "recursion": 512,
+    "address_space_GiB": 32,
+    "workers": 1,
+    "build_CPU": 17,
+    "read_query_git_CPU": 16,
+    "timing_lock": "shared",
+    "async": false
+  },
+  "remaining": [
+    "actual four flag visits/LRzero and64 vector visits",
+    "producer/header/RAW/register Storage/caller and native/provider ABI admission",
+    "relative cache/materialization",
+    "native physical memory/alias/origin/control",
+    "all-family O1/O2/O4 recount",
+    "remaining M6 and fresh final Lake/make check"
+  ],
+  "native_make_check": "Not repeated for Lean-only step; last whole PASS5236c0e9677f635526fdd515cde5195b2ba0810c. Fresh final confirmation remains due at goal closure.",
+  "complete_ISA_handler_families": 0,
+  "milestones": {
+    "M1_M4": "done",
+    "M5": "open",
+    "M6": "open"
+  }
+}

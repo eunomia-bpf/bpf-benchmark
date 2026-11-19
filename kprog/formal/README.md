@@ -114,7 +114,11 @@ The [Numeric GPR-input sequence](results/m5-numeric-producer-gpr-inputs/README.m
 now executes all 30 actual visits from initialization, with ordered provider
 traces and derived word/tag cells. Both caches remain cold, `_ctx` survives,
 and the original 204-frontier global frame and allocation permissions remain.
-The separate x30-zero branch follows that reached state.
+The [Numeric pointer-table composition](results/m5-numeric-producer-tables/README.md)
+then executes the 10-transition x30 zero branch and 186 table transitions.
+Both real 31-slot tables point to the allocated cells, with all 31 word/tag
+readbacks derived, the 30 provider traces retained, and caches/context/global
+framing preserved. It reaches the source boundary before the four flags.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 

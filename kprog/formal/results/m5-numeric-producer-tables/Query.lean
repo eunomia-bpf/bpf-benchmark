@@ -1,0 +1,16 @@
+import KProgFormal.ClightRefinement.Arm64NumericProducerTables
+open KProgFormal.ClightRefinement
+#check Arm64Producer.initialize_pointer_table_bound
+#print axioms Arm64Producer.initialize_pointer_table_bound
+#check Arm64Producer.pointer_tables_initialized_bound
+#print axioms Arm64Producer.pointer_tables_initialized_bound
+#check Arm64Producer.register30_and_pointer_tables_bound
+#print axioms Arm64Producer.register30_and_pointer_tables_bound
+#check Arm64Producer.initialize_pointer_table
+#print axioms Arm64Producer.initialize_pointer_table
+#check Arm64Producer.pointer_tables_initialized
+#print axioms Arm64Producer.pointer_tables_initialized
+#check Arm64Producer.register30_and_pointer_tables
+#print axioms Arm64Producer.register30_and_pointer_tables
+#check Arm64NumericProducerTables.initialized_pointer_tables
+#print axioms Arm64NumericProducerTables.initialized_pointer_tables
