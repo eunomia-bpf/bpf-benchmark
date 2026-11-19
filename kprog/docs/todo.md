@@ -59,6 +59,13 @@
   this is no new rejection or causal attribution. Diagnostics still wait.
 
 - [ ] P-B-cilium-headlen (PERF handoff 2026-11-19T20:22:55Z, OMP639663a85):
+  PERF confirmation:852c2bfe3/worker487083 completed0 at23:11:02Z.
+  Current14requests now14stock/14checked-sim-c, eachverifyreceipt0,
+  versusprevious8stock/6packet. Sixstockfixtures/18packetTEST_RUNs pass;
+  16positive/8exclusion/5freshness controls pass. Historical41/current6
+  all emit B (367/408predicates), but replay.py does NOT stock-load them.
+  Currentpopulation packet class is closed; historical41stock remainsopen,
+  separatefrom6store/3emitter/request64arming andperformance. Seeedge-result.json.
   PERF 2026-11-19: focused head_edge baseline481274 exits2 at stock load:
   byte16/range16, verifier.log112, matching current six Cilium rejects.
   Candidate uses dominating scalar intervals to express boundary EQ/NE as

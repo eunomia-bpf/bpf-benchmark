@@ -1,5 +1,21 @@
 # Cilium head-length bounds
 
+Worker487083 completed0 at2026-11-19T23:11:02Z. The boundary-equality
+repair852c2bfe3 passes16 positive/eight exclusion selectors, five freshness
+cases, six sole-kernel fixture loads and18 packet TEST_RUN cases. Fresh
+Cilium run230826_548703 is appok with14/14 stock verification receipts
+(phaseverify/status0) and14 checked-sim-c installs, versus8/14 previously.
+This closes the six packet failures in that current population.
+
+The historical41 and current-six replay sets all emit B, with367 and408
+lowered predicates respectively. `replay.py` invokes the compiler/backend;
+it does not stock-load these objects. Thus archived41 stock acceptance is
+still unmeasured by this run, despite the peer class-closure record.
+Historical store/emitter/arming defects and performance remain separate.
+`edge-result.json` records these outcomes; full receipts are in raw
+`edge-candidate-20261119T225223Z-487083`, including`coverage.json` and
+`cilium/service.tar.gz`. The earlier queued/candidate status below is history.
+
 PERF 2026-11-19T22:39Z: worker366677 completed0, fresh app status`ok`,
 run `x86_kvm_corpus_20261119_223501_349942`. Its service journal contains
 14requests: eight stock passes and six packet rejects, all successful native

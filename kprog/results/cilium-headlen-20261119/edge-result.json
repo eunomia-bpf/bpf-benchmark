@@ -1,0 +1,25 @@
+{
+  "raw": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/edge-candidate-20261119T225223Z-487083",
+  "source_commit": "7ca1aaec6a32475e4425b64bfaa1876cfed0bba5",
+  "started": "2026-11-19T23:06:26Z",
+  "finished": "2026-11-19T23:11:02Z",
+  "make_exit": 0,
+  "positive_selectors": 16,
+  "exclusion_selectors": 8,
+  "packet_data_freshness_cases": 5,
+  "stock_fixture_programs": 6,
+  "stock_packet_execution_cases": 18,
+  "historical_packet_replays": {"b_emitted": 41, "predicates_lowered": 367, "stock_load_attempted": false},
+  "current_packet_replays": {"b_emitted": 6, "predicates_lowered": 408, "stock_load_attempted": false},
+  "fresh_app": {
+    "run": "corpus/results/x86_kvm_corpus_20261119_230826_548703",
+    "status": "ok",
+    "requests": 14,
+    "stock_passed": 14,
+    "verification_receipts_phase_verify_status_zero": 14,
+    "checked_sim_c_installed": 14,
+    "previous_same_population_stock_passed": 8,
+    "previous_same_population_packet_rejected": 6
+  },
+  "scope": "Boundary-equality repair confirmed on sole-kernel fixtures and the current 14-request Cilium population. Historical 41-request replay proves B emission only. Historical stock acceptance, separate emitter/arming defects and performance targets remain open."
+}
