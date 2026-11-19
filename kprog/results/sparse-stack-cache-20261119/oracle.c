@@ -46,6 +46,10 @@ int main(void)
             X86_SIM_L_STACK_RELEASE(offset);
             cached=X86_SIM_L_STACK_VALUES_READ(index,X86_WIDTH_64);
             assert(cached.tag==X86_SIM_TAG_SCALAR);
+            X86_SIM_RUN_OP(X86_OP_MOV_LOAD,X86_RAX,alias?X86_RDI:X86_RSP,
+                X86_WIDTH_64,0,alias?0:(__u64)offset);
+            assert(state.rax_tag==X86_SIM_TAG_SCALAR &&
+                   (uintptr_t)state.rax.ptr==0x1020304050607080UL);
             ++cases;
         }
     }
