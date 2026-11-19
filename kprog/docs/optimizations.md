@@ -1418,3 +1418,15 @@ Combined canonical rebuild/SH controls/Katran/stock/40replays/freshCilium
 worker303179 waitsimageEX; rawcheck-20261119T210631Z-303179 under persistent
 cilium-headlen-20261119. OMP earlier235bounds/40B emissions do not establish
 finalcandidate freshness coverage orstockacceptance. No runtime gain yet.
+
+PERF 2026-11-19T21:27:36Z: Cilium relative-table follow-up bb45dea26 locates retained
+RAXbits8..31 in private DWORD spills atentryRSP-248/-268. Every branch's
+firstdirectreadback isESI/EDI at8953/9152/9156; existingregister-mask
+analysis findstheseupperbitsdead aftereachreadback. ProvisionalABI prefix
+hasnounresolvedmemoryaliases butfivehelpercalls; helpermemoryeffects and
+private-spill non-observation mustbeproved beforeproductionlowering changes.
+No numericcodebasebinding/guardrelaxation/zeroing orruntimegain. Evidence
+results/cilium-table-liveness-20261119/memory-result.json; rawprefix-20261119T212638Z.
+Separately OMPf660709bb reportsfinal80dbc headlen233bounds/40requests,
+two stale predicatesleftunchanged, stillnotstockacceptance. Worker303179
+continuesimageEXqueue, allLTOon, benchmarksettingsunchanged.

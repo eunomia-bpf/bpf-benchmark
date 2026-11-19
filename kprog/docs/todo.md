@@ -92,6 +92,12 @@
   actual journal reconciliation; prior verified receipt remains14).
 
 - [ ] P-B-relative-table-live-partials (PERF 2026-11-19T19:57:44Z): actual Cilium
+  PERF 2026-11-19T21:27:36Z: bb45dea26 diagnostic follows private DWORD spills:
+  firstreadbacks22:8953/40:9152/58:9156 intoESI/EDI, existingregister
+  liveness provesbits8..31deadafterreadback. PrefixABIaliasinventory has
+  nounresolvedaliases; fivehelpercalls andmemorynon-observation proof
+  remain. Needextendexistingliveness throughprivatespills preservingall
+  observations, notzerocodebits. No productionlowering/B/stockgain.
   checked requests22/40/58 fail relative table lowering. Diagnostic8654dcc06
   reproduces all3 using the existing bound instruction-effect analysis.
   First observed live bits are RAX8..31: MOV AL,5 followed by DWORD store

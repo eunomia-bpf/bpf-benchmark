@@ -64,3 +64,9 @@ three generation failures, which have `b_generated=false`,
 native installation does not establish stock acceptance. The original
 handoff is retained; `historical-coverage.json` records the actual distinction.
 Raw `/workspaces/kprog-raw/perf/cilium-headlen-20261119/journal-20261119T211300Z`. This is archive analysis, not a new run.
+
+OMP's later independent replay, recorded in `f660709bb`, covers final
+`80dbcfc51`:233predicates across all40requests, with two possible-write
+predicates left unchanged. This supersedes235 as the reported final-source
+lowering count; canonical worker303179 and actual stock acceptance remain
+pending at 2026-11-19T21:27:36Z. The independent count is compiler evidence only.

@@ -1,0 +1,413 @@
+{
+  "recorded": "2026-11-19T21:27:36Z",
+  "source_commit": "bb45dea26",
+  "raw": "/workspaces/kprog-raw/perf/cilium-table-liveness-20261119/prefix-20261119T212638Z",
+  "worker_pid": 314409,
+  "worker_terminal": true,
+  "requests": [
+    {
+      "request": 22,
+      "rejected_store": {
+        "pc": 3735,
+        "instruction": "mov    DWORD PTR [rsp+0x20],eax"
+      },
+      "stack_cells": [
+        -248
+      ],
+      "bytes": 4,
+      "first_direct_cell_accesses": [
+        {
+          "pc": 8953,
+          "instruction": "mov    esi,DWORD PTR [rsp+0x20]",
+          "accesses": [
+            {
+              "pc": 8953,
+              "instruction": "mov    esi,DWORD PTR [rsp+0x20]",
+              "operand": "DWORD PTR [rsp+0x20]",
+              "stack_offset": -248,
+              "bytes": 4,
+              "context": []
+            }
+          ],
+          "upper_bits_dead_after_readback": true,
+          "readback_masks": [
+            4294967040
+          ]
+        }
+      ],
+      "calls_before_first_direct_access": [
+        {
+          "pc": 8887,
+          "symbol": "bpf_map_lookup_elem"
+        },
+        {
+          "pc": 150,
+          "symbol": "bpf_map_lookup_elem"
+        },
+        {
+          "pc": 8948,
+          "symbol": "bpf_map_update_elem"
+        },
+        {
+          "pc": 574,
+          "symbol": "bpf_tail_call"
+        },
+        {
+          "pc": 554,
+          "symbol": "bpf_map_update_elem"
+        }
+      ],
+      "prefix_stack_arguments": [
+        {
+          "pc": 150,
+          "symbol": "bpf_map_lookup_elem",
+          "pointers": [
+            {
+              "parameter": "void *map",
+              "register": "X86_RDI",
+              "alias": "external_or_scalar"
+            },
+            {
+              "parameter": " const void *key",
+              "register": "X86_RSI",
+              "stack_offset": -104
+            }
+          ],
+          "scope": "Pointer roots only; pointee read extents are not proved."
+        },
+        {
+          "pc": 554,
+          "symbol": "bpf_map_update_elem",
+          "pointers": [
+            {
+              "parameter": "void *map",
+              "register": "X86_RDI",
+              "alias": "external_or_scalar"
+            },
+            {
+              "parameter": " const void *key",
+              "register": "X86_RSI",
+              "stack_offset": -104
+            },
+            {
+              "parameter": " const void *value",
+              "register": "X86_RDX",
+              "stack_offset": -208
+            }
+          ],
+          "scope": "Pointer roots only; pointee read extents are not proved."
+        },
+        {
+          "pc": 8887,
+          "symbol": "bpf_map_lookup_elem",
+          "pointers": [
+            {
+              "parameter": "void *map",
+              "register": "X86_RDI",
+              "alias": "external_or_scalar"
+            },
+            {
+              "parameter": " const void *key",
+              "register": "X86_RSI",
+              "stack_offset": -232
+            }
+          ],
+          "scope": "Pointer roots only; pointee read extents are not proved."
+        },
+        {
+          "pc": 8948,
+          "symbol": "bpf_map_update_elem",
+          "pointers": [
+            {
+              "parameter": "void *map",
+              "register": "X86_RDI",
+              "alias": "external_or_scalar"
+            },
+            {
+              "parameter": " const void *key",
+              "register": "X86_RSI",
+              "stack_offset": -232
+            },
+            {
+              "parameter": " const void *value",
+              "register": "X86_RDX",
+              "stack_offset": -104
+            }
+          ],
+          "scope": "Pointer roots only; pointee read extents are not proved."
+        }
+      ],
+      "unresolved_prefix_aliases": []
+    },
+    {
+      "request": 40,
+      "rejected_store": {
+        "pc": 3693,
+        "instruction": "mov    DWORD PTR [rsp+0x1c],eax"
+      },
+      "stack_cells": [
+        -268
+      ],
+      "bytes": 4,
+      "first_direct_cell_accesses": [
+        {
+          "pc": 9152,
+          "instruction": "mov    edi,DWORD PTR [rsp+0x1c]",
+          "accesses": [
+            {
+              "pc": 9152,
+              "instruction": "mov    edi,DWORD PTR [rsp+0x1c]",
+              "operand": "DWORD PTR [rsp+0x1c]",
+              "stack_offset": -268,
+              "bytes": 4,
+              "context": []
+            }
+          ],
+          "upper_bits_dead_after_readback": true,
+          "readback_masks": [
+            4294967040
+          ]
+        }
+      ],
+      "calls_before_first_direct_access": [
+        {
+          "pc": 9079,
+          "symbol": "bpf_map_lookup_elem"
+        },
+        {
+          "pc": 148,
+          "symbol": "bpf_map_lookup_elem"
+        },
+        {
+          "pc": 9140,
+          "symbol": "bpf_map_update_elem"
+        },
+        {
+          "pc": 550,
+          "symbol": "bpf_tail_call"
+        },
+        {
+          "pc": 530,
+          "symbol": "bpf_map_update_elem"
+        }
+      ],
+      "prefix_stack_arguments": [
+        {
+          "pc": 148,
+          "symbol": "bpf_map_lookup_elem",
+          "pointers": [
+            {
+              "parameter": "void *map",
+              "register": "X86_RDI",
+              "alias": "external_or_scalar"
+            },
+            {
+              "parameter": " const void *key",
+              "register": "X86_RSI",
+              "stack_offset": -112
+            }
+          ],
+          "scope": "Pointer roots only; pointee read extents are not proved."
+        },
+        {
+          "pc": 530,
+          "symbol": "bpf_map_update_elem",
+          "pointers": [
+            {
+              "parameter": "void *map",
+              "register": "X86_RDI",
+              "alias": "external_or_scalar"
+            },
+            {
+              "parameter": " const void *key",
+              "register": "X86_RSI",
+              "stack_offset": -112
+            },
+            {
+              "parameter": " const void *value",
+              "register": "X86_RDX",
+              "stack_offset": -224
+            }
+          ],
+          "scope": "Pointer roots only; pointee read extents are not proved."
+        },
+        {
+          "pc": 9079,
+          "symbol": "bpf_map_lookup_elem",
+          "pointers": [
+            {
+              "parameter": "void *map",
+              "register": "X86_RDI",
+              "alias": "external_or_scalar"
+            },
+            {
+              "parameter": " const void *key",
+              "register": "X86_RSI",
+              "stack_offset": -248
+            }
+          ],
+          "scope": "Pointer roots only; pointee read extents are not proved."
+        },
+        {
+          "pc": 9140,
+          "symbol": "bpf_map_update_elem",
+          "pointers": [
+            {
+              "parameter": "void *map",
+              "register": "X86_RDI",
+              "alias": "external_or_scalar"
+            },
+            {
+              "parameter": " const void *key",
+              "register": "X86_RSI",
+              "stack_offset": -248
+            },
+            {
+              "parameter": " const void *value",
+              "register": "X86_RDX",
+              "stack_offset": -112
+            }
+          ],
+          "scope": "Pointer roots only; pointee read extents are not proved."
+        }
+      ],
+      "unresolved_prefix_aliases": []
+    },
+    {
+      "request": 58,
+      "rejected_store": {
+        "pc": 3697,
+        "instruction": "mov    DWORD PTR [rsp+0x1c],eax"
+      },
+      "stack_cells": [
+        -268
+      ],
+      "bytes": 4,
+      "first_direct_cell_accesses": [
+        {
+          "pc": 9156,
+          "instruction": "mov    edi,DWORD PTR [rsp+0x1c]",
+          "accesses": [
+            {
+              "pc": 9156,
+              "instruction": "mov    edi,DWORD PTR [rsp+0x1c]",
+              "operand": "DWORD PTR [rsp+0x1c]",
+              "stack_offset": -268,
+              "bytes": 4,
+              "context": []
+            }
+          ],
+          "upper_bits_dead_after_readback": true,
+          "readback_masks": [
+            4294967040
+          ]
+        }
+      ],
+      "calls_before_first_direct_access": [
+        {
+          "pc": 9083,
+          "symbol": "bpf_map_lookup_elem"
+        },
+        {
+          "pc": 148,
+          "symbol": "bpf_map_lookup_elem"
+        },
+        {
+          "pc": 9144,
+          "symbol": "bpf_map_update_elem"
+        },
+        {
+          "pc": 632,
+          "symbol": "bpf_tail_call"
+        },
+        {
+          "pc": 612,
+          "symbol": "bpf_map_update_elem"
+        }
+      ],
+      "prefix_stack_arguments": [
+        {
+          "pc": 148,
+          "symbol": "bpf_map_lookup_elem",
+          "pointers": [
+            {
+              "parameter": "void *map",
+              "register": "X86_RDI",
+              "alias": "external_or_scalar"
+            },
+            {
+              "parameter": " const void *key",
+              "register": "X86_RSI",
+              "stack_offset": -112
+            }
+          ],
+          "scope": "Pointer roots only; pointee read extents are not proved."
+        },
+        {
+          "pc": 612,
+          "symbol": "bpf_map_update_elem",
+          "pointers": [
+            {
+              "parameter": "void *map",
+              "register": "X86_RDI",
+              "alias": "external_or_scalar"
+            },
+            {
+              "parameter": " const void *key",
+              "register": "X86_RSI",
+              "stack_offset": -112
+            },
+            {
+              "parameter": " const void *value",
+              "register": "X86_RDX",
+              "stack_offset": -224
+            }
+          ],
+          "scope": "Pointer roots only; pointee read extents are not proved."
+        },
+        {
+          "pc": 9083,
+          "symbol": "bpf_map_lookup_elem",
+          "pointers": [
+            {
+              "parameter": "void *map",
+              "register": "X86_RDI",
+              "alias": "external_or_scalar"
+            },
+            {
+              "parameter": " const void *key",
+              "register": "X86_RSI",
+              "stack_offset": -248
+            }
+          ],
+          "scope": "Pointer roots only; pointee read extents are not proved."
+        },
+        {
+          "pc": 9144,
+          "symbol": "bpf_map_update_elem",
+          "pointers": [
+            {
+              "parameter": "void *map",
+              "register": "X86_RDI",
+              "alias": "external_or_scalar"
+            },
+            {
+              "parameter": " const void *key",
+              "register": "X86_RSI",
+              "stack_offset": -248
+            },
+            {
+              "parameter": " const void *value",
+              "register": "X86_RDX",
+              "stack_offset": -112
+            }
+          ],
+          "scope": "Pointer roots only; pointee read extents are not proved."
+        }
+      ],
+      "unresolved_prefix_aliases": []
+    }
+  ],
+  "scope": "Diagnostic ABI pointer inventory over provisional CFG; no dead-memory proof, lowering, B emission, stock acceptance, or runtime result.",
+  "remaining": "Compiler must establish memory non-observation through private spills and helper effects before replacing original liveness rejection; no production lowering, B emission or stock result."
+}
