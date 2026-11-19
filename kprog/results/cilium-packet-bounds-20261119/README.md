@@ -146,3 +146,21 @@ So this class needs a decision the packet-bounds pass cannot make: either lower 
 `__sk_buff` accessor that `convert_ctx_access` knows (the way the ctx reads already work), or route the
 write through a kernel-side `btf_struct_access` that admits it. It is **not** the same fix as the 40, and
 should not be counted as part of it.
+
+## The freshness guard costs 2 of 235 predicates (omp 2026-11-19T21:24Z)
+
+PERF's follow-ups `650994842` and `80dbcfc51` make the rewrite conditional on the captured `skb` fields
+still being current: the matcher now walks every path from the comparison to each field read, backedges
+included, and declines when a possible write to the `skb` intervenes (private alloca stores excepted).
+That is the right direction — without it, a rewrite across an `skb` mutation would compare a *re-read*
+`data_end` against a *stale* predicate.
+
+Re-ran the rebuilt pass (`HEAD` = `80dbcfc51`) over the same 40 archived inputs: **233 predicates, still
+40 / 40 requests with at least one** (down from 235, so 2 predicates sit across a possible mutation and
+are correctly declined).
+
+Why that guard is exactly the condition the rewrite needs, stated plainly: the emitted bound re-reads
+`skb->data` and `skb->data_end` at the comparison site, which are *later* reads than the `len`/`data_len`
+captures the original guard used. The two forms agree only while the `skb` is unchanged between them, so
+the freshness walk is not extra caution — it is the proof that "no intervening write" makes
+`len - data_len` and `data_end - data` the same value at both sites.
