@@ -1320,3 +1320,13 @@ cells versus16, same424B arena. One-line production condition; no handler,
 raw write, invalidation, source P, flag, limit or runtime check change.
 Regressions add immediate-only/unknown-destination/erase-after-pointer cases,
 normal B with no cache cells and native byte readback. Prepared, unvalidated.
+
+PERF 2026-11-19T20:04:37Z: Immediate-store candidate0a96f6eaa passes complete component
+worker2824290:21selectors,4normal B emissions (including zero cache cells),
+native readback0x12345678 and72full+72sparse shared-C UBSan cases. Existing
+effect inventory renders Tetragon13cells (removed25/27/35), same424B arena,
+2538states/17return edges. Immediate bytes/invalidation remain in sharedI.
+Receipt sparse-stack-cache-20261119/immediate-result.json; raw /workspaces/kprog-raw/perf/sparse-stack-cache-20261119/check-20261119T200325Z-282429.
+One genuinely changed-source normal-O1 retained Tetragon compile follows,
+using the currently installed bounds compiler (5033bed62 rebuild still
+waits imageEX). No full B/frame/stock/runtime performance claim.

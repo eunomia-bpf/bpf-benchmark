@@ -105,6 +105,12 @@
   fidelity class closed; actual checked-app coverage remains separate.
 
 - [ ] P-B-constant-ALU32 (PERF 2026-11-19T11:28:45Z): Tetragon request 6's
+  PERF 2026-11-19T20:04:37Z: immediate-store creation exclusion0a96f6eaa passes
+  21selectors/4B emissions/native0x12345678/72full+72sparse UBSan cases.
+  Actual retained Tetra13cache cells versus16, same424arena/17RETedges.
+  See sparse-stack-cache-20261119/immediate-result.json. One changed normal
+  O1 compile follows; actual frame/stock/runtime gains not established.
+
   Sparse-cache component7087690ee passes18selectors/3B emissions/72C
   tag+alias+lifetime cases per layout with UBSan, worker247988. Retained6
   renders16cells versus53 with unchanged424B arena. Full retained B worker

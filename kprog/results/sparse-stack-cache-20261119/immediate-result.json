@@ -1,0 +1,38 @@
+{
+  "selection_cases": 21,
+  "b_emission_cases": 4,
+  "immediate_native_result": 305419896,
+  "shared_c": {
+    "full": {
+      "tag_alias_partial_release_cases": 72
+    },
+    "sparse": {
+      "tag_alias_partial_release_cases": 72
+    }
+  },
+  "scope": "Immediate-store creation exclusion component selection, four B emissions including empty cache, native immediate byte readback and shared-C tag/alias/invalidation checks. No full Tetragon B/stock/app/timing result.",
+  "raw": "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/check-20261119T200325Z-282429",
+  "source_commit": "eed7bd384559937656344a34567cebf6db704eff",
+  "finished": "2026-11-19T20:03:36Z",
+  "exit_code": 0,
+  "tetragon_previous_cells": 16,
+  "tetragon_cache_words": [
+    23,
+    26,
+    28,
+    29,
+    30,
+    31,
+    32,
+    37,
+    38,
+    39,
+    40,
+    43,
+    44
+  ],
+  "tetragon_arena_bytes": 424,
+  "tetragon_analysis_states": 2538,
+  "tetragon_return_edges": 17,
+  "sanitizer": "Clang18 UBSan with installed libubsan, full and sparse cases pass"
+}
