@@ -16,3 +16,6 @@ real-proof:
 	$(ROOT)/kprog/x86/native_lab/native_link/target/release/native-link --input $(OUT)/otel/baseline.o --symbol trusted_x86_x86_sim_xdp --mode proof --preserve-entry-abi --output $(OUT)/otel/baseline.proof.o
 	llvm-objdump-18 -dr $(OUT)/otel/native.proof.o > $(OUT)/otel/native.asm
 	llvm-objdump-18 -dr $(OUT)/otel/baseline.proof.o > $(OUT)/otel/baseline.asm
+.PHONY: pipeline
+pipeline:
+	python3 $(ROOT)/kprog/results/checked-array-c-20261119/pipeline.py $(OUT)/pipeline
