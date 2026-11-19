@@ -463,12 +463,25 @@ Ran `checked-corpus` myself on the rebuilt base (`packet-bounds` 473,784 B built
 two bodies that produced `off=16 size=1 r=16` in the previous capture; here they install 6 of 6.
 
 The three rejects are one program that is **new in this capture** — `34af4b3a`, absent from both 64-request
-captures. It is a different shape, not a survivor of the packet class: its `bounds-input.bc` reads only
-`ctx+8`, `ctx+44` and `ctx+76` and then `data+22` and `data+30`, with **no `ctx+80` (`data_end`) read and no
-`len`/`data_len` read anywhere**, so there is no head-length predicate to lower (`predicates lowered=0`,
-`unified=0`). Its reads are bounded only by the simulator's unspecified-value marker
-`%x > 0x8000000000000017`. Whether the emitter should bound such a read at all (and against which value) is a
-new question, and belongs with the emitter's remaining refusals rather than with this class.
+captures. It is **not** a survivor of the packet class but it *is* the same rule in the other direction, and an
+earlier note of mine (which read a stale extraction) said wrongly that it had nothing to lower: the pass
+does lower it (`lowered=1`, `unified=1`), and the body does compute `headlen = len - data_len` and compare it.
+What fails is where the bound lands:
+
+```
+ 45:  r8 = *(u32 *)(r6 + 0x4c)     ; data
+ 46:  r1 = *(u32 *)(r6 + 0x50)     ; data_end
+ 48:  if w2 < 0x22 goto LBB0_2     ; w2 = headlen
+ 49:  r2 = r8;  r2 += 0x22
+ 51:  if r2 <= r1 goto LBB0_4      ; ✓ the bound, and its true edge jumps away
+LBB0_2 …                           ; the fall-through continues to
+121:  r1 = *(u32 *)(r8 + 30)       ; ← the read, on the path where the comparison was false
+```
+
+Verified minimally on the host: that shape rejects with `invalid access to packet, off=30 size=4,
+R8(id=0,off=30,r=0)` — the live run's exact text — and is `ACCEPT` once `data`/`data_end` are re-loaded and
+bounded inside the falling-through block. So the last item is the same per-path rule as the `+0x10` case with
+the branch taken the other way: the bound must be re-emitted on the path that reaches the read.
 
 Capture size is not fixed: this guest catches 12 requests, the two baselines 64, PERF's capture 14, all from
 the same `verified_corpus.py <app> 1 10 1`. So counts are only comparable program by program, which is what
