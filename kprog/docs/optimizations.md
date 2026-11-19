@@ -872,3 +872,11 @@ even after constant-freeze folding; no speculative private-base fast path
 was added. Evidence results/b-analysis-flags-20261119/post-contract-result.json
 and results/native-base-roots-20261119. Native C pieces remain enabled;
 no new runtime gain or stock acceptance is claimed.
+
+PERF 2026-11-19T08:17:44Z: Combined checked-native cohort through ff02957cc passes actual
+BCC checked-corpus: programs/native/B-generated/B-stock25/25/25/25,25 checked
+native,0 fallback,0 failures, app ok. Installed native20,043B vsJIT7,965B.
+This establishes the post-verification compilation contract and combined
+helper functionality; the existing1x10s functional run supplies no official
+runtime gain. Evidence results/native-cohort-check-20261119/coverage.json,
+raw run x86_kvm_corpus_20261119_081018_746542. Official combined timing follows.

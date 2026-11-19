@@ -8,6 +8,9 @@
 
 ## 0. Lane 目标与待办
 
+- [x] P-combined-BCC-stock（PERF 2026-11-19T08:17:44Z，本提交）：ff02957cc组合cohort实际checked-corpus通过，programs/native/B-generated/B-stock25/25/25/25，0fallback/0failure，app ok；installed20043B vsJIT7965B。1x10s仅功能检查，速度目标仍开；results/native-cohort-check-20261119/coverage.json，run081018_746542。
+
+
 PERF 2026-11-19T08:05:59Z：227467 已结束：保留IR的 O3 backend通过，packing1322.171s通过，最终llc16.463s仍触发既有4096B编译栈限；不改变生产O1/g或stock512B。该pass-order假设单独不足，完整B覆盖仍开。BCC request17的42个generated base用LLVM root分析全部unknown，只折叠常数freeze也不改变；不添加无依据的private-base fastpath。全部PERF进程/镜像lease已释放，ff02957cc组合批次可按原锁次序继续。见results/b-analysis-flags-20261119与native-base-roots-20261119。
 
 
