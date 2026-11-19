@@ -1,0 +1,219 @@
+{
+  "cases": 30,
+  "plain_control_cases": 6,
+  "mismatches": [],
+  "mismatch_count": 0,
+  "rows": [
+    {
+      "function": "numeric_value",
+      "value": 0,
+      "expected": 0,
+      "observed": 0
+    },
+    {
+      "function": "numeric_lane",
+      "value": 0,
+      "lane": 0,
+      "expected": 0,
+      "observed": 0
+    },
+    {
+      "function": "numeric_lane",
+      "value": 0,
+      "lane": 1,
+      "expected": 0,
+      "observed": 0
+    },
+    {
+      "function": "numeric_lane",
+      "value": 0,
+      "lane": 4,
+      "expected": 0,
+      "observed": 0
+    },
+    {
+      "function": "numeric_once",
+      "value": 0,
+      "expected": 0,
+      "observed": 0,
+      "expected_counter": 1,
+      "observed_counter": 1
+    },
+    {
+      "function": "numeric_value",
+      "value": 1,
+      "expected": 1,
+      "observed": 1
+    },
+    {
+      "function": "numeric_lane",
+      "value": 1,
+      "lane": 0,
+      "expected": 1,
+      "observed": 1
+    },
+    {
+      "function": "numeric_lane",
+      "value": 1,
+      "lane": 1,
+      "expected": 0,
+      "observed": 0
+    },
+    {
+      "function": "numeric_lane",
+      "value": 1,
+      "lane": 4,
+      "expected": 0,
+      "observed": 0
+    },
+    {
+      "function": "numeric_once",
+      "value": 1,
+      "expected": 1,
+      "observed": 1,
+      "expected_counter": 2,
+      "observed_counter": 2
+    },
+    {
+      "function": "numeric_value",
+      "value": 4294967295,
+      "expected": 4294967295,
+      "observed": 4294967295
+    },
+    {
+      "function": "numeric_lane",
+      "value": 4294967295,
+      "lane": 0,
+      "expected": 4294967295,
+      "observed": 4294967295
+    },
+    {
+      "function": "numeric_lane",
+      "value": 4294967295,
+      "lane": 1,
+      "expected": 16777215,
+      "observed": 16777215
+    },
+    {
+      "function": "numeric_lane",
+      "value": 4294967295,
+      "lane": 4,
+      "expected": 0,
+      "observed": 0
+    },
+    {
+      "function": "numeric_once",
+      "value": 4294967295,
+      "expected": 4294967295,
+      "observed": 4294967295,
+      "expected_counter": 4294967296,
+      "observed_counter": 4294967296
+    },
+    {
+      "function": "numeric_value",
+      "value": 4294967296,
+      "expected": 4294967296,
+      "observed": 4294967296
+    },
+    {
+      "function": "numeric_lane",
+      "value": 4294967296,
+      "lane": 0,
+      "expected": 0,
+      "observed": 0
+    },
+    {
+      "function": "numeric_lane",
+      "value": 4294967296,
+      "lane": 1,
+      "expected": 16777216,
+      "observed": 16777216
+    },
+    {
+      "function": "numeric_lane",
+      "value": 4294967296,
+      "lane": 4,
+      "expected": 1,
+      "observed": 1
+    },
+    {
+      "function": "numeric_once",
+      "value": 4294967296,
+      "expected": 4294967296,
+      "observed": 4294967296,
+      "expected_counter": 4294967297,
+      "observed_counter": 4294967297
+    },
+    {
+      "function": "numeric_value",
+      "value": 1311768467463790320,
+      "expected": 1311768467463790320,
+      "observed": 1311768467463790320
+    },
+    {
+      "function": "numeric_lane",
+      "value": 1311768467463790320,
+      "lane": 0,
+      "expected": 2596069104,
+      "observed": 2596069104
+    },
+    {
+      "function": "numeric_lane",
+      "value": 1311768467463790320,
+      "lane": 1,
+      "expected": 2023406814,
+      "observed": 2023406814
+    },
+    {
+      "function": "numeric_lane",
+      "value": 1311768467463790320,
+      "lane": 4,
+      "expected": 305419896,
+      "observed": 305419896
+    },
+    {
+      "function": "numeric_once",
+      "value": 1311768467463790320,
+      "expected": 1311768467463790320,
+      "observed": 1311768467463790320,
+      "expected_counter": 1311768467463790321,
+      "observed_counter": 1311768467463790321
+    },
+    {
+      "function": "numeric_value",
+      "value": 18446612682375452280,
+      "expected": 18446612682375452280,
+      "observed": 18446612682375452280
+    },
+    {
+      "function": "numeric_lane",
+      "value": 18446612682375452280,
+      "lane": 0,
+      "expected": 305419896,
+      "observed": 305419896
+    },
+    {
+      "function": "numeric_lane",
+      "value": 18446612682375452280,
+      "lane": 1,
+      "expected": 2148676694,
+      "observed": 2148676694
+    },
+    {
+      "function": "numeric_lane",
+      "value": 18446612682375452280,
+      "lane": 4,
+      "expected": 4294936704,
+      "observed": 4294936704
+    },
+    {
+      "function": "numeric_once",
+      "value": 18446612682375452280,
+      "expected": 18446612682375452280,
+      "observed": 18446612682375452280,
+      "expected_counter": 18446612682375452281,
+      "observed_counter": 18446612682375452281
+    }
+  ],
+  "scope": "Actual stock frontend/native compiler execution of the NUMERIC bit-preservation boundary; no B stock load, app failure or timing claim."
+}

@@ -1,0 +1,263 @@
+{
+  "cases": [
+    {
+      "function": "data_value",
+      "value": 0,
+      "expected": 0,
+      "observed": 0
+    },
+    {
+      "function": "end_value",
+      "value": 0,
+      "expected": 16909060,
+      "observed": 16909060
+    },
+    {
+      "function": "mark_value",
+      "value": 0,
+      "expected": 305419896,
+      "observed": 305419896
+    },
+    {
+      "function": "data_direct",
+      "value": 0,
+      "expected": 0,
+      "observed": 0
+    },
+    {
+      "function": "end_direct",
+      "value": 0,
+      "expected": 16909060,
+      "observed": 16909060
+    },
+    {
+      "function": "mark_direct",
+      "value": 0,
+      "expected": 305419896,
+      "observed": 305419896
+    },
+    {
+      "function": "data_lane",
+      "value": 0,
+      "lane": 0,
+      "expected": 0,
+      "observed": 0
+    },
+    {
+      "function": "data_lane",
+      "value": 0,
+      "lane": 4,
+      "expected": 0,
+      "observed": 0
+    },
+    {
+      "function": "end_lane",
+      "value": 0,
+      "lane": 0,
+      "expected": 16909060,
+      "observed": 16909060
+    },
+    {
+      "function": "end_lane",
+      "value": 0,
+      "lane": 4,
+      "expected": 0,
+      "observed": 0
+    },
+    {
+      "function": "data_value",
+      "value": 1,
+      "expected": 1,
+      "observed": 1
+    },
+    {
+      "function": "end_value",
+      "value": 1,
+      "expected": 16909061,
+      "observed": 16909061
+    },
+    {
+      "function": "mark_value",
+      "value": 1,
+      "expected": 305419896,
+      "observed": 305419896
+    },
+    {
+      "function": "data_direct",
+      "value": 1,
+      "expected": 1,
+      "observed": 1
+    },
+    {
+      "function": "end_direct",
+      "value": 1,
+      "expected": 16909061,
+      "observed": 16909061
+    },
+    {
+      "function": "mark_direct",
+      "value": 1,
+      "expected": 305419896,
+      "observed": 305419896
+    },
+    {
+      "function": "data_lane",
+      "value": 1,
+      "lane": 0,
+      "expected": 1,
+      "observed": 1
+    },
+    {
+      "function": "data_lane",
+      "value": 1,
+      "lane": 4,
+      "expected": 0,
+      "observed": 0
+    },
+    {
+      "function": "end_lane",
+      "value": 1,
+      "lane": 0,
+      "expected": 16909061,
+      "observed": 16909061
+    },
+    {
+      "function": "end_lane",
+      "value": 1,
+      "lane": 4,
+      "expected": 0,
+      "observed": 0
+    },
+    {
+      "function": "data_value",
+      "value": 1311768467463790320,
+      "expected": 1311768467463790320,
+      "observed": 1311768467463790320
+    },
+    {
+      "function": "end_value",
+      "value": 1311768467463790320,
+      "expected": 1311768467480699380,
+      "observed": 1311768467480699380
+    },
+    {
+      "function": "mark_value",
+      "value": 1311768467463790320,
+      "expected": 305419896,
+      "observed": 305419896
+    },
+    {
+      "function": "data_direct",
+      "value": 1311768467463790320,
+      "expected": 1311768467463790320,
+      "observed": 1311768467463790320
+    },
+    {
+      "function": "end_direct",
+      "value": 1311768467463790320,
+      "expected": 1311768467480699380,
+      "observed": 1311768467480699380
+    },
+    {
+      "function": "mark_direct",
+      "value": 1311768467463790320,
+      "expected": 305419896,
+      "observed": 305419896
+    },
+    {
+      "function": "data_lane",
+      "value": 1311768467463790320,
+      "lane": 0,
+      "expected": 2596069104,
+      "observed": 2596069104
+    },
+    {
+      "function": "data_lane",
+      "value": 1311768467463790320,
+      "lane": 4,
+      "expected": 305419896,
+      "observed": 305419896
+    },
+    {
+      "function": "end_lane",
+      "value": 1311768467463790320,
+      "lane": 0,
+      "expected": 2612978164,
+      "observed": 2612978164
+    },
+    {
+      "function": "end_lane",
+      "value": 1311768467463790320,
+      "lane": 4,
+      "expected": 305419896,
+      "observed": 305419896
+    },
+    {
+      "function": "data_value",
+      "value": 18446612682375452280,
+      "expected": 18446612682375452280,
+      "observed": 18446612682375452280
+    },
+    {
+      "function": "end_value",
+      "value": 18446612682375452280,
+      "expected": 18446612682392361340,
+      "observed": 18446612682392361340
+    },
+    {
+      "function": "mark_value",
+      "value": 18446612682375452280,
+      "expected": 305419896,
+      "observed": 305419896
+    },
+    {
+      "function": "data_direct",
+      "value": 18446612682375452280,
+      "expected": 18446612682375452280,
+      "observed": 18446612682375452280
+    },
+    {
+      "function": "end_direct",
+      "value": 18446612682375452280,
+      "expected": 18446612682392361340,
+      "observed": 18446612682392361340
+    },
+    {
+      "function": "mark_direct",
+      "value": 18446612682375452280,
+      "expected": 305419896,
+      "observed": 305419896
+    },
+    {
+      "function": "data_lane",
+      "value": 18446612682375452280,
+      "lane": 0,
+      "expected": 305419896,
+      "observed": 305419896
+    },
+    {
+      "function": "data_lane",
+      "value": 18446612682375452280,
+      "lane": 4,
+      "expected": 4294936704,
+      "observed": 4294936704
+    },
+    {
+      "function": "end_lane",
+      "value": 18446612682375452280,
+      "lane": 0,
+      "expected": 322328956,
+      "observed": 322328956
+    },
+    {
+      "function": "end_lane",
+      "value": 18446612682375452280,
+      "lane": 4,
+      "expected": 4294936704,
+      "observed": 4294936704
+    }
+  ],
+  "mismatches": [],
+  "absolute_address_uses_register_base": true,
+  "scope": "Actual shared macros and compiler stages on host buffers using the sole kernel layouts; no stock B load, guest, corpus path or timing claim."
+}

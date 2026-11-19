@@ -1110,3 +1110,13 @@ instruction. No production code change, rebuilt base, host pass or speed
 claim. Current Tracee and its raw data stay intact.
 
 PERF 2026-11-19T16:39:41Z: Actual SKB integration confirms18/40mismatches, all12direct-C controls pass. Shared asm loads retain public offsets/widths behind the native base barrier, while direct loads convert correctly (data208/i64). Repair is the native lowering context-root class, not a flag or layout change. Actual BCC coverage-reader replay preserves25allchecked/0failed. No app speed claim. See skb-numeric-integration-20261119 and native-cohort-check-20261119.
+
+PERF 2026-11-19T16:45:29Z: Shared SKB context-root repair passes40/40host fields versus
+18mismatches before. Native memory lowering retains an external entry
+pointer directly; it no longer hides that root behind an opaque barrier
+or ptrtoint/inttoptr pair before physical-context conversion. Noncontext
+bases retain their barrier; actual absolute0x70 register-base control and
+NUMERIC30+6ABI/Bemission pass. Sole tools rebuilt with checked-sim-stage
+under timing SH/image EX; no image, guest, runtime check or flag change.
+App per-call/body/helper/map/bytes effect remains unmeasured. See
+skb-numeric-integration-20261119, run164404_21511.

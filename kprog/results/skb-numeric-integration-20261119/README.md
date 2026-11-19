@@ -57,3 +57,24 @@ while data_direct reads physical208/i64. This confirms context-root
 recognition is lost at native memory lowering, rather than a wrong layout
 or a standalone NUMERIC bit-loss recurrence. Baseline rows and IR excerpt
 are committed; full commands/IR/layouts remain raw. No app/path/timing claim.
+
+PERF 2026-11-19T16:45:29Z: Production compile_sim_ir.cpp repairs this class by returning
+the externally callable entry-context pointer directly from memory-base
+lowering. It is already a runtime register. This avoids both the opaque
+barrier and a ptrtoint/inttoptr round trip that also obscures the root.
+Other bases retain the exact existing barrier and pointer conversion. No
+runtime condition/check, source flag, kernel or context-compiler change.
+
+Canonical checked-sim-stage rebuilt the sole base tools under timing SH /
+image EX. Worker21511 completes0 at16:44:18Z:40/40field cases pass, the
+absolute0x70control still emits a register-base load, and NUMERIC30cases
+plus six plain ABI controls and B emission pass. The faulting absolute
+address is inspected, never executed. Fixed rows and IR excerpt are
+committed; full raw /workspaces/kprog-raw/perf/skb-numeric-integration-20261119/fix-20261119T164404Z-21511.
+
+Failed attempts remain raw: worker20584 first hit a test-fixture placeholder
+error ($$0 rather than a C operand); corrected fixture431282dc8 then exposed
+18 mismatches because removing the barrier alone retained the cast pair.
+Those are not hidden or counted as passes. Revised pointer-preserving
+lowering is what worker21511 tests. No image/guest or app coverage/timing
+was run; actual checked Cilium confirmation remains separate.

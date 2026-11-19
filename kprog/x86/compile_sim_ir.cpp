@@ -50,11 +50,18 @@ static Value *memoryAsm(CallInst *call, StringRef text, IRBuilder<> &b) {
   // is not a host address. Semantics are unchanged, the load still addresses
   // base+displacement, and a base already in a register keeps that register.
   auto stable=[&](Value *v) -> Value * {
+    // The public entry context is already a runtime pointer argument. Keep
+    // its root visible so context-lower can translate its offsets and widths.
+    // Synthetic constant-null register bases still need the barrier below.
+    if (auto *arg=dyn_cast<Argument>(v); arg && arg->getType()->isPointerTy() &&
+        arg->getArgNo()==0 && arg->getParent()->hasSection() &&
+        !arg->getParent()->hasLocalLinkage()) return v;
     auto *type=FunctionType::get(b.getInt64Ty(),{b.getInt64Ty()},false);
-    return b.CreateCall(InlineAsm::get(type,"","=r,0",true),{bits(v)});
+    auto *base=b.CreateCall(InlineAsm::get(type,"","=r,0",true),{bits(v)});
+    return b.CreateIntToPtr(base,b.getPtrTy());
   };
   auto address=[&](StringRef base,StringRef sign,StringRef displacement) {
-    auto *pointer=b.CreateIntToPtr(stable(read(base)),b.getPtrTy());
+    auto *pointer=stable(read(base));
     auto *offset=bits(read(displacement)); if (sign=="-") offset=b.CreateNeg(offset);
     return b.CreateGEP(b.getInt8Ty(),pointer,offset);
   };
