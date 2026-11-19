@@ -19,3 +19,33 @@ observation at lines 975–983. MOV_LOAD has the same shape at 1632–1638.
 RSP uses STACK_READ and the indexed alias enters the tagged read. The prior
 LOCK regression preserved those existing contracts. No request-time header,
 generator, compiler, service, loader or formal export is edited here.
+
+PERF 2026-11-19T10:08:32Z: Worker 334315 completed at 10:06:57Z with Make
+exit 2 at the expected semantic assertion, source 97cf863dd. All 48 cases
+were written before the assertion: the eight live groups agree, and all
+eight released groups differ (two families x four widths). For the byte
+case, fixed aliases read 0x88 with zero input visits, while RSP and indexed
+aliases return the supplied 0x80 with one visit. Wider cases show the same
+stored-value versus environment-value distinction. result.json retains all
+observations and grouped differences; complete commands and the assertion
+remain under /workspaces/kprog-raw/perf/released-alias-20261119/
+reproduce-20261119T100657Z-334315. This is a reproduced shared-I discrepancy,
+not a compiler/setup failure or an app performance result.
+
+The next source change should preserve the fixed physical access, including
+its constant displacement and base barrier, then apply the same tagged
+released-stack observation used by the indexed path. A shared post-load
+observation can serve fixed and indexed reads without replacing the fixed
+access with a different load hook. Apply it in READ_MEM_VALUE and MOV_LOAD;
+retain the physical read before tag/input evaluation, so an access failure
+consumes no extra input. Live and non-stack accesses retain their values and
+input visits. Test all address forms and byte widths again, together with
+the existing fixed-load/base-barrier and LOCK regressions.
+
+This is a phase-1 source/model change. It introduces no program filter,
+refusal, runtime limit, mode switch or new benchmark condition. Its exact
+shared-header freeze scope must cite this new evidence when implemented;
+the earlier LOCK exception is not a substitute. FORMAL's primitive and
+memory observation obligations remain explicit. No source patch or guest
+was started during coordinator batch 327120, whose request-time inputs
+remain those of 3f80b472e.

@@ -24,6 +24,12 @@ boundary and retained failed attempts: results/lock-prefix-review-20261119.
   visits. Separate source/model review is needed; this is no new app gate.
   Evidence: shared-released-debug-20261119T0945Z, alias=1 raw=0 zf=1 pf=1,
   and READ_MEM_VALUE_DECL's fixed-load branch; see lock-prefix-review README.
+  PERF 2026-11-19T10:08:32Z: 97cf863dd adds the real shared-C regression;
+  worker 334315 records 48 cases and eight unequal released-address groups,
+  both READ_MEM_VALUE/MOV_LOAD and all widths. Fixed byte 0x88/0 visits vs
+  RSP/indexed 0x80/1 visit; live groups agree. Make 2 is the expected semantic
+  assertion. Evidence and fixed-access-preserving plan: results/released-alias-20261119.
+  The source fix follows batch 327120; request-time inputs stay unchanged.
 
 PERF 2026-11-19T09:23:54Z: Combined cohort batch 254724 completed with host
 exit 0. BCC, 3 x 180 s with stats on: programs/native/B-generated/B-stock
