@@ -58,6 +58,7 @@ CHECKED_APPS ?= otelcol-ebpf-profiler/profiling bcc/set cilium/agent tetragon/ob
 CHECKED_OUTPUT ?= /workspaces/kprog-raw/verified/checked-corpus
 CHECKED_GUEST_BUILD ?= /var/tmp/kprog-tmp/verified/checked-corpus
 CHECKED_HOST_CPUS ?= 16-17
+CHECKED_VM_CPUS ?= 2
 CHECKED_VM_MEMORY ?= 48G
 CHECKED_VM_ADDRESS_SPACE ?= 85899345920
 checked-corpus:
@@ -68,7 +69,7 @@ checked-corpus:
 		--cwd $(REPO_ROOT) --rwdir $(REPO_ROOT) --rwdir $(CHECKED_OUTPUT) --rwdir /var/tmp=$(CHECKED_GUEST_BUILD) \
 		--rodir $(CHECKED_OUTPUT)/loader-inputs=$(dir $(CHECKED_LOADER)) --rodir $(CHECKED_OUTPUT)/bounds-inputs=$(CHECKED_COMPILER_BASE) \
 		--overlay-rwdir /tmp --overlay-rwdir /run --overlay-rwdir /usr/local \
-		--disable-monitor --verbose --cpus 2 --memory $(CHECKED_VM_MEMORY) --append 'loglevel=4 panic=30 oops=panic' \
+		--disable-monitor --verbose --cpus $(CHECKED_VM_CPUS) --memory $(CHECKED_VM_MEMORY) --append 'loglevel=4 panic=30 oops=panic' \
 		--exec 'bash $(REPO_ROOT)/kprog/test/run_checked_otel.sh $(CHECKED_OUTPUT) $(CHECKED_APP) $(CHECKED_OUTPUT)/loader-inputs/$(notdir $(CHECKED_LOADER)) $(CHECKED_OUTPUT)/bounds-inputs/packet-bounds' || status=$$?; \
 	printf '%s\n' "$$status" > "$(CHECKED_OUTPUT)/exit-code"; date -u +%FT%TZ > "$(CHECKED_OUTPUT)/finished"; \
 	rm -f "$(CHECKED_GUEST_BUILD)/bpf-benchmark-docker.img"; exit $$status
@@ -78,7 +79,7 @@ checked-corpus-all:
 	install -d "$(CHECKED_OUTPUT)"
 	failed=0; for app in $(CHECKED_APPS); do \
 		$(MAKE) checked-corpus CHECKED_OUTPUT=$(CHECKED_OUTPUT)/$${app%%/*} CHECKED_APP=$$app \
-			CHECKED_HOST_CPUS=$(CHECKED_HOST_CPUS) CHECKED_LOADER=$(CHECKED_LOADER) \
+			CHECKED_HOST_CPUS=$(CHECKED_HOST_CPUS) CHECKED_VM_CPUS=$(CHECKED_VM_CPUS) CHECKED_LOADER=$(CHECKED_LOADER) \
 			> $(CHECKED_OUTPUT)/$${app%%/*}.log 2>&1 && rc=0 || rc=$$?; \
 		printf '%s\t%s\n' "$$app" "$$rc" >> $(CHECKED_OUTPUT)/run-codes.tsv; \
 		if test $$rc -ne 0; then failed=1; fi; \
