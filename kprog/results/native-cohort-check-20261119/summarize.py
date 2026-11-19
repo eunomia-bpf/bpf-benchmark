@@ -17,7 +17,7 @@ with tarfile.open(raw / 'service.tar.gz') as service:
     for line in lines:
         row = json.loads(line)
         item = {key: row[key] for key in [
-            'request_id', 'source_prog_id', 'prog_id', 'status', 'execution_path',
+            'request_id', 'source_prog_id', 'prog_id', 'status', 'execution_mode', 'execution_path',
             'b_generated', 'b_stock_passed', 'simulator_failure', 'error'
         ] if key in row}
         archive = Path(row['artifact_archive'] if row['status'] == 0 else row['failure_archive'])
@@ -42,9 +42,10 @@ summary = dict(
     b_stock_passed=sum(r.get('b_stock_passed') is True for r in records),
     checked_native=sum(r.get('execution_path') == 'checked-sim-c' for r in records),
     direct_native=sum(r.get('execution_path') == 'direct-native' for r in records),
+    kept_on_ebpf=sum(r['status'] != 0 for r in records),
     failed=sum(r['status'] != 0 for r in records),
     requests_detail=records, corpus=corpus,
-    scope='Registered-service coverage and corpus status; workload parameters are recorded per corpus run.'
+    scope='Registered-service completions and corpus status. Failed requests keep the original eBPF program; direct_native counts only explicit historical/control records. B counts include recorded true values, not inferred acceptance. Counts are requests except programs; workload parameters are recorded per corpus run.'
 )
 output.write_text(json.dumps(summary, indent=2) + '\n')
 print(json.dumps({k: v for k, v in summary.items() if k not in ['requests_detail', 'corpus']}))

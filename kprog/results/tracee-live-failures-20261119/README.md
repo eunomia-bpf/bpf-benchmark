@@ -54,3 +54,22 @@ without a new compiler build, frontend run, stock reload, image or guest.
 An unresolved PC or missing capsule is an inspection failure, never an app
 coverage conclusion. Full artifacts remain raw; only compact evidence will
 be committed after the tool runs.
+
+PERF 2026-11-19T14:59:03Z: Replacement inspector430344 waits timing SH on CPU19/4GiB.
+Raw: /workspaces/kprog-raw/perf/tracee-live-failures-20261119/inspect-20261119T144031Z-430344.
+The input is the coordinator run's final timing/service.tar.gz, not the
+temporary request directory. Neither mapping nor LLVM inspection has run yet.
+
+Coordinator c3960d089 changes subsequent checked-sim-c requests: B failure
+keeps the original program on eBPF. The prefix above describes the older
+running batch and retains its actual direct-native records. The existing
+coverage reader now reports kept_on_ebpf for failed requests; it preserves
+execution_mode when supplied and never relabels historical direct successes.
+The base loader still needs rebuilding in the next authorized base/image
+batch; this records source behavior, not a claim that the running guest has
+changed. No production source or running batch input is changed here.
+
+Future Cilium measurement uses the existing lto-apps-20261119/Makefile
+checked-timing APP=cilium/agent entry with 3 x 180 s and stats on, after
+reading OMP's result and respecting its queue. The canonical checked-corpus
+1 x 10 s functional check is not a complete timing measurement.

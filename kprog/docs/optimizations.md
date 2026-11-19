@@ -1069,3 +1069,11 @@ alias integer differences at shared header950/1645 are source candidates,
 not exact debug mapping yet. B-only numeric abstraction is unimplemented
 and its preservation/precision need study; no source, check or limit change.
 Raw full logs remain; see tracee-live-failures-20261119 (c5159c5d7).
+
+PERF 2026-11-19T14:59:03Z: Phase-1 Tracee PC mapping is queued as430344, using the
+final service archive after temporary-session cleanup. Old owned waiter429804
+was ended before execution; its cancellation/raw data remain. No frontend,
+profile, guest, runtime optimization or speed claim. Coverage reporting now
+counts failed requests as kept on eBPF per c3960d089, keeping historical
+direct-native successes explicit. Base rebuild and actual checked coverage
+remain pending after the current lease. See tracee-live-failures-20261119.

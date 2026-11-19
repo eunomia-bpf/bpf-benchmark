@@ -26,3 +26,13 @@ temporary session after archiving; the reader uses service.tar.gz, preserving
 all request capsules. Source7e7447fdd/7889e4740 provides that reader. All current
 C helpers and native normalization/verified-path/integer pieces were enabled.
 No image or benchmark setting changed. The guest and its leases are finished.
+
+PERF 2026-11-19T14:59:03Z: Coverage reporting follows c3960d089. A failed service
+request keeps the original eBPF program and contributes to kept_on_ebpf,
+not native_installed. Explicit older direct-native successes remain in
+direct_native; they are never retrospectively counted as verified. B counts
+include recorded true values; a failure with missing B fields does not prove
+that no object was generated. Counts are service requests except the distinct
+source-program total. A completed BCC archive replay is queued on timing SH
+to confirm the existing 25 checked records are preserved. This reader changes
+analysis only; the base trusted loader rebuild follows the current batch.

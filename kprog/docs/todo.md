@@ -11,12 +11,19 @@
 - [ ] P-B-pointer-integer-difference (PERF live Tracee 2026-11-19):
   request27 sys_dup_exit_tail and request30 generate B but stock rejects
   scalar-minus-stack-pointer arithmetic (insns959/27607). Request28 also
-  has a separate536-byte frame. All install direct native, not skipped.
+  has a separate536-byte frame. The retained pre-c3960d089 run installs
+  these direct native. Current checked-sim-c keeps failed requests on eBPF;
+  report those separately from checked native installations.
   Map exact retained IR/source locations after the active Tracee timing
   lease, then fix the compiler class without erasing observations, fixing
   the virtual stack base, adding checks or changing limits. B-only numeric
   abstraction is a candidate, not an implemented/proven transformation.
   Current prefix33 is not final coverage. See tracee-live-failures-20261119.
+  PERF 2026-11-19T14:59:03Z: Inspector119540e55, worker430344, waits timing SH
+  to map capsules27/28/30 from the final service archive; no new frontend
+  or guest. Live temporary session paths are removed after archiving.
+  Coverage reader now counts failed requests as kept_on_ebpf and preserves
+  explicit historical direct-native records. Validation is queued separately.
 
 - [ ] P-native-skb-numeric-integration (PERF 2026-11-19T13:58:47Z):
   validate shared SKB field macros through compile-sim-ir and context-lower,
