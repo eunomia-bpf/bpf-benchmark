@@ -29,7 +29,6 @@ static void inspect(Module &module, StringRef phase) {
     } else { ++counts["non-pointer operand"]; continue; }
     SmallVector<Value *, 4> roots;
     bool known = getUnderlyingObjectsForCodeGen(address, roots);
-    if (temporary) temporary->eraseFromParent();
     bool privateStack = known && !roots.empty();
     for (auto *root : roots) {
       auto *local = dyn_cast<AllocaInst>(root);
@@ -37,6 +36,7 @@ static void inspect(Module &module, StringRef phase) {
       if (!type || type->getName() != "union.x86_sim_stack_mem") privateStack = false;
     }
     ++counts[privateStack ? "known private arena" : known ? "other known roots" : "unknown roots"];
+    if (temporary) temporary->eraseFromParent();
   }
   for (const auto &count : counts)
     outs() << phase << '\t' << count.first << '\t' << count.second << '\n';
