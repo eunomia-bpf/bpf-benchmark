@@ -9,14 +9,9 @@
 #include <map>
 using namespace llvm;
 
-int main(int argc, char **argv) {
-  if (argc != 2) return 1;
-  LLVMContext context;
-  SMDiagnostic diagnostic;
-  auto module = parseIRFile(argv[1], diagnostic, context);
-  if (!module) { diagnostic.print(argv[0], errs()); return 1; }
+static void inspect(Module &module, StringRef phase) {
   std::map<std::string, unsigned> counts;
-  for (auto &function : *module) for (auto &instruction : instructions(function)) {
+  for (auto &function : module) for (auto &instruction : instructions(function)) {
     auto *call = dyn_cast<CallInst>(&instruction);
     if (!call || call->arg_size() != 1) continue;
     auto *assembly = dyn_cast<InlineAsm>(call->getCalledOperand());
@@ -34,5 +29,26 @@ int main(int argc, char **argv) {
     }
     ++counts[privateStack ? "known private arena" : known ? "other known roots" : "unknown roots"];
   }
-  for (const auto &count : counts) outs() << count.first << '\t' << count.second << '\n';
+  for (const auto &count : counts)
+    outs() << phase << '\t' << count.first << '\t' << count.second << '\n';
+}
+
+int main(int argc, char **argv) {
+  if (argc != 2) return 1;
+  LLVMContext context;
+  SMDiagnostic diagnostic;
+  auto module = parseIRFile(argv[1], diagnostic, context);
+  if (!module) { diagnostic.print(argv[0], errs()); return 1; }
+  inspect(*module, "retained");
+  // Defined integer constants have no poison bits; freezing preserves them.
+  // Change only this in-memory diagnostic module, never the retained input.
+  SmallVector<FreezeInst *, 16> constants;
+  for (auto &function : *module) for (auto &instruction : instructions(function))
+    if (auto *freeze = dyn_cast<FreezeInst>(&instruction))
+      if (isa<ConstantInt>(freeze->getOperand(0))) constants.push_back(freeze);
+  for (auto *freeze : constants) {
+    freeze->replaceAllUsesWith(freeze->getOperand(0));
+    freeze->eraseFromParent();
+  }
+  inspect(*module, "constant-freezes-folded");
 }
