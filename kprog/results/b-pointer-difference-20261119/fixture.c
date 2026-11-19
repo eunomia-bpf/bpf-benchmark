@@ -18,12 +18,13 @@ int guarded_difference(struct xdp_md *ctx)
     void *value = saved;
     unsigned char tag = saved_tag;
     asm volatile("" : "+r"(value));
+    unsigned long result = (unsigned long)value;
     if (tag == 4) {
         unsigned long delta = (unsigned long)value - (unsigned long)&arena[16];
         asm volatile("" : "+r"(delta));
-        return delta == (unsigned long)-8 ? XDP_PASS : XDP_DROP;
+        result = delta + ctx->egress_ifindex;
     }
-    return XDP_DROP;
+    return result;
 }
 
 char fixture_license[] __attribute__((section("license"), used)) = "GPL";

@@ -40,8 +40,8 @@ program.restype = ctypes.c_int
 rows = []
 for scalar in [0, 1, 0x12345678, 0xffffffff]:
     for queue in [0, 1, 2, 3]:
-        context = (ctypes.c_uint32 * 6)(0, 0, 0, scalar, queue, 0)
-        rows.append(dict(scalar=scalar, queue=queue, expected=2 if queue & 1 else 1,
+        context = (ctypes.c_uint32 * 6)(0, 0, 0, scalar, queue, 123)
+        rows.append(dict(scalar=scalar, queue=queue, expected=ctypes.c_int(115 if queue & 1 else scalar).value,
                          observed=program(context)))
 (out/'result.json').write_text(json.dumps(dict(cases=rows,
     scope='Actual B compile/disassembly and native execution of the source fixture; '
