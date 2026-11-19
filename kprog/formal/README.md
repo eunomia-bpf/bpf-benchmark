@@ -2213,3 +2213,14 @@ in 75 internal transitions. Every byte and the SP word read back zero, while
 other declared locals and caller blocks retain their contents and permissions.
 This is the metadata/SP initializer; stack payload and physical native-origin
 correspondence remain separate.
+
+M5 Numeric consumer boundary: `Arm64NumericProducerConsumer` derives the actual
+entry argument, retained target, silent sequence step and local Freeable ranges
+at the reached `initialized_storage` memory. With genuine callee/signature facts,
+two call steps append to its original trace; a given body run and post-body
+ownership compose with the three-step return/free suffix. Lifetime's original
+APIs remain projections of world-bound laws. The kernel checks that the generic
+void/nine-argument handler has a different ABI from the one-pointer/uint32
+continuation. Its source body wrapper and binding remain open; this is partial
+composition, with complete ISA-family count zero. See
+[the receipt](results/m5-numeric-producer-consumer/README.md).

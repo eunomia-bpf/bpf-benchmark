@@ -14,46 +14,69 @@ def consumerContinuation (m : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) : CC.Cont 
 
 theorem consumer_source : afterVectorLoop = .Ssequence consumerCall consumerReturn := rfl
 
-theorem consumer_argument (m before : CC.Mem) (le : CC.TempEnv) (entry : HeaderLocal m) :
-    CC.doEvalExpr ge (allocation m).1 le before consumerArgument = some (.Vptr entry.block 0) := by
+theorem consumer_argument_bound (world : CC.CGenv) (m before : CC.Mem) (le : CC.TempEnv) (entry : HeaderLocal m) :
+    CC.doEvalExpr world (allocation m).1 le before consumerArgument = some (.Vptr entry.block 0) := by
   simp only [consumerArgument, CC.doEvalExpr, CC.doEvalLvalue, CC.lvalOfVar, entry.binding]
+  rfl
+
+theorem consumer_argument (m before : CC.Mem) (le : CC.TempEnv) (entry : HeaderLocal m) :
+    CC.doEvalExpr ge (allocation m).1 le before consumerArgument = some (.Vptr entry.block 0) :=
+  consumer_argument_bound ge m before le entry
+
+theorem consumer_arguments_bound (world : CC.CGenv) (m before : CC.Mem) (le : CC.TempEnv) (entry : HeaderLocal m) :
+    CC.doEvalExprlist world (allocation m).1 le before [consumerArgument] [CC.tptr headerType] =
+      some [.Vptr entry.block 0] := by
+  simp only [CC.doEvalExprlist, consumer_argument_bound world m before le entry]
   rfl
 
 theorem consumer_arguments (m before : CC.Mem) (le : CC.TempEnv) (entry : HeaderLocal m) :
     CC.doEvalExprlist ge (allocation m).1 le before [consumerArgument] [CC.tptr headerType] =
-      some [.Vptr entry.block 0] := by
-  simp only [CC.doEvalExprlist, consumer_argument m before le entry]
-  rfl
+      some [.Vptr entry.block 0] :=
+  consumer_arguments_bound ge m before le entry
 
 /-- The source sequence reaches its actual indirect call without touching memory. -/
-theorem consumer_ready (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) :
-    InternalRun ge 1 (.State producer afterVectorLoop k (allocation m).1 le before)
+theorem consumer_ready_bound (world : CC.CGenv) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) :
+    InternalRun world 1 (.State producer afterVectorLoop k (allocation m).1 le before)
       (.State producer consumerCall (.Kseq consumerReturn k) (allocation m).1 le before) := by
   rw [consumer_source]
-  exact .step trivial (CC.doStep_sound ge _ _ _ rfl) (.refl _)
+  exact .step trivial (CC.doStep_sound world _ _ _ rfl) (.refl _)
+
+theorem consumer_ready (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) :
+    InternalRun ge 1 (.State producer afterVectorLoop k (allocation m).1 le before)
+      (.State producer consumerCall (.Kseq consumerReturn k) (allocation m).1 le before) :=
+  consumer_ready_bound ge m before le k
 
 /-- Callee lookup and its exact C signature are explicit.  This is a call
 boundary theorem, not a choice or execution proof of a linked native body. -/
+theorem consumer_call_with_binding_bound (world : CC.CGenv) (m before : CC.Mem) (entry : HeaderLocal m)
+    (le : CC.TempEnv) (k : CC.Cont) (target : CC.Val) (callee : CC.FunDef)
+    (continuation : le.get Arm64Entry._continuation = some target)
+    (binding : CC.Genv.findFunct world.genv_genv target = some callee)
+    (signature : CC.typeOfFundef callee = consumerType) :
+    InternalRun world 2 (.State producer afterVectorLoop k (allocation m).1 le before)
+      (.Callstate callee [.Vptr entry.block 0] (consumerContinuation m le k) before) := by
+  have callStep : CC.doStep world
+      (.State producer consumerCall (.Kseq consumerReturn k) (allocation m).1 le before) =
+      some (CC.E0, .Callstate callee [.Vptr entry.block 0] (consumerContinuation m le k) before) := by
+    have classified : CC.Cop.classifyFun (CC.typeof consumerAddress) =
+        .f [CC.tptr headerType] CC.tuint CC.cc_default := rfl
+    have targetEval : CC.doEvalExpr world (allocation m).1 le before consumerAddress = some target := continuation
+    have typeEq : CC.typeOfFundef callee =
+        .Tfunction [CC.tptr headerType] CC.tuint CC.cc_default := signature
+    simp only [consumerCall, CC.doStep, classified, targetEval,
+      consumer_arguments_bound world m before le entry, binding, typeEq, ite_true]
+    rfl
+  exact (consumer_ready_bound world m before le k).trans
+    (.step trivial (CC.doStep_sound world _ _ _ callStep) (.refl _))
+
 theorem consumer_call_with_binding (m before : CC.Mem) (entry : HeaderLocal m)
     (le : CC.TempEnv) (k : CC.Cont) (target : CC.Val) (callee : CC.FunDef)
     (continuation : le.get Arm64Entry._continuation = some target)
     (binding : CC.Genv.findFunct ge.genv_genv target = some callee)
     (signature : CC.typeOfFundef callee = consumerType) :
     InternalRun ge 2 (.State producer afterVectorLoop k (allocation m).1 le before)
-      (.Callstate callee [.Vptr entry.block 0] (consumerContinuation m le k) before) := by
-  have callStep : CC.doStep ge
-      (.State producer consumerCall (.Kseq consumerReturn k) (allocation m).1 le before) =
-      some (CC.E0, .Callstate callee [.Vptr entry.block 0] (consumerContinuation m le k) before) := by
-    have classified : CC.Cop.classifyFun (CC.typeof consumerAddress) =
-        .f [CC.tptr headerType] CC.tuint CC.cc_default := rfl
-    have targetEval : CC.doEvalExpr ge (allocation m).1 le before consumerAddress = some target := continuation
-    have typeEq : CC.typeOfFundef callee =
-        .Tfunction [CC.tptr headerType] CC.tuint CC.cc_default := signature
-    simp only [consumerCall, CC.doStep, classified, targetEval,
-      consumer_arguments m before le entry, binding, typeEq, ite_true]
-    rfl
-  exact (consumer_ready m before le k).trans
-    (.step trivial (CC.doStep_sound ge _ _ _ callStep) (.refl _))
+      (.Callstate callee [.Vptr entry.block 0] (consumerContinuation m le k) before) :=
+  consumer_call_with_binding_bound ge m before entry le k target callee continuation binding signature
 
 /-- Counter updates preserve the actual continuation temporary. -/
 theorem consumer_temp_distinct : Arm64Entry._continuation ≠ Arm64Entry._i := by decide +kernel
@@ -115,6 +138,39 @@ theorem header_caches_at_consumer_call (m before : CC.Mem) (le : CC.TempEnv)
 frees every local range.  Contents remain as inaccessible bytes, not a live
 borrowed entry.  The continuation's execution and access preservation are not
 inferred from this return-boundary theorem. -/
+theorem consumer_return_releases_locals_bound (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (m before : CC.Mem) (le : CC.TempEnv)
+    (k : CC.Cont) (value : BitVec 32)
+    (owned : ∀ id localValue, (allocation m).1.get id = some localValue →
+      CC.Mem.rangePerm before localValue.1 0 (CC.sizeof world.genv_cenv localValue.2) .Cur .Freeable = true) :
+    ∃ after, InternalRun world 3
+        (.Returnstate (.Vint value) (consumerContinuation m le k) before)
+        (.Returnstate (.Vint value) (CC.callCont k) after) ∧
+      FrameBelow m.nextblock before after ∧ after.contents = before.contents ∧
+      after.nextblock = before.nextblock ∧
+      (∀ row ∈ CC.blocksOfEnv world.genv_cenv (allocation m).1, ∀ ofs,
+        row.2.1 ≤ ofs → ofs < row.2.2 →
+        ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) := by
+  have ownedOld : ∀ id localValue, (allocation m).1.get id = some localValue →
+      CC.Mem.rangePerm before localValue.1 0 (CC.sizeof ge.genv_cenv localValue.2) .Cur .Freeable = true := by
+    simpa only [layout] using owned
+  obtain ⟨after, freed, frame, contents, next, released⟩ := deallocate_live_locals
+    (CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (allocation m)).symm) ownedOld
+  have freedWorld : CC.Mem.freeList before (CC.blocksOfEnv world.genv_cenv (allocation m).1) = some after := by
+    simpa only [layout] using freed
+  have returnStep : CC.doStep world
+      (.State producer consumerReturn k (allocation m).1
+        (le.set Arm64Entry._t'131 (.Vint value)) before) =
+      some (CC.E0, .Returnstate (.Vint value) (CC.callCont k) after) := by
+    have cast : CC.Cop.semCast (.Vint value) CC.tuint producer.fn_return before =
+        some (.Vint value) := rfl
+    simp only [consumerReturn, CC.doStep, CC.doEvalExpr, CC.PTree.gss, CC.typeof, cast, freedWorld]
+  refine ⟨after, ?_, frame, contents, next, ?_⟩
+  · exact .step trivial (CC.doStep_sound world _ _ _ rfl)
+      (.step trivial (CC.doStep_sound world _ _ _ rfl)
+        (.step trivial (CC.doStep_sound world _ _ _ returnStep) (.refl _)))
+  · simpa only [layout] using released
+
 theorem consumer_return_releases_locals (m before : CC.Mem) (le : CC.TempEnv)
     (k : CC.Cont) (value : BitVec 32)
     (owned : ∀ id localValue, (allocation m).1.get id = some localValue →
@@ -126,19 +182,7 @@ theorem consumer_return_releases_locals (m before : CC.Mem) (le : CC.TempEnv)
       after.nextblock = before.nextblock ∧
       (∀ row ∈ CC.blocksOfEnv ge.genv_cenv (allocation m).1, ∀ ofs,
         row.2.1 ≤ ofs → ofs < row.2.2 →
-        ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) := by
-  obtain ⟨after, freed, frame, contents, next, released⟩ := deallocate_live_locals
-    (CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (allocation m)).symm) owned
-  have returnStep : CC.doStep ge
-      (.State producer consumerReturn k (allocation m).1
-        (le.set Arm64Entry._t'131 (.Vint value)) before) =
-      some (CC.E0, .Returnstate (.Vint value) (CC.callCont k) after) := by
-    have cast : CC.Cop.semCast (.Vint value) CC.tuint producer.fn_return before =
-        some (.Vint value) := rfl
-    simp only [consumerReturn, CC.doStep, CC.doEvalExpr, CC.PTree.gss, CC.typeof, cast, freed]
-  refine ⟨after, ?_, frame, contents, next, released⟩
-  exact .step trivial (CC.doStep_sound ge _ _ _ rfl)
-    (.step trivial (CC.doStep_sound ge _ _ _ rfl)
-      (.step trivial (CC.doStep_sound ge _ _ _ returnStep) (.refl _)))
+        ∀ kind permission, CC.Mem.perm after row.1 ofs kind permission = false) :=
+  consumer_return_releases_locals_bound ge rfl m before le k value owned
 
 end KProgFormal.ClightRefinement.Arm64Producer

@@ -1,0 +1,30 @@
+import KProgFormal.ClightRefinement.Arm64NumericProducerRegisterStorage
+open KProgFormal.ClightRefinement
+#check Arm64Producer.consumer_argument_bound
+#print axioms Arm64Producer.consumer_argument_bound
+#check Arm64Producer.consumer_arguments_bound
+#print axioms Arm64Producer.consumer_arguments_bound
+#check Arm64Producer.consumer_ready_bound
+#print axioms Arm64Producer.consumer_ready_bound
+#check Arm64Producer.consumer_call_with_binding_bound
+#print axioms Arm64Producer.consumer_call_with_binding_bound
+#check Arm64Producer.consumer_return_releases_locals_bound
+#print axioms Arm64Producer.consumer_return_releases_locals_bound
+#check Arm64Producer.consumer_call_with_binding
+#print axioms Arm64Producer.consumer_call_with_binding
+#check Arm64Producer.consumer_return_releases_locals
+#print axioms Arm64Producer.consumer_return_releases_locals
+#check Arm64NumericProducerConsumer.instruction_handler_not_continuation
+#print axioms Arm64NumericProducerConsumer.instruction_handler_not_continuation
+#check Arm64NumericProducerConsumer.boundary
+#print axioms Arm64NumericProducerConsumer.boundary
+#check Arm64NumericProducerConsumer.Boundary.call
+#print axioms Arm64NumericProducerConsumer.Boundary.call
+#check Arm64NumericProducerConsumer.Boundary.call_after
+#print axioms Arm64NumericProducerConsumer.Boundary.call_after
+#check Arm64NumericProducerConsumer.return_releases_locals
+#print axioms Arm64NumericProducerConsumer.return_releases_locals
+#check Arm64NumericProducerConsumer.Boundary.call_return
+#print axioms Arm64NumericProducerConsumer.Boundary.call_return
+#check Arm64NumericProducerRegisterStorage.initialized_storage
+#print axioms Arm64NumericProducerRegisterStorage.initialized_storage

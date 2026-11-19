@@ -1,5 +1,6 @@
 import KProgFormal.ClightRefinement.Arm64NumericProducerVectorLoop
 import KProgFormal.ClightRefinement.Arm64ProducerRegisterStorage
+import KProgFormal.ClightRefinement.Arm64NumericProducerConsumer
 
 set_option Elab.async false
 
@@ -95,7 +96,8 @@ theorem initialized_storage (addresses : Arm64Registers.PointerOrigins)
       after.nextblock = (allocation initialMemory).2.nextblock ∧
       finalLe.get Arm64Entry._i = some (.Vint 32) ∧
       finalLe.get Arm64Entry._ctx = some ctx ∧
-      finalLe.get Arm64Entry._continuation = some continuation := by
+      finalLe.get Arm64Entry._continuation = some continuation ∧
+      Arm64NumericProducerConsumer.Boundary continuation k after finalLe entry := by
   obtain ⟨init, words, tags, flagBlocks, lrBlock, vector, stackTags, spBlock, cells, entry, sources,
       tailSources, after, le, traces, length, flagBindings, lrBinding, spBinding, run,
       headerReads, pointerReads, vectorViews, tailReads, stackEqual, contextEqual, abiEqual,
@@ -161,7 +163,8 @@ theorem initialized_storage (addresses : Arm64Registers.PointerOrigins)
     headerReads, pointerReads, vectorViews, storage, gprs, spView, flagsView, ?_, tailReads,
     stackEqual, contextEqual, abiEqual, wordsEqual, tagsEqual, lrEqual, spEqual,
     wordPointers, tagPointers, reads, flagReads, lrRead, vectorReads, stackReads, spRead,
-    contextReads, caches, frame, access, next, index, ctxRead⟩
+    contextReads, caches, frame, access, next, index, ctxRead.1, ctxRead.2,
+    Arm64NumericProducerConsumer.boundary continuation k after le entry ctxRead.2 access⟩
   intro origins s nativeGpr nativeSp nativeFlags nativeVectors
   refine ⟨?_, ⟨0, spView, by simpa using nativeSp⟩, ?_, ?_⟩
   · intro r
