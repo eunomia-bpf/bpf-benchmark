@@ -69,7 +69,7 @@ must rise from 14.
 6 requests (6, 14, 32, 44, 56, 61) are rejected with `only read is supported` — a write through a packet
 pointer the verifier has not proved writable. Same file, different matcher question; counted here so the
 two are not confused.
-## Post-fix check against the same archive inputs (omp 2026-11-19T21:02Z)
+## Post-fix check against the same archive inputs (omp 2026-11-19T21:10Z)
 
 PERF's `cdd26e9cd` ("Recognize classifier head-length predicates through simulator memory
 templates") closes all three gaps above. Rebuilt the pass from that commit
@@ -92,8 +92,12 @@ after   (23) if w3 < 0x2a goto …              ; the original scalar guard, pre
         (26) r1 = *(u32 *)(r6 + 0x4c)          ; then the byte read is in bounds
 ```
 
-The scalar guard is preserved and the pointer bound is added beside it; `clang-18 -O1 -target bpf`
-compiles all four sampled requests (3, 7, 9, 15, 21) to objects without error.
+The scalar guard is preserved and the pointer bound is added beside it. Compiled all **40** patched
+programs with the pipeline's own command (`clang-18 -w -g -O1 -mcpu=v4 -target bpf`, the flags in
+`trusted_specializer.py`); every one built, and the count of pointer-to-pointer compares in the emitted
+`classifier` section is at least the lowering count in all 40 — no predicate is lost between IR and
+bytecode. The bound itself reads the two public `__sk_buff` fields, `+0x4c` (data, offset 76) and
+`+0x50` (data_end, offset 80), which the kernel's context conversion turns into `pkt` and `pkt_end`.
 
 **The rewrite is an identity, not a strengthening.** The kernel itself defines the guard this way:
 `bpf_convert_data_end_access` (`vendor/linux-framework/net/core/filter.c:10976-11015`) lowers a read of
@@ -108,7 +112,8 @@ on all 14 Cilium requests that already install and whose B input is archived (1,
 39, 46, 51, 52, 54, 62; the other three installing requests kept no `bounds-input.bc`). So the fix
 changes bytecode only for the 40 that the verifier rejects, and the other five apps keep theirs.
 
-Not yet proven here: that the 40 patched B programs are *accepted* by the stock verifier. The host BTF
+Not yet proven here: that the 40 patched B programs are *accepted* by the stock verifier. Loading needs
+a guest. The host BTF
 lacks the apps' extern symbols (`__config_endpoint_ipv4` etc.), so the load must happen in the guest;
 PERF's `kprog/results/cilium-headlen-20261119/validate.sh` does exactly that (stock fixtures, captured
 40-request replay, then a full `checked-corpus` Cilium run) and is the run to read for the verdict.
