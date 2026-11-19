@@ -23,7 +23,7 @@
   25/25/25/25, zero fallback/failures; retained Tetragon backend passes in
   396.616 s and is packing. Tetragon emission/stock remains open.
 
-- [ ] P-checked-helper-context (PERF 2026-11-19T11:43:27Z): current checked
+- [x] P-checked-helper-context (220dbc191; run115036_062366; positive original FD): current checked
   BCC plans still bind five TP output/stack sites to generic helpers; the
   original-FD query is called only by the normal manifest route. Move the
   existing query to the common FD loader and delete the obsolete flag path.
@@ -33,6 +33,10 @@
   worker360208 is checking actual stock/native coverage and installed targets
   on CPUs20-21. Keep this item open through those receipts; context-only
   source-ID-zero and map-operation identity recovery remain separate work.
+  PERF 2026-11-19T11:56:20Z: Functional worker360208 completes0/appok,
+  25/25/25/25 checked, zero fallback/failures. All five TP sites now bind
+  their expected functions, and block_rq_complete selects raw_tp via original
+  aux. Installed8,628/JIT7,965B; no functional-run speed claim.
 - [ ] P-checked-map-ops (PERF 2026-11-19T11:43:27Z): all 25 current BCC
   checked plans lack map_ops; 17 update/10 delete static sites use generic
   wrappers. The trusted route's translated-insn scanner has no process-FD

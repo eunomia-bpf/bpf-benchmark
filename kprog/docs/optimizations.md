@@ -963,3 +963,9 @@ normal FD paths share it; the obsolete manifest opt-in path is deleted
 bindings, stock/native coverage and runtime effects remain pending. The
 query runs at load time, not per call; no new runtime check or helper body
 is introduced. Source-ID-zero and map-operation identities remain open.
+
+PERF 2026-11-19T11:56:20Z: Original-FD helper binding220dbc191 is confirmed
+by canonical BCC run115036_062366:25/25/25/25 checked, zero fallback/failures,
+all five TP call sites corrected, and raw_tp selected for block_rq_complete
+from its original aux. Installed8,628native/7,965JITB. Positive-FD class
+closed; source-ID-zero and map operations remain open. No new speed ratio.

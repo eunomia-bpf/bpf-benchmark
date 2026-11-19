@@ -71,3 +71,15 @@ It holds batch EX/timing SH/image SH and runs the existing 1 x 10 s
 functional protocol on CPUs20-21. At 11:52:26Z it has not completed;
 actual coverage and the post-fix relocation audit remain pending. Retain
 the worker and inputs; this is no speed measurement.
+
+PERF 2026-11-19T11:56:20Z: Worker360208 is terminal 0/app ok. Run
+`x86_kvm_corpus_20261119_115036_062366`, source220dbc191, records
+25 programs/native/B-generated/B-stock, all checked, zero fallback/failures.
+Installed bytes remain 8,628 native versus 7,965 JIT. The archived post-fix
+call audit (`fixed.json`) resolves all five TP sites to the expected _tp
+functions. The original-aux query also selects bpf_perf_event_output_raw_tp
+for tracing-type block_rq_complete. Ordinary kprobe output remains generic.
+This confirms positive-original-FD helper binding; source-ID-zero/context-only
+is still open. There is no speed ratio from the 1 x 10 s functional check.
+Map operations remain generic at the same 17 update/10 delete sites, with
+zero map_ops entries. That separate item is unchanged by this correctness fix.
