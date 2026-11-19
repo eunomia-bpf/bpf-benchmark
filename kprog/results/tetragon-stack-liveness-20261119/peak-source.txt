@@ -1,0 +1,51 @@
+    call void @llvm.dbg.label(metadata !4531), !dbg !10485
+    %331258 = call i32 asm sideeffect "$0 = $0", "=w,0"(i32 8) #6, !dbg !10486, !srcloc !7734
+    call void @llvm.dbg.label(metadata !4532), !dbg !10487
+    %331259 = call i32 asm sideeffect "$0 = $0", "=w,0"(i32 4) #6, !dbg !10488, !srcloc !7734
+    call void @llvm.dbg.label(metadata !4533), !dbg !10489
+    call void @llvm.dbg.label(metadata !4534), !dbg !10490
+    call void @llvm.dbg.label(metadata !4535), !dbg !10491
+    %331260 = icmp eq i32 %331259, 4, !dbg !10492
+    br i1 %331260, label %331261, label %334543, !dbg !10492
+  
+  331261:                                           ; preds = %331255
+    %331262 = inttoptr i64 %331257 to ptr, !dbg !10484
+    %331263 = inttoptr i64 %325861 to ptr
+    %331264 = zext i32 %331258 to i64, !dbg !10486
+    %331265 = call i64 inttoptr (i64 4 to ptr)(ptr nocapture noundef writeonly %331263, i32 noundef %331258, ptr nocapture noundef readonly %331262) #7, !dbg !10494
+    %331266 = icmp eq i32 %331258, 0, !dbg !10494
+    br i1 %331266, label %331532, label %331267, !dbg !10494
+  
+  331267:                                           ; preds = %331261
+    %331268 = icmp eq i64 %325863, 416
+    %331269 = icmp eq i64 %325863, 408
+    %331270 = icmp eq i64 %325863, 400
+    %331271 = icmp eq i64 %325863, 392
+    %331272 = icmp eq i64 %325863, 384
+    %331273 = icmp eq i64 %325863, 376
+    %331274 = icmp eq i64 %325863, 368
+    %331275 = icmp eq i64 %325863, 360
+    %331276 = icmp eq i64 %325863, 352
+    %331277 = icmp eq i64 %325863, 344
+    %331278 = icmp eq i64 %325863, 336
+    %331279 = icmp eq i64 %325863, 328
+    %331280 = icmp eq i64 %325863, 320
+    %331281 = icmp eq i64 %325863, 312
+    %331282 = icmp eq i64 %325863, 304
+    %331283 = icmp eq i64 %325863, 296
+    %331284 = icmp eq i64 %325863, 288
+    %331285 = icmp eq i64 %325863, 280
+    %331286 = icmp eq i64 %325863, 272
+    %331287 = icmp eq i64 %325863, 264
+    %331288 = icmp eq i64 %325863, 256
+    %331289 = icmp eq i64 %325863, 248
+    %331290 = icmp eq i64 %325863, 240
+    %331291 = icmp eq i64 %325863, 232
+    %331292 = icmp eq i64 %325863, 224
+    %331293 = icmp eq i64 %325863, 216
+    %331294 = icmp eq i64 %325863, 208
+    %331295 = icmp eq i64 %325863, 200
+    %331296 = icmp eq i64 %325863, 192
+    %331297 = icmp eq i64 %325863, 184
+    %331298 = icmp eq i64 %325863, 176
+    %331299 = icmp eq i64 %325863, 168

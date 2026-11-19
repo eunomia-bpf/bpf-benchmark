@@ -8,6 +8,13 @@
 
 ## 0. Lane 目标与待办
 
+- [ ] P-B-constant-ALU32 (PERF 2026-11-19T11:28:45Z): Tetragon request 6's
+  retained B has 438,579 machine blocks and a conservative 3,996-byte live
+  spill frontier before and after packing. At the first peak, constant i32
+  self moves of 8/4 hide size/helper-ID facts and retain stack-tag fanout.
+  Fold only these exact constant self moves in the B IR pass; retain live
+  ALU32 moves and all bounds/limits. See results/tetragon-stack-liveness-20261119.
+
 PERF 2026-11-19T10:48:19Z: Freeze/LOCK batch 327120 completed, host 0/app ok, BCC programs/native/
 B-generated/B-stock 25/25/25/25, all checked, no fallback/failures. Per call
 1.007x, throughput 1.006x (1.015/0.995/1.006), installed 8,628 B vs JIT
