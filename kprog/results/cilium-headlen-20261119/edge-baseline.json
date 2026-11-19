@@ -1,0 +1,15 @@
+{
+  "raw": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/edge-baseline-20261119T224534Z-481274",
+  "started": "2026-11-19T22:47:43Z",
+  "finished": "2026-11-19T22:47:47Z",
+  "exit_code": 2,
+  "fixture_b_emitted": true,
+  "stock_load_error": -13,
+  "verifier_error": "invalid access to packet, off=16 size=1, R2(id=0,off=16,r=16)",
+  "verifier_log_line": 112,
+  "current_rejected_requests": [4, 5, 8, 9, 11, 14],
+  "current_inputs": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/current-six-inputs/inputs.json",
+  "request4_scalar": "%357",
+  "request4_predicates": {"1051": "ult 16", "1127": "ult 18", "1134": "eq 16", "7507": "eq 18"},
+  "scope": "Actual focused sole-kernel failure and retained current-app inputs; candidate confirmation follows separately."
+}

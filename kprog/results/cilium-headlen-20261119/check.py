@@ -48,6 +48,29 @@ for width,predicates in [(32,['uge','ule']),(64,['ugt','uge','ult','ule'])]:
 }}
 '''
 controls+='\ndeclare void @read_context(ptr) readonly\n'
+boundary=['ir_edge_eq_lower','ir_edge_ne_lower','ir_edge_eq_upper','ir_edge_ne_upper']
+for name in [*boundary,'ir_edge_nondominating']:
+    guard='ule' if name.endswith('upper') else 'uge'
+    predicate='ne' if '_ne_' in name else 'eq'
+    split='  br i1 %choose, label %guarded, label %check\nguarded:\n' if name=='ir_edge_nondominating' else ''
+    controls+=f'''\ndefine i32 @{name}(ptr %ctx, i1 %choose) section "classifier" {{
+entry:
+  %kernel = call ptr @bpf_cast_to_kern_ctx(ptr %ctx)
+  %len = call i64 asm sideeffect "$0 = *(u32 *)($1 + $2)", "=r,r,i,~{{memory}}"(ptr %kernel, i64 112)
+  %data_len = call i64 asm sideeffect "$0 = *(u32 *)($1 + $2)", "=r,r,i,~{{memory}}"(ptr %kernel, i64 116)
+  %left = trunc i64 %len to i32
+  %right = trunc i64 %data_len to i32
+  %span = sub i32 %left, %right
+{split}  %guard = icmp {guard} i32 %span, 42
+  br i1 %guard, label %check, label %exit
+check:
+  %compare = icmp {predicate} i32 %span, 42
+  %result = zext i1 %compare to i32
+  ret i32 %result
+exit:
+  ret i32 0
+}}
+'''
 data_controls = {'plain': True, 'readonly': True, 'private_store': True,
                  'mutating': False, 'identity_stale': False}
 for name in data_controls:
@@ -93,7 +116,7 @@ run([compiler,out/'controls.explicit.ll','-o',out/'controls.lowered.bc'])
 lowered=run(['llvm-dis-18',out/'controls.lowered.bc','-o','-'])
 (out/'controls.lowered.ll').write_text(lowered)
 bodies={name:body for name,body in re.findall(r'define [^@]+@(\w+)\([^\n]*\).*?\{(.*?)^}',lowered,re.S|re.M)}
-positive=['head_ge','head_not_lt','old_tc','old_xdp','asm_tc',*explicit,'ir_readonly_loop']
+positive=['head_ge','head_not_lt','old_tc','old_xdp','asm_tc',*explicit,'ir_readonly_loop',*boundary]
 negative=['wrong_root','wrong_offset','wrong_section','equality','signed_negative',
           'stale_call','stale_store','ir_mutating_loop']
 observed={name:'packet_bound' in bodies[name] for name in positive+negative}
@@ -112,9 +135,15 @@ else:
     assert all(observed[name] for name in positive),observed
 assert not any(observed[name] for name in negative),observed
 assert all(observed[name] for name in ['old_tc','old_xdp']),observed
+assert re.search(r'icmp eq i32 %span, 42',bodies['ir_edge_nondominating']),bodies['ir_edge_nondominating']
+for name,predicate in zip(boundary,['ule','ugt','uge','ult']):
+    expected=predicate if mode=='after' else ('ne' if '_ne_' in name else 'eq')
+    assert re.search(r'icmp '+expected+r' i32 %span, 42',bodies[name]),(name,bodies[name])
+    if mode=='after':
+        assert not re.search(r'icmp (eq|ne) i32 %span, 42',bodies[name]),(name,bodies[name])
 for name in positive:
     if observed[name]:
-        bound=43 if name in {'ir_ule32','ir_ugt64','ir_ule64'} else 42
+        bound=43 if name in {'ir_ule32','ir_ugt64','ir_ule64','ir_edge_eq_lower','ir_edge_ne_lower'} else 42
         assert re.search(r'packet_bound\w* = add i64 [^,\n]+, '+str(bound)+r'\b',bodies[name]),(name,bodies[name])
 if mode=='after':
     run([root/'kprog/stock-path/bin/clang',*adapter.COMPILE_FLAGS,'-emit-llvm','-c',source,'-o',out/'fixture.frontend.bc'])

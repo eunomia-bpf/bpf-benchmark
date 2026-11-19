@@ -1472,3 +1472,14 @@ withrange16 but reachbyte16 onthe18byteguard/equalityalternatebranch.
 This is the next compiler class; sourceP/settings unchanged. Actualcoverage
 reader8d32bf972 uses eachcapsule/nativehash andretains error tails, with
 historical14/41/6/3 regression preserved. See fresh-coverage.json.
+
+PERF 2026-11-19: focused head_edge baseline481274 reproduces the current
+byte16/range16 rejection on the sole kernel. Actual request4 uses one i32
+span for ULT16/ULT18/EQ16/EQ18. The candidate expresses EQ/NE at a dominating
+interval boundary as an equivalent ordered scalar predicate: under x>=K,
+x==K becomes x<=K and x!=K becomes x>K; the upper-bound case is symmetric.
+Existing packet-bound lowering then carries bounds onto both relevant edges.
+Standalone equality and bypassing paths retain their original treatment.
+Four selector cases and the actual packet execution fixture cover this class;
+syntax passes, with compiler/stock/current-app confirmation pending. Native P,
+uniform flags and benchmark settings retain their current definitions.

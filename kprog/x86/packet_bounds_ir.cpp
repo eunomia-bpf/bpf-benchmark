@@ -6,6 +6,8 @@
 #include "llvm/ADT/SetVector.h"
 #include "llvm/ADT/SmallPtrSet.h"
 #include "llvm/IR/CFG.h"
+#include "llvm/IR/ConstantRange.h"
+#include "llvm/IR/Dominators.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/DIBuilder.h"
 #include "llvm/IR/InstIterator.h"
@@ -21,6 +23,7 @@
 #include "llvm/Support/ModRef.h"
 #include "llvm/Support/ToolOutputFile.h"
 #include <linux/bpf.h>
+#include <algorithm>
 #include <cstddef>
 using namespace llvm;
 static cl::opt<std::string> Input(cl::Positional,cl::Required);
@@ -498,6 +501,38 @@ static unsigned fold_equality_edges(Module &module) {
   }
   return count;
 }
+// At a known interval boundary, equality is an ordered scalar predicate:
+// x>=K makes x==K equivalent to x<=K. Its false edge then carries x>K,
+// allowing the existing packet-bound lowering to describe both outcomes.
+static ICmpInst::Predicate ordered_boundary(ICmpInst *compare,DominatorTree &tree) {
+  auto predicate=compare->getPredicate();
+  auto *node=tree.getNode(compare->getParent());
+  if (!compare->isEquality() || !node) return predicate;
+  auto *constant=cast<ConstantInt>(compare->getOperand(1));
+  for (node=node->getIDom();node;node=node->getIDom()) {
+    auto *branch=dyn_cast<BranchInst>(node->getBlock()->getTerminator());
+    if (!branch || !branch->isConditional() ||
+        branch->getSuccessor(0)==branch->getSuccessor(1)) continue;
+    auto *guard=dyn_cast<ICmpInst>(branch->getCondition());
+    if (!guard || guard->getOperand(0)->getType()!=compare->getOperand(0)->getType() ||
+        origin(guard->getOperand(0))!=origin(compare->getOperand(0))) continue;
+    auto *bound=dyn_cast<ConstantInt>(guard->getOperand(1));
+    if (!bound) continue;
+    for (unsigned edge=0;edge<2;++edge) {
+      if (!tree.dominates(BasicBlockEdge(node->getBlock(),branch->getSuccessor(edge)),
+                          compare->getParent())) continue;
+      auto relation=edge?guard->getInversePredicate():guard->getPredicate();
+      auto range=ConstantRange::makeExactICmpRegion(relation,bound->getValue());
+      auto point=ConstantRange(constant->getValue());
+      bool equal=predicate==ICmpInst::ICMP_EQ;
+      if (range.icmp(ICmpInst::ICMP_UGE,point))
+        return equal?ICmpInst::ICMP_ULE:ICmpInst::ICMP_UGT;
+      if (range.icmp(ICmpInst::ICMP_ULE,point))
+        return equal?ICmpInst::ICMP_UGE:ICmpInst::ICMP_ULT;
+    }
+  }
+  return predicate;
+}
 int main(int argc,char **argv) {
   cl::ParseCommandLineOptions(argc,argv);
   LLVMContext context;SMDiagnostic error;auto module=parseIRFile(Input,error,context);
@@ -523,6 +558,10 @@ int main(int argc,char **argv) {
     } else continue;
     SmallVector<ICmpInst *,8> comparisons;
     for (auto &instruction:instructions(function)) if (auto *compare=dyn_cast<ICmpInst>(&instruction)) comparisons.push_back(compare);
+    // Consult original branch guards before their pointer-bound expansion.
+    std::stable_partition(comparisons.begin(),comparisons.end(),
+        [](ICmpInst *compare) { return compare->isEquality(); });
+    DominatorTree dominators(function);
     for (auto *compare:comparisons) {
       auto *span=compare->getOperand(0);
       auto *difference=dyn_cast<BinaryOperator>(origin(span));
@@ -541,7 +580,7 @@ int main(int argc,char **argv) {
       }
       if (!headlen && (!constant->getType()->isIntegerTy(64) || !difference->getType()->isIntegerTy(64) ||
           !field(difference->getOperand(0),function,end) || !field(difference->getOperand(1),function,data))) continue;
-      auto predicate=compare->getPredicate();auto size=constant->getValue();
+      auto predicate=ordered_boundary(compare,dominators);auto size=constant->getValue();
       bool signed_compare=ICmpInst::isSigned(predicate);
       if (signed_compare && size.isNegative()) continue;
       bool inverse=predicate==ICmpInst::ICMP_SGE || predicate==ICmpInst::ICMP_UGE || predicate==ICmpInst::ICMP_SGT || predicate==ICmpInst::ICMP_UGT;
