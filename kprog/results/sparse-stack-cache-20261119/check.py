@@ -1,4 +1,5 @@
 """Catch lost ghost tags from omitted alias destinations or sparse bindings."""
+import fcntl
 import json
 from pathlib import Path
 import re
@@ -43,6 +44,7 @@ cases={
              'mov BYTE PTR [rsp+0x9],0'],[1]),
 }
 rows=[]
+b_sources={}
 for name,(assembly,expected) in cases.items():
     assembly=assembly+['add rsp,0x40','xor eax,eax','ret']
     instructions=[]
@@ -56,12 +58,7 @@ for name,(assembly,expected) in cases.items():
     (out/'selection.json').write_text(json.dumps(rows,indent=2)+'\n')
     assert words==expected,(name,expected,words)
     if name in {'direct','join','narrow'}:
-        fixture=build/'fixture.bpf.c'
-        fixture.write_text(source.replace('#include "../x86_sim_local_bpf.h"',
-            '#include '+json.dumps(str(root/'kprog/x86/x86_sim_local_bpf.h'))))
-        adapter.compile_simulator(root/'kprog/stock-path/bin/clang',fixture,
-            build/'fixture.bpf.o',run,
-            bounds_compiler=Path('/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds'))
+        b_sources[name]=source
 
 observations={}
 for mode,words in {'full':range(8),'sparse':[1,5]}.items():
@@ -72,6 +69,19 @@ for mode,words in {'full':range(8),'sparse':[1,5]}.items():
          root/'kprog/results/sparse-stack-cache-20261119/oracle.c','-o',build/'oracle'])
     observations[mode]=json.loads(run([build/'oracle']))
 assert observations['full']==observations['sparse'],observations
+(out/'oracle-result.json').write_text(json.dumps(observations,indent=2)+'\n')
+print(json.dumps(observations),flush=True)
+# Only B emission reads the mutable compiler base. The host selection and
+# shared-C checks above are independent of the runtime image rebuild.
+with open('/workspaces/.agent-state/kprog-lanes/locks/image','a') as lock:
+    fcntl.flock(lock,fcntl.LOCK_SH)
+    for name,source in b_sources.items():
+        fixture=build/'fixture.bpf.c'
+        fixture.write_text(source.replace('#include "../x86_sim_local_bpf.h"',
+            '#include '+json.dumps(str(root/'kprog/x86/x86_sim_local_bpf.h'))))
+        adapter.compile_simulator(root/'kprog/stock-path/bin/clang',fixture,
+            build/'fixture.bpf.o',run,
+            bounds_compiler=Path('/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds'))
 (out/'result.json').write_text(json.dumps(dict(selection_cases=len(rows),b_emission_cases=3,
     shared_c=observations,scope='Generator selection, actual B emission and shared-C tag/alias/partial-write/replant checks; no stock/app/timing claim.'),indent=2)+'\n')
 print(json.dumps(observations),flush=True)
