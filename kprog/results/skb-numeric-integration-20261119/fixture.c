@@ -34,6 +34,6 @@ unsigned long absolute_address_control(void)
 {
     unsigned long value;
     void *base = 0;
-    asm volatile("$0 = *(u64 *)($1 + 112)" : "=r"(value) : "r"(base));
+    asm volatile("%0 = *(u64 *)(%1 + 112)" : "=r"(value) : "r"(base));
     return value;
 }
