@@ -15,11 +15,12 @@ diff --git a/kprog/stock-path/include/stock_native_input.h b/kprog/stock-path/in
 diff --git a/kprog/x86/compile_sim_ir.cpp b/kprog/x86/compile_sim_ir.cpp
 --- a/kprog/x86/compile_sim_ir.cpp
 +++ b/kprog/x86/compile_sim_ir.cpp
-@@ -187,4 +187,6 @@
+@@ -187,4 +187,7 @@
      StringRef text=assembly->getAsmString(); IRBuilder<> b(call);
      b.SetCurrentDebugLocation(call->getDebugLoc()); Value *result=nullptr;
 -    if (text.empty()) {
 +    if (text=="# kprog_numeric") {
-+      result=call->getArgOperand(1);
++      // Clang places explicit inputs before the tied read/write input.
++      result=call->getArgOperand(0);
 +    } else if (text.empty()) {
        if (!call->getType()->isIntegerTy() || call->arg_size()!=1 ||

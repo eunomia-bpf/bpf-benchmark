@@ -19,7 +19,12 @@
 extern unsigned long long kprog_unspecified_input[] __attribute__((section(".ksyms")));
 #define KPROG_UNSPECIFIED_WORD() (*(volatile unsigned long long *)&kprog_unspecified_input[0])
 #define NATIVE_LAB_ENTRY_INPUT(kind) ({ (void)(kind); (unsigned long)KPROG_UNSPECIFIED_WORD(); })
-#define NATIVE_LAB_NUMERIC(value) ({ (void)(value); (unsigned long)KPROG_UNSPECIFIED_WORD(); })
+#define NATIVE_LAB_NUMERIC(value) ({ \
+  unsigned long __kprog_numeric_bits = (unsigned long)(value); \
+  unsigned long __kprog_numeric_scalar = (unsigned long)KPROG_UNSPECIFIED_WORD(); \
+  asm volatile("# kprog_numeric" : "+r"(__kprog_numeric_scalar) : "r"(__kprog_numeric_bits)); \
+  __kprog_numeric_scalar; \
+})
 #define NATIVE_LAB_EXCLUSIVE_FAILURE(site) ({ (void)(site); (unsigned long)(KPROG_UNSPECIFIED_WORD() & 1); })
 #endif
 #endif

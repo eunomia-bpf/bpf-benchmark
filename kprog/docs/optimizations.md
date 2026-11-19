@@ -1026,3 +1026,12 @@ concrete-map facts. Existing generation metadata already holds dimensions.
 Archive audit411576 is queued to identify actual helper selection; no live
 site, cost or gain is claimed. Numeric repair and parser completeness stay
 ahead of this candidate. See results/checked-array-facts-20261119.
+
+PERF 2026-11-19T13:38:04Z: NUMERIC concrete-bit boundary is repaired. Stock B keeps
+its unknown scalar, while native lowering selects the concrete operand
+preserved by the header. Canonical sole-tool rebuild passes; worker416559
+passes30 numeric/lane/single-evaluation cases, six ABI controls and B
+emission. Initial candidate21/30 failure is retained and traced to Clang's
+explicit-before-tied input ordering. No new helper, mode or runtime check;
+true unspecified inputs remain unchanged. Component correctness only, with
+no corpus speed/installed-byte claim. See numeric-context-bridge-20261119.

@@ -186,7 +186,10 @@ int main(int argc,char **argv) {
     if (!assembly) continue; // Actual indirect function calls keep their target.
     StringRef text=assembly->getAsmString(); IRBuilder<> b(call);
     b.SetCurrentDebugLocation(call->getDebugLoc()); Value *result=nullptr;
-    if (text.empty()) {
+    if (text=="# kprog_numeric") {
+      // Clang places explicit inputs before the tied read/write input.
+      result=call->getArgOperand(0);
+    } else if (text.empty()) {
       if (!call->getType()->isIntegerTy() || call->arg_size()!=1 ||
           call->getArgOperand(0)->getType()!=call->getType() ||
           assembly->getConstraintString()!="=r,0" || assembly->isAlignStack() ||

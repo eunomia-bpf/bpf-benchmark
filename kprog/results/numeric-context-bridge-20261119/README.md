@@ -66,3 +66,27 @@ the repair and rebuilding the sole checked tools through checked-sim-stage.
 It retains the exact applied diff, build log and native/B component outputs.
 It starts no image or guest. Production source is unchanged until those
 leases are acquired; host results and the production commit remain pending.
+
+PERF 2026-11-19T13:38:04Z: Native bit preservation is fixed in the production header
+and compiler. The first applied candidate built and emitted B, but failed
+21 of 30 numeric cases: Clang lowers +r as =r,r,0, putting the explicit
+concrete input first. The initial converter selected the tied scalar. That
+failed candidate and all rows remain in first-repair-result.json and raw
+fix-20261119T131416Z-407693. The current patch selects operand zero and
+records the operand-order reason in the compiler.
+
+Canonical checked-sim-stage rebuilt the sole tools in place under timing
+SH/image EX. Actual worker416559 finished successfully at13:37:02Z: all
+30 numeric/lane/single-evaluation cases and six ABI controls pass. Stock B
+emission succeeds: fixed-stock-disassembly.txt shows numeric_value returns
+the ordinary unspecified-input scalar, while fixed-native.ll returns its
+argument and numeric_once returns the old value with exactly one increment.
+The assembly comment adds no B instruction, kernel operation or native
+helper call. True unspecified/entry/exclusive cases are unchanged. This is
+a component fidelity result, not a corpus path hit, stock-B load, per-call
+gain or installed-byte measurement.
+
+Successful raw: /workspaces/kprog-raw/perf/numeric-context-bridge-20261119/reproduce-20261119T133702Z-416559.
+Rebuild log: /workspaces/kprog-raw/perf/numeric-context-bridge-20261119/rebuild-concrete-operand-20261119.log.
+The sole image remains94484bec285d; subsequent checked app confirmation
+follows the coordinator's queued Tracee batch, with all C/LTO pieces on.

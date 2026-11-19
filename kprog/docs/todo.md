@@ -8,7 +8,7 @@
 
 ## 0. Lane 目标与待办
 
-- [ ] P-native-numeric-bridge (PERF 2026-11-19T12:46:11Z): audit native
+- [x] P-native-numeric-bridge (this commit; run133702_416559): audit native
   preservation of NUMERIC(value)'s concrete bits through the reused stock
   frontend. The proof header discards value; native freezes the resulting
   unspecified-input read. Worker 400746 completed at 12:52:08Z: all five
@@ -25,6 +25,12 @@
   Host regression also emits B and tests single evaluation. Production
   sources remain unchanged while queued; host pass and source commit remain
   pending. Do not start a duplicate repair worker.
+  PERF 2026-11-19T13:37:02Z: Production header/compiler repair passes
+  30 native numeric/lane/single-evaluation cases, six ABI controls and actual
+  B emission. B still returns an unknown scalar; native preserves actual
+  bits. Initial candidate's21/30 failures are retained; Clang puts explicit
+  concrete input before the tied scalar, now selected correctly. Component
+  fidelity class closed; actual checked-app coverage remains separate.
 
 - [ ] P-B-constant-ALU32 (PERF 2026-11-19T11:28:45Z): Tetragon request 6's
   retained B has 438,579 machine blocks and a conservative 3,996-byte live
