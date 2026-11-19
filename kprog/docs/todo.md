@@ -8,6 +8,9 @@
 
 ## 0. Lane 目标与待办
 
+PERF 2026-11-19T07:26:12Z：native private-arena rule 已落5be6df084，1344执行/25 BCC/ARRAY与OTel回归通过。Tetragon B O1最终emission因4096B栈界限失败；复用packed MIR诊断得到最大直接R10 offset5776B，不能据此放宽stock512B。生产限制未改。下一步223517只在现有 .bounds.bc 上试 O3（不重跑 C frontend、不改生产flags），见results/b-analysis-flags-20261119。组合批次runtime与全应用stock覆盖仍开。
+
+
 PERF 2026-11-19T07:10:39Z: Native private-arena normalization implemented and host-tested;25 BCC and ARRAY/OTel compile regressions pass. C helpers remain enabled. Source/receipt in results/native-private-stack-20261119; app per-call/body/helpers/maps/installed results remain pending the combined checked-sim-c batch.
 
 

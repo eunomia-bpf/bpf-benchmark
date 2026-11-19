@@ -67,3 +67,16 @@ Diagnostic worker221549 reuses that completed packed MIR with a diagnostic
 repeat frontend or packing and does not change production flags, the kernel's
 512-byte stock limit, benchmark settings, or installation policy. Results will
 be committed after completion.
+
+PERF 2026-11-19T07:26:12Z: The retained-MIR diagnostic completed (worker221549,
+raw `/workspaces/kprog-raw/perf/b-analysis-flags-20261119/stack-20261119T071859Z-221549`): largest direct R10 displacement5776 B and executable
+sections10,589,544 B. This is a diagnostic object, not stock verification;
+production compiler4096/stock512 limits remain unchanged. Raising the
+compiler bound cannot close the actual stack gap.
+
+Experiment af6ef8d95 now tests O3 only after the existing bounds pass has
+removed private volatility/opaque identities and described helper memory.
+It reuses the completed O1 frontend's .bounds.bc, so it does not repeat the
+original slow C frontend or alter production flags. Worker223517 runs on
+CPU18, timing SH/image SH,32GiB AS; results will distinguish pass ordering
+from simply restoring the original expensive O3 frontend.
