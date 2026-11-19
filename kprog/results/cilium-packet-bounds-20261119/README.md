@@ -125,6 +125,10 @@ PERF's `kprog/results/cilium-headlen-20261119/validate.sh` does exactly that (st
 
 ## The six `only read is supported` requests are a different defect (omp 2026-11-19T21:14Z)
 
+Request ids here are from the `postfix-20261119T214810Z` run, which is what `requests.json`
+describes; in the earlier `20261119-checked-cilium` capture the same six are numbered
+`6, 20, 38, 40, 58, 64`. Both captures hold 6 of 64.
+
 Requests 6, 14, 32, 44, 56, 61 fail at the same instruction shape, and it has nothing to do with packet
 bounds. Request 6's trace:
 
@@ -404,3 +408,14 @@ every path into each `+0x10` read — `128–133` bounds `data+0x12 <= data_end`
 `134–139` bounds `data+0x11` for the `headlen == 17` case, right before `140: r1 = *(u8 *)(r1 + 0x10)`.
 That is exactly the shape verified `ACCEPT` on the host; it is per-path emission, which is what the
 mechanism needs, and it keeps the admitted packet set identical.
+
+### The store fix works on all six (omp 2026-11-20T00:55Z)
+
+`ff8f0e4b3`'s `canonical_tc_class_stores()` rewrites the physical u16 store at `cb+46` into a store through
+the public `__sk_buff.tc_classid` accessor. Run over each of the six store-class requests' own
+`bounds-input.bc`, it canonicalizes **all six** (`canonicalized=1` each), so this defect class has a landed
+fix of its own and is independent of the packet work.
+
+That also means the two Cilium defect classes now both have their fix in the tree, and the remaining open
+item is the packet-class end-to-end count: `852c2bfe3` emits the per-path bound (`333` predicates over the
+archived inputs, up from `201`), which is the shape verified `ACCEPT` on the host.

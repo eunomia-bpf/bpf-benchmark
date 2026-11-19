@@ -51,7 +51,7 @@
  },
  {
   "request_id": 6,
-  "class": "only_read",
+  "class": "store",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 2,
@@ -131,7 +131,7 @@
  },
  {
   "request_id": 14,
-  "class": "emitter_relative_table",
+  "class": "emitter",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 2,
@@ -191,7 +191,7 @@
  },
  {
   "request_id": 20,
-  "class": "only_read",
+  "class": "store",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 5,
@@ -305,7 +305,7 @@
  },
  {
   "request_id": 32,
-  "class": "emitter_relative_table",
+  "class": "emitter",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 2,
@@ -365,7 +365,7 @@
  },
  {
   "request_id": 38,
-  "class": "only_read",
+  "class": "store",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 5,
@@ -385,7 +385,7 @@
  },
  {
   "request_id": 40,
-  "class": "only_read"
+  "class": "store"
  },
  {
   "request_id": 41,
@@ -539,7 +539,7 @@
  },
  {
   "request_id": 56,
-  "class": "emitter_relative_table",
+  "class": "emitter",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 2,
@@ -559,7 +559,7 @@
  },
  {
   "request_id": 58,
-  "class": "only_read"
+  "class": "store"
  },
  {
   "request_id": 59,
@@ -613,7 +613,7 @@
  },
  {
   "request_id": 64,
-  "class": "only_read",
+  "class": "store",
   "section": "classifier",
   "ctx_data_end_reads": 0,
   "ctx_data_reads": 2,
