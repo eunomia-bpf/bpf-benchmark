@@ -203,17 +203,21 @@ theorem x0_layout :
     CC.unionFieldOffset ge.genv_cenv Arm64Entry._x gprComposite.co_members = .OK (0, .Full) := by
   decide +kernel
 
-private theorem first_return_exec (m : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+private theorem first_return_exec (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (m : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (xb tb : CC.Block) (supplied middle after : CC.Mem) (value : BitVec 64)
     (cell : (allocation m).1.get Arm64Entry.___a64_x0 =
       some (xb, .Tunion Arm64Entry._arm64_sim_gpr CC.noattr))
     (tag : (allocation m).1.get Arm64Entry.___a64_x0_tag = some (tb, CC.tuchar))
     (storeCell : CC.Mem.storev .Mint64 supplied (.Vptr xb (0#64)) (.Vlong value) = some middle)
     (storeTag : CC.Mem.storev .Mint8unsigned middle (.Vptr tb (0#64)) (.Vint (0#32)) = some after) :
-    steps ge 9 (.Returnstate (.Vlong value) (inputContinuation m le k) supplied) =
+    steps world 9 (.Returnstate (.Vlong value) (inputContinuation m le k) supplied) =
       some (CC.E0, .State producer nextRegisterStage k (allocation m).1
         (firstInputTemps le value) after) ∧
-    InternalPath ge 9 (.Returnstate (.Vlong value) (inputContinuation m le k) supplied) := by
+    InternalPath world 9 (.Returnstate (.Vlong value) (inputContinuation m le k) supplied) := by
+  rcases world with ⟨functions, composites⟩
+  change composites = ge.genv_cenv at layout
+  subst composites
   simp +decide [steps, InternalPath, InternalState, inputContinuation, inputParts, nextRegisterStage, firstInputTemps,
     CC.doStep, CC.setOpttemp, CC.PTree.gso, CC.doEvalExpr, CC.doEvalLvalue, CC.lvalOfVar,
     CC.doDerefLoc, CC.doAssignLoc, CC.lvalOfField, CC.typeof, CC.accessMode,
@@ -227,16 +231,17 @@ private theorem first_return_exec (m : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
 stored through the real x0 union field and scalar tag. The provider's trace
 and complete post-memory are retained except for those two constructed stores.
 Writable local permissions after the provider remain an explicit ABI premise. -/
-theorem first_input_returns (m before supplied : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+theorem first_input_returns_bound (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (m before supplied : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (value : BitVec 64) (trace : CC.Trace)
-    (provider : CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv ge.genv_genv)
+    (provider : CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv world.genv_genv)
       [.Vint (6#32)] before trace (.Vlong value) supplied)
     (access : supplied.access = (allocation m).2.access) :
     ∃ xb tb after,
       (allocation m).1.get Arm64Entry.___a64_x0 =
         some (xb, .Tunion Arm64Entry._arm64_sim_gpr CC.noattr) ∧
       (allocation m).1.get Arm64Entry.___a64_x0_tag = some (tb, CC.tuchar) ∧
-      CC.Star (CC.Step2 ge)
+      CC.Star (CC.Step2 world)
         (.Callstate Arm64OriginCache.inputFunction [.Vint (6#32)] (inputContinuation m le k) before)
         trace (.State producer nextRegisterStage k (allocation m).1 (firstInputTemps le value) after) ∧
       CC.Mem.loadv .Mint64 after (.Vptr xb 0) = some (.Vlong value) ∧
@@ -256,8 +261,8 @@ theorem first_input_returns (m before supplied : CC.Mem) (le : CC.TempEnv) (k : 
   have locals := (allocated_local_storage
     (CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (allocation m)).symm)).2
   have distinct : xb ≠ tb := locals _ _ _ _ cell tag (by decide +kernel)
-  have suffix := first_return_exec m le k xb tb supplied middle after value cell tag storeCell storeTag
-  have call : CC.Star (CC.Step2 ge)
+  have suffix := first_return_exec world layout m le k xb tb supplied middle after value cell tag storeCell storeTag
+  have call : CC.Star (CC.Step2 world)
       (.Callstate Arm64OriginCache.inputFunction [.Vint (6#32)] (inputContinuation m le k) before)
       trace (.Returnstate (.Vlong value) (inputContinuation m le k) supplied) :=
     .step _ _ _ _ _ _ (.external_function _ _ _ _ _ _ _ _ _ _ provider) (.refl _)
@@ -274,5 +279,27 @@ theorem first_input_returns (m before supplied : CC.Mem) (le : CC.TempEnv) (k : 
   · intro id ty block bound notCell notTag chunk ofs
     exact (CC.Mem.load_store_other storeTag chunk block ofs (.inl (locals _ _ _ _ bound tag notTag))).trans
       (CC.Mem.load_store_other storeCell chunk block ofs (.inl (locals _ _ _ _ bound cell notCell)))
+
+/-- Preserve the standalone API as a projection of the actual-world law. -/
+theorem first_input_returns (m before supplied : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (value : BitVec 64) (trace : CC.Trace)
+    (provider : CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv ge.genv_genv)
+      [.Vint (6#32)] before trace (.Vlong value) supplied)
+    (access : supplied.access = (allocation m).2.access) :
+    ∃ xb tb after,
+      (allocation m).1.get Arm64Entry.___a64_x0 =
+        some (xb, .Tunion Arm64Entry._arm64_sim_gpr CC.noattr) ∧
+      (allocation m).1.get Arm64Entry.___a64_x0_tag = some (tb, CC.tuchar) ∧
+      CC.Star (CC.Step2 ge)
+        (.Callstate Arm64OriginCache.inputFunction [.Vint (6#32)] (inputContinuation m le k) before)
+        trace (.State producer nextRegisterStage k (allocation m).1 (firstInputTemps le value) after) ∧
+      CC.Mem.loadv .Mint64 after (.Vptr xb 0) = some (.Vlong value) ∧
+      CC.Mem.loadv .Mint8unsigned after (.Vptr tb 0) = some (.Vint 0) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) →
+        id ≠ Arm64Entry.___a64_x0 → id ≠ Arm64Entry.___a64_x0_tag →
+        ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk supplied block ofs) ∧
+      FrameBelow m.nextblock supplied after ∧ after.access = supplied.access ∧
+      after.nextblock = supplied.nextblock :=
+  first_input_returns_bound ge rfl m before supplied le k value trace provider access
 
 end KProgFormal.ClightRefinement.Arm64Producer

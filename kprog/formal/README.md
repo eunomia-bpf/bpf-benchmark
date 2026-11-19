@@ -105,6 +105,11 @@ now executes the actual 580-transition initialization in that world and reaches
 the genuine first input call after 594 transitions, using its actual symbol
 binding and Kcall continuation. Both caches remain cold and the original
 204-frontier global frame is retained; provider outcomes remain separate.
+The [first Numeric provider-return contract](results/m5-numeric-producer-input/README.md)
+resumes every admitted scalar outcome at that reached call memory, preserving
+its actual world, trace and supplied post-memory through both source stores.
+It derives x0/tag readbacks and retains the context temporary; globals frame
+from initialization only under the provider's own corresponding frame.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 

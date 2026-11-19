@@ -1,0 +1,114 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-numeric-producer-input",
+  "proved": {
+    "actual_world": "Arm64NumericProgram.ge, including its actual Senv in provider externalCall",
+    "reused": "existing first_return_exec9, real word/tag store construction and original standalone first_input_returns contract",
+    "initialized_prefix_internal_transitions": 594,
+    "external_steps": 1,
+    "return_store_internal_transitions": 9,
+    "complete_execution_relation": "CC.Star (CC.Step2 Numeric.ge), with exactly the admitted provider trace; not an InternalRun through external call",
+    "provider_quantification": "actual reached before memory is derived before quantifying every scalar Vlong outcome, trace and supplied memory",
+    "provider_ABI_premise": "actual externalCall in Numeric Senv and supplied.access equal real allocated local permissions",
+    "stores": "both derived from actual producer local permissions; no successful-store hypothesis",
+    "readbacks": "full64 Vlong word in real x0 union, tag0 in real distinct tag local",
+    "preservation": "all other named local loads relative to SUPPLIED memory; access/nextblock unchanged from SUPPLIED memory; actual ctx temporary preserved",
+    "frame": "stores frame all globals below original204 relative supplied; end-to-end initial frame follows under actual provider before-to-supplied frame",
+    "not_assumed": [
+      "supplied equals before",
+      "provider trace empty",
+      "old and Numeric Senv equal",
+      "arbitrary final register state",
+      "all outcomes scalar without ABI admission"
+    ],
+    "old_public_API": "original standalone first_input_returns statement preserved as projection",
+    "C_runtime_benchmark_changes": false
+  },
+  "focused": {
+    "exit": 0,
+    "log": "focused1.log",
+    "jobs": 180,
+    "attempts": 1,
+    "new_module_seconds": 1.1
+  },
+  "public_queries": {
+    "exit": 0,
+    "log": "Query-1.log",
+    "theorems": 4,
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64Producer.first_input_returns_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.first_input_returns": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericProducerPrefix.initialized_first_input": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericProducerInput.initialized_first_outcomes": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "full_lake_build": {
+    "exit": 0,
+    "log": "lake-build1.log",
+    "jobs": 324,
+    "attempts": 1
+  },
+  "export_parity": {
+    "exit": 0,
+    "log": "export-parity1.log",
+    "reference": "9c617740f",
+    "files": 23,
+    "bytes": 243488732,
+    "all_identical": true
+  },
+  "limits": {
+    "heartbeats": 200000,
+    "recursion": 512,
+    "lean_workers": 1,
+    "address_space_GiB": 32,
+    "build_cpu": 17,
+    "query_edit_git_cpu": 18,
+    "every_host_command_timing_lock": "shared",
+    "raised": false
+  },
+  "source_changes_after_final_validation": false,
+  "native_make_check": {
+    "run_this_step": false,
+    "reason": "Lean proof/refactor only; no C/runtime/tool changes",
+    "last_complete_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "fresh_final_check_required": true
+  },
+  "remaining": [
+    "actual native/provider ABI admission",
+    "remaining29 GPR visits,4 flag visits,64 vector visits in actual Numeric world",
+    "remaining producer/header/register/caller transport",
+    "relative cache/materialization",
+    "native physical memory/alias/origin/control",
+    "all-family O1/O2/O4 recount",
+    "remaining M6 and fresh final Lake/make check"
+  ],
+  "complete_ISA_handler_families": 0,
+  "milestones": {
+    "M1_M4": "done",
+    "M5": "open",
+    "M6": "open"
+  }
+}

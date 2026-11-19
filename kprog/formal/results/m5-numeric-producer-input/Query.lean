@@ -1,0 +1,10 @@
+import KProgFormal.ClightRefinement.Arm64NumericProducerInput
+open KProgFormal.ClightRefinement
+#check Arm64Producer.first_input_returns_bound
+#print axioms Arm64Producer.first_input_returns_bound
+#check Arm64Producer.first_input_returns
+#print axioms Arm64Producer.first_input_returns
+#check Arm64NumericProducerPrefix.initialized_first_input
+#print axioms Arm64NumericProducerPrefix.initialized_first_input
+#check Arm64NumericProducerInput.initialized_first_outcomes
+#print axioms Arm64NumericProducerInput.initialized_first_outcomes
