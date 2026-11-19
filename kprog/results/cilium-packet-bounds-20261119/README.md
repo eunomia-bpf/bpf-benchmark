@@ -343,3 +343,43 @@ Next measurement needed, and it is PERF's file: whether re-deriving the pointer 
 than from the unified SSA value (or unifying only after the `inttoptr`) yields the accepted `r=0` shape.
 Both fixes were verified acceptable **as semantics** earlier; this is about which SSA value carries the
 verifier's packet id.
+
+## The remaining rejection is a fall-through recovery, proven on the host (omp 2026-11-20T00:20Z)
+
+PERF's todo note and my bytecode read agree on the site. In request 4's generated B (PERF's capsule), the
+`classifier` section has:
+
+```
+110:  if w2 < 0x10 goto LBB0_9        ; w2 = headlen = data_end - data
+111:  r4 = r1
+112:  r4 += 0x10
+113:  if r4 <= r3 goto LBB0_11        ; the bound, i.e. data+16 <= data_end
+...
+129:  if w2 == 0x10 goto LBB0_18       ; recovered on scalar equality
+130:  r1 = *(u8 *)(r1 + 0x10)         ; ← read at +16
+```
+
+`130` is reachable when the bound at `113` **fails** and `w2 == 0x10` holds. `w2 == 0x10` means
+`data_end - data == 16`, so the read is in bounds by arithmetic — but the verifier does not derive a packet
+range from a scalar equality, so it rejects with `off=16 size=1`.
+
+Reproduced on the host (7.3.0, `CAP_BPF`) with the minimal shape, and the same shape with the equality
+placed before the bound:
+
+| shape | verdict |
+|---|---|
+| bound fails → `if w2 != 16 goto ok` → read at `+16` | `invalid access to packet, off=16 size=1, R1(…,r=0)` |
+| equality only, no bound before it | same rejection |
+| read through the register that was compared (`r4`) | `R4(…,r=16)` rejected |
+
+and the fix — re-emitting the bound on the falling-through path before the read — is `ACCEPT`:
+
+```
+small:  if w2 == 0x10 goto out
+        r4 = r1; r4 += 0x11; if r4 > r3 goto out
+        r0 = *(u8 *)(r1 + 0x10)
+```
+
+So the last gap is **per-path emission**: a bound proves a read only on the paths where it was tested, and a
+scalar equality does not replace it. That is a statement about where to emit, not about what to prove, and
+it keeps the admitted set identical (`headlen >= K` still admits exactly the same packets).
