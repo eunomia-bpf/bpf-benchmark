@@ -4206,7 +4206,7 @@ LoadedProgram load_from_fd(const FdLoadOptions &options)
         symbol_name = resolution->symbol_name;
         kernel_kfunc_context = resolution->kernel_kfunc_context;
         kernel_kfunc_btf = resolution->kernel_kfunc_btf;
-        if (resolution->source_matches) source_bpf_object = resolution->source_bpf_object;
+        source_bpf_object = resolution->source_bpf_object;
         map_rules = std::move(resolution->map_rules);
     }
     if (symbol_name.empty()) {

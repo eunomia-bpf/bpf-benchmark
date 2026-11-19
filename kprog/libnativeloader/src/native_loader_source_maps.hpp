@@ -11,7 +11,7 @@ struct SourceMapRelocation {
 class SourceBpfMaps {
     struct Function { std::string name; size_t section; uint64_t start, size; };
     struct Relocation { GElf_Sym target; std::string name, section; uint32_t type; int64_t addend; bool rela; };
-    struct Code { std::vector<bpf_insn> insns; std::map<size_t, Relocation> relocs; };
+    struct Code { std::vector<bpf_insn> insns; std::map<size_t, Relocation> relocs; std::set<size_t> core; };
     ScopedFd fd_;
     std::unique_ptr<Elf, decltype(&elf_end)> elf_{nullptr, elf_end};
     GElf_Ehdr header_{};
@@ -24,6 +24,31 @@ class SourceBpfMaps {
         fail("original BPF call has no function at section/offset " +
              std::to_string(section) + "/" + std::to_string(address));
     }
+    static uint32_t word(const Elf_Data *d, size_t at) {
+        if (at + 4 > d->d_size) fail("original BPF BTF is truncated");
+        uint32_t v;
+        std::memcpy(&v, static_cast<const uint8_t *>(d->d_buf) + at, 4);
+        return v;
+    }
+    // Instructions with a CO-RE relocation record in .BTF.ext; libbpf rewrites their immediates
+    // and offsets at load.
+    void mark_core(const Elf_Data *btf, const Elf_Data *ext, const std::map<std::string, size_t> &sections) {
+        const uint32_t header = word(ext, 4);
+        if (header < 32 || !word(ext, 28)) return;
+        const size_t strings = word(btf, 4) + word(btf, 16), strings_end = strings + word(btf, 20);
+        if (strings_end > btf->d_size) fail("original BPF BTF strings are truncated");
+        size_t at = header + word(ext, 24);
+        const size_t end = at + word(ext, 28), record = word(ext, at);
+        for (at += 4; at < end;) {
+            const size_t name = strings + word(ext, at), count = word(ext, at + 4);
+            if (name >= strings_end) fail("original BPF CO-RE section name is outside the BTF strings");
+            const char *text = static_cast<const char *>(btf->d_buf) + name;
+            const auto found = sections.find(std::string(text, strnlen(text, strings_end - name)));
+            at += 8;
+            for (size_t i = 0; i < count; ++i, at += record)
+                if (found != sections.end()) code_.at(found->second).core.insert(word(ext, at) / sizeof(bpf_insn));
+        }
+    }
 public:
     explicit SourceBpfMaps(const std::filesystem::path &path)
         : fd_(open(path.c_str(), O_RDONLY | O_CLOEXEC)) {
@@ -35,11 +60,17 @@ public:
         size_t strings;
         if (elf_getshdrstrndx(elf_.get(), &strings)) fail("read original BPF section strings");
         Elf_Scn *section = nullptr;
+        const Elf_Data *btf = nullptr, *btf_ext = nullptr;
+        std::map<std::string, size_t> code_sections;
         while ((section = elf_nextscn(elf_.get(), section))) {
             GElf_Shdr h{};
             if (!gelf_getshdr(section, &h)) fail("read original BPF section header");
             Elf_Data *data = elf_getdata(section, nullptr);
+            const char *section_name = elf_strptr(elf_.get(), strings, h.sh_name);
+            if (section_name && std::string_view(section_name) == ".BTF") btf = data;
+            if (section_name && std::string_view(section_name) == ".BTF.ext") btf_ext = data;
             if (h.sh_type == SHT_PROGBITS && (h.sh_flags & SHF_EXECINSTR)) {
+                if (section_name) code_sections.emplace(section_name, elf_ndxscn(section));
                 if (h.sh_size % sizeof(bpf_insn) || (h.sh_size && (!data || data->d_size != h.sh_size)))
                     fail("original BPF code is not whole instructions");
                 Code code;
@@ -98,6 +129,7 @@ public:
                                r.r_addend, h.sh_type == SHT_RELA});
             }
         }
+        if (btf && btf_ext) mark_core(btf, btf_ext, code_sections);
     }
 
     std::vector<uint8_t> map_definitions(const std::filesystem::path &path) const {
@@ -116,8 +148,9 @@ public:
     }
 
     // Leading instructions of entry that agree with the loaded program, and the entry length. libbpf
-    // rewrites immediates and offsets (CO-RE, map FDs, calls) and the source register of ld_imm64 and
-    // call, so the comparison takes opcode and registers outside those fields.
+    // rewrites the immediates and offsets of relocated instructions (ELF and CO-RE relocations, calls)
+    // and the source register of ld_imm64 and call; every other immediate and offset is the program's
+    // own constant and must agree too, so a program built with other constants keeps its eBPF.
     struct Agreement { size_t leading = 0, aligned = 0, length = 0; };
     bool same_insn(const Code &code, size_t slot, const bpf_insn &b) const {
         const auto &a = code.insns.at(slot);
@@ -131,7 +164,9 @@ public:
                 b.src_reg == BPF_PSEUDO_MAP_IDX || b.src_reg == BPF_PSEUDO_MAP_IDX_VALUE;
             if (source_data != loaded_data) return false;
         }
-        return true;
+        const size_t owner = a.code == 0 && slot ? slot - 1 : slot;  // second half of an ld_imm64
+        if (a.code == (BPF_JMP | BPF_CALL) || code.relocs.contains(owner) || code.core.contains(owner)) return true;
+        return a.imm == b.imm && a.off == b.off;
     }
     Agreement agreement(const std::string &entry, const std::vector<bpf_insn> &loaded) const {
         const Function *root = nullptr;

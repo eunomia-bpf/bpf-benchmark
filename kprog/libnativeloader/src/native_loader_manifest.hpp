@@ -620,7 +620,8 @@ std::optional<ManifestResolution> resolve_native_manifest(
         }
     }
 
-    if (!selected) {
+    // A program whose source differs from every entry (other constants, other build) keeps its eBPF.
+    if (!selected || !selected->source_matches) {
         return std::nullopt;
     }
     std::error_code ec;

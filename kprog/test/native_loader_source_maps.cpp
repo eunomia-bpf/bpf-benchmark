@@ -195,18 +195,25 @@ try {
     require(failed, "missing intercepted relocation silently used process-name lookup");
 
     bpf_prog_info info{}; info.type = BPF_PROG_TYPE_SOCKET_FILTER; std::strcpy(info.name, "entry");
-    for (bool enabled : {false, true}) {
-        const auto manifest = std::filesystem::path(argv[3]) /
-            (enabled ? "enabled-manifest.json" : "disabled-manifest.json");
+    const auto manifest = std::filesystem::path(argv[3]) / "manifest.json";
+    {
         std::ofstream f(manifest);
-        f << "{\"objects\":[{\"program\":\"entry\",\"native_object\":\"" << argv[2] << "\"";
-        if (enabled) f << ",\"source_bpf_object\":\"fixture.bpf.o\"";
-        f << "}]}"; f.close(); require(static_cast<bool>(f), "write manifest");
-        const auto selected = resolve_native_manifest(manifest, info, std::vector<bpf_insn>(1),
-            [](int) -> bpf_map_info { fail("unexpected map resolution"); });
-        require(selected && (enabled ? selected->source_bpf_object == manifest.parent_path() / "fixture.bpf.o"
-                                     : selected->source_bpf_object.empty()), "optional source object path/default changed");
+        f << "{\"objects\":[{\"program\":\"entry\",\"native_object\":\"" << argv[2]
+          << "\",\"source_bpf_object\":\"fixture.bpf.o\"}]}";
+        f.close(); require(static_cast<bool>(f), "write manifest");
     }
-    std::cout << "original ELF/final FD binding, subprogram layout, resource-ID lookup, conflicts, default-off manifest: PASS\n";
+    const auto resolve = [&](const std::vector<bpf_insn> &loaded) {
+        return resolve_native_manifest(manifest, info, [&](const std::filesystem::path &object, const std::string &entry) {
+            return SourceBpfMaps(object).agreement(entry, loaded);
+        }, loaded.size());
+    };
+    const auto selected = resolve(root);
+    require(selected && selected->source_bpf_object == manifest.parent_path() / "fixture.bpf.o",
+            "loaded program that agrees with its source lost the native entry");
+    auto constant = root;
+    size_t changed = 0;
+    for (auto &insn : constant) if (!changed && insn.code == (BPF_ALU64 | BPF_ADD | BPF_K)) { insn.imm -= 8; ++changed; }
+    require(changed == 1 && !resolve(constant), "program built with another constant took the native entry");
+    std::cout << "original ELF/final FD binding, subprogram layout, resource-ID lookup, conflicts, source agreement: PASS\n";
     return 0;
 } catch (const std::exception &error) { std::cerr << error.what() << '\n'; return 1; }
