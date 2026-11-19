@@ -89,3 +89,4 @@ import KProgFormal.ClightRefinement.Arm64ProgramEntryResources
 import KProgFormal.ClightRefinement.Arm64ProgramEntryCall
 import KProgFormal.ClightRefinement.Arm64ProgramEntryPrefix
 import KProgFormal.ClightRefinement.Arm64ProgramEntryInputs
+import KProgFormal.ClightRefinement.Arm64ProgramEntryRegisters

@@ -77,7 +77,7 @@ theorem register_input_ready_bound (world : CC.CGenv)
   have run := declaration_call_exec world binding (registerDeclaration j) m memory le k different
   exact internalRun_of_steps run.2 run.1
 
-private structure DeclarationStores (d : RegisterDeclaration) (m supplied : CC.Mem) (value : BitVec 64) where
+structure DeclarationStores (d : RegisterDeclaration) (m supplied : CC.Mem) (value : BitVec 64) where
   wordBlock : CC.Block
   tagBlock : CC.Block
   middle : CC.Mem
@@ -95,22 +95,20 @@ private structure DeclarationStores (d : RegisterDeclaration) (m supplied : CC.M
   access : after.access = supplied.access
   next : after.nextblock = supplied.nextblock
 
-private theorem declaration_stores (i : Fin 31) (m supplied : CC.Mem) (value : BitVec 64)
+/-- A single shared memory construction for any declared word/tag pair. -/
+theorem declaration_stores_for (d : RegisterDeclaration) (m supplied : CC.Mem) (value : BitVec 64)
+    (wordMember : (d.word, .Tunion Arm64Entry._arm64_sim_gpr CC.noattr) ∈ producer.fn_vars)
+    (tagMember : (d.tag, CC.tuchar) ∈ producer.fn_vars) (distinctNames : d.word ≠ d.tag)
     (access : supplied.access = (allocation m).2.access) :
-    Nonempty (DeclarationStores (registerDeclaration i) m supplied value) := by
-  let d := registerDeclaration i
-  have source := register_declarations_source i
+    Nonempty (DeclarationStores d m supplied value) := by
   obtain ⟨xb, cell, cellFresh, cellWritable⟩ := scalar_local m d.word
-    (.Tunion Arm64Entry._arm64_sim_gpr CC.noattr) .Mint64 source.2.1 (by decide +kernel) (by decide)
+    (.Tunion Arm64Entry._arm64_sim_gpr CC.noattr) .Mint64 wordMember (by decide +kernel) (by decide)
   obtain ⟨tb, tag, tagFresh, tagWritable⟩ := scalar_local m d.tag
-    CC.tuchar .Mint8unsigned source.2.2.1 rfl (by decide)
+    CC.tuchar .Mint8unsigned tagMember rfl (by decide)
   obtain ⟨middle, storeWord, middleAccess⟩ := create_store m supplied .Mint64 xb (.Vlong value) access cellWritable
   obtain ⟨after, storeTag, afterAccess⟩ := create_store m middle .Mint8unsigned tb (.Vint (0#32)) middleAccess tagWritable
   have locals := (allocated_local_storage
     (CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (allocation m)).symm)).2
-  have distinctNames : d.word ≠ d.tag := by
-    have different : ∀ i : Fin 31, (registerDeclaration i).word ≠ (registerDeclaration i).tag := by decide +kernel
-    exact different i
   have distinct : xb ≠ tb := locals _ _ _ _ cell tag distinctNames
   refine ⟨⟨xb, tb, middle, after, cell, tag, storeWord, storeTag, ?_, ?_, ?_,
     (FrameBelow.store cellFresh storeWord).trans (FrameBelow.store tagFresh storeTag),
@@ -123,24 +121,53 @@ private theorem declaration_stores (i : Fin 31) (m supplied : CC.Mem) (value : B
     exact (CC.Mem.load_store_other storeTag chunk block ofs (.inl (locals _ _ _ _ bound tag notTag))).trans
       (CC.Mem.load_store_other storeWord chunk block ofs (.inl (locals _ _ _ _ bound cell notWord)))
 
+private theorem declaration_stores (i : Fin 31) (m supplied : CC.Mem) (value : BitVec 64)
+    (access : supplied.access = (allocation m).2.access) :
+    Nonempty (DeclarationStores (registerDeclaration i) m supplied value) := by
+  exact declaration_stores_for (registerDeclaration i) m supplied value
+    (register_declarations_source i).2.1 (register_declarations_source i).2.2.1
+    (by have different : ∀ i : Fin 31, (registerDeclaration i).word ≠ (registerDeclaration i).tag := by decide +kernel
+        exact different i) access
+
+/-- The named GPR record and its x field are the only composite facts used
+by declaration writeback and the x30 zero branch. -/
+def GprLayout (world : CC.CGenv) : Prop :=
+  world.genv_cenv.get Arm64Entry._arm64_sim_gpr = some gprComposite ∧
+  CC.unionFieldOffset world.genv_cenv Arm64Entry._x gprComposite.co_members = .OK (0, .Full)
+
+/-- Execute a returned input in the actual caller using the shared stores. -/
+theorem declaration_return_body (world : CC.CGenv) (f : CC.Function) (e : CC.Env)
+    (gpr : GprLayout world) (d : RegisterDeclaration) (m supplied : CC.Mem)
+    (le : CC.TempEnv) (k : CC.Cont) (value : BitVec 64) (writes : DeclarationStores d m supplied value)
+    (wordBinding : e.get d.word = some (writes.wordBlock, .Tunion Arm64Entry._arm64_sim_gpr CC.noattr))
+    (tagBinding : e.get d.tag = some (writes.tagBlock, CC.tuchar)) :
+    steps world 9 (.Returnstate (.Vlong value) (.Kcall (some d.inputTemp) f e le
+      (.Kseq d.setValue (.Kseq d.storeValue (.Kseq (.Ssequence d.storeTag d.rest) k)))) supplied) =
+      some (CC.E0, .State f d.rest k e (d.temps le value) writes.after) ∧
+    InternalPath world 9 (.Returnstate (.Vlong value) (.Kcall (some d.inputTemp) f e le
+      (.Kseq d.setValue (.Kseq d.storeValue (.Kseq (.Ssequence d.storeTag d.rest) k)))) supplied) := by
+  simp [steps, InternalPath, InternalState, RegisterDeclaration.temps,
+    RegisterDeclaration.setValue, RegisterDeclaration.storeValue, RegisterDeclaration.storeTag,
+    CC.doStep, CC.setOpttemp, CC.PTree.gss, CC.doEvalExpr, CC.doEvalLvalue, CC.lvalOfVar,
+    CC.doDerefLoc, CC.doAssignLoc, CC.lvalOfField, CC.typeof, CC.accessMode,
+    gpr.1, gpr.2, CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
+    CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
+    CC.Integers.Ptrofs.zero, CC.Integers.Ptrofs.add, CC.Integers.Ptrofs.repr,
+    CC.Integers.MI.zero, CC.Integers.MI.add, CC.tuchar, CC.tuint, CC.tulong, CC.E0, CC.Eapp,
+    wordBinding, tagBinding, writes.storeWord, writes.storeTag]
+
 private theorem declaration_return_exec (world : CC.CGenv)
     (layout : world.genv_cenv = ge.genv_cenv) (d : RegisterDeclaration) (m supplied : CC.Mem)
     (le : CC.TempEnv) (k : CC.Cont) (value : BitVec 64) (writes : DeclarationStores d m supplied value) :
     steps world 9 (.Returnstate (.Vlong value) (d.continuation m le k) supplied) =
       some (CC.E0, .State producer d.rest k (allocation m).1 (d.temps le value) writes.after) ∧
     InternalPath world 9 (.Returnstate (.Vlong value) (d.continuation m le k) supplied) := by
-  rcases world with ⟨functions, composites⟩
-  change composites = ge.genv_cenv at layout
-  subst composites
-  simp [steps, InternalPath, InternalState, RegisterDeclaration.continuation, RegisterDeclaration.temps,
-    RegisterDeclaration.setValue, RegisterDeclaration.storeValue, RegisterDeclaration.storeTag,
-    CC.doStep, CC.setOpttemp, CC.PTree.gss, CC.doEvalExpr, CC.doEvalLvalue, CC.lvalOfVar,
-    CC.doDerefLoc, CC.doAssignLoc, CC.lvalOfField, CC.typeof, CC.accessMode,
-    x0_layout.1, x0_layout.2, CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
-    CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
-    CC.Integers.Ptrofs.zero, CC.Integers.Ptrofs.add, CC.Integers.Ptrofs.repr,
-    CC.Integers.MI.zero, CC.Integers.MI.add, CC.tuchar, CC.tuint, CC.tulong, CC.E0, CC.Eapp,
-    writes.wordBinding, writes.tagBinding, writes.storeWord, writes.storeTag]
+  have gpr : GprLayout world := by
+    unfold GprLayout
+    rw [layout]
+    exact x0_layout
+  exact declaration_return_body world producer (allocation m).1 gpr d m supplied le k value writes
+    writes.wordBinding writes.tagBinding
 
 /-- An actual initializer follows each stated provider outcome through the
 real writeback. Preservation is relative to provider post-memory. -/
@@ -182,23 +209,23 @@ theorem register_input_returns_bound (world : CC.CGenv)
     star_trans (register_input_ready_bound world binding i m before le k).sound
       (star_trans call (internalRun_of_steps suffix.2 suffix.1).sound)
 
-private theorem declaration_zero_exec (world : CC.CGenv)
-    (layout : world.genv_cenv = ge.genv_cenv) (d : RegisterDeclaration) (m before : CC.Mem)
+/-- The zero branch uses the same store witness and named GPR layout. -/
+theorem declaration_zero_body (world : CC.CGenv) (f : CC.Function) (e : CC.Env)
+    (gpr : GprLayout world) (d : RegisterDeclaration) (m before : CC.Mem)
     (le : CC.TempEnv) (k : CC.Cont) (same : CC.Integers.Int.eq d.index (30#32) = true)
-    (writes : DeclarationStores d m before (0#64)) :
-    steps world 10 (.State producer d.body k (allocation m).1 le before) =
-      some (CC.E0, .State producer d.rest k (allocation m).1
+    (writes : DeclarationStores d m before (0#64))
+    (wordBinding : e.get d.word = some (writes.wordBlock, .Tunion Arm64Entry._arm64_sim_gpr CC.noattr))
+    (tagBinding : e.get d.tag = some (writes.tagBlock, CC.tuchar)) :
+    steps world 10 (.State f d.body k e le before) =
+      some (CC.E0, .State f d.rest k e
         (le.set d.resultTemp (.Vlong (0#64))) writes.after) ∧
-    InternalPath world 10 (.State producer d.body k (allocation m).1 le before) := by
-  rcases world with ⟨functions, composites⟩
-  change composites = ge.genv_cenv at layout
-  subst composites
+    InternalPath world 10 (.State f d.body k e le before) := by
   have indexSame : d.index = (30#32) := by
     simpa only [CC.Integers.Int.eq, CC.Integers.MI.eq, beq_iff_eq] using same
   simp +decide [steps, InternalPath, InternalState, RegisterDeclaration.body,
     RegisterDeclaration.storeValue, RegisterDeclaration.storeTag,
     CC.doStep, CC.typeconv, CC.removeAttributes, CC.tattr, CC.doEvalExpr, CC.doEvalLvalue, CC.lvalOfVar, CC.doDerefLoc, CC.doAssignLoc,
-    CC.lvalOfField, CC.typeof, CC.accessMode, CC.PTree.gss, x0_layout.1, x0_layout.2,
+    CC.lvalOfField, CC.typeof, CC.accessMode, CC.PTree.gss, gpr.1, gpr.2,
     CC.Cop.semBinaryOperation, CC.Cop.semCmp, CC.Cop.classifyCmp, CC.Cop.semBinarith,
     CC.Cop.classifyBinarith, CC.Cop.binarithType, CC.Cop.semCast, CC.Cop.classifyCast,
     CC.Cop.castIntInt, CC.Cop.boolVal, CC.Cop.classifyBool, CC.Val.ofBool, CC.Val.Vtrue,
@@ -207,7 +234,22 @@ private theorem declaration_zero_exec (world : CC.CGenv)
     CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext,
     CC.Integers.Ptrofs.zero, CC.Integers.Ptrofs.add, CC.Integers.Ptrofs.repr, CC.Integers.MI.add,
     CC.tuchar, CC.tuint, CC.tint, CC.tulong, CC.E0, CC.Eapp,
-    writes.wordBinding, writes.tagBinding, writes.storeWord, writes.storeTag]
+    wordBinding, tagBinding, writes.storeWord, writes.storeTag]
+
+private theorem declaration_zero_exec (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (d : RegisterDeclaration) (m before : CC.Mem)
+    (le : CC.TempEnv) (k : CC.Cont) (same : CC.Integers.Int.eq d.index (30#32) = true)
+    (writes : DeclarationStores d m before (0#64)) :
+    steps world 10 (.State producer d.body k (allocation m).1 le before) =
+      some (CC.E0, .State producer d.rest k (allocation m).1
+        (le.set d.resultTemp (.Vlong (0#64))) writes.after) ∧
+    InternalPath world 10 (.State producer d.body k (allocation m).1 le before) := by
+  have gpr : GprLayout world := by
+    unfold GprLayout
+    rw [layout]
+    exact x0_layout
+  exact declaration_zero_body world producer (allocation m).1 gpr d m before le k same writes
+    writes.wordBinding writes.tagBinding
 
 /-- x30's declaration uses no provider call and writes its actual zero word
 and scalar tag. Its later return-tag binding is a separate producer stage. -/

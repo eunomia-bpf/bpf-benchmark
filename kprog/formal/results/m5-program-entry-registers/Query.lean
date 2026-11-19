@@ -1,0 +1,26 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryRegisters
+
+open KProgFormal.ClightRefinement
+
+#check Arm64Producer.declaration_stores_for
+#print axioms Arm64Producer.declaration_stores_for
+#check Arm64Producer.declaration_return_body
+#print axioms Arm64Producer.declaration_return_body
+#check Arm64Producer.declaration_zero_body
+#print axioms Arm64Producer.declaration_zero_body
+#check Arm64Producer.register_input_returns_bound
+#print axioms Arm64Producer.register_input_returns_bound
+#check Arm64Producer.register30_initialized_bound
+#print axioms Arm64Producer.register30_initialized_bound
+#check Arm64ProgramEntryRegisters.gpr_layout
+#print axioms Arm64ProgramEntryRegisters.gpr_layout
+#check Arm64ProgramEntryRegisters.other_temporaries
+#print axioms Arm64ProgramEntryRegisters.other_temporaries
+#check Arm64ProgramEntryRegisters.context_retained
+#print axioms Arm64ProgramEntryRegisters.context_retained
+#check Arm64ProgramEntryRegisters.first_writeback
+#print axioms Arm64ProgramEntryRegisters.first_writeback
+#check Arm64ProgramEntryRegisters.first_input_returns
+#print axioms Arm64ProgramEntryRegisters.first_input_returns
+#check Arm64ProgramEntryRegisters.entry_first_returns
+#print axioms Arm64ProgramEntryRegisters.entry_first_returns
