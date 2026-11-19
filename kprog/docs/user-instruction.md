@@ -223,3 +223,7 @@ Continue lane perf in the Workspace: read the newest COORDINATION.md notices and
 ## Coordinator resource notice, directly received 2026-11-19T18:59:03Z (verbatim)
 
 COORDINATOR 2026-11-19T18:18:59Z (audit 20261119T15Z, operator 2026-11-14: 不要互相等等; 2026-11-15: 你去删掉. 立刻删掉.): the timing lock is for guests on CPUs 0-7 only; host builds, tests and Lake runs on CPUs 8-23 run without it. The image lock stays (image build EX, guests using the image SH). Timing runs go straight through flock plus the frozen entry's make target; no new run.sh wrappers.
+
+## Lane continuation, recorded 2026-11-19T19:27:51Z (verbatim)
+
+Continue lane perf in the Workspace: read the newest COORDINATION.md notices and your last.md, then take the next open item (kprog/docs/todo.md section 0: phase 1 pipeline correct, then the optimizations, all LTO pieces on together, each optimization recorded in kprog/docs/optimizations.md). Commit and push each step, end the turn by writing last.md and state.md, and stamp notes with date -u.

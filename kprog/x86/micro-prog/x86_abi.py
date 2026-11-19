@@ -31,7 +31,8 @@ class State:
     pointers: dict[int, int | bool | frozenset[ReturnAddress] | PointerAlternatives | None]
     constants: tuple[int | None, ...]
 
-def check_definedness(insns, targets, exit_addr, decode, return_sites=None, stack_value_offsets=None):
+def check_definedness(insns, targets, exit_addr, decode, return_sites=None, stack_value_offsets=None,
+                      return_sites_by_pc=None):
     regs = (*dict.fromkeys((r[0] for r in decode.REGS.values())), 'X86_XMM0')
     index = {reg: i for i, reg in enumerate(regs)}
 
@@ -119,6 +120,12 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None, stac
         return state.defined[reg] >> shift & (1 << width) - 1
     def return_from(state):
         destinations = state.pointers.get(state.aliases[rsp])
+        if return_sites_by_pc is not None:
+            if (not isinstance(destinations, frozenset) or not destinations or
+                    any(d.target is None for d in destinations)):
+                return_sites_by_pc[addr] = None
+            elif return_sites_by_pc.get(addr, set()) is not None:
+                return_sites_by_pc.setdefault(addr, set()).update(d.target for d in destinations)
         for destination in destinations if isinstance(destinations, frozenset) else ():
             if destination.target is not None:
                 if return_sites is not None:

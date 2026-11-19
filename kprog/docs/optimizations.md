@@ -1219,3 +1219,13 @@ separate. This admits a targeted per-site dispatcher experiment using the
 existing saved-ReturnAddress analysis while retaining raw pop/release and
 unsupported-target behavior. No such transformation or gain is yet claimed;
 return-inventory.json retains exact PCs/targets and raw provenance.
+
+PERF 2026-11-19T19:27:51Z: Per-native-RET dispatch candidate now consumes the existing
+saved ReturnAddress effects by PC and unions all caller contexts. Unknown,
+outer or unobserved values retain the complete finite target set. Identical
+sets share one dispatcher. Raw SUB_RET pop/release and unsupported-target
+default remain in shared I; no handler, limit, P input or flag change.
+Regression recipe results/return-dispatch-20261119 covers nested calls,
+multiple RETs, caller-context unions, unknown dominance in both arrival
+orders, sibling helper returns, normal B emission and native execution.
+Prepared only; validation and the changed Tetragon compile remain pending.

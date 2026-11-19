@@ -1697,6 +1697,7 @@ def proof_kind_for_source(bench: Bench, source: Path) -> str:
 
 def render_x86_subroutine(symbol: str, insns: list[NativeInsn],
                           call_functions: dict[int, str],
+                          return_dispatches: dict[int, str],
                           rodata_idents: dict[str, str] | None = None,
                           targets: dict[int, frozenset[tuple[str, int]]] | None = None,
                           all_addrs: set[int] | None = None) -> str:
@@ -1713,9 +1714,8 @@ def render_x86_subroutine(symbol: str, insns: list[NativeInsn],
                              next_addr=next_addrs.get(insn.addr),
                              call_functions=call_functions,
                              step_macro="X86_SIM_RUN_OP",
-                             ret_statement=(
-                                 "X86_SIM_X86_SUB_RET(x86_sim_ret_dispatch);"
-                             ),
+                             ret_statement=(f"X86_SIM_X86_SUB_RET({return_dispatches[insn.addr]});"
+                                            if insn.addr in return_dispatches else ""),
                              rodata_idents=rodata_idents, targets=targets)
     lines.append("")
     return "\n".join(lines)
@@ -1869,10 +1869,11 @@ def render_program(name: str, insns: list[NativeInsn],
         insns[0].addr, *(fn[0].addr for fn in subfunctions.values() if fn)
     }) if has_indirect else {}
     native_return_sites = set()
+    return_sites_by_pc = {}
     stack_value_offsets = set()
     stack_bytes = check_definedness(all_insns, targets, exit_addr,
         sys.modules[__name__], return_sites=native_return_sites,
-        stack_value_offsets=stack_value_offsets)
+        stack_value_offsets=stack_value_offsets, return_sites_by_pc=return_sites_by_pc)
     if kind == "raw":
         if not program_section:
             raise ValueError("raw context requires its real BPF program section")
@@ -1906,7 +1907,14 @@ def render_program(name: str, insns: list[NativeInsn],
     }
     # The existing ABI analysis follows actual saved ReturnAddress values.
     # Helper fallthroughs are not produced by the modeled native CALL/RET.
-    return_addrs = sorted(native_return_sites)
+    return_dispatches, dispatch_cases = {}, {}
+    for body in subfunctions.values():
+        for insn in body:
+            if insn.mnemonic == 'ret' or (insn.mnemonic == 'jmp' and is_helper_symbol(insn.reloc_symbol)):
+                # Unknown saved values retain the complete finite dispatch.
+                cases = tuple(sorted(return_sites_by_pc.get(insn.addr) or native_return_sites))
+                label = dispatch_cases.setdefault(cases, f'x86_sim_ret_dispatch_{insn.addr:x}')
+                return_dispatches[insn.addr] = label
     has_stack = any(
         insn.mnemonic in {"push", "pop"} or
         "[rsp" in insn.raw.lower() or
@@ -2018,18 +2026,13 @@ def render_program(name: str, insns: list[NativeInsn],
     if subfunctions:
         for symbol, fn_insns in subfunctions.items():
             lines.append(render_x86_subroutine(
-                symbol, fn_insns, subroutine_label_by_addr, rodata_idents, targets, addrs))
-        lines.extend([
-            "x86_sim_ret_dispatch:",
-            "\tswitch (__x86_sim_ret_addr) {",
-        ])
-        for addr in return_addrs:
-            lines.append(f"\tcase 0x{addr:x}ULL: goto x86_l_{addr:x};")
-        lines.extend([
-            "\tdefault: __x86_sim_unresolved_indirect_target();",
-            "\t}",
-            "",
-        ])
+                symbol, fn_insns, subroutine_label_by_addr, return_dispatches,
+                rodata_idents, targets, addrs))
+        for cases, label in dispatch_cases.items():
+            lines.extend([f"{label}:", "\tswitch (__x86_sim_ret_addr) {"])
+            for addr in cases:
+                lines.append(f"\tcase 0x{addr:x}ULL: goto x86_l_{addr:x};")
+            lines.extend(["\tdefault: __x86_sim_unresolved_indirect_target();", "\t}", ""])
     lines.extend(["}", "", "X86_SIM_LICENSE();", ""])
     opcodes = sorted(set(re.findall(r"\bX86_SIM_RUN_OP(?:_SUB)?\(\s*(X86_OP_\w+)", "\n".join(lines))))
     lines[instruction_declarations:instruction_declarations] = [
