@@ -27,7 +27,7 @@ runtime follow in coordinator batch 327120 with 2eb36bad9; PERF queues no
 duplicate timing. Keep this item open through that result. Exact formal
 boundary and retained failed attempts: results/lock-prefix-review-20261119.
 
-- [ ] P-x86-released-alias: shared I's no-index fixed-load default bypasses
+- [x] P-x86-released-alias (b77ae773c; run105515_135901): shared I's no-index fixed-load default bypasses
   the tagged private/released-byte observation, while RSP and indexed stack
   aliases use it. The LOCK fix preserves both existing contracts and input
   visits. Separate source/model review is needed; this is no new app gate.

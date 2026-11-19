@@ -114,3 +114,14 @@ app stock acceptance and any runtime effect of this alias change are not
 yet measured. The completed 1.007x freeze/LOCK timing predates this repair.
 No duplicate timing or new benchmark gate is introduced. FORMAL's memory
 observation and atomic refinement obligations remain explicit.
+
+PERF 2026-11-19T11:08:16Z: Canonical BCC functional worker 344181 is terminal 0,
+app ok, run x86_kvm_corpus_20261119_105515_135901. Its archived service
+confirms programs/native/B-generated/B-stock 25/25/25/25, all checked,
+zero fallback or failed requests. coverage.json retains the actual source
+b77ae773c and complete outcomes. Installed native is 8,628 B versus JIT
+7,965 B across 25 programs, the same byte count as the preceding cohort.
+This 1 x 10 s run supplies functional coverage, not an official speed ratio
+or proof of byte-for-byte code identity. P-x86-released-alias is complete;
+full-application stock coverage and FORMAL's memory correspondence remain
+open. All raw logs, failed baselines and source/test receipts are retained.

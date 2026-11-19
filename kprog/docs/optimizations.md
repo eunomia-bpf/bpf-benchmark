@@ -929,3 +929,12 @@ compilations and 1,024 barrier executions pass. This is correctness work;
 no runtime gain is claimed. BCC functional coverage and installed bytes are
 pending, all C/LTO pieces on. The completed 1.007x measurement precedes this
 change. See results/released-alias-20261119.
+
+PERF 2026-11-19T11:08:16Z: Released-alias correctness fix b77ae773c now passes the
+canonical BCC functional check: run105515_135901, 25 programs/native/B-
+generated/B-stock, all checked with zero fallback/failures, host0/appok.
+Installed bytes remain8,628 native versus7,965 JIT. This confirms source
+integration with all C/LTO pieces on; the functional1x10s run is not a new
+speed measurement. Latest official combined result remains1.007x per call
+and1.006x throughput before this fix. Runtime targets remain open. See
+results/released-alias-20261119/coverage.json and functional-installed.txt.
