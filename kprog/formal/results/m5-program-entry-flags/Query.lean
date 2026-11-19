@@ -1,0 +1,40 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryFlags
+
+open KProgFormal.ClightRefinement
+
+#check Arm64Producer.flag_call_body
+#print axioms Arm64Producer.flag_call_body
+#check Arm64Producer.flag_return_body
+#print axioms Arm64Producer.flag_return_body
+#check Arm64Producer.flag_input_returns_body
+#print axioms Arm64Producer.flag_input_returns_body
+#check Arm64Producer.flag_input_returns_bound
+#print axioms Arm64Producer.flag_input_returns_bound
+#check Arm64ProducerFlagInputs.run_suffix_body
+#print axioms Arm64ProducerFlagInputs.run_suffix_body
+#check Arm64ProducerFlagInputs.flag_inputs_initialized_bound
+#print axioms Arm64ProducerFlagInputs.flag_inputs_initialized_bound
+#check Arm64Producer.lr_initialized_body
+#print axioms Arm64Producer.lr_initialized_body
+#check Arm64Producer.lr_initialized_bound
+#print axioms Arm64Producer.lr_initialized_bound
+#check Arm64ProgramEntryFlags.source
+#print axioms Arm64ProgramEntryFlags.source
+#check Arm64ProgramEntryFlags.first_stage
+#print axioms Arm64ProgramEntryFlags.first_stage
+#check Arm64ProgramEntryFlags.metadata
+#print axioms Arm64ProgramEntryFlags.metadata
+#check Arm64ProgramEntryFlags.chain
+#print axioms Arm64ProgramEntryFlags.chain
+#check Arm64ProgramEntryFlags.lr_source
+#print axioms Arm64ProgramEntryFlags.lr_source
+#check Arm64ProgramEntryFlags.binding
+#print axioms Arm64ProgramEntryFlags.binding
+#check Arm64ProgramEntryFlags.lr_binding
+#print axioms Arm64ProgramEntryFlags.lr_binding
+#check Arm64ProgramEntryFlags.input_returns
+#print axioms Arm64ProgramEntryFlags.input_returns
+#check Arm64ProgramEntryFlags.initialized
+#print axioms Arm64ProgramEntryFlags.initialized
+#check Arm64ProgramEntryFlags.entry_initialized
+#print axioms Arm64ProgramEntryFlags.entry_initialized

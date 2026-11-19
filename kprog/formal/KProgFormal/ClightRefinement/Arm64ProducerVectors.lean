@@ -313,6 +313,40 @@ theorem vector_input_returns (i : Fin 64) (m before supplied : CC.Mem)
 
 /-- The actual LR declaration immediately before vector inputs writes zero,
 framing all other declared local loads and old caller memory. -/
+theorem lr_initialized_body (world : CC.CGenv) (f : CC.Function) (e : CC.Env) (rest : CC.Stmt) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (actualBinding : ∀ block, (allocation m).1.get Arm64Entry.___a64_lr = some (block, CC.tulong) →
+      e.get Arm64Entry.___a64_lr = some (block, CC.tulong))
+    (access : before.access = (allocation m).2.access) :
+    ∃ block after, (allocation m).1.get Arm64Entry.___a64_lr = some (block, CC.tulong) ∧
+      InternalRun world 3 (.State f (.Ssequence (.Sassign (.Evar Arm64Entry.___a64_lr CC.tulong) (.Econst_int (0#32) CC.tint)) rest) k e le before)
+        (.State f rest k e le after) ∧
+      CC.Mem.loadv .Mint64 after (.Vptr block 0) = some (.Vlong 0) ∧
+      (∀ id ty other, (allocation m).1.get id = some (other, ty) → id ≠ Arm64Entry.___a64_lr →
+        ∀ chunk ofs, CC.Mem.load chunk after other ofs = CC.Mem.load chunk before other ofs) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock := by
+  obtain ⟨block, binding, fresh, writable⟩ := scalar_local m Arm64Entry.___a64_lr CC.tulong .Mint64
+    (by decide +kernel) rfl (by decide)
+  obtain ⟨after, stored, afterAccess⟩ := create_store m before .Mint64 block (.Vlong (0#64)) access writable
+  have exec : steps world 3 (.State f (.Ssequence (.Sassign (.Evar Arm64Entry.___a64_lr CC.tulong) (.Econst_int (0#32) CC.tint)) rest) k e le before) =
+      some (CC.E0, .State f rest k e le after) ∧
+      InternalPath world 3 (.State f (.Ssequence (.Sassign (.Evar Arm64Entry.___a64_lr CC.tulong) (.Econst_int (0#32) CC.tint)) rest) k e le before) := by
+    change CC.Mem.storev .Mint64 before (.Vptr block (0#64)) (.Vlong (0#64)) = some after at stored
+    simp +decide [steps, InternalPath, InternalState, CC.doStep, CC.doEvalLvalue, CC.doEvalExpr,
+      CC.lvalOfVar, CC.doAssignLoc, CC.accessMode, CC.typeof, CC.Cop.semCast, CC.Cop.classifyCast,
+      CC.Cop.castIntLong, CC.Integers.Int.signed, CC.Integers.MI.signed,
+      CC.Integers.Int64.repr, CC.Integers.Int.repr, CC.Integers.MI.repr,
+      CC.Integers.Ptrofs.zero, CC.Integers.MI.zero, CC.tulong, CC.tint,
+      CC.Archi.ptr64, CC.E0, CC.Eapp, actualBinding block binding, stored]
+  refine ⟨block, after, binding, internalRun_of_steps exec.2 exec.1,
+    CC.Mem.load_store_same stored, ?_, FrameBelow.store fresh stored,
+    afterAccess.trans access.symm, CC.Mem.store_nextblock stored⟩
+  intro id ty other bound different chunk ofs
+  have distinct := (allocated_local_storage
+    (CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (allocation m)).symm)).2
+  exact CC.Mem.load_store_other stored chunk other ofs
+    (.inl (distinct _ _ _ _ bound binding different))
+
 theorem lr_initialized_bound (world : CC.CGenv) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (access : before.access = (allocation m).2.access) :
     ∃ block after, (allocation m).1.get Arm64Entry.___a64_lr = some (block, CC.tulong) ∧
@@ -323,28 +357,9 @@ theorem lr_initialized_bound (world : CC.CGenv) (m before : CC.Mem) (le : CC.Tem
         ∀ chunk ofs, CC.Mem.load chunk after other ofs = CC.Mem.load chunk before other ofs) ∧
       FrameBelow m.nextblock before after ∧ after.access = before.access ∧
       after.nextblock = before.nextblock := by
-  obtain ⟨block, binding, fresh, writable⟩ := scalar_local m Arm64Entry.___a64_lr CC.tulong .Mint64
-    (by decide +kernel) rfl (by decide)
-  obtain ⟨after, stored, afterAccess⟩ := create_store m before .Mint64 block (.Vlong (0#64)) access writable
-  have exec : steps world 3 (.State producer (flagDeclaration 3).rest k (allocation m).1 le before) =
-      some (CC.E0, .State producer vectorStart k (allocation m).1 le after) ∧
-      InternalPath world 3 (.State producer (flagDeclaration 3).rest k (allocation m).1 le before) := by
-    rw [lr_zero_source]
-    change CC.Mem.storev .Mint64 before (.Vptr block (0#64)) (.Vlong (0#64)) = some after at stored
-    simp +decide [steps, InternalPath, InternalState, CC.doStep, CC.doEvalLvalue, CC.doEvalExpr,
-      CC.lvalOfVar, CC.doAssignLoc, CC.accessMode, CC.typeof, CC.Cop.semCast, CC.Cop.classifyCast,
-      CC.Cop.castIntLong, CC.Integers.Int.signed, CC.Integers.MI.signed,
-      CC.Integers.Int64.repr, CC.Integers.Int.repr, CC.Integers.MI.repr,
-      CC.Integers.Ptrofs.zero, CC.Integers.MI.zero, CC.tulong, CC.tint,
-      CC.Archi.ptr64, CC.E0, CC.Eapp, binding, stored]
-  refine ⟨block, after, binding, internalRun_of_steps exec.2 exec.1,
-    CC.Mem.load_store_same stored, ?_, FrameBelow.store fresh stored,
-    afterAccess.trans access.symm, CC.Mem.store_nextblock stored⟩
-  intro id ty other bound different chunk ofs
-  have distinct := (allocated_local_storage
-    (CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (allocation m)).symm)).2
-  exact CC.Mem.load_store_other stored chunk other ofs
-    (.inl (distinct _ _ _ _ bound binding different))
+  rw [lr_zero_source]
+  exact lr_initialized_body world producer (allocation m).1 vectorStart m before le k
+    (fun _ bound => bound) access
 
 theorem lr_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (access : before.access = (allocation m).2.access) :

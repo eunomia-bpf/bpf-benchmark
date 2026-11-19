@@ -1,0 +1,259 @@
+{
+  "step": "M5 actual four flag inputs, LR zero and register/table prefix composition",
+  "status": "pass",
+  "recorded_utc": "2026-11-19T23:33:32Z",
+  "before_commit_head": "6b0204beb2c0d5e53948ee14ce9ee4573361e55c",
+  "raw_directory": "/workspaces/kprog-raw/formal/m5-program-entry-flags",
+  "execution": {
+    "checked_actual_flag_declarations": 4,
+    "actual_input_block": 59,
+    "actual_declaration_temporaries": "checked source temporary-name map",
+    "per_flag_call_internal_steps": 3,
+    "per_flag_return_store_internal_steps": 4,
+    "lr_zero_internal_steps": 3,
+    "provider_external_steps": "one per flag visit, separate from internal transitions",
+    "flag_values": "low bit of each explicit supplied 64-bit word",
+    "lr_value": 0,
+    "endpoint": "actual vectorStart before its 64 vector inputs",
+    "ordered_provider_traces_retained": 34,
+    "trace_order": "30 preceding GPR traces followed by four flag traces",
+    "preserved": "all 31 register words/tags, 62 table pointers to those same cells, cache base/validity readbacks, original context, unselected temporaries, caller frame, permissions and allocation frontier",
+    "actual_bindings": "all four flag cells and LR derived from allocation name/type correspondence",
+    "provider_contract": "GPR and flag ProviderAt availability/post-memory/local/frame/access/frontier obligations remain explicit; native/all-outcome/original-context admission remains open",
+    "complete_isa_families": 0
+  },
+  "checks": {
+    "focused1": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProducerFlags"
+      ],
+      "exit": 0,
+      "seconds": 13.079388856887817,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 152
+    },
+    "focused2": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProducerFlagInputs"
+      ],
+      "exit": 0,
+      "seconds": 170.76859259605408,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 170
+    },
+    "focused3": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryFlags"
+      ],
+      "exit": 1,
+      "seconds": 339.51631593704224,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "focused4": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryFlags"
+      ],
+      "exit": 0,
+      "seconds": 11.327057838439941,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 191
+    },
+    "query1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "results/m5-program-entry-flags/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.378843307495117,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "lake-build1": {
+      "command": [
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 740.7907075881958,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 354
+    }
+  },
+  "repaired_attempts": {
+    "focused3": "final entry theorem omitted TableLocals from the opened source names; actual flag/LR proofs already checked, name resolution corrected and complete module rechecked"
+  },
+  "public_query_counts": {
+    "types": 18,
+    "axiom_reports": 18
+  },
+  "axiom_reports": {
+    "KProgFormal.ClightRefinement.Arm64Producer.flag_call_body": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.flag_return_body": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.flag_input_returns_body": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.flag_input_returns_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProducerFlagInputs.run_suffix_body": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProducerFlagInputs.flag_inputs_initialized_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.lr_initialized_body": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.lr_initialized_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryFlags.source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryFlags.first_stage": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryFlags.metadata": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryFlags.chain": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryFlags.lr_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryFlags.binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryFlags.lr_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryFlags.input_returns": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryFlags.initialized": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryFlags.entry_initialized": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false,
+    "unchanged": true
+  },
+  "resources": {
+    "lean_cpu": 17,
+    "control_cpu": 16,
+    "workers": 1,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "none for host work under 2026-11-19T18:18:59 coordination rule"
+  },
+  "lean_source_sha256": {
+    "kprog/formal/KProgFormal.lean": "17798b493d6bc457b051129f26c763e8c949428830abab3be0edaa5138040e85",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerFlags.lean": "652c0f30d4ca6dfc384e0b1bb3286eb7055352bab5011e789e2bff8a0450f5eb",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerFlagInputs.lean": "e52d0a797acaca3772b5e7885932f2e7511b81067bf8a1553b080b33f986c850",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerVectors.lean": "3860766628bd279c030889c497eba4bf7d39624e232ea149f8afef5681f08390",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryFlags.lean": "e12b52d20450cc874941285e3d406a35f3c3693af101c098d89d3c31b31fd816",
+    "kprog/formal/results/m5-program-entry-flags/Query.lean": "4d576e0c4b975e0b6d6e2d08adcc47a0928cead8bb3e929de13a63d70ff7ec0a"
+  },
+  "scope": {
+    "changed": "formal proofs, receipts and own todo line",
+    "memory_witness": "original scalar_local/create_store construction and readback/separation/frame proofs, shared by generic flag and LR helpers",
+    "traversal": "original four-flag induction parameterized by function/environment, actual declarations/stages, names/successors and per-input execution",
+    "source_interfaces": "existing flag_input_ready_bound, flag_input_returns_bound, flag_inputs_initialized_bound and lr_initialized_bound signatures retained",
+    "actual_ast_certificate": "four complete actual flag-body equations, real successor chain and actual LR-zero assignment/vector successor",
+    "composite_requirement": "actual primitive uchar/ulong local bindings; no whole composite-environment equality",
+    "code_growth": "285-line actual module, 100 net supporting source lines and one root import",
+    "c_runtime_compiler_kernel_image_base_benchmark_paper_design_changes": false
+  },
+  "goal_closure": {
+    "M5": "open: actual 64 vector inputs and remaining RAW/tag/stack/context prefix, complete body/native/provider/original-context/all-outcome admission, ISA refinement and O1/O2/O4 recount",
+    "M6": "open, after M5",
+    "whole_make_check_this_step": "not repeated for Lean-only change; fresh final Lake/make check remain due",
+    "last_whole_make_check_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "clight_byte_comparison_this_step": "not repeated; no C/export source changed",
+    "last_export_comparison": "results/m5-program-entry-fields/validation.json; ten Arm64 baseline-identical and twelve historical x86 differences recorded"
+  }
+}

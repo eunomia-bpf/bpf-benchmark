@@ -86,22 +86,24 @@ theorem flag_word_bit (value : BitVec 64) : flagWord value = (0#32) ∨ flagWord
       CC.Integers.Int.repr, CC.Integers.MI.repr, CC.Integers.Int64.unsigned, CC.Integers.MI.unsigned,
       CC.Integers.Int64.and, CC.Integers.MI.and, *]
 
-def FlagDeclaration.continuation (d : FlagDeclaration) (m : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) : CC.Cont :=
-  .Kcall (some d.inputTemp) producer (allocation m).1 le (.Kseq d.store (.Kseq d.rest k))
+def FlagDeclaration.continuationFor (d : FlagDeclaration) (f : CC.Function) (e : CC.Env)
+    (le : CC.TempEnv) (k : CC.Cont) : CC.Cont :=
+  .Kcall (some d.inputTemp) f e le (.Kseq d.store (.Kseq d.rest k))
 
-private theorem flag_call_exec (world : CC.CGenv)
-    (binding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input =
-        some (CC.Positive.ofNat 64) ∧
-      CC.Genv.findFunctPtr world.genv_genv (CC.Positive.ofNat 64) = some Arm64OriginCache.inputFunction) (d : FlagDeclaration) (m memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) :
-    steps world 3 (.State producer d.body k (allocation m).1 le memory) =
+def FlagDeclaration.continuation (d : FlagDeclaration) (m : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) : CC.Cont :=
+  d.continuationFor producer (allocation m).1 le k
+
+/-- Shared internal call prefix with the real function, environment and symbol. -/
+theorem flag_call_body (world : CC.CGenv) (f : CC.Function) (e : CC.Env) (inputBlock : CC.Block)
+    (binding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input = some inputBlock ∧
+      CC.Genv.findFunctPtr world.genv_genv inputBlock = some Arm64OriginCache.inputFunction)
+    (d : FlagDeclaration) (memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (unshadowed : e.get Arm64Entry._native_lab_entry_input = none) :
+    steps world 3 (.State f d.body k e le memory) =
       some (CC.E0, .Callstate Arm64OriginCache.inputFunction [.Vint (6#32)]
-        (d.continuation m le k) memory) ∧
-    InternalPath world 3 (.State producer d.body k (allocation m).1 le memory) := by
-  have unshadowed : (allocation m).1.get Arm64Entry._native_lab_entry_input = none := by
-    have notLocal : Arm64Entry._native_lab_entry_input ∉ CC.varNames producer.fn_vars := by decide +kernel
-    simpa only [CC.emptyEnv, CC.PTree.gempty] using CC.allocVariables_env_other
-      (CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (allocation m)).symm) notLocal
-  simp +decide [steps, InternalPath, InternalState, FlagDeclaration.body, FlagDeclaration.continuation,
+        (d.continuationFor f e le k) memory) ∧
+    InternalPath world 3 (.State f d.body k e le memory) := by
+  simp +decide [steps, InternalPath, InternalState, FlagDeclaration.body, FlagDeclaration.continuationFor,
     CC.doStep, CC.doEvalExpr, CC.doEvalExprlist, CC.lvalOfVar, CC.doDerefLoc, CC.accessMode, CC.typeof,
     CC.tptr, CC.tint, CC.tuint, CC.tulong, CC.Cop.classifyFun, CC.Cop.semCast, CC.Cop.classifyCast,
     CC.Cop.castIntInt, CC.Genv.findFunct, CC.Integers.Ptrofs.eq, CC.Integers.Ptrofs.zero,
@@ -117,19 +119,25 @@ theorem flag_input_ready_bound (world : CC.CGenv)
       (.Callstate Arm64OriginCache.inputFunction [.Vint (6#32)]
         ((flagDeclaration i).continuation m le k) memory) := by
   rw [(flag_declarations_source i).1]
-  have run := flag_call_exec world binding (flagDeclaration i) m memory le k
+  have unshadowed : (allocation m).1.get Arm64Entry._native_lab_entry_input = none := by
+    have notLocal : Arm64Entry._native_lab_entry_input ∉ CC.varNames producer.fn_vars := by decide +kernel
+    simpa only [CC.emptyEnv, CC.PTree.gempty] using CC.allocVariables_env_other
+      (CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (allocation m)).symm) notLocal
+  have run := flag_call_body world producer (allocation m).1 (CC.Positive.ofNat 64)
+    binding (flagDeclaration i) memory le k unshadowed
   exact internalRun_of_steps run.2 run.1
 
-private theorem flag_return_exec (world : CC.CGenv) (d : FlagDeclaration) (m supplied after : CC.Mem)
+theorem flag_return_body (world : CC.CGenv) (f : CC.Function) (e : CC.Env)
+    (d : FlagDeclaration) (supplied after : CC.Mem)
     (le : CC.TempEnv) (k : CC.Cont) (value : BitVec 64) (block : CC.Block)
-    (binding : (allocation m).1.get d.name = some (block, CC.tuchar))
+    (binding : e.get d.name = some (block, CC.tuchar))
     (stored : CC.Mem.storev .Mint8unsigned supplied (.Vptr block (0#64))
       (.Vint (flagWord value)) = some after) :
-    steps world 4 (.Returnstate (.Vlong value) (d.continuation m le k) supplied) =
-      some (CC.E0, .State producer d.rest k (allocation m).1
+    steps world 4 (.Returnstate (.Vlong value) (d.continuationFor f e le k) supplied) =
+      some (CC.E0, .State f d.rest k e
         (le.set d.inputTemp (.Vlong value)) after) ∧
-    InternalPath world 4 (.Returnstate (.Vlong value) (d.continuation m le k) supplied) := by
-  simp +decide [steps, InternalPath, InternalState, FlagDeclaration.continuation, FlagDeclaration.store,
+    InternalPath world 4 (.Returnstate (.Vlong value) (d.continuationFor f e le k) supplied) := by
+  simp +decide [steps, InternalPath, InternalState, FlagDeclaration.continuationFor, FlagDeclaration.store,
     CC.doStep, CC.setOpttemp, CC.PTree.gss, CC.doEvalExpr, CC.doEvalLvalue, CC.lvalOfVar,
     CC.doAssignLoc, CC.typeof, CC.accessMode, CC.Cop.semBinaryOperation, CC.Cop.semAnd,
     CC.Cop.semBinarith, CC.Cop.classifyBinarith, CC.Cop.binarithType, CC.Cop.semCast,
@@ -144,6 +152,55 @@ private theorem flag_return_exec (world : CC.CGenv) (d : FlagDeclaration) (m sup
 
 /-- Each actual flag input outcome writes the low bit through its real byte
 local. Provider trace and post-memory are retained, with explicit permissions. -/
+theorem flag_input_returns_body (world : CC.CGenv) (f : CC.Function) (e : CC.Env)
+    (inputBlock : CC.Block)
+    (inputBinding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input = some inputBlock ∧
+      CC.Genv.findFunctPtr world.genv_genv inputBlock = some Arm64OriginCache.inputFunction)
+    (unshadowed : e.get Arm64Entry._native_lab_entry_input = none)
+    (d : FlagDeclaration) (member : (d.name, CC.tuchar) ∈ producer.fn_vars)
+    (m before supplied : CC.Mem)
+    (actualBinding : ∀ block, (allocation m).1.get d.name = some (block, CC.tuchar) →
+      e.get d.name = some (block, CC.tuchar))
+    (le : CC.TempEnv) (k : CC.Cont) (value : BitVec 64) (trace : CC.Trace)
+    (provider : CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv world.genv_genv)
+      [.Vint (6#32)] before trace (.Vlong value) supplied)
+    (access : supplied.access = (allocation m).2.access) :
+    ∃ block after, (allocation m).1.get d.name = some (block, CC.tuchar) ∧
+      CC.Star (CC.Step2 world)
+        (.State f d.body k e le before)
+        trace (.State f d.rest k e (le.set d.inputTemp (.Vlong value)) after) ∧
+      CC.Mem.loadv .Mint8unsigned after (.Vptr block 0) = some (.Vint (flagWord value)) ∧
+      (flagWord value = (0#32) ∨ flagWord value = (1#32)) ∧
+      (∀ id ty other, (allocation m).1.get id = some (other, ty) → id ≠ d.name →
+        ∀ chunk ofs, CC.Mem.load chunk after other ofs = CC.Mem.load chunk supplied other ofs) ∧
+      FrameBelow m.nextblock supplied after ∧ after.access = supplied.access ∧
+      after.nextblock = supplied.nextblock := by
+  obtain ⟨block, binding, fresh, writable⟩ := scalar_local m d.name CC.tuchar .Mint8unsigned
+    member rfl (by decide)
+  obtain ⟨after, stored, afterAccess⟩ :=
+    create_store m supplied .Mint8unsigned block (.Vint (flagWord value)) access writable
+  have suffix := flag_return_body world f e d supplied after le k value block (actualBinding block binding) stored
+  have call : CC.Star (CC.Step2 world)
+      (.Callstate Arm64OriginCache.inputFunction [.Vint (6#32)] (d.continuationFor f e le k) before)
+      trace (.Returnstate (.Vlong value) (d.continuationFor f e le k) supplied) :=
+    .step _ _ _ _ _ _ (.external_function _ _ _ _ _ _ _ _ _ _ provider) (.refl _)
+      (by simp [CC.E0, CC.Eapp])
+  have prefixRun := flag_call_body world f e inputBlock inputBinding d before le k unshadowed
+  refine ⟨block, after, binding, ?_, ?_, flag_word_bit value, ?_, FrameBelow.store fresh stored,
+    afterAccess.trans access.symm, CC.Mem.store_nextblock stored⟩
+  · simpa only [CC.E0, CC.Eapp, List.nil_append, List.append_nil] using
+      star_trans (internalRun_of_steps prefixRun.2 prefixRun.1).sound
+        (star_trans call (internalRun_of_steps suffix.2 suffix.1).sound)
+  · have load := CC.Mem.load_store_same stored
+    rcases flag_word_bit value with zero | one <;>
+      simpa [CC.Mem.loadv, CC.Integers.Ptrofs.unsigned, CC.Integers.MI.unsigned,
+        CC.Val.loadResult, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext, *] using load
+  · intro id ty other bound different chunk ofs
+    have distinct := (allocated_local_storage
+      (CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (allocation m)).symm)).2
+    exact CC.Mem.load_store_other stored chunk other ofs
+      (.inl (distinct _ _ _ _ bound binding different))
+
 theorem flag_input_returns_bound (world : CC.CGenv)
     (inputBinding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input =
         some (CC.Positive.ofNat 64) ∧
@@ -163,32 +220,15 @@ theorem flag_input_returns_bound (world : CC.CGenv)
         ∀ chunk ofs, CC.Mem.load chunk after other ofs = CC.Mem.load chunk supplied other ofs) ∧
       FrameBelow m.nextblock supplied after ∧ after.access = supplied.access ∧
       after.nextblock = supplied.nextblock := by
+  have unshadowed : (allocation m).1.get Arm64Entry._native_lab_entry_input = none := by
+    have notLocal : Arm64Entry._native_lab_entry_input ∉ CC.varNames producer.fn_vars := by decide +kernel
+    simpa only [CC.emptyEnv, CC.PTree.gempty] using CC.allocVariables_env_other
+      (CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (allocation m)).symm) notLocal
   dsimp only
-  let d := flagDeclaration i
-  obtain ⟨block, binding, fresh, writable⟩ := scalar_local m d.name CC.tuchar .Mint8unsigned
-    (flag_declarations_source i).2 rfl (by decide)
-  obtain ⟨after, stored, afterAccess⟩ :=
-    create_store m supplied .Mint8unsigned block (.Vint (flagWord value)) access writable
-  have suffix := flag_return_exec world d m supplied after le k value block binding stored
-  have call : CC.Star (CC.Step2 world)
-      (.Callstate Arm64OriginCache.inputFunction [.Vint (6#32)] (d.continuation m le k) before)
-      trace (.Returnstate (.Vlong value) (d.continuation m le k) supplied) :=
-    .step _ _ _ _ _ _ (.external_function _ _ _ _ _ _ _ _ _ _ provider) (.refl _)
-      (by simp [CC.E0, CC.Eapp])
-  refine ⟨block, after, binding, ?_, ?_, flag_word_bit value, ?_, FrameBelow.store fresh stored,
-    afterAccess.trans access.symm, CC.Mem.store_nextblock stored⟩
-  · simpa only [CC.E0, CC.Eapp, List.nil_append, List.append_nil] using
-      star_trans (flag_input_ready_bound world inputBinding i m before le k).sound
-        (star_trans call (internalRun_of_steps suffix.2 suffix.1).sound)
-  · have load := CC.Mem.load_store_same stored
-    rcases flag_word_bit value with zero | one <;>
-      simpa [CC.Mem.loadv, CC.Integers.Ptrofs.unsigned, CC.Integers.MI.unsigned,
-        CC.Val.loadResult, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext, *] using load
-  · intro id ty other bound different chunk ofs
-    have distinct := (allocated_local_storage
-      (CC.doAllocVariables_sound _ _ _ _ _ _ (Prod.eta (allocation m)).symm)).2
-    exact CC.Mem.load_store_other stored chunk other ofs
-      (.inl (distinct _ _ _ _ bound binding different))
+  rw [(flag_declarations_source i).1]
+  exact flag_input_returns_body world producer (allocation m).1 (CC.Positive.ofNat 64)
+    inputBinding unshadowed (flagDeclaration i) (flag_declarations_source i).2 m before supplied
+    (fun _ bound => bound) le k value trace provider access
 
 theorem flag_input_ready (i : Fin 4) (m memory : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) :
     InternalRun ge 3 (.State producer (flagDeclarationStage i) k (allocation m).1 le memory)
