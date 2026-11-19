@@ -239,7 +239,7 @@ tracee:
 			-o "$(OUT)/tracee/lsm_support/$${src}.bpf.o"; \
 	done
 
-$(NATIVE_OUT)/katran/%.native.o: katran/katran/lib/bpf/%.c katran-compat.h Makefile
+$(NATIVE_OUT)/katran/%.native.o: katran/katran/lib/bpf/%.c katran-compat.h native-helpers.h Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) -include "$(CURDIR)/katran-compat.h" -DDEBUG -D__KERNEL__ \
 		-I"$(CURDIR)/katran" -I"$(CURDIR)/katran/katran/lib/linux_includes" \
@@ -247,7 +247,7 @@ $(NATIVE_OUT)/katran/%.native.o: katran/katran/lib/bpf/%.c katran-compat.h Makef
 		-o "$@" "$<"
 
 $(NATIVE_OUT)/bcc/%.native.o: bcc/libbpf-tools/%.bpf.c bcc/libbpf-tools/x86/vmlinux.h \
-		core-compat.h $(CORE_ANSWERS)/bcc.h Makefile
+		core-compat.h native-helpers.h $(CORE_ANSWERS)/bcc.h Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) $(call core_flags,$(CORE_ANSWERS)/bcc.h) \
 		-I"$(CURDIR)/bcc/libbpf-tools" -I"$(CURDIR)/bcc/libbpf-tools/x86" \
@@ -277,7 +277,7 @@ $(NATIVE_OUT)/cilium/%.bpf.o: cilium/bpf/%.c Makefile
 		-Wno-address-of-packed-member -Wno-unknown-warning-option \
 		-I"$(CURDIR)/cilium/bpf" -I"$(CURDIR)/cilium/bpf/include" -c -o "$@" "$<"
 
-$(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c core-compat.h $(CORE_ANSWERS)/cilium.h Makefile
+$(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c core-compat.h native-helpers.h $(CORE_ANSWERS)/cilium.h Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(CILIUM_NATIVE_OPTIONS) $(NATIVE_CFLAGS) \
 		$(call core_flags,$(CORE_ANSWERS)/cilium.h) -DMICRO_NATIVE_CILIUM \
@@ -291,7 +291,7 @@ $(NATIVE_OUT)/cilium/%.native.o: cilium/bpf/%.c core-compat.h $(CORE_ANSWERS)/ci
 $(OTEL_EBPF_DIR)/errors.h: otel/tools/errors-codegen/errors.json otel/tools/errors-codegen/main.go
 	$(MAKE) -C "$(CURDIR)/$(OTEL_EBPF_DIR)" errors.h
 
-$(NATIVE_OUT)/otel/%.native.o: $(OTEL_EBPF_DIR)/%.ebpf.c $(OTEL_EBPF_DIR)/errors.h core-compat.h $(CORE_ANSWERS)/otel.h Makefile
+$(NATIVE_OUT)/otel/%.native.o: $(OTEL_EBPF_DIR)/%.ebpf.c $(OTEL_EBPF_DIR)/errors.h core-compat.h native-helpers.h $(CORE_ANSWERS)/otel.h Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) $(call core_flags,$(CORE_ANSWERS)/otel.h) \
 		-Wno-unused-function -Wno-unused-variable \
@@ -330,7 +330,7 @@ $(OTEL_NATIVE_OBJECT): $(OTEL_NATIVE_UNIT_OBJS) $(NATIVE_IR_LINK)
 	"$(LLVM_OBJCOPY)" --add-section .llvmbc="$(OTEL_NATIVE_IR)" "$@"
 
 $(TRACEE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinux.h \
-		core-compat.h $(CORE_ANSWERS)/tracee.h Makefile
+		core-compat.h native-helpers.h $(CORE_ANSWERS)/tracee.h Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) $(call core_flags,$(CORE_ANSWERS)/tracee.h) \
 		-D__TARGET_ARCH_x86 -D__BPF_TRACING__ -DCORE -DCOMMON_BUILD \
@@ -339,7 +339,7 @@ $(TRACEE_NATIVE_OBJECT): tracee/pkg/ebpf/c/tracee.bpf.c tracee/pkg/ebpf/c/vmlinu
 		-o "$@" "$<"
 
 $(NATIVE_OUT)/tracee/lsm_support/%.native.o: tracee/pkg/ebpf/c/lsmsupport/%.bpf.c tracee/pkg/ebpf/c/vmlinux.h \
-		core-compat.h $(CORE_ANSWERS)/tracee.h Makefile
+		core-compat.h native-helpers.h $(CORE_ANSWERS)/tracee.h Makefile
 	install -d "$(dir $@)"
 	"$(CLANG)" $(NATIVE_CFLAGS) $(call core_flags,$(CORE_ANSWERS)/tracee.h) \
 		-D__TARGET_ARCH_x86 -D__BPF_TRACING__ \
@@ -430,7 +430,7 @@ native-tracee: $(TRACEE_NATIVE_OBJS)
 		--object "$(TRACEE_NATIVE_STAGE_OUT)/tracee.native.o,source=$(TRACEE_NATIVE_STAGE_OUT)/tracee.bpf.o" \
 		$(foreach src,$(TRACEE_LSM_SUPPORT_SRCS),--object "$(TRACEE_NATIVE_STAGE_OUT)/$(src).native.o,source=$(TRACEE_NATIVE_STAGE_OUT)/$(src).bpf.o")
 
-native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h core-compat.h $(CORE_ANSWERS)/tetragon.h $(NATIVE_LINK)
+native-tetragon: tetragon/bpf/include/vmlinux_generated_x86.h core-compat.h native-helpers.h $(CORE_ANSWERS)/tetragon.h $(NATIVE_LINK)
 	install -d "$(NATIVE_OUT)/tetragon"
 	install -d "$(TETRAGON_NATIVE_STAGE_OUT)"
 	rm -f "$(NATIVE_OUT)/tetragon"/*.native.o "$(NATIVE_OUT)/tetragon"/*.proof.o "$(NATIVE_OUT)/tetragon"/*.proof.ok

@@ -126,112 +126,6 @@ fn select_lookup_site(
     Ok((format!("runtime:{native_call_index}"), spec))
 }
 
-pub(super) fn bpf_helper_name_from_id(helper_id: u64) -> Option<&'static str> {
-    match helper_id {
-        1 => Some("bpf_map_lookup_elem"),
-        2 => Some("bpf_map_update_elem"),
-        3 => Some("bpf_map_delete_elem"),
-        4 => Some("bpf_probe_read_compat"),
-        5 => Some("bpf_ktime_get_ns"),
-        6 => Some("bpf_trace_printk"),
-        7 => Some("bpf_get_prandom_u32"),
-        8 => Some("bpf_get_smp_processor_id"),
-        9 => Some("bpf_skb_store_bytes"),
-        10 => Some("bpf_l3_csum_replace"),
-        11 => Some("bpf_l4_csum_replace"),
-        12 => Some("bpf_tail_call"),
-        13 => Some("bpf_clone_redirect"),
-        14 => Some("bpf_get_current_pid_tgid"),
-        15 => Some("bpf_get_current_uid_gid"),
-        16 => Some("bpf_get_current_comm"),
-        17 => Some("bpf_get_cgroup_classid"),
-        18 => Some("bpf_skb_vlan_push"),
-        19 => Some("bpf_skb_vlan_pop"),
-        20 => Some("bpf_skb_get_tunnel_key"),
-        21 => Some("bpf_skb_set_tunnel_key"),
-        23 => Some("bpf_redirect"),
-        24 => Some("bpf_get_route_realm"),
-        25 => Some("bpf_perf_event_output"),
-        26 => Some("bpf_skb_load_bytes"),
-        27 => Some("bpf_get_stackid"),
-        28 => Some("bpf_csum_diff"),
-        29 => Some("bpf_skb_get_tunnel_opt"),
-        30 => Some("bpf_skb_set_tunnel_opt"),
-        31 => Some("bpf_skb_change_proto"),
-        32 => Some("bpf_skb_change_type"),
-        33 => Some("bpf_skb_under_cgroup"),
-        34 => Some("bpf_get_hash_recalc"),
-        35 => Some("bpf_get_current_task"),
-        36 => Some("bpf_probe_write_user"),
-        37 => Some("bpf_current_task_under_cgroup"),
-        38 => Some("bpf_skb_change_tail"),
-        39 => Some("bpf_skb_pull_data"),
-        40 => Some("bpf_csum_update"),
-        41 => Some("bpf_set_hash_invalid"),
-        42 => Some("bpf_get_numa_node_id"),
-        43 => Some("bpf_skb_change_head"),
-        44 => Some("bpf_xdp_adjust_head"),
-        45 => Some("bpf_probe_read_compat_str"),
-        46 => Some("bpf_get_socket_cookie"),
-        47 => Some("bpf_get_socket_uid"),
-        48 => Some("bpf_set_hash"),
-        49 => Some("bpf_setsockopt"),
-        50 => Some("bpf_skb_adjust_room"),
-        51 => Some("bpf_redirect_map"),
-        54 => Some("bpf_xdp_adjust_meta"),
-        57 => Some("bpf_getsockopt"),
-        58 => Some("bpf_override_return"),
-        65 => Some("bpf_xdp_adjust_tail"),
-        67 => Some("bpf_get_stack"),
-        68 => Some("bpf_skb_load_bytes_relative"),
-        69 => Some("bpf_fib_lookup"),
-        80 => Some("bpf_get_current_cgroup_id"),
-        84 => Some("bpf_sk_lookup_tcp"),
-        85 => Some("bpf_sk_lookup_udp"),
-        86 => Some("bpf_sk_release"),
-        87 => Some("bpf_map_push_elem"),
-        88 => Some("bpf_map_pop_elem"),
-        95 => Some("bpf_sk_fullsock"),
-        99 => Some("bpf_skc_lookup_tcp"),
-        109 => Some("bpf_send_signal"),
-        118 => Some("bpf_jiffies64"),
-        122 => Some("bpf_get_netns_cookie"),
-        124 => Some("bpf_sk_assign"),
-        127 => Some("bpf_seq_write"),
-        130 => Some("bpf_ringbuf_output"),
-        133 => Some("bpf_ringbuf_discard"),
-        134 => Some("bpf_ringbuf_query"),
-        148 => Some("bpf_copy_from_user"),
-        112 => Some("bpf_probe_read_user"),
-        113 => Some("bpf_probe_read_kernel"),
-        114 => Some("bpf_probe_read_user_str"),
-        115 => Some("bpf_probe_read_kernel_str"),
-        125 => Some("bpf_ktime_get_boot_ns"),
-        131 => Some("bpf_ringbuf_reserve"),
-        132 => Some("bpf_ringbuf_submit"),
-        152 => Some("bpf_redirect_neigh"),
-        155 => Some("bpf_redirect_peer"),
-        158 => Some("bpf_get_current_task_btf"),
-        161 => Some("bpf_ima_inode_hash"),
-        164 => Some("bpf_for_each_map_elem"),
-        173 => Some("bpf_get_func_ip"),
-        174 => Some("bpf_get_attach_cookie"),
-        175 => Some("bpf_task_pt_regs"),
-        181 => Some("bpf_loop"),
-        183 => Some("bpf_get_func_arg"),
-        184 => Some("bpf_get_func_ret"),
-        185 => Some("bpf_get_func_arg_cnt"),
-        186 => Some("bpf_get_retval"),
-        187 => Some("bpf_set_retval"),
-        188 => Some("bpf_xdp_get_buff_len"),
-        189 => Some("bpf_xdp_load_bytes"),
-        190 => Some("bpf_xdp_store_bytes"),
-        193 => Some("bpf_ima_file_hash"),
-        195 => Some("bpf_map_lookup_percpu_elem"),
-        _ => None,
-    }
-}
-
 fn find_symbol_in_section_at_address(
     elf: &object::File,
     section_index: object::SectionIndex,
@@ -326,7 +220,14 @@ fn resolve_x86_plt32_defined_target_addr(
     let target_sym = elf
         .symbol_by_index(target_sym_idx)
         .with_context(|| format!("PLT32 target symbol {target_sym_idx:?}"))?;
-    let Some(section_index) = target_sym.section_index() else {
+    // A PLT32 relocation names code: a function symbol, or the section symbol
+    // of a code section plus the callee's offset (the assembler's form for a
+    // static function in another section). A data symbol is never a code target.
+    let Some(section_index) = target_sym.section_index().filter(|index| {
+        target_sym.kind() == object::SymbolKind::Text
+            || (target_sym.kind() == object::SymbolKind::Section
+                && elf.section_by_index(*index).is_ok_and(|s| s.kind() == object::SectionKind::Text))
+    }) else {
         return Ok(None);
     };
     let target_addr = i128::from(target_sym.address())
@@ -882,18 +783,6 @@ fn scan_helper_calls(
     Ok(out)
 }
 
-fn x86_mov_imm_to_gpr64(insn: &Instruction) -> Option<(Register, u64)> {
-    if insn.mnemonic() != Mnemonic::Mov
-        || insn.op_count() < 2
-        || insn.op0_kind() != OpKind::Register
-    {
-        return None;
-    }
-    let reg = x86_gpr64_family(insn.op0_register())?;
-    let imm = insn.try_immediate(1).ok()?;
-    Some((reg, imm))
-}
-
 fn x86_mov_gpr64_to_gpr64(insn: &Instruction) -> Option<(Register, Register)> {
     if insn.mnemonic() != Mnemonic::Mov
         || insn.op_count() < 2
@@ -1115,18 +1004,10 @@ pub(super) fn rewrite_x86(
                     defined: None, relocation_offset: None });
             }
         }
-        // Keep code-entry labels, including resolved table targets, intact.
-        let incoming_labels:HashSet<_>=Decoder::with_ip(64,&bytes,sym.address,DecoderOptions::NONE)
-            .into_iter().filter(|i|matches!(i.flow_control(),
-                FlowControl::ConditionalBranch|FlowControl::UnconditionalBranch))
-            .map(|i|i.near_branch_target())
-            .chain(helper_calls.branch_targets.values().flatten().copied())
-            .filter_map(|ip|ip.checked_sub(sym.address)).collect();
         let proven_helpers = &helper_calls.single;
         let defined_code_calls = code_provenance::calls(elf, sym, included)?;
         let entry_abi_strip = if is_entry {
             let entry_has_tail_call = proven_helpers.values().any(|name| name == "bpf_tail_call")
-                || helper_calls.numeric_joins.values().flatten().any(|(_,name)| name=="bpf_tail_call")
                 || helper_call_sites.iter().any(|(key, name)| {
                     key.0 == sym.section_index && key.1 == sym.address && name == "bpf_tail_call"
                 });
@@ -1189,16 +1070,6 @@ pub(super) fn rewrite_x86(
                 remap_x86_entry_registers(&mut insn, &entry_abi_strip.register_renames)?;
             }
 
-            if helper_calls.tails.contains(&local_ip) {
-                if let Some(alternatives) = helper_calls.numeric_joins.get(&local_ip) {
-                    append_x86_numeric_helper_dispatch(&mut local, &mut kinds,
-                        &mut insn_local_ip, &mut next_synthetic_ip, local_ip,
-                        insn.next_ip()-sym.address, x86_gpr64_family(insn.op0_register()).unwrap(),
-                        alternatives, helper_addrs, true, proof_mode, &mut tail_calls)?;
-                    resolved_helper_call_sites.insert(site_key);
-                    continue;
-                }
-            }
             if let Some(tail) = tail_transfers.remove(&local_ip) {
                 let conditional = insn.is_jcc_short_or_near();
                 if conditional {
@@ -1443,20 +1314,6 @@ pub(super) fn rewrite_x86(
                 let call_reg = x86_indirect_call_register(&insn);
                 let helper_call_name = helper_call_sites.get(&site_key).cloned()
                     .or_else(|| proven_helpers.get(&local_ip).cloned());
-                if let Some(alternatives)=helper_calls.numeric_joins.get(&local_ip) {
-                    if proof_mode {
-                        // The proof keeps the original finite dispatch. B's
-                        // existing helper-ID interpreter observes each path.
-                        local.push(insn);kinds.push(None);insn_local_ip.push(local_ip);
-                    } else {
-                        append_x86_numeric_helper_dispatch(&mut local,&mut kinds,
-                            &mut insn_local_ip,&mut next_synthetic_ip,local_ip,
-                            insn.next_ip()-sym.address,call_reg.unwrap(),alternatives,helper_addrs,
-                            false, false, &mut tail_calls)?;
-                    }
-                    resolved_helper_call_sites.insert(site_key);
-                    continue;
-                }
                 if let Some(name) = helper_call_name {
                     if show {
                         eprintln!("native-link-helper-site {}", serde_json::json!({
@@ -1518,18 +1375,6 @@ pub(super) fn rewrite_x86(
                         resolved_helper_call_sites.insert(site_key);
                         continue;
                     }
-                    // The resolved call defines RAX; its adjacent target ID is dead.
-                    // Proof, finite dispatch and tail-call state are handled above.
-                    if call_reg==Some(Register::RAX) && matches!(kinds.last(),Some(None))
-                        && local.last().is_some_and(|previous|
-                            matches!(previous.op0_register(),Register::EAX|Register::RAX)
-                            && previous.next_ip()==local_ip && !incoming_labels.contains(&previous.ip())
-                            && x86_mov_imm_to_gpr64(previous).is_some_and(|(_,id)|
-                                bpf_helper_name_from_id(id)==Some(name.as_str()))) {
-                        let keep=local.len()-1;
-                        local.truncate(keep);kinds.truncate(keep);insn_local_ip.truncate(keep);
-                    }
-
                     if name == "bpf_map_lookup_elem" {
                         let native_call_index = lookup_call_counter;
                         lookup_call_counter += 1;
@@ -3683,64 +3528,6 @@ fn push_x86_helper_call_reloc(
     Ok(())
 }
 
-fn append_x86_numeric_helper_dispatch(
-    local: &mut Vec<Instruction>, kinds: &mut Vec<Option<PatchKind>>,
-    source_ips: &mut Vec<u64>, next_ip: &mut u64, source_ip: u64,
-    continuation: u64, register: Register, alternatives: &[(u64,String)],
-    helpers: &HashMap<String,u64>,
-    tail: bool, proof: bool, proof_tails: &mut Vec<(usize,DirectTailTransfer)>,
-) -> Result<()> {
-    let registers=[Register::RAX,Register::RCX,Register::RDX,Register::RBX,
-        Register::RSP,Register::RBP,Register::RSI,Register::RDI,
-        Register::R8,Register::R9,Register::R10,Register::R11,
-        Register::R12,Register::R13,Register::R14,Register::R15];
-    let reg=registers.iter().position(|r| *r==register).unwrap() as u8;
-    let mut bytes=Vec::new();
-    let mut calls=HashMap::new();
-    let mut returns=HashSet::new();
-    for (index,(id,name)) in alternatives.iter().enumerate() {
-        let last=index+1==alternatives.len();
-        // Helper CALL already clobbers condition flags in the shared ABI.
-        // Comparisons leave argument registers and observed helper IDs intact.
-        let next=if last {None} else {
-            bytes.extend_from_slice(&[0x48 | (reg>>3),0x81,0xf8 | (reg&7)]);
-            bytes.extend_from_slice(&(*id as u32).to_le_bytes());
-            Some(append_x86_jcc_rel32(&mut bytes,0x85))
-        };
-        calls.insert(bytes.len(),(name, if proof { 0 } else {
-            runtime_call_target(name,helpers,"finite helper call")?
-        }));
-        bytes.extend_from_slice(&[if tail {0xe9} else {0xe8},0,0,0,0]);
-        if let Some(next)=next {
-            if !tail { returns.insert(bytes.len());bytes.extend_from_slice(&[0xe9,0,0,0,0]); }
-            let destination=bytes.len();patch_x86_rel32(&mut bytes,next,destination)?;
-        }
-    }
-    let base=*next_ip;
-    for (index,mut instruction) in Decoder::with_ip(64,&bytes,base,DecoderOptions::NONE).into_iter().enumerate() {
-        let offset=(instruction.ip()-base) as usize;
-        if returns.contains(&offset) { instruction.set_near_branch64(continuation); }
-        let kind=calls.get(&offset).filter(|_| !proof).map(|(_name,target)| PatchKind::HelperBranchRel32 {
-            target_addr:*target,opcode:if tail {0xe9} else {0xe8} });
-        if let Some((name,_)) = calls.get(&offset).filter(|_| tail) {
-            instruction.set_near_branch64(X86_JMP_END_PLACEHOLDER_TARGET);
-            if proof { proof_tails.push((local.len(),DirectTailTransfer { symbol:(*name).clone(),
-                addend:-4,defined:None,relocation_offset:None })); }
-        } else if kind.is_some() { instruction=build_x86_helper_call_rel32_slot()?; }
-        if index==0 {
-            push_x86_replacement(local,kinds,source_ips,source_ip,instruction,kind);
-        } else {
-            // DeclareByte call slots have no decoded length; keep the virtual
-            // labels from the fully decoded dispatch rather than advancing by
-            // Instruction::len(), so its internal branches keep exact targets.
-            instruction.set_ip(base+offset as u64);
-            local.push(instruction);kinds.push(kind);source_ips.push(u64::MAX);
-        }
-    }
-    *next_ip=base+bytes.len() as u64;
-    Ok(())
-}
-
 fn x86_required_u32_helper_arg(
     helper_addrs: &HashMap<String, u64>,
     key: &str,
@@ -4183,16 +3970,15 @@ mod tests {
 
     #[test]
     fn clock_calls_bind_fast_target_without_changing_observed_helper_identity() -> Result<()> {
-        // Cover ELF PLT/GOT calls, a hoisted GOT pointer, numeric helper5 and
+        // Cover ELF PLT/GOT calls, a hoisted GOT pointer and
         // a sibling tail jump. Address/ID observations must keep their value.
-        for form in [4, 9, 41, 42, 100, 101, 102] {
+        for form in [4, 9, 41, 42, 100, 102] {
             let mut object = WriteObject::new(BinaryFormat::Elf, object::Architecture::X86_64, Endianness::Little);
             let text = object.add_section(Vec::new(), b".text".to_vec(), SectionKind::Text);
             let (mut bytes, relocation, observed) = match form {
                 4 => (vec![0xe8,0,0,0,0,0xc3], Some((1,4)), None),
                 102 => (vec![0xe9,0,0,0,0], Some((1,4)), None),
                 100 => (vec![0x48,0x8b,0x05,0,0,0,0,0x48,0x89,0x07,0xff,0xd0,0xc3], Some((3,9)), Some(0x1234u64)),
-                101 => (vec![0xb8,5,0,0,0,0x48,0x89,0x07,0xff,0xd0,0xc3], None, Some(5u64)),
                 r => (vec![0xff,0x15,0,0,0,0,0xc3], Some((2,r)), None),
             };
             object.append_section_data(text, &bytes, 1);
@@ -4320,7 +4106,7 @@ mod tests {
         // Facts are deliberately in A,B order while machine code uses B,A.
         let ops = [MapOps { name: "map_a".into(), update: 0x1000, remove: 0x2000 },
                    MapOps { name: "map_b".into(), update: 0x3000, remove: 0x4000 }];
-        for form in 0..3 {
+        for form in 1..3 {
             for tail in [false, true].into_iter().filter(|tail| !tail || form == 1) {
                 let mut object = WriteObject::new(BinaryFormat::Elf,
                     object::Architecture::X86_64, Endianness::Little);
@@ -4385,11 +4171,10 @@ mod tests {
 
     #[test]
     fn runtime_map_lookup_rewrites_immediate_got_and_plt_calls() -> Result<()> {
-        for form in 0..3 {
+        for form in 1..3 {
             let mut object = WriteObject::new(BinaryFormat::Elf, object::Architecture::X86_64, Endianness::Little);
             let text = object.add_section(Vec::new(), b".text".to_vec(), SectionKind::Text);
             let bytes = match form {
-                0 => vec![0xb8, 1, 0, 0, 0, 0xff, 0xd0, 0xc3],
                 // A branch enters the rewritten call: the label must stay on
                 // the helper slot's first byte so the branch keeps calling it.
                 1 => vec![0xeb, 2, 0x90, 0x90, 0xff, 0x15, 0, 0, 0, 0, 0xc3],
@@ -4690,7 +4475,7 @@ mod tests {
         let text = object.add_section(Vec::new(), b".text".to_vec(), SectionKind::Text);
         // Native entry takes the key pointer; RDI then gets the actual named map.
         let bytes = [0x48,0x89,0xfe, 0x48,0x8b,0x3d,0,0,0,0,
-                     0xb8,1,0,0,0, 0xff,0xd0, 0xc3];
+                     0xe8,0,0,0,0, 0xc3];
         object.append_section_data(text, &bytes, 1);
         object.add_symbol(WriteSymbol { name: b"entry".to_vec(), value: 0, size: bytes.len() as u64,
             kind: SymbolKind::Text, scope: SymbolScope::Linkage, weak: false,
@@ -4700,6 +4485,11 @@ mod tests {
             section: WriteSymbolSection::Undefined, flags: SymbolFlags::None });
         object.add_relocation(text, WriteRelocation { offset: 6, symbol: map, addend: -4,
             flags: RelocationFlags::Elf { r_type: 9 } })?;
+        let lookup = object.add_symbol(WriteSymbol { name: b"bpf_map_lookup_elem".to_vec(), value: 0, size: 0,
+            kind: SymbolKind::Text, scope: SymbolScope::Linkage, weak: false,
+            section: WriteSymbolSection::Undefined, flags: SymbolFlags::None });
+        object.add_relocation(text, WriteRelocation { offset: 11, symbol: lookup, addend: -4,
+            flags: RelocationFlags::Elf { r_type: 4 } })?;
         let encoded = object.write()?;
         let elf = object::File::parse(encoded.as_slice())?;
         let entry = find_symbol_by_name(&elf, "entry")?;
@@ -4802,9 +4592,9 @@ mod tests {
             (X86_BPF_PROG_BPF_FUNC_OFFSET_KEY.into(),72),
             (X86_TAIL_CALL_OFFSET_KEY.into(),12)]);
         let mut cases=0;
-        for (name,id,tail) in [("bpf_jiffies64",118,false),("bpf_tail_call",12,true)] {
-            for named in [false,true] { for base in [0usize,32] { for skip_nop in [0u8,1] {
-                let mut bytes=if named {vec![]} else {vec![0xb8,id,0,0,0]};
+        for (name,tail) in [("bpf_jiffies64",false),("bpf_tail_call",true)] {
+            for named in [true] { for base in [0usize,32] { for skip_nop in [0u8,1] {
+                let mut bytes=vec![];
                 bytes.extend_from_slice(&[0x85,0xff,0x74,skip_nop,0x90]);
                 let call=bytes.len();
                 bytes.extend_from_slice(if named {&[0xe8,0,0,0,0][..]} else {&[0xff,0xd0][..]});
@@ -4854,69 +4644,11 @@ mod tests {
     }
 
     #[test]
-    #[cfg(all(target_arch="x86_64",target_os="linux"))]
-    fn bound_helpers_drop_only_dead_adjacent_rax_ids_and_keep_proof_and_tail_state() -> Result<()> {
-        let helpers=HashMap::from([("bpf_get_current_pid_tgid".into(),0x1234),
-            (X86_BPF_MAP_MAX_ENTRIES_OFFSET_KEY.into(),68),
-            (X86_BPF_ARRAY_PTRS_OFFSET_KEY.into(),304),
-            (X86_BPF_PROG_BPF_FUNC_OFFSET_KEY.into(),72),(X86_TAIL_CALL_OFFSET_KEY.into(),12)]);
-        let link=|code:&[u8],proof:bool| -> Result<RewriteResult> {
-            let mut object=WriteObject::new(BinaryFormat::Elf,object::Architecture::X86_64,Endianness::Little);
-            let text=object.add_section(Vec::new(),b".text".to_vec(),SectionKind::Text);
-            object.append_section_data(text,code,1);
-            object.add_symbol(WriteSymbol{name:b"entry".to_vec(),value:0,size:code.len() as u64,
-                kind:SymbolKind::Text,scope:SymbolScope::Linkage,weak:false,
-                section:WriteSymbolSection::Section(text),flags:SymbolFlags::None});
-            let bytes=object.write()?;let elf=object::File::parse(bytes.as_slice())?;
-            let entry=find_symbol_by_name(&elf,"entry")?;
-            rewrite_x86(&elf,&entry,&[entry.clone()],&helpers,&HashMap::new(),&HashMap::new(),
-                &[],proof,false,false)
-        };
-        let definitions=|bytes:&[u8],id:u64| -> Result<usize> {Ok(decode_x86(bytes)?.iter()
-            .filter(|i|x86_mov_imm_to_gpr64(i).is_some_and(|(_,value)|value==id)).count())};
-        let forms:Vec<(Vec<u8>,usize)>=vec![
-            (vec![0xb8,14,0,0,0,0xff,0xd0,0xc3],0),
-            (vec![0x85,0xff,0x74,1,0x90,0xb8,14,0,0,0,0xff,0xd0,0xc3],1),
-            (vec![0xb8,14,0,0,0,0x85,0xff,0x74,5,0xb8,14,0,0,0,0xff,0xd0,0xc3],1),
-            (vec![0xb8,14,0,0,0,0x85,0xff,0xff,0xd0,0xc3],1),
-            (vec![0x41,0xbb,14,0,0,0,0x41,0xff,0xd3,0xc3],1),
-            (vec![0x48,0xb8,14,0,0,0,0,0,0,0,0xff,0xd0,0xc3],0),
-            (vec![0x48,0xc7,0xc0,14,0,0,0,0xff,0xd0,0xc3],0)];
-        let mut cases=0;
-        for (index,(bytes,expected)) in forms.iter().enumerate() {
-            let proof=link(bytes,true)?;
-            assert_eq!(definitions(&proof.blob,14)?,definitions(bytes,14)?,"proof retains IDs form{index}");
-            let linked=link(bytes,false)?;
-            assert_eq!(definitions(&linked.blob,14)?,*expected,"dead ID form{index}");
-            assert_eq!(linked.relocs.len(),1);assert_eq!(linked.relocs[0].target,0x1234);
-            let relocation=linked.relocs[0];
-            assert_eq!(relocation.kind,NATIVE_LAB_RELOC_HELPER_CALL_REL32);
-            let mut blob=linked.blob;blob.push(0xc3);let target=blob.len();
-            // Count the helper and return RDI XOR RDX without changing callee-saved registers.
-            blob.extend_from_slice(&[0x48,0xff,0x06,0x48,0x89,0xf8,0x48,0x31,0xd0,0xc3]);
-            let offset=relocation.offset as usize;
-            blob[offset+1..offset+5].copy_from_slice(&i32::try_from(target as i64-offset as i64-5)?.to_le_bytes());
-            let mut calls=0u64;
-            for argument in [0usize,7,65537,usize::MAX] {for selector in [0usize,1] {
-                let result=memory::call_blob(&blob,selector as *mut u8,&mut calls as *mut u64 as usize,argument) as usize;
-                assert_eq!(result,selector^argument,"args/return form{index}");cases+=1;
-            }}
-            assert_eq!(unsafe{std::ptr::read_volatile(&calls)},8,"one helper per invocation");
-        }
-        let tail=link(&[0xb8,12,0,0,0,0xff,0xd0,0xc3],false)?;
-        assert_eq!(definitions(&tail.blob,12)?,1,"tail miss state stays untouched");
-        let mut tail=tail.blob;tail.push(0xc3);let mut map=[0u8;72];
-        assert_eq!(memory::call_blob(&tail,std::ptr::null_mut(),map.as_mut_ptr() as usize,1) as usize,12);
-        println!("dead helper IDs: {cases} argument/return/call executions, seven proof shapes and tail miss PASS");
-        Ok(())
-    }
-
-    #[test]
     fn kernel_tail_calls_always_relocate_the_counter_frame() -> Result<()> {
         // An omitted kind-10 relocation leaves the frozen frame displacement
         // in an otherwise valid tail stub. Check production ELF rewriting,
         // including the final offset after chunk emission and branch encoding.
-        for immediate in [false, true] {
+        for immediate in [false] {
             let mut object = WriteObject::new(BinaryFormat::Elf,
                 object::Architecture::X86_64, Endianness::Little);
             let text = object.add_section(Vec::new(), b".text".to_vec(), SectionKind::Text);
