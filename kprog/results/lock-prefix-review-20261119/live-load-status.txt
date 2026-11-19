@@ -1,0 +1,17 @@
+PERF 2026-11-19T10:36:35Z
+Scope: live registered-service completions; measurement is still running.
+Batch: /workspaces/kprog-raw/coordinator/lto-freeze-20261119/batch-20261119T093606Z-327120
+Source cohort: 3f80b472e7c24893561fee8270be5b1732223048
+Request log: timing/state/session-oxjn2o75/requests/requests.jsonl
+Completed records: 25
+Distinct source_prog_id: 25
+status == 0: 25
+execution_path == checked-sim-c: 25
+b_generated == true: 25
+b_stock_passed == true: 25
+Direct fallback: 0
+Failed requests: 0
+Baseline measurement_done: ok
+Native measurement_start: 3 samples
+Native measurement_done: pending
+Final corpus status, throughput, per-call time and installed bytes: pending

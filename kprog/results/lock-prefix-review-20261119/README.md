@@ -111,3 +111,13 @@ The coordinator's queued batch 327120 installs the HEAD compiler and times
 this fix together with 2eb36bad9. No separate BCC timing is queued. Actual
 app B/stock/native coverage and the combined runtime effect remain pending;
 the previous 1.016x result precedes this implementation.
+
+PERF 2026-11-19T10:36:35Z: Live batch 327120 completed the baseline arm
+with status ok. Its request log has 25 completions from 25 distinct source
+program IDs: all status 0, checked-sim-c, B generated and B stock accepted;
+no fallback or failed request. The last request finished at 10:33:24Z.
+The native arm's three samples have started. live-load-status.txt records
+the point-in-time counts and exact raw log. This is actual guest stock and
+native-install evidence for the combined freeze/LOCK cohort, while final
+app status and runtime remain pending. The final archive reader will
+replace this provisional accounting with complete run coverage.
