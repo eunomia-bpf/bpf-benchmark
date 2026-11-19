@@ -51,3 +51,16 @@ parity on other apps. PERF uses the canonical compiler, not the peer's
 `/tmp/pbt/pb-new` diagnostic build. The fresh guest's per-request journals
 will decide coverage; a successful fixture or B emission alone does not
 close the 40-request acceptance objective. No runtime gain is claimed here.
+
+Historical journal reconciliation, PERF 2026-11-19T21:12:20Z: `coverage.py` reads the
+actual archived service journal and each stock-success verification receipt.
+There are exactly14 `b_stock_passed=true` records, each with `phase=verify`,
+`status=0`: requests1,2,4,5,8,13,30,34,39,46,51,52,54,62.
+The remaining classes are40packet rejects,6store rejects,3generation failures
+(22,40,58) and1terminal failure. Execution paths are14checked-sim-c,
+49direct-native and1unreported. The handoff's17-class tally includes the
+three generation failures, which have `b_generated=false`,
+`b_stock_passed=false`, and `execution_path=direct-native`. Their successful
+native installation does not establish stock acceptance. The original
+handoff is retained; `historical-coverage.json` records the actual distinction.
+Raw `/workspaces/kprog-raw/perf/cilium-headlen-20261119/journal-20261119T211300Z`. This is archive analysis, not a new run.

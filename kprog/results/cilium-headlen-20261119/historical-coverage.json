@@ -1,0 +1,812 @@
+{
+  "source_archive": "/workspaces/kprog-raw/verified/20261119-checked-cilium/service.tar.gz",
+  "journal": "service/requests/requests.jsonl",
+  "counts": {
+    "stock_passed": 14,
+    "packet_rejected": 40,
+    "store_rejected": 6,
+    "generation_failed": 3,
+    "other_failure": 1
+  },
+  "execution_paths": {
+    "checked-sim-c": 14,
+    "direct-native": 49,
+    "unreported": 1
+  },
+  "requests": [
+    {
+      "request_id": 1,
+      "category": "stock_passed",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "failure_stage": null,
+      "reported_class": "verified",
+      "verification_record": {
+        "request_id": 1,
+        "prog_id": 239,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 2,
+      "category": "stock_passed",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "failure_stage": null,
+      "reported_class": "verified",
+      "verification_record": {
+        "request_id": 2,
+        "prog_id": 247,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 3,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 4,
+      "category": "stock_passed",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "failure_stage": null,
+      "reported_class": "verified",
+      "verification_record": {
+        "request_id": 4,
+        "prog_id": 260,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 5,
+      "category": "stock_passed",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "failure_stage": null,
+      "reported_class": "verified",
+      "verification_record": {
+        "request_id": 5,
+        "prog_id": 267,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 6,
+      "category": "store_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "only_read"
+    },
+    {
+      "request_id": 7,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 8,
+      "category": "stock_passed",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "failure_stage": null,
+      "reported_class": "verified",
+      "verification_record": {
+        "request_id": 8,
+        "prog_id": 286,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 9,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 10,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 11,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 12,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 13,
+      "category": "stock_passed",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "failure_stage": null,
+      "reported_class": "verified",
+      "verification_record": {
+        "request_id": 13,
+        "prog_id": 317,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 14,
+      "category": "store_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "only_read"
+    },
+    {
+      "request_id": 15,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 16,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 17,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 18,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 19,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 20,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 21,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 22,
+      "category": "generation_failed",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": false,
+      "b_stock_passed": false,
+      "failure_stage": "generation",
+      "reported_class": "verified",
+      "error": "relative table computation has live register or flag results"
+    },
+    {
+      "request_id": 23,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 24,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 25,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 26,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 27,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 28,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 29,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 30,
+      "category": "stock_passed",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "failure_stage": null,
+      "reported_class": "verified",
+      "verification_record": {
+        "request_id": 30,
+        "prog_id": 418,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 31,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 32,
+      "category": "store_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "only_read"
+    },
+    {
+      "request_id": 33,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 34,
+      "category": "stock_passed",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "failure_stage": null,
+      "reported_class": "verified",
+      "verification_record": {
+        "request_id": 34,
+        "prog_id": 443,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 35,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 36,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 37,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 38,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 39,
+      "category": "stock_passed",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "failure_stage": null,
+      "reported_class": "verified",
+      "verification_record": {
+        "request_id": 39,
+        "prog_id": 474,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 40,
+      "category": "generation_failed",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": false,
+      "b_stock_passed": false,
+      "failure_stage": "generation",
+      "reported_class": "verified",
+      "error": "relative table computation has live register or flag results"
+    },
+    {
+      "request_id": 41,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 42,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 43,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 44,
+      "category": "store_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "only_read"
+    },
+    {
+      "request_id": 45,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 46,
+      "category": "stock_passed",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "failure_stage": null,
+      "reported_class": "verified",
+      "verification_record": {
+        "request_id": 46,
+        "prog_id": 515,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 47,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 48,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 49,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 50,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 51,
+      "category": "stock_passed",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "failure_stage": null,
+      "reported_class": "verified",
+      "verification_record": {
+        "request_id": 51,
+        "prog_id": 546,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 52,
+      "category": "stock_passed",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "failure_stage": null,
+      "reported_class": "verified",
+      "verification_record": {
+        "request_id": 52,
+        "prog_id": 553,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 53,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 54,
+      "category": "stock_passed",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "failure_stage": null,
+      "reported_class": "verified",
+      "verification_record": {
+        "request_id": 54,
+        "prog_id": 566,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 55,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 56,
+      "category": "store_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "only_read"
+    },
+    {
+      "request_id": 57,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 58,
+      "category": "generation_failed",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": false,
+      "b_stock_passed": false,
+      "failure_stage": "generation",
+      "reported_class": "verified",
+      "error": "relative table computation has live register or flag results"
+    },
+    {
+      "request_id": 59,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 60,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 61,
+      "category": "store_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "only_read"
+    },
+    {
+      "request_id": 62,
+      "category": "stock_passed",
+      "journal_status": 0,
+      "phase": "load",
+      "execution_path": "checked-sim-c",
+      "b_generated": true,
+      "b_stock_passed": true,
+      "failure_stage": null,
+      "reported_class": "verified",
+      "verification_record": {
+        "request_id": 62,
+        "prog_id": 612,
+        "phase": "verify",
+        "status": 0
+      }
+    },
+    {
+      "request_id": 63,
+      "category": "packet_rejected",
+      "journal_status": 0,
+      "phase": "load-direct",
+      "execution_path": "direct-native",
+      "b_generated": true,
+      "b_stock_passed": false,
+      "failure_stage": "verification",
+      "reported_class": "packet"
+    },
+    {
+      "request_id": 64,
+      "category": "other_failure",
+      "journal_status": -5,
+      "phase": null,
+      "execution_path": null,
+      "b_generated": null,
+      "b_stock_passed": null,
+      "failure_stage": null,
+      "reported_class": null
+    }
+  ],
+  "scope": "Historical journal and stock-verification receipts; no new execution or acceptance.",
+  "recorded": "2026-11-19T21:12:20Z",
+  "raw": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/journal-20261119T211300Z"
+}

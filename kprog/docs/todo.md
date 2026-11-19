@@ -59,6 +59,10 @@
   this is no new rejection or causal attribution. Diagnostics still wait.
 
 - [ ] P-B-cilium-headlen (PERF handoff 2026-11-19T20:22:55Z, OMP639663a85):
+  PERF 2026-11-19T21:12:20Z: historicaljournal reconciled:14stockpasses with14verify0
+  receipts,40packet/6store/3generation/1other.22/40/58 aredirect-native,
+  generatedfalse/stockfalse despitepeerverifiedclass. Historicalcoverage.json
+  recordsactualfields; no newpass. Worker303179 remainsunstartedimageEXwaiter.
   PERF 2026-11-19T21:07:34Z: final80dbcfc51 preserves captured headlen across possible
   skb mutations, including loop backedges.12positive/8negative controls;
   oldcompiler expected baseline passes, candidate syntax/layout0.
