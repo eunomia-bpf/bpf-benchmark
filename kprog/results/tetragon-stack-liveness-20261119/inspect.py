@@ -15,7 +15,7 @@ WIDTH = dict(LDD=8, LDW32=4, LDH=2, LDB=1, STD=8, STW32=4, STH=2, STB=1)
 
 
 def inspect(lines):
-    slots, blocks, escaped = {}, {}, set()
+    slots, blocks, escaped, accesses = {}, {}, set(), {}
     current = None
     in_body = False
     for line in lines:
@@ -40,6 +40,8 @@ def inspect(lines):
         if not referenced:
             continue
         load, store = LOAD.match(line), STORE.match(line)
+        for number in referenced:
+            accesses.setdefault(number, Counter())[line.strip().split(' ', 1)[0] if not load else load[1]] += 1
         if load or store:
             match = load or store
             number = int(match[2])
@@ -103,6 +105,7 @@ def inspect(lines):
     return dict(slots=len(slots), declared_bytes=sum(s['size'] for s in slots.values()),
                 shapes=dict(Counter(f"{s['kind']}:{s['size']}:{s['alignment']}" for s in slots.values())),
                 eligible_spill_slots=len(eligible), excluded_slots=sorted(escaped),
+                accesses=accesses,
                 blocks=len(blocks), dataflow_visits=visits,
                 peaks=sorted(peaks, key=lambda p: p['live_bytes'], reverse=True)[:10],
                 scope='Conservative CFG whole-slot liveness, not path feasibility, stock acceptance or a runtime measurement.')
