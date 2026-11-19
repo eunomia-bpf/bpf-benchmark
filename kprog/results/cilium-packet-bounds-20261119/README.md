@@ -69,3 +69,44 @@ must rise from 14.
 6 requests (6, 14, 32, 44, 56, 61) are rejected with `only read is supported` — a write through a packet
 pointer the verifier has not proved writable. Same file, different matcher question; counted here so the
 two are not confused.
+## Post-fix check against the same archive inputs (omp 2026-11-19T20:55Z)
+
+PERF's `cdd26e9cd` ("Recognize classifier head-length predicates through simulator memory
+templates") closes all three gaps above. Rebuilt the pass from that commit
+(`clang++-18 … ../x86/packet_bounds_ir.cpp -o /tmp/pbt/pb-new`) and ran it over the same 40 archived
+`trusted_x86.bpf.bounds-input.bc` files:
+
+| | before | after |
+|---|---|---|
+| requests with `predicates lowered > 0` | 0 / 40 | **40 / 40** |
+| predicates lowered, total | 0 | **235** |
+| per-request range | — | 1 (req 3, 7) … 35 (req 15) |
+
+Request 7's emitted B, `classifier` section, before → after:
+
+```
+before  (61) r1 = *(u32 *)(r1 + 76)          ; R1=pkt(r=0) — no bound, byte read rejected
+after   (23) if w3 < 0x2a goto …              ; the original scalar guard, preserved
+        (24) r1 += 0x2a
+        (25) if r1 > r2 goto …                ; data + 42 <= data_end
+        (26) r1 = *(u32 *)(r6 + 0x4c)          ; then the byte read is in bounds
+```
+
+The scalar guard is preserved and the pointer bound is added beside it; `clang-18 -O1 -target bpf`
+compiles all four sampled requests (3, 7, 9, 15, 21) to objects without error.
+
+**The rewrite is an identity, not a strengthening.** The kernel itself defines the guard this way:
+`bpf_convert_data_end_access` (`vendor/linux-framework/net/core/filter.c:10976-11015`) lowers a read of
+`__sk_buff.data_end` to `skb->data + skb->len - skb->data_len`, and `skb_headlen()`
+(`include/linux/skbuff.h:2531-2534`) is `skb->len - skb->data_len`. So `len - data_len >= K` and
+`data + K <= data_end` accept exactly the same packets; no condition was added and P is unchanged — as
+required for this pass.
+
+**No regression on the other apps.** The same binary lowers 0 predicates on all 14 OTel and the one
+Katran archived inputs (`/workspaces/kprog-raw/verified/20261119-checked-otel2`,
+`-katran2`), so the 17 currently installing Cilium requests and the other five apps keep their bytecode.
+
+Not yet proven here: that the 40 patched B programs are *accepted* by the stock verifier. The host BTF
+lacks the apps' extern symbols (`__config_endpoint_ipv4` etc.), so the load must happen in the guest;
+PERF's `kprog/results/cilium-headlen-20261119/validate.sh` does exactly that (stock fixtures, captured
+40-request replay, then a full `checked-corpus` Cilium run) and is the run to read for the verdict.
