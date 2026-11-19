@@ -27,7 +27,7 @@ for name in cases:
     with tarfile.open(fileobj=io.BytesIO(packed)) as request:
         native=request.extractfile('request/generated/request.native.o').read()
         metadata=json.load(request.extractfile('request/generation.metadata.json'))
-        original=json.load(request.extractfile('request/generated/artifacts.json'))
+        original=dict(symbol=request.extractfile('request/kernel.entry').read().decode('ascii'))
     begin=time.perf_counter()
     artifacts=specialize(native,original['symbol'],metadata,directory,
         ROOT/'kprog/x86/native_lab/native_link/target/release/native-link',

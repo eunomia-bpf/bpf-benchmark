@@ -13,7 +13,7 @@ exec 9>/workspaces/.agent-state/kprog-lanes/locks/image
 flock -s 9
 date -u +%FT%TZ > "$out/started"
 rc=0
-taskset -c 19 prlimit --as=34359738368 -- make -f kprog/results/b-analysis-flags-20261119/Makefile compile OUT="$out" || rc=$?
+taskset -c 19 prlimit --as=34359738368 -- make -f kprog/results/b-analysis-flags-20261119/Makefile compile OUT="$out" CASES="${*:-bcc1 bcc7 tetragon6}" || rc=$?
 printf '%s\n' "$rc" > "$out/exit-code"
 date -u +%FT%TZ > "$out/finished"
 exit "$rc"
