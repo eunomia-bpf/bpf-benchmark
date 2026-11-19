@@ -54,21 +54,18 @@ A copy of the pass with `classifier` added to the section gate, run over all 63 
 is the *first* rejection but not the block: adding it alone changes nothing. The `asm`-operand and
 i32/`len-data_len` gaps both have to be handled.
 
-## Why this needs the file's owner, not a drive-by edit
+## Why the change needed the file's owner
 
-`kprog/x86/packet_bounds_ir.cpp` is frozen; PERF owns it under two open lines (to 2026-11-21) and has a
-queued rebuild (`rawfix-20261119T193239Z`, worker 269752 waiting on the image lock). The change is not a
-one-liner: it must extend `field()`/`origin()` to recognize the asm-offset read form, accept
-`__sk_buff.len`/`data_len` (112/116) as a packet-span source in addition to `data_end`/`data` (80/76),
-and lower a 32-bit `len - data_len >= K` compare into the pointer form that `end - data >= K` already
-emits. Acceptance is measurable: the 40 requests' `bounds.bc` must verify, and Cilium's verified count
-must rise from 14.
+`kprog/x86/packet_bounds_ir.cpp` is frozen and PERF owns it under two open lines (to 2026-11-21). The
+change is not a one-liner: it must extend `field()`/`origin()` to recognize the asm-offset read form,
+accept `__sk_buff.len`/`data_len` (112/116) as a packet-span source in addition to `data_end`/`data`
+(80/76), and lower a 32-bit `len - data_len >= K` compare into the pointer form that `end - data >= K`
+already emits. This was handed to PERF rather than edited here; it landed as `cdd26e9cd`, `650994842`
+and `80dbcfc51` (checked below). Acceptance is measurable: the 40 requests' B must verify, and
+Cilium's verified count must rise from 14.
 
-## Second class, for the same hand-off
+The 6 requests 6, 14, 32, 44, 56, 61 are a separate class, analysed at the end of this file.
 
-6 requests (6, 14, 32, 44, 56, 61) are rejected with `only read is supported` — a write through a packet
-pointer the verifier has not proved writable. Same file, different matcher question; counted here so the
-two are not confused.
 ## Post-fix check against the same archive inputs (omp 2026-11-19T21:10Z)
 
 PERF's `cdd26e9cd` ("Recognize classifier head-length predicates through simulator memory
