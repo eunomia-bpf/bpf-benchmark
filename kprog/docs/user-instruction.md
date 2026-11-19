@@ -178,6 +178,8 @@ Every word the operator says about kprog is recorded here verbatim, with its dat
 - 2026-11-19（07:01 UTC 之前收到）: "LTO 配置的 BCC 结果已入库：每次调用 1.004x，吞吐 1.004x；代码是 JIT 的 6.84 倍??? 不应该好很多吗? 你再想想???? 是不是有啥还没做到"
 - 2026-11-19（14:46 UTC 之前收到）: "啥情况? 没动? 还在一直跑?"
 - 2026-11-19（14:46 UTC 之前收到）: "按记录回落到直接原生 是是什么鬼??? （加了 helper 上下文绑定、hash map 回调、ALU32 折叠）这些又是什么鬼??? 你告诉我一下现在的完整的做法, 符合我们的要求吗? 实际上的代码和直接正常用户态native编译的有何区别???"
+- 2026-11-19（15:40 UTC 之前收到）: "读内核内存要调用 bpf_probe_read，用户态程序是直接解引用，这一项在 Tracee 和 Tetragon 每次调用的时间里占 41–46%；不能也直接内联和解引用???"
+- 2026-11-19（15:40 UTC 之前收到，引用协调者对 c3960d089 的说明）: "这个是谁的设计? 我的原话是什么? 恢复这个, 吧 verify 和运行分开看"
 
 ## Standing words for every Workspace (also in spark-manage workspace-rules.md)
 - 2026-11-13（社区巡检那段对话里说的，各处通用）: "不要做任何除了社区巡检之外的固定的 linter 之类的, 记住."

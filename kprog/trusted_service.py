@@ -191,9 +191,9 @@ def load_service_artifacts(args, worker, fd, request, actual, envelope, artifact
                 (job/'checked-simulator-verification.json').write_text(json.dumps(verified, indent=2)+'\n')
         if failure is not None:
             (job/'simulator-failure.json').write_text(json.dumps(failure, indent=2)+'\n')
-            # The design installs native code only after the stock verifier accepts B; a program whose B
-            # fails a stage stays on eBPF (the request fails and the shim keeps the original program).
-            raise RuntimeError(f"checked simulator {failure['stage']} failed; the program stays on eBPF")
+            return dict(load('load-direct', artifacts), execution_path='direct-native',
+                b_generated=failure['stage'] != 'generation', b_stock_passed=False,
+                simulator_failure=failure)
         artifacts = worker.compile_checked_simulator(artifacts, args.native_link, args.sim_native_compiler,
             context_compiler=getattr(args,'sim_context_compiler',None),
             public_layout=getattr(args,'sim_public_layout',None),

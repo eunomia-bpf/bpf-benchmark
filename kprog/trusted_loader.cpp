@@ -38,7 +38,7 @@ template<class T> T info(int fd) {
     return out;
 }
 
-void load(int argc, char **argv, bool verify_only) {
+void load(int argc, char **argv, bool verify_only, bool direct_native = false) {
     const int fixed = argc > 4 && u32(argv[4]) == 0 ? 21 : 17;
     if (argc < fixed || (argc - fixed) % 3) throw std::runtime_error("load requires fixed service fields and map triples");
     uint32_t service = u32(argv[2]);
@@ -48,7 +48,7 @@ void load(int argc, char **argv, bool verify_only) {
     native_loader::FdLoadOptions o;
     if (source) o.original_prog_fd = source->value;
     o.trusted_service_fd = service; o.trusted_request_id = number(argv[3]);
-    o.trusted_verify_only = verify_only;
+    o.trusted_verify_only = verify_only; o.trusted_direct_native = direct_native;
     o.native_object_path = argv[5]; o.symbol_name = argv[6];
     o.trusted_native_proof_path = argv[7]; o.proof_object_path = argv[8];
     o.trusted_simulator_program = argv[9]; o.native_link_path = argv[10];
@@ -75,7 +75,7 @@ void load(int argc, char **argv, bool verify_only) {
     native_loader::close_loaded_program(&program);
     if (!id) throw std::runtime_error("trusted loader returned no program identity");
     std::cout << "{\"request_id\":" << o.trusted_request_id << ",\"prog_id\":" << id
-        << ",\"phase\":\"" << (verify_only ? "verify" : "load") << "\",\"status\":0}" << std::endl;
+        << ",\"phase\":\"" << (verify_only ? "verify" : direct_native ? "load-direct" : "load") << "\",\"status\":0}" << std::endl;
 }
 void abi() {
     std::cout << sizeof(native_lab_trusted_request) << ' ' << sizeof(native_lab_trusted_result)
@@ -98,8 +98,9 @@ int main(int argc, char **argv) {
     try {
         if (argc == 2 && std::string(argv[1]) == "abi") abi();
         else if (argc > 1 && std::string(argv[1]) == "load") load(argc, argv, false);
+        else if (argc > 1 && std::string(argv[1]) == "load-direct") load(argc, argv, false, true);
         else if (argc > 1 && std::string(argv[1]) == "verify") load(argc, argv, true);
-        else throw std::runtime_error("usage: trusted-native-loader abi | load|verify SERVICE_FIELDS MAP_TRIPLES");
+        else throw std::runtime_error("usage: trusted-native-loader abi | load|verify|load-direct SERVICE_FIELDS MAP_TRIPLES");
         return 0;
     } catch (const native_loader::SimulatorVerificationError &e) {
         std::cerr << "trusted-native-loader: " << e.what() << '\n'; return 2;
