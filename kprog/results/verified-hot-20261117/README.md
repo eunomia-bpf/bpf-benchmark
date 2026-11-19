@@ -219,18 +219,67 @@ only when the loader can run; a program the loader skips still returns `()` unde
 obligation stays where it belongs. With that change the baseline of this run measures
 (`measurement_done phase=baseline status=ok`) and the requests follow.
 
-### The frontend compile is superlinear on one program shape
+### The frontend compile is linear in instruction sites, and one arm inflates each site
 
 Request 6 (`request-iwtue2bu`, `trusted_x86.bpf.c` 356 KB) spent **74 minutes** in the frontend compile
 `clang -w -g -O3 -mcpu=v4 -target bpf -mllvm -bpf-stack-size=4096 -emit-llvm -c`; requests 1-5 took
 about 24 s each, and request 3 was 7.5 MB packed, so the driver is the program's shape rather than its
-size. That program's preprocessed form holds two `always_inline` dispatch functions of 8,909 and 2,208
-lines and 558 `switch` statements.
+size.
 
-A gdb backtrace of the stuck process (reproduced on the host with the same input and clang) is
-`GVNPass::findLeader` → `DominatorTreeBase<llvm::BasicBlock, false>::updateDFSNumbers`, so GVN, not
-occupancy, is what costs the time. Measured on that input: `-O1` 123 s, `-O0` 136 s, `-O2` past 400 s,
-`-O3` past 25 min (25m of wall, 36m of user). `COMPILE_FLAGS` carries `-O3`.
+The 2026-11-18 record blamed `GVNPass::findLeader` from a gdb backtrace. That attribution is wrong:
+every GVN knob leaves the time unchanged, and only `-Xclang -ftime-report` (the `-mllvm -time-passes`
+route prints nothing on this clang) measures the real split. At `-O1` on the real 5,647,010-byte input
+`InstCombinePass` costs 190.2 s of 307.7 s (61.8%), against `SROAPass` 35.9 s and `AlwaysInlinerPass`
+18.4 s.
 
-Tetragon's verified run therefore completes but can take a long time on a large straight-line program.
+Cost is linear in instruction sites, so splitting the function cannot help. Label-preserving truncations
+of the real input at `-O3` gave 360 labels → 579 s and 720 labels → 1176 s, a slope of **1.658 s per
+label**; extrapolated to the program's 2,885 labels that is 4,766 s ≈ 80 min, which reproduces the
+recorded 74 minutes to within a few percent. The same truncations at `-O1` were linear too (720 → 179 s,
+1440 → 249 s).
+
+The per-site cost is 1.35 MB of frontend IR for a helper-call site against 10 KB for a MOV-immediate
+site, because `X86_SIM_DECLARE_INSTRUCTION` expands `X86_SIM_L_EXEC_DISPATCH` over all 57 arms in every
+constant-opcode wrapper, and `X86_SIM_L_ARM_CALL_HELPER` expands `X86_SIM_BPF_CALL_ID(IMM)` as a
+`switch` over all 70 helper slots. At `-O0` the frontend emits every arm body at every site — one
+`CALL_HELPER` call in an otherwise empty program emits 198,407 IR lines from 70 switch cases of ~1,830
+lines each — and only the optimizer removes the dead arms afterwards. Measured on the archived input:
+5.5 MB / 1 s with no call, 62 KB with one MOV-immediate call, 1.35 MB with one `CALL_HELPER` call,
+156.8 MB / 34 s with the helper switch reduced to one body, 929.3 MB / 198 s as shipped.
+
+Tetragon's verified run therefore completes but costs up to 74 minutes on a large straight-line program.
 Cilium, Katran and OTel follow in that order; each gets its own section here.
+
+### The frontend IR is not what the optimizer spends its time on (measured 2026-11-19)
+
+The per-site IR inflation above is real at `-O0`, but it does not explain the optimization cost. Removing it
+was measured, and the optimizer got *slower*.
+
+Every one of the 2,689 `X86_SIM_RUN_OP` sites in the archived input maps to an opcode whose
+`DIRECT_STEP_MACROS` entry (`kprog/x86/micro-prog/generated_x86_specialization.py`) names a dedicated
+`X86_SIM_L_EXEC_*` handler that bypasses the 57-arm chain; the 432 helper sites map to
+`STATIC_HELPER_CALLS` (`generate_micro_sim_proofs.py:1143`, the same table `direct_step_statement` already
+uses for the fidelity encoder). Rewriting the generated C that way, on the same archived program:
+
+| input | `-O0` IR / time | `-O1` time |
+|---|---|---|
+| as shipped | 929.3 MB / 198 s | 356 s |
+| helper sites → direct call (432 sites) | 147.1 MB / 39 s | — |
+| all literal sites → `X86_SIM_L_EXEC_*` | **50.0 MB / 33 s** | **847 s** |
+
+An 18× smaller frontend makes optimization **2.4× slower**. `-Xclang -ftime-report` on that smaller input
+gives the same shape as the shipped one — `InstCombinePass` 494.1 s of 847.1 s (60.5%), `SROAPass` 217.8 s
+(26.6%) — so the cost tracks the optimizer's work on the surviving code, not the byte count the frontend
+emitted. Two earlier rewrites (per-site arm macro, per-site arm function) were flat or worse for the same
+reason. Splitting the function does not help either, for the linear reason already recorded.
+
+Consequence: the cliff is a property of `-O3` on a large straight-line dispatcher, and the only lever that
+measured is the optimization level. `be3946f6d` moved B's frontend/backend to `-O1` (keeping `-g` for the
+BTF map externs libbpf must open) for that reason; P and the final native compile stay at `-O3`.
+
+That level change is not neutral for the artifact. B is analyzed and never executed
+(`kprog/docs/design.md:108`), so no timed number moves, but the emitted eBPF differs: compiling all 43
+`kprog/x86/micro-prog/*.bpf.c` at both levels and diffing the `llvm-objdump -d` streams gives 9 identical,
+28 larger at `-O1`, 6 smaller — 15,253 instructions at `-O1` against 13,624 at `-O3`, **+12.0%**, worst
+`packet_record_bounds_window` 453 vs 325 (**+39.4%**). The extra size lands on the B the verifier analyzes;
+it is not a claim about the timed native code.
