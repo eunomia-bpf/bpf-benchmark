@@ -533,7 +533,7 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None, stac
             if width == 64 and (count is None or count == 0):
                 if ri(args[0]):
                     reg = ri(args[0])[0]
-                    alias[reg] = incoming.aliases[reg] if count == 0 else None
+                    alias[reg] = incoming.aliases[reg] if count == 0 or incoming.aliases[reg] is False else None
                 elif stack_value_offsets is not None:
                     stack_value_offsets.add(None)
         # RSP is a private-stack offset even when its concrete value is

@@ -31,6 +31,8 @@ cases={
  'unknown':(['sub rsp,0x40','mov rcx,QWORD PTR [rdi]','mov QWORD PTR [rsp+rcx],rdi'],list(range(8))),
  'register_add':(['sub rsp,0x40','lea rbx,[rsp+0x8]','mov rcx,QWORD PTR [rdi]',
                  'add rbx,rcx','mov QWORD PTR [rbx],rdi'],list(range(8))),
+ 'unknown_inc':(['sub rsp,0x40','lea rbx,[rsp+0x8]','mov rcx,QWORD PTR [rdi]',
+                 'add rbx,rcx','inc rbx','mov QWORD PTR [rbx],rdi'],list(range(8))),
  'scalar_plus_pointer':(['sub rsp,0x40','mov rbx,0x8','add rbx,rsp',
                         'mov QWORD PTR [rbx],rdi'],list(range(8))),
  'index_pointer':(['sub rsp,0x40','lea rbx,[rsp+0x8]','lea rcx,[rbx*1]',
