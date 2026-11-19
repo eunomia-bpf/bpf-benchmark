@@ -72,15 +72,22 @@ exit:
 }}
 '''
 data_controls = {'plain': True, 'readonly': True, 'private_store': True,
-                 'mutating': False, 'identity_stale': False}
+                 'mutating': False, 'identity_stale': False, 'cb_store': True,
+                 'packet_data_store': False, 'cb_cross_end': False, 'foreign_cb_store': False,
+                 'xdp_cb_store': False}
 for name in data_controls:
     middle = {'plain': '', 'readonly': '  call void @read_context(ptr %ctx)\n',
               'private_store': '  store i8 7, ptr %local\n',
               'mutating': '  call void @mutate_context(ptr %ctx)\n',
-              'identity_stale': '  call void @mutate_context(ptr %ctx)\n  %carried = call i64 asm sideeffect "", "=r,0"(i64 %first)\n'}[name]
+              'identity_stale': '  call void @mutate_context(ptr %ctx)\n  %carried = call i64 asm sideeffect "", "=r,0"(i64 %first)\n'}.get(name, '')
+    if name in {'cb_store','packet_data_store','cb_cross_end','foreign_cb_store','xdp_cb_store'}:
+        offset = 76 if name == 'packet_data_store' else 66 if name == 'cb_cross_end' else 48
+        pointer = '%local' if name == 'foreign_cb_store' else '%ctx'
+        middle = f'''  %stored = call i64 asm sideeffect "$0 = $2\\0A*(u8 *)($1 + $3) = $0\\0A$0 >>= 8\\0A*(u8 *)($1 + $4) = $0\\0A$0 >>= 8\\0A*(u8 *)($1 + $5) = $0\\0A$0 >>= 8\\0A*(u8 *)($1 + $6) = $0", "=&r,r,r,i,i,i,i,~{{memory}}"(ptr {pointer}, i64 7, i64 {offset}, i64 {offset+1}, i64 {offset+2}, i64 {offset+3})\n'''
     left = '%carried' if name == 'identity_stale' else '%first'
-    controls+=f'''\ndefine i64 @ir_data_{name}(ptr %ctx) section "classifier" {{
-  %local = alloca i8
+    section = 'xdp' if name == 'xdp_cb_store' else 'classifier'
+    controls+=f'''\ndefine i64 @ir_data_{name}(ptr %ctx) section "{section}" {{
+  %local = alloca [4 x i8]
   %first = call i64 asm sideeffect "$0 = *(u32 *)($1 + $2)", "=r,r,i,~{{memory}}"(ptr %ctx, i64 76)
 {middle}  %second = call i64 asm sideeffect "$0 = *(u32 *)($1 + $2)", "=r,r,i,~{{memory}}"(ptr %ctx, i64 76)
   %value = add i64 {left}, %second
