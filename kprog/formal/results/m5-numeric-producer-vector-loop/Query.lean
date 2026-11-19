@@ -1,0 +1,32 @@
+import KProgFormal.ClightRefinement.Arm64NumericProducerVectorLoop
+open KProgFormal.ClightRefinement
+#check Arm64Producer.vector_loop_target_bound
+#print axioms Arm64Producer.vector_loop_target_bound
+#check Arm64Producer.vector_loop_value_bound
+#print axioms Arm64Producer.vector_loop_value_bound
+#check Arm64Producer.vector_loop_test_bound
+#print axioms Arm64Producer.vector_loop_test_bound
+#check Arm64Producer.vector_loop_increment_bound
+#print axioms Arm64Producer.vector_loop_increment_bound
+#check Arm64Producer.vector_loop_store_step_bound
+#print axioms Arm64Producer.vector_loop_store_step_bound
+#check Arm64Producer.vector_loop_iteration_bound
+#print axioms Arm64Producer.vector_loop_iteration_bound
+#check Arm64Producer.vector_loop_initialized_bound
+#print axioms Arm64Producer.vector_loop_initialized_bound
+#check Arm64Producer.vector_loop_exit_bound
+#print axioms Arm64Producer.vector_loop_exit_bound
+#check Arm64Producer.vector_pointers_initialized_bound
+#print axioms Arm64Producer.vector_pointers_initialized_bound
+#check Arm64Producer.header_initialized_before_consumer_bound
+#print axioms Arm64Producer.header_initialized_before_consumer_bound
+#check Arm64Producer.header_caches_before_consumer_bound
+#print axioms Arm64Producer.header_caches_before_consumer_bound
+#check Arm64Producer.vector_pointers_initialized
+#print axioms Arm64Producer.vector_pointers_initialized
+#check Arm64Producer.header_initialized_before_consumer
+#print axioms Arm64Producer.header_initialized_before_consumer
+#check Arm64Producer.header_caches_before_consumer
+#print axioms Arm64Producer.header_caches_before_consumer
+#check Arm64NumericProducerVectorLoop.initialized_vectors
+#print axioms Arm64NumericProducerVectorLoop.initialized_vectors

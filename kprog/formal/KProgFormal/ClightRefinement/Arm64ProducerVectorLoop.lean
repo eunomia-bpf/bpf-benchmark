@@ -64,41 +64,56 @@ theorem vector_loop_offsets : ∀ high : Bool, ∀ i : Fin 32,
     CC.Integers.Ptrofs.unsigned (vectorLoopSourceOffset high i) =
       16 * (i.val : Int) + (if high then 8 else 0) := by decide +kernel
 
-theorem vector_loop_target (m before : CC.Mem) (le : CC.TempEnv)
+theorem vector_loop_target_bound (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (m before : CC.Mem) (le : CC.TempEnv)
     (entry : HeaderLocal m) (high : Bool) (i : Fin 32)
     (index : le.get Arm64Entry._i = some (.Vint (CC.Integers.Int.repr i.val))) :
-    CC.doEvalLvalue ge (allocation m).1 le before (vectorLoopTarget high) =
+    CC.doEvalLvalue world (allocation m).1 le before (vectorLoopTarget high) =
       some (entry.block, vectorLoopHeaderOffset high i, .Full) := by
   cases high
   all_goals simp [vectorLoopTarget, vectorLoopIndex, headerType, CC.doEvalLvalue, CC.doEvalExpr,
-    CC.lvalOfVar, CC.doDerefLoc, CC.lvalOfField, CC.typeof, CC.accessMode, entry.binding, index,
+    CC.lvalOfVar, CC.doDerefLoc, CC.lvalOfField, CC.typeof, CC.accessMode, entry.binding, index, layout,
     null_vector_layout.1, null_vector_layout.2.1, null_vector_layout.2.2.1,
     CC.Cop.semBinaryOperation, CC.Cop.semAdd, CC.Cop.classifyAdd, CC.Cop.semAddPtrInt,
     CC.Cop.ptrofsOfInt, CC.typeconv, CC.removeAttributes, CC.tattr, CC.sizeof,
     CC.tptr, CC.tarray, CC.tuint, vectorLoopHeaderOffset]
   all_goals rfl
 
-theorem vector_loop_value (m before : CC.Mem) (le : CC.TempEnv)
+theorem vector_loop_target (m before : CC.Mem) (le : CC.TempEnv)
+    (entry : HeaderLocal m) (high : Bool) (i : Fin 32)
+    (index : le.get Arm64Entry._i = some (.Vint (CC.Integers.Int.repr i.val))) :
+    CC.doEvalLvalue ge (allocation m).1 le before (vectorLoopTarget high) =
+      some (entry.block, vectorLoopHeaderOffset high i, .Full) :=
+  vector_loop_target_bound ge rfl m before le entry high i index
+
+theorem vector_loop_value_bound (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (m before : CC.Mem) (le : CC.TempEnv)
     (vectors : VectorLocal m) (high : Bool) (i : Fin 32)
     (index : le.get Arm64Entry._i = some (.Vint (CC.Integers.Int.repr i.val))) :
-    CC.doEvalExpr ge (allocation m).1 le before (vectorLoopValue high) =
+    CC.doEvalExpr world (allocation m).1 le before (vectorLoopValue high) =
       some (.Vptr vectors.block (vectorLoopSourceOffset high i)) := by
   have size := vector_layout.2.1
   simp only [vectorType, CC.sizeof, vector_layout.1] at size
   cases high
   all_goals simp [vectorLoopValue, vectorLoopIndex, vectorType, vectorArrayType,
     CC.doEvalLvalue, CC.doEvalExpr, CC.lvalOfVar, CC.doDerefLoc, CC.lvalOfField,
-    CC.typeof, CC.accessMode, vectors.binding, index, vector_layout.1, size,
+    CC.typeof, CC.accessMode, vectors.binding, index, layout, vector_layout.1, size,
     vector_layout.2.2.1, vector_layout.2.2.2.1,
     CC.Cop.semBinaryOperation, CC.Cop.semAdd, CC.Cop.classifyAdd, CC.Cop.semAddPtrInt,
     CC.Cop.ptrofsOfInt, CC.typeconv, CC.removeAttributes, CC.tattr, CC.sizeof,
     CC.tptr, CC.tarray, CC.tuint, vectorLoopSourceOffset]
   all_goals rfl
 
-
-theorem vector_loop_test (m before : CC.Mem) (le : CC.TempEnv) (i : Fin 33)
+theorem vector_loop_value (m before : CC.Mem) (le : CC.TempEnv)
+    (vectors : VectorLocal m) (high : Bool) (i : Fin 32)
     (index : le.get Arm64Entry._i = some (.Vint (CC.Integers.Int.repr i.val))) :
-    CC.doEvalExpr ge (allocation m).1 le before vectorLoopTest =
+    CC.doEvalExpr ge (allocation m).1 le before (vectorLoopValue high) =
+      some (.Vptr vectors.block (vectorLoopSourceOffset high i)) :=
+  vector_loop_value_bound ge rfl m before le vectors high i index
+
+theorem vector_loop_test_bound (world : CC.CGenv) (m before : CC.Mem) (le : CC.TempEnv) (i : Fin 33)
+    (index : le.get Arm64Entry._i = some (.Vint (CC.Integers.Int.repr i.val))) :
+    CC.doEvalExpr world (allocation m).1 le before vectorLoopTest =
       some (.Vint (if i.val < 32 then 1 else 0)) := by
   simp only [vectorLoopTest, vectorLoopIndex, CC.doEvalExpr, index]
   change some (CC.Val.ofBool
@@ -108,9 +123,15 @@ theorem vector_loop_test (m before : CC.Mem) (le : CC.TempEnv) (i : Fin 33)
       CC.Val.Vint (if j.val < 32 then 1 else 0) := by decide +kernel
   rw [arithmetic]
 
-theorem vector_loop_increment (m before : CC.Mem) (le : CC.TempEnv) (i : Fin 32)
+theorem vector_loop_test (m before : CC.Mem) (le : CC.TempEnv) (i : Fin 33)
     (index : le.get Arm64Entry._i = some (.Vint (CC.Integers.Int.repr i.val))) :
-    CC.doEvalExpr ge (allocation m).1 le before
+    CC.doEvalExpr ge (allocation m).1 le before vectorLoopTest =
+      some (.Vint (if i.val < 32 then 1 else 0)) :=
+  vector_loop_test_bound ge m before le i index
+
+theorem vector_loop_increment_bound (world : CC.CGenv) (m before : CC.Mem) (le : CC.TempEnv) (i : Fin 32)
+    (index : le.get Arm64Entry._i = some (.Vint (CC.Integers.Int.repr i.val))) :
+    CC.doEvalExpr world (allocation m).1 le before
       (.Ebinop .Oadd vectorLoopIndex (.Econst_int 1 CC.tint) CC.tuint) =
       some (.Vint (CC.Integers.Int.repr (i.val + 1))) := by
   simp only [vectorLoopIndex, CC.doEvalExpr, index]
@@ -119,13 +140,21 @@ theorem vector_loop_increment (m before : CC.Mem) (le : CC.TempEnv) (i : Fin 32)
       CC.Integers.Int.repr (j.val + 1) := by decide +kernel
   rw [arithmetic]
 
+theorem vector_loop_increment (m before : CC.Mem) (le : CC.TempEnv) (i : Fin 32)
+    (index : le.get Arm64Entry._i = some (.Vint (CC.Integers.Int.repr i.val))) :
+    CC.doEvalExpr ge (allocation m).1 le before
+      (.Ebinop .Oadd vectorLoopIndex (.Econst_int 1 CC.tint) CC.tuint) =
+      some (.Vint (CC.Integers.Int.repr (i.val + 1))) :=
+  vector_loop_increment_bound ge m before le i index
+
 /-- The actual loop store is constructible from the allocated header resource;
 its frame is stated for arbitrary typed observations outside that slot. -/
-theorem vector_loop_store_step (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+theorem vector_loop_store_step_bound (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (entry : HeaderLocal m) (vectors : VectorLocal m) (high : Bool) (i : Fin 32)
     (index : le.get Arm64Entry._i = some (.Vint (CC.Integers.Int.repr i.val)))
     (access : before.access = (allocation m).2.access) :
-    ∃ after, CC.doStep ge
+    ∃ after, CC.doStep world
         (.State producer (vectorLoopStore high) k (allocation m).1 le before) =
         some (CC.E0, .State producer .Sskip k (allocation m).1 le after) ∧
       CC.Mem.load CC.Mptr after entry.block ((if high then 352 else 96) + 8 * (i.val : Int)) =
@@ -167,9 +196,9 @@ theorem vector_loop_store_step (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Con
   have storev : CC.Mem.storev CC.Mptr before (.Vptr entry.block (vectorLoopHeaderOffset high i))
       (.Vptr vectors.block (vectorLoopSourceOffset high i)) = some after := by
     simpa only [CC.Mem.storev, (vector_loop_offsets high i).1] using stored
-  have target := vector_loop_target m before le entry high i index
-  have value := vector_loop_value m before le vectors high i index
-  have assigned : CC.doStep ge
+  have target := vector_loop_target_bound world layout m before le entry high i index
+  have value := vector_loop_value_bound world layout m before le vectors high i index
+  have assigned : CC.doStep world
       (.State producer (vectorLoopStore high) k (allocation m).1 le before) =
       some (CC.E0, .State producer .Sskip k (allocation m).1 le after) := by
     simp only [vectorLoopStore, CC.doStep, target, value]
@@ -185,9 +214,91 @@ theorem vector_loop_store_step (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Con
   intro chunk block ofs separate
   exact CC.Mem.load_store_other stored chunk block ofs separate
 
+theorem vector_loop_store_step (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (entry : HeaderLocal m) (vectors : VectorLocal m) (high : Bool) (i : Fin 32)
+    (index : le.get Arm64Entry._i = some (.Vint (CC.Integers.Int.repr i.val)))
+    (access : before.access = (allocation m).2.access) :
+    ∃ after, CC.doStep ge
+        (.State producer (vectorLoopStore high) k (allocation m).1 le before) =
+        some (CC.E0, .State producer .Sskip k (allocation m).1 le after) ∧
+      CC.Mem.load CC.Mptr after entry.block ((if high then 352 else 96) + 8 * (i.val : Int)) =
+        some (.Vptr vectors.block (vectorLoopSourceOffset high i)) ∧
+      (∀ chunk block ofs, block ≠ entry.block ∨
+          ofs + CC.sizeChunk chunk ≤ (if high then 352 else 96) + 8 * (i.val : Int) ∨
+          (if high then 352 else 96) + 8 * (i.val : Int) + 8 ≤ ofs →
+        CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock :=
+  vector_loop_store_step_bound ge rfl m before le k entry vectors high i index access
 
 /-- One successful iteration of the actual exported loop, including the test,
 both stores, and the uint32 counter increment. -/
+theorem vector_loop_iteration_bound (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (entry : HeaderLocal m) (vectors : VectorLocal m) (i : Fin 32)
+    (index : le.get Arm64Entry._i = some (.Vint (CC.Integers.Int.repr i.val)))
+    (access : before.access = (allocation m).2.access) :
+    ∃ after, InternalRun world 11
+        (.State producer vectorLoop k (allocation m).1 le before)
+        (.State producer vectorLoop k (allocation m).1
+          (le.set Arm64Entry._i (.Vint (CC.Integers.Int.repr (i.val + 1)))) after) ∧
+      CC.Mem.load CC.Mptr after entry.block (96 + 8 * (i.val : Int)) =
+        some (.Vptr vectors.block (vectorLoopSourceOffset false i)) ∧
+      CC.Mem.load CC.Mptr after entry.block (352 + 8 * (i.val : Int)) =
+        some (.Vptr vectors.block (vectorLoopSourceOffset true i)) ∧
+      (∀ chunk block ofs,
+        (block ≠ entry.block ∨ ofs + CC.sizeChunk chunk ≤ 96 + 8 * (i.val : Int) ∨
+          96 + 8 * (i.val : Int) + 8 ≤ ofs) →
+        (block ≠ entry.block ∨ ofs + CC.sizeChunk chunk ≤ 352 + 8 * (i.val : Int) ∨
+          352 + 8 * (i.val : Int) + 8 ≤ ofs) →
+        CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock := by
+  let loopK := CC.Cont.Kloop1 vectorLoopBody vectorLoopIncrement k
+  let stores := CC.Stmt.Ssequence (vectorLoopStore false) (vectorLoopStore true)
+  obtain ⟨middle, lowStep, lowRead, lowOther, lowFrame, lowAccess, lowNext⟩ :=
+    vector_loop_store_step_bound world layout m before le (.Kseq (vectorLoopStore true) loopK)
+      entry vectors false i index access
+  obtain ⟨after, highStep, highRead, highOther, highFrame, highAccess, highNext⟩ :=
+    vector_loop_store_step_bound world layout m middle le loopK entry vectors true i index (lowAccess.trans access)
+  have test := vector_loop_test_bound world m before le ⟨i.val, by have h := i.isLt; omega⟩ index
+  change CC.doEvalExpr world (allocation m).1 le before vectorLoopTest =
+    some (.Vint (if i.val < 32 then 1 else 0)) at test
+  rw [ite_eq_left i.isLt] at test
+  have branch : CC.doStep world
+      (.State producer (.Sifthenelse vectorLoopTest .Sskip .Sbreak)
+        (.Kseq stores loopK) (allocation m).1 le before) =
+      some (CC.E0, .State producer .Sskip (.Kseq stores loopK) (allocation m).1 le before) := by
+    simp only [CC.doStep, test]
+    rfl
+  have increment : CC.doStep world
+      (.State producer vectorLoopIncrement (.Kloop2 vectorLoopBody vectorLoopIncrement k)
+        (allocation m).1 le after) =
+      some (CC.E0, .State producer .Sskip (.Kloop2 vectorLoopBody vectorLoopIncrement k)
+        (allocation m).1 (le.set Arm64Entry._i (.Vint (CC.Integers.Int.repr (i.val + 1)))) after) := by
+    simp only [vectorLoopIncrement, CC.doStep, vector_loop_increment_bound world m after le i index]
+  have run : InternalRun world 11
+      (.State producer vectorLoop k (allocation m).1 le before)
+      (.State producer vectorLoop k (allocation m).1
+        (le.set Arm64Entry._i (.Vint (CC.Integers.Int.repr (i.val + 1)))) after) :=
+    .step trivial (CC.doStep_sound world _ _ _ rfl)
+      (.step trivial (CC.doStep_sound world _ _ _ rfl)
+        (.step trivial (CC.doStep_sound world _ _ _ branch)
+          (.step trivial (CC.doStep_sound world _ _ _ rfl)
+            (.step trivial (CC.doStep_sound world _ _ _ rfl)
+              (.step trivial (CC.doStep_sound world _ _ _ lowStep)
+                (.step trivial (CC.doStep_sound world _ _ _ rfl)
+                  (.step trivial (CC.doStep_sound world _ _ _ highStep)
+                    (.step trivial (CC.doStep_sound world _ _ _ rfl)
+                      (.step trivial (CC.doStep_sound world _ _ _ increment)
+                        (.step trivial (CC.doStep_sound world _ _ _ rfl) (.refl _)))))))))))
+  refine ⟨after, run, ?_, highRead, ?_, lowFrame.trans highFrame,
+    highAccess.trans lowAccess, highNext.trans lowNext⟩
+  · exact (highOther CC.Mptr entry.block (96 + 8 * (i.val : Int))
+      (.inr (.inl (by change 96 + 8 * (i.val : Int) + 8 ≤ 352 + 8 * (i.val : Int); omega)))).trans lowRead
+  · intro chunk block ofs outsideLow outsideHigh
+    exact (highOther chunk block ofs outsideHigh).trans (lowOther chunk block ofs outsideLow)
+
 theorem vector_loop_iteration (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (entry : HeaderLocal m) (vectors : VectorLocal m) (i : Fin 32)
     (index : le.get Arm64Entry._i = some (.Vint (CC.Integers.Int.repr i.val)))
@@ -207,71 +318,34 @@ theorem vector_loop_iteration (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont
           352 + 8 * (i.val : Int) + 8 ≤ ofs) →
         CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
       FrameBelow m.nextblock before after ∧ after.access = before.access ∧
-      after.nextblock = before.nextblock := by
-  let loopK := CC.Cont.Kloop1 vectorLoopBody vectorLoopIncrement k
-  let stores := CC.Stmt.Ssequence (vectorLoopStore false) (vectorLoopStore true)
-  obtain ⟨middle, lowStep, lowRead, lowOther, lowFrame, lowAccess, lowNext⟩ :=
-    vector_loop_store_step m before le (.Kseq (vectorLoopStore true) loopK)
-      entry vectors false i index access
-  obtain ⟨after, highStep, highRead, highOther, highFrame, highAccess, highNext⟩ :=
-    vector_loop_store_step m middle le loopK entry vectors true i index (lowAccess.trans access)
-  have test := vector_loop_test m before le ⟨i.val, by have h := i.isLt; omega⟩ index
-  change CC.doEvalExpr ge (allocation m).1 le before vectorLoopTest =
-    some (.Vint (if i.val < 32 then 1 else 0)) at test
-  rw [ite_eq_left i.isLt] at test
-  have branch : CC.doStep ge
-      (.State producer (.Sifthenelse vectorLoopTest .Sskip .Sbreak)
-        (.Kseq stores loopK) (allocation m).1 le before) =
-      some (CC.E0, .State producer .Sskip (.Kseq stores loopK) (allocation m).1 le before) := by
-    simp only [CC.doStep, test]
-    rfl
-  have increment : CC.doStep ge
-      (.State producer vectorLoopIncrement (.Kloop2 vectorLoopBody vectorLoopIncrement k)
-        (allocation m).1 le after) =
-      some (CC.E0, .State producer .Sskip (.Kloop2 vectorLoopBody vectorLoopIncrement k)
-        (allocation m).1 (le.set Arm64Entry._i (.Vint (CC.Integers.Int.repr (i.val + 1)))) after) := by
-    simp only [vectorLoopIncrement, CC.doStep, vector_loop_increment m after le i index]
-  have run : InternalRun ge 11
-      (.State producer vectorLoop k (allocation m).1 le before)
-      (.State producer vectorLoop k (allocation m).1
-        (le.set Arm64Entry._i (.Vint (CC.Integers.Int.repr (i.val + 1)))) after) :=
-    .step trivial (CC.doStep_sound ge _ _ _ rfl)
-      (.step trivial (CC.doStep_sound ge _ _ _ rfl)
-        (.step trivial (CC.doStep_sound ge _ _ _ branch)
-          (.step trivial (CC.doStep_sound ge _ _ _ rfl)
-            (.step trivial (CC.doStep_sound ge _ _ _ rfl)
-              (.step trivial (CC.doStep_sound ge _ _ _ lowStep)
-                (.step trivial (CC.doStep_sound ge _ _ _ rfl)
-                  (.step trivial (CC.doStep_sound ge _ _ _ highStep)
-                    (.step trivial (CC.doStep_sound ge _ _ _ rfl)
-                      (.step trivial (CC.doStep_sound ge _ _ _ increment)
-                        (.step trivial (CC.doStep_sound ge _ _ _ rfl) (.refl _)))))))))))
-  refine ⟨after, run, ?_, highRead, ?_, lowFrame.trans highFrame,
-    highAccess.trans lowAccess, highNext.trans lowNext⟩
-  · exact (highOther CC.Mptr entry.block (96 + 8 * (i.val : Int))
-      (.inr (.inl (by change 96 + 8 * (i.val : Int) + 8 ≤ 352 + 8 * (i.val : Int); omega)))).trans lowRead
-  · intro chunk block ofs outsideLow outsideHigh
-    exact (highOther chunk block ofs outsideHigh).trans (lowOther chunk block ofs outsideLow)
+      after.nextblock = before.nextblock :=
+  vector_loop_iteration_bound ge rfl m before le k entry vectors i index access
 
 /-- Initialization reaches the actual loop with an unsigned zero counter. -/
-theorem vector_loop_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) :
-    InternalRun ge 4 (.State producer beforeVectorLoop k (allocation m).1 le before)
+theorem vector_loop_initialized_bound (world : CC.CGenv) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) :
+    InternalRun world 4 (.State producer beforeVectorLoop k (allocation m).1 le before)
       (.State producer vectorLoop (.Kseq afterVectorLoop k) (allocation m).1
         (le.set Arm64Entry._i (.Vint 0)) before) := by
   rw [vector_loop_source]
-  exact .step trivial (CC.doStep_sound ge _ _ _ rfl)
-    (.step trivial (CC.doStep_sound ge _ _ _ rfl)
-      (.step trivial (CC.doStep_sound ge _ _ _ rfl)
-        (.step trivial (CC.doStep_sound ge _ _ _ rfl) (.refl _))))
+  exact .step trivial (CC.doStep_sound world _ _ _ rfl)
+    (.step trivial (CC.doStep_sound world _ _ _ rfl)
+      (.step trivial (CC.doStep_sound world _ _ _ rfl)
+        (.step trivial (CC.doStep_sound world _ _ _ rfl) (.refl _))))
+
+theorem vector_loop_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) :
+    InternalRun ge 4 (.State producer beforeVectorLoop k (allocation m).1 le before)
+      (.State producer vectorLoop (.Kseq afterVectorLoop k) (allocation m).1
+        (le.set Arm64Entry._i (.Vint 0)) before) :=
+  vector_loop_initialized_bound ge m before le k
 
 /-- At counter32 the actual break exits to the source consumer sequence. -/
-theorem vector_loop_exit (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+theorem vector_loop_exit_bound (world : CC.CGenv) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (index : le.get Arm64Entry._i = some (.Vint 32)) :
-    InternalRun ge 6
+    InternalRun world 6
       (.State producer vectorLoop (.Kseq afterVectorLoop k) (allocation m).1 le before)
       (.State producer afterVectorLoop k (allocation m).1 le before) := by
-  have test := vector_loop_test m before le ⟨32, by decide⟩ index
-  have branch : CC.doStep ge
+  have test := vector_loop_test_bound world m before le ⟨32, by decide⟩ index
+  have branch : CC.doStep world
       (.State producer (.Sifthenelse vectorLoopTest .Sskip .Sbreak)
         (.Kseq (.Ssequence (vectorLoopStore false) (vectorLoopStore true))
           (.Kloop1 vectorLoopBody vectorLoopIncrement (.Kseq afterVectorLoop k)))
@@ -282,13 +356,19 @@ theorem vector_loop_exit (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
         (allocation m).1 le before) := by
     simp only [CC.doStep, test]
     rfl
-  exact .step trivial (CC.doStep_sound ge _ _ _ rfl)
-    (.step trivial (CC.doStep_sound ge _ _ _ rfl)
-      (.step trivial (CC.doStep_sound ge _ _ _ branch)
-        (.step trivial (CC.doStep_sound ge _ _ _ rfl)
-          (.step trivial (CC.doStep_sound ge _ _ _ rfl)
-            (.step trivial (CC.doStep_sound ge _ _ _ rfl) (.refl _))))))
+  exact .step trivial (CC.doStep_sound world _ _ _ rfl)
+    (.step trivial (CC.doStep_sound world _ _ _ rfl)
+      (.step trivial (CC.doStep_sound world _ _ _ branch)
+        (.step trivial (CC.doStep_sound world _ _ _ rfl)
+          (.step trivial (CC.doStep_sound world _ _ _ rfl)
+            (.step trivial (CC.doStep_sound world _ _ _ rfl) (.refl _))))))
 
+theorem vector_loop_exit (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (index : le.get Arm64Entry._i = some (.Vint 32)) :
+    InternalRun ge 6
+      (.State producer vectorLoop (.Kseq afterVectorLoop k) (allocation m).1 le before)
+      (.State producer afterVectorLoop k (allocation m).1 le before) :=
+  vector_loop_exit_bound ge m before le k index
 
 private theorem vector_pair_separate (high side : Bool) (i j : Fin 32) (different : j ≠ i) :
     (if high then 352 else 96 : Int) + 8 * (j.val : Int) + 8 ≤
@@ -300,11 +380,12 @@ private theorem vector_pair_separate (high side : Bool) (i j : Fin 32) (differen
   have jb := j.isLt
   cases high <;> cases side <;> simp only [Bool.false_eq_true, ite_false, ite_true] <;> omega
 
-private theorem vector_loop_iteration_frame (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+private theorem vector_loop_iteration_frame (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (entry : HeaderLocal m) (vectors : VectorLocal m) (i : Fin 32)
     (index : le.get Arm64Entry._i = some (.Vint (CC.Integers.Int.repr i.val)))
     (access : before.access = (allocation m).2.access) :
-    ∃ after, InternalRun ge 11
+    ∃ after, InternalRun world 11
         (.State producer vectorLoop k (allocation m).1 le before)
         (.State producer vectorLoop k (allocation m).1
           (le.set Arm64Entry._i (.Vint (CC.Integers.Int.repr (i.val + 1)))) after) ∧
@@ -319,7 +400,7 @@ private theorem vector_loop_iteration_frame (m before : CC.Mem) (le : CC.TempEnv
       FrameBelow m.nextblock before after ∧ after.access = before.access ∧
       after.nextblock = before.nextblock := by
   obtain ⟨after, run, lowRead, highRead, keep, frame, finalAccess, next⟩ :=
-    vector_loop_iteration m before le k entry vectors i index access
+    vector_loop_iteration_bound world layout m before le k entry vectors i index access
   refine ⟨after, run, ?_, ?_, ?_, frame, finalAccess, next⟩
   · intro high; cases high
     · exact lowRead
@@ -339,12 +420,13 @@ private theorem vector_loop_iteration_frame (m before : CC.Mem) (le : CC.TempEnv
       · exact .inr (.inl (Int.le_trans h (by omega)))
       · exact .inr (.inr (Int.le_trans (by omega) h))
 
-private theorem vector_loop_suffix (fuel start : Nat) (total : start + fuel = 32)
+private theorem vector_loop_suffix (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (fuel start : Nat) (total : start + fuel = 32)
     (m : CC.Mem) (entry : HeaderLocal m) (vectors : VectorLocal m)
     (before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (index : le.get Arm64Entry._i = some (.Vint (CC.Integers.Int.repr start)))
     (access : before.access = (allocation m).2.access) :
-    ∃ after finalLe, InternalRun ge (11 * fuel)
+    ∃ after finalLe, InternalRun world (11 * fuel)
         (.State producer vectorLoop k (allocation m).1 le before)
         (.State producer vectorLoop k (allocation m).1 finalLe after) ∧
       finalLe.get Arm64Entry._i = some (.Vint 32) ∧
@@ -372,7 +454,7 @@ private theorem vector_loop_suffix (fuel start : Nat) (total : start + fuel = 32
     have bound : start < 32 := by omega
     let i : Fin 32 := ⟨start, bound⟩
     obtain ⟨middle, headRun, headRead, headOther, headOutside, headFrame, headAccess, headNext⟩ :=
-      vector_loop_iteration_frame m before le k entry vectors i index access
+      vector_loop_iteration_frame world layout m before le k entry vectors i index access
     obtain ⟨after, finalLe, tailRun, tailIndex, tailTemps, tailRead, tailEarlier, tailOutside,
       tailFrame, tailAccess, tailNext⟩ :=
       ih (start + 1) (by omega) middle
@@ -397,6 +479,32 @@ private theorem vector_loop_suffix (fuel start : Nat) (total : start + fuel = 32
 
 /-- All 32 actual iterations reach the source consumer sequence.  Both pointer
 arrays are populated, all other typed header/local observations are framed. -/
+theorem vector_pointers_initialized_bound (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (m before : CC.Mem) (entry : HeaderLocal m)
+    (vectors : VectorLocal m) (le : CC.TempEnv) (k : CC.Cont)
+    (access : before.access = (allocation m).2.access) :
+    ∃ after finalLe, InternalRun world 362
+        (.State producer beforeVectorLoop k (allocation m).1 le before)
+        (.State producer afterVectorLoop k (allocation m).1 finalLe after) ∧
+      finalLe.get Arm64Entry._i = some (.Vint 32) ∧
+      (∀ id, id ≠ Arm64Entry._i → finalLe.get id = le.get id) ∧
+      (∀ (high : Bool) (i : Fin 32), CC.Mem.load CC.Mptr after entry.block
+        ((if high then 352 else 96) + 8 * (i.val : Int)) =
+        some (.Vptr vectors.block (vectorLoopSourceOffset high i))) ∧
+      (∀ chunk block ofs, block ≠ entry.block ∨ ofs + CC.sizeChunk chunk ≤ 96 ∨ 608 ≤ ofs →
+        CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock := by
+  obtain ⟨after, finalLe, loopRun, finalIndex, temps, read, _, outside, frame, finalAccess, next⟩ :=
+    vector_loop_suffix world layout 32 0 rfl m entry vectors before (le.set Arm64Entry._i (.Vint 0))
+      (.Kseq afterVectorLoop k) (CC.PTree.gss _ _ _) access
+  refine ⟨after, finalLe,
+    ((vector_loop_initialized_bound world m before le k).trans loopRun).trans
+      (vector_loop_exit_bound world m after finalLe k finalIndex), finalIndex, ?_,
+    (fun high i => read high i (Nat.zero_le _)), outside, frame, finalAccess, next⟩
+  intro id different
+  exact (temps id different).trans (CC.PTree.gso _ _ _ _ (Ne.symm different))
+
 theorem vector_pointers_initialized (m before : CC.Mem) (entry : HeaderLocal m)
     (vectors : VectorLocal m) (le : CC.TempEnv) (k : CC.Cont)
     (access : before.access = (allocation m).2.access) :
@@ -411,17 +519,8 @@ theorem vector_pointers_initialized (m before : CC.Mem) (entry : HeaderLocal m)
       (∀ chunk block ofs, block ≠ entry.block ∨ ofs + CC.sizeChunk chunk ≤ 96 ∨ 608 ≤ ofs →
         CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
       FrameBelow m.nextblock before after ∧ after.access = before.access ∧
-      after.nextblock = before.nextblock := by
-  obtain ⟨after, finalLe, loopRun, finalIndex, temps, read, _, outside, frame, finalAccess, next⟩ :=
-    vector_loop_suffix 32 0 rfl m entry vectors before (le.set Arm64Entry._i (.Vint 0))
-      (.Kseq afterVectorLoop k) (CC.PTree.gss _ _ _) access
-  refine ⟨after, finalLe,
-    ((vector_loop_initialized m before le k).trans loopRun).trans
-      (vector_loop_exit m after finalLe k finalIndex), finalIndex, ?_,
-    (fun high i => read high i (Nat.zero_le _)), outside, frame, finalAccess, next⟩
-  intro id different
-  exact (temps id different).trans (CC.PTree.gso _ _ _ _ (Ne.symm different))
-
+      after.nextblock = before.nextblock :=
+  vector_pointers_initialized_bound ge rfl m before entry vectors le k access
 
 /-- The reached tail calls the actual continuation temporary with &entry. -/
 theorem vector_loop_consumer_source : afterVectorLoop = .Ssequence
@@ -433,11 +532,13 @@ theorem vector_loop_consumer_source : afterVectorLoop = .Ssequence
 
 /-- Complete header construction and its vector loop, at the same allocated
 entry, reaching the actual consumer sequence with all 92 field observations. -/
-theorem header_initialized_before_consumer (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+theorem header_initialized_before_consumer_bound (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (symbols : ∀ store, CC.Genv.findSymbol world.genv_genv (payloadCallbackName store) =
+      some (payloadCallbackBlock store)) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (access : before.access = (allocation m).2.access) :
     ∃ entry : HeaderLocal m, ∃ cells : (i : Fin 12) → HeaderSourceLocal m i,
     ∃ sources : (i : Fin 9) → TailLocal m i, ∃ vectors : VectorLocal m, ∃ after finalLe,
-      InternalRun ge 638 (.State producer afterContext k (allocation m).1 le before)
+      InternalRun world 638 (.State producer afterContext k (allocation m).1 le before)
         (.State producer afterVectorLoop k (allocation m).1 finalLe after) ∧
       finalLe.get Arm64Entry._i = some (.Vint 32) ∧
       (∀ id, id ≠ Arm64Entry._i → finalLe.get id = le.get id) ∧
@@ -453,10 +554,10 @@ theorem header_initialized_before_consumer (m before : CC.Mem) (le : CC.TempEnv)
   classical
   obtain ⟨entry, cells, sources, middle, headRun, scalarReads, _, tailReads,
     headLocals, headFrame, headAccess, headNext⟩ :=
-    header_initialized_before_loop m before le k access
+    header_initialized_before_loop_bound world layout symbols m before le k access
   let vectors := Classical.choice (vector_local m)
   obtain ⟨after, finalLe, loopRun, index, temps, vectorReads, outside, loopFrame, loopAccess, loopNext⟩ :=
-    vector_pointers_initialized m middle entry vectors le k (headAccess.trans access)
+    vector_pointers_initialized_bound world layout m middle entry vectors le k (headAccess.trans access)
   refine ⟨entry, cells, sources, vectors, after, finalLe, headRun.trans loopRun,
     index, temps, ?_, vectorReads, ?_, ?_, headFrame.trans loopFrame,
     loopAccess.trans headAccess, loopNext.trans headNext⟩
@@ -475,7 +576,43 @@ theorem header_initialized_before_consumer (m before : CC.Mem) (le : CC.TempEnv)
     exact (outside chunk block ofs (.inl (distinct _ _ _ _ binding entry.binding different))).trans
       (headLocals id ty block binding different chunk ofs)
 
+theorem header_initialized_before_consumer (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (access : before.access = (allocation m).2.access) :
+    ∃ entry : HeaderLocal m, ∃ cells : (i : Fin 12) → HeaderSourceLocal m i,
+    ∃ sources : (i : Fin 9) → TailLocal m i, ∃ vectors : VectorLocal m, ∃ after finalLe,
+      InternalRun ge 638 (.State producer afterContext k (allocation m).1 le before)
+        (.State producer afterVectorLoop k (allocation m).1 finalLe after) ∧
+      finalLe.get Arm64Entry._i = some (.Vint 32) ∧
+      (∀ id, id ≠ Arm64Entry._i → finalLe.get id = le.get id) ∧
+      (∀ i, CC.Mem.load CC.Mptr after entry.block (8 * (i.val : Int)) = some (.Vptr (cells i).block 0)) ∧
+      (∀ (high : Bool) (i : Fin 32), CC.Mem.load CC.Mptr after entry.block
+        ((if high then 352 else 96) + 8 * (i.val : Int)) =
+        some (.Vptr vectors.block (vectorLoopSourceOffset high i))) ∧
+      (∀ i, CC.Mem.load (tailChunk i) after entry.block (tailOffset i) = some (tailValue sources i)) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ≠ Arm64Entry._entry →
+        ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock :=
+  header_initialized_before_consumer_bound ge rfl (fun store => (payload_callback_binding store).1) m before le k access
+
 /-- Both borrowed caches survive the complete actual vector-pointer loop. -/
+theorem header_caches_before_consumer_bound (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (symbols : ∀ store, CC.Genv.findSymbol world.genv_genv (payloadCallbackName store) =
+      some (payloadCallbackBlock store)) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (access : before.access = (allocation m).2.access) :
+    ∃ stack : CacheLocals false m, ∃ returns : CacheLocals true m, ∃ after finalLe,
+      InternalRun world 638 (.State producer afterContext k (allocation m).1 le before)
+        (.State producer afterVectorLoop k (allocation m).1 finalLe after) ∧
+      Nonempty (Arm64RegisterReads.BorrowedCacheStorage false (allocation m).2.nextblock stack.entryBlock 0 after) ∧
+      Nonempty (Arm64RegisterReads.BorrowedCacheStorage true (allocation m).2.nextblock returns.entryBlock 0 after) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock := by
+  obtain ⟨entry, cells, _, _, after, finalLe, run, _, _, reads, _, _, _, frame, afterAccess, next⟩ :=
+    header_initialized_before_consumer_bound world layout symbols m before le k access
+  obtain ⟨stack, stackStorage⟩ := header_cache_storage false m after entry cells (afterAccess.trans access) reads
+  obtain ⟨returns, returnStorage⟩ := header_cache_storage true m after entry cells (afterAccess.trans access) reads
+  exact ⟨stack, returns, after, finalLe, run, stackStorage, returnStorage, frame, afterAccess, next⟩
+
 theorem header_caches_before_consumer (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (access : before.access = (allocation m).2.access) :
     ∃ stack : CacheLocals false m, ∃ returns : CacheLocals true m, ∃ after finalLe,
@@ -484,11 +621,7 @@ theorem header_caches_before_consumer (m before : CC.Mem) (le : CC.TempEnv) (k :
       Nonempty (Arm64RegisterReads.BorrowedCacheStorage false (allocation m).2.nextblock stack.entryBlock 0 after) ∧
       Nonempty (Arm64RegisterReads.BorrowedCacheStorage true (allocation m).2.nextblock returns.entryBlock 0 after) ∧
       FrameBelow m.nextblock before after ∧ after.access = before.access ∧
-      after.nextblock = before.nextblock := by
-  obtain ⟨entry, cells, _, _, after, finalLe, run, _, _, reads, _, _, _, frame, afterAccess, next⟩ :=
-    header_initialized_before_consumer m before le k access
-  obtain ⟨stack, stackStorage⟩ := header_cache_storage false m after entry cells (afterAccess.trans access) reads
-  obtain ⟨returns, returnStorage⟩ := header_cache_storage true m after entry cells (afterAccess.trans access) reads
-  exact ⟨stack, returns, after, finalLe, run, stackStorage, returnStorage, frame, afterAccess, next⟩
+      after.nextblock = before.nextblock :=
+  header_caches_before_consumer_bound ge rfl (fun store => (payload_callback_binding store).1) m before le k access
 
 end KProgFormal.ClightRefinement.Arm64Producer

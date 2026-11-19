@@ -74,3 +74,4 @@ import KProgFormal.ClightRefinement.Arm64NumericProducerContext
 import KProgFormal.ClightRefinement.Arm64NumericProducerHeader
 import KProgFormal.ClightRefinement.Arm64NumericProducerHeaderVectors
 import KProgFormal.ClightRefinement.Arm64NumericProducerHeaderTail
+import KProgFormal.ClightRefinement.Arm64NumericProducerVectorLoop

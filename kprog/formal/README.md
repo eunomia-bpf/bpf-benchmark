@@ -148,6 +148,11 @@ adds the last 16 header stores in 48 transitions. Both callback symbols and
 function bodies are derived in the actual Numeric environment; stack-tag and
 helper-context pointers connect to the earlier locals. All 92 header readbacks,
 initialized data, cache resources and 98 traces survive up to the live vector loop.
+The [Numeric live-vector loop](results/m5-numeric-producer-vector-loop/README.md)
+executes all 32 iterations in 362 transitions, deriving 64 live pointers to
+the existing input words and all 32 borrowed-reader pairs. Scalar/tail fields,
+other initialized data, cache resources and 98 traces survive. The loop ends
+with `_i = 32` and preserves other temporaries, including the retained `_ctx`.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 
