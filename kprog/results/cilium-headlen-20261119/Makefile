@@ -1,9 +1,10 @@
 .PHONY: prepare check replay stock-probe stock stock-guest coverage
 INPUTS ?= /workspaces/kprog-raw/perf/cilium-headlen-20261119/inputs-41/inputs.json
+SOURCE_ARCHIVE ?= /workspaces/kprog-raw/verified/20261119-checked-cilium/service.tar.gz
 coverage:
 	python3 kprog/results/cilium-headlen-20261119/coverage.py $(ARCHIVE) $(OUT)
 prepare:
-	python3 kprog/results/cilium-headlen-20261119/prepare.py $(OUT) $(PREVIOUS)
+	python3 kprog/results/cilium-headlen-20261119/prepare.py $(OUT) "$(PREVIOUS)" "$(SOURCE_ARCHIVE)"
 check:
 	python3 kprog/results/cilium-headlen-20261119/check.py $(OUT) $(MODE)
 replay:

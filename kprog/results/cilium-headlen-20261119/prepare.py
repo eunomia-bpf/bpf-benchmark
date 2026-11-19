@@ -6,8 +6,8 @@ import sys
 import tarfile
 
 out = Path(sys.argv[1]); out.mkdir(parents=True, exist_ok=True)
-source = Path('/workspaces/kprog-raw/verified/20261119-checked-cilium/service.tar.gz')
-previous = json.loads(Path(sys.argv[2]).read_text()) if len(sys.argv) == 3 else None
+source = Path(sys.argv[3]) if len(sys.argv) == 4 else Path('/workspaces/kprog-raw/verified/20261119-checked-cilium/service.tar.gz')
+previous = json.loads(Path(sys.argv[2]).read_text()) if len(sys.argv) >= 3 and sys.argv[2] else None
 reused = {row['request']: row for row in previous['requests']} if previous else {}
 if previous and previous['source_archive'] != str(source):
     raise ValueError('retained inputs belong to a different service archive')
