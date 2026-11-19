@@ -1,0 +1,28 @@
+{
+  "mode": "before",
+  "selection": {
+    "head_ge": false,
+    "head_not_lt": false,
+    "old_tc": true,
+    "old_xdp": true,
+    "asm_tc": false,
+    "ir_uge32": false,
+    "ir_ule32": false,
+    "ir_ugt64": false,
+    "ir_uge64": false,
+    "ir_ult64": false,
+    "ir_ule64": false,
+    "wrong_root": false,
+    "wrong_offset": false,
+    "wrong_section": false,
+    "equality": false,
+    "signed_negative": false
+  },
+  "b_emitted": false,
+  "scope": "Distinct current old-compiler baseline: two original spans match, nine new headlen/asm forms missed, five exclusions retained. No candidate B/stock/current-app pass.",
+  "recorded": "2026-11-19T20:50:12Z",
+  "raw": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/explicit-before-20261119T204911Z",
+  "wrapper_exit": 0,
+  "final_candidate_syntax_raw": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/syntax-bound-20261119T204439Z",
+  "final_candidate_syntax_exit": 0
+}

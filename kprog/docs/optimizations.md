@@ -1388,3 +1388,14 @@ Katran replay/stock8positive fixtures/40captured frontends andfreshCilium
 checked-corpus (1x10functional, notofficialtiming). Replays4workers on8-11
 with8GiBAS perchild; appusesexisting48GVM/80GAS on18-19. AllLTO stayson;
 no frontendrepeat forcaptured40 and no newtimingwrapper. Acceptance pending.
+
+PERF 2026-11-19T20:50:12Z: Removed3C fixture spellings that Clang canonicalized to
+already covered comparisons. Current matrix has11distinct positives:
+2original loads,2classifier u32C branches,1asm TC span,6explicit IR
+ULE/UGE32 andfourunsigned64 comparisons.5negative boundaries retained.
+Old compiler matches2old/misses9new; explicit-before-result.json records0
+expected-baseline exit. After mode also checks42versus43 bound bytes,
+covering inclusive/strict arithmetic. Stock file now5positive programs and
+4test-run cases. Settled only unstarted296915 child296922 viaPIDfd before
+fixture edits; oldraw/exit143 retained. Requeue same combined source650994842
+with refined tests, no sourcecompiler changes or actualcandidate passyet.

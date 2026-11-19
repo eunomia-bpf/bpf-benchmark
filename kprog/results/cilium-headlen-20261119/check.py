@@ -62,6 +62,10 @@ else:
     assert all(observed[name] for name in positive),observed
 assert not any(observed[name] for name in negative),observed
 assert all(observed[name] for name in ['old_tc','old_xdp']),observed
+for name in positive:
+    if observed[name]:
+        bound=43 if name in {'ir_ule32','ir_ugt64','ir_ule64'} else 42
+        assert re.search(r'packet_bound\w* = add i64 [^,\n]+, '+str(bound)+r'\b',bodies[name]),(name,bodies[name])
 if mode=='after':
     run([root/'kprog/stock-path/bin/clang',*adapter.COMPILE_FLAGS,'-emit-llvm','-c',source,'-o',out/'fixture.frontend.bc'])
     run([compiler,out/'fixture.frontend.bc','-o',out/'fixture.bounds.bc'])
