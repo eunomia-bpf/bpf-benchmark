@@ -273,7 +273,7 @@ def parse_native_link_blob(
         raise RuntimeError(f"missing proof object for {name}: {proof_obj}")
     rodata16 = load_rodata_blobs(proof_obj)
     disasm = subprocess.run(
-        ["objdump", "-dr", "--insn-width=16", "-Mintel", str(proof_obj)], cwd=REPO_ROOT, check=True, text=True,
+        ["objdump", "-dr", "-z", "--insn-width=16", "-Mintel", str(proof_obj)], cwd=REPO_ROOT, check=True, text=True,
         stdout=subprocess.PIPE)
     symbols = text_symbol_addrs(proof_obj)
     insns = [
