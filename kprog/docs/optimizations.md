@@ -1019,3 +1019,10 @@ native compilation. The sole checked tools are rebuilt only after batch EX,
 timing SH and image EX are acquired. Native regression, B emission and six
 single-evaluation controls are pending; no fixed coverage or speed claim.
 Raw: /workspaces/kprog-raw/perf/numeric-context-bridge-20261119/fix-20261119T131416Z-407693.
+
+PERF 2026-11-19T13:28:19Z: Source-only ARRAY C/LTO review dbe517262 finds runtime
+loads of max_entries, elem_size and index_mask where the kernel JIT embeds
+concrete-map facts. Existing generation metadata already holds dimensions.
+Archive audit411576 is queued to identify actual helper selection; no live
+site, cost or gain is claimed. Numeric repair and parser completeness stay
+ahead of this candidate. See results/checked-array-facts-20261119.
