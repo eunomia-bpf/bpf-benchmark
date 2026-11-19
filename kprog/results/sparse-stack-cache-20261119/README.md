@@ -45,3 +45,11 @@ walltime directly. Announced replacement251396 left no run directory or
 surviving process, so it is not a started compile. Replacement251817 was
 confirmed with persistent run state and parent1 before this checkpoint.
 No full B emission, frame reduction or stock success is claimed yet.
+
+PERF 2026-11-19T18:55:27Z: Job251817 normal O1 frontend passes in94.592s; bounds
+passes3.521s, preserving the standard interface/limits. Actual frontend
+IR16459728bytes, bounds IR11571164bytes; these are
+this input's sizes, not a speedup against an unmatched old compile. The
+normal pre-PEI backend started18:53:07Z and remains pending.
+tetragon-partial.json records actual commands/statuses; no final B,
+physical frame, stock/current-app or speed result is claimed.

@@ -1,0 +1,126 @@
+{
+  "raw": "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T185126Z-251817",
+  "source_commit": "b1e2a7cad5155ec92184027e25464e79e3c8df03",
+  "recorded": "2026-11-19T18:55:27Z",
+  "completed": [
+    {
+      "command": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-w",
+        "-g",
+        "-O1",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-E",
+        "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T185126Z-251817/trusted_x86.bpf.piece0.c",
+        "-o",
+        "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T185126Z-251817/trusted_x86.bpf.piece0.i"
+      ],
+      "returncode": 0,
+      "seconds": 0.30767580699466635
+    },
+    {
+      "command": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-w",
+        "-g",
+        "-O1",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-E",
+        "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T185126Z-251817/trusted_x86.bpf.piece1.c",
+        "-o",
+        "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T185126Z-251817/trusted_x86.bpf.piece1.i"
+      ],
+      "returncode": 0,
+      "seconds": 0.28423885299707763
+    },
+    {
+      "command": [
+        "/workspaces/repository/kprog/stock-path/bin/clang",
+        "-w",
+        "-g",
+        "-O1",
+        "-mcpu=v4",
+        "-target",
+        "bpf",
+        "-mllvm",
+        "-bpf-stack-size=4096",
+        "-D__TARGET_ARCH_x86",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/include/uapi",
+        "-I",
+        "/workspaces/repository/vendor/libbpf/src",
+        "-I",
+        "/usr/include/x86_64-linux-gnu",
+        "-emit-llvm",
+        "-c",
+        "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T185126Z-251817/trusted_x86.bpf.i",
+        "-o",
+        "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T185126Z-251817/trusted_x86.bpf.bounds-input.bc"
+      ],
+      "returncode": 0,
+      "seconds": 94.5919816950045
+    },
+    {
+      "command": [
+        "/workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds",
+        "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T185126Z-251817/trusted_x86.bpf.bounds-input.bc",
+        "-o",
+        "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T185126Z-251817/trusted_x86.bpf.bounds.bc"
+      ],
+      "returncode": 0,
+      "seconds": 3.5209276829991722
+    }
+  ],
+  "active_command": {
+    "command": [
+      "/workspaces/repository/kprog/stock-path/bin/clang",
+      "-w",
+      "-g",
+      "-O1",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu",
+      "-c",
+      "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T185126Z-251817/trusted_x86.bpf.bounds.bc",
+      "-mllvm",
+      "-stop-before=prologepilog",
+      "-o",
+      "/workspaces/kprog-raw/perf/sparse-stack-cache-20261119/tetragon-20261119T185126Z-251817/trusted_x86.bpf.before.mir"
+    ],
+    "started": "2026-11-19T18:53:07.450826+00:00"
+  },
+  "frontend_bytes": 16459728,
+  "bounds_bytes": 11571164,
+  "scope": "Completed sparse Tetragon frontend/bounds stages only; backend/packing/final B/frame/stock remain pending."
+}

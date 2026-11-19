@@ -1192,3 +1192,11 @@ preprocessing pieces pass; joined C4.7MiB, frontend pending18:51:29Z.
 The generator emits16cache cells, arena424B; object frame/stock/current-app
 and speed are unmeasured. No repeated unchanged frontend/O3, flags or
 limits changed. Sourcef6a82ce31/b1e2a7cad; see sparse-stack-cache-20261119.
+
+PERF 2026-11-19T18:55:27Z: Job251817 normal O1 frontend passes in94.592s; bounds
+passes3.521s, preserving the standard interface/limits. Actual frontend
+IR16459728bytes, bounds IR11571164bytes; these are
+this input's sizes, not a speedup against an unmatched old compile. The
+normal pre-PEI backend started18:53:07Z and remains pending.
+results/sparse-stack-cache-20261119/tetragon-partial.json records actual commands/statuses; no final B,
+physical frame, stock/current-app or speed result is claimed.

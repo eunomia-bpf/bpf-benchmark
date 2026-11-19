@@ -84,7 +84,8 @@
   Sparse-cache component7087690ee passes18selectors/3B emissions/72C
   tag+alias+lifetime cases per layout with UBSan, worker247988. Retained6
   renders16cells versus53 with unchanged424B arena. Full retained B worker
-  251817 is active in normal O1 frontend, CPU20/32GiBAS, raw sparse-stack-
+  251817 passes O1 frontend94.592s/bounds3.521s; normal backend is active,
+  CPU20/32GiBAS, raw sparse-stack-
   cache-20261119/tetragon-20261119T185126Z-251817; no image/base rebuild.
   Actual emitted frame/stock/current-app coverage and speed remain open.
   Read-only inventory195833/e9d43500b completed0:2,538ABI states/18contexts,
