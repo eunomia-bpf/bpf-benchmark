@@ -1,0 +1,10 @@
+{
+  "result": "96 probe copy/error/guard cases, two u32 lengths and compat retention passed\n",
+  "kernel_bindings": [
+    "copy_from_user_nofault",
+    "copy_from_kernel_nofault",
+    "memset"
+  ],
+  "proof_and_kernel_entries": 4,
+  "scope": "Host wrapper ABI/zeroing and static current-kernel bindings; no kernel copy execution or app timing"
+}

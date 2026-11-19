@@ -16,11 +16,13 @@
 #include <linux/bpf.h>
 #include <cstdlib>
 #include <map>
+#include <set>
 using namespace llvm;
 [[noreturn]] static void fail(const Twine &s) { errs()<<s<<'\n'; std::exit(1); }
 static cl::opt<std::string> Input(cl::Positional,cl::Required);
 static cl::opt<std::string> Output("o",cl::Required);
 static cl::list<std::string> ArrayMaps("array-map");
+static cl::opt<std::string> HelperList("helper-list");
 #define HELPER_NAME(name) "bpf_" #name
 static const char *HelperNames[] = {__BPF_FUNC_MAPPER(HELPER_NAME)};
 #undef HELPER_NAME
@@ -103,6 +105,7 @@ int main(int argc,char **argv) {
     for (auto &i:instructions(f)) if (auto *call=dyn_cast<CallInst>(&i)) calls.push_back(call);
   }
   unsigned lowered=0;
+  std::set<std::string> inlinedHelpers;
   for (auto *call:calls) {
     call->setTailCallKind(CallInst::TCK_None);
     if (auto *expr=dyn_cast<ConstantExpr>(call->getCalledOperand())) {
@@ -113,6 +116,9 @@ int main(int argc,char **argv) {
         if (auto *map=dyn_cast<GlobalVariable>(call->getArgOperand(0)->stripPointerCasts()))
           for (const auto &array:ArrayMaps)
             if (map->getName()==array) name="__kprog_array_lookup";
+      if (id->equalsInt(BPF_FUNC_probe_read_user)) name="__kprog_probe_read_user";
+      if (id->equalsInt(BPF_FUNC_probe_read_kernel)) name="__kprog_probe_read_kernel";
+      if (name.starts_with("__kprog_")) inlinedHelpers.insert(name.str());
       call->setCalledFunction(m->getOrInsertFunction(name,call->getFunctionType()));
       ++lowered; continue;
     }
@@ -151,5 +157,12 @@ int main(int argc,char **argv) {
   if (ec) fail(ec.message());
   WriteBitcodeToFile(*m,out.os()); out.keep(); out.os().flush();
   if (out.os().has_error()) fail("write native simulator IR failed");
+  if (!HelperList.empty()) {
+    ToolOutputFile helpers(HelperList,ec,sys::fs::OF_Text);
+    if (ec) fail(ec.message());
+    for (const auto &name:inlinedHelpers) helpers.os()<<name<<'\n';
+    helpers.keep(); helpers.os().flush();
+    if (helpers.os().has_error()) fail("write native simulator helper list failed");
+  }
   errs()<<"native simulator operations lowered="<<lowered<<'\n';
 }

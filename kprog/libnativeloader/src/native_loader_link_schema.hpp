@@ -130,6 +130,11 @@ NativeLinkArgs build_native_link_args(
     for (const auto &[name, address] : companion.kernel_functions)
         add_name_addr(out.helpers, name, address);
     if (companion.needs_kernel_symbols) {
+        // C helper LTO calls the kernel's existing nofault boundaries.
+        for (const char *symbol : native_lto::kernel_symbols) {
+            uint64_t addr = kallsyms_lookup(symbol);
+            if (addr != 0) add_name_addr(out.helpers, symbol, addr);
+        }
         for (const char *symbol : kRuntimeCallSymbols) {
             uint64_t addr = kallsyms_lookup(symbol);
             if (addr != 0) {

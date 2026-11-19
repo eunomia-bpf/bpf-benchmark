@@ -128,6 +128,8 @@ PERF 2026-11-19T05:48:41Z：按删除提交 `07d9c4c96` 复核本 lane 队列：
 
 PERF 2026-11-19T06:00:59Z：首个 C helper LTO 类已完成主机验证：普通 ARRAY，源码 compile_sim_ir.cpp/trusted_specializer.py/micro-prog/inline_array.py。25 个保留 BCC frontend 无可选 ARRAY（17 个 generic lookup 保留）；OTel 已检查过的 request 1 有一个 system_analysis lookup，生产编译 API 复用原 B frontend 后 C 内联成功，native proof 链接通过。1,008 个边界执行与两次 generic 调用通过；proof text 1542→1572 B，重定位 7→6。结果 results/checked-array-c-20261119；应用运行时间/installed bytes 未量，普通 ARRAY 以外的 helper 保持当前调用。下一批交 OMP 合并计时，不为本项重复 profiler。原 helper 参数单次求值缺陷已由 `9be7e30be` 修好，不再排其旧 draft。
 
+PERF 2026-11-19T06:19:32Z：C probe-read user/kernel common wrappers 主机完成，绕过 helper 外层调用但保留内核 nofault copy 的所有策略/异常路径和负值时完整清零。源码 inline_probe.c + compiler/specializer + loader 两个开放 LTO 头；不重建 B，不改 compat/string。96 个 copy/error/guard、u32/compat 和 4 个真实符号 proof/kernel 链接通过；25 个保留 BCC frontend 的生产编译 API 全通过，6 程序共选中 37 个 kernel-probe 静态 site；ARRAY 1008 边界与 OTel API 组合回归通过。结果 results/checked-probe-c-20261119；下一批交 OMP 合并量 BCC/OTel 的 per-call/body/helpers/maps、吞吐和 installed bytes。ktime 已直绑同一 fast 函数，仅 C wrapper 无额外收益；深度内联需保留 timekeeping.c 的动态 clocksource callback 和 latch，不猜固定时钟。
+
 - [ ] 1. helper 的 LTO（perf 实现，omp 排批次）。取时间叶子例程（协调者批次在量）、uid_gid + 字符串循环 + Cilium 开关（协调者下一批）之后：
   a. [x] 已由 `07d9c4c96` 删除关闭；历史任务：bpf_get_current_task_btf 并入 current-task 内联（Tracee 121 处）；bpf_jiffies64 换成对 jiffies 的一次读（Cilium 91 处）；
      PERF 2026-11-17T11:00:43Z：两项源码和主机验证完成：已有执行 fixture 覆盖 BTF 的完整 GS 指针、jiffies 值变化、紧凑地址编码及旧 facts；一项 Rust 测试通过，另 44 项未运行，C++ loader 模板实例化通过 -Werror。配方 58257acf8/8558d7f50，结果 results/task-btf-inline-20261117。应用 per-call、body/helper/map 和 installed bytes 等协调者两个已排批次后测量，本项保持未完成。
