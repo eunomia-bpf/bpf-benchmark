@@ -1,0 +1,16 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryAllocation
+
+open KProgFormal.ClightRefinement
+
+#check Arm64ProgramEntryAllocation.composite_layouts
+#print axioms Arm64ProgramEntryAllocation.composite_layouts
+#check Arm64ProgramEntryAllocation.declarations
+#print axioms Arm64ProgramEntryAllocation.declarations
+#check Arm64ProgramEntryAllocation.local_size
+#print axioms Arm64ProgramEntryAllocation.local_size
+#check Arm64ProgramEntryAllocation.allocation_corresponds
+#print axioms Arm64ProgramEntryAllocation.allocation_corresponds
+#check Arm64ProgramEntryAllocation.local_binding
+#print axioms Arm64ProgramEntryAllocation.local_binding
+#check Arm64ProgramEntryAllocation.local_storage
+#print axioms Arm64ProgramEntryAllocation.local_storage

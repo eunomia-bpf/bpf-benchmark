@@ -1,0 +1,167 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-program-entry-allocation",
+  "scope": "Actual production macro entry allocation compared with extracted RAW producer; statement/temporary transport and continuation binding remain open",
+  "source_units": [
+    "kprog/formal/c/Arm64Entry.c",
+    "kprog/formal/c/Arm64ProgramFixture.c",
+    "kprog/formal/oracles/arm64_execute_compile.bpf.c"
+  ],
+  "checked": [
+    "Every real local declaration maps by entry-view name swap and two anonymous composite tags",
+    "Complete vector/stack/header composite records agree including members, attributes, size, alignment and rank",
+    "Every source local has equal allocation size in the actual production world",
+    "For arbitrary incoming memory both actual doAllocVariables results have identical memory",
+    "Every environment lookup corresponds with the same block and mapped declaration type",
+    "Actual local references retain fresh block bounds and complete Freeable ranges"
+  ],
+  "not_claimed": [
+    "Temporary/expression/statement alpha correspondence",
+    "Execution of initialization or program body in production function",
+    "Bound one-entry-pointer/uint32 continuation",
+    "Original native/provider/context admission",
+    "Completed ISA handler family"
+  ],
+  "focused": [
+    {
+      "log": "focused1.log",
+      "exit": 1
+    },
+    {
+      "log": "focused2.log",
+      "exit": 0
+    },
+    {
+      "log": "focused3.log",
+      "exit": 0
+    }
+  ],
+  "full_lake_build": {
+    "exit": 0,
+    "jobs": 338,
+    "log": "lake-build1.log"
+  },
+  "public_queries": {
+    "exit": 0,
+    "theorems": 6,
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAllocation.composite_layouts": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAllocation.declarations": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAllocation.local_size": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAllocation.allocation_corresponds": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAllocation.local_binding": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64ProgramEntryAllocation.local_storage": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    "log": "Query-1.log"
+  },
+  "export_comparison": {
+    "reference": "9c617740f",
+    "exit": 1,
+    "files": 23,
+    "Arm64_unchanged": 10,
+    "baseline_bytes": 243488732,
+    "current_bytes": 248620630,
+    "changed_files": [
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Context.lean",
+        "bytes": 101977,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86ContextSkb.lean",
+        "bytes": 21258154,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86ContextXdp.lean",
+        "bytes": 21172430,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Helpers.lean",
+        "bytes": 8077199,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Inline.lean",
+        "bytes": 19707461,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Memory.lean",
+        "bytes": 1820683,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Pointer.lean",
+        "bytes": 1000688,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86ProgramProfile.lean",
+        "bytes": 21524184,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86ReadonlyProfile.lean",
+        "bytes": 20287920,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86StackProfile200.lean",
+        "bytes": 25006502,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86StackProfile376.lean",
+        "bytes": 29271597,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86TetragonWake.lean",
+        "bytes": 31986244,
+        "identical": false
+      }
+    ]
+  },
+  "limits": {
+    "timing_lock": "shared",
+    "workers": 1,
+    "build_CPU": 17,
+    "control_CPU": 16,
+    "address_space_GiB": 32,
+    "heartbeats": 200000,
+    "recursion": 512,
+    "async": false
+  },
+  "native_make_check": "Lean-only change; not repeated. Fresh final lake build and make check remain due at goal closure.",
+  "milestones": {
+    "M1_M4": "done",
+    "M5": "open",
+    "M6": "open",
+    "complete_ISA_handler_families": 0
+  }
+}
