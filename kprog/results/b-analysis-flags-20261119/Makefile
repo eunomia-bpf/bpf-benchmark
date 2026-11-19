@@ -5,3 +5,6 @@ metadata:
 .PHONY: compile
 compile:
 	python3 $(ROOT)/kprog/results/b-analysis-flags-20261119/compile.py $(OUT) $(CASES)
+.PHONY: diagnose-stack
+diagnose-stack:
+	python3 $(ROOT)/kprog/results/b-analysis-flags-20261119/stack.py $(OUT)
