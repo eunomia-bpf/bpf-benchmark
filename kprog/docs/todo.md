@@ -59,6 +59,11 @@
   this is no new rejection or causal attribution. Diagnostics still wait.
 
 - [ ] P-B-cilium-headlen (PERF handoff 2026-11-19T20:22:55Z, OMP639663a85):
+  PERF 2026-11-19T22:35Z:366677 canonical rebuild/controls pass;5packet stock
+  loads/4execution cases and1TC store stock load/4execution cases pass.
+  All41packet/sixstore captures emit B, both Make targets0. Actualrequest7
+  read28 nowusesboundedr1; retainedreload27writesr2. FreshCilium started
+  22:33:12Z; application stock acceptance remains open. See subset-result.json.
   PERF 2026-11-19T22:34Z: ff8f0e4b3 shares dominating packet-data SSA values
   across context-preserving intervals; original reads retain ordering effects.
   8ec55e8b7 covers read freshness and exact TC stores. Combined validator366677

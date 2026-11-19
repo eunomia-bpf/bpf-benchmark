@@ -1,0 +1,27 @@
+{
+  "raw": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/check-20261119T222823Z-366677",
+  "source_commit": "238c643fccbde2f961bf9d31f0ff99fa614098fe",
+  "compiler_rebuild_started": "2026-11-19T22:32:52Z",
+  "headlen_positive_controls": 12,
+  "headlen_exclusion_controls": 8,
+  "packet_data_freshness_cases": 5,
+  "tc_store_positive_controls": 1,
+  "tc_store_exclusion_controls": 5,
+  "stock_packet_fixtures_loaded": 5,
+  "stock_packet_execution_cases_passed": 4,
+  "stock_tc_store_fixtures_loaded": 1,
+  "stock_tc_store_execution_cases_passed": 4,
+  "packet_capture_b_emissions": 41,
+  "packet_replay_make_exit": 0,
+  "store_capture_b_emissions": 6,
+  "store_replay_make_exit": 0,
+  "request7_placement": {
+    "bounded_base": "r1",
+    "bound_instructions": [24, 25, 26],
+    "retained_reload": "27: r2 = *(u32 *)(r6 + 76)",
+    "bounded_access": "28: r2 = *(u16 *)(r1 + 20)"
+  },
+  "fresh_app_started": "2026-11-19T22:33:12Z",
+  "fresh_app_stock_acceptance": "pending",
+  "scope": "Focused compiler controls, sole-kernel stock fixtures and captured B emissions. Fresh application acceptance and runtime gain remain separate."
+}

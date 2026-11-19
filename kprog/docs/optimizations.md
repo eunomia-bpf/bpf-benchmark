@@ -1454,3 +1454,12 @@ analysis, withunchangedtransferfunctions/lowering. Scope ofnextcompiler
 proofincludeswhole-functionescapes/helpereffects/implicitspills, notjust
 firstreadback. No candidateelisionlanded orruntimegain. Evidence
 results/cilium-table-liveness-20261119/escape-result.json andpointer-store-result.json.
+
+PERF 2026-11-19T22:35Z: ff8f0e4b3 preserves packet-data SSA values across
+context-preserving intervals and canonicalizes the frozen TC class store.
+Canonical validator366677 passes12positive/eight exclusion/five freshness
+controls,5packet stock loads/4execution cases and1TC stock load/4execution
+cases. All41packet/sixstore captured frontends emit B. Capturedrequest7
+reads through its boundedr1 while its retainedreload writesr2. Actual fresh
+Cilium stock coverage and performance remain separate; freshapp started
+22:33:12Z. Evidence results/cilium-headlen-20261119/subset-result.json.

@@ -1,5 +1,20 @@
 # Cilium head-length bounds
 
+PERF 2026-11-19T22:35Z: validator366677 rebuilt the canonical compiler from
+238c643fc at22:32:52Z and completed the focused compiler/stock checks.
+All12 positive/eight exclusion controls and five data-freshness cases pass.
+The five packet fixtures load on the sole guest kernel; all four packet
+TEST_RUN cases return their expected values. The TC class fixture also loads,
+with four TEST_RUN cases preserving the low16bits of marks0,65535,0x12345678
+and0xffffffff. All41 packet captures and allsix store captures emit B,
+each replay target exits0. `subset-result.json` records these separate outcomes.
+
+The request7 replay now bounds the packet base in r1 at instructions24-26;
+the retained data reload writes r2 at27, while the read at28 uses r1+20.
+This shows the intended placement in an actual captured program. Fresh Cilium
+started22:33:12Z on CPUs18-19 through the existing checked-corpus target;
+its per-request stock acceptance and application result remain pending.
+
 PERF 2026-11-19T22:34Z recovery: `ff8f0e4b3` shares the SSA value of
 dominating public packet-data reads across intervals with preserved context.
 Original reads retain their ordering effects; `8ec55e8b7` checks plain,
