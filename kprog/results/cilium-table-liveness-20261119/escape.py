@@ -42,6 +42,11 @@ with open('/workspaces/.agent-state/kprog-lanes/locks/image', 'a') as lock:
         readback_dead = private_results_dead(instructions, [following[readback.addr]],
             ('X86_RSI',), 0, adapter.gen, exit_addr, {}, {}, initial=(0xffffff00, 0))
         assert readback_dead, name
+        partial = next(i for i in instructions if i.mnemonic == 'mov' and i.operands[0] == 'al')
+        original_store_dead = private_results_dead(instructions, [partial.addr],
+            ('X86_RAX',), 0, adapter.gen, exit_addr, {}, {})
+        if name == 'escaped_before':
+            assert not original_store_dead, 'the escaped spill is an observable definition'
         incoming = {}
         adapter.gen.check_definedness(instructions, {}, exit_addr, adapter.gen, incoming_states=incoming)
         regs = tuple(dict.fromkeys(info[0] for info in adapter.gen.REGS.values())) + ('X86_XMM0',)
@@ -63,6 +68,7 @@ with open('/workspaces/.agent-state/kprog-lanes/locks/image', 'a') as lock:
             observed.append(dict(input=value, result=result))
         assert (len({row['result'] for row in observed}) > 1) == bool(escaped), observed
         rows.append(dict(name=name, local_readback_upper_bits_dead=readback_dead,
+                         original_store_dead=original_store_dead,
                          pointer_escaped_before_spill=bool(escaped), native=observed))
 (out/'result.json').write_text(json.dumps(dict(cases=rows,
     scope='Actual native execution and bound proof-effect liveness; the escaped case proves local readback liveness alone cannot justify spill elision. No production lowering or stock acceptance.'), indent=2)+'\n')
