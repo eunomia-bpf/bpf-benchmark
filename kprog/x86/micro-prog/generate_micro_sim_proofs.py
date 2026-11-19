@@ -1913,7 +1913,7 @@ def render_program(name: str, insns: list[NativeInsn],
         "[rbp" in insn.raw.lower()
         for fn_insns in [insns, *subfunctions.values()]
         for insn in fn_insns
-    ) or bool(subfunctions)
+    ) or bool(stack_bytes or subfunctions)
     next_addrs = {
         insn.addr: insns[index + 1].addr
         for index, insn in enumerate(insns[:-1])
