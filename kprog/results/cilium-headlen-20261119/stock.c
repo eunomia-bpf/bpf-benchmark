@@ -19,15 +19,17 @@ int main(int argc,char **argv)
     unsigned loaded=0,cases=0;
     struct bpf_program *program;
     bpf_object__for_each_program(program,object)++loaded;
-    const char *names[]={"head_ge","head_not_lt"};
+    const char *names[]={"head_ge","head_not_lt","head_edge"};
     for(unsigned i=0;i<sizeof(names)/sizeof(names[0]);++i){
         program=bpf_object__find_program_by_name(object,names[i]);
         if(!program){fprintf(stderr,"missing %s\n",names[i]);bpf_object__close(object);return 1;}
-        for(unsigned length=32;length<=64;length+=32){
+        const unsigned lengths[]={14,16,17,18,32,64};
+        for(unsigned j=0;j<sizeof(lengths)/sizeof(lengths[0]);++j){
+            unsigned length=lengths[j];
             unsigned char packet[64];memset(packet,0x5a,sizeof(packet));
             struct bpf_test_run_opts run={.sz=sizeof(run),.data_in=packet,.data_size_in=length,.repeat=1};
             result=bpf_prog_test_run_opts(bpf_program__fd(program),&run);
-            unsigned expected=length==64?0x5a:0;
+            unsigned expected=length>=(i==2?17:42)?0x5a:0;
             printf("{\"program\":\"%s\",\"packet_bytes\":%u,\"retval\":%u,\"expected\":%u,\"error\":%d}\n",names[i],length,run.retval,expected,result);
             if(result||run.retval!=expected){bpf_object__close(object);return 1;}
             ++cases;

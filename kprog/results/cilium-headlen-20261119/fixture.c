@@ -42,6 +42,24 @@ SEC("tc") int asm_tc(struct __sk_buff *ctx)
     return end-start >= 42 ? packet_byte(ctx) : 0;
 }
 
+/* A short packet reaches byte16 through the scalar equality's false edge. */
+SEC("classifier") int head_edge(struct __sk_buff *ctx)
+{
+    void *kernel = bpf_cast_to_kern_ctx(ctx);
+    unsigned span = word(word(read32(kernel,112))-word(read32(kernel,116)));
+    if (span < 16) return 0;
+    void *data = (void *)read32(ctx,76);
+    unsigned long value;
+    asm volatile("%0 = *(u16 *)(%1 + %2)" : "=r"(value) : "r"(data), "i"(14) : "memory");
+    if (word(span) < 18) {
+        if (word(span) == 16) return 0;
+        asm volatile("%0 = *(u8 *)(%1 + %2)" : "=r"(value) : "r"(data), "i"(16) : "memory");
+    } else {
+        asm volatile("%0 = *(u16 *)(%1 + %2)" : "=r"(value) : "r"(data), "i"(16) : "memory");
+    }
+    return value & 255;
+}
+
 #ifdef SELECTOR_CONTROLS
 extern void mutate_context(void *);
 SEC("classifier") int wrong_root(struct __sk_buff *ctx)
