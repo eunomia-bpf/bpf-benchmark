@@ -429,6 +429,8 @@ PERF 2026-11-19T06:35:06Z：06:20 的 B 编译项已实现 O1（frontend/B backe
 
 协调者 2026-11-19T22:05Z：上面的决定已实现（4abd03352）。吻合度比较 ELF 重定位和 CO-RE 重定位（读源对象的 .BTF.ext）以外的立即数和偏移；和任何条目都不完全吻合的程序留在 eBPF。主机上对六个应用的源对象核对：Tracee 34769、Tetragon 65789、BCC 90 个 CO-RE 位置；按 libbpf 改写重定位位置之后，1231 个入口函数全部完全吻合，改一个常量的情况 1213 个都能认出。下一步：计时轮转结束（约 00:50）后打镜像、跑六应用检查。预期 Cilium 按端点的程序留在 eBPF（shim 日志 "no manifest match"），其他五个应用的替换数保持 OTel 14、BCC 25、Tetragon 288、Tracee 169、Katran 1（Cilium 那次是 135）。
 
+**协调者 2026-11-19T23:40Z（8f6ff5891 镜像的检查，计时轮转开始）**：六应用检查（six-app-names-20261119T231151Z，每应用一次 10 秒，stats 开）0 个加载错误；替换 OTel 14/14、BCC 25/25、Cilium 28/135（107 个按端点另编、常量不同的程序留在 eBPF）、Tetragon 288/288、Tracee 169/169、Katran 1/1。吞吐 / 每次调用：OTel 0.979x / 0.930x，BCC 1.001x / 1.012x，Cilium 1.029x / 1.034x，Tetragon 1.487x / 1.241x，Tracee 1.975x / 2.096x，Katran 1.111x / 1.089x。23:39 起在这个镜像上跑完整轮转（stats 关、开两轮，一个批次，约 5.5 小时），之后 make micro 用唯一内核和镜像（micro-20261119T233930Z，冻结入口的 OVERRIDES、-o runtime-kernel-image）。批次持有 image 共享锁到约 05:15；在 CPU 0-7 之外用 image 共享锁的运行照常并行。
+
 **协调者 2026-11-19T23:12Z（吻合度用完整函数名）**：15b43f8cc 的检查（six-app-core-20261119T223720Z）：Tracee 替换 94/169，每次调用 1.777x、吞吐 1.507x；BCC 19/25（1.008x / 1.012x）、OTel 13/14、Cilium 19/135、Tetragon 13/288、Katran 1/1，0 个加载错误。留在 eBPF 的日志行显示：Tetragon 275 个、Tracee 75 个、BCC 6 个、OTel 1 个全是“differs at its length”，即 manifest 里没有 symbol 的条目只带内核截断的 15 字符名字，吻合度按这个名字找不到源函数（长度 0）；4abd03352 之前取的是第一个同名条目，同样没有比过。修法（8f6ff5891）：吻合度用加载程序 BTF 给出的完整函数名，和原生一侧选函数用同一个名字。Cilium 留下的差在 ld_imm64 常量和寄存器分配（agent 自己按配置编译），留在 eBPF。新镜像和检查已排队（six-app-names-20261119T231151Z），看过检查再跑计时轮转，之后 micro。
 
 **协调者 2026-11-19T22:50Z（六应用检查、micro 的内核）**：
