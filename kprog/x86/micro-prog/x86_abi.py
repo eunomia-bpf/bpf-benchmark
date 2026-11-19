@@ -31,7 +31,7 @@ class State:
     pointers: dict[int, int | bool | frozenset[ReturnAddress] | PointerAlternatives | None]
     constants: tuple[int | None, ...]
 
-def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
+def check_definedness(insns, targets, exit_addr, decode, return_sites=None, stack_value_offsets=None):
     regs = (*dict.fromkeys((r[0] for r in decode.REGS.values())), 'X86_XMM0')
     index = {reg: i for i, reg in enumerate(regs)}
 
@@ -209,6 +209,15 @@ def check_definedness(insns, targets, exit_addr, decode, return_sites=None):
 
         def store(operand, width, value=FULL, pointer=False):
             location = address(operand)
+            # Only full-width stores can create ghost-cache facts. Track
+            # destinations regardless of the source's coarse alias class.
+            if stack_value_offsets is not None and width == 64:
+                if type(location) is int:
+                    stack_value_offsets.add(location)
+                elif isinstance(location, PointerAlternatives):
+                    stack_value_offsets.update(location.offsets)
+                elif location is not False:
+                    stack_value_offsets.add(None)
             if isinstance(location, PointerAlternatives):
                 full = (1 << width) - 1
                 for target in location.offsets:

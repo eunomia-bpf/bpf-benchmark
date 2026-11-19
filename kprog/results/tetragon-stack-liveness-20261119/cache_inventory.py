@@ -68,6 +68,8 @@ finally:
 
 summary['generated_arena_bytes'] = int(re.search(
     r'#define X86_SIM_STACK_BYTES (\d+)U', generated)[1])
+summary['generated_cache_words'] = [int(word) for word in re.findall(r'M\((\d+)\)', next(
+    line for line in generated.splitlines() if line.startswith('#define X86_SIM_STACK_VALUE_WORDS')))]
 summary['full_width_store_sites'] = [dict(row, offsets=sorted(row['offsets']))
                                     for row in sorted(stores.values(), key=lambda r:r['native_pc'])]
 summary.update(retained_proof=str(retained/'trusted_x86.proof.o'),
