@@ -1156,3 +1156,12 @@ removed, production compiler changed, or improvement measured. B subtraction
 confirmation186985 still waits the coordinator batch; its prior host/CFG
 passes remain separate from pending stock acceptance. See
 results/tetragon-stack-liveness-20261119 and b-pointer-difference-20261119.
+
+PERF 2026-11-19T18:11:03Z: Tetragon inventory195833 passes0:2,538ABI states/18contexts,
+420byte extent/424byte arena/53cells,91full-width stores (39known stack,
+52external,0unknown destinations),0unknown RSP states. There are43negative
+aligned pointer-dictionary offsets, not a proof that the other10cache
+cells are dead. No cache pruning or measured gain; call/frame/helper-copy
+and source tag coverage remain required reasoning. CPU20 read-only overlap
+18:09:13Z..18:09:17Z with BCC check is recorded. See
+results/tetragon-stack-liveness-20261119/cache-inventory-result.json.

@@ -99,3 +99,24 @@ Worker193484 is detached under timing SH, CPU20/4GiB AS, with persistent raw
 Only queued/run.log exist at18:05:34Z; no analysis pass is claimed. The
 existing pointer-difference stock confirmation186985 remains separately
 queued on batch EX behind the coordinator's six-app check.
+
+PERF 2026-11-19T18:11:03Z: Inventory195833 completed0 frome9d43500b at18:09:17Z,
+with2,538ABI states and18call contexts. Stack extent420 rounds to the
+original424-byte arena/53cells. It observes91full-width store sites:
+39have known stack offsets,52are external,0have unknown destinations.
+There are17distinct direct-store offsets (one unaligned at-212),
+45pointer-dictionary offsets including0 and-212, and43negative aligned
+offsets in the arena. All observed RSP states are exact. This inventory
+does not prove the other10cells dead: its dictionary also contains call
+return facts and helper-copy effects, and False source aliases include
+external pointers as well as scalars. Source-level cache save/copy/frame
+coverage must establish any pruning argument; no production pruning,
+B acceptance or runtime gain is claimed.
+
+The focused run used CPU20/4GiBAS for18:09:13Z..18:09:17Z alongside the
+coordinator BCC check. The non-verbatim all-host timingSH wait was relaxed
+for this read-only diagnostic only (AGENTS.md allows relaxation when
+blocked); old unstarted193484/193489 ends143, raw preserved. The stock
+confirmation186985 remains queued on its original locks. Compact actual
+counts: cache-inventory-result.json; full raw inventory/logs at
+/workspaces/kprog-raw/perf/tetragon-cache-inventory-20261119/inventory-20261119T180913Z-195833.
