@@ -58,3 +58,24 @@ snapshot is not a per-program native census or the BCC timing result.
 The queued main checked-sim-c timing keeps all C/LTO pieces on and uses
 3x180s/stats1 on CPUs0-7. Raw batch:
 `/workspaces/kprog-raw/perf/native-cohort-timing-20261119/batch-20261119T122058Z-369379`.
+
+PERF 2026-11-19T13:05:36Z: The retained six-app check is complete. Reading every
+post_rejit shim log under timing SH gives the following replacement events
+and distinct installed native IDs, with zero native-loader failure lines in
+each app. All six check commands and suite statuses are successful.
+
+| App | Replacement events | Installed native IDs | Loader failures |
+| --- | ---: | ---: | ---: |
+| OTel | 14 | 14 | 0 |
+| BCC | 25 | 25 | 0 |
+| Cilium | 135 | 135 | 0 |
+| Tetragon | 288 | 288 | 0 |
+| Tracee | 169 | 169 | 0 |
+| Katran | 1 | 1 | 0 |
+
+`check-census.json` retains the per-native-ID byte pairs, source log paths
+and all loader failures. Cilium's 135 is this run's observed count; it is
+not forced to an earlier run's 113. These are ordinary direct-native P
+functional checks, not six-app B generation/stock verification or official
+timing. The main checked BCC timing still waits for timing EX; its label
+in progress.log alone is not evidence that a guest or sample has started.

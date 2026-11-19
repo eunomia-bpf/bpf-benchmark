@@ -1,0 +1,3269 @@
+{
+  "batch": "/workspaces/kprog-raw/perf/native-cohort-timing-20261119/batch-20261119T122058Z-369379",
+  "image_id": "sha256:94484bec285d02aafbb43213081e1da9a4689224d99ab3eda09294bf9d735f12",
+  "apps": [
+    {
+      "finished_utc": "2026-11-19T12:34:38Z",
+      "app": "otelcol-ebpf-profiler/profiling",
+      "exit_code": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261119_123254_109655",
+      "suite_status": "ok",
+      "shim_logs": [
+        "/workspaces/repository/corpus/results/x86_kvm_corpus_20261119_123254_109655/details/shim-logs/otelcol-ebpf-profiler__profiling.post_rejit.log"
+      ],
+      "replacement_events": 14,
+      "installed_programs": 14,
+      "loader_failures": [],
+      "jit_bytes": 167706,
+      "installed_bytes": 117415,
+      "programs": [
+        {
+          "native_id": 22,
+          "jit_bytes": 202,
+          "installed_bytes": 188
+        },
+        {
+          "native_id": 26,
+          "jit_bytes": 3650,
+          "installed_bytes": 2011
+        },
+        {
+          "native_id": 28,
+          "jit_bytes": 21868,
+          "installed_bytes": 13651
+        },
+        {
+          "native_id": 30,
+          "jit_bytes": 18424,
+          "installed_bytes": 14246
+        },
+        {
+          "native_id": 32,
+          "jit_bytes": 18264,
+          "installed_bytes": 12326
+        },
+        {
+          "native_id": 34,
+          "jit_bytes": 14983,
+          "installed_bytes": 11767
+        },
+        {
+          "native_id": 36,
+          "jit_bytes": 19605,
+          "installed_bytes": 8833
+        },
+        {
+          "native_id": 38,
+          "jit_bytes": 17840,
+          "installed_bytes": 16370
+        },
+        {
+          "native_id": 40,
+          "jit_bytes": 20215,
+          "installed_bytes": 12787
+        },
+        {
+          "native_id": 42,
+          "jit_bytes": 22797,
+          "installed_bytes": 18373
+        },
+        {
+          "native_id": 44,
+          "jit_bytes": 1572,
+          "installed_bytes": 1118
+        },
+        {
+          "native_id": 46,
+          "jit_bytes": 792,
+          "installed_bytes": 557
+        },
+        {
+          "native_id": 48,
+          "jit_bytes": 3815,
+          "installed_bytes": 2838
+        },
+        {
+          "native_id": 50,
+          "jit_bytes": 3679,
+          "installed_bytes": 2350
+        }
+      ]
+    },
+    {
+      "finished_utc": "2026-11-19T12:37:48Z",
+      "app": "bcc/set",
+      "exit_code": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261119_123619_886135",
+      "suite_status": "ok",
+      "shim_logs": [
+        "/workspaces/repository/corpus/results/x86_kvm_corpus_20261119_123619_886135/details/shim-logs/bcc__set.post_rejit.log"
+      ],
+      "replacement_events": 25,
+      "installed_programs": 25,
+      "loader_failures": [],
+      "jit_bytes": 7965,
+      "installed_bytes": 6172,
+      "programs": [
+        {
+          "native_id": 128,
+          "jit_bytes": 40,
+          "installed_bytes": 34
+        },
+        {
+          "native_id": 130,
+          "jit_bytes": 40,
+          "installed_bytes": 35
+        },
+        {
+          "native_id": 132,
+          "jit_bytes": 40,
+          "installed_bytes": 35
+        },
+        {
+          "native_id": 134,
+          "jit_bytes": 40,
+          "installed_bytes": 35
+        },
+        {
+          "native_id": 136,
+          "jit_bytes": 141,
+          "installed_bytes": 94
+        },
+        {
+          "native_id": 137,
+          "jit_bytes": 40,
+          "installed_bytes": 35
+        },
+        {
+          "native_id": 140,
+          "jit_bytes": 1501,
+          "installed_bytes": 1077
+        },
+        {
+          "native_id": 144,
+          "jit_bytes": 143,
+          "installed_bytes": 99
+        },
+        {
+          "native_id": 143,
+          "jit_bytes": 141,
+          "installed_bytes": 94
+        },
+        {
+          "native_id": 148,
+          "jit_bytes": 110,
+          "installed_bytes": 78
+        },
+        {
+          "native_id": 149,
+          "jit_bytes": 108,
+          "installed_bytes": 74
+        },
+        {
+          "native_id": 150,
+          "jit_bytes": 121,
+          "installed_bytes": 110
+        },
+        {
+          "native_id": 156,
+          "jit_bytes": 121,
+          "installed_bytes": 82
+        },
+        {
+          "native_id": 160,
+          "jit_bytes": 602,
+          "installed_bytes": 519
+        },
+        {
+          "native_id": 162,
+          "jit_bytes": 602,
+          "installed_bytes": 519
+        },
+        {
+          "native_id": 164,
+          "jit_bytes": 383,
+          "installed_bytes": 281
+        },
+        {
+          "native_id": 165,
+          "jit_bytes": 406,
+          "installed_bytes": 272
+        },
+        {
+          "native_id": 167,
+          "jit_bytes": 493,
+          "installed_bytes": 410
+        },
+        {
+          "native_id": 169,
+          "jit_bytes": 354,
+          "installed_bytes": 295
+        },
+        {
+          "native_id": 171,
+          "jit_bytes": 121,
+          "installed_bytes": 82
+        },
+        {
+          "native_id": 174,
+          "jit_bytes": 110,
+          "installed_bytes": 78
+        },
+        {
+          "native_id": 176,
+          "jit_bytes": 440,
+          "installed_bytes": 363
+        },
+        {
+          "native_id": 178,
+          "jit_bytes": 935,
+          "installed_bytes": 692
+        },
+        {
+          "native_id": 179,
+          "jit_bytes": 496,
+          "installed_bytes": 414
+        },
+        {
+          "native_id": 181,
+          "jit_bytes": 437,
+          "installed_bytes": 365
+        }
+      ]
+    },
+    {
+      "finished_utc": "2026-11-19T12:41:19Z",
+      "app": "cilium/agent",
+      "exit_code": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261119_123927_233867",
+      "suite_status": "ok",
+      "shim_logs": [
+        "/workspaces/repository/corpus/results/x86_kvm_corpus_20261119_123927_233867/details/shim-logs/cilium__agent.post_rejit.log"
+      ],
+      "replacement_events": 135,
+      "installed_programs": 135,
+      "loader_failures": [],
+      "jit_bytes": 586250,
+      "installed_bytes": 539410,
+      "programs": [
+        {
+          "native_id": 209,
+          "jit_bytes": 513,
+          "installed_bytes": 385
+        },
+        {
+          "native_id": 213,
+          "jit_bytes": 3949,
+          "installed_bytes": 2416
+        },
+        {
+          "native_id": 215,
+          "jit_bytes": 20,
+          "installed_bytes": 20
+        },
+        {
+          "native_id": 217,
+          "jit_bytes": 12958,
+          "installed_bytes": 10861
+        },
+        {
+          "native_id": 219,
+          "jit_bytes": 863,
+          "installed_bytes": 448
+        },
+        {
+          "native_id": 221,
+          "jit_bytes": 1268,
+          "installed_bytes": 7497
+        },
+        {
+          "native_id": 223,
+          "jit_bytes": 409,
+          "installed_bytes": 263
+        },
+        {
+          "native_id": 225,
+          "jit_bytes": 8258,
+          "installed_bytes": 8829
+        },
+        {
+          "native_id": 227,
+          "jit_bytes": 3390,
+          "installed_bytes": 2285
+        },
+        {
+          "native_id": 229,
+          "jit_bytes": 8885,
+          "installed_bytes": 6784
+        },
+        {
+          "native_id": 231,
+          "jit_bytes": 5226,
+          "installed_bytes": 3587
+        },
+        {
+          "native_id": 233,
+          "jit_bytes": 6570,
+          "installed_bytes": 5487
+        },
+        {
+          "native_id": 235,
+          "jit_bytes": 863,
+          "installed_bytes": 448
+        },
+        {
+          "native_id": 237,
+          "jit_bytes": 3949,
+          "installed_bytes": 2416
+        },
+        {
+          "native_id": 239,
+          "jit_bytes": 5226,
+          "installed_bytes": 3587
+        },
+        {
+          "native_id": 241,
+          "jit_bytes": 12985,
+          "installed_bytes": 10850
+        },
+        {
+          "native_id": 243,
+          "jit_bytes": 2796,
+          "installed_bytes": 2045
+        },
+        {
+          "native_id": 245,
+          "jit_bytes": 3390,
+          "installed_bytes": 2285
+        },
+        {
+          "native_id": 247,
+          "jit_bytes": 6570,
+          "installed_bytes": 5487
+        },
+        {
+          "native_id": 249,
+          "jit_bytes": 409,
+          "installed_bytes": 263
+        },
+        {
+          "native_id": 251,
+          "jit_bytes": 8885,
+          "installed_bytes": 6784
+        },
+        {
+          "native_id": 253,
+          "jit_bytes": 20,
+          "installed_bytes": 20
+        },
+        {
+          "native_id": 255,
+          "jit_bytes": 8246,
+          "installed_bytes": 8788
+        },
+        {
+          "native_id": 257,
+          "jit_bytes": 1268,
+          "installed_bytes": 7432
+        },
+        {
+          "native_id": 259,
+          "jit_bytes": 1268,
+          "installed_bytes": 7432
+        },
+        {
+          "native_id": 261,
+          "jit_bytes": 6570,
+          "installed_bytes": 5487
+        },
+        {
+          "native_id": 263,
+          "jit_bytes": 2796,
+          "installed_bytes": 2045
+        },
+        {
+          "native_id": 265,
+          "jit_bytes": 3949,
+          "installed_bytes": 2416
+        },
+        {
+          "native_id": 267,
+          "jit_bytes": 5226,
+          "installed_bytes": 3587
+        },
+        {
+          "native_id": 269,
+          "jit_bytes": 12985,
+          "installed_bytes": 10843
+        },
+        {
+          "native_id": 271,
+          "jit_bytes": 863,
+          "installed_bytes": 448
+        },
+        {
+          "native_id": 273,
+          "jit_bytes": 3390,
+          "installed_bytes": 2285
+        },
+        {
+          "native_id": 275,
+          "jit_bytes": 20,
+          "installed_bytes": 20
+        },
+        {
+          "native_id": 277,
+          "jit_bytes": 8246,
+          "installed_bytes": 8788
+        },
+        {
+          "native_id": 279,
+          "jit_bytes": 8885,
+          "installed_bytes": 6784
+        },
+        {
+          "native_id": 281,
+          "jit_bytes": 409,
+          "installed_bytes": 263
+        },
+        {
+          "native_id": 283,
+          "jit_bytes": 1268,
+          "installed_bytes": 7497
+        },
+        {
+          "native_id": 285,
+          "jit_bytes": 863,
+          "installed_bytes": 448
+        },
+        {
+          "native_id": 287,
+          "jit_bytes": 8258,
+          "installed_bytes": 8829
+        },
+        {
+          "native_id": 289,
+          "jit_bytes": 5226,
+          "installed_bytes": 3587
+        },
+        {
+          "native_id": 291,
+          "jit_bytes": 8885,
+          "installed_bytes": 6784
+        },
+        {
+          "native_id": 293,
+          "jit_bytes": 12958,
+          "installed_bytes": 10861
+        },
+        {
+          "native_id": 295,
+          "jit_bytes": 3390,
+          "installed_bytes": 2285
+        },
+        {
+          "native_id": 297,
+          "jit_bytes": 3949,
+          "installed_bytes": 2416
+        },
+        {
+          "native_id": 299,
+          "jit_bytes": 20,
+          "installed_bytes": 20
+        },
+        {
+          "native_id": 301,
+          "jit_bytes": 409,
+          "installed_bytes": 263
+        },
+        {
+          "native_id": 303,
+          "jit_bytes": 6570,
+          "installed_bytes": 5487
+        },
+        {
+          "native_id": 305,
+          "jit_bytes": 863,
+          "installed_bytes": 448
+        },
+        {
+          "native_id": 307,
+          "jit_bytes": 2796,
+          "installed_bytes": 2045
+        },
+        {
+          "native_id": 309,
+          "jit_bytes": 20,
+          "installed_bytes": 20
+        },
+        {
+          "native_id": 311,
+          "jit_bytes": 3390,
+          "installed_bytes": 2285
+        },
+        {
+          "native_id": 313,
+          "jit_bytes": 3949,
+          "installed_bytes": 2416
+        },
+        {
+          "native_id": 315,
+          "jit_bytes": 6570,
+          "installed_bytes": 5487
+        },
+        {
+          "native_id": 317,
+          "jit_bytes": 8246,
+          "installed_bytes": 8788
+        },
+        {
+          "native_id": 319,
+          "jit_bytes": 5226,
+          "installed_bytes": 3587
+        },
+        {
+          "native_id": 321,
+          "jit_bytes": 409,
+          "installed_bytes": 263
+        },
+        {
+          "native_id": 323,
+          "jit_bytes": 1268,
+          "installed_bytes": 7432
+        },
+        {
+          "native_id": 325,
+          "jit_bytes": 8885,
+          "installed_bytes": 6784
+        },
+        {
+          "native_id": 327,
+          "jit_bytes": 12985,
+          "installed_bytes": 10850
+        },
+        {
+          "native_id": 329,
+          "jit_bytes": 1268,
+          "installed_bytes": 7432
+        },
+        {
+          "native_id": 331,
+          "jit_bytes": 863,
+          "installed_bytes": 448
+        },
+        {
+          "native_id": 333,
+          "jit_bytes": 12985,
+          "installed_bytes": 10843
+        },
+        {
+          "native_id": 335,
+          "jit_bytes": 6570,
+          "installed_bytes": 5487
+        },
+        {
+          "native_id": 337,
+          "jit_bytes": 3949,
+          "installed_bytes": 2416
+        },
+        {
+          "native_id": 339,
+          "jit_bytes": 5226,
+          "installed_bytes": 3587
+        },
+        {
+          "native_id": 341,
+          "jit_bytes": 2796,
+          "installed_bytes": 2045
+        },
+        {
+          "native_id": 343,
+          "jit_bytes": 20,
+          "installed_bytes": 20
+        },
+        {
+          "native_id": 345,
+          "jit_bytes": 3390,
+          "installed_bytes": 2285
+        },
+        {
+          "native_id": 347,
+          "jit_bytes": 8246,
+          "installed_bytes": 8788
+        },
+        {
+          "native_id": 349,
+          "jit_bytes": 8885,
+          "installed_bytes": 6784
+        },
+        {
+          "native_id": 351,
+          "jit_bytes": 409,
+          "installed_bytes": 263
+        },
+        {
+          "native_id": 353,
+          "jit_bytes": 513,
+          "installed_bytes": 385
+        },
+        {
+          "native_id": 355,
+          "jit_bytes": 3949,
+          "installed_bytes": 2416
+        },
+        {
+          "native_id": 357,
+          "jit_bytes": 409,
+          "installed_bytes": 263
+        },
+        {
+          "native_id": 359,
+          "jit_bytes": 3390,
+          "installed_bytes": 2285
+        },
+        {
+          "native_id": 361,
+          "jit_bytes": 5226,
+          "installed_bytes": 3587
+        },
+        {
+          "native_id": 363,
+          "jit_bytes": 6570,
+          "installed_bytes": 5487
+        },
+        {
+          "native_id": 365,
+          "jit_bytes": 12958,
+          "installed_bytes": 10861
+        },
+        {
+          "native_id": 367,
+          "jit_bytes": 863,
+          "installed_bytes": 448
+        },
+        {
+          "native_id": 369,
+          "jit_bytes": 1268,
+          "installed_bytes": 7497
+        },
+        {
+          "native_id": 371,
+          "jit_bytes": 8258,
+          "installed_bytes": 8829
+        },
+        {
+          "native_id": 373,
+          "jit_bytes": 20,
+          "installed_bytes": 20
+        },
+        {
+          "native_id": 375,
+          "jit_bytes": 8885,
+          "installed_bytes": 6784
+        },
+        {
+          "native_id": 377,
+          "jit_bytes": 5226,
+          "installed_bytes": 3587
+        },
+        {
+          "native_id": 379,
+          "jit_bytes": 3949,
+          "installed_bytes": 2416
+        },
+        {
+          "native_id": 381,
+          "jit_bytes": 8246,
+          "installed_bytes": 8788
+        },
+        {
+          "native_id": 383,
+          "jit_bytes": 863,
+          "installed_bytes": 448
+        },
+        {
+          "native_id": 385,
+          "jit_bytes": 3390,
+          "installed_bytes": 2285
+        },
+        {
+          "native_id": 387,
+          "jit_bytes": 2796,
+          "installed_bytes": 2045
+        },
+        {
+          "native_id": 389,
+          "jit_bytes": 20,
+          "installed_bytes": 20
+        },
+        {
+          "native_id": 391,
+          "jit_bytes": 12985,
+          "installed_bytes": 10850
+        },
+        {
+          "native_id": 393,
+          "jit_bytes": 8885,
+          "installed_bytes": 6784
+        },
+        {
+          "native_id": 395,
+          "jit_bytes": 409,
+          "installed_bytes": 263
+        },
+        {
+          "native_id": 397,
+          "jit_bytes": 1268,
+          "installed_bytes": 7432
+        },
+        {
+          "native_id": 399,
+          "jit_bytes": 6570,
+          "installed_bytes": 5487
+        },
+        {
+          "native_id": 401,
+          "jit_bytes": 863,
+          "installed_bytes": 448
+        },
+        {
+          "native_id": 403,
+          "jit_bytes": 2796,
+          "installed_bytes": 2045
+        },
+        {
+          "native_id": 405,
+          "jit_bytes": 20,
+          "installed_bytes": 20
+        },
+        {
+          "native_id": 407,
+          "jit_bytes": 12985,
+          "installed_bytes": 10843
+        },
+        {
+          "native_id": 409,
+          "jit_bytes": 8885,
+          "installed_bytes": 6784
+        },
+        {
+          "native_id": 411,
+          "jit_bytes": 409,
+          "installed_bytes": 263
+        },
+        {
+          "native_id": 413,
+          "jit_bytes": 6570,
+          "installed_bytes": 5487
+        },
+        {
+          "native_id": 415,
+          "jit_bytes": 3390,
+          "installed_bytes": 2285
+        },
+        {
+          "native_id": 417,
+          "jit_bytes": 5226,
+          "installed_bytes": 3587
+        },
+        {
+          "native_id": 419,
+          "jit_bytes": 3949,
+          "installed_bytes": 2416
+        },
+        {
+          "native_id": 421,
+          "jit_bytes": 1268,
+          "installed_bytes": 7432
+        },
+        {
+          "native_id": 423,
+          "jit_bytes": 8246,
+          "installed_bytes": 8788
+        },
+        {
+          "native_id": 425,
+          "jit_bytes": 5379,
+          "installed_bytes": 4720
+        },
+        {
+          "native_id": 427,
+          "jit_bytes": 386,
+          "installed_bytes": 263
+        },
+        {
+          "native_id": 429,
+          "jit_bytes": 3626,
+          "installed_bytes": 2800
+        },
+        {
+          "native_id": 431,
+          "jit_bytes": 931,
+          "installed_bytes": 775
+        },
+        {
+          "native_id": 433,
+          "jit_bytes": 2778,
+          "installed_bytes": 2045
+        },
+        {
+          "native_id": 435,
+          "jit_bytes": 5584,
+          "installed_bytes": 4027
+        },
+        {
+          "native_id": 437,
+          "jit_bytes": 6404,
+          "installed_bytes": 7444
+        },
+        {
+          "native_id": 439,
+          "jit_bytes": 1093,
+          "installed_bytes": 824
+        },
+        {
+          "native_id": 441,
+          "jit_bytes": 5214,
+          "installed_bytes": 3797
+        },
+        {
+          "native_id": 443,
+          "jit_bytes": 6220,
+          "installed_bytes": 8800
+        },
+        {
+          "native_id": 445,
+          "jit_bytes": 1892,
+          "installed_bytes": 1133
+        },
+        {
+          "native_id": 447,
+          "jit_bytes": 20,
+          "installed_bytes": 20
+        },
+        {
+          "native_id": 449,
+          "jit_bytes": 5764,
+          "installed_bytes": 4262
+        },
+        {
+          "native_id": 451,
+          "jit_bytes": 5806,
+          "installed_bytes": 4490
+        },
+        {
+          "native_id": 453,
+          "jit_bytes": 5379,
+          "installed_bytes": 4720
+        },
+        {
+          "native_id": 455,
+          "jit_bytes": 5806,
+          "installed_bytes": 4490
+        },
+        {
+          "native_id": 457,
+          "jit_bytes": 5764,
+          "installed_bytes": 4262
+        },
+        {
+          "native_id": 459,
+          "jit_bytes": 1093,
+          "installed_bytes": 824
+        },
+        {
+          "native_id": 461,
+          "jit_bytes": 20,
+          "installed_bytes": 20
+        },
+        {
+          "native_id": 463,
+          "jit_bytes": 386,
+          "installed_bytes": 263
+        },
+        {
+          "native_id": 465,
+          "jit_bytes": 5214,
+          "installed_bytes": 3797
+        },
+        {
+          "native_id": 467,
+          "jit_bytes": 1892,
+          "installed_bytes": 1133
+        },
+        {
+          "native_id": 469,
+          "jit_bytes": 2778,
+          "installed_bytes": 2045
+        },
+        {
+          "native_id": 471,
+          "jit_bytes": 6404,
+          "installed_bytes": 7444
+        },
+        {
+          "native_id": 473,
+          "jit_bytes": 6220,
+          "installed_bytes": 8800
+        },
+        {
+          "native_id": 475,
+          "jit_bytes": 5584,
+          "installed_bytes": 4027
+        },
+        {
+          "native_id": 477,
+          "jit_bytes": 3626,
+          "installed_bytes": 2800
+        },
+        {
+          "native_id": 479,
+          "jit_bytes": 931,
+          "installed_bytes": 775
+        }
+      ]
+    },
+    {
+      "finished_utc": "2026-11-19T12:44:44Z",
+      "app": "tetragon/observer",
+      "exit_code": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261119_124324_218948",
+      "suite_status": "ok",
+      "shim_logs": [
+        "/workspaces/repository/corpus/results/x86_kvm_corpus_20261119_124324_218948/details/shim-logs/tetragon__observer.post_rejit.log"
+      ],
+      "replacement_events": 288,
+      "installed_programs": 288,
+      "loader_failures": [],
+      "jit_bytes": 2472912,
+      "installed_bytes": 1402864,
+      "programs": [
+        {
+          "native_id": 334,
+          "jit_bytes": 1042,
+          "installed_bytes": 977
+        },
+        {
+          "native_id": 336,
+          "jit_bytes": 1088,
+          "installed_bytes": 987
+        },
+        {
+          "native_id": 338,
+          "jit_bytes": 7339,
+          "installed_bytes": 4329
+        },
+        {
+          "native_id": 340,
+          "jit_bytes": 5131,
+          "installed_bytes": 3458
+        },
+        {
+          "native_id": 344,
+          "jit_bytes": 1385,
+          "installed_bytes": 1467
+        },
+        {
+          "native_id": 346,
+          "jit_bytes": 11821,
+          "installed_bytes": 9005
+        },
+        {
+          "native_id": 348,
+          "jit_bytes": 1537,
+          "installed_bytes": 1247
+        },
+        {
+          "native_id": 350,
+          "jit_bytes": 329,
+          "installed_bytes": 218
+        },
+        {
+          "native_id": 354,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 356,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 358,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 360,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 362,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 364,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 366,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 368,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 370,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 372,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 374,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 376,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 378,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 380,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 382,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 384,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 386,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 388,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 390,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 392,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 394,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 396,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 398,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 400,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 402,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 404,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 406,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 408,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 410,
+          "jit_bytes": 4399,
+          "installed_bytes": 4450
+        },
+        {
+          "native_id": 412,
+          "jit_bytes": 803,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 414,
+          "jit_bytes": 15275,
+          "installed_bytes": 15806
+        },
+        {
+          "native_id": 416,
+          "jit_bytes": 17570,
+          "installed_bytes": 1851
+        },
+        {
+          "native_id": 418,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 420,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 422,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 424,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 426,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 428,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 430,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 432,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 434,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 436,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 438,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 440,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 442,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 444,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 446,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 448,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 450,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 452,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 454,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 456,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 458,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 460,
+          "jit_bytes": 4399,
+          "installed_bytes": 4450
+        },
+        {
+          "native_id": 462,
+          "jit_bytes": 17570,
+          "installed_bytes": 1851
+        },
+        {
+          "native_id": 464,
+          "jit_bytes": 803,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 466,
+          "jit_bytes": 15275,
+          "installed_bytes": 15806
+        },
+        {
+          "native_id": 468,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 470,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 472,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 474,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 476,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 478,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 480,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 482,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 484,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 486,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 488,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 490,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 492,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 494,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 496,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 498,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 500,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 502,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 504,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 506,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 508,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 510,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 512,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 514,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 516,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 518,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 520,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 522,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 524,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 526,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 528,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 530,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 532,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 534,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 536,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 538,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 540,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 542,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 544,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 546,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 548,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 550,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 552,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 554,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 556,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 558,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 560,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 562,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 564,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 566,
+          "jit_bytes": 17570,
+          "installed_bytes": 1851
+        },
+        {
+          "native_id": 568,
+          "jit_bytes": 4399,
+          "installed_bytes": 4450
+        },
+        {
+          "native_id": 570,
+          "jit_bytes": 803,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 572,
+          "jit_bytes": 15275,
+          "installed_bytes": 15806
+        },
+        {
+          "native_id": 574,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 576,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 578,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 580,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 582,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 584,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 586,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 588,
+          "jit_bytes": 15275,
+          "installed_bytes": 15806
+        },
+        {
+          "native_id": 590,
+          "jit_bytes": 803,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 592,
+          "jit_bytes": 17570,
+          "installed_bytes": 1851
+        },
+        {
+          "native_id": 594,
+          "jit_bytes": 4399,
+          "installed_bytes": 4450
+        },
+        {
+          "native_id": 596,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 598,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 600,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 602,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 604,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 606,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 608,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 610,
+          "jit_bytes": 803,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 612,
+          "jit_bytes": 17570,
+          "installed_bytes": 1851
+        },
+        {
+          "native_id": 614,
+          "jit_bytes": 15275,
+          "installed_bytes": 15806
+        },
+        {
+          "native_id": 616,
+          "jit_bytes": 4399,
+          "installed_bytes": 4450
+        },
+        {
+          "native_id": 618,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 620,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 622,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 624,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 626,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 628,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 630,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 632,
+          "jit_bytes": 15275,
+          "installed_bytes": 15806
+        },
+        {
+          "native_id": 634,
+          "jit_bytes": 4399,
+          "installed_bytes": 4450
+        },
+        {
+          "native_id": 636,
+          "jit_bytes": 17570,
+          "installed_bytes": 1851
+        },
+        {
+          "native_id": 638,
+          "jit_bytes": 803,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 640,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 642,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 644,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 646,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 648,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 650,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 652,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 654,
+          "jit_bytes": 4399,
+          "installed_bytes": 4450
+        },
+        {
+          "native_id": 656,
+          "jit_bytes": 803,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 658,
+          "jit_bytes": 15275,
+          "installed_bytes": 15806
+        },
+        {
+          "native_id": 660,
+          "jit_bytes": 17570,
+          "installed_bytes": 1851
+        },
+        {
+          "native_id": 662,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 664,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 666,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 668,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 670,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 672,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 674,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 676,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 678,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 680,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 682,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 684,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 686,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 688,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 690,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 692,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 694,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 696,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 698,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 700,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 702,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 704,
+          "jit_bytes": 17665,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 706,
+          "jit_bytes": 15684,
+          "installed_bytes": 10622
+        },
+        {
+          "native_id": 708,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 710,
+          "jit_bytes": 14942,
+          "installed_bytes": 12413
+        },
+        {
+          "native_id": 712,
+          "jit_bytes": 12216,
+          "installed_bytes": 9344
+        },
+        {
+          "native_id": 714,
+          "jit_bytes": 5427,
+          "installed_bytes": 6280
+        },
+        {
+          "native_id": 716,
+          "jit_bytes": 1879,
+          "installed_bytes": 1582
+        },
+        {
+          "native_id": 718,
+          "jit_bytes": 745,
+          "installed_bytes": 643
+        },
+        {
+          "native_id": 720,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 722,
+          "jit_bytes": 1881,
+          "installed_bytes": 1580
+        },
+        {
+          "native_id": 724,
+          "jit_bytes": 17850,
+          "installed_bytes": 15565
+        },
+        {
+          "native_id": 726,
+          "jit_bytes": 17665,
+          "installed_bytes": 10627
+        },
+        {
+          "native_id": 728,
+          "jit_bytes": 4399,
+          "installed_bytes": 2852
+        },
+        {
+          "native_id": 730,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 732,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 734,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 736,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 738,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 740,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 742,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 744,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 746,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 748,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 750,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 752,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 754,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 756,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 758,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 760,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 762,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 764,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 766,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 768,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 770,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 772,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 774,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 776,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 778,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 780,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 782,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 784,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 786,
+          "jit_bytes": 4399,
+          "installed_bytes": 4450
+        },
+        {
+          "native_id": 788,
+          "jit_bytes": 15275,
+          "installed_bytes": 15806
+        },
+        {
+          "native_id": 790,
+          "jit_bytes": 803,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 792,
+          "jit_bytes": 17570,
+          "installed_bytes": 1851
+        },
+        {
+          "native_id": 794,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 796,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 798,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 800,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 802,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 804,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 806,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 808,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 810,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 812,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 814,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 816,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 818,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 820,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 822,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 824,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 826,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 828,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 830,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 832,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 834,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 836,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 838,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 840,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 842,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 844,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 846,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 848,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 850,
+          "jit_bytes": 17570,
+          "installed_bytes": 1851
+        },
+        {
+          "native_id": 852,
+          "jit_bytes": 4399,
+          "installed_bytes": 4450
+        },
+        {
+          "native_id": 854,
+          "jit_bytes": 15275,
+          "installed_bytes": 15806
+        },
+        {
+          "native_id": 856,
+          "jit_bytes": 803,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 858,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 860,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 862,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 864,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 866,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 868,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 870,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 872,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 874,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 876,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 878,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 880,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 882,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 884,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 886,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        },
+        {
+          "native_id": 888,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 890,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 892,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 894,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 896,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 898,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 900,
+          "jit_bytes": 1317,
+          "installed_bytes": 750
+        },
+        {
+          "native_id": 902,
+          "jit_bytes": 12213,
+          "installed_bytes": 9341
+        },
+        {
+          "native_id": 904,
+          "jit_bytes": 1879,
+          "installed_bytes": 1571
+        },
+        {
+          "native_id": 906,
+          "jit_bytes": 18335,
+          "installed_bytes": 1932
+        },
+        {
+          "native_id": 908,
+          "jit_bytes": 1881,
+          "installed_bytes": 469
+        },
+        {
+          "native_id": 910,
+          "jit_bytes": 18593,
+          "installed_bytes": 11982
+        },
+        {
+          "native_id": 912,
+          "jit_bytes": 5672,
+          "installed_bytes": 7129
+        }
+      ]
+    },
+    {
+      "finished_utc": "2026-11-19T12:48:57Z",
+      "app": "tracee/monitor",
+      "exit_code": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261119_124651_509831",
+      "suite_status": "ok",
+      "shim_logs": [
+        "/workspaces/repository/corpus/results/x86_kvm_corpus_20261119_124651_509831/details/shim-logs/tracee__monitor.post_rejit.log"
+      ],
+      "replacement_events": 169,
+      "installed_programs": 169,
+      "loader_failures": [],
+      "jit_bytes": 2068918,
+      "installed_bytes": 1566091,
+      "programs": [
+        {
+          "native_id": 192,
+          "jit_bytes": 72,
+          "installed_bytes": 67
+        },
+        {
+          "native_id": 197,
+          "jit_bytes": 72,
+          "installed_bytes": 67
+        },
+        {
+          "native_id": 203,
+          "jit_bytes": 240,
+          "installed_bytes": 197
+        },
+        {
+          "native_id": 205,
+          "jit_bytes": 2524,
+          "installed_bytes": 1890
+        },
+        {
+          "native_id": 207,
+          "jit_bytes": 17661,
+          "installed_bytes": 14392
+        },
+        {
+          "native_id": 209,
+          "jit_bytes": 269,
+          "installed_bytes": 227
+        },
+        {
+          "native_id": 211,
+          "jit_bytes": 2103,
+          "installed_bytes": 1756
+        },
+        {
+          "native_id": 213,
+          "jit_bytes": 12117,
+          "installed_bytes": 9397
+        },
+        {
+          "native_id": 215,
+          "jit_bytes": 8194,
+          "installed_bytes": 5912
+        },
+        {
+          "native_id": 217,
+          "jit_bytes": 8227,
+          "installed_bytes": 5931
+        },
+        {
+          "native_id": 219,
+          "jit_bytes": 2363,
+          "installed_bytes": 1760
+        },
+        {
+          "native_id": 221,
+          "jit_bytes": 11766,
+          "installed_bytes": 9405
+        },
+        {
+          "native_id": 223,
+          "jit_bytes": 2363,
+          "installed_bytes": 1760
+        },
+        {
+          "native_id": 225,
+          "jit_bytes": 11766,
+          "installed_bytes": 9405
+        },
+        {
+          "native_id": 227,
+          "jit_bytes": 2363,
+          "installed_bytes": 1760
+        },
+        {
+          "native_id": 229,
+          "jit_bytes": 11766,
+          "installed_bytes": 9405
+        },
+        {
+          "native_id": 231,
+          "jit_bytes": 2363,
+          "installed_bytes": 1760
+        },
+        {
+          "native_id": 233,
+          "jit_bytes": 11766,
+          "installed_bytes": 9405
+        },
+        {
+          "native_id": 235,
+          "jit_bytes": 2363,
+          "installed_bytes": 1760
+        },
+        {
+          "native_id": 237,
+          "jit_bytes": 11766,
+          "installed_bytes": 9405
+        },
+        {
+          "native_id": 239,
+          "jit_bytes": 2363,
+          "installed_bytes": 1760
+        },
+        {
+          "native_id": 241,
+          "jit_bytes": 11766,
+          "installed_bytes": 9405
+        },
+        {
+          "native_id": 243,
+          "jit_bytes": 22769,
+          "installed_bytes": 16595
+        },
+        {
+          "native_id": 245,
+          "jit_bytes": 22904,
+          "installed_bytes": 16683
+        },
+        {
+          "native_id": 247,
+          "jit_bytes": 23045,
+          "installed_bytes": 16776
+        },
+        {
+          "native_id": 249,
+          "jit_bytes": 23180,
+          "installed_bytes": 16859
+        },
+        {
+          "native_id": 251,
+          "jit_bytes": 12318,
+          "installed_bytes": 6614
+        },
+        {
+          "native_id": 253,
+          "jit_bytes": 20746,
+          "installed_bytes": 13463
+        },
+        {
+          "native_id": 255,
+          "jit_bytes": 4509,
+          "installed_bytes": 2903
+        },
+        {
+          "native_id": 257,
+          "jit_bytes": 55771,
+          "installed_bytes": 76753
+        },
+        {
+          "native_id": 259,
+          "jit_bytes": 157,
+          "installed_bytes": 153
+        },
+        {
+          "native_id": 261,
+          "jit_bytes": 6141,
+          "installed_bytes": 4464
+        },
+        {
+          "native_id": 263,
+          "jit_bytes": 4339,
+          "installed_bytes": 3779
+        },
+        {
+          "native_id": 265,
+          "jit_bytes": 58814,
+          "installed_bytes": 66435
+        },
+        {
+          "native_id": 267,
+          "jit_bytes": 659,
+          "installed_bytes": 688
+        },
+        {
+          "native_id": 269,
+          "jit_bytes": 52694,
+          "installed_bytes": 61497
+        },
+        {
+          "native_id": 271,
+          "jit_bytes": 3766,
+          "installed_bytes": 2615
+        },
+        {
+          "native_id": 273,
+          "jit_bytes": 20290,
+          "installed_bytes": 14784
+        },
+        {
+          "native_id": 275,
+          "jit_bytes": 24424,
+          "installed_bytes": 16066
+        },
+        {
+          "native_id": 277,
+          "jit_bytes": 22751,
+          "installed_bytes": 14726
+        },
+        {
+          "native_id": 279,
+          "jit_bytes": 8748,
+          "installed_bytes": 6216
+        },
+        {
+          "native_id": 281,
+          "jit_bytes": 1203,
+          "installed_bytes": 856
+        },
+        {
+          "native_id": 283,
+          "jit_bytes": 255,
+          "installed_bytes": 239
+        },
+        {
+          "native_id": 285,
+          "jit_bytes": 9262,
+          "installed_bytes": 5962
+        },
+        {
+          "native_id": 287,
+          "jit_bytes": 9016,
+          "installed_bytes": 6349
+        },
+        {
+          "native_id": 289,
+          "jit_bytes": 8246,
+          "installed_bytes": 5891
+        },
+        {
+          "native_id": 291,
+          "jit_bytes": 25524,
+          "installed_bytes": 18886
+        },
+        {
+          "native_id": 293,
+          "jit_bytes": 8102,
+          "installed_bytes": 5829
+        },
+        {
+          "native_id": 295,
+          "jit_bytes": 55731,
+          "installed_bytes": 72502
+        },
+        {
+          "native_id": 297,
+          "jit_bytes": 6853,
+          "installed_bytes": 5248
+        },
+        {
+          "native_id": 299,
+          "jit_bytes": 6542,
+          "installed_bytes": 4878
+        },
+        {
+          "native_id": 301,
+          "jit_bytes": 11718,
+          "installed_bytes": 7618
+        },
+        {
+          "native_id": 303,
+          "jit_bytes": 9892,
+          "installed_bytes": 6897
+        },
+        {
+          "native_id": 305,
+          "jit_bytes": 8722,
+          "installed_bytes": 6147
+        },
+        {
+          "native_id": 307,
+          "jit_bytes": 8685,
+          "installed_bytes": 6146
+        },
+        {
+          "native_id": 309,
+          "jit_bytes": 8685,
+          "installed_bytes": 6146
+        },
+        {
+          "native_id": 311,
+          "jit_bytes": 35546,
+          "installed_bytes": 25352
+        },
+        {
+          "native_id": 313,
+          "jit_bytes": 22789,
+          "installed_bytes": 14193
+        },
+        {
+          "native_id": 315,
+          "jit_bytes": 17940,
+          "installed_bytes": 12168
+        },
+        {
+          "native_id": 317,
+          "jit_bytes": 10005,
+          "installed_bytes": 6924
+        },
+        {
+          "native_id": 319,
+          "jit_bytes": 10802,
+          "installed_bytes": 7625
+        },
+        {
+          "native_id": 321,
+          "jit_bytes": 10102,
+          "installed_bytes": 7485
+        },
+        {
+          "native_id": 323,
+          "jit_bytes": 8225,
+          "installed_bytes": 5848
+        },
+        {
+          "native_id": 325,
+          "jit_bytes": 8531,
+          "installed_bytes": 6088
+        },
+        {
+          "native_id": 327,
+          "jit_bytes": 9175,
+          "installed_bytes": 6420
+        },
+        {
+          "native_id": 329,
+          "jit_bytes": 8351,
+          "installed_bytes": 5958
+        },
+        {
+          "native_id": 331,
+          "jit_bytes": 9474,
+          "installed_bytes": 6594
+        },
+        {
+          "native_id": 333,
+          "jit_bytes": 9167,
+          "installed_bytes": 6420
+        },
+        {
+          "native_id": 335,
+          "jit_bytes": 10843,
+          "installed_bytes": 7352
+        },
+        {
+          "native_id": 337,
+          "jit_bytes": 10156,
+          "installed_bytes": 7059
+        },
+        {
+          "native_id": 339,
+          "jit_bytes": 11397,
+          "installed_bytes": 7760
+        },
+        {
+          "native_id": 341,
+          "jit_bytes": 10678,
+          "installed_bytes": 7215
+        },
+        {
+          "native_id": 343,
+          "jit_bytes": 11156,
+          "installed_bytes": 7603
+        },
+        {
+          "native_id": 345,
+          "jit_bytes": 953,
+          "installed_bytes": 851
+        },
+        {
+          "native_id": 347,
+          "jit_bytes": 953,
+          "installed_bytes": 851
+        },
+        {
+          "native_id": 349,
+          "jit_bytes": 156,
+          "installed_bytes": 131
+        },
+        {
+          "native_id": 351,
+          "jit_bytes": 283,
+          "installed_bytes": 231
+        },
+        {
+          "native_id": 353,
+          "jit_bytes": 19028,
+          "installed_bytes": 13282
+        },
+        {
+          "native_id": 355,
+          "jit_bytes": 23672,
+          "installed_bytes": 15396
+        },
+        {
+          "native_id": 357,
+          "jit_bytes": 28515,
+          "installed_bytes": 21318
+        },
+        {
+          "native_id": 359,
+          "jit_bytes": 156,
+          "installed_bytes": 131
+        },
+        {
+          "native_id": 361,
+          "jit_bytes": 283,
+          "installed_bytes": 231
+        },
+        {
+          "native_id": 363,
+          "jit_bytes": 19027,
+          "installed_bytes": 13285
+        },
+        {
+          "native_id": 365,
+          "jit_bytes": 23766,
+          "installed_bytes": 15435
+        },
+        {
+          "native_id": 367,
+          "jit_bytes": 28677,
+          "installed_bytes": 21746
+        },
+        {
+          "native_id": 369,
+          "jit_bytes": 156,
+          "installed_bytes": 131
+        },
+        {
+          "native_id": 371,
+          "jit_bytes": 283,
+          "installed_bytes": 231
+        },
+        {
+          "native_id": 373,
+          "jit_bytes": 19031,
+          "installed_bytes": 13285
+        },
+        {
+          "native_id": 375,
+          "jit_bytes": 23672,
+          "installed_bytes": 15396
+        },
+        {
+          "native_id": 377,
+          "jit_bytes": 28515,
+          "installed_bytes": 21318
+        },
+        {
+          "native_id": 379,
+          "jit_bytes": 156,
+          "installed_bytes": 131
+        },
+        {
+          "native_id": 381,
+          "jit_bytes": 19031,
+          "installed_bytes": 13285
+        },
+        {
+          "native_id": 383,
+          "jit_bytes": 16710,
+          "installed_bytes": 13331
+        },
+        {
+          "native_id": 385,
+          "jit_bytes": 156,
+          "installed_bytes": 131
+        },
+        {
+          "native_id": 387,
+          "jit_bytes": 19027,
+          "installed_bytes": 13285
+        },
+        {
+          "native_id": 389,
+          "jit_bytes": 16744,
+          "installed_bytes": 13318
+        },
+        {
+          "native_id": 391,
+          "jit_bytes": 20526,
+          "installed_bytes": 14035
+        },
+        {
+          "native_id": 393,
+          "jit_bytes": 156,
+          "installed_bytes": 131
+        },
+        {
+          "native_id": 395,
+          "jit_bytes": 20243,
+          "installed_bytes": 12824
+        },
+        {
+          "native_id": 397,
+          "jit_bytes": 36704,
+          "installed_bytes": 23647
+        },
+        {
+          "native_id": 399,
+          "jit_bytes": 34215,
+          "installed_bytes": 23949
+        },
+        {
+          "native_id": 401,
+          "jit_bytes": 628,
+          "installed_bytes": 664
+        },
+        {
+          "native_id": 403,
+          "jit_bytes": 15782,
+          "installed_bytes": 11764
+        },
+        {
+          "native_id": 405,
+          "jit_bytes": 156,
+          "installed_bytes": 131
+        },
+        {
+          "native_id": 407,
+          "jit_bytes": 8861,
+          "installed_bytes": 6297
+        },
+        {
+          "native_id": 409,
+          "jit_bytes": 8411,
+          "installed_bytes": 5979
+        },
+        {
+          "native_id": 411,
+          "jit_bytes": 9729,
+          "installed_bytes": 7150
+        },
+        {
+          "native_id": 413,
+          "jit_bytes": 6418,
+          "installed_bytes": 5027
+        },
+        {
+          "native_id": 415,
+          "jit_bytes": 6647,
+          "installed_bytes": 5268
+        },
+        {
+          "native_id": 417,
+          "jit_bytes": 6656,
+          "installed_bytes": 5263
+        },
+        {
+          "native_id": 419,
+          "jit_bytes": 18316,
+          "installed_bytes": 12460
+        },
+        {
+          "native_id": 421,
+          "jit_bytes": 16868,
+          "installed_bytes": 12670
+        },
+        {
+          "native_id": 423,
+          "jit_bytes": 9171,
+          "installed_bytes": 6449
+        },
+        {
+          "native_id": 425,
+          "jit_bytes": 8753,
+          "installed_bytes": 6070
+        },
+        {
+          "native_id": 427,
+          "jit_bytes": 156,
+          "installed_bytes": 131
+        },
+        {
+          "native_id": 429,
+          "jit_bytes": 8846,
+          "installed_bytes": 6355
+        },
+        {
+          "native_id": 431,
+          "jit_bytes": 156,
+          "installed_bytes": 131
+        },
+        {
+          "native_id": 433,
+          "jit_bytes": 19447,
+          "installed_bytes": 13734
+        },
+        {
+          "native_id": 435,
+          "jit_bytes": 19657,
+          "installed_bytes": 13210
+        },
+        {
+          "native_id": 437,
+          "jit_bytes": 9084,
+          "installed_bytes": 6603
+        },
+        {
+          "native_id": 439,
+          "jit_bytes": 156,
+          "installed_bytes": 131
+        },
+        {
+          "native_id": 441,
+          "jit_bytes": 14730,
+          "installed_bytes": 10308
+        },
+        {
+          "native_id": 443,
+          "jit_bytes": 18205,
+          "installed_bytes": 12699
+        },
+        {
+          "native_id": 445,
+          "jit_bytes": 8763,
+          "installed_bytes": 6416
+        },
+        {
+          "native_id": 447,
+          "jit_bytes": 8545,
+          "installed_bytes": 6050
+        },
+        {
+          "native_id": 449,
+          "jit_bytes": 9746,
+          "installed_bytes": 7389
+        },
+        {
+          "native_id": 451,
+          "jit_bytes": 156,
+          "installed_bytes": 131
+        },
+        {
+          "native_id": 453,
+          "jit_bytes": 8481,
+          "installed_bytes": 6093
+        },
+        {
+          "native_id": 455,
+          "jit_bytes": 10216,
+          "installed_bytes": 7336
+        },
+        {
+          "native_id": 457,
+          "jit_bytes": 18296,
+          "installed_bytes": 12570
+        },
+        {
+          "native_id": 459,
+          "jit_bytes": 18296,
+          "installed_bytes": 12570
+        },
+        {
+          "native_id": 461,
+          "jit_bytes": 9573,
+          "installed_bytes": 6598
+        },
+        {
+          "native_id": 463,
+          "jit_bytes": 16497,
+          "installed_bytes": 11033
+        },
+        {
+          "native_id": 465,
+          "jit_bytes": 16410,
+          "installed_bytes": 10964
+        },
+        {
+          "native_id": 467,
+          "jit_bytes": 473,
+          "installed_bytes": 361
+        },
+        {
+          "native_id": 469,
+          "jit_bytes": 19181,
+          "installed_bytes": 13115
+        },
+        {
+          "native_id": 471,
+          "jit_bytes": 487,
+          "installed_bytes": 361
+        },
+        {
+          "native_id": 473,
+          "jit_bytes": 18993,
+          "installed_bytes": 13115
+        },
+        {
+          "native_id": 475,
+          "jit_bytes": 156,
+          "installed_bytes": 131
+        },
+        {
+          "native_id": 477,
+          "jit_bytes": 17743,
+          "installed_bytes": 12205
+        },
+        {
+          "native_id": 479,
+          "jit_bytes": 11649,
+          "installed_bytes": 7322
+        },
+        {
+          "native_id": 481,
+          "jit_bytes": 16269,
+          "installed_bytes": 12052
+        },
+        {
+          "native_id": 483,
+          "jit_bytes": 16477,
+          "installed_bytes": 12066
+        },
+        {
+          "native_id": 485,
+          "jit_bytes": 26658,
+          "installed_bytes": 19908
+        },
+        {
+          "native_id": 487,
+          "jit_bytes": 18479,
+          "installed_bytes": 11998
+        },
+        {
+          "native_id": 489,
+          "jit_bytes": 18787,
+          "installed_bytes": 12462
+        },
+        {
+          "native_id": 491,
+          "jit_bytes": 8683,
+          "installed_bytes": 6131
+        },
+        {
+          "native_id": 493,
+          "jit_bytes": 8674,
+          "installed_bytes": 6182
+        },
+        {
+          "native_id": 495,
+          "jit_bytes": 17293,
+          "installed_bytes": 11673
+        },
+        {
+          "native_id": 497,
+          "jit_bytes": 45467,
+          "installed_bytes": 29754
+        },
+        {
+          "native_id": 499,
+          "jit_bytes": 14971,
+          "installed_bytes": 10546
+        },
+        {
+          "native_id": 501,
+          "jit_bytes": 9456,
+          "installed_bytes": 6595
+        },
+        {
+          "native_id": 503,
+          "jit_bytes": 335,
+          "installed_bytes": 257
+        },
+        {
+          "native_id": 505,
+          "jit_bytes": 8689,
+          "installed_bytes": 6001
+        },
+        {
+          "native_id": 507,
+          "jit_bytes": 348,
+          "installed_bytes": 279
+        },
+        {
+          "native_id": 509,
+          "jit_bytes": 8937,
+          "installed_bytes": 6095
+        },
+        {
+          "native_id": 511,
+          "jit_bytes": 8937,
+          "installed_bytes": 6095
+        },
+        {
+          "native_id": 513,
+          "jit_bytes": 5743,
+          "installed_bytes": 4186
+        },
+        {
+          "native_id": 516,
+          "jit_bytes": 19474,
+          "installed_bytes": 6191
+        },
+        {
+          "native_id": 518,
+          "jit_bytes": 19474,
+          "installed_bytes": 6191
+        },
+        {
+          "native_id": 520,
+          "jit_bytes": 946,
+          "installed_bytes": 737
+        },
+        {
+          "native_id": 522,
+          "jit_bytes": 928,
+          "installed_bytes": 709
+        },
+        {
+          "native_id": 524,
+          "jit_bytes": 20,
+          "installed_bytes": 20
+        },
+        {
+          "native_id": 526,
+          "jit_bytes": 58722,
+          "installed_bytes": 41115
+        },
+        {
+          "native_id": 528,
+          "jit_bytes": 7361,
+          "installed_bytes": 5722
+        },
+        {
+          "native_id": 530,
+          "jit_bytes": 3430,
+          "installed_bytes": 3019
+        },
+        {
+          "native_id": 532,
+          "jit_bytes": 2007,
+          "installed_bytes": 1328
+        },
+        {
+          "native_id": 534,
+          "jit_bytes": 2007,
+          "installed_bytes": 1328
+        },
+        {
+          "native_id": 536,
+          "jit_bytes": 2007,
+          "installed_bytes": 1328
+        }
+      ]
+    },
+    {
+      "finished_utc": "2026-11-19T12:52:08Z",
+      "app": "katran",
+      "exit_code": 0,
+      "run": "/workspaces/repository/corpus/results/x86_kvm_corpus_20261119_125104_438079",
+      "suite_status": "ok",
+      "shim_logs": [
+        "/workspaces/repository/corpus/results/x86_kvm_corpus_20261119_125104_438079/details/shim-logs/katran.post_rejit.log"
+      ],
+      "replacement_events": 1,
+      "installed_programs": 1,
+      "loader_failures": [],
+      "jit_bytes": 13641,
+      "installed_bytes": 8727,
+      "programs": [
+        {
+          "native_id": 16,
+          "jit_bytes": 13641,
+          "installed_bytes": 8727
+        }
+      ]
+    }
+  ],
+  "scope": "Direct-native P functional check only. Counts are observations, not an admission gate, a B stock-verification census or timing."
+}
