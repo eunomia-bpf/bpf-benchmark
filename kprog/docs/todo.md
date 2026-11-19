@@ -236,6 +236,11 @@ PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are 
 
 PERF 2026-11-19T06:35:06Z：06:20 的 B 编译项已实现 O1（frontend/B backend），P 与最终 native LTO 仍 O3。g0 和 line-tables 的真实 .ksyms map 对象都在 libbpf open 返回 -3，完整 g 才保留 BTF extern 类型并成功，所以保留 g。新鲜生成 BCC fentry_vfs_read/inet_sock_set_state 的 B/libbpf open、原 frontend 复用、native O3/proof 均通过；Tetragon request6 的 retry 211523 在 CPU19/timing SH/image SH/32GiB AS 下运行；O1 frontend 与 bounds 阶段已通过，B machine backend 仍在进行（初始 210433 因旧失败存档无 artifacts.json 在进入 Tetragon 前停止，d71b7f19b 改读 kernel.entry）。结果 results/b-analysis-flags-20261119；不声称新 stock 接受或应用速度，OMP 组合批次继续量 Tetragon/Tracee 覆盖。
 
+**协调者 2026-11-19T18:15:53Z（接 16:59 的块）**：
+1. 六个应用的 helper 全部按名字调用（21b4f3012）：helper 段移到 vendor/bpf/native-helpers.h，core-compat.h 和 katran-compat.h 共用；Katran 自己头文件里的同名指针变量在引入时改成私有名。native-link 的 helper 编号路径删掉（-432 行，38 个测试通过）；段符号加偏移的 PLT32 调用解析到对应函数（静态函数在另一个段时编译器用这种形式）。新旧 native-link 在六个应用的 719 个程序上：643 个逐字节一致，76 个以前链接不了、现在能链接。
+2. 第一轮检查发现并修好的三处（3e99eaa1e）：OTel 同名指针变量占了 helper 符号；Tetragon 的错误统计按名字记录 helper 编号，所以它保留自己的声明；内联读取的常量源地址成了绝对操作数。都记在 anti-patterns.md 的“坑”一节。
+3. 进行中：镜像加六应用检查（batch-20261119T181526Z，基于 21b4f3012）；通过后冻结入口六应用计时（每个 3 x 180 s，stats 关和开，广度优先）。
+
 **协调者 2026-11-19T16:59:27Z（运营者：“helper 能用宏或者 function inline 都可以. 但是不要在链接器里面手写太多, 链接器要简单”；“代码要显著减少, 你来做”）**：
 1. 已做：所有应用的 helper 一套写法（ded33d751、5319f359d）：core-compat.h 里按内核 helper 名字的 extern 加同名宏，Cilium、Tetragon 自己的 BPF_FUNC 声明也成为同一批 extern；内核地址的 probe_read 直接 load，出错由 load site 恢复；按编号的宏、Tetragon 的 call *%rax 内联汇编、Cilium helpers.h 的原生分支（116 行）删掉。core-compat.h 886 行变 641 行。
 2. 代码量（可执行字节）：Tracee 1 457 903 → 1 311 616，Cilium 266 073 → 256 377，Tetragon 5 127 859 → 4 996 482，BCC 8 015 → 7 612，OTel 525 519 → 523 440。Tracee 的 probe_read 调用 28 425 → 2 790（剩下的是读用户地址的 helper）。
