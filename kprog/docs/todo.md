@@ -18,8 +18,9 @@
   controls and existing ALU32 controls pass. Retained27 now tests tag4 at
   PC966 before subtraction970 (old959sub before962test);15sites anchored.
   Receipt f969fb46e, results/b-pointer-difference-20261119/fixed-result.json.
-  Stock fixture and retained30 replay worker186985 are queued behind the
-  coordinator batch, not yet run; no stock/app coverage or timing claim.
+  The earlier unstarted waiter186985 was ended after the18:18 resource
+  correction. Replacement247989 completed0 as recorded above; fresh app
+  stock coverage and timing remain separate.
   request27 sys_dup_exit_tail and request30 generate B but stock rejects
   scalar-minus-stack-pointer arithmetic (insns959/27607). Request28 also
   has a separate536-byte frame. Operator instruction restored direct-native
@@ -82,7 +83,9 @@
 - [ ] P-B-constant-ALU32 (PERF 2026-11-19T11:28:45Z): Tetragon request 6's
   Sparse-cache component7087690ee passes18selectors/3B emissions/72C
   tag+alias+lifetime cases per layout with UBSan, worker247988. Retained6
-  renders16cells versus53 with unchanged424B arena; full B compile next.
+  renders16cells versus53 with unchanged424B arena. Full retained B worker
+  251817 is active in normal O1 frontend, CPU20/32GiBAS, raw sparse-stack-
+  cache-20261119/tetragon-20261119T185126Z-251817; no image/base rebuild.
   Actual emitted frame/stock/current-app coverage and speed remain open.
   Read-only inventory195833/e9d43500b completed0:2,538ABI states/18contexts,
   original424B arena/53cells,91full-width stores (39known stack/52external),

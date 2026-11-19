@@ -1185,3 +1185,10 @@ corrected operands now pass the sanitizer. See sparse-stack-cache-20261119.
 Pointer subtraction247989 also passes focused stock load/TEST_RUN and
 retained30 emission, with test27618 before sub27622. Whole Tracee stock
 coverage remains open; see b-pointer-difference-20261119.
+
+PERF 2026-11-19T18:52:30Z: Retained Tetragon changed-C B compilation251817 is now
+active on CPU20/32GiBAS, normal O1 and unchanged backend/packer. Both
+preprocessing pieces pass; joined C4.7MiB, frontend pending18:51:29Z.
+The generator emits16cache cells, arena424B; object frame/stock/current-app
+and speed are unmeasured. No repeated unchanged frontend/O3, flags or
+limits changed. Sourcef6a82ce31/b1e2a7cad; see sparse-stack-cache-20261119.
