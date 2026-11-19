@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 cd /workspaces/repository
+# Match the production checked-corpus service: ordinary stock inputs for B.
+export CLANG=/workspaces/repository/kprog/stock-path/bin/clang
 out=/workspaces/kprog-raw/perf/b-analysis-flags-20261119/production-$(date -u +%Y%m%dT%H%M%SZ)-$$
 install -d "$out"
 printf '%s\n' "$out" > /workspaces/kprog-raw/perf/b-analysis-flags-20261119/latest-production
