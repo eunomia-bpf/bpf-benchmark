@@ -1,0 +1,25 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryPrefix
+
+open KProgFormal.ClightRefinement
+
+#check Arm64Producer.AbiLayout
+#print axioms Arm64Producer.source_abi_layout
+#check Arm64Producer.PrefixLocal
+#check Arm64Producer.prefix_body_bound
+#print axioms Arm64Producer.prefix_body_bound
+#check Arm64Producer.initialize_caches_body
+#print axioms Arm64Producer.initialize_caches_body
+#check Arm64Producer.prefix_internal_bound
+#print axioms Arm64Producer.prefix_internal_bound
+#check Arm64Producer.initialize_caches_bound
+#print axioms Arm64Producer.initialize_caches_bound
+#check Arm64ProgramEntryPrefix.prefix_source
+#print axioms Arm64ProgramEntryPrefix.prefix_source
+#check Arm64ProgramEntryPrefix.abi_layout
+#print axioms Arm64ProgramEntryPrefix.abi_layout
+#check Arm64ProgramEntryPrefix.prefix_internal
+#print axioms Arm64ProgramEntryPrefix.prefix_internal
+#check Arm64ProgramEntryPrefix.cache_source
+#print axioms Arm64ProgramEntryPrefix.cache_source
+#check Arm64ProgramEntryPrefix.entry_caches_initialized
+#print axioms Arm64ProgramEntryPrefix.entry_caches_initialized

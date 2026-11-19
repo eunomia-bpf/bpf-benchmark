@@ -151,7 +151,24 @@ theorem cache_stage_exported :
     sequenceTail 3 Arm64Entry.s_kprog_arm64_entry_raw_66 = some cacheStage ∧
     sequenceTail 4 cacheStage = some afterCacheStage := by constructor <;> rfl
 
-private theorem initialize_exec (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
+/-- The four exported cache assignments, independent of their successor. -/
+def cacheAssignments : List CC.Stmt := by
+  run_tac do
+    let mut body ← Lean.Elab.Term.elabTerm (← `(cacheStage)) none
+    let mut rows : Array Lean.Expr := #[]
+    for _ in [:4] do
+      body ← Lean.Meta.withTransparency .all (Lean.Meta.whnf body)
+      unless body.isAppOfArity ``CC.Stmt.Ssequence 2 do
+        throwError "cache initializer no longer has four assignments"
+      rows := rows.push body.getAppArgs[0]!
+      body := body.getAppArgs[1]!
+    let result ← Lean.Meta.mkListLit (Lean.mkConst ``CC.Stmt) rows.toList
+    Lean.Elab.Tactic.closeMainGoal `cache_assignments result
+
+theorem cache_stage_source : cacheStage =
+    cacheAssignments.foldr CC.Stmt.Ssequence afterCacheStage := by rfl
+
+private theorem initialize_exec (world : CC.CGenv) (f : CC.Function) (rest : CC.Stmt) (e : CC.Env) (le : CC.TempEnv) (k : CC.Cont)
     (sb rb sv rv : CC.Block) (before m1 m2 m3 after : CC.Mem)
     (stackBase : e.get Arm64Entry.___a64_numeric_sp = some (sb, CC.tulong))
     (returnBase : e.get Arm64Entry.___a64_numeric_return = some (rb, CC.tulong))
@@ -161,14 +178,14 @@ private theorem initialize_exec (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv
     (s1 : CC.Mem.storev .Mint64 m1 (.Vptr rb 0) (.Vlong 0) = some m2)
     (s2 : CC.Mem.storev .Mint8unsigned m2 (.Vptr sv 0) (.Vint 0) = some m3)
     (s3 : CC.Mem.storev .Mint8unsigned m3 (.Vptr rv 0) (.Vint 0) = some after) :
-    steps world 12 (.State producer cacheStage k e le before) =
-      some (CC.E0, .State producer afterCacheStage k e le after) ∧
-    InternalPath world 12 (.State producer cacheStage k e le before) := by
+    steps world 12 (.State f (cacheAssignments.foldr CC.Stmt.Ssequence rest) k e le before) =
+      some (CC.E0, .State f rest k e le after) ∧
+    InternalPath world 12 (.State f (cacheAssignments.foldr CC.Stmt.Ssequence rest) k e le before) := by
   change CC.Mem.storev .Mint64 before (.Vptr sb (0#64)) (.Vlong (0#64)) = some m1 at s0
   change CC.Mem.storev .Mint64 m1 (.Vptr rb (0#64)) (.Vlong (0#64)) = some m2 at s1
   change CC.Mem.storev .Mint8unsigned m2 (.Vptr sv (0#64)) (.Vint (0#32)) = some m3 at s2
   change CC.Mem.storev .Mint8unsigned m3 (.Vptr rv (0#64)) (.Vint (0#32)) = some after at s3
-  simp +decide [steps, InternalPath, InternalState, cacheStage, afterCacheStage,
+  simp +decide [steps, InternalPath, InternalState, cacheAssignments, List.foldr,
     step_seq, step_skip_seq, CC.doStep, CC.doEvalLvalue, CC.lvalOfVar,
     CC.doEvalExpr, CC.typeof, CC.doAssignLoc, CC.accessMode,
     CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntLong, CC.Cop.castIntInt,
@@ -182,11 +199,14 @@ private theorem initialize_exec (world : CC.CGenv) (e : CC.Env) (le : CC.TempEnv
 permissions. Any preceding stores may change contents while preserving access.
 The result initializes both cache words and validity bytes to zero, preserves
 all caller blocks, and changes no permissions or allocation identity. -/
-theorem initialize_caches_bound (world : CC.CGenv) (m before : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
+theorem initialize_caches_body (world : CC.CGenv) (f : CC.Function)
+    (rest : CC.Stmt) (m before : CC.Mem) (e : CC.Env) (k : CC.Cont) (le : CC.TempEnv)
+    (bases : ∀ returns, e.get (baseName returns) = (allocation m).1.get (baseName returns))
+    (valids : ∀ returns, e.get (validName returns) = (allocation m).1.get (validName returns))
     (access : before.access = (allocation m).2.access) :
     ∃ after, InternalRun world 12
-        (.State producer cacheStage k (allocation m).1 le before)
-        (.State producer afterCacheStage k (allocation m).1 le after) ∧
+        (.State f (cacheAssignments.foldr CC.Stmt.Ssequence rest) k e le before)
+        (.State f rest k e le after) ∧
       (∀ returns, ∃ locals : CacheLocals returns m,
         CC.Mem.loadv .Mint64 after (.Vptr locals.baseBlock 0) = some (.Vlong 0) ∧
         CC.Mem.loadv .Mint8unsigned after (.Vptr locals.validBlock 0) = some (.Vint 0)) ∧
@@ -222,8 +242,9 @@ theorem initialize_caches_bound (world : CC.CGenv) (m before : CC.Mem) (k : CC.C
   obtain ⟨m2, s1, a2⟩ := create m1 .Mint64 ret.baseBlock (.Vlong 0) a1 ret.baseWritable
   obtain ⟨m3, s2, a3⟩ := create m2 .Mint8unsigned stack.validBlock (.Vint 0) a2 stack.validWritable
   obtain ⟨after, s3, a4⟩ := create m3 .Mint8unsigned ret.validBlock (.Vint 0) a3 ret.validWritable
-  have exec := initialize_exec world (allocation m).1 le k _ _ _ _ before m1 m2 m3 after
-    stack.baseBinding ret.baseBinding stack.validBinding ret.validBinding s0 s1 s2 s3
+  have exec := initialize_exec world f rest e le k _ _ _ _ before m1 m2 m3 after
+    ((bases false).trans stack.baseBinding) ((bases true).trans ret.baseBinding)
+    ((valids false).trans stack.validBinding) ((valids true).trans ret.validBinding) s0 s1 s2 s3
   have baseStack : CC.Mem.loadv .Mint64 after (.Vptr stack.baseBlock 0) = some (.Vlong 0) := by
     have h3 := CC.Mem.load_store_other s3 .Mint64 stack.baseBlock 0 (.inl sbRv)
     have h2 := CC.Mem.load_store_other s2 .Mint64 stack.baseBlock 0 (.inl stack.separate)
@@ -251,6 +272,21 @@ theorem initialize_caches_bound (world : CC.CGenv) (m before : CC.Mem) (k : CC.C
       ((FrameBelow.store stack.validFresh s2).trans (FrameBelow.store ret.validFresh s3))
   · exact (CC.Mem.store_nextblock s3).trans ((CC.Mem.store_nextblock s2).trans
       ((CC.Mem.store_nextblock s1).trans (CC.Mem.store_nextblock s0)))
+
+/-- Source producer specialization of the shared cache store construction. -/
+theorem initialize_caches_bound (world : CC.CGenv) (m before : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
+    (access : before.access = (allocation m).2.access) :
+    ∃ after, InternalRun world 12
+        (.State producer cacheStage k (allocation m).1 le before)
+        (.State producer afterCacheStage k (allocation m).1 le after) ∧
+      (∀ returns, ∃ locals : CacheLocals returns m,
+        CC.Mem.loadv .Mint64 after (.Vptr locals.baseBlock 0) = some (.Vlong 0) ∧
+        CC.Mem.loadv .Mint8unsigned after (.Vptr locals.validBlock 0) = some (.Vint 0)) ∧
+      FrameBelow m.nextblock before after ∧
+      after.access = before.access ∧ after.nextblock = before.nextblock := by
+  rw [cache_stage_source]
+  exact initialize_caches_body world producer afterCacheStage m before (allocation m).1 k le
+    (fun _ => rfl) (fun _ => rfl) access
 
 theorem initialize_caches (m before : CC.Mem) (k : CC.Cont) (le : CC.TempEnv)
     (access : before.access = (allocation m).2.access) :

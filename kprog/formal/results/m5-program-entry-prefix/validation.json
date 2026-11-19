@@ -1,0 +1,188 @@
+{
+  "step": "M5 actual production ABI and cache prefix",
+  "status": "pass",
+  "recorded_utc": "2026-11-19T21:09:06.941850+00:00",
+  "before_commit_head": "28cd184a70849ffe95bb233b258f80a5dd0253b2",
+  "raw_directory": "/workspaces/kprog-raw/formal/m5-program-entry-prefix",
+  "execution": {
+    "abi_local_assignments": 189,
+    "cache_assignments": 4,
+    "assignment_steps": 567,
+    "entry_steps": 1,
+    "cache_steps": 12,
+    "entry_through_caches_steps": 580,
+    "pre_header_statements_executed": 193,
+    "pre_header_statements_total": 419,
+    "complete_isa_families": 0
+  },
+  "checks": {
+    "focused1": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProducerPrefix"
+      ],
+      "exit": 1,
+      "seconds": 426.23658299446106,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "focused2": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryPrefix"
+      ],
+      "exit": 1,
+      "seconds": 38.77810621261597,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "focused3": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryPrefix"
+      ],
+      "exit": 0,
+      "seconds": 880.256121635437,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 173
+    },
+    "query1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "results/m5-program-entry-prefix/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.5589234828948975,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "lake-build1": {
+      "command": [
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 552.0486838817596,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 348
+    }
+  },
+  "public_query_counts": {
+    "types": 11,
+    "axiom_reports": 10
+  },
+  "axiom_reports": {
+    "KProgFormal.ClightRefinement.Arm64Producer.source_abi_layout": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.prefix_body_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.initialize_caches_body": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.prefix_internal_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64Producer.initialize_caches_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryPrefix.prefix_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryPrefix.abi_layout": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryPrefix.prefix_internal": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryPrefix.cache_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryPrefix.entry_caches_initialized": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "prior_attempts": {
+    "focused1": "AbiLayout needed unfolding before closed decision; five uint array offsets needed primitive sizeof normalization; include/doc placement fixed.",
+    "focused2": "Optional primitive-size normalization used strict simp and reported no progress on already closed offsets; made that rewrite optional. Both failures and full logs retained."
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false,
+    "unchanged": true
+  },
+  "resources": {
+    "lean_cpu": 17,
+    "control_cpu": 16,
+    "workers": 1,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "none for host work under 2026-11-19T18:18:59 coordination rule"
+  },
+  "lean_source_sha256": {
+    "kprog/formal/KProgFormal.lean": "1a71d50775e189624e2d88b0cc8aa63f44c0c32004a7a6f7096c2f13d361ab2a",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64Producer.lean": "16568b08b1aa037b52c94d1c6f413f75808f226ac6724cc4230ac207e128b148",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerPrefix.lean": "e589eeedb0e62880e4b0a6f08a26b38535f226cb7162ba81eb4751273dbc0126",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryPrefix.lean": "33c388ab05666b22cdc126e72f3bd2dc66648bdf27f3cb2fceee8fa4a0f1374c",
+    "kprog/formal/results/m5-program-entry-prefix/Query.lean": "c0c678f2a1e1accb1eff5da27d718c6d1b6ca95f5b5f325160851446eae466c5"
+  },
+  "scope": {
+    "changed": "formal proofs and their receipts plus own todo line",
+    "c_runtime_kernel_image_base_benchmark_paper_design_changes": false,
+    "source_store_construction": "shared generic proofs, not a second producer replay",
+    "source_apis": "original source entry/cache theorem signatures retained"
+  },
+  "goal_closure": {
+    "M5": "open; actual remaining setup/input/provider/prefix and handler/native compositions plus O1/O2/O4 recount",
+    "M6": "open, after M5",
+    "whole_make_check_this_step": "not repeated for Lean-only change; final closure still requires fresh full Lake and make check",
+    "last_whole_make_check_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "clight_byte_comparison_this_step": "not repeated; no C/export source changed",
+    "last_export_comparison": "results/m5-program-entry-fields/validation.json; ten Arm64 exports retain baseline and twelve historical x86 differences remain recorded"
+  }
+}
