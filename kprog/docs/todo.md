@@ -99,8 +99,12 @@
   receipts remain in sparse-stack-cache-20261119; sparse cells insufficient.
   Per-RET candidate d0849dd27 passes focused B/native regressions and actual
   retained generated inventory:17edges instead of global119 across seven
-  sites, all exact. Raw pop/release/default preserved. One changed-source
-  normal-O1 Tetragon compile is next; no emitted-frame result yet.
+  sites, all exact. Raw pop/release/default preserved. Changed normal-O1
+  backend passes225.411s, but inspection271036 finds1218referenced spills
+  and5304B minimum payload. Owned packer270474 cancelled19:36:51Z,
+  rc-15/wrapper2; no llc/stock rejection. Raw/storage receipt in
+  return-dispatch-20261119; no unchanged rerun. Actual live-state reduction
+  still needed before final B/stock; exact RET metadata alone is insufficient.
   Actual emitted frame/stock/current-app coverage and speed remain open.
   Read-only inventory195833/e9d43500b completed0:2,538ABI states/18contexts,
   original424B arena/53cells,91full-width stores (39known stack/52external),

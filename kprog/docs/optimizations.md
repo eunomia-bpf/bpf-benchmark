@@ -1272,3 +1272,15 @@ CPU18/8GiBAS on this immutable MIR, no timinglock. Partial commands in
 return-dispatch-20261119/tetragon-partial.json. Katran mapping/syntax-only
 receipt is b-pointer-difference-20261119/katran-mapped.json;269752 remains
 unstarted imageEX waiter. No stock or execution-performance claim.
+
+PERF 2026-11-19T19:38:16Z: Changed per-RET Tetragon267684 is terminal2 after intentional
+cancellation. Inspector2710360 finds282132blocks/1218referenced spills,
+432B locals and6196declared bytes; conservative CFG live-spill peak5308B
+atbb106359. Even all4byte spills need5304B under the unchanged packer,
+so exact RET sets do not resolve storage. Ended only exact owned packer
+270474 (ancestor267684) at19:36:51Z; rc-15/122.635s is cancellation,
+not llc or stock rejection. Raw MIR/logs retained, storage receipt committed
+in return-dispatch-20261119/tetragon-storage.json. No repeat of this same
+frontend/packing run. Parent Tetragon B/stock/performance remains open; next
+work is MIR/source live-state analysis while Katran offset-pair269752 waits
+imageEX for actual compiler/control/captured-B validation.
