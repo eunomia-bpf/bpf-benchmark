@@ -25,3 +25,18 @@ generator and shared operation with FORMAL. The shared interpreter header
 is frozen; this source review changes neither it nor the active cohort.
 The current results remain recorded with this correctness limitation;
 this finding adds no benchmark admission gate or automatic rerun.
+
+PERF 2026-11-19T09:05:51Z:8aa2dc378 adds four real locked/plain assembly pairs:
+INC64,INC32,register-source ADD64,immediate-source ADD64. The local Make
+entry builds one fixture object, GNU objdump feeds the actual production
+parser, and evidence.json records native extents, decoded text and encoded
+operations. The regression requires different locked/plain encodings; the
+current defect is expected to fail that assertion after writing all cases.
+An encoding-only pass will not close the shared atomic-memory obligation.
+
+Detached worker314899 waits on timing SH behind the active BCC measurement;
+raw reproduce-20261119T085937Z-314899, launcher
+/workspaces/kprog-raw/perf/lock-prefix-review-launch-20261119.log. No test
+result is claimed before it runs, and no active generator/interpreter or
+benchmark input changed. Read commands.json/evidence.json/exit-code next;
+distinguish a reproduced semantic assertion from a setup/compiler failure.

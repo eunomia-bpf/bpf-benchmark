@@ -65,3 +65,10 @@ native-loader failures. Native replacement counts in entry order are
 14 /25 /113 /288 /169 /1. Katran084956_577247 is the final row; its small
 raw metadata/results are committed. BCC checked-native timing has now
 started; batch254724 retains its lease and no speed result exists yet.
+
+PERF 2026-11-19T09:05:51Z:12eb56533 prepares the results-only analyze target. The shared
+coverage reader now accepts explicit source-commit/exit/log paths, so the
+timing subdirectory is analyzed against the parent batch's actual files.
+After completion, invoke its Make analyze target with BATCH, RUN and OUT;
+it uses the existing ratio/installed-code readers. It has not been run on
+unfinished timing data. The checked-timing recipe and workload remain fixed.
