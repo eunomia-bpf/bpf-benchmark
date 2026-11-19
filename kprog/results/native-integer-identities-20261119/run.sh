@@ -19,6 +19,7 @@ validate() {
     taskset -c 19 prlimit --as=17179869184 -- make -f kprog/results/native-integer-identities-20261119/Makefile test OUT="$out"
     taskset -c 19 prlimit --as=17179869184 -- make -f kprog/results/native-verified-paths-20261119/Makefile test OUT="$out/verified"
     taskset -c 19 prlimit --as=17179869184 -- make -f kprog/results/checked-probe-c-20261119/Makefile replay OUT="$out" > "$out/bcc-replay.log" 2>&1
+    install -d "$out/probe" "$out/array"
     taskset -c 19 prlimit --as=17179869184 -- make -f kprog/results/checked-probe-c-20261119/Makefile test OUT="$out/probe" > "$out/probe.log" 2>&1
     taskset -c 19 prlimit --as=17179869184 -- make -f kprog/results/checked-array-c-20261119/Makefile test pipeline OUT="$out/array" > "$out/array.log" 2>&1
 }
