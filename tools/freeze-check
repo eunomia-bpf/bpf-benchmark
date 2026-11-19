@@ -5,6 +5,7 @@
 #   vendor/bpf/Makefile and vendor/bpf/*compat*.h (P flags and headers),
 #   kprog/x86/native_lab/native_link/ (linker LTO), the loader's LTO and link-plan headers,
 #   and the load-time LTO compiler sources kprog/x86/perf_context_lto.cpp and kprog/x86/link_embedded_ir.cpp.
+# Open for the design's main configuration (LTO, checked-sim-c: B generation, specializer, sim compiler; coordinator 2026-11-19).
 # Open for records: kprog/results, kprog/docs, corpus/results, micro/results. Proof track: kprog/formal.
 # Opened classes (coordinator 2026-11-18): kprog/docs/freeze-open.tsv, one line per path:
 #   path<TAB>open-until UTC date<TAB>evidence (run path and log line)<TAB>who.
@@ -14,7 +15,7 @@ OPENED="$(git rev-parse --show-toplevel 2>/dev/null)/kprog/docs/freeze-open.tsv"
 TODAY=$(date -u +%F)
 opened() { [ -f "$OPENED" ] && awk -F'\t' -v p="$1" -v d="$TODAY" '$1==p && $2>=d {f=1} END {exit !f}' "$OPENED"; }
 FROZEN='^(kprog/|kinsn/|bpfopt/shim/|runner/|vendor/bpf/|micro/|corpus/|e2e/|Makefile$)'
-OPEN='^(kprog/results/|kprog/docs/|corpus/results/|micro/results/|kprog/formal/|kprog/x86/native_lab/native_link/|kprog/x86/perf_context_lto\.cpp$|kprog/x86/link_embedded_ir\.cpp$|kprog/libnativeloader/src/native_loader_(lto|link_plan|link_schema|context_lto)\.hpp$|vendor/bpf/Makefile$|vendor/bpf/[^/]*compat[^/]*\.h$)'
+OPEN='^(kprog/trusted_generation\.py$|kprog/x86/trusted_specializer\.py$|kprog/x86/compile_sim_ir\.cpp$|kprog/x86/micro-prog/|kprog/results/|kprog/docs/|corpus/results/|micro/results/|kprog/formal/|kprog/x86/native_lab/native_link/|kprog/x86/perf_context_lto\.cpp$|kprog/x86/link_embedded_ir\.cpp$|kprog/libnativeloader/src/native_loader_(lto|link_plan|link_schema|context_lto)\.hpp$|vendor/bpf/Makefile$|vendor/bpf/[^/]*compat[^/]*\.h$)'
 bad=0
 while IFS=$'\t' read -r add del path; do
   [ -n "$path" ] || continue
