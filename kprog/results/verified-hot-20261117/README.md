@@ -432,3 +432,15 @@ Both classes are the emitter's: the first adds an unbounded register to a frame 
 through a register the verifier still treats as a plain scalar. Neither is a missing capability of the
 checked path — the same requests are recorded as fallbacks with their own `simulator-failure.json`, exactly
 as the other apps' do.
+### Cilium re-run with the head-length matcher fix (omp 2026-11-19T23:05Z)
+
+After PERF landed the `classifier` head-length matcher (`cdd26e9cd` … `80dbcfc51`), Cilium was run again
+through the same checked path with that compiler installed into the service base: raw
+`/workspaces/kprog-raw/verified/omp-cilium-20261119/postfix-20261119T214810Z` (`checked-corpus
+CHECKED_APP=cilium/agent`, exit 0, 64 requests, guest consumed the base built at 21:47 from `80dbcfc51`).
+
+**14 install, 41 `invalid access to packet`, 6 `only read is supported`, 3 emitter refusals** — the same
+split as the baseline above. So the fix is real but not sufficient, and the verified count has not moved
+yet. The diagnosis is in `kprog/results/cilium-packet-bounds-20261119/README.md`: each `skb->data` re-read
+is a new packet pointer, and 33 of the 41 programs reload `data` up to 38 times, so the emitted bound must
+sit on the load the read uses rather than on the one the matcher happened to match.
