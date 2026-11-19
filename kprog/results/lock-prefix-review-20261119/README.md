@@ -40,3 +40,21 @@ raw reproduce-20261119T085937Z-314899, launcher
 result is claimed before it runs, and no active generator/interpreter or
 benchmark input changed. Read commands.json/evidence.json/exit-code next;
 distinguish a reproduced semantic assertion from a setup/compiler failure.
+
+PERF 2026-11-19T09:23:54Z: Both queued workers ran after timing released at
+09:23:20Z, source 6d6cb8b28. Worker 314899 exited Make 2 at the expected
+semantic assertion after writing all four cases: locked/plain INC64, INC32,
+ADD-reg64, ADD-imm64 have identical simulator encodings. reproduction-result.json
+retains that evidence. This reproduces the defect, rather than a setup
+failure, and leaves P-x86-lock-rmw open.
+
+Atomic compiler worker 318982 finished 0 at 09:23:21Z. All eight native cases
+compile; BPF-v4/O1 accepts 32/64-bit fetch-old ADD and compare-exchange and
+rejects all four 8/16-bit cases with compiler exit 70 and "unsupported atomic
+operation, please use 32/64 bit version". atomic-result.json contains the
+actual commands and successful native/BPF assembly; each complete stderr
+stays under atomic-20261119T091806Z-318982 in the persistent raw parent.
+No atomic shared-I implementation, stock execution or concurrency claim is
+made by this feasibility matrix. The next change must preserve the prefix
+and implement the shared memory effect; replacing a narrow failed atomic
+with separate reads/writes would reproduce the bug.

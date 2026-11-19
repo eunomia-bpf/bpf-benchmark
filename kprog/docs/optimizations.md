@@ -889,3 +889,14 @@ arithmetic canonicalization exposes1 of42 retained private bases,41 remain
 unknown; no production optimization or runtime gain is inferred. Results
 native-cohort-timing-20261119 and native-base-roots-20261119. Lock-prefix
 fidelity953453b7f is the next phase1 item, ahead of optional alias work.
+
+PERF 2026-11-19T09:23:54Z: Combined checked-native cohort through ff02957cc
+is now timed: BCC 3 x 180 s, stats on, run 085534_233511, programs/native/
+B-generated/B-stock 25/25/25/25, 0 fallback/failures, app ok. Per call
+107.7→106.0 ns (1.016x), throughput 1.018x, sample ratios 1.013/1.020/1.022,
+0 workload errors; installed 20,043 B vs JIT 7,965 B. All prior C/native
+pieces are on; later 2eb36bad9 is not in the installed compiler. This measures the combined cohort rather
+than separate piece effects; body/helpers/maps were not profiled. Runtime
+targets remain open. Lost LOCK semantics in shared I is a confirmed phase1
+defect affecting B and native, recorded without discarding the measurement.
+Evidence results/native-cohort-timing-20261119 and lock-prefix-review-20261119.

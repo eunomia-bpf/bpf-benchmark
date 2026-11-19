@@ -72,3 +72,27 @@ timing subdirectory is analyzed against the parent batch's actual files.
 After completion, invoke its Make analyze target with BATCH, RUN and OUT;
 it uses the existing ratio/installed-code readers. It has not been run on
 unfinished timing data. The checked-timing recipe and workload remain fixed.
+
+PERF 2026-11-19T09:23:54Z: Batch 254724 finished at 09:23:20Z, host exit 0,
+app ok. Final run x86_kvm_corpus_20261119_085534_233511 completes all three
+180 s samples in each arm, stats on. Actual registered-service coverage is
+programs/native/B-generated/B-stock 25/25/25/25, 25 checked-sim-c, 0 direct
+fallback, 0 failed requests. coverage.json reads the archived service rather
+than inferring coverage from the functional smoke.
+
+The existing May analysis reports 107.7→106.0 ns/inv (JIT/native), 1.016x
+speedup; its established >=100-run summary retains 15/25 JIT and 16/25 native
+programs. Throughput is 1.018x, with sample ratios 1.013/1.020/1.022, range
+1.013–1.022. Raw rates are 510635/509299/510637 against
+517514/519579/521977 ops/s, 0 workload errors. Installed bytes are 20,043
+native vs 7,965 JIT across 25 programs. timing-summary.txt and installed.txt
+retain the script output; the corpus small raw files are committed too.
+
+This is the combined cohort through ff02957cc, installed 07:53:18Z, before
+2eb36bad9's unspecified-input change. It is a two-arm combined measurement,
+not an isolated contribution for any individual C/LTO piece. It does not
+meet the runtime targets. Body/helper/map shares were not profiled here;
+older shares are not substituted. The confirmed lost-LOCK correctness
+limitation remains documented in lock-prefix-review-20261119; these raw
+results stay in the record and no admission gate or automatic rerun is added.
+The batch/image/timing leases and owned guest have ended.
