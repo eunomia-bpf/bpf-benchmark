@@ -26,3 +26,23 @@ Reading: Cilium is faster without the hand-written map routines and fusion; Trac
 that came from inlined probe reads; OTel, BCC and Katran are about the same. Code shrinks on every app.
 Decision (coordinator): the routines stay deleted from master (07d9c4c96); probe reads and the other hot helpers
 come back the way the design puts them, as C compiled with the specialized sim C in the LTO configuration.
+
+## Test 2: per-app manifest options erased (2026-11-19, local a4d8336e7, image b3b5050f)
+
+Erased in vendor/bpf/Makefile: Cilium source_map_prefix and prog_type, OTel --source-bpf-object, Tetragon
+--dedupe-program / --source-object-root / --helper-disambiguate 174. One-image check, all six rc=0:
+
+| App | Native replaced / native-loader failed | Before (test 1) |
+|---|---|---|
+| OTel | 13 / 1 | 14 / 0 |
+| BCC | 25 / 0 | 25 / 0 |
+| Cilium | 65 / 70 | 113 / 0 |
+| Tetragon | 1 / 287 (manifest lists 648 variant entries) | 288 / 0 |
+| Tracee | 169 / 0 | 169 / 0 |
+| Katran | 1 / 0 | 1 / 0 |
+
+The options select which native object or kernel-version variant belongs to a loaded program and bind its
+tail-call maps. Decision (coordinator): replace them with one mechanism for every app: each native object is
+paired with the BPF object it was compiled beside, and the loader picks the entry whose source program matches
+the loaded program and binds maps through that source object's relocations (the design already names
+source_bpf_object for map binding). BCC, Tracee and Katran need no option today and keep working.

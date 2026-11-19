@@ -40,6 +40,8 @@
 
 PERF 2026-11-16T23:05:09Z: image96a677d6826f and the requested frozen check are complete. BCC/Tracee/Katran app ok; OTel/Cilium fail on a filtered-out LPM symbol, Tetragon on a missing conditional-tail callee. Source fixes a53922beb/3940c4bee are pushed; host475 entries/239 emissions and loader build pass. Three errors remain on this image, so the next breadth round waits for the corrected image/check. Receipt results/lookup-batch-publication-20261116/summary.json; next publication raw is /workspaces/kprog-raw/perf/20261116-native-load-corrections.
 
+**协调者 2026-11-19T04:48:00Z（lean 第二项：擦掉按应用的 manifest 键）**：擦掉后 Cilium 70 个、Tetragon 287 个、OTel 1 个原生装载失败（kprog/results/lean-20261118/README.md 第二节）。这些键在现在的 loader 里管“装载的程序对应哪个原生对象 / 哪个内核版本变体”和尾调用 map 的绑定。换成对所有应用一样的做法：每个原生对象配上和它一起编出来的 BPF 对象，loader 选源程序和装载的程序一致的那一项，并按源对象的重定位绑定 map（设计里已有 source_bpf_object）。perf 的 Codex 额度 05:36 UTC 回来后实现，协调者在 bpf-benchmark-lean 上测功能。
+
 **协调者 2026-11-19T01:27:01Z（运营者：“1.214x（要重跑）??? 不要随便重跑”）**：不再重跑。量出来的数照实用，旁边写明当时的主机负载；lean 的 Cilium 重跑 01:26 停掉，Tracee 重跑取消，只跑六个应用 stats 开那一轮。
 
 **协调者 2026-11-19T01:25:56Z（运营者：“手写的 helper 例程 是不是应替换成 c 实现的直接编译进去的”）**：是。helper 用 C 实现，放在 LTO 编译器的输入里（kprog/x86/link_embedded_ir.cpp、perf_context_lto.cpp 一侧，开放路径），sim 特化之后：一份 B 交 stock verifier（helper 照常是调用），同一份 sim C 连同 helper 的 C 一起编译，编译器跨 helper 边界内联和优化，编成原生代码。先做占时间最多的几类：ktime（BCC、Katran）、probe_read 一类（Tracee、Tetragon、OTel）、perf_event_output（BCC）、map 更新和删除。每类做完在 LTO 配置上量一次。
