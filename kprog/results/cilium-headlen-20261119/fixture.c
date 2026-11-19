@@ -24,10 +24,7 @@ SEC("classifier") int NAME(struct __sk_buff *ctx) { \
     return (CONDITION) ? packet_byte(ctx) : 0; \
 }
 HEAD(head_ge, span >= 42)
-HEAD(head_gt, span > 41)
 HEAD(head_not_lt, !(span < 42))
-HEAD(head_not_le, !(span <= 41))
-HEAD(head_wide, (unsigned long)span >= 42)
 
 SEC("tc") int old_tc(struct __sk_buff *ctx)
 {

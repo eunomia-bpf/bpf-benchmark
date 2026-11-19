@@ -26,16 +26,38 @@ run(['clang-18','-fsyntax-only','-I'+str(root/'vendor/bpf/targets/x86'/release),
 source=Path(__file__).with_name('fixture.c')
 run([root/'kprog/stock-path/bin/clang',*adapter.COMPILE_FLAGS,'-DSELECTOR_CONTROLS',
      '-emit-llvm','-c',source,'-o',out/'controls.bc'])
-run([compiler,out/'controls.bc','-o',out/'controls.lowered.bc'])
+controls=run(['llvm-dis-18',out/'controls.bc','-o','-'])
+explicit=[]
+# Clang canonicalizes C comparisons; keep the missing predicates and wide
+# comparisons explicit so each new branch has an independent regression.
+for width,predicates in [(32,['uge','ule']),(64,['ugt','uge','ult','ule'])]:
+    for predicate in predicates:
+        name=f'ir_{predicate}{width}';explicit.append(name)
+        wide='  %wide = zext i32 %span to i64\n' if width==64 else ''
+        operand='%wide' if width==64 else '%span'
+        controls+=f'''\ndefine i32 @{name}(ptr %ctx) section "classifier" {{
+  %kernel = call ptr @bpf_cast_to_kern_ctx(ptr %ctx)
+  %len = call i64 asm sideeffect "$0 = *(u32 *)($1 + $2)", "=r,r,i,~{{memory}}"(ptr %kernel, i64 112)
+  %data_len = call i64 asm sideeffect "$0 = *(u32 *)($1 + $2)", "=r,r,i,~{{memory}}"(ptr %kernel, i64 116)
+  %left = trunc i64 %len to i32
+  %right = trunc i64 %data_len to i32
+  %span = sub i32 %left, %right
+{wide}  %compare = icmp {predicate} i{width} {operand}, 42
+  %result = zext i1 %compare to i32
+  ret i32 %result
+}}
+'''
+(out/'controls.explicit.ll').write_text(controls)
+run([compiler,out/'controls.explicit.ll','-o',out/'controls.lowered.bc'])
 lowered=run(['llvm-dis-18',out/'controls.lowered.bc','-o','-'])
 (out/'controls.lowered.ll').write_text(lowered)
 bodies={name:body for name,body in re.findall(r'define [^@]+@(\w+)\([^\n]*\).*?\{(.*?)^}',lowered,re.S|re.M)}
-positive=['head_ge','head_gt','head_not_lt','head_not_le','head_wide','old_tc','old_xdp','asm_tc']
+positive=['head_ge','head_not_lt','old_tc','old_xdp','asm_tc',*explicit]
 negative=['wrong_root','wrong_offset','wrong_section','equality','signed_negative']
 observed={name:'packet_bound' in bodies[name] for name in positive+negative}
 (out/'selection.json').write_text(json.dumps(observed,indent=2)+'\n')
 if mode=='before':
-    assert not any(observed[name] for name in positive[:5]+['asm_tc']),observed
+    assert not any(observed[name] for name in positive if name not in {'old_tc','old_xdp'}),observed
 else:
     assert all(observed[name] for name in positive),observed
 assert not any(observed[name] for name in negative),observed

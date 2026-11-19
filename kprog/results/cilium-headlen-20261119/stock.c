@@ -19,7 +19,7 @@ int main(int argc,char **argv)
     unsigned loaded=0,cases=0;
     struct bpf_program *program;
     bpf_object__for_each_program(program,object)++loaded;
-    const char *names[]={"head_ge","head_gt","head_not_lt","head_not_le","head_wide"};
+    const char *names[]={"head_ge","head_not_lt"};
     for(unsigned i=0;i<sizeof(names)/sizeof(names[0]);++i){
         program=bpf_object__find_program_by_name(object,names[i]);
         if(!program){fprintf(stderr,"missing %s\n",names[i]);bpf_object__close(object);return 1;}
