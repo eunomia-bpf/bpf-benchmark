@@ -30,6 +30,10 @@ boundary and retained failed attempts: results/lock-prefix-review-20261119.
   RSP/indexed 0x80/1 visit; live groups agree. Make 2 is the expected semantic
   assertion. Evidence and fixed-access-preserving plan: results/released-alias-20261119.
   The source fix follows batch 327120; request-time inputs stay unchanged.
+  PERF 2026-11-19T10:33:14Z: exact repair.patch (+19/-18) is ready and passes
+  read-only git apply --check; it is not applied or tested. It shares the
+  post-load observation and retains fixed physical loads/displacements/base
+  barriers. Expanded ordinary/fault tests are queued as worker 337201.
 
 PERF 2026-11-19T09:23:54Z: Combined cohort batch 254724 completed with host
 exit 0. BCC, 3 x 180 s with stats on: programs/native/B-generated/B-stock

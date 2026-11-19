@@ -67,3 +67,20 @@ reproduce-20261119T101625Z-337201, launcher
 on timing SH behind the coordinator's BCC guest; started/exit-code/result
 are pending. Preserve that worker and its committed scripts/fixture until
 it finishes. No request-time input, image, base or benchmark setting changed.
+
+PERF 2026-11-19T10:33:14Z: repair.patch now contains the exact deferred
+header change, with 19 added and 18 removed lines. A shared post-load stack
+observation serves the existing address/indexed loaders and a fixed-load
+wrapper. Only the two affected default fixed-load branches are redirected;
+the ABI-specific pointer paths remain as they are. The fixed wrapper still
+calls KPROG_X86_MEM_LOAD_FIXED with the original displacement and width,
+before evaluating its stack tag and environment input.
+
+`git apply --check kprog/results/released-alias-20261119/repair.patch` passes
+against the active header. This validates patch context only: the patch is
+not applied, compiled, stock-verified or timed. It changes no active source
+or build input and is not a second source tree. After the batch and queued
+reader finish, add the defect-specific freeze row and apply the delta in
+the single checkout. Run the expanded alias test, shared LOCK checks and
+fixed-load/base-barrier regressions before committing the source fix. The
+item and its runtime/proof obligations remain open.
