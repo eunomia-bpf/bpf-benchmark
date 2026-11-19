@@ -46,3 +46,10 @@ vendor/bpf/tetragon/bpf/include/vmlinux_generated_x86.h. This is the same
 kind of BTF dedup-order change previously recorded on11-16. The frozen
 paths remain uncommitted build output; no source edit or native-byte
 identity claim is made here.
+
+PERF 2026-11-19T08:43:39Z: Cilium check083913_345166 also completed rc0 with113 native
+replacements and0 loader failures. Remaining check rows and BCC timing are
+still in progress. The installed compile-sim-ir remains the07:53:18 build
+of the measured cohort. New unrelated source work in compile_sim_ir.cpp
+(freezeUnspecifiedInputs) appeared at08:40:58; it has not replaced that base
+binary. This run must not be attributed to that new source work.
