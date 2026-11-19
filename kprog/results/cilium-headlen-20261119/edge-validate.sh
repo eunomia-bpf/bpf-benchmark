@@ -30,6 +30,8 @@ make -f kprog/results/cilium-headlen-20261119/Makefile stock OUT="$out/stock" FI
 if [ "$mode" = candidate ]; then
     make -n -f kprog/results/cilium-headlen-20261119/Makefile replay OUT="$out/replay" > "$out/replay-dry-run.log"
     taskset -c 8-11 prlimit --as=8589934592 -- make -f kprog/results/cilium-headlen-20261119/Makefile replay OUT="$out/replay"
+    make -n -f kprog/results/cilium-headlen-20261119/Makefile replay OUT="$out/current-replay" INPUTS="$base/current-six-inputs/inputs.json" > "$out/current-replay-dry-run.log"
+    taskset -c 8-11 prlimit --as=8589934592 -- make -f kprog/results/cilium-headlen-20261119/Makefile replay OUT="$out/current-replay" INPUTS="$base/current-six-inputs/inputs.json"
     make -n -C kprog/libnativeloader checked-corpus CHECKED_APP=cilium/agent CHECKED_OUTPUT="$out/cilium" CHECKED_HOST_CPUS=18-19 > "$out/app-dry-run.log"
     make -C kprog/libnativeloader checked-corpus CHECKED_APP=cilium/agent CHECKED_OUTPUT="$out/cilium" CHECKED_HOST_CPUS=18-19
 fi
