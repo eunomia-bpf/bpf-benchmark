@@ -1,0 +1,14 @@
+{
+  "raw": "/workspaces/kprog-raw/perf/cilium-headlen-20261119/archive-stock-20261119T232454Z-524242",
+  "source_commit": "4fae058ac",
+  "finished": "2026-11-19T23:25:22Z",
+  "make_exit": 2,
+  "attempted": 41,
+  "stock_loaded": [7, 10, 15, 16, 19, 23, 24, 26, 31, 41, 42, 49, 50, 53, 63, 64],
+  "remaining_packet_access": [12, 17, 36, 37, 48],
+  "trusted_skb_store_124": [9, 35],
+  "invalid_helper_unknown_minus_one": [3, 27, 29, 33, 43, 55],
+  "scalar_memory_access": [11, 20, 21, 38, 45, 57, 60],
+  "unbounded_inner_map_access": [18, 25, 28, 47, 59],
+  "scope": "Actual sole-kernel detached stock loads with captured map/inner-map shapes and program type/flags. All requests reached BPF_PROG_LOAD. Fresh maps are empty; this does not reproduce live resource contents, native binding or application execution. Request64 B acceptance does not resolve its historical native arming failure."
+}

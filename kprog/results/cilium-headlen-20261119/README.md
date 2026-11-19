@@ -1,5 +1,14 @@
 # Cilium head-length bounds
 
+Detached stock replay524242 finished at2026-11-19T23:25:22Z, makeexit2:
+16/41 load, including request64. Five still reject packet reads (12,17,36,37,48).
+The other20 reach subsequent defects: two trusted-sk_buff+124 stores,
+six unknownhelper-1 calls, seven scalar accesses and five unbounded inner-map
+accesses. Every request reaches BPF_PROG_LOAD; complete logs remain in
+`archive-stock-20261119T232454Z-524242`. `archive-stock-result.json` lists
+each outcome. Thus the historical packet class is still open. Request64's
+B acceptance does not establish its native arming/binding success.
+
 `archive_validate.sh` tests the remaining historical acceptance question.
 It reuses the41 emitted B objects and the production`relocate_trusted_proof`
 function, creates fresh maps with captured shapes (including inner maps and
