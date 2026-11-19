@@ -1229,3 +1229,11 @@ Regression recipe results/return-dispatch-20261119 covers nested calls,
 multiple RETs, caller-context unions, unknown dominance in both arrival
 orders, sibling helper returns, normal B emission and native execution.
 Prepared only; validation and the changed Tetragon compile remain pending.
+
+PERF 2026-11-19T19:28:39Z: Candidate d0849dd27 component check passes0: nested native
+CALL/RET and two RETs share exact caller sets, unknown saved addresses
+dominate both arrival orders, sibling helper JMP uses its caller set, normal
+B emission completes and three native executions return20/22/22 as expected.
+Raw /workspaces/kprog-raw/perf/return-dispatch-20261119/check-20261119T192803Z. No stock/app/timing result.
+The existing retained inventory now checks generated per-PC dispatches against
+its independent observation of existing ABI states before the Tetragon compile.

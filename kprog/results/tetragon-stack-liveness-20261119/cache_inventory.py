@@ -83,6 +83,19 @@ summary['full_width_store_sites'] = [dict(row, offsets=sorted(row['offsets']))
                                     for row in sorted(stores.values(), key=lambda r:r['native_pc'])]
 summary['return_sites'] = [dict(row,targets=sorted(row['targets']))
                            for row in sorted(returns.values(),key=lambda r:r['native_pc'])]
+dispatches = {label: [int(v, 16) for v in re.findall(r'case 0x([0-9a-f]+)ULL:', body)]
+    for label, body in re.findall(r'(x86_sim_ret_dispatch_[0-9a-f]+):\n\tswitch \(__x86_sim_ret_addr\) \{(.*?)\n\t}', generated, re.S)}
+dispatch_sites = []
+for pc, body in re.findall(r'^x86_l_([0-9a-f]+):\n(.*?)(?=^x86_l_|\Z)', generated, re.S | re.M):
+    for label in re.findall(r'X86_SIM_X86_SUB_RET\((x86_sim_ret_dispatch_[0-9a-f]+)\)', body):
+        observed = dispatches[label]
+        row = returns[int(pc, 16)]
+        if not row['unknown'] and not row['outer']:
+            assert observed == sorted(row['targets']), (pc, observed, row)
+        dispatch_sites.append(dict(native_pc=int(pc, 16), label=label, targets=observed))
+summary['generated_return_dispatch_sites'] = dispatch_sites
+summary['generated_return_dispatch_edges'] = sum(len(row['targets']) for row in dispatch_sites)
+(out/'generated.bpf.c').write_text(generated)
 summary.update(retained_proof=str(retained/'trusted_x86.proof.o'),
     metadata_capsule=str(capsule), pruning_proven=False,
     scope='Read-only observation of the existing ABI CFG analysis. The alias '
