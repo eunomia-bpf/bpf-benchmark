@@ -4024,35 +4024,33 @@ native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOpti
         pins.push_back(std::move(fd));
     }
     std::vector<bpf_insn> proof;
-    if (!options.trusted_direct_native) {
-        // These aliases come from kernel-pinned identities, not process-wide map names.
-        using Object = std::unique_ptr<bpf_object, decltype(&bpf_object__close)>;
-        bpf_object *raw = bpf_object__open_file(options.proof_object_path.c_str(), nullptr);
-        const long open_error = libbpf_get_error(raw);
-        if (open_error || !raw) fail("open service simulator: " + libbpf_error_string(open_error ? open_error : -errno));
-        Object object(raw, bpf_object__close);
-        bpf_program *selected = bpf_object__find_program_by_name(raw, options.trusted_simulator_program.c_str());
-        if (!selected || static_cast<uint32_t>(bpf_program__type(selected)) != info.type)
-            fail("service simulator entry/type differs from original program");
-        const auto *instructions = bpf_program__insns(selected);
-        const size_t count = bpf_program__insn_cnt(selected);
-        if (!instructions || !count) fail("service simulator is empty");
-        proof.assign(instructions, instructions + count);
-        relocate_trusted_proof(raw, options.proof_object_path, options.trusted_simulator_program,
-                               companion, proof, pins, bindings);
-        // B's typed declarations are generated from the running target BTF. Use
-        // those same declarations to resolve the matching calls/addresses in P.
-        const auto *loaded_types = bpf_object__btf(raw);
-        if (loaded_types && btf__find_by_name_kind(loaded_types, ".ksyms", BTF_KIND_DATASEC) > 0) {
-            std::unique_ptr<btf, decltype(&btf__free)> proof_types(
-                btf__parse(options.proof_object_path.c_str(), nullptr), btf__free);
-            if (!proof_types) fail("read simulator BTF for native kernel functions");
-            if (!native_kfunc_declarations(proof_types.get()).empty()) {
-                std::unique_ptr<btf, decltype(&btf__free)> kernel(btf__load_vmlinux_btf(), btf__free);
-                if (!kernel) fail("read target BTF for native kernel functions");
-                companion.kernel_functions = native_kernel_function_targets(options.native_object_path,
-                    proof_types.get(), kernel.get());
-            }
+    // These aliases come from kernel-pinned identities, not process-wide map names.
+    using Object = std::unique_ptr<bpf_object, decltype(&bpf_object__close)>;
+    bpf_object *raw = bpf_object__open_file(options.proof_object_path.c_str(), nullptr);
+    const long open_error = libbpf_get_error(raw);
+    if (open_error || !raw) fail("open service simulator: " + libbpf_error_string(open_error ? open_error : -errno));
+    Object object(raw, bpf_object__close);
+    bpf_program *selected = bpf_object__find_program_by_name(raw, options.trusted_simulator_program.c_str());
+    if (!selected || static_cast<uint32_t>(bpf_program__type(selected)) != info.type)
+        fail("service simulator entry/type differs from original program");
+    const auto *instructions = bpf_program__insns(selected);
+    const size_t count = bpf_program__insn_cnt(selected);
+    if (!instructions || !count) fail("service simulator is empty");
+    proof.assign(instructions, instructions + count);
+    relocate_trusted_proof(raw, options.proof_object_path, options.trusted_simulator_program,
+                           companion, proof, pins, bindings);
+    // B's typed declarations are generated from the running target BTF. Use
+    // those same declarations to resolve the matching calls/addresses in P.
+    const auto *loaded_types = bpf_object__btf(raw);
+    if (loaded_types && btf__find_by_name_kind(loaded_types, ".ksyms", BTF_KIND_DATASEC) > 0) {
+        std::unique_ptr<btf, decltype(&btf__free)> proof_types(
+            btf__parse(options.proof_object_path.c_str(), nullptr), btf__free);
+        if (!proof_types) fail("read simulator BTF for native kernel functions");
+        if (!native_kfunc_declarations(proof_types.get()).empty()) {
+            std::unique_ptr<btf, decltype(&btf__free)> kernel(btf__load_vmlinux_btf(), btf__free);
+            if (!kernel) fail("read target BTF for native kernel functions");
+            companion.kernel_functions = native_kernel_function_targets(options.native_object_path,
+                proof_types.get(), kernel.get());
         }
     }
     bpf_prog_load_opts opts{}; opts.sz = sizeof(opts);
@@ -4094,22 +4092,10 @@ native_loader::LoadedProgram load_trusted_worker(const native_loader::FdLoadOpti
         return out;
     }
     // The simulator's proof is what the kernel verifies, so its calls decide
-    // whether the link needs kernel addresses. A direct native image builds
-    // its proof after linking, so this keeps the catalogue for it.
+    // whether the link needs kernel addresses.
     companion.needs_kernel_symbols |= proof_needs_kernel_symbols(proof);
     LinkedBlob linked = load_or_link_native_blob(options.native_link_path, options.native_object_path,
         options.symbol_name, companion, options.trusted_native_proof_path);
-    ScopedFd tail_call_marker;
-    if (options.trusted_direct_native) {
-        const auto relocs = parse_native_lab_relocs(linked.relocs, linked.blob.size());
-        const bool tail_call_reachable = companion.has_tail_call ||
-            std::any_of(relocs.begin(), relocs.end(), [](const auto &reloc) {
-                return reloc.kind == NATIVE_LAB_RELOC_X86_TAIL_COUNT;
-            });
-        if (tail_call_reachable)
-            tail_call_marker.fd = create_tail_call_marker_map();
-        proof = native_stub_program(tail_call_marker.get());
-    }
     // P retains its relocated maps; B's LDDW references retain B's maps.
     std::vector<int> fd_array = reopen_relocated_map_fds(linked.relocated_map_ids);
     for (int fd : fd_array)
