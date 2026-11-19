@@ -1002,3 +1002,12 @@ and native lowering freezes the resulting unspecified read. This is a
 component correctness result, with no corpus path or performance inference.
 No production input changes during the active combined timing batch. See
 results/numeric-context-bridge-20261119; the native/B boundary fix remains open.
+
+PERF 2026-11-19T13:08:19Z: The combined image 94484bec285d passes the six-app
+direct-native functional census: OTel/BCC/Cilium/Tetragon/Tracee/Katran
+install 14/25/135/288/169/1 distinct native IDs, respectively, with zero
+native-loader failures in all retained post_rejit logs. All app check
+commands and suite statuses succeed. Counts are observations, not a gate;
+Cilium is not constrained to an earlier endpoint count. This is not B stock
+verification or a speed result. The checked BCC timing guest is active.
+Receipts: results/checked-hash-ops-20261119/check-census.json (5035abdf5).
