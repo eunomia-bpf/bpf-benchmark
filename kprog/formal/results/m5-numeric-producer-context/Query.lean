@@ -1,0 +1,24 @@
+import KProgFormal.ClightRefinement.Arm64NumericProducerContext
+open KProgFormal.ClightRefinement
+#check Arm64Producer.stack_tags_initialized_bound
+#print axioms Arm64Producer.stack_tags_initialized_bound
+#check Arm64Producer.sp_initialized_bound
+#print axioms Arm64Producer.sp_initialized_bound
+#check Arm64Producer.stack_tags_and_sp_bound
+#print axioms Arm64Producer.stack_tags_and_sp_bound
+#check Arm64Producer.context_initialized_bound
+#print axioms Arm64Producer.context_initialized_bound
+#check Arm64Producer.stack_sp_and_context_bound
+#print axioms Arm64Producer.stack_sp_and_context_bound
+#check Arm64Producer.stack_tags_initialized
+#print axioms Arm64Producer.stack_tags_initialized
+#check Arm64Producer.sp_initialized
+#print axioms Arm64Producer.sp_initialized
+#check Arm64Producer.stack_tags_and_sp
+#print axioms Arm64Producer.stack_tags_and_sp
+#check Arm64Producer.context_initialized
+#print axioms Arm64Producer.context_initialized
+#check Arm64Producer.stack_sp_and_context
+#print axioms Arm64Producer.stack_sp_and_context
+#check Arm64NumericProducerContext.initialized_context
+#print axioms Arm64NumericProducerContext.initialized_context

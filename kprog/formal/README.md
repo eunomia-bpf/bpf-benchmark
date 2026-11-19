@@ -129,6 +129,11 @@ then executes all 64 vector input visits, deriving each low/high word in its
 actual allocated array. All 98 provider traces remain ordered, and the tables,
 GPRs, flags, LR, caches, context and global framing survive. The result reaches
 `afterVectorInputs`, before RAW/header processing.
+The [Numeric stack/context composition](results/m5-numeric-producer-context/README.md)
+adds 90 pure transitions: 24 tag clears, SP zero and five context stores. It
+derives helper context/ABI values, x0 context with RAW tag 1 and x30 RETURN
+tag 10, retaining the tables, other registers, flags, vectors, caches and
+98 traces. A represented-context premise keeps the pointer cast defined.
 Actual provider admissibility, native memory/origin/alias bindings and program
 control closure remain open.
 

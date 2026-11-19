@@ -1,0 +1,307 @@
+{
+  "raw": "/workspaces/kprog-raw/formal/m5-numeric-producer-context",
+  "proved": {
+    "world": "actual Arm64NumericProgram.ge; NumericMemory.initialMemory/program.initMem/frontier204",
+    "phases": {
+      "stack_tag_clears": 24,
+      "stack_internal_transitions": 72,
+      "SP_zero_transitions": 3,
+      "context_stores": 5,
+      "context_transitions": 15,
+      "pure_suffix_transitions": 90,
+      "provider_trace_entries_retained": 98,
+      "new_provider_visits": 0
+    },
+    "start": "actual initialized producer through all98 actual input visits, ending afterVectorInputs",
+    "end": "actual afterContext, before header construction",
+    "new_data": "24 tag bytes0, SPzero, helper context+ABI ctx, x0 wordctx/RAWtag1, x30 existing word0/RETURNtag10; actual bindings and context cell readbacks derived",
+    "preserved": "both31-slot tables/62 pointer reads, other GPR data, four flags, LRzero, all64 vector words, cold caches, ctx temp, initial204 global contents/both permissions, allocation access/nextblock",
+    "context_domain": "existing ValueRep addresses ctx ctxWord permits defined pointer cast/loadResult; may admit Vptr or Vlong, no Vlong/native physical-address/dereference inference",
+    "provider": "all three actual-world ProviderAt availability/ABI hypotheses retained with actual Senv, full traces and supplied memories",
+    "trace": "same ordered98 provider entries and real Numeric CC.Star; pure90 appends no provider/event",
+    "reuse": "actual source declarations/statement metadata, old storage/store/list proofs, context_cast; world/Cenv transport and old API projections",
+    "old_public_APIs": [
+      "stack_tags_initialized",
+      "sp_initialized",
+      "stack_tags_and_sp",
+      "context_initialized",
+      "stack_sp_and_context"
+    ],
+    "not_assumed": [
+      "old and Numeric Senv equal",
+      "provider post-memory equals pre-memory",
+      "empty provider traces",
+      "native/provider/caller admission proved",
+      "all31 scalar words/tags unchanged through source context writes"
+    ],
+    "FORMAL_C_runtime_benchmark_changes": false
+  },
+  "focused": [
+    {
+      "exit": 0,
+      "jobs": 155,
+      "log": "focused1.log",
+      "note": "Shared world/context laws and old clients pass first attempt."
+    },
+    {
+      "exit": 1,
+      "log": "focused2.log",
+      "note": "Block equality remained a tuple fst projection during rewrite; made result block types explicit, no statement/domain change."
+    },
+    {
+      "exit": 1,
+      "log": "focused3.log",
+      "note": "Tag numeral proof-expression mismatch between raw BitVec notation and expected Int numeral; normalized proof readbacks only."
+    },
+    {
+      "exit": 0,
+      "jobs": 184,
+      "log": "focused4.log",
+      "note": "Actual initialized context suffix passes, new module5.6s; all source data/trace/frame obligations checked."
+    }
+  ],
+  "public_queries": {
+    "exit": 0,
+    "theorems": 11,
+    "log": "Query-1.log",
+    "axioms": {
+      "KProgFormal.ClightRefinement.Arm64Producer.stack_tags_initialized_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.sp_initialized_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.stack_tags_and_sp_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.context_initialized_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.stack_sp_and_context_bound": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.stack_tags_initialized": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.sp_initialized": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.stack_tags_and_sp": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.context_initialized": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64Producer.stack_sp_and_context": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "KProgFormal.ClightRefinement.Arm64NumericProducerContext.initialized_context": [
+        "propext",
+        "CC.externalFunctionsSem",
+        "CC.inlineAssemblySem",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    }
+  },
+  "full_lake_build": {
+    "exit": 0,
+    "jobs": 329,
+    "attempts": 1,
+    "log": "lake-build1.log"
+  },
+  "export_comparison": {
+    "exit": 1,
+    "files": 23,
+    "current_bytes": 243488732,
+    "reference": "9c617740f",
+    "all_identical": false,
+    "unchanged_files": [
+      {
+        "path": "kprog/formal/KProgFormal/Clight/Arm64Access.lean",
+        "bytes": 36119,
+        "identical": true
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/Arm64Address.lean",
+        "bytes": 291923,
+        "identical": true
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/Arm64Addressing.lean",
+        "bytes": 22635714,
+        "identical": true
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/Arm64Entry.lean",
+        "bytes": 850142,
+        "identical": true
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/Arm64Numeric.lean",
+        "bytes": 171979,
+        "identical": true
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/Arm64PayloadProfile.lean",
+        "bytes": 3032758,
+        "identical": true
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/Arm64Program.lean",
+        "bytes": 12234925,
+        "identical": true
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/Arm64ProgramContext.lean",
+        "bytes": 1901712,
+        "identical": true
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/Arm64ProgramFixture.lean",
+        "bytes": 688543,
+        "identical": true
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/Arm64Stack.lean",
+        "bytes": 375661,
+        "identical": true
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Numeric.lean",
+        "bytes": 54217,
+        "identical": true
+      }
+    ],
+    "changed_files": [
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Context.lean",
+        "bytes": 101977,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86ContextSkb.lean",
+        "bytes": 21258154,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86ContextXdp.lean",
+        "bytes": 21172430,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Helpers.lean",
+        "bytes": 8077199,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Inline.lean",
+        "bytes": 19707461,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Memory.lean",
+        "bytes": 1820683,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86Pointer.lean",
+        "bytes": 1000688,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86ProgramProfile.lean",
+        "bytes": 21524184,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86ReadonlyProfile.lean",
+        "bytes": 20287920,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86StackProfile200.lean",
+        "bytes": 25006502,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86StackProfile376.lean",
+        "bytes": 29271597,
+        "identical": false
+      },
+      {
+        "path": "kprog/formal/KProgFormal/Clight/X86TetragonWake.lean",
+        "bytes": 31986244,
+        "identical": false
+      }
+    ],
+    "Arm64_unchanged": 10,
+    "log": "export-parity1.log",
+    "reason": "PERF typed LOCK primitive changes x86 exports; Arm64 source remains byte-identical. This is an explicit comparison difference, not a newly proved atomic contract."
+  },
+  "limits": {
+    "heartbeats": 200000,
+    "recursion": 512,
+    "workers": 1,
+    "address_space_GiB": 32,
+    "build_CPU": 17,
+    "read_query_git_CPU": 16,
+    "timing_lock": "shared",
+    "async": false
+  },
+  "remaining": [
+    "actual header/RAW/register Storage/caller transport",
+    "native/provider/original-context admission",
+    "relative caches/materialization",
+    "physical MemoryRep/alias/origin/control",
+    "all-family O1/O2/O4 recount",
+    "remaining M6 and fresh final Lake/make check"
+  ],
+  "native_make_check": "Not repeated for Lean-only step. Last whole PASS5236c0e9677f635526fdd515cde5195b2ba0810c; fresh final check due at whole goal closure.",
+  "complete_ISA_handler_families": 0,
+  "milestones": {
+    "M1_M4": "done",
+    "M5": "open",
+    "M6": "open"
+  }
+}

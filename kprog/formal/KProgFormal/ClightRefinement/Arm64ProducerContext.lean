@@ -91,20 +91,21 @@ theorem context_local (m : CC.Mem) (i : Fin 5) : Nonempty (ContextLocal m i) := 
     scalar_local m (contextName i) (contextLocalType i) (contextChunk i) present size align
   exact ⟨⟨block, binding, fresh, writable⟩⟩
 
-private theorem context_lvalue (m before : CC.Mem) (le : CC.TempEnv) (i : Fin 5)
+private theorem context_lvalue (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) (m before : CC.Mem) (le : CC.TempEnv) (i : Fin 5)
     (cell : ContextLocal m i) :
-    CC.doEvalLvalue ge (allocation m).1 le before (contextTarget i) = some (cell.block, 0, .Full) := by
+    CC.doEvalLvalue world (allocation m).1 le before (contextTarget i) = some (cell.block, 0, .Full) := by
   rcases five_cases i with rfl | rfl | rfl | rfl | rfl
   all_goals simp +decide [contextTarget, contextLocalType, CC.doEvalLvalue, CC.lvalOfVar,
     CC.doEvalExpr, CC.doDerefLoc, CC.accessMode, CC.lvalOfField, CC.typeof,
-    cell.binding, context_pointer_layout.1, context_pointer_layout.2,
+    cell.binding, layout, context_pointer_layout.1, context_pointer_layout.2,
     CC.Integers.Ptrofs.add, CC.Integers.Ptrofs.repr, CC.Integers.MI.add,
     CC.Integers.MI.repr, CC.Integers.Ptrofs.zero, CC.Integers.MI.zero]
 
-private theorem context_rhs {addresses : Arm64Registers.PointerOrigins} {ctx : CC.Val} {word : BitVec 64}
+private theorem context_rhs (world : CC.CGenv) {addresses : Arm64Registers.PointerOrigins} {ctx : CC.Val} {word : BitVec 64}
     (represented : Arm64Registers.ValueRep addresses ctx word) (m before : CC.Mem)
     (le : CC.TempEnv) (input : le.get Arm64Entry._ctx = some ctx) (i : Fin 5) :
-    CC.doEvalExpr ge (allocation m).1 le before (contextRhs i) = some (contextValue ctx i) ∧
+    CC.doEvalExpr world (allocation m).1 le before (contextRhs i) = some (contextValue ctx i) ∧
     CC.Cop.semCast (contextValue ctx i) (CC.typeof (contextRhs i))
       (CC.typeof (contextTarget i)) before = some (contextValue ctx i) ∧
     CC.Val.loadResult (contextChunk i) (contextValue ctx i) = contextValue ctx i := by
@@ -115,12 +116,13 @@ private theorem context_rhs {addresses : Arm64Registers.PointerOrigins} {ctx : C
   all_goals simp [CC.Cop.semCast, CC.Cop.classifyCast, CC.Cop.castIntInt,
     CC.tuint, CC.tuchar, CC.Val.loadResult, CC.Integers.Int.zero_ext, CC.Integers.MI.zero_ext]
 
-private theorem context_write {addresses : Arm64Registers.PointerOrigins} {ctx : CC.Val} {word : BitVec 64}
+private theorem context_write (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) {addresses : Arm64Registers.PointerOrigins} {ctx : CC.Val} {word : BitVec 64}
     (represented : Arm64Registers.ValueRep addresses ctx word) (m before : CC.Mem)
     (le : CC.TempEnv) (input : le.get Arm64Entry._ctx = some ctx) (k : CC.Cont)
     (i : Fin 5) (cell : ContextLocal m i) (rest : CC.Stmt)
     (access : before.access = (allocation m).2.access) :
-    ∃ after, InternalRun ge 3
+    ∃ after, InternalRun world 3
         (.State producer (.Ssequence (contextAssignment i) rest) k (allocation m).1 le before)
         (.State producer rest k (allocation m).1 le after) ∧
       CC.Mem.load (contextChunk i) after cell.block 0 = some (contextValue ctx i) ∧
@@ -130,11 +132,11 @@ private theorem context_write {addresses : Arm64Registers.PointerOrigins} {ctx :
       after.nextblock = before.nextblock := by
   obtain ⟨after, stored, afterAccess⟩ :=
     create_store m before (contextChunk i) cell.block (contextValue ctx i) access cell.writable
-  have target := context_lvalue m before le i cell
-  have rhs := context_rhs represented m before le input i
+  have target := context_lvalue world layout m before le i cell
+  have rhs := context_rhs world represented m before le input i
   have mode : CC.accessMode (CC.typeof (contextTarget i)) = .By_value (contextChunk i) := by
     rcases five_cases i with rfl | rfl | rfl | rfl | rfl <;> rfl
-  have assigned : CC.doStep ge
+  have assigned : CC.doStep world
       (.State producer (contextAssignment i) (.Kseq rest k) (allocation m).1 le before) =
       some (CC.E0, .State producer .Sskip (.Kseq rest k) (allocation m).1 le after) := by
     simp only [contextAssignment, CC.doStep, target, rhs.1, rhs.2.1, CC.doAssignLoc, mode]
@@ -142,12 +144,12 @@ private theorem context_write {addresses : Arm64Registers.PointerOrigins} {ctx :
       | some memory => some (CC.E0, CC.State.State producer .Sskip (.Kseq rest k) (allocation m).1 le memory)
       | none => none) = _
     rw [stored]
-  have run : InternalRun ge 3
+  have run : InternalRun world 3
       (.State producer (.Ssequence (contextAssignment i) rest) k (allocation m).1 le before)
       (.State producer rest k (allocation m).1 le after) :=
-    .step trivial (CC.doStep_sound ge _ _ _ rfl)
-      (.step trivial (CC.doStep_sound ge _ _ _ assigned)
-        (.step trivial (CC.doStep_sound ge _ _ _ rfl) (.refl _)))
+    .step trivial (CC.doStep_sound world _ _ _ rfl)
+      (.step trivial (CC.doStep_sound world _ _ _ assigned)
+        (.step trivial (CC.doStep_sound world _ _ _ rfl) (.refl _)))
   refine ⟨after, run, ?_, ?_, FrameBelow.store cell.fresh stored,
     afterAccess.trans access.symm, CC.Mem.store_nextblock stored⟩
   · simpa only [rhs.2.2] using CC.Mem.load_store_same stored
@@ -157,12 +159,13 @@ private theorem context_write {addresses : Arm64Registers.PointerOrigins} {ctx :
     exact CC.Mem.load_store_other stored chunk block ofs
       (.inl (distinct _ _ _ _ bound cell.binding different))
 
-private theorem run_context {addresses : Arm64Registers.PointerOrigins} {ctx : CC.Val} {word : BitVec 64}
+private theorem run_context (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) {addresses : Arm64Registers.PointerOrigins} {ctx : CC.Val} {word : BitVec 64}
     (represented : Arm64Registers.ValueRep addresses ctx word) (m : CC.Mem)
     (cells : (i : Fin 5) → ContextLocal m i) (rows : List (Fin 5)) (rest : CC.Stmt)
     (le : CC.TempEnv) (input : le.get Arm64Entry._ctx = some ctx) (k : CC.Cont) (before : CC.Mem)
     (access : before.access = (allocation m).2.access) :
-    ∃ after, InternalRun ge (3 * rows.length)
+    ∃ after, InternalRun world (3 * rows.length)
         (.State producer (rows.foldr (fun i next => .Ssequence (contextAssignment i) next) rest)
           k (allocation m).1 le before)
         (.State producer rest k (allocation m).1 le after) ∧
@@ -179,7 +182,7 @@ private theorem run_context {addresses : Arm64Registers.PointerOrigins} {ctx : C
     · intro id ty block bound different chunk ofs; rfl
   | cons head tail ih =>
     obtain ⟨middle, headRun, headRead, headOther, headFrame, headAccess, headNext⟩ :=
-      context_write represented m before le input k head (cells head)
+      context_write world layout represented m before le input k head (cells head)
         (tail.foldr (fun i next => .Ssequence (contextAssignment i) next) rest) access
     obtain ⟨after, tailRun, tailRead, tailOther, tailFrame, tailAccess, tailNext⟩ :=
       ih middle (headAccess.trans access)
@@ -203,6 +206,68 @@ private theorem run_context {addresses : Arm64Registers.PointerOrigins} {ctx : C
 
 /-- The actual five stores take fifteen internal transitions. All three context
 cells retain the represented input, LR has RETURN tag 10, and x0 has ABI tag 1. -/
+theorem context_initialized_bound (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) {addresses : Arm64Registers.PointerOrigins} {ctx : CC.Val} {word : BitVec 64}
+    (represented : Arm64Registers.ValueRep addresses ctx word) (m before : CC.Mem)
+    (le : CC.TempEnv) (input : le.get Arm64Entry._ctx = some ctx) (k : CC.Cont)
+    (access : before.access = (allocation m).2.access) :
+    ∃ cells : (i : Fin 5) → ContextLocal m i, ∃ after,
+      InternalRun world 15 (.State producer afterSpZero k (allocation m).1 le before)
+        (.State producer afterContext k (allocation m).1 le after) ∧
+      (∀ i, CC.Mem.load (contextChunk i) after (cells i).block 0 = some (contextValue ctx i)) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) →
+        (∀ i, id ≠ contextName i) →
+        ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock := by
+  classical
+  let cells : (i : Fin 5) → ContextLocal m i := fun i => Classical.choice (context_local m i)
+  obtain ⟨after, run, read, other, frame, finalAccess, next⟩ :=
+    run_context world layout represented m cells (List.finRange 5) afterContext le input k before access
+  refine ⟨cells, after, ?_, (fun i => read i (List.mem_finRange i)), ?_, frame, finalAccess, next⟩
+  · have mapped : List.ofFn contextAssignment = (List.finRange 5).map contextAssignment := by
+      simp only [List.finRange, List.map_ofFn, Function.comp_def]
+    rw [context_source]
+    simpa only [List.length_finRange, mapped, List.foldr_map] using run
+  · intro id ty block bound different chunk ofs
+    exact other id ty block bound (fun i _ => different i) chunk ofs
+
+/-- Source-composed stack-tag/SP/context setup. Previously initialized stack
+metadata survives the context writes, with no external boundary in this segment. -/
+theorem stack_sp_and_context_bound (world : CC.CGenv)
+    (layout : world.genv_cenv = ge.genv_cenv) {addresses : Arm64Registers.PointerOrigins} {ctx : CC.Val} {word : BitVec 64}
+    (represented : Arm64Registers.ValueRep addresses ctx word) (m before : CC.Mem)
+    (le : CC.TempEnv) (input : le.get Arm64Entry._ctx = some ctx) (k : CC.Cont)
+    (access : before.access = (allocation m).2.access) :
+    ∃ tags : StackTagLocal m, ∃ spBlock, ∃ cells : (i : Fin 5) → ContextLocal m i, ∃ after,
+      (allocation m).1.get Arm64Entry.___a64_sp = some (spBlock, CC.tlong) ∧
+      InternalRun world 90 (.State producer afterVectorInputs k (allocation m).1 le before)
+        (.State producer afterContext k (allocation m).1 le after) ∧
+      (∀ i : Fin 24, CC.Mem.load .Mint8unsigned after tags.block (i.val : Int) = some (.Vint 0)) ∧
+      CC.Mem.loadv .Mint64 after (.Vptr spBlock 0) = some (.Vlong 0) ∧
+      (∀ i, CC.Mem.load (contextChunk i) after (cells i).block 0 = some (contextValue ctx i)) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) →
+        id ≠ Arm64Entry.___a64_stack_tag → id ≠ Arm64Entry.___a64_sp →
+        (∀ i, id ≠ contextName i) →
+        ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock := by
+  obtain ⟨tags, spBlock, middle, spBinding, setupRun, tagReads, spRead,
+      setupOther, setupFrame, setupAccess, setupNext⟩ := stack_tags_and_sp_bound world m before le k access
+  obtain ⟨cells, after, contextRun, contextReads, contextOther, contextFrame, contextAccess, contextNext⟩ :=
+    context_initialized_bound world layout represented m middle le input k (setupAccess.trans access)
+  have notTags : ∀ i, Arm64Entry.___a64_stack_tag ≠ contextName i := by decide +kernel
+  have notSp : ∀ i, Arm64Entry.___a64_sp ≠ contextName i := by decide +kernel
+  refine ⟨tags, spBlock, cells, after, spBinding, setupRun.trans contextRun, ?_, ?_, contextReads,
+    ?_, setupFrame.trans contextFrame, contextAccess.trans setupAccess, contextNext.trans setupNext⟩
+  · intro i
+    exact (contextOther _ _ _ tags.binding notTags .Mint8unsigned (i.val : Int)).trans (tagReads i)
+  · change CC.Mem.load .Mint64 after spBlock 0 = some (.Vlong 0)
+    exact (contextOther _ _ _ spBinding notSp .Mint64 0).trans spRead
+  · intro id ty block bound notTags notSp notContext chunk ofs
+    exact (contextOther id ty block bound notContext chunk ofs).trans
+      (setupOther id ty block bound notTags notSp chunk ofs)
+
 theorem context_initialized {addresses : Arm64Registers.PointerOrigins} {ctx : CC.Val} {word : BitVec 64}
     (represented : Arm64Registers.ValueRep addresses ctx word) (m before : CC.Mem)
     (le : CC.TempEnv) (input : le.get Arm64Entry._ctx = some ctx) (k : CC.Cont)
@@ -215,21 +280,9 @@ theorem context_initialized {addresses : Arm64Registers.PointerOrigins} {ctx : C
         (∀ i, id ≠ contextName i) →
         ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
       FrameBelow m.nextblock before after ∧ after.access = before.access ∧
-      after.nextblock = before.nextblock := by
-  classical
-  let cells : (i : Fin 5) → ContextLocal m i := fun i => Classical.choice (context_local m i)
-  obtain ⟨after, run, read, other, frame, finalAccess, next⟩ :=
-    run_context represented m cells (List.finRange 5) afterContext le input k before access
-  refine ⟨cells, after, ?_, (fun i => read i (List.mem_finRange i)), ?_, frame, finalAccess, next⟩
-  · have mapped : List.ofFn contextAssignment = (List.finRange 5).map contextAssignment := by
-      simp only [List.finRange, List.map_ofFn, Function.comp_def]
-    rw [context_source]
-    simpa only [List.length_finRange, mapped, List.foldr_map] using run
-  · intro id ty block bound different chunk ofs
-    exact other id ty block bound (fun i _ => different i) chunk ofs
+      after.nextblock = before.nextblock :=
+  context_initialized_bound ge rfl represented m before le input k access
 
-/-- Source-composed stack-tag/SP/context setup. Previously initialized stack
-metadata survives the context writes, with no external boundary in this segment. -/
 theorem stack_sp_and_context {addresses : Arm64Registers.PointerOrigins} {ctx : CC.Val} {word : BitVec 64}
     (represented : Arm64Registers.ValueRep addresses ctx word) (m before : CC.Mem)
     (le : CC.TempEnv) (input : le.get Arm64Entry._ctx = some ctx) (k : CC.Cont)
@@ -246,21 +299,7 @@ theorem stack_sp_and_context {addresses : Arm64Registers.PointerOrigins} {ctx : 
         (∀ i, id ≠ contextName i) →
         ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
       FrameBelow m.nextblock before after ∧ after.access = before.access ∧
-      after.nextblock = before.nextblock := by
-  obtain ⟨tags, spBlock, middle, spBinding, setupRun, tagReads, spRead,
-      setupOther, setupFrame, setupAccess, setupNext⟩ := stack_tags_and_sp m before le k access
-  obtain ⟨cells, after, contextRun, contextReads, contextOther, contextFrame, contextAccess, contextNext⟩ :=
-    context_initialized represented m middle le input k (setupAccess.trans access)
-  have notTags : ∀ i, Arm64Entry.___a64_stack_tag ≠ contextName i := by decide +kernel
-  have notSp : ∀ i, Arm64Entry.___a64_sp ≠ contextName i := by decide +kernel
-  refine ⟨tags, spBlock, cells, after, spBinding, setupRun.trans contextRun, ?_, ?_, contextReads,
-    ?_, setupFrame.trans contextFrame, contextAccess.trans setupAccess, contextNext.trans setupNext⟩
-  · intro i
-    exact (contextOther _ _ _ tags.binding notTags .Mint8unsigned (i.val : Int)).trans (tagReads i)
-  · change CC.Mem.load .Mint64 after spBlock 0 = some (.Vlong 0)
-    exact (contextOther _ _ _ spBinding notSp .Mint64 0).trans spRead
-  · intro id ty block bound notTags notSp notContext chunk ofs
-    exact (contextOther id ty block bound notContext chunk ofs).trans
-      (setupOther id ty block bound notTags notSp chunk ofs)
+      after.nextblock = before.nextblock :=
+  stack_sp_and_context_bound ge rfl represented m before le input k access
 
 end KProgFormal.ClightRefinement.Arm64Producer

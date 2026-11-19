@@ -54,10 +54,10 @@ theorem stack_tag_local (m : CC.Mem) : Nonempty (StackTagLocal m) := by
   exact ⟨⟨block, binding, fresh, CC.Mem.rangePerm_implies range
     (by decide : CC.permOrder .Freeable .Writable = true)⟩⟩
 
-private theorem stack_tag_write (m before : CC.Mem) (tags : StackTagLocal m)
+private theorem stack_tag_write (world : CC.CGenv) (m before : CC.Mem) (tags : StackTagLocal m)
     (i : Fin 24) (le : CC.TempEnv) (k : CC.Cont) (rest : CC.Stmt)
     (access : before.access = (allocation m).2.access) :
-    ∃ after, InternalRun ge 3
+    ∃ after, InternalRun world 3
         (.State producer (.Ssequence (stackTagAssignment i) rest) k (allocation m).1 le before)
         (.State producer rest k (allocation m).1 le after) ∧
       CC.Mem.load .Mint8unsigned after tags.block (i.val : Int) = some (.Vint 0) ∧
@@ -88,10 +88,10 @@ private theorem stack_tag_write (m before : CC.Mem) (tags : StackTagLocal m)
   have storev : CC.Mem.storev .Mint8unsigned before (.Vptr tags.block (stackTagOffset i))
       (.Vint (0#32)) = some after := by
     simpa only [CC.Mem.storev, stack_tag_offsets] using stored
-  have exec : steps ge 3
+  have exec : steps world 3
       (.State producer (.Ssequence (stackTagAssignment i) rest) k (allocation m).1 le before) =
       some (CC.E0, .State producer rest k (allocation m).1 le after) ∧
-      InternalPath ge 3
+      InternalPath world 3
         (.State producer (.Ssequence (stackTagAssignment i) rest) k (allocation m).1 le before) := by
     simp +decide [steps, InternalPath, InternalState, stackTagAssignment, stackTagType,
       CC.doStep, CC.doEvalLvalue, CC.doEvalExpr, CC.lvalOfVar, CC.doDerefLoc,
@@ -117,10 +117,10 @@ private theorem stack_tag_write (m before : CC.Mem) (tags : StackTagLocal m)
     exact CC.Mem.load_store_other stored chunk block ofs
       (.inl (distinct _ _ _ _ bound tags.binding different))
 
-private theorem run_stack_tags (m : CC.Mem) (tags : StackTagLocal m) (rows : List (Fin 24))
+private theorem run_stack_tags (world : CC.CGenv) (m : CC.Mem) (tags : StackTagLocal m) (rows : List (Fin 24))
     (rest : CC.Stmt) (le : CC.TempEnv) (k : CC.Cont) (before : CC.Mem)
     (access : before.access = (allocation m).2.access) :
-    ∃ after, InternalRun ge (3 * rows.length)
+    ∃ after, InternalRun world (3 * rows.length)
         (.State producer (rows.foldr (fun i next => .Ssequence (stackTagAssignment i) next) rest)
           k (allocation m).1 le before)
         (.State producer rest k (allocation m).1 le after) ∧
@@ -139,7 +139,7 @@ private theorem run_stack_tags (m : CC.Mem) (tags : StackTagLocal m) (rows : Lis
     · intro id ty block bound different chunk ofs; rfl
   | cons head tail ih =>
     obtain ⟨middle, headRun, headRead, headOther, headLocals, headFrame, headAccess, headNext⟩ :=
-      stack_tag_write m before tags head le k
+      stack_tag_write world m before tags head le k
         (tail.foldr (fun i next => .Ssequence (stackTagAssignment i) next) rest) access
     obtain ⟨after, tailRun, tailRead, tailOther, tailLocals, tailFrame, tailAccess, tailNext⟩ :=
       ih middle (headAccess.trans access)
@@ -162,9 +162,9 @@ private theorem run_stack_tags (m : CC.Mem) (tags : StackTagLocal m) (rows : Lis
         (headLocals id ty block bound different chunk ofs)
 
 /-- All actual stack-tag byte initializers execute and read back zero. -/
-theorem stack_tags_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+theorem stack_tags_initialized_bound (world : CC.CGenv) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (access : before.access = (allocation m).2.access) :
-    ∃ tags : StackTagLocal m, ∃ after, InternalRun ge 72
+    ∃ tags : StackTagLocal m, ∃ after, InternalRun world 72
         (.State producer afterVectorInputs k (allocation m).1 le before)
         (.State producer afterStackTags k (allocation m).1 le after) ∧
       (∀ i : Fin 24, CC.Mem.load .Mint8unsigned after tags.block (i.val : Int) = some (.Vint 0)) ∧
@@ -174,7 +174,7 @@ theorem stack_tags_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Con
       after.nextblock = before.nextblock := by
   obtain ⟨tags⟩ := stack_tag_local m
   obtain ⟨after, run, read, _, other, frame, finalAccess, next⟩ :=
-    run_stack_tags m tags (List.finRange 24) afterStackTags le k before access
+    run_stack_tags world m tags (List.finRange 24) afterStackTags le k before access
   refine ⟨tags, after, ?_, (fun i => read i (List.mem_finRange i)), other, frame, finalAccess, next⟩
   have mapped : List.ofFn stackTagAssignment = (List.finRange 24).map stackTagAssignment := by
     simp only [List.finRange, List.map_ofFn, Function.comp_def]
@@ -193,10 +193,10 @@ theorem sp_zero_source : afterStackTags =
     .Ssequence (.Sassign (.Evar Arm64Entry.___a64_sp CC.tlong)
       (.Econst_int (0#32) CC.tint)) afterSpZero := by rfl
 
-theorem sp_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+theorem sp_initialized_bound (world : CC.CGenv) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (access : before.access = (allocation m).2.access) :
     ∃ block after, (allocation m).1.get Arm64Entry.___a64_sp = some (block, CC.tlong) ∧
-      InternalRun ge 3 (.State producer afterStackTags k (allocation m).1 le before)
+      InternalRun world 3 (.State producer afterStackTags k (allocation m).1 le before)
         (.State producer afterSpZero k (allocation m).1 le after) ∧
       CC.Mem.loadv .Mint64 after (.Vptr block 0) = some (.Vlong 0) ∧
       (∀ id ty other, (allocation m).1.get id = some (other, ty) → id ≠ Arm64Entry.___a64_sp →
@@ -206,9 +206,9 @@ theorem sp_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
   obtain ⟨block, binding, fresh, writable⟩ := scalar_local m Arm64Entry.___a64_sp CC.tlong .Mint64
     (by decide +kernel) rfl (by decide)
   obtain ⟨after, stored, afterAccess⟩ := create_store m before .Mint64 block (.Vlong (0#64)) access writable
-  have exec : steps ge 3 (.State producer afterStackTags k (allocation m).1 le before) =
+  have exec : steps world 3 (.State producer afterStackTags k (allocation m).1 le before) =
       some (CC.E0, .State producer afterSpZero k (allocation m).1 le after) ∧
-      InternalPath ge 3 (.State producer afterStackTags k (allocation m).1 le before) := by
+      InternalPath world 3 (.State producer afterStackTags k (allocation m).1 le before) := by
     rw [sp_zero_source]
     change CC.Mem.storev .Mint64 before (.Vptr block (0#64)) (.Vlong (0#64)) = some after at stored
     simp +decide [steps, InternalPath, InternalState, CC.doStep, CC.doEvalLvalue, CC.doEvalExpr,
@@ -228,6 +228,54 @@ theorem sp_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
 
 /-- The actual 24 tag clears and SP zero assignment complete without a
 provider call, with exact byte/SP readback and other-local framing. -/
+theorem stack_tags_and_sp_bound (world : CC.CGenv) (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (access : before.access = (allocation m).2.access) :
+    ∃ tags : StackTagLocal m, ∃ spBlock after,
+      (allocation m).1.get Arm64Entry.___a64_sp = some (spBlock, CC.tlong) ∧
+      InternalRun world 75 (.State producer afterVectorInputs k (allocation m).1 le before)
+        (.State producer afterSpZero k (allocation m).1 le after) ∧
+      (∀ i : Fin 24, CC.Mem.load .Mint8unsigned after tags.block (i.val : Int) = some (.Vint 0)) ∧
+      CC.Mem.loadv .Mint64 after (.Vptr spBlock 0) = some (.Vlong 0) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) →
+        id ≠ Arm64Entry.___a64_stack_tag → id ≠ Arm64Entry.___a64_sp →
+        ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock := by
+  obtain ⟨tags, middle, tagRun, tagReads, tagOther, tagFrame, tagAccess, tagNext⟩ :=
+    stack_tags_initialized_bound world m before le k access
+  obtain ⟨spBlock, after, spBinding, spRun, spRead, spOther, spFrame, spAccess, spNext⟩ :=
+    sp_initialized_bound world m middle le k (tagAccess.trans access)
+  refine ⟨tags, spBlock, after, spBinding, tagRun.trans spRun, ?_, spRead, ?_,
+    tagFrame.trans spFrame, spAccess.trans tagAccess, spNext.trans tagNext⟩
+  · intro i
+    exact (spOther _ _ _ tags.binding (by decide +kernel) .Mint8unsigned (i.val : Int)).trans (tagReads i)
+  · intro id ty block bound notTags notSp chunk ofs
+    exact (spOther id ty block bound notSp chunk ofs).trans (tagOther id ty block bound notTags chunk ofs)
+
+theorem stack_tags_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (access : before.access = (allocation m).2.access) :
+    ∃ tags : StackTagLocal m, ∃ after, InternalRun ge 72
+        (.State producer afterVectorInputs k (allocation m).1 le before)
+        (.State producer afterStackTags k (allocation m).1 le after) ∧
+      (∀ i : Fin 24, CC.Mem.load .Mint8unsigned after tags.block (i.val : Int) = some (.Vint 0)) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) → id ≠ Arm64Entry.___a64_stack_tag →
+        ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock :=
+  stack_tags_initialized_bound ge m before le k access
+
+theorem sp_initialized (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
+    (access : before.access = (allocation m).2.access) :
+    ∃ block after, (allocation m).1.get Arm64Entry.___a64_sp = some (block, CC.tlong) ∧
+      InternalRun ge 3 (.State producer afterStackTags k (allocation m).1 le before)
+        (.State producer afterSpZero k (allocation m).1 le after) ∧
+      CC.Mem.loadv .Mint64 after (.Vptr block 0) = some (.Vlong 0) ∧
+      (∀ id ty other, (allocation m).1.get id = some (other, ty) → id ≠ Arm64Entry.___a64_sp →
+        ∀ chunk ofs, CC.Mem.load chunk after other ofs = CC.Mem.load chunk before other ofs) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock :=
+  sp_initialized_bound ge m before le k access
+
 theorem stack_tags_and_sp (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
     (access : before.access = (allocation m).2.access) :
     ∃ tags : StackTagLocal m, ∃ spBlock after,
@@ -240,16 +288,7 @@ theorem stack_tags_and_sp (m before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont)
         id ≠ Arm64Entry.___a64_stack_tag → id ≠ Arm64Entry.___a64_sp →
         ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
       FrameBelow m.nextblock before after ∧ after.access = before.access ∧
-      after.nextblock = before.nextblock := by
-  obtain ⟨tags, middle, tagRun, tagReads, tagOther, tagFrame, tagAccess, tagNext⟩ :=
-    stack_tags_initialized m before le k access
-  obtain ⟨spBlock, after, spBinding, spRun, spRead, spOther, spFrame, spAccess, spNext⟩ :=
-    sp_initialized m middle le k (tagAccess.trans access)
-  refine ⟨tags, spBlock, after, spBinding, tagRun.trans spRun, ?_, spRead, ?_,
-    tagFrame.trans spFrame, spAccess.trans tagAccess, spNext.trans tagNext⟩
-  · intro i
-    exact (spOther _ _ _ tags.binding (by decide +kernel) .Mint8unsigned (i.val : Int)).trans (tagReads i)
-  · intro id ty block bound notTags notSp chunk ofs
-    exact (spOther id ty block bound notSp chunk ofs).trans (tagOther id ty block bound notTags chunk ofs)
+      after.nextblock = before.nextblock :=
+  stack_tags_and_sp_bound ge m before le k access
 
 end KProgFormal.ClightRefinement.Arm64Producer
