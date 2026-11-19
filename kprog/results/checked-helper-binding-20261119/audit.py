@@ -49,7 +49,9 @@ with tarfile.open(args.archive) as service:
                         continue
                     calls.append(dict(offset=offset, target=target,
                         helper_names=sorted(name for name, address in helpers.items() if address == target),
-                        kernel_symbols=addresses.get(target-slide, []) if slide is not None else []))
+                        kernel_symbols=addresses.get(target-slide, []) if slide is not None else [],
+                        map_operations=sorted({operation for ops in plan['map_ops']
+                            for operation in ['update', 'remove'] if ops[operation] == target})))
                 contextual = []
                 for call in calls:
                     for helper in ['bpf_perf_event_output', 'bpf_get_stack']:
@@ -65,9 +67,12 @@ with tarfile.open(args.archive) as service:
 contexts = [call for row in rows for plan in row.get('plans', []) for call in plan['contextual'] if call['expected']]
 writes = Counter(helper for row in rows for plan in row.get('plans', []) for call in plan['calls']
                  for helper in call['helper_names'] if helper in ['bpf_map_update_elem', 'bpf_map_delete_elem'])
+direct = Counter(operation for row in rows for plan in row.get('plans', [])
+                 for call in plan['calls'] for operation in call['map_operations'])
 result = dict(archive=str(args.archive), system_map=str(args.system_map), requests=len(rows),
     context_calls=len(contexts), expected_context_bound=sum(c['expected_bound'] for c in contexts),
     generic_write_calls=dict(writes),
+    direct_write_calls=dict(direct),
     plans_with_map_ops=sum(bool(plan['map_ops']) for row in rows for plan in row.get('plans', [])),
     rows=rows, scope='Retained installed call relocations, not invocation weights or current helper time shares.')
 args.output.write_text(json.dumps(result, indent=2)+'\n')
