@@ -1,5 +1,8 @@
 BOUNDS := /workspaces/.agent-state/kprog-ck/verified-compiler/packet-bounds
-.PHONY: test rebuild replay
+.PHONY: test rebuild replay syntax
+syntax:
+	clang++-18 $$(llvm-config-18 --cxxflags) -std=c++17 -Ivendor/libbpf/include/uapi \
+		-fsyntax-only kprog/x86/packet_bounds_ir.cpp
 test:
 	python3 kprog/results/b-pointer-difference-20261119/test.py $(OUT) $(MODE)
 rebuild:
