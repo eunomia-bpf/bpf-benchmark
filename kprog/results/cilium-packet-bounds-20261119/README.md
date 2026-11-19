@@ -193,3 +193,21 @@ the one that counts for the recorded numbers.
 Recompiled all 40 patched programs from `HEAD` (`80dbcfc51`, the freshness-guarded matcher) with the
 pipeline's flags: **40 / 40 carry at least one emitted pointer bound in the `classifier` section**, so the
 233 lowerings recorded above survive into bytecode for every request rather than being folded away.
+
+## The forty-first program: request 64 (omp 2026-11-19T22:12Z)
+
+The one hard failure in this run is not a separate defect — it is the same packet class with a second
+mishap behind it. Request 64 (`tail_nodeport_nat_egress_ipv4`, `source_prog_id=622`) failed B's
+verification with `invalid access to packet, off=18 size=2, R6(id=0,off=18,r=0)` / "R6 offset is outside
+of the packet" — the identical shape as the 40 — and then its direct-native fallback could not find its
+own arm image (`arm kernel native image: No such file or directory`), which is why it is a hard failure
+rather than a fallback. Two independent problems, and only the first is this defect.
+
+It was not counted in the 40 because its capsule is a `.failure.tar.gz`; its `bounds-input.bc` is there
+all the same. Through `HEAD` the pass lowers **2** predicates and `clang` emits **3** pointer bounds, so
+the fix covers this program too. The run's own README entry (`verified-hot-20261117/README.md:300`)
+records it as a hard failure from the missing arm image; the packet rejection behind it is the same class
+documented here, and the arm-image miss is still open and unrelated to this fix.
+
+So the class is **41 programs**, not 40: 40 archived as successes with a verifier rejection, 1 archived as
+the hard failure above.
