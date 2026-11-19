@@ -880,3 +880,12 @@ This establishes the post-verification compilation contract and combined
 helper functionality; the existing1x10s functional run supplies no official
 runtime gain. Evidence results/native-cohort-check-20261119/coverage.json,
 raw run x86_kvm_corpus_20261119_081018_746542. Official combined timing follows.
+
+PERF 2026-11-19T08:53:11Z: Image5c974db3050f completes the frozen six-app functional
+check, native14/25/113/288/169/1 with0 loader failures. Main checked-sim-c
+BCC3x180s stats1 is running on the installed07:53 compiler cohort through
+ff02957cc; later source2eb36bad9 is not measured by that binary. Read-only
+arithmetic canonicalization exposes1 of42 retained private bases,41 remain
+unknown; no production optimization or runtime gain is inferred. Results
+native-cohort-timing-20261119 and native-base-roots-20261119. Lock-prefix
+fidelity953453b7f is the next phase1 item, ahead of optional alias work.

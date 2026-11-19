@@ -59,3 +59,9 @@ PERF 2026-11-19T08:49:54Z: Further check rows complete: Tetragon084248_939825 rc
 failures. Katran and the main checked-native BCC timing are still pending.
 The small per-run raw metadata/results are committed; bulky shim details
 remain in their original run directories.
+
+PERF 2026-11-19T08:53:11Z: The six-app check completed at08:51:00Z, all rc0 and zero
+native-loader failures. Native replacement counts in entry order are
+14 /25 /113 /288 /169 /1. Katran084956_577247 is the final row; its small
+raw metadata/results are committed. BCC checked-native timing has now
+started; batch254724 retains its lease and no speed result exists yet.

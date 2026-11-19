@@ -35,3 +35,11 @@ batch. Detached recipe c1ded558b waits on timing SH; no production source,
 compiler base or guest is changed. The initial foreground waiting flock
 305980 was ended before work began and retained as exit143 at
 arithmetic-20261119T083043Z; the detached worker uses a fresh raw directory.
+
+PERF 2026-11-19T08:53:11Z: Detached worker308945 ran at08:51:00-08:51:03 between the
+check and timing stages, returning0 before the timing guest acquired EX.
+Pure arithmetic simplification exposes1 known private arena base;41 remain
+unknown (both earlier phases still have42 unknown). See arithmetic-roots.tsv.
+This supports only a narrow opportunity, not blanket barrier removal or a
+runtime gain. It changes no compiler/guest input and does not replace the
+higher-priority lock-prefix fidelity work. Raw arithmetic-20261119T084026Z-308945.
