@@ -14,6 +14,11 @@
   self moves of 8/4 hide size/helper-ID facts and retain stack-tag fanout.
   Fold only these exact constant self moves in the B IR pass; retain live
   ALU32 moves and all bounds/limits. See results/tetragon-stack-liveness-20261119.
+  PERF 2026-11-19T11:34:23Z: Implemented 0cb83f15d; four literal and three
+  preservation controls emit B, and two fresh BCC B/libbpf/native-O3 subsets
+  pass. Retained Tetragon worker 353863 folds 375 additional constants;
+  backend/packing/emission, actual stock and fresh app confirmation remain
+  open. Evidence and pending raw path: results/constant-alu32-20261119.
 
 PERF 2026-11-19T10:48:19Z: Freeze/LOCK batch 327120 completed, host 0/app ok, BCC programs/native/
 B-generated/B-stock 25/25/25/25, all checked, no fallback/failures. Per call

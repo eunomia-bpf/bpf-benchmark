@@ -25,3 +25,22 @@ contract, not new stock acceptance, native installation or runtime speed.
 pass and unchanged O1 backend/packer/llc. It does not repeat the frontend or
 the previous failed O3 hypothesis. Its input predates the recent shared-I
 repairs, so successful emission would still require fresh app confirmation.
+
+PERF 2026-11-19T11:34:23Z: The real BCC fentry_vfs_read and
+inet_sock_set_state subset passes fresh B generation/libbpf-open and native
+O3/proof compilation with the current shared header. B generation takes
+0.996/2.747 s; observed direct R10 depths are 0/256 bytes. This is host
+compilation, not stock verification or native installation. Summary is in
+`bcc-subset.json`; raw is `bcc-subset-20261119T1134Z` under the directory above.
+The preceding `1133Z` attempt omitted CLANG's canonical stock wrapper and
+stopped at an unconverted `.8byte` private-input template. Its Make exit 2
+and logs remain. Setting CLANG to `kprog/stock-path/bin/clang`, as the
+canonical service does, fixes the test setup without a production change.
+
+Detached Tetragon worker 353863 started at 11:32:35Z, raw
+`replay-20261119T113235Z-353863`, source 0cb83f15d. Bounds lowering passes in
+5.080 s: total folded constant identities rise from 556 to 931, while the
+324 live empty identities and other normalization counts stay unchanged.
+The 375 additional folds come from this exact constant ALU32 class. The
+unchanged backend, packing and emission stages are pending. No new stock,
+whole-app or timing result is claimed.

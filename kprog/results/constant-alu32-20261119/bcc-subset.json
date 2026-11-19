@@ -1,0 +1,82 @@
+[
+  {
+    "case": "bcc1",
+    "symbol": "fentry_vfs_read",
+    "b_generation_seconds": 0.9957958580052946,
+    "libbpf_open_error": 0,
+    "b_flags": [
+      "-w",
+      "-g",
+      "-O1",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu"
+    ],
+    "native_status": "host compiled, not installed",
+    "stock_status": "not run",
+    "max_direct_r10_displacement": 0,
+    "native_compile_seconds": 0.04640790299890796,
+    "native_flags": [
+      "-target",
+      "x86_64-linux-gnu",
+      "-O3",
+      "-march=native",
+      "-foptimize-sibling-calls",
+      "-fomit-frame-pointer",
+      "-mno-red-zone",
+      "-mgeneral-regs-only",
+      "-fno-stack-protector",
+      "-fno-asynchronous-unwind-tables",
+      "-fno-unwind-tables"
+    ]
+  },
+  {
+    "case": "bcc7",
+    "symbol": "inet_sock_set_state",
+    "b_generation_seconds": 2.7467565939950873,
+    "libbpf_open_error": 0,
+    "b_flags": [
+      "-w",
+      "-g",
+      "-O1",
+      "-mcpu=v4",
+      "-target",
+      "bpf",
+      "-mllvm",
+      "-bpf-stack-size=4096",
+      "-D__TARGET_ARCH_x86",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/include/uapi",
+      "-I",
+      "/workspaces/repository/vendor/libbpf/src",
+      "-I",
+      "/usr/include/x86_64-linux-gnu"
+    ],
+    "native_status": "host compiled, not installed",
+    "stock_status": "not run",
+    "max_direct_r10_displacement": 256,
+    "native_compile_seconds": 0.23468615799356485,
+    "native_flags": [
+      "-target",
+      "x86_64-linux-gnu",
+      "-O3",
+      "-march=native",
+      "-foptimize-sibling-calls",
+      "-fomit-frame-pointer",
+      "-mno-red-zone",
+      "-mgeneral-regs-only",
+      "-fno-stack-protector",
+      "-fno-asynchronous-unwind-tables",
+      "-fno-unwind-tables"
+    ]
+  }
+]
