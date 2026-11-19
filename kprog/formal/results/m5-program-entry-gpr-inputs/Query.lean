@@ -1,0 +1,40 @@
+import KProgFormal.ClightRefinement.Arm64ProgramEntryGprInputs
+
+open KProgFormal.ClightRefinement
+
+#check Arm64ProgramEntryRegisterSource.source
+#print axioms Arm64ProgramEntryRegisterSource.source
+#check Arm64ProgramEntryRegisterSource.metadata
+#print axioms Arm64ProgramEntryRegisterSource.metadata
+#check Arm64ProgramEntryRegisterSource.storage_metadata
+#print axioms Arm64ProgramEntryRegisterSource.storage_metadata
+#check Arm64ProgramEntryRegisterSource.indices
+#print axioms Arm64ProgramEntryRegisterSource.indices
+#check Arm64ProgramEntryRegisterSource.chain
+#print axioms Arm64ProgramEntryRegisterSource.chain
+#check Arm64ProgramEntryRegisterSource.last_rest
+#print axioms Arm64ProgramEntryRegisterSource.last_rest
+#check Arm64ProgramEntryRegisterSource.first_stage
+#print axioms Arm64ProgramEntryRegisterSource.first_stage
+#check Arm64ProgramEntryRegisterSource.first_declaration
+#print axioms Arm64ProgramEntryRegisterSource.first_declaration
+#check Arm64ProducerGprInputs.run_suffix_body
+#print axioms Arm64ProducerGprInputs.run_suffix_body
+#check Arm64ProducerGprInputs.gpr_inputs_initialized_bound
+#print axioms Arm64ProducerGprInputs.gpr_inputs_initialized_bound
+#check Arm64ProgramEntryGprInputs.storage
+#print axioms Arm64ProgramEntryGprInputs.storage
+#check Arm64ProgramEntryGprInputs.call_ready
+#print axioms Arm64ProgramEntryGprInputs.call_ready
+#check Arm64ProgramEntryGprInputs.writeback
+#print axioms Arm64ProgramEntryGprInputs.writeback
+#check Arm64ProgramEntryGprInputs.input_returns
+#print axioms Arm64ProgramEntryGprInputs.input_returns
+#check Arm64ProgramEntryGprInputs.zero_initialized
+#print axioms Arm64ProgramEntryGprInputs.zero_initialized
+#check Arm64ProgramEntryGprInputs.initialized
+#print axioms Arm64ProgramEntryGprInputs.initialized
+#check Arm64ProgramEntryGprInputs.actual_cell_binding
+#print axioms Arm64ProgramEntryGprInputs.actual_cell_binding
+#check Arm64ProgramEntryGprInputs.entry_initialized
+#print axioms Arm64ProgramEntryGprInputs.entry_initialized

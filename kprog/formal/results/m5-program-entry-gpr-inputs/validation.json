@@ -1,0 +1,279 @@
+{
+  "step": "M5 actual all-register declarations and complete GPR input traversal",
+  "status": "pass",
+  "recorded_utc": "2026-11-19T22:44:05Z",
+  "before_commit_head": "933edd3f6ba442321c0879ed74f66fa977eb247d",
+  "raw_directory": "/workspaces/kprog-raw/formal/m5-program-entry-gpr-inputs",
+  "execution": {
+    "checked_actual_register_declarations": 31,
+    "provider_visits": 30,
+    "ordered_provider_traces": 30,
+    "actual_prefix_internal_steps": 589,
+    "per_input_call_internal_steps": 5,
+    "per_input_writeback_internal_steps": 9,
+    "last_register_zero_internal_steps": 10,
+    "endpoint": "actual afterRegisters",
+    "stored_words": "explicit provider words x0-x29; zero x30",
+    "stored_tags": "all 31 zero",
+    "bindings": "all 31 word/tag cells in both source allocation and actual production environment",
+    "preserved": "both cache words/validity bytes, original context temporary, other local loads/temporaries, caller frame, permissions and allocation frontier",
+    "provider_contract": "ProviderAt remains explicit: availability, post-memory frame, access/frontier and allocated-local preservation are invocation premises",
+    "complete_isa_families": 0
+  },
+  "checks": {
+    "focused1": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterSource"
+      ],
+      "exit": 1,
+      "seconds": 2.6617209911346436,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "focused2": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterSource"
+      ],
+      "exit": 0,
+      "seconds": 29.797016143798828,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 176
+    },
+    "focused3": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProducerGprInputs"
+      ],
+      "exit": 1,
+      "seconds": 13.434509515762329,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "focused4": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryGprInputs"
+      ],
+      "exit": 1,
+      "seconds": 19.764488220214844,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "focused5": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryGprInputs"
+      ],
+      "exit": 1,
+      "seconds": 5.478130340576172,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "focused6": {
+      "command": [
+        "lake",
+        "build",
+        "KProgFormal.ClightRefinement.Arm64ProgramEntryGprInputs"
+      ],
+      "exit": 0,
+      "seconds": 5.446037292480469,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 189
+    },
+    "query1": {
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "results/m5-program-entry-gpr-inputs/Query.lean"
+      ],
+      "exit": 0,
+      "seconds": 1.7486822605133057,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368
+    },
+    "lake-build1": {
+      "command": [
+        "lake",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 509.0956790447235,
+      "cpu": 17,
+      "workers": 1,
+      "address_space_bytes": 34359738368,
+      "jobs": 352
+    }
+  },
+  "repaired_attempts": {
+    "focused1": "Subtype constructor elaboration supplied implicit type explicitly; fixed predicate application",
+    "focused3": "arbitrary stage composition required explicit Fin eta equality",
+    "focused4": "shared source traversal passed; actual parser rejected reserved identifier prefix",
+    "focused5": "actual binding metadata rewrite required both sides unfolded to the same word/tag name"
+  },
+  "public_query_counts": {
+    "types": 18,
+    "axiom_reports": 18
+  },
+  "axiom_reports": {
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterSource.source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterSource.metadata": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterSource.storage_metadata": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterSource.indices": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterSource.chain": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterSource.last_rest": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterSource.first_stage": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryRegisterSource.first_declaration": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProducerGprInputs.run_suffix_body": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProducerGprInputs.gpr_inputs_initialized_bound": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryGprInputs.storage": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryGprInputs.call_ready": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryGprInputs.writeback": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryGprInputs.input_returns": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryGprInputs.zero_initialized": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryGprInputs.initialized": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryGprInputs.actual_cell_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "KProgFormal.ClightRefinement.Arm64ProgramEntryGprInputs.entry_initialized": [
+      "propext",
+      "CC.externalFunctionsSem",
+      "CC.inlineAssemblySem",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "proof_limits": {
+    "maxHeartbeats": 200000,
+    "maxRecDepth": 512,
+    "Elab.async": false,
+    "unchanged": true
+  },
+  "resources": {
+    "lean_cpu": 17,
+    "control_cpu": 16,
+    "workers": 1,
+    "address_space_bytes": 34359738368,
+    "timing_lock": "none for host work under 2026-11-19T18:18:59 coordination rule"
+  },
+  "lean_source_sha256": {
+    "kprog/formal/KProgFormal.lean": "2b11ac3819f4797d03ff2f9ac104caea0eae8b5ad768cfa303aa168e33c1d132",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProducerGprInputs.lean": "7935a0aa113b4a29f0e907c6f897fe0c4a9cbd5a7125928f51e5ad466ab84270",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryRegisterSource.lean": "6f4c63de29f4e85624cb91dcae1452f73d9516d375e4a0846b2bd7a40cc7768d",
+    "kprog/formal/KProgFormal/ClightRefinement/Arm64ProgramEntryGprInputs.lean": "53319316aa6ec5fdfb1ee8b072ad78bf6ccd7cc64c8aeb866c26f3d8c6e7d1fd",
+    "kprog/formal/results/m5-program-entry-gpr-inputs/Query.lean": "d5c9a2ffc815ea2b2f0ba31debd05a0ed0f0fefd3bfeec14f8cfc7f740faab5d"
+  },
+  "scope": {
+    "changed": "formal proofs, receipts and own todo line",
+    "source_memory_witness": "existing generic declaration_stores_for, shared call/return/zero proofs",
+    "source_traversal": "original induction parameterized by function, environment, actual declaration/stage family, name correspondence and per-input execution",
+    "source_interfaces": "existing source gpr_inputs_initialized_bound interface checked by wrapper over shared induction",
+    "actual_ast_certificate": "31 kernel-checked full-body equalities with successors extracted from actual production spine",
+    "code_growth": "98-line actual source certificate and 254-line actual execution module; 64 net supporting source-traversal lines and two root imports",
+    "c_runtime_compiler_kernel_image_base_benchmark_paper_design_changes": false
+  },
+  "goal_closure": {
+    "M5": "open: actual pointer tables and remaining prefix, complete body/native/original-context/all-outcome admission, ISA refinement and O1/O2/O4 recount",
+    "M6": "open, after M5",
+    "whole_make_check_this_step": "not repeated for Lean-only change; fresh final Lake/make check remain due",
+    "last_whole_make_check_pass": "5236c0e9677f635526fdd515cde5195b2ba0810c",
+    "clight_byte_comparison_this_step": "not repeated; no C/export source changed",
+    "last_export_comparison": "results/m5-program-entry-fields/validation.json; ten Arm64 baseline-identical and twelve historical x86 differences recorded"
+  }
+}

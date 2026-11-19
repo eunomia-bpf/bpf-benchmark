@@ -31,6 +31,126 @@ private theorem names_separate : ∀ selected (i j : Fin 30), i ≠ j →
     tableCellName selected (inputRegister i) ≠ (registerDeclaration (inputRegister j)).tag := by
   decide +kernel
 
+/-- Shared traversal over a real declaration family. The caller supplies
+its checked successor chain and actual per-input execution, while the existing
+induction retains ordered traces, earlier cells and caller/local/temp frames. -/
+theorem run_suffix_body (world : CC.CGenv) (f : CC.Function) (e : CC.Env)
+    (decl : Fin 31 → RegisterDeclaration) (stage : Fin 31 → CC.Stmt)
+    (sameNames : ∀ i, (decl i).word = (registerDeclaration i).word ∧
+      (decl i).tag = (registerDeclaration i).tag)
+    (chain : ∀ i : Fin 30, (decl (inputRegister i)).rest =
+      stage ⟨i.val + 1, Nat.add_lt_add_right i.isLt 1⟩)
+    (m : CC.Mem) (blocks : Bool → Fin 30 → CC.Block)
+    (bindings : ∀ selected i, (allocation m).1.get (tableCellName selected (inputRegister i)) =
+      some (blocks selected i, tableCellType selected))
+    (values : Fin 31 → BitVec 64) (provider : ProviderAt world m values)
+    (runInput : ∀ (i : Fin 30) (before supplied : CC.Mem) (le : CC.TempEnv) (k : CC.Cont) (trace : CC.Trace),
+      CC.externalCall Arm64OriginCache.inputEF (CC.Genv.toSenv world.genv_genv)
+        [.Vint (6#32)] before trace (.Vlong (values (inputRegister i))) supplied →
+      supplied.access = (allocation m).2.access →
+      ∃ xb tb after,
+        (allocation m).1.get (decl (inputRegister i)).word =
+          some (xb, .Tunion Arm64Entry._arm64_sim_gpr CC.noattr) ∧
+        (allocation m).1.get (decl (inputRegister i)).tag = some (tb, CC.tuchar) ∧
+        CC.Star (CC.Step2 world) (.State f (stage (inputRegister i)) k e le before)
+          trace (.State f (decl (inputRegister i)).rest k e
+            ((decl (inputRegister i)).temps le (values (inputRegister i))) after) ∧
+        CC.Mem.loadv .Mint64 after (.Vptr xb 0) = some (.Vlong (values (inputRegister i))) ∧
+        CC.Mem.loadv .Mint8unsigned after (.Vptr tb 0) = some (.Vint 0) ∧
+        (∀ id ty block, (allocation m).1.get id = some (block, ty) →
+          id ≠ (decl (inputRegister i)).word → id ≠ (decl (inputRegister i)).tag →
+          ∀ chunk ofs, CC.Mem.load chunk after block ofs = CC.Mem.load chunk supplied block ofs) ∧
+        FrameBelow m.nextblock supplied after ∧ after.access = supplied.access ∧
+        after.nextblock = supplied.nextblock)
+    (count : Nat) :
+    ∀ start : Fin 31, start.val + count = 30 → ∀ (before : CC.Mem) (le : CC.TempEnv) (k : CC.Cont),
+    before.access = (allocation m).2.access →
+    ∃ after finalLe, ∃ traces : List CC.Trace, traces.length = count ∧
+      CC.Star (CC.Step2 world) (.State f (stage start) k e le before)
+        traces.flatten (.State f (stage 30) k e finalLe after) ∧
+      (∀ j : Fin 30, start.val ≤ j.val →
+        CC.Mem.load .Mint64 after (blocks false j) 0 = some (.Vlong (values (inputRegister j))) ∧
+        CC.Mem.load .Mint8unsigned after (blocks true j) 0 = some (.Vint 0)) ∧
+      (∀ selected (j : Fin 30), j.val < start.val → ∀ chunk ofs,
+        CC.Mem.load chunk after (blocks selected j) ofs = CC.Mem.load chunk before (blocks selected j) ofs) ∧
+      (∀ id ty block, (allocation m).1.get id = some (block, ty) →
+        (∀ i : Fin 30, id ≠ (decl (inputRegister i)).word ∧
+          id ≠ (decl (inputRegister i)).tag) → ∀ chunk ofs,
+        CC.Mem.load chunk after block ofs = CC.Mem.load chunk before block ofs) ∧
+      (∀ id, (∀ i : Fin 30, id ≠ (decl (inputRegister i)).inputTemp ∧
+          id ≠ (decl (inputRegister i)).resultTemp) → finalLe.get id = le.get id) ∧
+      FrameBelow m.nextblock before after ∧ after.access = before.access ∧
+      after.nextblock = before.nextblock := by
+  have separated : ∀ selected (i j : Fin 30), i ≠ j →
+      tableCellName selected (inputRegister i) ≠ (decl (inputRegister j)).word ∧
+      tableCellName selected (inputRegister i) ≠ (decl (inputRegister j)).tag := by
+    intro selected i j different
+    rw [(sameNames (inputRegister j)).1, (sameNames (inputRegister j)).2]
+    exact names_separate selected i j different
+  induction count with
+  | zero =>
+    intro start bound before le k access
+    have same : start = 30 := Fin.ext (by omega)
+    subst start
+    refine ⟨before, le, [], rfl, .refl _, ?_, ?_, ?_, ?_, FrameBelow.refl _ _, rfl, rfl⟩
+    · intro j lower; have := j.isLt; omega
+    · intro selected j upper chunk ofs; rfl
+    · intro id ty block binding different chunk ofs; rfl
+    · intro id different; rfl
+  | succ count ih =>
+    intro start bound before le k access
+    let i : Fin 30 := ⟨start.val, by omega⟩
+    let nextStart : Fin 31 := ⟨start.val + 1, by omega⟩
+    obtain ⟨trace, supplied, call, providerAccess, providerNext, providerFrame, providerLocals⟩ :=
+      provider i before access
+    obtain ⟨xb, tb, middle, wordBinding, tagBinding, headRun, headWord, headTag,
+        headLocals, headFrame, headAccess, headNext⟩ :=
+      runInput i before supplied le k trace call
+        (providerAccess.trans access)
+    rw [(sameNames (inputRegister i)).1] at wordBinding
+    rw [(sameNames (inputRegister i)).2] at tagBinding
+    have wordBlock : xb = blocks false i :=
+      congrArg Prod.fst (Option.some.inj (wordBinding.symm.trans (bindings false i)))
+    have tagBlock : tb = blocks true i :=
+      congrArg Prod.fst (Option.some.inj (tagBinding.symm.trans (bindings true i)))
+    rw [wordBlock] at headWord
+    rw [tagBlock] at headTag
+    change CC.Mem.load .Mint64 middle (blocks false i) 0 = some (.Vlong (values (inputRegister i))) at headWord
+    change CC.Mem.load .Mint8unsigned middle (blocks true i) 0 = some (.Vint 0) at headTag
+    rw [chain i] at headRun
+    obtain ⟨after, finalLe, traces, length, tailRun, tailReads, tailOld, tailLocals,
+        tailTemps, tailFrame, tailAccess, tailNext⟩ :=
+      ih nextStart (by dsimp [nextStart]; omega) middle
+        ((decl (inputRegister i)).temps le (values (inputRegister i))) k
+        (headAccess.trans (providerAccess.trans access))
+    refine ⟨after, finalLe, trace :: traces, by simp [length], ?_, ?_, ?_, ?_, ?_,
+      (providerFrame.trans headFrame).trans tailFrame,
+      tailAccess.trans (headAccess.trans providerAccess), tailNext.trans (headNext.trans providerNext)⟩
+    · simpa only [List.flatten_cons, CC.Eapp, show inputRegister i = start from Fin.ext rfl] using star_trans headRun tailRun
+    · intro j lower
+      by_cases same : j = i
+      · subst j
+        exact ⟨(tailOld false i (by dsimp [i, nextStart]; omega) .Mint64 0).trans headWord,
+          (tailOld true i (by dsimp [i, nextStart]; omega) .Mint8unsigned 0).trans headTag⟩
+      · apply tailReads j
+        have different : j.val ≠ start.val := fun equal => same (Fin.ext equal)
+        dsimp [nextStart]
+        omega
+    · intro selected j upper chunk ofs
+      have different : j ≠ i := by intro equal; subst j; dsimp [i] at upper; omega
+      exact (tailOld selected j (by dsimp [nextStart]; omega) chunk ofs).trans
+        ((headLocals _ _ _ (bindings selected j) (separated selected j i different).1
+          (separated selected j i different).2 chunk ofs).trans
+          (providerLocals _ _ _ (bindings selected j) chunk ofs))
+    · intro id ty block binding different chunk ofs
+      exact (tailLocals id ty block binding different chunk ofs).trans
+        ((headLocals id ty block binding (different i).1 (different i).2 chunk ofs).trans
+          (providerLocals id ty block binding chunk ofs))
+    · intro id different
+      exact (tailTemps id different).trans
+        ((CC.PTree.gso _ _ _ _ (Ne.symm (different i).2)).trans
+          (CC.PTree.gso _ _ _ _ (Ne.symm (different i).1)))
+
 private theorem run_suffix (world : CC.CGenv)
     (layout : world.genv_cenv = ge.genv_cenv)
     (binding : CC.Genv.findSymbol world.genv_genv Arm64Entry._native_lab_entry_input =
@@ -57,67 +177,11 @@ private theorem run_suffix (world : CC.CGenv)
           id ≠ (registerDeclaration (inputRegister i)).resultTemp) → finalLe.get id = le.get id) ∧
       FrameBelow m.nextblock before after ∧ after.access = before.access ∧
       after.nextblock = before.nextblock := by
-  induction count with
-  | zero =>
-    intro start bound before le k access
-    have same : start = 30 := Fin.ext (by omega)
-    subst start
-    refine ⟨before, le, [], rfl, .refl _, ?_, ?_, ?_, ?_, FrameBelow.refl _ _, rfl, rfl⟩
-    · intro j lower; have := j.isLt; omega
-    · intro selected j upper chunk ofs; rfl
-    · intro id ty block binding different chunk ofs; rfl
-    · intro id different; rfl
-  | succ count ih =>
-    intro start bound before le k access
-    let i : Fin 30 := ⟨start.val, by omega⟩
-    let nextStart : Fin 31 := ⟨start.val + 1, by omega⟩
-    obtain ⟨trace, supplied, call, providerAccess, providerNext, providerFrame, providerLocals⟩ :=
-      provider i before access
-    obtain ⟨xb, tb, middle, wordBinding, tagBinding, headRun, headWord, headTag,
-        headLocals, headFrame, headAccess, headNext⟩ :=
-      register_input_returns_bound world layout binding i m before supplied le k (values (inputRegister i)) trace call
-        (providerAccess.trans access)
-    have wordBlock : xb = blocks false i :=
-      congrArg Prod.fst (Option.some.inj (wordBinding.symm.trans (bindings false i)))
-    have tagBlock : tb = blocks true i :=
-      congrArg Prod.fst (Option.some.inj (tagBinding.symm.trans (bindings true i)))
-    rw [wordBlock] at headWord
-    rw [tagBlock] at headTag
-    change CC.Mem.load .Mint64 middle (blocks false i) 0 = some (.Vlong (values (inputRegister i))) at headWord
-    change CC.Mem.load .Mint8unsigned middle (blocks true i) 0 = some (.Vint 0) at headTag
-    rw [register_declarations_chain i] at headRun
-    obtain ⟨after, finalLe, traces, length, tailRun, tailReads, tailOld, tailLocals,
-        tailTemps, tailFrame, tailAccess, tailNext⟩ :=
-      ih nextStart (by dsimp [nextStart]; omega) middle
-        ((registerDeclaration (inputRegister i)).temps le (values (inputRegister i))) k
-        (headAccess.trans (providerAccess.trans access))
-    refine ⟨after, finalLe, trace :: traces, by simp [length], ?_, ?_, ?_, ?_, ?_,
-      (providerFrame.trans headFrame).trans tailFrame,
-      tailAccess.trans (headAccess.trans providerAccess), tailNext.trans (headNext.trans providerNext)⟩
-    · simpa only [List.flatten_cons, CC.Eapp] using star_trans headRun tailRun
-    · intro j lower
-      by_cases same : j = i
-      · subst j
-        exact ⟨(tailOld false i (by dsimp [i, nextStart]; omega) .Mint64 0).trans headWord,
-          (tailOld true i (by dsimp [i, nextStart]; omega) .Mint8unsigned 0).trans headTag⟩
-      · apply tailReads j
-        have different : j.val ≠ start.val := fun equal => same (Fin.ext equal)
-        dsimp [nextStart]
-        omega
-    · intro selected j upper chunk ofs
-      have different : j ≠ i := by intro equal; subst j; dsimp [i] at upper; omega
-      exact (tailOld selected j (by dsimp [nextStart]; omega) chunk ofs).trans
-        ((headLocals _ _ _ (bindings selected j) (names_separate selected j i different).1
-          (names_separate selected j i different).2 chunk ofs).trans
-          (providerLocals _ _ _ (bindings selected j) chunk ofs))
-    · intro id ty block binding different chunk ofs
-      exact (tailLocals id ty block binding different chunk ofs).trans
-        ((headLocals id ty block binding (different i).1 (different i).2 chunk ofs).trans
-          (providerLocals id ty block binding chunk ofs))
-    · intro id different
-      exact (tailTemps id different).trans
-        ((CC.PTree.gso _ _ _ _ (Ne.symm (different i).2)).trans
-          (CC.PTree.gso _ _ _ _ (Ne.symm (different i).1)))
+  exact run_suffix_body world producer (allocation m).1 registerDeclaration registerDeclarationStage
+    (fun _ => ⟨rfl, rfl⟩) register_declarations_chain m blocks bindings values provider
+    (fun i before supplied le k trace call access =>
+      register_input_returns_bound world layout binding i m before supplied le k
+        (values (inputRegister i)) trace call access) count
 
 /-- All30 real GPR visits, including x0, derive word/tag data from actual
 external outcomes. Both per-return temporary updates and30 ordered traces
